@@ -73,7 +73,18 @@ export function RouteBreadcrumbsContextProvider({ children }: { children: React.
       };
     });
 
-  useBreadcrumbs(formattedBreadcrumbs);
+  // Filter out the "Universal Profiling" breadcrumb because it is included in the breadcrumbs already in case of the project navigation
+  const projectStyleBreadcrumbs = formattedBreadcrumbs.filter(
+    (breadcrumb) => String(breadcrumb?.text).toLocaleLowerCase() !== 'universal profiling'
+  );
+
+  useBreadcrumbs(projectStyleBreadcrumbs, {
+    absoluteProjectStyleBreadcrumbs: false,
+    classicOnly: false,
+  });
+
+  // Keep using breadcrumbs for the Profiling app for classic navigation
+  useBreadcrumbs(formattedBreadcrumbs, { classicOnly: true });
 
   return (
     <RouteBreadcrumbsContext.Provider value={api}>{children}</RouteBreadcrumbsContext.Provider>

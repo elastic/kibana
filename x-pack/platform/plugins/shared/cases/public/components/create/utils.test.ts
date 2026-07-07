@@ -6,15 +6,17 @@
  */
 
 import {
-  getInitialCaseValue,
   trimUserFormData,
   getOwnerDefaultValue,
   createFormDeserializer,
   createFormSerializer,
 } from './utils';
+import { getInitialCaseValue } from '../../../common/utils/get_initial_case_value';
 import { ConnectorTypes, CaseSeverity, CustomFieldTypes } from '../../../common/types/domain';
 import { GENERAL_CASES_OWNER } from '../../../common';
+import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import { casesConfigurationsMock } from '../../containers/configure/mock';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('utils', () => {
   describe('getInitialCaseValue', () => {
@@ -35,6 +37,7 @@ describe('utils', () => {
         description: '',
         settings: {
           syncAlerts: true,
+          extractObservables: true,
         },
         severity: 'low',
         tags: [],
@@ -58,6 +61,7 @@ describe('utils', () => {
         owner: 'foobar',
         settings: {
           syncAlerts: true,
+          extractObservables: true,
         },
         severity: 'low',
         tags: [],
@@ -78,7 +82,7 @@ describe('utils', () => {
         category: 'categorty',
         severity: CaseSeverity.HIGH as const,
         description: 'Cool description',
-        settings: { syncAlerts: false },
+        settings: { syncAlerts: false, extractObservables: false },
         customFields: [{ key: 'key', type: CustomFieldTypes.TEXT as const, value: 'text' }],
       };
 
@@ -149,6 +153,7 @@ describe('utils', () => {
       fields: { incidentTypes: null, severityCode: null },
       customFields: {},
       syncAlerts: false,
+      extractObservables: false,
     };
     const serializedFormData = {
       title: 'title',
@@ -156,6 +161,7 @@ describe('utils', () => {
       customFields: [],
       settings: {
         syncAlerts: false,
+        extractObservables: false,
       },
       tags: [],
       connector: {
@@ -176,6 +182,7 @@ describe('utils', () => {
         description: '',
         settings: {
           syncAlerts: true,
+          extractObservables: true,
         },
         severity: 'low',
         tags: [],
@@ -189,16 +196,12 @@ describe('utils', () => {
       expect(
         createFormSerializer(
           [
-            {
+            createMockActionConnector({
               id: 'test',
               actionTypeId: '.test',
               name: 'My connector',
-              isDeprecated: false,
-              isPreconfigured: false,
               config: { foo: 'bar' },
-              isMissingSecrets: false,
-              isSystemAction: false,
-            },
+            }),
           ],
           casesConfigurationsMock,
           {
@@ -277,6 +280,35 @@ describe('utils', () => {
         tags: ['tag 1', 'tag 2'],
       });
     });
+
+    it('includes extended_fields in serialized output when present', () => {
+      const extendedFields = { customKey: 'customValue' };
+      expect(
+        createFormSerializer([], casesConfigurationsMock, {
+          ...dataToSerialize,
+          [CASE_EXTENDED_FIELDS]: extendedFields,
+        })
+      ).toEqual({ ...serializedFormData, extended_fields: extendedFields });
+    });
+
+    it('omits extended_fields from serialized output when not present', () => {
+      expect(createFormSerializer([], casesConfigurationsMock, dataToSerialize)).toEqual(
+        serializedFormData
+      );
+    });
+
+    it('serializes templateId and templateVersion into a template object', () => {
+      expect(
+        createFormSerializer([], casesConfigurationsMock, {
+          ...dataToSerialize,
+          templateId: 'tmpl-1',
+          templateVersion: 2,
+        })
+      ).toEqual({
+        ...serializedFormData,
+        template: { id: 'tmpl-1', version: 2 },
+      });
+    });
   });
 
   describe('createFormDeserializer', () => {
@@ -287,6 +319,7 @@ describe('utils', () => {
           description: 'description',
           settings: {
             syncAlerts: false,
+            extractObservables: false,
           },
           tags: [],
           connector: {
@@ -306,6 +339,7 @@ describe('utils', () => {
         title: 'title',
         description: 'description',
         syncAlerts: false,
+        extractObservables: false,
         tags: [],
         owner: casesConfigurationsMock.owner,
         connectorId: 'foobar',
@@ -325,6 +359,7 @@ describe('utils', () => {
           description: 'description',
           settings: {
             syncAlerts: false,
+            extractObservables: false,
           },
           tags: [],
           connector: {
@@ -360,6 +395,7 @@ describe('utils', () => {
         title: 'title',
         description: 'description',
         syncAlerts: false,
+        extractObservables: false,
         tags: [],
         owner: casesConfigurationsMock.owner,
         connectorId: 'foobar',

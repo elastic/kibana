@@ -1,0 +1,44 @@
+# Inbox demo workflow — multi-select array of enum
+name: inbox-demo-array-enum
+enabled: true
+triggers:
+  - type: manual
+steps:
+  # Soft-interface reasoning surfaced by the inbox from the step that ran
+  # immediately before the `waitForInput` (see 01_string_input.yml).
+  - name: analyze
+    type: data.set
+    with:
+      reasoning:
+        summary: "Telemetry maps cleanly onto several ATT&CK tactics; pre-selecting the strongest matches for analyst review."
+        sections:
+          - title: "OBSERVED BEHAVIOR"
+            body: "Phishing link click, then signed-binary proxy execution, a scheduled task for persistence, and SMB enumeration."
+          - title: "SUGGESTED TACTICS"
+            body: "initial_access, execution, and persistence are strong matches; lateral_movement is a weaker secondary signal."
+  - name: ask_tags
+    type: waitForInput
+    with:
+      message: "Select the relevant MITRE ATT&CK tactics observed."
+      schema:
+        type: object
+        properties:
+          tactics:
+            type: array
+            title: Tactics
+            items:
+              type: string
+              enum:
+                - initial_access
+                - execution
+                - persistence
+                - privilege_escalation
+                - defense_evasion
+                - lateral_movement
+                - exfiltration
+        required:
+          - tactics
+  - name: log_tactics
+    type: console
+    with:
+      message: "Tactics = {{ steps.ask_tags.output.tactics }}"

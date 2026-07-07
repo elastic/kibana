@@ -9,7 +9,6 @@ import { Spaces } from '../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function getConnectorTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
@@ -48,6 +47,8 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },
+          is_connector_type_deprecated: false,
+          auth_mode: 'shared',
         });
     });
 
@@ -87,6 +88,8 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
           is_system_action: false,
           connector_type_id: '.slack',
           name: 'Slack#xyz',
+          is_connector_type_deprecated: false,
+          auth_mode: 'shared',
         });
     });
 
@@ -110,6 +113,8 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
           is_system_action: false,
           connector_type_id: '.servicenow',
           name: 'ServiceNow#xyz',
+          is_connector_type_deprecated: false,
+          auth_mode: 'shared',
         });
 
       await supertest
@@ -123,6 +128,8 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
           is_system_action: false,
           connector_type_id: '.servicenow',
           name: 'ServiceNow#xyz',
+          is_connector_type_deprecated: false,
+          auth_mode: 'shared',
         });
     });
   });

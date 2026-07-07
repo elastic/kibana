@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FC, PropsWithChildren } from 'react';
-import { CustomIntegration } from '../common';
+import type { FC, PropsWithChildren } from 'react';
+import type { CustomIntegration } from '../common';
 
 export interface CustomIntegrationsSetup {
   getAppendCustomIntegrations: () => Promise<CustomIntegration[]>;

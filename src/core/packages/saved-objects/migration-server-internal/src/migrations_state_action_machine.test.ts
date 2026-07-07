@@ -44,13 +44,7 @@ describe('migrationsStateActionMachine', () => {
   const initialState = createInitialState({
     kibanaVersion: '7.11.0',
     waitForMigrationCompletion: false,
-    mustRelocateDocuments: true,
     indexTypes: ['typeA', 'typeB', 'typeC'],
-    indexTypesMap: {
-      '.kibana': ['typeA', 'typeB', 'typeC'],
-      '.kibana_task_manager': ['task'],
-      '.kibana_cases': ['typeD', 'typeE'],
-    },
     hashToVersionMap: {
       'typeA|someHash': '10.1.0',
       'typeB|someHash': '10.1.0',
@@ -76,6 +70,7 @@ describe('migrationsStateActionMachine', () => {
         metaPickupSyncDelaySec: 120,
         runOnRoles: ['migrator'],
       },
+      useCumulativeLogger: false,
     },
     typeRegistry,
     docLinks,
@@ -113,7 +108,12 @@ describe('migrationsStateActionMachine', () => {
     await migrationStateActionMachine({
       initialState,
       logger: mockLogger.get(),
-      model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'LEGACY_DELETE', 'DONE']),
+      model: transitionModel([
+        'WAIT_FOR_YELLOW_SOURCE',
+        'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+        'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+        'DONE',
+      ]),
       next,
       abort,
     });
@@ -135,7 +135,7 @@ describe('migrationsStateActionMachine', () => {
         ],
       } as State,
       logger: mockLogger.get(),
-      model: transitionModel(['LEGACY_DELETE', 'FATAL']),
+      model: transitionModel(['UPDATE_SOURCE_MAPPINGS_PROPERTIES', 'FATAL']),
       next,
       abort,
     }).catch((err) => err);
@@ -151,7 +151,12 @@ describe('migrationsStateActionMachine', () => {
       migrationStateActionMachine({
         initialState,
         logger,
-        model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'LEGACY_DELETE', 'DONE']),
+        model: transitionModel([
+          'WAIT_FOR_YELLOW_SOURCE',
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+          'DONE',
+        ]),
         next,
         abort,
       })
@@ -164,9 +169,9 @@ describe('migrationsStateActionMachine', () => {
 
     expect(stateTransitionLogs).toMatchInlineSnapshot(`
       Array [
-        "[.my-so-index] Log from LEGACY_REINDEX control state",
-        "[.my-so-index] Log from LEGACY_DELETE control state",
-        "[.my-so-index] Log from LEGACY_DELETE control state",
+        "[.my-so-index] Log from WAIT_FOR_YELLOW_SOURCE control state",
+        "[.my-so-index] Log from UPDATE_SOURCE_MAPPINGS_PROPERTIES control state",
+        "[.my-so-index] Log from UPDATE_SOURCE_MAPPINGS_PROPERTIES control state",
         "[.my-so-index] Log from DONE control state",
       ]
     `);
@@ -177,7 +182,12 @@ describe('migrationsStateActionMachine', () => {
       migrationStateActionMachine({
         initialState,
         logger: mockLogger.get(),
-        model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'LEGACY_DELETE', 'DONE']),
+        model: transitionModel([
+          'WAIT_FOR_YELLOW_SOURCE',
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+          'DONE',
+        ]),
         next,
         abort,
       })
@@ -189,7 +199,12 @@ describe('migrationsStateActionMachine', () => {
       migrationStateActionMachine({
         initialState: { ...initialState, ...{ sourceIndex: Option.some('source-index') } },
         logger: mockLogger.get(),
-        model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'LEGACY_DELETE', 'DONE']),
+        model: transitionModel([
+          'WAIT_FOR_YELLOW_SOURCE',
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+          'DONE',
+        ]),
         next,
         abort,
       })
@@ -201,7 +216,12 @@ describe('migrationsStateActionMachine', () => {
       migrationStateActionMachine({
         initialState: { ...initialState, ...{ sourceIndex: Option.none } },
         logger: mockLogger.get(),
-        model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'LEGACY_DELETE', 'DONE']),
+        model: transitionModel([
+          'WAIT_FOR_YELLOW_SOURCE',
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+          'DONE',
+        ]),
         next,
         abort,
       })
@@ -213,7 +233,11 @@ describe('migrationsStateActionMachine', () => {
       migrationStateActionMachine({
         initialState: { ...initialState, reason: 'the fatal reason' } as State,
         logger: mockLogger.get(),
-        model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'FATAL']),
+        model: transitionModel([
+          'WAIT_FOR_YELLOW_SOURCE',
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+          'FATAL',
+        ]),
         next,
         abort,
       })
@@ -227,7 +251,11 @@ describe('migrationsStateActionMachine', () => {
       migrationStateActionMachine({
         initialState: { ...initialState, reason: 'the fatal reason' } as State,
         logger: mockLogger.get(),
-        model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'FATAL']),
+        model: transitionModel([
+          'WAIT_FOR_YELLOW_SOURCE',
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+          'FATAL',
+        ]),
         next: () => {
           throw new errors.ResponseError(
             elasticsearchClientMock.createApiResponse({
@@ -269,7 +297,11 @@ describe('migrationsStateActionMachine', () => {
       migrationStateActionMachine({
         initialState: { ...initialState, reason: 'the fatal reason' } as State,
         logger: mockLogger.get(),
-        model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'FATAL']),
+        model: transitionModel([
+          'WAIT_FOR_YELLOW_SOURCE',
+          'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+          'FATAL',
+        ]),
         next: () => {
           throw new Error('this action throws');
         },
@@ -300,7 +332,11 @@ describe('migrationsStateActionMachine', () => {
         migrationStateActionMachine({
           initialState: { ...initialState, reason: 'the fatal reason' } as State,
           logger: mockLogger.get(),
-          model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'FATAL']),
+          model: transitionModel([
+            'WAIT_FOR_YELLOW_SOURCE',
+            'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+            'FATAL',
+          ]),
           next: () => {
             throw new Error('this action throws');
           },
@@ -315,7 +351,11 @@ describe('migrationsStateActionMachine', () => {
         migrationStateActionMachine({
           initialState: { ...initialState, reason: 'the fatal reason' } as State,
           logger: mockLogger.get(),
-          model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'FATAL']),
+          model: transitionModel([
+            'WAIT_FOR_YELLOW_SOURCE',
+            'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+            'FATAL',
+          ]),
           next,
           abort,
         })

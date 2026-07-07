@@ -22,8 +22,8 @@ import {
   EuiScreenReaderOnly,
   EuiText,
   EuiToolTip,
+  EuiIconTip,
   RIGHT_ALIGNMENT,
-  EuiIcon,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
@@ -113,9 +113,8 @@ export const useColumns = (
       width: '40px',
       isExpander: true,
       render: (item: TransformListRow) => (
-        <EuiButtonIcon
-          onClick={() => toggleDetails(item)}
-          aria-label={
+        <EuiToolTip
+          content={
             expandedRowItemIds.includes(item.config.id)
               ? i18n.translate('xpack.transform.transformList.rowCollapse', {
                   defaultMessage: 'Hide details for {transformId}',
@@ -126,9 +125,29 @@ export const useColumns = (
                   values: { transformId: item.config.id },
                 })
           }
-          iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowDown' : 'arrowRight'}
-          data-test-subj="transformListRowDetailsToggle"
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            onClick={() => toggleDetails(item)}
+            aria-label={
+              expandedRowItemIds.includes(item.config.id)
+                ? i18n.translate('xpack.transform.transformList.rowCollapse', {
+                    defaultMessage: 'Hide details for {transformId}',
+                    values: { transformId: item.config.id },
+                  })
+                : i18n.translate('xpack.transform.transformList.rowExpand', {
+                    defaultMessage: 'Show details for {transformId}',
+                    values: { transformId: item.config.id },
+                  })
+            }
+            iconType={
+              expandedRowItemIds.includes(item.config.id)
+                ? 'chevronSingleDown'
+                : 'chevronSingleRight'
+            }
+            data-test-subj="transformListRowDetailsToggle"
+          />
+        </EuiToolTip>
       ),
     },
     {
@@ -139,19 +158,24 @@ export const useColumns = (
       truncateText: { lines: TRUNCATE_TEXT_LINES },
       scope: 'row',
       render: (transformId, item) => {
-        if (!isManagedTransform(item)) return <span title={transformId}>{transformId}</span>;
+        if (!isManagedTransform(item))
+          return (
+            <EuiToolTip content={transformId}>
+              <span>{transformId}</span>
+            </EuiToolTip>
+          );
         return (
           <>
-            <span
-              title={`${transformId} (${i18n.translate(
+            <EuiToolTip
+              content={`${transformId} (${i18n.translate(
                 'xpack.transform.transformList.managedBadgeLabel',
                 {
                   defaultMessage: 'Managed',
                 }
               )})`}
             >
-              {transformId}
-            </span>
+              <span>{transformId}</span>
+            </EuiToolTip>
             &nbsp;
             <EuiToolTip
               content={i18n.translate('xpack.transform.transformList.managedBadgeTooltip', {
@@ -159,7 +183,7 @@ export const useColumns = (
                   'This transform is preconfigured and managed by Elastic; other parts of the product might have might have dependencies on its behavior.',
               })}
             >
-              <EuiBadge color="hollow" data-test-subj="transformListRowIsManagedBadge">
+              <EuiBadge tabIndex={0} color="hollow" data-test-subj="transformListRowIsManagedBadge">
                 {i18n.translate('xpack.transform.transformList.managedBadgeLabel', {
                   defaultMessage: 'Managed',
                 })}
@@ -200,15 +224,18 @@ export const useColumns = (
             );
         const needsReauthTooltipIcon = needsReauth ? (
           <>
-            <EuiToolTip content={`${TRANSFORM_INSUFFICIENT_PERMISSIONS_MSG} ${actionMsg}`}>
-              <EuiIcon size="s" color="warning" type={'alert'} />
-            </EuiToolTip>
+            <EuiIconTip
+              content={`${TRANSFORM_INSUFFICIENT_PERMISSIONS_MSG} ${actionMsg}`}
+              type="warning"
+              size="s"
+              color="warning"
+            />
             &nbsp;
           </>
         ) : null;
 
         const alertingRulesTooltipIcon = Array.isArray(item.alerting_rules) ? (
-          <EuiToolTip
+          <EuiIconTip
             position="bottom"
             content={
               <FormattedMessage
@@ -217,9 +244,8 @@ export const useColumns = (
                 values={{ rulesCount: item.alerting_rules.length }}
               />
             }
-          >
-            <EuiIcon type="bell" />
-          </EuiToolTip>
+            type="bell"
+          />
         ) : (
           <span />
         );
@@ -238,7 +264,11 @@ export const useColumns = (
       sortable: true,
       truncateText: { lines: TRUNCATE_TEXT_LINES },
       render(text: string) {
-        return <span title={text}>{text}</span>;
+        return (
+          <EuiToolTip content={text}>
+            <span>{text}</span>
+          </EuiToolTip>
+        );
       },
     },
     {

@@ -14,6 +14,7 @@ import type {
   PostDeletePackagePoliciesResponse,
   NewPackagePolicy,
   UpdatePackagePolicy,
+  UpdatePackagePolicyWithId,
   PackagePolicy,
   DeletePackagePoliciesResponse,
   NewAgentPolicy,
@@ -53,7 +54,7 @@ export type PostPackagePolicyPostCreateCallback = (
 ) => Promise<PackagePolicy>;
 
 export type PutPackagePolicyUpdateCallback = (
-  updatePackagePolicy: UpdatePackagePolicy,
+  updatePackagePolicy: UpdatePackagePolicyWithId,
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   context?: RequestHandlerContext,
@@ -76,7 +77,10 @@ export type PostAgentPolicyUpdateCallback = (
   agentPolicy: Partial<AgentPolicy>
 ) => Promise<Partial<AgentPolicy>>;
 
-export type PostAgentPolicyPostUpdateCallback = (agentPolicy: AgentPolicy) => Promise<AgentPolicy>;
+export type PostAgentPolicyPostUpdateCallback = (
+  agentPolicy: AgentPolicy,
+  requestSpaceId?: string
+) => Promise<AgentPolicy>;
 
 export type ExternalCallbackCreate = ['packagePolicyCreate', PostPackagePolicyCreateCallback];
 export type ExternalCallbackPostCreate = [

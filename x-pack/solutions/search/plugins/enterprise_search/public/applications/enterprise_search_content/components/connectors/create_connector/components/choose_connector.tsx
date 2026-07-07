@@ -10,17 +10,18 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { useActions, useValues } from 'kea';
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiBadge,
   EuiFlexItem,
   EuiIcon,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiText,
   useEuiTheme,
   EuiTextTruncate,
   EuiBadgeGroup,
+  EuiFormPrepend,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -32,7 +33,7 @@ import {
 } from '../../../../../shared/constants';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { NewConnectorLogic } from '../../../new_index/method_connector/new_connector_logic';
-import { SelfManagePreference } from '../create_connector';
+import type { SelfManagePreference } from '../create_connector';
 
 interface ChooseConnectorSelectableProps {
   selfManaged: SelfManagePreference;
@@ -71,6 +72,7 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
         <EuiFlexItem
           css={css`
             overflow: auto;
+            align-self: center;
           `}
           grow
         >
@@ -104,7 +106,7 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
           <EuiBadge
             aria-label={TECH_PREVIEW_LABEL}
             key={key + '-preview'}
-            iconType="beaker"
+            iconType="flask"
             color="hollow"
           >
             {TECH_PREVIEW_LABEL}
@@ -129,7 +131,7 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
       }
       return {
         _append,
-        _prepend: <EuiIcon size="l" type={connector.iconPath} />,
+        _prepend: <EuiIcon size="l" type={connector.iconPath} aria-hidden />,
         'aria-label': connector.name + _ariaLabelAppend,
         key: key.toString(),
         label: connector.name,
@@ -150,7 +152,7 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
         'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.euiComboBox.accessibleScreenReaderLabelLabel',
         { defaultMessage: 'Select a data source for your connector to use.' }
       )}
-      prepend={<EuiIcon type={selectedConnector?.iconPath ?? 'plugs'} size="l" />}
+      prepend={<EuiFormPrepend iconLeft={selectedConnector?.iconPath ?? 'plugs'} />}
       singleSelection
       fullWidth
       placeholder={i18n.translate(

@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, keys } from '@elastic/eui';
 import {
   type Message,
   type TelemetryEventTypeWithPayload,
@@ -17,6 +17,7 @@ import { useLastUsedPrompts } from '../hooks/use_last_used_prompts';
 import { PromptEditorFunction } from './prompt_editor_function';
 import { PromptEditorNaturalLanguage } from './prompt_editor_natural_language';
 import { useScopes } from '../hooks/use_scopes';
+import { useGenAIConnectors } from '../hooks';
 
 export interface PromptEditorProps {
   disabled: boolean;
@@ -42,6 +43,7 @@ export function PromptEditor({
   onSubmit,
 }: PromptEditorProps) {
   const scopes = useScopes();
+  const connectors = useGenAIConnectors();
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [mode, setMode] = useState<'prompt' | 'function'>(
@@ -102,15 +104,19 @@ export function PromptEditor({
 
       setInnerMessage(undefined);
       setMode('prompt');
+      const connector = connectors.getConnector(connectors.selectedConnector || '');
       onSendTelemetry({
         type: ObservabilityAIAssistantTelemetryEventType.UserSentPromptInChat,
-        payload: { scopes },
+        payload: {
+          scopes,
+          connector,
+        },
       });
     } catch (_) {
       setInnerMessage(oldMessage);
       setMode(oldMessage.function_call?.name ? 'function' : 'prompt');
     }
-  }, [addLastUsedPrompt, innerMessage, loading, onSendTelemetry, onSubmit, scopes]);
+  }, [addLastUsedPrompt, innerMessage, loading, onSendTelemetry, onSubmit, scopes, connectors]);
 
   // Submit on Enter
   useEffect(() => {
@@ -138,6 +144,11 @@ export function PromptEditor({
     }
   }, [hidden, onChangeHeight]);
 
+  const submitLabel = i18n.translate(
+    'xpack.aiAssistant.chatPromptEditor.euiButtonIcon.submitLabel',
+    { defaultMessage: 'Submit' }
+  );
+
   return (
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" ref={containerRef}>
       <EuiFlexItem>
@@ -163,27 +174,26 @@ export function PromptEditor({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          data-test-subj="observabilityAiAssistantChatPromptEditorButtonIcon"
-          aria-label={i18n.translate(
-            'xpack.aiAssistant.chatPromptEditor.euiButtonIcon.submitLabel',
-            { defaultMessage: 'Submit' }
-          )}
-          disabled={loading || disabled || invalid}
-          display={
-            mode === 'function'
-              ? innerMessage?.function_call?.name
+        <EuiToolTip content={submitLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            data-test-subj="observabilityAiAssistantChatPromptEditorButtonIcon"
+            aria-label={submitLabel}
+            disabled={loading || disabled || invalid}
+            display={
+              mode === 'function'
+                ? innerMessage?.function_call?.name
+                  ? 'fill'
+                  : 'base'
+                : innerMessage?.content
                 ? 'fill'
                 : 'base'
-              : innerMessage?.content
-              ? 'fill'
-              : 'base'
-          }
-          iconType="kqlFunction"
-          isLoading={loading}
-          size="m"
-          onClick={handleSubmit}
-        />
+            }
+            iconType="kqlFunction"
+            isLoading={loading}
+            size="m"
+            onClick={handleSubmit}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

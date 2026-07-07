@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import { UIMetricUsage } from './telemetry_ui_metric_collector';
+import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import type { UIMetricUsage } from './telemetry_ui_metric_collector';
 
 const commonSchema: MakeSchemaFrom<UIMetricUsage>[string] = {
   type: 'array',

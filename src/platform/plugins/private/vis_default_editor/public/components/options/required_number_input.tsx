@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode, useCallback, ChangeEvent, useEffect } from 'react';
+import type { ReactNode, ChangeEvent } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 
 interface NumberInputOptionProps<ParamName extends string> {
   disabled?: boolean;
   error?: ReactNode;
-  isInvalid?: boolean;
   label?: React.ReactNode;
   max?: number;
   min?: number;
@@ -34,7 +34,6 @@ interface NumberInputOptionProps<ParamName extends string> {
 function RequiredNumberInputOption<ParamName extends string>({
   disabled,
   error,
-  isInvalid,
   label,
   max,
   min,
@@ -60,7 +59,7 @@ function RequiredNumberInputOption<ParamName extends string>({
   );
 
   return (
-    <EuiFormRow label={label} error={error} isInvalid={isInvalid} fullWidth display="rowCompressed">
+    <EuiFormRow label={label} error={error} isInvalid={!isValid} fullWidth display="rowCompressed">
       <EuiFieldNumber
         compressed
         fullWidth

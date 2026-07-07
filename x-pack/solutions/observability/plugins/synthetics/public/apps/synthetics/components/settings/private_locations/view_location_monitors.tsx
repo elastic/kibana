@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiPopover, EuiButtonEmpty, EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -49,7 +50,14 @@ export const ViewLocationMonitors = ({
   );
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      aria-label={i18n.translate('xpack.synthetics.viewLocationMonitors.popoverAriaLabel', {
+        defaultMessage: 'Location monitors details',
+      })}
+    >
       {count > 0 ? (
         <GreaterThanZeroMessage count={count} name={formattedLocationName} />
       ) : (

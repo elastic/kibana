@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { Workspace } from '../../types';
+import type { Workspace } from '../../types';
 import { gphSidebarHeaderStyles, gphSidebarPanelStyles } from '../../styles';
 import { gphFormGroupSmallStyles } from './control_plane.styles';
 
@@ -22,7 +23,7 @@ export const SelectStyle = ({ colors, workspace }: SelectStyleProps) => {
   return (
     <div css={gphSidebarPanelStyles}>
       <div css={gphSidebarHeaderStyles}>
-        <EuiIcon type="brush" size="s" />{' '}
+        <EuiIcon type="brush" size="s" aria-hidden={true} />{' '}
         {i18n.translate('xpack.graph.sidebar.styleVerticesTitle', {
           defaultMessage: 'Style selected vertices',
         })}
@@ -36,7 +37,7 @@ export const SelectStyle = ({ colors, workspace }: SelectStyleProps) => {
           };
           return (
             <EuiIcon
-              type="stopFilled"
+              type="stopFill"
               color={c}
               css={colorPickerIconStyles}
               aria-hidden="true"

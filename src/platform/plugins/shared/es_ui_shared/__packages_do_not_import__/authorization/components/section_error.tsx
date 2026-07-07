@@ -9,7 +9,7 @@
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
-import { Error } from '../types';
+import type { Error } from '../types';
 
 interface Props {
   title: React.ReactNode;
@@ -23,11 +23,8 @@ export const SectionError: React.FunctionComponent<Props> = ({
   actions,
   ...rest
 }) => {
-  const {
-    error: errorString,
-    cause, // wrapEsError() on the server adds a "cause" array
-    message,
-  } = error;
+  const { error: errorString, cause: topLevelCause, message, attributes } = error;
+  const cause = topLevelCause ?? attributes?.causes;
 
   return (
     <EuiCallOut title={title} role="alert" color="danger" iconType="warning" {...rest}>

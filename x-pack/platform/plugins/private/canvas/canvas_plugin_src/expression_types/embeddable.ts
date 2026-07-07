@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { ExpressionTypeDefinition } from '@kbn/expressions-plugin/common';
-import { EmbeddableTypes } from './embeddable_types';
+import type { ExpressionTypeDefinition } from '@kbn/expressions-plugin/common';
 
 export const EmbeddableExpressionType = 'embeddable';
-export { EmbeddableTypes };
 
 export interface EmbeddableExpression {
   /**

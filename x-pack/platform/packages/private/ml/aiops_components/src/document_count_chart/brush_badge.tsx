@@ -66,7 +66,9 @@ export const BrushBadge: FC<BrushBadgeProps> = ({
         }
         position="top"
       >
-        <EuiBadge css={{ width, textAlign: 'center' }}>{label}</EuiBadge>
+        <EuiBadge tabIndex={0} css={{ width, textAlign: 'center' }}>
+          {label}
+        </EuiBadge>
       </EuiToolTip>
     </div>
   );

@@ -7,13 +7,12 @@
 
 import sinon from 'sinon';
 import _ from 'lodash';
-import { FeatureCollection } from 'geojson';
-import { TableSourceDescriptor } from '../../../../../common/descriptor_types';
+import type { FeatureCollection } from 'geojson';
 import { FEATURE_VISIBLE_PROPERTY_NAME, SOURCE_TYPES } from '../../../../../common/constants';
 import { performInnerJoins } from './perform_inner_joins';
 import { InnerJoin } from '../../../joins/inner_join';
-import { IVectorSource } from '../../../sources/vector_source';
-import { IField } from '../../../fields/field';
+import type { IVectorSource } from '../../../sources/vector_source';
+import type { IField } from '../../../fields/field';
 
 const LEFT_FIELD = 'leftKey';
 const COUNT_PROPERTY_NAME = '__kbnjoin__count__d3625663-5b34-4d50-a784-0d743f676a0c';
@@ -63,7 +62,7 @@ const joinDescriptor = {
     ],
     term: 'rightKey',
     type: SOURCE_TYPES.TABLE_SOURCE,
-  } as TableSourceDescriptor,
+  },
 };
 const mockVectorSource = {
   getInspectorAdapters: () => {

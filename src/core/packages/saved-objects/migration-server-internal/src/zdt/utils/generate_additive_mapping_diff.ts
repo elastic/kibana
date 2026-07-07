@@ -17,6 +17,7 @@ import {
   getVirtualVersionMap,
   getModelVersionDelta,
 } from '@kbn/core-saved-objects-base-server-internal';
+import { initialModelVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { getUpdatedRootFields } from '../../core/compare_mappings';
 import { getBaseMappings } from '../../core/build_active_mappings';
 
@@ -44,11 +45,12 @@ export const generateAdditiveMappingDiff = ({
     throw new Error('Cannot generate additive mapping diff: meta not present on index');
   }
 
-  const typeVersions = getVirtualVersionMap(types);
+  const typeVersions = getVirtualVersionMap({ types, useModelVersionsOnly: true });
   const mappingVersion = getVirtualVersionsFromMappingMeta({
     meta,
     source: 'mappingVersions',
     knownTypes: types.map((type) => type.name),
+    minimumVirtualVersion: initialModelVersion,
   });
   if (!mappingVersion) {
     // should never occur given we checked previously in the flow but better safe than sorry.

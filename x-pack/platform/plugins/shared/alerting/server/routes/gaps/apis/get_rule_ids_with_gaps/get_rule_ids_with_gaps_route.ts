@@ -14,7 +14,7 @@ import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
 import { INTERNAL_ALERTING_GAPS_GET_RULES_API_PATH } from '../../../../types';
-import { transformResponseV1 } from './transforms';
+import { transformRequestV1, transformResponseV1 } from './transforms';
 
 export const getRuleIdsWithGapsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -41,7 +41,7 @@ export const getRuleIdsWithGapsRoute = (
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
         const body: GetRuleIdsWithGapBodyV1 = req.body;
-        const result = await rulesClient.getRuleIdsWithGaps(body);
+        const result = await rulesClient.getRuleIdsWithGaps(transformRequestV1(body));
         const response: GetRuleIdsWithGapResponseV1 = {
           body: transformResponseV1(result),
         };

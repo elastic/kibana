@@ -37,13 +37,19 @@ export const replaceSignalsIndexAlias = async ({
   await esClient.indices.updateAliases({
     actions: [
       { remove: { index: oldIndex, alias } },
-      { add: { index: newIndex, alias, is_write_index: false } },
+      { add: { index: newIndex, alias, is_write_index: false, is_hidden: true } },
     ],
   });
   await esClient.indices.updateAliases({
     actions: [
       { remove: { index: oldIndex, alias: legacySiemSignalsAlias } },
-      { add: { index: newIndex, alias: legacySiemSignalsAlias, is_write_index: false } },
+      {
+        add: {
+          index: newIndex,
+          alias: legacySiemSignalsAlias,
+          is_write_index: false,
+        },
+      },
     ],
   });
 };

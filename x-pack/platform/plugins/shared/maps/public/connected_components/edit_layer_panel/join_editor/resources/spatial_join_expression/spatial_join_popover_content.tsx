@@ -9,10 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { EuiCallOut, EuiFormRow, EuiPopoverTitle, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
-import type {
-  ESDistanceSourceDescriptor,
-  JoinSourceDescriptor,
-} from '../../../../../../common/descriptor_types';
+import type { ESDistanceSourceDescriptor } from '../../../../../../common/descriptor_types';
 import { getIndexPatternService } from '../../../../../kibana_services';
 import { getGeoFields } from '../../../../../index_pattern_util';
 import { GeoIndexPatternSelect } from '../../../../../components/geo_index_pattern_select';
@@ -23,7 +20,7 @@ import { DEFAULT_WITHIN_DISTANCE } from '../../../../../classes/sources/join_sou
 
 interface Props {
   sourceDescriptor: Partial<ESDistanceSourceDescriptor>;
-  onSourceDescriptorChange: (sourceDescriptor: Partial<JoinSourceDescriptor>) => void;
+  onSourceDescriptorChange: (sourceDescriptor: Partial<ESDistanceSourceDescriptor>) => void;
 }
 
 export function SpatialJoinPopoverContent(props: Props) {
@@ -64,7 +61,7 @@ export function SpatialJoinPopoverContent(props: Props) {
 
   const dataViewCallout = unableToLoadDataView ? (
     <>
-      <EuiCallOut color="warning">
+      <EuiCallOut announceOnMount color="warning">
         <p>
           {i18n.translate('xpack.maps.spatialJoinExpression.noDataViewTitle', {
             defaultMessage: 'Unable to load data view {dataViewId}.',

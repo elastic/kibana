@@ -7,9 +7,12 @@
 
 import { useMemo, useCallback } from 'react';
 import { useAssistantOverlay } from '@kbn/elastic-assistant';
-import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
+import {
+  getAttackDiscoveryMarkdown,
+  type AttackDiscovery,
+  type Replacements,
+} from '@kbn/elastic-assistant-common';
 import { useAssistantAvailability } from '../../../../../assistant/use_assistant_availability';
-import { getAttackDiscoveryMarkdown } from '../get_attack_discovery_markdown/get_attack_discovery_markdown';
 
 /**
  * This category is provided in the prompt context for the assistant
@@ -22,7 +25,8 @@ export const useViewInAiAssistant = ({
   attackDiscovery: AttackDiscovery | undefined;
   replacements?: Replacements;
 }) => {
-  const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
+  const { hasAssistantPrivilege, isAssistantEnabled, isAssistantVisible } =
+    useAssistantAvailability();
 
   // the prompt context for this insight:
   const getPromptContext = useCallback(
@@ -57,7 +61,7 @@ export const useViewInAiAssistant = ({
   const disabled = attackDiscovery == null || !hasAssistantPrivilege || promptContextId == null;
 
   return useMemo(
-    () => ({ promptContextId, disabled, showAssistantOverlay }),
-    [promptContextId, disabled, showAssistantOverlay]
+    () => ({ promptContextId, disabled, showAssistantOverlay, isAssistantVisible }),
+    [promptContextId, disabled, showAssistantOverlay, isAssistantVisible]
   );
 };

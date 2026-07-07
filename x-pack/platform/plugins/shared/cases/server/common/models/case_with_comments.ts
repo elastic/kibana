@@ -11,11 +11,19 @@ import type {
   SavedObjectReference,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsFindResponse,
 } from '@kbn/core/server';
+import {
+  isLegacyAttachmentRequest,
+  isUnifiedAttachmentRequest,
+  isAlertAttachmentType,
+  isEventAttachmentType,
+} from '../../../common/utils/attachments';
 import type {
   AlertAttachmentPayload,
   AttachmentAttributes,
   Case,
+  EventAttachmentPayload,
   UserCommentAttachmentPayload,
 } from '../../../common/types/domain';
 import {
@@ -29,24 +37,36 @@ import {
 import { CASE_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import type { CasesClientArgs } from '../../client';
 import type { RefreshSetting } from '../../services/types';
+import type { AttachmentSavedObjectType } from '../../services/user_actions/types';
 import { createCaseError } from '../error';
 import { AttachmentLimitChecker } from '../limiter_checker';
 import type { AlertInfo } from '../types';
 import type { CaseSavedObjectTransformed } from '../types/case';
 import {
   countAlertsForID,
-  flattenCommentSavedObjects,
+  flattenAttachmentSavedObjects,
   transformNewComment,
   getOrUpdateLensReferences,
   isCommentRequestTypeAlert,
   getAlertInfoFromComments,
   getIDsAndIndicesAsArrays,
+  isCommentRequestTypeEvent,
+  countEventsForID,
 } from '../utils';
 import { decodeOrThrow } from '../runtime_types';
-import type { AttachmentRequest, AttachmentPatchRequest } from '../../../common/types/api';
+import type {
+  AttachmentRequest,
+  AttachmentPatchRequestV2,
+  AttachmentRequestV2,
+} from '../../../common/types/api';
+import type {
+  AttachmentAttributesV2,
+  AttachmentMode,
+  UnifiedAttachmentPayload,
+} from '../../../common/types/domain/attachment/v2';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
-type CommentRequestWithId = Array<{ id: string } & AttachmentRequest>;
+type CommentRequestWithId = Array<{ id: string } & (AttachmentRequest | UnifiedAttachmentPayload)>;
 
 /**
  * This class represents a case that can have a comment attached to it.
@@ -82,10 +102,12 @@ export class CaseCommentModel {
     updateRequest,
     updatedAt,
     owner,
+    mode = 'legacy',
   }: {
-    updateRequest: AttachmentPatchRequest;
+    updateRequest: AttachmentPatchRequestV2;
     updatedAt: string;
     owner: string;
+    mode?: AttachmentMode;
   }): Promise<CaseCommentModel> {
     try {
       const { id, version, ...queryRestAttributes } = updateRequest;
@@ -101,9 +123,14 @@ export class CaseCommentModel {
         refresh: false,
       };
 
-      if (queryRestAttributes.type === AttachmentType.user && queryRestAttributes?.comment) {
+      if (
+        queryRestAttributes.type === AttachmentType.user &&
+        'comment' in queryRestAttributes &&
+        queryRestAttributes.comment
+      ) {
         const currentComment = (await this.params.services.attachmentService.getter.get({
-          attachmentId: id,
+          savedObjectId: id,
+          mode,
         })) as SavedObject<UserCommentAttachmentPayload>;
 
         const updatedReferences = getOrUpdateLensReferences(
@@ -121,7 +148,7 @@ export class CaseCommentModel {
 
       const [comment, commentableCase] = await Promise.all([
         this.params.services.attachmentService.update({
-          attachmentId: id,
+          savedObjectId: id,
           updatedAttributes: {
             ...queryRestAttributes,
             updated_at: updatedAt,
@@ -129,7 +156,7 @@ export class CaseCommentModel {
           },
           options,
         }),
-        this.partialUpdateCaseUserAndDateSkipRefresh(updatedAt),
+        this.partialUpdateCaseWithAttachmentDataSkipRefresh({ date: updatedAt }),
       ]);
 
       await commentableCase.createUpdateCommentUserAction(comment, updateRequest, owner);
@@ -144,21 +171,36 @@ export class CaseCommentModel {
     }
   }
 
-  private async partialUpdateCaseUserAndDateSkipRefresh(date: string) {
-    return this.partialUpdateCaseUserAndDate(date, false);
+  private async partialUpdateCaseWithAttachmentDataSkipRefresh({
+    date,
+  }: {
+    date: string;
+  }): Promise<CaseCommentModel> {
+    return this.partialUpdateCaseWithAttachmentData({
+      date,
+      refresh: false,
+    });
   }
 
-  private async partialUpdateCaseUserAndDate(
-    date: string,
-    refresh: RefreshSetting
-  ): Promise<CaseCommentModel> {
+  private async partialUpdateCaseWithAttachmentData({
+    date,
+    refresh,
+  }: {
+    date: string;
+    refresh: RefreshSetting;
+  }): Promise<CaseCommentModel> {
     try {
+      const { totalComments, totalAlerts, totalEvents } = await this.getAttachmentStats();
+
       const updatedCase = await this.params.services.caseService.patchCase({
         originalCase: this.caseInfo,
         caseId: this.caseInfo.id,
         updatedAttributes: {
           updated_at: date,
           updated_by: { ...this.params.user },
+          total_comments: totalComments,
+          total_alerts: totalAlerts,
+          total_events: totalEvents,
         },
         refresh,
       });
@@ -180,13 +222,30 @@ export class CaseCommentModel {
     }
   }
 
+  private async getAttachmentStats() {
+    const attachmentStats =
+      await this.params.services.attachmentService.getter.getCaseAttatchmentStats({
+        caseIds: [this.caseInfo.id],
+      });
+
+    const totalComments = attachmentStats.get(this.caseInfo.id)?.userComments ?? 0;
+    const totalAlerts = attachmentStats.get(this.caseInfo.id)?.alerts ?? 0;
+    const totalEvents = attachmentStats.get(this.caseInfo.id)?.events ?? 0;
+
+    return {
+      totalComments,
+      totalAlerts,
+      totalEvents,
+    };
+  }
+
   private newObjectWithInfo(caseInfo: CaseSavedObjectTransformed): CaseCommentModel {
     return new CaseCommentModel(caseInfo, this.params);
   }
 
   private async createUpdateCommentUserAction(
-    comment: SavedObjectsUpdateResponse<AttachmentAttributes>,
-    updateRequest: AttachmentPatchRequest,
+    comment: SavedObjectsUpdateResponse<AttachmentAttributesV2>,
+    updateRequest: AttachmentPatchRequestV2,
     owner: string
   ) {
     const { id, version, ...queryRestAttributes } = updateRequest;
@@ -196,7 +255,8 @@ export class CaseCommentModel {
         type: UserActionTypes.comment,
         action: UserActionActions.update,
         caseId: this.caseInfo.id,
-        attachmentId: comment.id,
+        savedObjectId: comment.id,
+        savedObjectType: comment.type as AttachmentSavedObjectType,
         payload: { attachment: queryRestAttributes },
         user: this.params.user,
         owner,
@@ -213,36 +273,37 @@ export class CaseCommentModel {
     id,
   }: {
     createdDate: string;
-    commentReq: AttachmentRequest;
+    commentReq: AttachmentRequestV2;
     id: string;
   }): Promise<CaseCommentModel> {
     try {
       await this.validateCreateCommentRequest([commentReq]);
-      const attachmentsWithoutDuplicateAlerts = await this.filterDuplicatedAlerts([
+      const attachmentsWithoutDuplicates = await this.filterDuplicatedAttachments([
         { ...commentReq, id },
       ]);
 
-      if (attachmentsWithoutDuplicateAlerts.length === 0) {
+      if (attachmentsWithoutDuplicates.length === 0) {
         return this;
       }
 
-      const { id: commentId, ...attachment } = attachmentsWithoutDuplicateAlerts[0];
+      const { id: commentId, ...attachment } = attachmentsWithoutDuplicates[0];
 
       const references = [...this.buildRefsToCase(), ...this.getCommentReferences(attachment)];
 
-      const [comment, commentableCase] = await Promise.all([
-        this.params.services.attachmentService.create({
-          attributes: transformNewComment({
-            createdDate,
-            ...attachment,
-            ...this.params.user,
-          }),
-          references,
-          id,
-          refresh: false,
+      const comment = await this.params.services.attachmentService.create({
+        attributes: transformNewComment({
+          createdDate,
+          ...attachment,
+          ...this.params.user,
         }),
-        this.partialUpdateCaseUserAndDateSkipRefresh(createdDate),
-      ]);
+        references,
+        id,
+        refresh: true,
+      });
+
+      const commentableCase = await this.partialUpdateCaseWithAttachmentDataSkipRefresh({
+        date: createdDate,
+      });
 
       await Promise.all([
         commentableCase.handleAlertComments([attachment]),
@@ -259,7 +320,7 @@ export class CaseCommentModel {
     }
   }
 
-  private async filterDuplicatedAlerts(
+  private async filterDuplicatedAttachments(
     attachments: CommentRequestWithId
   ): Promise<CommentRequestWithId> {
     /**
@@ -268,67 +329,184 @@ export class CaseCommentModel {
     const removeItemsByPosition = (items: string[], positionsToRemove: number[]): string[] =>
       items.filter((_, itemIndex) => !positionsToRemove.some((position) => position === itemIndex));
 
-    const dedupedAlertAttachments: CommentRequestWithId = [];
+    const assertIdsAndIndicesHaveMatchingLengths = (ids: string[], indices: string[]): void => {
+      if (ids.length !== indices.length) {
+        throw Boom.badRequest(
+          `attachmentId and metadata.index must have matching lengths. Received attachmentId.length=${ids.length} and metadata.index.length=${indices.length}.`
+        );
+      }
+    };
+
+    const dedupedAttachments: CommentRequestWithId = [];
     const idsAlreadySeen = new Set();
-    const alertsAttachedToCase = await this.params.services.attachmentService.getter.getAllAlertIds(
-      {
-        caseId: this.caseInfo.id,
-      }
-    );
 
-    attachments.forEach((attachment) => {
-      if (!isCommentRequestTypeAlert(attachment)) {
-        dedupedAlertAttachments.push(attachment);
-        return;
+    // Dedup helper for unified (v2) alert/event attachments. The unified contract for
+    // metadata.index is "scalar broadcast OR 1-to-1 array of matching length"; an array
+    // whose length does not match attachmentId has no sensible interpretation and is
+    // rejected, mirroring the legacy paired-array strictness.
+    const dedupeUnifiedAttachment = <
+      T extends { attachmentId: string | string[]; metadata?: unknown }
+    >(
+      attachment: T,
+      idsAlreadyInCase: Set<string>
+    ): T | undefined => {
+      const { ids } = getIDsAndIndicesAsArrays(attachment as unknown as AttachmentRequestV2);
+      const existingMetadata =
+        attachment.metadata && typeof attachment.metadata === 'object'
+          ? (attachment.metadata as Record<string, unknown>)
+          : {};
+      const rawMetadataIndex = existingMetadata.index as string | string[] | undefined;
+
+      if (Array.isArray(rawMetadataIndex) && rawMetadataIndex.length !== ids.length) {
+        throw Boom.badRequest(
+          `attachmentId and metadata.index must have matching lengths when metadata.index is an array. Received attachmentId.length=${ids.length} and metadata.index.length=${rawMetadataIndex.length}.`
+        );
       }
 
-      const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
       const idPositionsThatAlreadyExistInCase: number[] = [];
 
       ids.forEach((id, index) => {
-        if (alertsAttachedToCase.has(id) || idsAlreadySeen.has(id)) {
+        if (idsAlreadyInCase.has(id) || idsAlreadySeen.has(id)) {
           idPositionsThatAlreadyExistInCase.push(index);
         }
 
         idsAlreadySeen.add(id);
       });
 
-      const alertIdsNotAlreadyAttachedToCase = removeItemsByPosition(
-        ids,
-        idPositionsThatAlreadyExistInCase
-      );
-      const alertIndicesNotAlreadyAttachedToCase = removeItemsByPosition(
-        indices,
-        idPositionsThatAlreadyExistInCase
-      );
+      const newIds = removeItemsByPosition(ids, idPositionsThatAlreadyExistInCase);
+      const newMetadataIndex = Array.isArray(rawMetadataIndex)
+        ? removeItemsByPosition(rawMetadataIndex, idPositionsThatAlreadyExistInCase)
+        : rawMetadataIndex;
 
-      if (
-        alertIdsNotAlreadyAttachedToCase.length > 0 &&
-        alertIdsNotAlreadyAttachedToCase.length === alertIndicesNotAlreadyAttachedToCase.length
-      ) {
-        dedupedAlertAttachments.push({
-          ...attachment,
-          alertId: alertIdsNotAlreadyAttachedToCase,
-          index: alertIndicesNotAlreadyAttachedToCase,
-        });
+      if (newIds.length === 0) {
+        return undefined;
       }
+
+      return {
+        ...attachment,
+        attachmentId: newIds,
+        metadata: {
+          ...existingMetadata,
+          index: newMetadataIndex,
+        },
+      };
+    };
+    const alertsAttachedToCase = await this.params.services.attachmentService.getter.getAllAlertIds(
+      {
+        caseId: this.caseInfo.id,
+      }
+    );
+
+    const eventsAttachedToCase = await this.params.services.attachmentService.getter.getAllEventIds(
+      {
+        caseId: this.caseInfo.id,
+        owner: this.caseInfo.attributes.owner,
+      }
+    );
+
+    attachments.forEach((attachment) => {
+      if (isAlertAttachmentType(attachment.type)) {
+        if (isLegacyAttachmentRequest(attachment) && isCommentRequestTypeAlert(attachment)) {
+          const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
+          const idPositionsThatAlreadyExistInCase: number[] = [];
+
+          ids.forEach((id, index) => {
+            if (alertsAttachedToCase.has(id) || idsAlreadySeen.has(id)) {
+              idPositionsThatAlreadyExistInCase.push(index);
+            }
+
+            idsAlreadySeen.add(id);
+          });
+
+          assertIdsAndIndicesHaveMatchingLengths(ids, indices);
+
+          const alertIdsNotAlreadyAttachedToCase = removeItemsByPosition(
+            ids,
+            idPositionsThatAlreadyExistInCase
+          );
+          const alertIndicesNotAlreadyAttachedToCase = removeItemsByPosition(
+            indices,
+            idPositionsThatAlreadyExistInCase
+          );
+
+          if (alertIdsNotAlreadyAttachedToCase.length > 0) {
+            dedupedAttachments.push({
+              ...attachment,
+              alertId: alertIdsNotAlreadyAttachedToCase,
+              index: alertIndicesNotAlreadyAttachedToCase,
+            });
+          }
+        } else if ('attachmentId' in attachment) {
+          const deduped = dedupeUnifiedAttachment(attachment, alertsAttachedToCase);
+          if (deduped) {
+            dedupedAttachments.push(deduped);
+          }
+        }
+        return;
+      }
+
+      if (isEventAttachmentType(attachment.type)) {
+        if (isLegacyAttachmentRequest(attachment) && isCommentRequestTypeEvent(attachment)) {
+          const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
+          const idPositionsThatAlreadyExistInCase: number[] = [];
+
+          ids.forEach((id, index) => {
+            if (eventsAttachedToCase.has(id) || idsAlreadySeen.has(id)) {
+              idPositionsThatAlreadyExistInCase.push(index);
+            }
+
+            idsAlreadySeen.add(id);
+          });
+
+          assertIdsAndIndicesHaveMatchingLengths(ids, indices);
+
+          const newIds = removeItemsByPosition(ids, idPositionsThatAlreadyExistInCase);
+          const newIndices = removeItemsByPosition(indices, idPositionsThatAlreadyExistInCase);
+
+          if (newIds.length > 0) {
+            dedupedAttachments.push({
+              ...attachment,
+              eventId: newIds,
+              index: newIndices,
+            });
+          }
+        } else if ('attachmentId' in attachment) {
+          const deduped = dedupeUnifiedAttachment(attachment, eventsAttachedToCase);
+          if (deduped) {
+            dedupedAttachments.push(deduped);
+          }
+        }
+
+        return;
+      }
+
+      dedupedAttachments.push(attachment);
     });
 
-    return dedupedAlertAttachments;
+    return dedupedAttachments;
   }
 
-  private getAlertAttachments(attachments: AttachmentRequest[]): AlertAttachmentPayload[] {
-    return attachments.filter(
-      (attachment): attachment is AlertAttachmentPayload => attachment.type === AttachmentType.alert
-    );
+  private getAttachmentsByType<
+    T extends AttachmentType,
+    R = T extends AttachmentType.event ? AlertAttachmentPayload[] : EventAttachmentPayload[]
+  >(attachments: AttachmentRequestV2[], attachmentType: T): R {
+    return attachments.filter((attachment) => attachment.type === attachmentType) as R;
   }
 
-  private async validateCreateCommentRequest(req: AttachmentRequest[]) {
-    const alertAttachments = this.getAlertAttachments(req);
-    const hasAlertsInRequest = alertAttachments.length > 0;
+  private async validateCreateCommentRequest(req: Array<AttachmentRequestV2>) {
+    if (this.caseInfo.attributes.status === CaseStatuses.closed) {
+      const hasAlertsInRequest = req.some((a) => isAlertAttachmentType(a.type));
 
-    if (hasAlertsInRequest && this.caseInfo.attributes.status === CaseStatuses.closed) {
-      throw Boom.badRequest('Alert cannot be attached to a closed case');
+      if (hasAlertsInRequest) {
+        throw Boom.badRequest('Alert cannot be attached to a closed case');
+      }
+
+      const eventAttachments = this.getAttachmentsByType(req, AttachmentType.event);
+      const hasEventsInRequest = eventAttachments.length > 0;
+
+      if (hasEventsInRequest) {
+        throw Boom.badRequest('Event cannot be attached to a closed case');
+      }
     }
 
     if (req.some((attachment) => attachment.owner !== this.caseInfo.attributes.owner)) {
@@ -354,13 +532,27 @@ export class CaseCommentModel {
     ];
   }
 
-  private getCommentReferences(commentReq: AttachmentRequest) {
+  private getCommentReferences(commentReq: AttachmentRequestV2) {
     let references: SavedObjectReference[] = [];
 
-    if (commentReq.type === AttachmentType.user && commentReq?.comment) {
+    if (
+      isLegacyAttachmentRequest(commentReq) &&
+      commentReq.type === AttachmentType.user &&
+      commentReq?.comment
+    ) {
       const commentStringReferences = getOrUpdateLensReferences(
         this.params.lensEmbeddableFactory,
         commentReq.comment
+      );
+      references = [...references, ...commentStringReferences];
+    } else if (
+      isUnifiedAttachmentRequest(commentReq) &&
+      commentReq.type === 'comment' &&
+      commentReq.data?.content
+    ) {
+      const commentStringReferences = getOrUpdateLensReferences(
+        this.params.lensEmbeddableFactory,
+        commentReq.data?.content as string
       );
       references = [...references, ...commentStringReferences];
     }
@@ -368,8 +560,8 @@ export class CaseCommentModel {
     return references;
   }
 
-  private async handleAlertComments(attachments: AttachmentRequest[]) {
-    const alertAttachments = this.getAlertAttachments(attachments);
+  private async handleAlertComments(attachments: AttachmentRequestV2[]) {
+    const alertAttachments = attachments.filter((a) => isAlertAttachmentType(a.type));
 
     const alerts = getAlertInfoFromComments(alertAttachments);
 
@@ -400,33 +592,37 @@ export class CaseCommentModel {
   }
 
   private async createCommentUserAction(
-    comment: SavedObject<AttachmentAttributes>,
-    req: AttachmentRequest
+    comment: SavedObject<AttachmentAttributesV2>,
+    req: AttachmentRequestV2
   ) {
     await this.params.services.userActionService.creator.createUserAction({
       userAction: {
         type: UserActionTypes.comment,
         action: UserActionActions.create,
         caseId: this.caseInfo.id,
-        attachmentId: comment.id,
+        savedObjectId: comment.id,
+        savedObjectType: comment.type as AttachmentSavedObjectType,
         payload: {
           attachment: req,
         },
         user: this.params.user,
-        owner: comment.attributes.owner,
+        owner: req.owner,
       },
     });
   }
 
   private async bulkCreateCommentUserAction(
-    attachments: Array<{ id: string } & AttachmentRequest>
+    attachments: Array<
+      { id: string; savedObjectType: AttachmentSavedObjectType } & AttachmentRequestV2
+    >
   ) {
     await this.params.services.userActionService.creator.bulkCreateAttachmentCreation({
       caseId: this.caseInfo.id,
-      attachments: attachments.map(({ id, ...attachment }) => ({
+      attachments: attachments.map(({ id, savedObjectType, ...attachment }) => ({
         id,
         owner: attachment.owner,
         attachment,
+        savedObjectType,
       })),
       user: this.params.user,
     });
@@ -441,7 +637,7 @@ export class CaseCommentModel {
     };
   }
 
-  public async encodeWithComments(): Promise<Case> {
+  public async encodeWithComments({ mode }: { mode: AttachmentMode }): Promise<Case> {
     try {
       const comments = await this.params.services.caseService.getAllCaseComments({
         id: this.caseInfo.id,
@@ -450,13 +646,22 @@ export class CaseCommentModel {
           page: 1,
           perPage: MAX_DOCS_PER_PAGE,
         },
+        mode,
       });
-
-      const totalAlerts = countAlertsForID({ comments, id: this.caseInfo.id }) ?? 0;
+      const totalAlerts =
+        countAlertsForID({
+          comments: comments as SavedObjectsFindResponse<AttachmentAttributes>,
+          id: this.caseInfo.id,
+        }) ?? 0;
+      const totalEvents =
+        countEventsForID({
+          comments: comments as SavedObjectsFindResponse<AttachmentAttributes>,
+        }) ?? 0;
 
       const caseResponse = {
-        comments: flattenCommentSavedObjects(comments.saved_objects),
+        comments: flattenAttachmentSavedObjects(comments.saved_objects),
         totalAlerts,
+        totalEvents,
         ...this.formatForEncoding(comments.total),
       };
 
@@ -478,7 +683,7 @@ export class CaseCommentModel {
     try {
       await this.validateCreateCommentRequest(attachments);
 
-      const attachmentWithoutDuplicateAlerts = await this.filterDuplicatedAlerts(attachments);
+      const attachmentWithoutDuplicateAlerts = await this.filterDuplicatedAttachments(attachments);
 
       if (attachmentWithoutDuplicateAlerts.length === 0) {
         return this;
@@ -486,31 +691,41 @@ export class CaseCommentModel {
 
       const caseReference = this.buildRefsToCase();
 
-      const [newlyCreatedAttachments, commentableCase] = await Promise.all([
-        this.params.services.attachmentService.bulkCreate({
-          attachments: attachmentWithoutDuplicateAlerts.map(({ id, ...attachment }) => {
-            return {
-              attributes: transformNewComment({
-                createdDate: new Date().toISOString(),
-                ...attachment,
-                ...this.params.user,
-              }),
-              references: [...caseReference, ...this.getCommentReferences(attachment)],
-              id,
-            };
-          }),
-          refresh: false,
+      const newlyCreatedAttachments = await this.params.services.attachmentService.bulkCreate({
+        attachments: attachmentWithoutDuplicateAlerts.map(({ id, ...attachment }) => {
+          return {
+            attributes: transformNewComment({
+              createdDate: new Date().toISOString(),
+              ...attachment,
+              ...this.params.user,
+            }),
+            references: [...caseReference, ...this.getCommentReferences(attachment)],
+            id,
+          };
         }),
-        this.partialUpdateCaseUserAndDateSkipRefresh(new Date().toISOString()),
-      ]);
+        refresh: true,
+      });
+
+      const commentableCase = await this.partialUpdateCaseWithAttachmentDataSkipRefresh({
+        date: new Date().toISOString(),
+      });
 
       const savedObjectsWithoutErrors = newlyCreatedAttachments.saved_objects.filter(
         (attachment) => attachment.error == null
       );
 
-      const attachmentsWithoutErrors = attachments.filter((attachment) =>
-        savedObjectsWithoutErrors.some((so) => so.id === attachment.id)
-      );
+      const attachmentsWithoutErrors = attachments.flatMap((attachment) => {
+        const savedObject = savedObjectsWithoutErrors.find((so) => so.id === attachment.id);
+
+        return savedObject
+          ? [
+              {
+                ...attachment,
+                savedObjectType: savedObject.type as AttachmentSavedObjectType,
+              },
+            ]
+          : [];
+      });
 
       await Promise.all([
         commentableCase.handleAlertComments(attachmentsWithoutErrors),

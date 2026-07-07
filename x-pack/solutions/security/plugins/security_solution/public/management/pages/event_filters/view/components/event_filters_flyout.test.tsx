@@ -254,6 +254,34 @@ describe('Event filter flyout', () => {
       expect(renderResult.getByText('Cancel')).not.toBeNull();
     });
 
+    it('should show OS selector and trigger enrichment when rendering with event data', async () => {
+      const searchMock = (useKibana as jest.Mock)().services.data.search.search;
+      const eventData = ecsEventMock();
+
+      act(() => {
+        render({ data: eventData });
+      });
+
+      // Verify enrichment was triggered with correct parameters
+      await waitFor(() => {
+        expect(searchMock).toHaveBeenCalledWith({
+          params: {
+            index: eventData._index,
+            body: {
+              query: {
+                match: {
+                  _id: eventData._id,
+                },
+              },
+            },
+          },
+        });
+      });
+
+      const osSelect = renderResult.getByTestId('eventFilters-form-os-select');
+      expect(osSelect).toBeVisible();
+    });
+
     it('should start with "add event filter" button disabled', () => {
       render();
       const confirmButton = renderResult.getByTestId('add-exception-confirm-button');

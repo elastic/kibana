@@ -6,8 +6,8 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { ManagementAppLocator } from '@kbn/management-plugin/common';
-import { LocatorDefinition } from '@kbn/share-plugin/public';
+import type { ManagementAppLocator } from '@kbn/management-plugin/common';
+import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import { linkToSnapshots } from './application/services/navigation';
 import { PLUGIN } from '../common/constants';
 

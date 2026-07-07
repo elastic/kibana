@@ -10,9 +10,9 @@
 import React from 'react';
 import { Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
-import { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 import { groupBy, orderBy } from 'lodash';
-import {
+import type {
   IconPosition,
   ReferenceLineConfig,
   FillStyle,
@@ -21,14 +21,13 @@ import {
   CommonXYReferenceLineLayerConfig,
 } from '../../../common/types';
 import { FillStyles } from '../../../common/constants';
+import type { GroupsConfiguration, AxesMap } from '../../helpers';
 import {
-  GroupsConfiguration,
   mapVerticalToHorizontalPlacement,
   Marker,
   MarkerBody,
   getAxisPosition,
   getOriginalAxisPosition,
-  AxesMap,
   isReferenceLine,
 } from '../../helpers';
 import type { ReferenceLineAnnotationConfig } from './reference_line_annotations';
@@ -138,7 +137,7 @@ export const getBottomRect = (
     y1: undefined,
   },
   header: headerLabel,
-  details: formatter?.convert(currentValue) || currentValue?.toString(),
+  details: formatter?.convertToText(currentValue) || currentValue?.toString(),
 });
 
 export const getHorizontalRect = (
@@ -155,7 +154,7 @@ export const getHorizontalRect = (
     y1: isFillAbove ? nextValue : currentValue,
   },
   header: headerLabel,
-  details: formatter?.convert(currentValue) || currentValue?.toString(),
+  details: formatter?.convertToText(currentValue) || currentValue?.toString(),
 });
 
 const sortReferenceLinesByGroup = (referenceLines: ReferenceLineConfig[], group: FillStyle) => {

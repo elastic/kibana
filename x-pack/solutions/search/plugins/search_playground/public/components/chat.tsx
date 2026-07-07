@@ -6,7 +6,8 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Controller, FieldErrors, useFormContext } from 'react-hook-form';
+import type { FieldErrors } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -16,6 +17,7 @@ import {
   EuiHideFor,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
@@ -27,7 +29,8 @@ import { AnalyticsEvents } from '../analytics/constants';
 import { useAutoBottomScroll } from '../hooks/use_auto_bottom_scroll';
 import { ChatSidebar } from './chat_sidebar';
 import { useChat } from '../hooks/use_chat';
-import { PlaygroundForm, PlaygroundFormFields, ChatRequestData, MessageRole } from '../types';
+import type { PlaygroundForm, ChatRequestData } from '../types';
+import { PlaygroundFormFields, MessageRole } from '../types';
 
 import { MessageList } from './message_list/message_list';
 import { QuestionInput } from './question_input';
@@ -128,15 +131,16 @@ export const Chat = () => {
         onSubmit={handleSubmit(onSubmit)}
         data-test-subj="chatPage"
       >
-        <EuiFlexGroup gutterSize="none">
+        <EuiFlexGroup css={{ overflow: 'auto' }} gutterSize="none" wrap>
           <EuiFlexItem
             grow={2}
             css={{
               paddingTop: euiTheme.size.l,
               paddingBottom: euiTheme.size.l,
-              // don't allow the chat to shrink below 66.6% of the screen
+              // don't allow the chat to shrink below 700px
               flexBasis: 0,
-              minWidth: '66.6%',
+              minWidth: '50em',
+              minHeight: '22em',
             }}
           >
             <EuiFlexGroup direction="column" className="eui-fullHeight">
@@ -203,35 +207,55 @@ export const Chat = () => {
                       isDisabled={isSubmitting || isRegenerating}
                       button={
                         isSubmitting || isRegenerating ? (
-                          <EuiButtonIcon
-                            data-test-subj="stopRequestButton"
-                            aria-label={i18n.translate(
+                          <EuiToolTip
+                            content={i18n.translate(
                               'xpack.searchPlayground.chat.stopButtonAriaLabel',
                               {
                                 defaultMessage: 'Stop request',
                               }
                             )}
-                            display="base"
-                            size="s"
-                            iconType="stop"
-                            onClick={handleStopRequest}
-                          />
+                            disableScreenReaderOutput
+                          >
+                            <EuiButtonIcon
+                              data-test-subj="stopRequestButton"
+                              aria-label={i18n.translate(
+                                'xpack.searchPlayground.chat.stopButtonAriaLabel',
+                                {
+                                  defaultMessage: 'Stop request',
+                                }
+                              )}
+                              display="base"
+                              size="s"
+                              iconType="stop"
+                              onClick={handleStopRequest}
+                            />
+                          </EuiToolTip>
                         ) : (
-                          <EuiButtonIcon
-                            aria-label={i18n.translate(
+                          <EuiToolTip
+                            content={i18n.translate(
                               'xpack.searchPlayground.chat.sendButtonAriaLabel',
                               {
                                 defaultMessage: 'Send a question',
                               }
                             )}
-                            display={isValid ? 'base' : 'empty'}
-                            size="s"
-                            type="submit"
-                            isLoading={isSubmitting}
-                            isDisabled={!isValid}
-                            iconType={TelegramIcon}
-                            data-test-subj="sendQuestionButton"
-                          />
+                            disableScreenReaderOutput
+                          >
+                            <EuiButtonIcon
+                              aria-label={i18n.translate(
+                                'xpack.searchPlayground.chat.sendButtonAriaLabel',
+                                {
+                                  defaultMessage: 'Send a question',
+                                }
+                              )}
+                              display={isValid ? 'base' : 'empty'}
+                              size="s"
+                              type="submit"
+                              isLoading={isSubmitting}
+                              isDisabled={!isValid}
+                              iconType={TelegramIcon}
+                              data-test-subj="sendQuestionButton"
+                            />
+                          </EuiToolTip>
                         )
                       }
                     />

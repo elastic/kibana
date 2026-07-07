@@ -7,32 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
-import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
+import { DEFAULT_DASHBOARD_STATE } from '../../../../common/default_dashboard_state';
 import { extractDashboardState } from './extract_dashboard_state';
-
-const DASHBOARD_STATE = omit(DEFAULT_DASHBOARD_STATE, ['panels', 'sections']);
 
 describe('extractDashboardState', () => {
   test('should extract all DashboardState fields', () => {
     const optionalState = {
-      timeRange: {
+      time_range: {
         from: 'now-15m',
         to: 'now',
       },
       references: [],
-      refreshInterval: {
+      refresh_interval: {
         pause: false,
         value: 5,
       },
     };
+
+    /**
+     * State extracted with extractDashboardState is meant to act like an override.
+     * In this test, we are overriding all required state keys with their default
+     * values to ensure every key is properly extracted.
+     */
     expect(
       extractDashboardState({
-        ...DASHBOARD_STATE,
+        ...DEFAULT_DASHBOARD_STATE,
         ...optionalState,
       })
     ).toEqual({
-      ...DASHBOARD_STATE,
+      ...DEFAULT_DASHBOARD_STATE,
       ...optionalState,
     });
   });

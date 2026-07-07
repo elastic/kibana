@@ -5,23 +5,33 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { Provider as ReduxProvider } from 'react-redux';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { Subject } from 'rxjs';
-import { Store } from 'redux';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { Subject } from 'rxjs';
+import type { Store } from 'redux';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { SyntheticsRefreshContextProvider } from './synthetics_refresh_context';
 import { SyntheticsDataViewContextProvider } from './synthetics_data_view_context';
-import { SyntheticsAppProps } from './synthetics_settings_context';
+import type { SyntheticsAppProps } from './synthetics_settings_context';
 import { storage, store } from '../state';
+const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 export const SyntheticsSharedContext: React.FC<
   React.PropsWithChildren<SyntheticsAppProps & { reload$?: Subject<boolean>; reduxStore?: Store }>
 > = ({ reduxStore, coreStart, setupPlugins, startPlugins, children, darkMode, reload$ }) => {
   const queryClient = new QueryClient();
+
+  const spacesApi = startPlugins.spaces;
+
+  const ContextWrapper = useMemo(
+    () =>
+      spacesApi ? spacesApi.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
+    [spacesApi]
+  );
 
   return (
     <KibanaContextProvider
@@ -29,7 +39,9 @@ export const SyntheticsSharedContext: React.FC<
         ...coreStart,
         ...setupPlugins,
         storage,
+        contentManagement: startPlugins.contentManagement,
         data: startPlugins.data,
+        dataViews: startPlugins.dataViews,
         inspector: startPlugins.inspector,
         triggersActionsUi: startPlugins.triggersActionsUi,
         observability: startPlugins.observability,
@@ -40,11 +52,14 @@ export const SyntheticsSharedContext: React.FC<
         spaces: startPlugins.spaces,
         fleet: startPlugins.fleet,
         share: startPlugins.share,
+        kql: startPlugins.kql,
         unifiedSearch: startPlugins.unifiedSearch,
         embeddable: startPlugins.embeddable,
         slo: startPlugins.slo,
         serverless: startPlugins.serverless,
         charts: startPlugins.charts,
+        uiActions: startPlugins.uiActions,
+        agentBuilder: startPlugins.agentBuilder,
       }}
     >
       <EuiThemeProvider darkMode={darkMode}>
@@ -60,7 +75,7 @@ export const SyntheticsSharedContext: React.FC<
                     height: '100%',
                   }}
                 >
-                  {children}
+                  <ContextWrapper>{children}</ContextWrapper>
                 </RedirectAppLinks>
               </SyntheticsDataViewContextProvider>
             </SyntheticsRefreshContextProvider>

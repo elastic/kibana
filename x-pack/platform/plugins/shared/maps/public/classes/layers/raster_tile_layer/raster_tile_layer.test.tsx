@@ -6,19 +6,18 @@
  */
 
 import { RasterTileLayer } from './raster_tile_layer';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { SOURCE_TYPES } from '../../../../common/constants';
-import { DataRequestMeta, XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
+import type { DataRequestMeta, XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
 import { AbstractSource } from '../../sources/source';
-import { ILayer } from '../layer';
-import { RasterTileSource } from 'maplibre-gl';
-import { DataRequest } from '../../util/data_request';
-import { IRasterSource, RasterTileSourceData } from '../../sources/raster_source';
+import type { ILayer } from '../layer';
+import type { RasterTileSource } from 'maplibre-gl';
+import type { DataRequest } from '../../util/data_request';
+import type { IRasterSource, RasterTileSourceData } from '../../sources/raster_source';
 
 const sourceDescriptor: XYZTMSSourceDescriptor = {
   type: SOURCE_TYPES.EMS_XYZ,
   urlTemplate: 'https://example.com/{x}/{y}/{z}.png',
-  id: 'foobar',
 };
 
 class MockTileSource extends AbstractSource implements IRasterSource {
@@ -60,7 +59,7 @@ describe('RasterTileLayer', () => {
 
     const layer: ILayer = new RasterTileLayer({
       source,
-      layerDescriptor: { id: 'layerid', sourceDescriptor },
+      layerDescriptor: RasterTileLayer.createDescriptor({ id: 'layerid', sourceDescriptor }),
     });
     expect(await source.getDisplayName()).toEqual(await layer.getDisplayName());
   });
@@ -69,7 +68,11 @@ describe('RasterTileLayer', () => {
     const source = new MockTileSource(sourceDescriptor);
     const layer: ILayer = new RasterTileLayer({
       source,
-      layerDescriptor: { id: 'layerid', sourceDescriptor, label: 'custom' },
+      layerDescriptor: RasterTileLayer.createDescriptor({
+        id: 'layerid',
+        sourceDescriptor,
+        label: 'custom',
+      }),
     });
     expect('custom').toEqual(await layer.getDisplayName());
   });

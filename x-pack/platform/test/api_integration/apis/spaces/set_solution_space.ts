@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -170,7 +170,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(400);
 
       expect(body.message).to.eql(
-        '[request body]: types that failed validation:\n- [request body.0.solution_type]: definition for this key is missing\n- [request body.1.solution]: definition for this key is missing'
+        "[request body]: types that failed validation:\n- [request body.0.solution_type]: Additional properties are not allowed ('solution_type' was unexpected)\n- [request body.1.solution]: Additional properties are not allowed ('solution' was unexpected)"
       );
     });
 

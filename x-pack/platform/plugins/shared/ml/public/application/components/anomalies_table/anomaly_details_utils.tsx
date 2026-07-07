@@ -13,19 +13,19 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
-  EuiText,
   EuiSpacer,
   EuiLink,
   EuiIconTip,
+  EuiTitle,
 } from '@elastic/eui';
 import {
   getAnomalyScoreExplanationImpactValue,
-  getSeverityColor,
   showActualForFunction,
   showTypicalForFunction,
   type MlAnomaliesTableRecord,
   type MlAnomalyRecordDoc,
   ML_JOB_AGGREGATION,
+  useSeverityColor,
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import type { EntityCellFilter } from '../entity_cell';
@@ -247,7 +247,7 @@ export const DetailsItems: FC<{
         <EuiIconTip
           size="s"
           color="subdued"
-          type="questionInCircle"
+          type="question"
           className="eui-alignTop"
           position="left"
           content={i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.recordScoreTooltip', {
@@ -270,7 +270,7 @@ export const DetailsItems: FC<{
         <EuiIconTip
           size="s"
           color="subdued"
-          type="questionInCircle"
+          type="question"
           className="eui-alignTop"
           position="left"
           content={i18n.translate(
@@ -328,8 +328,8 @@ export const DetailsItems: FC<{
 
   return (
     <>
-      {items.map(({ title, description }) => (
-        <>
+      {items.map(({ title, description }, index) => (
+        <React.Fragment key={`detail-item-${index}-${title}`}>
           <EuiFlexGroup gutterSize="none">
             <EuiFlexItem css={{ width: '180px' }} grow={false}>
               {title}
@@ -337,7 +337,7 @@ export const DetailsItems: FC<{
             <EuiFlexItem>{description}</EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="xs" />
-        </>
+        </React.Fragment>
       ))}
     </>
   );
@@ -391,7 +391,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             position="left"
             content={i18n.translate(
@@ -432,7 +432,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             position="left"
             content={getImpactTooltip(
@@ -458,7 +458,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             position="left"
             content={getImpactTooltip(explanation.single_bucket_impact, 'single_bucket')}
@@ -480,7 +480,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             position="left"
             content={getImpactTooltip(explanation.multi_bucket_impact, 'multi_bucket')}
@@ -502,7 +502,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             position="left"
             content={i18n.translate(
@@ -530,7 +530,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             position="left"
             content={i18n.translate(
@@ -558,7 +558,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             position="left"
             content={i18n.translate(
@@ -577,25 +577,26 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
 
   return (
     <div>
-      <EuiText size="xs">
-        <h4>
-          <FormattedMessage
-            id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationTitle"
-            defaultMessage="Anomaly explanation {learnMoreLink}"
-            values={{
-              learnMoreLink: (
-                <EuiLink href={docsUrl} target="_blank" css={{ marginLeft: '8px' }}>
-                  <FormattedMessage
-                    id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanation.learnMoreLinkText"
-                    defaultMessage="Learn more"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </h4>
-      </EuiText>
-
+      <EuiTitle size="xxs">
+        <h3>
+          <strong>
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationTitle"
+              defaultMessage="Anomaly explanation {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink href={docsUrl} target="_blank" css={{ marginLeft: '8px' }}>
+                    <FormattedMessage
+                      id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanation.learnMoreLinkText"
+                      defaultMessage="Learn more"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </strong>
+        </h3>
+      </EuiTitle>
       <EuiSpacer size="s" />
 
       {explanationDetails.map(({ title, description }) => (
@@ -613,14 +614,16 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
       <EuiSpacer size="s" />
       {impactDetails.length ? (
         <>
-          <EuiText size="xs">
-            <h4>
-              <FormattedMessage
-                id="xpack.ml.anomaliesTable.anomalyDetails.impactOnScoreTitle"
-                defaultMessage="Impact on initial score"
-              />
-            </h4>
-          </EuiText>
+          <EuiTitle size="xxs">
+            <h3>
+              <strong>
+                <FormattedMessage
+                  id="xpack.ml.anomaliesTable.anomalyDetails.impactOnScoreTitle"
+                  defaultMessage="Impact on initial score"
+                />
+              </strong>
+            </h3>
+          </EuiTitle>
           <EuiSpacer size="s" />
 
           {impactDetails.map(({ title, description }) => (
@@ -641,13 +644,14 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
 };
 
 const RecordScore: FC<{ score: number }> = ({ score }) => {
+  const color = useSeverityColor(score);
   return (
     <div
       css={{
         borderBottom: '2px solid',
       }}
       style={{
-        borderBottomColor: getSeverityColor(score),
+        borderBottomColor: color,
       }}
     >
       {score}

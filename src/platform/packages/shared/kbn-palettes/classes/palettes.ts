@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IKbnPalette } from './types';
+import type { IKbnPalette } from './types';
 
 export class KbnPalettes {
   #palettes: Map<string, IKbnPalette>;

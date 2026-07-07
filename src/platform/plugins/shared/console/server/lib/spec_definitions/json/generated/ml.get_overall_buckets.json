@@ -12,7 +12,7 @@
       ],
       "end": [],
       "exclude_interim": "__flag__",
-      "overall_score": [],
+      "overall_score": "",
       "start": [],
       "top_n": [
         "1"
@@ -26,6 +26,7 @@
       "_ml/anomaly_detectors/{job_id}/results/overall_buckets"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-overall-buckets",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-ml-get-overall-buckets",
     "availability": {
       "stack": true,
       "serverless": true

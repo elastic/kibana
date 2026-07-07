@@ -6,13 +6,11 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useEvent from 'react-use/lib/useEvent';
-import { ObservabilityOnboardingAppServices } from '../../..';
-import {
-  OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT,
-  OnboardingFlowEventContext,
-} from '../../../../common/telemetry_events';
+import type { ObservabilityOnboardingAppServices } from '../../..';
+import type { OnboardingFlowEventContext } from '../../../../common/telemetry_events';
+import { OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
 
 interface Props {
   isActive: boolean;
@@ -28,6 +26,10 @@ export function useWindowBlurDataMonitoringTrigger({
   telemetryEventContext,
 }: Props) {
   const [windowLostFocus, setWindowLostFocus] = useState(false);
+  const telemetrySentRef = useRef(false);
+  const telemetryEventContextRef = useRef(telemetryEventContext);
+  const previousOnboardingFlowTypeRef = useRef(onboardingFlowType);
+  const previousOnboardingIdRef = useRef(onboardingId);
   const {
     services: { analytics },
   } = useKibana<ObservabilityOnboardingAppServices>();
@@ -37,15 +39,36 @@ export function useWindowBlurDataMonitoringTrigger({
   const isMonitoringData = isActive && windowLostFocus;
 
   useEffect(() => {
-    if (isMonitoringData) {
+    telemetryEventContextRef.current = telemetryEventContext;
+  }, [telemetryEventContext]);
+
+  useEffect(() => {
+    const previousOnboardingFlowType = previousOnboardingFlowTypeRef.current;
+    const previousOnboardingId = previousOnboardingIdRef.current;
+    const onboardingFlowTypeChanged = previousOnboardingFlowType !== onboardingFlowType;
+    const resolvedOnboardingIdChanged =
+      previousOnboardingId !== undefined && previousOnboardingId !== onboardingId;
+
+    if (onboardingFlowTypeChanged || resolvedOnboardingIdChanged) {
+      telemetrySentRef.current = false;
+      setWindowLostFocus(false);
+    }
+
+    previousOnboardingFlowTypeRef.current = onboardingFlowType;
+    previousOnboardingIdRef.current = onboardingId;
+  }, [onboardingFlowType, onboardingId]);
+
+  useEffect(() => {
+    if (isMonitoringData && !telemetrySentRef.current) {
+      telemetrySentRef.current = true;
       analytics?.reportEvent(OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT.eventType, {
         onboardingFlowType,
         onboardingId,
         step: 'awaiting_data',
-        context: telemetryEventContext,
+        context: telemetryEventContextRef.current,
       });
     }
-  }, [analytics, isMonitoringData, onboardingFlowType, onboardingId, telemetryEventContext]);
+  }, [analytics, isMonitoringData, onboardingFlowType, onboardingId]);
 
   return isMonitoringData;
 }

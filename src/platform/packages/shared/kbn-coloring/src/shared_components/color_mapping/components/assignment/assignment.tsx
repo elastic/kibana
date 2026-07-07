@@ -9,24 +9,24 @@
 
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { IKbnPalette, KbnPalettes } from '@kbn/palettes';
-import { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { IKbnPalette, KbnPalettes } from '@kbn/palettes';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import {
   removeAssignment,
   updateAssignmentColor,
   updateAssignmentRules,
 } from '../../state/color_mapping';
-import { ColorMapping } from '../../config';
+import type { ColorMapping } from '../../config';
 import { Range } from './range';
 import { Match } from './match';
 
-import { ColorMappingInputData } from '../../categorical_color_mapping';
+import type { ColorMappingInputData } from '../../categorical_color_mapping';
 import { ColorSwatch } from '../color_picker/color_swatch';
-import { ColorAssignmentMatcher } from '../../color/color_assignment_matcher';
+import type { ColorAssignmentMatcher } from '../../color/color_assignment_matcher';
 
 export function Assignment({
   data,
@@ -123,32 +123,39 @@ export function Assignment({
       )}
 
       <EuiFlexItem grow={0}>
-        <EuiButtonIcon
-          iconType="trash"
-          size="xs"
-          disabled={disableDelete}
-          onClick={() => dispatch(removeAssignment(index))}
-          aria-label={i18n.translate(
-            'coloring.colorMapping.assignments.deleteAssignmentButtonLabel',
-            {
-              defaultMessage: 'Delete this assignment',
+        <EuiToolTip
+          content={i18n.translate('coloring.colorMapping.assignments.deleteAssignmentButtonLabel', {
+            defaultMessage: 'Delete this assignment',
+          })}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="trash"
+            size="xs"
+            disabled={disableDelete}
+            onClick={() => dispatch(removeAssignment(index))}
+            aria-label={i18n.translate(
+              'coloring.colorMapping.assignments.deleteAssignmentButtonLabel',
+              {
+                defaultMessage: 'Delete this assignment',
+              }
+            )}
+            color="danger"
+            css={
+              !disableDelete
+                ? css`
+                    color: ${euiThemeVars.euiTextColor};
+                    transition: ${euiThemeVars.euiAnimSpeedFast} ease-in-out;
+                    transition-property: color;
+                    &:hover,
+                    &:focus {
+                      color: ${euiThemeVars.euiColorDangerText};
+                    }
+                  `
+                : undefined
             }
-          )}
-          color="danger"
-          css={
-            !disableDelete
-              ? css`
-                  color: ${euiThemeVars.euiTextColor};
-                  transition: ${euiThemeVars.euiAnimSpeedFast} ease-in-out;
-                  transition-property: color;
-                  &:hover,
-                  &:focus {
-                    color: ${euiThemeVars.euiColorDangerText};
-                  }
-                `
-              : undefined
-          }
-        />
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

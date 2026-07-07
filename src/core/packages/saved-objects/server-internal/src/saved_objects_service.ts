@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject, Observable, firstValueFrom, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { Subject, firstValueFrom, of } from 'rxjs';
 import { filter, switchMap } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import { stripVersionQualifier } from '@kbn/std';
 import type { ServiceStatus } from '@kbn/core-status-common';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { DocLinksServiceSetup, DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest, RequestTiming } from '@kbn/core-http-server';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type {
   ElasticsearchClient,
@@ -35,7 +36,9 @@ import type {
   SavedObjectsSecurityExtensionFactory,
   SavedObjectsSpacesExtensionFactory,
   SavedObjectsExtensions,
+  SavedObjectsExtensionFactory,
 } from '@kbn/core-saved-objects-server';
+import { ENCRYPTION_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectConfig,
   SavedObjectsSerializer,
@@ -43,7 +46,6 @@ import {
   type SavedObjectsConfigType,
   type SavedObjectsMigrationConfigType,
   type IKibanaMigrator,
-  DEFAULT_INDEX_TYPES_MAP,
   HASH_TO_VERSION_MAP,
 } from '@kbn/core-saved-objects-base-server-internal';
 import {
@@ -60,13 +62,15 @@ import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-serve
 import type { DeprecationRegistryProvider } from '@kbn/core-deprecations-server';
 import type { NodeInfo } from '@kbn/core-node-server';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsAccessControlTransforms } from '@kbn/core-saved-objects-server/src/contracts';
 import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
-import { applyTypeDefaults } from './apply_type_defaults';
 import { getAllIndices } from './utils';
-import { MIGRATION_CLIENT_OPTIONS, REMOVED_TYPES } from './constants';
+import { MIGRATION_CLIENT_OPTIONS } from './constants';
+import removedTypes from '../removed_types.json';
+import wipTypes from '../wip_types.json';
 
 /**
  * @internal
@@ -122,9 +126,14 @@ export class SavedObjectsService
   private encryptionExtensionFactory?: SavedObjectsEncryptionExtensionFactory;
   private securityExtensionFactory?: SavedObjectsSecurityExtensionFactory;
   private spacesExtensionFactory?: SavedObjectsSpacesExtensionFactory;
+  private accessControlTransforms?: SavedObjectsAccessControlTransforms;
 
   private migrator$ = new Subject<IKibanaMigrator>();
-  private typeRegistry = new SavedObjectTypeRegistry({ legacyTypes: REMOVED_TYPES });
+
+  private typeRegistry = new SavedObjectTypeRegistry({
+    legacyTypes: removedTypes,
+  });
+
   private started = false;
 
   constructor(private readonly coreContext: CoreContext) {
@@ -145,9 +154,11 @@ export class SavedObjectsService
       this.coreContext.configService.atPath<SavedObjectsMigrationConfigType>('migrations')
     );
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
+    const accessControlEnabled = this.config.enableAccessControl;
+    this.typeRegistry.setAccessControlEnabled(accessControlEnabled);
+
     deprecations.getRegistry('savedObjects').registerDeprecations(
       getSavedObjectsDeprecationsProvider({
-        kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
         savedObjectsConfig: this.config,
         kibanaVersion: this.kibanaVersion,
         typeRegistry: this.typeRegistry,
@@ -162,7 +173,6 @@ export class SavedObjectsService
       logger: this.logger,
       config: this.config,
       migratorPromise: firstValueFrom(this.migrator$),
-      kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
       kibanaVersion: this.kibanaVersion,
       isServerless: this.coreContext.env.packageInfo.buildFlavor === 'serverless',
       docLinks,
@@ -215,14 +225,26 @@ export class SavedObjectsService
         }
         this.spacesExtensionFactory = factory;
       },
+      setAccessControlTransforms: (transforms) => {
+        if (this.started) {
+          throw new Error('cannot call `setAccessControlTransforms` after service startup.');
+        }
+        if (this.accessControlTransforms) {
+          throw new Error(
+            'access control tranforms have already been set, and can only be set once'
+          );
+        }
+        this.accessControlTransforms = transforms;
+      },
       registerType: (type) => {
         if (this.started) {
           throw new Error('cannot call `registerType` after service startup.');
         }
-        this.typeRegistry.registerType(applyTypeDefaults(type));
+        this.typeRegistry.registerType(type);
       },
       getTypeRegistry: () => this.typeRegistry,
       getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,
+      isAccessControlEnabled: () => accessControlEnabled,
     };
   }
 
@@ -237,6 +259,8 @@ export class SavedObjectsService
     }
 
     this.logger.debug('Starting SavedObjects service');
+
+    this.assertNoUnallowedWipTypes();
 
     const client = elasticsearch.client;
 
@@ -307,12 +331,14 @@ export class SavedObjectsService
       const migrationStartTime = performance.now();
       await migrator.runMigrations();
       migrationDuration = Math.round(performance.now() - migrationStartTime);
+      this.logger.info(`Completed all migrations in ${migrationDuration}ms`);
     }
 
     const createRepository = (
       esClient: ElasticsearchClient,
       includedHiddenTypes: string[] = [],
-      extensions?: SavedObjectsExtensions
+      extensions?: SavedObjectsExtensions,
+      serverTiming?: RequestTiming
     ) => {
       return SavedObjectsRepository.createRepository(
         migrator,
@@ -321,20 +347,28 @@ export class SavedObjectsService
         esClient,
         this.logger.get('repository'),
         includedHiddenTypes,
-        extensions
+        extensions,
+        serverTiming
       );
     };
 
     const repositoryFactory: SavedObjectsRepositoryFactory = {
       createInternalRepository: (
         includedHiddenTypes?: string[],
-        extensions?: SavedObjectsExtensions | undefined
-      ) => createRepository(client.asInternalUser, includedHiddenTypes, extensions),
+        extensions?: SavedObjectsExtensions | undefined,
+        serverTiming?: RequestTiming
+      ) => createRepository(client.asInternalUser, includedHiddenTypes, extensions, serverTiming),
       createScopedRepository: (
         req: KibanaRequest,
         includedHiddenTypes?: string[],
         extensions?: SavedObjectsExtensions
-      ) => createRepository(client.asScoped(req).asCurrentUser, includedHiddenTypes, extensions),
+      ) =>
+        createRepository(
+          client.asScoped(req).asCurrentUser,
+          includedHiddenTypes,
+          extensions,
+          req.serverTiming
+        ),
     };
 
     const clientProvider = new SavedObjectsClientProvider({
@@ -363,6 +397,15 @@ export class SavedObjectsService
 
     return {
       getScopedClient: clientProvider.getClient.bind(clientProvider),
+      getUnsafeInternalClient: ({ includedHiddenTypes, excludedExtensions = [] } = {}) => {
+        const safeExcludedExtensions = Array.isArray(excludedExtensions) ? excludedExtensions : [];
+        const extensions = this.getInternalExtensions(safeExcludedExtensions);
+        const repository = repositoryFactory.createInternalRepository(
+          includedHiddenTypes,
+          extensions
+        );
+        return new SavedObjectsClient(repository);
+      },
       createScopedRepository: repositoryFactory.createScopedRepository,
       createInternalRepository: repositoryFactory.createInternalRepository,
       createSerializer: () => new SavedObjectsSerializer(this.typeRegistry),
@@ -379,6 +422,7 @@ export class SavedObjectsService
           typeRegistry: this.typeRegistry,
           importSizeLimit: options?.importSizeLimit ?? this.config!.maxImportExportSize,
           logger: this.logger.get('importer'),
+          createAccessControlImportTransforms: this.accessControlTransforms?.createImportTransforms,
         }),
       getTypeRegistry: () => this.typeRegistry,
       getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,
@@ -402,7 +446,67 @@ export class SavedObjectsService
     };
   }
 
+  private getInternalExtensions(excludedExtensions: string[] = []): SavedObjectsExtensions {
+    // For internal clients, we automatically exclude security extension to avoid user scoping
+    // and handle extensions that can work without a request context
+    const createExt = <T>(
+      extensionId: string,
+      extensionFactory?: SavedObjectsExtensionFactory<T | undefined>
+    ): T | undefined => {
+      if (excludedExtensions.includes(extensionId) || !extensionFactory) {
+        return undefined;
+      }
+
+      // Create a minimal request-like object for extensions that need it
+      // but don't require actual user context (like encryption/spaces)
+      // Using 'unknown' cast is intentional here as we're creating a minimal fake request
+      const internalRequest = {
+        headers: {},
+        getBasePath: () => '',
+        path: '/',
+        route: { settings: {} },
+        url: { href: '/' },
+        raw: { req: { url: '/' } },
+      } as unknown as KibanaRequest;
+
+      return extensionFactory({
+        typeRegistry: this.typeRegistry,
+        request: internalRequest,
+      });
+    };
+
+    return {
+      encryptionExtension: createExt(ENCRYPTION_EXTENSION_ID, this.encryptionExtensionFactory),
+      securityExtension: undefined, // Always undefined for internal clients
+      spacesExtension: createExt(SPACES_EXTENSION_ID, this.spacesExtensionFactory),
+    };
+  }
+
   public async stop() {}
+
+  private assertNoUnallowedWipTypes() {
+    const wipTypeNames = new Set<string>(wipTypes);
+    const allowedWipTypes = new Set<string>(this.config!.migration.allowWipTypes ?? []);
+    const registeredWipTypes = this.typeRegistry
+      .getAllTypes()
+      .filter((t) => wipTypeNames.has(t.name))
+      .map((t) => t.name);
+
+    const notAllowed = registeredWipTypes.filter((name) => !allowedWipTypes.has(name));
+    if (notAllowed.length > 0) {
+      throw new Error(
+        `Kibana cannot start because the following WIP saved object types are registered ` +
+          `but not listed in 'migrations.allowWipTypes': [${notAllowed.join(', ')}]. ` +
+          `Add each type name to 'migrations.allowWipTypes' to acknowledge the risk.`
+      );
+    }
+    if (registeredWipTypes.length > 0) {
+      this.logger.warn(
+        `Starting with WIP saved object types: [${registeredWipTypes.join(', ')}]. ` +
+          `These types may have breaking changes and are not production-ready.`
+      );
+    }
+  }
 
   private createMigrator(
     soMigrationsConfig: SavedObjectsMigrationConfigType,
@@ -418,13 +522,13 @@ export class SavedObjectsService
       kibanaVersion: this.kibanaVersion,
       soMigrationsConfig,
       kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
-      defaultIndexTypesMap: DEFAULT_INDEX_TYPES_MAP,
       hashToVersionMap: HASH_TO_VERSION_MAP,
       client,
       docLinks,
       waitForMigrationCompletion,
       nodeRoles: nodeInfo.roles,
       esCapabilities,
+      kibanaVersionCheck: '8.18.0', // enforce upgrades from a compatible Kibana version
     });
   }
 }

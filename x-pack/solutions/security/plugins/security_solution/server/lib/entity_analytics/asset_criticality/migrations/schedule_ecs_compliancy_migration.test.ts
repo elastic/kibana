@@ -40,8 +40,8 @@ const getStartServices = jest.fn().mockResolvedValue([
 ]);
 const mockAbortController = {
   abort: jest.fn(),
-  signal: {},
-};
+  signal: new AbortController().signal,
+} satisfies AbortController;
 
 global.AbortController = jest.fn().mockImplementation(() => mockAbortController);
 
@@ -58,6 +58,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
       logger,
       getStartServices,
       kibanaVersion: '8.0.0',
+      hasEncryptionKey: true,
     });
 
     expect(taskManager.registerTaskDefinitions).toHaveBeenCalledWith({
@@ -73,6 +74,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
         logger,
         getStartServices,
         kibanaVersion: '8.0.0',
+        hasEncryptionKey: true,
       })
     ).resolves.not.toThrow();
   });
@@ -86,6 +88,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
       logger,
       getStartServices,
       kibanaVersion: '8.0.0',
+      hasEncryptionKey: true,
     });
 
     expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith(
@@ -106,6 +109,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
       logger,
       getStartServices,
       kibanaVersion: '8.0.0',
+      hasEncryptionKey: true,
     });
 
     expect(logger.error).toHaveBeenCalledWith(
@@ -122,6 +126,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
       logger,
       getStartServices,
       kibanaVersion: '8.0.0',
+      hasEncryptionKey: true,
     });
 
     expect(mockTaskManagerStart.ensureScheduled).not.toHaveBeenCalled();
@@ -133,7 +138,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
         getStartServices,
         logger,
         auditLogger,
-      })();
+      })({ abortController: mockAbortController });
 
       await migrationTask.run();
 
@@ -153,7 +158,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
         getStartServices,
         logger,
         auditLogger,
-      })();
+      })({ abortController: mockAbortController });
 
       await migrationTask.run();
 
@@ -168,7 +173,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
         getStartServices,
         logger,
         auditLogger,
-      })();
+      })({ abortController: mockAbortController });
 
       await migrationTask.run();
       await migrationTask.cancel();

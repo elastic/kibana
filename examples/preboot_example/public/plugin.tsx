@@ -11,7 +11,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { App } from './app';
-import { ConfigType } from './config';
+import type { ConfigType } from './config';
 
 export class PrebootExamplePlugin implements Plugin<void, void, {}, {}> {
   #config: ConfigType;

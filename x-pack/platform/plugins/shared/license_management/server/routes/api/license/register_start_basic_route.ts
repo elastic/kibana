@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { startBasic } from '../../../lib/start_basic';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../helpers';
 
 export function registerStartBasicRoute({

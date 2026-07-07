@@ -10,16 +10,15 @@ import { registerConnectorTypes } from '..';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
-import { MAX_OTHER_FIELDS_LENGTH } from '../../../common/jira/constants';
+import { CONNECTOR_ID, MAX_OTHER_FIELDS_LENGTH } from '@kbn/connector-schemas/jira/constants';
 
-const CONNECTOR_TYPE_ID = '.jira';
 let connectorTypeModel: ConnectorTypeModel;
 
 beforeAll(() => {
   const connectorTypeRegistry = new TypeRegistry<ConnectorTypeModel>();
   ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
   registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
-  const getResult = connectorTypeRegistry.get(CONNECTOR_TYPE_ID);
+  const getResult = connectorTypeRegistry.get(CONNECTOR_ID);
   if (getResult !== null) {
     connectorTypeModel = getResult;
   }
@@ -27,7 +26,7 @@ beforeAll(() => {
 
 describe('connectorTypeRegistry.get() works', () => {
   test('connector type static data is as expected', () => {
-    expect(connectorTypeModel.id).toEqual(CONNECTOR_TYPE_ID);
+    expect(connectorTypeModel.id).toEqual(CONNECTOR_ID);
   });
 });
 
@@ -37,7 +36,7 @@ describe('jira action params validation', () => {
       subActionParams: { incident: { summary: 'some title {{test}}' }, comments: [] },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.summary': [],
         'subActionParams.incident.labels': [],
@@ -51,7 +50,7 @@ describe('jira action params validation', () => {
       subActionParams: { incident: { summary: '' }, comments: [] },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.summary': ['Summary is required.'],
         'subActionParams.incident.labels': [],
@@ -68,7 +67,7 @@ describe('jira action params validation', () => {
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.summary': [],
         'subActionParams.incident.labels': ['Labels cannot contain spaces.'],
@@ -85,7 +84,7 @@ describe('jira action params validation', () => {
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.summary': [],
         'subActionParams.incident.labels': [],
@@ -109,7 +108,7 @@ describe('jira action params validation', () => {
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.summary': [],
         'subActionParams.incident.labels': [],
@@ -135,7 +134,7 @@ describe('jira action params validation', () => {
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.summary': [],
         'subActionParams.incident.labels': [],

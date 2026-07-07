@@ -11,12 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { useKibana, useForm } from '../../../../../shared_imports';
 import { useTestPipelineContext } from '../../context';
 import { serialize } from '../../serialize';
-import { DeserializeResult } from '../../deserialize';
-import { Document } from '../../types';
+import type { DeserializeResult } from '../../deserialize';
+import type { Document } from '../../types';
 import { useIsMounted } from '../../use_is_mounted';
 import { TestPipelineFlyout as ViewComponent } from './test_pipeline_flyout';
 
-import { TestPipelineFlyoutTab } from './test_pipeline_tabs';
+import type { TestPipelineFlyoutTab } from './test_pipeline_tabs';
 
 export interface Props {
   activeTab: TestPipelineFlyoutTab;
@@ -43,8 +43,12 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
   const { services } = useKibana();
   const isMounted = useIsMounted();
 
-  const { testPipelineData, testPipelineDataDispatch, updateTestOutputPerProcessor } =
-    useTestPipelineContext();
+  const {
+    testPipelineData,
+    testPipelineDataDispatch,
+    updateTestOutputPerProcessor,
+    fieldAccessPattern,
+  } = useTestPipelineContext();
 
   const {
     config: { documents: cachedDocuments, verbose: cachedVerbose },
@@ -73,7 +77,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
       const { error, data: currentTestOutput } = await services.api.simulatePipeline({
         documents,
         verbose,
-        pipeline: { ...serializedProcessors },
+        pipeline: { ...serializedProcessors, field_access_pattern: fieldAccessPattern },
       });
 
       if (!isMounted.current) {
@@ -129,6 +133,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
       return { isSuccessful: true };
     },
     [
+      fieldAccessPattern,
       isMounted,
       processors,
       services.api,

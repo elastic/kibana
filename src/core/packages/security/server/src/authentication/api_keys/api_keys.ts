@@ -8,17 +8,16 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-
 import type { KibanaRequest } from '@kbn/core-http-server';
 
-import { ElasticsearchPrivilegesType, KibanaPrivilegesType } from '../../roles';
+import type { ElasticsearchPrivilegesType, KibanaPrivilegesType } from '../../roles';
 
 /**
  * Interface for managing API keys in Elasticsearch, including creation,
  * validation, and invalidation of API keys,
  * as well as checking the status of API key features.
  */
-export interface APIKeys {
+export interface NativeAPIKeysType {
   /**
    * Determines if API Keys are enabled in Elasticsearch.
    */
@@ -90,6 +89,21 @@ export interface APIKeys {
    * @param params The params to invalidate the API keys.
    */
   invalidateAsInternalUser(params: InvalidateAPIKeysParams): Promise<InvalidateAPIKeyResult | null>;
+
+  /**
+   * Clones an existing API key using the internal user, creating a new independent key
+   * with the same role descriptors as the source. The source key credential is extracted
+   * from the request's Authorization header.
+   *
+   * Requires the `clone_api_key` cluster privilege (available to `kibana_system`).
+   *
+   * @param request Request instance containing the source API key in the Authorization header.
+   * @param cloneParams Clone operation parameters.
+   */
+  cloneAsInternalUser(
+    request: KibanaRequest,
+    cloneParams: CloneAPIKeyParams
+  ): Promise<CloneAPIKeyResult | null>;
 }
 
 export type CreateAPIKeyParams =
@@ -157,6 +171,18 @@ export interface GrantAPIKeyResult {
   api_key: string;
 }
 
+export interface CloneAPIKeyParams {
+  name: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface CloneAPIKeyResult {
+  id: string;
+  name: string;
+  api_key: string;
+  encoded: string;
+}
+
 /**
  * Represents the parameters for validating API Key credentials.
  */
@@ -203,10 +229,11 @@ export interface InvalidateAPIKeyResult {
    */
   error_details?: Array<{
     type?: string;
-    reason?: string;
+    code?: string;
+    reason?: string | null;
     caused_by?: {
       type?: string;
-      reason?: string;
+      reason?: string | null;
     };
   }>;
 }

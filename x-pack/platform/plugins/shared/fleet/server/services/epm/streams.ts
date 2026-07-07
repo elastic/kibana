@@ -18,8 +18,11 @@ export function streamToString(stream: NodeJS.ReadableStream | Buffer): Promise<
 
   return new Promise((resolve, reject) => {
     const body: string[] = [];
+    // @ts-expect-error upgrade typescript v5.9.3
     stream.on('data', (chunk: string) => body.push(chunk));
+    // @ts-expect-error upgrade typescript v5.9.3
     stream.on('end', () => resolve(body.join('')));
+    // @ts-expect-error upgrade typescript v5.9.3
     stream.on('error', reject);
   });
 }

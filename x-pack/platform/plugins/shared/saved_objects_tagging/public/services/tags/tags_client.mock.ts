@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ITagInternalClient } from './tags_client';
+import type { ITagInternalClient } from './tags_client';
 
 const createInternalClientMock = () => {
   const mock: jest.Mocked<ITagInternalClient> = {

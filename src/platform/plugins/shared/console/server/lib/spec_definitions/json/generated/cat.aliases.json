@@ -6,11 +6,35 @@
       ],
       "help": "__flag__",
       "v": "__flag__",
+      "bytes": [
+        "b",
+        "kb",
+        "mb",
+        "gb",
+        "tb",
+        "pb"
+      ],
+      "time": [
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
+      ],
       "error_trace": "__flag__",
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "h": [],
+      "h": [
+        "alias",
+        "index",
+        "filter",
+        "routing.index",
+        "routing.search",
+        "is_write_index"
+      ],
       "s": [],
       "expand_wildcards": [
         "all",
@@ -33,6 +57,7 @@
       "_cat/aliases/{name}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-aliases",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-cat-aliases",
     "availability": {
       "stack": true,
       "serverless": true

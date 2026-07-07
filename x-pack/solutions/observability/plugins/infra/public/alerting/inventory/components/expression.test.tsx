@@ -12,6 +12,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { type FieldSpec } from '@kbn/data-views-plugin/common';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
+import { unifiedSearchPluginMock as mockUnifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import type { AlertContextMeta } from './expression';
@@ -57,7 +58,10 @@ jest.mock('../../../containers/metrics_source', () => ({
 
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibanaContextForPlugin: () => ({
-    services: mockCoreMock.createStart(),
+    services: {
+      ...mockCoreMock.createStart(),
+      unifiedSearch: mockUnifiedSearchPluginMock.createStartContract(),
+    },
   }),
 }));
 const exampleCustomMetric = {
@@ -124,9 +128,6 @@ describe('Expression', () => {
   });
 
   it('should pass the elasticsearch query to the expression chart', async () => {
-    const FILTER_QUERY =
-      '{"bool":{"should":[{"match_phrase":{"host.name":"testHostName"}}],"minimum_should_match":1}}';
-
     const ruleParams = {
       criteria: [
         {
@@ -139,7 +140,8 @@ describe('Expression', () => {
       ],
       nodeType: undefined,
       filterQueryText: 'host.name: "testHostName"',
-      filterQuery: FILTER_QUERY,
+      filterQuery:
+        '{"bool":{"should":[{"match_phrase":{"host.name":"testHostName"}}],"minimum_should_match":1}}',
     };
 
     const wrapper = shallowWithIntl(
@@ -158,7 +160,7 @@ describe('Expression', () => {
 
     const chart = wrapper.find('[data-test-subj="preview-chart"]');
 
-    expect(chart.prop('filterQuery')).toBe(FILTER_QUERY);
+    expect(chart.prop('kuery')).toBe(ruleParams.filterQueryText);
   });
 
   describe('using custom metrics', () => {
@@ -236,5 +238,18 @@ describe('ExpressionRow', () => {
           '<span class="euiExpression__value css-1lfq7nz-euiExpression__value">Rate of some.system.field</span>'
         ) ?? [];
     expect(valueMatch).toBeTruthy();
+  });
+
+  it('should include inclusive range comparators in threshold options', async () => {
+    const { wrapper, update } = await setup(expression as InventoryMetricConditions);
+    wrapper.find('button[data-test-subj="thresholdPopover"]').simulate('click');
+    await update();
+
+    const comparatorOptionValues = wrapper
+      .find('select[data-test-subj="comparatorOptionsComboBox"] option')
+      .map((option) => option.prop('value'));
+
+    expect(comparatorOptionValues).toContain(COMPARATORS.BETWEEN_INCLUSIVE);
+    expect(comparatorOptionValues).toContain(COMPARATORS.NOT_BETWEEN_INCLUSIVE);
   });
 });

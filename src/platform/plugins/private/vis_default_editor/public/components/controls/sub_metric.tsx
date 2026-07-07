@@ -12,10 +12,12 @@ import { EuiFormLabel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useMount from 'react-use/lib/useMount';
 
-import { AggParamType, IAggConfig, AggGroupNames } from '@kbn/data-plugin/public';
+import type { AggParamType, IAggConfig } from '@kbn/data-plugin/public';
+import { AggGroupNames } from '@kbn/data-plugin/public';
 import { useSubAggParamsHandlers } from './utils';
-import { AggParamEditorProps } from '../agg_param_props';
+import type { AggParamEditorProps } from '../agg_param_props';
 import { DefaultEditorAggParams } from '../agg_params';
+import { visEditorSubAggStyles } from '../../_agg.styles';
 
 function SubMetricParamEditor({
   agg,
@@ -79,6 +81,7 @@ function SubMetricParamEditor({
         setTouched={setTouched}
         schemas={schemas}
         hideCustomLabel={!isCustomMetric}
+        css={visEditorSubAggStyles}
       />
     </>
   );

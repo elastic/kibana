@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { HttpSetup, IToasts } from '@kbn/core/public';
+import type { HttpSetup, IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import type { ApiConfig, Replacements, User } from '@kbn/elastic-assistant-common';
 import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
-  ApiConfig,
-  Replacements,
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
-import { Conversation, ClientMessage } from '../../../assistant_context/types';
-import { FetchConversationsResponse } from './use_fetch_current_user_conversations';
+import type { Conversation, ClientMessage } from '../../../assistant_context/types';
+import type { FetchConversationsResponse } from './use_fetch_current_user_conversations';
 
 export interface GetConversationByIdParams {
   http: HttpSetup;
@@ -50,12 +49,22 @@ export const getConversationById = async ({
 
     return response as Conversation;
   } catch (error) {
-    toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
-      title: i18n.translate('xpack.elasticAssistant.conversations.getConversationError', {
-        defaultMessage: 'Error fetching conversation by id {id}',
-        values: { id },
-      }),
-    });
+    // Check if this is a 403 Forbidden error
+    if (error.response?.status === 403) {
+      toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
+        title: i18n.translate('xpack.elasticAssistant.conversations.accessDeniedError', {
+          defaultMessage: 'Access denied to conversation',
+        }),
+      });
+    } else {
+      // For other errors (like 404), show the generic error message
+      toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
+        title: i18n.translate('xpack.elasticAssistant.conversations.getConversationError', {
+          defaultMessage: 'Error fetching conversation by id {id}',
+          values: { id },
+        }),
+      });
+    }
     throw error;
   }
 };
@@ -196,6 +205,7 @@ export interface PutConversationMessageParams {
   toasts?: IToasts;
   conversationId: string;
   title?: string;
+  users?: User[];
   messages?: ClientMessage[];
   apiConfig?: ApiConfig;
   replacements?: Replacements;
@@ -221,6 +231,7 @@ export const updateConversation = async ({
   http,
   toasts,
   title,
+  users,
   conversationId,
   messages,
   apiConfig,
@@ -236,6 +247,7 @@ export const updateConversation = async ({
         body: JSON.stringify({
           id: conversationId,
           title,
+          users,
           messages,
           replacements,
           apiConfig,

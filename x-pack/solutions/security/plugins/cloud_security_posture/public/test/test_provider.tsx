@@ -11,10 +11,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 // eslint-disable-next-line no-restricted-imports
 import { Router } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
+import { NoDataCardKibanaProvider } from '@kbn/shared-ux-card-no-data';
 import { getMockDependencies } from './fixtures/get_mock_dependencies';
 
 interface CspAppDeps {
@@ -41,13 +42,15 @@ export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
   return (
     <KibanaContextProvider services={{ ...core, ...deps }}>
       <QueryClientProvider client={queryClient}>
-        <Router history={params.history}>
-          <I18nProvider>
-            <Routes>
-              <Route path="*" render={() => <>{children}</>} />
-            </Routes>
-          </I18nProvider>
-        </Router>
+        <NoDataCardKibanaProvider coreStart={core}>
+          <Router history={params.history}>
+            <I18nProvider>
+              <Routes>
+                <Route path="*" render={() => <>{children}</>} />
+              </Routes>
+            </I18nProvider>
+          </Router>
+        </NoDataCardKibanaProvider>
       </QueryClientProvider>
     </KibanaContextProvider>
   );

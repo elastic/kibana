@@ -18,6 +18,14 @@ export const THREAT_FIELD = i18n.translate(
   }
 );
 
+export const THREAT_FIELD_LABEL_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.threatMatch.threatFieldLabelHelpDescription',
+  {
+    defaultMessage:
+      'Start by defining the MATCHES conditions, then add more MATCHES/DOES NOT MATCH entries as needed.',
+  }
+);
+
 export const FIELD_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.threatMatch.fieldPlaceholderDescription',
   {
@@ -29,6 +37,13 @@ export const MATCHES = i18n.translate('xpack.securitySolution.threatMatch.matche
   defaultMessage: 'MATCHES',
 });
 
+export const DOES_NOT_MATCH = i18n.translate(
+  'xpack.securitySolution.threatMatch.doesNotMatchLabel',
+  {
+    defaultMessage: 'DOES NOT MATCH',
+  }
+);
+
 export const AND = i18n.translate('xpack.securitySolution.threatMatch.andDescription', {
   defaultMessage: 'AND',
 });
@@ -36,3 +51,10 @@ export const AND = i18n.translate('xpack.securitySolution.threatMatch.andDescrip
 export const OR = i18n.translate('xpack.securitySolution.threatMatch.orDescription', {
   defaultMessage: 'OR',
 });
+
+export const DELETE_ENTRY_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.threatMatch.deleteEntryAriaLabel',
+  {
+    defaultMessage: 'Delete entry',
+  }
+);

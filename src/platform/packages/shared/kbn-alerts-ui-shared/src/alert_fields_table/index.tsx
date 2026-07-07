@@ -9,12 +9,11 @@
 
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiTabbedContentProps, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiTabbedContent,
-  EuiTabbedContentProps,
   useEuiOverflowScroll,
-  EuiBasicTableColumn,
   useEuiTheme,
   useEuiFontSize,
 } from '@elastic/eui';
@@ -113,6 +112,9 @@ export const AlertFieldsTable = memo(({ alert, fields }: AlertFieldsTableProps) 
   }, [alert, fields]);
   return (
     <EuiInMemoryTable
+      tableCaption={i18n.translate('alertsUIShared.alertFieldsTable.tableCaption', {
+        defaultMessage: 'Alert fields',
+      })}
       items={items}
       itemId="key"
       columns={columns}

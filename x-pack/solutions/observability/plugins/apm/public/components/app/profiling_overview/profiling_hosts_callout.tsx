@@ -37,7 +37,7 @@ export function ProfilingHostsCallout({ serviceName }: Props) {
         values: { serviceName },
       })}
       color="primary"
-      iconType="iInCircle"
+      iconType="info"
     >
       <p>
         {i18n.translate('xpack.apm.profiling.callout.description', {

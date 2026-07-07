@@ -229,7 +229,7 @@ export const FieldsSelectorTable = ({
               <EuiButtonEmpty
                 data-test-subj="viewSelectorButton"
                 size="xs"
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 iconSide="right"
                 onClick={togglePopover}
               >
@@ -239,7 +239,6 @@ export const FieldsSelectorTable = ({
           >
             <EuiContextMenuPanel
               data-test-subj="viewSelectorMenu"
-              size="s"
               items={[
                 <EuiContextMenuItem
                   data-test-subj="viewSelectorOption-all"

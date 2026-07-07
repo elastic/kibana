@@ -37,7 +37,7 @@ import { useUserPrivileges as _useUserPrivileges } from '../../../../common/comp
 import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import { useGetEndpointActionList as _useGetEndpointActionList } from '../../../hooks/response_actions/use_get_endpoint_action_list';
-import { OUTPUT_MESSAGES } from '../translations';
+import { OUTPUT_MESSAGES, TABLE_COLUMN_NAMES, UX_MESSAGES } from '../translations';
 import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
 import type { ExperimentalFeatures } from '../../../../../common';
 
@@ -57,73 +57,78 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
-    useKibana: () => ({
-      services: {
-        uiSettings: {
-          get: jest.fn().mockImplementation((key) => {
-            const get = (k: 'dateFormat' | 'timepicker:quickRanges') => {
-              const x = {
-                dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
-                'timepicker:quickRanges': [
-                  {
-                    from: 'now/d',
-                    to: 'now/d',
-                    display: 'Today',
-                  },
-                  {
-                    from: 'now/w',
-                    to: 'now/w',
-                    display: 'This week',
-                  },
-                  {
-                    from: 'now-15m',
-                    to: 'now',
-                    display: 'Last 15 minutes',
-                  },
-                  {
-                    from: 'now-30m',
-                    to: 'now',
-                    display: 'Last 30 minutes',
-                  },
-                  {
-                    from: 'now-1h',
-                    to: 'now',
-                    display: 'Last 1 hour',
-                  },
-                  {
-                    from: 'now-24h',
-                    to: 'now',
-                    display: 'Last 24 hours',
-                  },
-                  {
-                    from: 'now-7d',
-                    to: 'now',
-                    display: 'Last 7 days',
-                  },
-                  {
-                    from: 'now-30d',
-                    to: 'now',
-                    display: 'Last 30 days',
-                  },
-                  {
-                    from: 'now-90d',
-                    to: 'now',
-                    display: 'Last 90 days',
-                  },
-                  {
-                    from: 'now-1y',
-                    to: 'now',
-                    display: 'Last 1 year',
-                  },
-                ],
+    useKibana: () => {
+      const originalUseKibana = original.useKibana();
+      return {
+        ...originalUseKibana,
+        services: {
+          ...originalUseKibana.services,
+          uiSettings: {
+            get: jest.fn().mockImplementation((key) => {
+              const get = (k: 'dateFormat' | 'timepicker:quickRanges') => {
+                const x = {
+                  dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
+                  'timepicker:quickRanges': [
+                    {
+                      from: 'now/d',
+                      to: 'now/d',
+                      display: 'Today',
+                    },
+                    {
+                      from: 'now/w',
+                      to: 'now/w',
+                      display: 'This week',
+                    },
+                    {
+                      from: 'now-15m',
+                      to: 'now',
+                      display: 'Last 15 minutes',
+                    },
+                    {
+                      from: 'now-30m',
+                      to: 'now',
+                      display: 'Last 30 minutes',
+                    },
+                    {
+                      from: 'now-1h',
+                      to: 'now',
+                      display: 'Last 1 hour',
+                    },
+                    {
+                      from: 'now-24h',
+                      to: 'now',
+                      display: 'Last 24 hours',
+                    },
+                    {
+                      from: 'now-7d',
+                      to: 'now',
+                      display: 'Last 7 days',
+                    },
+                    {
+                      from: 'now-30d',
+                      to: 'now',
+                      display: 'Last 30 days',
+                    },
+                    {
+                      from: 'now-90d',
+                      to: 'now',
+                      display: 'Last 90 days',
+                    },
+                    {
+                      from: 'now-1y',
+                      to: 'now',
+                      display: 'Last 1 year',
+                    },
+                  ],
+                };
+                return x[k];
               };
-              return x[k];
-            };
-            return get(key);
-          }),
+              return get(key);
+            }),
+          },
         },
-      },
-    }),
+      };
+    },
   };
 });
 
@@ -215,6 +220,8 @@ describe('Response actions history', () => {
       (renderResult = mockedContext.render(
         <ResponseActionsLog data-test-subj={testPrefix} {...(props ?? {})} />
       ));
+
+    mockedContext.setExperimentalFlag({ responseActionsEndpointCancel: true });
 
     useGetEndpointActionListMock.mockReturnValue({
       ...getBaseMockedActionList(),
@@ -347,20 +354,37 @@ describe('Response actions history', () => {
       render({ agentIds: 'agent-a' });
 
       expect(
-        Array.from(renderResult.getByTestId(`${testPrefix}`).querySelectorAll('thead th'))
-          .slice(0, 6)
+        Array.from(renderResult.getByTestId(testPrefix).querySelectorAll('thead th'))
+          .slice(0)
           .map((col) => col.textContent)
-      ).toEqual(['Time', 'Command', 'User', 'Comments', 'Status', 'Expand rows']);
+      ).toEqual([
+        UX_MESSAGES.screenReaderExpand,
+        TABLE_COLUMN_NAMES.time,
+        TABLE_COLUMN_NAMES.command,
+        TABLE_COLUMN_NAMES.user,
+        TABLE_COLUMN_NAMES.comments,
+        TABLE_COLUMN_NAMES.status,
+        TABLE_COLUMN_NAMES.actions,
+      ]);
     });
 
     it('should show `Hosts` column when `showHostNames` is TRUE', async () => {
       render({ showHostNames: true });
 
       expect(
-        Array.from(renderResult.getByTestId(`${testPrefix}`).querySelectorAll('thead th'))
-          .slice(0, 7)
+        Array.from(renderResult.getByTestId(testPrefix).querySelectorAll('thead th'))
+          .slice(0)
           .map((col) => col.textContent)
-      ).toEqual(['Time', 'Command', 'User', 'Hosts', 'Comments', 'Status', 'Expand rows']);
+      ).toEqual([
+        UX_MESSAGES.screenReaderExpand,
+        TABLE_COLUMN_NAMES.time,
+        TABLE_COLUMN_NAMES.command,
+        TABLE_COLUMN_NAMES.user,
+        TABLE_COLUMN_NAMES.hosts,
+        TABLE_COLUMN_NAMES.comments,
+        TABLE_COLUMN_NAMES.status,
+        TABLE_COLUMN_NAMES.actions,
+      ]);
     });
 
     it('should show multiple hostnames correctly', async () => {
@@ -588,7 +612,6 @@ describe('Response actions history', () => {
     });
 
     it('should contain agent type info in each expanded row', async () => {
-      mockedContext.setExperimentalFlag({ responseActionsSentinelOneV1Enabled: true });
       render();
       const { getAllByTestId } = renderResult;
 
@@ -691,7 +714,7 @@ describe('Response actions history', () => {
           expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
         });
 
-        const downloadLink = getByTestId(`${testPrefix}-getFileDownloadLink`);
+        const downloadLink = getByTestId(`${testPrefix}-output-getFileDownloadLink`);
         expect(downloadLink).toBeTruthy();
         expect(downloadLink.textContent).toEqual(
           'Click here to download(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
@@ -774,7 +797,9 @@ describe('Response actions history', () => {
           expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
         });
 
-        const downloadExecuteLink = getByTestId(`${testPrefix}-actionsLogTray-getExecuteLink`);
+        const downloadExecuteLink = getByTestId(
+          `${testPrefix}-output-actionsLogTray-getExecuteLink`
+        );
         expect(downloadExecuteLink).toBeTruthy();
         expect(downloadExecuteLink.textContent).toEqual(
           'Click here to download full output(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
@@ -818,9 +843,7 @@ describe('Response actions history', () => {
         });
 
         const accordionTitles = Array.from(
-          getByTestId(`${testPrefix}-executeDetails`).querySelectorAll(
-            '.euiAccordion__triggerWrapper'
-          )
+          getByTestId(`${testPrefix}-output`).querySelectorAll('.euiAccordion__triggerWrapper')
         ).map((el) => el.textContent);
 
         expect(accordionTitles).toEqual([
@@ -851,7 +874,7 @@ describe('Response actions history', () => {
         const expandButton = getByTestId(`${testPrefix}-expand-button`);
         await user.click(expandButton);
 
-        expect(getByTestId(`${testPrefix}-actionsLogTray-executeResponseOutput-output`));
+        expect(getByTestId(`${testPrefix}-output-actionsLogTray-executeResponseOutput-output`));
       });
 
       it('should not contain full output download link in expanded row for `execute` action WITHOUT Actions Log privileges', async () => {
@@ -910,7 +933,7 @@ describe('Response actions history', () => {
           const expandButton = getByTestId(`${testPrefix}-expand-button`);
           await user.click(expandButton);
 
-          const output = getByTestId(`${testPrefix}-actionsLogTray-getExecuteLink`);
+          const output = getByTestId(`${testPrefix}-output-actionsLogTray-getExecuteLink`);
           expect(output).toBeTruthy();
           expect(output.textContent).toEqual(
             'Click here to download full output(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
@@ -943,6 +966,7 @@ describe('Response actions history', () => {
 
       it('should display pending output if action is not complete yet', async () => {
         action.isCompleted = false;
+        action.agentState[action.agents.at(0)!].isCompleted = false;
         const { getByTestId } = render();
         await user.click(getByTestId(`${testPrefix}-expand-button`));
 
@@ -955,7 +979,7 @@ describe('Response actions history', () => {
         const { getByTestId } = render();
         await user.click(getByTestId(`${testPrefix}-expand-button`));
 
-        expect(getByTestId(`${testPrefix}-uploadDetails`)).toHaveTextContent(
+        expect(getByTestId(`${testPrefix}-output`)).toHaveTextContent(
           'upload completed successfully' +
             'File saved to: /path/to/uploaded/file' +
             'Free disk space on drive: 1.18MB'
@@ -970,6 +994,7 @@ describe('Response actions history', () => {
         action.agentState['agent-b'] = {
           errors: undefined,
           wasSuccessful: true,
+          wasCanceled: false,
           isCompleted: true,
           completedAt: '2023-05-10T20:09:25.824Z',
         };
@@ -986,12 +1011,13 @@ describe('Response actions history', () => {
 
         await user.click(getByTestId(`${testPrefix}-expand-button`));
 
-        expect(getByTestId(`${testPrefix}-uploadDetails`)).toHaveTextContent(
-          'upload completed successfully' +
-            'Host: Host-agent-a' +
+        expect(getByTestId(`${testPrefix}-output`)).toHaveTextContent(
+          'Host-agent-a: upload completed successfully' +
+            'Execution completed 2022-04-30T16:08:47.449Z' +
             'File saved to: /path/to/uploaded/file' +
             'Free disk space on drive: 1.18MB' +
-            'Host: host b' +
+            'host b: upload completed successfully' +
+            'Execution completed 2023-05-10T20:09:25.824Z' +
             'File saved to: some/path/to/file' +
             'Free disk space on drive: 120.55KB'
         );
@@ -1031,16 +1057,18 @@ describe('Response actions history', () => {
               'agent-a': {
                 errors: undefined,
                 wasSuccessful: true,
+                wasCanceled: false,
                 isCompleted: true,
                 completedAt: '2023-05-10T20:09:25.824Z',
               },
               'agent-b': {
                 errors: undefined,
                 wasSuccessful: true,
+                wasCanceled: false,
                 isCompleted: true,
                 completedAt: '2023-05-10T20:09:25.824Z',
               },
-            } as unknown as Pick<ActionDetails, 'agentState'>,
+            },
             outputs: (command === 'upload'
               ? {
                   'agent-a': {
@@ -1119,9 +1147,28 @@ describe('Response actions history', () => {
 
         const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
         const outputs = await expandRows();
+
         expect(outputs.map((n) => n.textContent)).toEqual([
-          `${outputCommand} failedThe following errors were encountered:An unknown error occurred`,
-          `${outputCommand} failedThe following errors were encountered:An unknown error occurred`,
+          expect.stringMatching(
+            new RegExp(
+              `Host-agent-a: ${outputCommand} failed` +
+                'Execution completed .*' +
+                'The following errors were encountered:An unknown error occurred' +
+                `Host-agent-b: ${outputCommand} failed` +
+                'Execution completed .*' +
+                'The following errors were encountered:An unknown error occurred'
+            )
+          ),
+          expect.stringMatching(
+            new RegExp(
+              `Host-agent-a: ${outputCommand} failed` +
+                'Execution completed .*' +
+                'The following errors were encountered:An unknown error occurred' +
+                `Host-agent-b: ${outputCommand} failed` +
+                'Execution completed .*' +
+                'The following errors were encountered:An unknown error occurred'
+            )
+          ),
         ]);
         expect(
           renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
@@ -1137,7 +1184,8 @@ describe('Response actions history', () => {
           data: await getActionListMock({
             actionCount: 2,
             commands: [command],
-            isCompleted: false,
+            isCompleted: true,
+            wasSuccessful: false,
             isExpired: true,
             status: 'failed',
           }),
@@ -1147,8 +1195,8 @@ describe('Response actions history', () => {
         const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
         const outputs = await expandRows();
         expect(outputs.map((n) => n.textContent)).toEqual([
-          `${outputCommand} failed: action expired`,
-          `${outputCommand} failed: action expired`,
+          `${outputCommand} failed: action expiredThe following errors were encountered:An unknown error occurred`,
+          `${outputCommand} failed: action expiredThe following errors were encountered:An unknown error occurred`,
         ]);
         expect(
           renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
@@ -1203,10 +1251,11 @@ describe('Response actions history', () => {
             'agent-a': {
               errors: [],
               wasSuccessful: true,
+              wasCanceled: false,
               isCompleted: true,
               completedAt: '2023-05-10T20:09:25.824Z',
             },
-          } as unknown as Pick<ActionDetails, 'agentState'>,
+          },
           outputs: {},
         });
 
@@ -1241,10 +1290,11 @@ describe('Response actions history', () => {
                 'agent-a': {
                   errors: ['Error here!'],
                   wasSuccessful: false,
+                  wasCanceled: false,
                   isCompleted: true,
                   completedAt: '2023-05-10T20:09:25.824Z',
                 },
-              } as unknown as Pick<ActionDetails, 'agentState'>,
+              },
               // just adding three commands for tests with respective error response codes
               outputs: ['get-file', 'scan'].includes(command)
                 ? ({
@@ -1306,10 +1356,11 @@ describe('Response actions history', () => {
                   'agent-a': {
                     errors: ['Error message w/o output'],
                     wasSuccessful: false,
+                    wasCanceled: false,
                     isCompleted: true,
                     completedAt: '2023-05-10T20:09:25.824Z',
                   },
-                } as unknown as Pick<ActionDetails, 'agentState'>,
+                },
               }),
             });
             render();
@@ -1342,23 +1393,25 @@ describe('Response actions history', () => {
             'agent-a': {
               errors: [''],
               wasSuccessful: true,
+              wasCanceled: false,
               isCompleted: true,
               completedAt: '2023-05-10T20:09:25.824Z',
             },
             'agent-b': {
               errors: [''],
               wasSuccessful: false,
+              wasCanceled: false,
               isCompleted: true,
               completedAt: '2023-05-10T20:09:25.824Z',
             },
             'agent-c': {
               errors: [''],
-              isExpired: true,
               wasSuccessful: false,
+              wasCanceled: false,
               isCompleted: true,
               completedAt: '2023-05-10T20:09:25.824Z',
             },
-          } as unknown as Pick<ActionDetails, 'agentState'>,
+          },
           outputs: {},
         });
 
@@ -1396,16 +1449,18 @@ describe('Response actions history', () => {
                 'agent-a': {
                   errors: ['Error with agent-a!'],
                   wasSuccessful: false,
+                  wasCanceled: false,
                   isCompleted: true,
                   completedAt: '2023-05-10T20:09:25.824Z',
                 },
                 'agent-b': {
                   errors: ['Error with agent-b!'],
                   wasSuccessful: false,
+                  wasCanceled: false,
                   isCompleted: true,
                   completedAt: '2023-05-10T20:09:25.824Z',
                 },
-              } as unknown as Pick<ActionDetails, 'agentState'>,
+              },
               outputs: {
                 'agent-a': {
                   type: 'json',
@@ -1444,15 +1499,30 @@ describe('Response actions history', () => {
             const outputs = await expandRows();
             if (command === 'get-file') {
               expect(outputs.map((n) => n.textContent)).toEqual([
-                `${outputCommand} failedThe following errors were encountered:Host: Host-agent-aErrors: The file specified was not found | Error with agent-a!Host: Host-agent-bErrors: The path defined is not valid | Error with agent-b!`,
+                'Host-agent-a: get-file failed' +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following errors were encountered:The file specified was not found | Error with agent-a!' +
+                  'Host-agent-b: get-file failed' +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following errors were encountered:The path defined is not valid | Error with agent-b!',
               ]);
             } else if (command === 'scan') {
               expect(outputs.map((n) => n.textContent)).toEqual([
-                `${outputCommand} failedThe following errors were encountered:Host: Host-agent-aErrors: Invalid absolute file path provided | Error with agent-a!Host: Host-agent-bErrors: Invalid absolute file path provided | Error with agent-b!`,
+                'Host-agent-a: scan failed' +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following errors were encountered:Invalid absolute file path provided | Error with agent-a!' +
+                  'Host-agent-b: scan failed' +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following errors were encountered:Invalid absolute file path provided | Error with agent-b!',
               ]);
             } else {
               expect(outputs.map((n) => n.textContent)).toEqual([
-                `${outputCommand} failedThe following errors were encountered:Host: Host-agent-aErrors: Error with agent-a!Host: Host-agent-bErrors: Error with agent-b!`,
+                `Host-agent-a: ${outputCommand} failed` +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following error was encountered:Error with agent-a!' +
+                  `Host-agent-b: ${outputCommand} failed` +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following error was encountered:Error with agent-b!',
               ]);
             }
           }
@@ -1475,16 +1545,18 @@ describe('Response actions history', () => {
                 'agent-a': {
                   errors: ['Error with agent-a!'],
                   wasSuccessful: false,
+                  wasCanceled: false,
                   isCompleted: true,
                   completedAt: '2023-05-10T20:09:25.824Z',
                 },
                 'agent-b': {
                   errors: ['Error with agent-b!'],
                   wasSuccessful: false,
+                  wasCanceled: false,
                   isCompleted: true,
                   completedAt: '2023-05-10T20:09:25.824Z',
                 },
-              } as unknown as Pick<ActionDetails, 'agentState'>,
+              },
               outputs: {},
             });
 
@@ -1498,15 +1570,30 @@ describe('Response actions history', () => {
             const outputs = await expandRows();
             if (command === 'get-file') {
               expect(outputs.map((n) => n.textContent)).toEqual([
-                `${outputCommand} failedThe following errors were encountered:Host: Host-agent-aErrors: Error with agent-a!Host: Host-agent-bErrors: Error with agent-b!`,
+                'Host-agent-a: get-file failed' +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following error was encountered:Error with agent-a!' +
+                  'Host-agent-b: get-file failed' +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following error was encountered:Error with agent-b!',
               ]);
             } else if (command === 'scan') {
               expect(outputs.map((n) => n.textContent)).toEqual([
-                `${outputCommand} failedThe following errors were encountered:Host: Host-agent-aErrors: Error with agent-a!Host: Host-agent-bErrors: Error with agent-b!`,
+                'Host-agent-a: scan failed' +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following error was encountered:Error with agent-a!' +
+                  'Host-agent-b: scan failed' +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following error was encountered:Error with agent-b!',
               ]);
             } else {
               expect(outputs.map((n) => n.textContent)).toEqual([
-                `${outputCommand} failedThe following errors were encountered:Host: Host-agent-aErrors: Error with agent-a!Host: Host-agent-bErrors: Error with agent-b!`,
+                `Host-agent-a: ${outputCommand} failed` +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following error was encountered:Error with agent-a!' +
+                  `Host-agent-b: ${outputCommand} failed` +
+                  'Execution completed 2023-05-10T20:09:25.824Z' +
+                  'The following error was encountered:Error with agent-b!',
               ]);
             }
           }
@@ -1520,8 +1607,9 @@ describe('Response actions history', () => {
 
     beforeEach(() => {
       featureFlags = {
-        responseActionUploadEnabled: true,
         crowdstrikeRunScriptEnabled: true,
+        microsoftDefenderEndpointCancelEnabled: true,
+        responseActionsEndpointMemoryDump: true,
       };
 
       mockedContext.setExperimentalFlag(featureFlags);
@@ -1541,7 +1629,7 @@ describe('Response actions history', () => {
       );
     });
 
-    it('should show a list of actions (with `runscript`) when opened', async () => {
+    it('should show a list of actions (with `runscript` and `cancel`) when opened', async () => {
       // Note: when we enable new commands, it might be needed to increase the height
       render({ 'data-test-height': 350 });
       const { getByTestId, getAllByTestId } = renderResult;
@@ -1563,6 +1651,40 @@ describe('Response actions history', () => {
         'upload. To check this option, press Enter.',
         'scan. To check this option, press Enter.',
         'runscript. To check this option, press Enter.',
+        'cancel. To check this option, press Enter.',
+        'memory-dump. To check this option, press Enter.',
+      ]);
+    });
+
+    it('should show a list of actions (without `cancel`) when cancel feature flag is disabled', async () => {
+      // Set the cancel feature flag to false
+      const featureFlagsWithoutCancel = {
+        ...featureFlags,
+        microsoftDefenderEndpointCancelEnabled: false,
+      };
+      mockedContext.setExperimentalFlag(featureFlagsWithoutCancel);
+
+      render({ 'data-test-height': 350 });
+      const { getByTestId, getAllByTestId } = renderResult;
+
+      await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
+      expect(filterList).toBeTruthy();
+      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(
+        RESPONSE_ACTION_API_COMMANDS_NAMES.length - 1
+      );
+      expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
+        'isolate. To check this option, press Enter.',
+        'release. To check this option, press Enter.',
+        'kill-process. To check this option, press Enter.',
+        'suspend-process. To check this option, press Enter.',
+        'processes. To check this option, press Enter.',
+        'get-file. To check this option, press Enter.',
+        'execute. To check this option, press Enter.',
+        'upload. To check this option, press Enter.',
+        'scan. To check this option, press Enter.',
+        'runscript. To check this option, press Enter.',
+        'memory-dump. To check this option, press Enter.',
       ]);
     });
 
@@ -1586,11 +1708,12 @@ describe('Response actions history', () => {
       await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
       expect(filterList).toBeTruthy();
-      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(3);
+      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(4);
       expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
         'Failed',
         'Pending',
         'Successful',
+        'Canceled',
       ]);
     });
 
@@ -1858,11 +1981,6 @@ describe('Response actions history', () => {
     });
 
     it('should show a list of agents and action types when opened in page view', async () => {
-      mockedContext.setExperimentalFlag({
-        responseActionsSentinelOneV1Enabled: true,
-        responseActionsCrowdstrikeManualHostIsolationEnabled: true,
-        responseActionsMSDefenderEndpointEnabled: true,
-      });
       render({ isFlyout: false });
       const { getByTestId, getAllByTestId } = renderResult;
 
@@ -1889,6 +2007,159 @@ describe('Response actions history', () => {
       await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
       expect(clearAllButton.hasAttribute('disabled')).toBeTruthy();
+    });
+  });
+
+  describe('Row actions', () => {
+    beforeEach(() => {
+      apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
+    });
+
+    it('should not render a cancel button for completed actions', async () => {
+      // Default mock has isCompleted: true for all actions
+      render();
+      expect(renderResult.queryAllByTestId('responseActionRowActions')).toHaveLength(0);
+    });
+
+    it('should render a cancel button for pending actions', async () => {
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      expect(renderResult.getByTestId('responseActionRowActions')).toBeTruthy();
+    });
+
+    it('should render a disabled cancel button when the action command is not cancelable for the agent type', async () => {
+      // `isolate` is not cancelable for the default `endpoint` agent type
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['isolate'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      expect(renderResult.getByTestId('responseActionRowActions')).toBeDisabled();
+    });
+
+    it('should render a disabled cancel button when user lacks the required permission to cancel the command', async () => {
+      // `get-file` requires `canWriteFileOperations` to cancel
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: getEndpointAuthzInitialStateMock({
+          canWriteFileOperations: false,
+        }),
+      });
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      expect(renderResult.getByTestId('responseActionRowActions')).toBeDisabled();
+    });
+
+    it('should render an enabled cancel button for a pending cancelable action when user has required permissions', async () => {
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      expect(renderResult.getByTestId('responseActionRowActions')).not.toBeDisabled();
+    });
+
+    it('should show cancel action modal when cancel button is clicked', async () => {
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      await user.click(renderResult.getByTestId('responseActionRowActions'));
+      expect(renderResult.getByRole('dialog')).toBeTruthy();
+    });
+
+    it('should dismiss cancel action modal when it is closed', async () => {
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      await user.click(renderResult.getByTestId('responseActionRowActions'));
+      expect(renderResult.getByRole('dialog')).toBeTruthy();
+      await user.click(renderResult.getByLabelText('Closes this modal window'));
+      await waitFor(() => {
+        expect(renderResult.queryByRole('dialog')).toBeNull();
+      });
+    });
+
+    it('should disable all row cancel buttons when a cancel action modal is open', async () => {
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 2,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      const cancelButtons = renderResult.getAllByTestId('responseActionRowActions');
+      expect(cancelButtons).toHaveLength(2);
+      expect(cancelButtons[0]).not.toBeDisabled();
+      expect(cancelButtons[1]).not.toBeDisabled();
+
+      await user.click(cancelButtons[0]);
+
+      await waitFor(() => {
+        const updatedButtons = renderResult.getAllByTestId('responseActionRowActions');
+        expect(updatedButtons[0]).toBeDisabled();
+        expect(updatedButtons[1]).toBeDisabled();
+      });
+    });
+
+    it('should not display the actions column when `responseActionsEndpointCancel` feature flag is disabled', async () => {
+      mockedContext.setExperimentalFlag({ responseActionsEndpointCancel: false });
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({
+          actionCount: 1,
+          commands: ['get-file'],
+          isCompleted: false,
+          status: 'pending',
+        }),
+      });
+      render();
+      const columnHeaders = Array.from(
+        renderResult.getByTestId(testPrefix).querySelectorAll('thead th')
+      ).map((col) => col.textContent);
+      expect(columnHeaders).not.toContain(TABLE_COLUMN_NAMES.actions);
+      expect(renderResult.queryAllByTestId('responseActionRowActions')).toHaveLength(0);
     });
   });
 });

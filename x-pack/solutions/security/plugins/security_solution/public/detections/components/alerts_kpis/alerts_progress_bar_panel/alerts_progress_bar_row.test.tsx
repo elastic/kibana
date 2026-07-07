@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { render } from '@testing-library/react';
+import { render, within } from '@testing-library/react';
 import React from 'react';
 import { ProgressBarRow } from './alerts_progress_bar_row';
 import type { AlertsProgressBarData } from './types';
@@ -19,10 +19,12 @@ describe('ProgressBarRow', () => {
       label: 'label',
     };
 
-    const { getByText } = render(<ProgressBarRow item={item} />);
+    const { container } = render(<ProgressBarRow item={item} />);
+    // target only the visible label/value, skip the one for screen readers
+    const data = within(container.querySelector('.euiProgress__data')!);
 
-    expect(getByText('percentageLabel')).toBeInTheDocument();
-    expect(getByText('label')).toBeInTheDocument();
+    expect(data.getByText('percentageLabel')).toBeInTheDocument();
+    expect(data.getByText('label')).toBeInTheDocument();
   });
 
   it('should render key value when key is not Other', () => {
@@ -34,9 +36,11 @@ describe('ProgressBarRow', () => {
       label: 'label',
     };
 
-    const { getByText } = render(<ProgressBarRow item={item} />);
+    const { container } = render(<ProgressBarRow item={item} />);
+    // target only the visible label/value, skip the one for screen readers
+    const data = within(container.querySelector('.euiProgress__data')!);
 
-    expect(getByText('percentageLabel')).toBeInTheDocument();
-    expect(getByText('key')).toBeInTheDocument();
+    expect(data.getByText('percentageLabel')).toBeInTheDocument();
+    expect(data.getByText('key')).toBeInTheDocument();
   });
 });

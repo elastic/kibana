@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { EuiLink, EuiText, EuiFlexGroup } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import {
   ALERT_DURATION,
   ALERT_SEVERITY,
@@ -14,7 +15,6 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_REASON,
   TIMESTAMP,
-  ALERT_UUID,
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_VALUES,
   ALERT_RULE_NAME,
@@ -22,6 +22,8 @@ import {
   ALERT_START,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_UUID,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_CONSUMER,
   ALERT_CASE_IDS,
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
@@ -38,10 +40,12 @@ import { asDuration } from '../../../../common/utils/formatters';
 import { AlertSeverityBadge } from '../../alert_severity_badge';
 import { AlertStatusIndicator } from '../../alert_status_indicator';
 import { parseAlert } from '../../../pages/alerts/helpers/parse_alert';
+import { useAuthorizedToReadRuleType } from '../../../hooks/use_authorized_to_read_rule_type';
 import { CellTooltip } from './cell_tooltip';
 import { TimestampTooltip } from './timestamp_tooltip';
-import { GetObservabilityAlertsTableProp } from '../types';
+import type { GetObservabilityAlertsTableProp } from '../types';
 import AlertActions from '../../alert_actions/alert_actions';
+import { ElapsedTimestampTooltip } from '../../../../common';
 
 export const getAlertFieldValue = (alert: Alert, fieldName: string) => {
   // can be updated when working on https://github.com/elastic/kibana/issues/140819
@@ -72,13 +76,17 @@ export type AlertCellRenderers = Record<string, (value: string) => ReactNode>;
 // eslint-disable-next-line react/function-component-definition
 export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellValue'> = (props) => {
   const {
+    tableId,
     columnId,
     alert,
-    openAlertInFlyout,
+    rowIndex,
+    onExpandedAlertIndexChange,
     observabilityRuleTypeRegistry,
     services: { http },
     parentAlert,
   } = props;
+
+  const { authorizedToReadRuleType } = useAuthorizedToReadRuleType();
 
   const cellRenderers: AlertCellRenderers = {
     [ALERT_STATUS]: (value) => {
@@ -92,9 +100,12 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
     [TIMESTAMP]: (value) => (
       <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
     ),
-    [ALERT_START]: (value) => (
-      <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
-    ),
+    [ALERT_START]: (value) =>
+      tableId === 'xpack.observability.alerts.relatedAlerts' ? (
+        <ElapsedTimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
+      ) : (
+        <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
+      ),
     [ALERT_RULE_EXECUTION_TIMESTAMP]: (value) => (
       <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
     ),
@@ -111,7 +122,7 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
         <EuiLink
           data-test-subj="o11yGetRenderCellValueLink"
           css={{ ':hover': { textDecoration: 'none' } }}
-          onClick={() => openAlertInFlyout?.(parsedAlert.fields[ALERT_UUID])}
+          onClick={() => onExpandedAlertIndexChange(rowIndex)}
         >
           {parsedAlert.reason}
         </EuiLink>
@@ -120,13 +131,27 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
     [ALERT_RULE_NAME]: (value) => {
       const ruleCategory = getAlertFieldValue(alert, ALERT_RULE_CATEGORY);
       const ruleId = getAlertFieldValue(alert, ALERT_RULE_UUID);
+      const ruleTypeId = getAlertFieldValue(alert, ALERT_RULE_TYPE_ID);
+      const ruleConsumer = getAlertFieldValue(alert, ALERT_RULE_CONSUMER);
       const ruleLink = ruleId ? http.basePath.prepend(paths.observability.ruleDetails(ruleId)) : '';
+      // Rule read is authorized per rule type (and consumer), so gate the link on
+      // the specific rule behind this alert rather than a coarse "any rules" flag.
+      const canReadRule = authorizedToReadRuleType(
+        ruleTypeId,
+        ruleConsumer === '--' ? undefined : ruleConsumer
+      );
       return (
         <CellTooltip
           value={
-            <EuiLink data-test-subj="o11yCellRenderersLink" href={ruleLink}>
-              {value}
-            </EuiLink>
+            canReadRule && ruleLink ? (
+              <EuiLink data-test-subj="o11yCellRenderersLink" href={ruleLink}>
+                {value}
+              </EuiLink>
+            ) : (
+              <EuiText size="s" data-test-subj="o11yCellRenderersRuleName">
+                {value}
+              </EuiText>
+            )
           }
           tooltipContent={ruleCategory}
         />

@@ -22,12 +22,15 @@ import type { CasesPublicStartDependencies, CasesPublicSetupDependencies } from 
 import { CasesUiPlugin } from './plugin';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { CASE_PAGE_VIEW_EVENT_TYPE } from '../common/constants';
+import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
 
 function getConfig(overrides = {}) {
   return {
     markdownPlugins: { lens: true },
     files: { maxSize: 1, allowedMimeTypes: ALLOWED_MIME_TYPES },
     stack: { enabled: true },
+    incrementalId: { enabled: true },
     ...overrides,
   };
 }
@@ -66,9 +69,22 @@ describe('Cases Ui Plugin', () => {
       },
       features: featuresPluginMock.createStart(),
       security: securityMock.createStart(),
+      dashboard: {
+        findDashboardsService: jest.fn(),
+      } as unknown as CasesPublicStartDependencies['dashboard'],
       data: dataPluginMock.createStartContract(),
       embeddable: embeddablePluginMock.createStartContract(),
       lens: lensPluginMock.createStartContract(),
+      maps: {
+        Map: () => null,
+        PassiveMap: () => null,
+        createLayerDescriptors: {
+          createSecurityLayerDescriptors: jest.fn(),
+          createBasemapLayerDescriptor: jest.fn(),
+          createESSearchSourceLayerDescriptor: jest.fn(),
+        },
+        suggestEMSTermJoinConfig: jest.fn(),
+      },
       contentManagement: contentManagementMock.createStartContract(),
       storage: {
         store: {
@@ -84,6 +100,7 @@ describe('Cases Ui Plugin', () => {
       },
       triggersActionsUi: triggersActionsUiMock.createStart(),
       fieldFormats: fieldFormatsMock,
+      toastNotifications: toastsServiceMock.createSetupContract(),
     };
   });
 
@@ -96,9 +113,21 @@ describe('Cases Ui Plugin', () => {
           "attachmentFramework": Object {
             "registerExternalReference": [Function],
             "registerPersistableState": [Function],
+            "registerUnified": [Function],
           },
         }
-    `);
+      `);
+    });
+
+    it('registers cases page view event type', async () => {
+      plugin.setup(coreSetup, pluginsSetup);
+
+      expect(coreSetup.analytics.registerEventType).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: CASE_PAGE_VIEW_EVENT_TYPE,
+          schema: expect.objectContaining({ owner: expect.objectContaining({ type: 'keyword' }) }),
+        })
+      );
     });
 
     it('should register kibana feature when stack is enabled', async () => {
@@ -133,6 +162,11 @@ describe('Cases Ui Plugin', () => {
             getCasesMetrics: expect.any(Function),
           },
           getRelatedCases: expect.any(Function),
+        },
+        config: {
+          templatesEnabled: false,
+          attachmentsEnabled: false,
+          casesRedesign: { list: false, details: false, settings: false },
         },
         helpers: {
           canUseCases: expect.any(Function),

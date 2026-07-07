@@ -19,7 +19,7 @@ import { setBreadcrumbs } from '../../../utils/breadcrumbs';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { SingleDocViewer } from './single_doc_viewer';
 import { createDataViewDataSource } from '../../../../common/data_sources';
-import { useScopedProfilesManager } from '../../../context_awareness';
+import { useScopedServices } from '../../../components/scoped_services_provider';
 
 export interface DocProps extends EsDocSearchProps {
   /**
@@ -30,7 +30,7 @@ export interface DocProps extends EsDocSearchProps {
 
 export function Doc(props: DocProps) {
   const { dataView } = props;
-  const scopedProfilesManager = useScopedProfilesManager();
+  const { scopedProfilesManager } = useScopedServices();
   const services = useDiscoverServices();
   const { locator, chrome, docLinks } = services;
   const indexExistsLink = docLinks.links.apis.indexExists;
@@ -79,6 +79,7 @@ export function Doc(props: DocProps) {
       <EuiPageBody panelled paddingSize="m" panelProps={{ role: 'main' }}>
         {reqState === ElasticRequestState.NotFoundDataView && (
           <EuiCallOut
+            announceOnMount
             color="danger"
             data-test-subj={`doc-msg-notFoundDataView`}
             iconType="warning"
@@ -93,6 +94,7 @@ export function Doc(props: DocProps) {
         )}
         {reqState === ElasticRequestState.NotFound && (
           <EuiCallOut
+            announceOnMount
             color="danger"
             data-test-subj={`doc-msg-notFound`}
             iconType="warning"
@@ -112,6 +114,7 @@ export function Doc(props: DocProps) {
 
         {reqState === ElasticRequestState.Error && (
           <EuiCallOut
+            announceOnMount
             color="danger"
             data-test-subj={`doc-msg-error`}
             iconType="warning"
@@ -137,7 +140,7 @@ export function Doc(props: DocProps) {
         )}
 
         {reqState === ElasticRequestState.Loading && (
-          <EuiCallOut data-test-subj={`doc-msg-loading`}>
+          <EuiCallOut announceOnMount data-test-subj={`doc-msg-loading`}>
             <EuiLoadingSpinner size="m" />{' '}
             <FormattedMessage id="discover.doc.loadingDescription" defaultMessage="Loading…" />
           </EuiCallOut>

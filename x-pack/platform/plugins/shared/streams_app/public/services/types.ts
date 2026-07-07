@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { IDataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public';
-import { StreamsTelemetryClient } from '../telemetry/client';
+import type { IDataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public';
+import type { StreamsTelemetryClient } from '../telemetry/client';
+import type { FocusedSignificantEventService } from './significant_events/focused_significant_event_service';
 
 export interface StreamsAppServices {
   dataStreamsClient: Promise<IDataStreamsStatsClient>;
-  PageTemplate: React.FC<React.PropsWithChildren<{}>>;
+  focusedSignificantEventService: FocusedSignificantEventService;
   telemetryClient: StreamsTelemetryClient;
+  version: string;
 }

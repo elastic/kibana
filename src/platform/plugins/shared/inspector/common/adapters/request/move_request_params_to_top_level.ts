@@ -8,7 +8,7 @@
  */
 
 import type { ConnectionRequestParams } from '@elastic/transport';
-import { Response } from './types';
+import type { Response } from './types';
 
 interface SearchResponse {
   [key: string]: unknown;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DownloadSource, FleetProxy, FleetServerHost } from '../../../../../../common/types';
+import type { DownloadSource, ProxyConfig, FleetServerHost } from '../../../../../../common/types';
 import {
   getDownloadBaseUrl,
   getDownloadSourceProxyArgs,
@@ -21,7 +21,7 @@ function getArtifact(
   platform: PLATFORM_TYPE,
   kibanaVersion: string,
   downloadSource?: DownloadSource,
-  downloadSourceProxy?: FleetProxy
+  downloadSourceProxy?: ProxyConfig
 ) {
   const ARTIFACT_BASE_URL = `${getDownloadBaseUrl(downloadSource)}/beats/elastic-agent`;
   const { windows: windowsDownloadSourceProxyArgs, curl: curlDownloadSourceProxyArgs } =
@@ -112,8 +112,8 @@ function getArtifact(
 export function getInstallCommandForPlatform({
   platform,
   esOutputHost,
-  esOutputProxy,
   serviceToken,
+  esOutputProxy,
   policyId,
   fleetServerHost,
   isProductionDeployment,
@@ -124,15 +124,15 @@ export function getInstallCommandForPlatform({
 }: {
   platform: PLATFORM_TYPE;
   esOutputHost: string;
-  esOutputProxy?: FleetProxy | undefined;
   serviceToken: string;
+  esOutputProxy?: ProxyConfig | undefined;
   policyId?: string;
   fleetServerHost?: FleetServerHost | null;
   isProductionDeployment?: boolean;
   sslCATrustedFingerprint?: string;
   kibanaVersion?: string;
   downloadSource?: DownloadSource;
-  downloadSourceProxy?: FleetProxy;
+  downloadSourceProxy?: ProxyConfig;
 }): string {
   const newLineSeparator = platform === 'windows' || platform === 'windows_msi' ? '`\n' : '\\\n';
 
@@ -204,7 +204,7 @@ export function getInstallCommandForPlatform({
     mac_aarch64: `${artifact.downloadCommand}\nsudo ./elastic-agent install ${commandArgumentsStr}`,
     mac_x86_64: `${artifact.downloadCommand}\nsudo ./elastic-agent install ${commandArgumentsStr}`,
     windows: `${artifact.downloadCommand}\n.\\elastic-agent.exe install ${commandArgumentsStr}`,
-    windows_msi: `${artifact.downloadCommand}\n.\\elastic-agent.msi --% INSTALLARGS="${commandArgumentsStr}"`,
+    windows_msi: `${artifact.downloadCommand}\n.\\elastic-agent-${kibanaVersion}-windows-x86_64.msi --% INSTALLARGS="${commandArgumentsStr}"`,
     deb_aarch64: `${artifact.downloadCommand}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent\nsudo elastic-agent enroll ${commandArgumentsStr}`,
     deb_x86_64: `${artifact.downloadCommand}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent\nsudo elastic-agent enroll ${commandArgumentsStr}`,
     rpm_aarch64: `${artifact.downloadCommand}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent\nsudo elastic-agent enroll ${commandArgumentsStr}`,

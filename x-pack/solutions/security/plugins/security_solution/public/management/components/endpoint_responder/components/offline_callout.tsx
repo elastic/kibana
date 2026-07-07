@@ -26,7 +26,8 @@ export const OfflineCallout = memo<OfflineCalloutProps>(({ agentType, endpointId
     return (
       <>
         <EuiCallOut
-          iconType="offline"
+          announceOnMount={false}
+          iconType="wifiSlash"
           color="warning"
           data-test-subj="offlineCallout"
           title={i18n.translate('xpack.securitySolution.responder.hostOffline.callout.title', {

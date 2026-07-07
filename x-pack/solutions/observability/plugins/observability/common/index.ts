@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { OBSERVABILITY_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
+
 export type { AsDuration, AsPercent, TimeUnitChar, TimeFormatter } from './utils/formatters';
 
 export {
@@ -19,16 +21,18 @@ export { getInspectResponse } from './utils/get_inspect_response';
 export { getAlertDetailsUrl, getAlertUrl } from './utils/alerting/alert_url';
 export { convertToBuiltInComparators } from './utils/convert_legacy_outside_comparator';
 export { ProcessorEvent } from './processor_event';
+export { ElapsedTimestampTooltip } from './components/elapsed_timestamp_tooltip';
 
 export {
   enableInspectEsQueries,
+  searchExcludedDataTiers,
   maxSuggestions,
   enableComparisonByDefault,
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
   apmServiceGroupMaxNumberOfServices,
+  enableInfrastructureAssetCustomDashboards,
   apmEnableTableSearchBar,
-  entityCentricExperience,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
   syntheticsThrottlingEnabled,
@@ -42,7 +46,8 @@ export {
   profilingAzureCostDiscountRate,
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
-  apmEnableServiceMapApiV2,
+  apmTraceLogsDefaultColumns,
+  enableDiagnosticMode,
 } from './ui_settings_keys';
 
 export {
@@ -55,6 +60,7 @@ export const casesFeatureId = 'observabilityCases';
 export const casesFeatureIdV2 = 'observabilityCasesV2';
 export const casesFeatureIdV3 = 'observabilityCasesV3';
 export const sloFeatureId = 'slo';
+export const observabilityAlertsFeatureId = OBSERVABILITY_ALERTS_FEATURE_ID;
 // The ID of the observability app. Should more appropriately be called
 // 'observability' but it's used in telemetry by applicationUsage so we don't
 // want to change it.
@@ -75,14 +81,18 @@ export const syntheticsEditMonitorLocatorID = 'SYNTHETICS_EDIT_MONITOR_LOCATOR';
 export const syntheticsAddMonitorLocatorID = 'SYNTHETICS_ADD_MONITOR_LOCATOR';
 export const syntheticsSettingsLocatorID = 'SYNTHETICS_SETTINGS';
 export const alertsLocatorID = 'ALERTS_LOCATOR';
-export const ruleDetailsLocatorID = 'RULE_DETAILS_LOCATOR';
-export const rulesLocatorID = 'RULES_LOCATOR';
-export const sloDetailsLocatorID = 'SLO_DETAILS_LOCATOR';
-export const sloEditLocatorID = 'SLO_EDIT_LOCATOR';
-export const sloListLocatorID = 'SLO_LIST_LOCATOR';
 
 import { paths } from './locators/paths';
 export const observabilityPaths = paths.observability;
 export type { AlertsLocator, AlertsLocatorParams } from './locators/alerts';
 export { AlertsLocatorDefinition } from './locators/alerts';
 export { observabilityAlertFeatureIds } from './constants';
+
+export {
+  OBSERVABILITY_TIERED_FEATURES,
+  OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE,
+} from './product_features';
+
+// This label is used in multiple places across the observability plugins, so we export it from the common package
+// to avoid having to recreate it in multiple places and ensure consistency.
+export { NOT_AVAILABLE_LABEL } from './i18n';

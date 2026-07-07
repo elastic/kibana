@@ -7,16 +7,12 @@
 
 import { useSelector } from '@xstate/react';
 import { useCallback } from 'react';
-import { getDateISORange } from '@kbn/timerange';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { useDatasetQualityFilters } from './use_dataset_quality_filters';
-import { DataStreamStat } from '../../common/data_streams_stats';
-import {
-  DatasetEbtProps,
-  DatasetNavigatedEbtProps,
-  NavigationSource,
-  NavigationTarget,
-} from '../services/telemetry';
+import type { DataStreamStat } from '../../common/data_streams_stats';
+import type { DatasetEbtProps, DatasetNavigatedEbtProps } from '../services/telemetry';
+import { NavigationSource, NavigationTarget } from '../services/telemetry';
+import { getSafeDateISORange } from '../utils';
 
 export function useDatasetTelemetry() {
   const { service, telemetryClient } = useDatasetQualityContext();
@@ -46,7 +42,10 @@ export function useDatasetTelemetry() {
           isIgnoredFilter,
           canUserViewIntegrations
         );
-        telemetryClient.trackDatasetNavigated(ebtProps);
+        // Skip telemetry if date range is invalid
+        if (ebtProps) {
+          telemetryClient.trackDatasetNavigated(ebtProps);
+        }
       } else {
         throw new Error(
           `Cannot report dataset navigation telemetry for unknown dataset ${rawName}`
@@ -73,8 +72,13 @@ function getDatasetEbtProps(
   nonAggregatableDatasets: string[],
   isIgnoredFilter: boolean,
   canUserViewIntegrations: boolean
-): DatasetNavigatedEbtProps {
-  const { startDate: from, endDate: to } = getDateISORange(filters.timeRange);
+): DatasetNavigatedEbtProps | undefined {
+  const dateRange = getSafeDateISORange(filters.timeRange);
+  if (!dateRange) {
+    // Return undefined when date range is invalid - telemetry should not crash the UI
+    return undefined;
+  }
+  const { startDate: from, endDate: to } = dateRange;
   const datasetEbtProps: DatasetEbtProps = {
     index_name: dataset.rawName,
     data_stream: {

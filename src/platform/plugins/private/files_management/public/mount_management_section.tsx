@@ -15,7 +15,7 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { StartDependencies } from './types';
 import { App } from './app';
 import { FilesManagementAppContextProvider } from './context';

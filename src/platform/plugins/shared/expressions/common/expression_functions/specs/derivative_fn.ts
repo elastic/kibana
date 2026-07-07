@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Datatable } from '../../expression_types';
+import type { Datatable } from '../../expression_types';
 import { buildResultColumns, getBucketIdentifier } from '../series_calculation_helpers';
-import { DerivativeArgs } from './derivative';
+import type { DerivativeArgs } from './derivative';
 
 /**
  * Calculates the derivative of a specified column in the data table.

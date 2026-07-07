@@ -7,20 +7,12 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { range } from 'lodash';
-import {
-  DEFAULT_AAD_CONFIG,
-  RuleType,
-  RuleTypeState,
-  AlertsClientError,
-} from '@kbn/alerting-plugin/server';
+import type { RuleType, RuleTypeState } from '@kbn/alerting-plugin/server';
+import { DEFAULT_AAD_CONFIG, AlertsClientError } from '@kbn/alerting-plugin/server';
 import { schema } from '@kbn/config-schema';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import {
-  DEFAULT_INSTANCES_TO_GENERATE,
-  ALERTING_EXAMPLE_APP_ID,
-  AlwaysFiringParams,
-  AlwaysFiringActionGroupIds,
-} from '../../common/constants';
+import type { AlwaysFiringParams, AlwaysFiringActionGroupIds } from '../../common/constants';
+import { DEFAULT_INSTANCES_TO_GENERATE, ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 type ActionGroups = 'small' | 'medium' | 'large';
 interface State extends RuleTypeState {

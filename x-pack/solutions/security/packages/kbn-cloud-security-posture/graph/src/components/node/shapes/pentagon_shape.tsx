@@ -18,11 +18,12 @@ export const PentagonHoverShape = memo<HoverShapeProps>(({ stroke }) => (
 ));
 PentagonHoverShape.displayName = 'PentagonHoverShape';
 
-export const PentagonShape = memo<ShapeProps>(({ stroke, fill }) => (
+export const PentagonShape = memo<ShapeProps>(({ stroke, fill, ...rest }) => (
   <path
     d="M33.0916 2.82091C35.7203 0.911085 39.2797 0.911086 41.9084 2.82092L70.5461 23.6274C73.1747 25.5373 74.2747 28.9225 73.2706 32.0127L62.332 65.6783C61.3279 68.7685 58.4483 70.8607 55.1991 70.8607H19.8009C16.5517 70.8607 13.6721 68.7685 12.668 65.6783L1.72938 32.0127C0.725323 28.9225 1.82526 25.5373 4.45392 23.6274L33.0916 2.82091Z"
     fill={fill}
     stroke={stroke}
+    {...rest}
   />
 ));
 PentagonShape.displayName = 'PentagonShape';

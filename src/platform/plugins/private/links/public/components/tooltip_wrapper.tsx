@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { EuiToolTip, EuiToolTipProps } from '@elastic/eui';
+import type { EuiToolTipProps } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 
 type TooltipWrapperProps = Partial<Omit<EuiToolTipProps, 'content'>> & {
   tooltipContent: string;
@@ -25,7 +26,7 @@ export const TooltipWrapper: React.FunctionComponent<TooltipWrapperProps> = ({
   return (
     <>
       {condition ? (
-        <EuiToolTip content={tooltipContent} delay="regular" {...tooltipProps}>
+        <EuiToolTip content={tooltipContent} {...tooltipProps}>
           <>{children}</>
         </EuiToolTip>
       ) : (

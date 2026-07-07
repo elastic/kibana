@@ -28,6 +28,7 @@ import { appReducer } from '../../../../../common/store/app';
 import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
 import { RenderContextProviders } from '../../../../../common/components/with_security_context/render_context_providers';
 import type { AppAction } from '../../../../../common/store/actions';
+import { SECURITY_FEATURE_ID } from '../../../../../../common/constants';
 
 // Defined a private custom reducer that reacts to an action that enables us to update the
 // store with new values for technical preview features/flags. Because the `action.type` is a `Symbol`,
@@ -96,7 +97,7 @@ export const createFleetContextRendererMock = (): AppContextTestRender => {
 
     startServices.application.capabilities = deepFreeze({
       ...startServices.application.capabilities,
-      siemV2: { show: true, crud: true },
+      [SECURITY_FEATURE_ID]: { show: true, crud: true },
     });
 
     return (
@@ -161,6 +162,8 @@ export const generateFleetPackageInfo = (): PackageInfo => {
     path: '',
     assets: {
       kibana: {
+        alerting_rule_template: [],
+        slo_template: [],
         csp_rule_template: [],
         dashboard: [],
         visualization: [],
@@ -183,6 +186,8 @@ export const generateFleetPackageInfo = (): PackageInfo => {
         ilm_policy: [],
         data_stream_ilm_policy: [],
         ml_model: [],
+        knowledge_base: [],
+        esql_view: [],
       },
     },
     status: 'not_installed',

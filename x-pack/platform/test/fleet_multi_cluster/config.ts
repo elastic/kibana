@@ -6,13 +6,14 @@
  */
 
 import { resolve } from 'path';
-import { FtrConfigProviderContext, getKibanaCliLoggers } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
+import { getKibanaCliLoggers } from '@kbn/test';
 import { RemoteEsArchiverProvider } from './services/remote_es/remote_es_archiver';
 import { RemoteEsProvider } from './services/remote_es/remote_es';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('@kbn/test-suites-xpack/functional/config.base')
+    require.resolve('../api_integration/config.ts')
   );
 
   return {

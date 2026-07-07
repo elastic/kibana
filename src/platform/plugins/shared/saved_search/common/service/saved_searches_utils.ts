@@ -10,50 +10,86 @@
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { pick } from 'lodash';
-import type { SavedSearch, SavedSearchAttributes } from '..';
-import { fromSavedSearchAttributes as fromSavedSearchAttributesCommon } from '..';
-import type { SerializableSavedSearch } from '../types';
+import type { SavedSearch } from '..';
+import type { SavedSearchAttributes, SerializableSavedSearch } from '../types';
+import { extractTabs } from './extract_tabs';
+import type { DiscoverSessionAttributes } from '../../server';
 
-export { getSavedSearchFullPathUrl, getSavedSearchUrl } from '..';
-
-export const fromSavedSearchAttributes = (
+export const fromDiscoverSessionAttributesToSavedSearch = <
+  Serialized extends boolean = false,
+  ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch
+>(
   id: string | undefined,
-  attributes: SavedSearchAttributes,
+  { title, description, tabs }: DiscoverSessionAttributes,
   tags: string[] | undefined,
-  references: SavedObjectReference[] | undefined,
   searchSource: SavedSearch['searchSource'] | SerializedSearchSourceFields,
-  sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'],
   managed: boolean,
-  serialized: boolean = false
-): SavedSearch | SerializableSavedSearch => ({
-  ...fromSavedSearchAttributesCommon(id, attributes, tags, searchSource, managed, serialized),
-  sharingSavedObjectProps,
-  references,
-});
+  serialized: Serialized = false as Serialized,
+  sharingSavedObjectProps?: SavedSearch['sharingSavedObjectProps'],
+  references?: SavedObjectReference[]
+) => {
+  const [{ attributes }] = tabs;
+  return {
+    id,
+    ...(serialized ? { serializedSearchSource: searchSource } : { searchSource }),
+    title,
+    sort: attributes.sort,
+    columns: attributes.columns,
+    description,
+    tags,
+    grid: attributes.grid,
+    hideChart: attributes.hideChart,
+    hideTable: attributes.hideTable ?? false,
+    viewMode: attributes.viewMode,
+    hideAggregatedPreview: attributes.hideAggregatedPreview,
+    rowHeight: attributes.rowHeight,
+    headerRowHeight: attributes.headerRowHeight,
+    isTextBasedQuery: attributes.isTextBasedQuery,
+    usesAdHocDataView: attributes.usesAdHocDataView,
+    timeRestore: attributes.timeRestore,
+    timeRange: attributes.timeRange,
+    refreshInterval: attributes.refreshInterval,
+    rowsPerPage: attributes.rowsPerPage,
+    sampleSize: attributes.sampleSize,
+    breakdownField: attributes.breakdownField,
+    chartInterval: attributes.chartInterval,
+    visContext: attributes.visContext,
+    controlGroupJson: attributes.controlGroupJson,
+    density: attributes.density,
+    tabs,
+    managed,
+    sharingSavedObjectProps,
+    references,
+  } as ReturnType;
+};
 
 export const toSavedSearchAttributes = (
   savedSearch: SavedSearch,
   searchSourceJSON: string
-): SavedSearchAttributes => ({
-  kibanaSavedObjectMeta: { searchSourceJSON },
-  title: savedSearch.title ?? '',
-  sort: savedSearch.sort ?? [],
-  columns: savedSearch.columns ?? [],
-  description: savedSearch.description ?? '',
-  grid: savedSearch.grid ?? {},
-  hideChart: savedSearch.hideChart ?? false,
-  viewMode: savedSearch.viewMode,
-  hideAggregatedPreview: savedSearch.hideAggregatedPreview,
-  rowHeight: savedSearch.rowHeight,
-  headerRowHeight: savedSearch.headerRowHeight,
-  isTextBasedQuery: savedSearch.isTextBasedQuery ?? false,
-  usesAdHocDataView: savedSearch.usesAdHocDataView,
-  timeRestore: savedSearch.timeRestore ?? false,
-  timeRange: savedSearch.timeRange ? pick(savedSearch.timeRange, ['from', 'to']) : undefined,
-  refreshInterval: savedSearch.refreshInterval,
-  rowsPerPage: savedSearch.rowsPerPage,
-  sampleSize: savedSearch.sampleSize,
-  density: savedSearch.density,
-  breakdownField: savedSearch.breakdownField,
-  visContext: savedSearch.visContext,
-});
+): SavedSearchAttributes =>
+  extractTabs({
+    kibanaSavedObjectMeta: { searchSourceJSON },
+    title: savedSearch.title ?? '',
+    sort: savedSearch.sort ?? [],
+    columns: savedSearch.columns ?? [],
+    description: savedSearch.description ?? '',
+    grid: savedSearch.grid ?? {},
+    hideChart: savedSearch.hideChart ?? false,
+    hideTable: savedSearch.hideTable ?? false,
+    viewMode: savedSearch.viewMode,
+    hideAggregatedPreview: savedSearch.hideAggregatedPreview,
+    rowHeight: savedSearch.rowHeight,
+    headerRowHeight: savedSearch.headerRowHeight,
+    isTextBasedQuery: savedSearch.isTextBasedQuery ?? false,
+    usesAdHocDataView: savedSearch.usesAdHocDataView,
+    controlGroupJson: savedSearch.controlGroupJson,
+    timeRestore: savedSearch.timeRestore ?? false,
+    timeRange: savedSearch.timeRange ? pick(savedSearch.timeRange, ['from', 'to']) : undefined,
+    refreshInterval: savedSearch.refreshInterval,
+    rowsPerPage: savedSearch.rowsPerPage,
+    sampleSize: savedSearch.sampleSize,
+    density: savedSearch.density,
+    breakdownField: savedSearch.breakdownField,
+    chartInterval: savedSearch.chartInterval,
+    visContext: savedSearch.visContext,
+  });

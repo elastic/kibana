@@ -8,7 +8,7 @@
 // @ts-expect-error untyped local
 import { arrayToMap } from './aeroelastic/functional';
 import { getId } from './get_id';
-import { PositionedElement } from '../../types';
+import type { PositionedElement } from '../../types';
 
 export const cloneSubgraphs = (nodes: PositionedElement[]) => {
   const idMap = arrayToMap(nodes.map((n) => n.id));

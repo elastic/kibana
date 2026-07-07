@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
-import { ConsoleTourStep, ConsoleTourStepProps } from './console_tour_step';
+import type { ConsoleTourStepProps } from './console_tour_step';
+import { ConsoleTourStep } from './console_tour_step';
 
 export interface TopNavMenuItem {
   id: string;

@@ -15,7 +15,7 @@ import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert
 import { v4 as uuidv4 } from 'uuid';
 import { getDataViewsStart } from '../services';
 import { getConfiguration } from './configurations';
-import { ConvertHeatmapToLensVisualization } from './types';
+import type { ConvertHeatmapToLensVisualization } from './types';
 
 export const convertToLens: ConvertHeatmapToLensVisualization = async (vis, timefilter) => {
   if (!timefilter) {

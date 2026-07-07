@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { GlobalSearchResult } from '@kbn/global-search-plugin/public';
-
-/* @internal */
-export const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
+import type { GlobalSearchResult } from '@kbn/global-search-plugin/public';
 
 /* @internal */
 export const blurEvent = new FocusEvent('focusout', {

@@ -1,0 +1,27 @@
+{
+  "type": "index",
+  "value": {
+    "index": ".kibana-siem-rule-migrations-migrations-default",
+    "aliases": {},
+    "mappings": {
+      "dynamic": "false",
+      "_meta": {
+        "namespace": "default",
+        "kibana": {
+          "version": "9.1.0"
+        }
+      },
+      "properties": {
+        "name": {
+          "type": "keyword"
+        },
+        "created_at": {
+          "type": "date"
+        },
+        "created_by": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}

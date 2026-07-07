@@ -12,14 +12,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import { flatten } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { ResultLinks } from '../../../../../common/app';
-import type { LinkCardProps } from '../link_card/link_card';
+import type { ResultLinks } from '@kbn/file-upload-common';
+import type { LinkCardProps } from './link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import type { CombinedField } from '../combined_fields/types';
 
 type LinkType = 'file' | 'index';
 
@@ -45,15 +43,13 @@ export interface ResultLink {
 }
 
 interface Props {
-  results: FindFileStructureResponse;
   index: string;
-  dataViewId: string;
+  dataViewId: string | undefined;
   timeFieldName?: string;
   createDataView: boolean;
-  showFilebeatFlyout(): void;
+  showFilebeatFlyout?: () => void;
   getAdditionalLinks?: GetAdditionalLinks;
   resultLinks?: ResultLinks;
-  combinedFields: CombinedField[];
 }
 
 interface GlobalState {
@@ -64,7 +60,6 @@ interface GlobalState {
 const RECHECK_DELAY_MS = 3000;
 
 export const ResultsLinks: FC<Props> = ({
-  results,
   index,
   dataViewId,
   timeFieldName,
@@ -72,7 +67,6 @@ export const ResultsLinks: FC<Props> = ({
   showFilebeatFlyout,
   getAdditionalLinks,
   resultLinks,
-  combinedFields,
 }) => {
   const {
     services: {
@@ -81,7 +75,6 @@ export const ResultsLinks: FC<Props> = ({
       application: { getUrlForApp, capabilities },
     },
   } = useDataVisualizerKibana();
-  const fieldStats = results.field_stats;
   const [duration, setDuration] = useState({
     from: 'now-30m',
     to: 'now',
@@ -117,7 +110,7 @@ export const ResultsLinks: FC<Props> = ({
 
     getDiscoverUrl();
 
-    if (Array.isArray(getAdditionalLinks)) {
+    if (Array.isArray(getAdditionalLinks) && dataViewId !== undefined) {
       Promise.all(
         getAdditionalLinks.map(async (asyncCardGetter) => {
           const cardResults = await asyncCardGetter({
@@ -184,22 +177,6 @@ export const ResultsLinks: FC<Props> = ({
     setGlobalState(_globalState);
   }, [duration]);
 
-  useEffect(() => {
-    // Update the global time range from known timeFieldName if stats is available
-    if (
-      fieldStats &&
-      typeof fieldStats === 'object' &&
-      timeFieldName !== undefined &&
-      Object.hasOwn(fieldStats, timeFieldName) &&
-      fieldStats[timeFieldName].earliest !== undefined &&
-      fieldStats[timeFieldName].latest !== undefined
-    ) {
-      setGlobalState({
-        time: { from: fieldStats[timeFieldName].earliest!, to: fieldStats[timeFieldName].latest! },
-      });
-    }
-  }, [timeFieldName, fieldStats]);
-
   async function updateTimeValues(recheck = true) {
     if (timeFieldName !== undefined) {
       const { from, to } = await getFullTimeRange(index, timeFieldName, fileUpload);
@@ -221,12 +198,12 @@ export const ResultsLinks: FC<Props> = ({
   }
 
   return (
-    <EuiFlexGroup gutterSize="l">
+    <EuiFlexGroup gutterSize="l" data-test-subj="dataVisualizerFileResultsLinks">
       {createDataView && discoverLink && (
         <EuiFlexItem>
           <EuiCard
             hasBorder
-            icon={<EuiIcon size="xxl" type={`discoverApp`} />}
+            icon={<EuiIcon aria-hidden={true} size="xxl" type={`discoverApp`} />}
             title={
               <FormattedMessage
                 id="xpack.dataVisualizer.file.resultsLinks.viewIndexInDiscoverTitle"
@@ -242,7 +219,7 @@ export const ResultsLinks: FC<Props> = ({
         <EuiFlexItem>
           <EuiCard
             hasBorder
-            icon={<EuiIcon size="xxl" type={`managementApp`} />}
+            icon={<EuiIcon aria-hidden={true} size="xxl" type={`managementApp`} />}
             title={
               <FormattedMessage
                 id="xpack.dataVisualizer.file.resultsLinks.indexManagementTitle"
@@ -258,7 +235,7 @@ export const ResultsLinks: FC<Props> = ({
         <EuiFlexItem>
           <EuiCard
             hasBorder
-            icon={<EuiIcon size="xxl" type={`managementApp`} />}
+            icon={<EuiIcon aria-hidden={true} size="xxl" type={`managementApp`} />}
             title={
               <FormattedMessage
                 id="xpack.dataVisualizer.file.resultsLinks.dataViewManagementTitle"
@@ -270,11 +247,11 @@ export const ResultsLinks: FC<Props> = ({
           />
         </EuiFlexItem>
       )}
-      {resultLinks?.fileBeat?.enabled === false ? null : (
+      {resultLinks?.fileBeat?.enabled !== false && showFilebeatFlyout !== undefined ? (
         <EuiFlexItem>
           <EuiCard
             hasBorder
-            icon={<EuiIcon size="xxl" type={`filebeatApp`} />}
+            icon={<EuiIcon aria-hidden={true} size="xxl" type={`filebeatApp`} />}
             data-test-subj="fileDataVisFilebeatConfigLink"
             title={
               <FormattedMessage
@@ -286,13 +263,13 @@ export const ResultsLinks: FC<Props> = ({
             onClick={showFilebeatFlyout}
           />
         </EuiFlexItem>
-      )}
+      ) : null}
 
       {playgroundLink ? (
         <EuiFlexItem>
           <EuiCard
             hasBorder
-            icon={<EuiIcon size="xxl" type={`logoElasticsearch`} />}
+            icon={<EuiIcon aria-hidden={true} size="xxl" type={`logoElasticsearch`} />}
             data-test-subj="fileDataVisFilebeatConfigLink"
             title={
               <FormattedMessage
@@ -311,7 +288,7 @@ export const ResultsLinks: FC<Props> = ({
           <EuiFlexItem key={link.title}>
             <EuiCard
               hasBorder
-              icon={<EuiIcon size="xxl" type={link.icon} />}
+              icon={<EuiIcon aria-hidden={true} size="xxl" type={link.icon} />}
               data-test-subj="fileDataVisLink"
               title={link.title}
               description={link.description}

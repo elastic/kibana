@@ -36,7 +36,7 @@ const mainApiRequestsToIntercept = [
 
 const mainAliasNames = mainApiRequestsToIntercept.map(({ aliasName }) => `@${aliasName}`);
 
-describe('Service Inventory', () => {
+describe('Service inventory', () => {
   before(() => {
     const { rangeFrom, rangeTo } = timeRange;
     synthtrace.index(
@@ -56,15 +56,13 @@ describe('Service Inventory', () => {
         cy.intercept(method, endpoint).as(aliasName)
       );
       cy.loginAsViewerUser();
-      cy.visitKibana(serviceInventoryHref, {
-        localStorageOptions: [['apm.dismissedEntitiesInventoryCallout', 'false']],
-      });
+      cy.visitKibana(serviceInventoryHref);
     });
 
     it('has no detectable a11y violations on load', () => {
-      cy.contains('h1', 'Services');
-      // set skipFailures to true to not fail the test when there are accessibility failures
-      checkA11y({ skipFailures: true });
+      cy.contains('h1', 'Service inventory');
+
+      checkA11y();
     });
 
     it('has a list of services', () => {
@@ -100,7 +98,7 @@ describe('Service Inventory', () => {
       cy.getByTestSubj('environmentFilter').find('input').click();
       cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList').should('be.visible');
       cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList')
-        .contains('button', 'production')
+        .contains('.euiComboBoxOption', 'production')
         .click({ force: true });
 
       cy.expectAPIsToHaveBeenCalledWith({
@@ -114,7 +112,8 @@ describe('Service Inventory', () => {
         moment(timeRange.rangeFrom).subtract(5, 'm').toISOString(),
         moment(timeRange.rangeTo).subtract(5, 'm').toISOString()
       );
-      cy.contains('Update').click();
+      // selectAbsoluteTimeRange now submits the query directly (legacy clicks
+      // querySubmitButton; new picker auto-submits via onDateRangeChange).
       cy.wait(mainAliasNames);
     });
   });
@@ -165,7 +164,7 @@ describe('Service Inventory', () => {
       );
 
       cy.visitKibana(`${serviceInventoryHref}&pageSize=10&sortField=serviceName&sortDirection=asc`);
-      cy.contains('Services');
+      cy.contains('Service inventory');
       cy.get('.euiPagination__list').children().should('have.length', 5);
       cy.wait('@detailedStatisticsRequest').then((payload) => {
         expect(payload.request.body.serviceNames).eql(

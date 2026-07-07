@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import React, { FC, useState, useMemo, useCallback } from 'react';
-import {
+import type { FC } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
+import type {
   OriginSaveModalProps,
-  SavedObjectSaveModalOrigin,
   OnSaveProps,
   SaveModalState,
 } from '@kbn/saved-objects-plugin/public';
-import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import { SavedObjectSaveModalOrigin } from '@kbn/saved-objects-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 
 export type OriginSaveProps = OnSaveProps & { returnToOrigin: boolean; newTags?: string[] };
 
 export type TagEnhancedSavedObjectSaveModalOriginProps = Omit<OriginSaveModalProps, 'onSave'> & {
   initialTags: string[];
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
-  onSave: (props: OriginSaveProps) => void;
+  onSave: (props: OriginSaveProps) => Promise<void>;
 };
 
 export const TagEnhancedSavedObjectSaveModalOrigin: FC<
@@ -56,11 +57,12 @@ export const TagEnhancedSavedObjectSaveModalOrigin: FC<
     );
 
   const tagEnhancedOnSave: OriginSaveModalProps['onSave'] = useCallback(
-    (saveOptions) => {
-      onSave({
+    async (saveOptions) => {
+      await onSave({
         ...saveOptions,
         newTags: selectedTags,
       });
+      return {}; // SaveResult return type not needed here
     },
     [onSave, selectedTags]
   );

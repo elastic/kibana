@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export const INSTALL_EA_INTEGRATIONS_HREF = `browse/security?q=entityanalytics`;
+export const USER_PANEL_RISK_SCORE_QUERY_ID = 'userPanelRiskScoreQuery';
+export const USER_PANEL_OBSERVED_USER_QUERY_ID = 'UserPanelObservedUserQuery';

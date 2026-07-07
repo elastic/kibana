@@ -23,14 +23,18 @@
       "taskManager",
       "triggersActionsUi",
       "ruleRegistry",
-      "security"
+      "security",
+      "unifiedDocViewer"
     ],
     "optionalPlugins": [
       "fleet",
       "home",
       "lens",
       "telemetry",
-      "cases"
+      "cases",
+      "spaces",
+      "uiActions",
+      "unifiedSearch"
     ],
     "requiredBundles": [
       "esUiShared",

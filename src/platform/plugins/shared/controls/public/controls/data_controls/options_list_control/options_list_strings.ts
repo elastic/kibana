@@ -8,13 +8,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OptionsListSearchTechnique } from '../../../../common/options_list/suggestions_searching';
+import type { OptionsListSearchTechnique } from '@kbn/controls-schemas';
+import { MAX_OPTIONS_LIST_BULK_SELECT_SIZE } from './constants';
 
 export const OptionsListStrings = {
   control: {
     getDisplayName: () =>
-      i18n.translate('controls.optionsList.displayName', {
-        defaultMessage: 'Options list',
+      i18n.translate('controls.optionsList.control.displayName', {
+        defaultMessage: 'options list',
       }),
     getSeparator: (type?: string) => {
       if (['date', 'number'].includes(type ?? '')) {
@@ -108,10 +109,6 @@ export const OptionsListStrings = {
           }),
       },
     },
-    getAdditionalSettingsTitle: () =>
-      i18n.translate('controls.optionsList.editor.additionalSettingsTitle', {
-        defaultMessage: `Additional settings`,
-      }),
     getRunPastTimeoutTitle: () =>
       i18n.translate('controls.optionsList.editor.runPastTimeout', {
         defaultMessage: 'Ignore timeout for results',
@@ -128,16 +125,16 @@ export const OptionsListStrings = {
         defaultMessage: 'Popover for {fieldName} control',
         values: { fieldName },
       }),
+    getSearchAriaLabel: (fieldName: string) =>
+      i18n.translate('controls.optionsList.popover.ariaLabel', {
+        defaultMessage: 'Filter suggestions for {fieldName} control',
+        values: { fieldName },
+      }),
     getSuggestionsAriaLabel: (fieldName: string, optionCount: number) =>
       i18n.translate('controls.optionsList.popover.suggestionsAriaLabel', {
         defaultMessage:
           'Available {optionCount, plural, one {option} other {options}} for {fieldName}',
         values: { fieldName, optionCount },
-      }),
-    getAllowExpensiveQueriesWarning: () =>
-      i18n.translate('controls.optionsList.popover.allowExpensiveQueriesWarning', {
-        defaultMessage:
-          'The cluster setting to allow expensive queries is off, so some features are disabled.',
       }),
     getLoadingMoreMessage: () =>
       i18n.translate('controls.optionsList.popover.loadingMore', {
@@ -160,7 +157,7 @@ export const OptionsListStrings = {
       switch (fieldType) {
         case 'ip': {
           return i18n.translate('controls.optionsList.popover.invalidSearch.ip', {
-            defaultMessage: 'Your search is not a valid IP address.',
+            defaultMessage: 'Your search is not a valid IP address or CIDR notation.',
           });
         }
         case 'number': {
@@ -212,13 +209,13 @@ export const OptionsListStrings = {
     getInvalidSelectionsSectionAriaLabel: (fieldName: string, invalidSelectionCount: number) =>
       i18n.translate('controls.optionsList.popover.invalidSelectionsAriaLabel', {
         defaultMessage:
-          'Invalid {invalidSelectionCount, plural, one {selection} other {selections}} for {fieldName}',
+          'Invalid {invalidSelectionCount, plural, one {selection} other {selections}} for {fieldName} ({invalidSelectionCount})',
         values: { fieldName, invalidSelectionCount },
       }),
     getInvalidSelectionsSectionTitle: (invalidSelectionCount: number) =>
       i18n.translate('controls.optionsList.popover.invalidSelectionsSectionTitle', {
         defaultMessage:
-          'Invalid {invalidSelectionCount, plural, one {selection} other {selections}}',
+          'Invalid {invalidSelectionCount, plural, one {selection} other {selections}} ({invalidSelectionCount})',
         values: { invalidSelectionCount },
       }),
     getInvalidSelectionsLabel: (selectedOptions: number) =>
@@ -266,6 +263,15 @@ export const OptionsListStrings = {
         defaultMessage:
           'Appears in {documentCount, number} {documentCount, plural, one {document} other {documents}}',
         values: { documentCount },
+      }),
+    getSelectAllButtonLabel: () =>
+      i18n.translate('controls.optionsList.popover.selectAllButtonLabel', {
+        defaultMessage: 'Select all',
+      }),
+    getMaximumBulkSelectionTooltip: () =>
+      i18n.translate('controls.optionsList.popover.maximumBulkSelectionTooltip', {
+        defaultMessage: 'Bulk selection is only available for fewer than {maxOptions} options',
+        values: { maxOptions: MAX_OPTIONS_LIST_BULK_SELECT_SIZE },
       }),
   },
   controlAndPopover: {

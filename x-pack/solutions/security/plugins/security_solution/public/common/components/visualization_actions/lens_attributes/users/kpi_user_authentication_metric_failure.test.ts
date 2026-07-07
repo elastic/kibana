@@ -11,15 +11,8 @@ import { wrapper } from '../../mocks';
 import { useLensAttributes } from '../../use_lens_attributes';
 
 import { kpiUserAuthenticationsMetricFailureLensAttributes } from './kpi_user_authentication_metric_failure';
-
-jest.mock('../../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({
-    selectedPatterns: ['auditbeat-mytest-*'],
-    dataViewId: 'security-solution-my-test',
-    indicesExist: true,
-    sourcererDataView: {},
-  }),
-}));
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../../../utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn().mockReturnValue([
@@ -32,6 +25,12 @@ jest.mock('../../../../utils/route/use_route_spy', () => ({
 }));
 
 describe('kpiUserAuthenticationsMetricFailureLensAttributes', () => {
+  beforeAll(() => {
+    jest
+      .mocked(useDataView)
+      .mockReturnValue(withIndices(['auditbeat-mytest-*'], 'security-solution-my-test'));
+  });
+
   it('should render', () => {
     const { result } = renderHook(
       () =>

@@ -9,10 +9,11 @@ import { EuiBadge, EuiToolTip, RIGHT_ALIGNMENT, LEFT_ALIGNMENT, EuiIconTip } fro
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
 import React, { useMemo } from 'react';
+import { Timestamp } from '@kbn/apm-ui-shared';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { asInteger } from '../../../../../../common/utils/formatters';
 import { useApmParams } from '../../../../../hooks/use_apm_params';
-import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { truncate, unit } from '../../../../../utils/style';
 import {
   ChartType,
@@ -23,7 +24,6 @@ import { ErrorDetailLink } from '../../../../shared/links/apm/mobile/error_detai
 import { ErrorOverviewLink } from '../../../../shared/links/apm/mobile/error_overview_link';
 import type { ITableColumn } from '../../../../shared/managed_table';
 import { ManagedTable } from '../../../../shared/managed_table';
-import { TimestampTooltip } from '../../../../shared/timestamp_tooltip';
 import { isTimeComparison } from '../../../../shared/time_comparison/get_comparison_options';
 
 const GroupIdLink = styled(ErrorDetailLink)`
@@ -81,7 +81,7 @@ function MobileErrorGroupList({
             })}{' '}
             <EuiIconTip
               size="s"
-              type="questionInCircle"
+              type="question"
               color="subdued"
               iconProps={{
                 className: 'eui-alignTop',
@@ -166,7 +166,11 @@ function MobileErrorGroupList({
         }),
         align: LEFT_ALIGNMENT,
         render: (_, { lastSeen }) =>
-          lastSeen ? <TimestampTooltip time={lastSeen} timeUnit="minutes" /> : NOT_AVAILABLE_LABEL,
+          lastSeen ? (
+            <Timestamp timestamp={lastSeen} timeUnit="minutes" renderMode="tooltip" />
+          ) : (
+            NOT_AVAILABLE_LABEL
+          ),
       },
       {
         field: 'occurrences',

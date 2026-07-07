@@ -7,11 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExistsFilter } from './exists_filter';
-import { PhrasesFilter, PhrasesFilterMeta } from './phrases_filter';
-import { PhraseFilter, PhraseFilterMeta, PhraseFilterMetaParams } from './phrase_filter';
-import { RangeFilter, RangeFilterMeta, RangeFilterParams } from './range_filter';
-import { MatchAllFilter, MatchAllFilterMeta } from './match_all_filter';
+import type { FilterStateStore } from '@kbn/es-query-constants';
+import type { ExistsFilter } from './exists_filter';
+import type { PhrasesFilter, PhrasesFilterMeta } from './phrases_filter';
+import type {
+  PhraseFilter,
+  PhraseFilterMeta,
+  PhraseFilterMetaParams,
+  PhraseFilterValue,
+} from './phrase_filter';
+import type { RangeFilter, RangeFilterMeta, RangeFilterParams } from './range_filter';
+import type { MatchAllFilter, MatchAllFilterMeta } from './match_all_filter';
 
 /**
  * A common type for filters supported by this package
@@ -39,16 +45,6 @@ export enum FILTERS {
   RANGE_FROM_VALUE = 'range_from_value',
   SPATIAL_FILTER = 'spatial_filter',
   COMBINED = 'combined',
-}
-
-/**
-  Filter,
- * An enum to denote whether a filter is specific to an application's context or whether it should be applied globally.
- * @public
- */
-export enum FilterStateStore {
-  APP_STATE = 'appState',
-  GLOBAL_STATE = 'globalState',
 }
 
 export type FilterMetaParams =
@@ -82,7 +78,7 @@ export type FilterMeta = {
   type?: string;
   key?: string;
   params?: FilterMetaParams;
-  value?: string;
+  value?: string | RangeFilterParams | PhraseFilterValue[];
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

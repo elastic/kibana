@@ -14,7 +14,7 @@ import {
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/winlogbeat_instructions';
-import {
+import type {
   TutorialContext,
   TutorialSchema,
 } from '../../services/tutorials/lib/tutorials_registry_types';

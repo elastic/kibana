@@ -10,7 +10,7 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ServerStatus } from './server_status';
-import { StatusState } from '../lib';
+import type { StatusState } from '../lib';
 
 const getStatus = (parts: Partial<StatusState> = {}): StatusState => ({
   id: 'available',
@@ -54,5 +54,11 @@ describe('ServerStatus', () => {
 
     component = mountWithIntl(<ServerStatus serverState={getStatus()} name="Kibana" />);
     expect(component.find('EuiText').text()).toMatchInlineSnapshot(`"Kibana"`);
+  });
+
+  it('omits the name slot when `name` is not provided', () => {
+    const component = mountWithIntl(<ServerStatus serverState={getStatus()} />);
+    expect(component.find('EuiTitle').text()).toMatchInlineSnapshot(`"Kibana status is Green"`);
+    expect(component.find('EuiText').exists()).toBe(false);
   });
 });

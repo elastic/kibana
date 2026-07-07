@@ -18,7 +18,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { type IHttpFetchError, isHttpFetchError } from '@kbn/core-http-browser';
-import { Services } from './services';
+import type { Services } from './services';
 
 interface Props {
   getMessageById: Services['getMessageById'];
@@ -71,7 +71,7 @@ export function GetMessageRouteExample({ getMessageById }: Props) {
         </EuiFormRow>
 
         {error !== undefined ? (
-          <EuiCallOut color="danger" iconType="warning">
+          <EuiCallOut announceOnMount color="danger" iconType="warning">
             {error.message}
           </EuiCallOut>
         ) : null}

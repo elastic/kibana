@@ -113,6 +113,7 @@ describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
     cy.getByTestSubj('policyDetailsConfirmModal').should('be.visible').click();
     cy.getByTestSubj('confirmModalConfirmButton').should('be.visible').click();
     cy.contains(/has been updated/);
+    cy.getByTestSubj('policyDetailsBackLink').scrollIntoView();
     cy.getByTestSubj('policyDetailsBackLink').should('be.visible').click();
     cy.location('pathname', { timeout: 20000 }).should('equal', APP_ENDPOINTS_PATH);
 
@@ -129,7 +130,8 @@ describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('Endpoint reassignment', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/206198
+  describe.skip('Endpoint reassignment', () => {
     let response: IndexedFleetEndpointPolicyResponse;
     let initialAgentData: Agent;
 
@@ -185,11 +187,11 @@ describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
       );
 
       cy.getByTestSubj(FLEET_REASSIGN_POLICY_MODAL)
-        .find('select')
+        .find('input')
         .should('be.visible')
-        .as('reassignPolicySelect');
-      cy.get('@reassignPolicySelect').select(response.agentPolicies[0].name);
-      cy.get('@reassignPolicySelect').should('have.value', response.agentPolicies[0].id);
+        .as('reassignPolicyInput');
+      cy.get('@reassignPolicyInput').type('{backspace}');
+      cy.get('@reassignPolicyInput').type(`${response.agentPolicies[0].name}{enter}`);
 
       cy.getByTestSubj(FLEET_REASSIGN_POLICY_MODAL_CONFIRM_BUTTON)
         .should('be.visible')

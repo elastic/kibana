@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import type { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MappingTypeMapping,
+  IndicesUpdateAliasesAction,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { get, sortBy } from 'lodash';
+import { sortBy } from 'lodash';
 import type { IIndexPatternString } from '../resource_installer_utils';
-import { retryTransientEsErrors } from './retry_transient_es_errors';
+import { retryTransientEsErrors } from '../../lib/retry_transient_es_errors';
 import type { DataStreamAdapter } from './data_stream_adapter';
 import { updateIndexTemplateFieldsLimit } from './update_index_template_fields_limit';
 
@@ -17,14 +20,15 @@ export interface ConcreteIndexInfo {
   index: string;
   alias: string;
   isWriteIndex: boolean;
+  isHidden?: boolean;
 }
 
-interface UpdateIndexMappingsOpts {
+interface UpdateIndexMappingsAndSettingsOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
-  validIndexPrefixes?: string[];
   concreteIndices: ConcreteIndexInfo[];
+  simulatedMapping: MappingTypeMapping | undefined;
 }
 
 interface UpdateIndexOpts {
@@ -32,7 +36,15 @@ interface UpdateIndexOpts {
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
   concreteIndexInfo: ConcreteIndexInfo;
+  simulatedMapping: MappingTypeMapping;
   attempt?: number;
+}
+
+interface UpdateTotalFieldLimitSettingOpts {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  totalFieldsLimit: number;
+  concreteIndexInfo: ConcreteIndexInfo;
 }
 
 const MAX_FIELDS_LIMIT_INCREASE_ATTEMPTS = 100;
@@ -42,7 +54,7 @@ const updateTotalFieldLimitSetting = async ({
   esClient,
   totalFieldsLimit,
   concreteIndexInfo,
-}: UpdateIndexOpts) => {
+}: UpdateTotalFieldLimitSettingOpts) => {
   const { index, alias } = concreteIndexInfo;
   try {
     await retryTransientEsErrors(
@@ -73,29 +85,10 @@ const updateUnderlyingMapping = async ({
   logger,
   esClient,
   concreteIndexInfo,
+  simulatedMapping,
   attempt = 1,
 }: UpdateIndexOpts) => {
   const { index, alias } = concreteIndexInfo;
-  let simulatedIndexMapping: IndicesSimulateIndexTemplateResponse;
-  try {
-    simulatedIndexMapping = await retryTransientEsErrors(
-      () => esClient.indices.simulateIndexTemplate({ name: index }),
-      { logger }
-    );
-  } catch (err) {
-    logger.error(
-      `Ignored PUT mappings for ${alias}; error generating simulated mappings: ${err.message}`
-    );
-    return;
-  }
-
-  const simulatedMapping = get(simulatedIndexMapping, ['template', 'mappings']);
-
-  if (simulatedMapping == null) {
-    logger.error(`Ignored PUT mappings for ${alias}; simulated mappings were empty`);
-    return;
-  }
-
   try {
     await retryTransientEsErrors(
       () => esClient.indices.putMapping({ index, ...simulatedMapping }),
@@ -121,6 +114,7 @@ const updateUnderlyingMapping = async ({
             logger,
             esClient,
             concreteIndexInfo,
+            simulatedMapping,
             totalFieldsLimit: newLimit,
             attempt: attempt + 1,
           });
@@ -140,51 +134,45 @@ const updateUnderlyingMapping = async ({
     throw err;
   }
 };
+
 /**
  * Updates the underlying mapping for any existing concrete indices
  */
-export const updateIndexMappings = async ({
+export const updateIndexMappingsAndSettings = async ({
   logger,
   esClient,
   totalFieldsLimit,
   concreteIndices,
-  validIndexPrefixes,
-}: UpdateIndexMappingsOpts) => {
-  let validConcreteIndices = [];
-  if (validIndexPrefixes) {
-    for (const cIdx of concreteIndices) {
-      if (!validIndexPrefixes?.some((prefix: string) => cIdx.index.startsWith(prefix))) {
-        logger.warn(
-          `Found unexpected concrete index name "${
-            cIdx.index
-          }" while expecting index with one of the following prefixes: [${validIndexPrefixes.join(
-            ','
-          )}] Not updating mappings or settings for this index.`
-        );
-      } else {
-        validConcreteIndices.push(cIdx);
-      }
-    }
-  } else {
-    validConcreteIndices = concreteIndices;
-  }
-
+  simulatedMapping,
+}: UpdateIndexMappingsAndSettingsOpts) => {
   logger.debug(
-    `Updating underlying mappings for ${validConcreteIndices.length} indices / data streams.`
+    `Updating underlying mappings for ${concreteIndices.length} indices / data streams.`
   );
+
+  if (simulatedMapping == null) {
+    throw new Error(
+      'Failed to update index mappings and settings: simulated index mapping not found'
+    );
+  }
 
   // Update total field limit setting of found indices
   // Other index setting changes are not updated at this time
   await Promise.all(
-    validConcreteIndices.map((index) =>
+    concreteIndices.map((index) =>
       updateTotalFieldLimitSetting({ logger, esClient, totalFieldsLimit, concreteIndexInfo: index })
     )
   );
 
   // Update mappings of the found indices.
   await Promise.all(
-    validConcreteIndices.map((index) =>
-      updateUnderlyingMapping({ logger, esClient, totalFieldsLimit, concreteIndexInfo: index })
+    concreteIndices.map((index) =>
+      updateUnderlyingMapping({
+        logger,
+        esClient,
+        totalFieldsLimit,
+        concreteIndexInfo: index,
+        simulatedMapping,
+      })
     )
   );
 };
@@ -206,42 +194,137 @@ export const createConcreteWriteIndex = async (opts: CreateConcreteWriteIndexOpt
   await opts.dataStreamAdapter.createStream(opts);
 };
 
-interface SetConcreteWriteIndexOpts {
+interface UpdateAliasesAndSetConcreteWriteIndexOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   concreteIndices: ConcreteIndexInfo[];
+  alias: string;
 }
 
-export async function setConcreteWriteIndex(opts: SetConcreteWriteIndexOpts) {
-  const { logger, esClient, concreteIndices } = opts;
-  const lastIndex = concreteIndices.length - 1;
-  const concreteIndex = sortBy(concreteIndices, ['index'])[lastIndex];
+export async function updateAliasesAndSetConcreteWriteIndex(
+  opts: UpdateAliasesAndSetConcreteWriteIndexOpts
+): Promise<ConcreteIndexInfo> {
+  const { logger, esClient, concreteIndices, alias } = opts;
+  const sortedConcreteIndices = sortBy(concreteIndices, ['index']);
+  const latestIndex = sortedConcreteIndices[sortedConcreteIndices.length - 1];
+
+  const concreteWriteIndex = await setConcreteWriteIndex({
+    logger,
+    esClient,
+    sortedConcreteIndices,
+    latestIndex,
+    alias,
+  });
+
+  await migrateAliasesToHidden({
+    logger,
+    esClient,
+    sortedConcreteIndices,
+    alias,
+  });
+
+  return concreteWriteIndex;
+}
+
+async function setConcreteWriteIndex({
+  logger,
+  esClient,
+  sortedConcreteIndices,
+  latestIndex,
+  alias,
+}: {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  sortedConcreteIndices: ConcreteIndexInfo[];
+  latestIndex: ConcreteIndexInfo;
+  alias: string;
+}): Promise<ConcreteIndexInfo> {
+  const existingWriteIndex = sortedConcreteIndices.find((index) => index.isWriteIndex);
+  if (existingWriteIndex) {
+    return existingWriteIndex;
+  }
+
+  logger.debug(`Indices for alias ${alias} exist but none are set as the write index`);
   logger.debug(
-    `Attempting to set index: ${concreteIndex.index} as the write index for alias: ${concreteIndex.alias}.`
+    `Attempting to set index: ${latestIndex.index} as the write index for alias: ${latestIndex.alias}.`
   );
+
   try {
     await retryTransientEsErrors(
       () =>
         esClient.indices.updateAliases({
           actions: [
-            { remove: { index: concreteIndex.index, alias: concreteIndex.alias } },
+            { remove: { index: latestIndex.index, alias: latestIndex.alias } },
             {
               add: {
-                index: concreteIndex.index,
-                alias: concreteIndex.alias,
+                index: latestIndex.index,
+                alias: latestIndex.alias,
                 is_write_index: true,
+                is_hidden: latestIndex.isHidden ? true : undefined,
               },
             },
           ],
         }),
       { logger }
     );
-    logger.info(
-      `Successfully set index: ${concreteIndex.index} as the write index for alias: ${concreteIndex.alias}.`
-    );
+
+    logger.info(`Successfully set write index for alias: ${alias}.`);
+    return { ...latestIndex, isWriteIndex: true };
   } catch (error) {
-    throw new Error(
-      `Failed to set index: ${concreteIndex.index} as the write index for alias: ${concreteIndex.alias}.`
+    throw new Error(`Failed to set write index for alias: ${alias}. Error: ${error.message}`);
+  }
+}
+
+async function migrateAliasesToHidden({
+  logger,
+  esClient,
+  sortedConcreteIndices,
+  alias,
+}: {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  sortedConcreteIndices: ConcreteIndexInfo[];
+  alias: string;
+}): Promise<void> {
+  const allHidden = sortedConcreteIndices.every((index) => index.isHidden);
+  if (allHidden) {
+    return;
+  }
+
+  logger.debug(`Indices for alias ${alias} exist but some are not set as hidden`);
+  logger.debug(`Attempting to set index aliases as hidden for alias: ${alias}.`);
+
+  try {
+    const allIndicesForAlias = await retryTransientEsErrors(
+      () =>
+        esClient.indices.getAlias({
+          name: alias,
+          expand_wildcards: ['open', 'hidden'],
+        }),
+      { logger }
+    );
+
+    const actions: IndicesUpdateAliasesAction[] = Object.entries(allIndicesForAlias)
+      .filter(([, indexInfo]) => !indexInfo.aliases[alias]?.is_hidden)
+      .map(([indexName, indexInfo]) => ({
+        add: {
+          index: indexName,
+          alias,
+          is_write_index: indexInfo.aliases[alias]?.is_write_index ?? false,
+          is_hidden: true,
+        },
+      }));
+
+    if (actions.length === 0) {
+      return;
+    }
+
+    await retryTransientEsErrors(() => esClient.indices.updateAliases({ actions }), { logger });
+
+    logger.info(`Successfully set index aliases to hidden for alias: ${alias}.`);
+  } catch (error) {
+    logger.warn(
+      `Failed to set index aliases to hidden for alias: ${alias}. Error: ${error.message}`
     );
   }
 }

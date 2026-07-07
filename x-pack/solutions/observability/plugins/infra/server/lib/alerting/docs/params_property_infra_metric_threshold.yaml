@@ -1,5 +1,9 @@
 # @kbn-doc-linker partial
-
+title: Metric threshold
+description: >
+  The parameters for the metric threshold rule.
+  These parameters are appropriate when `rule_type_id` is `metrics.alert.threshold`.
+type: object
 properties:
   criteria:
     type: array

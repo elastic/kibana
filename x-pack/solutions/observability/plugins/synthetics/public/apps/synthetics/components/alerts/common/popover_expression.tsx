@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import React, { useState, ReactNode } from 'react';
-import { EuiExpression, EuiPopover, EuiExpressionProps } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
+import type { EuiExpressionProps } from '@elastic/eui';
+import { EuiExpression, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   title?: ReactNode;
@@ -34,6 +37,9 @@ export function PopoverExpression(props: Props) {
         />
       }
       repositionOnScroll
+      aria-label={i18n.translate('xpack.synthetics.popoverExpression.popoverAriaLabel', {
+        defaultMessage: 'Popover expression options',
+      })}
     >
       {children}
     </EuiPopover>

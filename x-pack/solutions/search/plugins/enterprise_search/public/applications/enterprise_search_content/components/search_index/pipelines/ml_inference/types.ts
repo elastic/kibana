@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FieldMapping } from '../../../../../../../common/ml_inference_pipeline';
+import type { FieldMapping } from '../../../../../../../common/ml_inference_pipeline';
 
-import { InferencePipelineInferenceConfig } from '../../../../../../../common/types/pipelines';
+import type { InferencePipelineInferenceConfig } from '../../../../../../../common/types/pipelines';
 
 export interface InferencePipelineConfiguration {
   existingPipeline?: boolean;

@@ -10,16 +10,17 @@
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 import { AggGroupNames } from '@kbn/data-plugin/public';
-import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import type { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import type { PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
 import {
-  PartitionVisParams,
   LabelPositions,
   ValueFormats,
   EmptySizeRatios,
   LegendDisplay,
 } from '@kbn/expression-partition-vis-plugin/common';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common';
-import { PieTypeProps } from '../types';
+import type { PieTypeProps } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { getPieOptions } from '../editor/components';
 
@@ -29,7 +30,7 @@ export const getPieVisTypeDefinition = ({
 }: PieTypeProps): VisTypeDefinition<PartitionVisParams> => ({
   name: 'pie',
   title: i18n.translate('visTypePie.pie.pieTitle', { defaultMessage: 'Pie' }),
-  icon: 'visPie',
+  icon: 'chartPie',
   description: i18n.translate('visTypePie.pie.pieDescription', {
     defaultMessage: 'Compare data in proportion to a whole.',
   }),

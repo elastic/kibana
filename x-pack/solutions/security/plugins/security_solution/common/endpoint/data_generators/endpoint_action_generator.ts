@@ -8,10 +8,17 @@
 import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
-import { isProcessesAction } from '../service/response_actions/type_guards';
-import { ENDPOINT_ACTION_RESPONSES_DS, ENDPOINT_ACTIONS_DS } from '../constants';
+import {
+  isMemoryDumpAction,
+  isProcessesAction,
+  isRunScriptAction,
+} from '../service/response_actions/type_guards';
+import {
+  ACTION_AGENT_FILE_DOWNLOAD_ROUTE,
+  ENDPOINT_ACTION_RESPONSES_DS,
+  ENDPOINT_ACTIONS_DS,
+} from '../constants';
 import { BaseDataGenerator } from './base_data_generator';
-import type { GetProcessesActionOutputContent } from '../types';
 import {
   type ActionDetails,
   type ActionResponseOutput,
@@ -21,6 +28,7 @@ import {
   type EndpointActivityLogAction,
   type EndpointActivityLogActionResponse,
   type EndpointPendingActions,
+  type GetProcessesActionOutputContent,
   type LogsEndpointAction,
   type LogsEndpointActionResponse,
   type ProcessesEntry,
@@ -204,6 +212,15 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       output = uploadOutput as typeof output;
     }
 
+    if (command === 'cancel' && !output) {
+      output = {
+        type: 'json',
+        content: {
+          code: 'ra_cancel_success',
+        },
+      } as typeof output;
+    }
+
     return merge(
       {
         '@timestamp': timeStamp.toISOString(),
@@ -263,6 +280,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       isCompleted: true,
       isExpired: false,
       wasSuccessful: true,
+      wasCanceled: false,
       errors: undefined,
       startedAt: '2022-04-27T16:08:47.449Z',
       status: 'successful',
@@ -276,6 +294,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           isCompleted: true,
           completedAt: '2022-04-30T16:08:47.449Z',
           wasSuccessful: true,
+          wasCanceled: false,
         };
         return acc;
       }, {} as ActionDetails['agentState']),
@@ -313,6 +332,10 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             content: {
               code: 'ra_get-file_success',
               zip_size: 123,
+              downloadUri: ACTION_AGENT_FILE_DOWNLOAD_ROUTE.replace(
+                `{action_id}`,
+                details.id
+              ).replace(`{file_id}`, agentId),
               contents: [
                 {
                   path: '/some/file/txt',
@@ -442,6 +465,49 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       }, {} as Required<ActionDetails<GetProcessesActionOutputContent>>['outputs']);
     }
 
+    if (isMemoryDumpAction(details)) {
+      if (!details.outputs) {
+        details.outputs = {};
+      }
+
+      for (const agentId of details.agents) {
+        details.outputs[agentId] = {
+          type: 'json',
+          content: {
+            code: 'ra_memory-dump-success',
+            path: `/home/user/${agentId}/tmp/memory-dump.2025-11-03T16:22:05.365Z.zip`,
+            file_size: 23895729,
+            disk_free_space: 1234567000,
+          },
+        };
+      }
+    }
+
+    if (isRunScriptAction(details)) {
+      if (details.isCompleted) {
+        if (!details.outputs) {
+          details.outputs = {};
+        }
+
+        if (details.agentType === 'endpoint') {
+          if (!details.parameters) {
+            details.parameters = {
+              scriptId: 'script-123',
+              scriptInput: 'foo',
+            };
+          }
+
+          for (const agentId of details.agents) {
+            details.outputs[agentId] = this.generateExecuteActionResponseOutput({
+              content: {
+                output_file_id: getFileDownloadId(details, agentId),
+              },
+            });
+          }
+        }
+      }
+    }
+
     return merge(details, overrides as ActionDetails) as unknown as ActionDetails<
       TOutputContent,
       TParameters
@@ -450,6 +516,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
 
   randomGetFileFailureCode(): string {
     return this.randomChoice([
+      'ra_get-file_error_canceled',
       'ra_get-file_error_not-found',
       'ra_get-file_error_is-directory',
       'ra_get-file_error_invalid-input',
@@ -460,14 +527,19 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       'ra_get-file_error_upload-api-unreachable',
       'ra_get-file_error_upload-timeout',
       'ra_get-file_error_queue-timeout',
+      'ra_get-file_error_not-enough-free-space',
     ]);
   }
 
   randomScanFailureCode(): string {
     return this.randomChoice([
-      'ra_scan_error_scan-invalid-input',
+      'ra_scan_error_canceled',
+      'ra_scan_error_disabled',
+      'ra_scan_error_invalid-input',
       'ra_scan_error_not-found',
-      'ra_scan_error_scan-queue-quota',
+      'ra_scan_error_queue-quota',
+      'ra_scan_error_processing',
+      'ra_scan_error_processing-interrupted',
     ]);
   }
 

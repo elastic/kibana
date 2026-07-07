@@ -8,12 +8,12 @@ import { useTimeZone } from '@kbn/observability-shared-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
 import { useSelectedLocation } from './use_selected_location';
-import { Ping, PingState } from '../../../../../../common/runtime_types';
+import type { Ping, PingState } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
 } from '../../../../../../common/constants/client_defaults';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
@@ -23,7 +23,7 @@ export function useMonitorErrors(monitorIdArg?: string) {
 
   const { monitorId } = useParams<{ monitorId: string }>();
 
-  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
+  const { dateRangeStart, dateRangeEnd, remoteName } = useGetUrlParams();
 
   const selectedLocation = useSelectedLocation();
 
@@ -31,7 +31,7 @@ export function useMonitorErrors(monitorIdArg?: string) {
 
   const { data, loading } = useReduxEsSearch(
     {
-      index: SYNTHETICS_INDEX_PATTERN,
+      index: getSyntheticsCcsIndex(remoteName),
       size: 0,
       query: {
         bool: {
@@ -71,7 +71,15 @@ export function useMonitorErrors(monitorIdArg?: string) {
             summary: {
               top_hits: {
                 size: 1,
-                _source: ['error', 'state', 'monitor', '@timestamp'],
+                _source: [
+                  'error',
+                  'state',
+                  'monitor',
+                  '@timestamp',
+                  'config_id',
+                  'observer',
+                  'http.response.status_code',
+                ],
                 sort: [{ '@timestamp': 'desc' }],
               },
             },
@@ -86,7 +94,15 @@ export function useMonitorErrors(monitorIdArg?: string) {
         },
       },
     },
-    [lastRefresh, monitorId, monitorIdArg, dateRangeStart, dateRangeEnd, selectedLocation?.label],
+    [
+      lastRefresh,
+      monitorId,
+      monitorIdArg,
+      dateRangeStart,
+      dateRangeEnd,
+      selectedLocation?.label,
+      remoteName,
+    ],
     {
       name: `getMonitorErrors/${dateRangeStart}/${dateRangeEnd}`,
       isRequestReady: Boolean(selectedLocation?.label),

@@ -23,6 +23,7 @@ export const mockStatsGreenIndex: Record<string, IndicesStatsIndicesStats> = {
       docs: {
         count: 4,
         deleted: 0,
+        total_size_in_bytes: 2,
       },
       shard_stats: {
         total_count: 1,
@@ -109,6 +110,7 @@ export const mockStatsGreenIndex: Record<string, IndicesStatsIndicesStats> = {
       fielddata: {
         memory_size_in_bytes: 608,
         evictions: 0,
+        global_ordinals: { build_time_in_millis: 2 },
       },
       completion: {
         size_in_bytes: 0,
@@ -158,6 +160,7 @@ export const mockStatsGreenIndex: Record<string, IndicesStatsIndicesStats> = {
       docs: {
         count: 8,
         deleted: 0,
+        total_size_in_bytes: 2,
       },
       shard_stats: {
         total_count: 2,
@@ -244,6 +247,7 @@ export const mockStatsGreenIndex: Record<string, IndicesStatsIndicesStats> = {
       fielddata: {
         memory_size_in_bytes: 608,
         evictions: 0,
+        global_ordinals: { build_time_in_millis: 2 },
       },
       completion: {
         size_in_bytes: 0,

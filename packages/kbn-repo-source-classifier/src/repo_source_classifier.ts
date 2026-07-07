@@ -17,7 +17,7 @@ import { RepoPath } from './repo_path';
 import { inferGroupAttrsFromPath } from './group';
 
 const STATIC_EXTS = new Set(
-  'json|woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg|html|md|txt|tmpl|xml'
+  'json|woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg|html|md|txt|tmpl|xml|yaml|yml'
     .split('|')
     .map((e) => `.${e}`)
 );
@@ -121,10 +121,6 @@ export class RepoSourceClassifier {
       return 'common package';
     }
 
-    if (root === 'shareable_runtime') {
-      return 'non-package';
-    }
-
     if (root === 'tasks') {
       return 'tests or mocks';
     }
@@ -166,7 +162,14 @@ export class RepoSourceClassifier {
 
     const { pkgId, rel } = pkgInfo;
 
-    if (pkgId === '@kbn/test' || pkgId === '@kbn/test-subj-selector') {
+    if (
+      pkgId === '@kbn/test' ||
+      pkgId === '@kbn/test-docker-servers' ||
+      pkgId === '@kbn/test-es-server' ||
+      pkgId === '@kbn/test-kibana-server' ||
+      pkgId === '@kbn/test-saml-auth' ||
+      pkgId === '@kbn/test-subj-selector'
+    ) {
       return 'common package';
     }
 

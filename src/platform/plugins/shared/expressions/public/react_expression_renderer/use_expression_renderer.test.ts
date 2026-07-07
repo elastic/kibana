@@ -8,10 +8,12 @@
  */
 
 import type { RefObject } from 'react';
-import { renderHook, act, RenderHookResult } from '@testing-library/react';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import type { IInterpreterRenderHandlers } from '../../common';
-import { ExpressionRendererParams, useExpressionRenderer } from './use_expression_renderer';
+import type { ExpressionRendererParams } from './use_expression_renderer';
+import { useExpressionRenderer } from './use_expression_renderer';
 import * as loader from '../loader';
 
 describe('useExpressionRenderer', () => {
@@ -38,6 +40,7 @@ describe('useExpressionRenderer', () => {
     } as unknown as typeof expressionLoader;
 
     expressionLoaderSpy.mockImplementation(() => expressionLoader);
+    // @ts-expect-error upgrade typescript v5.9.3
     hook = renderHook(
       (params: ExpressionRendererParams) => useExpressionRenderer(nodeRef, params),
       { initialProps: { expression: 'something' } }

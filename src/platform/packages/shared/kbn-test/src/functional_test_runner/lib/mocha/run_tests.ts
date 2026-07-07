@@ -8,8 +8,8 @@
  */
 
 import * as Rx from 'rxjs';
-import { Lifecycle } from '../lifecycle';
-import { Mocha } from '../../fake_mocha_types';
+import type { Lifecycle } from '../lifecycle';
+import type { Mocha } from '../../fake_mocha_types';
 
 /**
  *  Run the tests that have already been loaded into

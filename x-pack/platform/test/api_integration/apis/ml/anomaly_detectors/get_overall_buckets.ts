@@ -8,7 +8,7 @@
 import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common';
 import expect from '@kbn/expect';
 import { USER } from '../../../services/ml/security_common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -57,7 +57,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('POST anomaly_detectors results overall_buckets', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       for (const jobId of [jobId1, jobId2]) {

@@ -9,10 +9,10 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { RuleExecutionSummaryAndChartWithApi } from './rule_execution_summary_and_chart';
 
-import { RuleSummary, RuleType } from '../../../../types';
-import { ComponentOpts as RuleApis } from '../../common/components/with_bulk_rule_api_operations';
+import type { RuleSummary, RuleType } from '../../../../types';
+import type { ComponentOpts as RuleApis } from '../../common/components/with_bulk_rule_api_operations';
 import { RuleEventLogListTable } from './rule_event_log_list_table';
-import { RefreshToken } from './types';
+import type { RefreshToken } from './types';
 
 const RULE_EVENT_LOG_LIST_STORAGE_KEY = 'xpack.triggersActionsUI.ruleEventLogList.initialColumns';
 

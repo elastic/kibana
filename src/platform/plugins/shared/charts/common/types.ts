@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ColorSchemas, LabelRotation } from './static';
+import type { ColorSchemas, LabelRotation } from './static';
 
 export interface ColorSchemaParams {
   colorSchema: ColorSchemas;

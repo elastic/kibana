@@ -6,23 +6,23 @@
  */
 
 import moment from 'moment/moment';
-import { IBasePath } from '@kbn/core-http-server';
+import type { IBasePath } from '@kbn/core-http-server';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
-import {
+import type {
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
   ActionGroupIdsOf,
 } from '@kbn/alerting-plugin/server';
 import { i18n } from '@kbn/i18n';
-import { PublicAlertsClient } from '@kbn/alerting-plugin/server/alerts_client/types';
-import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
+import type { PublicAlertsClient } from '@kbn/alerting-plugin/server/alerts_client/types';
+import type { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
-import { MonitorSummaryTLSRule } from './types';
-import { TLSLatestPing } from './tls_rule_executor';
+import type { MonitorSummaryTLSRule } from './types';
+import type { TLSLatestPing } from './tls_rule_executor';
 import { ALERT_DETAILS_URL } from '../action_variables';
-import { Cert } from '../../../common/runtime_types';
+import type { Cert } from '../../../common/runtime_types';
 import { tlsTranslations } from '../translations';
-import { MonitorStatusActionGroup } from '../../../common/constants/synthetics_alerts';
+import type { MonitorStatusActionGroup } from '../../../common/constants/synthetics_alerts';
 import {
   AGENT_NAME,
   CERT_COMMON_NAME,
@@ -48,7 +48,7 @@ interface TLSContent {
 }
 
 const getValidBefore = (notBefore?: string): TLSContent => {
-  if (!notBefore) return { summary: 'Error, missing `certificate_not_valid_before` date.' };
+  if (!notBefore) return { summary: 'Error, missing `not_before` date.' };
   const relativeDate = moment().diff(notBefore, 'days');
   const formattedDate = moment(notBefore).format('MMM D, YYYY z');
   return relativeDate >= 0
@@ -62,7 +62,7 @@ const getValidBefore = (notBefore?: string): TLSContent => {
       };
 };
 const getValidAfter = (notAfter?: string): TLSContent => {
-  if (!notAfter) return { summary: 'Error, missing `certificate_not_valid_after` date.' };
+  if (!notAfter) return { summary: 'Error, missing `not_after` date.' };
   const relativeDate = moment().diff(notAfter, 'days');
   const formattedDate = moment(notAfter).format('MMM D, YYYY z');
   return relativeDate >= 0
@@ -74,6 +74,35 @@ const getValidAfter = (notAfter?: string): TLSContent => {
         summary: tlsTranslations.validAfterExpiringString(formattedDate, Math.abs(relativeDate)),
         status: tlsTranslations.expiringLabel,
       };
+};
+
+// Prefix that namespaces fingerprint-free browser-certificate alert ids so they
+// can never collide with a lightweight cert's raw sha256 and can be recognized
+// later (e.g. when enriching recovered-alert context).
+export const BROWSER_CERT_ALERT_ID_PREFIX = 'browser-cert';
+
+/**
+ * Derives the stable alert id for a certificate.
+ *
+ * Lightweight HTTP/TCP certificates always carry a `sha256` fingerprint, which
+ * we keep using verbatim so existing alerts retain their identity across the
+ * upgrade. Browser monitor network events do not index a fingerprint, so we
+ * fall back to the certificate's subject common name + issuer — the same dedupe
+ * key the Certificates page uses. That identity is stable across renewals (only
+ * `not_after` changes), so a renewed cert recovers the existing alert instead
+ * of spawning a duplicate. Returns `undefined` when neither identity is
+ * available, in which case the certificate is skipped.
+ */
+export const getTLSCertAlertId = (
+  cert: Pick<Cert, 'sha256' | 'common_name' | 'issuer'>
+): string | undefined => {
+  if (cert.sha256) {
+    return cert.sha256;
+  }
+  if (cert.common_name) {
+    return `${BROWSER_CERT_ALERT_ID_PREFIX}:${cert.common_name}:${cert.issuer ?? ''}`;
+  }
+  return undefined;
 };
 
 export type CertSummary = ReturnType<typeof getCertSummary>;
@@ -176,6 +205,33 @@ export const setTLSRecoveredAlertsContext = async ({
       defaultMessage: 'Certificate {commonName} {summary}',
       values: { commonName: state.commonName, summary: state.summary },
     });
+
+    // Browser certificates carry no sha256 fingerprint and live on per-resource
+    // network events rather than the monitor's summary ping, so we cannot
+    // reconcile them against `latestPing` the way lightweight certs are below.
+    // Emit a fingerprint-free recovery message and move on.
+    if (!state.sha256) {
+      const newStatus = i18n.translate('xpack.synthetics.alerts.tls.browserRecovered.newStatus', {
+        defaultMessage:
+          'Certificate {commonName} is no longer expiring or aging within the configured threshold.',
+        values: { commonName: state.commonName },
+      });
+      const newSummary = i18n.translate('xpack.synthetics.alerts.tls.browserRecovered.newSummary', {
+        defaultMessage:
+          'Monitor certificate has been updated or is no longer within the alert threshold.',
+      });
+      alertsClient.setAlertData({
+        id: recoveredAlertId,
+        context: {
+          ...state,
+          newStatus,
+          previousStatus,
+          summary: newSummary,
+          [ALERT_DETAILS_URL]: alertUrl,
+        },
+      });
+      continue;
+    }
 
     const newCommonName = latestPing?.tls?.server?.x509?.subject.common_name ?? '';
     const newExpiryDate = latestPing?.tls?.server?.x509?.not_after ?? '';

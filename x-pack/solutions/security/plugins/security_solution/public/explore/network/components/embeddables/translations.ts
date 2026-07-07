@@ -21,13 +21,6 @@ export const EMBEDDABLE_HEADER_HELP = i18n.translate(
   }
 );
 
-export const MAP_TITLE = i18n.translate(
-  'xpack.securitySolution.components.embeddables.embeddedMap.embeddablePanelTitle',
-  {
-    defaultMessage: 'Source -> Destination Point-to-Point Map',
-  }
-);
-
 export const SOURCE_LAYER = i18n.translate(
   'xpack.securitySolution.components.embeddables.embeddedMap.sourceLayerLabel',
   {
@@ -97,6 +90,20 @@ export const MAP_TOOL_TIP_FEATURES_FOOTER = (currentFeature: number, totalFeatur
     defaultMessage:
       '{currentFeature} of {totalFeatures} {totalFeatures, plural, =1 {feature} other {features}}',
   });
+
+export const NEXT = i18n.translate(
+  'xpack.securitySolution.components.embeddables.mapToolTip.next',
+  {
+    defaultMessage: 'Next',
+  }
+);
+
+export const PREVIOUS = i18n.translate(
+  'xpack.securitySolution.components.embeddables.mapToolTip.previous',
+  {
+    defaultMessage: 'Previous',
+  }
+);
 
 export const HOST = i18n.translate(
   'xpack.securitySolution.components.embeddables.mapToolTip.pointContent.hostTitle',

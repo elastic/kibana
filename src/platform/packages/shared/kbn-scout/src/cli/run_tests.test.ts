@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FlagsReader } from '@kbn/dev-cli-runner';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { FlagsReader } from '@kbn/dev-cli-runner';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { runScoutPlaywrightConfig } from './run_tests';
-import { initLogsDir } from '@kbn/test';
+import { initLogsDir } from './init_logs_dir';
 import { parseTestFlags, runTests } from '../playwright/runner';
 
-jest.mock('@kbn/test', () => ({
+jest.mock('./init_logs_dir', () => ({
   initLogsDir: jest.fn(),
 }));
 

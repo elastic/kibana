@@ -33,6 +33,7 @@ describe('checkActionTypeEnabled', () => {
       enabledInConfig: true,
       enabledInLicense: true,
       isSystemActionType: false,
+      isDeprecated: false,
     };
     expect(checkActionTypeEnabled(actionType)).toMatchInlineSnapshot(`
           Object {
@@ -51,6 +52,7 @@ describe('checkActionTypeEnabled', () => {
       enabledInConfig: true,
       enabledInLicense: false,
       isSystemActionType: false,
+      isDeprecated: false,
     };
     expect(checkActionTypeEnabled(actionType)).toMatchInlineSnapshot(`
       Object {
@@ -86,6 +88,7 @@ describe('checkActionTypeEnabled', () => {
       enabledInConfig: false,
       enabledInLicense: true,
       isSystemActionType: false,
+      isDeprecated: false,
     };
     expect(checkActionTypeEnabled(actionType)).toMatchInlineSnapshot(`
           Object {
@@ -109,6 +112,7 @@ describe('checkActionTypeEnabled', () => {
       enabledInConfig: false,
       enabledInLicense: true,
       isSystemActionType: false,
+      isDeprecated: false,
     };
 
     const isPreconfiguredConnector = true;
@@ -131,6 +135,7 @@ describe('checkActionFormActionTypeEnabled', () => {
       isDeprecated: true,
       name: 'test',
       referencedByCount: 0,
+      isConnectorTypeDeprecated: false,
     },
     {
       actionTypeId: '2',
@@ -140,6 +145,7 @@ describe('checkActionFormActionTypeEnabled', () => {
       isSystemAction: false,
       name: 'test',
       referencedByCount: 0,
+      isConnectorTypeDeprecated: false,
     },
   ];
 
@@ -153,6 +159,7 @@ describe('checkActionFormActionTypeEnabled', () => {
       enabledInConfig: false,
       enabledInLicense: true,
       isSystemActionType: false,
+      isDeprecated: false,
     };
 
     expect(checkActionFormActionTypeEnabled(actionType, preconfiguredConnectors))
@@ -173,6 +180,7 @@ describe('checkActionFormActionTypeEnabled', () => {
       enabledInConfig: false,
       enabledInLicense: true,
       isSystemActionType: false,
+      isDeprecated: false,
     };
     expect(checkActionFormActionTypeEnabled(actionType, preconfiguredConnectors))
       .toMatchInlineSnapshot(`

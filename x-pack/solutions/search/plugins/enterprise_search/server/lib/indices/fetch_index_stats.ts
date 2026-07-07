@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/types';
+import type { ExpandWildcard } from '@elastic/elasticsearch/lib/api/types';
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
 export const fetchIndexStats = async (
   client: IScopedClusterClient,

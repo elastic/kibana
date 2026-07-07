@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UseResultsRollupReturnValue } from '../../../hooks/use_results_rollup/types';
+import type { UseResultsRollupReturnValue } from '../../../hooks/use_results_rollup/types';
 import { mockUseResultsRollup } from '../../use_results_rollup/mock_use_results_rollup';
 
 export const getMergeResultsRollupContextProps = (

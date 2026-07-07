@@ -9,10 +9,14 @@ import { lazy } from 'react';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
 import type { ConnectorAddModalProps } from './connector_add_modal';
 import type { CreateConnectorFlyoutProps } from './create_connector_flyout';
+import type { CreateConnectorFormProps } from './create_connector_form';
 import type { EditConnectorFlyoutProps } from './edit_connector_flyout';
 
 export const CreateConnectorFlyout = suspendedComponentWithProps<CreateConnectorFlyoutProps>(
   lazy(() => import('./create_connector_flyout'))
+);
+export const CreateConnectorForm = suspendedComponentWithProps<CreateConnectorFormProps>(
+  lazy(() => import('./create_connector_form'))
 );
 export const EditConnectorFlyout = suspendedComponentWithProps<EditConnectorFlyoutProps>(
   lazy(() => import('./edit_connector_flyout'))
@@ -27,4 +31,9 @@ export const AddConnectorInline = suspendedComponentWithProps(
   lazy(() => import('./connector_add_inline'))
 );
 
-export type { ConnectorFormSchema } from './types';
+export type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
+export type {
+  CreateConnectorFormProps,
+  CreateConnectorFormHandle,
+  CreateConnectorFormStatus,
+} from './create_connector_form';

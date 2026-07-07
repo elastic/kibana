@@ -6,13 +6,15 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { SiemRuleMigrationsClientDependencies } from '../types';
 import { RuleMigrationsDataMigrationClient } from './rule_migrations_data_migration_client';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
-import type IndexApi from '@elastic/elasticsearch/lib/api/api';
-import type GetApi from '@elastic/elasticsearch/lib/api/api/get';
-import type SearchApi from '@elastic/elasticsearch/lib/api/api/search';
+import type { Client } from '@elastic/elasticsearch';
+
+type IndexApi = Client['create'];
+type GetApi = Client['get'];
+type SearchApi = Client['search'];
+import type { SiemMigrationsClientDependencies } from '../../common/types';
 
 describe('RuleMigrationsDataMigrationClient', () => {
   let ruleMigrationsDataMigrationClient: RuleMigrationsDataMigrationClient;
@@ -25,7 +27,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
     userName: 'testUser',
     profile_uid: 'testProfileUid',
   } as unknown as AuthenticatedUser;
-  const dependencies = {} as unknown as SiemRuleMigrationsClientDependencies;
+  const dependencies = {} as unknown as SiemMigrationsClientDependencies;
 
   beforeEach(() => {
     ruleMigrationsDataMigrationClient = new RuleMigrationsDataMigrationClient(
@@ -44,8 +46,9 @@ describe('RuleMigrationsDataMigrationClient', () => {
   describe('create', () => {
     test('should create a new migration', async () => {
       const index = '.kibana-siem-rule-migrations';
+      const name = 'test name';
 
-      const result = await ruleMigrationsDataMigrationClient.create();
+      const result = await ruleMigrationsDataMigrationClient.create(name);
 
       expect(result).not.toBeFalsy();
       expect(esClient.asInternalUser.create).toHaveBeenCalledWith({
@@ -55,16 +58,17 @@ describe('RuleMigrationsDataMigrationClient', () => {
         document: {
           created_by: currentUser.profile_uid,
           created_at: expect.any(String),
+          name,
         },
       });
     });
 
     test('should throw an error if an error occurs', async () => {
-      (
-        esClient.asInternalUser.create as unknown as jest.MockedFn<typeof IndexApi>
-      ).mockRejectedValueOnce(new Error('Test error'));
+      (esClient.asInternalUser.create as unknown as jest.MockedFn<IndexApi>).mockRejectedValueOnce(
+        new Error('Test error')
+      );
 
-      await expect(ruleMigrationsDataMigrationClient.create()).rejects.toThrow('Test error');
+      await expect(ruleMigrationsDataMigrationClient.create('test')).rejects.toThrow('Test error');
 
       expect(esClient.asInternalUser.create).toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalled();
@@ -85,11 +89,11 @@ describe('RuleMigrationsDataMigrationClient', () => {
         _id: id,
       };
 
-      (
-        esClient.asInternalUser.get as unknown as jest.MockedFn<typeof GetApi>
-      ).mockResolvedValueOnce(response);
+      (esClient.asInternalUser.get as unknown as jest.MockedFn<GetApi>).mockResolvedValueOnce(
+        response
+      );
 
-      const result = await ruleMigrationsDataMigrationClient.get({ id });
+      const result = await ruleMigrationsDataMigrationClient.get(id);
 
       expect(result).toEqual({
         ...response._source,
@@ -104,24 +108,22 @@ describe('RuleMigrationsDataMigrationClient', () => {
         found: false,
       };
 
-      (
-        esClient.asInternalUser.get as unknown as jest.MockedFn<typeof GetApi>
-      ).mockRejectedValueOnce({
+      (esClient.asInternalUser.get as unknown as jest.MockedFn<GetApi>).mockRejectedValueOnce({
         message: JSON.stringify(response),
       });
 
-      const result = await ruleMigrationsDataMigrationClient.get({ id });
+      const result = await ruleMigrationsDataMigrationClient.get(id);
 
       expect(result).toBeUndefined();
     });
 
     test('should throw an error if an error occurs', async () => {
       const id = 'testId';
-      (
-        esClient.asInternalUser.get as unknown as jest.MockedFn<typeof GetApi>
-      ).mockRejectedValueOnce(new Error('Test error'));
+      (esClient.asInternalUser.get as unknown as jest.MockedFn<GetApi>).mockRejectedValueOnce(
+        new Error('Test error')
+      );
 
-      await expect(ruleMigrationsDataMigrationClient.get({ id })).rejects.toThrow('Test error');
+      await expect(ruleMigrationsDataMigrationClient.get(id)).rejects.toThrow('Test error');
 
       expect(esClient.asInternalUser.get).toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalledWith(`Error getting migration ${id}: Error: Test error`);
@@ -135,9 +137,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
       const migrationId = 'testId';
       const index = '.kibana-siem-rule-migrations';
 
-      const operations = await ruleMigrationsDataMigrationClient.prepareDelete({
-        id: migrationId,
-      });
+      const operations = await ruleMigrationsDataMigrationClient.prepareDelete(migrationId);
 
       expect(operations).toMatchObject([
         {
@@ -175,9 +175,9 @@ describe('RuleMigrationsDataMigrationClient', () => {
         },
       } as unknown as ReturnType<typeof esClient.asInternalUser.search>;
 
-      (
-        esClient.asInternalUser.search as unknown as jest.MockedFn<typeof SearchApi>
-      ).mockResolvedValueOnce(response);
+      (esClient.asInternalUser.search as unknown as jest.MockedFn<SearchApi>).mockResolvedValueOnce(
+        response
+      );
 
       await ruleMigrationsDataMigrationClient.getAll();
       expect(esClient.asInternalUser.search).toHaveBeenCalledWith({
@@ -219,6 +219,24 @@ describe('RuleMigrationsDataMigrationClient', () => {
     it('should update `finished_at` when called saveAsEnded', async () => {
       const migrationId = 'testId';
 
+      (esClient.asInternalUser.get as unknown as jest.MockedFn<GetApi>).mockResolvedValueOnce({
+        _index: '.kibana-siem-rule-migrations',
+        found: true,
+        _source: {
+          created_by: currentUser.profile_uid,
+          created_at: new Date().toISOString(),
+          last_execution: {
+            started_at: new Date().toISOString(),
+            is_stopped: false,
+            error: null,
+            finished_at: null,
+            connector_id: connectorId,
+            skip_prebuilt_rules_matching: false,
+          },
+        },
+        _id: migrationId,
+      });
+
       await ruleMigrationsDataMigrationClient.saveAsFinished({ id: migrationId });
 
       expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
@@ -227,6 +245,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
         refresh: 'wait_for',
         doc: {
           last_execution: {
+            total_execution_time_ms: expect.any(Number),
             finished_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
           },
         },
@@ -255,6 +274,24 @@ describe('RuleMigrationsDataMigrationClient', () => {
     it('should update `error` params correctly when called saveAsFailed', async () => {
       const migrationId = 'testId';
 
+      (esClient.asInternalUser.get as unknown as jest.MockedFn<GetApi>).mockResolvedValueOnce({
+        _index: '.kibana-siem-rule-migrations',
+        found: true,
+        _source: {
+          created_by: currentUser.profile_uid,
+          created_at: new Date().toISOString(),
+          last_execution: {
+            started_at: new Date().toISOString(),
+            is_stopped: false,
+            error: null,
+            finished_at: null,
+            connector_id: connectorId,
+            skip_prebuilt_rules_matching: false,
+          },
+        },
+        _id: migrationId,
+      });
+
       await ruleMigrationsDataMigrationClient.saveAsFailed({
         id: migrationId,
         error: 'Test error',
@@ -267,6 +304,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
         doc: {
           last_execution: {
             error: 'Test error',
+            total_execution_time_ms: expect.any(Number),
             finished_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
           },
         },

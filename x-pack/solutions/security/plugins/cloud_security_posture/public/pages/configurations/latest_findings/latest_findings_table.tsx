@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { Filter } from '@kbn/es-query';
-import { DataTableRecord } from '@kbn/discover-utils/types';
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { Filter } from '@kbn/es-query';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 import {

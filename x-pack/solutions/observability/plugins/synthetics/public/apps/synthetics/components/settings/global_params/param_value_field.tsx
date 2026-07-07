@@ -10,8 +10,8 @@ import React from 'react';
 import { useFormContext, useFormState } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { OptionalText } from '../components/optional_text';
-import { ListParamItem } from './params_list';
-import { SyntheticsParams } from '../../../../../../common/runtime_types';
+import type { ListParamItem } from './params_list';
+import type { SyntheticsParams } from '../../../../../../common/runtime_types';
 import { VALUE_LABEL, VALUE_REQUIRED } from './add_param_form';
 
 export const ParamValueField = ({ isEditingItem }: { isEditingItem: ListParamItem | null }) => {
@@ -29,6 +29,7 @@ export const ParamValueField = ({ isEditingItem }: { isEditingItem: ListParamIte
           labelAppend={<OptionalText />}
         >
           <EuiTextArea
+            isInvalid={Boolean(errors?.value)}
             data-test-subj="syntheticsAddParamFormTextArea"
             fullWidth
             aria-label={NEW_VALUE_LABEL}
@@ -37,12 +38,13 @@ export const ParamValueField = ({ isEditingItem }: { isEditingItem: ListParamIte
         </EuiFormRow>
         <EuiSpacer size="xs" />
         <EuiCallOut
+          announceOnMount
           size="s"
           title={i18n.translate('xpack.synthetics.paramValueField.euiCallOut.newValue', {
             defaultMessage:
               'Assign a new value to update this parameter, or leave blank to keep the current value.',
           })}
-          iconType="iInCircle"
+          iconType="info"
         />
       </>
     );
@@ -56,6 +58,7 @@ export const ParamValueField = ({ isEditingItem }: { isEditingItem: ListParamIte
       error={errors?.value?.message}
     >
       <EuiTextArea
+        isInvalid={Boolean(errors?.value)}
         data-test-subj="syntheticsAddParamFormTextArea"
         fullWidth
         aria-label={VALUE_LABEL}

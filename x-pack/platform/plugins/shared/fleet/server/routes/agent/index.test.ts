@@ -11,7 +11,9 @@ import type { FleetRequestHandlerContext } from '../..';
 
 import { xpackMocks } from '../../mocks';
 import {
+  BulkChangeAgentsPrivilegeLevelResponseSchema,
   BulkMigrateAgentsResponseSchema,
+  ChangeAgentPrivilegeLevelResponseSchema,
   DeleteAgentResponseSchema,
   DeleteAgentUploadFileResponseSchema,
   GetActionStatusResponseSchema,
@@ -23,6 +25,7 @@ import {
   ListAgentUploadsResponseSchema,
   MigrateSingleAgentResponseSchema,
   PostBulkActionResponseSchema,
+  PostBulkAgentRollbackResponseSchema,
   PostNewAgentActionResponseSchema,
   PostRetrieveAgentsByActionsResponseSchema,
 } from '../../types/rest_spec/agent';
@@ -59,6 +62,7 @@ import {
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 
 import { bulkMigrateAgentsHandler, migrateSingleAgentHandler } from './migrate_handlers';
+import { changeAgentPrivilegeLevelHandler } from './change_privilege_level_handlers';
 jest.mock('./handlers', () => ({
   ...jest.requireActual('./handlers'),
   getAgentHandler: jest.fn(),
@@ -81,6 +85,10 @@ jest.mock('./handlers', () => ({
 jest.mock('./migrate_handlers', () => ({
   migrateSingleAgentHandler: jest.fn(),
   bulkMigrateAgentsHandler: jest.fn(),
+}));
+
+jest.mock('./change_privilege_level_handlers', () => ({
+  changeAgentPrivilegeLevelHandler: jest.fn(),
 }));
 
 jest.mock('./actions_handlers', () => ({
@@ -515,5 +523,43 @@ describe('schema validation', () => {
     });
     const validationResp = BulkMigrateAgentsResponseSchema.validate(expectedResponse);
     expect(validationResp).toEqual(expectedResponse);
+  });
+
+  it('change privilege level of single agent should return valid response', async () => {
+    const expectedResponse = {
+      actionId: 'change-privilege-action-123',
+    };
+    (changeAgentPrivilegeLevelHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+      return res.ok({ body: expectedResponse });
+    });
+    await changeAgentPrivilegeLevelHandler(context, {} as any, response);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: expectedResponse,
+    });
+    const validationResp = ChangeAgentPrivilegeLevelResponseSchema.validate(expectedResponse);
+    expect(validationResp).toEqual(expectedResponse);
+  });
+
+  it('bulk action dry-run response { count } passes PostBulkActionResponseSchema', () => {
+    const dryRunResponse = { count: 42 };
+    expect(PostBulkActionResponseSchema.validate(dryRunResponse)).toEqual(dryRunResponse);
+  });
+
+  it('bulk migrate dry-run response { count } passes BulkMigrateAgentsResponseSchema', () => {
+    const dryRunResponse = { count: 7 };
+    expect(BulkMigrateAgentsResponseSchema.validate(dryRunResponse)).toEqual(dryRunResponse);
+  });
+
+  it('bulk privilege level change dry-run response { count } passes BulkChangeAgentsPrivilegeLevelResponseSchema', () => {
+    const dryRunResponse = { count: 3 };
+    expect(BulkChangeAgentsPrivilegeLevelResponseSchema.validate(dryRunResponse)).toEqual(
+      dryRunResponse
+    );
+  });
+
+  it('bulk rollback dry-run response { count } passes PostBulkAgentRollbackResponseSchema', () => {
+    const dryRunResponse = { count: 15 };
+    expect(PostBulkAgentRollbackResponseSchema.validate(dryRunResponse)).toEqual(dryRunResponse);
   });
 });

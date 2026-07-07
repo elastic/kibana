@@ -173,7 +173,7 @@ function createMockClient() {
     } as unknown as Case;
   });
 
-  client.attachments.getAllAlertsAttachToCase.mockImplementation(async () => {
+  client.attachments.getAllDocumentsAttachedToCase.mockImplementation(async () => {
     return [{ id: '1', index: '2', attached_at: '3' }];
   });
 
@@ -221,6 +221,7 @@ function createMockClientArgs() {
       alertsService,
       userActionService,
     },
+    config: { attachments: { enabled: false } },
   };
 
   return { mockServices: clientArgs, clientArgs: clientArgs as unknown as CasesClientArgs };

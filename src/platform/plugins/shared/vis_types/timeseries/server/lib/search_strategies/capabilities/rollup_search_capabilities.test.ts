@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Unit } from '@kbn/datemath';
+import type { Unit } from '@kbn/datemath';
 import type { Panel } from '../../../../common/types';
 import { RollupSearchCapabilities } from './rollup_search_capabilities';
 

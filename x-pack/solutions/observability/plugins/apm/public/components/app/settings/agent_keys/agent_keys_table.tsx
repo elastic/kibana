@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn, EuiInMemoryTableProps } from '@elastic/eui';
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { ApiKey } from '@kbn/security-plugin-types-common';
-import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
+import { Timestamp } from '@kbn/apm-ui-shared';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 
 interface Props {
@@ -54,7 +54,7 @@ export function AgentKeysTable({ agentKeys, onKeyDelete, canManage }: Props) {
       mobileOptions: {
         show: false,
       },
-      render: (date: number) => <TimestampTooltip time={date} />,
+      render: (date: number) => <Timestamp timestamp={date} renderMode="tooltip" />,
     },
   ];
 

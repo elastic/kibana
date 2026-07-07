@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type {
   NotificationItem,
   NotificationsSearchResponse,
-} from '@kbn/ml-plugin/common/types/notifications';
+} from '@kbn/ml-common-types/notifications';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
@@ -23,7 +23,9 @@ export default ({ getService }: FtrProviderContext) => {
   describe('GET notifications', () => {
     before(async () => {
       testStart = Date.now();
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/bm_classification'
+      );
       await ml.api.initSavedObjects();
       await ml.testResources.setKibanaTimeZoneToUTC();
 

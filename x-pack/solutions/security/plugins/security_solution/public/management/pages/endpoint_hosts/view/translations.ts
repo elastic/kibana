@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { STALE_ENDPOINT_PACKAGE_MESSAGE } from '../../../../../common/endpoint/utils/is_endpoint_package_stale';
 
 export const OVERVIEW = i18n.translate('xpack.securitySolution.endpointDetails.overview', {
   defaultMessage: 'Overview',
@@ -41,24 +42,43 @@ export const WORKFLOW_INSIGHTS = {
       }
     ),
   },
+  knowledgeBase: {
+    setupKB: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.knowledgeBase.setupRequired.setupKB',
+      { defaultMessage: 'set up a knowledge base' }
+    ),
+    setupOngoing: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.knowledgeBase.setupOngoing',
+      {
+        defaultMessage:
+          "Knowledge base setup is in progress. You can start a scan now and we'll queue it for you.",
+      }
+    ),
+    docsLinkText: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.knowledgeBase.docsLinkText',
+      {
+        defaultMessage: 'Learn more',
+      }
+    ),
+  },
+  stalePackageBanner: {
+    title: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.stalePackageBanner.title',
+      { defaultMessage: 'Endpoint integration update available' }
+    ),
+    description: (installedVersion: string, latestVersion: string) =>
+      i18n.translate(
+        'xpack.securitySolution.endpointDetails.workflowInsights.stalePackageBanner.description',
+        {
+          defaultMessage: STALE_ENDPOINT_PACKAGE_MESSAGE,
+          values: { installedVersion, latestVersion },
+        }
+      ),
+  },
   issues: {
     title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.issues.title', {
       defaultMessage: 'Insights',
     }),
-    survey: {
-      description: i18n.translate(
-        'xpack.securitySolution.endpointDetails.workflowInsights.survey.text',
-        {
-          defaultMessage: 'How is Automatic Troubleshooting working for you? ',
-        }
-      ),
-      callToAction: i18n.translate(
-        'xpack.securitySolution.endpointDetails.workflowInsights.survey.callToAction',
-        {
-          defaultMessage: 'Provide feedback',
-        }
-      ),
-    },
     emptyResults: i18n.translate(
       'xpack.securitySolution.endpointDetails.workflowInsights.issues.emptyResults',
       {
@@ -66,24 +86,58 @@ export const WORKFLOW_INSIGHTS = {
       }
     ),
     remediationButton: {
-      ariaLabel: i18n.translate(
-        'xpack.securitySolution.endpointDetails.workflowInsights.issues.insightRemediationButtonAriaLabel',
-        {
-          defaultMessage: 'Create trusted app',
-        }
-      ),
-      tooltipContent: i18n.translate(
-        'xpack.securitySolution.endpointDetails.workflowInsights.issues.insightRemediationButtonTooltipContent',
-        {
-          defaultMessage: 'Create trusted app',
-        }
-      ),
-      tooltipNoPermissions: i18n.translate(
-        'xpack.securitySolution.endpointDetails.workflowInsights.issues.insightRemediationButtonTooltipNoPermissions',
-        {
-          defaultMessage: 'You do not have the privileges required to perform this operation.',
-        }
-      ),
+      incompatibleAntivirus: {
+        ariaLabel: i18n.translate(
+          'xpack.securitySolution.endpointDetails.workflowInsights.issues.incompatibleAntivirus.insightRemediationButtonAriaLabel',
+          {
+            defaultMessage: 'Create trusted app',
+          }
+        ),
+        actionText: i18n.translate(
+          'xpack.securitySolution.endpointDetails.workflowInsights.issues.incompatibleAntivirus.insightRemediationButtonActionText',
+          {
+            defaultMessage: 'Create trusted app',
+          }
+        ),
+        tooltipContent: i18n.translate(
+          'xpack.securitySolution.endpointDetails.workflowInsights.issues.incompatibleAntivirus.insightRemediationButtonTooltipContent',
+          {
+            defaultMessage: 'Create trusted app',
+          }
+        ),
+        tooltipNoPermissions: i18n.translate(
+          'xpack.securitySolution.endpointDetails.workflowInsights.issues.incompatibleAntivirus.insightRemediationButtonTooltipNoPermissions',
+          {
+            defaultMessage: 'You do not have the privileges required to perform this operation.',
+          }
+        ),
+      },
+      policyResponseFailure: {
+        ariaLabel: i18n.translate(
+          'xpack.securitySolution.endpointDetails.workflowInsights.issues.policyResponseFailure.insightRemediationButtonAriaLabel',
+          {
+            defaultMessage: 'Learn more',
+          }
+        ),
+        actionText: i18n.translate(
+          'xpack.securitySolution.endpointDetails.workflowInsights.issues.policyResponseFailure.insightRemediationButtonActionText',
+          {
+            defaultMessage: 'Learn more',
+          }
+        ),
+        expandMessage: i18n.translate(
+          'xpack.securitySolution.endpointDetails.workflowInsights.issues.policyResponseFailure.insightRemediationButtonExpandMessage',
+          {
+            defaultMessage: 'view more',
+          }
+        ),
+        collapseMessage: i18n.translate(
+          'xpack.securitySolution.endpointDetails.workflowInsights.issues.policyResponseFailure.insightRemediationButtonCollapseMessage',
+          {
+            defaultMessage: 'view less',
+          }
+        ),
+      },
     },
   },
   toasts: {
@@ -91,6 +145,18 @@ export const WORKFLOW_INSIGHTS = {
       'xpack.securitySolution.endpointDetails.workflowInsights.toast.error',
       {
         defaultMessage: 'Failed to start scan',
+      }
+    ),
+    partialScanError: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.partialScanError',
+      {
+        defaultMessage: 'Insight scan failed',
+      }
+    ),
+    partialScanErrorBody: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.partialScanErrorBody',
+      {
+        defaultMessage: 'Some insights could not be generated. Please try again.',
       }
     ),
     fetchInsightsError: i18n.translate(
@@ -115,6 +181,24 @@ export const WORKFLOW_INSIGHTS = {
       'xpack.securitySolution.endpointDetails.workflowInsights.toast.maxFetchAttemptsReached',
       {
         defaultMessage: 'Failed to fetch insights after multiple attempts',
+      }
+    ),
+    scanFailedAllCombos: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.scanFailedAllCombos',
+      {
+        defaultMessage: 'Scan failed.',
+      }
+    ),
+    scanTimedOut: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.scanTimedOut',
+      {
+        defaultMessage: 'Scan timed out.',
+      }
+    ),
+    unexpectedError: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.unexpectedError',
+      {
+        defaultMessage: 'An unexpected error occurred.',
       }
     ),
   },

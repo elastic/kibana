@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   InjectedMetadata,
   InjectedMetadataClusterInfo,
   InjectedMetadataExternalUrlPolicy,
@@ -29,6 +29,7 @@ export interface InjectedMetadataParams {
 export interface InternalInjectedMetadataSetup {
   getBasePath: () => string;
   getServerBasePath: () => string;
+  getSpaceId: () => string;
   getPublicBaseUrl: () => string | undefined;
   getAssetsHrefBase: () => string;
   getKibanaBuildNumber: () => number;
@@ -61,8 +62,12 @@ export interface InternalInjectedMetadataSetup {
   getFeatureFlags: () =>
     | {
         overrides: Record<string, unknown>;
+        initialFeatureFlags: Record<string, unknown>;
       }
     | undefined;
+  getUserStorage: () => {
+    values: Record<string, unknown>;
+  };
 }
 
 /** @internal */

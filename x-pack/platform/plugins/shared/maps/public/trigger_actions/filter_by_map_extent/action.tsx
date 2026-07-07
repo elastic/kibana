@@ -6,12 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { HasParentApi, HasType } from '@kbn/presentation-publishing';
 import {
   type EmbeddableApiContext,
   apiIsOfType,
   areTriggersDisabled,
-  HasParentApi,
-  HasType,
 } from '@kbn/presentation-publishing';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { apiHasVisualizeConfig } from '@kbn/visualizations-plugin/public';

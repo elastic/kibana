@@ -8,7 +8,7 @@
  */
 
 import { MODEL_TYPES } from '../../../../common/enums';
-import { Metric } from '../../../../common/types';
+import type { Metric } from '../../../../common/types';
 
 export const MODEL_SCRIPTS = {
   [MODEL_TYPES.UNWEIGHTED]: () => 'MovingFunctions.unweightedAvg(values)',

@@ -11,9 +11,11 @@ import { Subject, catchError } from 'rxjs';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { CoreStart } from '@kbn/core/public';
 import { fetch$ } from '@kbn/presentation-publishing';
+import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
+import { SWIMLANE_TYPE } from '@kbn/ml-common-types/embeddables/swimlane_type';
 import type { AnomalyChartsServices, AnomalyChartsApi } from '..';
 import { getJobsObservable } from '../common/get_jobs_observable';
-import { OVERALL_LABEL, SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
+import { OVERALL_LABEL } from '../../application/explorer/explorer_constants';
 import { processFilters } from '../common/process_filters';
 import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
 import {
@@ -30,7 +32,7 @@ export function useAnomalyChartsData(
   api: AnomalyChartsApi,
   services: [CoreStart, MlStartDependencies, AnomalyChartsServices],
   chartWidth: number,
-  severity: number,
+  severity: SeverityThreshold[],
   renderCallbacks: {
     onRenderComplete: () => void;
     onLoading: (v: boolean) => void;
@@ -48,7 +50,7 @@ export function useAnomalyChartsData(
   const [isLoading, setIsLoading] = useState(false);
 
   const chartWidth$ = useMemo(() => new Subject<number>(), []);
-  const severity$ = useMemo(() => new Subject<number>(), []);
+  const severity$ = useMemo(() => new Subject<SeverityThreshold[]>(), []);
 
   useEffect(() => {
     const subscription = combineLatest({
@@ -118,9 +120,9 @@ export function useAnomalyChartsData(
               embeddableContainerWidth,
               timeRange.earliestMs,
               timeRange.latestMs,
+              severityValue,
               influencersFilterQuery,
               selectionInfluencers,
-              severityValue ?? 0,
               maxSeriesToPlot
             );
           }

@@ -7,12 +7,18 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 
 import { useDispatch } from 'react-redux';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
+import { useUiSetting } from '../../../../common/lib/kibana';
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { useEntityFromStore } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { AlertsByStatusAgg, AlertsByStatusResponse, ParsedAlertsData } from './types';
 import {
   STATUS_CRITICAL_LABEL,
@@ -31,58 +37,77 @@ export const severityLabels: Record<Severity, string> = {
   low: STATUS_LOW_LABEL,
 };
 
-export interface EntityFilter {
-  field: string;
-  value: string;
-}
+export const ENTITY_ID_FIELD = 'entity.id';
+
+/** Stable empty map so callers passing inline `{}` do not invalidate query memoization every render. */
+const EMPTY_IDENTITY_FIELDS: Record<string, string> = {};
+
+const toStoreEntityType = (type: string | undefined): 'host' | 'user' | undefined => {
+  if (type === EntityType.host || type === 'host') {
+    return 'host';
+  }
+  if (type === EntityType.user || type === 'user') {
+    return 'user';
+  }
+  return undefined;
+};
+
+/**
+ * Builds a bool.filter query wrapping one `term` clause per field/value pair (AND semantics).
+ */
+export const buildEntityIdentifierTermFilters = (
+  identityFields: Record<string, string>
+): QueryDslQueryContainer => ({
+  bool: {
+    filter: Object.entries(identityFields).map(([fieldName, fieldValue]) => ({
+      term: {
+        [fieldName]: fieldValue,
+      },
+    })),
+  },
+});
 
 export const getAlertsByStatusQuery = ({
   additionalFilters = [],
   from,
   to,
-  entityFilter,
+  entityFilters = [],
   runtimeMappings,
 }: {
   from: string;
   to: string;
-  entityFilter?: EntityFilter;
+  entityFilters?: QueryDslQueryContainer[];
   additionalFilters?: ESBoolQuery[];
   runtimeMappings?: Record<string, unknown>;
-}) => ({
-  size: 0,
-  query: {
-    bool: {
-      filter: [
-        ...additionalFilters,
-        { range: { '@timestamp': { gte: from, lte: to } } },
-        ...(entityFilter
-          ? [
-              {
-                term: {
-                  [entityFilter.field]: entityFilter.value,
-                },
-              },
-            ]
-          : []),
-      ],
-    },
-  },
-  aggs: {
-    alertsByStatus: {
-      terms: {
-        field: 'kibana.alert.workflow_status',
+}) => {
+  return {
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...additionalFilters,
+          { range: { '@timestamp': { gte: from, lte: to } } },
+          ...entityFilters,
+        ],
       },
-      aggs: {
-        statusBySeverity: {
-          terms: {
-            field: 'kibana.alert.severity',
+    },
+    aggs: {
+      alertsByStatus: {
+        terms: {
+          field: 'kibana.alert.workflow_status',
+        },
+        aggs: {
+          statusBySeverity: {
+            terms: {
+              field: 'kibana.alert.severity',
+            },
           },
         },
       },
     },
-  },
-  ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
-});
+    ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
+  };
+};
 
 export const parseAlertsData = (
   response: AlertsByStatusResponse<{}, AlertsByStatusAgg>
@@ -114,7 +139,9 @@ export interface UseAlertsByStatusProps {
   queryId: string;
   signalIndexName: string | null;
   skip?: boolean;
-  entityFilter?: EntityFilter;
+  identityFields: Record<string, string>;
+  entityType?: string;
+  entityRecord?: EntityStoreRecord | null;
   additionalFilters?: ESBoolQuery[];
   from: string;
   to: string;
@@ -129,15 +156,67 @@ export type UseAlertsByStatus = (props: UseAlertsByStatusProps) => {
 
 export const useAlertsByStatus: UseAlertsByStatus = ({
   additionalFilters,
-  entityFilter,
+  identityFields,
+  entityType,
   queryId,
   signalIndexName,
   skip = false,
   to,
   from,
   runtimeMappings,
+  entityRecord: entityRecordInput,
 }) => {
   const dispatch = useDispatch();
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
+  const identityFieldsStable =
+    identityFields != null && Object.keys(identityFields).length > 0
+      ? identityFields
+      : EMPTY_IDENTITY_FIELDS;
+  const entityIdValue = identityFieldsStable[ENTITY_ID_FIELD];
+  const storeEntityType = toStoreEntityType(entityType);
+
+  const shouldResolveEntityIdFromStore =
+    Boolean(entityIdValue) && // entity ID is defined
+    entityStoreV2Enabled && // entity store v2 is enabled
+    storeEntityType != null && // entity type is mappable to store-supported types
+    !entityRecordInput; // entity record not already provided as input
+
+  const entityFromStore = useEntityFromStore({
+    entityId: entityIdValue,
+    entityType: storeEntityType ?? 'host',
+    skip: skip || !shouldResolveEntityIdFromStore,
+  });
+
+  const { entityRecord, isLoading: entityFromStoreLoading } = entityFromStore;
+
+  const euidApi = useEntityStoreEuidApi();
+  const entityFilters = useMemo(() => {
+    if (entityStoreV2Enabled && euidApi?.euid && (entityRecord || entityRecordInput)) {
+      // Use the entity record to generate a DSL query fragment
+      const filter = euidApi.euid?.dsl.getEuidFilterBasedOnDocument(
+        storeEntityType ?? 'generic',
+        entityRecord ?? entityRecordInput
+      );
+      return filter != null ? [filter] : [];
+    }
+
+    return identityFieldsStable != null && Object.keys(identityFieldsStable).length > 0
+      ? [buildEntityIdentifierTermFilters(identityFieldsStable)]
+      : [];
+  }, [
+    entityStoreV2Enabled,
+    euidApi?.euid,
+    entityRecord,
+    entityRecordInput,
+    identityFieldsStable,
+    storeEntityType,
+  ]);
+
+  const skipAlertsQuery =
+    skip || (shouldResolveEntityIdFromStore && (entityFromStoreLoading || !entityFilters.length));
+
+  const isResolvingEntityId = shouldResolveEntityIdFromStore && entityFromStoreLoading;
+
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [items, setItems] = useState<null | ParsedAlertsData>(null);
   const setQuery = useCallback(
@@ -160,6 +239,19 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
       dispatch(inputsActions.deleteOneQuery({ inputId: InputsModelId.global, id })),
     [dispatch]
   );
+
+  const alertsQuery = useMemo(
+    () =>
+      getAlertsByStatusQuery({
+        from,
+        to,
+        entityFilters: entityFilters ?? [],
+        additionalFilters,
+        runtimeMappings,
+      }),
+    [from, to, entityFilters, additionalFilters, runtimeMappings]
+  );
+
   const {
     data,
     loading: isLoading,
@@ -168,30 +260,15 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
     response,
     setQuery: setAlertsQuery,
   } = useQueryAlerts<{}, AlertsByStatusAgg>({
-    query: getAlertsByStatusQuery({
-      from,
-      to,
-      entityFilter,
-      additionalFilters,
-      runtimeMappings,
-    }),
+    query: alertsQuery,
     indexName: signalIndexName,
-    skip,
+    skip: skipAlertsQuery,
     queryName: ALERTS_QUERY_NAMES.BY_STATUS,
   });
 
   useEffect(() => {
-    setAlertsQuery(
-      getAlertsByStatusQuery({
-        from,
-        to,
-        entityFilter,
-        additionalFilters,
-        runtimeMappings,
-      })
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setAlertsQuery, from, to, entityFilter, additionalFilters]);
+    setAlertsQuery(alertsQuery);
+  }, [setAlertsQuery, alertsQuery]);
 
   useEffect(() => {
     if (data == null) {
@@ -222,8 +299,8 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
     refetch,
     setQuery,
     queryId,
-    loading: isLoading,
+    loading: isLoading || isResolvingEntityId,
   });
 
-  return { items, isLoading, updatedAt };
+  return { items, isLoading: isLoading || isResolvingEntityId, updatedAt };
 };

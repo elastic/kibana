@@ -14,7 +14,7 @@ import {
   DEFAULT_SIZE,
   DEFAULT_SORT,
 } from '../../../../../common/requests/get_certs_request_body';
-import { CertResult, GetCertsParams } from '../../../../../common/runtime_types';
+import type { CertResult, GetCertsParams } from '../../../../../common/runtime_types';
 import { SyntheticsRefreshContext } from '../../contexts';
 
 export const useCertSearch = ({
@@ -23,6 +23,13 @@ export const useCertSearch = ({
   search,
   sortBy = DEFAULT_SORT,
   direction = DEFAULT_DIRECTION,
+  monitorTypes,
+  browserResourceTypes,
+  certOrigin,
+  tags,
+  issuers,
+  notValidAfter,
+  remoteNames,
 }: GetCertsParams): CertResult & { isLoading?: boolean } => {
   const { lastRefresh } = useContext(SyntheticsRefreshContext);
 
@@ -36,9 +43,31 @@ export const useCertSearch = ({
         search,
         sortBy,
         direction,
+        monitorTypes,
+        browserResourceTypes,
+        certOrigin,
+        tags,
+        issuers,
+        notValidAfter,
+        remoteNames,
       })
     );
-  }, [direction, dispatch, lastRefresh, pageIndex, search, size, sortBy]);
+  }, [
+    direction,
+    dispatch,
+    lastRefresh,
+    pageIndex,
+    search,
+    size,
+    sortBy,
+    monitorTypes,
+    browserResourceTypes,
+    certOrigin,
+    tags,
+    issuers,
+    notValidAfter,
+    remoteNames,
+  ]);
 
   const { data, isLoading } = useSelector(selectCertsListState);
 

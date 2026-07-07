@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiConfirmModal, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiConfirmModal, EuiLoadingSpinner, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as labels from './translations';
 
@@ -17,9 +17,13 @@ interface Props {
 }
 
 export const ConfirmJobDeletion: React.FC<Props> = ({ loading, onConfirm, onCancel }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={labels.JOB_DELETION_CONFIRMATION}
+      titleProps={{ id: modalTitleId }}
       onCancel={onCancel}
       onConfirm={onConfirm}
       cancelButtonText="Cancel"

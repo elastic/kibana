@@ -41,7 +41,10 @@ export const useCasesAddToNewCaseFlyout = ({
     ({
       attachments,
       headerContent,
-    }: { attachments?: CaseAttachmentsWithoutOwner; headerContent?: React.ReactNode } = {}) => {
+    }: {
+      attachments?: CaseAttachmentsWithoutOwner;
+      headerContent?: React.ReactNode;
+    } = {}) => {
       dispatch({
         type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
         payload: {

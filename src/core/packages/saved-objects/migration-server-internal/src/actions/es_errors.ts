@@ -28,6 +28,10 @@ export const isIndexNotFoundException = (errorCause?: ErrorCause): boolean => {
   return errorCause?.type === 'index_not_found_exception';
 };
 
+export const isUnavailableShardsException = (errorCause?: ErrorCause): boolean => {
+  return errorCause?.type === 'unavailable_shards_exception';
+};
+
 export const isClusterShardLimitExceeded = (errorCause?: ErrorCause): boolean => {
   // traditional ES: validation_exception. serverless ES: illegal_argument_exception
   return (
@@ -36,12 +40,16 @@ export const isClusterShardLimitExceeded = (errorCause?: ErrorCause): boolean =>
     hasAllKeywordsInOrder(errorCause?.reason, [
       'this action would add',
       'shards, but this cluster currently has',
-      'maximum normal shards open',
+      'maximum',
+      'shards open',
     ])
   );
 };
 
-export const hasAllKeywordsInOrder = (message: string | undefined, keywords: string[]): boolean => {
+export const hasAllKeywordsInOrder = (
+  message: string | null | undefined,
+  keywords: string[]
+): boolean => {
   if (!message || !keywords.length) {
     return false;
   }

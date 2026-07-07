@@ -5,6 +5,7 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
+import { omit } from 'lodash';
 import type { SavedObject } from '@kbn/core/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { RawRule, IntervalSchedule } from '../../../../types';
@@ -12,6 +13,10 @@ import { resetMonitoringLastRun, getNextRun } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import {
+  addMissingUiamKeyTagIfNeeded,
+  API_KEY_ATTRIBUTES_TO_STRIP,
+} from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import {
   updateMeta,
@@ -108,6 +113,22 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
     throw error;
   }
 
+  const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
+  const { autoRecoverAlerts: isLifecycleAlert } = ruleType;
+  const indices = context.getAlertIndicesAlias([ruleType.id], context.spaceId);
+
+  if (isLifecycleAlert && context.alertsService) {
+    try {
+      await context.alertsService.clearAlertFlappingHistory({
+        indices,
+        ruleIds: [id],
+      });
+    } catch (error) {
+      // Don't throw if we can't clear the flapping history for whatever reason
+      context.logger.error(`Failure to clear flapping history from rule ${id} - ${error.message}`);
+    }
+  }
+
   context.auditLogger?.log(
     ruleAuditEvent({
       action: RuleAuditAction.ENABLE,
@@ -123,29 +144,44 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
 
     const username = await context.getUserName();
     const now = new Date();
+    const nowIso = now.toISOString();
 
     const schedule = attributes.schedule as IntervalSchedule;
 
-    const updateAttributes = updateMeta(context, {
-      ...attributes,
-      ...(!existingApiKey &&
-        (await createNewAPIKeySet(context, {
+    const apiKeyAttributes = !existingApiKey
+      ? await createNewAPIKeySet(context, {
           id: attributes.alertTypeId,
           ruleName: attributes.name,
           username,
           shouldUpdateApiKey: true,
-        }))),
+          apiKeyOwnership: { apiKeyCreatedByUser: attributes.apiKeyCreatedByUser },
+        })
+      : ({} as Awaited<ReturnType<typeof createNewAPIKeySet>>);
+
+    const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
+      attributes.tags,
+      existingApiKey ? attributes.uiamApiKey : apiKeyAttributes.uiamApiKey,
+      existingApiKey ? attributes.apiKeyCreatedByUser : apiKeyAttributes.apiKeyCreatedByUser,
+      context.isServerless,
+      context.featureFlags
+    );
+
+    const updateAttributes = updateMeta(context, {
+      ...(existingApiKey ? attributes : omit(attributes, API_KEY_ATTRIBUTES_TO_STRIP)),
+      ...apiKeyAttributes,
+      tags: tagsWithUiamCheck,
       ...(attributes.monitoring && {
         monitoring: resetMonitoringLastRun(attributes.monitoring),
       }),
       nextRun: getNextRun({ interval: schedule.interval }),
       enabled: true,
       updatedBy: username,
-      updatedAt: now.toISOString(),
+      updatedAt: nowIso,
+      lastEnabledAt: nowIso,
       executionStatus: {
         status: 'pending',
         lastDuration: 0,
-        lastExecutionDate: now.toISOString(),
+        lastExecutionDate: nowIso,
         error: null,
         warning: null,
       },

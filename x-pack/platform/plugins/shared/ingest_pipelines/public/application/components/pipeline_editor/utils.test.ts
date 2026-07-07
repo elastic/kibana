@@ -76,6 +76,7 @@ describe('convert processors to json', () => {
       processor: '{"1": """aaa"bbb"""}',
       inference_config: '{"1": """aaa"bbb"""}',
       field_map: '{"1": """aaa"bbb"""}',
+      input_output: '[{"1": """aaa"bbb"""}]',
       customOptions: '{"customProcessor": """aaa"bbb"""}',
     };
 
@@ -92,7 +93,61 @@ describe('convert processors to json', () => {
       // eslint-disable-next-line prettier/prettier
       field_map: { 1: "aaa\"bbb" },
       // eslint-disable-next-line prettier/prettier
+      input_output: [{ 1: "aaa\"bbb" }],
+      // eslint-disable-next-line prettier/prettier
       customProcessor: "aaa\"bbb"
+    });
+  });
+
+  it('preserves empty string values', () => {
+    const obj = {
+      field1: 'normalString',
+      value: '',
+      inference_config: '',
+      field_map: '',
+      input_output: '',
+      params: '',
+      pattern_definitions: '',
+      processor: '',
+      customOptions: '',
+    };
+
+    const result = convertProccesorsToJson(obj);
+
+    expect(result).toEqual({
+      field1: 'normalString',
+      value: '',
+      inference_config: '',
+      field_map: '',
+      input_output: '',
+      params: '',
+      pattern_definitions: '',
+      processor: '',
+    });
+
+    // Explicitly check that empty strings are preserved and not converted to undefined
+    expect(result.value).toBe('');
+    expect(result.inference_config).toBe('');
+    expect(result.field_map).toBe('');
+    expect(result.input_output).toBe('');
+    expect(result.params).toBe('');
+    expect(result.pattern_definitions).toBe('');
+    expect(result.processor).toBe('');
+  });
+
+  it('handles null and undefined values correctly', () => {
+    const obj = {
+      value: null,
+      inference_config: undefined,
+      field_map: 'normalString',
+    };
+
+    const result = convertProccesorsToJson(obj);
+
+    expect(result).toEqual({
+      value: undefined,
+      inference_config: undefined,
+      field_map: 'normalString',
     });
   });
 });

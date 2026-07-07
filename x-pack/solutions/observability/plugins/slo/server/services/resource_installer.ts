@@ -11,14 +11,19 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
+  COMPOSITE_SUMMARY_INDEX_NAME,
+  HEALTH_DATA_STREAM_NAME,
   SLI_DESTINATION_INDEX_NAME,
   SUMMARY_DESTINATION_INDEX_NAME,
   SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
+import { COMPOSITE_SUMMARY_MAPPINGS_TEMPLATE } from '../assets/component_templates/composite_summary_mappings_template';
 import { SLI_MAPPINGS_TEMPLATE } from '../assets/component_templates/sli_mappings_template';
 import { SLI_SETTINGS_TEMPLATE } from '../assets/component_templates/sli_settings_template';
 import { SUMMARY_MAPPINGS_TEMPLATE } from '../assets/component_templates/summary_mappings_template';
 import { SUMMARY_SETTINGS_TEMPLATE } from '../assets/component_templates/summary_settings_template';
+import { COMPOSITE_SUMMARY_INDEX_TEMPLATE } from '../assets/index_templates/composite_summary_index_template';
+import { HEALTH_INDEX_TEMPLATE } from '../assets/index_templates/health_index_template';
 import { SLI_INDEX_TEMPLATE } from '../assets/index_templates/sli_index_template';
 import { SUMMARY_INDEX_TEMPLATE } from '../assets/index_templates/summary_index_template';
 import { retryTransientEsErrors } from '../utils/retry';
@@ -38,14 +43,21 @@ export class DefaultResourceInstaller implements ResourceInstaller {
         this.createOrUpdateComponentTemplate(SLI_SETTINGS_TEMPLATE),
         this.createOrUpdateComponentTemplate(SUMMARY_MAPPINGS_TEMPLATE),
         this.createOrUpdateComponentTemplate(SUMMARY_SETTINGS_TEMPLATE),
+        this.createOrUpdateComponentTemplate(COMPOSITE_SUMMARY_MAPPINGS_TEMPLATE),
       ]);
 
       await this.createOrUpdateIndexTemplate(SLI_INDEX_TEMPLATE);
       await this.createOrUpdateIndexTemplate(SUMMARY_INDEX_TEMPLATE);
+      await this.createOrUpdateIndexTemplate(COMPOSITE_SUMMARY_INDEX_TEMPLATE);
 
       await this.createIndex(SLI_DESTINATION_INDEX_NAME);
       await this.createIndex(SUMMARY_DESTINATION_INDEX_NAME);
       await this.createIndex(SUMMARY_TEMP_INDEX_NAME);
+      await this.createIndex(COMPOSITE_SUMMARY_INDEX_NAME);
+      await this.updateCompositeSummaryMapping();
+
+      await this.createOrUpdateIndexTemplate(HEALTH_INDEX_TEMPLATE);
+      await this.createDataStream(HEALTH_DATA_STREAM_NAME);
     } catch (err) {
       this.logger.error(`Error while installing SLO shared resources: ${err}`);
     }
@@ -82,23 +94,44 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     }
   }
 
+  private async updateCompositeSummaryMapping() {
+    const mappings = COMPOSITE_SUMMARY_MAPPINGS_TEMPLATE.template?.mappings;
+    if (!mappings) {
+      return;
+    }
+    await this.execute(() =>
+      this.esClient.indices.putMapping({ index: COMPOSITE_SUMMARY_INDEX_NAME, ...mappings })
+    );
+  }
+
+  private async createDataStream(dataStreamName: string) {
+    try {
+      this.logger.debug(`Installing data stream [${dataStreamName}]`);
+      await this.execute(() => this.esClient.indices.createDataStream({ name: dataStreamName }));
+    } catch (err) {
+      if (err?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
+        throw err;
+      }
+    }
+  }
+
   private async execute<T>(esCall: () => Promise<T>): Promise<T> {
     return await retryTransientEsErrors(esCall, { logger: this.logger });
   }
 
   private async fetchComponentTemplateVersion(name: string) {
-    const getTemplateRes = await this.execute(() =>
+    const response = await this.execute(() =>
       this.esClient.cluster.getComponentTemplate({ name }, { ignore: [404] })
     );
 
-    return getTemplateRes?.component_templates?.[0]?.component_template?._meta?.version ?? null;
+    return response?.component_templates?.[0]?.component_template?._meta?.version ?? null;
   }
 
   private async fetchIndexTemplateVersion(name: string) {
-    const getTemplateRes = await this.execute(() =>
+    const response = await this.execute(() =>
       this.esClient.indices.getIndexTemplate({ name }, { ignore: [404] })
     );
 
-    return getTemplateRes?.index_templates?.[0]?.index_template?._meta?.version ?? null;
+    return response?.index_templates?.[0]?.index_template?._meta?.version ?? null;
   }
 }

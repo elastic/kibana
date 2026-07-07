@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { HelpPopover } from '../components/help_popover/help_popover';
 
 export const AnomalyTimelineHelpPopover: FC = () => {
@@ -18,6 +19,9 @@ export const AnomalyTimelineHelpPopover: FC = () => {
       title={i18n.translate('xpack.ml.explorer.anomalyTimelinePopoverTitle', {
         defaultMessage: 'Anomaly timelines',
       })}
+      buttonCss={css`
+        color: inherit;
+      `}
     >
       <p>
         <FormattedMessage

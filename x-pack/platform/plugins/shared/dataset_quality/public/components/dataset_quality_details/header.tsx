@@ -9,7 +9,9 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSkeletonText,
   EuiSkeletonTitle,
+  EuiSpacer,
   EuiTextColor,
   EuiTitle,
   useEuiShadow,
@@ -17,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
+import { FAILURE_STORE_SELECTOR } from '../../../common/constants';
 import { openInDiscoverText } from '../../../common/translations';
 import {
   useDatasetDetailsRedirectLinkTelemetry,
@@ -39,7 +42,7 @@ export function Header() {
     navigationSource: navigationSources.Header,
   });
   const redirectLinkProps = useRedirectLink({
-    dataStreamStat: datasetDetails,
+    dataStreamStat: `${datasetDetails.rawName},${datasetDetails.rawName}${FAILURE_STORE_SELECTOR}`,
     timeRangeConfig: timeRange,
     sendTelemetry,
   });
@@ -48,11 +51,15 @@ export function Header() {
     integrationDetails?.integration?.integration?.datasets?.[datasetDetails.name] ?? title;
 
   return !loadingState.integrationDetailsLoaded ? (
-    <EuiSkeletonTitle
-      size="s"
-      data-test-subj="datasetQualityDetailsIntegrationLoading"
-      className="datasetQualityDetailsIntegrationLoading"
-    />
+    <>
+      <EuiSkeletonTitle
+        size="l"
+        data-test-subj="datasetQualityDetailsIntegrationLoading"
+        className="datasetQualityDetailsIntegrationLoading"
+      />
+      <EuiSpacer size="s" />
+      <EuiSkeletonText lines={1} />
+    </>
   ) : (
     <EuiFlexGroup justifyContent="flexStart">
       <EuiFlexItem grow>

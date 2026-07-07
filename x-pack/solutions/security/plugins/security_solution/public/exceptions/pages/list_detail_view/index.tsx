@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 
@@ -12,14 +13,14 @@ import {
   ExceptionListHeader,
   ViewerStatus,
 } from '@kbn/securitysolution-exception-list-components';
-import { EuiSkeletonText } from '@elastic/eui';
-import { useParams } from 'react-router-dom';
+import { EuiScreenReaderLive, EuiSkeletonText } from '@elastic/eui';
+import { useLocation, useParams } from 'react-router-dom';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { ReferenceErrorModal } from '../../../common/components/reference_error_modal';
 import type { Rule } from '../../../detection_engine/rule_management/logic/types';
-import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
+import { MissingDetectionsPrivilegesCallOut } from '../../../detections/components/callouts/missing_detections_privileges_callout';
 import { NotFoundPage } from '../../../app/404';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 import { LinkToRuleDetails, ListWithSearch, ManageRules } from '../../components';
@@ -64,6 +65,11 @@ export const ListsDetailViewComponent: FC = () => {
     handleReferenceDelete,
   } = useListDetailsView(exceptionListId);
 
+  const location = useLocation<{ justCreated?: string }>();
+  const screenReaderMessage = location.state?.justCreated
+    ? i18n.SHARED_EXCEPTION_LIST_CREATED_SUCCESSFULLY(location.state.justCreated)
+    : '';
+
   const [showIncludeExpiredExceptionItemsModal, setShowIncludeExpiredExceptionItemsModal] =
     useState<CheckExceptionTtlActionTypes | null>(null);
 
@@ -100,7 +106,7 @@ export const ListsDetailViewComponent: FC = () => {
     if (invalidListId || !listName || !list) return <NotFoundPage />;
     return (
       <>
-        <MissingPrivilegesCallOut />
+        <MissingDetectionsPrivilegesCallOut />
         <ExceptionListHeader
           name={listName}
           description={listDescription}
@@ -190,6 +196,9 @@ export const ListsDetailViewComponent: FC = () => {
   ]);
   return (
     <>
+      {screenReaderMessage && (
+        <EuiScreenReaderLive focusRegionOnTextChange>{screenReaderMessage}</EuiScreenReaderLive>
+      )}
       <SpyRoute pageName={SecurityPageName.exceptions} state={{ listName }} />
       {detailsViewContent}
     </>

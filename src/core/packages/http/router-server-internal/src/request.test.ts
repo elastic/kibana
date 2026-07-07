@@ -11,7 +11,7 @@ jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
 }));
 
-import { RouteOptions } from '@hapi/hapi';
+import type { RouteOptions } from '@hapi/hapi';
 import { hapiMocks } from '@kbn/hapi-mocks';
 import type { FakeRawRequest, RouteSecurity } from '@kbn/core-http-server';
 import { CoreKibanaRequest } from './request';
@@ -558,7 +558,6 @@ describe('CoreKibanaRequest', () => {
       it('should be true', () => {
         const request: FakeRawRequest = {
           headers: {},
-          path: '/',
         };
         const kibanaRequest = CoreKibanaRequest.from(request);
         expect(kibanaRequest.isFakeRequest).toBe(true);
@@ -569,7 +568,6 @@ describe('CoreKibanaRequest', () => {
       it('should be 1.0', () => {
         const request: FakeRawRequest = {
           headers: {},
-          path: '/',
         };
         const kibanaRequest = CoreKibanaRequest.from(request);
         expect(kibanaRequest.httpVersion).toEqual('1.0');
@@ -583,7 +581,6 @@ describe('CoreKibanaRequest', () => {
             foo: 'bar',
             hello: 'dolly',
           },
-          path: '/',
         };
         const kibanaRequest = CoreKibanaRequest.from(request);
         expect(kibanaRequest.headers).toEqual({

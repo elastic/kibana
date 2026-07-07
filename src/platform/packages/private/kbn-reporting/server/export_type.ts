@@ -12,7 +12,6 @@ import type {
   FakeRawRequest,
   Headers,
   HttpServiceSetup,
-  IBasePath,
   KibanaRequest,
 } from '@kbn/core-http-server';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
@@ -20,23 +19,29 @@ import type { PluginInitializerContext } from '@kbn/core-plugins-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
-import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
 import type { Logger } from '@kbn/logging';
 import type { ReportingServerInfo } from '@kbn/reporting-common/types';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import {
+  EXPORT_TYPE_SCHEDULED,
+  LICENSE_TYPE_BASIC,
+  REPORTING_FEATURE_ID,
+} from '@kbn/reporting-common';
 import type { CreateJobFn, RunTaskFn } from './types';
 import type { ReportingConfigType } from '.';
 
 export interface BaseExportTypeSetupDeps {
-  basePath: Pick<IBasePath, 'set'>;
   spaces?: SpacesPluginSetup;
 }
 
 export interface BaseExportTypeStartDeps {
+  licensing: LicensingPluginStart;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   esClient: IClusterClient;
@@ -64,6 +69,7 @@ export abstract class ExportType<
   public setupDeps!: SetupDepsType;
   public startDeps!: StartDepsType;
   public http!: HttpServiceSetup;
+  public isServerless: boolean;
 
   constructor(
     core: CoreSetup,
@@ -72,6 +78,7 @@ export abstract class ExportType<
     public context: PluginInitializerContext<ReportingConfigType>
   ) {
     this.http = core.http;
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
 
   setup(setupDeps: SetupDepsType) {
@@ -79,6 +86,23 @@ export abstract class ExportType<
   }
   start(startDeps: StartDepsType) {
     this.startDeps = startDeps;
+  }
+
+  getFeatureUsageName(type: string): string {
+    return `${REPORTING_FEATURE_ID}: ${this.id} ${type} export`;
+  }
+  shouldNotifyUsage(type: string): boolean {
+    if (type === EXPORT_TYPE_SCHEDULED) {
+      return true;
+    }
+
+    return !this.validLicenses.includes(LICENSE_TYPE_BASIC);
+  }
+
+  notifyUsage(type: string) {
+    if (this.shouldNotifyUsage(type)) {
+      this.startDeps.licensing.featureUsage.notifyUsage(this.getFeatureUsageName(type));
+    }
   }
 
   private async getSavedObjectsClient(request: KibanaRequest) {
@@ -122,20 +146,14 @@ export abstract class ExportType<
     spaceId: string | undefined,
     logger = this.logger
   ): KibanaRequest {
+    if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
+      logger.info(`Generating request for space: ${spaceId}`);
+    }
     const rawRequest: FakeRawRequest = {
       headers,
-      path: '/',
+      spaceId: spaceId ? asSpaceId(spaceId) : undefined,
     };
-    const fakeRequest = kibanaRequestFactory(rawRequest);
-
-    const spacesService = this.setupDeps.spaces?.spacesService;
-    if (spacesService) {
-      if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
-        logger.info(`Generating request for space: ${spaceId}`);
-        this.setupDeps.basePath.set(fakeRequest, `/s/${spaceId}`);
-      }
-    }
-    return fakeRequest;
+    return kibanaRequestFactory(rawRequest);
   }
 
   /*

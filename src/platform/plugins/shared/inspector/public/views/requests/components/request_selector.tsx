@@ -9,13 +9,12 @@
 
 import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiBadge,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -23,7 +22,7 @@ import {
 } from '@elastic/eui';
 
 import { RequestStatus } from '../../../../common/adapters';
-import { Request } from '../../../../common/adapters/request/types';
+import type { Request } from '../../../../common/adapters/request/types';
 
 interface RequestSelectorProps {
   requests: Request[];
@@ -32,12 +31,6 @@ interface RequestSelectorProps {
 }
 
 export class RequestSelector extends Component<RequestSelectorProps> {
-  static propTypes = {
-    requests: PropTypes.array.isRequired,
-    selectedRequest: PropTypes.object.isRequired,
-    onRequestChanged: PropTypes.func,
-  };
-
   handleSelected = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     const selectedOption = this.props.requests.find(
       (request) => request.id === selectedOptions[0].value
@@ -63,16 +56,20 @@ export class RequestSelector extends Component<RequestSelectorProps> {
         value: item.id,
       };
     });
+    const requestLabel = i18n.translate('inspector.requests.requestLabel', {
+      defaultMessage: 'Request',
+    });
 
     return (
       <EuiComboBox
+        aria-label={requestLabel}
         data-test-subj="inspectorRequestChooser"
         fullWidth={true}
         id="inspectorRequestChooser"
         isClearable={false}
         onChange={this.handleSelected}
         options={options}
-        prepend="Request"
+        prepend={requestLabel}
         selectedOptions={[
           {
             label: this.props.selectedRequest.name,
@@ -116,6 +113,7 @@ export class RequestSelector extends Component<RequestSelectorProps> {
             >
               <EuiBadge
                 data-test-subj="inspectorRequestTotalTime"
+                tabIndex={0}
                 color={selectedRequest.status === RequestStatus.OK ? 'success' : 'danger'}
                 iconType={selectedRequest.status === RequestStatus.OK ? 'check' : 'cross'}
               >

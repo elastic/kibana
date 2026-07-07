@@ -27,6 +27,8 @@ export const INSIGHTS_CHANNEL = 'security-insights-v1';
 
 export const TASK_METRICS_CHANNEL = 'task-metrics';
 
+export const DETECTION_RULE_TYPE_ESQL = 'esql';
+
 export const DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS = {
   linux: {
     advanced: {
@@ -156,6 +158,9 @@ export const DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS = {
         cloud_lookup: null,
 
         cloud_lookup_url: null,
+      },
+      ransomware: {
+        diagnostic: null,
       },
       memory_protection: {
         memory_scan_collect_sample: false,

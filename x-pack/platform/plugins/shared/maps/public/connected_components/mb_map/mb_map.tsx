@@ -8,9 +8,9 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { supported as maplibreglSupported } from '@mapbox/mapbox-gl-supported';
-import { Adapters } from '@kbn/inspector-plugin/public';
-import { Filter } from '@kbn/es-query';
-import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { Adapters } from '@kbn/inspector-plugin/public';
+import type { Filter } from '@kbn/es-query';
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { maplibregl } from '@kbn/mapbox-gl';
 import type { Map as MapboxMap, MapOptions, MapMouseEvent } from '@kbn/mapbox-gl';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -24,27 +24,27 @@ import {
   getUsageCollection,
   isScreenshotMode,
 } from '../../kibana_services';
-import { ILayer } from '../../classes/layers/layer';
-import {
+import type { ILayer } from '../../classes/layers/layer';
+import type {
   CustomIcon,
   Goto,
   MapCenterAndZoom,
   MapSettings,
   Timeslice,
 } from '../../../common/descriptor_types';
+import type { RawValue } from '../../../common/constants';
 import {
   APP_ID,
   CUSTOM_ICON_SIZE,
   DECIMAL_DEGREES_PRECISION,
   MAKI_ICON_SIZE,
-  RawValue,
   ZOOM_PRECISION,
 } from '../../../common/constants';
 import { getCanAccessEmsFonts, getGlyphs, getKibanaFontsGlyphUrl } from './glyphs';
 import { syncLayerOrder } from './sort_layers';
 
 import { removeOrphanedSourcesAndLayers } from './remove_orphaned';
-import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
+import type { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { TileStatusTracker } from './tile_status_tracker';
 import { DrawFeatureControl } from './draw_control/draw_feature_control';
 import type { MapExtentState } from '../../reducers/map/types';

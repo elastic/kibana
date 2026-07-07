@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { Meta, StoryObj } from '@storybook/react';
-import { ComponentProps } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+import type { ComponentProps } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { EsqlCodeBlock as Component } from './esql_code_block';
 

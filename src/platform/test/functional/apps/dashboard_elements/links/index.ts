@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile, getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -33,17 +33,8 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     await dashboard.preserveCrossAppState();
   }
 
-  async function teardown() {
-    await esArchiver.unload(
-      'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
-    );
-    await security.testUser.restoreDefaults();
-    await kibanaServer.savedObjects.cleanStandardList();
-  }
-
   describe('links panel', function () {
     before(setup);
-    after(teardown);
     loadTestFile(require.resolve('./links_create_edit'));
     loadTestFile(require.resolve('./links_navigation'));
   });

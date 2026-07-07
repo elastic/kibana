@@ -7,9 +7,11 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
+import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import type { AlertsFilter, RuleAlertData } from '../types';
-import { DEFAULT_FLAPPING_SETTINGS, MaintenanceWindowStatus, RecoveredActionGroup } from '../types';
+import { DEFAULT_FLAPPING_SETTINGS, RecoveredActionGroup } from '../types';
 import {
   ALERT_ACTION_GROUP,
   ALERT_CONSECUTIVE_MATCHES,
@@ -19,6 +21,8 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
+  ALERT_MUTED,
   ALERT_PENDING_RECOVERED_COUNT,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_RULE_CATEGORY,
@@ -33,8 +37,11 @@ import {
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_SEVERITY_IMPROVING,
+  ALERT_SNOOZED,
   ALERT_START,
+  ALERT_STATE_NAMESPACE,
   ALERT_STATUS,
+  ALERT_STATUS_UNTRACKED,
   ALERT_TIME_RANGE,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
@@ -66,15 +73,16 @@ import {
   getExpectedQueryByExecutionUuid,
   getExpectedQueryByTimeRange,
   getParamsByExecutionUuid,
-  getParamsByTimeQuery,
   getParamsByMaintenanceWindowScopedQuery,
+  getParamsByTimeQuery,
   getParamsByUpdateMaintenanceWindowIds,
   mockAAD,
 } from './alerts_client_fixtures';
 import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter';
-import type { MaintenanceWindow } from '../application/maintenance_window/types';
-import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
-import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
+import {
+  maintenanceWindowsServiceMock,
+  getMockMaintenanceWindow,
+} from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
 import type { KibanaRequest } from '@kbn/core/server';
 import { rule } from './lib/test_fixtures';
 import { RUNTIME_MAINTENANCE_WINDOW_ID_FIELD } from './lib/get_summarized_alerts_query';
@@ -151,15 +159,6 @@ const trackedAlert2Raw = {
   },
 };
 
-const trackedAlert3Raw = {
-  state: { foo: false },
-  meta: {
-    flapping: false,
-    flappingHistory: [true, false, false],
-    uuid: 'xyz',
-  },
-};
-
 const fetchedAlert1 = {
   [TIMESTAMP]: '2023-03-28T12:27:28.159Z',
   [EVENT_ACTION]: 'open',
@@ -168,9 +167,11 @@ const fetchedAlert1 = {
   [ALERT_CONSECUTIVE_MATCHES]: 0,
   [ALERT_DURATION]: 0,
   [ALERT_FLAPPING]: false,
+  [ALERT_MUTED]: false,
   [ALERT_FLAPPING_HISTORY]: [true],
   [ALERT_INSTANCE_ID]: '1',
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+  [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
   [ALERT_PENDING_RECOVERED_COUNT]: 0,
   [ALERT_RULE_CATEGORY]: 'My test rule',
   [ALERT_RULE_CONSUMER]: 'bar',
@@ -182,6 +183,7 @@ const fetchedAlert1 = {
   [ALERT_RULE_TYPE_ID]: 'test.rule-type',
   [ALERT_RULE_TAGS]: ['rule-', '-tags'],
   [ALERT_RULE_UUID]: '1',
+  [ALERT_SNOOZED]: false,
   [ALERT_START]: '2023-03-28T12:27:28.159Z',
   [ALERT_STATUS]: 'active',
   [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z' },
@@ -200,9 +202,11 @@ const fetchedAlert2 = {
   [ALERT_CONSECUTIVE_MATCHES]: 0,
   [ALERT_DURATION]: 36000000000,
   [ALERT_FLAPPING]: false,
+  [ALERT_MUTED]: false,
   [ALERT_FLAPPING_HISTORY]: [true, false],
   [ALERT_INSTANCE_ID]: '2',
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+  [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
   [ALERT_PENDING_RECOVERED_COUNT]: 0,
   [ALERT_RULE_CATEGORY]: 'My test rule',
   [ALERT_RULE_CONSUMER]: 'bar',
@@ -214,6 +218,7 @@ const fetchedAlert2 = {
   [ALERT_RULE_TYPE_ID]: 'test.rule-type',
   [ALERT_RULE_TAGS]: ['rule-', '-tags'],
   [ALERT_RULE_UUID]: '1',
+  [ALERT_SNOOZED]: false,
   [ALERT_START]: '2023-03-28T02:27:28.159Z',
   [ALERT_STATUS]: 'active',
   [ALERT_TIME_RANGE]: { gte: '2023-03-28T02:27:28.159Z' },
@@ -240,9 +245,11 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_CONSECUTIVE_MATCHES]: 1,
   [ALERT_DURATION]: 0,
   [ALERT_FLAPPING]: false,
+  [ALERT_MUTED]: false,
   [ALERT_FLAPPING_HISTORY]: [true],
   [ALERT_INSTANCE_ID]: '1',
   [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-id1', 'test-id2'],
+  [ALERT_MAINTENANCE_WINDOW_NAMES]: ['test-name1', 'test-name2'],
   [ALERT_PENDING_RECOVERED_COUNT]: 0,
   [ALERT_RULE_CATEGORY]: 'My test rule',
   [ALERT_RULE_CONSUMER]: 'bar',
@@ -256,6 +263,7 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_RULE_TAGS]: ['rule-', '-tags'],
   [ALERT_RULE_UUID]: '1',
   [ALERT_SEVERITY_IMPROVING]: false,
+  [ALERT_SNOOZED]: false,
   [ALERT_START]: date,
   [ALERT_STATUS]: 'active',
   [ALERT_TIME_RANGE]: { gte: date },
@@ -268,15 +276,16 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
 });
 
 const getOngoingIndexedAlertDoc = (overrides = {}) => ({
-  ...getNewIndexedAlertDoc(),
+  ...omit(getNewIndexedAlertDoc(), ALERT_SEVERITY_IMPROVING),
   [EVENT_ACTION]: 'active',
   [ALERT_DURATION]: 36000000000,
   [ALERT_FLAPPING_HISTORY]: [true, false],
   [ALERT_START]: '2023-03-28T12:27:28.159Z',
   [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z' },
   [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
-  [ALERT_SEVERITY_IMPROVING]: undefined,
+  [ALERT_SNOOZED]: false,
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+  [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
   [ALERT_PENDING_RECOVERED_COUNT]: 0,
   ...overrides,
 });
@@ -295,6 +304,7 @@ const getRecoveredIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
   [ALERT_SEVERITY_IMPROVING]: true,
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+  [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
   [ALERT_PENDING_RECOVERED_COUNT]: 0,
   ...overrides,
 });
@@ -327,6 +337,12 @@ const fakeRequest = {
 const ruleInfo = `for test.rule-type:1 'rule-name'`;
 const logTags = { tags: ['test.rule-type', '1', 'alerts-client'] };
 
+type InnerHit = { count?: number; url?: string } & (
+  | typeof fetchedAlert1
+  | typeof fetchedAlert2
+  | typeof fetchedAlert3
+);
+
 describe('Alerts Client', () => {
   let alertsClientParams: AlertsClientParams;
   let determineDelayedAlertsOpts: DetermineDelayedAlertsOpts;
@@ -347,6 +363,7 @@ describe('Alerts Client', () => {
     describe(`using ${label} for alert indices`, () => {
       beforeEach(() => {
         jest.clearAllMocks();
+        jest.restoreAllMocks();
         logger = loggingSystemMock.createLogger();
         alertsClientParams = {
           alertingEventLogger,
@@ -370,6 +387,7 @@ describe('Alerts Client', () => {
               eventEndTime: new Date().toISOString(),
               status: MaintenanceWindowStatus.Running,
               id: 'test-id1',
+              title: 'test-name1',
             },
             {
               ...getMockMaintenanceWindow(),
@@ -377,6 +395,7 @@ describe('Alerts Client', () => {
               eventEndTime: new Date().toISOString(),
               status: MaintenanceWindowStatus.Running,
               id: 'test-id2',
+              title: 'test-name2',
             },
           ],
           maintenanceWindowsWithoutScopedQueryIds: ['test-id1', 'test-id2'],
@@ -457,47 +476,21 @@ describe('Alerts Client', () => {
         });
 
         test('should query for alerts', async () => {
-          const spy = jest
-            .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
-            .mockImplementation(() => mockLegacyAlertsClient);
-
-          const alertsClient = new AlertsClient(alertsClientParams);
-
-          const executionOptionsWithAlerts = {
-            ...defaultExecutionOpts,
-            activeAlertsFromState: { '1': trackedAlert1Raw, '2': trackedAlert2Raw },
-            recoveredAlertsFromState: { '3': trackedAlert3Raw },
-          };
-
-          await alertsClient.initializeExecution(executionOptionsWithAlerts);
-          expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(
-            executionOptionsWithAlerts
-          );
-
-          expect(clusterClient.search).toHaveBeenCalledWith({
-            query: {
-              bool: {
-                filter: [
-                  { term: { [ALERT_RULE_UUID]: '1' } },
-                  { terms: { [ALERT_UUID]: ['abc', 'def', 'xyz'] } },
-                ],
-              },
+          clusterClient.search.mockResolvedValueOnce({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  fields: { [ALERT_RULE_EXECUTION_UUID]: ['exec-uuid-1'] },
+                },
+              ],
             },
-            seq_no_primary_term: true,
-            index: useDataStreamForAlerts
-              ? '.alerts-test.alerts-default'
-              : '.internal.alerts-test.alerts-default-*',
-            ignore_unavailable: true,
-            sort: {
-              'kibana.alert.start': 'desc',
-            },
-            size: 3,
           });
-
-          spy.mockRestore();
-        });
-
-        test('should query for alerts with execution uuid when provided', async () => {
           const spy = jest
             .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
             .mockImplementation(() => mockLegacyAlertsClient);
@@ -506,26 +499,119 @@ describe('Alerts Client', () => {
 
           await alertsClient.initializeExecution({
             ...defaultExecutionOpts,
-            trackedExecutions: ['1234'],
           });
           expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith({
             ...defaultExecutionOpts,
-            trackedExecutions: ['1234'],
           });
 
-          expect(clusterClient.search).toHaveBeenCalledWith({
+          expect(clusterClient.search).toHaveBeenNthCalledWith(1, {
+            size: 20,
+            ignore_unavailable: true,
+            index: useDataStreamForAlerts
+              ? '.alerts-test.alerts-default'
+              : '.internal.alerts-test.alerts-default-*',
             query: {
               bool: {
                 must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
-                filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: ['1234'] } }],
               },
             },
+            collapse: {
+              field: ALERT_RULE_EXECUTION_UUID,
+            },
+            _source: false,
+            sort: [{ [TIMESTAMP]: { order: 'desc' } }],
+          });
+
+          expect(clusterClient.search).toHaveBeenNthCalledWith(2, {
+            size: 2000,
+            ignore_unavailable: true,
             seq_no_primary_term: true,
             index: useDataStreamForAlerts
               ? '.alerts-test.alerts-default'
               : '.internal.alerts-test.alerts-default-*',
+            query: {
+              bool: {
+                must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
+                must_not: [{ term: { [ALERT_STATUS]: ALERT_STATUS_UNTRACKED } }],
+                filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: ['exec-uuid-1'] } }],
+              },
+            },
+          });
+
+          spy.mockRestore();
+        });
+
+        test('should query for alerts and filter out null execution uuids', async () => {
+          clusterClient.search.mockResolvedValueOnce({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  fields: { [ALERT_RULE_EXECUTION_UUID]: ['exec-uuid-1'] },
+                },
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  fields: { [ALERT_RULE_EXECUTION_UUID]: [null] },
+                },
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  fields: { [ALERT_RULE_EXECUTION_UUID]: null },
+                },
+              ],
+            },
+          });
+          const spy = jest
+            .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
+            .mockImplementation(() => mockLegacyAlertsClient);
+
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+          });
+          expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith({
+            ...defaultExecutionOpts,
+          });
+
+          expect(clusterClient.search).toHaveBeenNthCalledWith(1, {
+            size: 20,
             ignore_unavailable: true,
+            index: useDataStreamForAlerts
+              ? '.alerts-test.alerts-default'
+              : '.internal.alerts-test.alerts-default-*',
+            query: {
+              bool: {
+                must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
+              },
+            },
+            collapse: {
+              field: ALERT_RULE_EXECUTION_UUID,
+            },
+            _source: false,
+            sort: [{ [TIMESTAMP]: { order: 'desc' } }],
+          });
+
+          expect(clusterClient.search).toHaveBeenNthCalledWith(2, {
             size: 2000,
+            ignore_unavailable: true,
+            seq_no_primary_term: true,
+            index: useDataStreamForAlerts
+              ? '.alerts-test.alerts-default'
+              : '.internal.alerts-test.alerts-default-*',
+            query: {
+              bool: {
+                must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
+                must_not: [{ term: { [ALERT_STATUS]: ALERT_STATUS_UNTRACKED } }],
+                filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: ['exec-uuid-1'] } }],
+              },
+            },
           });
 
           spy.mockRestore();
@@ -554,20 +640,16 @@ describe('Alerts Client', () => {
             .mockImplementation(() => mockLegacyAlertsClient);
 
           const alertsClient = new AlertsClient(alertsClientParams);
-          const executionOptionsWithUuid = {
-            ...defaultExecutionOpts,
-            trackedExecutions: ['1234'],
-          };
 
           try {
-            await alertsClient.initializeExecution(executionOptionsWithUuid);
+            await alertsClient.initializeExecution(defaultExecutionOpts);
           } catch (e) {
             spy.mockRestore();
             expect(e.message).toBe(`search failed!`);
           }
 
           expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(
-            executionOptionsWithUuid
+            defaultExecutionOpts
           );
 
           expect(logger.error).toHaveBeenCalledWith(
@@ -576,94 +658,6 @@ describe('Alerts Client', () => {
           );
 
           spy.mockRestore();
-        });
-
-        test('should generate tracked executions from the alerts when fetched by alert uuids', async () => {
-          clusterClient.search.mockResolvedValue({
-            took: 10,
-            timed_out: false,
-            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
-            hits: {
-              total: { relation: 'eq', value: 2 },
-              hits: [
-                {
-                  _id: 'abc',
-                  _index: '.internal.alerts-test.alerts-default-000001',
-                  _seq_no: 41,
-                  _primary_term: 665,
-                  _source: fetchedAlert1,
-                },
-                {
-                  _id: 'def',
-                  _index: '.internal.alerts-test.alerts-default-000002',
-                  _seq_no: 42,
-                  _primary_term: 666,
-                  _source: fetchedAlert2,
-                },
-                {
-                  _id: 'xyz',
-                  _index: '.internal.alerts-test.alerts-default-000002',
-                  _seq_no: 43,
-                  _primary_term: 667,
-                  _source: fetchedAlert3,
-                },
-              ],
-            },
-          });
-
-          const alertsClient = new AlertsClient(alertsClientParams);
-
-          await alertsClient.initializeExecution({
-            ...defaultExecutionOpts,
-            activeAlertsFromState: {
-              '1': trackedAlert1Raw,
-              '2': trackedAlert2Raw,
-              '3': trackedAlert3Raw,
-            },
-          });
-
-          expect(alertsClient.getTrackedExecutions()).toEqual(
-            new Set([
-              '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-              '34lrfhw-645g-as67-sdf5-2534fvf8vfnjks',
-            ])
-          );
-        });
-
-        test('should generate tracked executions from the state when fetched by execution uuids', async () => {
-          clusterClient.search.mockResolvedValue({
-            took: 10,
-            timed_out: false,
-            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
-            hits: {
-              total: { relation: 'eq', value: 2 },
-              hits: [
-                {
-                  _id: 'abc',
-                  _index: '.internal.alerts-test.alerts-default-000001',
-                  _seq_no: 41,
-                  _primary_term: 665,
-                  _source: fetchedAlert1,
-                },
-                {
-                  _id: 'def',
-                  _index: '.internal.alerts-test.alerts-default-000002',
-                  _seq_no: 42,
-                  _primary_term: 666,
-                  _source: fetchedAlert2,
-                },
-              ],
-            },
-          });
-
-          const alertsClient = new AlertsClient(alertsClientParams);
-
-          await alertsClient.initializeExecution({
-            ...defaultExecutionOpts,
-            trackedExecutions: ['111', '222', '333'],
-          });
-
-          expect(alertsClient.getTrackedExecutions()).toEqual(new Set(['111', '222', '333']));
         });
       });
 
@@ -717,41 +711,6 @@ describe('Alerts Client', () => {
           });
         });
 
-        test('should index new alerts even if updatePersistedAlertsWithMaintenanceWindowIds fails', async () => {
-          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
-            ...alertsClientParams,
-            isServerless: true,
-          });
-
-          await alertsClient.initializeExecution(defaultExecutionOpts);
-
-          // Report 2 new alerts
-          const alertExecutorService = alertsClient.factory();
-          alertExecutorService.create('1').scheduleActions('default');
-          alertExecutorService.create('2').scheduleActions('default');
-
-          await alertsClient.processAlerts();
-          alertsClient.determineFlappingAlerts();
-          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
-          alertsClient.logAlerts(logAlertsOpts);
-
-          maintenanceWindowsService.getMaintenanceWindows.mockRejectedValue(
-            'Failed to fetch maintenance windows'
-          );
-
-          const result = await alertsClient.persistAlerts();
-
-          expect(logger.error).toHaveBeenCalledWith(
-            'Error updating maintenance window IDs:',
-            'Failed to fetch maintenance windows'
-          );
-
-          expect(result).toEqual({
-            alertIds: [],
-            maintenanceWindowIds: [],
-          });
-        });
-
         test('should index new alerts with refresh: true in stateless', async () => {
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
             ...alertsClientParams,
@@ -801,7 +760,7 @@ describe('Alerts Client', () => {
           });
         });
 
-        test('should not index new alerts if the activeCount is less than the rule alertDelay', async () => {
+        test('should set alert status "delayed" if activeCount is less than the rule alertDelay', async () => {
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
             ...alertsClientParams,
             rule: { ...alertsClientParams.rule, alertDelay: 3 },
@@ -811,22 +770,15 @@ describe('Alerts Client', () => {
 
           // Report 1 new alerts
           const alertExecutorService = alertsClient.factory();
-          alertExecutorService.create('1').scheduleActions('default');
+          const alert = alertExecutorService.create('1').scheduleActions('default');
 
           await alertsClient.processAlerts();
           alertsClient.determineFlappingAlerts();
-          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
-          alertsClient.logAlerts(logAlertsOpts);
+          alertsClient.determineDelayedAlerts({ ...determineDelayedAlertsOpts, alertDelay: 3 });
 
           await alertsClient.persistAlerts();
 
-          expect(clusterClient.bulk).not.toHaveBeenCalled();
-          expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
-            eventLogger: alertingEventLogger,
-            request: fakeRequest,
-            ruleTypeCategory: 'test',
-            spaceId: 'space1',
-          });
+          expect(alert.isDelayed()).toBe(true);
         });
 
         test('should update ongoing alerts in existing index', async () => {
@@ -835,7 +787,7 @@ describe('Alerts Client', () => {
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 1 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
@@ -847,6 +799,7 @@ describe('Alerts Client', () => {
               ],
             },
           });
+
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
@@ -888,7 +841,10 @@ describe('Alerts Client', () => {
                 },
               },
               // ongoing alert doc
-              getOngoingIndexedAlertDoc({ [ALERT_UUID]: 'abc' }),
+              getOngoingIndexedAlertDoc({
+                [ALERT_UUID]: 'abc',
+                [ALERT_STATE_NAMESPACE]: { foo: true },
+              }),
               {
                 create: { _id: uuid2, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
               },
@@ -910,18 +866,19 @@ describe('Alerts Client', () => {
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 1 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
                   _index: '.internal.alerts-test.alerts-default-000001',
                   _seq_no: 41,
                   _primary_term: 665,
-                  _source: expandFlattenedAlert(fetchedAlert1),
+                  _source: expandFlattenedAlert(fetchedAlert1) as InnerHit,
                 },
               ],
             },
           });
+
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
@@ -981,6 +938,8 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
+                [ALERT_MUTED]: false,
                 [ALERT_PENDING_RECOVERED_COUNT]: 0,
                 [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_RULE_CATEGORY]: 'My test rule',
@@ -993,12 +952,14 @@ describe('Alerts Client', () => {
                 [ALERT_RULE_TYPE_ID]: 'test.rule-type',
                 [ALERT_RULE_TAGS]: ['rule-', '-tags'],
                 [ALERT_RULE_UUID]: '1',
+                [ALERT_SNOOZED]: false,
                 [ALERT_STATUS]: 'active',
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z' },
                 [ALERT_WORKFLOW_STATUS]: 'open',
                 [SPACE_IDS]: ['default'],
                 [VERSION]: '8.9.0',
                 [TAGS]: ['rule-', '-tags'],
+                [ALERT_STATE_NAMESPACE]: { foo: true },
               },
               {
                 create: { _id: uuid2, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
@@ -1042,7 +1003,7 @@ describe('Alerts Client', () => {
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 1 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
@@ -1052,6 +1013,7 @@ describe('Alerts Client', () => {
               ],
             },
           });
+
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
@@ -1075,13 +1037,14 @@ describe('Alerts Client', () => {
 
           await alertsClient.persistAlerts();
 
-          expect(spy).toHaveBeenCalledTimes(5);
+          expect(spy).toHaveBeenCalledTimes(4);
           expect(spy).toHaveBeenNthCalledWith(1, 'active');
-          expect(spy).toHaveBeenNthCalledWith(2, 'recovered');
-          expect(spy).toHaveBeenNthCalledWith(3, 'new');
+          expect(spy).toHaveBeenNthCalledWith(2, 'delayed');
+          expect(spy).toHaveBeenNthCalledWith(3, 'recovered');
+          expect(spy).toHaveBeenNthCalledWith(4, 'delayed');
 
           expect(logger.error).toHaveBeenCalledWith(
-            `Error writing alert(2) to .alerts-test.alerts-default - alert(2) doesn't exist in active alerts ${ruleInfo}.`,
+            `Error writing alert(2) to .alerts-test.alerts-default - alert(2) doesn't exist in active or delayed alerts ${ruleInfo}.`,
             logTags
           );
           spy.mockRestore();
@@ -1098,7 +1061,11 @@ describe('Alerts Client', () => {
                 },
               },
               // ongoing alert doc
-              getOngoingIndexedAlertDoc({ [ALERT_UUID]: 'abc', [ALERT_CONSECUTIVE_MATCHES]: 0 }),
+              getOngoingIndexedAlertDoc({
+                [ALERT_UUID]: 'abc',
+                [ALERT_CONSECUTIVE_MATCHES]: 0,
+                [ALERT_STATE_NAMESPACE]: { foo: true },
+              }),
             ],
           });
           expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
@@ -1115,7 +1082,7 @@ describe('Alerts Client', () => {
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 2 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
@@ -1134,6 +1101,7 @@ describe('Alerts Client', () => {
               ],
             },
           });
+
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
@@ -1183,12 +1151,16 @@ describe('Alerts Client', () => {
                 [ALERT_DURATION]: 72000000000,
                 [ALERT_START]: '2023-03-28T02:27:28.159Z',
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T02:27:28.159Z' },
+                [ALERT_STATE_NAMESPACE]: { foo: true },
               }),
               {
                 create: { _id: uuid3, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
               },
               // new alert doc
-              getNewIndexedAlertDoc({ [ALERT_UUID]: uuid3, [ALERT_INSTANCE_ID]: '3' }),
+              getNewIndexedAlertDoc({
+                [ALERT_UUID]: uuid3,
+                [ALERT_INSTANCE_ID]: '3',
+              }),
               {
                 index: {
                   _id: 'abc',
@@ -1199,7 +1171,10 @@ describe('Alerts Client', () => {
                 },
               },
               // recovered alert doc
-              getRecoveredIndexedAlertDoc({ [ALERT_UUID]: 'abc' }),
+              getRecoveredIndexedAlertDoc({
+                [ALERT_UUID]: 'abc',
+                [ALERT_STATE_NAMESPACE]: { foo: true },
+              }),
             ],
           });
           expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
@@ -1216,25 +1191,26 @@ describe('Alerts Client', () => {
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 2 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
                   _index: '.internal.alerts-test.alerts-default-000001',
                   _seq_no: 41,
                   _primary_term: 665,
-                  _source: expandFlattenedAlert(fetchedAlert1),
+                  _source: expandFlattenedAlert(fetchedAlert1) as InnerHit,
                 },
                 {
                   _id: 'def',
                   _index: '.internal.alerts-test.alerts-default-000002',
                   _seq_no: 42,
                   _primary_term: 666,
-                  _source: expandFlattenedAlert(fetchedAlert2),
+                  _source: expandFlattenedAlert(fetchedAlert2) as InnerHit,
                 },
               ],
             },
           });
+
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
@@ -1295,6 +1271,8 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false, false, false],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
+                [ALERT_MUTED]: false,
                 [ALERT_PENDING_RECOVERED_COUNT]: 0,
                 [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_RULE_CATEGORY]: 'My test rule',
@@ -1307,12 +1285,14 @@ describe('Alerts Client', () => {
                 [ALERT_RULE_TYPE_ID]: 'test.rule-type',
                 [ALERT_RULE_TAGS]: ['rule-', '-tags'],
                 [ALERT_RULE_UUID]: '1',
+                [ALERT_SNOOZED]: false,
                 [ALERT_STATUS]: 'active',
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T02:27:28.159Z' },
                 [ALERT_WORKFLOW_STATUS]: 'open',
                 [SPACE_IDS]: ['default'],
                 [VERSION]: '8.9.0',
                 [TAGS]: ['rule-', '-tags'],
+                [ALERT_STATE_NAMESPACE]: { foo: true },
               },
               {
                 create: { _id: uuid3, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
@@ -1348,9 +1328,12 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, true],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
+                [ALERT_MUTED]: false,
                 [ALERT_PENDING_RECOVERED_COUNT]: 0,
                 [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_SEVERITY_IMPROVING]: true,
+                [ALERT_SNOOZED]: false,
                 [ALERT_START]: '2023-03-28T12:27:28.159Z',
                 [ALERT_END]: date,
                 [ALERT_STATUS]: 'recovered',
@@ -1359,6 +1342,9 @@ describe('Alerts Client', () => {
                 [SPACE_IDS]: ['default'],
                 [VERSION]: '8.9.0',
                 [TAGS]: ['rule-', '-tags'],
+                [ALERT_STATE_NAMESPACE]: {
+                  foo: true,
+                },
               },
             ],
           });
@@ -1376,7 +1362,7 @@ describe('Alerts Client', () => {
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 2 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
@@ -1395,6 +1381,7 @@ describe('Alerts Client', () => {
               ],
             },
           });
+
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
@@ -1447,6 +1434,9 @@ describe('Alerts Client', () => {
                 [ALERT_DURATION]: 37951841000,
                 [ALERT_START]: '2023-03-28T02:27:28.159Z',
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T02:27:28.159Z' },
+                [ALERT_STATE_NAMESPACE]: {
+                  foo: true,
+                },
               }),
               {
                 create: { _id: uuid3, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
@@ -1477,6 +1467,9 @@ describe('Alerts Client', () => {
                 [ALERT_UUID]: 'abc',
                 [ALERT_END]: startedAtDate,
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: startedAtDate },
+                [ALERT_STATE_NAMESPACE]: {
+                  foo: true,
+                },
               }),
             ],
           });
@@ -1490,12 +1483,13 @@ describe('Alerts Client', () => {
 
         test('should use runTimestamp time if provided', async () => {
           const runTimestamp = '2023-10-01T00:00:00.000Z';
+
           clusterClient.search.mockResolvedValue({
             took: 10,
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 2 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
@@ -1514,6 +1508,7 @@ describe('Alerts Client', () => {
               ],
             },
           });
+
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
@@ -1567,6 +1562,9 @@ describe('Alerts Client', () => {
                 [ALERT_DURATION]: 37951841000,
                 [ALERT_START]: '2023-03-28T02:27:28.159Z',
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T02:27:28.159Z' },
+                [ALERT_STATE_NAMESPACE]: {
+                  foo: true,
+                },
               }),
               {
                 create: { _id: uuid3, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
@@ -1597,6 +1595,9 @@ describe('Alerts Client', () => {
                 [ALERT_UUID]: 'abc',
                 [ALERT_END]: startedAtDate,
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: startedAtDate },
+                [ALERT_STATE_NAMESPACE]: {
+                  foo: true,
+                },
               }),
             ],
           });
@@ -1710,7 +1711,7 @@ describe('Alerts Client', () => {
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 2 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
@@ -1729,6 +1730,7 @@ describe('Alerts Client', () => {
               ],
             },
           });
+
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
@@ -1775,6 +1777,9 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING_HISTORY]: [true, false, false, false],
                 [ALERT_START]: '2023-03-28T02:27:28.159Z',
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T02:27:28.159Z' },
+                [ALERT_STATE_NAMESPACE]: {
+                  foo: true,
+                },
               }),
             ],
           });
@@ -1867,10 +1872,7 @@ describe('Alerts Client', () => {
             alertsClientParams
           );
 
-          expect(await alertsClient.persistAlerts()).toStrictEqual({
-            alertIds: [],
-            maintenanceWindowIds: [],
-          });
+          await alertsClient.persistAlerts();
 
           expect(logger.debug).toHaveBeenCalledWith(
             `Resources registered and installed for test context but "shouldWrite" is set to false ${ruleInfo}.`,
@@ -1916,6 +1918,479 @@ describe('Alerts Client', () => {
 
           await expect(alertsClient.persistAlerts()).rejects.toThrowError(
             'index [.internal.alerts-default.alerts-default-000001] blocked by: [FORBIDDEN/8/index write (api)];'
+          );
+        });
+      });
+
+      describe('getBuiltActiveAlertDataByInstanceId()', () => {
+        test('returns undefined before persistAlerts() has been called', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('1')).toBeUndefined();
+        });
+
+        test('returns built alert document by instance ID after persistAlerts()', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+          alertExecutorService.create('2').scheduleActions('default');
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          const doc1 = alertsClient.getBuiltActiveAlertDataByInstanceId('1');
+          const doc2 = alertsClient.getBuiltActiveAlertDataByInstanceId('2');
+
+          expect(doc1).toEqual(expect.objectContaining({ [ALERT_INSTANCE_ID]: '1' }));
+          expect(doc2).toEqual(expect.objectContaining({ [ALERT_INSTANCE_ID]: '2' }));
+        });
+
+        test('returns undefined for an instance ID not present in the built alerts', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('unknown-id')).toBeUndefined();
+        });
+
+        test('does not cache recovered alerts', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+          // Seed a tracked ongoing alert so it can recover this run
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            activeAlertsFromState: {
+              '1': {
+                state: {},
+                meta: {
+                  uuid: 'uuid-1',
+                  flappingHistory: [],
+                  flapping: false,
+                  pendingRecoveredCount: 0,
+                  activeCount: 1,
+                },
+              },
+            },
+          });
+          // Do not schedule any actions → alert '1' recovers
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          // Recovered alerts are not in the cache — only active alerts matter for
+          // condition-based snooze evaluation.
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('1')).toBeUndefined();
+        });
+
+        test('caches only active alert when both active and recovered alerts exist in the same execution', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+          // Seed alert '1' as tracked so it can recover, alert '2' will be new/active
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            activeAlertsFromState: {
+              '1': {
+                state: {},
+                meta: {
+                  uuid: 'uuid-1',
+                  flappingHistory: [],
+                  flapping: false,
+                  pendingRecoveredCount: 0,
+                  activeCount: 1,
+                },
+              },
+            },
+          });
+          // '1' is not re-scheduled → it recovers; '2' fires for the first time
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('2').scheduleActions('default');
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          // '1' is recovered — must not be in the cache
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('1')).toBeUndefined();
+          // '2' is active — must be in the cache
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('2')).toBeDefined();
+        });
+
+        test('cache is cleared and repopulated on each persistAlerts() call', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+          alertExecutorService.create('2').scheduleActions('default');
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('1')).toBeDefined();
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('2')).toBeDefined();
+
+          // Simulate a second execution where the cache is reset
+          await alertsClient.persistAlerts();
+          // Cache still has both (same alerts were re-built)
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('1')).toBeDefined();
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('2')).toBeDefined();
+        });
+      });
+
+      describe('clearSnoozedStatusForAlerts()', () => {
+        const snoozedInstanceId = '1';
+        const snoozedRuleData = {
+          ...alertRuleData,
+          snoozedInstances: [
+            {
+              instanceId: snoozedInstanceId,
+              snoozedAt: '2024-01-01T00:00:00.000Z',
+              snoozedBy: 'test_user',
+            },
+          ],
+        };
+
+        const setupAndPersist = async (ruleData = snoozedRuleData) => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+            ...alertsClientParams,
+            rule: ruleData,
+          });
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create(snoozedInstanceId).scheduleActions('default');
+          alertExecutorService.create('2').scheduleActions('default');
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+          await alertsClient.persistAlerts();
+          return alertsClient;
+        };
+
+        test('calls updateByQuery to set kibana.alert.snoozed=false for condition-expired instances', async () => {
+          clusterClient.updateByQuery.mockResolvedValueOnce({
+            failures: [],
+            updated: 1,
+            total: 1,
+          });
+          const alertsClient = await setupAndPersist();
+
+          const doc = alertsClient.getBuiltActiveAlertDataByInstanceId(snoozedInstanceId);
+          expect(doc).toBeDefined();
+          expect(doc![ALERT_SNOOZED]).toBe(true);
+
+          const uuid = doc![ALERT_UUID] as string;
+          await alertsClient.clearSnoozedStatusForAlerts([snoozedInstanceId]);
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
+            conflicts: 'proceed',
+            index: '.alerts-test.alerts-default',
+            query: { terms: { _id: [uuid] } },
+            refresh: true,
+            script: {
+              lang: 'painless',
+              source: `ctx._source['${ALERT_SNOOZED}'] = false;`,
+            },
+          });
+        });
+
+        test('updates the in-memory cache to reflect the cleared snooze status', async () => {
+          clusterClient.updateByQuery.mockResolvedValueOnce({
+            failures: [],
+            updated: 1,
+            total: 1,
+          });
+          const alertsClient = await setupAndPersist();
+
+          expect(
+            alertsClient.getBuiltActiveAlertDataByInstanceId(snoozedInstanceId)![ALERT_SNOOZED]
+          ).toBe(true);
+
+          await alertsClient.clearSnoozedStatusForAlerts([snoozedInstanceId]);
+
+          expect(
+            alertsClient.getBuiltActiveAlertDataByInstanceId(snoozedInstanceId)![ALERT_SNOOZED]
+          ).toBe(false);
+        });
+
+        test('does nothing when conditionExpiredInstanceIds is empty', async () => {
+          const alertsClient = await setupAndPersist();
+
+          await alertsClient.clearSnoozedStatusForAlerts([]);
+
+          expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
+        });
+
+        test('does nothing when ruleType.alerts.shouldWrite is false', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+            ...alertsClientParams,
+            rule: snoozedRuleData,
+            ruleType: { ...ruleType, alerts: { ...ruleType.alerts!, shouldWrite: false } },
+          });
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create(snoozedInstanceId).scheduleActions('default');
+          await alertsClient.processAlerts();
+          // persistAlerts() short-circuits when shouldWrite is false, so cache is empty
+          await alertsClient.persistAlerts();
+
+          await alertsClient.clearSnoozedStatusForAlerts([snoozedInstanceId]);
+
+          expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
+        });
+
+        test('skips instance IDs not present in the built alert cache', async () => {
+          clusterClient.updateByQuery.mockResolvedValueOnce({
+            failures: [],
+            updated: 1,
+            total: 1,
+          });
+          const alertsClient = await setupAndPersist();
+
+          // 'unknown-id' was never built, 'snoozedInstanceId' was
+          await alertsClient.clearSnoozedStatusForAlerts(['unknown-id', snoozedInstanceId]);
+
+          const callArgs = clusterClient.updateByQuery.mock.calls[0][0] as unknown as {
+            query: { terms: { _id: string[] } };
+          };
+          // Only the known instance's UUID should be in the query
+          expect(callArgs.query.terms._id).toHaveLength(1);
+        });
+
+        test('does nothing when no cached instance matches any of the provided IDs', async () => {
+          const alertsClient = await setupAndPersist();
+
+          await alertsClient.clearSnoozedStatusForAlerts(['unknown-id-1', 'unknown-id-2']);
+
+          expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
+        });
+
+        test('logs error and swallows when updateByQuery fails', async () => {
+          clusterClient.updateByQuery.mockRejectedValueOnce(new Error('ES unavailable'));
+          const alertsClient = await setupAndPersist();
+
+          await expect(
+            alertsClient.clearSnoozedStatusForAlerts([snoozedInstanceId])
+          ).resolves.toBeUndefined();
+
+          expect(logger.error).toHaveBeenCalledWith(
+            expect.stringContaining('Error clearing snoozed status for condition-expired alerts'),
+            logTags
+          );
+        });
+      });
+
+      describe('updatePersistedAlerts', () => {
+        test('should update the persistent alerts successfully', async () => {
+          clusterClient.updateByQuery.mockResponseOnce({
+            failures: [],
+            updated: 0,
+            total: 1,
+          });
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+            ...alertsClientParams,
+            isServerless: false,
+          });
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          // Report 2 new alerts
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService
+            .create('1')
+            .scheduleActions('default')
+            .updateLastScheduledActions('default');
+          alertExecutorService
+            .create('2')
+            .scheduleActions('default')
+            .updateLastScheduledActions('default');
+
+          await alertsClient.processAlerts();
+          await alertsClient.persistAlerts();
+
+          const { rawActiveAlerts } = alertsClient.getRawAlertInstancesForState();
+
+          const uuid1 = rawActiveAlerts['1'].meta!.uuid!;
+          const uuid2 = rawActiveAlerts['2'].meta!.uuid!;
+
+          await alertsClient.updatePersistedAlerts({
+            alertsToUpdateWithLastScheduledActions:
+              alertsClient.getAlertsToUpdateWithLastScheduledActions(),
+            alertsToUpdateWithMaintenanceWindows: {},
+          });
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(1);
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
+            conflicts: 'proceed',
+            index: '.alerts-test.alerts-default',
+            query: {
+              terms: {
+                _id: [uuid1, uuid2],
+              },
+            },
+            script: {
+              lang: 'painless',
+              params: {
+                toMaintenanceWindows: {},
+                toScheduledAction: {
+                  [uuid1]: {
+                    date: '2023-03-28T22:27:28.159Z',
+                    group: 'default',
+                  },
+                  [uuid2]: {
+                    date: '2023-03-28T22:27:28.159Z',
+                    group: 'default',
+                  },
+                },
+              },
+              source: `
+                if (params.toScheduledAction.containsKey(ctx._source['kibana.alert.uuid'])) {
+                  ctx._source['kibana.alert.scheduled_action.group'] = params.toScheduledAction[ctx._source['kibana.alert.uuid']].group;
+                  ctx._source['kibana.alert.scheduled_action.date'] = params.toScheduledAction[ctx._source['kibana.alert.uuid']].date;
+                  if (params.toScheduledAction[ctx._source['kibana.alert.uuid']].containsKey('throttling')) {
+                    ctx._source['kibana.alert.scheduled_action.throttling'] = params.toScheduledAction[ctx._source['kibana.alert.uuid']].throttling;
+                  }
+                }
+                if (params.toMaintenanceWindows.containsKey(ctx._source['kibana.alert.uuid'])) {
+                  ctx._source['kibana.alert.maintenance_window_ids'] = params.toMaintenanceWindows[ctx._source['kibana.alert.uuid']];
+                }
+              `,
+            },
+          });
+        });
+
+        test('should not call updateByQuery if there is no alert neither with last scheduled actions nor maintenance windows', async () => {
+          clusterClient.updateByQuery.mockResponseOnce({
+            failures: [],
+            updated: 0,
+            total: 1,
+          });
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+            ...alertsClientParams,
+            isServerless: false,
+          });
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          // Report 2 new alerts
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+          alertExecutorService.create('2').scheduleActions('default');
+
+          await alertsClient.processAlerts();
+          await alertsClient.persistAlerts();
+
+          await alertsClient.updatePersistedAlerts({
+            alertsToUpdateWithLastScheduledActions:
+              alertsClient.getAlertsToUpdateWithLastScheduledActions(),
+            alertsToUpdateWithMaintenanceWindows: {},
+          });
+
+          expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
+        });
+
+        test('should update alerts with new maintenance window Ids', async () => {
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          const alert1 = new Alert('1', { meta: { maintenanceWindowIds: ['mw1'] } });
+          const alert2 = new Alert('2', { meta: { maintenanceWindowIds: ['mw1', 'mw2'] } });
+          const alert3 = new Alert('3', { meta: { maintenanceWindowIds: ['mw2', 'mw3'] } });
+
+          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
+            '1': alert1,
+            '2': alert2,
+            '3': alert3,
+          });
+
+          // @ts-ignore
+          await alertsClient.updatePersistedAlerts({
+            alertsToUpdateWithLastScheduledActions: {},
+            alertsToUpdateWithMaintenanceWindows: {
+              [alert1.getUuid()]: ['mw1'],
+              [alert2.getUuid()]: ['mw1', 'mw2'],
+              [alert3.getUuid()]: ['mw2', 'mw3'],
+            },
+          });
+
+          const params = clusterClient.updateByQuery.mock.calls[0][0] as UpdateByQueryRequest;
+
+          expect(params.query).toEqual({
+            terms: {
+              _id: [alert1.getUuid(), alert2.getUuid(), alert3.getUuid()],
+            },
+          });
+
+          expect(params.script).toEqual({
+            source: expect.anything(),
+            lang: 'painless',
+            params: {
+              toScheduledAction: {},
+              toMaintenanceWindows: {
+                [alert1.getUuid()]: ['mw1'],
+                [alert2.getUuid()]: ['mw1', 'mw2'],
+                [alert3.getUuid()]: ['mw2', 'mw3'],
+              },
+            },
+          });
+        });
+
+        test('should call warn if ES errors with a non retryable error', async () => {
+          clusterClient.updateByQuery.mockRejectedValueOnce('something went wrong!');
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          const alert1 = new Alert('1', { meta: { maintenanceWindowIds: ['mw1'] } });
+
+          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
+            '1': alert1,
+          });
+
+          await expect(
+            // @ts-ignore
+            alertsClient.updatePersistedAlerts({
+              alertsToUpdateWithLastScheduledActions: {},
+              alertsToUpdateWithMaintenanceWindows: {
+                [alert1.getUuid()]: ['mw1'],
+              },
+            })
+          ).rejects.toBe('something went wrong!');
+
+          expect(logger.error).toHaveBeenCalledWith(
+            `Error updating alerts. (last scheduled actions or maintenance windows) for test.rule-type:1 'rule-name': something went wrong!`,
+            logTags
           );
         });
       });
@@ -2459,70 +2934,104 @@ describe('Alerts Client', () => {
         });
       });
 
-      describe('updateAlertMaintenanceWindowIds', () => {
-        test('should update alerts with new maintenance window Ids', async () => {
+      describe('getAlertsToUpdateWithMaintenanceWindows', () => {
+        test('should return alert IDs to update with maintenance windows', async () => {
+          const alert1 = new Alert('1');
+          const alert2 = new Alert('2');
+
+          const loggerSpy = jest
+            .spyOn(alertingEventLogger, 'setMaintenanceWindowIds')
+            .mockImplementation();
+
+          maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
+            maintenanceWindows: getParamsByUpdateMaintenanceWindowIds.maintenanceWindows,
+            maintenanceWindowsWithoutScopedQueryIds: [],
+          });
+
+          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
+            '1': alert1,
+            '2': alert2,
+          });
+
+          jest
+            // @ts-ignore
+            .spyOn(AlertsClient.prototype, 'getMaintenanceWindowScopedQueryAlerts')
+            // @ts-ignore
+            .mockResolvedValueOnce({
+              mw1: [alert1.getUuid(), alert2.getUuid()],
+              mw2: [alert2.getUuid()],
+            });
+
           const alertsClient = new AlertsClient(alertsClientParams);
 
-          const alert1 = new Alert('1', { meta: { maintenanceWindowIds: ['mw1'] } });
-          const alert2 = new Alert('2', { meta: { maintenanceWindowIds: ['mw1', 'mw2'] } });
-          const alert3 = new Alert('3', { meta: { maintenanceWindowIds: ['mw2', 'mw3'] } });
+          const result = await alertsClient.getAlertsToUpdateWithMaintenanceWindows();
+
+          expect(loggerSpy).toHaveBeenCalledWith(['mw1', 'mw2']);
+
+          expect(alert1.getMaintenanceWindowIds()).toEqual(['mw1']);
+          expect(alert2.getMaintenanceWindowIds()).toEqual(['mw1', 'mw2']);
+
+          expect(result).toEqual({
+            [alert1.getUuid()]: ['mw1'],
+            [alert2.getUuid()]: ['mw1', 'mw2'],
+          });
+        });
+
+        test('should skip loading maintenance windows when there are no alerts', async () => {
+          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({});
+          const msearchSpy = jest.spyOn(AlertsClient.prototype, 'msearch');
+
+          const alertsClient = new AlertsClient(alertsClientParams);
+          const result = await alertsClient.getAlertsToUpdateWithMaintenanceWindows();
+
+          expect(maintenanceWindowsService.getMaintenanceWindows).not.toHaveBeenCalled();
+          expect(msearchSpy).not.toHaveBeenCalled();
+
+          expect(result).toEqual({});
+        });
+
+        test('should not return alerts if none match the maintenance window scoped query', async () => {
+          maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
+            maintenanceWindows: [
+              ...getParamsByUpdateMaintenanceWindowIds.maintenanceWindows,
+              { id: 'mw3' } as unknown as MaintenanceWindow,
+            ],
+            maintenanceWindowsWithoutScopedQueryIds: [],
+          });
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          const alert1 = new Alert('1');
+          const alert2 = new Alert('2');
+          const alert3 = new Alert('3');
+          const alert4 = new Alert('4');
 
           jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
             '1': alert1,
             '2': alert2,
             '3': alert3,
+            '4': alert4,
           });
 
-          // @ts-ignore
-          await alertsClient.updateAlertMaintenanceWindowIds([
-            alert1.getUuid(),
-            alert2.getUuid(),
-            alert3.getUuid(),
-          ]);
-
-          const params = clusterClient.updateByQuery.mock.calls[0][0] as UpdateByQueryRequest;
-
-          expect(params.query).toEqual({
-            terms: {
-              _id: [alert1.getUuid(), alert2.getUuid(), alert3.getUuid()],
-            },
-          });
-
-          expect(params.script).toEqual({
-            source: expect.anything(),
-            lang: 'painless',
-            params: {
-              [alert1.getUuid()]: ['mw1'],
-              [alert2.getUuid()]: ['mw1', 'mw2'],
-              [alert3.getUuid()]: ['mw2', 'mw3'],
-            },
-          });
-        });
-
-        test('should call warn if ES errors', async () => {
-          clusterClient.updateByQuery.mockRejectedValueOnce('something went wrong!');
-          const alertsClient = new AlertsClient(alertsClientParams);
-
-          const alert1 = new Alert('1', { meta: { maintenanceWindowIds: ['mw1'] } });
-
-          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
-            '1': alert1,
-          });
-
-          await expect(
+          jest
             // @ts-ignore
-            alertsClient.updateAlertMaintenanceWindowIds([alert1.getUuid()])
-          ).rejects.toBe('something went wrong!');
+            .spyOn(AlertsClient.prototype, 'getMaintenanceWindowScopedQueryAlerts')
+            // @ts-ignore
+            .mockResolvedValueOnce({});
 
-          expect(logger.warn).toHaveBeenCalledWith(
-            `Error updating alert maintenance window IDs for test.rule-type:1 'rule-name': something went wrong!`,
-            logTags
-          );
+          const result = await alertsClient.getAlertsToUpdateWithMaintenanceWindows();
+
+          expect(alert1.getMaintenanceWindowIds()).toEqual([]);
+          expect(alert2.getMaintenanceWindowIds()).toEqual([]);
+          expect(alert3.getMaintenanceWindowIds()).toEqual([]);
+
+          expect(result).toEqual({});
         });
-      });
 
-      describe('updatePersistedAlertsWithMaintenanceWindowIds', () => {
-        test('should update alerts with MW ids when provided with maintenance windows', async () => {
+        test('should return alerts based on alert id with MW ids when provided with maintenance windows', async () => {
+          const loggerSpy = jest
+            .spyOn(alertingEventLogger, 'setMaintenanceWindowIds')
+            .mockImplementation();
+
           maintenanceWindowsService.getMaintenanceWindows.mockReturnValueOnce({
             maintenanceWindows: [
               ...getParamsByUpdateMaintenanceWindowIds.maintenanceWindows,
@@ -2553,29 +3062,122 @@ describe('Alerts Client', () => {
               mw2: [alert3.getUuid()],
             });
 
-          const updateSpy = jest
-            // @ts-ignore
-            .spyOn(AlertsClient.prototype, 'updateAlertMaintenanceWindowIds')
-            // @ts-ignore
-            .mockResolvedValueOnce({});
-
-          // @ts-ignore - accessing private function
-          const result = await alertsClient.updatePersistedAlertsWithMaintenanceWindowIds();
+          const result = await alertsClient.getAlertsToUpdateWithMaintenanceWindows();
 
           expect(alert1.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);
           expect(alert2.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);
           expect(alert3.getMaintenanceWindowIds()).toEqual(['mw3', 'mw2']);
 
           expect(result).toEqual({
-            alertIds: [alert1.getUuid(), alert2.getUuid(), alert3.getUuid()],
-            maintenanceWindowIds: ['mw3', 'mw1', 'mw2'],
+            [alert1.getUuid()]: ['mw3', 'mw1'],
+            [alert2.getUuid()]: ['mw3', 'mw1'],
+            [alert3.getUuid()]: ['mw3', 'mw2'],
           });
 
-          expect(updateSpy).toHaveBeenLastCalledWith([
-            alert1.getUuid(),
-            alert2.getUuid(),
-            alert3.getUuid(),
-          ]);
+          expect(loggerSpy).toHaveBeenCalledWith(['mw3', 'mw1', 'mw2']);
+        });
+      });
+
+      describe('getAlertsToUpdateWithLastScheduledActions()', () => {
+        test('should return alert IDs to update with last scheduled actions', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+            ...alertsClientParams,
+            isServerless: false,
+          });
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          // Report 2 new alerts
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService
+            .create('1')
+            .scheduleActions('default')
+            .updateLastScheduledActions('default');
+          alertExecutorService
+            .create('2')
+            .scheduleActions('default')
+            .updateLastScheduledActions('default', null, '111-2222');
+
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          const { rawActiveAlerts } = alertsClient.getRawAlertInstancesForState();
+          const uuid1 = rawActiveAlerts['1'].meta?.uuid as string;
+          const uuid2 = rawActiveAlerts['2'].meta?.uuid as string;
+          const result = await alertsClient.getAlertsToUpdateWithLastScheduledActions();
+
+          expect(Object.keys(rawActiveAlerts)).toHaveLength(2);
+          expect(result).toEqual({
+            [uuid1]: {
+              date: '2023-03-28T22:27:28.159Z',
+              group: 'default',
+            },
+            [uuid2]: {
+              date: '2023-03-28T22:27:28.159Z',
+              group: 'default',
+              throttling: {
+                '111-2222': {
+                  date: '2023-03-28T22:27:28.159Z',
+                },
+              },
+            },
+          });
+        });
+
+        test('should return an empty object if no alerts are found', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+            ...alertsClientParams,
+            isServerless: false,
+          });
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          await alertsClient.processAlerts();
+          await alertsClient.persistAlerts();
+
+          const result = await alertsClient.getAlertsToUpdateWithLastScheduledActions();
+
+          expect(result).toEqual({});
+        });
+
+        test('filter the alerts without last scheduled actions', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+            ...alertsClientParams,
+            isServerless: false,
+          });
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          // Report 2 new alerts
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService
+            .create('1')
+            .scheduleActions('default')
+            .updateLastScheduledActions('default');
+
+          // Does not update last scheduled actions for alert '2'
+          alertExecutorService.create('2').scheduleActions('default');
+
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          const result = await alertsClient.getAlertsToUpdateWithLastScheduledActions();
+          const { rawActiveAlerts } = alertsClient.getRawAlertInstancesForState();
+          const uuid1 = rawActiveAlerts['1'].meta?.uuid as string;
+
+          expect(result).toEqual({
+            [uuid1]: {
+              date: '2023-03-28T22:27:28.159Z',
+              group: 'default',
+            },
+          });
         });
       });
 
@@ -2815,9 +3417,11 @@ describe('Alerts Client', () => {
                 [ALERT_ACTION_GROUP]: 'default',
                 [ALERT_DURATION]: 0,
                 [ALERT_FLAPPING]: false,
+                [ALERT_MUTED]: false,
                 [ALERT_FLAPPING_HISTORY]: [true],
                 [ALERT_INSTANCE_ID]: '1',
                 [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-id1', 'test-id2'],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: ['test-name1', 'test-name2'],
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -2850,9 +3454,11 @@ describe('Alerts Client', () => {
                 [ALERT_ACTION_GROUP]: 'default',
                 [ALERT_DURATION]: 0,
                 [ALERT_FLAPPING]: false,
+                [ALERT_MUTED]: false,
                 [ALERT_FLAPPING_HISTORY]: [true],
                 [ALERT_INSTANCE_ID]: '2',
                 [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-id1', 'test-id2'],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: ['test-name1', 'test-name2'],
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -2929,14 +3535,15 @@ describe('Alerts Client', () => {
             [ALERT_INSTANCE_ID]: alertInstanceId,
             [ALERT_STATUS]: 'active',
             [ALERT_UUID]: 'abc',
-          };
+          } as InnerHit;
           const newClusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
           newClusterClient.search.mockResolvedValue({
             took: 10,
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 1 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
@@ -3098,9 +3705,11 @@ describe('Alerts Client', () => {
                 [ALERT_ACTION_GROUP]: 'default',
                 [ALERT_DURATION]: 0,
                 [ALERT_FLAPPING]: false,
+                [ALERT_MUTED]: false,
                 [ALERT_FLAPPING_HISTORY]: [true],
                 [ALERT_INSTANCE_ID]: '1',
                 [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-id1', 'test-id2'],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: ['test-name1', 'test-name2'],
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -3130,7 +3739,7 @@ describe('Alerts Client', () => {
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 1 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
@@ -3144,6 +3753,7 @@ describe('Alerts Client', () => {
               ],
             },
           });
+
           const alertsClient = new AlertsClient<
             { count: number; url: string },
             {},
@@ -3201,9 +3811,11 @@ describe('Alerts Client', () => {
                 [ALERT_ACTION_GROUP]: 'default',
                 [ALERT_DURATION]: 36000000000,
                 [ALERT_FLAPPING]: false,
+                [ALERT_MUTED]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false],
                 [ALERT_INSTANCE_ID]: '1',
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -3222,6 +3834,7 @@ describe('Alerts Client', () => {
                 [SPACE_IDS]: ['default'],
                 [VERSION]: '8.9.0',
                 [TAGS]: ['rule-', '-tags'],
+                [ALERT_STATE_NAMESPACE]: { foo: true },
               },
             ],
           });
@@ -3233,7 +3846,7 @@ describe('Alerts Client', () => {
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 1 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
@@ -3249,6 +3862,7 @@ describe('Alerts Client', () => {
               ],
             },
           });
+
           const alertsClient = new AlertsClient<
             { count: number; url: string },
             {},
@@ -3304,9 +3918,11 @@ describe('Alerts Client', () => {
                 [ALERT_DURATION]: 36000000000,
                 [ALERT_END]: date,
                 [ALERT_FLAPPING]: false,
+                [ALERT_MUTED]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, true],
                 [ALERT_INSTANCE_ID]: '1',
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -3325,6 +3941,7 @@ describe('Alerts Client', () => {
                 [SPACE_IDS]: ['default'],
                 [VERSION]: '8.9.0',
                 [TAGS]: ['rule-', '-tags'],
+                [ALERT_STATE_NAMESPACE]: { foo: true },
               },
             ],
           });
@@ -3357,7 +3974,7 @@ describe('Alerts Client', () => {
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 1 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
@@ -3369,6 +3986,7 @@ describe('Alerts Client', () => {
               ],
             },
           });
+
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
@@ -3429,6 +4047,7 @@ describe('Alerts Client', () => {
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
+
           clusterClient.search.mockResolvedValue({
             took: 10,
             timed_out: false,

@@ -41,7 +41,7 @@ const StatComponent: React.FC<Props> = ({
   const styles = useStyles();
   return (
     <EuiToolTip content={tooltipText}>
-      <EuiText css={styles.text} data-test-subj="stat" size={'xs'}>
+      <EuiText css={styles.text} data-test-subj="stat" size={'xs'} tabIndex={0}>
         {children && <span css={styles.description}>{children}</span>}
         <EuiBadge color={badgeColor} {...badgeProps}>
           {badgeText}

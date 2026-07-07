@@ -36,16 +36,6 @@ export class ConsolePageObject extends FtrService {
     return await editorViewDiv[line].getVisibleText();
   }
 
-  public async getCurrentLineNumber() {
-    const textArea = await this.getTextArea();
-    const styleAttribute = (await textArea.getAttribute('style')) ?? '';
-    const height = parseFloat(styleAttribute.replace(/.*height: ([+-]?\d+(\.\d+)?).*/, '$1'));
-    const top = parseFloat(styleAttribute.replace(/.*top: ([+-]?\d+(\.\d+)?).*/, '$1'));
-    // calculate the line number by dividing the top position by the line height
-    // and adding 1 because line numbers start at 1
-    return Math.ceil(top / height) + 1;
-  }
-
   public async clearEditorText() {
     const textArea = await this.getTextArea();
     await textArea.clickMouseButton();
@@ -64,6 +54,20 @@ export class ConsolePageObject extends FtrService {
     // Simply clicking on the output editor doesn't focus it, so we need to click
     // on the margin view overlays
     await (await outputEditor.findByClassName('margin-view-overlays')).click();
+  }
+
+  public async scrollOutputToTop() {
+    const outputEditor = await this.testSubjects.find('consoleMonacoOutput');
+    const textArea = await outputEditor.findByTagName('textarea');
+    const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+    await textArea.pressKeys([selectionKey, Key.HOME]);
+  }
+
+  public async selectAllOutputText() {
+    const outputEditor = await this.testSubjects.find('consoleMonacoOutput');
+    const textArea = await outputEditor.findByTagName('textarea');
+    const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+    await textArea.pressKeys([selectionKey, 'a']);
   }
 
   public async getOutputText() {
@@ -85,18 +89,25 @@ export class ConsolePageObject extends FtrService {
   public async promptAutocomplete(letter = 'b') {
     const textArea = await this.getTextArea();
     await textArea.type(letter);
-    await this.retry.waitFor('autocomplete to be visible', () => this.isAutocompleteVisible());
+    await this.retry.waitFor(
+      'autocomplete to be visible',
+      async () => await this.isAutocompleteVisible()
+    );
   }
 
   public async isAutocompleteVisible() {
     const element = await this.find.byClassName('suggest-widget').catch(() => null);
     if (!element) return false;
 
-    const attribute = await element.getAttribute('style');
-    return !attribute?.includes('display: none;');
+    return await element.isDisplayed();
   }
 
   public async getAutocompleteSuggestion(index: number) {
+    await this.retry.waitFor(
+      'verify suggestions widget is displayed',
+      async () => await this.isAutocompleteVisible()
+    );
+
     const suggestionsWidget = await this.find.byClassName('suggest-widget');
     const suggestions = await suggestionsWidget.findAllByClassName('monaco-list-row');
     const suggestion = suggestions[index];
@@ -236,6 +247,48 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('sendRequestButton');
   }
 
+  public async clickPlayAndWaitForResults() {
+    await this.clickPlay();
+
+    // Try to catch the in-flight loading state. Fast requests (or identical repeated requests)
+    // may complete before we poll, so we tolerate never seeing the loading indicators — as long
+    // as output and a status badge are present when we check.
+    await this.retry
+      .tryForTime(5000, async () => {
+        const inFlight =
+          (await this.testSubjects.exists('consoleEditorContentSpinner')) ||
+          (await this.testSubjects.exists('consoleRequestInProgressBadge'));
+        if (!inFlight) throw new Error('Waiting for request to start');
+      })
+      .catch(async () => {
+        // We didn't catch the in-progress state — verify that output is already available,
+        // which means the request completed before we could observe it loading.
+        if (
+          !(await this.testSubjects.exists('consoleMonacoOutput')) ||
+          !(await this.testSubjects.exists('consoleResponseStatusBadge'))
+        ) {
+          throw new Error('Console request did not start or produce output');
+        }
+      });
+
+    // Wait for loading indicators to clear and output to be present.
+    await this.waitForRequestToComplete();
+  }
+
+  public async waitForRequestToComplete() {
+    await this.retry.try(async () => {
+      const inProgress =
+        (await this.testSubjects.exists('consoleEditorContentSpinner')) ||
+        (await this.testSubjects.exists('consoleRequestInProgressBadge'));
+      const outputReady = await this.testSubjects.exists('consoleMonacoOutput');
+      const statusReady = await this.testSubjects.exists('consoleResponseStatusBadge');
+
+      if (inProgress || !outputReady || !statusReady) {
+        throw new Error('Expected console request to finish and render output');
+      }
+    });
+  }
+
   public async isPlayButtonVisible() {
     return await this.testSubjects.exists('sendRequestButton');
   }
@@ -311,8 +364,8 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('consoleCompleteTourButton');
   }
 
-  public async clickRerunTour() {
-    await this.testSubjects.click('consoleRerunTourButton');
+  public async clickRunTour() {
+    await this.testSubjects.click('consoleRunTourButton');
   }
 
   public async openConsole() {
@@ -346,16 +399,9 @@ export class ConsolePageObject extends FtrService {
     return await this.isConsoleTabOpen('consoleHistoryPanel');
   }
 
-  public async openSettings() {
-    await this.testSubjects.click('consoleConfigButton');
-  }
-
-  public async toggleA11yOverlaySetting() {
-    // while the settings form opens/loads this may fail, so retry for a while
-    await this.retry.try(async () => {
-      const toggle = await this.testSubjects.find('enableA11yOverlay');
-      await toggle.click();
-    });
+  public async toggleA11yOverlaySetting(enabled: boolean) {
+    await this.testSubjects.waitForEnabled('enableA11yOverlay');
+    await this.testSubjects.setEuiSwitch('enableA11yOverlay', enabled ? 'check' : 'uncheck');
   }
 
   public async addNewVariable({ name, value }: { name: string; value: string }) {
@@ -421,13 +467,16 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async toggleKeyboardShortcuts(enabled: boolean) {
-    await this.openSettings();
+    await this.testSubjects.waitForEnabled('enableKeyboardShortcuts');
+    await this.testSubjects.setEuiSwitch('enableKeyboardShortcuts', enabled ? 'check' : 'uncheck');
+  }
 
-    // while the settings form opens/loads this may fail, so retry for a while
-    await this.retry.try(async () => {
-      const toggle = await this.testSubjects.find('enableKeyboardShortcuts');
-      await toggle.click();
-    });
+  public async setKeyboardShortcutsEnabled(enabled: boolean) {
+    await this.openConfig();
+    await this.toggleKeyboardShortcuts(enabled);
+    // The sleep is necessary to allow the switch state to be propagated
+    await this.common.sleep(500);
+    await this.openConsole();
   }
 
   public async hasSuccessBadge() {
@@ -445,12 +494,10 @@ export class ConsolePageObject extends FtrService {
   }
 
   async skipTourIfExists() {
-    await this.retry.try(async () => {
-      const tourShown = await this.testSubjects.exists('consoleSkipTourButton');
-      if (tourShown) {
-        await this.clickSkipTour();
-      }
-    });
+    const tourShown = await this.testSubjects.exists('consoleSkipTourButton');
+    if (tourShown) {
+      await this.clickSkipTour();
+    }
   }
 
   public async clickContextMenu() {
@@ -474,8 +521,12 @@ export class ConsolePageObject extends FtrService {
     return await this.testSubjects.exists('consoleMenuAutoIndent');
   }
 
-  public async isCopyAsButtonVisible() {
+  public async isCopyToLanguageButtonVisible() {
     return await this.testSubjects.exists('consoleMenuCopyAsButton');
+  }
+
+  public async isSelectLanguageButtonVisible() {
+    return await this.testSubjects.exists('consoleMenuSelectLanguage');
   }
 
   public async clickCopyAsCurlButton() {
@@ -484,30 +535,41 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async changeLanguageAndCopy(language: string) {
-    const openModalButton = await this.testSubjects.find('changeLanguageButton');
-    await openModalButton.click();
+    // Click "Select language" menu item to open language selector modal
+    await this.testSubjects.click('consoleMenuSelectLanguage');
 
-    const changeLangButton = await this.testSubjects.find(`languageOption-${language}`);
-    await changeLangButton.click();
+    // Wait for the modal to open
+    await this.retry.waitFor('language selector modal to open', async () => {
+      return await this.testSubjects.exists(`languageOption-${language}`);
+    });
 
-    const submitButton = await this.testSubjects.find('copyAsLanguageSubmit');
-    await submitButton.click();
+    // Select the language option
+    await this.testSubjects.click(`languageOption-${language}`);
+
+    // Click "Copy code" button to copy with the selected language
+    await this.testSubjects.click('copyAsLanguageSubmit');
   }
 
   public async changeDefaultLanguage(language: string) {
-    const openModalButton = await this.testSubjects.find('changeLanguageButton');
-    await openModalButton.click();
+    // Click "Select language" menu item to open language selector modal
+    await this.testSubjects.click('consoleMenuSelectLanguage');
 
-    const changeDefaultLangButton = await this.testSubjects.find(
-      `changeDefaultLanguageTo-${language}`
-    );
-    await changeDefaultLangButton.click();
+    // Wait for the modal to open
+    await this.retry.waitFor('language selector modal to open', async () => {
+      return await this.testSubjects.exists(`languageOption-${language}`);
+    });
 
-    const submitButton = await this.testSubjects.find('copyAsLanguageSubmit');
-    await submitButton.click();
+    // Select the language option
+    await this.testSubjects.click(`languageOption-${language}`);
+
+    // Click "Set as default" button (moves the badge)
+    await this.testSubjects.click('setAsDefaultLanguage');
+
+    // Click "Cancel" to close modal and save the default
+    await this.testSubjects.click('closeCopyAsModal');
   }
 
-  public async clickCopyAsButton() {
+  public async clickCopyToLanguageButton() {
     const button = await this.testSubjects.find('consoleMenuCopyAsButton');
     await button.click();
   }
@@ -572,5 +634,35 @@ export class ConsolePageObject extends FtrService {
 
   public async isOutputPanelEmptyStateVisible() {
     return await this.testSubjects.exists('consoleOutputPanelEmptyState');
+  }
+
+  public async clickOutputFilterButton() {
+    await this.testSubjects.click('consoleOutputFilterButton');
+  }
+
+  public async isOutputFilterRowVisible() {
+    return (
+      (await this.testSubjects.exists('filterJq')) ||
+      (await this.testSubjects.exists('filterRegex'))
+    );
+  }
+
+  public async typeInFilterInput(text: string) {
+    const testSubj = (await this.testSubjects.exists('filterJq')) ? 'filterJq' : 'filterRegex';
+    const input = await this.testSubjects.find(testSubj);
+    await input.clearValueWithKeyboard();
+    await input.type(text);
+  }
+
+  public async submitFilter() {
+    await this.testSubjects.click('consoleOutputFilterApply');
+  }
+
+  public async isOutputFilterButtonActive() {
+    const button = await this.testSubjects.find('consoleOutputFilterButton');
+    const wrapper = await button.findByXpath('..');
+    // The dot indicator is a sibling span inside the wrapper div
+    const children = await wrapper.findAllByCssSelector('span[style*="border-radius"]');
+    return children.length > 0;
   }
 }

@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { Index } from '../../types';
+import type { Index } from '../../types';
 
 export type IndexMap = Record<string, Index>;

@@ -6,10 +6,8 @@
  */
 import qs from 'query-string';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import {
-  TRANSACTION_DETAILS_BY_NAME_LOCATOR,
-  TransactionDetailsByNameParams,
-} from '@kbn/deeplinks-observability';
+import type { TransactionDetailsByNameParams } from '@kbn/deeplinks-observability';
+import { TRANSACTION_DETAILS_BY_NAME_LOCATOR } from '@kbn/deeplinks-observability';
 
 export type TransactionDetailsByNameLocator = LocatorPublic<TransactionDetailsByNameParams>;
 
@@ -23,8 +21,9 @@ export class TransactionDetailsByNameLocatorDefinition
     rangeTo,
     serviceName,
     transactionName,
+    environment,
   }: TransactionDetailsByNameParams) => {
-    const params = { rangeFrom, rangeTo, serviceName, transactionName };
+    const params = { rangeFrom, rangeTo, serviceName, transactionName, environment };
     return {
       app: 'apm',
       path: `/link-to/transaction?${qs.stringify(params)}`,

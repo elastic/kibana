@@ -170,12 +170,20 @@ describe('setup.getFeatureFlags()', () => {
           overrides: {
             'my-overridden-flag': 1234,
           },
+          initialFeatureFlags: {
+            'my-initial-flag': true,
+          },
         },
       },
     } as unknown as InjectedMetadataParams);
 
     const contract = injectedMetadata.setup();
-    expect(contract.getFeatureFlags()).toStrictEqual({ overrides: { 'my-overridden-flag': 1234 } });
+    expect(contract.getFeatureFlags()).toStrictEqual({
+      overrides: { 'my-overridden-flag': 1234 },
+      initialFeatureFlags: {
+        'my-initial-flag': true,
+      },
+    });
   });
 
   it('returns empty injectedMetadata.featureFlags', () => {
@@ -185,5 +193,19 @@ describe('setup.getFeatureFlags()', () => {
 
     const contract = injectedMetadata.setup();
     expect(contract.getFeatureFlags()).toBeUndefined();
+  });
+});
+
+describe('setup.getUserStorage()', () => {
+  it('returns injectedMetadata.userStorage', () => {
+    const injectedMetadata = new InjectedMetadataService({
+      injectedMetadata: {
+        userStorage: { values: { 'navigation:layout': { hidden: ['discover'] } } },
+      },
+    } as unknown as InjectedMetadataParams);
+
+    expect(injectedMetadata.setup().getUserStorage()).toEqual({
+      values: { 'navigation:layout': { hidden: ['discover'] } },
+    });
   });
 });

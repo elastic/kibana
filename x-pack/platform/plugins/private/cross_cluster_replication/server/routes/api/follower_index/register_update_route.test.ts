@@ -6,7 +6,8 @@
  */
 
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
-import { kibanaResponseFactory, RequestHandler } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 
 import { handleEsError } from '../../../shared_imports';
 import { mockRouteContext, mockLicense } from '../test_lib';
@@ -60,18 +61,16 @@ describe('[CCR API] Update follower index', () => {
 
     expect(response.payload).toEqual({
       index: 'foo',
-      body: {
-        max_outstanding_read_requests: 1,
-        max_outstanding_write_requests: 1,
-        max_read_request_operation_count: 1,
-        max_read_request_size: '1b',
-        max_retry_delay: '1s',
-        max_write_buffer_count: 1,
-        max_write_buffer_size: '1b',
-        max_write_request_operation_count: 1,
-        max_write_request_size: '1b',
-        read_poll_timeout: '1s',
-      },
+      max_outstanding_read_requests: 1,
+      max_outstanding_write_requests: 1,
+      max_read_request_operation_count: 1,
+      max_read_request_size: '1b',
+      max_retry_delay: '1s',
+      max_write_buffer_count: 1,
+      max_write_buffer_size: '1b',
+      max_write_request_operation_count: 1,
+      max_write_request_size: '1b',
+      read_poll_timeout: '1s',
     });
   });
 });

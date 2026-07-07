@@ -7,7 +7,14 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiBasicTable, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -75,37 +82,46 @@ export const FleetProxiesTable: React.FunctionComponent<FleetProxiesTableProps> 
         width: '68px',
         render: (fleetProxy: FleetProxy) => {
           const isDeleteVisible = authz.fleet.allSettings && !fleetProxy.is_preconfigured;
+          const deleteButtonLabel = i18n.translate(
+            'xpack.fleet.settings.fleetProxiesTable.deleteButtonTitle',
+            {
+              defaultMessage: 'Delete',
+            }
+          );
+          const editButtonLabel = i18n.translate(
+            'xpack.fleet.settings.fleetProxiesTable.editButtonTitle',
+            {
+              defaultMessage: 'Edit',
+            }
+          );
 
           return (
             <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 {isDeleteVisible && (
-                  <EuiButtonIcon
-                    color="text"
-                    iconType="trash"
-                    onClick={() => deleteFleetProxy(fleetProxy)}
-                    title={i18n.translate(
-                      'xpack.fleet.settings.fleetProxiesTable.deleteButtonTitle',
-                      {
-                        defaultMessage: 'Delete',
-                      }
-                    )}
-                    data-test-subj="fleetProxiesTable.delete.btn"
-                  />
+                  <EuiToolTip content={deleteButtonLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      aria-label={deleteButtonLabel}
+                      color="text"
+                      iconType="trash"
+                      onClick={() => deleteFleetProxy(fleetProxy)}
+                      data-test-subj="fleetProxiesTable.delete.btn"
+                    />
+                  </EuiToolTip>
                 )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  color="text"
-                  iconType="pencil"
-                  href={getHref('settings_edit_fleet_proxy', {
-                    itemId: fleetProxy.id,
-                  })}
-                  title={i18n.translate('xpack.fleet.settings.fleetProxiesTable.editButtonTitle', {
-                    defaultMessage: 'Edit',
-                  })}
-                  data-test-subj="fleetProxiesTable.edit.btn"
-                />
+                <EuiToolTip content={editButtonLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    aria-label={editButtonLabel}
+                    color="text"
+                    iconType="pencil"
+                    href={getHref('settings_edit_fleet_proxy', {
+                      itemId: fleetProxy.id,
+                    })}
+                    data-test-subj="fleetProxiesTable.edit.btn"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
@@ -117,5 +133,14 @@ export const FleetProxiesTable: React.FunctionComponent<FleetProxiesTableProps> 
     ];
   }, [deleteFleetProxy, getHref, authz.fleet.allSettings]);
 
-  return <EuiBasicTable columns={columns} items={proxies} data-test-subj="fleetProxiesTable" />;
+  return (
+    <EuiBasicTable
+      columns={columns}
+      items={proxies}
+      data-test-subj="fleetProxiesTable"
+      tableCaption={i18n.translate('xpack.fleet.settings.fleetProxiesTable.tableCaption', {
+        defaultMessage: 'Fleet proxies',
+      })}
+    />
+  );
 };

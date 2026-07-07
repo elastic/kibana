@@ -27,7 +27,6 @@ describe('CompleteExternalActionsTask class', () => {
 
     endpointAppContextMock.experimentalFeatures = {
       ...endpointAppContextMock.experimentalFeatures,
-      responseActionsSentinelOneV2Enabled: true,
     };
   });
 

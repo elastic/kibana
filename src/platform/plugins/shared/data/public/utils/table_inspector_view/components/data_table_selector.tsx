@@ -9,6 +9,7 @@
 
 import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiContextMenuPanel,
@@ -17,7 +18,7 @@ import {
   EuiFlexItem,
   EuiPopover,
 } from '@elastic/eui';
-import { Datatable } from '@kbn/expressions-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 
 interface TableSelectorState {
   isPopoverOpen: boolean;
@@ -84,7 +85,7 @@ export class TableSelector extends Component<TableSelectorProps, TableSelectorSt
               id="inspectorTableChooser"
               button={
                 <EuiButtonEmpty
-                  iconType="arrowDown"
+                  iconType="chevronSingleDown"
                   iconSide="right"
                   size="s"
                   onClick={this.togglePopover}
@@ -102,6 +103,9 @@ export class TableSelector extends Component<TableSelectorProps, TableSelectorSt
               panelPaddingSize="none"
               anchorPosition="downLeft"
               repositionOnScroll
+              aria-label={i18n.translate('data.inspector.table.tableChooserPopover.ariaLabel', {
+                defaultMessage: 'Select table',
+              })}
             >
               <EuiContextMenuPanel
                 items={this.props.tables.map(this.renderTableDropdownItem)}

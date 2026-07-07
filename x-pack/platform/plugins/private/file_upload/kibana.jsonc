@@ -22,8 +22,5 @@
     "requiredBundles": [
       "kibanaReact"
     ],
-    "extraPublicDirs": [
-      "common"
-    ]
   }
 }

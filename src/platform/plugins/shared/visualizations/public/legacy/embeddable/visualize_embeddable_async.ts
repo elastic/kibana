@@ -18,11 +18,7 @@ export const createVisualizeEmbeddableAsync = async (
 ) => {
   // Build optimization. Move app styles from main bundle
 
-  const [{ VisualizeEmbeddable }] = await Promise.all([
-    import('./visualize_embeddable'),
-    // @ts-expect-error TS error, cannot find type declaration for scss
-    import('./embeddables.scss'),
-  ]);
+  const { VisualizeEmbeddable } = await import('./visualize_embeddable');
 
   return new VisualizeEmbeddable(...args);
 };

@@ -9,16 +9,16 @@
 
 import _ from 'lodash';
 
+import type { Filter, PhraseFilter } from '@kbn/es-query';
 import {
   buildPhraseFilter,
   buildPhrasesFilter,
-  Filter,
   getPhraseFilterField,
   getPhraseFilterValue,
   isPhraseFilter,
-  PhraseFilter,
 } from '@kbn/es-query';
-import { DataViewsContract, FilterManager as QueryFilterManager } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { FilterManager as QueryFilterManager } from '@kbn/data-plugin/public';
 import { FilterManager } from './filter_manager';
 
 export class PhraseFilterManager extends FilterManager {

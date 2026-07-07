@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { Streams } from '../models/streams';
-import {
-  isInheritLifecycle,
+import type { Streams } from '../models/streams';
+import type {
+  IngestStreamEffectiveLifecycle,
+  IngestStreamLifecycleAll,
   WiredIngestStreamEffectiveLifecycle,
 } from '../models/ingest/lifecycle';
+import { isInheritLifecycle } from '../models/ingest/lifecycle';
 import { isDescendantOf, isChildOf, getSegments } from '../shared/hierarchy';
 
 export function findInheritedLifecycle(
@@ -22,6 +24,10 @@ export function findInheritedLifecycle(
 
   if (!originDefinition) {
     throw new Error('Unable to find inherited lifecycle');
+  }
+
+  if (isInheritLifecycle(originDefinition.ingest.lifecycle)) {
+    throw new Error('Wired streams can only inherit DSL or ILM');
   }
 
   return { ...originDefinition.ingest.lifecycle, from: originDefinition.name };
@@ -50,4 +56,14 @@ export function findInheritingStreams(
   }
 
   return inheriting;
+}
+
+export function effectiveToIngestLifecycle(
+  effectiveLifecycle: IngestStreamEffectiveLifecycle
+): IngestStreamLifecycleAll {
+  if ('from' in effectiveLifecycle) {
+    const { from, ...lifecycle } = effectiveLifecycle;
+    return lifecycle;
+  }
+  return effectiveLifecycle;
 }

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -37,5 +37,6 @@
     "@kbn/core-chrome-browser",
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/spaces-plugin",
+    "@kbn/core",
   ]
 }

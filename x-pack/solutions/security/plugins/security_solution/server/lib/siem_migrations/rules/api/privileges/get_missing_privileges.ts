@@ -14,7 +14,7 @@ import {
 } from '../../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { authz } from '../util/authz';
-import { withLicense } from '../util/with_license';
+import { withLicense } from '../../../common/api/util/with_license';
 
 export const registerSiemRuleMigrationsGetMissingPrivilegesRoute = (
   router: SecuritySolutionPluginRouter,

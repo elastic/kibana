@@ -8,6 +8,13 @@
  */
 import { loadConfiguration } from '@kbn/apm-config-loader';
 import { initTracing } from '@kbn/tracing';
+import { initMetrics } from '@kbn/metrics';
+import { context } from '@opentelemetry/api';
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
+
+import { maybeInitAutoInstrumentations } from './init_autoinstrumentations';
+import { buildOtelResources } from './build_otel_resources';
+
 /**
  *
  * Initializes OpenTelemetry (currently only tracing)
@@ -27,23 +34,45 @@ export const initTelemetry = (
   const apmConfigLoader = loadConfiguration(argv, rootDir, isDistributable);
 
   const apmConfig = apmConfigLoader.getConfig(serviceName);
-
   const telemetryConfig = apmConfigLoader.getTelemetryConfig();
+  const monitoringCollectionConfig = apmConfigLoader.getMonitoringCollectionConfig();
 
-  // explicitly check for enabled == false, as the default in the schema
-  // is true, but it's not parsed through @kbn/config-schema, so the
-  // default value is not returned
-  const telemetryEnabled = telemetryConfig?.enabled !== false;
-
-  // tracing is enabled only when telemetry is enabled and tracing is not disabled
-  const tracingEnabled = telemetryEnabled && telemetryConfig?.tracing?.enabled;
-
-  if (!tracingEnabled) {
-    return async () => {};
+  if (apmConfig.active !== false && telemetryConfig.tracing.enabled) {
+    throw new Error(
+      'Elastic APM and OpenTelemetry tracing cannot be enabled simultaneously.\n' +
+        'To use OpenTelemetry tracing, disable APM by setting `elastic.apm.active: false` in your Kibana configuration.\n' +
+        'To use Elastic APM, disable OpenTelemetry tracing by setting `telemetry.tracing.enabled: false`.'
+    );
   }
 
-  return initTracing({
-    tracingConfig: telemetryConfig.tracing,
-    apmConfig,
-  });
+  // resource.attributes.*
+  const resource = buildOtelResources(serviceName);
+
+  // The context manager runs unconditionally (outside the telemetry.enabled gate) because the
+  // dedicated inference tracer provider needs context.active() for span parent-child propagation
+  // and baggage for inference context detection, even when global tracing is off.
+  const contextManager = new AsyncLocalStorageContextManager();
+  context.setGlobalContextManager(contextManager);
+  contextManager.enable();
+
+  if (telemetryConfig.enabled) {
+    if (telemetryConfig.tracing.enabled) {
+      maybeInitAutoInstrumentations();
+    }
+
+    const asyncSettled = resource.waitForAsyncAttributes?.() ?? Promise.resolve();
+    asyncSettled.then(() => {
+      if (telemetryConfig.tracing.enabled) {
+        initTracing({ resource, tracingConfig: telemetryConfig.tracing });
+      }
+
+      if (telemetryConfig.metrics.enabled || monitoringCollectionConfig.enabled) {
+        initMetrics({
+          resource,
+          metricsConfig: telemetryConfig.metrics,
+          monitoringCollectionConfig,
+        });
+      }
+    });
+  }
 };

@@ -61,6 +61,7 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
   if (status === 'success') {
     return (
       <EuiCallOut
+        announceOnMount
         color="success"
         iconType="check"
         title={i18n.translate(
@@ -77,7 +78,6 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
             values={{
               hostUrl: <EuiCode>{selectedFleetServerHost?.host_urls[0]}</EuiCode>,
               fleetSettingsLink: (
-                // eslint-disable-next-line @elastic/eui/href-or-on-click
                 <EuiLink href={getHref('settings')} onClick={onClose}>
                   <FormattedMessage
                     id="xpack.fleet.fleetServerSetup.fleetSettingsLink"

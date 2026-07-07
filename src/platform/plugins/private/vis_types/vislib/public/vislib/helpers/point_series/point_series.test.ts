@@ -12,15 +12,15 @@ import _ from 'lodash';
 import type { Dimensions } from '@kbn/vis-type-xy-plugin/public';
 
 import { buildPointSeriesData } from './point_series';
-import { Table, Column } from '../../types';
+import type { Table, Column } from '../../types';
 import { setFormatService } from '../../../services';
-import { Serie } from './_add_to_siri';
+import type { Serie } from './_add_to_siri';
 
 describe('pointSeriesChartDataFromTable', function () {
   beforeAll(() => {
     setFormatService({
       deserialize: () => ({
-        convert: jest.fn((v) => v),
+        convertToText: jest.fn((v) => v),
       }),
     } as any);
   });

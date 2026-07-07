@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { useCallback } from 'react';
-import type { RuleMigrationFilters } from '../../../../common/siem_migrations/types';
+import type { RuleMigrationFilters } from '../../../../common/siem_migrations/rules/types';
 import { SIEM_RULE_MIGRATION_RULES_PATH } from '../../../../common/siem_migrations/constants';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';

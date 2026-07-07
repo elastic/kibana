@@ -11,12 +11,14 @@ import type { EsqlState } from '../types';
 import type { RuleRangeTuple } from '../../types';
 
 describe('initiateExcludedDocuments', () => {
-  it('should return an empty array if isRuleAggregating is true', () => {
+  it('should return an empty object if isRuleAggregating is true', () => {
     const state: EsqlState = {
-      excludedDocuments: [
-        { id: 'doc1', timestamp: '2025-04-28T10:00:00Z' },
-        { id: 'doc2', timestamp: '2025-04-28T11:00:00Z' },
-      ],
+      test_indes: {
+        excludedDocuments: [
+          { id: 'doc1', timestamp: '2025-04-28T10:00:00Z' },
+          { id: 'doc2', timestamp: '2025-04-28T11:00:00Z' },
+        ],
+      },
     };
     const tuple: RuleRangeTuple = {
       maxSignals: 100,
@@ -30,10 +32,10 @@ describe('initiateExcludedDocuments', () => {
       tuple,
       hasMvExpand: false,
     });
-    expect(result).toEqual([]);
+    expect(result).toEqual({});
   });
 
-  it('should return an empty array if excludedDocuments in state is undefined', () => {
+  it('should return an empty object if excludedDocuments in state is undefined', () => {
     const state: EsqlState = {};
     const tuple: RuleRangeTuple = {
       maxSignals: 100,
@@ -47,18 +49,20 @@ describe('initiateExcludedDocuments', () => {
       tuple,
       hasMvExpand: false,
     });
-    expect(result).toEqual([]);
+    expect(result).toEqual({});
   });
 
-  it('should return an empty array if rule has mv_expand command and rule query changed', () => {
+  it('should return an empty object if rule has mv_expand command and rule query changed', () => {
     const state: EsqlState = {
       lastQuery: 'from logs | mv_expand agent.name',
-      excludedDocuments: [
-        { id: 'doc1', timestamp: '2025-04-28T10:00:00Z' },
-        { id: 'doc2', timestamp: '2025-04-28T08:00:00Z' },
-        { id: 'doc3', timestamp: '2025-04-28T11:00:00Z' },
-        { id: 'doc4', timestamp: '2025-04-28T12:30:00Z' },
-      ],
+      excludedDocuments: {
+        test_index: [
+          { id: 'doc1', timestamp: '2025-04-28T10:00:00Z' },
+          { id: 'doc2', timestamp: '2025-04-28T08:00:00Z' },
+          { id: 'doc3', timestamp: '2025-04-28T11:00:00Z' },
+          { id: 'doc4', timestamp: '2025-04-28T12:30:00Z' },
+        ],
+      },
     };
     const tuple: RuleRangeTuple = {
       maxSignals: 100,
@@ -73,18 +77,46 @@ describe('initiateExcludedDocuments', () => {
       hasMvExpand: true,
       query: 'from logs | mv_expand agent.type',
     });
-    expect(result).toEqual([]);
+    expect(result).toEqual({});
   });
 
-  it('should return documents for mv_expand command when rule query has not changed', () => {
-    const state: EsqlState = {
-      lastQuery: 'from logs | mv_expand agent.name',
+  it('should return an empty object if rule state has excludedDocuments as array without indices information ', () => {
+    const state = {
       excludedDocuments: [
         { id: 'doc1', timestamp: '2025-04-28T10:00:00Z' },
         { id: 'doc2', timestamp: '2025-04-28T08:00:00Z' },
         { id: 'doc3', timestamp: '2025-04-28T11:00:00Z' },
         { id: 'doc4', timestamp: '2025-04-28T12:30:00Z' },
       ],
+    };
+
+    const tuple: RuleRangeTuple = {
+      maxSignals: 100,
+      from: moment('2025-04-28T09:00:00Z'),
+      to: moment('2025-04-28T12:00:00Z'),
+    };
+
+    const result = initiateExcludedDocuments({
+      state: state as unknown as EsqlState,
+      isRuleAggregating: false,
+      tuple,
+      hasMvExpand: false,
+      query: 'from logs',
+    });
+    expect(result).toEqual({});
+  });
+
+  it('should return documents for mv_expand command when rule query has not changed', () => {
+    const state: EsqlState = {
+      lastQuery: 'from logs | mv_expand agent.name',
+      excludedDocuments: {
+        test_index: [
+          { id: 'doc1', timestamp: '2025-04-28T10:00:00Z' },
+          { id: 'doc2', timestamp: '2025-04-28T08:00:00Z' },
+          { id: 'doc3', timestamp: '2025-04-28T11:00:00Z' },
+          { id: 'doc4', timestamp: '2025-04-28T12:30:00Z' },
+        ],
+      },
     };
     const tuple: RuleRangeTuple = {
       maxSignals: 100,
@@ -99,47 +131,55 @@ describe('initiateExcludedDocuments', () => {
       hasMvExpand: true,
       query: 'from logs | mv_expand agent.name',
     });
-    expect(result).toEqual([
-      { id: 'doc1', timestamp: '2025-04-28T10:00:00Z' },
-      { id: 'doc3', timestamp: '2025-04-28T11:00:00Z' },
-      { id: 'doc4', timestamp: '2025-04-28T12:30:00Z' },
-    ]);
+    expect(result).toEqual({
+      test_index: [
+        { id: 'doc1', timestamp: '2025-04-28T10:00:00Z' },
+        { id: 'doc3', timestamp: '2025-04-28T11:00:00Z' },
+        { id: 'doc4', timestamp: '2025-04-28T12:30:00Z' },
+      ],
+    });
   });
 
   it('should filter documents from state older than rule from time boundary', () => {
     const state: EsqlState = {
-      excludedDocuments: [
+      excludedDocuments: {
+        test_index: [
+          { id: 'doc1', timestamp: '2025-04-28T10:00:00Z' },
+          { id: 'doc2', timestamp: '2025-04-28T08:00:00Z' },
+          { id: 'doc3', timestamp: '2025-04-28T11:00:00Z' },
+          { id: 'doc4', timestamp: '2025-04-28T12:30:00Z' },
+        ],
+      },
+    };
+    const tuple: RuleRangeTuple = {
+      maxSignals: 100,
+      from: moment('2025-04-28T09:00:00Z'),
+      to: moment('2025-04-28T12:00:00Z'),
+    };
+
+    const result = initiateExcludedDocuments({
+      state,
+      isRuleAggregating: false,
+      tuple,
+      hasMvExpand: false,
+    });
+    expect(result).toEqual({
+      test_index: [
         { id: 'doc1', timestamp: '2025-04-28T10:00:00Z' },
-        { id: 'doc2', timestamp: '2025-04-28T08:00:00Z' },
         { id: 'doc3', timestamp: '2025-04-28T11:00:00Z' },
         { id: 'doc4', timestamp: '2025-04-28T12:30:00Z' },
       ],
-    };
-    const tuple: RuleRangeTuple = {
-      maxSignals: 100,
-      from: moment('2025-04-28T09:00:00Z'),
-      to: moment('2025-04-28T12:00:00Z'),
-    };
-
-    const result = initiateExcludedDocuments({
-      state,
-      isRuleAggregating: false,
-      tuple,
-      hasMvExpand: false,
     });
-    expect(result).toEqual([
-      { id: 'doc1', timestamp: '2025-04-28T10:00:00Z' },
-      { id: 'doc3', timestamp: '2025-04-28T11:00:00Z' },
-      { id: 'doc4', timestamp: '2025-04-28T12:30:00Z' },
-    ]);
   });
 
-  it('should return an empty array if no state documents are within from time boundary', () => {
+  it('should return an empty object if no state documents are within from time boundary', () => {
     const state: EsqlState = {
-      excludedDocuments: [
-        { id: 'doc1', timestamp: '2025-04-28T08:00:00Z' },
-        { id: 'doc2', timestamp: '2025-04-28T08:30:00Z' },
-      ],
+      excludedDocuments: {
+        test_index: [
+          { id: 'doc1', timestamp: '2025-04-28T08:00:00Z' },
+          { id: 'doc2', timestamp: '2025-04-28T08:30:00Z' },
+        ],
+      },
     };
     const tuple: RuleRangeTuple = {
       maxSignals: 100,
@@ -153,6 +193,6 @@ describe('initiateExcludedDocuments', () => {
       tuple,
       hasMvExpand: false,
     });
-    expect(result).toEqual([]);
+    expect(result).toEqual({});
   });
 });

@@ -8,9 +8,9 @@
 import { calendarAlignedTimeWindowSchema, rollingTimeWindowSchema } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
-import { DateRange } from '../models';
+import type { DateRange } from '../models';
+import type { TimeWindow } from '../models/time_window';
 import {
-  TimeWindow,
   toCalendarAlignedTimeWindowMomentUnit,
   toRollingTimeWindowMomentUnit,
 } from '../models/time_window';

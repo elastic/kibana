@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -7,19 +7,23 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/scout/**/*",
     "../../../../../typings/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/dev-tools-plugin",
     "@kbn/home-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/es-ui-shared-plugin",
-    "@kbn/licensing-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/config-schema",
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
+    "@kbn/scout",
+    "@kbn/licensing-plugin",
+    "@kbn/licensing-types",
   ],
   "exclude": [
     "target/**/*",

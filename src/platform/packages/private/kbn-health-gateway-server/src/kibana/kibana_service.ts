@@ -9,7 +9,7 @@
 
 import type { IConfigService } from '@kbn/config';
 import type { Logger, LoggerFactory } from '@kbn/logging';
-import { ServerStart } from '../server';
+import type { ServerStart } from '../server';
 import { KibanaConfig } from './kibana_config';
 import { StatusHandler } from './handlers';
 

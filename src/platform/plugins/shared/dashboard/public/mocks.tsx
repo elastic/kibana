@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
-import { BehaviorSubject } from 'rxjs';
-import { DashboardStart } from './plugin';
-import { DashboardState } from '../common/types';
+import type { DashboardStart } from './plugin';
+import type { DashboardState } from '../common/types';
 import { getDashboardApi } from './dashboard_api/get_dashboard_api';
-import { DashboardPanelMap, DashboardSectionMap } from '../common';
+import { deserializeLayout } from './dashboard_api/layout_manager/deserialize_layout';
+import type { DashboardReadResponseBody } from '../server';
+import { DEFAULT_DASHBOARD_STATE } from '../common/default_dashboard_state';
 
 export type Start = jest.Mocked<DashboardStart>;
 
@@ -48,6 +48,7 @@ export function setupIntersectionObserverMock({
     readonly root: Element | null = root;
     readonly rootMargin: string = rootMargin;
     readonly thresholds: readonly number[] = thresholds;
+    readonly scrollMargin: string = '';
     disconnect: () => void = disconnect;
     observe: (target: Element) => void = observe;
     takeRecords: () => IntersectionObserverEntry[] = takeRecords;
@@ -67,17 +68,6 @@ export function setupIntersectionObserverMock({
   });
 }
 
-export const mockControlGroupApi = {
-  untilInitialized: async () => {},
-  filters$: new BehaviorSubject(undefined),
-  query$: new BehaviorSubject(undefined),
-  timeslice$: new BehaviorSubject(undefined),
-  esqlVariables$: new BehaviorSubject(undefined),
-  dataViews$: new BehaviorSubject(undefined),
-  hasUnsavedChanges$: new BehaviorSubject(false),
-  children$: new BehaviorSubject([]),
-} as unknown as ControlGroupApi;
-
 export function buildMockDashboardApi({
   overrides,
   savedObjectId,
@@ -88,106 +78,98 @@ export function buildMockDashboardApi({
   const initialState = getSampleDashboardState(overrides);
   const results = getDashboardApi({
     initialState,
+    incomingEmbeddables: undefined,
     savedObjectId,
-    savedObjectResult: {
-      dashboardFound: true,
-      newDashboardCreated: savedObjectId === undefined,
-      dashboardId: savedObjectId,
-      managed: false,
-      dashboardInput: {
-        ...initialState,
-      },
-      references: [],
-    },
+    readResult: savedObjectId
+      ? ({
+          id: savedObjectId,
+          data: initialState,
+          meta: {
+            managed: false,
+          },
+        } as unknown as DashboardReadResponseBody)
+      : undefined,
   });
-  results.internalApi.setControlGroupApi(mockControlGroupApi);
   return results;
 }
 
 export function getSampleDashboardState(overrides?: Partial<DashboardState>): DashboardState {
   return {
-    // options
-    useMargins: true,
-    syncColors: false,
-    syncCursor: true,
-    syncTooltips: false,
-    hidePanelTitles: false,
-
+    ...DEFAULT_DASHBOARD_STATE,
     tags: [],
     filters: [],
     title: 'My Dashboard',
     query: {
-      language: 'kuery',
-      query: 'hi',
+      language: 'kql',
+      expression: 'hi',
     },
-    timeRange: {
+    time_range: {
       to: 'now',
       from: 'now-15m',
     },
-    timeRestore: false,
-    viewMode: 'view',
-    panels: {},
-    sections: {},
     ...overrides,
   };
 }
 
-export function getMockDashboardPanels(
-  withSections: boolean = false,
-  overrides?: {
-    panels?: DashboardPanelMap;
-    sections?: DashboardSectionMap;
-  }
-): { panels: DashboardPanelMap; sections: DashboardSectionMap } {
-  const panels = {
-    '1': {
-      gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
-      type: 'lens',
-      explicitInput: { id: '1' },
+export function getMockPanels() {
+  return [
+    {
+      grid: { x: 0, y: 0, w: 6, h: 6 },
+      config: { title: 'panel One' },
+      id: '1',
+      type: 'testPanelType',
     },
-    '2': {
-      gridData: { x: 6, y: 0, w: 6, h: 6, i: '2' },
-      type: 'lens',
-      explicitInput: { id: '2' },
+    {
+      grid: { x: 6, y: 0, w: 6, h: 6 },
+      config: { title: 'panel Two' },
+      id: '2',
+      type: 'testPanelType',
     },
-    ...overrides?.panels,
-  };
-  if (!withSections) return { panels, sections: {} };
+  ];
+}
 
-  return {
-    panels: {
-      ...panels,
-      '3': {
-        gridData: { x: 0, y: 0, w: 6, h: 6, i: '3', sectionId: 'section1' },
-        type: 'lens',
-        explicitInput: { id: '3' },
+export function getMockPanelsWithSections() {
+  return [
+    ...getMockPanels(),
+    {
+      title: 'Section One',
+      collapsed: true,
+      grid: {
+        y: 6,
       },
-      '4': {
-        gridData: { x: 0, y: 0, w: 6, h: 6, i: '4', sectionId: 'section2' },
-        type: 'lens',
-        explicitInput: { id: '4' },
-      },
-    },
-    sections: {
-      section1: {
-        id: 'section1',
-        title: 'Section One',
-        collapsed: true,
-        gridData: {
-          y: 6,
-          i: 'section1',
+      id: 'section1',
+      panels: [
+        {
+          grid: { x: 0, y: 0, w: 6, h: 6 },
+          config: { title: 'panel Three' },
+          id: '3',
+          type: 'testPanelType',
         },
-      },
-      section2: {
-        id: 'section2',
-        title: 'Section Two',
-        collapsed: false,
-        gridData: {
-          y: 7,
-          i: 'section2',
-        },
-      },
-      ...overrides?.sections,
+      ],
     },
-  } as any;
+    {
+      title: 'Section Two',
+      collapsed: false,
+      grid: {
+        y: 7,
+      },
+      id: 'section2',
+      panels: [
+        {
+          grid: { x: 0, y: 0, w: 6, h: 6 },
+          config: { title: 'panel Four' },
+          id: '4',
+          type: 'testPanelType',
+        },
+      ],
+    },
+  ];
+}
+
+export function getMockLayout() {
+  return deserializeLayout(getMockPanels(), []).layout;
+}
+
+export function getMockLayoutWithSections() {
+  return deserializeLayout(getMockPanelsWithSections(), []).layout;
 }

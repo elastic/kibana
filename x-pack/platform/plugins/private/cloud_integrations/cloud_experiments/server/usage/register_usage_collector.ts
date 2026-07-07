@@ -60,7 +60,7 @@ export function registerUsageCollector(
   );
 }
 
-async function getAllFlags(
+export async function getAllFlags(
   launchDarklyClient: LDClient,
   currentContext: EvaluationContext
 ): Promise<Usage> {

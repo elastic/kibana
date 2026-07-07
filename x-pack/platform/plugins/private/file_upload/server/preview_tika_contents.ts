@@ -7,7 +7,7 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { TIKA_PREVIEW_CHARS } from '@kbn/file-upload-common';
-import type { PreviewTikaResponse } from '../common/types';
+import type { PreviewTikaResponse } from '@kbn/file-upload-common';
 
 /**
  * Returns the contents of a file using the attachment ingest processor

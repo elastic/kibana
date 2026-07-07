@@ -9,29 +9,60 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { LocationsBadge } from './locations_badge';
 import { MonitorTypeBadge } from '../../../../common/components/monitor_type_badge';
+import { SyntheticsRemoteBadge } from '../../../../common/components/synthetics_remote_badge';
 import * as labels from '../../../management/monitor_list_table/labels';
-import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
+import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 
-export const MetricItemBody = ({ monitor }: { monitor: OverviewStatusMetaData }) => {
+export const MetricItemBody = ({
+  monitor,
+  onLocationClick,
+}: {
+  monitor: OverviewStatusMetaData;
+  onLocationClick?: (locationId: string, locationLabel: string) => void;
+}) => {
   const tags = monitor.tags;
   const history = useHistory();
+
+  const typeBadge = (
+    <MonitorTypeBadge
+      monitorType={monitor.type}
+      ariaLabel={labels.getFilterForTypeMessage(monitor.type)}
+      onClick={() => {
+        history.push({
+          search: `monitorTypes=${encodeURIComponent(JSON.stringify([monitor.type]))}`,
+        });
+      }}
+    />
+  );
+  const remoteBadge = <SyntheticsRemoteBadge remote={monitor.remote} />;
+
+  const badges = (
+    <>
+      {typeBadge}
+      {remoteBadge}
+    </>
+  );
+  if (tags.length === 0 && (monitor?.locations?.length ?? 0) <= 1) {
+    return (
+      <>
+        <EuiSpacer size="xs" />
+        {badges}
+      </>
+    );
+  }
 
   return (
     <>
       <EuiSpacer size="xs" />
       <EuiFlexGroup gutterSize="xs">
-        <EuiFlexItem grow={false}>
-          <MonitorTypeBadge
-            monitorType={monitor.type}
-            ariaLabel={labels.getFilterForTypeMessage(monitor.type)}
-            onClick={() => {
-              history.push({
-                search: `monitorTypes=${encodeURIComponent(JSON.stringify([monitor.type]))}`,
-              });
-            }}
-          />
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{badges}</EuiFlexItem>
+        {monitor?.locations?.length > 1 && (
+          <EuiFlexItem grow={false}>
+            <LocationsBadge monitor={monitor} onLocationClick={onLocationClick} />
+          </EuiFlexItem>
+        )}
         {(tags ?? []).length > 0 && (
           <EuiFlexItem grow={false}>
             <TagsList

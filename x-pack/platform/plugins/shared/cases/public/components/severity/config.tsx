@@ -8,47 +8,56 @@
 import React from 'react';
 
 import { useEuiTheme, EuiHealth } from '@elastic/eui';
+import type { AppHeaderBadge } from '@kbn/app-header';
 import { CaseSeverity } from '../../../common/types/domain';
 import { CRITICAL, HIGH, LOW, MEDIUM } from './translations';
+
+interface SeverityConfig {
+  label: string;
+  badgeColor: NonNullable<AppHeaderBadge['color']>;
+}
 
 interface Props {
   severity: CaseSeverity;
 }
 
-export const severities = {
+export const severities: Record<CaseSeverity, SeverityConfig> = {
   [CaseSeverity.LOW]: {
     label: LOW,
+    badgeColor: 'default',
   },
   [CaseSeverity.MEDIUM]: {
     label: MEDIUM,
+    badgeColor: 'warning',
   },
   [CaseSeverity.HIGH]: {
     label: HIGH,
+    badgeColor: 'danger',
   },
   [CaseSeverity.CRITICAL]: {
     label: CRITICAL,
+    badgeColor: 'danger',
   },
 };
 
 export const SeverityHealth: React.FC<Props> = ({ severity }) => {
   const { euiTheme } = useEuiTheme();
-  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
 
   const severityData = {
     low: {
-      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis0 : euiTheme.colors.severity.neutral,
+      color: euiTheme.colors.severity.neutral,
       label: LOW,
     },
     medium: {
-      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis5 : euiTheme.colors.severity.warning,
+      color: euiTheme.colors.severity.warning,
       label: MEDIUM,
     },
     high: {
-      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis7 : euiTheme.colors.severity.risk,
+      color: euiTheme.colors.severity.risk,
       label: HIGH,
     },
     critical: {
-      color: isAmsterdam ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.severity.danger,
+      color: euiTheme.colors.severity.danger,
       label: CRITICAL,
     },
   };

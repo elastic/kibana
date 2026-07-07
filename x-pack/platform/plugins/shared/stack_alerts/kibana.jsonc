@@ -16,6 +16,7 @@
     ],
     "requiredPlugins": [
       "unifiedSearch",
+      "kql",
       "alerting",
       "features",
       "triggersActionsUi",

@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSuperSelect,
+  EuiToolTip,
+} from '@elastic/eui';
 import { camelCase, isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -18,7 +25,7 @@ import { threatDefault } from '../step_about_rule/default_value';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import { MitreAttackTechniqueFields } from './technique_fields';
-import type { MitreTactic } from '../../../../detections/mitre/types';
+import type { MitreTactic } from '../../../../../common/detection_engine/mitre/types';
 
 const lazyMitreConfiguration = () => {
   /**
@@ -27,7 +34,7 @@ const lazyMitreConfiguration = () => {
    */
   return import(
     /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../detections/mitre/mitre_tactics_techniques'
+    '../../../../../common/detection_engine/mitre/mitre_tactics_techniques'
   );
 };
 
@@ -136,13 +143,15 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              color="danger"
-              iconType="trash"
-              isDisabled={isDisabled || isEqual(values, threatDefault)}
-              onClick={() => removeTactic(index)}
-              aria-label={Rulei18n.DELETE}
-            />
+            <EuiToolTip content={Rulei18n.DELETE} disableScreenReaderOutput>
+              <EuiButtonIcon
+                color="danger"
+                iconType="trash"
+                isDisabled={isDisabled || isEqual(values, threatDefault)}
+                onClick={() => removeTactic(index)}
+                aria-label={Rulei18n.DELETE}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       );

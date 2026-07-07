@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { has } from 'lodash/fp';
-import { SavedObjectsBulkCreateObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsBulkCreateObject, SavedObjectsClientContract } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 
-import { ExceptionListSoSchema } from '../../../../schemas/saved_objects/exceptions_list_so_schema';
-import { ImportResponse } from '../../import_exception_list_and_items';
+import type { ExceptionListSoSchema } from '../../../../schemas/saved_objects/exceptions_list_so_schema';
+import type { ImportResponse } from '../../import_exception_list_and_items';
 
 /**
  * Helper to bulk create exception list parent
@@ -33,7 +33,7 @@ export const bulkCreateImportedLists = async ({
   });
 
   return bulkCreateResponse.saved_objects.map((so) => {
-    if (has('error', so) && so.error != null) {
+    if (isSavedObjectErrorResult(so)) {
       return {
         error: {
           message: so.error.message,

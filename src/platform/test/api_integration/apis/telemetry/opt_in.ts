@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import SuperTest from 'supertest';
+import type SuperTest from 'supertest';
 import type { KbnClient } from '@kbn/test';
 import type { TelemetrySavedObjectAttributes } from '@kbn/telemetry-plugin/server/saved_objects';
 import {
@@ -126,7 +126,7 @@ async function getSavedObjectAttributes(
 
     return body.attributes;
   } catch (err) {
-    if (err.response?.status === 404) {
+    if (err.status === 404) {
       return {};
     }
     throw err;

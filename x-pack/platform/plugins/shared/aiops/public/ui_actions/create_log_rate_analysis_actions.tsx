@@ -5,34 +5,32 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { PresentationContainer } from '@kbn/presentation-containers';
+import { openLazyFlyout } from '@kbn/presentation-util';
+import type { PresentationContainer } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
 import { AIOPS_EMBEDDABLE_GROUPING } from '@kbn/aiops-common/constants';
-
-import type {
-  LogRateAnalysisEmbeddableApi,
-  LogRateAnalysisEmbeddableInitialState,
-} from '../embeddables/log_rate_analysis/types';
-import type { AiopsPluginStartDeps } from '../types';
+import type { LogRateAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/log_rate_analysis';
 
 import type { LogRateAnalysisActionContext } from './log_rate_analysis_action_context';
+import { LogRateAnalysisEmbeddableInitializer } from '../embeddables/log_rate_analysis/log_rate_analysis_embeddable_initializer';
+import type { AiopsCoreSetup } from '../types';
+import { canUseAiops } from '../capabilities';
 
 const parentApiIsCompatible = async (
   parentApi: unknown
 ): Promise<PresentationContainer | undefined> => {
-  const { apiIsPresentationContainer } = await import('@kbn/presentation-containers');
+  const { apiIsPresentationContainer } = await import('@kbn/presentation-publishing');
   // we cannot have an async type check, so return the casted parentApi rather than a boolean
   return apiIsPresentationContainer(parentApi) ? (parentApi as PresentationContainer) : undefined;
 };
 
 export function createAddLogRateAnalysisEmbeddableAction(
-  coreStart: CoreStart,
-  pluginStart: AiopsPluginStartDeps
+  getStartServices: AiopsCoreSetup['getStartServices']
 ): UiActionsActionDefinition<LogRateAnalysisActionContext> {
   return {
     id: 'create-log-rate-analysis-embeddable',
@@ -43,49 +41,43 @@ export function createAddLogRateAnalysisEmbeddableAction(
         defaultMessage: 'Log rate analysis',
       }),
     async isCompatible(context: EmbeddableApiContext) {
-      return Boolean(await parentApiIsCompatible(context.embeddable));
+      const [coreStart] = await getStartServices();
+      return Boolean(await parentApiIsCompatible(context.embeddable)) && canUseAiops(coreStart);
     },
     async execute(context) {
-      const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
+      const [[coreStart, pluginStart], presentationContainerParent] = await Promise.all([
+        getStartServices(),
+        parentApiIsCompatible(context.embeddable),
+      ]);
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
-      try {
-        const { resolveEmbeddableLogRateAnalysisUserInput } = await import(
-          '../embeddables/log_rate_analysis/resolve_log_rate_analysis_config_input'
-        );
-
-        const initialState: LogRateAnalysisEmbeddableInitialState = {
-          dataViewId: undefined,
-        };
-
-        const embeddable = await presentationContainerParent.addNewPanel<
-          object,
-          LogRateAnalysisEmbeddableApi
-        >({
-          panelType: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
-          serializedState: { rawState: initialState },
-        });
-
-        if (!embeddable) {
-          return;
-        }
-
-        const deletePanel = () => {
-          presentationContainerParent.removePanel(embeddable.uuid);
-        };
-
-        resolveEmbeddableLogRateAnalysisUserInput(
-          coreStart,
-          pluginStart,
-          context.embeddable,
-          embeddable.uuid,
-          true,
-          embeddable,
-          deletePanel
-        );
-      } catch (e) {
-        return Promise.reject();
-      }
+      openLazyFlyout({
+        core: coreStart,
+        parentApi: context.embeddable,
+        flyoutProps: {
+          hideCloseButton: true,
+          focusedPanelId: context.embeddable.uuid,
+          'data-test-subj': 'aiopsLogRateAnalysisEmbeddableInitializer',
+          'aria-labelledby': 'logRateAnalysisConfig',
+        },
+        loadContent: async ({ closeFlyout }) => {
+          return (
+            <LogRateAnalysisEmbeddableInitializer
+              dataViews={pluginStart.data.dataViews}
+              IndexPatternSelect={pluginStart.unifiedSearch.ui.IndexPatternSelect}
+              isNewPanel={true}
+              onCreate={(initialState) => {
+                presentationContainerParent.addNewPanel<LogRateAnalysisEmbeddableState>({
+                  panelType: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
+                  serializedState: initialState,
+                });
+                closeFlyout();
+              }}
+              onCancel={closeFlyout}
+            />
+          );
+        },
+      });
     },
   };
 }

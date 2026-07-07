@@ -10,70 +10,65 @@ import {
   getLanguageDisplayName,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
-import { omit } from 'lodash';
-import type { HasSerializableState, SerializedPanelState } from '@kbn/presentation-publishing';
-import { SavedObjectReference } from '@kbn/core/types';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
-import { isTextBasedLanguage } from '../helper';
-import type { GetStateType, LensEmbeddableStartServices, LensRuntimeState } from '../types';
-import type { IntegrationCallbacks } from '../types';
+import type { GetStateType, IntegrationCallbacks, LensSerializedState } from '@kbn/lens-common';
+import type {
+  LegacyLensStateApi,
+  LensByRefSerializedAPIConfig,
+  LensWireAPIConfig,
+} from '@kbn/lens-common-2';
+import type { HasSerializableState } from '@kbn/presentation-publishing';
+import { stripInheritedContext } from '../../../common/transforms/helpers';
+import { flattenAPIConfig } from '../../../common/transforms/utils';
+import { isTextBasedLanguage, transformToApiConfig } from '../helper';
 
-function cleanupSerializedState({
-  rawState,
-  references,
-}: {
-  rawState: LensRuntimeState;
-  references: SavedObjectReference[];
-}) {
-  const cleanedState = omit(rawState, 'searchSessionId');
-  return {
-    rawState: cleanedState,
-    references,
-  };
-}
-
-export function initializeIntegrations(
-  getLatestState: GetStateType,
-  serializeDynamicActions: (() => SerializedPanelState<DynamicActionsSerializedState>) | undefined,
-  { attributeService }: LensEmbeddableStartServices
-): {
+export function initializeIntegrations(getLatestState: GetStateType): {
   api: Omit<
     IntegrationCallbacks,
     | 'updateState'
     | 'updateAttributes'
     | 'updateDataViews'
-    | 'updateSavedObjectId'
+    | 'updateRefId'
     | 'updateOverrides'
     | 'updateDataLoading'
     | 'getTriggerCompatibleActions'
-    | 'mountInlineFlyout'
   > &
-    HasSerializableState;
+    Pick<HasSerializableState<LensWireAPIConfig>, 'serializeState'> &
+    LegacyLensStateApi;
 } {
   return {
     api: {
       /**
-       * This API is used by the dashboard to serialize the panel state to save it into its saved object.
+       * This API is used by the parent to serialize the panel state to save it into its saved object.
        * Make sure to remove the attributes when the panel is by reference.
        */
-      serializeState: () => {
-        const currentState = getLatestState();
-        const cleanedState = cleanupSerializedState(
-          attributeService.extractReferences(currentState)
-        );
-        const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
-          serializeDynamicActions?.() ?? {};
-        if (cleanedState.rawState.savedObjectId) {
+      serializeState: (): LensWireAPIConfig => {
+        const currentState = stripInheritedContext(getLatestState());
+
+        const { ref_id: refId, attributes, ...state } = currentState;
+        if (refId) {
           return {
-            rawState: {
-              ...cleanedState.rawState,
-              ...dynamicActionsState,
-              attributes: undefined,
-            },
-            references: [...cleanedState.references, ...(dynamicActionsReferences ?? [])],
+            ...state,
+            ref_id: refId,
+          } satisfies LensByRefSerializedAPIConfig;
+        }
+
+        return flattenAPIConfig(transformToApiConfig(currentState));
+      },
+      getLegacySerializedState: (): LensSerializedState => {
+        const currentState = getLatestState();
+        const { ref_id: refId, attributes, ...state } = currentState;
+
+        if (refId) {
+          return {
+            ...state,
+            ref_id: refId,
           };
         }
-        return cleanedState;
+
+        return {
+          ...state,
+          attributes,
+        };
       },
       // TODO: workout why we have this duplicated
       getFullAttributes: () => getLatestState().attributes,

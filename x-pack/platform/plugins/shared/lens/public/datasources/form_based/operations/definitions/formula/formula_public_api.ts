@@ -6,50 +6,10 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { Query } from '@kbn/es-query';
-import type { DateRange } from '../../../../../../common/types';
+import type { FormulaPublicApi, IndexPattern } from '@kbn/lens-common';
 import { convertDataViewIntoLensIndexPattern } from '../../../../../data_views_service/loader';
-import type { IndexPattern } from '../../../../../types';
-import type { PersistedIndexPatternLayer } from '../../../types';
-import type { TimeScaleUnit } from '../../../../../../common/expressions';
 
 import { insertOrReplaceFormulaColumn } from './parse';
-
-/** @public **/
-export interface FormulaPublicApi {
-  /**
-   * Method which Lens consumer can import and given a formula string,
-   * return a parsed result as list of columns to use as Embeddable attributes.
-   *
-   * @param id - Formula column id
-   * @param column.formula - String representation of a formula
-   * @param [column.label] - Custom formula label
-   * @param layer - The layer to which the formula columns will be added
-   * @param dataView - The dataView instance
-   *
-   * See `x-pack/examples/embedded_lens_example` for exemplary usage.
-   */
-  insertOrReplaceFormulaColumn: (
-    id: string,
-    column: {
-      formula: string;
-      label?: string;
-      filter?: Query;
-      reducedTimeRange?: string;
-      timeScale?: TimeScaleUnit;
-      format?: {
-        id: string;
-        params?: {
-          decimals: number;
-          compact?: boolean;
-        };
-      };
-    },
-    layer: PersistedIndexPatternLayer,
-    dataView: DataView,
-    dateRange?: DateRange
-  ) => PersistedIndexPatternLayer | undefined;
-}
 
 /** @public **/
 export const createFormulaPublicApi = (): FormulaPublicApi => {

@@ -9,7 +9,15 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiLinkButtonProps, EuiPopoverProps } from '@elastic/eui';
-import { EuiButtonEmpty, EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiText,
+  EuiToolTip,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import styled from '@emotion/styled';
 
 const PopoverContent = styled(EuiText)`
@@ -33,8 +41,7 @@ export function HelpPopoverButton({
       <EuiButtonEmpty
         data-test-subj="apmHelpPopoverButtonButton"
         className="apmHelpPopover__buttonIcon"
-        size="s"
-        iconType="help"
+        iconType="question"
         aria-label={buttonText}
         onClick={onClick}
       >
@@ -44,14 +51,15 @@ export function HelpPopoverButton({
   }
 
   return (
-    <EuiButtonIcon
-      data-test-subj="apmHelpPopoverButtonButton"
-      className="apmHelpPopover__buttonIcon"
-      size="s"
-      iconType="help"
-      aria-label={buttonText}
-      onClick={onClick}
-    />
+    <EuiToolTip content={buttonText} disableScreenReaderOutput>
+      <EuiButtonIcon
+        data-test-subj="apmHelpPopoverButtonButton"
+        className="apmHelpPopover__buttonIcon"
+        iconType="question"
+        aria-label={buttonText}
+        onClick={onClick}
+      />
+    </EuiToolTip>
   );
 }
 
@@ -70,6 +78,8 @@ export function HelpPopover({
   isOpen: EuiPopoverProps['isOpen'];
   title?: string;
 }) {
+  const popoverTitleId = useGeneratedHtmlId();
+
   return (
     <EuiPopover
       anchorPosition={anchorPosition}
@@ -78,8 +88,20 @@ export function HelpPopover({
       isOpen={isOpen}
       panelPaddingSize="s"
       ownFocus
+      aria-labelledby={title ? popoverTitleId : undefined}
+      aria-label={
+        title
+          ? undefined
+          : i18n.translate('xpack.apm.helpPopover.popoverAriaLabel', {
+              defaultMessage: 'Help',
+            })
+      }
     >
-      {title && <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>}
+      {title && (
+        <EuiPopoverTitle id={popoverTitleId} paddingSize="s">
+          {title}
+        </EuiPopoverTitle>
+      )}
 
       <PopoverContent size="s">{children}</PopoverContent>
     </EuiPopover>

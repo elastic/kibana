@@ -1,0 +1,10 @@
+`name`:
+{{{name}}}
+
+`description`:
+{{{description}}}
+
+{{#existing_queries}}
+`existing_queries`:
+{{{existing_queries}}}
+{{/existing_queries}}

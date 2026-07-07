@@ -10,6 +10,8 @@ import type {
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
 
+import type { KibanaRequest } from '@kbn/core/server';
+
 import { appContextService } from '../../services';
 
 import { type BulkUpgradeTaskParams, _runBulkUpgradeTask } from './run_bulk_upgrade';
@@ -22,14 +24,23 @@ import {
   TASK_TYPE,
   formatError,
 } from './utils';
+import type { BulkRollbackTaskParams } from './run_bulk_rollback';
+import { _runBulkRollbackTask } from './run_bulk_rollback';
 
 export function registerPackagesBulkOperationTask(taskManager: TaskManagerSetupContract) {
   taskManager.registerTaskDefinitions({
     [TASK_TYPE]: {
       title: TASK_TITLE,
       timeout: TASK_TIMEOUT,
-      createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-        const abortController = new AbortController();
+      createTaskRunner: ({
+        taskInstance,
+        abortController,
+        fakeRequest,
+      }: {
+        taskInstance: ConcreteTaskInstance;
+        abortController: AbortController;
+        fakeRequest?: KibanaRequest;
+      }) => {
         const logger = appContextService.getLogger();
 
         return {
@@ -38,7 +49,6 @@ export function registerPackagesBulkOperationTask(taskManager: TaskManagerSetupC
             if (taskInstance.state.isDone) {
               return;
             }
-
             const taskParams = taskInstance.params as BulkPackageOperationsTaskParams;
             try {
               let results: BulkPackageOperationsTaskState['results'];
@@ -53,6 +63,13 @@ export function registerPackagesBulkOperationTask(taskManager: TaskManagerSetupC
                   abortController,
                   logger,
                   taskParams: taskParams as BulkUpgradeTaskParams,
+                  request: fakeRequest!,
+                });
+              } else if (taskParams.type === 'bulk_rollback') {
+                results = await _runBulkRollbackTask({
+                  abortController,
+                  logger,
+                  taskParams: taskParams as BulkRollbackTaskParams,
                 });
               }
               const state: BulkPackageOperationsTaskState = {

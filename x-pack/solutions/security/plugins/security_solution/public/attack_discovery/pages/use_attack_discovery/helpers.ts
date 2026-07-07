@@ -6,7 +6,7 @@
  */
 
 import type { TraceOptions } from '@kbn/elastic-assistant/impl/assistant/types';
-import type { AttackDiscoveryPostRequestBody } from '@kbn/elastic-assistant-common';
+import type { PostAttackDiscoveryGenerateRequestBody } from '@kbn/elastic-assistant-common';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { isEmpty } from 'lodash/fp';
@@ -56,8 +56,7 @@ const getAzureApiVersionParameter = (url: string): string | undefined => {
 export const getRequestBody = ({
   alertsIndexPattern,
   anonymizationFields,
-  genAiConfig,
-  selectedConnector,
+  connectorId,
   size,
   traceOptions,
 }: {
@@ -79,11 +78,10 @@ export const getRequestBody = ({
       namespace?: string | undefined;
     }>;
   };
-  genAiConfig?: GenAiConfig;
+  connectorId: string;
   size: number;
-  selectedConnector?: ActionConnector;
   traceOptions: TraceOptions;
-}): AttackDiscoveryPostRequestBody => ({
+}): PostAttackDiscoveryGenerateRequestBody => ({
   alertsIndexPattern: alertsIndexPattern ?? '',
   anonymizationFields: anonymizationFields?.data ?? [],
   langSmithProject: isEmpty(traceOptions?.langSmithProject)
@@ -96,9 +94,7 @@ export const getRequestBody = ({
   size,
   subAction: 'invokeAI', // non-streaming
   apiConfig: {
-    connectorId: selectedConnector?.id ?? '',
-    actionTypeId: selectedConnector?.actionTypeId ?? '',
-    provider: genAiConfig?.apiProvider,
-    model: genAiConfig?.defaultModel,
+    connectorId,
+    actionTypeId: '', // resolved server-side via inference.getConnectorById
   },
 });

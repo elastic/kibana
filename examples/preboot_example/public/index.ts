@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { PrebootExamplePlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>

@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { REPOSITORY_TYPES } from '../../../common/constants';
-import { RepositoryType } from '../../../common/types';
+import type { RepositoryType } from '../../../common/types';
 
 interface Props {
   type: RepositoryType;

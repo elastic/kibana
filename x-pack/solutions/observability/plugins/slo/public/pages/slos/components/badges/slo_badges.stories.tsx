@@ -11,7 +11,8 @@ import type { StoryFn } from '@storybook/react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { buildForecastedSlo } from '../../../../data/slo/slo';
-import { SloBadges as Component, SloBadgesProps } from './slo_badges';
+import type { SloBadgesProps } from './slo_badges';
+import { SloBadges as Component } from './slo_badges';
 
 export default {
   component: Component,

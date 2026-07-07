@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IndexSettings } from './indices';
-import { Aliases } from './aliases';
-import { Mappings } from './mappings';
-import { DataStream, DataRetention } from '.';
-import { DataStreamOptions } from './data_streams';
+import type { IndexSettings } from './indices';
+import type { Aliases } from './aliases';
+import type { Mappings } from './mappings';
+import type { DataStream, DataRetention } from '.';
+import type { DataStreamOptions } from './data_streams';
 
 export interface ComponentTemplateSerialized {
   template: {
@@ -46,6 +46,7 @@ export interface ComponentTemplateListItem {
   hasSettings: boolean;
   isManaged: boolean;
   isDeprecated?: boolean;
+  hasFrozenOrDeletePhase?: boolean;
 }
 
 export interface ComponentTemplateDatastreams {

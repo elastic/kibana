@@ -7,14 +7,15 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
+import { useInputCommand } from '../../../hooks/state_selectors/use_input_command';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithCommandArgumentState } from '../../../hooks/state_selectors/use_with_command_argument_state';
 import type { CommandArgDefinition, CommandArgumentValueSelectorProps } from '../../../types';
 
 const ArgumentSelectorWrapperContainer = styled.span`
-  border: ${({ theme: { eui } }) => eui.euiBorderThin};
-  border-radius: ${({ theme: { eui } }) => eui.euiBorderRadiusSmall};
+  border: ${({ theme }) => theme.euiTheme.border.thin};
+  border-radius: ${({ theme }) => theme.euiTheme.border.radius.small};
   overflow: hidden;
   user-select: none;
 
@@ -23,7 +24,7 @@ const ArgumentSelectorWrapperContainer = styled.span`
   }
 
   .selectorContainer {
-    padding: 0 ${({ theme: { eui } }) => eui.euiSizeXS};
+    padding: 0 ${({ theme }) => theme.euiTheme.size.xs};
     max-width: 25vw;
     display: flex;
     align-items: center;
@@ -31,11 +32,11 @@ const ArgumentSelectorWrapperContainer = styled.span`
   }
 
   .argNameContainer {
-    background-color: ${({ theme: { eui } }) => eui.euiFormInputGroupLabelBackground};
+    background-color: ${({ theme }) => theme.euiTheme.colors.backgroundBaseSubdued};
   }
 
   .argName {
-    padding-left: ${({ theme: { eui } }) => eui.euiSizeXS};
+    padding-left: ${({ theme }) => theme.euiTheme.size.xs};
     height: 100%;
     display: flex;
     align-items: center;
@@ -59,7 +60,18 @@ export interface ArgumentSelectorWrapperProps {
 export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
   ({ argName, argIndex, argDefinition: { SelectorComponent } }) => {
     const dispatch = useConsoleStateDispatch();
+    const command = useInputCommand();
     const { valueText, value, store } = useWithCommandArgumentState(argName, argIndex);
+
+    if (!command) {
+      // FIXME: PT we should not throw here as that would likely crash the UI.
+      throw new Error('ArgumentSelectorWrapper should only be used when a command is entered');
+    }
+
+    // Create requestFocus callback that uses proper console dispatch instead of direct state manipulation
+    const requestFocus = useCallback(() => {
+      dispatch({ type: 'addFocusToKeyCapture' });
+    }, [dispatch]);
 
     const handleSelectorComponentOnChange = useCallback<
       CommandArgumentValueSelectorProps['onChange']
@@ -99,6 +111,8 @@ export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
                 argName={argName}
                 argIndex={argIndex}
                 store={store}
+                command={command}
+                requestFocus={requestFocus}
                 onChange={handleSelectorComponentOnChange}
               />
             </div>

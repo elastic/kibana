@@ -5,27 +5,23 @@
  * 2.0.
  */
 
-import { createReducer, PayloadAction } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { createReducer } from '@reduxjs/toolkit';
 
-import { WritableDraft } from 'immer/dist/types/types-external';
-import { IHttpFetchError } from '@kbn/core-http-browser';
+import type { Draft } from 'immer';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 
-import { ActionPayload } from '../utils/actions';
-import { TestNowResponse } from '../../../../../common/types';
+import type { ActionPayload } from '../utils/actions';
+import type { TestNowPayload } from './actions';
 import {
   clearTestNowMonitorAction,
   hideTestNowFlyoutAction,
   manualTestMonitorAction,
   manualTestRunUpdateAction,
-  TestNowPayload,
   toggleTestNowFlyoutAction,
 } from './actions';
-import {
-  MonitorFields,
-  ScheduleUnit,
-  ServiceLocationErrors,
-  SyntheticsMonitorSchedule,
-} from '../../../../../common/runtime_types';
+import type { ServiceLocationErrors } from '../../../../../common/runtime_types';
+import type { EnrichedTestNowResponse } from './api';
 
 export enum TestRunStatus {
   LOADING = 'loading',
@@ -38,15 +34,11 @@ export const isTestRunning = (testRun?: ManualTestRun) =>
 
 export interface ManualTestRun {
   configId: string;
-  name: string;
   testRunId?: string;
   status: TestRunStatus;
-  schedule: SyntheticsMonitorSchedule;
-  locations: MonitorFields['locations'];
   errors?: ServiceLocationErrors;
   fetchError?: { name: string; message: string };
   isTestNowFlyoutOpen: boolean;
-  monitor?: TestNowResponse['monitor'];
 }
 
 export interface ManualTestRunsState {
@@ -59,7 +51,7 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
   builder
     .addCase(
       String(manualTestMonitorAction.get),
-      (state: WritableDraft<ManualTestRunsState>, action: PayloadAction<TestNowPayload>) => {
+      (state: Draft<ManualTestRunsState>, action: PayloadAction<TestNowPayload>) => {
         state = Object.values(state).reduce((acc, curr) => {
           acc[curr.configId] = {
             ...curr,
@@ -71,44 +63,35 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
 
         state[action.payload.configId] = {
           configId: action.payload.configId,
-          name: action.payload.name,
           status: TestRunStatus.LOADING,
-          schedule: { unit: ScheduleUnit.MINUTES, number: '3' },
-          locations: [],
           isTestNowFlyoutOpen: true,
         };
       }
     )
     .addCase(
       String(manualTestMonitorAction.success),
-      (state: WritableDraft<ManualTestRunsState>, { payload }: PayloadAction<TestNowResponse>) => {
+      (state: Draft<ManualTestRunsState>, { payload }: PayloadAction<EnrichedTestNowResponse>) => {
         state[payload.configId] = {
           configId: payload.configId,
           testRunId: payload.testRunId,
           status: TestRunStatus.IN_PROGRESS,
           errors: payload.errors,
-          schedule: payload.schedule,
-          locations: payload.locations,
           isTestNowFlyoutOpen: true,
-          monitor: payload.monitor,
-          name: payload.monitor.name,
         };
       }
     )
     .addCase(
       String(manualTestMonitorAction.fail),
       (
-        state: WritableDraft<ManualTestRunsState>,
-        action: ActionPayload<TestNowResponse, TestNowPayload>
+        state: Draft<ManualTestRunsState>,
+        action: ActionPayload<EnrichedTestNowResponse, TestNowPayload>
       ) => {
         const fetchError = action.payload as unknown as IHttpFetchError;
         if (fetchError?.request?.url) {
           const { name, message } = fetchError;
 
           const [, errorMonitor] =
-            Object.entries(state).find(
-              ([key]) => fetchError.request.url.indexOf(key) > -1 ?? false
-            ) ?? [];
+            Object.entries(state).find(([key]) => fetchError.request.url.indexOf(key) > -1) ?? [];
 
           if (errorMonitor) {
             state[errorMonitor.configId] = {
@@ -132,7 +115,7 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
         return state;
       }
     )
-    .addCase(manualTestRunUpdateAction, (state: WritableDraft<ManualTestRunsState>, action) => {
+    .addCase(manualTestRunUpdateAction, (state: Draft<ManualTestRunsState>, action) => {
       const { testRunId, ...rest } = action.payload;
       const configId = Object.keys(state).find((key) => state[key].testRunId === testRunId);
       if (configId) {
@@ -142,7 +125,7 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
         };
       }
     })
-    .addCase(toggleTestNowFlyoutAction, (state: WritableDraft<ManualTestRunsState>, action) => {
+    .addCase(toggleTestNowFlyoutAction, (state: Draft<ManualTestRunsState>, action) => {
       state = Object.values(state).reduce((acc, curr) => {
         acc[curr.configId] = {
           ...curr,
@@ -157,7 +140,7 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
         isTestNowFlyoutOpen: !state[action.payload].isTestNowFlyoutOpen,
       };
     })
-    .addCase(hideTestNowFlyoutAction, (state: WritableDraft<ManualTestRunsState>) => {
+    .addCase(hideTestNowFlyoutAction, (state: Draft<ManualTestRunsState>) => {
       state = Object.values(state).reduce((acc, curr) => {
         acc[curr.configId] = {
           ...curr,
@@ -170,7 +153,7 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
     })
     .addCase(
       String(clearTestNowMonitorAction),
-      (state: WritableDraft<ManualTestRunsState>, action: PayloadAction<string>) => {
+      (state: Draft<ManualTestRunsState>, action: PayloadAction<string>) => {
         delete state[action.payload];
       }
     );

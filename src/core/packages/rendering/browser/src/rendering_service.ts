@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import type React from 'react';
 
 export interface RenderingService {
   addContext: (element: React.ReactNode) => React.ReactElement;

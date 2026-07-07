@@ -18,9 +18,12 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 export interface DataVisualizerSetupDependencies {
   home?: HomePublicPluginSetup;
@@ -30,18 +33,21 @@ export interface DataVisualizerSetupDependencies {
 }
 export interface DataVisualizerStartDependencies {
   analytics: AnalyticsServiceStart;
-  data: DataPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
-  fileUpload: FileUploadPluginStart;
-  maps: MapsStartApi;
-  embeddable: EmbeddableStart;
-  share: SharePluginStart;
-  lens?: LensPublicStart;
   charts: ChartsPluginStart;
-  dataViewFieldEditor?: IndexPatternFieldEditorStart;
-  fieldFormats: FieldFormatsStart;
-  uiActions?: UiActionsStart;
   cloud?: CloudStart;
+  data: DataPublicPluginStart;
+  dataViewFieldEditor?: IndexPatternFieldEditorStart;
+  dataViewEditor?: DataViewEditorStart;
+  contentManagement?: ContentManagementPublicStart;
+  embeddable: EmbeddableStart;
+  fieldFormats: FieldFormatsStart;
+  fileUpload: FileUploadPluginStart;
+  lens?: LensPublicStart;
+  maps: MapsStartApi;
   savedSearch: SavedSearchPublicPluginStart;
+  share: SharePluginStart;
+  uiActions: UiActionsStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection?: UsageCollectionStart;
+  cps: CPSPluginStart;
 }

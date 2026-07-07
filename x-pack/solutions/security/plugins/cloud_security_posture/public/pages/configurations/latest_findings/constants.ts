@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { GroupOption } from '@kbn/grouping';
+import type { GroupOption } from '@kbn/grouping';
 import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
-import { FindingsBaseURLQuery } from '../../../common/types';
-import { CloudSecurityDefaultColumn } from '../../../components/cloud_security_data_table';
+import type { FindingsBaseURLQuery } from '../../../common/types';
+import type { CloudSecurityDefaultColumn } from '../../../components/cloud_security_data_table';
 
 export const FINDINGS_UNIT = (totalCount: number) =>
   i18n.translate('xpack.csp.findings.unit', {
@@ -99,6 +99,12 @@ export const defaultGroupingOptions: GroupOption[] = [
       defaultMessage: 'Kubernetes cluster ID',
     }),
     key: FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_ID,
+  },
+  {
+    label: i18n.translate('xpack.csp.findings.latestFindings.groupNamespace', {
+      defaultMessage: 'Namespace',
+    }),
+    key: FINDINGS_GROUPING_OPTIONS.NAMESPACE,
   },
 ];
 

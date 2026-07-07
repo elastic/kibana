@@ -1,0 +1,10 @@
+﻿prs:
+- https://github.com/elastic/kibana/pull/266513
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-06
+areas:
+- Search and data
+title: Fix old package version conditions on settings page
+description: Fix version comparison on integration detail settings page that incorrectly hid or showed install options, and disable the "Add integration" button when viewing a version different from the installed or latest available version.

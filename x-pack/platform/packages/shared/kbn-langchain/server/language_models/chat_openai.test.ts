@@ -6,12 +6,13 @@
  */
 
 import type OpenAI from 'openai';
-import { Stream } from 'openai/streaming';
+import type { Stream } from 'openai/streaming';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 
 import { ActionsClientChatOpenAI } from './chat_openai';
 import { mockActionResponse, mockChatCompletion } from './mocks';
+import { DEFAULT_OPEN_AI_MODEL } from './constants';
 
 const connectorId = 'mock-connector-id';
 
@@ -94,7 +95,7 @@ describe('ActionsClientChatOpenAI', () => {
       const defaultStreamingArgs: OpenAI.ChatCompletionCreateParamsStreaming = {
         messages: [{ content: prompt, role: 'user' }],
         stream: true,
-        model: 'gpt-4.1',
+        model: DEFAULT_OPEN_AI_MODEL,
         n: 99,
         stop: ['a stop sequence'],
         tools: [{ function: jest.fn(), type: 'function' }],
@@ -113,7 +114,7 @@ describe('ActionsClientChatOpenAI', () => {
           actionId: connectorId,
           params: {
             subActionParams: {
-              model: 'gpt-4.1',
+              model: DEFAULT_OPEN_AI_MODEL,
               messages: [{ role: 'user', content: 'Do you know my name?' }],
               signal,
               timeout: 999999,
@@ -134,7 +135,7 @@ describe('ActionsClientChatOpenAI', () => {
       const defaultNonStreamingArgs: OpenAI.ChatCompletionCreateParamsNonStreaming = {
         messages: [{ content: prompt, role: 'user' }],
         stream: false,
-        model: 'gpt-4.1',
+        model: DEFAULT_OPEN_AI_MODEL,
       };
       it('returns the expected data', async () => {
         const actionsClientChatOpenAI = new ActionsClientChatOpenAI(defaultArgs);
@@ -146,7 +147,7 @@ describe('ActionsClientChatOpenAI', () => {
           actionId: connectorId,
           params: {
             subActionParams: {
-              body: '{"temperature":0.2,"model":"gpt-4.1","messages":[{"role":"user","content":"Do you know my name?"}]}',
+              body: `{"temperature":0.2,"model":"${DEFAULT_OPEN_AI_MODEL}","messages":[{"role":"user","content":"Do you know my name?"}]}`,
               signal,
               timeout: 999999,
             },
@@ -198,7 +199,7 @@ describe('ActionsClientChatOpenAI', () => {
       const defaultStreamingArgs: OpenAI.ChatCompletionCreateParamsStreaming = {
         messages: [{ content: prompt, role: 'user' }],
         stream: true,
-        model: 'gpt-4.1',
+        model: DEFAULT_OPEN_AI_MODEL,
         n: 99,
         stop: ['a stop sequence'],
         tools: [{ function: jest.fn(), type: 'function' }],
@@ -240,7 +241,7 @@ describe('ActionsClientChatOpenAI', () => {
       const defaultNonStreamingArgs: OpenAI.ChatCompletionCreateParamsNonStreaming = {
         messages: [{ content: prompt, role: 'user' }],
         stream: false,
-        model: 'gpt-4.1',
+        model: DEFAULT_OPEN_AI_MODEL,
         n: 99,
         stop: ['a stop sequence'],
         tools: [{ function: jest.fn(), type: 'function' }],

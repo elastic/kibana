@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import type { EuiSuperDatePickerCommonRange } from '@elastic/eui';
 import {
   EuiButton,
   EuiContextMenuItem,
@@ -18,11 +19,10 @@ import {
   EuiPopover,
   EuiPopoverFooter,
   EuiSuperDatePicker,
-  EuiSuperDatePickerCommonRange,
 } from '@elastic/eui';
-import { OnTimeChangeProps } from '@elastic/eui/src/components/date_picker/super_date_picker/super_date_picker';
+import type { OnTimeChangeProps } from '@elastic/eui/src/components/date_picker/super_date_picker/super_date_picker';
 
-import { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
+import type { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
 
 import { i18n } from '@kbn/i18n';
 
@@ -126,8 +126,17 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
       <RedirectAppLinks coreStart={{ application }}>
         <EuiFlexItem grow={false}>
           <EuiPopover
+            aria-label={i18n.translate(
+              'xpack.enterpriseSearch.analytics.collectionsView.managePopover.ariaLabel',
+              { defaultMessage: 'Manage collection options' }
+            )}
             button={
-              <EuiButton iconType="arrowDown" iconSide="right" onClick={togglePopover}>
+              <EuiButton
+                data-test-subj="enterpriseSearchAnalyticsCollectionToolbarManageButton"
+                iconType="chevronSingleDown"
+                iconSide="right"
+                onClick={togglePopover}
+              >
                 <FormattedMessage
                   id="xpack.enterpriseSearch.analytics.collectionsView.manageButton"
                   defaultMessage="Manage"
@@ -142,7 +151,6 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
             <EuiContextMenuPanel>
               <EuiContextMenuItem
                 icon="link"
-                size="s"
                 data-telemetry-id={'entSearch-analytics-overview-toolbar-integrate-tracker-link'}
                 onClick={() =>
                   navigateToUrl(
@@ -160,7 +168,6 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
 
               <EuiContextMenuItem
                 icon="database"
-                size="s"
                 href={manageDatastreamUrl}
                 data-telemetry-id={'entSearch-analytics-overview-toolbar-manage-datastream-link'}
               >
@@ -172,9 +179,8 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
 
               {discoverLink && (
                 <EuiContextMenuItem
-                  icon="visArea"
+                  icon="chartArea"
                   href={discoverLink}
-                  size="s"
                   data-telemetry-id={'entSearch-analytics-overview-toolbar-manage-discover-link'}
                 >
                   <FormattedMessage
@@ -186,6 +192,7 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
 
               <EuiPopoverFooter paddingSize="m">
                 <EuiButton
+                  data-test-subj="enterpriseSearchAnalyticsCollectionToolbarDeleteCollectionButton"
                   type="submit"
                   color="danger"
                   fullWidth

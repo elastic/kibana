@@ -4,19 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Reference } from '@kbn/content-management-utils';
+
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import {
-  APPLY_FILTER_TRIGGER,
-  generateFilters,
-  type DataPublicPluginStart,
-} from '@kbn/data-plugin/public';
+import { generateFilters, type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
-  type SerializedPanelState,
   apiHasExecutionContext,
   fetch$,
   initializeTimeRangeManager,
@@ -26,8 +20,7 @@ import {
   titleComparators,
   timeRangeComparators,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { cloneDeep } from 'lodash';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
@@ -39,7 +32,9 @@ import {
   switchMap,
   distinctUntilChanged,
   merge,
+  filter as filterObservable,
 } from 'rxjs';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { isDefined } from '@kbn/ml-is-defined';
@@ -51,16 +46,17 @@ import { FilterStateStore } from '@kbn/es-query';
 import { ENABLE_ESQL, getESQLAdHocDataview } from '@kbn/esql-utils';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { FieldStatsTableEmbeddableState } from '@kbn/data-visualizer-server-schemas/embeddables/field_stats';
 import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { DataVisualizerPluginStart } from '../../../../plugin';
-import type { FieldStatisticsTableEmbeddableState } from '../grid_embeddable/types';
-import { FieldStatsInitializerViewType } from '../grid_embeddable/types';
-import { FIELD_STATS_EMBEDDABLE_TYPE, FIELD_STATS_DATA_VIEW_REF_NAME } from './constants';
+import { FieldStatsInitializerViewType } from '../../../../../common/embeddables/types';
 import { initializeFieldStatsControls } from './initialize_field_stats_controls';
 import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
 import type { FieldStatisticsTableEmbeddableApi } from './types';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { FieldStatsComponentType } from '../../constants/field_stats_component_type';
+import { FIELD_STATS_EMBEDDABLE_TYPE } from '../../../../../common/embeddables/constants';
 
 export interface EmbeddableFieldStatsChartStartServices {
   data: DataPublicPluginStart;
@@ -109,8 +105,8 @@ export const getFieldStatsChartEmbeddableFactory = (
     DataVisualizerPluginStart
   >
 ) => {
-  const factory: EmbeddableFactory<
-    FieldStatisticsTableEmbeddableState,
+  const factory: EmbeddablePublicDefinition<
+    FieldStatsTableEmbeddableState,
     FieldStatisticsTableEmbeddableApi
   > = {
     type: FIELD_STATS_EMBEDDABLE_TYPE,
@@ -130,25 +126,10 @@ export const getFieldStatsChartEmbeddableFactory = (
         fieldFormats,
         ...startServices,
       };
-      const timeRangeManager = initializeTimeRangeManager(initialState.rawState);
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const timeRangeManager = initializeTimeRangeManager(initialState);
+      const titleManager = initializeTitleManager(initialState);
 
-      const deserializeState = (
-        state: SerializedPanelState<FieldStatisticsTableEmbeddableState>
-      ) => {
-        const serializedState = cloneDeep(state.rawState);
-        // inject the reference
-        const dataViewIdRef = state.references?.find(
-          (ref) => ref.name === FIELD_STATS_DATA_VIEW_REF_NAME
-        );
-        // if the serializedState already contains a dataViewId, we don't want to overwrite it. (Unsaved state can cause this)
-        if (dataViewIdRef && serializedState && !serializedState.dataViewId) {
-          serializedState.dataViewId = dataViewIdRef?.id;
-        }
-        return serializedState;
-      };
-
-      const state = deserializeState(initialState);
+      const state = initialState;
 
       const {
         fieldStatsControlsApi,
@@ -162,18 +143,28 @@ export const getFieldStatsChartEmbeddableFactory = (
       const { onError, dataLoading$, blockingError$ } = dataLoadingApi;
 
       const validDataViewId: string | undefined =
-        isDefined(state.dataViewId) && state.dataViewId !== '' ? state.dataViewId : undefined;
+        state.view_type === FieldStatsInitializerViewType.DATA_VIEW &&
+        isDefined(state.data_view_id) &&
+        state.data_view_id !== ''
+          ? state.data_view_id
+          : undefined;
+      const query =
+        state.view_type === FieldStatsInitializerViewType.ESQL ? state.query : undefined;
       let initialDataView: DataView | undefined;
       try {
-        const dataView = isESQLQuery(state.query)
-          ? await getESQLAdHocDataview(state.query.esql, deps.data.dataViews)
+        const dataView = isESQLQuery(query)
+          ? await getESQLAdHocDataview({
+              dataViewsService: deps.data.dataViews,
+              query: query.esql,
+              http: deps.http,
+            })
           : validDataViewId
           ? await deps.data.dataViews.get(validDataViewId)
           : undefined;
         initialDataView = dataView;
       } catch (error) {
         // Only need to publish blocking error if viewtype is data view, and no data view found
-        if (state.viewType === FieldStatsInitializerViewType.DATA_VIEW) {
+        if (state.view_type === FieldStatsInitializerViewType.DATA_VIEW) {
           onError(error);
         }
       }
@@ -188,7 +179,9 @@ export const getFieldStatsChartEmbeddableFactory = (
           fieldStatsControlsApi.dataViewId$
             .pipe(
               skip(1),
-              skipWhile((dataViewId) => !dataViewId),
+              filterObservable(
+                (dataViewId): dataViewId is string => isDefined(dataViewId) && dataViewId !== ''
+              ),
               switchMap(async (dataViewId) => {
                 try {
                   return await deps.data.dataViews.get(dataViewId);
@@ -207,31 +200,15 @@ export const getFieldStatsChartEmbeddableFactory = (
 
       const { toasts } = deps.notifications;
 
-      const serializeState = () => {
-        const dataViewId = fieldStatsControlsApi.dataViewId$?.getValue();
-        const references: Reference[] = dataViewId
-          ? [
-              {
-                type: DATA_VIEW_SAVED_OBJECT_TYPE,
-                name: FIELD_STATS_DATA_VIEW_REF_NAME,
-                id: dataViewId,
-              },
-            ]
-          : [];
-        return {
-          rawState: {
+      const stateApi = initializeStateApi<FieldStatsTableEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState: () =>
+          ({
             ...titleManager.getLatestState(),
             ...timeRangeManager.getLatestState(),
             ...serializeFieldStatsChartState(),
-          },
-          references,
-        };
-      };
-
-      const unsavedChangesApi = initializeUnsavedChanges({
-        uuid,
-        parentApi,
-        serializeState,
+          } as FieldStatsTableEmbeddableState),
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
@@ -242,10 +219,10 @@ export const getFieldStatsChartEmbeddableFactory = (
           ...fieldStatsControlsComparators,
           ...timeRangeComparators,
         }),
-        onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved?.rawState);
-          timeRangeManager.reinitializeState(lastSaved?.rawState);
-          fieldStatsStateManager.reinitializeState(lastSaved?.rawState);
+        applySerializedState: (nextState) => {
+          titleManager.reinitializeState(nextState);
+          timeRangeManager.reinitializeState(nextState);
+          fieldStatsStateManager.reinitializeState(nextState);
         },
       });
 
@@ -253,7 +230,7 @@ export const getFieldStatsChartEmbeddableFactory = (
         ...timeRangeManager.api,
         ...titleManager.api,
         ...fieldStatsControlsApi,
-        ...unsavedChangesApi,
+        ...stateApi,
         // PublishesDataLoading
         dataLoading$,
         // PublishesBlockingError
@@ -264,27 +241,33 @@ export const getFieldStatsChartEmbeddableFactory = (
           }),
         isEditingEnabled: () => true,
         onEdit: async () => {
-          try {
-            const { resolveEmbeddableFieldStatsUserInput } = await import(
-              './resolve_field_stats_embeddable_input'
-            );
-            const chartState = serializeFieldStatsChartState();
-            const nextUpdate = await resolveEmbeddableFieldStatsUserInput(
-              coreStart,
-              pluginStart,
-              parentApi,
-              uuid,
-              false,
-              chartState,
-              fieldStatsControlsApi
-            );
-            fieldStatsControlsApi.updateUserInput(nextUpdate);
-          } catch (e) {
-            toasts.addError(e, { title: ERROR_MSG.UPDATE_CONFIG_ERROR });
-          }
+          openLazyFlyout({
+            core: coreStart,
+            parentApi,
+            flyoutProps: {
+              hideCloseButton: true,
+              'data-test-subj': 'fieldStatisticsInitializerFlyout',
+              focusedPanelId: uuid,
+            },
+            loadContent: async ({ closeFlyout }) => {
+              const { EmbeddableFieldStatsUserInput } = await import(
+                './field_stats_embeddable_input'
+              );
+              return (
+                <EmbeddableFieldStatsUserInput
+                  coreStart={coreStart}
+                  pluginStart={pluginStart}
+                  isNewPanel={false}
+                  initialState={serializeFieldStatsChartState()}
+                  fieldStatsControlsApi={fieldStatsControlsApi}
+                  onUpdate={fieldStatsControlsApi.updateUserInput}
+                  closeFlyout={closeFlyout}
+                />
+              );
+            },
+          });
         },
         dataViews$,
-        serializeState,
       });
 
       const reload$ = fetch$(api).pipe(
@@ -307,7 +290,7 @@ export const getFieldStatsChartEmbeddableFactory = (
           toasts.addWarning(ERROR_MSG.APPLY_FILTER_ERR);
           return;
         }
-        const trigger = pluginStart.uiActions.getTrigger(APPLY_FILTER_TRIGGER);
+        const trigger = pluginStart.uiActions.getTrigger(ON_APPLY_FILTER);
         if (!trigger) {
           toasts.addWarning(ERROR_MSG.APPLY_FILTER_ERR);
           return;
@@ -418,6 +401,7 @@ export const getFieldStatsChartEmbeddableFactory = (
             return (
               <EuiFlexItem css={statsTableCss} data-test-subj="dashboardFieldStatsEmbeddedContent">
                 <EuiCallOut
+                  announceOnMount
                   title={
                     <h3>
                       <FormattedMessage
@@ -427,7 +411,7 @@ export const getFieldStatsChartEmbeddableFactory = (
                     </h3>
                   }
                   color="warning"
-                  iconType="alert"
+                  iconType="warning"
                 />
               </EuiFlexItem>
             );

@@ -6,8 +6,6 @@
  */
 
 import {
-  EuiBadge,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlyout,
   EuiFlyoutBody,
@@ -16,26 +14,29 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
-  EuiToolTip,
+  EuiFlyoutFooter,
   useGeneratedHtmlId,
+  EuiFlexItem,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import { DEGRADED_DOCS_QUERY, FAILURE_STORE_SELECTOR } from '../../../../common/constants';
 import { _IGNORED } from '../../../../common/es_fields';
 import {
   degradedFieldMessageIssueDoesNotExistInLatestIndex,
-  discoverAriaText,
   fieldIgnoredText,
+  flyoutCancelText,
+  discoverAriaText,
   openInDiscoverText,
-  overviewQualityIssuesSectionTitle,
 } from '../../../../common/translations';
 import {
   useDatasetDetailsRedirectLinkTelemetry,
   useDatasetQualityDetailsState,
+  useEsqlRedirectLink,
   useQualityIssues,
-  useRedirectLink,
 } from '../../../hooks';
 import { NavigationSource } from '../../../services/telemetry';
 import DegradedFieldFlyout from './degraded_field';
@@ -50,8 +51,9 @@ export default function QualityIssueFlyout() {
     renderedItems,
     isAnalysisInProgress,
     degradedFieldAnalysisFormattedResult,
+    isDegradedFieldsValueLoading,
   } = useQualityIssues();
-  const { dataStreamSettings, datasetDetails, timeRange } = useDatasetQualityDetailsState();
+  const { dataStreamSettings, datasetDetails, timeRange, view } = useDatasetQualityDetailsState();
   const pushedFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'pushedFlyoutTitle',
   });
@@ -65,27 +67,69 @@ export default function QualityIssueFlyout() {
   const isUserViewingTheIssueOnLatestBackingIndex =
     dataStreamSettings?.lastBackingIndexName === fieldList?.indexFieldWasLastPresentIn;
 
+  const isDegradedType = expandedDegradedField && expandedDegradedField.type === 'degraded';
+
+  const degradedEsqlQuery = isDegradedType
+    ? `FROM ${datasetDetails.rawName} METADATA ${_IGNORED} | WHERE MV_CONTAINS(${_IGNORED}, "${expandedDegradedField.name}") | SORT @timestamp DESC`
+    : '';
+
+  const failedEsqlQuery = `FROM ${datasetDetails.rawName}::failures | SORT @timestamp DESC`;
+
+  const esqlQuery = isDegradedType ? degradedEsqlQuery : failedEsqlQuery;
+
   const { sendTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
-    query: { language: 'kuery', query: `${_IGNORED}: ${expandedDegradedField}` },
+    query: { esql: esqlQuery },
     navigationSource: NavigationSource.DegradedFieldFlyoutHeader,
   });
 
-  const redirectLinkProps = useRedirectLink({
-    dataStreamStat: datasetDetails,
+  const redirectLinkProps = useEsqlRedirectLink({
+    esqlQuery,
     timeRangeConfig: timeRange,
-    query: {
-      language: 'kuery',
-      query:
-        expandedDegradedField && expandedDegradedField.type === 'degraded'
-          ? DEGRADED_DOCS_QUERY
-          : '',
-    },
-    selector:
-      expandedDegradedField && expandedDegradedField.type === 'failed'
-        ? FAILURE_STORE_SELECTOR
-        : undefined,
     sendTelemetry,
   });
+
+  const banner = useMemo(() => {
+    if (
+      expandedDegradedField?.type !== 'degraded' ||
+      !isUserViewingTheIssueOnLatestBackingIndex ||
+      isAnalysisInProgress ||
+      !degradedFieldAnalysisFormattedResult ||
+      degradedFieldAnalysisFormattedResult.identifiedUsingHeuristics ||
+      isDegradedFieldsValueLoading ||
+      view === 'wired'
+    ) {
+      return undefined;
+    }
+
+    return (
+      <EuiCallOut
+        announceOnMount
+        color="primary"
+        data-test-subj="datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist"
+      >
+        <FormattedMessage
+          id="xpack.datasetQuality.details.degradedField.potentialCause.ignoreMalformedWarning"
+          defaultMessage="If you've recently updated your {field_limit} settings, this quality issue may not be relevant. Rollover the data stream to verify."
+          values={{
+            field_limit: (
+              <strong>
+                {i18n.translate('xpack.datasetQuality.degradedFieldFlyout.strong.fieldLimitLabel', {
+                  defaultMessage: 'field limit',
+                })}
+              </strong>
+            ),
+          }}
+        />
+      </EuiCallOut>
+    );
+  }, [
+    expandedDegradedField?.type,
+    isUserViewingTheIssueOnLatestBackingIndex,
+    isAnalysisInProgress,
+    degradedFieldAnalysisFormattedResult,
+    isDegradedFieldsValueLoading,
+    view,
+  ]);
 
   return (
     <EuiFlyout
@@ -96,38 +140,21 @@ export default function QualityIssueFlyout() {
       data-test-subj={'datasetQualityDetailsDegradedFieldFlyout'}
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiBadge color="warning">{overviewQualityIssuesSectionTitle}</EuiBadge>
-        <EuiSpacer size="s" />
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
           <EuiTitle size="m">
             <EuiText>
               {expandedDegradedField?.type === 'degraded' ? (
                 <>
-                  {expandedDegradedField?.name}{' '}
-                  <span style={{ fontWeight: 400 }}>{fieldIgnoredText}</span>
+                  {expandedDegradedField?.name} {fieldIgnoredText}
                 </>
               ) : (
-                <span style={{ fontWeight: 400 }}>
-                  {i18n.translate(
-                    'xpack.datasetQuality.datasetQualityDetails.qualityIssueFlyout.failedDocsTitle',
-                    {
-                      defaultMessage: 'Documents indexing failed',
-                    }
-                  )}
-                </span>
+                <FormattedMessage
+                  id="xpack.datasetQuality.details.qualityIssues.documentIndexFailed"
+                  defaultMessage="Documents indexing failed"
+                />
               )}
             </EuiText>
           </EuiTitle>
-          <EuiToolTip content={openInDiscoverText}>
-            <EuiButtonIcon
-              display="base"
-              iconType="discoverApp"
-              aria-label={discoverAriaText}
-              size="s"
-              data-test-subj="datasetQualityDetailsDegradedFieldFlyoutTitleLinkToDiscover"
-              {...redirectLinkProps.linkProps}
-            />
-          </EuiToolTip>
         </EuiFlexGroup>
         {expandedDegradedField?.type === 'degraded' &&
           !isUserViewingTheIssueOnLatestBackingIndex && (
@@ -141,39 +168,28 @@ export default function QualityIssueFlyout() {
               </EuiTextColor>
             </>
           )}
-        {expandedDegradedField?.type === 'degraded' &&
-          isUserViewingTheIssueOnLatestBackingIndex &&
-          !isAnalysisInProgress &&
-          degradedFieldAnalysisFormattedResult &&
-          !degradedFieldAnalysisFormattedResult.identifiedUsingHeuristics && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiTextColor
-                color="danger"
-                data-test-subj="datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist"
-              >
-                <FormattedMessage
-                  id="xpack.datasetQuality.details.degradedField.potentialCause.ignoreMalformedWarning"
-                  defaultMessage="If you've recently updated your {field_limit} settings, this quality issue may not be relevant. Rollover the data stream to verify."
-                  values={{
-                    field_limit: (
-                      <strong>
-                        {i18n.translate(
-                          'xpack.datasetQuality.degradedFieldFlyout.strong.fieldLimitLabel',
-                          { defaultMessage: 'field limit' }
-                        )}
-                      </strong>
-                    ),
-                  }}
-                />
-              </EuiTextColor>
-            </>
-          )}
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody banner={banner}>
         {expandedDegradedField?.type === 'degraded' && <DegradedFieldFlyout />}
         {expandedDegradedField?.type === 'failed' && <FailedDocsFlyout />}
       </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={closeDegradedFieldFlyout}>{flyoutCancelText}</EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              aria-label={discoverAriaText}
+              size="s"
+              data-test-subj="datasetQualityDetailsDegradedFieldFlyoutTitleLinkToDiscover"
+              {...redirectLinkProps.linkProps}
+            >
+              {openInDiscoverText}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 }

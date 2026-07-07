@@ -12,9 +12,8 @@ import { descriptorToArray } from '@kbn/encrypted-saved-objects-plugin/server/cr
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { validateEvent } from '../../../../spaces_only/tests/alerting/group1/event_log';
+import { validateEvent } from '../../../../spaces_only/tests/alerting/validate_event';
 
-// eslint-disable-next-line import/no-default-export
 export default function eventLogTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');

@@ -6,13 +6,13 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { RouteComponentProps, useLocation } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageSection } from '@elastic/eui';
+import type { RouteComponentProps } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { parse } from 'query-string';
-import { ScopedHistory } from '@kbn/core/public';
+import type { ScopedHistory } from '@kbn/core/public';
 
-import { TemplateDeserialized } from '../../../../common';
+import type { TemplateDeserialized } from '../../../../common';
 import { TemplateForm } from '../../components';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../services/breadcrumbs';
 import { saveTemplate } from '../../services/api';
@@ -56,28 +56,22 @@ export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ h
   }, []);
 
   return (
-    <EuiPageSection restrictWidth style={{ width: '100%' }}>
-      <TemplateForm
-        title={
-          isLegacy ? (
-            <FormattedMessage
-              id="xpack.idxMgmt.createTemplate.createLegacyTemplatePageTitle"
-              defaultMessage="Create legacy template"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.idxMgmt.createTemplate.createTemplatePageTitle"
-              defaultMessage="Create template"
-            />
-          )
-        }
-        onSave={onSave}
-        isSaving={isSaving}
-        saveError={saveError}
-        clearSaveError={clearSaveError}
-        isLegacy={isLegacy}
-        history={history as ScopedHistory}
-      />
-    </EuiPageSection>
+    <TemplateForm
+      title={
+        isLegacy
+          ? i18n.translate('xpack.idxMgmt.createTemplate.createLegacyTemplatePageTitle', {
+              defaultMessage: 'Create legacy template',
+            })
+          : i18n.translate('xpack.idxMgmt.createTemplate.createTemplatePageTitle', {
+              defaultMessage: 'Create template',
+            })
+      }
+      onSave={onSave}
+      isSaving={isSaving}
+      saveError={saveError}
+      clearSaveError={clearSaveError}
+      isLegacy={isLegacy}
+      history={history as ScopedHistory}
+    />
   );
 };

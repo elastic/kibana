@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
+import React from 'react';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { render } from '../../../utils/test_helper';
 import { AlertsTableCellValue } from './cell_value';
-import { Alert } from '@kbn/alerting-types';
+import type { Alert } from '@kbn/alerting-types';
 import { coreMock } from '@kbn/core/public/mocks';
 
 interface AlertsTableRow {

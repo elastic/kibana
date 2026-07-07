@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiSideNavItemType, EuiPageSectionProps } from '@elastic/eui';
-import { _EuiPageBottomBarProps } from '@elastic/eui/src/components/page_template/bottom_bar/page_bottom_bar';
+import { type EuiSideNavItemType, type EuiPageSectionProps } from '@elastic/eui';
+import type { _EuiPageBottomBarProps } from '@elastic/eui/src/components/page_template/bottom_bar/page_bottom_bar';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
@@ -23,9 +23,8 @@ import type {
   KibanaPageTemplateProps,
   KibanaPageTemplateKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-template';
-import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { SearchBarPortal } from './search_bar_portal';
-import { ObservabilityTour } from '../tour';
+
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
 import { NavNameWithBetaBadge } from './nav_name_with_beta_badge';
 
@@ -44,7 +43,6 @@ export type WrappedPageTemplateProps = Pick<
   pageSectionProps?: EuiPageSectionProps;
   bottomBar?: React.ReactNode;
   bottomBarProps?: _EuiPageBottomBarProps;
-  topSearchBar?: React.ReactNode;
 };
 
 export interface NavigationEntry {
@@ -87,7 +85,6 @@ export interface ObservabilityPageTemplateDependencies {
   navigateToApp: ApplicationStart['navigateToApp'];
   navigationSections$: Observable<NavigationSection[]>;
   getPageTemplateServices: () => KibanaPageTemplateKibanaDependencies;
-  guidedOnboardingApi: GuidedOnboardingPluginStart['guidedOnboardingApi'];
   isSidebarEnabled$: BehaviorSubject<boolean>;
 }
 
@@ -109,15 +106,22 @@ export function ObservabilityPageTemplate({
   bottomBar,
   bottomBarProps,
   pageSectionProps,
-  guidedOnboardingApi,
-  topSearchBar,
   ...pageTemplateProps
 }: ObservabilityPageTemplateProps): React.ReactElement | null {
   const sections = useObservable(navigationSections$, []);
   const currentAppId = useObservable(currentAppId$, undefined);
   const { pathname: currentPath } = useLocation();
 
-  const { services } = useKibana();
+  const { services } = useKibana<{ spaces?: SpacesPluginStart }>();
+
+  const areAnnouncementsEnabled = services.notifications?.tours.isEnabled();
+  const canManageSpaces = services.application?.capabilities.spaces?.manage;
+
+  const SolutionViewSwitchCallout = services.spaces?.ui?.components?.getSolutionViewSwitchCallout;
+  const solutionNavFooter =
+    areAnnouncementsEnabled && canManageSpaces && SolutionViewSwitchCallout ? (
+      <SolutionViewSwitchCallout currentSolution="oblt" />
+    ) : undefined;
 
   const sideNavItems = useMemo<Array<EuiSideNavItemType<unknown>>>(
     () =>
@@ -193,52 +197,37 @@ export function ObservabilityPageTemplate({
 
   return (
     <KibanaPageTemplateKibanaProvider {...getPageTemplateServices()}>
-      <ObservabilityTour
-        navigateToApp={navigateToApp}
-        prependBasePath={services?.http?.basePath.prepend}
-        guidedOnboardingApi={guidedOnboardingApi}
-        isPageDataLoaded={isPageDataLoaded}
-        // The tour is dependent on the solution nav, and should not render if it is not visible
-        showTour={showSolutionNav}
-      >
-        {({ isTourVisible }) => {
-          return (
-            <KibanaPageTemplate
-              restrictWidth={false}
-              {...pageTemplateProps}
-              solutionNav={
-                showSolutionNav
-                  ? {
-                      icon: 'logoObservability',
-                      items: sideNavItems,
-                      name: sideNavTitle,
-                      // Only false if tour is active
-                      canBeCollapsed: isTourVisible === false,
-                    }
-                  : undefined
+      <KibanaPageTemplate
+        restrictWidth={false}
+        {...pageTemplateProps}
+        solutionNav={
+          showSolutionNav
+            ? {
+                icon: 'logoObservability',
+                items: sideNavItems,
+                name: sideNavTitle,
+                footer: solutionNavFooter,
               }
+            : undefined
+        }
+      >
+        <KibanaErrorBoundaryProvider analytics={services.analytics}>
+          <KibanaErrorBoundary>
+            <KibanaPageTemplate.Section
+              component="div"
+              alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
+              {...pageSectionProps}
             >
-              <KibanaErrorBoundaryProvider analytics={services.analytics}>
-                <KibanaErrorBoundary>
-                  <KibanaPageTemplate.Section
-                    component="div"
-                    alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
-                    {...pageSectionProps}
-                  >
-                    {topSearchBar && <SearchBarPortal>{topSearchBar}</SearchBarPortal>}
-                    {children}
-                  </KibanaPageTemplate.Section>
-                </KibanaErrorBoundary>
-              </KibanaErrorBoundaryProvider>
-              {bottomBar && (
-                <KibanaPageTemplate.BottomBar {...bottomBarProps}>
-                  {bottomBar}
-                </KibanaPageTemplate.BottomBar>
-              )}
-            </KibanaPageTemplate>
-          );
-        }}
-      </ObservabilityTour>
+              {children}
+            </KibanaPageTemplate.Section>
+          </KibanaErrorBoundary>
+        </KibanaErrorBoundaryProvider>
+        {bottomBar && (
+          <KibanaPageTemplate.BottomBar {...bottomBarProps}>
+            {bottomBar}
+          </KibanaPageTemplate.BottomBar>
+        )}
+      </KibanaPageTemplate>
     </KibanaPageTemplateKibanaProvider>
   );
 }

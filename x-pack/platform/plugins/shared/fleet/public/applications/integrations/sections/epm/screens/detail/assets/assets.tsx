@@ -8,7 +8,7 @@
 import React, { Fragment, useEffect, useState, useCallback, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiTitle, EuiCallOut } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import { ExperimentalFeaturesService } from '../../../../../../../services';
 
@@ -18,6 +18,8 @@ import type {
   KibanaAssetReference,
   SimpleSOAssetType,
 } from '../../../../../../../../common';
+import { ElasticsearchAssetType } from '../../../../../../../../common';
+import { KibanaSavedObjectType } from '../../../../../../../../common/types/models';
 import { displayedAssetTypes } from '../../../../../../../../common/constants';
 
 import { Error, ExtensionWrapper, Loading } from '../../../../../components';
@@ -36,10 +38,15 @@ import {
 } from '../../../../../hooks';
 import { sendGetBulkAssets } from '../../../../../hooks';
 import { SideBarColumn } from '../../../components/side_bar_column';
+import { ALERTING_ASSET_TYPES } from '../alerting';
 
-import { DeferredAssetsSection } from './deferred_assets_accordion';
+import { DeferredAssetsSection } from './deferred_assets_section';
 import { AssetsAccordion } from './assets_accordion';
 import { InstallKibanaAssetsButton } from './install_kibana_assets_button';
+
+const filteredDisplayedAssetTypes = displayedAssetTypes.filter(
+  (t) => !(ALERTING_ASSET_TYPES as string[]).includes(t)
+);
 
 interface AssetsPanelProps {
   packageInfo: PackageInfo;
@@ -95,14 +102,17 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
   const pkgAssetsByType = useMemo(
     () =>
       pkgAssets.reduce((acc, asset) => {
-        if (!acc[asset.type] && displayedAssetTypes.includes(asset.type)) {
-          acc[asset.type] = [];
+        if (filteredDisplayedAssetTypes.includes(asset.type)) {
+          if (!acc[asset.type]) {
+            acc[asset.type] = [];
+          }
+          acc[asset.type].push(asset);
         }
-        acc[asset.type].push(asset);
         return acc;
       }, {} as Record<string, Array<EsAssetReference | KibanaAssetReference>>),
     [pkgAssets]
   );
+
   const [fetchError, setFetchError] = useState<undefined | Error>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -126,30 +136,39 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
 
       if (pkgAssets.length > 0) {
         const deferredAssets = pkgAssets.filter((asset): asset is EsAssetReference => {
-          return 'deferred' in asset && asset.deferred === true;
+          // Deferred alert refs belong to the Alerting tab, not the Assets tab
+          return (
+            'deferred' in asset &&
+            asset.deferred === true &&
+            asset.type !== KibanaSavedObjectType.alert
+          );
         });
         setDeferredInstallations(deferredAssets);
       }
 
       try {
-        const assetIds: AssetSOObject[] = pkgAssets.map(({ id, type }) => ({
-          id,
-          type,
-        }));
+        const assetIds: AssetSOObject[] = pkgAssets
+          .filter(({ type }) => type !== ElasticsearchAssetType.knowledgeBase)
+          .map(({ id, type }) => ({
+            id,
+            type,
+          }));
 
-        const { data, error } = await sendGetBulkAssets({ assetIds });
-        if (error) {
-          setFetchError(error);
-        } else {
-          setAssetsSavedObjectsByType(
-            (data?.items || []).reduce((acc, asset) => {
-              if (!acc[asset.type]) {
-                acc[asset.type] = {};
-              }
-              acc[asset.type][asset.id] = asset;
-              return acc;
-            }, {} as typeof assetSavedObjectsByType)
-          );
+        if (assetIds.length > 0) {
+          const { data, error } = await sendGetBulkAssets({ assetIds });
+          if (error) {
+            setFetchError(error);
+          } else {
+            setAssetsSavedObjectsByType(
+              (data?.items || []).reduce((acc, asset) => {
+                if (!acc[asset.type]) {
+                  acc[asset.type] = {};
+                }
+                acc[asset.type][asset.id] = asset;
+                return acc;
+              }, {} as typeof assetSavedObjectsByType)
+            );
+          }
         }
       } catch (e) {
         setFetchError(e);
@@ -175,6 +194,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
   } else if (!canReadPackageSettings) {
     content = (
       <EuiCallOut
+        announceOnMount
         color="warning"
         title={
           <FormattedMessage
@@ -201,14 +221,17 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
       );
     } else {
       content = !hasDeferredInstallations ? (
-        <EuiTitle>
-          <h2>
+        <EuiCallOut
+          announceOnMount
+          iconType="info"
+          color="primary"
+          title={
             <FormattedMessage
               id="xpack.fleet.epm.packageDetails.assets.noAssetsFoundLabel"
-              defaultMessage="No assets found"
+              defaultMessage="No assets installed for this integration."
             />
-          </h2>
-        </EuiTitle>
+          }
+        />
       ) : null;
     }
   } else {
@@ -217,6 +240,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
       !assetsInstalledInCurrentSpace ? (
         <>
           <EuiCallOut
+            announceOnMount
             heading="h2"
             title={
               <FormattedMessage
@@ -266,7 +290,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
       ) : null,
 
       // List all assets by order of `displayedAssetTypes`
-      ...displayedAssetTypes.map((assetType) => {
+      ...filteredDisplayedAssetTypes.map((assetType) => {
         if (config?.hideDashboards && assetType === 'dashboard') {
           // If hideDashboards is set, filter out dashboards from displayed assets
           return null;
@@ -274,12 +298,24 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
 
         const assets = pkgAssetsByType[assetType] || [];
         const soAssets = assetSavedObjectsByType[assetType] || {};
-        const finalAssets = assets.map((asset) => {
-          return {
-            ...asset,
-            ...soAssets[asset.id],
-          };
-        });
+        const finalAssets = assets
+          .map((asset) => {
+            if (asset.type === ElasticsearchAssetType.knowledgeBase) {
+              return {
+                ...asset,
+                attributes: { title: asset.id },
+              };
+            }
+            return {
+              ...asset,
+              ...soAssets[asset.id],
+            };
+          })
+          .sort((a, b) => {
+            const titleA = a.attributes?.title ?? a.id;
+            const titleB = b.attributes?.title ?? b.id;
+            return titleA.localeCompare(titleB);
+          });
 
         if (!finalAssets.length) {
           return null;

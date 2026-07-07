@@ -27,7 +27,8 @@ import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { UnifiedTabs, useNewTabProps, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { type TabPreviewData, TabStatus } from '@kbn/unified-tabs';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-import { FieldListSidebar, FieldListSidebarProps } from './field_list_sidebar';
+import type { FieldListSidebarProps } from './field_list_sidebar';
+import { FieldListSidebar } from './field_list_sidebar';
 
 // TODO: replace with real data when ready
 const TAB_CONTENT_MOCK: TabPreviewData[] = [
@@ -128,6 +129,7 @@ export const UnifiedTabsExampleApp: React.FC<UnifiedTabsExampleAppProps> = ({
               items={managedItems}
               selectedItemId={managedSelectedItemId}
               recentlyClosedItems={[]}
+              onClearRecentlyClosed={() => {}} // not implemented in this example
               maxItemsCount={25}
               services={services}
               onChanged={(updatedState) =>
@@ -140,6 +142,7 @@ export const UnifiedTabsExampleApp: React.FC<UnifiedTabsExampleAppProps> = ({
               getPreviewData={() =>
                 TAB_CONTENT_MOCK[Math.floor(Math.random() * TAB_CONTENT_MOCK.length)]
               }
+              onEBTEvent={() => {}}
               renderContent={({ label }) => {
                 return (
                   <EuiFlexGroup direction="column" gutterSize="none">

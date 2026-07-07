@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/group5/_no_data.ts
+
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -39,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('when no data opens integrations', async () => {
       await header.waitUntilLoadingHasFinished();
 
-      const addIntegrations = await testSubjects.find('kbnOverviewAddIntegrations');
+      const addIntegrations = await testSubjects.find('noDataDefaultActionButton');
       await addIntegrations.click();
       await common.waitUntilUrlIncludes('integrations/browse');
     });

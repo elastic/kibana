@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { SolutionNav, SolutionNavProps } from './solution_nav';
+import type { SolutionNavProps } from './solution_nav';
+import { SolutionNav } from './solution_nav';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -104,5 +105,31 @@ describe('SolutionNav', () => {
       <SolutionNav name="Solution" canBeCollapsed={false} items={items} />
     );
     expect(noCollapse).toMatchSnapshot();
+  });
+
+  describe('footer', () => {
+    test('renders footer when provided', () => {
+      const component = shallow(
+        <SolutionNav
+          name="Solution"
+          items={items}
+          footer={<div id="test-footer">Footer content</div>}
+        />
+      );
+      expect(component.find('#test-footer').exists()).toBeTruthy();
+    });
+    test('does not render footer wrapper when footer is not provided', () => {
+      const component = shallow(<SolutionNav name="Solution" items={items} />);
+      expect(component.find('[data-test-subj="solutionNavFooter"]').exists()).toBeFalsy();
+    });
+    test('renders footer with custom children', () => {
+      const component = shallow(
+        <SolutionNav name="Solution" footer={<div id="test-footer">Footer</div>}>
+          <span id="custom-nav" />
+        </SolutionNav>
+      );
+      expect(component.find('#test-footer').exists()).toBeTruthy();
+      expect(component.find('#custom-nav').exists()).toBeTruthy();
+    });
   });
 });

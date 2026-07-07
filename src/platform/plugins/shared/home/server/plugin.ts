@@ -7,17 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
-import {
-  TutorialsRegistry,
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import type {
   TutorialsRegistrySetup,
   TutorialsRegistryStart,
-  SampleDataRegistry,
   SampleDataRegistrySetup,
   SampleDataRegistryStart,
 } from './services';
+import { TutorialsRegistry, SampleDataRegistry } from './services';
 import { capabilitiesProvider } from './capabilities_provider';
 import { sampleDataTelemetry } from './saved_objects';
 import { registerRoutes } from './routes';

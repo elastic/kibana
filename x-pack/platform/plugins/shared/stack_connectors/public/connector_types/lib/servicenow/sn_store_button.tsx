@@ -6,7 +6,8 @@
  */
 
 import React, { memo } from 'react';
-import { EuiButtonProps, EuiButton, EuiLink } from '@elastic/eui';
+import type { EuiButtonProps } from '@elastic/eui';
+import { EuiButton, EuiLink } from '@elastic/eui';
 
 import * as i18n from './translations';
 
@@ -24,7 +25,7 @@ const SNStoreButtonComponent: React.FC<Props> = ({ color, appId = '' }) => {
       href={getStoreURL(appId)}
       color={color}
       iconSide="right"
-      iconType="popout"
+      iconType="external"
       target="_blank"
     >
       {i18n.VISIT_SN_STORE}

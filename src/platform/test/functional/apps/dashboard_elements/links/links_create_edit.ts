@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -35,10 +35,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardLinks.addDashboardLink('links 001');
   }
 
+  async function openLinksPanelEditor() {
+    await dashboardAddPanel.openAddPanelFlyout();
+    await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Links');
+    await dashboardLinks.expectPanelEditorFlyoutIsOpen();
+    await testSubjects.missingOrFail('dashboardAddPanel');
+  }
+
   const DASHBOARD_NAME = 'Test Links panel';
   const LINKS_PANEL_NAME = 'Some links';
 
-  describe('links panel create and edit', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/274890
+  describe.skip('links panel create and edit', () => {
     describe('creation', () => {
       before(async () => {
         await dashboard.navigateToApp();
@@ -49,13 +57,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           exitFromEditMode: false,
           saveAsNew: true,
         });
-        await dashboard.loadSavedDashboard(DASHBOARD_NAME);
-        await dashboard.switchToEditMode();
+        await dashboard.loadDashboardInEditMode(DASHBOARD_NAME);
       });
 
       it('can not add an external link that violates externalLinks.policy', async () => {
-        await dashboardAddPanel.clickEditorMenuButton();
-        await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Links');
+        await openLinksPanelEditor();
 
         await dashboardLinks.setExternalUrlInput('https://danger.example.com');
         expect(await testSubjects.exists('links--linkDestination--error')).to.be(true);
@@ -64,8 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('can create a new by-reference links panel', async () => {
-        await dashboardAddPanel.clickEditorMenuButton();
-        await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Links');
+        await openLinksPanelEditor();
 
         await createSomeLinks();
         await dashboardLinks.toggleSaveByReference(true);
@@ -84,8 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('does not close the flyout when the user cancels the save as modal', async () => {
-        await dashboardAddPanel.clickEditorMenuButton();
-        await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Links');
+        await openLinksPanelEditor();
         await createSomeLinks();
         await dashboardLinks.toggleSaveByReference(true);
         await dashboardLinks.clickPanelEditorSaveButton();
@@ -98,8 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('by-value links panel', () => {
         it('can create a new by-value links panel', async () => {
-          await dashboardAddPanel.clickEditorMenuButton();
-          await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Links');
+          await openLinksPanelEditor();
           await dashboardLinks.setLayout('horizontal');
           await createSomeLinks();
           await dashboardLinks.toggleSaveByReference(false);
@@ -132,14 +135,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('editing', () => {
       it('can reorder links in an existing panel', async () => {
-        await dashboard.loadSavedDashboard('links 001');
-        await dashboard.switchToEditMode();
+        await dashboard.loadDashboardInEditMode('links 001');
 
         await dashboardPanelActions.clickEdit();
         await dashboardLinks.expectPanelEditorFlyoutIsOpen();
 
         // Move the third link up one step
-        await dashboardLinks.reorderLinks('link003', 3, 1, true);
+        await dashboardLinks.reorderLinks(3, 1, true);
 
         await dashboardLinks.clickPanelEditorSaveButton();
         await header.waitUntilLoadingHasFinished();
@@ -151,8 +153,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('can edit link in existing panel', async () => {
-        await dashboard.loadSavedDashboard('links 001');
-        await dashboard.switchToEditMode();
+        await dashboard.loadDashboardInEditMode('links 001');
 
         await dashboardPanelActions.clickEdit();
         await dashboardLinks.expectPanelEditorFlyoutIsOpen();
@@ -164,13 +165,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardLinks.clickPanelEditorSaveButton();
 
         await header.waitUntilLoadingHasFinished();
-        const link = await testSubjects.find('dashboardLink--link005');
+        const link = await testSubjects.find('dashboardLink--links 005');
         expect(await link.getVisibleText()).to.equal('to be deleted');
       });
 
       it('can delete link from existing panel', async () => {
-        await dashboard.loadSavedDashboard('links 001');
-        await dashboard.switchToEditMode();
+        await dashboard.loadDashboardInEditMode('links 001');
 
         await dashboardPanelActions.clickEdit();
         await dashboardLinks.expectPanelEditorFlyoutIsOpen();

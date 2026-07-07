@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import { uninstallTokensRouteService } from '../../../common/services';
 
@@ -47,3 +47,12 @@ export const sendGetUninstallToken = (uninstallTokenId: string) =>
     path: uninstallTokensRouteService.getInfoPath(uninstallTokenId),
     version: API_VERSIONS.public.v1,
   });
+
+export async function getUninstallTokenValue(uninstallTokenId: string): Promise<string> {
+  const data = await sendRequestForRq<GetUninstallTokenResponse>({
+    method: 'get',
+    path: uninstallTokensRouteService.getInfoPath(uninstallTokenId),
+    version: API_VERSIONS.public.v1,
+  });
+  return data.item.token;
+}

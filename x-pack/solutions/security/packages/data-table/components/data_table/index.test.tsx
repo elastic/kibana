@@ -18,7 +18,7 @@ import { defaultHeaders } from '../../mock/header';
 import { mockGlobalState } from '../../mock/global_state';
 import { mockTimelineData } from '../../mock/mock_timeline_data';
 import { TestProviders } from '../../mock/test_providers';
-import { DeprecatedCellValueElementProps } from '@kbn/timelines-plugin/common';
+import type { DeprecatedCellValueElementProps } from '@kbn/timelines-plugin/common';
 import { mockBrowserFields } from '../../mock/mock_source';
 import { getMappedNonEcsValue } from './utils';
 
@@ -256,7 +256,7 @@ describe('DataTable', () => {
     fireEvent.click(screen.getByTestId('dataGridColumnSelectorButton'));
 
     // `EuiDataGrid` renders switches for hiding in the `Columns` popover when `showColumnSelector.allowHide` is `true`
-    const switches = await screen.queryAllByRole('switch');
+    const switches = await screen.queryAllByTestId(/dataGridColumnSelectorToggleColumnVisibility-/);
 
     expect(switches.length).toBe(0); // no switches are rendered, because `allowHide` is `false`
   });

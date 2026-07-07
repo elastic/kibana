@@ -1,10 +1,14 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
   "include": ["*.ts", "src/**/*", "__mocks__/**/*.ts"],
   "kbn_references": [
+    "@kbn/licensing-types",
+    "@kbn/core-pricing-common",
+    "@kbn/projects-solutions-groups",
+    "@kbn/controls-schemas",
   ],
   "exclude": ["target/**/*"]
 }

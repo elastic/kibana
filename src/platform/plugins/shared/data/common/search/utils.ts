@@ -9,7 +9,8 @@
 
 import moment from 'moment-timezone';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { AggTypesDependencies } from '..';
+import type { AggTypesDependencies } from '..';
+import { ENHANCED_ES_SEARCH_STRATEGY } from './strategies/ese_search';
 
 // TODO - investigate if this check is still needed
 // There are no documented work flows where response or rawResponse is not returned
@@ -49,3 +50,13 @@ export const getUserTimeZone = (
 
   return userTimeZone ?? defaultTimeZone;
 };
+
+export function strategyToString(strategy?: string | symbol): string {
+  if (!strategy) {
+    return ENHANCED_ES_SEARCH_STRATEGY;
+  }
+
+  return typeof strategy === 'string'
+    ? strategy
+    : strategy.description ?? ENHANCED_ES_SEARCH_STRATEGY;
+}

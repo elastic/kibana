@@ -10,20 +10,23 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import apm from 'elastic-apm-node';
 import pMap from 'p-map';
 
-import { partition, uniq } from 'lodash';
+import { merge, partition, uniq } from 'lodash';
 
 import { appContextService } from '../app_context';
+import { agentPolicyService } from '../agent_policy';
 import type {
   Agent,
   AgentAction,
   AgentActionType,
   NewAgentAction,
   FleetServerAgentAction,
+  SecretReference,
 } from '../../../common/types/models';
 import {
   AGENT_ACTIONS_INDEX,
   AGENT_ACTIONS_RESULTS_INDEX,
   SO_SEARCH_LIMIT,
+  SCHEDULED_UNENROLL_ACTION_ID_PREFIX,
 } from '../../../common/constants';
 import { AgentActionNotFoundError } from '../../errors';
 
@@ -36,21 +39,52 @@ import { addNamespaceFilteringToQuery } from '../spaces/query_namespaces_filteri
 
 import { MAX_CONCURRENT_CREATE_ACTIONS } from '../../constants';
 
+import {
+  extractAndWriteActionSecrets,
+  isActionSecretStorageEnabled,
+  toCompiledSecretRef,
+} from '../secrets';
+
 import { bulkUpdateAgents } from './crud';
 
 const ONE_MONTH_IN_MS = 2592000000;
 
 export const NO_EXPIRATION = 'NONE';
 
-const SIGNED_ACTIONS: Set<Partial<AgentActionType>> = new Set(['UNENROLL', 'UPGRADE']);
+const SIGNED_ACTIONS: Set<Partial<AgentActionType>> = new Set(['UNENROLL', 'UPGRADE', 'MIGRATE']);
 
+/**
+ * Indexes a new action to the .fleet-actions index.
+ * Takes any secret data stored within the secrets field, stores it in saved objects,
+ * and replaces them in the action data with a reference to the saved objects.
+ */
 export async function createAgentAction(
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   newAgentAction: NewAgentAction
 ): Promise<AgentAction> {
   const actionId = newAgentAction.id ?? uuidv4();
   const now = Date.now();
   const timestamp = new Date(now).toISOString();
+
+  let data;
+  let secretReferences: SecretReference[] | undefined;
+  // Store secret values if enabled, otherwise store them as plain text.
+  if (await isActionSecretStorageEnabled(esClient, soClient)) {
+    const secretsRes = await extractAndWriteActionSecrets({
+      action: newAgentAction,
+      esClient,
+    });
+    const mergedData = merge(
+      secretsRes.actionWithSecrets.data,
+      secretsRes.actionWithSecrets.secrets
+    );
+    data = transformDataSecrets(mergedData);
+    secretReferences = secretsRes.secretReferences;
+  } else {
+    data = merge(newAgentAction.data, newAgentAction.secrets);
+  }
+
   const body: FleetServerAgentAction = {
     '@timestamp': timestamp,
     expiration:
@@ -60,7 +94,7 @@ export async function createAgentAction(
     agents: newAgentAction.agents,
     namespaces: newAgentAction.namespaces,
     action_id: actionId,
-    data: newAgentAction.data,
+    data,
     type: newAgentAction.type,
     start_time: newAgentAction.start_time,
     minimum_execution_duration: newAgentAction.minimum_execution_duration,
@@ -69,6 +103,7 @@ export async function createAgentAction(
     traceparent: apm.currentTraceparent,
     is_automatic: newAgentAction.is_automatic,
     policyId: newAgentAction.policyId,
+    ...(secretReferences?.length && { secret_references: secretReferences }),
   };
 
   const messageSigningService = appContextService.getMessageSigningService();
@@ -97,6 +132,34 @@ export async function createAgentAction(
     ...newAgentAction,
     created_at: timestamp,
   };
+}
+
+/**
+ * Recursively transforms all occurrences of { id: string } objects
+ * into `$co.elastic.secret{${id}}`, for any level of nesting.
+ */
+export function transformDataSecrets<T>(mergedData: T): any {
+  if (Array.isArray(mergedData)) {
+    return mergedData.map(transformDataSecrets);
+  } else if (mergedData && typeof mergedData === 'object') {
+    const newMergedData: any = {}; // NewAgentAction.data has any type
+    for (const [key, value] of Object.entries(mergedData)) {
+      if (
+        value &&
+        typeof value === 'object' &&
+        !Array.isArray(value) &&
+        Object.keys(value).length === 1 &&
+        Object.prototype.hasOwnProperty.call(value, 'id') &&
+        typeof value.id === 'string'
+      ) {
+        newMergedData[key] = toCompiledSecretRef(value.id);
+      } else {
+        newMergedData[key] = transformDataSecrets(value);
+      }
+    }
+    return newMergedData;
+  }
+  return mergedData;
 }
 
 export async function bulkCreateAgentActions(
@@ -328,7 +391,7 @@ export async function cancelAgentAction(
 ) {
   const currentSpaceId = getCurrentNamespace(soClient);
 
-  const getUpgradeActions = async () => {
+  const getCancellableActions = async () => {
     const query = {
       bool: {
         filter: [
@@ -356,22 +419,25 @@ export async function cancelAgentAction(
       });
     }
 
-    const upgradeActions: FleetServerAgentAction[] = res.hits.hits
+    const cancellableActions: FleetServerAgentAction[] = res.hits.hits
       .map((hit) => hit._source as FleetServerAgentAction)
       .filter(
         (action: FleetServerAgentAction | undefined): boolean =>
-          !!action && !!action.agents && !!action.action_id && action.type === 'UPGRADE'
+          !!action &&
+          !!action.agents &&
+          !!action.action_id &&
+          ['UPGRADE', 'UNENROLL'].includes(action.type as string)
       );
-    return upgradeActions;
+    return cancellableActions;
   };
 
   const cancelActionId = uuidv4();
   const now = new Date().toISOString();
 
-  const cancelledActions: Array<{ agents: string[] }> = [];
+  const cancelledActions: Array<{ agents: string[]; type: string; policyIds: string[] }> = [];
 
   const createAction = async (action: FleetServerAgentAction) => {
-    await createAgentAction(esClient, {
+    await createAgentAction(esClient, soClient, {
       id: cancelActionId,
       type: 'CANCEL',
       namespaces: [currentSpaceId],
@@ -382,13 +448,29 @@ export async function cancelAgentAction(
       created_at: now,
       expiration: action.expiration,
     });
+    // Collect policy IDs from the cancelled agents for UNENROLL actions so we
+    // can disable unenroll_timeout on those policies after all batches are done.
+    const policyIds: string[] = [];
+    if (action.type === 'UNENROLL') {
+      const agentsRes = await esClient.search<{ policy_id?: string }>({
+        index: '.fleet-agents',
+        query: { terms: { _id: action.agents! } },
+        _source: ['policy_id'],
+        size: action.agents!.length,
+      });
+      for (const hit of agentsRes.hits.hits) {
+        if (hit._source?.policy_id) policyIds.push(hit._source.policy_id);
+      }
+    }
     cancelledActions.push({
       agents: action.agents!,
+      type: action.type as string,
+      policyIds,
     });
   };
 
-  let upgradeActions = await getUpgradeActions();
-  for (const action of upgradeActions) {
+  let cancellableActions = await getCancellableActions();
+  for (const action of cancellableActions) {
     await createAction(action);
   }
 
@@ -419,25 +501,76 @@ export async function cancelAgentAction(
     }
   };
 
-  for (const action of upgradeActions) {
-    await updateAgentsToHealthy(action);
+  for (const action of cancellableActions) {
+    if (action.type === 'UPGRADE') {
+      await updateAgentsToHealthy(action);
+    }
   }
 
-  // At the end of cancel, doing one more query on upgrade action to find those docs that were possibly created by a concurrent upgrade action.
-  // This is to make sure we cancel all upgrade batches.
-  upgradeActions = await getUpgradeActions();
-  if (cancelledActions.length < upgradeActions.length) {
-    const missingBatches = upgradeActions.filter(
-      (upgradeAction) =>
+  // At the end of cancel, doing one more query to find docs possibly created by a concurrent action.
+  cancellableActions = await getCancellableActions();
+  if (cancelledActions.length < cancellableActions.length) {
+    const missingBatches = cancellableActions.filter(
+      (cancellableAction) =>
         !cancelledActions.some(
-          (cancelled) => upgradeAction.agents && cancelled.agents[0] === upgradeAction.agents[0]
+          (cancelled) =>
+            cancellableAction.agents && cancelled.agents[0] === cancellableAction.agents[0]
         )
     );
     appContextService.getLogger().debug(`missing batches to cancel: ${missingBatches.length}`);
     if (missingBatches.length > 0) {
       for (const missingBatch of missingBatches) {
         await createAction(missingBatch);
-        await updateAgentsToHealthy(missingBatch);
+        if (missingBatch.type === 'UPGRADE') {
+          await updateAgentsToHealthy(missingBatch);
+        }
+      }
+    }
+  }
+
+  // The following side-effects only apply when the cancelled action was created by the
+  // inactive-unenrollment task (identified by the prefix). Manual UNENROLL cancellations
+  // should not affect the scheduled unenrollment setting on the policy.
+  if (actionId.startsWith(SCHEDULED_UNENROLL_ACTION_ID_PREFIX)) {
+    // Cancel any other pending scheduled batches for the same policies so the entire
+    // policy's scheduled unenrollment is cancelled, not just the one batch the user selected.
+    // Use the agent IDs already in memory (from the cancelled batches) to scope the search
+    // without an extra round-trip through .fleet-agents.
+    const cancelledUnenrollAgentIds = new Set(
+      cancelledActions.filter((a) => a.type === 'UNENROLL').flatMap((a) => a.agents)
+    );
+    if (cancelledUnenrollAgentIds.size > 0) {
+      await cancelPendingBatches(
+        esClient,
+        soClient,
+        cancelledUnenrollAgentIds,
+        actionId,
+        currentSpaceId
+      );
+    }
+
+    // Disable unenroll_timeout on the affected policies so the task does not
+    // re-schedule the same agents on the next tick.
+    const unenrollPolicyIds = uniq(
+      cancelledActions.filter((a) => a.type === 'UNENROLL').flatMap((a) => a.policyIds)
+    );
+    if (unenrollPolicyIds.length > 0) {
+      const esClientForPolicy = appContextService.getInternalUserESClient();
+      for (const policyId of unenrollPolicyIds) {
+        try {
+          await agentPolicyService.update(soClient, esClientForPolicy, policyId, {
+            unenroll_timeout: 0,
+          });
+          auditLoggingService.writeCustomAuditLog({
+            message: `Disabled unenroll_timeout on agent policy [id=${policyId}] after user cancelled inactive unenrollment action [id=${actionId}]`,
+          });
+        } catch (err) {
+          appContextService
+            .getLogger()
+            .warn(
+              `Failed to disable unenroll_timeout on policy ${policyId} after cancel: ${err.message}`
+            );
+        }
       }
     }
   }
@@ -505,6 +638,59 @@ async function getAgentActionsByIds(
   }
 
   return agentIds;
+}
+
+async function cancelPendingBatches(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  cancelledAgentIds: Set<string>,
+  alreadyCancelledActionId: string,
+  currentSpaceId: string
+) {
+  const currentTime = new Date().toISOString();
+
+  // Query all pending scheduled batches by prefix + future start_time, excluding the
+  // action already cancelled. No round-trip through .fleet-agents is needed: we intersect
+  // in-memory against the agent IDs collected from the batches we just cancelled.
+  const pendingRes = await esClient.search<FleetServerAgentAction>({
+    index: AGENT_ACTIONS_INDEX,
+    ignore_unavailable: true,
+    query: {
+      bool: {
+        filter: [
+          { term: { type: 'UNENROLL' } },
+          { range: { start_time: { gt: currentTime } } },
+          { prefix: { action_id: SCHEDULED_UNENROLL_ACTION_ID_PREFIX } },
+        ],
+        must_not: [{ term: { action_id: alreadyCancelledActionId } }],
+      },
+    },
+    size: SO_SEARCH_LIMIT,
+  });
+
+  const seen = new Set<string>([alreadyCancelledActionId]);
+  for (const hit of pendingRes.hits.hits) {
+    const pendingAction = hit._source;
+    if (!pendingAction?.action_id || seen.has(pendingAction.action_id)) continue;
+    // Only cancel batches that share at least one agent with the already-cancelled batches,
+    // which scopes this to the same policy without a round-trip through .fleet-agents.
+    if (!pendingAction.agents?.some((id) => cancelledAgentIds.has(id))) continue;
+    seen.add(pendingAction.action_id);
+    await createAgentAction(esClient, soClient, {
+      id: uuidv4(),
+      type: 'CANCEL',
+      namespaces: [currentSpaceId],
+      agents: pendingAction.agents!,
+      data: { target_id: pendingAction.action_id },
+      created_at: currentTime,
+      expiration: pendingAction.expiration,
+    });
+    appContextService
+      .getLogger()
+      .debug(
+        `[cancelAgentAction] Also cancelled pending scheduled unenrollment batch ${pendingAction.action_id} for same policies`
+      );
+  }
 }
 
 async function getAgentIdsFromResults(
@@ -579,6 +765,7 @@ export interface ActionsService {
 
   createAgentAction: (
     esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
     newAgentAction: Omit<AgentAction, 'id'>
   ) => Promise<AgentAction>;
   getAgentActions: (esClient: ElasticsearchClient, actionId: string) => Promise<any[]>;

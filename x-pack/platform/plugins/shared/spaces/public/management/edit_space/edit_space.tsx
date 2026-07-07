@@ -17,10 +17,11 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { lazy, Suspense, useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import type { FC } from 'react';
 
 import type { ScopedHistory } from '@kbn/core/public';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { FeaturesPluginStart, KibanaFeature } from '@kbn/features-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -30,7 +31,7 @@ import { TAB_ID_CONTENT, TAB_ID_GENERAL, TAB_ID_ROLES } from './constants';
 import { handleApiError } from './handle_api_error';
 import { useTabs } from './hooks/use_tabs';
 import { useEditSpaceServices, useEditSpaceStore } from './provider';
-import { addSpaceIdToPath, ENTER_SPACE_PATH, type Space } from '../../../common';
+import { ENTER_SPACE_PATH, type Space } from '../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { SpaceSolutionBadge } from '../../space_solution_badge';
@@ -86,6 +87,7 @@ export const EditSpace: FC<PageProps> = ({
   const [isLoadingRoles, setIsLoadingRoles] = useState(true);
   const selectedTabId = getSelectedTabId(Boolean(capabilities?.roles?.view), _selectedTabId);
   const isSecurityEnabled = Boolean(license?.isEnabled());
+  const rolesLoadedForSpaceRef = useRef<string | null>(null);
   const [tabs, selectedTabContent] = useTabs({
     space,
     features,
@@ -149,20 +151,18 @@ export const EditSpace: FC<PageProps> = ({
       });
 
       setIsLoadingRoles(false);
+      rolesLoadedForSpaceRef.current = spaceId;
     };
 
-    if (isRoleManagementEnabled && !state.roles.size && !state.fetchRolesError) {
+    const shouldLoadRoles =
+      isRoleManagementEnabled &&
+      rolesLoadedForSpaceRef.current !== spaceId &&
+      !state.fetchRolesError;
+
+    if (shouldLoadRoles) {
       getRoles();
     }
-  }, [
-    dispatch,
-    invokeClient,
-    spaceId,
-    logger,
-    state.roles,
-    state.fetchRolesError,
-    isRoleManagementEnabled,
-  ]);
+  }, [dispatch, invokeClient, spaceId, logger, state.fetchRolesError, isRoleManagementEnabled]);
 
   useEffect(() => {
     const _getFeatures = async () => {
@@ -233,7 +233,7 @@ export const EditSpace: FC<PageProps> = ({
                       <React.Fragment>
                         {userActiveSpace?.id !== id ? (
                           <EuiButton
-                            iconType="push"
+                            iconType="merge"
                             href={addSpaceIdToPath(
                               serverBasePath,
                               id,

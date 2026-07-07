@@ -11,8 +11,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiLink,
-  EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
@@ -21,8 +20,8 @@ import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import type { Filter } from '../../../../../../common/custom_link/custom_link_types';
 import type { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
-import { callApmApi } from '../../../../../services/rest/create_call_apm_api';
 import { replaceTemplateVariables, convertFiltersToQuery } from './helper';
+import { getApmInternalServices } from '../../../../../plugin';
 
 export interface LinkPreviewProps {
   label: string;
@@ -32,6 +31,7 @@ export interface LinkPreviewProps {
 
 const fetchTransaction = debounce(
   async (filters: Filter[], callback: (transaction: Transaction) => void) => {
+    const { callApmApi } = getApmInternalServices();
     const transaction = await callApmApi('GET /internal/apm/settings/custom_links/transaction', {
       signal: null,
       params: { query: convertFiltersToQuery(filters) },
@@ -118,9 +118,15 @@ export function LinkPreview({ label, url, filters }: LinkPreviewProps) {
 
           <EuiFlexItem grow={false}>
             {error && (
-              <EuiToolTip position="top" content={error}>
-                <EuiIcon type="warning" color="warning" data-test-subj="preview-warning" />
-              </EuiToolTip>
+              <EuiIconTip
+                content={error}
+                position="top"
+                type="warning"
+                color="warning"
+                iconProps={{
+                  'data-test-subj': 'preview-warning',
+                }}
+              />
             )}
           </EuiFlexItem>
         </EuiFlexGroup>

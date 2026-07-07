@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { scheduleRruleSchema } from '@kbn/task-manager-plugin/server';
+import { scheduleRruleSchemaV1 } from '@kbn/task-manager-plugin/server';
 
 const rawLayoutIdSchema = schema.oneOf([
   schema.literal('preserve_layout'),
@@ -14,29 +14,25 @@ const rawLayoutIdSchema = schema.oneOf([
   schema.literal('canvas'),
 ]);
 
-export const rawNotificationSchema = schema.object({
-  email: schema.maybe(
-    schema.object(
-      {
-        to: schema.maybe(schema.arrayOf(schema.string())),
-        bcc: schema.maybe(schema.arrayOf(schema.string())),
-        cc: schema.maybe(schema.arrayOf(schema.string())),
-      },
-      {
-        validate: (value) => {
-          const allEmails = new Set([
-            ...(value.to || []),
-            ...(value.bcc || []),
-            ...(value.cc || []),
-          ]);
+export const rawEmailNotificationSchema = schema.object(
+  {
+    to: schema.maybe(schema.arrayOf(schema.string())),
+    bcc: schema.maybe(schema.arrayOf(schema.string())),
+    cc: schema.maybe(schema.arrayOf(schema.string())),
+  },
+  {
+    validate: (value) => {
+      const allEmails = new Set([...(value.to || []), ...(value.bcc || []), ...(value.cc || [])]);
 
-          if (allEmails.size === 0) {
-            return 'At least one email address is required';
-          }
-        },
+      if (allEmails.size === 0) {
+        return 'At least one email address is required';
       }
-    )
-  ),
+    },
+  }
+);
+
+export const rawNotificationSchema = schema.object({
+  email: schema.maybe(rawEmailNotificationSchema),
 });
 
 export const rawScheduledReportSchema = schema.object({
@@ -52,6 +48,6 @@ export const rawScheduledReportSchema = schema.object({
   migrationVersion: schema.maybe(schema.string()),
   notification: schema.maybe(rawNotificationSchema),
   payload: schema.string(),
-  schedule: scheduleRruleSchema,
+  schedule: scheduleRruleSchemaV1,
   title: schema.string(),
 });

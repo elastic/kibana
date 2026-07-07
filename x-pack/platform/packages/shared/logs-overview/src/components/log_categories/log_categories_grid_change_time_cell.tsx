@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiDataGridColumn } from '@elastic/eui';
-import { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { EuiDataGridColumn } from '@elastic/eui';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useMemo } from 'react';
-import { LogCategory } from '../../types';
+import type { LogCategory } from '../../types';
 
 export const logCategoriesGridChangeTimeColumn = {
   id: 'change_time' as const,

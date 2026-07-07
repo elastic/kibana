@@ -7,7 +7,7 @@
 
 import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import { distinctUntilChanged, map } from 'rxjs';
 import { isEqual } from 'lodash';
 import { PLUGIN_ID } from '../constants/app';

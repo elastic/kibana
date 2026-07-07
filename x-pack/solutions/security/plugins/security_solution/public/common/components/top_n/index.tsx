@@ -10,7 +10,7 @@ import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 
 import type { Filter, Query } from '@kbn/es-query';
-import { type DataViewSpec, getEsQueryConfig } from '@kbn/data-plugin/common';
+import { type DataView, getEsQueryConfig } from '@kbn/data-plugin/common';
 import { isActiveTimeline } from '../../../helpers';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useGlobalTime } from '../../containers/use_global_time';
@@ -77,13 +77,14 @@ const connector = connect(makeMapStateToProps);
 export interface OwnProps {
   browserFields: BrowserFields;
   field: string;
-  dataViewSpec?: DataViewSpec;
+  dataView: DataView;
   scopeId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
   paddingSize?: 's' | 'm' | 'l' | 'none';
   globalFilters?: Filter[];
 }
+
 type PropsFromRedux = ConnectedProps<typeof connector>;
 type Props = OwnProps & PropsFromRedux;
 
@@ -96,7 +97,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
   browserFields,
   dataProviders,
   field,
-  dataViewSpec,
+  dataView,
   globalFilters = EMPTY_FILTERS,
   globalQuery = EMPTY_QUERY,
   kqlMode,
@@ -119,7 +120,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
             config: getEsQueryConfig(uiSettings),
             dataProviders,
             filters: activeTimelineFilters,
-            dataViewSpec,
+            dataView,
             kqlMode,
             kqlQuery: {
               language: 'kuery',
@@ -133,7 +134,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
       uiSettings,
       dataProviders,
       activeTimelineFilters,
-      dataViewSpec,
+      dataView,
       kqlMode,
       activeTimelineKqlQueryExpression,
     ]
@@ -152,7 +153,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
       field={field as AlertsStackByField}
       filters={isActiveTimeline(scopeId ?? '') ? EMPTY_FILTERS : globalFilters}
       from={isActiveTimeline(scopeId ?? '') ? activeTimelineFrom : from}
-      dataViewSpec={dataViewSpec}
+      dataView={dataView}
       options={options}
       paddingSize={paddingSize}
       query={isActiveTimeline(scopeId ?? '') ? EMPTY_QUERY : globalQuery}

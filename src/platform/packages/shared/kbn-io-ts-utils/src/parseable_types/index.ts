@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as t from 'io-ts';
-import { MergeType } from '../merge_rt';
+import type * as t from 'io-ts';
+import type { MergeType } from '../merge_rt';
 
 export type ParseableType =
   | t.StringType

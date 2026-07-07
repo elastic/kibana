@@ -23,4 +23,9 @@ export interface ResultsRequestOptions extends Omit<RequestOptionsPaginated, 'so
   agentId?: string;
   startDate?: string;
   sort: SortField[];
+  integrationNamespaces?: string[];
+  scheduleId?: string;
+  executionCount?: number;
+  esFilters?: string;
+  spaceId?: string;
 }

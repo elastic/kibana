@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RecursiveReadonly } from '@kbn/utility-types';
-import { FeatureElasticsearchPrivileges } from './feature_elasticsearch_privileges';
+import type { RecursiveReadonly } from '@kbn/utility-types';
+import type { FeatureElasticsearchPrivileges } from './feature_elasticsearch_privileges';
 
 /**
  * Interface for registering an Elasticsearch feature.

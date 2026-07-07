@@ -8,7 +8,8 @@
  */
 
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert, FIELD_FORMAT_IDS, FieldFormatInstanceType } from '../types';
+import type { TextContextTypeConvert, FieldFormatInstanceType } from '../types';
+import { FIELD_FORMAT_IDS } from '../types';
 
 export const createCustomFieldFormat = (convert: TextContextTypeConvert): FieldFormatInstanceType =>
   class CustomFieldFormat extends FieldFormat {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseMutationOptions } from '@tanstack/react-query';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { UseMutationOptions } from '@kbn/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 
 import { API_VERSIONS } from '../../common/constants';
@@ -49,8 +49,11 @@ export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => 
       onError: (error) => {
         setErrorToast(error, { title: error?.body?.error, toastMessage: error?.body?.message });
       },
-      onSuccess: (response) => {
+      onSuccess: (response, { id }) => {
         queryClient.invalidateQueries([PACKS_ID]);
+        // Also the single pack: usePack keeps previous data, so the edit page
+        // would otherwise show pre-update queries until a hard reload.
+        queryClient.invalidateQueries(['pack', { packId: id }]);
         if (withRedirect) {
           navigateToApp(PLUGIN_ID, { path: pagePathGetters.packs() });
         }

@@ -16,6 +16,7 @@
       "cloud",
       "data",
       "dataViewEditor",
+      "dataViewFieldEditor",
       "dataViews",
       "dataVisualizer",
       "discover",
@@ -29,11 +30,13 @@
       "triggersActionsUi",
       "uiActions",
       "unifiedSearch",
+      "kql",
       "savedObjectsManagement",
       "savedSearch",
       "contentManagement",
       "presentationUtil",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "fileUpload"
     ],
     "optionalPlugins": [
       "alerting",
@@ -47,6 +50,7 @@
       "observabilityAIAssistant",
       "usageCollection",
       "cases",
+      "cps"
     ],
     "requiredBundles": [
       "cases",

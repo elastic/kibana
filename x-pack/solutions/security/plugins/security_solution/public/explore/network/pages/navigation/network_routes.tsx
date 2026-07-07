@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { TableId } from '@kbn/securitysolution-data-table';
-import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy/security_solution/network';
 
 import {
@@ -31,9 +30,7 @@ import { NetworkRouteType } from './types';
 import { NETWORK_PATH } from '../../../../../common/constants';
 
 export const NetworkRoutes = React.memo<NetworkRoutesProps>(
-  ({ type, to, filterQuery, isInitializing, from, dataViewSpec, indexNames, setQuery }) => {
-    const index = useMemo(() => dataViewSpecToViewBase(dataViewSpec), [dataViewSpec]);
-
+  ({ type, to, filterQuery, isInitializing, from, indexNames, setQuery }) => {
     const networkAnomaliesFilterQuery = {
       bool: {
         should: [
@@ -64,7 +61,6 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
 
     const tabProps = {
       ...commonProps,
-      indexPattern: index,
     };
 
     const anomaliesProps = {

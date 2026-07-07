@@ -5,26 +5,36 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import { InferenceTracingPhoenixExportConfig } from '@kbn/inference-common';
-import { ReadableSpan } from '@opentelemetry/sdk-trace-node';
+import type { tracing } from '@elastic/opentelemetry-node/sdk';
+import type { InferenceTracingPhoenixExportConfig } from '@kbn/inference-tracing-config';
 import { memoize } from 'lodash';
 import {
   SEMRESATTRS_PROJECT_NAME,
   SemanticConventions,
 } from '@arizeai/openinference-semantic-conventions';
+import { diag } from '@opentelemetry/api';
 import { BaseInferenceSpanProcessor } from '../base_inference_span_processor';
 import { ElasticGenAIAttributes, GenAISemanticConventions } from '../types';
 import { getChatSpan } from './get_chat_span';
 import { getExecuteToolSpan } from './get_execute_tool_span';
 import { PhoenixProtoExporter } from './phoenix_otlp_exporter';
 
+/**
+ * Build the Phoenix URL by preserving any path prefix on the base URL and
+ * appending the provided path (which may start with '/').
+ */
+function getPhoenixUrl(base: string | URL, path: string): URL {
+  const baseUrl = new URL(base);
+  const baseWithTrailingSlash = baseUrl.pathname.endsWith('/')
+    ? baseUrl.toString()
+    : `${baseUrl.toString()}/`;
+  const pathWithoutLeadingSlash = path.startsWith('/') ? path.slice(1) : path;
+  return new URL(pathWithoutLeadingSlash, baseWithTrailingSlash);
+}
+
 export class PhoenixSpanProcessor extends BaseInferenceSpanProcessor {
   private getProjectId: () => Promise<string | undefined>;
-  constructor(
-    private readonly logger: Logger,
-    private readonly config: InferenceTracingPhoenixExportConfig
-  ) {
+  constructor(private readonly config: InferenceTracingPhoenixExportConfig) {
     const headers = {
       ...(config.api_key ? { Authorization: `Bearer ${config.api_key}` } : {}),
     };
@@ -41,9 +51,9 @@ export class PhoenixSpanProcessor extends BaseInferenceSpanProcessor {
         return undefined;
       }
 
-      const base = new URL(config.public_url);
-
-      const { data } = await fetch(new URL('/v1/projects', base), { headers }).then(
+      const { data } = await fetch(getPhoenixUrl(config.public_url, '/v1/projects'), {
+        headers,
+      }).then(
         (response) =>
           response.json() as Promise<{
             data: Array<{ id: string; name: string; description: string }>;
@@ -57,14 +67,14 @@ export class PhoenixSpanProcessor extends BaseInferenceSpanProcessor {
 
     this.getProjectId = () => {
       return getProjectIdMemoized().catch((error) => {
-        logger.error(`Could not get project ID from Phoenix: ${error.message}`);
+        diag.error(`Could not get project ID from Phoenix: ${error.message}`);
         getProjectIdMemoized.cache.clear?.();
         return undefined;
       });
     };
   }
 
-  processInferenceSpan(span: ReadableSpan): ReadableSpan {
+  processInferenceSpan(span: tracing.ReadableSpan): tracing.ReadableSpan {
     const operationName = span.attributes[GenAISemanticConventions.GenAIOperationName];
     span.resource.attributes[SEMRESATTRS_PROJECT_NAME] = this.config.project_name ?? 'default';
     span.attributes[SemanticConventions.OPENINFERENCE_SPAN_KIND] =
@@ -83,11 +93,11 @@ export class PhoenixSpanProcessor extends BaseInferenceSpanProcessor {
           return;
         }
 
-        const url = new URL(
-          `/projects/${projectId}/traces/${traceId}?selected`,
-          new URL(this.config.public_url)
+        const url = getPhoenixUrl(
+          this.config.public_url,
+          `/projects/${projectId}/traces/${traceId}?selected`
         );
-        this.logger.info(`View trace at ${url.toString()}`);
+        diag.info(`View trace at ${url.toString()}`);
       });
     }
     return span;

@@ -66,6 +66,7 @@ export const NameConfigurationPanel = ({
           readOnly={readOnly}
           isLoading={isLoading}
           {...nameFieldProps}
+          isInvalid={nameFieldProps.isInvalid}
         />
       </EuiFormRow>
     </EuiDescribedFormGroup>

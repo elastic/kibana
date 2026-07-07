@@ -9,7 +9,8 @@
 
 import stripAnsi from 'strip-ansi';
 
-import { FailedTestCase, TestReport, makeFailedTestCaseIter } from './test_report';
+import type { FailedTestCase, TestReport } from './test_report';
+import { makeFailedTestCaseIter } from './test_report';
 
 export type TestFailure = FailedTestCase['$'] & {
   failure: string;
@@ -65,6 +66,10 @@ const isLikelyIrrelevant = (name: string, failure: string) => {
   }
 
   if (failure.includes('Unable to fetch Kibana status API response from Kibana')) {
+    return true;
+  }
+
+  if (failure.includes('Unable to read snapshot manifest: Internal Server Error')) {
     return true;
   }
 

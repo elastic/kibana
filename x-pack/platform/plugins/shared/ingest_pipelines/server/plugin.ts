@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
-import { IngestPipelinesConfigType } from './config';
+import type { IngestPipelinesConfigType } from './config';
 import { ApiRoutes } from './routes';
 import { handleEsError } from './shared_imports';
-import { Dependencies } from './types';
+import type { Dependencies } from './types';
 import { APP_CLUSTER_REQUIRED_PRIVILEGES } from '../common/constants';
 
 export class IngestPipelinesPlugin implements Plugin<void, void, any, any> {

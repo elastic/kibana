@@ -8,11 +8,12 @@
  */
 
 import React from 'react';
-import { StoryFn, Meta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react';
 
 import { getImageMetadata } from '@kbn/shared-ux-file-util';
 import { getImageData as getBlob, base64dLogo } from '@kbn/shared-ux-file-image-mocks';
-import { Image, Props } from './image';
+import type { Props } from './image';
+import { Image } from './image';
 
 const defaultArgs: Props = { alt: 'test', src: `data:image/png;base64,${base64dLogo}` };
 

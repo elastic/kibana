@@ -63,7 +63,7 @@ describe('Rules', () => {
     const saveButtonSelector = 'button[data-test-subj=ruleFlyoutFooterSaveButton]';
 
     describe('when created from APM', () => {
-      describe('when created from Service Inventory', () => {
+      describe('when created from Service inventory', () => {
         it('creates a rule', () => {
           cy.loginAsEditorUser();
 

@@ -8,13 +8,15 @@
  */
 
 import {
-  getTranslation,
-  getLocale,
-  translate,
-  init,
-  load,
-  handleIntlError,
+  formatList,
   getIsInitialized,
+  getLocale,
+  getTranslation,
+  handleIntlError,
+  init,
+  initDefault,
+  load,
+  translate,
 } from './src/core';
 
 import {
@@ -30,7 +32,9 @@ const i18n = {
   getTranslation,
   getLocale,
   translate,
+  formatList,
   init,
+  initDefault,
   load,
   handleIntlError,
   getIsInitialized,
@@ -47,4 +51,14 @@ const i18nLoader = {
 
 export type { Translation, TranslationInput } from './src/translation';
 export type { Formats, TranslateArguments } from './src/core';
+export { EN_LOCALE } from './src/core';
+export {
+  SUPPORTED_LOCALE_IDS,
+  getLocaleLabel,
+  toCanonicalLocaleId,
+  setAvailableLocales,
+  getAvailableLocales,
+  getBrowserPreferredLocale,
+} from './src/locales';
+export type { AvailableLocale, SupportedLocaleId } from './src/locales';
 export { i18n, i18nLoader };

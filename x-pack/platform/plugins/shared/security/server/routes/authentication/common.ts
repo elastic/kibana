@@ -20,6 +20,7 @@ import {
   TokenAuthenticationProvider,
 } from '../../authentication';
 import { wrapIntoCustomErrorResponse } from '../../errors';
+import { securityTelemetry } from '../../otel/instrumentation';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
 
@@ -67,13 +68,23 @@ export function defineCommonRoutes({
       try {
         const deauthenticationResult = await getAuthenticationService().logout(request);
         if (deauthenticationResult.failed()) {
+          securityTelemetry.recordLogoutAttempt({
+            outcome: 'failure',
+          });
           return response.customError(wrapIntoCustomErrorResponse(deauthenticationResult.error));
         }
+
+        securityTelemetry.recordLogoutAttempt({
+          outcome: 'success',
+        });
 
         return response.redirected({
           headers: { location: deauthenticationResult.redirectURL || `${serverBasePath}/` },
         });
       } catch (error) {
+        securityTelemetry.recordLogoutAttempt({
+          outcome: 'failure',
+        });
         return response.customError(wrapIntoCustomErrorResponse(error));
       }
     }
@@ -100,8 +111,8 @@ export function defineCommonRoutes({
   );
 
   const basicParamsSchema = schema.object({
-    username: schema.string({ minLength: 1 }),
-    password: schema.string({ minLength: 1 }),
+    username: schema.string({ minLength: 1, maxLength: 1024 }),
+    password: schema.string({ minLength: 1, maxLength: 1024 }),
   });
 
   function getLoginAttemptForProviderType<T extends string>(
@@ -145,9 +156,9 @@ export function defineCommonRoutes({
       },
       validate: {
         body: schema.object({
-          providerType: schema.string(),
-          providerName: schema.string(),
-          currentURL: schema.string(),
+          providerType: schema.string({ maxLength: 1024 }),
+          providerName: schema.string({ maxLength: 1024 }),
+          currentURL: schema.string({ maxLength: 8192 }),
           params: schema.conditional(
             schema.siblingRef('providerType'),
             schema.oneOf([
@@ -163,6 +174,7 @@ export function defineCommonRoutes({
     createLicensedRouteHandler(async (context, request, response) => {
       const { providerType, providerName, currentURL, params } = request.body;
       const redirectURL = parseNextURL(currentURL, basePath.serverBasePath);
+
       const authenticationResult = await getAuthenticationService().login(request, {
         provider: { name: providerName },
         redirectURL,

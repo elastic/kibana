@@ -3,8 +3,5 @@
   "name": "@kbn/automatic-import-plugin",
   "version": "1.0.0",
   "private": true,
-  "license": "Elastic License 2.0",
-  "scripts": {
-    "draw-graphs": "node ./scripts/draw_graphs"
-  }
+  "license": "Elastic License 2.0"
 }

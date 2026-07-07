@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
@@ -23,19 +23,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     );
   }
 
-  async function unloadCurrentData() {
-    await esArchiver.unload(
-      'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
-    );
-  }
-
   describe('dashboard app - esql controls', function () {
     before(loadCurrentData);
-    after(unloadCurrentData);
 
     loadTestFile(require.resolve('./field_control'));
-    loadTestFile(require.resolve('./interval_control'));
-    loadTestFile(require.resolve('./value_control'));
     loadTestFile(require.resolve('./create_from_dropdown'));
   });
 }

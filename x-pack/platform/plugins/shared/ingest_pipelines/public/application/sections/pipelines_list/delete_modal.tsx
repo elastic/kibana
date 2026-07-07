@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DeleteManagedAssetsCallout } from '@kbn/delete-managed-asset-callout';
-import { Pipeline } from '../../../../common/types';
+import type { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 
 export const PipelineDeleteModal = ({

@@ -6,13 +6,21 @@
  */
 
 import React, { lazy, useCallback, useEffect, useState } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { useLocation, matchPath } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiPageTemplate, EuiSpacer, EuiPageHeader, EuiButton, EuiButtonEmpty } from '@elastic/eui';
-import { routeToConnectorEdit, routeToConnectors, routeToLogs, Section } from '../../../constants';
+import {
+  EuiCallOut,
+  EuiPageTemplate,
+  EuiSpacer,
+  EuiPageHeader,
+  EuiButton,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+import type { Section } from '../../../constants';
+import { routeToConnectorEdit, routeToConnectors, routeToLogs } from '../../../constants';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
@@ -20,12 +28,16 @@ import { HealthContextProvider } from '../../../context/health_context';
 import { HealthCheck } from '../../../components/health_check';
 import { useKibana } from '../../../../common/lib/kibana';
 import ConnectorEventLogListTableWithApi from './actions_connectors_event_log_list_table';
-import { ActionConnector, EditConnectorTabs } from '../../../../types';
+import type { ActionConnector } from '../../../../types';
+import { EditConnectorTabs } from '../../../../types';
 import { CreateConnectorFlyout } from '../../action_connector_form/create_connector_flyout';
 import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_flyout';
-import { EditConnectorProps } from './types';
-import { loadAllActions } from '../../../lib/action_connector_api';
+import type { EditConnectorProps } from './types';
+import { loadAllActions, loadConnectorAuthStatus } from '../../../lib/action_connector_api';
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
+import { useSkippedPreconfiguredConnectorIds } from '../../../hooks/use_conflicted_connector_ids';
+
+type ConnectorAuthStatusError = string | undefined;
 
 const ConnectorsList = lazy(() => import('./actions_connectors_list'));
 
@@ -51,10 +63,14 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
 
   const location = useLocation();
 
+  const { skippedPreconfiguredConnectorIds } = useSkippedPreconfiguredConnectorIds();
+
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
   const [editConnectorProps, setEditConnectorProps] = useState<EditConnectorProps>({});
   const [actions, setActions] = useState<ActionConnector[]>([]);
   const [isLoadingActions, setIsLoadingActions] = useState<boolean>(true);
+  const [connectorAuthStatusError, setConnectorAuthStatusError] =
+    useState<ConnectorAuthStatusError>(undefined);
 
   const editItem = useCallback(
     (actionConnector: ActionConnector, tab: EditConnectorTabs, isFix?: boolean) => {
@@ -66,8 +82,35 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
   const loadActions = useCallback(async () => {
     setIsLoadingActions(true);
     try {
-      const actionsResponse = await loadAllActions({ http });
-      setActions(actionsResponse);
+      const [actionsResponse, authStatusMap] = await Promise.all([
+        loadAllActions({ http }),
+        loadConnectorAuthStatus({ http }).catch((error) => {
+          const message =
+            error?.body?.message ??
+            i18n.translate(
+              'xpack.triggersActionsUI.sections.connector.home.unableToLoadAuthStatusFallbackDetail',
+              {
+                defaultMessage: 'Check the Kibana logs for more information.',
+              }
+            );
+          setConnectorAuthStatusError(message);
+          return null;
+        }),
+      ]);
+
+      if (authStatusMap !== null) {
+        setConnectorAuthStatusError(undefined);
+      }
+
+      const actionsWithAuth = actionsResponse.map((connector) => {
+        const authEntry = authStatusMap?.[connector.id];
+        if (!authEntry) {
+          return connector;
+        }
+        return { ...connector, userAuthStatus: authEntry.userAuthStatus };
+      });
+
+      setActions(actionsWithAuth);
     } catch (e) {
       toasts.addDanger({
         title: i18n.translate(
@@ -147,6 +190,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
       actions,
       loadActions,
       setActions,
+      connectorAuthStatusError,
     });
   };
 
@@ -154,7 +198,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
     <EuiButton
       data-test-subj="createConnectorButton"
       fill
-      iconType="plusInCircle"
+      iconType="plusCircle"
       iconSide="left"
       onClick={() => setAddFlyoutVisibility(true)}
       isLoading={false}
@@ -171,7 +215,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
       key="documentation-button"
       target="_blank"
       href={docLinks.links.alerting.actionTypes}
-      iconType="help"
+      iconType="question"
     >
       <FormattedMessage
         id="xpack.triggersActionsUI.connectors.home.documentationButtonLabel"
@@ -221,6 +265,28 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
       />
 
       <EuiSpacer size="l" />
+
+      {skippedPreconfiguredConnectorIds.length > 0 && (
+        <>
+          <EuiCallOut
+            announceOnMount={false}
+            color="warning"
+            size="s"
+            data-test-subj="preconfiguredSkippedBanner"
+            title={
+              <FormattedMessage
+                id="xpack.triggersActionsUI.connectors.home.preconfiguredSkippedWarning"
+                defaultMessage="{count, plural, one {Preconfigured connector} other {Preconfigured connectors}} with {count, plural, one {ID} other {IDs}} [{ids}] {count, plural, one {was} other {were}} skipped because {count, plural, one {it conflicts} other {they conflict}} with an already existing connector."
+                values={{
+                  count: skippedPreconfiguredConnectorIds.length,
+                  ids: skippedPreconfiguredConnectorIds.join(', '),
+                }}
+              />
+            }
+          />
+          <EuiSpacer size="s" />
+        </>
+      )}
 
       {addFlyoutVisible && (
         <CreateConnectorFlyout

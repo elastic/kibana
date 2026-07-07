@@ -9,11 +9,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elast
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { OverviewErrorsSparklines } from './overview_errors_sparklines';
-import { useRefreshedRange } from '../../../../../hooks';
+import { useOverviewRefreshedRange } from '../../../common/use_overview_date_range';
 import { OverviewErrorsCount } from './overview_errors_count';
 
 export function OverviewErrors() {
-  const { from, to } = useRefreshedRange(6, 'hours');
+  // Follows the page-level date picker (URL params), defaulting to the overview's
+  // own window when untouched so it stays in step with the status panel.
+  const { from, to } = useOverviewRefreshedRange();
 
   return (
     <EuiPanel hasShadow={false} hasBorder>
@@ -34,5 +36,5 @@ export function OverviewErrors() {
 }
 
 const headingText = i18n.translate('xpack.synthetics.overview.errors.headingText', {
-  defaultMessage: 'Last 6 hours',
+  defaultMessage: 'Errors',
 });

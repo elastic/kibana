@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import Debug from '../../../debug/components/debug';
-import { Props } from './error';
+import type { Props } from './error';
 
 export const ShowDebugging: FC<Props> = ({ payload }) => {
   const [expanded, setExpanded] = useState(false);
@@ -16,7 +17,7 @@ export const ShowDebugging: FC<Props> = ({ payload }) => {
   return process.env.NODE_ENV === 'production' ? null : (
     <div>
       <EuiButtonEmpty
-        iconType={expanded ? 'arrowDown' : 'arrowRight'}
+        iconType={expanded ? 'chevronSingleDown' : 'chevronSingleRight'}
         onClick={() => setExpanded(!expanded)}
       >
         See Details

@@ -29,7 +29,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
@@ -59,7 +59,7 @@ describe('createAlertFactory()', () => {
         '1': alert,
       },
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
@@ -78,12 +78,48 @@ describe('createAlertFactory()', () => {
     });
   });
 
+  test('sets snooze config on newly created alert when snoozedInstancesMap contains a matching entry', () => {
+    const snoozeConfig = {
+      instanceId: '1',
+      snoozedAt: '2024-01-01T00:00:00.000Z',
+      snoozedBy: 'user',
+    };
+    const alertFactory = createAlertFactory({
+      alerts: {},
+      logger,
+      configuredMaxAlerts: 1000,
+      autoRecoverAlerts: true,
+      snoozedInstancesMap: new Map([['1', snoozeConfig]]),
+    });
+    const setSnoozeConfigSpy = jest.spyOn(Alert.prototype, 'setSnoozeConfig');
+    alertFactory.create('1');
+    expect(setSnoozeConfigSpy).toHaveBeenCalledWith(snoozeConfig);
+    setSnoozeConfigSpy.mockRestore();
+  });
+
+  test('does not set snooze config on existing alert when called via create()', () => {
+    const existingAlert = new Alert('1');
+    const setSnoozeConfigSpy = jest.spyOn(Alert.prototype, 'setSnoozeConfig');
+    const alertFactory = createAlertFactory({
+      alerts: { '1': existingAlert },
+      logger,
+      configuredMaxAlerts: 1000,
+      autoRecoverAlerts: true,
+      snoozedInstancesMap: new Map([
+        ['1', { instanceId: '1', snoozedAt: '2024-01-01T00:00:00.000Z', snoozedBy: 'user' }],
+      ]),
+    });
+    alertFactory.create('1');
+    expect(setSnoozeConfigSpy).not.toHaveBeenCalled();
+    setSnoozeConfigSpy.mockRestore();
+  });
+
   test('mutates given alerts', () => {
     const alerts = {};
     const alertFactory = createAlertFactory({
       alerts,
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       autoRecoverAlerts: true,
     });
     alertFactory.create('1');
@@ -113,7 +149,7 @@ describe('createAlertFactory()', () => {
         '1': alert,
       },
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       autoRecoverAlerts: true,
     });
     expect(alertFactory.get('1')).toMatchObject({
@@ -143,7 +179,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
-      maxAlerts: 3,
+      configuredMaxAlerts: 3,
       autoRecoverAlerts: true,
     });
 
@@ -159,11 +195,33 @@ describe('createAlertFactory()', () => {
     expect(alertFactory.hasReachedAlertLimit()).toBe(true);
   });
 
+  test('logs a warning when more alerts are created than allowed and the configured alert limit is greater than the max allowed threshold', () => {
+    const alertFactory = createAlertFactory({
+      alerts: {},
+      logger,
+      configuredMaxAlerts: 50001,
+      autoRecoverAlerts: true,
+    });
+
+    expect(alertFactory.hasReachedAlertLimit()).toBe(false);
+    for (let i = 0; i < 5000; i++) {
+      alertFactory.create(`${i}`);
+    }
+
+    expect(() => {
+      alertFactory.create('50001');
+    }).toThrowErrorMatchingInlineSnapshot(`"Rule reported more than 5000 alerts."`);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'The configured maximum alert limit exceeds the allowed threshold. Only 5000 alerts are being returned. Please consider adjusting xpack.alerting.rules.run.alerts.max.'
+    );
+    expect(alertFactory.hasReachedAlertLimit()).toBe(true);
+  });
+
   test('throws error when creating alerts after done() is called', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
@@ -206,7 +264,7 @@ describe('createAlertFactory()', () => {
       alerts: {},
       logger,
       canSetRecoveryContext: true,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
@@ -233,7 +291,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       canSetRecoveryContext: true,
       autoRecoverAlerts: true,
     });
@@ -260,7 +318,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       canSetRecoveryContext: true,
       autoRecoverAlerts: true,
     });
@@ -286,7 +344,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       canSetRecoveryContext: false,
       autoRecoverAlerts: true,
     });
@@ -315,7 +373,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       autoRecoverAlerts: true,
     });
 
@@ -333,7 +391,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       autoRecoverAlerts: true,
     });
 
@@ -348,7 +406,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       autoRecoverAlerts: true,
     });
 
@@ -363,7 +421,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       canSetRecoveryContext: true,
       autoRecoverAlerts: false,
     });
@@ -372,6 +430,7 @@ describe('createAlertFactory()', () => {
       meta: {
         flappingHistory: [],
         maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
         uuid: expect.any(String),
       },
       state: {},
@@ -395,7 +454,7 @@ describe('getPublicAlertFactory', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
-      maxAlerts: 1000,
+      configuredMaxAlerts: 1000,
       autoRecoverAlerts: true,
     });
 

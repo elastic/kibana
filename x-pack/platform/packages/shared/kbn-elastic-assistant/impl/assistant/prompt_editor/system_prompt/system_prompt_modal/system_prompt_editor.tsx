@@ -16,8 +16,8 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import { SystemPromptSettings } from '../../../settings/use_settings_updater/use_system_prompt_updater';
-import { Conversation } from '../../../../..';
+import type { SystemPromptSettings } from '../../../settings/use_settings_updater/use_system_prompt_updater';
+import type { Conversation } from '../../../../..';
 import * as i18n from './translations';
 import { ConversationMultiSelector } from './conversation_multi_selector/conversation_multi_selector';
 import { SystemPromptSelector } from './system_prompt_selector/system_prompt_selector';
@@ -128,7 +128,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
             <EuiFlexGroup alignItems="center" gutterSize={'xs'}>
               <EuiFlexItem>{i18n.SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION}</EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiIcon type={isNewConversationDefault ? 'starFilled' : 'starEmpty'} />
+                <EuiIcon type={isNewConversationDefault ? 'starFill' : 'star'} />
               </EuiFlexItem>
             </EuiFlexGroup>
           }

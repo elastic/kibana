@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, EuiText } from '@elastic/eui';
+import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -27,6 +27,8 @@ export const ConfirmDisableUsers: FunctionComponent<ConfirmDisableUsersProps> = 
   onCancel,
   onSuccess,
 }) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const { services } = useKibana();
   const isSystemUser = usernames[0] === 'kibana' || usernames[0] === 'kibana_system';
 
@@ -59,11 +61,13 @@ export const ConfirmDisableUsers: FunctionComponent<ConfirmDisableUsersProps> = 
   return (
     <EuiConfirmModal
       role="dialog"
+      aria-labelledby={confirmModalTitleId}
       title={i18n.translate('xpack.security.management.users.confirmDisableUsers.title', {
         defaultMessage:
           "Deactivate {count, plural, one{user ''{username}''} other{{count} users}}?",
         values: { count: usernames.length, username: usernames[0] },
       })}
+      titleProps={{ id: confirmModalTitleId }}
       onCancel={onCancel}
       onConfirm={disableUsers}
       cancelButtonText={i18n.translate(

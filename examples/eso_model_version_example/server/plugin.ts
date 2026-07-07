@@ -21,7 +21,7 @@
 // the decrypted migrated objects.                                                                                  //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-import {
+import type {
   CoreSetup,
   IRouter,
   Plugin,
@@ -29,14 +29,14 @@ import {
   SavedObjectsBulkResponse,
 } from '@kbn/core/server';
 
-import {
+import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import { schema } from '@kbn/config-schema';
 
-import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import type { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
 
 import {
   esoModelVersionExampleV1,

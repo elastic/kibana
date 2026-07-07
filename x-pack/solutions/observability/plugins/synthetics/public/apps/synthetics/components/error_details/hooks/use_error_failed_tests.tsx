@@ -8,12 +8,12 @@
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
-import { Ping } from '../../../../../../common/runtime_types';
+import type { Ping } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
 } from '../../../../../../common/constants/client_defaults';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 
@@ -22,11 +22,11 @@ export function useErrorFailedTests() {
 
   const { errorStateId, monitorId } = useParams<{ errorStateId: string; monitorId: string }>();
 
-  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
+  const { dateRangeStart, dateRangeEnd, remoteName } = useGetUrlParams();
 
   const { data, loading } = useReduxEsSearch(
     {
-      index: SYNTHETICS_INDEX_PATTERN,
+      index: getSyntheticsCcsIndex(remoteName),
       size: 10000,
       query: {
         bool: {
@@ -48,7 +48,7 @@ export function useErrorFailedTests() {
       },
       sort: [{ '@timestamp': 'desc' }],
     },
-    [lastRefresh, monitorId, dateRangeStart, dateRangeEnd],
+    [lastRefresh, monitorId, dateRangeStart, dateRangeEnd, remoteName],
     { name: 'getMonitorErrorFailedTests' }
   );
 

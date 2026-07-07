@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentType } from 'react';
+import type { ComponentType } from 'react';
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { CopyToDashboardAPI } from './copy_to_dashboard_action';
+import type { CopyToDashboardAPI } from './copy_to_dashboard_action';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
-import { DashboardPickerProps } from '@kbn/presentation-util-plugin/public/components/dashboard_picker/dashboard_picker';
+import type { DashboardPickerProps } from '@kbn/presentation-util-plugin/public/components/dashboard_picker/dashboard_picker';
 
 jest.mock('../utils/get_dashboard_capabilities', () => ({
   getDashboardCapabilities: () => ({
@@ -48,17 +49,15 @@ describe('CopyToDashboardModal', () => {
       savedObjectId$: new BehaviorSubject<string | undefined>('dashboardOne'),
       getDashboardPanelFromId: () => ({
         type: 'testPanelType',
-        gridData: { w: 1, h: 1, x: 0, y: 0, i: 'panelOne' },
+        grid: { w: 1, h: 1, x: 0, y: 0, i: 'panelOne' },
         serializedState: {
-          rawState: {
-            title: 'Panel One',
-          },
+          title: 'Panel One',
         },
       }),
     },
   };
   const closeModalMock = jest.fn();
-  const navigateToWithEmbeddablePackageMock = jest.fn();
+  const navigateToWithEmbeddablePackagesMock = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -66,7 +65,7 @@ describe('CopyToDashboardModal', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('../services/kibana_services').embeddableService = {
       getStateTransfer: () => ({
-        navigateToWithEmbeddablePackage: navigateToWithEmbeddablePackageMock,
+        navigateToWithEmbeddablePackages: navigateToWithEmbeddablePackagesMock,
       }),
     };
   });
@@ -114,20 +113,20 @@ describe('CopyToDashboardModal', () => {
       });
 
       await waitFor(() =>
-        expect(navigateToWithEmbeddablePackageMock).toHaveBeenCalledWith('dashboards', {
+        expect(navigateToWithEmbeddablePackagesMock).toHaveBeenCalledWith('dashboards', {
           path: '#/create',
-          state: {
-            serializedState: {
-              rawState: {
+          state: [
+            {
+              serializedState: {
                 title: 'Panel One',
               },
+              size: {
+                height: 1,
+                width: 1,
+              },
+              type: 'testPanelType',
             },
-            size: {
-              height: 1,
-              width: 1,
-            },
-            type: 'testPanelType',
-          },
+          ],
         })
       );
     });
@@ -159,20 +158,20 @@ describe('CopyToDashboardModal', () => {
       });
 
       await waitFor(() =>
-        expect(navigateToWithEmbeddablePackageMock).toHaveBeenCalledWith('dashboards', {
+        expect(navigateToWithEmbeddablePackagesMock).toHaveBeenCalledWith('dashboards', {
           path: '#/view/dashboardTwo?_a=(viewMode:edit)',
-          state: {
-            serializedState: {
-              rawState: {
+          state: [
+            {
+              serializedState: {
                 title: 'Panel One',
               },
+              size: {
+                height: 1,
+                width: 1,
+              },
+              type: 'testPanelType',
             },
-            size: {
-              height: 1,
-              width: 1,
-            },
-            type: 'testPanelType',
-          },
+          ],
         })
       );
     });

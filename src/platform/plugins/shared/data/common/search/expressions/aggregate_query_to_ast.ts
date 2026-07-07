@@ -8,20 +8,23 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { buildExpressionFunction, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
-import { AggregateQuery } from '../../query';
-import { EsqlExpressionFunctionDefinition } from './esql';
+import type { ExpressionAstFunction } from '@kbn/expressions-plugin/common';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import type { AggregateQuery } from '../../query';
+import type { EsqlExpressionFunctionDefinition } from './esql';
 
 export const aggregateQueryToAst = ({
   query,
   timeField,
   titleForInspector,
   descriptionForInspector,
+  ignoreGlobalFilters,
 }: {
   query: AggregateQuery;
   timeField?: string;
   titleForInspector?: string;
   descriptionForInspector?: string;
+  ignoreGlobalFilters?: boolean;
 }): undefined | ExpressionAstFunction => {
   return buildExpressionFunction<EsqlExpressionFunctionDefinition>('esql', {
     query: query.esql,
@@ -29,5 +32,6 @@ export const aggregateQueryToAst = ({
     locale: i18n.getLocale(),
     titleForInspector,
     descriptionForInspector,
+    ignoreGlobalFilters,
   }).toAst();
 };

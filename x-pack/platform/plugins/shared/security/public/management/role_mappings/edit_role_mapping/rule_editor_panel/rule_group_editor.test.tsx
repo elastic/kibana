@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiContextMenuItem } from '@elastic/eui';
+import { EuiContextMenuItem, EuiProvider } from '@elastic/eui';
 import React from 'react';
 
 import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
@@ -16,6 +16,12 @@ import { RuleGroupEditor } from './rule_group_editor';
 import { RuleGroupTitle } from './rule_group_title';
 import { AllRule, AnyRule, ExceptAnyRule, FieldRule } from '../../model';
 
+const shallowWithEuiProvider = (node: React.ReactElement) =>
+  shallowWithIntl(<EuiProvider>{node}</EuiProvider>);
+
+const mountWithEuiProvider = (node: React.ReactElement) =>
+  mountWithIntl(<EuiProvider>{node}</EuiProvider>);
+
 describe('RuleGroupEditor', () => {
   it('renders an empty group', () => {
     const props = {
@@ -25,8 +31,8 @@ describe('RuleGroupEditor', () => {
       onChange: jest.fn(),
       onDelete: jest.fn(),
     };
-    const wrapper = shallowWithIntl(<RuleGroupEditor {...props} />);
-    expect(wrapper.find(RuleGroupEditor)).toHaveLength(0);
+    const wrapper = mountWithEuiProvider(<RuleGroupEditor {...props} />);
+    expect(wrapper.find(RuleGroupEditor)).toHaveLength(1);
     expect(wrapper.find(FieldRuleEditor)).toHaveLength(0);
     expect(wrapper.find(AddRuleButton)).toHaveLength(1);
   });
@@ -39,7 +45,7 @@ describe('RuleGroupEditor', () => {
       onChange: jest.fn(),
       onDelete: jest.fn(),
     };
-    const wrapper = mountWithIntl(<RuleGroupEditor {...props} />);
+    const wrapper = mountWithEuiProvider(<RuleGroupEditor {...props} />);
     expect(wrapper.find(RuleGroupEditor)).toHaveLength(1);
     expect(wrapper.find(FieldRuleEditor)).toHaveLength(1);
     expect(wrapper.find(AddRuleButton)).toHaveLength(1);
@@ -55,7 +61,7 @@ describe('RuleGroupEditor', () => {
       return menuItem.text() === anyRule.getDisplayTitle();
     });
 
-    anyRuleOption.simulate('click');
+    anyRuleOption.find('button').first().simulate('click');
 
     expect(props.onChange).toHaveBeenCalledTimes(1);
     const [newRule] = props.onChange.mock.calls[0];
@@ -71,7 +77,7 @@ describe('RuleGroupEditor', () => {
       onChange: jest.fn(),
       onDelete: jest.fn(),
     };
-    const wrapper = mountWithIntl(<RuleGroupEditor {...props} />);
+    const wrapper = mountWithEuiProvider(<RuleGroupEditor {...props} />);
     expect(wrapper.find(RuleGroupEditor)).toHaveLength(2);
     expect(wrapper.find(FieldRuleEditor)).toHaveLength(1);
     expect(wrapper.find(AddRuleButton)).toHaveLength(2);
@@ -87,7 +93,7 @@ describe('RuleGroupEditor', () => {
       return menuItem.text() === anyRule.getDisplayTitle();
     });
 
-    anyRuleOption.simulate('click');
+    anyRuleOption.find('button').first().simulate('click');
 
     expect(props.onChange).toHaveBeenCalledTimes(0);
     expect(findTestSubject(wrapper, 'confirmRuleChangeModal')).toHaveLength(1);
@@ -109,7 +115,7 @@ describe('RuleGroupEditor', () => {
       onChange: jest.fn(),
       onDelete: jest.fn(),
     };
-    const wrapper = mountWithIntl(<RuleGroupEditor {...props} />);
+    const wrapper = mountWithEuiProvider(<RuleGroupEditor {...props} />);
     expect(wrapper.find(RuleGroupEditor)).toHaveLength(2);
     expect(wrapper.find(FieldRuleEditor)).toHaveLength(1);
     expect(wrapper.find(AddRuleButton)).toHaveLength(2);
@@ -125,7 +131,7 @@ describe('RuleGroupEditor', () => {
       return menuItem.text() === anyRule.getDisplayTitle();
     });
 
-    anyRuleOption.simulate('click');
+    anyRuleOption.find('button').first().simulate('click');
 
     expect(props.onChange).toHaveBeenCalledTimes(0);
     expect(findTestSubject(wrapper, 'confirmRuleChangeModal')).toHaveLength(1);
@@ -142,7 +148,7 @@ describe('RuleGroupEditor', () => {
       onChange: jest.fn(),
       onDelete: jest.fn(),
     };
-    const wrapper = shallowWithIntl(<RuleGroupEditor {...props} />);
+    const wrapper = shallowWithEuiProvider(<RuleGroupEditor {...props} />);
     expect(wrapper.find(AddRuleButton)).toHaveLength(0);
   });
 
@@ -155,7 +161,7 @@ describe('RuleGroupEditor', () => {
       onDelete: jest.fn(),
       readOnly: true,
     };
-    const wrapper = mountWithIntl(<RuleGroupEditor {...props} />);
+    const wrapper = mountWithEuiProvider(<RuleGroupEditor {...props} />);
 
     // Any/all title selectors are read-only
     const ruleGroupTitles = wrapper.find(RuleGroupTitle);

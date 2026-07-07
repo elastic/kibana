@@ -5,10 +5,41 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
+
 import { appContextService } from '../app_context';
 import { PolicyNamespaceValidationError } from '../../../common/errors';
 
+import type { PackagePolicy } from '../../types';
+import { packagePolicyService } from '../package_policy';
+import {
+  MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../../constants';
+
+import { PackagePolicyNameExistsError } from '../../errors';
+
 import { getSpaceSettings } from './space_settings';
+
+export { isNamespaceAllowedByPrefixes } from '../../../common/services/namespace_prefixes';
+
+/**
+ * Returns the allowed namespace prefixes for the given Kibana space, or `null`
+ * if no restriction applies (space awareness disabled or no prefixes configured).
+ */
+export async function getAllowedNamespacePrefixesForSpace(
+  spaceId?: string
+): Promise<string[] | null> {
+  const experimentalFeature = appContextService.getExperimentalFeatures();
+  if (!experimentalFeature.useSpaceAwareness) {
+    return null;
+  }
+  const settings = await getSpaceSettings(spaceId);
+  if (!settings.allowed_namespace_prefixes || settings.allowed_namespace_prefixes.length === 0) {
+    return null;
+  }
+  return settings.allowed_namespace_prefixes;
+}
 
 export async function validatePolicyNamespaceForSpace({
   namespace,
@@ -81,4 +112,34 @@ export async function validateAdditionalDatastreamsPermissionsForSpace({
       );
     }
   }
+}
+
+export async function validatePackagePoliciesUniqueNameAcrossSpaces(
+  packagePolicies: PackagePolicy[],
+  newSpaceIds: string[] = []
+) {
+  if (packagePolicies === undefined || packagePolicies.length === 0) return;
+  const allSpacesSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+
+  await pMap(
+    packagePolicies,
+    async (pkgPolicy) => {
+      const { items } = await packagePolicyService.list(allSpacesSoClient, {
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name:"${pkgPolicy.name}"`,
+        spaceId: '*',
+      });
+
+      const filteredItems = items.filter((item) => item.id !== pkgPolicy.id);
+      const matchingSpaceId = newSpaceIds.find((spaceId) =>
+        filteredItems.flatMap((item) => item.spaceIds ?? []).includes(spaceId)
+      );
+      if (matchingSpaceId)
+        throw new PackagePolicyNameExistsError(
+          `An integration policy with the name ${pkgPolicy.name} already exists in space "${matchingSpaceId}". Please rename it or choose a different name.`
+        );
+    },
+    {
+      concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
+    }
+  );
 }

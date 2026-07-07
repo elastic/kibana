@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
 import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX } from '@kbn/search-connectors';
 
-import { SyncJobsStats } from '../../../common/stats';
+import type { SyncJobsStats } from '../../../common/stats';
 
 import {
   getConnectedCountQuery,

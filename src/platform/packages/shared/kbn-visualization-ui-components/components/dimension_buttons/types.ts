@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 
 export interface AccessorConfig {
   columnId: string;

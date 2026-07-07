@@ -21,6 +21,7 @@ export const registerBulkDeleteRoute = (router: IRouter) => {
         },
       },
       validate: {
+        // codeql[js/kibana/unbounded-array-in-schema] FTR test-only API, input from test code not end users
         body: schema.arrayOf(
           schema.object({
             type: schema.string(),
@@ -34,7 +35,7 @@ export const registerBulkDeleteRoute = (router: IRouter) => {
       const hiddenTypes = listHiddenTypes(savedObjects.typeRegistry);
       const soClient = savedObjects.getClient({ includedHiddenTypes: hiddenTypes });
 
-      const statuses = await soClient.bulkDelete(req.body, { force: true });
+      const statuses = await soClient.bulkDelete(req.body, { force: true, refresh: true });
       return res.ok({ body: statuses });
     })
   );

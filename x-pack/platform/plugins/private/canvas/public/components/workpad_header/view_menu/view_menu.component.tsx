@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import PropTypes from 'prop-types';
-import {
-  EuiButtonEmpty,
-  EuiContextMenu,
-  EuiIcon,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Popover, ClosePopoverFn } from '../../popover';
+import type { ClosePopoverFn } from '../../popover';
+import { Popover } from '../../popover';
 import {
   MAX_ZOOM_LEVEL,
   MIN_ZOOM_LEVEL,
@@ -198,14 +195,14 @@ export const ViewMenu: FunctionComponent<Props> = ({
     ...getScaleMenuItems(),
     {
       name: strings.getZoomInText(),
-      icon: 'magnifyWithPlus',
+      icon: 'magnifyPlus',
       onClick: zoomIn,
       disabled: zoomScale === MAX_ZOOM_LEVEL,
       className: 'canvasContextMenu--topBorder',
     },
     {
       name: strings.getZoomOutText(),
-      icon: 'magnifyWithMinus',
+      icon: 'magnifyMinus',
       onClick: zoomOut,
       disabled: zoomScale <= MIN_ZOOM_LEVEL,
     },
@@ -245,7 +242,7 @@ export const ViewMenu: FunctionComponent<Props> = ({
       },
       {
         name: strings.getFullscreenMenuItemLabel(),
-        icon: <EuiIcon type="fullScreen" size="m" />,
+        icon: <EuiIcon type="fullScreen" size="m" aria-hidden={true} />,
         className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
         onClick: () => {
           enterFullscreen();
@@ -268,7 +265,7 @@ export const ViewMenu: FunctionComponent<Props> = ({
       },
       {
         name: isWriteable ? strings.getHideEditModeLabel() : strings.getShowEditModeLabel(),
-        icon: <EuiIcon type={isWriteable ? 'eyeClosed' : 'eye'} size="m" />,
+        icon: <EuiIcon type={isWriteable ? 'eyeSlash' : 'eye'} size="m" aria-hidden={true} />,
         className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
         onClick: () => {
           toggleWriteable();
@@ -277,7 +274,7 @@ export const ViewMenu: FunctionComponent<Props> = ({
       },
       {
         name: strings.getZoomMenuItemLabel(),
-        icon: 'magnifyWithPlus',
+        icon: 'magnifyPlus',
         panel: {
           id: 3,
           title: strings.getZoomMenuItemLabel(),
@@ -298,22 +295,4 @@ export const ViewMenu: FunctionComponent<Props> = ({
       )}
     </Popover>
   );
-};
-
-ViewMenu.propTypes = {
-  isWriteable: PropTypes.bool.isRequired,
-  zoomScale: PropTypes.number.isRequired,
-  fitToWindow: PropTypes.func.isRequired,
-  setZoomScale: PropTypes.func.isRequired,
-  zoomIn: PropTypes.func.isRequired,
-  zoomOut: PropTypes.func.isRequired,
-  resetZoom: PropTypes.func.isRequired,
-  toggleWriteable: PropTypes.func.isRequired,
-  enterFullscreen: PropTypes.func.isRequired,
-  doRefresh: PropTypes.func.isRequired,
-  refreshInterval: PropTypes.number.isRequired,
-  setRefreshInterval: PropTypes.func.isRequired,
-  autoplayEnabled: PropTypes.bool.isRequired,
-  autoplayInterval: PropTypes.number.isRequired,
-  setAutoplayInterval: PropTypes.func.isRequired,
 };

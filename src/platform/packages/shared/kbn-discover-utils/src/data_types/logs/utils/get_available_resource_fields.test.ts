@@ -8,7 +8,6 @@
  */
 
 import { getAvailableResourceFields } from './get_available_resource_fields';
-import type { ResourceFields } from '../../..';
 
 describe('getAvailableResourceFields', () => {
   it('should return available fields', () => {
@@ -36,13 +35,14 @@ describe('getAvailableResourceFields', () => {
     const fields = getAvailableResourceFields({
       'service.name': '',
     });
+    // Empty string values should be filtered out
     expect(fields).toEqual([]);
   });
 
   it('should ignore unknown fields', () => {
     const fields = getAvailableResourceFields({
       unknown: 'no',
-    } as ResourceFields);
+    });
     expect(fields).toEqual([]);
   });
 
@@ -71,5 +71,109 @@ describe('getAvailableResourceFields', () => {
       'kubernetes.pod.name',
       'kubernetes.deployment.name',
     ]);
+  });
+
+  it('should return available field names', () => {
+    const doc = {
+      'service.name': 'my-service',
+      'container.name': 'my-container',
+      'host.name': 'my-host',
+    };
+
+    const fields = getAvailableResourceFields(doc);
+    expect(fields).toEqual(['service.name', 'container.name', 'host.name']);
+  });
+
+  it('should check OTel fallbacks when ECS fields are not available', () => {
+    const doc = {
+      'other.field': 'value',
+    };
+
+    const fields = getAvailableResourceFields(doc);
+    expect(fields).toEqual([]);
+  });
+
+  it('should handle mixed ECS fields', () => {
+    const doc = {
+      'service.name': 'ecs-service',
+      'container.name': 'ecs-container',
+    };
+
+    const fields = getAvailableResourceFields(doc);
+    expect(fields).toEqual(['service.name', 'container.name']);
+  });
+
+  it('should filter out empty field values', () => {
+    const doc = {
+      'service.name': '',
+      'host.name': 'my-host',
+    };
+
+    const fields = getAvailableResourceFields(doc);
+    // Empty string values are filtered out
+    expect(fields).toEqual(['host.name']);
+  });
+
+  it('should return empty array when no resource fields are available', () => {
+    const doc = {
+      'other.field': 'value',
+      message: 'log message',
+    };
+
+    const fields = getAvailableResourceFields(doc);
+    expect(fields).toEqual([]);
+  });
+
+  it('should handle array values without extracting first element', () => {
+    const doc = {
+      'service.name': ['service1', 'service2'],
+    };
+
+    const fields = getAvailableResourceFields(doc);
+    // Arrays are not extracted, returned as field names
+    expect(fields).toEqual(['service.name']);
+  });
+
+  it('should ignore an array containing only an empty string', () => {
+    const fields = getAvailableResourceFields({
+      'service.name': [''],
+    });
+    expect(fields).toEqual([]);
+  });
+
+  it('should ignore an array containing only empty strings', () => {
+    const fields = getAvailableResourceFields({
+      'service.name': ['', ''],
+    });
+    expect(fields).toEqual([]);
+  });
+
+  it('should ignore an array containing only null values', () => {
+    const fields = getAvailableResourceFields({
+      'service.name': [null],
+    });
+    expect(fields).toEqual([]);
+  });
+
+  it('should ignore an empty array', () => {
+    const fields = getAvailableResourceFields({
+      'service.name': [],
+    });
+    expect(fields).toEqual([]);
+  });
+
+  it('should fall through to a populated field when an earlier field in the group is an empty array', () => {
+    const fields = getAvailableResourceFields({
+      'kubernetes.container.name': [''],
+      'container.name': 'my-container',
+    });
+    expect(fields).toEqual(['container.name']);
+  });
+
+  it('should keep an array that contains at least one non-empty value', () => {
+    const fields = getAvailableResourceFields({
+      'service.name': ['', 'my-service'],
+    });
+    expect(fields).toEqual(['service.name']);
   });
 });

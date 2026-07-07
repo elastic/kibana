@@ -22,7 +22,7 @@ import { DEFAULT_CUSTOM_ICON_CUTOFF, DEFAULT_CUSTOM_ICON_RADIUS } from '../../..
 import { getIsDarkMode } from '../../kibana_services';
 import { SymbolIcon } from '../../classes/styles/vector/components/legend/symbol_icon';
 import { CustomIconModal } from '../../classes/styles/vector/components/symbol/custom_icon_modal';
-import { CustomIcon } from '../../../common/descriptor_types';
+import type { CustomIcon } from '../../../common/descriptor_types';
 
 interface Props {
   customIcons: CustomIcon[];
@@ -118,7 +118,7 @@ export class CustomIconsPanel extends Component<Props, State> {
         <EuiTextAlign textAlign="center">
           <EuiButtonEmpty
             size="xs"
-            iconType="plusInCircleFilled"
+            iconType="plusCircle"
             onClick={() => this._handleNewIcon()}
             data-test-subj="mapsCustomIconPanel-add"
           >

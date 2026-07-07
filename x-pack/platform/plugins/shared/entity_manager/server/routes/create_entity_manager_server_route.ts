@@ -6,7 +6,7 @@
  */
 
 import { createServerRouteFactory } from '@kbn/server-route-repository';
-import { EntityManagerRouteHandlerResources } from './types';
+import type { EntityManagerRouteHandlerResources } from './types';
 
 export const createEntityManagerServerRoute =
   createServerRouteFactory<EntityManagerRouteHandlerResources>();

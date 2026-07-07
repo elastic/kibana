@@ -14,15 +14,16 @@
 import React, { useCallback } from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
-import { ComponentTemplatesFlyoutWithContextProps } from './component_templates_flyout_with_context_types';
+import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
+import type { ComponentTemplatesFlyoutWithContextProps } from './component_templates_flyout_with_context_types';
 import { httpService } from '../../services/http';
-import { notificationService } from '../../services/notification';
+import { NotificationService } from '../../services/notification';
 import { UiMetricService } from '../../services/ui_metric';
 import { documentationService } from '../../services';
 import { UIM_APP_NAME } from '../../../../common/constants/ui_metric';
 import { setUiMetricService } from '../../services/api';
-import { AppDependencies, IndexManagementAppContext } from '../..';
+import type { AppDependencies } from '../..';
+import { IndexManagementAppContext } from '../..';
 import { ComponentTemplateDetailsFlyoutContent } from './component_template_details';
 import { attemptToURIDecode } from './shared_imports';
 import { INDEX_MANAGEMENT_LOCATOR_ID } from '../../../locator';
@@ -36,8 +37,8 @@ export const ComponentTemplatesFlyoutWithContext: React.FC<
   // can't do it in an effect because then the first http call fails as the instantiation happens after first render
   if (!httpService.httpClient) {
     httpService.setup(core.http);
-    notificationService.setup(core.notifications);
   }
+  const notificationService = new NotificationService(core.notifications.toasts);
   documentationService.setup(core.docLinks);
 
   const uiMetricService = new UiMetricService(UIM_APP_NAME);
@@ -91,12 +92,17 @@ export const ComponentTemplatesFlyoutWithContext: React.FC<
   ];
   return (
     <IndexManagementAppContext core={core} dependencies={newDependencies}>
-      <EuiFlyout onClose={onClose}>
+      <EuiFlyout
+        onClose={onClose}
+        aria-label={i18n.translate('xpack.idxMgmt.componentTemplateDetails.flyoutAriaLabel', {
+          defaultMessage: 'Component template details',
+        })}
+      >
         <ComponentTemplateDetailsFlyoutContent
           componentTemplateName={componentTemplateName}
           onClose={onClose}
-          actions={actions}
-          showSummaryCallToAction
+          actions={dependencies.privs.manageIndexTemplates ? actions : []}
+          showSummaryCallToAction={dependencies.privs.manageIndexTemplates}
         />
       </EuiFlyout>
     </IndexManagementAppContext>

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import { BuildkiteMetadata, HostMetadata } from '../../../datasources';
+import type { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import type { BuildkiteMetadata, HostMetadata } from '../../../datasources';
 
 /**
  * Scout reporter event type
@@ -43,7 +43,7 @@ export interface ScoutReportEventInfo {
  */
 export interface ScoutReporterInfo {
   name: string;
-  type: 'jest' | 'ftr' | 'playwright';
+  type: 'jest' | 'ftr' | 'playwright' | 'cypress';
 }
 
 /**
@@ -60,12 +60,24 @@ export interface ScoutFileInfo {
  */
 export interface ScoutTestRunInfo {
   id: string;
+  target: {
+    type: string;
+    mode: string;
+  };
+  fully_parallel?: boolean;
   config?: {
     file?: ScoutFileInfo;
     category?: ScoutTestRunConfigCategory;
+    namespace?: string;
   };
   status?: string;
   duration?: number;
+  tests?: {
+    passes?: number;
+    pending?: number;
+    failures?: number;
+    total?: number;
+  };
 }
 
 /**
@@ -90,6 +102,7 @@ export interface ScoutTestInfo {
   expected_status?: string;
   duration?: number;
   status?: string;
+  console_errors?: string;
   step?: {
     title: string;
     category?: string;
@@ -111,4 +124,7 @@ export interface ScoutReportEvent {
   test_run: ScoutTestRunInfo;
   suite?: ScoutSuiteInfo;
   test?: ScoutTestInfo;
+  process?: {
+    uptime?: number;
+  };
 }

@@ -9,7 +9,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { StartPlugins } from '../../../types';
 
 type GlobalServices = Pick<CoreStart, 'application' | 'http' | 'uiSettings' | 'notifications'> &
-  Pick<StartPlugins, 'data' | 'unifiedSearch' | 'expressions' | 'savedSearch'>;
+  Pick<StartPlugins, 'data' | 'unifiedSearch' | 'expressions' | 'savedSearch' | 'share' | 'kql'>;
 
 /**
  * This class is a singleton that holds references to core Kibana services.
@@ -38,6 +38,7 @@ export class KibanaServices {
     application,
     data,
     unifiedSearch,
+    kql,
     kibanaBranch,
     kibanaVersion,
     buildFlavor,
@@ -46,6 +47,7 @@ export class KibanaServices {
     notifications,
     expressions,
     savedSearch,
+    share,
   }: GlobalServices & {
     kibanaBranch: string;
     kibanaVersion: string;
@@ -58,9 +60,11 @@ export class KibanaServices {
       http,
       uiSettings,
       unifiedSearch,
+      kql,
       notifications,
       expressions,
       savedSearch,
+      share,
     };
     this.kibanaBranch = kibanaBranch;
     this.kibanaVersion = kibanaVersion;

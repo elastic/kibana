@@ -9,7 +9,8 @@
 
 import _ from 'lodash';
 
-import { RangeFilterParams, buildRangeFilter } from '@kbn/es-query';
+import type { RangeFilterParams } from '@kbn/es-query';
+import { buildRangeFilter } from '@kbn/es-query';
 import { FilterManager } from './filter_manager';
 
 interface SliderValue {

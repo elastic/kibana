@@ -8,11 +8,13 @@
  */
 
 import { type Observable, timer, takeUntil } from 'rxjs';
-import { SavedObjectsServiceSetup, ISavedObjectsRepository, Logger } from '@kbn/core/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { SavedObjectsServiceSetup, ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { rollDailyData } from './rollups';
-import { registerSavedObjectTypes, EventLoopDelaysDaily } from './saved_objects';
-import { eventLoopDelaysUsageSchema, EventLoopDelaysUsageReport } from './schema';
+import type { EventLoopDelaysDaily } from './saved_objects';
+import { registerSavedObjectTypes } from './saved_objects';
+import type { EventLoopDelaysUsageReport } from './schema';
+import { eventLoopDelaysUsageSchema } from './schema';
 import { SAVED_OBJECTS_DAILY_TYPE } from './saved_objects';
 import { ROLL_DAILY_INDICES_INTERVAL, ROLL_INDICES_START } from './constants';
 

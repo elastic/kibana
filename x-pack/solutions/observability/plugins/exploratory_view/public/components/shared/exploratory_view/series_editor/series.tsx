@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFlexGroup, EuiPanel, EuiAccordion, EuiSpacer } from '@elastic/eui';
-import { BuilderItem } from '../types';
+import type { BuilderItem } from '../types';
 import { SeriesActions } from './columns/series_actions';
 import { SeriesInfo } from './columns/series_info';
 import { DataTypesSelect } from './columns/data_type_select';

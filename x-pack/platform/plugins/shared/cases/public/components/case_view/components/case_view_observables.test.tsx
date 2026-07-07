@@ -18,14 +18,42 @@ describe('Case View Page observables tab', () => {
   });
 
   it('should render the utility bar for the observables table', async () => {
-    renderWithTestingProviders(<CaseViewObservables isLoading={false} caseData={basicCase} />);
+    renderWithTestingProviders(
+      <CaseViewObservables
+        caseData={basicCase}
+        observables={basicCase.observables}
+        isLoading={false}
+        onUpdateField={jest.fn()}
+      />
+    );
 
     expect((await screen.findAllByTestId('cases-observables-add')).length).toBe(2);
   });
 
   it('should render the observable table', async () => {
-    renderWithTestingProviders(<CaseViewObservables isLoading={false} caseData={basicCase} />);
+    renderWithTestingProviders(
+      <CaseViewObservables
+        caseData={basicCase}
+        observables={basicCase.observables}
+        isLoading={false}
+        onUpdateField={jest.fn()}
+      />
+    );
 
     expect(await screen.findByTestId('cases-observables-table')).toBeInTheDocument();
+  });
+
+  it('returns null when searching and no observables match', () => {
+    const { container } = renderWithTestingProviders(
+      <CaseViewObservables
+        caseData={basicCase}
+        observables={[]}
+        isLoading={false}
+        searchTerm="foobar"
+        onUpdateField={jest.fn()}
+      />
+    );
+
+    expect(container).toBeEmptyDOMElement();
   });
 });

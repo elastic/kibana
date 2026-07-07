@@ -9,7 +9,7 @@
 
 import type { ISavedObjectsSerializer, SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { IDocumentMigrator } from '@kbn/core-saved-objects-base-server-internal';
-import { TransformRawDocs } from '../../types';
+import type { TransformRawDocs } from '../../types';
 import { migrateRawDocsSafely } from '../../core/migrate_raw_docs';
 
 export interface CreateDocumentTransformFnOpts {

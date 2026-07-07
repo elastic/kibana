@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { MouseEvent, useMemo, useState } from 'react';
+import type { MouseEvent } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,8 +21,8 @@ import {
   EuiText,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
-import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
-import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+import type { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
+import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import { css } from '@kbn/kibana-react-plugin/common';
 import { INSPECT_DOCUMENT, ViewDocument } from '../../common/components/view_document';
 import {
@@ -38,7 +39,8 @@ import {
   getTestRunDetailRelativeLink,
   TestDetailsLink,
 } from '../../common/links/test_details_link';
-import { ConfigKey, MonitorTypeEnum, Ping } from '../../../../../../common/runtime_types';
+import type { Ping } from '../../../../../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum } from '../../../../../../common/runtime_types';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { sortPings } from '../../../utils/monitor_test_result/sort_pings';
 import { selectPingsError } from '../../../state';
@@ -49,6 +51,8 @@ import { useSelectedLocation } from '../hooks/use_selected_location';
 import { useMonitorPings } from '../hooks/use_monitor_pings';
 import { JourneyLastScreenshot } from '../../common/screenshot/journey_last_screenshot';
 import { useSyntheticsRefreshContext, useSyntheticsSettingsContext } from '../../../contexts';
+import { useGetUrlParams } from '../../../hooks';
+import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
 
 type SortableField = 'timestamp' | 'monitor.status' | 'monitor.duration.us';
 
@@ -91,6 +95,8 @@ export const TestRunsTable = ({
   const pingsError = useSelector(selectPingsError);
   const { monitor } = useSelectedMonitor();
   const selectedLocation = useSelectedLocation();
+  const spaceId = useUrlSpaceId();
+  const { remoteName } = useGetUrlParams();
   const isTabletOrGreater = useIsWithinMinBreakpoint('s');
 
   const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER;
@@ -160,6 +166,8 @@ export const TestRunsTable = ({
             isBrowserMonitor={isBrowserMonitor}
             basePath={basePath}
             locationId={selectedLocation?.id}
+            spaceId={spaceId}
+            remoteName={remoteName}
           />
         ),
       },
@@ -277,6 +285,8 @@ export const TestRunsTable = ({
               monitorId,
               checkGroup: item.monitor.check_group,
               locationId: selectedLocation?.id,
+              spaceId,
+              remoteName,
             })
           );
         }
@@ -314,6 +324,9 @@ export const TestRunsTable = ({
               }
             : undefined
         }
+        tableCaption={i18n.translate('xpack.synthetics.monitorDetails.summary.testRunsCaption', {
+          defaultMessage: 'Recent test runs',
+        })}
       />
     </EuiPanel>
   );
@@ -324,11 +337,15 @@ export const MobileRowDetails = ({
   isBrowserMonitor,
   basePath,
   locationId,
+  spaceId,
+  remoteName,
 }: {
   ping: Ping;
   isBrowserMonitor: boolean;
   basePath: string;
   locationId?: string;
+  spaceId?: string;
+  remoteName?: string;
 }) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -359,6 +376,8 @@ export const MobileRowDetails = ({
                 configId: ping.config_id,
                 locationId,
                 stateId: ping?.state?.id!,
+                spaceId,
+                remoteName,
               })}
             >
               {i18n.translate('xpack.synthetics.monitorDetails.summary.viewErrorDetails', {

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiKeyPadMenuItemProps } from '@elastic/eui';
 import {
   EuiPanel,
   EuiText,
@@ -15,7 +16,6 @@ import {
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
   EuiIcon,
-  EuiKeyPadMenuItemProps,
 } from '@elastic/eui';
 
 export type MonitorTypeRadioGroupProps = EuiKeyPadMenuItemProps & {
@@ -59,7 +59,7 @@ export const MonitorType = ({
       isSelected={isSelected}
       data-test-subj={dataTestSubj}
     >
-      <EuiIcon type={icon} />
+      <EuiIcon type={icon} aria-hidden={true} />
     </EuiKeyPadMenuItem>
   );
 };

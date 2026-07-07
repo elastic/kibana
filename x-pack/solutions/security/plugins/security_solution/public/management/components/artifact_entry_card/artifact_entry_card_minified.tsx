@@ -127,11 +127,11 @@ export const ArtifactEntryCardMinified = memo(
                 color="primary"
                 size="s"
                 flush="left"
-                iconType={accordionTrigger === 'open' ? 'arrowUp' : 'arrowDown'}
+                iconType={accordionTrigger === 'open' ? 'chevronSingleUp' : 'chevronSingleDown'}
                 iconSide="right"
                 iconSize="m"
                 onClick={handleOnToggleAccordion}
-                style={{ fontWeight: 400 }}
+                css={{ fontWeight: 400 }}
               >
                 {getAccordionTitle()}
               </EuiButtonEmpty>

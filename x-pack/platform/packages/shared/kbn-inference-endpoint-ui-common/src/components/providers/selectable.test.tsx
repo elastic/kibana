@@ -55,6 +55,7 @@ describe('SelectableProvider', () => {
     providers,
     onClosePopover: jest.fn(),
     onProviderChange: jest.fn(),
+    onSolutionFilterChange: jest.fn(),
   };
   describe('should render', () => {
     describe('provider', () => {

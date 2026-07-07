@@ -4,33 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import { Logger } from '@kbn/core/server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { IUiSettingsClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
 import moment from 'moment';
 import { isEmpty } from 'lodash';
-import { TLSRuleInspect } from '../../../common/runtime_types/alert_rules/common';
+import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_settings';
+import { syntheticsMonitorAttributes } from '../../../common/types/saved_objects';
+import type { TLSRuleInspect } from '../../../common/runtime_types/alert_rules/common';
 import { MonitorConfigRepository } from '../../services/monitor_config_repository';
 import { FINAL_SUMMARY_FILTER } from '../../../common/constants/client_defaults';
 import { formatFilterString } from '../common';
-import { SyntheticsServerSetup } from '../../types';
+import type { SyntheticsServerSetup } from '../../types';
 import { getSyntheticsCerts } from '../../queries/get_certs';
-import { savedObjectsAdapter } from '../../saved_objects';
 import { DYNAMIC_SETTINGS_DEFAULTS, SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
-import { processMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
-import {
+import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
+import type {
   CertResult,
-  ConfigKey,
   EncryptedSyntheticsMonitorAttributes,
   Ping,
 } from '../../../common/runtime_types';
-import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { monitorAttributes } from '../../../common/types/saved_objects';
+import { ConfigKey, MonitorTypeEnum } from '../../../common/runtime_types';
+import type { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import { SyntheticsEsClient } from '../../lib';
 import { queryFilterMonitors } from '../status_rule/queries/filter_monitors';
@@ -57,13 +57,15 @@ export class TLSRuleExecutor {
     server: SyntheticsServerSetup,
     syntheticsMonitorClient: SyntheticsMonitorClient,
     spaceId: string,
-    ruleName: string
+    ruleName: string,
+    uiSettingsClient?: IUiSettingsClient
   ) {
     this.previousStartedAt = previousStartedAt;
     this.params = p;
     this.soClient = soClient;
     this.esClient = new SyntheticsEsClient(this.soClient, scopedClient, {
       heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
+      uiSettingsClient,
     });
     this.server = server;
     this.syntheticsMonitorClient = syntheticsMonitorClient;
@@ -81,9 +83,20 @@ export class TLSRuleExecutor {
   }
 
   async getMonitors() {
-    const HTTP_OR_TCP = `${monitorAttributes}.${ConfigKey.MONITOR_TYPE}: http or ${monitorAttributes}.${ConfigKey.MONITOR_TYPE}: tcp`;
+    const HTTP_OR_TCP = `${syntheticsMonitorAttributes}.${ConfigKey.MONITOR_TYPE}: http or ${syntheticsMonitorAttributes}.${ConfigKey.MONITOR_TYPE}: tcp`;
 
-    const baseFilter = `${monitorAttributes}.${AlertConfigKey.TLS_ENABLED}: true and (${HTTP_OR_TCP})`;
+    // Lightweight HTTP/TCP monitors expose a per-monitor "TLS alert" toggle, so
+    // we keep gating them on it. This clause is intentionally byte-for-byte the
+    // previous behavior so existing rules are undisturbed (asserted by tests).
+    const lightweightFilter = `${syntheticsMonitorAttributes}.${AlertConfigKey.TLS_ENABLED}: true and (${HTTP_OR_TCP})`;
+
+    // Browser monitors have no TLS-alert toggle in the UI, so their inclusion is
+    // governed entirely by the rule-level `includeBrowserCerts` flag plus the
+    // monitor/tag/location/project filters applied below. When the flag is off
+    // the filter remains exactly the lightweight one.
+    const baseFilter = this.params.includeBrowserCerts
+      ? `(${lightweightFilter}) or (${syntheticsMonitorAttributes}.${ConfigKey.MONITOR_TYPE}: ${MonitorTypeEnum.BROWSER})`
+      : lightweightFilter;
 
     const configIds = await queryFilterMonitors({
       spaceId: this.spaceId,
@@ -135,7 +148,7 @@ export class TLSRuleExecutor {
   async getExpiredCertificates() {
     const { enabledMonitorQueryIds } = await this.getMonitors();
 
-    const dynamicSettings = await savedObjectsAdapter.getSyntheticsDynamicSettings(this.soClient);
+    const dynamicSettings = await getSyntheticsDynamicSettings(this.soClient);
 
     const expiryThreshold =
       this.params.certExpirationThreshold ??
@@ -179,6 +192,13 @@ export class TLSRuleExecutor {
       direction: 'desc',
       filters,
       monitorIds: enabledMonitorQueryIds,
+      // Browser-certificate evaluation. When `includeBrowserCerts` is off these
+      // are all undefined/empty, so the query collapses on the sha256
+      // fingerprint exactly as before (lightweight-only behavior preserved).
+      includeBrowserCerts: this.params.includeBrowserCerts,
+      certOrigin: this.params.certOrigin,
+      browserResourceTypes: this.params.browserResourceTypes,
+      issuers: this.params.issuers,
     });
 
     this.debug(
@@ -207,6 +227,15 @@ export class TLSRuleExecutor {
       latestPingsMap.set(ping.config_id!, ping);
     });
     return certs.filter((cert) => {
+      // The "resolved" check compares against the monitor's latest summary ping,
+      // which only carries TLS for lightweight HTTP/TCP monitors. Browser
+      // certificates live on per-resource network events (not summary pings) and
+      // a single config emits many of them, so this per-config comparison does
+      // not apply. Their recovery is driven by the alerting framework instead
+      // (the cert id simply stops being reported once it is no longer expiring).
+      if (!cert.sha256) {
+        return true;
+      }
       const lPing = latestPingsMap.get(cert.configId);
       if (!lPing) {
         return true;
@@ -219,7 +248,9 @@ export class TLSRuleExecutor {
       return [];
     }
     const configIds = certs.map((cert) => cert.configId);
-    const certIds = certs.map((cert) => cert.sha256);
+    const certIds = certs
+      .map((cert) => cert.sha256)
+      .filter((sha256): sha256 is string => sha256 !== undefined);
     const { body } = await this.esClient.search({
       query: {
         bool: {

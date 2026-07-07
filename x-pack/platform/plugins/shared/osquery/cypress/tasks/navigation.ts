@@ -5,26 +5,21 @@
  * 2.0.
  */
 
-import { TOGGLE_NAVIGATION_BTN } from '../screens/navigation';
 import { closeToastIfVisible } from './integrations';
+import { suppressGlobalAnnouncements } from './common';
 
-export const INTEGRATIONS = 'app/integrations#/';
-export const FLEET = 'app/fleet/';
 export const FLEET_AGENT_POLICIES = 'app/fleet/policies';
 export const OSQUERY = 'app/osquery';
-export const NEW_LIVE_QUERY = 'app/osquery/live_queries/new';
-export const OSQUERY_INTEGRATION_PAGE = '/app/fleet/integrations/osquery_manager/add-integration';
 export const navigateTo = (page: string, opts?: Partial<Cypress.VisitOptions>) => {
+  // Complements FTR `hideAnnouncements` global default — ensures the setting persists for
+  // logged-in sessions that do not call `initializeDataViews` (which POSTs the same API).
+  suppressGlobalAnnouncements();
   cy.visit(page, opts);
   cy.contains('Loading Elastic').should('exist');
   cy.contains('Loading Elastic').should('not.exist');
 
   // There's a security warning toast that seemingly makes ui elements in the bottom right unavailable, so we close it
   closeToastIfVisible();
-};
-
-export const openNavigationFlyout = () => {
-  cy.get(TOGGLE_NAVIGATION_BTN).click();
 };
 
 export const createOldOsqueryPath = (version: string) =>
@@ -43,7 +38,7 @@ export enum NAV_SEARCH_INPUT_OSQUERY_RESULTS {
  * we will need to update these constants with the corresponding version.
  */
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
-  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.13',
+  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v9.2',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   KNOWLEDGE_BASE: 'elasticAssistant.knowledgeBase.newFeaturesTour.v8.16',
 };

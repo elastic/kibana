@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { Fragment } from 'react';
 
 import { useValues } from 'kea';
 
@@ -22,6 +23,7 @@ export const FlashMessages: FC<PropsWithChildren<unknown>> = ({ children }) => {
       {messages.map(({ type, message, description, iconType }, index) => (
         <Fragment key={index}>
           <EuiCallOut
+            data-test-subj="flashMessageCallout"
             color={FLASH_MESSAGE_TYPES[type].color}
             iconType={iconType ?? FLASH_MESSAGE_TYPES[type].iconType}
             title={message}

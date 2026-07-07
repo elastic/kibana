@@ -9,10 +9,9 @@
 
 import { getEql } from './eql';
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import { EqlExpressionFunctionDefinition } from '../../../common/search/expressions';
-import { StartServicesAccessor } from '@kbn/core/public';
-import { DataPublicPluginStart, DataStartDependencies } from '../../types';
-import { of } from 'rxjs';
+import type { EqlExpressionFunctionDefinition } from '../../../common/search/expressions';
+import type { StartServicesAccessor } from '@kbn/core/public';
+import type { DataPublicPluginStart, DataStartDependencies } from '../../types';
 
 jest.mock('@kbn/i18n', () => {
   return {
@@ -37,14 +36,17 @@ describe('eql', () => {
           get: jest.fn().mockReturnValue(true),
         },
       },
-      {},
       {
-        search: {
-          search: jest.fn((params: any) => of({ rawResponse: params })),
-        },
-        indexPatterns: {
+        dataViews: {
           get: jest.fn(),
           create: jest.fn(),
+        },
+      },
+      {
+        search: {
+          eql: jest.fn(async (params: any) => ({
+            rawResponse: params,
+          })),
         },
       },
     ];

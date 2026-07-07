@@ -6,7 +6,7 @@
  */
 
 import { createListIndex, deleteList, exportList, findLists, importList, readListIndex } from '.';
-import {
+import type {
   ApiPayload,
   DeleteListParams,
   ExportListParams,
@@ -14,7 +14,7 @@ import {
   ImportListParams,
 } from '../types';
 
-import { HttpFetchOptions } from '@kbn/core-http-browser';
+import type { HttpFetchOptions } from '@kbn/core-http-browser';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 
 import { getFoundListSchemaMock } from './mocks/response/found_list_schema.mock';

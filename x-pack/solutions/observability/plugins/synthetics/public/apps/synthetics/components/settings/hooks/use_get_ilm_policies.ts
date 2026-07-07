@@ -30,11 +30,11 @@ export const useGetIlmPolicies = () => {
       const policy = syntheticsILMPolicies.find((p) =>
         p.indexTemplates?.some((indTemp) => indTemp.includes(indexTemplate))
       );
-      const policyIndices = sizeData?.data?.filter((d) => policy?.indices?.includes(d.index!));
+      const policyIndices = sizeData?.data?.filter((d) => policy?.indices?.includes(d.index));
 
       let totalSize =
         policyIndices?.reduce((acc, curr) => {
-          return acc + Number(curr?.['store.size']) ?? 0;
+          return acc + (curr?.sizeInBytes ?? 0);
         }, 0) ?? 0;
 
       const phases = policy?.policy.phases ?? {};
@@ -44,7 +44,7 @@ export const useGetIlmPolicies = () => {
       if (name === 'synthetics') {
         totalSize =
           sizeData?.data?.reduce((acc, curr) => {
-            return acc + Number(curr?.['store.size']) ?? 0;
+            return acc + (curr?.sizeInBytes ?? 0);
           }, 0) ?? 0;
       }
 

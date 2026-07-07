@@ -7,8 +7,8 @@
 import { merge } from 'lodash';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/unflatten_known_fields';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { ServiceInstanceMetadataDetailsResponse } from '@kbn/apm-api-shared';
 import {
   AGENT_NAME,
   AT_TIMESTAMP,
@@ -23,12 +23,6 @@ import {
   getProcessorEventForTransactions,
 } from '../../lib/helpers/transactions';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import type { Agent } from '../../../typings/es_schemas/ui/fields/agent';
-import type { Service } from '../../../typings/es_schemas/raw/fields/service';
-import type { Container } from '../../../typings/es_schemas/raw/fields/container';
-import type { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
-import type { Host } from '../../../typings/es_schemas/raw/fields/host';
-import type { Cloud } from '../../../typings/es_schemas/raw/fields/cloud';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   SERVICE_METADATA_CLOUD_KEYS,
@@ -36,16 +30,6 @@ import {
   SERVICE_METADATA_INFRA_METRICS_KEYS,
   SERVICE_METADATA_SERVICE_KEYS,
 } from '../../../common/service_metadata';
-
-export interface ServiceInstanceMetadataDetailsResponse {
-  '@timestamp': string;
-  agent?: Agent;
-  service?: Service;
-  container?: Container;
-  kubernetes?: Kubernetes;
-  host?: Host;
-  cloud?: Cloud;
-}
 
 export async function getServiceInstanceMetadataDetails({
   serviceName,
@@ -97,7 +81,9 @@ export async function getServiceInstanceMetadataDetails({
       }
     );
 
-    return unflattenKnownApmEventFields(maybe(response.hits.hits[0])?.fields, requiredKeys);
+    const hits = maybe(response.hits.hits[0])?.fields;
+
+    return hits && accessKnownApmEventFields(hits).requireFields(requiredKeys).unflatten();
   }
 
   async function getTransactionEventSample() {
@@ -115,9 +101,9 @@ export async function getServiceInstanceMetadataDetails({
       }
     );
 
-    return unflattenKnownApmEventFields(
-      maybe(response.hits.hits[0])?.fields as undefined | FlattenedApmEvent
-    );
+    const hits = maybe(response.hits.hits[0])?.fields;
+
+    return hits && accessKnownApmEventFields(hits).unflatten();
   }
 
   async function getTransactionMetricSample() {
@@ -139,9 +125,9 @@ export async function getServiceInstanceMetadataDetails({
       }
     );
 
-    return unflattenKnownApmEventFields(
-      maybe(response.hits.hits[0])?.fields as undefined | FlattenedApmEvent
-    );
+    const hits = maybe(response.hits.hits[0])?.fields;
+
+    return hits && accessKnownApmEventFields(hits).unflatten();
   }
 
   // we can expect the most detail of application metrics,

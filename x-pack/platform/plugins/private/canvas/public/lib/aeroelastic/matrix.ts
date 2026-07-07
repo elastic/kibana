@@ -25,7 +25,7 @@
  *
  */
 
-import { Matrix3d, TransformMatrix3d, Vector3d } from '.';
+import type { Matrix3d, TransformMatrix3d, Vector3d } from '.';
 
 export const NANMATRIX: TransformMatrix3d = [
   NaN,

@@ -35,6 +35,14 @@ function createSettingsState(configured: boolean): PartialSetupState {
   };
 }
 
+function createProfilingState(enabled: boolean): PartialSetupState {
+  return {
+    profiling: {
+      enabled,
+    },
+  };
+}
+
 describe('Merging partial state operations', () => {
   const defaultSetupState = createDefaultSetupState();
 
@@ -85,6 +93,7 @@ describe('Merging partial state operations', () => {
     const mergedState = mergePartialSetupStates(defaultSetupState, [
       createResourceState({ enabled: true, created: true }),
       createSettingsState(true),
+      createProfilingState(true),
     ]);
 
     expect(areResourcesSetup(mergedState)).toBeTruthy();

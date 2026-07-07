@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import {
-  createKibanaReactContext,
-  KibanaReactContextValue,
-  useKibana,
-} from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMemo } from 'react';
-import { DatasetQualityStartDeps } from '../types';
+import type { DatasetQualityStartDeps } from '../types';
 
 export type PluginKibanaContextValue = CoreStart & DatasetQualityStartDeps;
 

@@ -12,18 +12,15 @@ import type {
   CaseUI,
   CaseConnectors,
   UserActionUI,
-  AttachmentUI,
-  UseFetchAlertData,
+  AttachmentUIV2,
   CaseUserActionsStats,
   CasesConfigurationUI,
 } from '../../containers/types';
-import type { AddCommentRefObject } from '../add_comment';
-import type { UserActionMarkdownRefObject } from './markdown_form';
-import type { CasesNavigation } from '../links';
 import type { UNSUPPORTED_ACTION_TYPES } from './constants';
 import type { OnUpdateFields } from '../case_view/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
+import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 import type { CurrentUserProfile } from '../types';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 
@@ -33,13 +30,9 @@ export interface UserActionTreeProps {
   currentUserProfile: CurrentUserProfile;
   data: CaseUI;
   casesConfiguration: CasesConfigurationUI;
-  getRuleDetailsHref?: RuleDetailsNavigation['href'];
-  actionsNavigation?: ActionsNavigation;
-  onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
-  onShowAlertDetails?: (alertId: string, index: string) => void;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   statusActionButton: JSX.Element | null;
-  useFetchAlertData: UseFetchAlertData;
+  attachActionButton?: JSX.Element | null;
   userActivityQueryParams: UserActivityParams;
   userActionsStats: CaseUserActionsStats;
 }
@@ -51,35 +44,24 @@ export type SupportedUserActionTypes = keyof Omit<
 >;
 
 export interface UserActionBuilderArgs {
-  appId?: string;
+  appId: string;
   caseData: CaseUI;
   casesConfiguration: CasesConfigurationUI;
   userProfiles: Map<string, UserProfileWithAvatar>;
   currentUserProfile: CurrentUserProfile;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   caseConnectors: CaseConnectors;
   userAction: UserActionUI;
-  attachments: AttachmentUI[];
+  attachments: AttachmentUIV2[];
   index: number;
-  commentRefs: React.MutableRefObject<
-    Record<string, AddCommentRefObject | UserActionMarkdownRefObject | null | undefined>
-  >;
   manageMarkdownEditIds: string[];
   selectedOutlineCommentId: string;
   loadingCommentIds: string[];
-  loadingAlertData: boolean;
-  alertData: Record<string, unknown>;
-  actionsNavigation?: ActionsNavigation;
   handleOutlineComment: (id: string) => void;
-  handleManageMarkdownEditId: (id: string) => void;
-  handleSaveComment: ({ id, version }: { id: string; version: string }, content: string) => void;
   handleDeleteComment: (id: string, successToasterTitle: string) => void;
-  handleManageQuote: (quote: string) => void;
-  onShowAlertDetails?: (alertId: string, index: string) => void;
-  getRuleDetailsHref?: RuleDetailsNavigation['href'];
-  onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
-  euiTheme?: EuiThemeComputed<{}>;
+  euiTheme: EuiThemeComputed<{}>;
 }
 
 export type UserActionBuilder = (args: UserActionBuilderArgs) => {
@@ -87,9 +69,6 @@ export type UserActionBuilder = (args: UserActionBuilderArgs) => {
 };
 
 export type UserActionBuilderMap = Record<SupportedUserActionTypes, UserActionBuilder>;
-
-export type RuleDetailsNavigation = CasesNavigation<string | null | undefined, 'configurable'>;
-export type ActionsNavigation = CasesNavigation<string, 'configurable'>;
 
 interface Signal {
   rule: {

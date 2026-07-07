@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ComponentProps } from '../../route_init';
+import type { ComponentProps } from '../../route_init';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useCharts } from '../../hooks/use_charts';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
@@ -19,7 +19,7 @@ import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { DetailStatus } from '../../../components/kibana/detail_status';
 import { PageTemplate } from '../page_template';
 import { AlertsCallout } from '../../../alerts/callout';
-import { AlertsByName } from '../../../alerts/types';
+import type { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { RULE_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
 

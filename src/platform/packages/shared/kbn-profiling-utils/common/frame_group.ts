@@ -8,7 +8,7 @@
  */
 
 import { takeRight } from 'lodash';
-import { StackFrameMetadata } from './profiling';
+import type { StackFrameMetadata } from './profiling';
 
 /** Frame group ID */
 export type FrameGroupID = string;

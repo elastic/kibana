@@ -8,7 +8,7 @@
  */
 
 import { Fit } from '@elastic/charts';
-import { EndValue, FittingFunction } from '../../common';
+import type { EndValue, FittingFunction } from '../../common';
 import { EndValues } from '../../common/constants';
 
 export function getFitEnum(fittingFunction?: FittingFunction | EndValue) {

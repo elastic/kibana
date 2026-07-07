@@ -50,7 +50,6 @@ const START_DATE_MINUS_2INTERVALS = getStartDate(-2 * INTERVAL_MILLIS);
   { "date":"2019-12-31T23:57:30.000Z", "testedValue":5, "group":"group-1" }
 */
 
-// eslint-disable-next-line import/no-default-export
 export default function timeSeriesQueryEndpointTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Index } from '../../../common';
-import { ExtensionsService } from '../../services/extensions_service';
+import type { Index } from '../../../common';
+import type { ExtensionsService } from '../../services/extensions_service';
 import { sortTable } from './sort_table';
 describe('sortTable', () => {
   describe('sorts by name', () => {
@@ -78,42 +78,6 @@ describe('sortTable', () => {
     it('descending', () => {
       const sorted = sortTable(indices, 'documents', false);
       expect(sorted).toEqual([{ documents: 12 }, { documents: 2 }, { documents: 1 }]);
-    });
-  });
-
-  describe('sorts by size', () => {
-    const indices = [{ size: '248b' }, { size: '2.35mb' }, { size: '6.36kb' }] as Index[];
-    it('ascending', () => {
-      const sorted = sortTable(indices, 'size', true);
-      expect(sorted).toEqual([{ size: '248b' }, { size: '6.36kb' }, { size: '2.35mb' }]);
-    });
-    it('descending', () => {
-      const sorted = sortTable(indices, 'size', false);
-      expect(sorted).toEqual([{ size: '2.35mb' }, { size: '6.36kb' }, { size: '248b' }]);
-    });
-  });
-
-  describe('sorts by primary_size', () => {
-    const indices = [
-      { primary_size: '248b' },
-      { primary_size: '2.35mb' },
-      { primary_size: '6.36kb' },
-    ] as Index[];
-    it('ascending', () => {
-      const sorted = sortTable(indices, 'primary_size', true);
-      expect(sorted).toEqual([
-        { primary_size: '248b' },
-        { primary_size: '6.36kb' },
-        { primary_size: '2.35mb' },
-      ]);
-    });
-    it('descending', () => {
-      const sorted = sortTable(indices, 'primary_size', false);
-      expect(sorted).toEqual([
-        { primary_size: '2.35mb' },
-        { primary_size: '6.36kb' },
-        { primary_size: '248b' },
-      ]);
     });
   });
 

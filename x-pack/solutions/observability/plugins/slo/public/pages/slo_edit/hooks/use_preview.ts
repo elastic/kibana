@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Indicator } from '@kbn/slo-schema';
+import type { Indicator } from '@kbn/slo-schema';
 import { debounce } from 'lodash';
 import { useCallback, useEffect, useState } from 'react';
 import { useGetPreviewData } from '../../../hooks/use_get_preview_data';

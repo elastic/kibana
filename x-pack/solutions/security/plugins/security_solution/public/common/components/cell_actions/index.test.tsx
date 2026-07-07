@@ -7,9 +7,29 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { SecurityCellActionsTrigger } from '../../../app/actions/constants';
 import { CellActionsMode, SecurityCellActions } from '.';
 import { CellActions } from '@kbn/cell-actions';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
+
+jest.mock('../../../data_view_manager/hooks/use_data_view', () => ({
+  useDataView: jest.fn(() => ({
+    dataView: {
+      id: 'security-default-dataview-id',
+      fields: {
+        getByName: jest.fn().mockReturnValue({
+          toSpec: jest.fn().mockReturnValue({
+            searchable: true,
+            aggregatable: true,
+          }),
+        }),
+      },
+    },
+  })),
+}));
+
+jest.mock('../../hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(() => false),
+}));
 
 const MockCellActions = CellActions as jest.Mocked<typeof CellActions>;
 jest.mock('@kbn/cell-actions', () => ({
@@ -17,12 +37,6 @@ jest.mock('@kbn/cell-actions', () => ({
   CellActions: jest.fn(() => <div data-test-subj="cell-actions-component" />),
 }));
 
-const mockFieldSpec = { someFieldSpec: 'theFieldSpec' };
-const mockGetFieldSpec = jest.fn((_: string) => mockFieldSpec);
-const mockUseGetFieldSpec = jest.fn((_: unknown) => mockGetFieldSpec);
-jest.mock('../../hooks/use_get_field_spec', () => ({
-  useGetFieldSpec: (param: unknown) => mockUseGetFieldSpec(param),
-}));
 const mockDataViewId = 'security-default-dataview-id';
 const mockUseDataViewId = jest.fn((_: unknown) => mockDataViewId);
 jest.mock('../../hooks/use_data_view_id', () => ({
@@ -30,7 +44,7 @@ jest.mock('../../hooks/use_data_view_id', () => ({
 }));
 
 const defaultProps = {
-  triggerId: SecurityCellActionsTrigger.DEFAULT,
+  triggerId: SECURITY_CELL_ACTIONS_DEFAULT,
   mode: CellActionsMode.INLINE,
 };
 const mockData = [{ field: 'fieldName', value: 'fieldValue' }];
@@ -81,7 +95,7 @@ describe('SecurityCellActions', () => {
 
     expect(MockCellActions).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: [{ field: mockFieldSpec, value: 'fieldValue' }],
+        data: [{ field: { aggregatable: true, searchable: true }, value: 'fieldValue' }],
       }),
       {}
     );

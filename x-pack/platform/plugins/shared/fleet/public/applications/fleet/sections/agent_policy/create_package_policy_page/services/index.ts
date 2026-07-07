@@ -6,7 +6,29 @@
  */
 
 export { isAdvancedVar } from './is_advanced_var';
+export { applyNamespaceCustomizationChange } from './apply_namespace_customization';
+export { applyIlmPolicyChange } from './apply_ilm_policy';
+export type { YamlParseFn } from './has_invalid_but_required_var';
 export { hasInvalidButRequiredVar } from './has_invalid_but_required_var';
+export {
+  getVisibleOptions,
+  getVisibleVarsForOption,
+  getVarsControlledByVarGroups,
+  computeDefaultVarGroupSelections,
+  shouldShowVar,
+  isVarRequiredByVarGroup,
+  isVarInSelectedVarGroupOption,
+  getSelectedOption,
+  isInputCompatibleWithVarGroupSelections,
+  isInputVisibleForVarGroupSelections,
+} from './var_group_helpers';
+export type { VarGroupSelection } from './var_group_helpers';
+export {
+  buildVarGroupPolicyUpdates,
+  registerPolicyUpdateHandler,
+  updateCloudConnectorPolicy,
+} from './var_group_policy_effects';
+export type { PolicyUpdateHandler } from './var_group_policy_effects';
 export type {
   PackagePolicyValidationResults,
   PackagePolicyConfigValidationResults,

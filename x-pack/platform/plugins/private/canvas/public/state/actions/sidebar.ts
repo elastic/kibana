@@ -6,7 +6,7 @@
  */
 
 import { createAction } from 'redux-actions';
-import { FilterField } from '../../../types';
+import type { FilterField } from '../../../types';
 
 export type SetGroupFiltersByOptionPayload = FilterField;
 export const SetGroupFiltersByOptionType = 'setGroupFiltersByOption';

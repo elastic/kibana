@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
+import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { useFormWithWarnings } from '../../../common/hooks/use_form_with_warnings';
 import type {
   AboutStepRule,
@@ -23,6 +24,7 @@ import { schema as aboutRuleSchema } from '../components/step_about_rule/schema'
 import { schema as scheduleRuleSchema } from '../components/step_schedule_rule/schema';
 import { getSchema as getActionsRuleSchema } from '../../rule_creation/components/step_rule_actions/get_schema';
 import { useFetchIndex } from '../../../common/containers/source';
+import { useConnectors } from '../../../common/hooks/use_connectors';
 import { VALIDATION_WARNING_CODES } from '../../rule_creation/constants/validation_warning_codes';
 
 export interface UseRuleFormsProps {
@@ -40,7 +42,10 @@ export const useRuleForms = ({
 }: UseRuleFormsProps) => {
   const {
     triggersActionsUi: { actionTypeRegistry },
+    http,
   } = useKibana().services;
+  const { connectors, setCurrentConnector } = useConnectors({ http });
+
   // DEFINE STEP FORM
   const { form: defineStepForm } = useFormWithWarnings<DefineStepRule>({
     defaultValue: defineStepDefault,
@@ -81,7 +86,17 @@ export const useRuleForms = ({
     'interval' in scheduleStepFormData ? scheduleStepFormData : scheduleStepDefault;
 
   // ACTIONS STEP FORM
-  const schema = useMemo(() => getActionsRuleSchema({ actionTypeRegistry }), [actionTypeRegistry]);
+  const handleNewConnectorCreated = useCallback(
+    (connector: ActionConnector) => {
+      setCurrentConnector(connector);
+    },
+    [setCurrentConnector]
+  );
+
+  const schema = useMemo(
+    () => getActionsRuleSchema({ actionTypeRegistry, connectors }),
+    [actionTypeRegistry, connectors]
+  );
   const { form: actionsStepForm } = useFormWithWarnings<ActionsStepRule>({
     defaultValue: actionsStepDefault,
     options: { stripEmptyFields: false, warningValidationCodes: VALIDATION_WARNING_CODES },
@@ -102,6 +117,7 @@ export const useRuleForms = ({
     scheduleStepData,
     actionsStepForm,
     actionsStepData,
+    handleNewConnectorCreated,
   };
 };
 
@@ -116,7 +132,7 @@ export const useRuleIndexPattern = ({
   index,
   dataViewId,
 }: UseRuleIndexPatternProps) => {
-  const { data } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const [isIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] =
     useFetchIndex(index);
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(initIndexPattern);
@@ -132,14 +148,22 @@ export const useRuleIndexPattern = ({
     if (dataSourceType === DataSourceType.DataView) {
       const fetchDataView = async () => {
         if (dataViewId != null && dataViewId !== '') {
-          const dv = await data.dataViews.get(dataViewId);
-          setIndexPattern(dv);
+          // We wrap dataViews.get within a try catch because we've seen errors happening with conflicting ids in the saved object api
+          try {
+            const dv = await data.dataViews.get(dataViewId);
+            setIndexPattern(dv);
+          } catch (error) {
+            notifications.toasts.addDanger({
+              title: 'Error retrieving data view',
+              text: `Error: ${error instanceof Error ? error.message : 'unknown'}`,
+            });
+          }
         }
       };
 
       fetchDataView();
     }
-  }, [dataSourceType, isIndexPatternLoading, data, dataViewId, initIndexPattern]);
+  }, [dataSourceType, isIndexPatternLoading, data, dataViewId, initIndexPattern, notifications]);
   return { indexPattern, isIndexPatternLoading, browserFields };
 };
 

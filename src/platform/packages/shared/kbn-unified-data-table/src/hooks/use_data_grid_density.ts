@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiDataGridStyle } from '@elastic/eui';
+import { mathWithUnits, type EuiDataGridStyle, type EuiThemeComputed } from '@elastic/eui';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useCallback, useMemo } from 'react';
+import { useRestorableRef } from '../restorable_state';
 import {
   DATA_GRID_STYLE_COMPACT,
   DATA_GRID_STYLE_EXPANDED,
@@ -40,6 +41,18 @@ export function getDensityFromStyle(style: EuiDataGridStyle) {
     : DataGridDensity.EXPANDED;
 }
 
+// Paddings are copied from EUI since it doesn't provide access to the raw styles
+export const getDataGridDensityPadding = (euiTheme: EuiThemeComputed, density: DataGridDensity) => {
+  switch (density) {
+    case DataGridDensity.COMPACT:
+      return euiTheme.size.xs;
+    case DataGridDensity.NORMAL:
+      return mathWithUnits(euiTheme.size.m, (x) => x / 2);
+    case DataGridDensity.EXPANDED:
+      return euiTheme.size.s;
+  }
+};
+
 const DATA_GRID_DENSITY_STORAGE_KEY = 'dataGridDensity';
 const getStorageKey = (consumer: string) => `${consumer}:${DATA_GRID_DENSITY_STORAGE_KEY}`;
 
@@ -53,9 +66,19 @@ export const useDataGridDensity = ({
   dataGridDensityState,
   onUpdateDataGridDensity,
 }: UseDataGridDensityProps) => {
-  const dataGridDensity = useMemo<DataGridDensity>(() => {
-    return dataGridDensityState ?? getDataGridDensity(storage, consumer);
-  }, [consumer, dataGridDensityState, storage]);
+  const initialValue = useMemo(
+    () => dataGridDensityState ?? getDataGridDensity(storage, consumer),
+    [dataGridDensityState, storage, consumer]
+  );
+
+  const restorableDensityRef = useRestorableRef('density', initialValue);
+
+  const dataGridDensity = useMemo<DataGridDensity>(
+    () => dataGridDensityState || restorableDensityRef.current,
+    [dataGridDensityState, restorableDensityRef]
+  );
+
+  restorableDensityRef.current = dataGridDensity; // Update the ref when dataGridDensityState changes
 
   const onChangeDataGridDensity = useCallback(
     (gridStyle: EuiDataGridStyle) => {

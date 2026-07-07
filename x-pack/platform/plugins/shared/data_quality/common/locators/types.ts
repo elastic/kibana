@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ManagementAppLocatorParams } from '@kbn/management-plugin/common/locator';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import type { ManagementAppLocatorParams } from '@kbn/management-plugin/common/locator';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 
 export interface DataQualityLocatorDependencies {
   useHash: boolean;

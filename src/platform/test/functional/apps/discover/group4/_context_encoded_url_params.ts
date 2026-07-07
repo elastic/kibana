@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const customDataViewIdParam = 'context-enc:oded-param';
 const customDocIdParam = '1+1=2/&?#';
@@ -55,10 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // navigate to the context view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const [, surroundingActionEl] = await dataGrid.getRowActions({
-        isAnchorRow: false,
-        rowIndex: 0,
-      });
+      const [, surroundingActionEl] = await dataGrid.getRowActions();
       await surroundingActionEl.click();
       await header.waitUntilLoadingHasFinished();
 

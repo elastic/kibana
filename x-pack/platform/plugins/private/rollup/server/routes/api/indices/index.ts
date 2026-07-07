@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { registerGetRoute } from './register_get_route';
 import { registerValidateIndexPatternRoute } from './register_validate_index_pattern_route';
+import { registerGetIndexCapsRoute } from './register_get_index_caps';
 
 export function registerIndicesRoutes(dependencies: RouteDependencies) {
   registerGetRoute(dependencies);
   registerValidateIndexPatternRoute(dependencies);
+  registerGetIndexCapsRoute(dependencies);
 }

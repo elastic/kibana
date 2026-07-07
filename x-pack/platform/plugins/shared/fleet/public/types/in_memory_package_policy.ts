@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PackagePolicy } from '../../common/types';
+import type { Installation, PackagePolicy } from '../../common/types';
 
 // Used in list view tables where virtual/flattened fields are added
 export interface InMemoryPackagePolicy extends PackagePolicy {
@@ -14,4 +14,7 @@ export interface InMemoryPackagePolicy extends PackagePolicy {
   packageVersion?: string;
   type?: string;
   hasUpgrade: boolean;
+  upgradeVersion?: string;
+  pendingUpgradeReview?: Installation['pending_upgrade_review'];
+  keepPoliciesUpToDate?: boolean;
 }

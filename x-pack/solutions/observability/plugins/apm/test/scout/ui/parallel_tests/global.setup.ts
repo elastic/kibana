@@ -1,0 +1,133 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { mergeTests, globalSetupHook as obltGlobalSetupHook, tags } from '@kbn/scout-oblt';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
+
+const globalSetupHook = mergeTests(obltGlobalSetupHook, synthtraceFixture);
+import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
+import { opbeans } from '../fixtures/synthtrace/opbeans';
+import { servicesDataFromTheLast24Hours } from '../fixtures/synthtrace/last_24_hours';
+import { generateSpanLinksData } from '../fixtures/synthtrace/generate_span_links_data';
+import { generateSpanStacktraceData } from '../fixtures/synthtrace/generate_span_stacktrace_data';
+import { otelSendotlp } from '../fixtures/synthtrace/otel_sendotlp';
+import { adserviceEdot } from '../fixtures/synthtrace/adservice_edot';
+import { mobileServices } from '../fixtures/synthtrace/mobile_services';
+import { azureFunctions } from '../fixtures/synthtrace/azure_functions';
+import { ingestApmMetricsFixtures } from '../../shared';
+import { testData } from '../fixtures';
+import { serviceDataWithRecentErrors } from '../fixtures/synthtrace/recent_errors';
+import { distributedTrace } from '../fixtures/synthtrace/distributed_trace';
+import { serviceMapMultiEnv } from '../fixtures/synthtrace/service_map_multi_env';
+import { infrastructure } from '../fixtures/synthtrace/infrastructure';
+
+globalSetupHook(
+  'Ingest data to Elasticsearch',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  async ({ apmSynthtraceEsClient, apiServices, log, config, esClient }) => {
+    const startTime = Date.now();
+    if (!config.isCloud) {
+      await apiServices.fleet.internal.setup();
+      log.info('Fleet infrastructure setup completed');
+      await apiServices.fleet.agent.setup();
+      log.info('Fleet agents setup completed');
+    }
+    const opbeansDataGenerator: SynthtraceGenerator<ApmFields> = opbeans({
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
+    });
+    const infrastructureDataGenerator = infrastructure({
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
+    });
+
+    await apmSynthtraceEsClient.index(opbeansDataGenerator);
+    await apmSynthtraceEsClient.index(infrastructureDataGenerator);
+    await apmSynthtraceEsClient.index(servicesDataFromTheLast24Hours());
+
+    // Generate service map multi-environment data for embeddable tests.
+    // Include future timestamps so delayed cloud/serverless shards still
+    // have data in relative "now" ranges when the spec finally runs.
+    const now = Date.now();
+    const fifteenMinutesAgo = now - 15 * 60 * 1000;
+    const twentyFourHoursFromNow = now + 24 * 60 * 60 * 1000;
+    const serviceMapMultiEnvData = serviceMapMultiEnv({
+      from: fifteenMinutesAgo,
+      to: twentyFourHoursFromNow,
+    });
+    await apmSynthtraceEsClient.index(serviceMapMultiEnvData);
+    log.info('Service map multi-environment data indexed');
+
+    // Generate span links data for span links tests
+    const spanLinksData = generateSpanLinksData();
+    await apmSynthtraceEsClient.index(spanLinksData);
+
+    // Generate span stacktrace data for stacktrace tests
+    const spanStacktraceData = generateSpanStacktraceData();
+    await apmSynthtraceEsClient.index(spanStacktraceData);
+
+    await apmSynthtraceEsClient.index(serviceDataWithRecentErrors());
+
+    // Generate distributed trace data for trace waterfall flyout tests
+    const distributedTraceData = distributedTrace();
+    await apmSynthtraceEsClient.index(distributedTraceData);
+    log.info('Distributed trace waterfall data indexed');
+
+    // Generate OTEL service data for OTEL service overview tests
+    const otelData = otelSendotlp({
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
+    });
+    await apmSynthtraceEsClient.index(otelData);
+    log.info('OTEL service data indexed');
+
+    // Generate eDot service data for eDot service overview tests
+    const edotData = adserviceEdot({
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
+    });
+    await apmSynthtraceEsClient.index(edotData);
+    log.info('eDot service data indexed');
+
+    // Generate mobile services data for mobile service overview tests
+    const mobileData = mobileServices({
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
+    });
+    await apmSynthtraceEsClient.index(mobileData);
+    log.info('Mobile services data indexed');
+
+    // Generate Azure Functions service data for cold start chart tests
+    const azureFunctionsData = azureFunctions({
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
+    });
+    await apmSynthtraceEsClient.index(azureFunctionsData);
+    log.info('Azure Functions service data indexed');
+
+    // Shared APM metrics dataset (classic + OTel synth metrics, AWS Lambda
+    // transactions fixture, OTel-native Java bulk-indexed metrics). Single
+    // source of truth for both UI and API Scout suites.
+    await ingestApmMetricsFixtures({ apmSynthtraceEsClient, esClient, log });
+
+    log.info('Cleaning up APM ML indices before running the APM tests');
+    const jobs = await esClient.ml.getJobs();
+    const apmJobs = jobs.jobs.filter((job) => job.job_id.startsWith('apm-'));
+    for (const job of apmJobs) {
+      try {
+        await esClient.ml.stopDatafeed({ datafeed_id: `datafeed-${job.job_id}`, force: true });
+        await esClient.ml.deleteDatafeed({ datafeed_id: `datafeed-${job.job_id}`, force: true });
+      } catch (error) {
+        // Datafeed might not exist
+        log.warning(`Datafeed not found for job: ${job.job_id}`, error);
+      }
+      await esClient.ml.deleteJob({ job_id: job.job_id, force: true });
+      log.info(`Deleted job: ${job.job_id}`);
+    }
+    log.info(`APM data ingestion took ${Date.now() - startTime} ms`);
+  }
+);

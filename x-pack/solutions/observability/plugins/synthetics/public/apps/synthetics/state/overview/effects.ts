@@ -6,13 +6,14 @@
  */
 
 import { call, takeLeading, takeEvery, put, select } from 'redux-saga/effects';
-import { OverviewStatusStateReducer, selectOverviewStatus } from '../overview_status';
+import type { OverviewStatusStateReducer } from '../overview_status';
+import { selectOverviewStatus } from '../overview_status';
 import type { OverviewTrend, TrendTable } from '../../../../../common/types';
 import { selectOverviewTrends } from './selectors';
 import { refreshOverviewTrends, trendStatsBatch } from './actions';
 import { fetchOverviewTrendStats as trendsApi } from './api';
 
-export const TRENDS_CHUNK_SIZE = 50;
+export const TRENDS_CHUNK_SIZE = 250;
 
 export function* fetchTrendEffect(
   action: ReturnType<typeof trendStatsBatch.get>
@@ -57,7 +58,7 @@ export function* refreshTrends(): Generator<unknown, void, any> {
         const trend = existingTrends[key] as OverviewTrend;
         return {
           configId: trend.configId,
-          locationId: trend.locationId,
+          locationIds: trend.locationIds,
           schedule: monitorConfigs.find(({ configId }) => configId === trend.configId)!.schedule,
         };
       });

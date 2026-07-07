@@ -6,11 +6,13 @@
  */
 
 import { createContext } from 'react';
-import { createDispatchHook, createSelectorHook, ReactReduxContextValue } from 'react-redux';
+import type { ReactReduxContextValue } from 'react-redux';
+import { createDispatchHook, createSelectorHook } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { createSelector } from 'reselect';
 import { panelsReducer, uiReducer } from './reducers';
-import { initialState, State } from './state';
+import type { State } from './state';
+import { initialState } from './state';
 import {
   clearAllUserWidthsFromLocalStorageMiddleware,
   savePushVsOverlayToLocalStorageMiddleware,

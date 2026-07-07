@@ -36,6 +36,9 @@ export const deleteConnectorRoute = (
           204: {
             description: 'Indicates a successful call.',
           },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
         },
       },
     },

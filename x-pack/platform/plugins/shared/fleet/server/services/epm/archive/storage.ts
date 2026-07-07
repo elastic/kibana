@@ -10,8 +10,12 @@ import { extname } from 'path';
 import { isBinaryFile } from 'isbinaryfile';
 import mime from 'mime-types';
 import { v5 as uuidv5 } from 'uuid';
-import type { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type {
+  SavedObject,
+  SavedObjectsClientContract,
+  SavedObjectsBulkCreateObject,
+} from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, isSavedObjectErrorResult } from '@kbn/core/server';
 
 import { ASSETS_SAVED_OBJECT_TYPE } from '../../../../common';
 import type {
@@ -146,7 +150,11 @@ export async function archiveEntryToBulkCreateObject(opts: {
 }
 export function packageAssetToArchiveEntry(asset: PackageAsset): ArchiveEntry {
   const { asset_path: path, data_utf8: utf8, data_base64: base64 } = asset;
-  const buffer = utf8 ? Buffer.from(utf8, 'utf8') : Buffer.from(base64, 'base64');
+  const buffer = utf8
+    ? Buffer.from(utf8, 'utf8')
+    : base64
+    ? Buffer.from(base64, 'base64')
+    : undefined;
 
   return {
     path,
@@ -183,25 +191,37 @@ export const getEsPackage = async (
   pkgName: string,
   pkgVersion: string,
   references: PackageAssetReference[],
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  options?: {
+    shouldFetchBuffer?: (reference: PackageAssetReference) => boolean;
+  }
 ) => {
   const logger = appContextService.getLogger();
   const bulkRes = await savedObjectsClient.bulkGet<PackageAsset>(
     references.map((reference) => ({
       ...reference,
-      fields: ['asset_path', 'data_utf8', 'data_base64'],
+      fields:
+        !options?.shouldFetchBuffer || options?.shouldFetchBuffer(reference)
+          ? ['asset_path', 'data_utf8', 'data_base64']
+          : ['asset_path'],
     }))
   );
-  const errors = bulkRes.saved_objects.filter((so) => so.error || !so.attributes);
-  const assets = bulkRes.saved_objects.map((so) => so.attributes);
+  const errors = bulkRes.saved_objects.filter(
+    (so) => isSavedObjectErrorResult(so) || !so.attributes
+  );
+  const assets = bulkRes.saved_objects
+    .filter(
+      (so): so is SavedObject<PackageAsset> => !isSavedObjectErrorResult(so) && !!so.attributes
+    )
+    .map((so) => so.attributes);
 
   if (errors.length) {
     const resolvedErrors = errors.map((so) =>
-      so.error
+      isSavedObjectErrorResult(so)
         ? { type: so.type, id: so.id, error: so.error }
         : !so.attributes
-        ? { type: so.type, id: so.id, error: { error: `No attributes retrieved` } }
-        : { type: so.type, id: so.id, error: { error: `Unknown` } }
+        ? { type: so.type, id: so.id, error: `No attributes retrieved` }
+        : { type: so.type, id: so.id, error: `Unknown` }
     );
 
     logger.warn(
@@ -218,10 +238,13 @@ export const getEsPackage = async (
   const entries: ArchiveEntry[] = assets.map(packageAssetToArchiveEntry);
   const paths: string[] = [];
   entries.forEach(({ path, buffer }) => {
-    if (path && buffer) {
-      assetsMap.set(path, buffer);
+    if (path) {
       paths.push(path);
+      if (buffer) {
+        assetsMap.set(path, buffer);
+      }
     }
+
     if (buffer && filterAssetPathForParseAndVerifyArchive(path)) {
       parseAndVerifyAssetsMap[path] = buffer;
     }

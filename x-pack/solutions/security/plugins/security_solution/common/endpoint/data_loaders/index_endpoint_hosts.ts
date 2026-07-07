@@ -7,9 +7,8 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import { cloneDeep, merge } from 'lodash';
-import type { AxiosResponse } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-import type { KbnClient } from '@kbn/test';
+import type { KbnClient, KbnClientResponse } from '@kbn/test';
 import type { BulkRequest, DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
   CreatePackagePolicyResponse,
@@ -37,14 +36,12 @@ import {
   deleteIndexedFleetAgents,
   indexFleetAgentForHost,
 } from './index_fleet_agent';
-import type {
-  DeleteIndexedEndpointFleetActionsResponse,
-  IndexedEndpointAndFleetActionsForHostResponse,
-} from './index_endpoint_fleet_actions';
 import {
   buildIEndpointAndFleetActionsBulkOperations,
   deleteIndexedEndpointAndFleetActions,
   type IndexEndpointAndFleetActionsForHostOptions,
+  type DeleteIndexedEndpointFleetActionsResponse,
+  type IndexedEndpointAndFleetActionsForHostResponse,
 } from './index_endpoint_fleet_actions';
 
 import type {
@@ -317,7 +314,7 @@ const fetchKibanaVersion = async (kbnClient: KbnClient) => {
     (await kbnClient.request({
       path: '/api/status',
       method: 'GET',
-    })) as AxiosResponse
+    })) as KbnClientResponse<{ version: { number: string } }>
   ).data.version.number;
 
   if (!version) {
@@ -338,7 +335,7 @@ export interface DeleteIndexedEndpointHostsResponse
 export const deleteIndexedEndpointHosts = async (
   esClient: Client,
   kbnClient: KbnClient,
-  indexedData: IndexedHostsResponse
+  indexedData: IndexedHostsResponse | undefined
 ): Promise<DeleteIndexedEndpointHostsResponse> => {
   const response: DeleteIndexedEndpointHostsResponse = {
     hosts: undefined,
@@ -351,6 +348,10 @@ export const deleteIndexedEndpointHosts = async (
     integrationPolicies: undefined,
     agentPolicies: undefined,
   };
+
+  if (!indexedData) {
+    return response;
+  }
 
   if (indexedData.hosts.length) {
     const query = {

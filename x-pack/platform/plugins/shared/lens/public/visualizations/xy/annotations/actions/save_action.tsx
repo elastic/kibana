@@ -8,28 +8,30 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { ToastsStart } from '@kbn/core-notifications-browser';
-import { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { ToastsStart } from '@kbn/core-notifications-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  OnSaveProps as SavedObjectOnSaveProps,
-  SavedObjectSaveModal,
-} from '@kbn/saved-objects-plugin/public';
+import type { OnSaveProps as SavedObjectOnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import { type SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type {
   LayerAction,
+  LensAppServices,
   RegisterLibraryAnnotationGroupFunction,
-  StartServices,
+  LensStartServices as StartServices,
   StateSetter,
-} from '../../../../types';
-import { XYByReferenceAnnotationLayerConfig, XYAnnotationLayerConfig, XYState } from '../../types';
+} from '@kbn/lens-common';
+import type {
+  XYByReferenceAnnotationLayerConfig,
+  XYAnnotationLayerConfig,
+  XYVisualizationState,
+} from '../../types';
 import {
-  getAnnotationLayerTitle,
   getGroupMetadataFromAnnotationLayer,
   isByReferenceAnnotationsLayer,
 } from '../../visualization_helpers';
@@ -41,18 +43,22 @@ export const SaveModal = ({
   domElement,
   savedObjectsTagging,
   onSave,
+  lastSavedTitle,
   title,
   description,
   tags,
   showCopyOnSave,
+  eventAnnotationService,
 }: {
   domElement: HTMLDivElement;
   savedObjectsTagging: SavedObjectTaggingPluginStart | undefined;
-  onSave: (props: ModalOnSaveProps) => void;
+  onSave: (props: ModalOnSaveProps) => Promise<void>;
+  lastSavedTitle: string;
   title: string;
   description: string;
   tags: string[];
   showCopyOnSave: boolean;
+  eventAnnotationService: LensAppServices['eventAnnotationService'];
 }) => {
   const [selectedTags, setSelectedTags] = useState<string[]>(tags);
 
@@ -60,8 +66,12 @@ export const SaveModal = ({
 
   return (
     <SavedObjectSaveModal
-      onSave={async (props) => onSave({ ...props, closeModal, newTags: selectedTags })}
+      hasLibraryItemWithTitle={eventAnnotationService.groupExistsWithTitle}
+      onSave={async (props) => {
+        await onSave({ ...props, closeModal, newTags: selectedTags });
+      }}
       onClose={closeModal}
+      lastSavedTitle={lastSavedTitle}
       title={title}
       description={description}
       showCopyOnSave={showCopyOnSave}
@@ -79,7 +89,7 @@ export const SaveModal = ({
       confirmButtonLabel={
         <>
           <div>
-            <EuiIcon type="save" />
+            <EuiIcon type="save" aria-hidden={true} />
           </div>
           <div>
             {i18n.translate(
@@ -141,28 +151,6 @@ const saveAnnotationGroupToLibrary = async (
   return { id: savedId, config: groupConfig };
 };
 
-const shouldStopBecauseDuplicateTitle = async (
-  newTitle: string,
-  existingTitle: string,
-  newCopyOnSave: ModalOnSaveProps['newCopyOnSave'],
-  onTitleDuplicate: ModalOnSaveProps['onTitleDuplicate'],
-  isTitleDuplicateConfirmed: ModalOnSaveProps['isTitleDuplicateConfirmed'],
-  eventAnnotationService: EventAnnotationServiceType
-) => {
-  if (isTitleDuplicateConfirmed || (newTitle === existingTitle && !newCopyOnSave)) {
-    return false;
-  }
-
-  const duplicateExists = await eventAnnotationService.groupExistsWithTitle(newTitle);
-
-  if (duplicateExists) {
-    onTitleDuplicate();
-    return true;
-  } else {
-    return false;
-  }
-};
-
 /** @internal exported for testing only */
 export const onSave = async ({
   state,
@@ -171,22 +159,14 @@ export const onSave = async ({
   registerLibraryAnnotationGroup,
   eventAnnotationService,
   toasts,
-  modalOnSaveProps: {
-    newTitle,
-    newDescription,
-    newTags,
-    closeModal,
-    newCopyOnSave,
-    onTitleDuplicate,
-    isTitleDuplicateConfirmed,
-  },
+  modalOnSaveProps: { newTitle, newDescription, newTags, closeModal, newCopyOnSave },
   dataViews,
   goToAnnotationLibrary,
   startServices,
 }: {
-  state: XYState;
+  state: XYVisualizationState;
   layer: XYAnnotationLayerConfig;
-  setState: StateSetter<XYState, unknown>;
+  setState: StateSetter<XYVisualizationState, unknown>;
   registerLibraryAnnotationGroup: (props: {
     id: string;
     group: EventAnnotationGroupConfig;
@@ -198,17 +178,6 @@ export const onSave = async ({
   goToAnnotationLibrary: () => Promise<void>;
   startServices: StartServices;
 }) => {
-  const shouldStop = await shouldStopBecauseDuplicateTitle(
-    newTitle,
-    getAnnotationLayerTitle(layer),
-    newCopyOnSave,
-    onTitleDuplicate,
-    isTitleDuplicateConfirmed,
-    eventAnnotationService
-  );
-
-  if (shouldStop) return;
-
   let savedInfo: Awaited<ReturnType<typeof saveAnnotationGroupToLibrary>>;
   try {
     savedInfo = await saveAnnotationGroupToLibrary(
@@ -264,7 +233,7 @@ export const onSave = async ({
         },
       }
     ),
-    text: ((element) =>
+    text: ((element) => {
       render(
         <KibanaRenderContextProvider {...startServices}>
           <FormattedMessage
@@ -288,7 +257,9 @@ export const onSave = async ({
           />
         </KibanaRenderContextProvider>,
         element
-      )) as MountPoint,
+      );
+      return () => unmountComponentAtNode(element);
+    }) as MountPoint,
   });
 };
 
@@ -304,9 +275,9 @@ export const getSaveLayerAction = ({
   goToAnnotationLibrary,
   startServices,
 }: {
-  state: XYState;
+  state: XYVisualizationState;
   layer: XYAnnotationLayerConfig;
-  setState: StateSetter<XYState, unknown>;
+  setState: StateSetter<XYVisualizationState, unknown>;
   registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
   eventAnnotationService: EventAnnotationServiceType;
   toasts: ToastsStart;
@@ -337,8 +308,10 @@ export const getSaveLayerAction = ({
         render(
           <KibanaRenderContextProvider {...startServices}>
             <SaveModal
+              eventAnnotationService={eventAnnotationService}
               domElement={domElement}
               savedObjectsTagging={savedObjectsTagging}
+              lastSavedTitle={''}
               onSave={async (props) => {
                 await onSave({
                   state,
@@ -365,6 +338,6 @@ export const getSaveLayerAction = ({
     isCompatible: true,
     'data-test-subj': 'lnsXY_annotationLayer_saveToLibrary',
     order: 100,
-    showOutsideList: true,
+    showOutsideList: false,
   };
 };

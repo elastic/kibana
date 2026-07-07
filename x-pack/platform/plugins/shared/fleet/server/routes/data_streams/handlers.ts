@@ -7,6 +7,7 @@
 import type { Dictionary } from 'lodash';
 import { keyBy, keys, merge } from 'lodash';
 import type { RequestHandler } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import pMap from 'p-map';
 import type { IndicesDataStreamsStatsDataStreamsStatsItem } from '@elastic/elasticsearch/lib/api/types';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -104,8 +105,8 @@ export const getListHandler: RequestHandler = async (context, request, response)
       dataStreamsStatsByName,
       dataStreamsMeteringStatsByName
     );
-    const dataStreamNames = keys(dataStreams);
-
+    // filter out data streams starting with ".", e.g. ".workflows-events"
+    const dataStreamNames = keys(dataStreams).filter((name) => !name.startsWith('.'));
     // Map package SOs
     const packageSavedObjectsByName = keyBy(packageSavedObjects.saved_objects, 'id');
     const packageMetadata: any = {};
@@ -136,7 +137,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
     );
     // Ignore dashboards not found
     const allDashboardSavedObjects = allDashboardSavedObjectsResponse.saved_objects.filter((so) => {
-      if (so.error) {
+      if (isSavedObjectErrorResult(so)) {
         if (so.error.statusCode === 404) {
           return false;
         }
@@ -252,6 +253,111 @@ export const getListHandler: RequestHandler = async (context, request, response)
     if (isResponseError && err?.body?.error?.type === 'security_exception') {
       throw new FleetUnauthorizedError(
         `Not enough permissions to query datastreams: ${err.message}`
+      );
+    }
+    throw err;
+  }
+};
+
+export const getDeprecatedILMCheckHandler: RequestHandler = async (context, request, response) => {
+  try {
+    const { elasticsearch } = await context.core;
+    const esClient = elasticsearch.client.asCurrentUser;
+
+    //  Before doing anything, check if the ILM policies are disabled and return early if they are
+    const isILMPolicyDisabled =
+      appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
+
+    if (isILMPolicyDisabled) {
+      return response.ok({
+        body: {
+          deprecatedILMPolicies: [],
+        },
+      });
+    }
+
+    const DEPRECATED_ILM_POLICY_TYPES = ['logs', 'metrics', 'synthetics'];
+
+    // Fetch all ILM policies
+    const ilmResponse = await esClient.ilm.getLifecycle();
+
+    // Check each deprecated policy type to see if we should show a callout
+    const deprecatedILMPolicies: Array<{
+      policyName: string;
+      version: number;
+      componentTemplates: string[];
+    }> = [];
+
+    for (const policyType of DEPRECATED_ILM_POLICY_TYPES) {
+      const deprecatedPolicyName = policyType;
+      const lifecyclePolicyName = `${policyType}@lifecycle`;
+
+      const deprecatedPolicy = ilmResponse[deprecatedPolicyName];
+      const lifecyclePolicy = ilmResponse[lifecyclePolicyName];
+
+      // Skip if deprecated policy doesn't exist
+      if (!deprecatedPolicy) {
+        continue;
+      }
+
+      // Fetch Fleet-managed component templates for this policy type
+      const componentTemplateResponse = await esClient.cluster.getComponentTemplate(
+        {
+          name: `${policyType}-*@package`,
+        },
+        {
+          ignore: [404],
+        }
+      );
+
+      // Filter component templates that actually use the deprecated policy
+      const fleetManagedTemplates = (componentTemplateResponse.component_templates || [])
+        .filter((template) => {
+          const ilmPolicyName =
+            template.component_template?.template?.settings?.index?.lifecycle?.name;
+          return ilmPolicyName === deprecatedPolicyName;
+        })
+        .map((template) => template.name);
+
+      // If no Fleet-managed component templates are using this deprecated policy, skip
+      if (fleetManagedTemplates.length === 0) {
+        continue;
+      }
+
+      if (!lifecyclePolicy) {
+        deprecatedILMPolicies.push({
+          policyName: deprecatedPolicyName,
+          version: deprecatedPolicy.version,
+          componentTemplates: fleetManagedTemplates,
+        });
+        continue;
+      }
+
+      // Don't show callout if both are unmodified (version 1) - auto-migration will happen
+      if (deprecatedPolicy.version === 1 && lifecyclePolicy.version === 1) {
+        // Both unmodified, auto-migration will handle this, skip
+        continue;
+      }
+
+      if (deprecatedPolicy.version > 1 || lifecyclePolicy.version > 1) {
+        deprecatedILMPolicies.push({
+          policyName: deprecatedPolicyName,
+          version: deprecatedPolicy.version,
+          componentTemplates: fleetManagedTemplates,
+        });
+      }
+    }
+
+    return response.ok({
+      body: {
+        deprecatedILMPolicies,
+      },
+    });
+  } catch (err) {
+    const isResponseError = err instanceof errors.ResponseError;
+    if (isResponseError && err?.body?.error?.type === 'security_exception') {
+      throw new FleetUnauthorizedError(
+        `Not enough permissions to query ILM policies: ${err.message}`
       );
     }
     throw err;

@@ -20,15 +20,8 @@ import {
 } from '../../../../common/endpoint/constants';
 import { buildStatusesKuery } from './support/agent_status';
 import type { GetMetadataListRequestQuery } from '../../../../common/api/endpoint';
-
-/**
- * 00000000-0000-0000-0000-000000000000 is initial Elastic Agent id sent by Endpoint before policy is configured
- * 11111111-1111-1111-1111-111111111111 is Elastic Agent id sent by Endpoint when policy does not contain an id
- */
-const IGNORED_ELASTIC_AGENT_IDS = [
-  '00000000-0000-0000-0000-000000000000',
-  '11111111-1111-1111-1111-111111111111',
-];
+import { buildBaseEndpointMetadataFilter } from '../../../../common/endpoint/utils/endpoint_metadata_filter';
+import { prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
 
 export interface QueryBuilderOptions {
   page: number;
@@ -78,7 +71,10 @@ const getUnitedMetadataSortMethod = (
   }
 };
 
-export function getESQueryHostMetadataByID(agentID: string): estypes.SearchRequest {
+export function getESQueryHostMetadataByID(
+  agentID: string,
+  ccsEnabled: boolean = false
+): estypes.SearchRequest {
   return {
     query: {
       bool: {
@@ -96,12 +92,13 @@ export function getESQueryHostMetadataByID(agentID: string): estypes.SearchReque
     },
     sort: MetadataSortMethod,
     size: 1,
-    index: metadataCurrentIndexPattern,
+    index: prefixIndexPatternsWithCcs(metadataCurrentIndexPattern, ccsEnabled),
   };
 }
 
 export function getESQueryHostMetadataByFleetAgentIds(
-  fleetAgentIds: string[]
+  fleetAgentIds: string[],
+  ccsEnabled: boolean = false
 ): estypes.SearchRequest {
   return {
     query: {
@@ -116,11 +113,14 @@ export function getESQueryHostMetadataByFleetAgentIds(
       },
     },
     sort: MetadataSortMethod,
-    index: metadataCurrentIndexPattern,
+    index: prefixIndexPatternsWithCcs(metadataCurrentIndexPattern, ccsEnabled),
   };
 }
 
-export function getESQueryHostMetadataByIDs(agentIDs: string[]): estypes.SearchRequest {
+export function getESQueryHostMetadataByIDs(
+  agentIDs: string[],
+  ccsEnabled: boolean = false
+): estypes.SearchRequest {
   return {
     query: {
       bool: {
@@ -137,7 +137,8 @@ export function getESQueryHostMetadataByIDs(agentIDs: string[]): estypes.SearchR
       },
     },
     sort: MetadataSortMethod,
-    index: metadataCurrentIndexPattern,
+    index: prefixIndexPatternsWithCcs(metadataCurrentIndexPattern, ccsEnabled),
+    size: agentIDs.length,
   };
 }
 
@@ -164,7 +165,8 @@ interface BuildUnitedIndexQueryResponse extends estypes.SearchRequest {
 export async function buildUnitedIndexQuery(
   soClient: SavedObjectsClientContract,
   queryOptions: GetMetadataListRequestQuery,
-  endpointPolicyIds: string[] = []
+  endpointPolicyIds: string[] = [],
+  ccsEnabled: boolean = false
 ): Promise<BuildUnitedIndexQueryResponse> {
   const {
     page = ENDPOINT_DEFAULT_PAGE,
@@ -176,46 +178,13 @@ export async function buildUnitedIndexQuery(
   } = queryOptions || {};
 
   const statusesKuery = buildStatusesKuery(hostStatuses);
-
-  const filterIgnoredAgents = {
-    must_not: { terms: { 'agent.id': IGNORED_ELASTIC_AGENT_IDS } },
-  };
-  const filterEndpointPolicyAgents = {
-    filter: [
-      // must contain an endpoint policy id
-      {
-        terms: { 'united.agent.policy_id': endpointPolicyIds },
-      },
-      // doc contains both agent and metadata
-      { exists: { field: 'united.endpoint.agent.id' } },
-      { exists: { field: 'united.agent.agent.id' } },
-      // agent is enrolled
-      {
-        term: {
-          'united.agent.active': {
-            value: true,
-          },
-        },
-      },
-    ],
-  };
-
-  const idFilter = {
-    bool: {
-      ...filterIgnoredAgents,
-      ...filterEndpointPolicyAgents,
-    },
-  };
+  const idFilter = buildBaseEndpointMetadataFilter(endpointPolicyIds);
 
   let query: BuildUnitedIndexQueryResponse['query'] = idFilter;
 
   if (statusesKuery || kuery) {
     const kqlQuery = toElasticsearchQuery(fromKueryExpression(kuery ?? ''));
-    const q = [];
-
-    if (filterIgnoredAgents || filterEndpointPolicyAgents) {
-      q.push(idFilter);
-    }
+    const q = [idFilter];
 
     if (statusesKuery) {
       q.push(toElasticsearchQuery(fromKueryExpression(statusesKuery)));
@@ -238,6 +207,6 @@ export async function buildUnitedIndexQuery(
     runtime_mappings: runtimeMappings,
     from: page * pageSize,
     size: pageSize,
-    index: METADATA_UNITED_INDEX,
+    index: prefixIndexPatternsWithCcs(METADATA_UNITED_INDEX, ccsEnabled),
   };
 }

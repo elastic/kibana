@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import {
+import type { UiCounterMetricType } from '@kbn/analytics';
+import { METRIC_TYPE } from '@kbn/analytics';
+import type { SnapshotRepositoriesInfo } from '../../../../../common';
+import type {
   ComponentTemplateListItem,
   ComponentTemplateDeserialized,
   ComponentTemplateSerialized,
@@ -19,7 +21,7 @@ import {
   UIM_COMPONENT_TEMPLATE_CREATE,
   UIM_COMPONENT_TEMPLATE_UPDATE,
 } from '../constants';
-import { UseRequestHook, SendRequestHook } from './request';
+import type { UseRequestHook, SendRequestHook } from './request';
 
 export const getApi = (
   useRequest: UseRequestHook,
@@ -110,6 +112,13 @@ export const getApi = (
     });
   }
 
+  function useLoadSnapshotRepositories() {
+    return useRequest<SnapshotRepositoriesInfo>({
+      path: `${apiBasePath}/snapshot_repositories`,
+      method: 'get',
+    });
+  }
+
   function useLoadReferencedIndexTemplateMeta(name: string) {
     return useRequest<ComponentTemplateMeta>({
       path: `${apiBasePath}/component_templates/${encodeURIComponent(
@@ -134,6 +143,7 @@ export const getApi = (
     useLoadComponentTemplate,
     createComponentTemplate,
     updateComponentTemplate,
+    useLoadSnapshotRepositories,
     useLoadReferencedIndexTemplateMeta,
     useLoadComponentTemplatesDatastream,
     getReferencedIndexTemplateMeta,

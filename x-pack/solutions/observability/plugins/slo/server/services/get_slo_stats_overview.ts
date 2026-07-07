@@ -5,37 +5,39 @@
  * 2.0.
  */
 
-import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { Logger } from '@kbn/logging';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
 import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
-import { AlertsClient } from '@kbn/rule-registry-plugin/server';
-import { GetSLOStatsOverviewParams, GetSLOStatsOverviewResponse } from '@kbn/slo-schema';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
+import type { GetSLOStatsOverviewParams, GetSLOStatsOverviewResponse } from '@kbn/slo-schema';
 import moment from 'moment';
+import type { SLOSettings } from '../domain/models';
 import { typedSearch } from '../utils/queries';
-import { getSummaryIndices, getSloSettings } from './slo_settings';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
+import { getSummaryIndices } from './utils/get_summary_indices';
 
 export class GetSLOStatsOverview {
   constructor(
-    private soClient: SavedObjectsClientContract,
-    private esClient: ElasticsearchClient,
+    private scopedClusterClient: IScopedClusterClient,
     private spaceId: string,
     private logger: Logger,
     private rulesClient: RulesClientApi,
-    private racClient: AlertsClient
+    private racClient: AlertsClient,
+    private settings: SLOSettings
   ) {}
 
   public async execute(params: GetSLOStatsOverviewParams): Promise<GetSLOStatsOverviewResponse> {
-    const settings = await getSloSettings(this.soClient);
-    const { indices } = await getSummaryIndices(this.esClient, settings);
+    const { indices } = await getSummaryIndices(
+      this.scopedClusterClient.asInternalUser,
+      this.settings
+    );
 
     const kqlQuery = params.kqlQuery ?? '';
     const filters = params.filters ?? '';
     const parsedFilters = parseStringFilters(filters, this.logger);
 
-    const response = await typedSearch(this.esClient, {
+    const response = await typedSearch(this.scopedClusterClient.asCurrentUser, {
       index: indices,
       size: 0,
       query: {
@@ -51,19 +53,34 @@ export class GetSLOStatsOverview {
       aggs: {
         stale: {
           filter: {
-            range: {
-              summaryUpdatedAt: {
-                lt: `now-${settings.staleThresholdInHours}h`,
-              },
+            bool: {
+              filter: [
+                {
+                  range: {
+                    summaryUpdatedAt: {
+                      lt: `now-${this.settings.staleThresholdInHours}h`,
+                    },
+                  },
+                },
+              ],
+              must_not: [{ term: { isTempDoc: true } }],
             },
           },
         },
         not_stale: {
           filter: {
-            range: {
-              summaryUpdatedAt: {
-                gte: `now-${settings.staleThresholdInHours}h`,
-              },
+            bool: {
+              should: [
+                { term: { isTempDoc: true } },
+                {
+                  range: {
+                    summaryUpdatedAt: {
+                      gte: `now-${this.settings.staleThresholdInHours}h`,
+                    },
+                  },
+                },
+              ],
+              minimum_should_match: 1,
             },
           },
           aggs: {

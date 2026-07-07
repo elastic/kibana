@@ -18,7 +18,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { useFetchStream } from '@kbn/ml-response-stream/client';
 
 export interface StreamingResponseProps {
@@ -134,7 +134,7 @@ export const StreamingResponse = ({
     inner = (
       <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon color="danger" type="warning" />
+          <EuiIcon color="danger" type="warning" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s">{content}</EuiText>

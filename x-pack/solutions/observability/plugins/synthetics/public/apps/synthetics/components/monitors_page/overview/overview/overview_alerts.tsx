@@ -11,7 +11,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
-  euiPaletteColorBlindBehindText,
   useEuiTheme,
 } from '@elastic/eui';
 import { RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
@@ -23,9 +22,10 @@ import {
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
 } from '../../../../../../../common/constants/synthetics_alerts';
-import { ClientPluginsStart } from '../../../../../../plugin';
-import { useGetUrlParams, useRefreshedRange } from '../../../../hooks';
+import type { ClientPluginsStart } from '../../../../../../plugin';
+import { useGetUrlParams } from '../../../../hooks';
 import { selectOverviewStatus } from '../../../../state/overview_status';
+import { useOverviewRefreshedRange } from '../../common/use_overview_date_range';
 import { AlertsLink } from '../../../common/links/view_alerts';
 import { useMonitorFilters } from '../../hooks/use_monitor_filters';
 import { useMonitorQueryFilters } from '../../hooks/use_monitor_query_filters';
@@ -63,14 +63,15 @@ export const useMonitorQueryIds = () => {
 };
 
 export const OverviewAlerts = () => {
-  const { from, to } = useRefreshedRange(12, 'hours');
+  // Follows the page-level date picker (URL params), defaulting to the overview's
+  // own window when untouched so it stays in step with the status panel.
+  const { from, to } = useOverviewRefreshedRange();
 
   const {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
 
   const { euiTheme } = useEuiTheme();
-  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
   const filters = useMonitorFilters({ forAlerts: true });
 
   const { locations } = useGetUrlParams();
@@ -107,9 +108,7 @@ export const OverviewAlerts = () => {
                   { field: 'kibana.alert.status', values: ['active', 'recovered'] },
                   ...filters,
                 ],
-                color: isAmsterdam
-                  ? euiTheme.colors.vis.euiColorVis1
-                  : euiTheme.colors.vis.euiColorVis6,
+                color: euiTheme.colors.vis.euiColorVis6,
               },
             ]}
           />
@@ -139,9 +138,7 @@ export const OverviewAlerts = () => {
                   { field: 'kibana.alert.status', values: ['active', 'recovered'] },
                   ...filters,
                 ],
-                color: isAmsterdam
-                  ? euiPaletteColorBlindBehindText()[1]
-                  : euiTheme.colors.vis.euiColorVis6,
+                color: euiTheme.colors.vis.euiColorVis6,
               },
             ]}
           />
@@ -159,5 +156,5 @@ const ALERTS_LABEL = i18n.translate('xpack.synthetics.detailsPanel.alerts', {
 });
 
 const headingText = i18n.translate('xpack.synthetics.overview.alerts.headingText', {
-  defaultMessage: 'Last 12 hours',
+  defaultMessage: 'Alerts',
 });

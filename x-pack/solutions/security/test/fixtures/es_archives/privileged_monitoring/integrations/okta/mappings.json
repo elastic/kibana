@@ -1,0 +1,801 @@
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "logs-entityanalytics_okta.user-default",
+    "template": {
+      "_meta": {
+        "managed": true,
+        "managed_by": "fleet",
+        "package": {
+          "name": "entityanalytics_okta"
+        }
+      },
+      "data_stream": {
+        "allow_custom_routing": false,
+        "hidden": false
+      },
+      "ignore_missing_component_templates": [],
+      "index_patterns": [
+        "logs-entityanalytics_okta.user-*"
+      ],
+      "name": "logs-entityanalytics_okta.user",
+      "priority": 200,
+      "template": {
+        "mappings": {
+          "_meta": {
+            "managed": true,
+            "managed_by": "fleet",
+            "package": {
+              "name": "entityanalytics_okta"
+            }
+          },
+          "date_detection": false,
+          "dynamic_templates": [
+            {
+              "ecs_timestamp": {
+                "match": "@timestamp",
+                "mapping": {
+                  "type": "date",
+                  "ignore_malformed": false
+                }
+              }
+            },
+            {
+              "entityanalytics_okta.groups.profile.*": {
+                "path_match": "entityanalytics_okta.groups.profile.*",
+                "match_mapping_type": "*",
+                "mapping": {
+                  "type": "keyword"
+                }
+              }
+            },
+            {
+              "strings_as_keyword": {
+                "match_mapping_type": "string",
+                "mapping": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
+              }
+            },
+            {
+              "ecs_message_match_only_text": {
+                "mapping": {
+                  "type": "match_only_text"
+                },
+                "path_match": [
+                  "message",
+                  "*.message"
+                ],
+                "unmatch_mapping_type": "object"
+              }
+            },
+            {
+              "ecs_non_indexed_keyword": {
+                "mapping": {
+                  "doc_values": false,
+                  "index": false,
+                  "type": "keyword"
+                },
+                "path_match": [
+                  "*event.original",
+                  "*gen_ai.agent.description"
+                ]
+              }
+            },
+            {
+              "ecs_non_indexed_long": {
+                "mapping": {
+                  "doc_values": false,
+                  "index": false,
+                  "type": "long"
+                },
+                "path_match": [
+                  "*.x509.public_key_exponent"
+                ]
+              }
+            },
+            {
+              "ecs_ip": {
+                "mapping": {
+                  "type": "ip"
+                },
+                "match_mapping_type": "string",
+                "path_match": [
+                  "ip",
+                  "*.ip",
+                  "*_ip"
+                ]
+              }
+            },
+            {
+              "ecs_wildcard": {
+                "mapping": {
+                  "type": "wildcard"
+                },
+                "path_match": [
+                  "*.io.text",
+                  "*.message_id",
+                  "*registry.data.strings",
+                  "*url.path"
+                ],
+                "unmatch_mapping_type": "object"
+              }
+            },
+            {
+              "ecs_path_match_wildcard_and_match_only_text": {
+                "mapping": {
+                  "fields": {
+                    "text": {
+                      "type": "match_only_text"
+                    }
+                  },
+                  "type": "wildcard"
+                },
+                "path_match": [
+                  "*.body.content",
+                  "*url.full",
+                  "*url.original"
+                ],
+                "unmatch_mapping_type": "object"
+              }
+            },
+            {
+              "ecs_match_wildcard_and_match_only_text": {
+                "mapping": {
+                  "fields": {
+                    "text": {
+                      "type": "match_only_text"
+                    }
+                  },
+                  "type": "wildcard"
+                },
+                "match": [
+                  "*command_line",
+                  "*stack_trace"
+                ],
+                "unmatch_mapping_type": "object"
+              }
+            },
+            {
+              "ecs_path_match_keyword_and_match_only_text": {
+                "mapping": {
+                  "fields": {
+                    "text": {
+                      "type": "match_only_text"
+                    }
+                  },
+                  "type": "keyword"
+                },
+                "path_match": [
+                  "*.title",
+                  "*.executable",
+                  "*.name",
+                  "*.working_directory",
+                  "*.full_name",
+                  "*file.path",
+                  "*file.target_path",
+                  "*os.full",
+                  "*email.subject",
+                  "*vulnerability.description",
+                  "*user_agent.original"
+                ],
+                "unmatch_mapping_type": "object"
+              }
+            },
+            {
+              "ecs_date": {
+                "mapping": {
+                  "type": "date"
+                },
+                "path_match": [
+                  "*.timestamp",
+                  "*_timestamp",
+                  "*.not_after",
+                  "*.not_before",
+                  "*.accessed",
+                  "created",
+                  "*.created",
+                  "*.installed",
+                  "*.creation_date",
+                  "*.ctime",
+                  "*.mtime",
+                  "ingested",
+                  "*.ingested",
+                  "*.start",
+                  "*.end",
+                  "*.indicator.first_seen",
+                  "*.indicator.last_seen",
+                  "*.indicator.modified_at",
+                  "*threat.enrichments.matched.occurred"
+                ],
+                "unmatch_mapping_type": "object"
+              }
+            },
+            {
+              "ecs_path_match_float": {
+                "mapping": {
+                  "type": "float"
+                },
+                "path_match": [
+                  "*.score.*",
+                  "*_score*"
+                ],
+                "path_unmatch": "*.version",
+                "unmatch_mapping_type": "object"
+              }
+            },
+            {
+              "ecs_usage_double_scaled_float": {
+                "mapping": {
+                  "scaling_factor": 1000,
+                  "type": "scaled_float"
+                },
+                "match_mapping_type": [
+                  "double",
+                  "long",
+                  "string"
+                ],
+                "path_match": "*.usage"
+              }
+            },
+            {
+              "ecs_geo_point": {
+                "mapping": {
+                  "type": "geo_point"
+                },
+                "path_match": [
+                  "*.geo.location"
+                ]
+              }
+            },
+            {
+              "ecs_flattened": {
+                "mapping": {
+                  "type": "flattened"
+                },
+                "match_mapping_type": "object",
+                "path_match": [
+                  "*structured_data",
+                  "*exports",
+                  "*imports"
+                ]
+              }
+            },
+            {
+              "ecs_gen_ai_integers": {
+                "mapping": {
+                  "type": "integer"
+                },
+                "path_match": [
+                  "*gen_ai.request.max_tokens",
+                  "*gen_ai.usage.input_tokens",
+                  "*gen_ai.usage.output_tokens",
+                  "*gen_ai.request.choice.count",
+                  "*gen_ai.request.seed"
+                ]
+              }
+            },
+            {
+              "ecs_gen_ai_doubles": {
+                "mapping": {
+                  "type": "double"
+                },
+                "path_match": [
+                  "*gen_ai.request.temperature",
+                  "*gen_ai.request.top_k",
+                  "*gen_ai.request.frequency_penalty",
+                  "*gen_ai.request.presence_penalty",
+                  "*gen_ai.request.top_p"
+                ]
+              }
+            },
+            {
+              "all_strings_to_keywords": {
+                "mapping": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "match_mapping_type": "string"
+              }
+            }
+          ],
+          "properties": {
+            "@timestamp": {
+              "ignore_malformed": false,
+              "type": "date"
+            },
+            "asset": {
+              "properties": {
+                "category": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "costCenter": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "create_date": {
+                  "type": "date"
+                },
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "last_seen": {
+                  "type": "date"
+                },
+                "last_status_change_date": {
+                  "type": "date"
+                },
+                "last_updated": {
+                  "type": "date"
+                },
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "status": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "vendor": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "data_stream": {
+              "properties": {
+                "dataset": {
+                  "type": "constant_keyword"
+                },
+                "namespace": {
+                  "type": "constant_keyword"
+                },
+                "type": {
+                  "type": "constant_keyword"
+                }
+              }
+            },
+            "data_stream.dataset": {
+              "type": "constant_keyword"
+            },
+            "data_stream.namespace": {
+              "type": "constant_keyword"
+            },
+            "data_stream.type": {
+              "type": "constant_keyword",
+              "value": "logs"
+            },
+            "entityanalytics_okta": {
+              "properties": {
+                "groups": {
+                  "dynamic": true,
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "profile": {
+                      "dynamic": true,
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "roles": {
+                  "properties": {
+                    "assignment_type": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "created": {
+                      "type": "date"
+                    },
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "label": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "last_updated": {
+                      "type": "date"
+                    },
+                    "status": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "user": {
+                  "properties": {
+                    "_embedded": {
+                      "type": "flattened"
+                    },
+                    "_links": {
+                      "type": "flattened"
+                    },
+                    "activated": {
+                      "type": "date"
+                    },
+                    "created": {
+                      "type": "date"
+                    },
+                    "credentials": {
+                      "properties": {
+                        "provider": {
+                          "properties": {
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "type": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "recovery_question": {
+                          "properties": {
+                            "is_set": {
+                              "type": "boolean"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "last_login": {
+                      "type": "date"
+                    },
+                    "last_updated": {
+                      "type": "date"
+                    },
+                    "password_changed": {
+                      "type": "date"
+                    },
+                    "profile": {
+                      "properties": {
+                        "city": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "cost_center": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "country_code": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "department": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "display_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "division": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "email": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "employee_number": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "first_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "honorific": {
+                          "properties": {
+                            "prefix": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "suffix": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "last_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "locale": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "login": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "manager": {
+                          "properties": {
+                            "id": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "middle_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "mobile_phone": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "nick_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "organization": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "postal_address": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "preferred_language": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "primary_phone": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "second_email": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "state": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "street_address": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "timezone": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "title": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "url": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "user_type": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "zip_code": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "status": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "status_changed": {
+                      "type": "date"
+                    },
+                    "transitioning_to_status": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "type": "flattened"
+                    }
+                  }
+                }
+              }
+            },
+            "event": {
+              "properties": {
+                "agent_id_status": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "dataset": {
+                  "type": "constant_keyword",
+                  "value": "entityanalytics_okta.user"
+                },
+                "ingested": {
+                  "format": "strict_date_time_no_millis||strict_date_optional_time||epoch_millis",
+                  "ignore_malformed": false,
+                  "type": "date"
+                },
+                "module": {
+                  "type": "constant_keyword",
+                  "value": "entityanalytics_okta"
+                }
+              }
+            },
+            "input": {
+              "properties": {
+                "type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "labels": {
+              "properties": {
+                "identity_source": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "log": {
+              "properties": {
+                "offset": {
+                  "type": "long"
+                }
+              }
+            },
+            "user": {
+              "properties": {
+                "account": {
+                  "properties": {
+                    "activated_date": {
+                      "type": "date"
+                    },
+                    "change_date": {
+                      "type": "date"
+                    },
+                    "create_date": {
+                      "type": "date"
+                    },
+                    "password_change_date": {
+                      "type": "date"
+                    },
+                    "status": {
+                      "properties": {
+                        "deprovisioned": {
+                          "type": "boolean"
+                        },
+                        "locked_out": {
+                          "type": "boolean"
+                        },
+                        "password_expired": {
+                          "type": "boolean"
+                        },
+                        "recovery": {
+                          "type": "boolean"
+                        },
+                        "suspended": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "geo": {
+                  "properties": {
+                    "city_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "country_iso_code": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "postal_code": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "region_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "timezone": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "organization": {
+                  "properties": {
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "profile": {
+                  "properties": {
+                    "department": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "first_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "job_title": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "last_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "manager": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "mobile_phone": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "other_identities": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "primaryPhone": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "secondEmail": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "status": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

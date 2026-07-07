@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MLErrorObject, ErrorType } from './types';
+import type { MLErrorObject, ErrorType } from '@kbn/ml-common-types/errors';
 
 /**
  * ML Request Failure

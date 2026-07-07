@@ -16,7 +16,6 @@ import type {
   PluginInitializerContext,
   ApplicationStart,
   DocLinksStart,
-  HttpSetup,
 } from '@kbn/core/public';
 import type {
   ScreenshotModePluginSetup,
@@ -25,12 +24,10 @@ import type {
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ElasticV3BrowserShipper } from '@elastic/ebt/shippers/elastic_v3/browser';
 import { isSyntheticsMonitor } from '@kbn/analytics-collection-utils';
-import { BehaviorSubject, map, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, type Observable, map, switchMap, tap } from 'rxjs';
 import { buildShipperHeaders, createBuildShipperUrl } from '../common/ebt_v3_endpoint';
 
 import type { TelemetryConfigLabels } from '../server/config';
-import { FetchTelemetryConfigRoute, INTERNAL_VERSION } from '../common/routes';
-import type { v2 } from '../common/types';
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
 import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
 
@@ -38,12 +35,38 @@ import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice'
  * Publicly exposed APIs from the Telemetry Service
  */
 export interface TelemetryServicePublicApis {
-  /** Is the cluster opted-in to telemetry? **/
+  /**
+   * Is the cluster opted-in to telemetry?
+   * @deprecated Subscribe to {@link TelemetryServicePublicApis.isOptedIn$ | isOptedIn$} instead.
+   * Reading this synchronously at `start()` time or initial render may return the stale injected
+   * default before the user's saved preference has been fetched from the server.
+   */
   getIsOptedIn: () => boolean | null;
+  /**
+   * Emits the user's opt-in preference.
+   *
+   * It withholds the synchronous injected/default value and emits the first time the preference is
+   * resolved from the server, then emits again whenever it changes. Replays the latest value to late
+   * subscribers.
+   */
+  isOptedIn$: Observable<boolean>;
   /** Is the user allowed to change the opt-in/out status? **/
   userCanChangeSettings: boolean;
-  /** Can phone-home telemetry calls be made? This depends on whether we have opted-in or if we are rendering a report */
+  /**
+   * Can phone-home telemetry calls be made? This depends on whether we have opted-in and on whether
+   * Kibana is rendering a report / running synthetics.
+   * @deprecated Subscribe to {@link TelemetryServicePublicApis.canSendTelemetry$ | canSendTelemetry$}
+   * instead. Reading this synchronously at `start()` time or initial render may return a value derived
+   * from the stale injected default before the user's saved preference has been fetched from the server.
+   */
   canSendTelemetry: () => boolean;
+  /**
+   * Emits whether phone-home telemetry calls can be made: the user is opted in AND Kibana is not in a
+   * "skip" mode (screenshot/synthetics). It withholds the synchronous injected default and emits once
+   * the preference is resolved from the server, then on every change. Replays the latest value to late
+   * subscribers.
+   */
+  canSendTelemetry$: Observable<boolean>;
   /** Is the cluster allowed to change the opt-in/out status? **/
   getCanChangeOptInStatus: () => boolean;
   /** Fetches an unencrypted telemetry payload so we can show it to the user **/
@@ -52,8 +75,9 @@ export interface TelemetryServicePublicApis {
    * Overwrite the opt-in status.
    * It will send a final request to the remote telemetry cluster to report about the opt-in/out change.
    * @param optedIn Whether the user is opting-in (`true`) or out (`false`).
+   * @param signal An AbortSignal to cancel any ongoing requests if the caller decides to
    */
-  setOptIn: (optedIn: boolean) => Promise<boolean>;
+  setOptIn: (optedIn: boolean, signal?: AbortSignal) => Promise<boolean>;
 }
 
 /**
@@ -147,7 +171,9 @@ export class TelemetryPlugin
   private readonly telemetryLabels$: BehaviorSubject<TelemetryConfigLabels>;
   private telemetrySender?: TelemetrySender;
   private telemetryNotifications?: TelemetryNotifications;
-  private telemetryService?: TelemetryService;
+  // Definitely assigned in `setup()` (which always runs before `start()` and any deferred callback
+  // that reads it), so consumers can treat it as always present.
+  private telemetryService!: TelemetryService;
   private canUserChangeSettings: boolean = true;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryPluginConfig>) {
@@ -213,24 +239,24 @@ export class TelemetryPlugin
     }
 
     this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {
-      await this.refreshConfig(http);
+      await this.refreshConfig();
       analytics.optIn({
         global: {
-          enabled: this.telemetryService!.isOptedIn && !this.shouldSkipTelemetry(screenshotMode),
+          enabled: this.telemetryService.isOptedIn && !this.shouldSkipTelemetry(screenshotMode),
         },
       });
     });
 
     if (home && !this.config.hidePrivacyStatement) {
       home.welcomeScreen.registerOnRendered(() => {
-        if (this.telemetryService?.userCanChangeSettings) {
+        if (this.telemetryService.userCanChangeSettings) {
           this.telemetryNotifications?.setOptInStatusNoticeSeen();
         }
       });
 
       home.welcomeScreen.registerTelemetryNoticeRenderer(() =>
         renderWelcomeTelemetryNotice(
-          this.telemetryService!,
+          this.telemetryService,
           http.basePath.prepend,
           telemetryConstants
         )
@@ -264,6 +290,19 @@ export class TelemetryPlugin
     });
     this.telemetryNotifications = telemetryNotifications;
 
+    if (this.shouldSkipTelemetry(screenshotMode)) {
+      // In screenshot/synthetics mode we don't query the server. Seed `isOptedIn$` with the
+      // synchronous injected default so subscribers still receive a value.
+      this.telemetryService.config = this.config;
+    } else {
+      // Fetch the user's saved preference as early as possible so `telemetryService.isOptedIn$` emits
+      // the real value without waiting for the first `currentAppId$` emission (which only fires after
+      // every plugin's `start()` has run). This is the fix for the stale-at-startup behavior.
+      this.refreshConfig().catch(() => {
+        // Best-effort: the `currentAppId$` subscription below will retry on the first app navigation.
+      });
+    }
+
     application.currentAppId$
       .pipe(
         switchMap(async () => {
@@ -274,11 +313,11 @@ export class TelemetryPlugin
           }
 
           // Refresh and get telemetry config
-          const updatedConfig = await this.refreshConfig(http);
+          const updatedConfig = await this.refreshConfig();
 
           analytics.optIn({
             global: {
-              enabled: this.telemetryService!.isOptedIn,
+              enabled: this.telemetryService.isOptedIn,
             },
           });
 
@@ -318,18 +357,20 @@ export class TelemetryPlugin
    * Kibana should skip telemetry collection if reporting is taking a screenshot
    * or Synthetics monitoring is navigating Kibana.
    * @param screenshotMode {@link ScreenshotModePluginSetup}
-   * @private
+   * @internal
    */
   private shouldSkipTelemetry(screenshotMode: ScreenshotModePluginSetup): boolean {
     return screenshotMode.isScreenshotMode() || isSyntheticsMonitor();
   }
 
   private getTelemetryServicePublicApis(): TelemetryServicePublicApis {
-    const telemetryService = this.telemetryService!;
+    const { telemetryService } = this;
     return {
       getIsOptedIn: () => telemetryService.getIsOptedIn(),
+      isOptedIn$: telemetryService.isOptedIn$,
       setOptIn: (optedIn) => telemetryService.setOptIn(optedIn),
       canSendTelemetry: () => telemetryService.canSendTelemetry(),
+      canSendTelemetry$: telemetryService.canSendTelemetry$,
       userCanChangeSettings: telemetryService.userCanChangeSettings,
       getCanChangeOptInStatus: () => telemetryService.getCanChangeOptInStatus(),
       fetchExample: () => telemetryService.fetchExample(),
@@ -337,18 +378,15 @@ export class TelemetryPlugin
   }
 
   /**
-   * Retrieve the up-to-date configuration
-   * @param http HTTP helper to make requests to the server
-   * @private
+   * Retrieve the up-to-date configuration.
+   *
+   * The fetch (and its concurrency/race handling against `setOptIn`) lives in the service; here we
+   * only publish the refreshed labels to the analytics context provider.
+   * @internal
    */
-  private async refreshConfig(http: HttpStart | HttpSetup): Promise<TelemetryPluginConfig> {
-    const updatedConfig = await this.fetchUpdatedConfig(http);
-    if (this.telemetryService) {
-      this.telemetryService.config = updatedConfig;
-    }
-
+  private async refreshConfig(): Promise<TelemetryPluginConfig> {
+    const updatedConfig = await this.telemetryService.refreshConfig();
     this.telemetryLabels$.next(updatedConfig.labels);
-
     return updatedConfig;
   }
 
@@ -357,7 +395,7 @@ export class TelemetryPlugin
    * This is a security feature, not included in the OSS build, so we need to fallback to `true`
    * in case it is `undefined`.
    * @param application CoreStart.application
-   * @private
+   * @internal
    */
   private getCanUserChangeSettings(application: ApplicationStart): boolean {
     return (application.capabilities?.savedObjectsManagement?.edit as boolean | undefined) ?? true;
@@ -384,33 +422,5 @@ export class TelemetryPlugin
     if (shouldShowBanner) {
       this.telemetryNotifications.renderOptInStatusNoticeBanner();
     }
-  }
-
-  /**
-   * Fetch configuration from the server and merge it with the one the browser already knows
-   * @param http The HTTP helper to make the requests
-   * @private
-   */
-  private async fetchUpdatedConfig(http: HttpStart | HttpSetup): Promise<TelemetryPluginConfig> {
-    const {
-      allowChangingOptInStatus,
-      optIn,
-      sendUsageFrom,
-      telemetryNotifyUserAboutOptInDefault,
-      labels,
-    } = await http.get<v2.FetchTelemetryConfigResponse>(
-      FetchTelemetryConfigRoute,
-      INTERNAL_VERSION
-    );
-
-    return {
-      ...this.config,
-      allowChangingOptInStatus,
-      optIn,
-      sendUsageFrom,
-      telemetryNotifyUserAboutOptInDefault,
-      labels,
-      userCanChangeSettings: this.canUserChangeSettings,
-    };
   }
 }

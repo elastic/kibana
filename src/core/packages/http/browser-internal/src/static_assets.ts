@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { InternalStaticAssets } from './types';
+import type { InternalStaticAssets } from './types';
 
 export class StaticAssets implements InternalStaticAssets {
   public readonly assetsHrefBase: string;

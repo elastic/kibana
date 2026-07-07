@@ -10,13 +10,8 @@ import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
-import {
-  EuiIcon,
-  EuiCode,
+import type {
   EuiComboBoxOptionOption,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
   EuiSelectProps,
   EuiFieldTextProps,
   EuiSwitchProps,
@@ -26,45 +21,63 @@ import {
   EuiCheckboxProps,
   EuiTextAreaProps,
   EuiButtonGroupProps,
+} from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
   EuiHighlight,
   EuiBadge,
   EuiToolTip,
 } from '@elastic/eui';
 import { MaintenanceWindowsLink } from '../fields/maintenance_windows/create_maintenance_windows_btn';
-import { MaintenanceWindowsFieldProps } from '../fields/maintenance_windows/maintenance_windows';
+import type { MaintenanceWindowsFieldProps } from '../fields/maintenance_windows/maintenance_windows';
+import type { MonitorSpacesProps } from '../fields/monitor_spaces';
 import { kibanaService } from '../../../../../utils/kibana_service';
-import {
-  PROFILE_OPTIONS,
-  ThrottlingConfigFieldProps,
-} from '../fields/throttling/throttling_config_field';
+import type { ThrottlingConfigFieldProps } from '../fields/throttling/throttling_config_field';
+import { PROFILE_OPTIONS } from '../fields/throttling/throttling_config_field';
+import type {
+  FormattedComboBoxProps,
+  JSONCodeEditorProps,
+  HeaderFieldProps,
+  RequestBodyFieldProps,
+  ResponseBodyIndexFieldProps,
+  ControlledFieldProp,
+} from './field_wrappers';
 import {
   FieldText,
   FieldNumber,
   FieldPassword,
   Checkbox,
   ComboBox,
+  LocationsComboBox,
   Select,
   Switch,
   Source,
   ButtonGroup,
   FormattedComboBox,
-  FormattedComboBoxProps,
   JSONEditor,
-  JSONCodeEditorProps,
   MonitorTypeRadioGroup,
   HeaderField,
-  HeaderFieldProps,
   RequestBodyField,
-  RequestBodyFieldProps,
   ResponseBodyIndexField,
-  ResponseBodyIndexFieldProps,
-  ControlledFieldProp,
   KeyValuePairsField,
   TextArea,
   ThrottlingWrapper,
   MaintenanceWindowsFieldWrapper,
+  KibanaSpacesWrapper,
 } from './field_wrappers';
 import { useMonitorName } from '../../../hooks/use_monitor_name';
+import type {
+  MonitorFields,
+  FieldMap,
+  FormLocation,
+  ResponseCheckJSON,
+  ThrottlingConfig,
+  RequestBodyCheck,
+} from '../types';
 import {
   ConfigKey,
   MonitorTypeEnum,
@@ -72,15 +85,9 @@ import {
   HTTPMethod,
   ScreenshotOption,
   Mode,
-  MonitorFields,
   TLSVersion,
   VerificationMode,
-  FieldMap,
-  FormLocation,
   ResponseBodyIndexPolicy,
-  ResponseCheckJSON,
-  ThrottlingConfig,
-  RequestBodyCheck,
   SourceType,
 } from '../types';
 import {
@@ -90,7 +97,7 @@ import {
 } from '../constants';
 import { getDefaultFormFields } from './defaults';
 import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
-import { KeyValuePairsFieldProps } from '../fields/key_value_field';
+import type { KeyValuePairsFieldProps } from '../fields/key_value_field';
 
 const getScheduleContent = (value: number, seconds?: boolean) => {
   if (seconds) {
@@ -199,7 +206,7 @@ export const MONITOR_TYPE_CONFIG = {
         'A lightweight API check to validate the availability of a web service or endpoint.',
     }),
     link: 'https://elastic.co/guide/en/observability/current/synthetics-lightweight.html',
-    icon: 'online',
+    icon: 'wifi',
     beta: false,
   },
   [FormMonitorType.TCP]: {
@@ -217,7 +224,7 @@ export const MONITOR_TYPE_CONFIG = {
         'A lightweight API check to validate the availability of a web service or endpoint.',
     }),
     link: 'https://www.elastic.co/guide/en/observability/current/synthetics-lightweight.html',
-    icon: 'online',
+    icon: 'wifi',
     beta: false,
   },
   [FormMonitorType.ICMP]: {
@@ -235,7 +242,7 @@ export const MONITOR_TYPE_CONFIG = {
         'A lightweight API check to validate the availability of a web service or endpoint.',
     }),
     link: 'https://www.elastic.co/guide/en/observability/current/synthetics-lightweight.html',
-    icon: 'online',
+    icon: 'wifi',
     beta: false,
   },
 };
@@ -422,7 +429,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     fieldKey: ConfigKey.LOCATIONS,
     required: true,
     controlled: true,
-    component: ComboBox,
+    component: LocationsComboBox,
     label: i18n.translate('xpack.synthetics.monitorConfig.locations.label', {
       defaultMessage: 'Locations',
     }),
@@ -1339,7 +1346,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         id="xpack.synthetics.monitorConfig.throttlingDisabled.label"
         defaultMessage="Connection profile ( {icon} Important information about throttling: {link})"
         values={{
-          icon: <EuiIcon type="alert" color="warning" size="s" />,
+          icon: <EuiIcon type="warning" color="warning" size="s" aria-hidden={true} />,
           link: (
             <EuiLink
               data-test-subj="syntheticsFIELDNoticeLink"
@@ -1700,5 +1707,25 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       value: field?.value as string[],
     }),
     labelAppend: <MaintenanceWindowsLink />,
+  },
+  [ConfigKey.KIBANA_SPACES]: {
+    fieldKey: ConfigKey.KIBANA_SPACES,
+    component: KibanaSpacesWrapper,
+    label: i18n.translate('xpack.synthetics.monitorConfig.kibanaSpaces.label', {
+      defaultMessage: 'Kibana spaces',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.kibanaSpaces.helpText', {
+      defaultMessage:
+        ' Current space should always be part of list, unless All spaces is selected.',
+    }),
+    controlled: true,
+    props: ({ field, setValue, trigger }): MonitorSpacesProps => ({
+      readOnly,
+      value: field?.value || [],
+      onChange: async (spaces?: string[]) => {
+        setValue(ConfigKey.KIBANA_SPACES, spaces);
+        await trigger(ConfigKey.KIBANA_SPACES);
+      },
+    }),
   },
 });

@@ -11,20 +11,19 @@ import { i18n } from '@kbn/i18n';
 import { parse } from 'hjson';
 
 import { DefaultEditorSize } from '@kbn/vis-default-editor-plugin/public';
-import {
-  VIS_EVENT_TO_TRIGGER,
-  VisGroups,
-  VisTypeDefinition,
-} from '@kbn/visualizations-plugin/public';
+import type { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import { VIS_EVENT_TO_TRIGGER, VisGroups } from '@kbn/visualizations-plugin/public';
 
 import { getDefaultSpec } from './default_spec';
 import { extractIndexPatternsFromSpec } from './lib/extract_index_pattern';
+import { extractProjectRoutingOverrides } from './lib/extract_project_routing_overrides';
 import { createInspectorAdapters } from './vega_inspector';
 import { toExpressionAst } from './to_ast';
 import { getInfoMessage } from './components/vega_info_message';
 import { VegaVisEditorComponent } from './components/vega_vis_editor_lazy';
 
 import type { VisParams } from './vega_fn';
+import { VegaIcon } from './vega_icon';
 
 export const vegaVisType: VisTypeDefinition<VisParams> = {
   name: 'vega',
@@ -34,10 +33,11 @@ export const vegaVisType: VisTypeDefinition<VisParams> = {
     defaultMessage: 'Use the Vega syntax to create new types of visualizations.',
     description: 'Vega and Vega-Lite are product names and should not be translated',
   }),
-  icon: 'visVega',
+  icon: VegaIcon, // VegaIcon svg is wrapped into EUIIcon
   group: VisGroups.PROMOTED,
   titleInWizard: i18n.translate('visTypeVega.type.vegaTitleInWizard', {
-    defaultMessage: 'Custom visualization',
+    defaultMessage: 'Vega',
+    description: 'Vega is a product name and should not be translated',
   }),
   visConfig: { defaults: { spec: getDefaultSpec() } },
   editorConfig: {
@@ -62,6 +62,16 @@ export const vegaVisType: VisTypeDefinition<VisParams> = {
       // spec is invalid
     }
     return [];
+  },
+  getProjectRoutingOverrides: async (visParams) => {
+    try {
+      const spec = parse(visParams.spec, { legacyRoot: false, keepWsc: true });
+
+      return extractProjectRoutingOverrides(spec);
+    } catch (e) {
+      // spec is invalid
+    }
+    return undefined;
   },
   inspectorAdapters: createInspectorAdapters,
   /**

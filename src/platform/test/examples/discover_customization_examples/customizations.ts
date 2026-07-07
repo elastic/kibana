@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/examples/discover_customization_examples/customizations.ts
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
@@ -26,7 +27,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   describe('Customizations', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
@@ -46,14 +49,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       await kibanaServer.savedObjects.cleanStandardList();
-    });
-
-    it('Top nav', async () => {
-      await testSubjects.existOrFail('shareTopNavButton');
-      await testSubjects.missingOrFail('discoverNewButton');
-      await testSubjects.missingOrFail('discoverOpenButton');
     });
 
     it('Search bar', async () => {

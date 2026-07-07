@@ -8,7 +8,9 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiFlyoutFooter, EuiFlyoutFooterProps } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { EuiFlyoutFooterProps } from '@elastic/eui';
+import { EuiFlyoutFooter } from '@elastic/eui';
 
 import { useFlyoutPanelContext } from './flyout_panel';
 
@@ -21,5 +23,11 @@ export const PanelFooter: React.FC<
     registerFooter();
   }, [registerFooter]);
 
-  return <EuiFlyoutFooter className="fieldEditor__flyoutPanel__footer" {...props} />;
+  return <EuiFlyoutFooter css={styles.footer} {...props} />;
+};
+
+const styles = {
+  footer: css({
+    flex: 0,
+  }),
 };

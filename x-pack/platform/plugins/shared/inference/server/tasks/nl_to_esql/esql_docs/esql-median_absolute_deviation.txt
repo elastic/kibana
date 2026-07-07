@@ -1,6 +1,6 @@
 # MEDIAN_ABSOLUTE_DEVIATION
 
-The MEDIAN_ABSOLUTE_DEVIATION function calculates the median absolute deviation, a measure of variability. It is particularly useful for describing data that may have outliers or may not follow a normal distribution. In such cases, it can be more descriptive than standard deviation. The function computes the median of each data point’s deviation from the median of the entire sample.
+The MEDIAN_ABSOLUTE_DEVIATION function calculates the median absolute deviation, which is a robust measure of variability. It is particularly useful for describing data with outliers or data that is not normally distributed, and can be more informative than standard deviation in such cases. The value is computed as the median of the absolute differences between each data point and the median of the entire sample.
 
 ## Syntax
 
@@ -10,18 +10,18 @@ The MEDIAN_ABSOLUTE_DEVIATION function calculates the median absolute deviation,
 
 #### number
 
-The numeric expression for which the median absolute deviation is to be calculated.
+The column or expression containing numeric values for which the median absolute deviation will be calculated.
 
 ## Examples
 
-Calculate the median salary and the median absolute deviation of salaries:
+Calculate the median and median absolute deviation of employee salaries:
 
 ```esql
 FROM employees
 | STATS MEDIAN(salary), MEDIAN_ABSOLUTE_DEVIATION(salary)
 ```
 
-Calculate the median absolute deviation of the maximum values of a multivalued column:
+Calculate the median absolute deviation of the maximum salary change per employee:
 
 ```esql
 FROM employees
@@ -30,5 +30,5 @@ FROM employees
 
 ## Limitations
 
-- The `MEDIAN_ABSOLUTE_DEVIATION` function is non-deterministic, which means you can get slightly different results using the same data.
-- The `MEDIAN_ABSOLUTE_DEVIATION` function is usually approximate, which means the results may not be exact.
+- The result of MEDIAN_ABSOLUTE_DEVIATION is usually approximate.
+- The function is non-deterministic, so you may get slightly different results when running the same query on the same data.

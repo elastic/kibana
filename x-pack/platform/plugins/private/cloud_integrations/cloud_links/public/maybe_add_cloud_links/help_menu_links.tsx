@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ChromeHelpMenuLink } from '@kbn/core-chrome-browser';
+import type { ChromeHelpMenuLink } from '@kbn/core-chrome-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
@@ -14,28 +14,37 @@ import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 export const createHelpMenuLinks = ({
   docLinks,
   helpSupportUrl,
+  isServerless,
 }: {
   docLinks: DocLinksStart;
   helpSupportUrl: string;
+  isServerless?: boolean;
 }) => {
   const helpMenuLinks: ChromeHelpMenuLink[] = [
     {
       title: i18n.translate('xpack.cloudLinks.helpMenuLinks.documentation', {
-        defaultMessage: 'Documentation',
+        defaultMessage: 'Kibana documentation',
       }),
       href: docLinks.links.elasticStackGetStarted,
+      iconType: 'documentation',
     },
+    ...(isServerless
+      ? [
+          {
+            title: i18n.translate('xpack.cloudLinks.helpMenuLinks.releaseNotes', {
+              defaultMessage: 'Release notes',
+            }),
+            href: docLinks.links.serverlessReleaseNotes,
+            iconType: 'popper',
+          },
+        ]
+      : []),
     {
       title: i18n.translate('xpack.cloudLinks.helpMenuLinks.support', {
-        defaultMessage: 'Support',
+        defaultMessage: 'Ask support',
       }),
       href: helpSupportUrl,
-    },
-    {
-      title: i18n.translate('xpack.cloudLinks.helpMenuLinks.giveFeedback', {
-        defaultMessage: 'Give feedback',
-      }),
-      href: docLinks.links.kibana.feedback,
+      iconType: 'question',
     },
     {
       title: i18n.translate('xpack.cloudLinks.helpMenuLinks.connectionDetails', {
@@ -45,6 +54,7 @@ export const createHelpMenuLinks = ({
       onClick: () => {
         openWiredConnectionDetails();
       },
+      iconType: 'plugs',
     },
   ];
 

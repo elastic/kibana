@@ -53,7 +53,7 @@ export const HostIsolationPanel = React.memo(
 
     if (!alertHostSupportsResponseActions) {
       return (
-        <EuiCallOut color="warning" data-test-subj="unsupportedAlertHost">
+        <EuiCallOut announceOnMount={false} color="warning" data-test-subj="unsupportedAlertHost">
           <FormattedMessage
             id="xpack.securitySolution.detections.hostIsolation.alertHostNotSupported"
             defaultMessage="The alert's host ({hostName}) does not support host isolation response actions."

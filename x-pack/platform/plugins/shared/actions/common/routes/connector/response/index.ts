@@ -8,26 +8,37 @@
 // Latest
 export type {
   ConnectorResponse,
-  AllConnectorsResponse,
+  GetAllConnectorsResponse,
   ConnectorExecuteResponse,
+  ConnectorAuthStatusResponse,
+  GetConnectorSpecResponse,
 } from './types/latest';
+
 export {
   connectorResponseSchema,
-  allConnectorsResponseSchema,
-  connectorTypesResponseSchema,
+  getAllConnectorsResponseSchema,
+  connectorTypeResponseSchema,
   connectorExecuteResponseSchema,
+  connectorAuthStatusResponseSchema,
+  getConnectorSpecResponseBodySchema,
 } from './schemas/latest';
 
-// v1
 export type {
   ConnectorResponse as ConnectorResponseV1,
-  AllConnectorsResponse as AllConnectorsResponseV1,
-  ConnectorTypesResponse as ConnectorTypesResponseV1,
+  GetAllConnectorsResponse as GetAllConnectorsResponseV1,
+  ConnectorTypeResponse as ConnectorTypeResponseV1,
+  GetAllConnectorTypesResponse as GetAllConnectorTypesResponseV1,
   ConnectorExecuteResponse as ConnectorExecuteResponseV1,
+  ConnectorAuthStatusResponse as ConnectorAuthStatusResponseV1,
+  GetConnectorSpecResponse as GetConnectorSpecResponseV1,
 } from './types/v1';
+
 export {
   connectorResponseSchema as connectorResponseSchemaV1,
-  allConnectorsResponseSchema as connectorWithExtraFindDataSchemaV1,
-  connectorTypesResponseSchema as connectorTypesResponseSchemaV1,
+  getAllConnectorsResponseSchema as getAllConnectorsResponseSchemaV1,
+  connectorTypeResponseSchema as connectorTypeResponseSchemaV1,
+  getAllConnectorTypesResponseSchema as getAllConnectorTypesResponseSchemaV1,
   connectorExecuteResponseSchema as connectorExecuteResponseSchemaV1,
+  connectorAuthStatusResponseSchema as connectorAuthStatusResponseSchemaV1,
+  getConnectorSpecResponseBodySchema as getConnectorSpecResponseBodySchemaV1,
 } from './schemas/v1';

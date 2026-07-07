@@ -6,8 +6,8 @@
  */
 
 import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
-import type { UseQueryOptions } from '@tanstack/react-query';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { UseQueryOptions } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
 import type { RulesSnoozeSettingsMap } from '../../logic';
 import { fetchRulesSnoozeSettings } from '../api';
@@ -48,7 +48,7 @@ export const useInvalidateFetchRulesSnoozeSettingsQuery = () => {
 
   return useCallback(() => {
     /**
-     * Invalidate all queries that start with FIND_RULES_QUERY_KEY. This
+     * Invalidate all queries that start with FETCH_RULE_SNOOZE_SETTINGS_QUERY_KEY. This
      * includes the in-memory query cache and paged query cache.
      */
     return queryClient.invalidateQueries(FETCH_RULE_SNOOZE_SETTINGS_QUERY_KEY, {

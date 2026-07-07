@@ -8,7 +8,8 @@
 import React from 'react';
 import { useEuiFontSize, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { WorkspaceNode } from '../../types';
+import { i18n } from '@kbn/i18n';
+import type { WorkspaceNode } from '../../types';
 import { getIconOffset, IconRenderer } from '../icon_renderer';
 
 interface SelectedNodeItemProps {
@@ -40,7 +41,11 @@ export const SelectedNodeItem = ({
   return (
     <button
       className="gphSelectionList__field"
-      aria-hidden="true"
+      data-test-subj={`graphSelectionListField-${node.label}`}
+      aria-label={i18n.translate('xpack.graph.sidebar.selections.selectedNodeItemButtonLabel', {
+        defaultMessage: 'Select {nodeLabel}',
+        values: { nodeLabel: node.label },
+      })}
       onClick={() => onSelectedFieldClick(node)}
       css={({ euiTheme }: UseEuiTheme) => css`
         line-height: ${euiTheme.font.lineHeightMultiplier};
@@ -57,7 +62,7 @@ export const SelectedNodeItem = ({
         ${isHighlighted ? `background: ${euiTheme.colors.lightShade}` : ''}
       `}
     >
-      <svg width="24" height="24">
+      <svg width="24" height="24" aria-hidden="true">
         <circle
           css={({ euiTheme }: UseEuiTheme) =>
             css`

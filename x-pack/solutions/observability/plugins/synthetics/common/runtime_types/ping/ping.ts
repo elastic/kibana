@@ -10,6 +10,7 @@ import { ObserverCodec } from './observer';
 import { ErrorStateCodec } from './error_state';
 import { DateRangeType } from '../common';
 import { SyntheticsDataType } from './synthetics';
+import { remoteMonitorInfoSchema } from '../remote';
 
 // IO type for validation
 export const PingErrorType = t.intersection([
@@ -74,9 +75,6 @@ export const X509Type = t.intersection([
 export type X509 = t.TypeOf<typeof X509Type>;
 
 export const TlsType = t.partial({
-  // deprecated in favor of server.x509.not_after/not_before
-  certificate_not_valid_after: t.string,
-  certificate_not_valid_before: t.string,
   cipher: t.string,
   established: t.boolean,
   server: t.partial({
@@ -242,17 +240,30 @@ export const PingType = t.intersection([
       dataset: t.string,
     }),
     labels: t.record(t.string, t.string),
+    remote: remoteMonitorInfoSchema,
+    kibanaUrl: t.string,
   }),
 ]);
 
-export const PingStateType = t.type({
-  timestamp: t.string,
-  '@timestamp': t.string,
-  monitor: MonitorType,
-  docId: t.string,
-  state: ErrorStateCodec,
-  error: PingErrorType,
-});
+export const PingStateType = t.intersection([
+  t.type({
+    timestamp: t.string,
+    '@timestamp': t.string,
+    monitor: MonitorType,
+    docId: t.string,
+    state: ErrorStateCodec,
+    error: PingErrorType,
+    config_id: t.string,
+    observer: ObserverCodec,
+  }),
+  t.partial({
+    http: t.partial({
+      response: t.partial({
+        status_code: t.number,
+      }),
+    }),
+  }),
+]);
 export type Ping = t.TypeOf<typeof PingType>;
 export type PingState = t.TypeOf<typeof PingStateType>;
 
@@ -276,6 +287,7 @@ export const GetPingsParamsType = t.intersection([
     monitorId: t.string,
     sort: t.string,
     status: t.string,
+    remoteName: t.string,
   }),
 ]);
 

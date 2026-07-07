@@ -1,14 +1,14 @@
 {
   "type": "plugin",
   "id": "@kbn/entityManager-plugin",
-  "owner": "@elastic/obs-entities",
+  "owner": "@elastic/core-analysis",
   "group": "platform",
   "visibility": "shared",
   "description": "Entity manager plugin for entity assets (inventory, topology, etc)",
   "plugin": {
     "id": "entityManager",
     "configPath": ["xpack", "entityManager"],
-    "browser": true,
+    "browser": false,
     "server": true,
     "requiredPlugins": [
       "security",

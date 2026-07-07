@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import React from 'react';
 
-import { ComponentTemplateListItem } from '../../../../../common';
-import {
-  ComponentTemplatesListItem,
-  Props as ComponentTemplatesListItemProps,
-} from './component_templates_list_item';
+import type { ComponentTemplateListItem } from '../../../../../common';
+import type { Props as ComponentTemplatesListItemProps } from './component_templates_list_item';
+import { ComponentTemplatesListItem } from './component_templates_list_item';
+
+const listStyles = css`
+  width: 100%;
+`;
 
 interface Props {
   components: ComponentTemplateListItem[];
@@ -20,7 +23,7 @@ interface Props {
 
 export const ComponentTemplatesList = ({ components, listItemProps }: Props) => {
   return (
-    <div data-test-subj="componentTemplatesList">
+    <div css={listStyles} data-test-subj="componentTemplatesList">
       {components.map((component) => (
         <ComponentTemplatesListItem key={component.name} component={component} {...listItemProps} />
       ))}

@@ -6,8 +6,9 @@
  */
 import type { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
-import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import querystring from 'querystring';
+import type { DataSchemaFormat } from './hosts_locator';
 
 export type InventoryLocator = LocatorPublic<InventoryLocatorParams>;
 
@@ -40,6 +41,8 @@ export interface InventoryLocatorParams extends SerializableRecord {
   metric: string; // encoded value
   nodeType: string;
   region?: string;
+
+  preferredSchema?: DataSchemaFormat | null;
   sort?: {
     by: string;
     direction: 'desc' | 'async';
@@ -78,6 +81,7 @@ export class InventoryLocatorDefinition implements LocatorDefinition<InventoryLo
       ),
       metric: params.metric,
       nodeType: rison.encodeUnknown(params.nodeType),
+      preferredSchema: rison.encodeUnknown(params.preferredSchema),
       region: rison.encodeUnknown(params.region ?? ''),
       sort: rison.encodeUnknown(params.sort ?? { by: 'name', direction: 'desc' }),
       timelineOpen: rison.encodeUnknown(params.timelineOpen ?? false),

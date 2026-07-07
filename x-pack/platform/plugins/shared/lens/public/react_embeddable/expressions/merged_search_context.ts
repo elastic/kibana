@@ -6,16 +6,17 @@
  */
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
+import type { ExecutionContextSearch, ProjectRouting } from '@kbn/es-query';
 import {
   type AggregateQuery,
   type Filter,
   isOfAggregateQueryType,
   type Query,
   type TimeRange,
-  ExecutionContextSearch,
 } from '@kbn/es-query';
-import { PublishingSubject, apiPublishesTimeslice } from '@kbn/presentation-publishing';
-import type { LensRuntimeState } from '../types';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
+import { apiPublishesTimeslice } from '@kbn/presentation-publishing';
+import type { LensRuntimeState } from '@kbn/lens-common';
 import { nonNullable } from '../../utils';
 
 export interface MergedSearchContext {
@@ -25,6 +26,8 @@ export interface MergedSearchContext {
   filters: Filter[];
   disableWarningToasts: boolean;
   esqlVariables?: ESQLControlVariable[];
+  projectRouting?: ProjectRouting;
+  isApproximate?: boolean;
 }
 
 export function getMergedSearchContext(
@@ -34,11 +37,15 @@ export function getMergedSearchContext(
     query,
     timeRange,
     esqlVariables,
+    projectRouting,
+    isApproximate,
   }: {
     filters?: Filter[];
     query?: Query | AggregateQuery;
     timeRange?: TimeRange;
     esqlVariables?: ESQLControlVariable[];
+    projectRouting?: ProjectRouting;
+    isApproximate?: boolean;
   },
   customTimeRange$: PublishingSubject<TimeRange | undefined>,
   parentApi: unknown,
@@ -62,6 +69,7 @@ export function getMergedSearchContext(
   const customTimeRange = customTimeRange$.getValue();
 
   const timeRangeToRender = customTimeRange ?? timesliceTimeRange ?? timeRange;
+
   const context = {
     esqlVariables,
     now: data.nowProvider.get().getTime(),
@@ -69,6 +77,8 @@ export function getMergedSearchContext(
     query: [attributes.state.query].filter(nonNullable),
     filters: injectFilterReferences(attributes.state.filters || [], attributes.references),
     disableWarningToasts: true,
+    projectRouting,
+    isApproximate,
   };
   // Prepend query and filters from dashboard to the visualization ones
   if (query) {

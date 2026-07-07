@@ -52,6 +52,7 @@ const PopoverTooltipComponent = ({
       anchorPosition={'upCenter'}
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
+      aria-label={i18n.POPOVER_TOOLTIP_ARIA_LABEL(columnName)}
       button={
         <EuiIcon
           aria-label={i18n.POPOVER_TOOLTIP_ARIA_LABEL(columnName)}
@@ -59,7 +60,7 @@ const PopoverTooltipComponent = ({
           onClick={onClick}
           onKeyDown={onKeyDown}
           color={anchorColor}
-          type="questionInCircle"
+          type="question"
         />
       }
     >

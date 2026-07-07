@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const HISTORY_FETCH_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.actions.historyFetchError',
+  {
+    defaultMessage: 'Failed to fetch rule change history',
+  }
+);
+
 export const CONNECTORS_FETCH_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.actions.connectorsFetchError',
   {
@@ -25,5 +32,12 @@ export const ACTIONS_FETCH_ERROR_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.actions.actionsFetchErrorDescription',
   {
     defaultMessage: 'Viewing actions is not available',
+  }
+);
+
+export const FETCH_PREBUILT_RULE_BASE_VERSION_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.fetchPrebuiltRuleBaseVersion',
+  {
+    defaultMessage: 'Failed to fetch Elastic rule version',
   }
 );

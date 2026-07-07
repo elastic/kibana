@@ -1,10 +1,10 @@
 env:
-  FTR_SECURITY_GEN_AI: "1"
+  FTR_SECURITY_GEN_AI: '1'
 steps:
   - label: '👨‍🔧 Pre-Build'
     command: .buildkite/scripts/lifecycle/pre_build.sh
     agents:
-      image: family/kibana-ubuntu-2004
+      image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
@@ -14,7 +14,7 @@ steps:
   - label: '🧑‍🏭 Build Kibana Distribution'
     command: .buildkite/scripts/steps/build_kibana.sh
     agents:
-      image: family/kibana-ubuntu-2004
+      image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-8
@@ -25,15 +25,15 @@ steps:
 
   - command: .buildkite/scripts/steps/test/ftr_configs.sh
     env:
-      FTR_CONFIG: "x-pack/test/security_solution_api_integration/test_suites/genai/evaluations/trial_license_complete_tier/configs/ess.config.ts"
+      FTR_CONFIG: 'x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/evaluations/trial_license_complete_tier/configs/ess.config.ts'
       FTR_CONFIG_GROUP_KEY: 'ftr-security-solution-gen-ai-evaluations'
-      FTR_SECURITY_GEN_AI: "1"
+      FTR_SECURITY_GEN_AI: '1'
     label: Security Solution Gen AI Evaluations
     key: ftr-security-solution-gen-ai-evaluations
     timeout_in_minutes: 50
     parallelism: 1
     agents:
-      image: family/kibana-ubuntu-2004
+      image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
@@ -44,5 +44,3 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
-
-

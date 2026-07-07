@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
-import { Adapters } from '@kbn/inspector-plugin/common';
-import { TrendlineArguments } from '../types';
+import type { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/common';
+import type { TrendlineArguments } from '../types';
 import { metricTrendlineFunction } from './metric_trendline_function';
 
 const fakeContext = {} as ExecutionContext<Adapters>;

@@ -8,13 +8,14 @@
 import fs from 'fs/promises';
 
 import apm from 'elastic-apm-node';
+import { withActiveSpan } from '@kbn/tracing-utils';
 
 import { compact } from 'lodash';
-import pMap from 'p-map';
+
 import pRetry from 'p-retry';
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { LockAcquisitionError } from '@kbn/lock-manager';
 
 import { MessageSigningError } from '../../common/errors';
@@ -22,8 +23,7 @@ import { MessageSigningError } from '../../common/errors';
 import { AUTO_UPDATE_PACKAGES } from '../../common/constants';
 import type { PreconfigurationError } from '../../common/constants';
 import type { DefaultPackagesInstallationError } from '../../common/types';
-
-import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS } from '../constants';
+import { scheduleSetupTask } from '../tasks/setup/schedule';
 
 import { appContextService } from './app_context';
 import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
@@ -40,12 +40,7 @@ import { downloadSourceService } from './download_source';
 
 import { getRegistryUrl, settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
-import {
-  ensureFleetEventIngestedPipelineIsInstalled,
-  ensureFleetFinalPipelineIsInstalled,
-} from './epm/elasticsearch/ingest_pipeline/install';
-import { ensureDefaultComponentTemplates } from './epm/elasticsearch/template/install';
-import { getInstallations, reinstallPackageForInstallation } from './epm/packages';
+
 import { isPackageInstalled } from './epm/packages/install';
 import type { UpgradeManagedPackagePoliciesResult } from './setup/managed_package_policies';
 import { setupUpgradeManagedPackagePolicies } from './setup/managed_package_policies';
@@ -59,6 +54,7 @@ import {
 import { cleanUpOldFileIndices } from './setup/clean_old_fleet_indices';
 import type { UninstallTokenInvalidError } from './security/uninstall_token_service';
 import { ensureAgentPoliciesFleetServerKeysAndPolicies } from './setup/fleet_server_policies_enrollment_keys';
+import { scheduleBumpMigratedAgentPoliciesTask } from './agent_policies/bump_migrated_agent_policies_task';
 import { ensureSpaceSettings } from './preconfiguration/space_settings';
 import {
   ensureDeleteUnenrolledAgentsSetting,
@@ -69,6 +65,10 @@ import { updateDeprecatedComponentTemplates } from './setup/update_deprecated_co
 import { createCCSIndexPatterns } from './setup/fleet_synced_integrations';
 import { ensureCorrectAgentlessSettingsIds } from './agentless_settings_ids';
 import { getSpaceAwareSaveobjectsClients } from './epm/kibana/assets/saved_objects';
+import { ensureFleetGlobalEsAssets } from './setup/ensure_fleet_global_es_assets';
+
+/** Maximum number of non-fatal errors retained in memory after setup. */
+const MAX_NON_FATAL_ERRORS = 100;
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -102,22 +102,32 @@ export async function setupFleet(
     useLock: boolean;
   } = { useLock: false }
 ): Promise<SetupStatus> {
-  const t = apm.startTransaction('fleet-setup', 'fleet');
-  try {
-    if (options.useLock) {
-      return _runSetupWithLock(() =>
-        awaitIfPending(async () => createSetupSideEffects(soClient, esClient))
-      );
-    } else {
-      return await awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
+  return withActiveSpan(
+    'fleet-setup',
+    {
+      attributes: { 'transaction.type': 'fleet' },
+      // Make sure that this is a parent transaction (not a child of any other ongoing transaction)
+      root: true,
+    },
+    async () => {
+      const t = apm.startTransaction('fleet-setup', 'fleet');
+      try {
+        if (options.useLock) {
+          return _runSetupWithLock(() =>
+            awaitIfPending(async () => createSetupSideEffects(soClient, esClient))
+          );
+        } else {
+          return await awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
+        }
+      } catch (error) {
+        apm.captureError(error);
+        t.setOutcome('failure');
+        throw error;
+      } finally {
+        t.end();
+      }
     }
-  } catch (error) {
-    apm.captureError(error);
-    t.setOutcome('failure');
-    throw error;
-  } finally {
-    t.end();
-  }
+  );
 }
 
 async function createSetupSideEffects(
@@ -165,14 +175,12 @@ async function createSetupSideEffects(
   );
 
   logger.debug('Setting up Fleet outputs');
-  await Promise.all([
-    ensurePreconfiguredOutputs(
-      soClient,
-      esClient,
-      getPreconfiguredOutputFromConfig(appContextService.getConfig())
-    ),
-    settingsService.settingsSetup(soClient),
-  ]);
+  await settingsService.settingsSetup(soClient);
+  await ensurePreconfiguredOutputs(
+    soClient,
+    esClient,
+    getPreconfiguredOutputFromConfig(appContextService.getConfig())
+  );
 
   const defaultOutput = await outputService.ensureDefaultOutput(soClient, esClient);
 
@@ -181,7 +189,12 @@ async function createSetupSideEffects(
 
   logger.debug('Setting up Fleet Elasticsearch assets');
   let stepSpan = apm.startSpan('Install Fleet global assets', 'preconfiguration');
-  await ensureFleetGlobalEsAssets(soClient, esClient);
+  await ensureFleetGlobalEsAssets(
+    { soClient, esClient, logger },
+    {
+      reinstallPackages: true,
+    }
+  );
   stepSpan?.end();
 
   // Ensure that required packages are always installed even if they're left out of the config
@@ -219,12 +232,24 @@ async function createSetupSideEffects(
   stepSpan?.end();
 
   stepSpan = apm.startSpan('Upgrade managed package policies', 'preconfiguration');
-  await setupUpgradeManagedPackagePolicies(soClient, esClient);
+  await setupUpgradeManagedPackagePolicies(soClient);
   stepSpan?.end();
 
   logger.debug('Upgrade Fleet package install versions');
   stepSpan = apm.startSpan('Upgrade package install format version', 'preconfiguration');
-  await upgradePackageInstallVersion({ soClient, esClient, logger });
+
+  const config = appContextService.getConfig();
+  const shouldDeferPackageBumpInstallVersion =
+    config?.startupOptimization?.deferPackageBumpInstallVersion ?? false;
+
+  if (shouldDeferPackageBumpInstallVersion) {
+    logger.info('Deferring package install version upgrade to background task');
+    await scheduleSetupTask(appContextService.getTaskManagerStart()!, {
+      type: 'upgradePackageInstallVersion',
+    });
+  } else {
+    await upgradePackageInstallVersion({ soClient, esClient, logger });
+  }
   stepSpan?.end();
 
   logger.debug('Generating key pair for message signing');
@@ -251,6 +276,11 @@ async function createSetupSideEffects(
   logger.debug('Upgrade Agent policy schema version');
   await upgradeAgentPolicySchemaVersion(soClient);
   stepSpan?.end();
+
+  // Bump the revision of agent policies whose package policies were flagged for a bump by a
+  // saved object migration (no span: this only schedules a background task).
+  logger.debug('Scheduling agent policy revision bump for migrated package policies');
+  await scheduleBumpMigratedAgentPoliciesTask(appContextService.getTaskManagerStart()!);
 
   stepSpan = apm.startSpan('Set up enrollment keys for preconfigured policies', 'preconfiguration');
   logger.debug(
@@ -282,7 +312,7 @@ async function createSetupSideEffects(
   const { savedObjectsImporter } = getSpaceAwareSaveobjectsClients();
   await createCCSIndexPatterns(esClient, soClient, savedObjectsImporter);
 
-  const nonFatalErrors = [
+  const rawNonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,
     ...(messageSigningServiceNonFatalError ? [messageSigningServiceNonFatalError] : []),
     ...(backfillPackagePolicySupportsAgentlessError
@@ -291,15 +321,30 @@ async function createSetupSideEffects(
     ...(ensureCorrectAgentlessSettingsIdsError ? [ensureCorrectAgentlessSettingsIdsError] : []),
   ];
 
-  if (nonFatalErrors.length > 0) {
+  logger.info('Scheduling async setup tasks');
+  await scheduleSetupTask(appContextService.getTaskManagerStart()!);
+
+  if (rawNonFatalErrors.length > 0) {
     logger.info('Encountered non fatal errors during Fleet setup');
-    formatNonFatalErrors(nonFatalErrors)
+    formatNonFatalErrors(rawNonFatalErrors)
       .map((e) => JSON.stringify(e))
       .forEach((error) => {
         logger.info(error);
         apm.captureError(error);
       });
   }
+
+  // Strip heavy ES connection metadata and cap stored errors to prevent large ResponseError
+  // objects from being retained in the module-level promise.
+  // See https://github.com/elastic/kibana/issues/273921
+  if (rawNonFatalErrors.length > MAX_NON_FATAL_ERRORS) {
+    logger.warn(
+      `Fleet setup encountered ${rawNonFatalErrors.length} non-fatal errors; storing only the first ${MAX_NON_FATAL_ERRORS}`
+    );
+  }
+  const nonFatalErrors = rawNonFatalErrors
+    .slice(0, MAX_NON_FATAL_ERRORS)
+    .map(sanitizeNonFatalError);
 
   logger.info('Fleet setup completed');
 
@@ -310,41 +355,25 @@ async function createSetupSideEffects(
 }
 
 /**
- * Ensure ES assets shared by all Fleet index template are installed
+ * Strips heavy ES client metadata (meta.connection, connection pool, TLS config, etc.)
+ * from any `ResponseError` stored inside a non-fatal error entry.  Each such object can
+ * retain ~10 MB of connection state, causing multi-GB heap growth when hundreds of errors
+ * accumulate in the module-level `awaitIfPending` promise.
+ *
+ * The entry's structural shape (package, agentPolicy, installType, …) is preserved so
+ * callers that inspect those fields continue to work.  Only the inner `.error` / `.errors`
+ * values are replaced with lightweight plain-Error objects carrying just name + message.
  */
-export async function ensureFleetGlobalEsAssets(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
-) {
-  const logger = appContextService.getLogger();
-  // Ensure Global Fleet ES assets are installed
-  logger.debug('Creating Fleet component template and ingest pipeline');
-  const globalAssetsRes = await Promise.all([
-    ensureDefaultComponentTemplates(esClient, logger), // returns an array
-    ensureFleetFinalPipelineIsInstalled(esClient, logger),
-    ensureFleetEventIngestedPipelineIsInstalled(esClient, logger),
-  ]);
-  const assetResults = globalAssetsRes.flat();
-  if (assetResults.some((asset) => asset.isCreated)) {
-    // Update existing index template
-    const installedPackages = await getInstallations(soClient);
-    await pMap(
-      installedPackages.saved_objects,
-      async ({ attributes: installation }) => {
-        await reinstallPackageForInstallation({
-          soClient,
-          esClient,
-          installation,
-        }).catch((err) => {
-          apm.captureError(err);
-          logger.error(
-            `Package needs to be manually reinstalled ${installation.name} after installing Fleet global assets: ${err.message}`
-          );
-        });
-      },
-      { concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS }
-    );
+function sanitizeNonFatalError(
+  e: SetupStatus['nonFatalErrors'][number]
+): SetupStatus['nonFatalErrors'][number] {
+  if ('error' in e) {
+    const slim = new Error(e.error.message);
+    slim.name = e.error.name;
+    return { ...e, error: slim } as typeof e;
   }
+  // UpgradeManagedPackagePoliciesResult uses `errors: any` — nothing large to strip there.
+  return e;
 }
 
 /**

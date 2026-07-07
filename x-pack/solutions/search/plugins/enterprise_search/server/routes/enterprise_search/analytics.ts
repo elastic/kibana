@@ -7,12 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { KibanaResponseFactory } from '@kbn/core-http-server';
-import { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
-import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import type { KibanaResponseFactory } from '@kbn/core-http-server';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { i18n } from '@kbn/i18n';
 
-import { AnalyticsEventsExist } from '../../../common/types/analytics';
+import type { AnalyticsEventsExist } from '../../../common/types/analytics';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addAnalyticsCollection } from '../../lib/analytics/add_analytics_collection';
 import { analyticsEventsExist } from '../../lib/analytics/analytics_events_exist';
@@ -122,7 +122,7 @@ export function registerAnalyticsRoutes({
       },
       validate: {
         body: schema.object({
-          keyName: schema.string(),
+          keyName: schema.string({ maxLength: 1000 }),
         }),
         params: schema.object({
           name: schema.string(),
@@ -154,7 +154,7 @@ export function registerAnalyticsRoutes({
       },
       validate: {
         body: schema.object({
-          name: schema.string(),
+          name: schema.string({ maxLength: 1024 }),
         }),
       },
     },

@@ -21,8 +21,7 @@ import type {
   SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { KibanaRequest } from '@kbn/core-http-server';
-import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { asyncForEach, asyncMap } from '@kbn/std';
 
 import type {
@@ -30,11 +29,12 @@ import type {
   AggregationsTermsExclude,
 } from '@elastic/elasticsearch/lib/api/types';
 import { isResponseError } from '@kbn/es-errors';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
 import type { Logger } from '@kbn/logging';
 
+import { ALL_SPACES_ID } from '../../../../common/constants';
 import { catchAndSetErrorStackTrace } from '../../../errors/utils';
 
 import type { AgentPolicySOAttributes } from '../../../types';
@@ -45,7 +45,11 @@ import type {
   UninstallTokenMetadata,
 } from '../../../../common/types/models/uninstall_token';
 
-import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../constants';
+import {
+  UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+} from '../../../constants';
 import { appContextService } from '../../app_context';
 import { agentPolicyService, getAgentPolicySavedObjectType } from '../../agent_policy';
 import { isSpaceAwarenessEnabled } from '../../spaces/helpers';
@@ -68,10 +72,10 @@ interface UninstallTokenSOAggregation {
 
 function getNamespaceFiltering(namespace: string) {
   if (namespace === DEFAULT_NAMESPACE_STRING) {
-    return `(${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:default) or (not ${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:*)`;
+    return `(${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:"${ALL_SPACES_ID}") or (${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:default) or (not ${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:*)`;
   }
 
-  return `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:${namespace}`;
+  return `(${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:${namespace}) or (${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:"${ALL_SPACES_ID}")`;
 }
 
 export interface UninstallTokenInvalidError {
@@ -239,6 +243,11 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       : undefined;
   }
 
+  private prepareExactPolicyIdQuery(policyId: string | undefined): string | undefined {
+    if (!policyId) return undefined;
+    // Escape special characters but don't add wildcards for exact matching
+    return this.prepareSearchString(policyId, /[@#&*+()\[\]{}|.?~"<]/, '');
+  }
   private prepareRegexpQuery(str: string | undefined): string | undefined {
     return this.prepareSearchString(str, /[@#&*+()[\]{}|.?~"<]/, '.*');
   }
@@ -279,7 +288,10 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       `getting token metadata with policyIdSearchTerm [${policyIdSearchTerm}] and poliyNameSearchTerm [${policyNameSearchTerm}] and excluded policy ids [${excludedPolicyIds}]`
     );
 
-    const policyIdFilter = this.prepareRegexpQuery(policyIdSearchTerm);
+    // If theres a search term and not just a policy id, then we use partial, otherwise, use exact matching
+    const policyIdFilter = policyNameSearchTerm
+      ? this.prepareRegexpQuery(policyIdSearchTerm)
+      : this.prepareExactPolicyIdQuery(policyIdSearchTerm);
 
     let policyIdsFoundByName: string[] | undefined;
     const policyNameSearchString = this.prepareQueryStringQuery(policyNameSearchTerm);
@@ -640,6 +652,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   private async getAllPolicyIds(): Promise<string[]> {
     const agentPolicyIdsFetcher = await agentPolicyService.fetchAllAgentPolicyIds(this.soClient, {
       spaceId: '*',
+      kuery: `NOT ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true`,
     });
     const policyIds: string[] = [];
     for await (const agentPolicyId of agentPolicyIdsFetcher) {
@@ -706,17 +719,8 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       return this._soClient;
     }
 
-    const fakeRequest = {
-      headers: {},
-      getBasePath: () => '',
-      path: '/',
-      route: { settings: {} },
-      url: { href: {} },
-      raw: { req: { url: '/' } },
-    } as unknown as KibanaRequest;
-
-    this._soClient = appContextService.getSavedObjects().getScopedClient(fakeRequest, {
-      excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
+    this._soClient = appContextService.getSavedObjects().getUnsafeInternalClient({
+      excludedExtensions: [SPACES_EXTENSION_ID],
       includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
     });
 

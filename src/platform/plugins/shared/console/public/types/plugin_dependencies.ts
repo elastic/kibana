@@ -14,16 +14,18 @@ import type {
   ThemeServiceStart,
   UserProfileService,
 } from '@kbn/core/public';
-import { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
-import { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
-import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { SharePluginSetup, SharePluginStart, LocatorPublic } from '@kbn/share-plugin/public';
+import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
+import type { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/public';
+import type { SharePluginSetup, SharePluginStart, LocatorPublic } from '@kbn/share-plugin/public';
 
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { EmbeddedConsoleView } from './embeddable_console';
-import { ConsoleUILocatorParams } from './locator';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { EmbeddedConsoleView } from './embeddable_console';
+import type { ConsoleUILocatorParams } from './locator';
 
 export interface ConsoleStartServices {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
@@ -40,7 +42,6 @@ export interface AppSetupUIPluginDependencies {
 }
 
 export interface AppPluginSetupDependencies {
-  dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
   licensing: LicensingPluginStart;
 }
@@ -49,7 +50,6 @@ export interface AppStartUIPluginDependencies {
   home?: HomePublicPluginStart;
   share: SharePluginStart;
   usageCollection?: UsageCollectionStart;
-  dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
   licensing: LicensingPluginStart;
 }

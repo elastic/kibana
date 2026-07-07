@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FlashMessageColors } from './types';
+import type { FlashMessageColors } from './types';
 
 export const FLASH_MESSAGE_TYPES = {
   success: { color: 'success' as FlashMessageColors, iconType: 'check' },
-  info: { color: 'primary' as FlashMessageColors, iconType: 'iInCircle' },
+  info: { color: 'primary' as FlashMessageColors, iconType: 'info' },
   warning: { color: 'warning' as FlashMessageColors, iconType: 'warning' },
   error: { color: 'danger' as FlashMessageColors, iconType: 'error' },
 };

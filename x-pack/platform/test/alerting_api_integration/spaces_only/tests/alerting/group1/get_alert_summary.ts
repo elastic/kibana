@@ -19,7 +19,6 @@ import {
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { TEST_CACHE_EXPIRATION_TIME } from '../create_test_data';
 
-// eslint-disable-next-line import/no-default-export
 export default function createGetAlertSummaryTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');

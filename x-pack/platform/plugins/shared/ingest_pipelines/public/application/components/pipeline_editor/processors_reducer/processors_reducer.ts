@@ -6,10 +6,11 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Reducer, useReducer, Dispatch } from 'react';
-import { DeserializeResult } from '../deserialize';
+import type { Reducer, Dispatch } from 'react';
+import { useReducer } from 'react';
+import type { DeserializeResult } from '../deserialize';
 import { getValue, setValue } from '../utils';
-import { ProcessorInternal, ProcessorSelector } from '../types';
+import type { ProcessorInternal, ProcessorSelector } from '../types';
 
 import { unsafeProcessorMove, duplicateProcessor } from './utils';
 

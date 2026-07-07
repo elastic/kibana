@@ -9,15 +9,15 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { WATCH_TYPES } from '../../../../common/constants';
 import { serializeJsonWatch, serializeThresholdWatch } from '../../../../common/lib/serialization';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 const paramsSchema = schema.object({
-  id: schema.string(),
+  id: schema.string({ maxLength: 1000 }),
 });
 
 const bodySchema = schema.object(
   {
-    type: schema.string(),
+    type: schema.string({ maxLength: 1000 }),
     isNew: schema.boolean(),
     isActive: schema.boolean(),
   },

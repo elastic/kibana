@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ReactText } from 'react';
-import { Query } from '@kbn/es-query';
-import { HttpStart } from '@kbn/core/public';
+import type { ReactText } from 'react';
+import type { Query } from '@kbn/es-query';
+import type { HttpStart } from '@kbn/core/public';
 import type { estypes } from '@elastic/elasticsearch';
 
 export type SampleInput = ReactText | ReactText[] | Record<string, ReactText | ReactText[]>;

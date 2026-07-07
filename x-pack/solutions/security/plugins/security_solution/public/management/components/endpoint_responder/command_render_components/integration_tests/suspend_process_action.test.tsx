@@ -146,7 +146,7 @@ describe('When using the suspend-process action from response actions console', 
     await enterConsoleCommand(renderResult, user, 'suspend-process --pid 123 --entityId 123wer');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'This command supports only one of the following arguments: --pid, --entityId'
+      'This command supports only one of the following arguments: --entityId, --pid'
     );
   });
 
@@ -155,7 +155,7 @@ describe('When using the suspend-process action from response actions console', 
     await enterConsoleCommand(renderResult, user, 'suspend-process');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'This command supports only one of the following arguments: --pid, --entityId'
+      'This command supports only one of the following arguments: --entityId, --pid'
     );
   });
 
@@ -250,6 +250,7 @@ describe('When using the suspend-process action from response actions console', 
       'agent-a': {
         isCompleted: true,
         wasSuccessful: false,
+        wasCanceled: false,
         errors: ['error one', 'error two'],
         completedAt: new Date().toISOString(),
       },
@@ -294,6 +295,7 @@ describe('When using the suspend-process action from response actions console', 
         'agent-a': {
           isCompleted: true,
           wasSuccessful: false,
+          wasCanceled: false,
           errors: ['error one', 'error two'],
           completedAt: new Date().toISOString(),
         },

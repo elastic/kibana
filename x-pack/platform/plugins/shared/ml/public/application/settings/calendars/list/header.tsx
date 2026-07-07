@@ -25,6 +25,7 @@ import {
 
 import { MlPageHeader } from '../../../components/page_header';
 import { useMlKibana } from '../../../contexts/kibana/kibana_context';
+import { PageTitle } from '../../../components/page_title';
 
 interface Props {
   isDst: boolean;
@@ -42,17 +43,21 @@ export const CalendarsListHeader: FC<Props> = ({ totalCount, refreshCalendars, i
   return (
     <>
       <MlPageHeader>
-        {isDst ? (
-          <FormattedMessage
-            id="xpack.ml.settings.calendars.listHeader.calendarsTitle"
-            defaultMessage="Daylight savings time calendars"
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.ml.settings.calendars.listHeader.calendarsTitle"
-            defaultMessage="Calendars"
-          />
-        )}
+        <PageTitle
+          title={
+            isDst ? (
+              <FormattedMessage
+                id="xpack.ml.settings.calendars.listHeader.calendarsTitle"
+                defaultMessage="Daylight savings time calendars"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.ml.settings.calendars.listHeader.calendarsTitle"
+                defaultMessage="Calendars"
+              />
+            )
+          }
+        />
       </MlPageHeader>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
         <EuiFlexItem grow={false}>

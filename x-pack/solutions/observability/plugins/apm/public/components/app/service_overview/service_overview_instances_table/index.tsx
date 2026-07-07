@@ -9,8 +9,8 @@ import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React, { useEffect, useState } from 'react';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import type { SortDirection } from '../service_overview_instances_chart_and_table';
 import { PAGE_SIZE } from '../service_overview_instances_chart_and_table';
 import { OverviewTableContainer } from '../../../shared/overview_table_container';
@@ -136,16 +136,16 @@ export function ServiceOverviewInstancesTable({
     showPerPageOptions: false,
   };
 
+  const headerTitle = i18n.translate('xpack.apm.serviceOverview.instancesTableTitle', {
+    defaultMessage: 'Top {count} {count, plural, one {instance} other {instances}}',
+    values: { count: mainStatsItemCount },
+  });
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="serviceOverviewInstancesTable">
       <EuiFlexItem>
         <EuiTitle size="xs">
-          <h2>
-            {i18n.translate('xpack.apm.serviceOverview.instancesTableTitle', {
-              defaultMessage: 'Top {count} {count, plural, one {instance} other {instances}}',
-              values: { count: mainStatsItemCount },
-            })}
-          </h2>
+          <h2>{headerTitle}</h2>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem data-test-subj="serviceInstancesTableContainer">
@@ -154,6 +154,7 @@ export function ServiceOverviewInstancesTable({
           isEmptyAndNotInitiated={mainStatsItemCount === 0 && isNotInitiated}
         >
           <EuiBasicTable
+            tableCaption={headerTitle}
             noItemsMessage={
               status === FETCH_STATUS.LOADING
                 ? i18n.translate('xpack.apm.serviceOverview.loadingText', {
@@ -164,6 +165,7 @@ export function ServiceOverviewInstancesTable({
                   })
             }
             data-test-subj="instancesTable"
+            rowHeader="serviceNodeName"
             loading={isLoading}
             items={mainStatsItems}
             columns={columns}
@@ -179,6 +181,9 @@ export function ServiceOverviewInstancesTable({
                   })
                 : ''
             }
+            tableLayout="auto"
+            scrollableInline
+            responsiveBreakpoint={false}
           />
         </OverviewTableContainer>
       </EuiFlexItem>

@@ -5,107 +5,8 @@
  * 2.0.
  */
 
-import type { Agent as SuperTestAgent } from 'supertest';
-
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { RoleCredentials, SecurityService } from '@kbn/ftr-common-functional-services';
-
-export async function createPackagePolicy(
-  supertest: SuperTestAgent,
-  agentPolicyId: string,
-  policyTemplate: string,
-  input: string,
-  deployment: string,
-  posture: string,
-  packageName: string = 'cloud_security_posture-1',
-  roleAuthc?: RoleCredentials,
-  internalRequestHeader?: { 'x-elastic-internal-origin': string; 'kbn-xsrf': string }
-) {
-  const version = CLOUD_SECURITY_PLUGIN_VERSION;
-  const title = 'Security Posture Management';
-  const streams = [
-    {
-      enabled: true,
-      data_stream: {
-        type: 'logs',
-        dataset: 'cloud_security_posture.vulnerabilities',
-      },
-    },
-  ];
-
-  const inputTemplate = {
-    enabled: true,
-    type: input,
-    policy_template: policyTemplate,
-  };
-
-  const inputs = posture === 'vuln_mgmt' ? { ...inputTemplate, streams } : { ...inputTemplate };
-
-  const { body: postPackageResponse } =
-    roleAuthc && internalRequestHeader
-      ? await supertest
-          .post(`/api/fleet/package_policies`)
-          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-          .set(internalRequestHeader)
-          .set(roleAuthc.apiKeyHeader)
-          .send({
-            force: true,
-            name: packageName,
-            description: '',
-            namespace: 'default',
-            policy_id: agentPolicyId,
-            enabled: true,
-            inputs: [inputs],
-            package: {
-              name: 'cloud_security_posture',
-              title,
-              version,
-            },
-            vars: {
-              deployment: {
-                value: deployment,
-                type: 'text',
-              },
-              posture: {
-                value: posture,
-                type: 'text',
-              },
-            },
-          })
-          .expect(200)
-      : await supertest
-          .post(`/api/fleet/package_policies`)
-          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            force: true,
-            name: packageName,
-            description: '',
-            namespace: 'default',
-            policy_id: agentPolicyId,
-            enabled: true,
-            inputs: [inputs],
-            package: {
-              name: 'cloud_security_posture',
-              title,
-              version,
-            },
-            vars: {
-              deployment: {
-                value: deployment,
-                type: 'text',
-              },
-              posture: {
-                value: posture,
-                type: 'text',
-              },
-            },
-          })
-          .expect(200);
-
-  return postPackageResponse.item;
-}
+import type { SecurityService } from '@kbn/ftr-common-functional-services';
+import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
 
 export const createUser = async (security: SecurityService, userName: string, roleName: string) => {
   await security.user.create(userName, {
@@ -123,7 +24,7 @@ export const createCSPRole = async (
   await security.role.create(roleName, {
     kibana: [
       {
-        feature: { siemV2: ['read'], fleetv2: ['all'], fleet: ['read'] },
+        feature: { [SECURITY_FEATURE_ID]: ['read'], fleetv2: ['all'], fleet: ['read'] },
         spaces: ['*'],
       },
     ],
@@ -139,6 +40,24 @@ export const createCSPRole = async (
           },
         }
       : {}),
+  });
+};
+
+/**
+ * Creates a role that is a valid authenticated Kibana user but intentionally
+ * lacks the `cloud-security-posture-read` privilege (granted only by the
+ * Security Solution feature `read`/`all`). Used to assert the status route's
+ * `requiredPrivileges` gate returns a 403 — the Kibana feature-privilege axis,
+ * distinct from the ES index-ACL `unprivileged` status `createCSPRole` exercises.
+ */
+export const createRoleWithoutCspRead = async (security: SecurityService, roleName: string) => {
+  await security.role.create(roleName, {
+    kibana: [
+      {
+        feature: { fleetv2: ['read'] },
+        spaces: ['*'],
+      },
+    ],
   });
 };
 

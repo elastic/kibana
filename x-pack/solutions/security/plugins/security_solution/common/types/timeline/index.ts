@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-export * from './cells';
-export * from './columns';
+export type * from './cells';
+export type * from './columns';
 export * from './data_provider';
-export * from './rows';
-export * from './store';
+export type * from './rows';
+export type * from './store';
 
 /**
  * Used for scrolling top inside a tab. Especially when swiching tabs.

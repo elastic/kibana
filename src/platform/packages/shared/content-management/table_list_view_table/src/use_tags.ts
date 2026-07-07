@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { Query } from '@elastic/eui';
+import type { Query } from '@elastic/eui';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { SearchQueryError, Tag } from './types';
 

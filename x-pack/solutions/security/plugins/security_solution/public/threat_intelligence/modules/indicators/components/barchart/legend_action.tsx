@@ -34,32 +34,39 @@ export interface IndicatorBarchartLegendActionProps {
    * Indicator field selected in the IndicatorFieldSelector component, passed to the {@link AddToTimelineContextMenu} to populate the timeline.
    */
   field: EuiComboBoxOptionOption<string>;
+  announceIndicatorActionChange: (filterMessage: string) => void;
 }
 
 export const IndicatorBarchartLegendAction: FC<IndicatorBarchartLegendActionProps> = ({
   data,
   field,
+  announceIndicatorActionChange,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const group = field.value === 'date' ? timestampToIsoString(data) : data;
+
   const popoverItems = [
     <FilterInContextMenu
       key={FILTER_IN_BUTTON_TEST_ID}
       data={group}
       field={field.label}
+      onAnnounce={announceIndicatorActionChange}
       data-test-subj={FILTER_IN_BUTTON_TEST_ID}
     />,
     <FilterOutContextMenu
       key={FILTER_OUT_BUTTON_TEST_ID}
       data={group}
       field={field.label}
+      onAnnounce={announceIndicatorActionChange}
       data-test-subj={FILTER_OUT_BUTTON_TEST_ID}
     />,
     <AddToTimelineContextMenu
       key={TIMELINE_BUTTON_TEST_ID}
       data={group}
       field={field.label}
+      onAnnounce={announceIndicatorActionChange}
+      showPopover={setPopover}
       data-test-subj={TIMELINE_BUTTON_TEST_ID}
     />,
     <CopyToClipboardContextMenu
@@ -79,10 +86,10 @@ export const IndicatorBarchartLegendAction: FC<IndicatorBarchartLegendActionProp
     <EuiPopover
       data-test-subj={POPOVER_BUTTON_TEST_ID}
       button={
-        <EuiToolTip content={BUTTON_LABEL}>
+        <EuiToolTip content={BUTTON_LABEL} disableScreenReaderOutput>
           <EuiButtonIcon
             aria-label={BUTTON_LABEL}
-            iconType="boxesHorizontal"
+            iconType="boxesVertical"
             iconSize="s"
             size="xs"
             onClick={() => setPopover((prevIsPopoverOpen) => !prevIsPopoverOpen)}
@@ -94,9 +101,10 @@ export const IndicatorBarchartLegendAction: FC<IndicatorBarchartLegendActionProp
       closePopover={() => setPopover(false)}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      aria-label={BUTTON_LABEL}
     >
       <ReduxProvider store={store}>
-        <EuiContextMenuPanel size="s" items={popoverItems} />
+        <EuiContextMenuPanel items={popoverItems} />
       </ReduxProvider>
     </EuiPopover>
   );

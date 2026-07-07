@@ -15,6 +15,7 @@ import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
+import type { UnifiedAttachmentTypeRegistry } from './client/attachment_framework/unified_attachment_registry';
 import type { RenderAppProps } from './types';
 
 import { CasesApp } from './components/app';
@@ -33,6 +34,7 @@ export const renderApp = (deps: RenderAppProps) => {
 interface CasesAppWithContextProps {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   getFilesClient: (scope: string) => ScopedFilesClient;
 }
 
@@ -40,12 +42,14 @@ const CasesAppWithContext: React.FC<CasesAppWithContextProps> = React.memo(
   ({
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
+    unifiedAttachmentTypeRegistry,
     getFilesClient,
   }) => {
     return (
       <CasesApp
         externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
         persistableStateAttachmentTypeRegistry={persistableStateAttachmentTypeRegistry}
+        unifiedAttachmentTypeRegistry={unifiedAttachmentTypeRegistry}
         getFilesClient={getFilesClient}
       />
     );
@@ -72,6 +76,7 @@ export const App: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
           <CasesAppWithContext
             externalReferenceAttachmentTypeRegistry={deps.externalReferenceAttachmentTypeRegistry}
             persistableStateAttachmentTypeRegistry={deps.persistableStateAttachmentTypeRegistry}
+            unifiedAttachmentTypeRegistry={deps.unifiedAttachmentTypeRegistry}
             getFilesClient={pluginsStart.files.filesClientFactory.asScoped}
           />
         </Router>

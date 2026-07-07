@@ -1,6 +1,6 @@
 # TAU
 
-TAU function returns the mathematical constant τ (tau), which is the ratio of a circle's circumference to its radius.
+The TAU function returns the ratio of a circle’s circumference to its radius, which is a mathematical constant equal to approximately 6.283185307179586.
 
 ## Syntax
 
@@ -12,12 +12,8 @@ This function does not require any parameters.
 
 ## Examples
 
-```esql
-ROW TAU()
-```
+Returns the value of the mathematical constant TAU as a single row.
 
 ```esql
-FROM sample_data
-| EVAL tau_value = TAU()
-| KEEP tau_value
+ROW TAU()
 ```

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import { Status } from '../../../../../../common/types/api';
-import { Actions } from '../../../../shared/api_logic/create_api_logic';
-import {
-  AnalyticsEventsExistAPILogic,
-  AnalyticsEventsExistApiLogicResponse,
-} from '../../../api/check_analytics_events/check_analytics_events_exist_api_logic';
+import type { Actions } from '../../../../shared/api_logic/create_api_logic';
+import type { AnalyticsEventsExistApiLogicResponse } from '../../../api/check_analytics_events/check_analytics_events_exist_api_logic';
+import { AnalyticsEventsExistAPILogic } from '../../../api/check_analytics_events/check_analytics_events_exist_api_logic';
 
 export interface AnalyticsCollectionNoEventsCalloutActions {
   apiSuccess: Actions<{}, AnalyticsEventsExistApiLogicResponse>['apiSuccess'];

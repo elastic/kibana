@@ -8,11 +8,10 @@
 import React, { useState } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import {
-  Criteria,
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButton,
   EuiButtonIcon,
   EuiContextMenuItem,
@@ -28,20 +27,20 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import {
-  KnowledgeBaseEntry,
-  KnowledgeBaseState,
-} from '@kbn/observability-ai-assistant-plugin/public';
+import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/public';
+import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKnowledgeBase } from '@kbn/ai-assistant/src/hooks';
 import { KnowledgeBaseInstallationStatusPanel } from '@kbn/ai-assistant/src/knowledge_base/knowledge_base_installation_status_panel';
 import { SettingUpKnowledgeBase } from '@kbn/ai-assistant/src/knowledge_base/setting_up_knowledge_base';
 import { InspectKnowledgeBasePopover } from '@kbn/ai-assistant/src/knowledge_base/inspect_knowlegde_base_popover';
 import { KnowledgeBaseReindexingCallout } from '@kbn/ai-assistant/src/knowledge_base/knowledge_base_reindexing_callout';
 import { useGetKnowledgeBaseEntries } from '../../hooks/use_get_knowledge_base_entries';
-import { categorizeEntries, KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
+import type { KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
+import { categorizeEntries } from '../../helpers/categorize_entries';
 import { KnowledgeBaseEditManualEntryFlyout } from './knowledge_base_edit_manual_entry_flyout';
 import { KnowledgeBaseCategoryFlyout } from './knowledge_base_category_flyout';
 import { KnowledgeBaseBulkImportFlyout } from './knowledge_base_bulk_import_flyout';
@@ -82,17 +81,25 @@ export function KnowledgeBaseTab() {
         </EuiScreenReaderOnly>
       ),
       render: (category: KnowledgeBaseEntryCategory) => {
+        const isSelected = category.categoryKey === selectedCategory?.categoryKey;
+        const label = isSelected
+          ? i18n.translate(
+              'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.collapseRowButtonLabel',
+              { defaultMessage: 'Collapse' }
+            )
+          : i18n.translate(
+              'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.expandRowButtonLabel',
+              { defaultMessage: 'Expand' }
+            );
         return (
-          <EuiButtonIcon
-            data-test-subj="pluginsColumnsButton"
-            onClick={() => setSelectedCategory(category)}
-            aria-label={
-              category.categoryKey === selectedCategory?.categoryKey ? 'Collapse' : 'Expand'
-            }
-            iconType={
-              category.categoryKey === selectedCategory?.categoryKey ? 'minimize' : 'expand'
-            }
-          />
+          <EuiToolTip content={label} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="pluginsColumnsButton"
+              onClick={() => setSelectedCategory(category)}
+              aria-label={label}
+              iconType={isSelected ? 'minimize' : 'expand'}
+            />
+          </EuiToolTip>
         );
       },
     },
@@ -101,16 +108,16 @@ export function KnowledgeBaseTab() {
       name: '',
       render: (category: KnowledgeBaseEntryCategory) => {
         if (category.entries.length === 1 && category.entries[0].role === 'user_entry') {
-          return <EuiIcon type="documentation" color="primary" />;
+          return <EuiIcon type="documentation" color="primary" aria-hidden={true} />;
         }
         if (
           category.entries.length === 1 &&
           category.entries[0].role === 'assistant_summarization'
         ) {
-          return <EuiIcon type="sparkles" color="primary" />;
+          return <EuiIcon type="sparkles" color="primary" aria-hidden={true} />;
         }
 
-        return <EuiIcon type="logoElastic" />;
+        return <EuiIcon type="logoElastic" aria-hidden={true} />;
       },
       width: '40px',
     },
@@ -226,7 +233,7 @@ export function KnowledgeBaseTab() {
     query,
     sortBy,
     sortDirection,
-    kbState: knowledgeBase.status.value?.kbState,
+    inferenceModelState: knowledgeBase.status.value?.inferenceModelState,
   });
 
   const categorizedEntries = categorizeEntries({ entries });
@@ -253,7 +260,7 @@ export function KnowledgeBaseTab() {
     );
   }
 
-  if (knowledgeBase.status.value?.kbState === KnowledgeBaseState.READY) {
+  if (knowledgeBase.status.value?.inferenceModelState === InferenceModelState.READY) {
     return (
       <>
         <EuiFlexGroup direction="column">
@@ -307,6 +314,10 @@ export function KnowledgeBaseTab() {
 
               <EuiFlexItem grow={false}>
                 <EuiPopover
+                  aria-label={i18n.translate(
+                    'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.newEntryButtonLabel',
+                    { defaultMessage: 'New entry' }
+                  )}
                   isOpen={isNewEntryPopoverOpen}
                   closePopover={() => setIsNewEntryPopoverOpen(false)}
                   button={
@@ -314,7 +325,7 @@ export function KnowledgeBaseTab() {
                       fill
                       data-test-subj="knowledgeBaseNewEntryButton"
                       iconSide="right"
-                      iconType="arrowDown"
+                      iconType="chevronSingleDown"
                       onClick={() => setIsNewEntryPopoverOpen((prevValue) => !prevValue)}
                     >
                       {i18n.translate(
@@ -327,7 +338,6 @@ export function KnowledgeBaseTab() {
                   }
                 >
                   <EuiContextMenuPanel
-                    size="s"
                     items={[
                       <EuiContextMenuItem
                         key="singleEntry"
@@ -337,7 +347,6 @@ export function KnowledgeBaseTab() {
                           setIsNewEntryPopoverOpen(false);
                           setNewEntryFlyoutType('singleEntry');
                         }}
-                        size="s"
                       >
                         {i18n.translate(
                           'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.singleEntryContextMenuItemLabel',
@@ -381,6 +390,10 @@ export function KnowledgeBaseTab() {
                 onClick: () => setSelectedCategory(row),
               })}
               onChange={handleChangeSort}
+              tableCaption={i18n.translate(
+                'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.tableCaption',
+                { defaultMessage: 'Knowledge base entries table' }
+              )}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -459,7 +472,10 @@ export function KnowledgeBaseTab() {
               <InspectKnowledgeBasePopover knowledgeBase={knowledgeBase} />
             </>
           ) : (
-            <KnowledgeBaseInstallationStatusPanel knowledgeBase={knowledgeBase} />
+            <KnowledgeBaseInstallationStatusPanel
+              knowledgeBase={knowledgeBase}
+              eisCalloutZIndex={0}
+            />
           )}
         </EuiFlexItem>
       </EuiPanel>

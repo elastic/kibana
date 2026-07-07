@@ -8,7 +8,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { UsageCounters } from '@kbn/usage-collection-plugin/common';
+import type { UsageCounters } from '@kbn/usage-collection-plugin/common';
 import {
   type UsageCollectionSetup,
   USAGE_COUNTERS_SAVED_OBJECT_TYPE,

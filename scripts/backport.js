@@ -7,10 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../src/setup_node_env/node_version_validator');
+require('@kbn/setup-node-env/node_version_validator');
 var process = require('process');
-var backport = require('backport');
 
-backport.backportRun({
-  processArgs: process.argv.slice(2), // forward command line args to backport
-});
+import('backport')
+  .then(function (backport) {
+    backport.backportRun({
+      processArgs: process.argv.slice(2), // forward command line args to backport
+    });
+  })
+  .catch(function (err) {
+    console.error(err);
+    process.exit(1);
+  });

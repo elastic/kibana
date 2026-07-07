@@ -6,32 +6,42 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import pRetry from 'p-retry';
 
 import type { Agent } from '../../types';
-import { AgentReassignmentError } from '../../errors';
+import { AgentReassignmentError, FleetVersionConflictError } from '../../errors';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
-import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
+import { agentsKueryNamespaceFilter, buildFilterWithNamespace } from '../spaces/agent_namespaces';
 
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
-import { getAgentsById, getAgentsByKuery, openPointInTime } from './crud';
+import { closePointInTime, getAgentsById, getAgentsByKuery, openPointInTime } from './crud';
 import type { GetAgentsOptions } from '.';
 import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
 
 export async function updateAgentTags(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  options: ({ agents: Agent[] } | GetAgentsOptions) & { batchSize?: number },
+  options: ({ agents: Agent[] } | GetAgentsOptions) & { batchSize?: number; dryRun?: boolean },
   tagsToAdd: string[],
   tagsToRemove: string[]
-): Promise<{ actionId: string }> {
+): Promise<{ actionId: string } | { count: number }> {
   const currentSpaceId = getCurrentNamespace(soClient);
   const outgoingErrors: Record<Agent['id'], Error> = {};
   const givenAgents: Agent[] = [];
 
-  if ('agentIds' in options) {
+  if ('agents' in options) {
+    if (options.dryRun) {
+      return { count: options.agents.length };
+    }
+    givenAgents.push(...options.agents);
+  } else if ('agentIds' in options) {
+    if (options.dryRun) {
+      const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
+      return { count: maybeAgents.filter((a) => !('notFound' in a)).length };
+    }
     const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
     for (const maybeAgent of maybeAgents) {
       if ('notFound' in maybeAgent) {
@@ -46,27 +56,39 @@ export async function updateAgentTags(
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
     const namespaceFilter = await agentsKueryNamespaceFilter(currentSpaceId);
 
-    const filters = namespaceFilter ? [namespaceFilter] : [];
-    if (options.kuery !== '') {
-      filters.push(options.kuery);
+    const nsAndKuery = buildFilterWithNamespace(
+      namespaceFilter,
+      options.kuery !== '' ? options.kuery : undefined
+    );
+    const filters: string[] = [];
+    if (nsAndKuery) {
+      filters.push(nsAndKuery);
     }
     if (tagsToAdd.length === 1 && tagsToRemove.length === 0) {
-      filters.push(`NOT (tags:${tagsToAdd[0]})`);
+      filters.push(`(NOT (tags:${tagsToAdd[0]}))`);
     } else if (tagsToRemove.length === 1 && tagsToAdd.length === 0) {
-      filters.push(`tags:${tagsToRemove[0]}`);
+      filters.push(`(tags:${tagsToRemove[0]})`);
     }
 
-    const kuery = filters.map((filter) => `(${filter})`).join(' AND ');
+    const kuery = filters.join(' AND ');
     const pitId = await openPointInTime(esClient);
 
-    // calculate total count
+    // calculate total count; close PIT before propagating any ES error
     const res = await getAgentsByKuery(esClient, soClient, {
       kuery,
       showAgentless: options.showAgentless,
       showInactive: options.showInactive ?? false,
       perPage: 0,
       pitId,
+    }).catch(async (error) => {
+      await closePointInTime(esClient, pitId);
+      throw error;
     });
+
+    if (options.dryRun) {
+      await closePointInTime(esClient, pitId);
+      return { count: res.total };
+    }
 
     return await new UpdateAgentTagsActionRunner(
       esClient,
@@ -84,9 +106,22 @@ export async function updateAgentTags(
     ).runActionAsyncTask();
   }
 
-  return await updateTagsBatch(soClient, esClient, givenAgents, outgoingErrors, {
-    tagsToAdd,
-    tagsToRemove,
-    spaceId: currentSpaceId,
-  });
+  return pRetry(
+    () =>
+      updateTagsBatch(soClient, esClient, givenAgents, outgoingErrors, {
+        tagsToAdd,
+        tagsToRemove,
+        spaceId: currentSpaceId,
+      }),
+    {
+      onFailedAttempt: (error) => {
+        if (!(error instanceof FleetVersionConflictError)) {
+          throw error;
+        }
+      },
+      retries: 3,
+      minTimeout: 100,
+      maxTimeout: 200,
+    }
+  );
 }

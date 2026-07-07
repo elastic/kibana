@@ -11,30 +11,31 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover, unifiedFieldList, dashboard, header, timePicker } = getPageObjects([
-    'common',
-    'discover',
-    'unifiedFieldList',
-    'dashboard',
-    'header',
-    'timePicker',
-  ]);
+  const { common, discover, unifiedFieldList, dashboard, header, timePicker, unifiedTabs } =
+    getPageObjects([
+      'common',
+      'discover',
+      'unifiedFieldList',
+      'dashboard',
+      'header',
+      'timePicker',
+      'unifiedTabs',
+    ]);
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
   const dataViews = getService('dataViews');
+  const queryBar = getService('queryBar');
   const monacoEditor = getService('monacoEditor');
   const ebtUIHelper = getService('kibana_ebt_ui');
   const retry = getService('retry');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const toasts = getService('toasts');
+  const performanceMetricTimeoutMs = 1500;
 
   describe('telemetry', () => {
     describe('context', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded(
-          'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-        );
         await kibanaServer.importExport.load(
           'src/platform/test/functional/fixtures/kbn_archiver/discover'
         );
@@ -57,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
           eventTypes: ['performance_metric'],
-          withTimeoutMs: 500,
+          withTimeoutMs: performanceMetricTimeoutMs,
         });
 
         expect(events[events.length - 1].context.discoverProfiles).to.eql([
@@ -77,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
           eventTypes: ['performance_metric'],
-          withTimeoutMs: 500,
+          withTimeoutMs: performanceMetricTimeoutMs,
         });
 
         expect(events[events.length - 1].context.discoverProfiles).to.eql([
@@ -113,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.waitForRenderComplete();
         const rows = await dataGrid.getDocTableRows();
         expect(rows.length).to.be.above(0);
-        await testSubjects.click('dashboardEditorMenuButton');
+        await dashboardAddPanel.openAddPanelFlyout();
 
         const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
           eventTypes: ['click'],
@@ -129,9 +130,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('contextual profiles', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded(
-          'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-        );
         await kibanaServer.importExport.load(
           'src/platform/test/functional/fixtures/kbn_archiver/discover'
         );
@@ -264,6 +262,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(event2.properties).to.eql({
           eventName: 'dataTableSelection',
+          fieldName: '<non-ecs>',
         });
       });
 
@@ -395,6 +394,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilSearchingHasFinished();
 
         // event 3
+        // preventing flakiness in this case, there were 2 toasts displayed, covering the cell in the flaky case
+        await toasts.dismissAll();
         await dataGrid.clickFieldActionInFlyout('log.level', 'addFilterOutValueButton');
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
@@ -424,6 +425,233 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'example-root-profile',
           'example-data-source-profile',
         ]);
+      });
+    });
+
+    describe('trackSubmittingQuery telemetry', () => {
+      beforeEach(async () => {
+        await discover.resetQueryMode();
+        await common.navigateToApp('discover');
+        await discover.waitUntilTabIsLoaded();
+        await ebtUIHelper.setOptIn(true);
+      });
+
+      it('should track field usage for KQL queries', async () => {
+        await queryBar.setQuery('agent.name: "java" and log.level : "debug"');
+        await queryBar.submitQuery();
+        await discover.waitUntilTabIsLoaded();
+
+        const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['discover_query_fields_usage'],
+          withTimeoutMs: 500,
+        });
+
+        expect(event.properties).to.eql({
+          eventName: 'kqlQuery',
+          fieldNames: ['agent.name', 'log.level'],
+        });
+      });
+
+      it('should track field usage for ES|QL queries', async () => {
+        await discover.selectTextBaseLang();
+        await monacoEditor.setCodeEditorValue(
+          'from my-example-* | where agent.name == "java" and log.level == "debug"'
+        );
+        await testSubjects.click('querySubmitButton');
+        await discover.waitUntilTabIsLoaded();
+
+        const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['discover_query_fields_usage'],
+          withTimeoutMs: 500,
+        });
+
+        expect(event.properties).to.eql({
+          eventName: 'esqlQuery',
+          fieldNames: ['agent.name', 'log.level'],
+        });
+      });
+
+      it('should track field usage for KQL queries embedded in ES|QL queries', async () => {
+        await discover.selectTextBaseLang();
+        await monacoEditor.setCodeEditorValue(
+          'from my-example-* | where agent.name == "java" and KQL("""log.level:"debug" """)'
+        );
+        await testSubjects.click('querySubmitButton');
+        await discover.waitUntilTabIsLoaded();
+
+        const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['discover_query_fields_usage'],
+          withTimeoutMs: 500,
+        });
+
+        expect(event.properties).to.eql({
+          eventName: 'esqlQuery',
+          fieldNames: ['agent.name', 'log.level'],
+        });
+      });
+
+      it('should track free text search as __FREE_TEXT__ placeholder', async () => {
+        await queryBar.setQuery('error occurred');
+        await queryBar.submitQuery();
+        await discover.waitUntilTabIsLoaded();
+
+        const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['discover_query_fields_usage'],
+          withTimeoutMs: 500,
+        });
+
+        expect(event.properties).to.eql({
+          eventName: 'kqlQuery',
+          fieldNames: ['__FREE_TEXT__'],
+        });
+      });
+    });
+
+    describe('trackTabs telemetry', () => {
+      beforeEach(async () => {
+        await common.navigateToApp('discover');
+        await discover.waitUntilTabIsLoaded();
+        await ebtUIHelper.setOptIn(true);
+      });
+
+      it('should track tabCreated event', async () => {
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+
+        const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['discover_tabs'],
+          withTimeoutMs: 500,
+        });
+
+        expect(event.properties).to.eql({
+          eventName: 'tabCreated',
+          totalTabsOpen: 1,
+          tabId: event.properties.tabId,
+        });
+      });
+
+      it('should track tabClosed event', async () => {
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await unifiedTabs.closeTab(1);
+        await discover.waitUntilTabIsLoaded();
+
+        const [_createTabEvent, closeTabEvent] = await ebtUIHelper.getEvents(
+          Number.MAX_SAFE_INTEGER,
+          {
+            eventTypes: ['discover_tabs'],
+            withTimeoutMs: 500,
+          }
+        );
+
+        expect(closeTabEvent.properties).to.eql({
+          eventName: 'tabClosed',
+          totalTabsOpen: 2,
+          remainingTabsCount: 1,
+          tabId: closeTabEvent.properties.tabId,
+        });
+      });
+
+      it('should track tabSwitched event', async () => {
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await unifiedTabs.selectTab(0);
+        await discover.waitUntilTabIsLoaded();
+
+        const [_createTabEvent, switchTabEvent] = await ebtUIHelper.getEvents(
+          Number.MAX_SAFE_INTEGER,
+          {
+            eventTypes: ['discover_tabs'],
+            withTimeoutMs: 500,
+          }
+        );
+
+        expect(switchTabEvent.properties).to.eql({
+          eventName: 'tabSwitched',
+          totalTabsOpen: 2,
+          tabId: switchTabEvent.properties.tabId,
+          fromIndex: 1,
+          toIndex: 0,
+        });
+      });
+
+      it('should track tabDuplicated event', async () => {
+        await unifiedTabs.duplicateTab(0);
+        await discover.waitUntilTabIsLoaded();
+
+        const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['discover_tabs'],
+          withTimeoutMs: 500,
+        });
+
+        expect(event.properties).to.eql({
+          eventName: 'tabDuplicated',
+          totalTabsOpen: 1,
+          tabId: event.properties.tabId,
+        });
+      });
+
+      it('should track tabClosedOthers event', async () => {
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await unifiedTabs.openTabMenu(2);
+        await testSubjects.click('unifiedTabs_tabMenuItem_closeOtherTabs');
+        await discover.waitUntilTabIsLoaded();
+
+        const [_createTabEvent1, _createTabEvent2, closeOtherTabsEvent] =
+          await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+            eventTypes: ['discover_tabs'],
+            withTimeoutMs: 500,
+          });
+
+        expect(closeOtherTabsEvent.properties).to.eql({
+          eventName: 'tabClosedOthers',
+          totalTabsOpen: 3,
+          closedTabsCount: 2,
+          tabId: closeOtherTabsEvent.properties.tabId,
+        });
+      });
+
+      it('should track tabClosedToTheRight event', async () => {
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await unifiedTabs.openTabMenu(0);
+        await testSubjects.click('unifiedTabs_tabMenuItem_closeTabsToTheRight');
+        await discover.waitUntilTabIsLoaded();
+
+        const [_createTabEvent1, _createTabEvent2, closeTabsToTheRightEvent] =
+          await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+            eventTypes: ['discover_tabs'],
+            withTimeoutMs: 500,
+          });
+
+        expect(closeTabsToTheRightEvent.properties).to.eql({
+          eventName: 'tabClosedToTheRight',
+          totalTabsOpen: 3,
+          closedTabsCount: 2,
+          remainingTabsCount: 1,
+          tabId: closeTabsToTheRightEvent.properties.tabId,
+        });
+      });
+
+      it('should track tabRenamed event', async () => {
+        const newTitle = 'New tab title';
+        await unifiedTabs.editTabLabel(0, newTitle);
+        await discover.waitUntilTabIsLoaded();
+
+        const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['discover_tabs'],
+          withTimeoutMs: 500,
+        });
+        expect(event.properties).to.eql({
+          eventName: 'tabRenamed',
+          totalTabsOpen: 1,
+          tabId: event.properties.tabId,
+        });
       });
     });
   });

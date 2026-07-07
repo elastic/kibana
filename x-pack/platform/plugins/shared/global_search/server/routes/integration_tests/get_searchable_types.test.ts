@@ -6,33 +6,32 @@
  */
 
 import supertest from 'supertest';
+import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { globalSearchPluginMock } from '../../mocks';
 import { registerInternalSearchableTypesRoute } from '../get_searchable_types';
 
-type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 const pluginId = Symbol('globalSearch');
 
 describe('GET /internal/global_search/searchable_types', () => {
   let server: SetupServerReturn['server'];
-  let httpSetup: SetupServerReturn['httpSetup'];
+  let createRouter: SetupServerReturn['createRouter'];
+  let registerRouteHandlerContext: SetupServerReturn['registerRouteHandlerContext'];
   let globalSearchHandlerContext: ReturnType<
     typeof globalSearchPluginMock.createRouteHandlerContext
   >;
 
   beforeEach(async () => {
-    ({ server, httpSetup } = await setupServer(pluginId));
+    ({ server, createRouter, registerRouteHandlerContext } = await setupServer(pluginId));
 
     globalSearchHandlerContext = globalSearchPluginMock.createRouteHandlerContext();
-    httpSetup.registerRouteHandlerContext<
+    registerRouteHandlerContext<
       ReturnType<typeof globalSearchPluginMock.createRequestHandlerContext>,
       'globalSearch'
     >(pluginId, 'globalSearch', () => globalSearchHandlerContext);
 
     const router =
-      httpSetup.createRouter<ReturnType<typeof globalSearchPluginMock.createRequestHandlerContext>>(
-        '/'
-      );
+      createRouter<ReturnType<typeof globalSearchPluginMock.createRequestHandlerContext>>('/');
 
     registerInternalSearchableTypesRoute(router);
 
@@ -44,9 +43,7 @@ describe('GET /internal/global_search/searchable_types', () => {
   });
 
   it('calls the handler context with correct parameters', async () => {
-    await supertest(httpSetup.server.listener)
-      .get('/internal/global_search/searchable_types')
-      .expect(200);
+    await supertest(server.listener).get('/internal/global_search/searchable_types').expect(200);
 
     expect(globalSearchHandlerContext.getSearchableTypes).toHaveBeenCalledTimes(1);
   });
@@ -54,7 +51,7 @@ describe('GET /internal/global_search/searchable_types', () => {
   it('returns the types returned from the service', async () => {
     globalSearchHandlerContext.getSearchableTypes.mockResolvedValue(['type-a', 'type-b']);
 
-    const response = await supertest(httpSetup.server.listener)
+    const response = await supertest(server.listener)
       .get('/internal/global_search/searchable_types')
       .expect(200);
 
@@ -66,7 +63,7 @@ describe('GET /internal/global_search/searchable_types', () => {
   it('returns the default error when the observable throws any other error', async () => {
     globalSearchHandlerContext.getSearchableTypes.mockRejectedValue(new Error());
 
-    const response = await supertest(httpSetup.server.listener)
+    const response = await supertest(server.listener)
       .get('/internal/global_search/searchable_types')
       .expect(500);
 

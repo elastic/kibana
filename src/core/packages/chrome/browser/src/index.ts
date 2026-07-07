@@ -12,17 +12,35 @@ export type {
   ChromeBreadcrumb,
   ChromeSetBreadcrumbsParams,
 } from './breadcrumb';
-export type { ChromeStart } from './contracts';
+export type {
+  AppHeaderBack,
+  AppHeaderBadge,
+  AppHeaderBadgeItem,
+  AppHeaderConfig,
+  AppHeaderEditableTitle,
+  AppHeaderMetadataButtonItem,
+  AppHeaderMetadataHealthItem,
+  AppHeaderMetadataItem,
+  AppHeaderMetadataItems,
+  AppHeaderMetadataTextItem,
+  AppHeaderTab,
+  AppHeaderTabAction,
+  AppHeaderTabActions,
+  AppHeaderTabBadge,
+  AppHeaderTabIconBadge,
+  AppHeaderTitle,
+  AppHeaderTitleSaveResult,
+  ChromeNext,
+  GlobalHeaderAiButton,
+} from './chrome_next';
+export type { ChromeSetup, ChromeStart } from './contracts';
 export type { ChromeDocTitle } from './doc_title';
 export type {
   ChromeHelpExtension,
-  ChromeHelpMenuActions,
   ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuLink,
   ChromeHelpExtensionMenuCustomLink,
-  ChromeHelpExtensionMenuDiscussLink,
   ChromeHelpExtensionMenuDocumentationLink,
-  ChromeHelpExtensionMenuGitHubLink,
   ChromeGlobalHelpExtensionMenuLink,
 } from './help_extension';
 export type { ChromeNavControls, ChromeNavControl, ChromeHelpMenuLink } from './nav_controls';
@@ -31,11 +49,10 @@ export type {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
 } from './recently_accessed';
-export type { ChromeBadge, ChromeUserBanner, ChromeStyle } from './types';
+export type { ChromeBadge, ChromeBreadcrumbsBadge, ChromeUserBanner, ChromeStyle } from './types';
 
 export type {
   ChromeProjectNavigationNode,
-  PanelSelectedNode,
   AppDeepLinkId,
   AppId,
   SolutionId,
@@ -43,24 +60,26 @@ export type {
   CloudLink,
   CloudLinks,
   CloudURLs,
-  SideNavCompProps,
-  SideNavComponent,
   SideNavNodeStatus,
   ChromeSetProjectBreadcrumbsParams,
   NodeDefinition,
-  NodeDefinitionWithChildren,
   RenderAs as NodeRenderAs,
-  EuiThemeSize,
   NavigationTreeDefinition,
-  GroupDefinition,
-  ItemDefinition,
-  PresetDefinition,
-  RecentlyAccessedDefinition,
-  NavigationGroupPreset,
-  RootNavigationItemDefinition,
   NavigationTreeDefinitionUI,
   SolutionNavigationDefinition,
   SolutionNavigationDefinitions,
+  NavigationCustomization,
+  NavigationCustomizationMove,
   EuiSideNavItemTypeEnhanced,
   RenderAs,
 } from './project_navigation';
+
+export type {
+  SidebarApp,
+  SidebarAppConfig,
+  SidebarAppDefinition,
+  SidebarSetup,
+  SidebarStart,
+} from './sidebar';
+
+export type { GlobalSearchConfig } from './chrome_next/global_search';

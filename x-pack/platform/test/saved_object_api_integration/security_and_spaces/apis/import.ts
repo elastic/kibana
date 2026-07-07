@@ -7,14 +7,14 @@
 
 import { SPACES } from '../../common/lib/spaces';
 import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
-import { TestUser } from '../../common/lib/types';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { TestUser } from '../../common/lib/types';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { ImportTestDefinition } from '../../common/suites/import';
 import {
   importTestSuiteFactory,
   importTestCaseFailures,
   TEST_CASES as CASES,
   SPECIAL_TEST_CASES,
-  ImportTestDefinition,
 } from '../../common/suites/import';
 
 const {
@@ -138,16 +138,9 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
   };
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-  const es = getService('es');
-
-  const { addTests, createTestDefinitions, expectSavedObjectForbidden } = importTestSuiteFactory(
-    es,
-    esArchiver,
-    supertest
-  );
+export default function (context: FtrProviderContext) {
+  const { addTests, createTestDefinitions, expectSavedObjectForbidden } =
+    importTestSuiteFactory(context);
   const createTests = (overwrite: boolean, createNewCopies: boolean, spaceId: string) => {
     const singleRequest = true;
 

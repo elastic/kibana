@@ -7,29 +7,24 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { ServiceAgentResponse } from '@kbn/apm-api-shared';
+import { getAgentName } from '@kbn/elastic-agent-utils';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   AGENT_NAME,
   SERVICE_NAME,
   SERVICE_RUNTIME_NAME,
+  SERVICE_RUNTIME_VERSION,
+  PROCESS_RUNTIME_VERSION,
   CLOUD_PROVIDER,
   CLOUD_SERVICE_NAME,
   TELEMETRY_SDK_NAME,
   TELEMETRY_SDK_LANGUAGE,
 } from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import type { ServerlessType } from '../../../common/serverless';
 import { getServerlessTypeFromCloudData } from '../../../common/serverless';
 import { maybe } from '../../../common/utils/maybe';
-
-export interface ServiceAgentResponse {
-  agentName?: string;
-  runtimeName?: string;
-  telemetrySdkName?: string;
-  telemetrySdkLanguage?: string;
-  serverlessType?: ServerlessType;
-}
 
 export async function getServiceAgent({
   serviceName,
@@ -47,31 +42,38 @@ export async function getServiceAgent({
     TELEMETRY_SDK_NAME,
     TELEMETRY_SDK_LANGUAGE,
     SERVICE_RUNTIME_NAME,
+    SERVICE_RUNTIME_VERSION,
+    PROCESS_RUNTIME_VERSION,
     CLOUD_PROVIDER,
     CLOUD_SERVICE_NAME,
   ] as const);
 
   const params = {
-    terminate_after: 1,
     apm: {
-      events: [
-        ProcessorEvent.span,
-        ProcessorEvent.error,
-        ProcessorEvent.transaction,
-        ProcessorEvent.metric,
-      ],
+      events: [ProcessorEvent.error, ProcessorEvent.transaction, ProcessorEvent.metric],
     },
     track_total_hits: 1,
     size: 1,
-    _source: [AGENT_NAME, SERVICE_RUNTIME_NAME, CLOUD_PROVIDER, CLOUD_SERVICE_NAME],
+    _source: [
+      AGENT_NAME,
+      SERVICE_RUNTIME_NAME,
+      SERVICE_RUNTIME_VERSION,
+      CLOUD_PROVIDER,
+      CLOUD_SERVICE_NAME,
+    ],
     query: {
       bool: {
         filter: [
           { term: { [SERVICE_NAME]: serviceName } },
           ...rangeQuery(start, end),
           {
-            exists: {
-              field: AGENT_NAME,
+            bool: {
+              should: [
+                { exists: { field: AGENT_NAME } },
+                { exists: { field: TELEMETRY_SDK_NAME } },
+                { exists: { field: TELEMETRY_SDK_LANGUAGE } },
+              ],
+              minimum_should_match: 1,
             },
           },
         ],
@@ -95,9 +97,7 @@ export async function getServiceAgent({
       },
     },
     fields,
-    sort: {
-      _score: { order: 'desc' as const },
-    },
+    sort: { '@timestamp': { order: 'desc' as const }, _score: { order: 'desc' as const } },
   };
 
   const response = await apmEventClient.search('get_service_agent_name', params);
@@ -106,16 +106,30 @@ export async function getServiceAgent({
     return {};
   }
 
-  const event = unflattenKnownApmEventFields(hit.fields);
+  const event = accessKnownApmEventFields(hit.fields);
 
-  const { agent, service, cloud, telemetry } = event;
-  const serverlessType = getServerlessTypeFromCloudData(cloud?.provider, cloud?.service?.name);
+  const serverlessType = getServerlessTypeFromCloudData(
+    event[CLOUD_PROVIDER],
+    event[CLOUD_SERVICE_NAME]
+  );
+
+  const runtimeVersion =
+    event[SERVICE_RUNTIME_VERSION] ??
+    (hit.fields?.[PROCESS_RUNTIME_VERSION]?.[0] as string | undefined);
+
+  const agentName =
+    getAgentName(
+      event[AGENT_NAME] ?? null,
+      event[TELEMETRY_SDK_LANGUAGE] ?? null,
+      event[TELEMETRY_SDK_NAME] ?? null
+    ) ?? undefined;
 
   return {
-    agentName: agent?.name,
-    telemetrySdkName: telemetry?.sdk?.name,
-    telemetrySdkLanguage: telemetry?.sdk?.language,
-    runtimeName: service?.runtime?.name,
+    agentName,
+    telemetrySdkName: event[TELEMETRY_SDK_NAME],
+    telemetrySdkLanguage: event[TELEMETRY_SDK_LANGUAGE],
+    runtimeName: event[SERVICE_RUNTIME_NAME],
+    runtimeVersion,
     serverlessType,
   };
 }

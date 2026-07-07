@@ -18,11 +18,11 @@ import type {
   RouteMethod,
 } from '@kbn/core/server';
 import type { ServerSentEvent } from '@kbn/sse-utils';
-import { z } from '@kbn/zod';
-import * as t from 'io-ts';
-import { Observable } from 'rxjs';
-import { Readable } from 'stream';
-import { Required, RequiredKeys, ValuesType } from 'utility-types';
+import type { z } from '@kbn/zod/v4';
+import type * as t from 'io-ts';
+import type { Observable } from 'rxjs';
+import type { Readable } from 'stream';
+import type { Required, RequiredKeys, ValuesType } from 'utility-types';
 
 type MaybeOptional<T extends { params?: Record<string, any> }> = RequiredKeys<
   T['params']
@@ -42,9 +42,9 @@ export interface RouteParams {
 }
 
 export type ZodParamsObject = z.ZodObject<{
-  path?: z.ZodSchema;
-  query?: z.ZodSchema;
-  body?: z.ZodSchema;
+  path?: z.ZodType;
+  query?: z.ZodType;
+  body?: z.ZodType;
 }>;
 
 export type IoTsParamsObject = WithoutIncompatibleMethods<t.Type<RouteParams>>;
@@ -195,10 +195,12 @@ type ClientRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
     ? MaybeOptional<{
         params: t.OutputOf<TRouteParamsRT>;
       }>
-    : TRouteParamsRT extends z.ZodSchema
-    ? MaybeOptional<{
-        params: z.input<TRouteParamsRT>;
-      }>
+    : TRouteParamsRT extends z.ZodType
+    ? z.input<TRouteParamsRT> extends Record<string, any>
+      ? MaybeOptional<{
+          params: z.input<TRouteParamsRT>;
+        }>
+      : never
     : never;
 
 type DecodedRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
@@ -206,9 +208,9 @@ type DecodedRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
     ? MaybeOptional<{
         params: t.TypeOf<TRouteParamsRT>;
       }>
-    : TRouteParamsRT extends z.ZodSchema
+    : TRouteParamsRT extends z.ZodType<infer O extends Record<string, any>>
     ? MaybeOptional<{
-        params: z.output<TRouteParamsRT>;
+        params: O;
       }>
     : never;
 

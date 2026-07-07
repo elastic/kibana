@@ -7,7 +7,8 @@
 
 import moment from 'moment';
 
-import { ConnectorSyncJob, SyncJobType, SyncStatus, TriggerMethod } from '@kbn/search-connectors';
+import type { ConnectorSyncJob } from '@kbn/search-connectors';
+import { SyncJobType, SyncStatus, TriggerMethod } from '@kbn/search-connectors';
 import { nextTick } from '@kbn/test-jest-helpers';
 import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__';
 
@@ -15,8 +16,10 @@ import { FetchSyncJobsApiLogic } from '../../../api/connector/fetch_sync_jobs_ap
 
 import { IndexViewLogic } from '../index_view_logic';
 
-import { SyncJobView, SyncJobsViewLogic } from './sync_jobs_view_logic';
-import { HttpError, Status } from '../../../../common/types/api';
+import type { SyncJobView } from './sync_jobs_view_logic';
+import { SyncJobsViewLogic } from './sync_jobs_view_logic';
+import type { HttpError } from '../../../../common/types/api';
+import { Status } from '../../../../common/types/api';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 
 // We can't test fetchTimeOutId because this will get set whenever the logic is created

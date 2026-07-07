@@ -48,10 +48,10 @@ const downloadAndStoreElasticAgent = async (
   // Download all the versions in the list
   for (const versionToDownload of versionsToDownload) {
     try {
-      const { url } = await getAgentDownloadUrl(versionToDownload, closestMatch, log);
+      const { url, shaUrl } = await getAgentDownloadUrl(versionToDownload, closestMatch, log);
       const fileName = `${getAgentFileName(versionToDownload)}.tar.gz`;
 
-      await downloadAndStoreAgent(url, fileName);
+      await downloadAndStoreAgent(url, fileName, shaUrl);
       log.info(`Successfully downloaded and stored version ${versionToDownload}`);
     } catch (error) {
       log.error(`Failed to download or store version ${versionToDownload}: ${error.message}`);

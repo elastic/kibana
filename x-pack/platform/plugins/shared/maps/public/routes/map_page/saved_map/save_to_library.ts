@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/public';
-import type { MapAttributes } from '../../../../common/content_management';
+import type { MapAttributes } from '../../../../server';
 import { getMapClient } from '../../../content_management';
 
 export async function saveToLibrary(

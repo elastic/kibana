@@ -7,32 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { HttpStart } from '@kbn/core/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { extractReferences } from '../saved_visualization_references';
 import { visualizationsClient } from '../../content_management';
-import { TypesStart } from '../../vis_types';
+import type { BasicVisualizationClient, TypesStart } from '../../vis_types';
 
 interface UpdateBasicSoAttributesDependencies {
   savedObjectsTagging?: SavedObjectsTaggingApi;
   overlays: OverlayStart;
   typesService: TypesStart;
   contentManagement: ContentManagementPublicStart;
+  http: HttpStart;
 }
 
 function getClientForType(
   type: string,
   typesService: TypesStart,
-  contentManagement: ContentManagementPublicStart
-) {
+  contentManagement: ContentManagementPublicStart,
+  http: HttpStart
+): BasicVisualizationClient {
   const visAliases = typesService.getAliases();
-  return (
-    visAliases
-      .find((v) => v.appExtensions?.visualizations.docTypes.includes(type))
-      ?.appExtensions?.visualizations.client(contentManagement) || visualizationsClient
-  );
+  return (visAliases
+    .find((v) => v.appExtensions?.visualizations.docTypes.includes(type))
+    ?.appExtensions?.visualizations.client(contentManagement, http) ||
+    visualizationsClient) as BasicVisualizationClient;
 }
 
 function getAdditionalOptionsForUpdate(
@@ -49,7 +51,7 @@ function getAdditionalOptionsForUpdate(
 }
 
 export const updateBasicSoAttributes = async (
-  soId: string,
+  id: string,
   type: string,
   newAttributes: {
     title: string;
@@ -58,9 +60,14 @@ export const updateBasicSoAttributes = async (
   },
   dependencies: UpdateBasicSoAttributesDependencies
 ) => {
-  const client = getClientForType(type, dependencies.typesService, dependencies.contentManagement);
+  const client = getClientForType(
+    type,
+    dependencies.typesService,
+    dependencies.contentManagement,
+    dependencies.http
+  );
 
-  const so = await client.get(soId);
+  const so = await client.get(id);
   const extractedReferences = extractReferences({
     attributes: so.item.attributes,
     references: so.item.references,
@@ -82,7 +89,7 @@ export const updateBasicSoAttributes = async (
   }
 
   return await client.update({
-    id: soId,
+    id,
     data: {
       ...attributes,
     },
@@ -91,4 +98,32 @@ export const updateBasicSoAttributes = async (
       ...getAdditionalOptionsForUpdate(type, dependencies.typesService, 'update'),
     },
   });
+};
+
+export const deleteSOByType = async (
+  id: string,
+  type: string,
+  dependencies: UpdateBasicSoAttributesDependencies
+) => {
+  const client = getClientForType(
+    type,
+    dependencies.typesService,
+    dependencies.contentManagement,
+    dependencies.http
+  );
+
+  const { success } = await client.delete(id);
+
+  if (!success) throw new Error();
+};
+
+export const deleteListItems = async (
+  items: object[], // can be any SO item type from the vis page
+  dependencies: UpdateBasicSoAttributesDependencies
+) => {
+  return Promise.all(
+    items.map(async (item: any) => {
+      await deleteSOByType(item.id, item.savedObjectType, dependencies);
+    })
+  );
 };

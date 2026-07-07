@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import {
   asDecimal,
   asInteger,
@@ -65,7 +65,7 @@ export function MetricsChart({ chart, fetchStatus }: Props) {
         </EuiFlexItem>
         {chart.description && (
           <EuiFlexItem grow={false}>
-            <EuiIconTip content={chart.description} position="top" type="questionInCircle" />
+            <EuiIconTip content={chart.description} position="top" type="question" />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

@@ -75,7 +75,9 @@ export function calculateObjectDiff<TBase extends Obj, TCompare extends Obj>(
         removedMap[key] = [];
         updatedMap[key] = [];
         diffRecursive(
+          // @ts-expect-error upgrade typescript v5.9.3
           base[key] as Obj,
+          // @ts-expect-error upgrade typescript v5.9.3
           compare[key] as Obj,
           addedMap[key] as Obj,
           removedMap[key] as Obj,

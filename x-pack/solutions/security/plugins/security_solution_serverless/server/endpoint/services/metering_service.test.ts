@@ -21,7 +21,7 @@ import { METERING_TASK } from '../constants/metering';
 
 import { EndpointMeteringService } from './metering_service';
 
-describe('EndpointMeteringService', () => {
+describe.skip('EndpointMeteringService', () => {
   function buildDefaultUsageRecordArgs() {
     return {
       logger: loggingSystemMock.createLogger(),

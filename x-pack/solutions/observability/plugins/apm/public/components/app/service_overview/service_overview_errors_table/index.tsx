@@ -20,6 +20,9 @@ interface Props {
 
 export function ServiceOverviewErrorsTable({ serviceName, onLoadTable }: Props) {
   const { query } = useApmParams('/services/{serviceName}/overview');
+  const headerTitle = i18n.translate('xpack.apm.serviceOverview.errorsTableTitle', {
+    defaultMessage: 'Errors',
+  });
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="serviceOverviewErrorsTable">
@@ -27,11 +30,7 @@ export function ServiceOverviewErrorsTable({ serviceName, onLoadTable }: Props) 
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
-              <h2>
-                {i18n.translate('xpack.apm.serviceOverview.errorsTableTitle', {
-                  defaultMessage: 'Errors',
-                })}
-              </h2>
+              <h2>{headerTitle}</h2>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -52,6 +51,7 @@ export function ServiceOverviewErrorsTable({ serviceName, onLoadTable }: Props) 
             isCompactMode={true}
             saveTableOptionsToUrl={false}
             showPerPageOptions={false}
+            tableCaption={headerTitle}
           />
         </OverviewTableContainer>
       </EuiFlexItem>

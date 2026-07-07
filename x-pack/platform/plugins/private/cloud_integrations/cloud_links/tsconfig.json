@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -8,6 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
@@ -15,8 +16,6 @@
     "@kbn/cloud-plugin",
     "@kbn/security-plugin",
     "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/guided-onboarding-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/core-doc-links-browser",
     "@kbn/core-ui-settings-browser",
@@ -28,6 +27,7 @@
     "@kbn/core-mount-utils-browser",
     "@kbn/core-plugins-browser",
     "@kbn/config",
+    "@kbn/scout",
   ],
   "exclude": [
     "target/**/*",

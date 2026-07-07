@@ -9,8 +9,9 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiFormRow, EuiSwitch, EuiText, EuiDatePicker, UseEuiTheme } from '@elastic/eui';
-import moment from 'moment';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiText, EuiDatePicker } from '@elastic/eui';
+import type moment from 'moment';
 import type {
   PointInTimeEventAnnotationConfig,
   RangeEventAnnotationConfig,

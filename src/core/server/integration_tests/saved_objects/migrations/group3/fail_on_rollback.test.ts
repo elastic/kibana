@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as timer } from 'timers/promises';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import {
   startElasticsearch,
@@ -14,17 +15,16 @@ import {
   defaultKibanaIndex,
   defaultKibanaTaskIndex,
   currentVersion,
-} from '../kibana_migrator_test_kit';
+} from '@kbn/migrator-test-kit';
 import '../jest_matchers';
-import { delay } from '../test_utils';
-import { getUpToDateMigratorTestKit } from '../kibana_migrator_test_kit.fixtures';
-import { BASELINE_TEST_ARCHIVE_1K } from '../kibana_migrator_archive_utils';
+import { getUpToDateMigratorTestKit } from '@kbn/migrator-test-kit/fixtures';
+import { BASELINE_TEST_ARCHIVE_SMALL } from '../kibana_migrator_archive_utils';
 
 describe('when rolling back to an older version', () => {
   let esServer: TestElasticsearchUtils['es'];
 
   beforeAll(async () => {
-    esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_1K });
+    esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_SMALL });
   });
 
   it('kibana should detect that a later version alias exists, and abort', async () => {
@@ -50,6 +50,6 @@ describe('when rolling back to an older version', () => {
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(2);
+    await timer(2_000);
   });
 });

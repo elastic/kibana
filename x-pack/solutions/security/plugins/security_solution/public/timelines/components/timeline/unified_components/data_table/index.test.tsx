@@ -6,6 +6,7 @@
  */
 
 import { createMockStore, mockTimelineData, TestProviders } from '../../../../../common/mock';
+import type { ComponentProps } from 'react';
 import React from 'react';
 import { TimelineDataTable } from '.';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types';
@@ -13,16 +14,11 @@ import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import type { ComponentProps } from 'react';
 import { getColumnHeaders } from '../../body/column_headers/helpers';
 import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import * as timelineActions from '../../../../store/actions';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-
-jest.mock('../../../../../sourcerer/containers');
-
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useLocation: jest.fn(() => ({
@@ -36,10 +32,50 @@ const refetchMock = jest.fn();
 const onFetchMoreRecordsMock = jest.fn();
 
 const openFlyoutMock = jest.fn();
+const mockOpenSystemFlyout = jest.fn();
+const mockUiSettingsGet = jest.fn().mockReturnValue(false);
+const mockUseUiSetting = jest.fn().mockReturnValue(false);
+const mockDocumentFlyoutWrapper = jest.fn((_props?: unknown) => (
+  <div>{'MockDocumentFlyoutWrapper'}</div>
+));
+const mockAttackFlyoutWrapper = jest.fn((_props?: unknown) => (
+  <div>{'MockAttackFlyoutWrapper'}</div>
+));
 
 const updateSampleSizeSpy = jest.spyOn(timelineActions, 'updateSampleSize');
 
 jest.mock('@kbn/expandable-flyout');
+jest.mock('../../../../../flyout_v2/shared/components/flyout_provider', () => ({
+  flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
+}));
+jest.mock('../../../../../flyout_v2/document/main/document_flyout_wrapper', () => ({
+  DocumentFlyoutWrapper: (props: unknown) => mockDocumentFlyoutWrapper(props),
+}));
+jest.mock('../../../../../flyout_v2/attack/main/attack_flyout_wrapper', () => ({
+  AttackFlyoutWrapper: (props: unknown) => mockAttackFlyoutWrapper(props),
+}));
+jest.mock('../../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../../common/lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      ...original.useKibana(),
+      services: {
+        ...original.useKibana().services,
+        overlays: {
+          ...original.useKibana().services.overlays,
+          openSystemFlyout: mockOpenSystemFlyout,
+        },
+        uiSettings: {
+          ...original.useKibana().services.uiSettings,
+          get: mockUiSettingsGet,
+        },
+      },
+    }),
+    useUiSetting: (...args: Parameters<typeof mockUseUiSetting>) => mockUseUiSetting(...args),
+  };
+});
 
 const initialEnrichedColumns = getColumnHeaders(
   defaultUdtHeaders,
@@ -47,6 +83,21 @@ const initialEnrichedColumns = getColumnHeaders(
 );
 
 const initialEnrichedColumnsIds = initialEnrichedColumns.map((c) => c.id);
+const mockAttackTimelineData = [
+  {
+    ...mockTimelineData[0],
+    _id: 'attack-1',
+    data: [
+      ...mockTimelineData[0].data,
+      { field: 'kibana.alert.attack_discovery.alert_ids', value: ['alert-1'] },
+      { field: 'kibana.alert.rule.rule_type_id', value: ['attack-discovery'] },
+    ],
+    ecs: {
+      ...mockTimelineData[0].ecs,
+      _index: 'attack-index',
+    },
+  },
+];
 
 type TestComponentProps = Partial<ComponentProps<typeof TimelineDataTable>> & {
   store?: ReturnType<typeof createMockStore>;
@@ -63,7 +114,6 @@ const mockDataView = new DataView({
 
 const TestComponent = (props: TestComponentProps) => {
   const { store = createMockStore(), ...restProps } = props;
-  useSourcererDataView();
   return (
     <TestProviders store={store}>
       <TimelineDataTable
@@ -101,10 +151,12 @@ const getTimelineFromStore = (
 
 describe('unified data table', () => {
   beforeEach(() => {
-    (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
       openFlyout: openFlyoutMock,
+      closeFlyout: jest.fn(),
     });
+    mockUiSettingsGet.mockReturnValue(false);
+    mockUseUiSetting.mockReturnValue(false);
   });
   afterEach(() => {
     updateSampleSizeSpy.mockClear();
@@ -116,6 +168,74 @@ describe('unified data table', () => {
     async () => {
       render(<TestComponent />);
       expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+
+  it(
+    'opens attack flyout when expanded row is an attack discovery alert',
+    async () => {
+      render(<TestComponent events={mockAttackTimelineData} />);
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+      fireEvent.click(screen.getByTestId('docTableExpandToggleColumn'));
+
+      await waitFor(() => {
+        expect(openFlyoutMock).toHaveBeenCalledWith({
+          right: {
+            id: 'attack-details-right',
+            params: {
+              attackId: 'attack-1',
+              indexName: 'attack-index',
+            },
+          },
+        });
+      });
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+
+  it(
+    'opens DocumentFlyoutWrapper via system flyout when enableNewFlyout setting is enabled and row is not an attack',
+    async () => {
+      mockUseUiSetting.mockReturnValue(true);
+
+      render(<TestComponent />);
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+      fireEvent.click(screen.getAllByTestId('docTableExpandToggleColumn')[0]);
+
+      await waitFor(() => {
+        expect(mockOpenSystemFlyout).toHaveBeenCalled();
+      });
+
+      const flyoutElement = mockOpenSystemFlyout.mock.calls[0][0];
+      expect(flyoutElement.props.documentId).toBe(mockTimelineData[0]._id);
+      expect(flyoutElement.props.indexName).toBe(mockTimelineData[0].ecs._index);
+      expect(flyoutElement.props.onAlertUpdated).toBe(refetchMock);
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+
+  it(
+    'opens AttackFlyoutWrapper via system flyout when enableNewFlyout setting is enabled and row is an attack discovery alert',
+    async () => {
+      mockUseUiSetting.mockReturnValue(true);
+
+      render(<TestComponent events={mockAttackTimelineData} />);
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+      fireEvent.click(screen.getByTestId('docTableExpandToggleColumn'));
+
+      await waitFor(() => {
+        expect(mockOpenSystemFlyout).toHaveBeenCalled();
+      });
+
+      const flyoutElement = mockOpenSystemFlyout.mock.calls[0][0];
+      expect(flyoutElement.props.attackId).toBe('attack-1');
+      expect(flyoutElement.props.indexName).toBe('attack-index');
+      expect(flyoutElement.props.onAttackUpdated).toBe(refetchMock);
+      expect(mockDocumentFlyoutWrapper).not.toHaveBeenCalled();
     },
     SPECIAL_TEST_TIMEOUT
   );

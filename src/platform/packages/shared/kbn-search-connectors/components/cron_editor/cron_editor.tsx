@@ -9,7 +9,8 @@
 
 import React, { Component, Fragment } from 'react';
 
-import { EuiSelect, EuiFormRow, EuiSelectOption } from '@elastic/eui';
+import type { EuiSelectOption } from '@elastic/eui';
+import { EuiSelect, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -31,7 +32,7 @@ import { CronMonthly } from './cron_monthly';
 import { CronWeekly } from './cron_weekly';
 import { CronYearly } from './cron_yearly';
 import { cronExpressionToParts, cronPartsToExpression } from './services';
-import { Frequency, Field, FieldToValueMap } from '../../types/cron_editor';
+import type { Frequency, Field, FieldToValueMap } from '../../types/cron_editor';
 
 const excludeBlockListedFrequencies = (
   units: EuiSelectOption[],

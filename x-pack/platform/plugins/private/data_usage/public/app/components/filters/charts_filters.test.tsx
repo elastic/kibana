@@ -9,7 +9,7 @@ import { TestProvider } from '../../../../common/test_utils';
 import { render, type RenderResult } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { ChartsFilters, type ChartsFiltersProps } from './charts_filters';
-import { FilterName } from '../../hooks';
+import type { FilterName } from '../../hooks';
 import { mockUseKibana } from '../../mocks';
 import {
   METRIC_TYPE_VALUES,

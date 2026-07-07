@@ -12,10 +12,8 @@ import { FetchCustomPipelineApiLogic } from '../../../api/index/fetch_custom_pip
 
 import { IndexNameLogic } from '../index_name_logic';
 
-import {
-  IndexPipelinesConfigurationsLogic,
-  IndexPipelinesConfigurationsValues,
-} from './pipelines_json_configurations_logic';
+import type { IndexPipelinesConfigurationsValues } from './pipelines_json_configurations_logic';
+import { IndexPipelinesConfigurationsLogic } from './pipelines_json_configurations_logic';
 
 const indexName = 'unit-test-index';
 const DEFAULT_VALUES: IndexPipelinesConfigurationsValues = {

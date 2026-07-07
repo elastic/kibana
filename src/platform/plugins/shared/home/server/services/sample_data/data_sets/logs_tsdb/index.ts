@@ -11,14 +11,7 @@ import path from 'path';
 import { i18n } from '@kbn/i18n';
 import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
-import { SampleDatasetProvider } from '../../lib/sample_dataset_registry_types';
-
-const logsName = i18n.translate('home.sampleData.logsTsdbSpecTitle', {
-  defaultMessage: 'Sample web logs (TSDB)',
-});
-const logsDescription = i18n.translate('home.sampleData.logsTsdbSpecDescription', {
-  defaultMessage: 'Sample data, visualizations, and dashboards for monitoring web logs.',
-});
+import type { SampleDatasetProvider } from '../../lib/sample_dataset_registry_types';
 
 export const GLOBE_ICON_PATH =
   '/platform/plugins/shared/home/assets/sample_data_resources/logs/icon.svg';
@@ -29,11 +22,17 @@ export const logsTSDBSpecProvider: SampleDatasetProvider = ({ staticAssets }) =>
   endDate.setMonth(endDate.getMonth() + 2);
   return {
     id: 'logstsdb',
-    name: logsName,
-    description: logsDescription,
-    previewImagePath: staticAssets.getPluginAssetHref('/sample_data_resources/logs/dashboard.webp'),
+    name: i18n.translate('home.sampleData.logsTsdbSpecTitle', {
+      defaultMessage: 'Sample web logs (TSDB)',
+    }),
+    description: i18n.translate('home.sampleData.logsTsdbSpecDescription', {
+      defaultMessage: 'Sample data, visualizations, and dashboards for monitoring web logs.',
+    }),
+    previewImagePath: staticAssets.getPluginAssetHref(
+      '/sample_data_resources/logs/search_analytics.svg'
+    ),
     darkPreviewImagePath: staticAssets.getPluginAssetHref(
-      '/sample_data_resources/logs/dashboard_dark.webp'
+      '/sample_data_resources/logs/search_analytics.svg'
     ),
     overviewDashboard: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef8f5b',
     defaultIndex: '90943e30-9a47-11e8-b64d-95841ca0c247',

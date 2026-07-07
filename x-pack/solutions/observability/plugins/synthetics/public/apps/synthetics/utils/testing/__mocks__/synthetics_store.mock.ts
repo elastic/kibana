@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { SyntheticsAppState } from '../../../state/root_reducer';
+import type { SyntheticsAppState } from '../../../state/root_reducer';
+import type { TLSVersion } from '../../../../../../common/runtime_types';
 import {
   ConfigKey,
   MonitorTypeEnum,
@@ -14,9 +15,8 @@ import {
   ScheduleUnit,
   SourceType,
   VerificationMode,
-  TLSVersion,
 } from '../../../../../../common/runtime_types';
-import { MonitorDetailsState } from '../../../state';
+import type { MonitorDetailsState } from '../../../state';
 
 /**
  * NOTE: This variable name MUST start with 'mock*' in order for
@@ -105,6 +105,7 @@ export const mockState: SyntheticsAppState = {
       order: 'asc',
     },
     view: 'cardView',
+    showLastRun: false,
   },
   syntheticsEnablement: { loading: false, error: null, enablement: null },
   monitorDetails: getMonitorDetailsMockSlice(),
@@ -164,6 +165,12 @@ export const mockState: SyntheticsAppState = {
     error: null,
   },
   maintenanceWindows: {},
+  monitorHealth: {
+    data: null,
+    loading: false,
+    loaded: false,
+    error: null,
+  },
 };
 
 function getBrowserJourneyMockSlice() {

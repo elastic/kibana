@@ -9,7 +9,7 @@
 
 import { assertNever } from '@kbn/std';
 import type { RewritePolicyConfig } from '@kbn/core-logging-server';
-import { RewritePolicy } from './policy';
+import type { RewritePolicy } from './policy';
 import { MetaRewritePolicy, metaRewritePolicyConfigSchema } from './meta';
 
 export type { RewritePolicy };

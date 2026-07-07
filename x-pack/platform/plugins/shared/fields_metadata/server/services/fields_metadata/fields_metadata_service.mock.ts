@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { createFieldsMetadataClientMock } from './fields_metadata_client.mock';
-import { FieldsMetadataServiceSetup, FieldsMetadataServiceStart } from './types';
+import type { FieldsMetadataServiceSetup, FieldsMetadataServiceStart } from './types';
 
 export const createFieldsMetadataServiceSetupMock =
   (): jest.Mocked<FieldsMetadataServiceSetup> => ({
     registerIntegrationFieldsExtractor: jest.fn(),
     registerIntegrationListExtractor: jest.fn(),
+    registerStreamsFieldsExtractor: jest.fn(),
   });
 
 export const createFieldsMetadataServiceStartMock =

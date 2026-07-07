@@ -7,7 +7,7 @@
 
 import { getExceptionListItemSchemaMock } from '../common/schemas/response/exception_list_item_schema.mock';
 
-import { ListPluginSetup } from './types';
+import type { ListPluginSetup } from './types';
 import { getListClientMock } from './services/lists/list_client.mock';
 import {
   getCreateExceptionListItemOptionsMock,

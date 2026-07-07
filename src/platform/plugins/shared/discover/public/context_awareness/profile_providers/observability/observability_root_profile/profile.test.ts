@@ -8,10 +8,13 @@
  */
 
 import { SolutionType } from '../../../profiles';
-import { createContextAwarenessMocks } from '../../../__mocks__';
+import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import { createObservabilityRootProfileProvider } from './profile';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 
-const mockServices = createContextAwarenessMocks().profileProviderServices;
+const mockServices = createProfileProviderSharedServicesMock();
 
 describe('observabilityRootProfileProvider', () => {
   const observabilityRootProfileProvider = createObservabilityRootProfileProvider(mockServices);
@@ -60,7 +63,7 @@ describe('observabilityRootProfileProvider', () => {
       expect(result.context.allLogsIndexPattern).toEqual('logs-*');
       const defaultDataViews = observabilityRootProfileProvider.profile.getDefaultAdHocDataViews?.(
         () => [],
-        { context: result.context }
+        { context: result.context, toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT }
       )();
       expect(defaultDataViews).toEqual([
         {
@@ -85,9 +88,207 @@ describe('observabilityRootProfileProvider', () => {
       expect(result.context.allLogsIndexPattern).toEqual(undefined);
       const defaultDataViews = observabilityRootProfileProvider.profile.getDefaultAdHocDataViews?.(
         () => [],
-        { context: result.context }
+        { context: result.context, toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT }
       )();
       expect(defaultDataViews).toEqual([]);
     });
   });
+
+  describe('getDefaultEsqlQuery', () => {
+    it('should return an ES|QL query using the allLogsIndexPattern from the resolved context', async () => {
+      const result = await observabilityRootProfileProvider.resolve({
+        solutionNavId: SolutionType.Observability,
+      });
+      if (!result.isMatch) {
+        throw new Error('Expected result to match');
+      }
+      expect(result.context.allLogsIndexPattern).toEqual('logs-*');
+      const defaultEsqlQuery = observabilityRootProfileProvider.profile.getDefaultEsqlQuery?.(
+        () => ({ query: 'FROM prev-pattern' }),
+        { context: result.context, toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT }
+      )();
+      expect(defaultEsqlQuery).toEqual({ query: 'FROM logs-*' });
+    });
+
+    it('should fall back to the previous profile return value when allLogsIndexPattern is undefined', async () => {
+      jest
+        .spyOn(mockServices.logsContextService, 'getAllLogsIndexPattern')
+        .mockReturnValueOnce(undefined);
+      const result = await observabilityRootProfileProvider.resolve({
+        solutionNavId: SolutionType.Observability,
+      });
+      if (!result.isMatch) {
+        throw new Error('Expected result to match');
+      }
+      expect(result.context.allLogsIndexPattern).toEqual(undefined);
+      const prevValue = { query: 'FROM prev-pattern' };
+      const prev = jest.fn().mockReturnValue(prevValue);
+      const defaultEsqlQuery = observabilityRootProfileProvider.profile.getDefaultEsqlQuery?.(
+        prev,
+        {
+          context: result.context,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+        }
+      )();
+      expect(prev).toHaveBeenCalled();
+      expect(defaultEsqlQuery).toEqual(prevValue);
+    });
+  });
+
+  describe('getDocViewer', () => {
+    it('does NOT add attributes doc viewer tab to the registry when the record has no attributes fields', () => {
+      const getDocViewer = observabilityRootProfileProvider.profile.getDocViewer!(
+        () => ({
+          title: 'test title',
+          docViewsRegistry: (registry) => registry,
+        }),
+        {
+          context: {
+            solutionType: SolutionType.Observability,
+            allLogsIndexPattern: mockServices.logsContextService.getAllLogsIndexPattern(),
+          },
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+        }
+      );
+
+      const docViewer = getDocViewer({
+        record: buildMockRecord('test-index', {
+          foo: 'bar',
+        }),
+      });
+
+      const registry = new DocViewsRegistry();
+
+      expect(docViewer.title).toBe('test title');
+      expect(registry.getAll()).toHaveLength(0);
+
+      docViewer.docViewsRegistry(registry);
+
+      expect(registry.getAll()).toHaveLength(0);
+    });
+    it('adds attributes doc viwer tab to the registry when the record has any attributes. field', () => {
+      const getDocViewer = observabilityRootProfileProvider.profile.getDocViewer!(
+        () => ({
+          title: 'test title',
+          docViewsRegistry: (registry) => registry,
+        }),
+        {
+          context: {
+            solutionType: SolutionType.Observability,
+            allLogsIndexPattern: mockServices.logsContextService.getAllLogsIndexPattern(),
+          },
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+        }
+      );
+
+      const docViewer = getDocViewer({
+        record: buildMockRecord('test-index', {
+          'attributes.foo': 'bar',
+        }),
+      });
+
+      const registry = new DocViewsRegistry();
+
+      expect(docViewer.title).toBe('test title');
+      expect(registry.getAll()).toHaveLength(0);
+      docViewer.docViewsRegistry(registry);
+
+      expect(registry.getAll()).toHaveLength(1);
+
+      expect(registry.getAll()[0]).toEqual(
+        expect.objectContaining({
+          id: 'doc_view_obs_attributes_overview',
+          title: 'Attributes',
+          order: 9,
+          render: expect.any(Function),
+        })
+      );
+    });
+    it('adds attributes doc viwer tab to the registry when the record has any scope.attributes. field', () => {
+      const getDocViewer = observabilityRootProfileProvider.profile.getDocViewer!(
+        () => ({
+          title: 'test title',
+          docViewsRegistry: (registry) => registry,
+        }),
+        {
+          context: {
+            solutionType: SolutionType.Observability,
+            allLogsIndexPattern: mockServices.logsContextService.getAllLogsIndexPattern(),
+          },
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+        }
+      );
+
+      const docViewer = getDocViewer({
+        record: buildMockRecord('test-index', {
+          'scope.attributes.foo': 'bar',
+        }),
+      });
+
+      const registry = new DocViewsRegistry();
+
+      expect(docViewer.title).toBe('test title');
+      expect(registry.getAll()).toHaveLength(0);
+      docViewer.docViewsRegistry(registry);
+
+      expect(registry.getAll()).toHaveLength(1);
+
+      expect(registry.getAll()[0]).toEqual(
+        expect.objectContaining({
+          id: 'doc_view_obs_attributes_overview',
+          title: 'Attributes',
+          order: 9,
+          render: expect.any(Function),
+        })
+      );
+    });
+    it('adds attributes doc viewer tab to the registry when the record has any resource.attributes. field', () => {
+      const getDocViewer = observabilityRootProfileProvider.profile.getDocViewer!(
+        () => ({
+          title: 'test title',
+          docViewsRegistry: (registry) => registry,
+        }),
+        {
+          context: {
+            solutionType: SolutionType.Observability,
+            allLogsIndexPattern: mockServices.logsContextService.getAllLogsIndexPattern(),
+          },
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+        }
+      );
+
+      const docViewer = getDocViewer({
+        record: buildMockRecord('test-index', {
+          'resource.attributes.foo': 'bar',
+        }),
+      });
+
+      const registry = new DocViewsRegistry();
+
+      expect(docViewer.title).toBe('test title');
+      expect(registry.getAll()).toHaveLength(0);
+      docViewer.docViewsRegistry(registry);
+
+      expect(registry.getAll()).toHaveLength(1);
+
+      expect(registry.getAll()[0]).toEqual(
+        expect.objectContaining({
+          id: 'doc_view_obs_attributes_overview',
+          title: 'Attributes',
+          order: 9,
+          render: expect.any(Function),
+        })
+      );
+    });
+  });
 });
+
+const buildMockRecord = (index: string, fields: Record<string, unknown> = {}) =>
+  buildDataTableRecord({
+    _id: '',
+    _index: index,
+    fields: {
+      _index: index,
+      ...fields,
+    },
+  });

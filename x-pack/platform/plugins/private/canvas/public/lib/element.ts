@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElementSpec } from '../../types';
+import type { ElementSpec } from '../../types';
 
 export class Element {
   /** The name of the Element. This must match the name of the function that is used to create the `type: render` object  */

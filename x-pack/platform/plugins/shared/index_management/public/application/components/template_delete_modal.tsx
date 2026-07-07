@@ -6,13 +6,20 @@
  */
 
 import React, { Fragment, useState } from 'react';
-import { EuiConfirmModal, EuiCallOut, EuiCheckbox, EuiBadge, EuiSpacer } from '@elastic/eui';
+import {
+  EuiConfirmModal,
+  EuiCallOut,
+  EuiCheckbox,
+  EuiBadge,
+  EuiSpacer,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DeleteManagedAssetsCallout } from '@kbn/delete-managed-asset-callout';
 import { deleteTemplates } from '../services/api';
-import { notificationService } from '../services/notification';
+import { useServices } from '../app_context';
 
 export const TemplateDeleteModal = ({
   templatesToDelete,
@@ -21,7 +28,10 @@ export const TemplateDeleteModal = ({
   templatesToDelete: Array<{ name: string; isLegacy?: boolean; type?: string }>;
   callback: (data?: { hasDeletedTemplates: boolean }) => void;
 }) => {
+  const { notificationService } = useServices();
   const [isDeleteConfirmed, setIsDeleteConfirmed] = useState<boolean>(false);
+
+  const modalTitleId = useGeneratedHtmlId();
 
   const numTemplatesToDelete = templatesToDelete.length;
 
@@ -86,6 +96,8 @@ export const TemplateDeleteModal = ({
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       buttonColor="danger"
       data-test-subj="deleteTemplatesConfirmation"
       title={
@@ -163,6 +175,7 @@ export const TemplateDeleteModal = ({
         </ul>
         {hasSystemTemplate && (
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.idxMgmt.deleteTemplatesModal.proceedWithCautionCallOutTitle"

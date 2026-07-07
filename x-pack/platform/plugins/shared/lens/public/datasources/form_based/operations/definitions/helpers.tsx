@@ -9,20 +9,20 @@ import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEqual } from 'lodash';
-import { Query } from '@kbn/es-query';
-import { TextBasedLayerColumn } from '../../esql_layer/types';
-import type { IndexPattern, IndexPatternField } from '../../../../types';
-import {
-  type FieldBasedOperationErrorMessage,
-  type GenericIndexPatternColumn,
-  operationDefinitionMap,
-} from '.';
-import {
+import type { Query } from '@kbn/es-query';
+import type {
+  ColumnBuildHints,
   FieldBasedIndexPatternColumn,
   FormattedIndexPatternColumn,
-  ReferenceBasedIndexPatternColumn,
-} from './column_types';
-import type { FormBasedLayer, LastValueIndexPatternColumn } from '../../types';
+  GenericIndexPatternColumn,
+  TextBasedLayerColumn,
+  FormBasedLayer,
+  FormBasedPersistedState,
+  IndexPattern,
+  IndexPatternField,
+} from '@kbn/lens-common';
+import { cleanupFormulaReferenceColumns, hasStateFormulaColumn } from '@kbn/lens-common';
+import { type FieldBasedOperationErrorMessage, operationDefinitionMap } from '.';
 import { hasField } from '../../pure_utils';
 import { FIELD_NOT_FOUND, FIELD_WRONG_TYPE } from '../../../../user_messages_ids';
 
@@ -162,11 +162,52 @@ export function isValidNumber(
   );
 }
 
+/**
+ * Type guard for narrowing a full column to a specific column type.
+ * Use this when you have a complete `GenericIndexPatternColumn` and need to
+ * access type-specific properties with full type safety.
+ */
 export function isColumnOfType<C extends GenericIndexPatternColumn>(
   type: C['operationType'],
   column: GenericIndexPatternColumn
 ): column is C {
   return column.operationType === type;
+}
+
+/**
+ * Checks if partial column hints match a specific operation type.
+ * Use this in `buildColumn` implementations when working with `previousColumn`
+ * which is typed as `ColumnBuildHints` (partial metadata, not a full column).
+ *
+ * Unlike `isColumnOfType`, this does NOT narrow the type - it only returns a boolean.
+ * Use `getBooleanParam` or `getNumberParam` to safely extract typed params.
+ */
+export function hasOperationType(column: ColumnBuildHints | undefined, type: string): boolean {
+  return column?.operationType === type;
+}
+
+/**
+ * Safely extracts a boolean param from column hints.
+ * Returns `undefined` if the param doesn't exist or isn't a boolean.
+ */
+export function getBooleanParam(
+  column: ColumnBuildHints | undefined,
+  paramName: string
+): boolean | undefined {
+  const value = column?.params?.[paramName];
+  return typeof value === 'boolean' ? value : undefined;
+}
+
+/**
+ * Safely extracts a number param from column hints.
+ * Returns `undefined` if the param doesn't exist or isn't a number.
+ */
+export function getNumberParam(
+  column: ColumnBuildHints | undefined,
+  paramName: string
+): number | undefined {
+  const value = column?.params?.[paramName];
+  return typeof value === 'number' ? value : undefined;
 }
 
 export const isColumn = (
@@ -188,12 +229,8 @@ export function isColumnFormatted(
   );
 }
 
-export function getFormatFromPreviousColumn(
-  previousColumn: GenericIndexPatternColumn | ReferenceBasedIndexPatternColumn | undefined
-) {
-  return previousColumn?.dataType === 'number' &&
-    isColumnFormatted(previousColumn) &&
-    previousColumn.params
+export function getFormatFromPreviousColumn(previousColumn: ColumnBuildHints | undefined) {
+  return previousColumn?.dataType === 'number' && previousColumn.params?.format
     ? { format: previousColumn.params.format }
     : undefined;
 }
@@ -212,13 +249,14 @@ export function comparePreviousColumnFilter(filter: Query | undefined, field: st
 }
 
 export function getFilter(
-  previousColumn: GenericIndexPatternColumn | undefined,
+  previousColumn: ColumnBuildHints | undefined,
   columnParams: { kql?: string | undefined; lucene?: string | undefined } | undefined
 ) {
   let filter = previousColumn?.filter;
   if (
     previousColumn &&
-    isColumnOfType<LastValueIndexPatternColumn>('last_value', previousColumn) &&
+    previousColumn.operationType === 'last_value' &&
+    previousColumn.sourceField &&
     comparePreviousColumnFilter(filter, previousColumn.sourceField)
   ) {
     return;
@@ -235,4 +273,21 @@ export function getFilter(
 
 export function isMetricCounterField(field?: IndexPatternField) {
   return field?.timeSeriesMetric === 'counter';
+}
+
+export function cleanupFormulaColumns(state: FormBasedPersistedState): FormBasedPersistedState {
+  // check whether it makes sense to perform all the work for formula
+  if (hasStateFormulaColumn(state)) {
+    return state;
+  }
+
+  const layers = { ...state.layers };
+  for (const layerId of Object.keys(layers)) {
+    layers[layerId] = cleanupFormulaReferenceColumns(layers[layerId]);
+  }
+
+  return {
+    ...state,
+    layers,
+  };
 }

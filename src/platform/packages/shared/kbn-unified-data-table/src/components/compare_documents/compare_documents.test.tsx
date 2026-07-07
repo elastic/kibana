@@ -10,21 +10,25 @@
 import type { EuiDataGridProps } from '@elastic/eui';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { omit } from 'lodash';
 import React from 'react';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
-import CompareDocuments, { CompareDocumentsProps } from './compare_documents';
+import type { CompareDocumentsProps } from './compare_documents';
+import CompareDocuments from './compare_documents';
 import { useComparisonFields } from './hooks/use_comparison_fields';
 
 let mockLocalStorage: Record<string, string> = {};
 
-jest.mock('react-use/lib/useLocalStorage', () =>
-  jest.fn((key: string, value: unknown) => {
-    mockLocalStorage[key] = JSON.stringify(value);
-    return [value, jest.fn()];
-  })
-);
+jest.mock('../../restorable_state', () => {
+  const real = jest.requireActual('../../restorable_state');
+  return {
+    useRestorableLocalStorage: jest.fn((key: string, storageKey, value: unknown) => {
+      mockLocalStorage[storageKey] = JSON.stringify(value);
+      return real.useRestorableLocalStorage(key, storageKey, value);
+    }),
+  };
+});
 
 let mockDataGridProps: EuiDataGridProps | undefined;
 
@@ -48,7 +52,8 @@ const docs = generateEsHits(dataViewWithTimefieldMock, 5).map((hit) =>
   buildDataTableRecord(hit, dataViewWithTimefieldMock)
 );
 
-const getDocById = (id: string) => docs.find((doc) => doc.raw._id === id);
+const createDocMap = (currentDocs = docs) =>
+  new Map(currentDocs.map((doc, docIndex) => [doc.raw._id ?? doc.id, { doc, docIndex }]));
 
 const renderCompareDocuments = ({
   forceShowAllFields = false,
@@ -69,7 +74,7 @@ const renderCompareDocuments = ({
       forceShowAllFields={forceShowAllFields}
       showFullScreenButton={true}
       fieldFormats={{} as any}
-      getDocById={getDocById}
+      docMap={createDocMap()}
       replaceSelectedDocs={replaceSelectedDocs}
       setIsCompareActive={jest.fn()}
       {...props}
@@ -96,7 +101,7 @@ describe('CompareDocuments', () => {
       Object {
         "aria-describedby": "test",
         "aria-labelledby": "test",
-        "className": "css-h7dgtn-useComparisonCss-useComparisonCss",
+        "className": "css-d1lkc2-useComparisonCss-useComparisonCss",
         "columnVisibility": Object {
           "setVisibleColumns": [Function],
           "visibleColumns": Array [
@@ -149,7 +154,9 @@ describe('CompareDocuments', () => {
   it('should set selected docs when columns change', () => {
     const { replaceSelectedDocs } = renderCompareDocuments();
     const visibleColumns = ['fields_generated-id', '0', '1', '2'];
-    mockDataGridProps?.columnVisibility.setVisibleColumns(visibleColumns);
+    act(() => {
+      mockDataGridProps?.columnVisibility.setVisibleColumns(visibleColumns);
+    });
     expect(replaceSelectedDocs).toHaveBeenCalledWith(visibleColumns.slice(1));
   });
 
@@ -164,11 +171,11 @@ describe('CompareDocuments', () => {
     );
   });
 
-  it('should retain comparison docs when getDocById loses access to them', () => {
+  it('should retain comparison docs when docMap and selectedDocIds lose access to them', () => {
     const { rerender } = renderCompareDocuments();
     const visibleColumns = ['fields_generated-id', '0', '1', '2'];
     expect(mockDataGridProps?.columnVisibility.visibleColumns).toEqual(visibleColumns);
-    rerender({ getDocById: () => undefined });
+    rerender({ docMap: new Map(), selectedDocIds: [] });
     expect(mockDataGridProps?.columnVisibility.visibleColumns).toEqual(visibleColumns);
   });
 });

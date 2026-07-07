@@ -21,6 +21,10 @@ import {
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import {
+  CHANGE_POINT_CHART_DEFAULT_SERIES,
+  CHANGE_POINT_DETECTION_VIEW_TYPE,
+} from '@kbn/aiops-change-point-detection/constants';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
@@ -28,6 +32,7 @@ import { pick } from 'lodash';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
+import type { ChangePointChartEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/change_point_chart';
 import {
   ChangePointDetectionControlsContextProvider,
   useChangePointDetectionControlsContext,
@@ -42,14 +47,51 @@ import { ViewTypeSelector } from '../../components/change_point_detection/view_t
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../../hooks/use_data_source';
 import { FilterQueryContextProvider } from '../../hooks/use_filters_query';
-import { DEFAULT_SERIES } from './const';
-import type { ChangePointEmbeddableState } from './types';
+import type { ChangePointDetectionProps } from '../../shared_components/change_point_detection';
 
 export interface AnomalyChartsInitializerProps {
-  initialInput?: Partial<ChangePointEmbeddableState>;
-  onCreate: (props: ChangePointEmbeddableState) => void;
+  initialInput?: Partial<ChangePointChartEmbeddableState>;
+  onCreate: (props: ChangePointChartEmbeddableState) => void;
   onCancel: () => void;
 }
+
+const getInitialFormControls = (
+  initialInput?: Partial<ChangePointChartEmbeddableState>
+): FormControlsProps | undefined => {
+  if (
+    !initialInput?.aggregation_function ||
+    !initialInput.metric_field ||
+    initialInput.max_series_to_plot === undefined
+  ) {
+    return undefined;
+  }
+
+  return {
+    fn: initialInput.aggregation_function,
+    metricField: initialInput.metric_field,
+    splitField: initialInput.split_field,
+    maxSeriesToPlot: initialInput.max_series_to_plot,
+    partitions: initialInput.partitions,
+  };
+};
+
+const getTitle = (formInput?: FormControlsProps) => {
+  if (!isPopulatedObject(formInput)) return '';
+
+  return i18n.translate('xpack.aiops.changePointDetection.attachmentTitle', {
+    defaultMessage: 'Change point: {function}({metric}){splitBy}',
+    values: {
+      function: formInput.fn,
+      metric: formInput.metricField,
+      splitBy: formInput.splitField
+        ? i18n.translate('xpack.aiops.changePointDetection.splitByTitle', {
+            defaultMessage: ' split by "{splitField}"',
+            values: { splitField: formInput.splitField },
+          })
+        : '',
+    },
+  });
+};
 
 export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
   initialInput,
@@ -77,41 +119,28 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
     uiSettingsKeys: UI_SETTINGS,
   };
 
-  const [dataViewId, setDataViewId] = useState(initialInput?.dataViewId ?? '');
-  const [viewType, setViewType] = useState(initialInput?.viewType ?? 'charts');
+  const [dataViewId, setDataViewId] = useState(initialInput?.data_view_id ?? '');
+  const [viewType, setViewType] = useState(
+    initialInput?.view_type ?? CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS
+  );
 
-  const [formInput, setFormInput] = useState<FormControlsProps>(
-    pick(initialInput ?? {}, [
-      'fn',
-      'metricField',
-      'splitField',
-      'maxSeriesToPlot',
-      'partitions',
-    ]) as FormControlsProps
+  const [formInput, setFormInput] = useState<FormControlsProps | undefined>(() =>
+    getInitialFormControls(initialInput)
   );
 
   const [isFormValid, setIsFormValid] = useState(true);
 
-  const updatedProps = useMemo(() => {
+  const embeddableState = useMemo<ChangePointChartEmbeddableState | undefined>(() => {
+    if (!dataViewId || !formInput?.metricField) return undefined;
     return {
-      ...formInput,
-      viewType,
-      title: isPopulatedObject(formInput)
-        ? i18n.translate('xpack.aiops.changePointDetection.attachmentTitle', {
-            defaultMessage: 'Change point: {function}({metric}){splitBy}',
-            values: {
-              function: formInput.fn,
-              metric: formInput?.metricField,
-              splitBy: formInput?.splitField
-                ? i18n.translate('xpack.aiops.changePointDetection.splitByTitle', {
-                    defaultMessage: ' split by "{splitField}"',
-                    values: { splitField: formInput.splitField },
-                  })
-                : '',
-            },
-          })
-        : '',
-      dataViewId,
+      title: getTitle(formInput),
+      view_type: viewType,
+      data_view_id: dataViewId,
+      aggregation_function: formInput.fn,
+      metric_field: formInput.metricField,
+      max_series_to_plot: formInput.maxSeriesToPlot,
+      ...(formInput.splitField ? { split_field: formInput.splitField } : {}),
+      ...(formInput.partitions?.length ? { partitions: formInput.partitions } : {}),
     };
   }, [formInput, dataViewId, viewType]);
 
@@ -187,8 +216,8 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="aiopsChangePointChartsInitializerConfirmButton"
-              isDisabled={!isFormValid || !dataViewId}
-              onClick={onCreate.bind(null, updatedProps)}
+              isDisabled={!isFormValid || !embeddableState}
+              onClick={() => embeddableState && onCreate(embeddableState)}
               fill
             >
               <FormattedMessage
@@ -203,10 +232,11 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
   );
 };
 
-export type FormControlsProps = Pick<
-  ChangePointEmbeddableState,
-  'metricField' | 'splitField' | 'fn' | 'maxSeriesToPlot' | 'partitions'
->;
+type FormControlsProps = Pick<
+  ChangePointDetectionProps,
+  'fn' | 'metricField' | 'splitField' | 'partitions'
+> &
+  Required<Pick<ChangePointDetectionProps, 'maxSeriesToPlot'>>;
 
 export const FormControls: FC<{
   formInput?: FormControlsProps;
@@ -234,7 +264,7 @@ export const FormControls: FC<{
           metricField: metricFieldOptions[0]?.name,
           splitField: undefined,
           partitions: undefined,
-          maxSeriesToPlot: DEFAULT_SERIES,
+          maxSeriesToPlot: CHANGE_POINT_CHART_DEFAULT_SERIES,
         });
         return;
       }
@@ -302,7 +332,7 @@ export const FormControls: FC<{
       <MaxSeriesControl
         inline={false}
         disabled={!!formInput?.partitions?.length}
-        value={formInput.maxSeriesToPlot!}
+        value={formInput.maxSeriesToPlot}
         onChange={(v) => updateCallback({ maxSeriesToPlot: v })}
         onValidationChange={(result) => onValidationChange(result === null)}
       />

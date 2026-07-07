@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('../../../../../../src/setup_node_env');
+require('@kbn/setup-node-env');
 // eslint-disable-next-line import/no-nodejs-modules
 const { join, resolve } = require('path');
 const { bundle } = require('@kbn/openapi-bundler');
@@ -29,7 +29,7 @@ const ROOT = resolve(__dirname, '..');
         tags: [
           {
             name: 'Security Endpoint Exceptions API',
-            'x-displayName': 'Security endpoint exceptions',
+            'x-displayName': 'Security Elastic Endpoint exceptions',
             description:
               "Endpoint Exceptions API allows you to manage detection rule endpoint exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.",
           },
@@ -54,7 +54,7 @@ const ROOT = resolve(__dirname, '..');
         tags: [
           {
             name: 'Security Endpoint Exceptions API',
-            'x-displayName': 'Security endpoint exceptions',
+            'x-displayName': 'Security Elastic Endpoint exceptions',
             description:
               "Endpoint Exceptions API allows you to manage detection rule endpoint exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.",
           },

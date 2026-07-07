@@ -11,6 +11,7 @@ import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type {
+  ActionConnector,
   ActionTypeRegistryContract,
   ActionVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
@@ -29,6 +30,7 @@ import * as i18n from './translations';
 import { RuleSnoozeSection } from './rule_snooze_section';
 import { NotificationAction } from './notification_action';
 import { ResponseAction } from './response_action';
+import { transformRuleInterval } from './utils';
 
 interface StepRuleActionsProps extends RuleStepProps {
   ruleId?: RuleObjectId; // Rule SO's id (not ruleId)
@@ -36,6 +38,8 @@ interface StepRuleActionsProps extends RuleStepProps {
   actionMessageParams: ActionVariables;
   summaryActionMessageParams: ActionVariables;
   form: FormHook<ActionsStepRule>;
+  ruleInterval: string | undefined;
+  onNewConnectorCreated?: (connector: ActionConnector) => void;
 }
 
 interface StepRuleActionsReadOnlyProps {
@@ -75,6 +79,8 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   actionMessageParams,
   summaryActionMessageParams,
   form,
+  ruleInterval,
+  onNewConnectorCreated,
 }) => {
   const {
     services: { application },
@@ -90,11 +96,19 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
             messageVariables: actionMessageParams,
             summaryMessageVariables: summaryActionMessageParams,
             ruleTypeId,
+            minimumThrottleInterval: transformRuleInterval(ruleInterval),
+            onNewConnectorCreated,
           }}
         />
       </>
     ),
-    [actionMessageParams, ruleTypeId, summaryActionMessageParams]
+    [
+      actionMessageParams,
+      ruleTypeId,
+      summaryActionMessageParams,
+      ruleInterval,
+      onNewConnectorCreated,
+    ]
   );
   const displayResponseActionsOptions = useMemo(() => {
     return (

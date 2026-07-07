@@ -2,101 +2,62 @@
 
 exports[`DeleteFilterListModal false canDeleteFilter privilege renders as disabled delete button 1`] = `
 <div>
-  <EuiButton
-    color="danger"
+  <button
+    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-base-disabled"
     data-test-subj="mlFilterListsDeleteButton"
-    iconType="trash"
-    isDisabled={false}
-    key="delete_filter_list"
-    onClick={[Function]}
+    disabled=""
+    type="button"
   >
-    <MemoizedFormattedMessage
-      defaultMessage="Delete"
-      id="xpack.ml.settings.filterLists.deleteFilterListModal.deleteButtonLabel"
-    />
-  </EuiButton>
-</div>
-`;
-
-exports[`DeleteFilterListModal renders as delete button after opening and closing modal 1`] = `
-<div>
-  <EuiButton
-    color="danger"
-    data-test-subj="mlFilterListsDeleteButton"
-    iconType="trash"
-    isDisabled={false}
-    key="delete_filter_list"
-    onClick={[Function]}
-  >
-    <MemoizedFormattedMessage
-      defaultMessage="Delete"
-      id="xpack.ml.settings.filterLists.deleteFilterListModal.deleteButtonLabel"
-    />
-  </EuiButton>
+    <span
+      class="emotion-euiButtonDisplayContent"
+    >
+      <span
+        color="inherit"
+        data-euiicon-type="trash"
+      />
+      Delete
+    </span>
+  </button>
 </div>
 `;
 
 exports[`DeleteFilterListModal renders as disabled delete button when no lists selected 1`] = `
 <div>
-  <EuiButton
-    color="danger"
+  <button
+    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-base-disabled"
     data-test-subj="mlFilterListsDeleteButton"
-    iconType="trash"
-    isDisabled={false}
-    key="delete_filter_list"
-    onClick={[Function]}
+    disabled=""
+    type="button"
   >
-    <MemoizedFormattedMessage
-      defaultMessage="Delete"
-      id="xpack.ml.settings.filterLists.deleteFilterListModal.deleteButtonLabel"
-    />
-  </EuiButton>
+    <span
+      class="emotion-euiButtonDisplayContent"
+    >
+      <span
+        color="inherit"
+        data-euiicon-type="trash"
+      />
+      Delete
+    </span>
+  </button>
 </div>
 `;
 
 exports[`DeleteFilterListModal renders as enabled delete button when a list is selected 1`] = `
 <div>
-  <EuiButton
-    color="danger"
+  <button
+    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-danger"
     data-test-subj="mlFilterListsDeleteButton"
-    iconType="trash"
-    isDisabled={false}
-    key="delete_filter_list"
-    onClick={[Function]}
+    type="button"
   >
-    <MemoizedFormattedMessage
-      defaultMessage="Delete"
-      id="xpack.ml.settings.filterLists.deleteFilterListModal.deleteButtonLabel"
-    />
-  </EuiButton>
-</div>
-`;
-
-exports[`DeleteFilterListModal renders modal after clicking delete button 1`] = `
-<div>
-  <EuiButton
-    color="danger"
-    data-test-subj="mlFilterListsDeleteButton"
-    iconType="trash"
-    isDisabled={false}
-    key="delete_filter_list"
-    onClick={[Function]}
-  >
-    <MemoizedFormattedMessage
-      defaultMessage="Delete"
-      id="xpack.ml.settings.filterLists.deleteFilterListModal.deleteButtonLabel"
-    />
-  </EuiButton>
-  <EuiConfirmModal
-    buttonColor="danger"
-    cancelButtonText="Cancel"
-    className="eui-textBreakWord"
-    confirmButtonText="Delete"
-    data-test-subj="mlFilterListDeleteConfirmation"
-    defaultFocusedButton="confirm"
-    onCancel={[Function]}
-    onConfirm={[Function]}
-    title="Delete 2 filter lists?"
-  />
+    <span
+      class="emotion-euiButtonDisplayContent"
+    >
+      <span
+        color="inherit"
+        data-euiicon-type="trash"
+      />
+      Delete
+    </span>
+  </button>
 </div>
 `;

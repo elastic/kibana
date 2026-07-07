@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Datatable, ExpressionFunctionDefinition } from '../../../types';
+import type { Datatable, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 const noop = () => {};

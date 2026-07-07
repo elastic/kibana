@@ -8,14 +8,9 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiButton,
-  EuiIcon,
-  EuiLink,
-  EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
-  EuiPopover,
-} from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiButton, EuiIcon, EuiLink, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { viewDetailsLabel } from './i18n_utils';
 import type { SearchResponseWarning } from '../../types';
 
@@ -76,6 +71,9 @@ export const ViewDetailsPopover = (props: Props) => {
   return (
     <EuiPopover
       id="ViewDetailsPopover"
+      aria-label={i18n.translate('searchResponseWarnings.viewDetailsPopoverAriaLabel', {
+        defaultMessage: 'View details',
+      })}
       button={
         props.displayAsLink ? (
           <EuiLink
@@ -84,7 +82,7 @@ export const ViewDetailsPopover = (props: Props) => {
             data-test-subj="searchResponseWarningsViewDetails"
           >
             <>
-              {viewDetailsLabel} <EuiIcon type="arrowRight" size="s" />
+              {viewDetailsLabel} <EuiIcon type="chevronSingleRight" size="s" aria-hidden={true} />
             </>
           </EuiLink>
         ) : (
@@ -92,7 +90,7 @@ export const ViewDetailsPopover = (props: Props) => {
             color="primary"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
             iconSide="right"
-            iconType="arrowRight"
+            iconType="chevronSingleRight"
             data-test-subj="searchResponseWarningsViewDetails"
           >
             {viewDetailsLabel}

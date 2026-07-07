@@ -9,21 +9,21 @@ import { i18n } from '@kbn/i18n';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import type { AxiosError } from 'axios';
-
 import type {
   Config,
   Secrets,
-  XSOARRunActionParams,
   XSOARPlaybooksActionResponse,
-} from '../../../common/xsoar/types';
+  XSOARRunActionParams,
+} from '@kbn/connector-schemas/xsoar';
 import {
-  XSOARRunActionResponseSchema,
-  XSOARPlaybooksActionResponseSchema,
+  SUB_ACTION,
   XSOARPlaybooksActionParamsSchema,
+  XSOARPlaybooksActionResponseSchema,
   XSOARRunActionParamsSchema,
-} from '../../../common/xsoar/schema';
-import { SUB_ACTION } from '../../../common/xsoar/constants';
+  XSOARRunActionResponseSchema,
+} from '@kbn/connector-schemas/xsoar';
 
 export const CLOUD_API_PATH = '/xsoar/public/v1';
 export const INCIDENT_PATH = '/incident';
@@ -94,13 +94,20 @@ export class XSOARConnector extends SubActionConnector<Config, Secrets> {
 
       this.logger.error(`error on ${this.ConnectorId} XSOAR event: ${errMessage}: ${err.message}`);
 
-      throw new Error(
-        i18n.translate('xpack.stackConnectors.xsoar.incidentBodyParsingError', {
-          defaultMessage: 'Error parsing Body: {err}',
-          values: {
-            err: err.toString(),
-          },
-        })
+      // The incident body is user-supplied input, so a JSON parsing failure here is always a
+      // user error. Mark it as such so it does not count against the connector's execution
+      // success rate. This is a SyntaxError with no HTTP status, so the createAndThrowUserError
+      // helper (which keys off Axios response status codes) does not apply here.
+      throw createTaskRunError(
+        new Error(
+          i18n.translate('xpack.stackConnectors.xsoar.incidentBodyParsingError', {
+            defaultMessage: 'Error parsing Body: {err}',
+            values: {
+              err: err.toString(),
+            },
+          })
+        ),
+        TaskErrorSource.USER
       );
     }
   }

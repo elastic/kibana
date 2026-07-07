@@ -7,20 +7,21 @@
 
 import pMap from 'p-map';
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { escapeQuotes } from '@kbn/es-query';
+import { SavedObjectsErrorHelpers, isSavedObjectErrorResult } from '@kbn/core/server';
 
 import { appContextService } from '../app_context';
 import { setupFleet } from '../setup';
 import {
-  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from '../../constants';
-import { agentPolicyService, getAgentPolicySavedObjectType } from '../agent_policy';
+import { agentPolicyService } from '../agent_policy';
 import { packagePolicyService } from '../package_policy';
 import { getAgentsByKuery, forceUnenrollAgent } from '../agents';
-import { listEnrollmentApiKeys, deleteEnrollmentApiKey } from '../api_keys';
+import { listEnrollmentApiKeys, deleteEnrollmentApiKeys } from '../api_keys';
 import type { AgentPolicy } from '../../types';
 import { AgentPolicyInvalidError } from '../../errors';
 
@@ -63,10 +64,9 @@ async function _deleteGhostPackagePolicies(
     return;
   }
 
-  const savedObjectType = await getAgentPolicySavedObjectType();
-  const objects = policyIds.map((id) => ({ id, type: savedObjectType }));
+  const objects = policyIds.map((id) => ({ id, type: AGENT_POLICY_SAVED_OBJECT_TYPE }));
   const agentPolicyExistsMap = (await soClient.bulkGet(objects)).saved_objects.reduce((acc, so) => {
-    if (so.error && so.error.statusCode === 404) {
+    if (isSavedObjectErrorResult(so) && so.error.statusCode === 404) {
       acc.set(so.id, false);
     } else {
       acc.set(so.id, true);
@@ -149,7 +149,7 @@ async function _deleteExistingData(
     existingPolicies = (
       await agentPolicyService.list(soClient, {
         perPage: SO_SEARCH_LIMIT,
-        kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.is_preconfigured:true`,
+        kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_preconfigured:true`,
       })
     ).items;
   }
@@ -162,7 +162,7 @@ async function _deleteExistingData(
   const { agents } = await getAgentsByKuery(esClient, soClient, {
     showInactive: true,
     perPage: SO_SEARCH_LIMIT,
-    kuery: existingPolicies.map((policy) => `policy_id:"${policy.id}"`).join(' or '),
+    kuery: existingPolicies.map((policy) => `policy_id:"${escapeQuotes(policy.id)}"`).join(' or '),
   });
 
   // Delete
@@ -176,17 +176,17 @@ async function _deleteExistingData(
   const { items: enrollmentApiKeys } = await listEnrollmentApiKeys(esClient, {
     perPage: SO_SEARCH_LIMIT,
     showInactive: true,
-    kuery: existingPolicies.map((policy) => `policy_id:"${policy.id}"`).join(' or '),
+    kuery: existingPolicies.map((policy) => `policy_id:"${escapeQuotes(policy.id)}"`).join(' or '),
   });
 
   if (enrollmentApiKeys.length > 0) {
     logger.info(`Deleting ${enrollmentApiKeys.length} enrollment api keys`);
-    await pMap(
-      enrollmentApiKeys,
-      (enrollmentKey) => deleteEnrollmentApiKey(esClient, enrollmentKey.id, true),
-      {
-        concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
-      }
+    await deleteEnrollmentApiKeys(
+      esClient,
+      enrollmentApiKeys.map((k) => k.id),
+      true,
+      undefined,
+      true
     );
   }
   logger.info(`Deleting ${existingPolicies.length} agent policies`);

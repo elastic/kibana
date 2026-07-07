@@ -8,17 +8,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from '../types';
-import { openSans, FontLabel as FontFamily } from '../../fonts';
-import {
-  CSSStyle,
-  FontSizeUnit,
-  FontStyle,
-  FontWeight,
-  Style,
-  TextAlignment,
-  TextDecoration,
-} from '../../types';
+import type { ExpressionFunctionDefinition } from '../types';
+import type { FontLabel as FontFamily } from '../../fonts';
+import { openSans } from '../../fonts';
+import type { CSSStyle, Style } from '../../types';
+import { FontSizeUnit, FontStyle, FontWeight, TextAlignment, TextDecoration } from '../../types';
 
 const dashify = (str: string) => {
   return str

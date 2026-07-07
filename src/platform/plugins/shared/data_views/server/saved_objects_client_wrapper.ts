@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
-import {
+import type { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
+import type {
   DataViewAttributes,
   PersistenceAPI,
   SavedObjectsClientCommonFindArgs,

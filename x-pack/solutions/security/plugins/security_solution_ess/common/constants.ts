@@ -9,11 +9,12 @@ import type { ProductFeatureKeyType } from '@kbn/security-solution-features/keys
 import {
   ALL_PRODUCT_FEATURE_KEYS,
   ProductFeatureSecurityKey,
+  ProductFeatureRulesKey,
 } from '@kbn/security-solution-features/keys';
 
 // List of product features that are disabled in different offering (eg. Serverless).
 const DISABLED_PRODUCT_FEATURES: ProductFeatureKeyType[] = [
-  ProductFeatureSecurityKey.externalDetections,
+  ProductFeatureRulesKey.externalDetections,
   ProductFeatureSecurityKey.configurations,
 ];
 

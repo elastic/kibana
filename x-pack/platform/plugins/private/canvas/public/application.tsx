@@ -6,25 +6,24 @@
  */
 
 import React from 'react';
-import { Store } from 'redux';
+import type { Store } from 'redux';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 
 import '@kbn/flot-charts';
 import { includes, remove } from 'lodash';
 
-import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from '@kbn/core/public';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
+import type { CanvasStartDeps, CanvasSetupDeps } from './plugin';
 import { App } from './components/app';
-import { SetupRegistries } from './plugin_api';
+import type { SetupRegistries } from './plugin_api';
 import { initRegistries, populateRegistries, destroyRegistries } from './registries';
-import { HelpMenu } from './components/help_menu/help_menu';
 import { createStore } from './store';
 
 import { init as initStatsReporter } from './lib/ui_metric';
@@ -33,6 +32,7 @@ import { CapabilitiesStrings } from '../i18n';
 
 import { startLegacyServices, services, LegacyServicesProvider } from './services';
 import { initFunctions } from './functions';
+import { setKeyboardShortcutsDocVisibility } from './state/actions/flyouts';
 // @ts-expect-error untyped local
 import { appUnload } from './state/actions/app';
 
@@ -119,7 +119,7 @@ export const initializeCanvas = async (
       : {
           text: strings.getText(),
           tooltip: strings.getTooltip(),
-          iconType: 'glasses',
+          iconType: 'readOnly',
         }
   );
 
@@ -135,18 +135,16 @@ export const initializeCanvas = async (
         linkType: 'documentation',
         href: docLinks.links.canvas.guide,
       },
+      {
+        linkType: 'custom',
+        content: i18n.translate('xpack.canvas.helpMenu.keyboardShortcutsLinkLabel', {
+          defaultMessage: 'Keyboard shortcuts',
+        }),
+        iconType: 'keyboard',
+        onClick: () => canvasStore.dispatch(setKeyboardShortcutsDocVisibility(true)),
+        'data-test-subj': 'canvasKeyboardShortcutsHelpLink',
+      },
     ],
-    content: (domNode, { hideHelpMenu }) => {
-      ReactDOM.render(
-        <KibanaRenderContextProvider {...coreStart}>
-          <Provider store={canvasStore}>
-            <HelpMenu hideHelpMenu={hideHelpMenu} />
-          </Provider>
-        </KibanaRenderContextProvider>,
-        domNode
-      );
-      return () => ReactDOM.unmountComponentAtNode(domNode);
-    },
   });
 
   if (setupPlugins.usageCollection) {

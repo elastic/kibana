@@ -9,7 +9,7 @@
 
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { DatatableColumn, Datatable } from '@kbn/expressions-plugin/public';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import { getSplitDimensionAccessor, createSplitPoint } from './get_split_dimension_utils';
 
 const data: Datatable = {
@@ -68,7 +68,7 @@ describe('getSplitDimensionAccessor', () => {
     };
     const columns = [data.columns[0], column, data.columns[2]] as DatatableColumn[];
     const defaultFormatterReturnedVal = fieldFormatsMock.deserialize();
-    const spyOnDefaultFormatterConvert = jest.spyOn(defaultFormatterReturnedVal, 'convert');
+    const spyOnDefaultFormatterConvert = jest.spyOn(defaultFormatterReturnedVal, 'convertToText');
 
     defaultFormatter.mockReturnValueOnce(defaultFormatterReturnedVal);
     const accessor = getSplitDimensionAccessor(columns, splitDimension, defaultFormatter);

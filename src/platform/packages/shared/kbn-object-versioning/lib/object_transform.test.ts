@@ -8,6 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod/v4';
 import { initTransform } from './object_transform';
 
 import type { ObjectMigrationDefinition, Version, VersionableObject } from './types';
@@ -20,6 +21,12 @@ const v1Tv2Transform = jest.fn((v1: FooV1): FooV2 => {
   const [firstName, lastName] = v1.fullName.split(' ');
   return { firstName, lastName };
 });
+
+const fooDefV0: VersionableObject<any, any, any, any> = {
+  schema: schema.object({
+    fullName: schema.string({ minLength: 1 }),
+  }),
+};
 
 const fooDefV1: VersionableObject<any, any, any, any> = {
   schema: schema.object({
@@ -53,10 +60,11 @@ const fooMigrationDef: ObjectMigrationDefinition = {
 };
 
 const setup = <UpIn = unknown, UpOut = unknown, DownIn = unknown, DownOut = unknown>(
-  browserVersion: Version
+  browserVersion: Version,
+  serviceDefinitions: ObjectMigrationDefinition = fooMigrationDef
 ) => {
   const transformsFactory = initTransform<UpIn, UpOut, DownIn, DownOut>(browserVersion);
-  return transformsFactory(fooMigrationDef);
+  return transformsFactory(serviceDefinitions);
 };
 
 describe('object transform', () => {
@@ -98,13 +106,22 @@ describe('object transform', () => {
       test('it should validate that the version to up transform to exists', () => {
         const fooTransforms = setup(1);
         const { error } = fooTransforms.up({ fullName: 'John Snow' }, 3);
-        expect(error!.message).toBe('Unvalid version to up transform to [3].');
+        expect(error!.message).toBe('Invalid version to up transform to [3].');
       });
 
       test('it should validate that the version to up transform from exists', () => {
         const fooTransforms = setup(0);
         const { error } = fooTransforms.up({ fullName: 'John Snow' });
-        expect(error!.message).toBe('Unvalid version to up transform from [0].');
+        expect(error!.message).toBe('Invalid version to up transform from [0].');
+      });
+
+      test('it should never perform up transform to 0 even if defined', () => {
+        const fooTransforms = setup(1, {
+          ...fooMigrationDef,
+          [0]: fooDefV0,
+        });
+        const { error } = fooTransforms.up({ fullName: 'John Snow' }, 0);
+        expect(error!.message).toBe('Invalid version to up transform to [0].');
       });
 
       test('it should handle errors while up transforming', () => {
@@ -119,6 +136,22 @@ describe('object transform', () => {
         expect(error!.message).toBe(
           `[Transform error] Cannot read properties of undefined (reading 'split').`
         );
+      });
+
+      test('it should validate using a Zod schema before up transform', () => {
+        const zodSchema = z.object({ fullName: z.string().min(1) });
+        const zodMigrationDef: ObjectMigrationDefinition = {
+          1: {
+            schema: zodSchema,
+            up: v1Tv2Transform,
+          },
+          2: fooDefV2,
+        };
+        const fooTransforms = setup(1, zodMigrationDef);
+        const invalidInput = { unknown: 'John Snow' };
+        const { error } = fooTransforms.up(invalidInput);
+        expect(error).toBeInstanceOf(Error);
+        expect(error?.message).toBe(z.prettifyError(zodSchema.safeParse(invalidInput)!.error!));
       });
     });
   });
@@ -157,13 +190,22 @@ describe('object transform', () => {
       test('it should validate that the version to down transform from exists', () => {
         const fooTransforms = setup(1);
         const { error } = fooTransforms.down({ fullName: 'John Snow' }, 3);
-        expect(error!.message).toBe('Unvalid version to down transform from [3].');
+        expect(error!.message).toBe('Invalid version to down transform from [3].');
       });
 
       test('it should validate that the version to down transform to exists', () => {
         const fooTransforms = setup(0);
         const { error } = fooTransforms.down({ firstName: 'John', lastName: 'Snow' });
-        expect(error!.message).toBe('Unvalid version to down transform to [0].');
+        expect(error!.message).toBe('Invalid version to down transform to [0].');
+      });
+
+      test('it should never perform down transform to 0 even if defined', () => {
+        const fooTransforms = setup(0, {
+          ...fooMigrationDef,
+          [0]: fooDefV0,
+        });
+        const { error } = fooTransforms.down({ fullName: 'John Snow' }, 1);
+        expect(error!.message).toBe('Invalid version to down transform to [0].');
       });
 
       test('it should handle errors while down transforming', () => {

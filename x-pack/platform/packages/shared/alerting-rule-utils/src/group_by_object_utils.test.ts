@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  getFormattedGroups,
-  unflattenGrouping,
-  getGroupByObject,
-  getFormattedGroupBy,
-} from './group_by_object_utils';
+import { getFormattedGroups, unflattenGrouping, getFlattenGrouping } from './group_by_object_utils';
 
 describe('getFormattedGroups', () => {
   it('should format groupBy correctly for empty input', () => {
@@ -51,68 +46,28 @@ describe('unflattenGrouping', () => {
   });
 });
 
-describe('getFormattedGroupBy', () => {
-  it('should format groupBy correctly for empty input', () => {
-    expect(getFormattedGroupBy(undefined, new Set<string>())).toEqual({});
-  });
-
-  it('should format groupBy correctly for multiple groups', () => {
+describe('getFlattenGrouping', () => {
+  it('should return undefined when groupBy is not provided', () => {
     expect(
-      getFormattedGroupBy(
-        ['host.name', 'host.mac', 'tags', 'container.name'],
-        new Set([
-          'host-0,00-00-5E-00-53-23,event-0,container-name',
-          'host-0,00-00-5E-00-53-23,group-0,container-name',
-          'host-0,00-00-5E-00-53-24,event-0,container-name',
-          'host-0,00-00-5E-00-53-24,group-0,container-name',
-        ])
-      )
-    ).toEqual({
-      'host-0,00-00-5E-00-53-23,event-0,container-name': [
-        { field: 'host.name', value: 'host-0' },
-        { field: 'host.mac', value: '00-00-5E-00-53-23' },
-        { field: 'tags', value: 'event-0' },
-        { field: 'container.name', value: 'container-name' },
-      ],
-      'host-0,00-00-5E-00-53-23,group-0,container-name': [
-        { field: 'host.name', value: 'host-0' },
-        { field: 'host.mac', value: '00-00-5E-00-53-23' },
-        { field: 'tags', value: 'group-0' },
-        { field: 'container.name', value: 'container-name' },
-      ],
-      'host-0,00-00-5E-00-53-24,event-0,container-name': [
-        { field: 'host.name', value: 'host-0' },
-        { field: 'host.mac', value: '00-00-5E-00-53-24' },
-        { field: 'tags', value: 'event-0' },
-        { field: 'container.name', value: 'container-name' },
-      ],
-      'host-0,00-00-5E-00-53-24,group-0,container-name': [
-        { field: 'host.name', value: 'host-0' },
-        { field: 'host.mac', value: '00-00-5E-00-53-24' },
-        { field: 'tags', value: 'group-0' },
-        { field: 'container.name', value: 'container-name' },
-      ],
-    });
-  });
-});
-
-describe('getGroupByObject', () => {
-  it('should return an object containing groups for one groupBy field', () => {
-    expect(getGroupByObject('host.name', new Set(['host-0', 'host-1']))).toEqual({
-      'host-0': { host: { name: 'host-0' } },
-      'host-1': { host: { name: 'host-1' } },
-    });
+      getFlattenGrouping({ groupBy: undefined, bucketKey: { key0: 'value' } })
+    ).toBeUndefined();
   });
 
-  it('should return an object containing groups for multiple groupBy fields', () => {
+  it('should flatten grouping for a single groupBy string', () => {
     expect(
-      getGroupByObject(
-        ['host.name', 'container.id'],
-        new Set(['host-0,container-0', 'host-1,container-1'])
-      )
-    ).toEqual({
-      'host-0,container-0': { container: { id: 'container-0' }, host: { name: 'host-0' } },
-      'host-1,container-1': { container: { id: 'container-1' }, host: { name: 'host-1' } },
-    });
+      getFlattenGrouping({
+        groupBy: 'host.name',
+        bucketKey: { key0: 'host-0' },
+      })
+    ).toEqual({ 'host.name': 'host-0' });
+  });
+
+  it('should flatten grouping for multiple groupBy fields', () => {
+    expect(
+      getFlattenGrouping({
+        groupBy: ['host.name', 'container.id'],
+        bucketKey: { key0: 'host-0', key1: 'container-0' },
+      })
+    ).toEqual({ 'host.name': 'host-0', 'container.id': 'container-0' });
   });
 });

@@ -7,25 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiDataGridCellValueElementProps, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { formatFieldValue } from '@kbn/discover-utils';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { formatFieldValueReact } from '@kbn/discover-utils';
+import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getFieldIconProps } from '@kbn/field-utils';
 import { FieldIcon } from '@kbn/react-field';
-import {
-  AdditionalFieldGroups,
-  getAllFallbackFields,
-  getAssociatedSmartFieldsAsString,
-  SmartFieldFallbackTooltip,
-} from '@kbn/unified-field-list';
 import classNames from 'classnames';
 import { isEqual, memoize } from 'lodash';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { CELL_CLASS } from '../../../utils/get_render_cell_value';
 import type { DocumentDiffMode } from '../types';
-import { calculateDiff, CalculateDiffProps, formatDiffValue } from './calculate_diff';
+import type { DocMap } from '../../../types';
+import type { CalculateDiffProps } from './calculate_diff';
+import { calculateDiff, formatDiffValue } from './calculate_diff';
 import {
   ADDED_SEGMENT_CLASS,
   BASE_CELL_CLASS,
@@ -38,27 +36,27 @@ import {
 
 export interface UseComparisonCellValueProps {
   dataView: DataView;
+  columnsMeta: DataTableColumnsMeta | undefined;
   comparisonFields: string[];
   fieldColumnId: string;
   selectedDocIds: string[];
   diffMode: DocumentDiffMode | undefined;
   fieldFormats: FieldFormatsStart;
-  getDocById: (id: string) => DataTableRecord | undefined;
-  additionalFieldGroups?: AdditionalFieldGroups;
+  docMap: DocMap;
 }
 
 export const useComparisonCellValue = ({
   dataView,
+  columnsMeta,
   comparisonFields,
   fieldColumnId,
   selectedDocIds,
   diffMode,
   fieldFormats,
-  getDocById,
-  additionalFieldGroups,
+  docMap,
 }: UseComparisonCellValueProps) => {
   const baseDocId = selectedDocIds[0];
-  const baseDoc = useMemo(() => getDocById(baseDocId)?.flattened, [baseDocId, getDocById]);
+  const baseDoc = useMemo(() => docMap.get(baseDocId)?.doc.flattened, [baseDocId, docMap]);
   const [calculateDiffMemoized] = useState(() => createCalculateDiffMemoized());
 
   return useCallback(
@@ -66,29 +64,29 @@ export const useComparisonCellValue = ({
       <DiffProvider value={calculateDiffMemoized}>
         <CellValue
           dataView={dataView}
+          columnsMeta={columnsMeta}
           comparisonFields={comparisonFields}
           fieldColumnId={fieldColumnId}
           baseDocId={baseDocId}
           baseDoc={baseDoc}
           diffMode={diffMode}
           fieldFormats={fieldFormats}
-          getDocById={getDocById}
-          additionalFieldGroups={additionalFieldGroups}
+          docMap={docMap}
           {...props}
         />
       </DiffProvider>
     ),
     [
-      additionalFieldGroups,
       baseDoc,
       baseDocId,
       calculateDiffMemoized,
       comparisonFields,
       dataView,
+      columnsMeta,
       diffMode,
       fieldColumnId,
       fieldFormats,
-      getDocById,
+      docMap,
     ]
   );
 };
@@ -97,37 +95,27 @@ type CellValueProps = Omit<UseComparisonCellValueProps, 'selectedDocIds'> &
   EuiDataGridCellValueElementProps & {
     baseDocId: string;
     baseDoc: DataTableRecord['flattened'] | undefined;
-    additionalFieldGroups?: AdditionalFieldGroups;
   };
 
 const EMPTY_VALUE = '-';
 
 const CellValue = (props: CellValueProps) => {
-  const {
-    dataView,
-    comparisonFields,
-    fieldColumnId,
-    rowIndex,
-    columnId,
-    getDocById,
-    additionalFieldGroups,
-  } = props;
+  const { dataView, comparisonFields, fieldColumnId, rowIndex, columnId, docMap, columnsMeta } =
+    props;
   const fieldName = comparisonFields[rowIndex];
-  const field = useMemo(() => dataView.fields.getByName(fieldName), [dataView.fields, fieldName]);
-  const comparisonDoc = useMemo(() => getDocById(columnId), [columnId, getDocById]);
-  const allFallbackFields = useMemo(
-    () => getAllFallbackFields(additionalFieldGroups),
-    [additionalFieldGroups]
+  const field = useMemo(
+    () =>
+      getDataViewFieldOrCreateFromColumnMeta({
+        dataView,
+        fieldName,
+        columnMeta: columnsMeta?.[fieldName],
+      }),
+    [dataView, fieldName, columnsMeta]
   );
+  const comparisonDoc = useMemo(() => docMap.get(columnId)?.doc, [columnId, docMap]);
+
   if (columnId === fieldColumnId) {
-    return (
-      <FieldCellValue
-        field={field}
-        fieldName={fieldName}
-        additionalFieldGroups={additionalFieldGroups}
-        allFallbackFields={allFallbackFields}
-      />
-    );
+    return <FieldCellValue field={field} fieldName={fieldName} />;
   }
 
   if (!comparisonDoc) {
@@ -144,29 +132,15 @@ interface FieldCellValueProps {
   fieldName: string;
 }
 
-const FieldCellValue = ({
-  field,
-  fieldName,
-  additionalFieldGroups,
-  allFallbackFields,
-}: FieldCellValueProps & {
-  additionalFieldGroups?: AdditionalFieldGroups;
-  allFallbackFields: string[]; // NOTE: Used purely as an optimisation to avoid looking up Smart Field names unless needed.
-}) => {
-  const isDerivedAsPartOfSmartField = allFallbackFields.includes(fieldName);
-  const associatedSmartFields = useMemo(
-    () =>
-      isDerivedAsPartOfSmartField
-        ? getAssociatedSmartFieldsAsString(fieldName, additionalFieldGroups)
-        : '',
-    [isDerivedAsPartOfSmartField, fieldName, additionalFieldGroups]
-  );
-
+const FieldCellValue = ({ field, fieldName }: FieldCellValueProps) => {
   return (
     <EuiFlexGroup responsive={false} gutterSize="s">
       {field && (
         <EuiFlexItem grow={false}>
-          <FieldIcon {...getFieldIconProps(field)} />
+          <FieldIcon
+            {...getFieldIconProps(field)}
+            data-test-subj="unifiedDataTableComparisonFieldIcon"
+          />
         </EuiFlexItem>
       )}
       <EuiFlexItem>
@@ -176,12 +150,6 @@ const FieldCellValue = ({
           data-test-subj="unifiedDataTableComparisonFieldName"
         >
           {field?.displayName ?? fieldName}
-          {isDerivedAsPartOfSmartField ? (
-            <>
-              {' '}
-              <SmartFieldFallbackTooltip associatedSmartFields={associatedSmartFields} />
-            </>
-          ) : null}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -227,20 +195,15 @@ const DiffCellValue = ({
 
   if (!diffMode || diffMode === 'basic') {
     return (
-      <span
-        className={CELL_CLASS}
-        // formatFieldValue guarantees sanitized values
-        // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{
-          __html: formatFieldValue(
-            comparisonValue,
-            comparisonDoc.raw,
-            fieldFormats,
-            dataView,
-            field
-          ),
-        }}
-      />
+      <span className={CELL_CLASS}>
+        {formatFieldValueReact({
+          value: comparisonValue,
+          hit: comparisonDoc.raw,
+          fieldFormats,
+          dataView,
+          field,
+        })}
+      </span>
     );
   }
 

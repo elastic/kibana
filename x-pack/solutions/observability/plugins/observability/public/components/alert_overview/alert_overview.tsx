@@ -14,8 +14,8 @@ import {
   EuiHorizontalRule,
   EuiInMemoryTable,
 } from '@elastic/eui';
+import type { AlertStatus } from '@kbn/rule-data-utils';
 import {
-  AlertStatus,
   ALERT_CASE_IDS,
   ALERT_DURATION,
   ALERT_END,
@@ -23,7 +23,9 @@ import {
   ALERT_EVALUATION_VALUES,
   ALERT_FLAPPING,
   ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
   ALERT_RULE_NAME,
+  ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
@@ -34,18 +36,17 @@ import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-tim
 
 import { get } from 'lodash';
 import { paths } from '../../../common/locators/paths';
-import { TopAlert } from '../../typings/alerts';
+import type { TopAlert } from '../../typings/alerts';
 import { useFetchBulkCases } from '../../hooks/use_fetch_bulk_cases';
 import { useCaseViewNavigation } from '../../hooks/use_case_view_navigation';
 import { useKibana } from '../../utils/kibana_react';
-import {
-  FlyoutThresholdData,
-  mapRuleParamsWithFlyout,
-} from './helpers/map_rules_params_with_flyout';
+import { useAuthorizedToReadRuleType } from '../../hooks/use_authorized_to_read_rule_type';
+import type { FlyoutThresholdData } from './helpers/map_rules_params_with_flyout';
+import { mapRuleParamsWithFlyout } from './helpers/map_rules_params_with_flyout';
 import { ColumnIDs, overviewColumns } from './overview_columns';
 import { getSources } from '../alert_sources/get_sources';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
-import { TimeRange } from '../../../common/typings';
+import type { TimeRange } from '../../../common/typings';
 
 export const AlertOverview = memo(
   ({
@@ -62,15 +63,25 @@ export const AlertOverview = memo(
         basePath: { prepend },
       },
     } = useKibana().services;
+    const { authorizedToReadRuleType } = useAuthorizedToReadRuleType();
     const { cases, isLoading } = useFetchBulkCases({ ids: alert.fields[ALERT_CASE_IDS] || [] });
     const dateFormat = useUiSetting<string>('dateFormat');
+
     const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
     const [ruleCriteria, setRuleCriteria] = useState<FlyoutThresholdData[] | undefined>([]);
+
+    const alertRuleTypeId = alert.fields[ALERT_RULE_TYPE_ID];
     const alertStart = alert.fields[ALERT_START];
     const alertEnd = alert.fields[ALERT_END];
     const ruleId = get(alert.fields, ALERT_RULE_UUID) ?? null;
+
+    const canReadAlertRule = authorizedToReadRuleType(
+      alertRuleTypeId,
+      alert.fields[ALERT_RULE_CONSUMER]
+    );
+
     const linkToRule =
-      pageId !== RULE_DETAILS_PAGE_ID && ruleId
+      canReadAlertRule && pageId !== RULE_DETAILS_PAGE_ID && ruleId
         ? prepend(paths.observability.ruleDetails(ruleId))
         : null;
 
@@ -97,6 +108,13 @@ export const AlertOverview = memo(
           },
         },
         {
+          id: ColumnIDs.WORKFLOW_TAGS,
+          key: i18n.translate('xpack.observability.alertFlyout.overviewTab.workflowTags', {
+            defaultMessage: 'Workflow tags',
+          }),
+          value: alert.fields['kibana.alert.workflow_tags'] as string[],
+        },
+        {
           id: ColumnIDs.SOURCE,
           key: i18n.translate('xpack.observability.alertFlyout.overviewTab.sources', {
             defaultMessage: 'Affected entity / source',
@@ -105,6 +123,7 @@ export const AlertOverview = memo(
           meta: {
             alertEnd,
             timeRange,
+            alertRuleTypeId,
             groups: getSources(alert) || [],
           },
         },
@@ -153,6 +172,7 @@ export const AlertOverview = memo(
           value: alert.fields[ALERT_RULE_NAME],
           meta: {
             ruleLink:
+              canReadAlertRule &&
               alert.fields[ALERT_RULE_UUID] &&
               prepend(paths.observability.ruleDetails(alert.fields[ALERT_RULE_UUID])),
           },
@@ -181,6 +201,7 @@ export const AlertOverview = memo(
       alertStatus,
       alert,
       alertEnd,
+      alertRuleTypeId,
       timeRange,
       dateFormat,
       ruleCriteria,
@@ -188,6 +209,7 @@ export const AlertOverview = memo(
       cases,
       navigateToCaseView,
       isLoading,
+      canReadAlertRule,
     ]);
 
     return (
@@ -218,7 +240,15 @@ export const AlertOverview = memo(
           </h4>
         </EuiTitle>
         <EuiSpacer size="m" />
-        <EuiInMemoryTable width={'80%'} columns={overviewColumns} itemId="key" items={items} />
+        <EuiInMemoryTable
+          width={'80%'}
+          columns={overviewColumns}
+          itemId="key"
+          items={items}
+          tableCaption={i18n.translate('xpack.observability.alertFlyout.alertOverviewCaption', {
+            defaultMessage: 'Alert overview',
+          })}
+        />
       </>
     );
   }

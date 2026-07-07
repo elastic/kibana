@@ -29,14 +29,13 @@ export async function getDataOutputForAgentPolicy(
   soClient: SavedObjectsClientContract,
   agentPolicy: Partial<AgentPolicySOAttributes>
 ) {
-  const dataOutputId =
-    agentPolicy.data_output_id || (await outputService.getDefaultDataOutputId(soClient));
+  const dataOutputId = agentPolicy.data_output_id || (await outputService.getDefaultDataOutputId());
 
   if (!dataOutputId) {
     throw new OutputNotFoundError('No default data output found.');
   }
 
-  return outputService.get(soClient, dataOutputId);
+  return outputService.get(dataOutputId);
 }
 
 /**
@@ -111,7 +110,9 @@ export async function validateOutputForPolicy(
 export async function validateAgentPolicyOutputForIntegration(
   soClient: SavedObjectsClientContract,
   agentPolicy: AgentPolicy,
-  packagePolicy: Pick<PackagePolicy, 'supports_agentless'>,
+  packagePolicy: Pick<PackagePolicy, 'supports_agentless'> & {
+    inputs?: Array<{ type: string; enabled: boolean }>;
+  },
   packageName: string,
   isNewPackagePolicy: boolean = true
 ) {

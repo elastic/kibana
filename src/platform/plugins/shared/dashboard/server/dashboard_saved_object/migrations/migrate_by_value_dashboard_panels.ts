@@ -7,20 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
-import {
-  controlGroupSavedObjectStateToSerializableRuntimeState,
-  serializableRuntimeStateToControlGroupSavedObjectState,
-} from '@kbn/controls-plugin/server';
-import { Serializable, SerializableRecord } from '@kbn/utility-types';
-import { SavedObjectMigrationFn } from '@kbn/core/server';
-import { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
+import type { Serializable, SerializableRecord } from '@kbn/utility-types';
+import type { SavedObjectMigrationFn } from '@kbn/core/server';
+import type { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
+import { safeJsonParse, safeJsonStringify } from '@kbn/std';
 
 import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
 } from './dashboard_panel_converters';
-import { SavedDashboardPanel } from '../schema/v2';
+import type { SavedDashboardPanel } from '../schema/v2';
 
 interface ValueOrReferenceInput {
   attributes?: Serializable;
@@ -34,15 +31,17 @@ export const migrateByValueDashboardPanels =
     const { attributes } = doc;
 
     if (attributes?.controlGroupInput) {
-      const controlGroupState = controlGroupSavedObjectStateToSerializableRuntimeState(
-        attributes.controlGroupInput
-      );
+      const controlGroupState: SerializableRecord = {
+        panels: safeJsonParse(attributes.controlGroupInput.panelsJSON) ?? {},
+      };
+
       const migratedControlGroupInput = migrate({
         ...controlGroupState,
-        type: CONTROL_GROUP_TYPE,
+        type: CONTROLS_GROUP_TYPE,
       } as SerializableRecord);
-      attributes.controlGroupInput =
-        serializableRuntimeStateToControlGroupSavedObjectState(migratedControlGroupInput);
+      attributes.controlGroupInput = {
+        panelsJSON: safeJsonStringify(migratedControlGroupInput.panels),
+      };
     }
 
     // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when

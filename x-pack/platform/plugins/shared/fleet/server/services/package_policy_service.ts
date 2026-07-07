@@ -12,11 +12,12 @@ import type {
   RequestHandlerContext,
   ElasticsearchClient,
   SavedObjectsClientContract,
+  SavedObjectsFindResponse,
+  SavedObjectsFindOptions,
+  SavedObjectsFindResult,
 } from '@kbn/core/server';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
-
-import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import type {
   PostDeletePackagePoliciesResponse,
@@ -26,8 +27,15 @@ import type {
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
 } from '../../common';
+import type { PackagePolicyAssetsMap } from '../../common/types';
 import type { DeletePackagePoliciesResponse } from '../../common/types';
-import type { NewPackagePolicy, UpdatePackagePolicy, PackagePolicy } from '../types';
+import type {
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+  UpdatePackagePolicyWithId,
+  PackagePolicy,
+  PackagePolicySOAttributes,
+} from '../types';
 import type { ExternalCallback } from '..';
 
 import type { NewPackagePolicyWithId } from './package_policy';
@@ -47,7 +55,7 @@ export type RunExternalCallbacksPackagePolicyArgument<A extends ExternalCallback
     : A extends 'packagePolicyPostCreate'
     ? PackagePolicy
     : A extends 'packagePolicyUpdate'
-    ? UpdatePackagePolicy
+    ? UpdatePackagePolicyWithId
     : A extends 'packagePolicyPostUpdate'
     ? PackagePolicy
     : never;
@@ -76,13 +84,13 @@ export interface PackagePolicyClient {
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
-      authorizationHeader?: HTTPAuthorizationHeader | null;
       bumpRevision?: boolean;
       force?: boolean;
       skipEnsureInstalled?: boolean;
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
       packageInfo?: PackageInfo;
+      createDatasetTemplates?: boolean;
     },
     context?: RequestHandlerContext,
     request?: KibanaRequest
@@ -101,9 +109,9 @@ export interface PackagePolicyClient {
       user?: AuthenticatedUser;
       bumpRevision?: boolean;
       force?: true;
-      authorizationHeader?: HTTPAuthorizationHeader | null;
       asyncDeploy?: boolean;
-    }
+    },
+    request?: KibanaRequest
   ): Promise<{
     created: PackagePolicy[];
     failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
@@ -112,7 +120,7 @@ export interface PackagePolicyClient {
   bulkUpdate(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    packagePolicyUpdates: UpdatePackagePolicy[],
+    packagePolicyUpdates: UpdatePackagePolicyWithId[],
     options?: PackagePolicyClientBulkUpdateOptions,
     currentVersion?: string
   ): Promise<{
@@ -143,6 +151,14 @@ export interface PackagePolicyClient {
     options?: PackagePolicyClientFindAllForAgentPolicyOptions
   ): Promise<PackagePolicy[]>;
 
+  compilePackagePolicyForVersions(
+    soClient: SavedObjectsClientContract,
+    packageInfo: PackageInfo,
+    assetsMap: PackagePolicyAssetsMap,
+    packagePolicy: PackagePolicy,
+    agentVersions?: string[]
+  ): Promise<void>;
+
   getByIDs(
     soClient: SavedObjectsClientContract,
     ids: string[],
@@ -164,7 +180,12 @@ export interface PackagePolicyClient {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyUpdate: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean },
+    options?: {
+      user?: AuthenticatedUser;
+      force?: boolean;
+      skipUniqueNameVerification?: boolean;
+      bumpRevision?: boolean;
+    },
     currentVersion?: string
   ): Promise<PackagePolicy>;
 
@@ -172,12 +193,7 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: {
-      user?: AuthenticatedUser;
-      skipUnassignFromAgentPolicies?: boolean;
-      force?: boolean;
-      asyncDeploy?: boolean;
-    },
+    options?: PackagePolicyClientDeleteOptions,
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<PostDeletePackagePoliciesResponse>;
@@ -265,6 +281,32 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     options?: PackagePolicyClientFetchAllItemsOptions
   ): Promise<AsyncIterable<PackagePolicy[]>>;
+
+  getPackagePolicySavedObjects(
+    soClient: SavedObjectsClientContract,
+    options: PackagePolicyClientRollbackOptions
+  ): Promise<SavedObjectsFindResponse<PackagePolicySOAttributes, unknown>>;
+
+  rollback(
+    soClient: SavedObjectsClientContract,
+    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>,
+    previousVersion: string
+  ): Promise<RollbackResult>;
+
+  restoreRollback(
+    soClient: SavedObjectsClientContract,
+    rollbackResult: RollbackResult
+  ): Promise<void>;
+
+  cleanupRollbackSavedObjects(
+    soClient: SavedObjectsClientContract,
+    rollbackResult: RollbackResult
+  ): Promise<void>;
+
+  bumpAgentPolicyRevisionAfterRollback(
+    soClient: SavedObjectsClientContract,
+    rollbackResult: RollbackResult
+  ): Promise<void>;
 }
 
 interface WithSpaceIdsOption {
@@ -277,6 +319,12 @@ interface WithSpaceIdsOption {
   spaceIds?: string[];
 }
 
+export interface RollbackResult {
+  updatedPolicies: Record<string, Array<SavedObjectsFindResult<PackagePolicySOAttributes>>>;
+  copiedPolicies: Record<string, Array<SavedObjectsFindResult<PackagePolicySOAttributes>>>;
+  previousVersionPolicies: Record<string, Array<SavedObjectsFindResult<PackagePolicySOAttributes>>>;
+}
+
 export type PackagePolicyClientFetchAllItemIdsOptions = Pick<ListWithKuery, 'perPage' | 'kuery'> &
   WithSpaceIdsOption;
 
@@ -287,6 +335,14 @@ export type PackagePolicyClientFetchAllItemsOptions = Pick<
   WithSpaceIdsOption;
 
 export interface PackagePolicyClientGetByIdsOptions extends WithSpaceIdsOption {
+  ignoreMissing?: boolean;
+}
+
+export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {
+  user?: AuthenticatedUser;
+  skipUnassignFromAgentPolicies?: boolean;
+  force?: boolean;
+  asyncDeploy?: boolean;
   ignoreMissing?: boolean;
 }
 
@@ -311,3 +367,6 @@ export interface PackagePolicyClientGetOptions {
 }
 
 export type PackagePolicyClientListIdsOptions = ListWithKuery & WithSpaceIdsOption;
+
+export type PackagePolicyClientRollbackOptions = Omit<SavedObjectsFindOptions, 'type'> &
+  WithSpaceIdsOption;

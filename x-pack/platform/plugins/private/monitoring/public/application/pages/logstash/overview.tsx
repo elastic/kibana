@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
-import { ComponentProps } from '../../route_init';
+import type { ComponentProps } from '../../route_init';
 import { useCharts } from '../../hooks/use_charts';
 import { Overview } from '../../../components/logstash/overview';
 import { LogstashTemplate } from './logstash_template';

@@ -192,10 +192,10 @@ describe('test endpoint routes', () => {
                   },
                 },
                 filter: [
-                  { terms: { 'united.agent.policy_id': [] } },
                   { exists: { field: 'united.endpoint.agent.id' } },
                   { exists: { field: 'united.agent.agent.id' } },
                   { term: { 'united.agent.active': { value: true } } },
+                  { terms: { 'united.agent.policy_id': [] } },
                 ],
               },
             },
@@ -236,9 +236,6 @@ describe('test endpoint routes', () => {
             },
           ],
         },
-      });
-      expect(routeConfig.options).toEqual({
-        authRequired: true,
       });
       expect(routeConfig.security?.authz).toEqual({ requiredPrivileges: ['securitySolution'] });
       expect(mockResponse.ok).toBeCalled();
@@ -324,9 +321,6 @@ describe('test endpoint routes', () => {
       );
 
       expect(esSearchMock).toHaveBeenCalledTimes(1);
-      expect(routeConfig.options).toEqual({
-        authRequired: true,
-      });
       expect(mockResponse.notFound).toBeCalled();
       const message = mockResponse.notFound.mock.calls[0][0]?.body;
       expect(message).toBeInstanceOf(EndpointHostNotFoundError);
@@ -358,9 +352,6 @@ describe('test endpoint routes', () => {
       );
 
       expect(esSearchMock).toHaveBeenCalledTimes(1);
-      expect(routeConfig.options).toEqual({
-        authRequired: true,
-      });
       expect(mockResponse.ok).toBeCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
       expect(result).toHaveProperty('metadata.Endpoint');
@@ -395,9 +386,6 @@ describe('test endpoint routes', () => {
       );
 
       expect(esSearchMock).toHaveBeenCalledTimes(1);
-      expect(routeConfig.options).toEqual({
-        authRequired: true,
-      });
       expect(mockResponse.ok).toBeCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
       expect(result.host_status).toEqual(HostStatus.UNHEALTHY);
@@ -434,9 +422,6 @@ describe('test endpoint routes', () => {
       );
 
       expect(esSearchMock).toHaveBeenCalledTimes(1);
-      expect(routeConfig.options).toEqual({
-        authRequired: true,
-      });
       expect(mockResponse.ok).toBeCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
       expect(result.host_status).toEqual(HostStatus.UNHEALTHY);
@@ -611,9 +596,6 @@ describe('test endpoint routes', () => {
       );
 
       expect(esClientMock.transform.getTransformStats).toHaveBeenCalledTimes(1);
-      expect(routeConfig.options).toEqual({
-        authRequired: true,
-      });
       expect(routeConfig.security?.authz).toEqual({ requiredPrivileges: ['securitySolution'] });
       expect(mockResponse.ok).toBeCalled();
       const response = mockResponse.ok.mock.calls[0][0]?.body as TransformGetTransformStatsResponse;

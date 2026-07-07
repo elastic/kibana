@@ -28,15 +28,19 @@
     "optionalPlugins": [
       "cases",
       "observabilityAIAssistant",
-      "usageCollection"
+      "usageCollection",
+      "cps",
+      "dataViewEditor",
+      "dataViewFieldEditor",
+      "contentManagement"
     ],
     "requiredBundles": [
-      "dataViews",
       "fieldFormats",
       "kibanaReact",
       "kibanaUtils",
-      "embeddable",
-      "cases"
+      "cases",
+      "savedSearch",
+      "savedObjectsFinder"
     ]
   }
 }

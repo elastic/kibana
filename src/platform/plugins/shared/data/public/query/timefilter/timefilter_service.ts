@@ -7,17 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IUiSettingsClient } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import {
-  TimeHistory,
-  Timefilter,
-  TimeHistoryContract,
-  TimefilterContract,
-  TimefilterConfig,
-} from '.';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { TimeHistoryContract, TimefilterContract, TimefilterConfig } from '.';
+import { TimeHistory, Timefilter } from '.';
 import { UI_SETTINGS } from '../../../common';
-import { NowProviderInternalContract } from '../../now_provider';
+import type { NowProviderInternalContract } from '../../now_provider';
 
 export interface TimeFilterServiceDependencies {
   uiSettings: IUiSettingsClient;

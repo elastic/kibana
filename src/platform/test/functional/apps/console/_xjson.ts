@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const retry = getService('retry');
@@ -91,20 +91,27 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         });
       });
 
-      // Status badge not yet implemented in phase 2
-      it.skip('should allow inline comments in request url row', async () => {
-        await executeRequest('\n GET _search // inline comment');
-        expect(await PageObjects.console.hasInvalidSyntax()).to.be(false);
-        expect(await PageObjects.console.getResponseStatus()).to.eql(200);
+      it('should allow inline comments in request url row', async () => {
+        await PageObjects.console.enterText('GET _search // inline comment');
+
+        await PageObjects.console.clickPlay();
+
+        await retry.try(async () => {
+          const status = await PageObjects.console.getResponseStatus();
+          expect(status).to.eql(200);
+        });
       });
 
-      // Status badge not yet implemented in phase 2
-      it.skip('should allow inline comments in request body', async () => {
-        await executeRequest(
-          '\n GET _search \n{\n "query": {\n "match_all": {} // inline comment\n}\n}'
+      it('should allow inline comments in request body', async () => {
+        await PageObjects.console.enterText(
+          'GET _search \n{\n "query": {\n "match_all": {} // inline comment\n}\n}'
         );
-        expect(await PageObjects.console.hasInvalidSyntax()).to.be(false);
-        expect(await PageObjects.console.getResponseStatus()).to.eql(200);
+        await PageObjects.console.clickPlay();
+
+        await retry.try(async () => {
+          const status = await PageObjects.console.getResponseStatus();
+          expect(status).to.eql(200);
+        });
       });
 
       it('should print warning for deprecated request', async () => {

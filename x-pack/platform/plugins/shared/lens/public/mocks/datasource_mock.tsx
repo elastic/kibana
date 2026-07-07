@@ -5,14 +5,14 @@
  * 2.0.
  */
 import React from 'react';
-import { DatasourcePublicAPI, Datasource } from '../types';
+import type { DatasourcePublicAPI, Datasource } from '@kbn/lens-common';
 
 export type DatasourceMock = jest.Mocked<Datasource> & {
   publicAPIMock: jest.Mocked<DatasourcePublicAPI>;
 };
 
 export function createMockDatasource(
-  id = 'testDatasource',
+  id = 'formBased',
   customPublicApi: Partial<DatasourcePublicAPI> = {}
 ): DatasourceMock {
   const publicAPIMock = {
@@ -29,7 +29,7 @@ export function createMockDatasource(
   } as jest.Mocked<DatasourcePublicAPI>;
 
   return {
-    id: 'testDatasource',
+    id,
     clearLayer: jest.fn((state, _layerId) => ({ newState: state, removedLayerIds: [] })),
     getDatasourceSuggestionsForField: jest.fn((_state, _item, filterFn, _indexPatterns) => []),
     getDatasourceSuggestionsForVisualizeField: jest.fn(
@@ -39,7 +39,7 @@ export function createMockDatasource(
     getDatasourceSuggestionsFromCurrentState: jest.fn((_state, _indexPatterns) => []),
     getPersistableState: jest.fn((x) => ({
       state: x,
-      savedObjectReferences: [{ type: 'index-pattern', id: 'mockip', name: 'mockip' }],
+      references: [{ type: 'index-pattern', id: 'mockip', name: 'mockip' }],
     })),
     getRenderEventCounters: jest.fn((_state) => []),
     getPublicAPI: jest.fn().mockReturnValue(publicAPIMock),
@@ -78,7 +78,7 @@ export function createMockDatasource(
 }
 
 export function mockDatasourceMap() {
-  const datasource = createMockDatasource();
+  const datasource = createMockDatasource('formBased');
   datasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
     {
       state: {},
@@ -94,8 +94,8 @@ export function mockDatasourceMap() {
 
   datasource.getLayers.mockReturnValue(['a']);
   return {
-    testDatasource2: createMockDatasource('testDatasource2'),
-    testDatasource: datasource,
+    textBased: createMockDatasource('textBased'),
+    formBased: datasource,
   };
 }
 

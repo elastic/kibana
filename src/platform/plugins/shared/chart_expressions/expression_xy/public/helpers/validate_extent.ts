@@ -8,7 +8,7 @@
  */
 
 import type { AxisExtentConfig } from '../../common';
-import { YScaleType } from '../../common';
+import type { YScaleType } from '../../common';
 
 /**
  * Returns true if the provided extent includes 0

@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { EuiIcon, euiPaletteColorBlind, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
-import { QuerySuggestion, QuerySuggestionTypes } from '@kbn/unified-search-plugin/public';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiIcon, euiPaletteColorBlind, useEuiTheme } from '@elastic/eui';
+import type { QuerySuggestion } from '@kbn/kql/public';
+import { QuerySuggestionTypes } from '@kbn/kql/public';
 import { transparentize } from 'polished';
 import { css } from '@emotion/react';
 
@@ -89,15 +91,15 @@ SuggestionItem.defaultProps = {
 const getEuiIconType = (suggestionType: QuerySuggestionTypes) => {
   switch (suggestionType) {
     case QuerySuggestionTypes.Field:
-      return 'kqlField';
+      return 'queryField';
     case QuerySuggestionTypes.Value:
-      return 'kqlValue';
+      return 'queryValue';
     case QuerySuggestionTypes.RecentSearch:
       return 'search';
     case QuerySuggestionTypes.Conjunction:
-      return 'kqlSelector';
+      return 'querySelector';
     case QuerySuggestionTypes.Operator:
-      return 'kqlOperand';
+      return 'queryOperand';
     default:
       return 'empty';
   }

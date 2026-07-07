@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import axios, { AxiosInstance } from 'axios';
-import { execSync, ExecSyncOptions } from 'child_process';
+import type { AxiosInstance } from 'axios';
+import axios from 'axios';
+import type { ExecSyncOptions } from 'child_process';
+import { execFileSync, execSync } from 'child_process';
 
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 
 import { parseLinkHeader } from './parse_link_header';
-import { Artifact } from './types/artifact';
-import { Build, BuildStatus } from './types/build';
-import { Job, JobState } from './types/job';
+import type { Artifact } from './types/artifact';
+import type { Build, BuildStatus } from './types/build';
+import type { Job, JobState } from './types/job';
 
 type ExecType =
   | ((command: string, execOpts: ExecSyncOptions) => Buffer | null)
@@ -27,12 +29,8 @@ export interface BuildkiteClientConfig {
   exec?: ExecType;
 }
 
-export interface BuildkiteGroup {
-  group: string;
-  steps: BuildkiteStep[];
-}
-
 export type BuildkiteStep =
+  | BuildkiteGroupStep
   | BuildkiteCommandStep
   | BuildkiteInputStep
   | BuildkiteTriggerStep
@@ -49,6 +47,21 @@ export interface BuildkiteAgentTargetingRule {
   machineType?: string;
   minCpuPlatform?: string;
   preemptible?: boolean;
+  diskSizeGb?: number;
+}
+
+export interface BuildkiteGroupStep {
+  group: string;
+  steps: BuildkiteStep[];
+  key?: string;
+  depends_on?: string | string[];
+  retry?: {
+    automatic: Array<{
+      exit_status: string;
+      limit: number;
+    }>;
+  };
+  env?: { [key: string]: string | number };
 }
 
 export interface BuildkiteCommandStep {
@@ -61,7 +74,6 @@ export interface BuildkiteCommandStep {
   agents: BuildkiteAgentQueue | BuildkiteAgentTargetingRule;
   timeout_in_minutes?: number;
   key?: string;
-  cancel_on_build_failing?: boolean;
   depends_on?: string | string[];
   retry?: {
     automatic: Array<{
@@ -365,8 +377,27 @@ export class BuildkiteClient {
     return (await this.http.post(url, options)).data;
   };
 
+  cancelStep = (stepIdOrKey: string): void => {
+    execFileSync('buildkite-agent', ['step', 'cancel', '--step', stepIdOrKey], {
+      stdio: ['pipe', 'inherit', 'inherit'],
+    });
+  };
+
+  getMetadataKeys = (): string[] => {
+    const stdout = execFileSync('buildkite-agent', ['meta-data', 'keys'], {
+      stdio: ['pipe', 'pipe', 'inherit'],
+    });
+
+    const output = stdout?.toString().trim() ?? '';
+    if (!output) {
+      return [];
+    }
+
+    return output.split('\n').filter(Boolean);
+  };
+
   setMetadata = (key: string, value: string) => {
-    this.exec(`buildkite-agent meta-data set '${key}'`, {
+    execFileSync('buildkite-agent', ['meta-data', 'set', key], {
       input: value,
       stdio: ['pipe', 'inherit', 'inherit'],
     });
@@ -374,7 +405,7 @@ export class BuildkiteClient {
 
   getMetadata(key: string, defaultValue: string | null = null): string | null {
     try {
-      const stdout = this.exec(`buildkite-agent meta-data get '${key}'`, {
+      const stdout = execFileSync('buildkite-agent', ['meta-data', 'get', key], {
         stdio: ['pipe'],
       });
       return stdout?.toString().trim() || defaultValue;
@@ -410,9 +441,9 @@ export class BuildkiteClient {
     });
   };
 
-  uploadSteps = (steps: Array<BuildkiteStep | BuildkiteGroup>) => {
+  uploadSteps = (steps: Array<BuildkiteStep>) => {
     this.exec(`buildkite-agent pipeline upload`, {
-      input: dump({ steps }),
+      input: stringify({ steps }),
       stdio: ['pipe', 'inherit', 'inherit'],
     });
   };

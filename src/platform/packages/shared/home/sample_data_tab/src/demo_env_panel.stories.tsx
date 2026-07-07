@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { Meta } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 
 import { DemoEnvironmentPanel } from './demo_env_panel';
 

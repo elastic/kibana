@@ -8,10 +8,9 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const es = getService('es');
@@ -31,9 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover.json'
       );
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
 
       await common.navigateToApp('discover');
       await timePicker.setCommonlyUsedTime('This_week');
@@ -41,7 +37,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       await es.transport.request({
         path: '/my-index-000001',
         method: 'DELETE',
@@ -90,7 +85,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor('the new record was found', async () => {
         await queryBar.submitQuery();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
-        return (await discover.getHitCountInt()) === 2;
+        return (
+          (await discover.getHitCountInt()) === 2 &&
+          (await unifiedFieldList.getSidebarSectionFieldCount('available')) === 3
+        );
       });
 
       expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).to.eql([

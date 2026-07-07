@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import PropTypes from 'prop-types';
 import { lifecycle, compose } from 'react-recompose';
 import { get } from 'lodash';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
 import { SimpleTemplate } from './simple_template';
-import { ExtendedTemplate, Props as ExtendedTemplateProps } from './extended_template';
-import { ExpressionAstExpression } from '../../../../types';
+import type { Props as ExtendedTemplateProps } from './extended_template';
+import { ExtendedTemplate } from './extended_template';
+import type { ExpressionAstExpression } from '../../../../types';
 import { ArgTypesStrings } from '../../../../i18n';
 
 const { SeriesStyle: strings } = ArgTypesStrings;
@@ -46,12 +46,6 @@ const EnhancedExtendedTemplate = compose<ExtendedTemplateProps, Props>(
     },
   })
 )(ExtendedTemplate);
-
-EnhancedExtendedTemplate.propTypes = {
-  argValue: PropTypes.any.isRequired,
-  setLabel: PropTypes.func.isRequired,
-  label: PropTypes.string,
-};
 
 export const seriesStyle = () => ({
   name: 'seriesStyle',

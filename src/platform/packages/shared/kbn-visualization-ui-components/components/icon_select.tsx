@@ -8,13 +8,14 @@
  */
 
 import React from 'react';
+import type { IconType } from '@elastic/eui';
 import {
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormPrepend,
   EuiFormRow,
   EuiIcon,
-  IconType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -29,12 +30,16 @@ export type IconSet<T> = Array<{
   shouldRotate?: boolean;
 }>;
 
+const iconDecorationLabel = i18n.translate('visualizationUiComponents.iconSelect.label', {
+  defaultMessage: 'Icon decoration',
+});
+
 const IconView = (props: { value?: string; label: string; icon?: IconType }) => {
   if (!props.value) return null;
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiIcon type={props.icon ?? props.value} />
+        <EuiIcon type={props.icon ?? props.value} aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem>{props.label}</EuiFlexItem>
     </EuiFlexGroup>
@@ -74,9 +79,10 @@ export function IconSelect<Icon extends string>({
       singleSelection={{ asPlainText: true }}
       renderOption={IconView}
       compressed
+      aria-label={iconDecorationLabel}
       prepend={
         hasIcon(selectedIcon.value) ? (
-          <EuiIcon type={selectedIcon.icon ?? selectedIcon.value} />
+          <EuiFormPrepend iconLeft={selectedIcon.icon ?? selectedIcon.value} />
         ) : undefined
       }
     />
@@ -95,13 +101,7 @@ export function IconSelectSetting<Icon extends string = string>({
   defaultIcon?: string;
 }) {
   return (
-    <EuiFormRow
-      display="columnCompressed"
-      fullWidth
-      label={i18n.translate('visualizationUiComponents.iconSelect.label', {
-        defaultMessage: 'Icon decoration',
-      })}
-    >
+    <EuiFormRow display="columnCompressed" fullWidth label={iconDecorationLabel}>
       <IconSelect
         defaultIcon={defaultIcon}
         customIconSet={customIconSet}

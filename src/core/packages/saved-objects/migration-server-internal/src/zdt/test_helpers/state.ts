@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PostInitState, PostDocInitState, OutdatedDocumentsSearchState } from '../state/types';
+import type { PostInitState, PostDocInitState, OutdatedDocumentsSearchState } from '../state/types';
 
 export const createPostInitState = (): PostInitState => ({
   controlState: 'INIT',

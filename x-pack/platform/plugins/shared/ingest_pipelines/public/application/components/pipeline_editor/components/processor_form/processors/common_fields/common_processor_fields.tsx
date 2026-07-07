@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { PainlessLang } from '@kbn/monaco';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
-import {
-  FieldConfig,
-  UseField,
-  FIELD_TYPES,
-  Field,
-  ToggleField,
-} from '../../../../../../../shared_imports';
+import type { FieldConfig } from '../../../../../../../shared_imports';
+import { UseField, FIELD_TYPES, Field, ToggleField } from '../../../../../../../shared_imports';
 
 import { TextEditor } from '../../field_components';
 import { to, from, EDITOR_PX_HEIGHT } from '../shared';

@@ -6,34 +6,27 @@
  */
 
 import { Readable } from 'stream';
-import { isNotFoundError } from '@kbn/es-errors';
-import { z } from '@kbn/zod';
-import { createConcatStream, createListStream, createPromiseFromStreams } from '@kbn/utils';
-import { installManagedIndexPattern } from '@kbn/fleet-plugin/server/services/epm/kibana/assets/install';
-import {
-  ContentPack,
-  contentPackIncludedObjectsSchema,
-  isIncludeAll,
-  isSupportedSavedObjectType,
-} from '@kbn/content-packs-schema';
-import type { SavedObject } from '@kbn/core/server';
+import { z } from '@kbn/zod/v4';
+import type { ContentPack, ContentPackStream } from '@kbn/content-packs-schema';
+import { contentPackIncludedObjectsSchema } from '@kbn/content-packs-schema';
+import { Streams, emptyAssets, getInheritedFieldsFromAncestors } from '@kbn/streams-schema';
+import { omit } from 'lodash';
+import { OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS } from '@kbn/management-settings-ids';
+import type { RequestHandlerContext } from '@kbn/core/server';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
-import { Asset } from '../../../common';
-import { DashboardAsset, DashboardLink } from '../../../common/assets';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
-import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
+import { generateArchive, parseArchive } from '../../lib/content';
+import { exportContentRequest } from '../../oas_examples';
 import {
-  CONTENT_NAME,
-  STREAM_NAME,
-  generateArchive,
-  parseArchive,
-  prepareForExport,
-  prepareForImport,
-  referenceManagedIndexPattern,
-  savedObjectLinks,
-} from '../../lib/content';
-import { StoredContentPack } from '../../lib/content/content_client';
+  prepareStreamsForExport,
+  prepareStreamsForImport,
+  scopeContentPackStreams,
+  scopeIncludedObjects,
+  withoutBaseFields,
+  withoutInheritedFieldMetadata,
+} from '../../lib/content/stream';
+import { asTree } from '../../lib/content/stream/tree';
 
 const MAX_CONTENT_PACK_SIZE_BYTES = 1024 * 1024 * 5; // 5MB
 
@@ -42,17 +35,37 @@ const exportContentRoute = createServerRoute({
   options: {
     access: 'public',
     summary: 'Export stream content',
-    description: 'Exports the content associated to a stream.',
+    description:
+      'Exports a content pack with the stream structure (routing, mappings, and processing). Significant-event queries are not included; manage them via the /api/streams/{name}/queries endpoints.',
+    availability: {
+      since: '9.1.0',
+      stability: 'experimental',
+    },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              exportContent: { value: exportContentRequest },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Content pack archive for the stream.',
+        },
+      },
+    }),
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream to export content from.'),
     }),
     body: z.object({
       name: z.string(),
       description: z.string(),
       version: z.string(),
-      replaced_patterns: z.array(z.string()),
       include: contentPackIncludedObjectsSchema,
     }),
   }),
@@ -61,48 +74,48 @@ const exportContentRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  async handler({ params, request, response, getScopedClients, context }) {
-    const { assetClient, soClient, streamsClient } = await getScopedClients({ request });
+  async handler({ params, request, response, context, getScopedClients }) {
+    await checkEnabled(context);
 
-    await streamsClient.ensureStream(params.path.name);
+    const { streamsClient } = await getScopedClients({ request });
 
-    if (!isIncludeAll(params.body.include) && params.body.include.objects.dashboards.length === 0) {
-      throw new StatusError(`Content pack must include at least one object`, 400);
+    const root = await streamsClient.getStream(params.path.name);
+    if (!Streams.WiredStream.Definition.is(root)) {
+      throw new StatusError('Only wired streams can be exported', 400);
     }
 
-    function isDashboard(asset: Asset): asset is DashboardAsset {
-      return asset[ASSET_TYPE] === 'dashboard';
-    }
+    const [ancestors, descendants] = await Promise.all([
+      streamsClient.getAncestors(params.path.name),
+      streamsClient.getDescendants(params.path.name),
+    ]);
 
-    const dashboards = (await assetClient.getAssets(params.path.name))
-      .filter(isDashboard)
-      .filter(
-        (dashboard) =>
-          isIncludeAll(params.body.include) ||
-          params.body.include.objects.dashboards.includes(dashboard['asset.id'])
-      );
-    if (dashboards.length === 0) {
-      throw new StatusError('No included objects were found', 400);
-    }
+    const inheritedFields = getInheritedFieldsFromAncestors(ancestors);
 
-    const exporter = (await context.core).savedObjects.getExporter(soClient);
-    const exportStream = await exporter.exportByObjects({
-      request,
-      objects: dashboards.map((dashboard) => ({ id: dashboard[ASSET_ID], type: 'dashboard' })),
-      includeReferencesDeep: true,
+    const exportedTree = asTree({
+      root: params.path.name,
+      include: scopeIncludedObjects({
+        root: params.path.name,
+        include: params.body.include,
+      }),
+      streams: [root, ...descendants].map((stream) => {
+        if (stream.name === params.path.name) {
+          // merge non-base inherited mappings into the exported root
+          // strip inherited field metadata (from, alias_for) so exports contain clean FieldDefinition
+          stream.ingest.wired.fields = withoutInheritedFieldMetadata(
+            withoutBaseFields({
+              ...inheritedFields,
+              ...stream.ingest.wired.fields,
+            })
+          );
+        }
+
+        return asContentPackEntry({ stream });
+      }),
     });
 
-    const savedObjects: SavedObject[] = await createPromiseFromStreams([
-      exportStream,
-      createConcatStream([]),
-    ]);
     const archive = await generateArchive(
       params.body,
-      prepareForExport({
-        savedObjects,
-        source: params.path.name,
-        replacedPatterns: params.body.replaced_patterns,
-      })
+      prepareStreamsForExport({ tree: exportedTree })
     );
 
     return response.ok({
@@ -115,21 +128,68 @@ const exportContentRoute = createServerRoute({
   },
 });
 
+function asContentPackEntry({
+  stream,
+}: {
+  stream: Streams.WiredStream.Definition;
+}): ContentPackStream {
+  return {
+    type: 'stream' as const,
+    name: stream.name,
+    request: {
+      stream: {
+        ...omit(stream, ['name', 'updated_at']),
+        ingest: {
+          ...stream.ingest,
+          processing: omit(stream.ingest.processing, 'updated_at'),
+        },
+      },
+      ...emptyAssets,
+    },
+  };
+}
+
 const importContentRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/content/import 2023-10-31',
   options: {
     access: 'public',
     summary: 'Import content into a stream',
-    description: 'Links content objects to a stream.',
+    description:
+      'Imports stream structure (routing, mappings, and processing) from a content pack into a stream.',
+    availability: {
+      since: '9.1.0',
+      stability: 'experimental',
+    },
     body: {
       accepts: 'multipart/form-data',
       maxBytes: MAX_CONTENT_PACK_SIZE_BYTES,
       output: 'stream',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'multipart/form-data': {
+            examples: {
+              importContent: {
+                value: {
+                  include: JSON.stringify({ objects: { all: {} } }),
+                  content: '<binary zip archive>',
+                },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Content was imported into the stream successfully.',
+        },
+      },
+    }),
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream to import content into.'),
     }),
     body: z.object({
       include: z
@@ -143,74 +203,43 @@ const importContentRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  async handler({ params, request, getScopedClients, context }) {
-    const { assetClient, soClient, streamsClient, contentClient } = await getScopedClients({
-      request,
-    });
-    const importer = (await context.core).savedObjects.getImporter(soClient);
+  async handler({ params, request, context, getScopedClients }) {
+    await checkEnabled(context);
 
-    await streamsClient.ensureStream(params.path.name);
+    const { streamsClient } = await getScopedClients({ request });
+
+    const root = await streamsClient.getStream(params.path.name);
+    if (!Streams.WiredStream.Definition.is(root)) {
+      throw new StatusError('Can only import content into wired streams', 400);
+    }
 
     const contentPack = await parseArchive(params.body.content);
-    const storedContentPack = await contentClient
-      .getStoredContentPack(params.path.name, contentPack.name)
-      .catch((err) => {
-        if (isNotFoundError(err)) {
-          return {
-            [STREAM_NAME]: params.path.name,
-            [CONTENT_NAME]: contentPack.name,
-            dashboards: [],
-          } as StoredContentPack;
-        }
 
-        throw err;
-      });
+    const descendants = await streamsClient.getDescendants(params.path.name);
 
-    const savedObjectEntries = contentPack.entries.filter(isSupportedSavedObjectType);
-    const links = savedObjectLinks(savedObjectEntries, storedContentPack);
-    const savedObjects = prepareForImport({
-      target: params.path.name,
-      include: params.body.include,
-      savedObjects: savedObjectEntries,
-      links,
+    const existingTree = asTree({
+      root: params.path.name,
+      include: { objects: { all: {} } },
+      streams: [root, ...descendants].map((stream) => asContentPackEntry({ stream })),
     });
 
-    if (referenceManagedIndexPattern(savedObjects)) {
-      // integration package's dashboards may reference pre-existing data views
-      // that we need to install before import
-      await installManagedIndexPattern({
-        savedObjectsClient: soClient,
-        savedObjectsImporter: importer,
-      });
-    }
-
-    const { successResults, errors = [] } = await importer.import({
-      readStream: createListStream(savedObjects),
-      createNewCopies: false,
-      overwrite: true,
+    const incomingTree = asTree({
+      root: params.path.name,
+      include: scopeIncludedObjects({
+        root: params.path.name,
+        include: params.body.include,
+      }),
+      streams: scopeContentPackStreams({
+        root: params.path.name,
+        streams: contentPack.entries.filter(
+          (entry): entry is ContentPackStream => entry.type === 'stream'
+        ),
+      }),
     });
 
-    await contentClient.upsertStoredContentPack(params.path.name, {
-      name: contentPack.name,
-      ...links,
-    });
+    const streams = prepareStreamsForImport({ existing: existingTree, incoming: incomingTree });
 
-    const createdAssets: Array<Omit<DashboardLink, 'asset.uuid'>> =
-      successResults
-        ?.filter((savedObject) => savedObject.type === 'dashboard')
-        .map((dashboard) => ({
-          [ASSET_TYPE]: 'dashboard',
-          [ASSET_ID]: dashboard.id,
-        })) ?? [];
-
-    if (createdAssets.length > 0) {
-      await assetClient.bulk(
-        params.path.name,
-        createdAssets.map((asset) => ({ index: { asset } }))
-      );
-    }
-
-    return { errors, created: createdAssets };
+    return await streamsClient.bulkUpsert(streams);
   },
 });
 
@@ -239,13 +268,23 @@ const previewContentRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  async handler({ request, params, getScopedClients }): Promise<ContentPack> {
+  async handler({ request, params, context, getScopedClients }): Promise<ContentPack> {
+    await checkEnabled(context);
+
     const { streamsClient } = await getScopedClients({ request });
     await streamsClient.ensureStream(params.path.name);
 
     return await parseArchive(params.body.content);
   },
 });
+
+async function checkEnabled(context: RequestHandlerContext) {
+  const core = await context.core;
+  const enabled = await core.uiSettings.client.get(OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS);
+  if (!enabled) {
+    throw new StatusError('Content packs are not enabled', 400);
+  }
+}
 
 export const contentRoutes = {
   ...exportContentRoute,

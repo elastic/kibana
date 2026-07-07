@@ -10,12 +10,8 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { type DatatableUtilitiesService, parseTimeShift } from '@kbn/data-plugin/common';
-import {
-  adjustTimeScaleLabelSuffix,
-  GenericIndexPatternColumn,
-  operationDefinitionMap,
-} from '../operations';
-import type { FormBasedLayer } from '../types';
+import type { GenericIndexPatternColumn, FormBasedLayer, IndexPattern } from '@kbn/lens-common';
+import { adjustTimeScaleLabelSuffix, operationDefinitionMap } from '../operations';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import {
   getDateHistogramInterval,
@@ -23,7 +19,6 @@ import {
   timeShiftOptions,
   getColumnTimeShiftWarnings,
 } from '../time_shift_utils';
-import type { IndexPattern } from '../../../types';
 
 export function setTimeShift(
   columnId: string,
@@ -101,6 +96,9 @@ export function TimeShift({
   const parsedLocalValue = localValue && parseTimeShift(localValue);
   const isLocalValueInvalid = Boolean(parsedLocalValue && isInvalid(parsedLocalValue));
   const warnings = getColumnTimeShiftWarnings(dateHistogramInterval, localValue);
+  const timeShiftLabel = i18n.translate('xpack.lens.indexPattern.timeShift.label', {
+    defaultMessage: 'Time shift',
+  });
 
   function getSelectedOption() {
     const goodPick = timeShiftOptions.filter(({ value }) => value === localValue);
@@ -123,9 +121,7 @@ export function TimeShift({
         display="rowCompressed"
         fullWidth
         data-test-subj="indexPattern-dimension-time-shift-row"
-        label={i18n.translate('xpack.lens.indexPattern.timeShift.label', {
-          defaultMessage: 'Time shift',
-        })}
+        label={timeShiftLabel}
         helpText={i18n.translate('xpack.lens.indexPattern.timeShift.help', {
           defaultMessage: 'Enter the time shift number and unit',
         })}
@@ -180,6 +176,7 @@ export function TimeShift({
                   setLocalValue(choice);
                 }
               }}
+              aria-label={timeShiftLabel}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

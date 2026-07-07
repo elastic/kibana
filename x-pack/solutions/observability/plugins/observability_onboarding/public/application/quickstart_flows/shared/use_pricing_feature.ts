@@ -6,7 +6,7 @@
  */
 
 import { useKibana } from '../../../hooks/use_kibana';
-import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
+import type { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
 
 export function usePricingFeature(feature: ObservabilityOnboardingPricingFeature): boolean {
   const {

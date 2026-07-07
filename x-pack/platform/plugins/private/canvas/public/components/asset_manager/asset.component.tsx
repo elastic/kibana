@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -24,7 +25,7 @@ import { useNotifyService } from '../../services';
 import { ConfirmModal } from '../confirm_modal';
 import { Clipboard } from '../clipboard';
 import { Download } from '../download';
-import { AssetType } from '../../../types';
+import type { AssetType } from '../../../types';
 
 const strings = {
   getCopyAssetTooltip: () =>
@@ -92,9 +93,9 @@ export const Asset: FC<Props> = ({ asset, onCreate, onDelete }) => {
 
   const createImage = (
     <EuiFlexItem className="asset-create-image" grow={false}>
-      <EuiToolTip content={strings.getCreateImageTooltip()}>
+      <EuiToolTip content={strings.getCreateImageTooltip()} disableScreenReaderOutput>
         <EuiButtonIcon
-          iconType="vector"
+          iconType="vectorSquare"
           aria-label={strings.getCreateImageTooltip()}
           onClick={() => onCreate(asset.id)}
         />
@@ -116,7 +117,7 @@ export const Asset: FC<Props> = ({ asset, onCreate, onDelete }) => {
     <EuiFlexItem grow={false}>
       <EuiToolTip content={strings.getCopyAssetTooltip()}>
         <Clipboard content={asset.id} onCopy={onCopy}>
-          <EuiButtonIcon iconType="copyClipboard" aria-label={strings.getCopyAssetTooltip()} />
+          <EuiButtonIcon iconType="copy" aria-label={strings.getCopyAssetTooltip()} />
         </Clipboard>
       </EuiToolTip>
     </EuiFlexItem>
@@ -124,7 +125,7 @@ export const Asset: FC<Props> = ({ asset, onCreate, onDelete }) => {
 
   const deleteAsset = (
     <EuiFlexItem grow={false}>
-      <EuiToolTip content={strings.getDeleteAssetTooltip()}>
+      <EuiToolTip content={strings.getDeleteAssetTooltip()} disableScreenReaderOutput>
         <EuiButtonIcon
           color="danger"
           iconType="trash"

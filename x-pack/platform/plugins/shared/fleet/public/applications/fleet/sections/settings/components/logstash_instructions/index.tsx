@@ -8,14 +8,15 @@
 import React, { useState, useMemo } from 'react';
 
 import {
-  EuiCallOut,
   EuiButton,
-  EuiSpacer,
-  EuiLink,
+  EuiButtonIcon,
+  EuiCallOut,
   EuiCode,
   EuiCodeBlock,
   EuiCopy,
-  EuiButtonIcon,
+  EuiLink,
+  EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiCallOutProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,7 +37,7 @@ export const LogstashInstructions = ({ isSSLEnabled }: LogstashInstructionsProps
 
   return (
     <CollapsibleCallout
-      iconType="iInCircle"
+      iconType="info"
       title={
         <FormattedMessage
           id="xpack.fleet.settings.logstashInstructions.calloutTitle"
@@ -51,7 +52,11 @@ export const LogstashInstructions = ({ isSSLEnabled }: LogstashInstructionsProps
           {documentationLink}."
           values={{
             documentationLink: (
-              <EuiLink external={true} href={docLinks.links.logstash.inputElasticAgent}>
+              <EuiLink
+                external={true}
+                target="_blank"
+                href={docLinks.links.logstash.inputElasticAgent}
+              >
                 <FormattedMessage
                   id="xpack.fleet.settings.logstashInstructions.documentationLink"
                   defaultMessage="Learn more"
@@ -132,18 +137,28 @@ const LogstashInstructionSteps = ({ isSSLEnabled }: LogstashInstructionStepsProp
                   <div className="euiCodeBlock__copyButton">
                     <EuiCopy textToCopy={logstashApiKey.apiKey}>
                       {(copy) => (
-                        <EuiButtonIcon
-                          onClick={copy}
-                          iconType="copyClipboard"
-                          color="text"
-                          disabled={!hasAllSettings}
-                          aria-label={i18n.translate(
+                        <EuiToolTip
+                          content={i18n.translate(
                             'xpack.fleet.settings.logstashInstructions.copyApiKeyButtonLabel',
                             {
                               defaultMessage: 'Copy message',
                             }
                           )}
-                        />
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            onClick={copy}
+                            iconType="copy"
+                            color="text"
+                            disabled={!hasAllSettings}
+                            aria-label={i18n.translate(
+                              'xpack.fleet.settings.logstashInstructions.copyApiKeyButtonLabel',
+                              {
+                                defaultMessage: 'Copy message',
+                              }
+                            )}
+                          />
+                        </EuiToolTip>
                       )}
                     </EuiCopy>
                   </div>
@@ -207,7 +222,11 @@ const LogstashInstructionSteps = ({ isSSLEnabled }: LogstashInstructionStepsProp
               defaultMessage="Replace the parts between the brackets with your generated SSL certificate file paths. View {documentationLink} to generate the certificates."
               values={{
                 documentationLink: (
-                  <EuiLink external={true} href={docLinks.links.fleet.secureLogstash}>
+                  <EuiLink
+                    external={true}
+                    target="_blank"
+                    href={docLinks.links.fleet.secureLogstash}
+                  >
                     <FormattedMessage
                       id="xpack.fleet.settings.logstashInstructions.ourDocumentationLink"
                       defaultMessage="our documentation"

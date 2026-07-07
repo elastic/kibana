@@ -93,10 +93,26 @@ describe('Color mapping - color generation', () => {
     expect(colorFactory('cat7')).toBe(neutralPaletteColors[1]);
   });
 
-  it('returns the unassigned color if configured statically', () => {
+  it('returns the unassigned color if configured statically and at least one assignment', () => {
     const colorFactory = getColorFactory(
       {
         ...DEFAULT_COLOR_MAPPING_CONFIG,
+        assignments: [
+          {
+            color: {
+              type: 'colorCode',
+              colorCode: 'red',
+            },
+            rules: [
+              {
+                type: 'raw',
+                value: 'test',
+              },
+            ],
+            touched: false,
+          },
+        ],
+
         specialAssignments: [
           {
             color: {
@@ -117,13 +133,14 @@ describe('Color mapping - color generation', () => {
       false,
       {
         type: 'categories',
-        categories: ['cat1', 'cat2', 'cat3', 'cat4'],
+        categories: ['cat1', 'cat2', 'cat3', 'cat4', 'test'],
       }
     );
     expect(colorFactory('cat1')).toBe(neutralPaletteColors[DEFAULT_NEUTRAL_PALETTE_INDEX]);
     expect(colorFactory('cat2')).toBe(neutralPaletteColors[DEFAULT_NEUTRAL_PALETTE_INDEX]);
     expect(colorFactory('cat3')).toBe(neutralPaletteColors[DEFAULT_NEUTRAL_PALETTE_INDEX]);
     expect(colorFactory('cat4')).toBe(neutralPaletteColors[DEFAULT_NEUTRAL_PALETTE_INDEX]);
+    expect(colorFactory('test')).toBe('red');
     // if the category is not available in the `categories` list then a default netural is used
     // this is an edge case and ideally never happen
     expect(colorFactory('not_available')).toBe(neutralPaletteColors[DEFAULT_NEUTRAL_PALETTE_INDEX]);
@@ -388,5 +405,39 @@ describe('Color mapping - color generation', () => {
     // if the category is not available in the `categories` list then a default neutral is used
     // this is an edge case and ideally never happen
     expect(colorFactory('not_available')).toBe(neutralPaletteColors[DEFAULT_NEUTRAL_PALETTE_INDEX]);
+  });
+
+  // prevent 8.11 basic configuration to generate gray palettes see https://github.com/elastic/kibana/issues/231165
+  it('no assignments always loop colors for others', () => {
+    const colorFactory = getColorFactory(
+      {
+        ...DEFAULT_COLOR_MAPPING_CONFIG,
+        assignments: [],
+        specialAssignments: [
+          {
+            color: {
+              colorIndex: 1,
+              paletteId: 'neutral',
+              type: 'categorical',
+            },
+            rules: [
+              {
+                type: 'other',
+              },
+            ],
+            touched: false,
+          },
+        ],
+      },
+      palettes,
+      true, // testing in dark mode
+      {
+        type: 'categories',
+        categories: ['cat1', 'cat2', 'cat3'],
+      }
+    );
+    expect(toHex(colorFactory('cat1'))).toBe(toHex(elasticPaletteColors[0]));
+    expect(toHex(colorFactory('cat2'))).toBe(toHex(elasticPaletteColors[1]));
+    expect(toHex(colorFactory('cat3'))).toBe(toHex(elasticPaletteColors[2]));
   });
 });

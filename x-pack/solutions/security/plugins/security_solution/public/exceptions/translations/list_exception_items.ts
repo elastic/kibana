@@ -39,3 +39,10 @@ export const EXCEPTION_UTILITY_TITLE = i18n.translate(
     defaultMessage: 'rule exceptions',
   }
 );
+
+export const EXCEPTION_UTILITY_ENDPOINT_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.list.utility.endpoint.title',
+  {
+    defaultMessage: 'endpoint exceptions',
+  }
+);

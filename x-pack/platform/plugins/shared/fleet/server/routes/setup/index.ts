@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import path from 'path';
+
 import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthzRouter } from '../../services/security';
@@ -24,7 +26,8 @@ export const FleetSetupResponseSchema = schema.object(
       schema.object({
         name: schema.string(),
         message: schema.string(),
-      })
+      }),
+      { maxSize: 10000 }
     ),
   },
   {
@@ -54,6 +57,8 @@ export const registerFleetSetupRoute = (router: FleetAuthzRouter) => {
         },
       },
       summary: `Initiate Fleet setup`,
+      description:
+        'Initialize Fleet and create the necessary Elasticsearch resources for Fleet to operate. Safe to call multiple times (idempotent). Returns the initialization status and any non-fatal errors encountered during setup.',
       options: {
         tags: ['oas-tag:Fleet internals'],
       },
@@ -61,16 +66,22 @@ export const registerFleetSetupRoute = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_fleet_setup.yaml'),
+        },
         validate: {
           request: {},
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => FleetSetupResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
             500: {
+              description: 'An internal server error occurred.',
               body: internalErrorResponse,
             },
           },
@@ -90,14 +101,18 @@ export const GetAgentsSetupResponseSchema = schema.object(
         schema.literal('api_keys'),
         schema.literal('fleet_admin_user'),
         schema.literal('fleet_server'),
-      ])
+      ]),
+      { maxSize: 5 }
     ),
     missing_optional_features: schema.arrayOf(
-      schema.oneOf([schema.literal('encrypted_saved_object_encryption_key_required')])
+      schema.oneOf([schema.literal('encrypted_saved_object_encryption_key_required')]),
+      { maxSize: 1 }
     ),
     package_verification_key_id: schema.maybe(schema.string()),
     is_space_awareness_enabled: schema.maybe(schema.boolean()),
     is_secrets_storage_enabled: schema.maybe(schema.boolean()),
+    is_ssl_secrets_storage_enabled: schema.maybe(schema.boolean()),
+    is_action_secrets_storage_enabled: schema.maybe(schema.boolean()),
   },
   {
     meta: {
@@ -126,7 +141,9 @@ export const registerCreateFleetSetupRoute = (router: FleetAuthzRouter) => {
           ],
         },
       },
-      summary: `Initiate agent setup`,
+      summary: `Initiate Fleet setup`,
+      description:
+        'Initialize Fleet. This endpoint is used by Elastic Agents to trigger Fleet setup. Safe to call multiple times; subsequent calls are idempotent.',
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },
@@ -134,13 +151,18 @@ export const registerCreateFleetSetupRoute = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_agents_setup.yaml'),
+        },
         validate: {
           request: {},
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => FleetSetupResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -169,6 +191,8 @@ export const registerGetFleetStatusRoute = (router: FleetAuthzRouter) => {
         },
       },
       summary: `Get agent setup info`,
+      description:
+        'Get the current Fleet setup status, including whether Fleet is ready to enroll agents and which requirements or optional features are missing.',
       options: {
         tags: ['oas-tag:Elastic Agents'],
       },
@@ -176,13 +200,18 @@ export const registerGetFleetStatusRoute = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_agents_setup.yaml'),
+        },
         validate: {
           request: {},
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetAgentsSetupResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },

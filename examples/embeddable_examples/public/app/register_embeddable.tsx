@@ -12,9 +12,9 @@ import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 // @ts-ignore
 import registerSearchEmbeddableSource from '../react_embeddables/search/register_search_embeddable?raw';
 // @ts-ignore
-import registerAttachActionSource from '../react_embeddables/search/register_add_search_panel_action?raw';
+import registerSearchPanelAction from '../react_embeddables/search/register_search_panel_action?raw';
 // @ts-ignore
-import registerFieldListEmbeddableSource from '../react_embeddables/field_list/register_field_list_embeddable?raw';
+import createPanelAction from '../react_embeddables/search/create_search_panel_action?raw';
 // @ts-ignore
 import registerReactEmbeddableSavedObjectSource from '../react_embeddables/register_saved_object_example?raw';
 
@@ -25,7 +25,7 @@ export const RegisterEmbeddable = () => {
         <h2>Register a new embeddable type</h2>
         <p>
           This plugin registers several embeddable types with{' '}
-          <strong>registerReactEmbeddableFactory</strong>. The code example below shows Search
+          <strong>registerEmbeddablePublicDefinition</strong>. The code example below shows Search
           embeddable registration. The embeddable factory is imported asynchronously to limit
           initial page load size.
         </p>
@@ -50,32 +50,20 @@ export const RegisterEmbeddable = () => {
         <h2>Show embeddables in the Add panel menu</h2>
         <p>
           Add your own embeddables to <em>Add panel</em> menu by attaching an action to the{' '}
-          <strong>ADD_PANEL_TRIGGER</strong> trigger. Notice usage of <strong>grouping</strong> to
-          nest related panel types and avoid bloating <em>Add panel</em> menu. Please reach out to
+          <strong>ADD_PANEL_TRIGGER</strong> trigger. Register the action asynchronously to reduce
+          initial plugin bundle size. The example below uses <strong>addTriggerActionAsync </strong>
+          to register the action lazily. Notice usage of <strong>grouping</strong> to nest related
+          panel types and avoid bloating <em>Add panel</em> menu. Please reach out to
           @elastic/kibana-presentation team to coordinate menu updates.
         </p>
       </EuiText>
       <EuiSpacer size="s" />
       <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">
-        {registerAttachActionSource}
+        {registerSearchPanelAction}
       </EuiCodeBlock>
-
-      <EuiSpacer size="l" />
-
-      <EuiText>
-        <h2>Configure initial dashboard placement (optional)</h2>
-        <p>
-          Add an entry to <strong>registerDashboardPanelPlacementSetting</strong> provided by the
-          Dashboard plugin start contract to configure initial dashboard placement. Panel placement
-          lets you configure the width, height, and placement strategy when panels get added to a
-          dashboard. In the example below, the Field List embeddable will be added to dashboards as
-          a narrow and tall panel.
-        </p>
-      </EuiText>
       <EuiSpacer size="s" />
-
       <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">
-        {registerFieldListEmbeddableSource}
+        {createPanelAction}
       </EuiCodeBlock>
 
       <EuiSpacer size="l" />

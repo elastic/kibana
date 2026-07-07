@@ -31,6 +31,7 @@ describe('When using calculateRouteAuthz()', () => {
       allSettings: false,
       addAgents: false,
       addFleetServers: false,
+      generateAgentReports: false,
     },
     integrations: {
       all: false,
@@ -935,6 +936,98 @@ describe('getAuthzFromRequest', () => {
       });
       const res = await getAuthzFromRequest({} as any);
       expect(res.fleet.addFleetServers).toBe(false);
+    });
+  });
+  describe('Fleet generateAgentReports', () => {
+    beforeEach(() => {
+      mockSecurity.authz.mode.useRbacForRequest.mockReturnValue(true);
+    });
+    it('should authorize with Fleet:GenerateReports and Fleet:Agents:Read', async () => {
+      checkPrivileges.mockResolvedValue({
+        privileges: {
+          kibana: [
+            {
+              resource: 'default',
+              privilege: 'api:fleet-generate-report',
+              authorized: true,
+            },
+            {
+              resource: 'default',
+              privilege: 'api:fleet-agents-read',
+              authorized: true,
+            },
+          ],
+          elasticsearch: {} as any,
+        },
+        hasAllRequested: false,
+        username: 'test',
+      });
+      const res = await getAuthzFromRequest({} as any);
+      expect(res.fleet.generateAgentReports).toBe(true);
+    });
+    it('should authorize with Fleet:GenerateReports and Fleet:Agents:All', async () => {
+      checkPrivileges.mockResolvedValue({
+        privileges: {
+          kibana: [
+            {
+              resource: 'default',
+              privilege: 'api:fleet-generate-report',
+              authorized: true,
+            },
+            {
+              resource: 'default',
+              privilege: 'api:fleet-agents-all',
+              authorized: true,
+            },
+          ],
+          elasticsearch: {} as any,
+        },
+        hasAllRequested: false,
+        username: 'test',
+      });
+      const res = await getAuthzFromRequest({} as any);
+      expect(res.fleet.generateAgentReports).toBe(true);
+    });
+    it('should not authorize without Fleet:GenerateReports', async () => {
+      checkPrivileges.mockResolvedValue({
+        privileges: {
+          kibana: [
+            {
+              resource: 'default',
+              privilege: 'api:fleet-agents-all',
+              authorized: true,
+            },
+            {
+              resource: 'default',
+              privilege: 'api:fleet-agents-read',
+              authorized: true,
+            },
+          ],
+          elasticsearch: {} as any,
+        },
+        hasAllRequested: false,
+        username: 'test',
+      });
+      const res = await getAuthzFromRequest({} as any);
+      expect(res.fleet.generateAgentReports).toBe(false);
+    });
+    it('should not authorize with only Fleet:GenerateReports', async () => {
+      checkPrivileges.mockResolvedValue({
+        privileges: {
+          kibana: [
+            {
+              resource: 'default',
+              privilege: 'api:fleet-generate-report',
+              authorized: true,
+            },
+          ],
+          elasticsearch: {} as any,
+        },
+        hasAllRequested: false,
+        username: 'test',
+      });
+      const res = await getAuthzFromRequest({} as any);
+      expect(res.fleet.generateAgentReports).toBe(false);
     });
   });
 });

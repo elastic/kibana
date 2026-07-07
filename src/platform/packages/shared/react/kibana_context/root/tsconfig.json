@@ -1,12 +1,8 @@
 {
-  "extends": "../../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node",
-      "react"
-    ]
+    "types": ["jest", "node", "react", "@kbn/core-user-settings-types"]
   },
   "include": [
     "**/*.ts",
@@ -16,7 +12,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/test-jest-helpers",
     "@kbn/react-kibana-context-common",
     "@kbn/core-i18n-browser-mocks",
     "@kbn/core-i18n-browser",
@@ -26,6 +21,11 @@
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/core-execution-context-browser",
     "@kbn/core-execution-context-browser-mocks",
-    "@kbn/shared-ux-router"
+    "@kbn/shared-ux-router",
+    "@kbn/core-chrome-layout-constants",
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/core-base-browser-internal",
+    "@kbn/react-kibana-context-env",
+    "@kbn/core-chrome-browser"
   ]
 }

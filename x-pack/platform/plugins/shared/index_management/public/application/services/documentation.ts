@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DocLinksStart } from '@kbn/core/public';
-import { DataType } from '../components/mappings_editor/types';
+import type { DocLinksStart } from '@kbn/core/public';
+import type { DataType } from '../components/mappings_editor/types';
 import { TYPE_DEFINITION } from '../components/mappings_editor/constants';
 
 class DocumentationService {
@@ -16,7 +16,6 @@ class DocumentationService {
   private esDocsBase: string = '';
   private enrichPolicies: string = '';
   private createEnrichPolicies: string = '';
-  private dataStreamsFailureStore: string = '';
   private matchAllQuery: string = '';
   private indexManagement: string = '';
   private indexSettings: string = '';
@@ -70,6 +69,10 @@ class DocumentationService {
   private bulkApi: string = '';
   private updateExistingDS: string = '';
   private enrichIngestData: string = '';
+  private mappingReference: string = '';
+  private elasticInferenceService: string = '';
+  private elasticInferenceServicePricing: string = '';
+  private cloudPricing: string = '';
 
   public setup(docLinks: DocLinksStart): void {
     const { links } = docLinks;
@@ -79,7 +82,6 @@ class DocumentationService {
     this.esDocsBase = links.elasticsearch.docsBase;
     this.enrichPolicies = links.elasticsearch.enrichPolicies;
     this.createEnrichPolicies = links.elasticsearch.createEnrichPolicy;
-    this.dataStreamsFailureStore = links.elasticsearch.dataStreamsFailureStore;
     this.matchAllQuery = links.elasticsearch.matchAllQuery;
     this.indexManagement = links.management.indexManagement;
     this.indexSettings = links.elasticsearch.indexSettings;
@@ -116,6 +118,7 @@ class DocumentationService {
     this.mappingParameters = links.elasticsearch.mappingParameters;
     this.mappingPositionIncrementGap = links.elasticsearch.mappingPositionIncrementGap;
     this.mappingRankFeatureFields = links.elasticsearch.mappingRankFeatureFields;
+    this.mappingReference = links.elasticsearch.mappingReference;
     this.mappingRouting = links.elasticsearch.mappingRouting;
     this.mappingSimilarity = links.elasticsearch.mappingSimilarity;
     this.mappingSourceFields = links.elasticsearch.mappingSourceFields;
@@ -127,12 +130,15 @@ class DocumentationService {
     this.mappingTypesRemoval = links.elasticsearch.mappingTypesRemoval;
     this.percolate = links.query.percolate;
     this.runtimeFields = links.runtimeFields.overview;
-    this.indicesComponentTemplate = links.apis.putComponentTemplate;
-    this.bulkIndexAlias = links.apis.bulkIndexAlias;
+    this.indicesComponentTemplate = links.indexManagement.componentTemplate;
+    this.bulkIndexAlias = links.indexManagement.indexAlias;
     this.indexStats = links.apis.indexStats;
     this.bulkApi = links.enterpriseSearch.bulkApi;
     this.updateExistingDS = links.elasticsearch.tutorialUpdateExistingDataStream;
     this.enrichIngestData = links.ingest.enrich;
+    this.elasticInferenceService = links.enterpriseSearch.elasticInferenceService;
+    this.elasticInferenceServicePricing = links.enterpriseSearch.elasticInferenceServicePricing;
+    this.cloudPricing = links.cloud.cloudPricing;
   }
 
   public getEsDocsBase() {
@@ -181,7 +187,7 @@ class DocumentationService {
     ) {
       return undefined;
     }
-    return `${this.esDocsBase}${typeDefinition.documentation[docType]}`;
+    return `${this.mappingReference}/${typeDefinition.documentation[docType]}`;
   };
   public getMappingTypesLink() {
     return this.mappingFieldDataTypes;
@@ -203,10 +209,6 @@ class DocumentationService {
 
   public getCreateEnrichPolicyLink() {
     return this.createEnrichPolicies;
-  }
-
-  public getDataStreamsFailureStoreLink() {
-    return this.dataStreamsFailureStore;
   }
 
   public getMatchAllQueryLink() {
@@ -375,6 +377,18 @@ class DocumentationService {
 
   public getEnrichIngestDataLink() {
     return this.enrichIngestData;
+  }
+
+  public getEisDocumentationLink() {
+    return this.elasticInferenceService;
+  }
+
+  public getEisPricingDocumentationLink() {
+    return this.elasticInferenceServicePricing;
+  }
+
+  public getCloudPricing() {
+    return this.cloudPricing;
   }
 
   public getWellKnownTextLink() {

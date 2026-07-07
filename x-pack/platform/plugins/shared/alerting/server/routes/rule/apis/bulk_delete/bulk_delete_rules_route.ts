@@ -17,9 +17,10 @@ import type {
 } from '../../../../../common/routes/rule/apis/bulk_delete';
 import { bulkDeleteRulesRequestBodySchemaV1 } from '../../../../../common/routes/rule/apis/bulk_delete';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
-import { transformRuleToRuleResponseV1 } from '../../transforms';
+import { transformRuleToRuleResponseInternalV1 } from '../../transforms';
 import type { Rule } from '../../../../application/rule/types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
+import { validateInternalRuleTypesBulkOperation } from '../../../lib/validate_internal_rule_types_by_query';
 
 export const bulkDeleteRulesRoute = ({
   router,
@@ -42,11 +43,19 @@ export const bulkDeleteRulesRoute = ({
         verifyAccessAndContext(licenseState, async (context, req, res) => {
           const alertingContext = await context.alerting;
           const rulesClient = await alertingContext.getRulesClient();
+          const ruleTypes = alertingContext.listTypes();
 
           const body: BulkDeleteRulesRequestBodyV1 = req.body;
           const { filter, ids } = body;
 
           try {
+            await validateInternalRuleTypesBulkOperation({
+              ids,
+              ruleTypes,
+              rulesClient,
+              operationText: 'delete',
+            });
+
             const bulkDeleteResult = await rulesClient.bulkDeleteRules({
               filter,
               ids,
@@ -57,7 +66,9 @@ export const bulkDeleteRulesRoute = ({
                 rules: bulkDeleteResult.rules.map((rule) => {
                   // TODO (http-versioning): Remove this cast, this enables us to move forward
                   // without fixing all of other solution types
-                  return transformRuleToRuleResponseV1<RuleParamsV1>(rule as Rule<RuleParamsV1>);
+                  return transformRuleToRuleResponseInternalV1<RuleParamsV1>(
+                    rule as Rule<RuleParamsV1>
+                  );
                 }),
               },
             };

@@ -38,6 +38,22 @@ export type SavedObjectAttributeSingle =
 export type SavedObjectAttribute = SavedObjectAttributeSingle | SavedObjectAttributeSingle[];
 
 /**
+ * Definition of the Saved Object access control interface
+ *
+ * @public
+ */
+
+export interface SavedObjectAccessControl {
+  /** The ID of the user who owns this object. */
+  owner: string;
+  /**
+   * The access mode of the object. `write_restricted` is editable only by the owner and admin users.
+   * Access mode `default` is editable by all users with write access to the object.
+   */
+  accessMode: 'write_restricted' | 'default';
+}
+
+/**
  * The data for a Saved Object is stored as an object in the `attributes`
  * property.
  *
@@ -114,4 +130,65 @@ export interface SavedObject<T = unknown> {
    * make their edits to the copy.
    */
   managed?: boolean;
+
+  /**
+   * Access control information of the saved object.
+   * This can be be used to customize access to the object in addition to RBAC, e.g.
+   * to set an object to read-only mode, where it is only editable by the owner of
+   * the object (or an admin), even if other users are granted write access via a role.
+   */
+  accessControl?: SavedObjectAccessControl;
+}
+
+/**
+ * An error entry returned for a single object by the bulk Saved Objects APIs.
+ * Unlike a successful {@link SavedObject}, it carries no `attributes`.
+ *
+ * @public
+ */
+export interface SavedObjectErrorResult {
+  id: string;
+  type: string;
+  error: SavedObjectError;
+}
+
+/**
+ * A single entry in a bulk Saved Objects response: either a successful
+ * {@link SavedObject} or a {@link SavedObjectErrorResult}. Narrow with
+ * {@link isSavedObjectErrorResult} before accessing `attributes`.
+ *
+ * @public
+ */
+export type SavedObjectBulkResult<T = unknown> = SavedObject<T> | SavedObjectErrorResult;
+
+/**
+ * Type guard that narrows a bulk Saved Objects result to a
+ * {@link SavedObjectErrorResult}.
+ *
+ * @public
+ */
+export const isSavedObjectErrorResult = (result: {
+  error?: SavedObjectError;
+}): result is SavedObjectErrorResult => result.error !== undefined;
+
+/**
+ * Saved object document as stored in `_source` of doc in ES index
+ * Similar to SavedObjectDoc and excludes `version`, includes `references`, has `attributes` in [typeMapping]
+ *
+ * @public
+ */
+export interface SavedObjectsRawDocSource {
+  type: string;
+  namespace?: string;
+  namespaces?: string[];
+  migrationVersion?: SavedObjectsMigrationVersion;
+  typeMigrationVersion?: string;
+  updated_at?: string;
+  created_at?: string;
+  created_by?: string;
+  references?: SavedObjectReference[];
+  originId?: string;
+  managed?: boolean;
+  accessControl?: SavedObjectAccessControl;
+  [typeMapping: string]: any;
 }

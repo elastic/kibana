@@ -10,7 +10,8 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { getSampleLayout } from './test_utils/sample_layout';
-import { GridLayout, GridLayoutProps } from './grid_layout';
+import type { GridLayoutProps } from './grid_layout';
+import { GridLayout } from './grid_layout';
 import { gridSettings, mockRenderPanelContents } from './test_utils/mocks';
 import { cloneDeep } from 'lodash';
 import {
@@ -22,7 +23,7 @@ import {
   touchStart,
 } from './test_utils/events';
 import { EuiThemeProvider } from '@elastic/eui';
-import { GridLayoutData } from './types';
+import type { GridLayoutData } from './types';
 
 const onLayoutChange = jest.fn();
 

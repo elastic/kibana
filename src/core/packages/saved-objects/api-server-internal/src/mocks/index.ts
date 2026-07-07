@@ -22,3 +22,4 @@ export {
 export { apiContextMock, type ApiExecutionContextMock } from './api_context.mock';
 export { createDocumentMigratorMock, createMigratorMock } from './migrator.mock';
 export { createEncryptionHelperMock } from './helpers';
+export { savedObjectsExtensionsMock } from './saved_objects_extensions.mock';

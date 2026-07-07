@@ -50,7 +50,6 @@ import {
 } from '../../../../../common/lib';
 import { TEST_CACHE_EXPIRATION_TIME } from '../../create_test_data';
 
-// eslint-disable-next-line import/no-default-export
 export default function createAlertsAsDataInstallResourcesTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
@@ -129,7 +128,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         expect(executionUuid).not.to.be(undefined);
 
         // Query for alerts
-        const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>();
+        const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
 
         // Get alert state from task document
         let state: any = await getTaskState(ruleId);
@@ -220,7 +219,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         expect(executionUuid).not.to.be(undefined);
 
         // Query for alerts
-        const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>();
+        const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
 
         // Get alert state from task document
         state = await getTaskState(ruleId);
@@ -378,7 +377,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         expect(executionUuid).not.to.be(undefined);
 
         // Query for alerts
-        const alertDocsRun3 = await queryForAlertDocs<PatternFiringAlert>();
+        const alertDocsRun3 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
 
         // Get alert state from task document
         state = await getTaskState(ruleId);
@@ -536,10 +535,24 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
     }
   }
 
-  async function queryForAlertDocs<T>(): Promise<Array<SearchHit<T>>> {
+  async function queryForAlertDocs<T>(ruleId?: string): Promise<Array<SearchHit<T>>> {
+    const query: any = ruleId
+      ? {
+          bool: {
+            must: [
+              {
+                term: {
+                  'kibana.alert.rule.uuid': ruleId,
+                },
+              },
+            ],
+          },
+        }
+      : { match_all: {} };
+
     const searchResult = await es.search({
       index: alertsAsDataIndex,
-      query: { match_all: {} },
+      query,
     });
     return searchResult.hits.hits as Array<SearchHit<T>>;
   }

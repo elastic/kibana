@@ -70,6 +70,27 @@ module.exports = (request, options) => {
     });
   }
 
+  if (request === 'ts-api-utils') {
+    return resolve.sync('ts-api-utils/lib/index.cjs', {
+      basedir: options.basedir,
+      extensions: options.extensions,
+    });
+  }
+
+  if (request === 'zod' || request === 'zod/v4') {
+    return resolve.sync('zod/v4/index.cjs', {
+      basedir: options.basedir,
+      extensions: options.extensions,
+    });
+  }
+
+  if (request === 'just-bash') {
+    return resolve.sync('just-bash/dist/bundle/index.cjs', {
+      basedir: options.basedir,
+      extensions: options.extensions,
+    });
+  }
+
   if (request === `elastic-apm-node`) {
     return APM_AGENT_MOCK;
   }

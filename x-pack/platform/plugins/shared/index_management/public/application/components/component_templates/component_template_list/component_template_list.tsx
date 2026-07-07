@@ -6,11 +6,11 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ScopedHistory } from '@kbn/core/public';
+import type { ScopedHistory } from '@kbn/core/public';
 import { EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/breadcrumbs';
@@ -20,18 +20,20 @@ import {
   PageError,
   attemptToURIDecode,
 } from '../../../../shared_imports';
-import { ComponentTemplateDeserialized, GlobalFlyout } from '../shared_imports';
+import type { ComponentTemplateDeserialized } from '../shared_imports';
+import { GlobalFlyout } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../constants';
 import { useComponentTemplatesContext } from '../component_templates_context';
+import type { ComponentTemplateDetailsProps } from '../component_template_details';
 import {
   ComponentTemplateDetailsFlyoutContent,
   defaultFlyoutProps,
-  ComponentTemplateDetailsProps,
 } from '../component_template_details';
 import { EmptyPrompt } from './empty_prompt';
 import { ComponentTable } from './table';
 import { ComponentTemplatesDeleteModal } from './delete_modal';
 import { useRedirectPath } from '../../../hooks/redirect_path';
+import { useAppContext } from '../../../app_context';
 
 interface Props {
   componentTemplateName?: string;
@@ -49,6 +51,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
     useGlobalFlyout();
   const { api, trackMetric, documentation } = useComponentTemplatesContext();
+  const { privs } = useAppContext();
   const redirectTo = useRedirectPath(history);
 
   useEffect(() => {
@@ -128,13 +131,14 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
         props: {
           onClose: goToComponentTemplateList,
           componentTemplateName,
-          showSummaryCallToAction: true,
-          actions,
+          showSummaryCallToAction: privs.manageIndexTemplates,
+          actions: privs.manageIndexTemplates ? actions : [],
         },
         flyoutProps: { ...defaultFlyoutProps, onClose: goToComponentTemplateList },
       });
     }
   }, [
+    privs.manageIndexTemplates,
     componentTemplateName,
     goToComponentTemplateList,
     goToEditComponentTemplate,

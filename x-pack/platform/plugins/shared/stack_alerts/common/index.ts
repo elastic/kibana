@@ -10,7 +10,7 @@ export { getComparatorScript, getHumanReadableComparator } from './comparator';
 export type { EsqlTable } from './es_query';
 export {
   rowToDocument,
-  transformDatatableToEsqlTable,
+  transformToEsqlTable,
   getEsqlQueryHits,
   ALERT_ID_COLUMN,
   ALERT_ID_SUGGESTED_MAX,

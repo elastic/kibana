@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-declare module 'react-redux/lib/utils/shallowEqual' {
-  const shallowEqual: typeof import('react-redux').shallowEqual;
+import 'react-redux';
 
-  // eslint-disable-next-line import/no-default-export
-  export default shallowEqual;
+declare module 'react-redux' {
+  export function shallowEqual<T>(objA: T, objB: T): boolean;
 }

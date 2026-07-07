@@ -9,7 +9,9 @@
 
 import React from 'react';
 
-import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { EventEmitter } from 'events';
 import ReactDOM from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -185,6 +187,12 @@ export function openContextMenu(
         closePopover={onClose}
         panelPaddingSize="none"
         anchorPosition="downRight"
+        aria-label={
+          props.closeButtonAriaLabel ??
+          i18n.translate('uiActions.contextMenu.ariaLabel', {
+            defaultMessage: 'Context menu',
+          })
+        }
       >
         <EuiContextMenu
           initialPanelId="mainMenu"

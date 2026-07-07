@@ -7,12 +7,26 @@
 
 import React, { useEffect, useMemo } from 'react';
 import type { EuiInMemoryTableProps } from '@elastic/eui';
-import { EuiCode, EuiCodeBlock, EuiText, EuiButtonIcon, EuiInMemoryTable } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCode,
+  EuiCodeBlock,
+  EuiInMemoryTable,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
+/**
+ * ## IMPORTANT TODO ##
+ * This file imports @elastic/ecs directly, which imports all ECS fields into the bundle.
+ * This should be migrated to using the unified fields metadata plugin instead.
+ * See https://github.com/elastic/kibana/tree/main/x-pack/platform/plugins/shared/fields_metadata for more details.
+ */
+// eslint-disable-next-line no-restricted-imports
 import { EcsFlat } from '@elastic/ecs';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { TableFieldNameCell } from '../../../document_details/right/components/table_field_name_cell';
+import { useQuery, useQueryClient } from '@kbn/react-query';
+import { TableFieldNameCell } from '../../../../flyout_v2/shared/components/table_field_name_cell';
 
 interface FlattenedItem {
   key: string; // Flattened dot notation object path for an object;
@@ -159,12 +173,17 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
               render: (fieldKey: string) => {
                 const isPinned = pinnedFields?.includes(fieldKey);
                 return (
-                  <EuiButtonIcon
-                    iconType={isPinned ? 'pinFilled' : 'pin'}
-                    aria-label={isPinned ? 'Unpin field' : 'Pin field'}
-                    color={isPinned ? 'primary' : 'text'}
-                    onClick={() => togglePin(fieldKey)}
-                  />
+                  <EuiToolTip
+                    content={isPinned ? 'Unpin field' : 'Pin field'}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      iconType={isPinned ? 'pinFill' : 'pin'}
+                      aria-label={isPinned ? 'Unpin field' : 'Pin field'}
+                      color={isPinned ? 'primary' : 'text'}
+                      onClick={() => togglePin(fieldKey)}
+                    />
+                  </EuiToolTip>
                 );
               },
             },
@@ -191,7 +210,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
           defaultMessage: 'Value',
         }),
         render: (value: unknown) => (
-          <div style={{ width: '100%' }}>{getDescriptionDisplay(value)}</div>
+          <div css={{ width: '100%' }}>{getDescriptionDisplay(value)}</div>
         ),
       },
     ],
@@ -200,6 +219,9 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
 
   return (
     <EuiInMemoryTable<FlattenedItem>
+      tableCaption={i18n.translate('xpack.securitySolution.fieldsTable.tableCaption', {
+        defaultMessage: 'Fields',
+      })}
       // @ts-ignore
       items={sortedItems}
       columns={columns}

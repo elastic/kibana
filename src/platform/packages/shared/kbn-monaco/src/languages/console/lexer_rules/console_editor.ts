@@ -14,7 +14,7 @@ import {
   matchToken,
   matchTokens,
 } from './shared';
-import { monaco } from '../../../monaco_imports';
+import type { monaco } from '../../../monaco_imports';
 
 export const languageConfiguration: monaco.languages.LanguageConfiguration = {
   ...consoleSharedLanguageConfiguration,
@@ -33,6 +33,14 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
       matchToken('whitespace', '\\s+'),
       // text
       matchToken('text', '.+?'),
+    ],
+    json_root: [
+      // Recognize HTTP methods so the next request is highlighted even if the
+      // previous JSON body didn't correctly transition back to root.
+      matchTokensWithEOL('method', /get|post|put|patch|delete|head/, 'root', 'method_sep'),
+      // Also recognize warning comments that start a new context
+      matchToken('warning', '#!.*$'),
+      ...consoleSharedLexerRules.tokenizer.json_root,
     ],
     comments: [
       // line comment indicated by #

@@ -8,16 +8,17 @@
 import moment from 'moment';
 import { JOB_STATUS } from '@kbn/reporting-common';
 
-import { SavedObject } from '@kbn/core/server';
-import { BasePayload } from '@kbn/reporting-common/types';
+import type { SavedObject } from '@kbn/core/server';
+import type { BasePayload } from '@kbn/reporting-common/types';
 import { Report } from './report';
-import { ScheduledReportType } from '../../types';
+import type { ScheduledReportType } from '../../types';
 
 interface ConstructorOpts {
   runAt: Date;
   kibanaId: string;
   kibanaName: string;
   queueTimeout: number;
+  spaceId: string;
   scheduledReport: SavedObject<ScheduledReportType>;
 }
 
@@ -26,7 +27,7 @@ export class ScheduledReport extends Report {
    * Create a report from a scheduled_report saved object
    */
   constructor(opts: ConstructorOpts) {
-    const { kibanaId, kibanaName, runAt, scheduledReport, queueTimeout } = opts;
+    const { kibanaId, kibanaName, runAt, scheduledReport, spaceId, queueTimeout } = opts;
     const now = moment.utc();
     const startTime = now.toISOString();
     const expirationTime = now.add(queueTimeout).toISOString();
@@ -62,6 +63,7 @@ export class ScheduledReport extends Report {
         started_at: startTime,
         timeout: queueTimeout,
         scheduled_report_id: scheduledReport.id,
+        space_id: spaceId,
       },
       { queue_time_ms: [now.diff(moment.utc(runAt), 'milliseconds')] }
     );

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { RouteInitializerDeps } from '..';
+import type { RouteInitializerDeps } from '..';
 import { API_ROUTE_WORKPAD_IMPORT } from '../../../common/lib/constants';
-import { ImportedCanvasWorkpad } from '../../../types';
+import type { ImportedCanvasWorkpad } from '../../../types';
 import { ImportedWorkpadSchema } from './workpad_schema';
 import { okResponse } from '../ok_response';
 import { catchErrorHandler } from '../catch_error_handler';

@@ -11,7 +11,7 @@ import { parse } from 'query-string';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { getAbsoluteTime } from '../utils/date';
-import { TimePickerTimeDefaults } from '../types';
+import type { TimePickerTimeDefaults } from '../types';
 
 const getParsedParams = (search: string) => {
   return search ? parse(search[0] === '?' ? search.slice(1) : search, { sort: false }) : {};

@@ -10,7 +10,8 @@
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { createAnyInstanceSerializer } from '@kbn/jest-serializers';
 
-import { Config, Platform } from '../../lib';
+import type { Platform } from '../../lib';
+import { Config } from '../../lib';
 import { DownloadNodeBuilds } from './download_node_builds_task';
 
 jest.mock('./node_shasums');
@@ -38,6 +39,7 @@ async function setup({ failOnUrl }: { failOnUrl?: string } = {}) {
     isRelease: true,
     targetAllPlatforms: true,
     targetServerlessPlatforms: false,
+    skipServerless: false,
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,
     dockerNamespace: null,

@@ -13,13 +13,16 @@ export class UnifiedSearchPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
+  private readonly PageObjects = this.ctx.getPageObjects(['discover']);
 
   public async switchDataView(switchButtonSelector: string, dataViewTitle: string) {
     await this.testSubjects.click(switchButtonSelector);
 
     const indexPatternSwitcher = await this.testSubjects.find('indexPattern-switcher', 500);
     await this.testSubjects.setValue('indexPattern-switcher--input', dataViewTitle);
-    await (await indexPatternSwitcher.findByCssSelector(`[title="${dataViewTitle}"]`)).click();
+    await (
+      await indexPatternSwitcher.findByCssSelector(`[data-test-subj="dataView-${dataViewTitle}"]`)
+    ).click();
 
     await this.retry.waitFor(
       'wait for updating switcher',
@@ -36,11 +39,13 @@ export class UnifiedSearchPageObject extends FtrService {
     );
 
     const indexPatternSwitcher = await this.testSubjects.find('indexPattern-switcher', 500);
+    const items = await indexPatternSwitcher.findAllByCssSelector(
+      '.euiSelectableListItem[data-test-subj^="dataView-"]'
+    );
     const availableDataViews = await Promise.all(
-      (
-        await indexPatternSwitcher.findAllByCssSelector('.euiSelectableListItem')
-      ).map(async (item) => {
-        return await item.getAttribute('title');
+      items.map(async (item) => {
+        const testSubj = (await item.getAttribute('data-test-subj')) ?? '';
+        return testSubj.slice('dataView-'.length);
       })
     );
 
@@ -67,7 +72,7 @@ export class UnifiedSearchPageObject extends FtrService {
   }
 
   public async switchToDataViewMode() {
-    await this.testSubjects.click('switch-to-dataviews');
+    await this.PageObjects.discover.selectDataViewMode();
     await this.retry.waitFor('the modal to open', async () => {
       return await this.testSubjects.exists('discover-esql-to-dataview-modal');
     });

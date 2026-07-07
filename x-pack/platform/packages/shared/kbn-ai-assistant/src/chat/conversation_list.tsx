@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiCollapsibleNavGroup,
   EuiFlexGroup,
@@ -17,12 +18,12 @@ import {
   euiScrollBarStyles,
   EuiSpacer,
   EuiText,
-  UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React, { MouseEvent, useEffect, useMemo, useState } from 'react';
+import type { MouseEvent } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type { UseConversationListResult } from '../hooks/use_conversation_list';
 import { useConfirmModal, useConversationsByDate, useConversationContextMenu } from '../hooks';
@@ -154,7 +155,7 @@ export function ConversationList({
               {DATE_CATEGORY_LABELS[category]}
             </EuiText>
           </EuiPanel>
-          <EuiListGroup flush={false} gutterSize="none">
+          <EuiListGroup>
             {list.map((conversation) => (
               <EuiListGroupItem
                 data-test-subj="observabilityAiAssistantConversationsLink"
@@ -165,7 +166,6 @@ export function ConversationList({
                     isPublic={conversation.public}
                   />
                 }
-                size="s"
                 isActive={conversation.id === selectedConversationId}
                 isDisabled={isLoading}
                 showToolTip
@@ -243,7 +243,7 @@ export function ConversationList({
               <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
                 <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="warning" color="danger" />
+                    <EuiIcon type="warning" color="danger" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText size="s" color="danger">
@@ -281,7 +281,7 @@ export function ConversationList({
                         }
                       )}
                       titleSize="xs"
-                      iconType="list"
+                      iconType="listBullet"
                       iconSize="m"
                       onToggle={(isOpen) =>
                         setOpenSection(isOpen ? ListSections.CONVERSATIONS : ListSections.ARCHIVED)
@@ -331,6 +331,7 @@ export function ConversationList({
                 <EuiFlexItem grow className={newChatButtonWrapperClassName}>
                   <NewChatButton
                     href={newConversationHref}
+                    // @ts-expect-error upgrade typescript v5.9.3
                     onClick={(event) => onClickConversation(event)}
                   />
                 </EuiFlexItem>

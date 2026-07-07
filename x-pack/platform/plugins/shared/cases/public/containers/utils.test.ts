@@ -12,6 +12,7 @@ import {
   constructAssigneesFilter,
   constructReportersFilter,
   constructCustomFieldsFilter,
+  getIncrementalIdSearchOverrides,
 } from './utils';
 
 import type { CaseUI } from './types';
@@ -25,6 +26,7 @@ const caseBeforeUpdate = {
   ],
   settings: {
     syncAlerts: true,
+    extractObservables: false,
   },
 } as CaseUI;
 
@@ -54,12 +56,35 @@ describe('utils', () => {
   describe('createUpdateSuccessToaster', () => {
     it('creates the correct toast when sync alerts is turned on and case has alerts', () => {
       // We remove the id as is randomly generated
-      const toast = createUpdateSuccessToaster(caseBeforeUpdate, caseAfterUpdate, 'settings', {
-        syncAlerts: true,
-      });
+      const toast = createUpdateSuccessToaster(
+        { ...caseBeforeUpdate, settings: { syncAlerts: false, extractObservables: false } },
+        caseAfterUpdate,
+        'settings',
+        {
+          syncAlerts: true,
+          extractObservables: false,
+        }
+      );
 
       expect(toast).toEqual({
         title: 'Alerts in "My case" have been synced',
+        className: 'eui-textBreakWord',
+      });
+    });
+
+    it('creates the correct toast when extract observables is turned on', () => {
+      const toast = createUpdateSuccessToaster(
+        { ...caseBeforeUpdate, settings: { syncAlerts: false, extractObservables: false } },
+        caseAfterUpdate,
+        'settings',
+        {
+          syncAlerts: false,
+          extractObservables: true,
+        }
+      );
+
+      expect(toast).toEqual({
+        title: 'Auto-extract observables setting in "My case" have been updated',
         className: 'eui-textBreakWord',
       });
     });
@@ -72,6 +97,7 @@ describe('utils', () => {
         'settings',
         {
           syncAlerts: true,
+          extractObservables: false,
         }
       );
 
@@ -85,6 +111,7 @@ describe('utils', () => {
       // We remove the id as is randomly generated
       const toast = createUpdateSuccessToaster(caseBeforeUpdate, caseAfterUpdate, 'settings', {
         syncAlerts: false,
+        extractObservables: false,
       });
 
       expect(toast).toEqual({
@@ -112,7 +139,7 @@ describe('utils', () => {
     it('creates the correct toast when the status change, case has alerts, and sync alerts is off', () => {
       // We remove the id as is randomly generated
       const toast = createUpdateSuccessToaster(
-        { ...caseBeforeUpdate, settings: { syncAlerts: false } },
+        { ...caseBeforeUpdate, settings: { syncAlerts: false, extractObservables: true } },
         caseAfterUpdate,
         'status',
         'closed'
@@ -216,6 +243,127 @@ describe('utils', () => {
           'dbeb8e9c-240b-4adb-b83e-e645e86c07ed': [false],
           'e0e8c50a-8d65-4f00-b6f0-d8a131fd34b4': [true, false],
         },
+      });
+    });
+  });
+
+  describe('getIncrementalIdSearchOverrides', () => {
+    it('returns an empty object if the search is not an incremental id search', () => {
+      const shouldReturnEmpty = [
+        '',
+        ' ',
+        'test',
+        '123',
+        'abc',
+        '#abc',
+        '##123',
+        '##123##',
+        '#123 abc',
+      ];
+
+      shouldReturnEmpty.forEach((search) => {
+        expect(getIncrementalIdSearchOverrides(search)).toEqual({});
+      });
+    });
+
+    it('returns the correct overrides for an incremental id search', () => {
+      expect(getIncrementalIdSearchOverrides('#123')).toEqual({
+        searchFields: ['cases.incremental_id.text'],
+        search: '123',
+      });
+      expect(getIncrementalIdSearchOverrides('   #123   ')).toEqual({
+        searchFields: ['cases.incremental_id.text'],
+        search: '123',
+      });
+    });
+  });
+
+  describe('parseExtendedFieldSearch', () => {
+    const { parseExtendedFieldSearch } = jest.requireActual('./utils');
+
+    it('returns empty filters and original text when no field:value pairs', () => {
+      expect(parseExtendedFieldSearch('some text')).toEqual({
+        extendedFieldFilters: [],
+        freeText: 'some text',
+      });
+    });
+
+    it('extracts a single field:value pair', () => {
+      expect(parseExtendedFieldSearch('priority:high')).toEqual({
+        extendedFieldFilters: [{ label: 'priority', value: 'high' }],
+        freeText: '',
+      });
+    });
+
+    it('extracts multiple field:value pairs with AND semantics', () => {
+      expect(parseExtendedFieldSearch('priority:high region:emea')).toEqual({
+        extendedFieldFilters: [
+          { label: 'priority', value: 'high' },
+          { label: 'region', value: 'emea' },
+        ],
+        freeText: '',
+      });
+    });
+
+    it('separates free text from field:value pairs', () => {
+      expect(parseExtendedFieldSearch('priority:high some text')).toEqual({
+        extendedFieldFilters: [{ label: 'priority', value: 'high' }],
+        freeText: 'some text',
+      });
+    });
+
+    it('handles quoted values with colons inside', () => {
+      expect(parseExtendedFieldSearch('notes:"value:with:colons"')).toEqual({
+        extendedFieldFilters: [{ label: 'notes', value: 'value:with:colons' }],
+        freeText: '',
+      });
+    });
+
+    it('handles mixed quoted and unquoted values with free text', () => {
+      expect(parseExtendedFieldSearch('priority:high notes:"some:value" free text here')).toEqual({
+        extendedFieldFilters: [
+          { label: 'priority', value: 'high' },
+          { label: 'notes', value: 'some:value' },
+        ],
+        freeText: 'free text here',
+      });
+    });
+
+    it('returns empty for empty string', () => {
+      expect(parseExtendedFieldSearch('')).toEqual({
+        extendedFieldFilters: [],
+        freeText: '',
+      });
+    });
+
+    it('extracts a quoted multi-word label', () => {
+      expect(parseExtendedFieldSearch('"Effort Level":high')).toEqual({
+        extendedFieldFilters: [{ label: 'Effort Level', value: 'high' }],
+        freeText: '',
+      });
+    });
+
+    it('extracts a quoted multi-word label with a quoted value', () => {
+      expect(parseExtendedFieldSearch('"Effort Level":"very high"')).toEqual({
+        extendedFieldFilters: [{ label: 'Effort Level', value: 'very high' }],
+        freeText: '',
+      });
+    });
+
+    it('mixes quoted multi-word label with unquoted single-word label', () => {
+      expect(parseExtendedFieldSearch('"Effort Level":high priority:critical')).toEqual({
+        extendedFieldFilters: [
+          { label: 'Effort Level', value: 'high' },
+          { label: 'priority', value: 'critical' },
+        ],
+        freeText: '',
+      });
+    });
+
+    it('preserves free text alongside quoted multi-word label filter', () => {
+      expect(parseExtendedFieldSearch('"Effort Level":high some free text')).toEqual({
+        extendedFieldFilters: [{ label: 'Effort Level', value: 'high' }],
+        freeText: 'some free text',
       });
     });
   });

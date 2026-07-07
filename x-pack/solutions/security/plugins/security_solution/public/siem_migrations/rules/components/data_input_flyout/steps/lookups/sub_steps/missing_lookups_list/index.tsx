@@ -7,11 +7,15 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
+import {
+  type AddUploadedLookups,
+  type UploadedLookups,
+} from '../../../../../../../common/components/migration_steps/types';
+import { MissingLookupsList } from '../../../../../../../common/components';
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
 import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { UploadedLookups, AddUploadedLookups } from '../../lookups_data_input';
+import { MigrationSource } from '../../../../../../../common/types';
 import * as i18n from './translations';
-import { MissingLookupsList } from './missing_lookups_list';
 
 export interface MissingLookupsListStepProps {
   status: EuiStepStatus;
@@ -35,7 +39,11 @@ export const useMissingLookupsListStep = ({
     (lookupName: string) => {
       // Saving the lookup with an empty content to omit it.
       // The translation will ignore this lookup and will not cause partial translations.
-      upsertResources(migrationStats.id, [{ type: 'lookup', name: lookupName, content: '' }]);
+      upsertResources({
+        migrationId: migrationStats.id,
+        vendor: migrationStats.vendor,
+        data: [{ type: 'lookup', name: lookupName, content: '' }],
+      });
     },
     [upsertResources, migrationStats]
   );
@@ -51,11 +59,15 @@ export const useMissingLookupsListStep = ({
   }, [isLoading, error, status]);
 
   return {
-    title: i18n.LOOKUPS_DATA_INPUT_COPY_TITLE,
+    title:
+      migrationStats.vendor === MigrationSource.SPLUNK
+        ? i18n.LOOKUPS_DATA_INPUT_COPY_TITLE
+        : i18n.SENTINAL_WACTHLISTS_DATA_INPUT_COPY_TITLE,
     status: listStepStatus,
     children: (
       <MissingLookupsList
         onCopied={onCopied}
+        migrationSource={migrationStats.vendor as MigrationSource}
         missingLookups={missingLookups}
         uploadedLookups={uploadedLookups}
         omitLookup={omitLookup}

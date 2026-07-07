@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SecurityIndexPrivilege } from '@elastic/elasticsearch/lib/api/types';
-import { SyntheticsEsClient } from '../../lib';
-import { SyntheticsServerSetup } from '../../types';
+import type { SecurityIndexPrivilege } from '@elastic/elasticsearch/lib/api/types';
+import type { SyntheticsEsClient } from '../../lib';
+import type { SyntheticsServerSetup } from '../../types';
 import { getFakeKibanaRequest } from '../utils/fake_kibana_request';
 import { getServiceApiKeyPrivileges, syntheticsIndex } from '../get_api_key';
 

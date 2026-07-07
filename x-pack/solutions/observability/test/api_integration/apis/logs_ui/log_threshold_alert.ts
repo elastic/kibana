@@ -7,27 +7,35 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
+import type { LogThresholdAlertReporter } from '@kbn/infra-plugin/server/lib/alerting/log_threshold/log_threshold_executor';
 import {
   executeAlert,
   executeRatioAlert,
-  LogThresholdAlertReporter,
 } from '@kbn/infra-plugin/server/lib/alerting/log_threshold/log_threshold_executor';
-import {
-  Comparator,
+import type {
   TimeUnit,
   RatioCriteria,
   RuleParams,
 } from '@kbn/infra-plugin/common/alerting/logs/log_threshold/types';
+import { Comparator } from '@kbn/infra-plugin/common/alerting/logs/log_threshold/types';
 import { DATES } from './utils/constants';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
   describe('Log Threshold Rule', () => {
     describe('executeAlert', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/alerts_test_data'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts_test_data'));
+      before(() =>
+        esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/alerts_test_data'
+        )
+      );
+      after(() =>
+        esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/alerts_test_data'
+        )
+      );
 
       describe('without group by', () => {
         it('should trigger alerts below the alert limit', async () => {
@@ -162,6 +170,9 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             undefined,
+            {
+              env: 'dev',
+            },
           ]);
           expect(alertsClient.setAlertLimitReached.calledOnceWith(true)).to.be(true);
         });
@@ -240,6 +251,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'host-01',
               },
             },
+            { 'host.name': 'host-01' },
           ]);
           expect(alertsClient.setAlertLimitReached.calledOnceWith(true)).to.be(true);
         });
@@ -358,6 +370,9 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             undefined,
+            {
+              env: 'dev',
+            },
           ]);
           expect(alertsClient.setAlertLimitReached.calledOnceWith(true)).to.be(true);
         });
@@ -365,8 +380,16 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('executeRatioAlert', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/ten_thousand_plus'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/ten_thousand_plus'));
+      before(() =>
+        esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/ten_thousand_plus'
+        )
+      );
+      after(() =>
+        esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/ten_thousand_plus'
+        )
+      );
 
       describe('without group by', () => {
         it('should trigger alerts below the alert limit', async () => {
@@ -499,6 +522,9 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             undefined,
+            {
+              'event.category': 'web',
+            },
           ]);
           expect(alertsClient.setAlertLimitReached.calledOnceWith(false)).to.be(true);
         });

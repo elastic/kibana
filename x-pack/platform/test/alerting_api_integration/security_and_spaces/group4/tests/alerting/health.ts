@@ -11,7 +11,6 @@ import { UserAtSpaceScenarios } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover, AlertUtils } from '../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function createFindTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');

@@ -46,7 +46,7 @@ export const StartActionName: FC<StartActionNameProps> = ({
               })
         }
       >
-        <>{startActionNameText}</>
+        <span tabIndex={0}>{startActionNameText}</span>
       </EuiToolTip>
     );
   }

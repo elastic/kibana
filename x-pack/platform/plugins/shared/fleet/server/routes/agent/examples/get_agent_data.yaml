@@ -1,0 +1,27 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          getAgentDataExample:
+            description: 'Data streams the agent is actively sending data to'
+            value:
+              items:
+                - data:
+                    'logs-nginx.access-default':
+                      - id: 'agent-id-1'
+                        name: 'my-host'
+              total: 1
+              totalMonitoring: 0
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

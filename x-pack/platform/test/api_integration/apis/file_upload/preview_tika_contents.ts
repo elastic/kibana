@@ -7,7 +7,7 @@
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { pdfBase64 } from './pdf_base64';
 
 export default ({ getService }: FtrProviderContext) => {

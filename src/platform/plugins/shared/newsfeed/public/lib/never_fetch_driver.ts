@@ -8,8 +8,8 @@
  */
 
 import type { Observable } from 'rxjs';
-import { FetchResult } from '../types';
-import { INewsfeedApiDriver } from './types';
+import type { FetchResult } from '../types';
+import type { INewsfeedApiDriver } from './types';
 
 /**
  * NewsfeedApiDriver variant that never fetches results. This is useful for instances where Kibana is started

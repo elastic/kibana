@@ -17,10 +17,11 @@ import {
   EuiModalFooter,
   EuiButtonEmpty,
   EuiButton,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
-import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { isManagedJob } from '../../../jobs_utils';
 import { stopDatafeeds } from '../utils';
 import { ManagedJobsWarningCallout } from './managed_jobs_warning_callout';
@@ -50,6 +51,8 @@ export const StopDatafeedsConfirmModal: FC<Props> = ({
   const [jobsToStop, setJobsToStop] = useState<MlSummaryJob[]>([]);
 
   const jobIds = useMemo(() => jobsToStop.map(({ id }) => id), [jobsToStop]);
+
+  const modalTitleId = useGeneratedHtmlId();
 
   useEffect(() => {
     if (typeof setShowFunction === 'function') {
@@ -94,9 +97,13 @@ export const StopDatafeedsConfirmModal: FC<Props> = ({
     );
 
     return (
-      <EuiModal data-test-subj="mlStopDatafeedsConfirmModal" onClose={closeModal}>
+      <EuiModal
+        data-test-subj="mlStopDatafeedsConfirmModal"
+        onClose={closeModal}
+        aria-labelledby={modalTitleId}
+      >
         <EuiModalHeader>
-          <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>{title}</EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
           <ManagedJobsWarningCallout

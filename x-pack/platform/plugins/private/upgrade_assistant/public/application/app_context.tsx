@@ -6,16 +6,16 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { AppDependencies } from '../types';
+import type { RootComponentDependencies } from '../types';
 
-export const AppContext = createContext<AppDependencies | undefined>(undefined);
+export const AppContext = createContext<RootComponentDependencies | undefined>(undefined);
 
 export const AppContextProvider = ({
   children,
   value,
 }: {
   children: React.ReactNode;
-  value: AppDependencies;
+  value: RootComponentDependencies;
 }) => {
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

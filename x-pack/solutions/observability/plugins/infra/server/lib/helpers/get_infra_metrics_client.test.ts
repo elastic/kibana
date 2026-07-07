@@ -22,11 +22,16 @@ const withExcludedDataTiers = (tiers: DataTier[]) => ({
 
 const mockedInfra = { getMetricsIndices: () => Promise.resolve(['*.indices']) };
 
+// Asserts the `query` shape passed to `callWithRequest('search', …)`: an extra
+// `bool` only when excluding tiers, otherwise the caller's query untouched.
 const infraMetricsTestHarness =
-  (tiers: DataTier[], input: QueryDslQueryContainer | undefined, output: QueryDslQueryContainer) =>
+  (
+    tiers: DataTier[],
+    input: QueryDslQueryContainer | undefined,
+    expectedQuery: QueryDslQueryContainer | undefined
+  ) =>
   async () => {
-    const callWithRequest = jest.fn();
-
+    const callWithRequest = jest.fn().mockResolvedValue({});
     const mockedCore = withExcludedDataTiers(tiers);
 
     const context = {
@@ -50,98 +55,78 @@ const infraMetricsTestHarness =
       context,
       'search',
       {
-        query: output,
         size: 1,
         track_total_hits: false,
         ignore_unavailable: true,
         index: ['*.indices'],
+        query: expectedQuery,
       },
       {}
     );
   };
 
 describe('getInfraMetricsClient', () => {
-  it(
-    'defines an empty must_not query if given no data tiers to filter by',
-    infraMetricsTestHarness([], undefined, { bool: { must_not: [] } })
-  );
+  describe('search', () => {
+    it(
+      'passes the query through untouched when there are no excluded data tiers and no query',
+      infraMetricsTestHarness([], undefined, undefined)
+    );
 
-  it(
-    'includes excluded data tiers in the request filter by default',
-    infraMetricsTestHarness(['data_frozen'], undefined, {
-      bool: {
-        must_not: [
-          {
-            terms: {
-              _tier: ['data_frozen'],
-            },
-          },
-        ],
-      },
-    })
-  );
+    it(
+      'passes the input query through untouched when there are no excluded data tiers',
+      infraMetricsTestHarness(
+        [],
+        { exists: { field: 'a-field' } },
+        { exists: { field: 'a-field' } }
+      )
+    );
 
-  it(
-    'merges provided filters with the excluded data tier filter',
-    infraMetricsTestHarness(
-      ['data_frozen'],
-      {
+    it(
+      'wraps the query in a bool and includes excluded data tiers in the filter',
+      infraMetricsTestHarness(['data_frozen'], undefined, {
         bool: {
-          must_not: {
-            exists: {
-              field: 'a-field',
-            },
-          },
-        },
-      },
-      {
-        bool: {
-          must_not: [
+          filter: [
             {
-              exists: {
-                field: 'a-field',
-              },
-            },
-            {
-              terms: {
-                _tier: ['data_frozen'],
+              bool: {
+                must_not: [
+                  {
+                    terms: {
+                      _tier: ['data_frozen'],
+                    },
+                  },
+                ],
               },
             },
           ],
+          must: [undefined],
         },
-      }
-    )
-  );
+      })
+    );
 
-  it(
-    'merges other query params with the excluded data tiers filter',
-    infraMetricsTestHarness(
-      ['data_frozen'],
-      {
-        bool: {
-          must: {
-            exists: {
-              field: 'a-field',
-            },
-          },
-        },
-      },
-      {
-        bool: {
-          must: {
-            exists: {
-              field: 'a-field',
-            },
-          },
-          must_not: [
-            {
-              terms: {
-                _tier: ['data_frozen'],
+    it(
+      'merges the provided query into must alongside the excluded data tier filter',
+      infraMetricsTestHarness(
+        ['data_frozen'],
+        { exists: { field: 'a-field' } },
+        {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  must_not: [
+                    {
+                      terms: {
+                        _tier: ['data_frozen'],
+                      },
+                    },
+                  ],
+                },
               },
-            },
-          ],
-        },
-      }
-    )
-  );
+            ],
+            must: [{ exists: { field: 'a-field' } }],
+          },
+        }
+      )
+    );
+  });
 });

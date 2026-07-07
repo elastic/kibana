@@ -14,6 +14,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
@@ -47,7 +48,7 @@ import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
@@ -55,6 +56,8 @@ import { Subject } from 'rxjs';
 
 import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { ReportingStart } from '@kbn/reporting-plugin/public';
 
 import type { FleetAuthz } from '../common';
 import { appRoutesService, INTEGRATIONS_PLUGIN_ID, PLUGIN_ID, setupRouteService } from '../common';
@@ -77,11 +80,6 @@ import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constant
 import type { RequestError } from './hooks';
 import { licenseService, sendGetBulkAssets } from './hooks';
 import { setHttpClient } from './hooks/use_request';
-import {
-  createCustomIntegrationsSearchProvider,
-  createPackageSearchProvider,
-} from './search_provider';
-import { TutorialDirectoryHeaderLink, TutorialModuleNotice } from './components/home_integration';
 import { createExtensionRegistrationCallback } from './services/ui_extensions';
 import { ExperimentalFeaturesService } from './services/experimental_features';
 import type {
@@ -93,7 +91,6 @@ import type {
 import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 import { setCustomIntegrations, setCustomIntegrationsStart } from './services/custom_integrations';
 import { getFleetDeepLinks } from './deep_links';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 
 export type { FleetConfigType } from '../common/types';
 
@@ -135,15 +132,16 @@ export interface FleetStartDeps {
   dashboard: DashboardStart;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   navigation: NavigationPublicPluginStart;
   customIntegrations: CustomIntegrationsStart;
   share: SharePluginStart;
   automaticImport?: AutomaticImportPluginStart;
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
-  guidedOnboarding?: GuidedOnboardingPluginStart;
   embeddable: EmbeddableStart;
   logsDataAccess: LogsDataAccessPluginStart;
+  reporting?: ReportingStart;
 }
 
 export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, 'cloud'> {
@@ -155,7 +153,6 @@ export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, '
   discover?: DiscoverStart;
   spaces?: SpacesPluginStart;
   authz: FleetAuthz;
-  guidedOnboarding?: GuidedOnboardingPluginStart;
 }
 
 export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDeps, FleetStartDeps> {
@@ -165,11 +162,16 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
   private experimentalFeatures: ExperimentalFeatures;
   private storage = new Storage(localStorage);
   private appUpdater$ = new Subject<AppUpdater>();
+  private logger: Logger;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<FleetConfigType>();
-    this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
+    this.experimentalFeatures = parseExperimentalConfigValue(
+      this.config.enableExperimental || [],
+      this.config.experimentalFeatures || {}
+    );
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.logger = initializerContext.logger.get();
   }
 
   public setup(core: CoreSetup<FleetStartDeps, FleetStart>, deps: FleetSetupDeps) {
@@ -277,8 +279,15 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
     // Register components for home/add data integration
     if (deps.home) {
-      deps.home.tutorials.registerDirectoryHeaderLink(PLUGIN_ID, TutorialDirectoryHeaderLink);
-      deps.home.tutorials.registerModuleNotice(PLUGIN_ID, TutorialModuleNotice);
+      const { home } = deps;
+      import('./components/home_integration')
+        .then(({ TutorialDirectoryHeaderLink, TutorialModuleNotice }) => {
+          home.tutorials.registerDirectoryHeaderLink(PLUGIN_ID, TutorialDirectoryHeaderLink);
+          home.tutorials.registerModuleNotice(PLUGIN_ID, TutorialModuleNotice);
+        })
+        .catch(() => {
+          this.logger.error('Failed to load home integration components.');
+        });
 
       deps.home.featureCatalogue.register({
         id: 'fleet',
@@ -297,10 +306,17 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     }
 
     if (deps.globalSearch) {
-      deps.globalSearch.registerResultProvider(createPackageSearchProvider(core));
-      deps.globalSearch.registerResultProvider(
-        createCustomIntegrationsSearchProvider(deps.customIntegrations)
-      );
+      const { globalSearch } = deps;
+      import('./search_provider')
+        .then(({ createPackageSearchProvider, createCustomIntegrationsSearchProvider }) => {
+          globalSearch.registerResultProvider(createPackageSearchProvider(core));
+          globalSearch.registerResultProvider(
+            createCustomIntegrationsSearchProvider(deps.customIntegrations)
+          );
+        })
+        .catch(() => {
+          this.logger.error('Failed to load search providers.');
+        });
     }
 
     return {};
@@ -339,12 +355,14 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
             read: capabilities.fleetv2.settings_read as boolean,
             all: capabilities.fleetv2.settings_all as boolean,
           },
+          generateReports: {
+            all: capabilities.fleetv2.generate_report as boolean,
+          },
         },
         integrations: {
           all: capabilities.fleet.all as boolean,
           read: capabilities.fleet.read as boolean,
         },
-        subfeatureEnabled: true,
       }),
       packagePrivileges: calculatePackagePrivilegesFromCapabilities(capabilities),
       endpointExceptionsPrivileges:

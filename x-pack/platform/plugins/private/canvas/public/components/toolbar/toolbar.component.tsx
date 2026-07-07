@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useContext, useEffect } from 'react';
-import PropTypes from 'prop-types';
+import type { FC } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -14,7 +14,7 @@ import { PageManager } from '../page_manager';
 import { Expression } from '../expression';
 import { Tray } from './tray';
 
-import { CanvasElement } from '../../../types';
+import type { CanvasElement } from '../../../types';
 import { RoutingButtonIcon } from '../routing';
 
 import { WorkpadRoutingContext } from '../../routes/workpad';
@@ -103,7 +103,7 @@ export const Toolbar: FC<Props> = ({
                 <RoutingButtonIcon
                   color="text"
                   to={getUrl(selectedPageNumber - 1)}
-                  iconType="arrowLeft"
+                  iconType="chevronSingleLeft"
                   isDisabled={selectedPageNumber <= 1}
                   aria-label={strings.getPreviousPageAriaLabel()}
                   data-test-subj="previousPageButton"
@@ -122,7 +122,7 @@ export const Toolbar: FC<Props> = ({
                 <RoutingButtonIcon
                   color="text"
                   to={getUrl(selectedPageNumber + 1)}
-                  iconType="arrowRight"
+                  iconType="chevronSingleRight"
                   isDisabled={selectedPageNumber >= totalPages}
                   aria-label={strings.getNextPageAriaLabel()}
                   data-test-subj="nextPageButton"
@@ -133,7 +133,7 @@ export const Toolbar: FC<Props> = ({
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     color="text"
-                    iconType="editorCodeBlock"
+                    iconType="code"
                     onClick={() => toggleTray('expression')}
                     data-test-subj="canvasExpressionEditorButton"
                   >
@@ -147,12 +147,4 @@ export const Toolbar: FC<Props> = ({
       </div>
     </div>
   );
-};
-
-Toolbar.propTypes = {
-  isWriteable: PropTypes.bool.isRequired,
-  selectedElement: PropTypes.object,
-  selectedPageNumber: PropTypes.number.isRequired,
-  totalPages: PropTypes.number.isRequired,
-  workpadName: PropTypes.string.isRequired,
 };

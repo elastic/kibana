@@ -15,11 +15,11 @@ import {
   ExternalServiceSimulator,
 } from '@kbn/actions-simulators-plugin/server/plugin';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { MAX_OTHER_FIELDS_LENGTH } from '@kbn/stack-connectors-plugin/common/jira/constants';
+import { MAX_OTHER_FIELDS_LENGTH } from '@kbn/connector-schemas/jira/constants';
+
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function jiraTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
@@ -89,6 +89,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             apiUrl: jiraSimulatorURL,
             projectKey: mockJira.config.projectKey,
           },
+          is_connector_type_deprecated: false,
         });
 
         const { body: fetchedAction } = await supertest
@@ -107,6 +108,8 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             apiUrl: jiraSimulatorURL,
             projectKey: mockJira.config.projectKey,
           },
+          is_connector_type_deprecated: false,
+          auth_mode: 'shared',
         });
       });
 
@@ -124,8 +127,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at apiUrl`,
             });
           });
       });
@@ -144,8 +146,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [projectKey]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at projectKey`,
             });
           });
       });
@@ -169,7 +170,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error configuring connector action: target url "http://jira.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: error configuring connector action: target url "http://jira.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -191,8 +192,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type secrets: [email]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type secrets: ✖ Invalid input: expected string, received undefined\n  → at email\n✖ Invalid input: expected string, received undefined\n  → at apiToken`,
             });
           });
       });
@@ -260,8 +260,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subAction]: expected value to equal [pushToService]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
+                message: `error validating action params: ✖ Invalid discriminator value. Expected 'getFields' | 'getIncident' | 'handshake' | 'pushToService' | 'issueTypes' | 'fieldsByIssueType' | 'issues' | 'issue'\n  → at subAction`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -279,8 +278,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.summary]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
+                message: `error validating action params: ✖ Invalid input: expected object, received undefined\n  → at subActionParams`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -306,8 +304,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.summary]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
+                message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subActionParams.incident.summary`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -335,8 +332,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
+                message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subActionParams.comments[0].commentId`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -363,8 +359,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
+                message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subActionParams.comments[0].comment`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -392,8 +387,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.labels]: types that failed validation:\n - [subActionParams.incident.labels.0.0]: The label label with spaces cannot contain spaces\n - [subActionParams.incident.labels.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
+                message: `error validating action params: ✖ The label label with spaces cannot contain spaces\n  → at subActionParams.incident.labels[0]`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -428,8 +422,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.otherFields]: types that failed validation:\n - [subActionParams.incident.otherFields.0]: A maximum of 20 fields in otherFields can be defined at a time.\n - [subActionParams.incident.otherFields.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
+                message: `error validating action params: ✖ A maximum of 20 fields in otherFields can be defined at a time.\n  → at subActionParams.incident.otherFields`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -459,8 +452,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.otherFields]: types that failed validation:\n - [subActionParams.incident.otherFields.0.key("summary")]: The following properties cannot be defined inside otherFields: summary.\n - [subActionParams.incident.otherFields.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
+                message: `error validating action params: ✖ The following properties cannot be defined inside otherFields: summary.\n  → at subActionParams.incident.otherFields.summary`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -529,13 +521,15 @@ export default function jiraTest({ getService }: FtrProviderContext) {
               id: simulatedActionId,
               provider: 'actions',
               actions: new Map([
-                ['execute-start', { gte: 2 }],
-                ['execute', { gte: 1 }],
+                ['execute-start', { gte: 11 }],
+                ['execute', { gte: 11 }],
               ]),
             });
           });
 
-          const executeEvent = events[1];
+          const executeEvent = events.find(
+            (e) => e?.event?.action === 'execute' && e?.event?.outcome === 'success'
+          );
           expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(124);
         });
 

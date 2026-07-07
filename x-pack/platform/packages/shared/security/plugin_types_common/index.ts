@@ -23,6 +23,8 @@ export type {
   FeaturesPrivileges,
   RawKibanaFeaturePrivileges,
   RawKibanaPrivileges,
+  RoleKibanaApplication,
+  RoleTransformError,
 } from './src/authorization';
 export type { SecurityLicense, SecurityLicenseFeatures, LoginLayout } from './src/licensing';
 export type {
@@ -47,3 +49,4 @@ export type {
   CategorizedApiKey,
   ApiKeyAggregations,
 } from './src/api_keys/api_key';
+export { RoleTransformErrorReason } from './src/roles';

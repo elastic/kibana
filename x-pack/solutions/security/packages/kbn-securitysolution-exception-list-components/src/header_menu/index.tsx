@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import React, { FC, ReactElement, useMemo, useState } from 'react';
+import type { FC, ReactElement } from 'react';
+import React, { useMemo, useState } from 'react';
+import type { EuiButtonEmptyProps, PanelPaddingSize, PopoverAnchorPosition } from '@elastic/eui';
 import {
   EuiButtonEmpty,
-  EuiButtonEmptyProps,
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiPopover,
-  PanelPaddingSize,
-  PopoverAnchorPosition,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
+import * as i18n from '../translations';
 
 export interface Action {
   key: string;
@@ -39,6 +40,7 @@ interface HeaderMenuComponentProps {
   useCustomActions?: boolean;
   anchorPosition?: PopoverAnchorPosition;
   panelPaddingSize?: PanelPaddingSize;
+  ariaLabel?: string;
 }
 
 const popoverHeightStyle = css`
@@ -58,6 +60,7 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
   iconSide = 'left',
   anchorPosition = 'downCenter',
   panelPaddingSize = 's',
+  ariaLabel = i18n.ACTIONS_ARIA_LABEL,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -94,20 +97,22 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
               iconType={iconType ? iconType : undefined}
               iconSide={iconSide}
               data-test-subj={`${dataTestSubj || ''}EmptyButton`}
-              aria-label="Header menu Button Empty"
+              aria-label={ariaLabel}
             >
               {text}
             </EuiButtonEmpty>
           ) : (
-            <EuiButtonIcon
-              isDisabled={disableActions}
-              onClick={onAffectedRulesClick}
-              iconType={iconType ? iconType : 'boxesHorizontal'}
-              data-test-subj={`${dataTestSubj || ''}ButtonIcon`}
-              aria-label="Header menu Button Icon"
-            >
-              {text}
-            </EuiButtonIcon>
+            <EuiToolTip content={ariaLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                isDisabled={disableActions}
+                onClick={onAffectedRulesClick}
+                iconType={iconType ? iconType : 'boxesVertical'}
+                data-test-subj={`${dataTestSubj || ''}ButtonIcon`}
+                aria-label={ariaLabel}
+              >
+                {text}
+              </EuiButtonIcon>
+            </EuiToolTip>
           )
         }
         onClick={(e) => e.stopPropagation()}
@@ -122,7 +127,6 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
             css={popoverHeightStyle}
             className="eui-scrollBar"
             data-test-subj={`${dataTestSubj || ''}MenuPanel`}
-            size="s"
             items={itemActions as ReactElement[]}
           />
         )}

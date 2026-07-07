@@ -10,7 +10,7 @@
 import React, { useEffect, useRef } from 'react';
 import { skip } from 'rxjs';
 
-import { UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
@@ -52,7 +52,8 @@ export const GridSectionDragPreview = React.memo(() => {
 const styles = ({ euiTheme }: UseEuiTheme) =>
   css({
     display: 'none',
-    minHeight: euiTheme.size.xl,
+    height: euiTheme.size.xl,
+    marginTop: `${euiTheme.size.s}`,
     position: 'relative',
   });
 

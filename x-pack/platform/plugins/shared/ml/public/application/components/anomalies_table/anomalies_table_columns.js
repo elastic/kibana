@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiLink, EuiScreenReaderOnly, EuiIconTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiLink, EuiScreenReaderOnly, EuiIconTip, EuiToolTip } from '@elastic/eui';
 
 import React from 'react';
 import { get } from 'lodash';
@@ -68,7 +68,8 @@ export function getColumns(
   toggleRow,
   filter,
   influencerFilter,
-  sourceIndicesWithGeoFields
+  sourceIndicesWithGeoFields,
+  showAnomalyAlertFlyout
 ) {
   const columns = [
     {
@@ -82,23 +83,28 @@ export function getColumns(
           </p>
         </EuiScreenReaderOnly>
       ),
-      render: (item) => (
-        <EuiButtonIcon
-          onClick={() => toggleRow(item)}
-          iconType={itemIdToExpandedRowMap[item.rowId] ? 'arrowDown' : 'arrowRight'}
-          aria-label={
-            itemIdToExpandedRowMap[item.rowId]
-              ? i18n.translate('xpack.ml.anomaliesTable.hideDetailsAriaLabel', {
-                  defaultMessage: 'Hide details',
-                })
-              : i18n.translate('xpack.ml.anomaliesTable.showDetailsAriaLabel', {
-                  defaultMessage: 'Show details',
-                })
-          }
-          data-row-id={item.rowId}
-          data-test-subj="mlAnomaliesListRowDetailsToggle"
-        />
-      ),
+      render: (item) => {
+        const toggleLabel = itemIdToExpandedRowMap[item.rowId]
+          ? i18n.translate('xpack.ml.anomaliesTable.hideDetailsAriaLabel', {
+              defaultMessage: 'Hide details',
+            })
+          : i18n.translate('xpack.ml.anomaliesTable.showDetailsAriaLabel', {
+              defaultMessage: 'Show details',
+            });
+        return (
+          <EuiToolTip content={toggleLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              onClick={() => toggleRow(item)}
+              iconType={
+                itemIdToExpandedRowMap[item.rowId] ? 'chevronSingleDown' : 'chevronSingleRight'
+              }
+              aria-label={toggleLabel}
+              data-row-id={item.rowId}
+              data-test-subj="mlAnomaliesListRowDetailsToggle"
+            />
+          </EuiToolTip>
+        );
+      },
     },
     {
       field: 'time',
@@ -118,13 +124,13 @@ export function getColumns(
       name: (
         <span>
           {i18n.translate('xpack.ml.anomaliesTable.severityColumnName', {
-            defaultMessage: 'Severity',
+            defaultMessage: 'Score',
           })}
           &nbsp;
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             content={i18n.translate('xpack.ml.overview.anomalyDetection.tableSeverityTooltip', {
               defaultMessage:
@@ -207,7 +213,7 @@ export function getColumns(
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             content={i18n.translate('xpack.ml.overview.anomalyDetection.tableActualTooltip', {
               defaultMessage: 'The actual values in the anomaly record results.',
@@ -247,7 +253,7 @@ export function getColumns(
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             content={i18n.translate('xpack.ml.overview.anomalyDetection.tableTypicalTooltip', {
               defaultMessage: 'The typical values in the anomaly record results.',
@@ -366,6 +372,7 @@ export function getColumns(
               interval={interval}
               showRuleEditorFlyout={showRuleEditorFlyout}
               sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
+              showAnomalyAlertFlyout={showAnomalyAlertFlyout}
             />
           );
         } else {

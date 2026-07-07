@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig, StorybookConfig } from './src/lib/default_config';
+import type { StorybookConfig } from './src/lib/default_config';
+import { defaultConfig } from './src/lib/default_config';
 export { defaultConfig };
 export type { StorybookConfig };
 export { runStorybookCli } from './src/lib/run_storybook_cli';

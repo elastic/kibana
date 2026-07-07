@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { randomBytes } from 'node:crypto';
 import yargs from 'yargs/yargs';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Client } from '@elastic/elasticsearch';
-import axios from 'axios';
 import pLimit from 'p-limit';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
-import { CreateMessageSchema } from '../server/ai_assistant_data_clients/conversations/types';
+import type { CreateMessageSchema } from '../server/ai_assistant_data_clients/conversations/types';
 import { getEsCreateConversationSchemaMock } from '../server/__mocks__/conversations_schema.mock';
 
 /**
@@ -52,12 +52,20 @@ export const create = async () => {
 
   try {
     logger.info(`Fetching available connectors...`);
-    const { data: connectors } = await axios.get(connectorsApiUrl, {
+    const connectorsResponse = await fetch(connectorsApiUrl, {
       headers: requestHeaders,
     });
-    const aiConnectors = connectors.filter(
-      ({ connector_type_id: connectorTypeId }: { connector_type_id: string }) =>
-        AllowedActionTypeIds.includes(connectorTypeId)
+    if (!connectorsResponse.ok) {
+      throw new Error(
+        `Failed to fetch connectors from ${connectorsApiUrl}: ${connectorsResponse.status} ${connectorsResponse.statusText}`
+      );
+    }
+    const connectors = (await connectorsResponse.json()) as Array<{
+      id: string;
+      connector_type_id: string;
+    }>;
+    const aiConnectors = connectors.filter(({ connector_type_id: connectorTypeId }) =>
+      AllowedActionTypeIds.includes(connectorTypeId)
     );
     if (aiConnectors.length === 0) {
       throw new Error('No AI connectors found, create an AI connector to use this script');
@@ -168,8 +176,8 @@ const getMockConversationContent = (): {
     updated_at: timestamp,
     '@timestamp': timestamp,
     messages: [
-      { content: 'Hello robot', role: 'user', '@timestamp': timestamp },
-      { content: 'Hello human', role: 'assistant', '@timestamp': timestamp },
+      { content: 'Hello robot', role: 'user', '@timestamp': timestamp, id: uuidv4() },
+      { content: 'Hello human', role: 'assistant', '@timestamp': timestamp, id: uuidv4() },
     ],
   };
 };

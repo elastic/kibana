@@ -6,7 +6,7 @@
  */
 
 import { EuiMarkdownFormat } from '@elastic/eui';
-import { Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import React from 'react';
 
 export interface Props {

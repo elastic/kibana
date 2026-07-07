@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 /**
  * Test the querying capabilities of dashboard, and make sure visualizations show the expected results, especially
@@ -34,8 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  // Failing: See https://github.com/elastic/kibana/issues/160062
-  describe.skip('dashboard filtering', function () {
+  describe('dashboard filtering', function () {
     const populateDashboard = async () => {
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
@@ -114,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('metric value shows no data', async () => {
-        await dashboardExpect.metricValuesExist(['-']);
+        await dashboardExpect.metricValuesExist(['(null)']);
       });
 
       it('tag cloud values are filtered', async () => {
@@ -127,10 +126,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('tsvb top n is filtered', async () => {
         await dashboardExpect.tsvbTopNValuesExist(['-', '-']);
-      });
-
-      it('saved search is filtered', async () => {
-        await dashboardExpect.savedSearchRowsMissing();
       });
 
       it('timelion is filtered', async () => {
@@ -158,48 +153,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.gotoDashboardLandingPage();
       });
 
-      it('filters on pie charts', async () => {
+      it('excludes data the same as an unpinned filter', async () => {
         await pieChart.expectEmptyPieChart();
-      });
-
-      it('area, bar and heatmap charts filtered', async () => {
-        await dashboardExpect.heatMapNoResults();
-      });
-
-      it('data tables are filtered', async () => {
-        await dashboardExpect.dataTableNoResult();
-      });
-
-      it('goal and guages are filtered', async () => {
-        await dashboardExpect.goalAndGuageLabelsExist(['0', '0%']);
-      });
-
-      it('metric value shows no data', async () => {
-        await dashboardExpect.metricValuesExist(['-']);
-      });
-
-      it('tag cloud values are filtered', async () => {
-        await dashboardExpect.emptyTagCloudFound();
-      });
-
-      it('tsvb metric is filtered', async () => {
-        await dashboardExpect.tsvbMetricValuesExist(['0 custom template']);
-      });
-
-      it('tsvb top n is filtered', async () => {
-        await dashboardExpect.tsvbTopNValuesExist(['-', '-']);
-      });
-
-      it('saved search is filtered', async () => {
-        await dashboardExpect.savedSearchRowsMissing();
-      });
-
-      it('timelion is filtered', async () => {
-        await dashboardExpect.timelionLegendCount(0);
-      });
-
-      it('vega is filtered', async () => {
-        await dashboardExpect.vegaTextsDoNotExist(['5,000']);
       });
     });
 
@@ -248,10 +203,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('tsvb markdown', async () => {
         await dashboardExpect.tsvbMarkdownWithValuesExists(['7,209.286']);
-      });
-
-      it('saved searches', async () => {
-        await dashboardExpect.savedSearchRowsExist();
       });
 
       it('vega', async () => {

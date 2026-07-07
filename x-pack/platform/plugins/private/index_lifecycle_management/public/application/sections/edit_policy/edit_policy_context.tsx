@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { createContext, ReactChild, useContext } from 'react';
+import type { ReactChild } from 'react';
+import React, { createContext, useContext } from 'react';
 
-import { PolicyFromES, SerializedPolicy } from '../../../../common/types';
+import type { PolicyFromES, SerializedPolicy } from '../../../../common/types';
 
 export interface EditPolicyContextValue {
   isNewPolicy: boolean;
+  isHotPhaseRequired: boolean;
   policy: SerializedPolicy;
   existingPolicies: PolicyFromES[];
   license: {

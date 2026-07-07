@@ -14,7 +14,6 @@ import { isTrustedApp } from './is_trusted_app';
 export const mapToArtifactInfo = (_item: MaybeImmutable<AnyArtifact>): ArtifactInfo => {
   const item = _item as AnyArtifact;
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { name, created_by, created_at, updated_at, updated_by, description = '', entries } = item;
 
   return {

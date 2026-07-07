@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type {
-  SearchStrategyDependencies,
-  DataViewsServerPluginStart,
-} from '@kbn/data-plugin/server';
+import type { SearchStrategyDependencies } from '@kbn/data-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { fieldsBeat as beatFields } from '@kbn/timelines-plugin/server/utils/beat_schema/fields.json';
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { requestEndpointFieldsSearch } from '.';
 import { createMockEndpointAppContextService } from '../../endpoint/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/service/authz/mocks';
@@ -88,14 +86,17 @@ describe('Endpoint fields', () => {
     buildIndexNameWithNamespaceMock.mockClear();
 
     // Reset all mocks on endpointAppContextService
+    (endpointAppContextService.isCcsEnabled as jest.Mock).mockResolvedValue(false);
     (endpointAppContextService.getActiveSpace as jest.Mock).mockClear();
     (endpointAppContextService.getInternalFleetServices as jest.Mock).mockClear();
     (endpointAppContextService.getEndpointAuthz as jest.Mock).mockResolvedValue(
       getEndpointAuthzInitialStateMock()
     );
+  });
 
-    // @ts-expect-error write to readonly property
-    endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = false;
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   afterAll(() => {
@@ -144,14 +145,6 @@ describe('Endpoint fields', () => {
     });
 
     describe('when space awareness feature is enabled', () => {
-      beforeEach(() => {
-        // @ts-expect-error write to readonly property
-        endpointAppContextService.experimentalFeatures = {
-          ...endpointAppContextService.experimentalFeatures,
-          endpointManagementSpaceAwarenessEnabled: true,
-        };
-      });
-
       it('should use space-aware index pattern when feature flag is enabled', async () => {
         const spaceId = 'custom-space';
         const mockIntegrationNamespaces = { endpoint: ['custom-namespace'] };
@@ -255,6 +248,85 @@ describe('Endpoint fields', () => {
         expect(response.indicesExist).toEqual(indices);
         expect(endpointAppContextService.getActiveSpace).not.toHaveBeenCalled();
         expect(buildIndexNameWithNamespaceMock).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when CCS is enabled', () => {
+      beforeEach(() => {
+        (endpointAppContextService.isCcsEnabled as jest.Mock).mockResolvedValue(true);
+      });
+
+      afterEach(() => {
+        (endpointAppContextService.isCcsEnabled as jest.Mock).mockResolvedValue(false);
+        // Restore benign namespace mocks so the events-branch setup above does not leak
+        // namespace expansion into later order-dependent tests in this file.
+        (endpointAppContextService.getInternalFleetServices as jest.Mock).mockReturnValue({
+          getIntegrationNamespaces: jest.fn().mockResolvedValue({ endpoint: [] }),
+        });
+        buildIndexNameWithNamespaceMock.mockReturnValue(null);
+      });
+
+      it('should pass the local and remote metadata patterns as separate entries when remotes are connected', async () => {
+        const indices = [METADATA_UNITED_INDEX];
+        const request = {
+          indices,
+          onlyCheckIfIndicesExist: false,
+        };
+
+        const response = await requestEndpointFieldsSearch(
+          endpointAppContextService,
+          request,
+          deps,
+          beatFields,
+          IndexPatterns
+        );
+
+        // The combined `local,*:local` pattern must be split so the existence check can
+        // resolve the remote entry independently (the local entry is empty under remote
+        // output, where `allow_no_indices: false` would otherwise fail the whole call).
+        expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: METADATA_UNITED_INDEX });
+        expect(getFieldsForWildcardMock).toHaveBeenCalledWith({
+          pattern: `*:${METADATA_UNITED_INDEX}`,
+        });
+        expect(response.indicesExist).toEqual([
+          METADATA_UNITED_INDEX,
+          `*:${METADATA_UNITED_INDEX}`,
+        ]);
+      });
+
+      it('should pass the local and remote events patterns as separate entries when remotes are connected', async () => {
+        const spaceId = 'default';
+        const namespacedEventsPattern = `${eventsIndexPattern}-${spaceId}`;
+        const request = {
+          indices: [eventsIndexPattern],
+          onlyCheckIfIndicesExist: false,
+        };
+
+        (endpointAppContextService.getActiveSpace as jest.Mock).mockResolvedValue({ id: spaceId });
+        const mockFleetServices = {
+          getIntegrationNamespaces: jest.fn().mockResolvedValue({ endpoint: [spaceId] }),
+        };
+        (endpointAppContextService.getInternalFleetServices as jest.Mock).mockReturnValue(
+          mockFleetServices
+        );
+        buildIndexNameWithNamespaceMock.mockReturnValue(namespacedEventsPattern);
+
+        const response = await requestEndpointFieldsSearch(
+          endpointAppContextService,
+          request,
+          deps,
+          beatFields,
+          IndexPatterns
+        );
+
+        expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: namespacedEventsPattern });
+        expect(getFieldsForWildcardMock).toHaveBeenCalledWith({
+          pattern: `*:${namespacedEventsPattern}`,
+        });
+        expect(response.indicesExist).toEqual([
+          namespacedEventsPattern,
+          `*:${namespacedEventsPattern}`,
+        ]);
       });
     });
 
@@ -389,6 +461,11 @@ describe('Endpoint fields', () => {
         );
       }).rejects.toThrowError('Invalid indices request invalid, invalid2');
     });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('without right privileges', () => {

@@ -12,7 +12,7 @@ import { EuiCode, EuiIcon, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IndexPatternManagmentContext } from '../../../../types';
+import type { IndexPatternManagmentContext } from '../../../../types';
 
 export const ScriptingSyntax = () => {
   const docLinksScriptedFields =
@@ -36,7 +36,7 @@ export const ScriptingSyntax = () => {
                     id="indexPatternManagement.syntax.defaultLabel.painlessLink"
                     defaultMessage="Painless"
                   />{' '}
-                  <EuiIcon type="link" />
+                  <EuiIcon type="link" aria-hidden={true} />
                 </EuiLink>
               ),
             }}
@@ -63,7 +63,7 @@ export const ScriptingSyntax = () => {
                     defaultMessage="native Java APIs"
                   />
                   &nbsp;
-                  <EuiIcon type="link" />
+                  <EuiIcon type="link" aria-hidden={true} />
                 </EuiLink>
               ),
               syntax: (
@@ -73,7 +73,7 @@ export const ScriptingSyntax = () => {
                     defaultMessage="syntax"
                   />
                   &nbsp;
-                  <EuiIcon type="link" />
+                  <EuiIcon type="link" aria-hidden={true} />
                 </EuiLink>
               ),
             }}
@@ -99,7 +99,7 @@ export const ScriptingSyntax = () => {
                     defaultMessage="Lucene Expressions"
                   />
                   &nbsp;
-                  <EuiIcon type="link" />
+                  <EuiIcon type="link" aria-hidden={true} />
                 </EuiLink>
               ),
             }}

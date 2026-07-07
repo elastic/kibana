@@ -7,11 +7,11 @@
 
 import _ from 'lodash';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiExpression,
   EuiFieldNumber,
   EuiFieldText,
@@ -26,12 +26,15 @@ import {
   EuiTitle,
   EuiPageHeader,
   EuiPageSection,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TIME_UNITS } from '../../../../../../common/constants';
 import { serializeThresholdWatch } from '../../../../../../common/lib/serialization';
-import { ErrableFormRow, SectionError, Error as ServerError } from '../../../../components';
+import type { Error as ServerError } from '../../../../components';
+import { ErrableFormRow, SectionError } from '../../../../components';
 import { fetchFields, getMatchingIndices, loadIndexPatterns } from '../../../../lib/api';
 import { aggTypes } from '../../../../models/watch/agg_types';
 import { groupByTypes } from '../../../../models/watch/group_by_types';
@@ -44,6 +47,15 @@ import { getTimeUnitLabel } from '../../../../lib/get_time_unit_label';
 import { goToWatchList } from '../../../../lib/navigation';
 import { RequestFlyout } from '../request_flyout';
 import { useAppContext } from '../../../../app_context';
+
+const styles = {
+  watcherThresholdAlertAggFieldContainer: css`
+    width: 300px;
+  `,
+  watcherThresholdInBetweenComparatorText: css`
+    align-self: center;
+  `,
+};
 
 const expressionFieldsWithValidation = [
   'aggField',
@@ -178,6 +190,12 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
 
+  const aggTypePopoverTitleId = useGeneratedHtmlId({ prefix: 'aggTypePopoverTitle' });
+  const aggFieldPopoverTitleId = useGeneratedHtmlId({ prefix: 'aggFieldPopoverTitle' });
+  const groupByPopoverTitleId = useGeneratedHtmlId({ prefix: 'groupByPopoverTitle' });
+  const watchThresholdPopoverTitleId = useGeneratedHtmlId({ prefix: 'watchThresholdPopoverTitle' });
+  const watchDurationPopoverTitleId = useGeneratedHtmlId({ prefix: 'watchDurationPopoverTitle' });
+
   const { watch, setWatchProperty } = useContext(WatchContext);
 
   useEffect(() => {
@@ -226,6 +244,11 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   const andThresholdText = i18n.translate('xpack.watcher.sections.watchEdit.threshold.andLabel', {
     defaultMessage: 'AND',
   });
+
+  const watchIntervalLabel = i18n.translate(
+    'xpack.watcher.sections.watchEdit.titlePanel.watchIntervalLabel',
+    { defaultMessage: 'Run watch every' }
+  );
 
   // Users might edit the request for use outside of the Watcher app. If they do make changes to it,
   // we have no guarantee it will still be compatible with the threshold alert form, so we strip
@@ -315,6 +338,10 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                 noSuggestions={!indexOptions.length}
                 options={indexOptions}
                 data-test-subj="indicesComboBox"
+                aria-label={i18n.translate(
+                  'xpack.watcher.sections.watchEdit.titlePanel.indicesToQueryAriaLabel',
+                  { defaultMessage: 'Indices to query' }
+                )}
                 selectedOptions={(watch.index || []).map((anIndex: string) => {
                   return {
                     label: anIndex,
@@ -386,6 +413,10 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                     setWatchProperty('timeField', '');
                   }
                 }}
+                aria-label={i18n.translate(
+                  'xpack.watcher.sections.watchEdit.titlePanel.timeFieldAriaLabel',
+                  { defaultMessage: 'Time field' }
+                )}
               />
             </ErrableFormRow>
           </EuiFlexItem>
@@ -393,12 +424,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
             <ErrableFormRow
               id="watchInterval"
               fullWidth
-              label={
-                <FormattedMessage
-                  id="xpack.watcher.sections.watchEdit.titlePanel.watchIntervalLabel"
-                  defaultMessage="Run watch every"
-                />
-              }
+              label={watchIntervalLabel}
               errorKey="triggerIntervalSize"
               isShowingErrors={hasErrors && watch.triggerIntervalSize !== undefined}
               errors={errors}
@@ -420,6 +446,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                         setWatchProperty('triggerIntervalSize', '');
                       }
                     }}
+                    aria-label={watchIntervalLabel}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>
@@ -479,9 +506,10 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                   }}
                   ownFocus
                   anchorPosition="downLeft"
+                  aria-labelledby={aggTypePopoverTitleId}
                 >
                   <div>
-                    <EuiPopoverTitle>
+                    <EuiPopoverTitle id={aggTypePopoverTitleId}>
                       {i18n.translate(
                         'xpack.watcher.sections.watchEdit.threshold.whenButtonLabel',
                         {
@@ -491,6 +519,12 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                     </EuiPopoverTitle>
                     <EuiSelect
                       value={watch.aggType}
+                      aria-label={i18n.translate(
+                        'xpack.watcher.sections.watchEdit.threshold.aggTypeSelectAriaLabel',
+                        {
+                          defaultMessage: 'Aggregation type',
+                        }
+                      )}
                       onChange={(e) => {
                         setWatchProperty('aggType', e.target.value);
                         setAggTypePopoverOpen(false);
@@ -530,9 +564,10 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                       setAggFieldPopoverOpen(false);
                     }}
                     anchorPosition="downLeft"
+                    aria-labelledby={aggFieldPopoverTitleId}
                   >
                     <div>
-                      <EuiPopoverTitle>
+                      <EuiPopoverTitle id={aggFieldPopoverTitleId}>
                         {i18n.translate(
                           'xpack.watcher.sections.watchEdit.threshold.ofButtonLabel',
                           {
@@ -543,7 +578,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                       <EuiFlexGroup>
                         <EuiFlexItem
                           grow={false}
-                          className="watcherThresholdAlertAggFieldContainer"
+                          css={styles.watcherThresholdAlertAggFieldContainer}
                         >
                           <ErrableFormRow
                             errorKey="aggField"
@@ -553,6 +588,10 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                             <EuiComboBox
                               singleSelection={{ asPlainText: true }}
                               placeholder={firstFieldOption.text}
+                              aria-label={i18n.translate(
+                                'xpack.watcher.sections.watchEdit.threshold.aggFieldAriaLabel',
+                                { defaultMessage: 'Aggregation field' }
+                              )}
                               options={esFields.reduce((esFieldOptions: any[], field: any) => {
                                 if (
                                   aggTypes[watch.aggType].validNormalizedTypes.includes(
@@ -627,9 +666,10 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                   }}
                   ownFocus
                   anchorPosition="downLeft"
+                  aria-labelledby={groupByPopoverTitleId}
                 >
                   <div>
-                    <EuiPopoverTitle>
+                    <EuiPopoverTitle id={groupByPopoverTitleId}>
                       {i18n.translate(
                         'xpack.watcher.sections.watchEdit.threshold.overButtonLabel',
                         {
@@ -641,6 +681,12 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                       <EuiFlexItem grow={false}>
                         <EuiSelect
                           value={watch.groupBy}
+                          aria-label={i18n.translate(
+                            'xpack.watcher.sections.watchEdit.threshold.groupBySelectAriaLabel',
+                            {
+                              defaultMessage: 'Group by',
+                            }
+                          )}
                           onChange={(e) => {
                             setWatchProperty('termSize', null);
                             setWatchProperty('termField', null);
@@ -680,6 +726,10 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                             >
                               <EuiSelect
                                 value={watch.termField || ''}
+                                aria-label={i18n.translate(
+                                  'xpack.watcher.sections.watchEdit.threshold.termFieldAriaLabel',
+                                  { defaultMessage: 'Group by field' }
+                                )}
                                 onChange={(e) => {
                                   setWatchProperty('termField', e.target.value);
                                 }}
@@ -739,13 +789,22 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                   }}
                   ownFocus
                   anchorPosition="downLeft"
+                  aria-labelledby={watchThresholdPopoverTitleId}
                 >
                   <div>
-                    <EuiPopoverTitle>{comparators[watch.thresholdComparator].text}</EuiPopoverTitle>
+                    <EuiPopoverTitle id={watchThresholdPopoverTitleId}>
+                      {comparators[watch.thresholdComparator].text}
+                    </EuiPopoverTitle>
                     <EuiFlexGroup>
                       <EuiFlexItem grow={false}>
                         <EuiSelect
                           value={watch.thresholdComparator}
+                          aria-label={i18n.translate(
+                            'xpack.watcher.sections.watchEdit.threshold.comparatorSelectAriaLabel',
+                            {
+                              defaultMessage: 'Comparator',
+                            }
+                          )}
                           onChange={(e) => {
                             setWatchProperty('thresholdComparator', e.target.value);
                           }}
@@ -761,7 +820,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                               {i > 0 ? (
                                 <EuiFlexItem
                                   grow={false}
-                                  className="watcherThresholdWatchInBetweenComparatorText"
+                                  css={styles.watcherThresholdInBetweenComparatorText}
                                 >
                                   <EuiText>{andThresholdText}</EuiText>
                                   {hasErrors && <EuiSpacer />}
@@ -824,9 +883,10 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                   }}
                   ownFocus
                   anchorPosition="downLeft"
+                  aria-labelledby={watchDurationPopoverTitleId}
                 >
                   <div>
-                    <EuiPopoverTitle>
+                    <EuiPopoverTitle id={watchDurationPopoverTitleId}>
                       <FormattedMessage
                         id="xpack.watcher.sections.watchEdit.threshold.forTheLastButtonLabel"
                         defaultMessage="For the last"
@@ -853,6 +913,12 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                       <EuiFlexItem grow={false}>
                         <EuiSelect
                           value={watch.timeWindowUnit}
+                          aria-label={i18n.translate(
+                            'xpack.watcher.sections.watchEdit.threshold.timeWindowUnitSelectAriaLabel',
+                            {
+                              defaultMessage: 'Time window unit',
+                            }
+                          )}
                           onChange={(e) => {
                             setWatchProperty('timeWindowUnit', e.target.value);
                           }}

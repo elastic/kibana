@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { MonitorListDrawerComponent } from './monitor_list_drawer';
-import { MonitorDetails, MonitorSummary, makePing } from '../../../../../../common/runtime_types';
+import type { MonitorDetails, MonitorSummary } from '../../../../../../common/runtime_types';
+import { makePing } from '../../../../../../common/runtime_types';
 import { shallowWithRouter } from '../../../../lib';
 
 describe('MonitorListDrawer component', () => {

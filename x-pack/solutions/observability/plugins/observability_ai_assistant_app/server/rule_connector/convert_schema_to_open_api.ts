@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import joiToJsonSchema from 'joi-to-json';
-import type { Type } from '@kbn/config-schema';
+import { z } from '@kbn/zod/v4';
 import { castArray, isPlainObject, forEach, unset } from 'lodash';
 import type { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/common/functions/types';
 
@@ -52,9 +51,11 @@ function dropUnknownProperties(object: CompatibleJSONSchema) {
   return object;
 }
 
-export function convertSchemaToOpenApi(typeSchema: Type<any>): CompatibleJSONSchema {
-  // @ts-ignore
-  const plainOpenApiSchema = joiToJsonSchema(typeSchema.getSchema(), 'open-api');
+export function convertSchemaToOpenApi(typeSchema: z.ZodType<any>): CompatibleJSONSchema {
+  const { $schema, $defs, ...plainOpenApiSchema } = z.toJSONSchema(typeSchema, {
+    unrepresentable: 'any',
+    io: 'input',
+  }) as Record<string, any>;
 
   return dropUnknownProperties(plainOpenApiSchema);
 }

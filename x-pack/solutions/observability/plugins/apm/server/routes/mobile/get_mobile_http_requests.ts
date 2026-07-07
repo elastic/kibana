@@ -7,6 +7,7 @@
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import type { Coordinate } from '@kbn/apm-types';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
@@ -19,8 +20,6 @@ import { getBucketSize } from '../../../common/utils/get_bucket_size';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import type { Maybe } from '../../../typings/common';
-
-import type { Coordinate } from '../../../typings/timeseries';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export interface HttpRequestsTimeseries {
@@ -67,7 +66,7 @@ async function getHttpRequestsTimeseries({
   };
 
   const response = await apmEventClient.search('get_http_requests_chart', {
-    apm: { events: [ProcessorEvent.span] },
+    apm: { events: [ProcessorEvent.span, ProcessorEvent.transaction] },
     track_total_hits: false,
     size: 0,
     query: {

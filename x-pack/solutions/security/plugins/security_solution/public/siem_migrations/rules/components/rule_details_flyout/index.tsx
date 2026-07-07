@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import { css } from '@emotion/css';
-import { euiThemeVars } from '@kbn/ui-theme';
 import {
   EuiButtonEmpty,
   EuiTitle,
@@ -16,7 +13,6 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiTabbedContent,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,9 +21,9 @@ import {
   EuiSkeletonTitle,
   EuiSkeletonText,
 } from '@elastic/eui';
-import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
+import type { EuiTabbedContentTab, EuiFlyoutProps } from '@elastic/eui';
 
-import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
+import { MigrationTranslationResult } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
@@ -45,29 +41,19 @@ import {
 import { SummaryTab, TranslationTab } from './tabs';
 import {
   convertMigrationCustomRuleToSecurityRulePayload,
+  getTranslationFieldsFromAnnotations,
   isMigrationCustomRule,
 } from '../../../../../common/siem_migrations/rules/utils';
 import { useUpdateMigrationRule } from '../../logic/use_update_migration_rule';
-import { UpdatedByLabel } from './updated_by';
-
-/*
- * Fixes tabs to the top and allows the content to scroll.
- */
-const ScrollableFlyoutTabbedContent = (props: EuiTabbedContentProps) => (
-  <EuiFlexGroup direction="column" gutterSize="none">
-    <EuiFlexItem grow={true}>
-      <EuiTabbedContent {...props} />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
-
-const tabPaddingClassName = css`
-  padding: 0 ${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeXL} ${euiThemeVars.euiSizeM};
-`;
-
-export const TabContentPadding: FC<PropsWithChildren<unknown>> = ({ children }) => (
-  <div className={tabPaddingClassName}>{children}</div>
-);
+import {
+  ScrollableFlyoutTabbedContent,
+  TabContentPadding,
+} from '../../../common/components/details_flyout/utils';
+import {
+  CLOSE_BUTTON_LABEL,
+  SUMMARY_TAB_LABEL,
+} from '../../../common/components/details_flyout/translation';
+import { UpdatedByLabel } from '../../../common/components/updated_by_label';
 
 interface MigrationRuleDetailsFlyoutProps {
   migrationRule: RuleMigrationRule;
@@ -125,7 +111,12 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
     const ruleDetailsToOverview = useMemo(() => {
       const elasticRule = migrationRule?.elastic_rule;
       if (isMigrationCustomRule(elasticRule)) {
-        return convertMigrationCustomRuleToSecurityRulePayload(elasticRule, false);
+        const translationFields = getTranslationFieldsFromAnnotations(migrationRule.original_rule);
+        return convertMigrationCustomRuleToSecurityRulePayload(
+          elasticRule,
+          false,
+          translationFields
+        );
       }
       return matchedPrebuiltRule;
     }, [migrationRule, matchedPrebuiltRule]);
@@ -134,6 +125,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
       () => ({
         id: 'translation',
         name: i18n.TRANSLATION_TAB_LABEL,
+        'data-test-subj': 'tabTranslation',
         content: (
           <TabContentPadding>
             <TranslationTab
@@ -151,6 +143,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
       () => ({
         id: 'overview',
         name: i18n.OVERVIEW_TAB_LABEL,
+        'data-test-subj': 'tabOverview',
         content: (
           <TabContentPadding>
             {ruleDetailsToOverview && (
@@ -167,7 +160,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
             )}
           </TabContentPadding>
         ),
-        disabled: migrationRule.translation_result === RuleTranslationResult.UNTRANSLATABLE,
+        disabled: migrationRule.translation_result === MigrationTranslationResult.UNTRANSLATABLE,
       }),
       [
         ruleDetailsToOverview,
@@ -181,7 +174,8 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
     const summaryTab: EuiTabbedContentTab = useMemo(
       () => ({
         id: 'summary',
-        name: i18n.SUMMARY_TAB_LABEL,
+        name: SUMMARY_TAB_LABEL,
+        'data-test-subj': 'tabSummary',
         content: (
           <TabContentPadding>
             <SummaryTab migrationRule={migrationRule} />
@@ -234,7 +228,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
         ownFocus
       >
         <EuiFlyoutHeader>
-          <EuiTitle size="m">
+          <EuiTitle size="m" data-test-subj="detailsFlyoutTitle">
             <h2 id={migrationsRulesFlyoutTitleId}>
               {ruleDetailsToOverview?.name ??
                 migrationRule.original_rule.title ??
@@ -242,7 +236,10 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
             </h2>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <UpdatedByLabel migrationRule={migrationRule} />
+          <UpdatedByLabel
+            updatedBy={migrationRule.updated_by ?? migrationRule.created_by}
+            updatedAt={migrationRule.updated_at ?? migrationRule['@timestamp']}
+          />
         </EuiFlyoutHeader>
         <EuiFlyoutBody
           // EUI TODO: We need to set transform to 'none' to avoid drag/drop issues in the flyout caused by the
@@ -266,8 +263,13 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={closeFlyout} flush="left">
-                {i18n.CLOSE_BUTTON_LABEL}
+              <EuiButtonEmpty
+                onClick={closeFlyout}
+                flush="left"
+                data-test-subj="detailsFlyoutCloseButton"
+                aria-label={CLOSE_BUTTON_LABEL}
+              >
+                {CLOSE_BUTTON_LABEL}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{ruleActions}</EuiFlexItem>

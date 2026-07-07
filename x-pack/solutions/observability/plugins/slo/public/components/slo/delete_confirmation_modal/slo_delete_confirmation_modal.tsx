@@ -21,7 +21,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ALL_VALUE, SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { useDeleteSlo } from '../../../hooks/use_delete_slo';
 import { useDeleteSloInstance } from '../../../hooks/use_delete_slo_instance';

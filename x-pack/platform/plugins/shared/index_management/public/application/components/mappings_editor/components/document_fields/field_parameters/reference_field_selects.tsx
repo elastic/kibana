@@ -12,7 +12,7 @@ import { EuiText } from '@elastic/eui';
 import { getFieldConfig } from '../../../lib';
 import { useMappingsState } from '../../../mappings_state_context';
 import { SuperSelectField, UseField } from '../../../shared_imports';
-import { SuperSelectOption } from '../../../types';
+import type { SuperSelectOption } from '../../../types';
 
 export const ReferenceFieldSelects = () => {
   const { fields, mappingViewFields } = useMappingsState();
@@ -32,7 +32,7 @@ export const ReferenceFieldSelects = () => {
     .map((field) => ({
       value: field.path.join('.'),
       inputDisplay: field.path.join('.'),
-      'data-test-subj': `select-reference-field-${field.path.join('.')}}`,
+      'data-test-subj': `select-reference-field-${field.path.join('.')}`,
     }));
   const fieldConfigReferenceField = getFieldConfig('reference_field');
   return (

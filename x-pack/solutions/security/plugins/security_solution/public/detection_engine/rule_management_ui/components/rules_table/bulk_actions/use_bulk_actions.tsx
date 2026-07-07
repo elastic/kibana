@@ -11,8 +11,12 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui
 import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { useCallback, useMemo } from 'react';
+import { BulkFillRuleGapsEventTypes } from '../../../../../common/lib/telemetry/events/bulk_fill_rule_gaps/types';
 import { ML_RULES_UNAVAILABLE } from './translations';
-import { MAX_MANUAL_RULE_RUN_BULK_SIZE } from '../../../../../../common/constants';
+import {
+  MAX_BULK_FILL_RULE_GAPS_BULK_SIZE,
+  MAX_MANUAL_RULE_RUN_BULK_SIZE,
+} from '../../../../../../common/constants';
 import type { TimeRange } from '../../../../rule_gaps/types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
@@ -47,8 +51,8 @@ import type { ExecuteBulkActionsDryRun } from './use_bulk_actions_dry_run';
 import { computeDryRunEditPayload } from './utils/compute_dry_run_edit_payload';
 import { transformExportDetailsToDryRunResult } from './utils/dry_run_result';
 import { prepareSearchParams } from './utils/prepare_search_params';
+import { useGapAutoFillSchedulerContext } from '../../../../rule_gaps/context/gap_auto_fill_scheduler_context';
 import { ManualRuleRunEventTypes } from '../../../../../common/lib/telemetry';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useUpsellingMessage } from '../../../../../common/hooks/use_upselling';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../../common/detection_engine/constants';
@@ -62,7 +66,9 @@ interface UseBulkActionsArgs {
   ) => Promise<boolean>;
   showBulkDuplicateConfirmation: () => Promise<string | null>;
   showManualRuleRunConfirmation: () => Promise<TimeRange | null>;
+  showBulkFillRuleGapsConfirmation: () => Promise<TimeRange | null>;
   showManualRuleRunLimitError: () => void;
+  showBulkFillRuleGapsRuleLimitError: () => void;
   completeBulkEditForm: (
     bulkActionEditType: BulkActionEditType
   ) => Promise<BulkActionEditPayload | null>;
@@ -75,7 +81,9 @@ export const useBulkActions = ({
   showBulkActionConfirmation,
   showBulkDuplicateConfirmation,
   showManualRuleRunConfirmation,
+  showBulkFillRuleGapsConfirmation,
   showManualRuleRunLimitError,
+  showBulkFillRuleGapsRuleLimitError,
   completeBulkEditForm,
   executeBulkActionsDryRun,
 }: UseBulkActionsArgs) => {
@@ -89,8 +97,16 @@ export const useBulkActions = ({
   const { executeBulkAction } = useExecuteBulkAction();
   const { bulkExport } = useBulkExport();
   const downloadExportedRules = useDownloadExportedRules();
+  const { scheduler } = useGapAutoFillSchedulerContext();
+  const activeSchedulerId = scheduler?.enabled ? scheduler.id : undefined;
   const {
     timelinePrivileges: { crud: canCreateTimelines },
+    rulesPrivileges: {
+      rules: { edit: canEditRules },
+      enableDisable: { edit: canEnableDisableRules },
+      manualRun: { edit: canManualRunRules },
+      customHighlightedFields: { edit: canEditCustomHighlightedFields },
+    },
   } = useUserPrivileges();
 
   const {
@@ -98,19 +114,20 @@ export const useBulkActions = ({
     actions: { clearRulesSelection, setIsPreflightInProgress },
   } = rulesTableContext;
   const globalQuery = useMemo(() => {
-    const gapRange = filterOptions?.showRulesWithGaps
-      ? getGapRange(filterOptions.gapSearchRange ?? defaultRangeValue)
+    const gapRange = filterOptions?.gapFillStatuses?.length
+      ? getGapRange(defaultRangeValue)
       : undefined;
 
     return {
       query: kql,
       ...(gapRange && { gapRange }),
+      ...(filterOptions?.gapFillStatuses?.length && {
+        gapFillStatuses: filterOptions.gapFillStatuses,
+      }),
+      ...(activeSchedulerId && { schedulerId: activeSchedulerId }),
     };
-  }, [kql, filterOptions]);
+  }, [kql, filterOptions, activeSchedulerId]);
 
-  const isBulkEditAlertSuppressionFeatureEnabled = useIsExperimentalFeatureEnabled(
-    'bulkEditAlertSuppressionEnabled'
-  );
   const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
   const license = useLicense();
   const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
@@ -287,6 +304,109 @@ export const useBulkActions = ({
         });
       };
 
+      const handleScheduleFillGapsAction = async () => {
+        let longTimeWarningToast: Toast;
+        let isBulkFillGapsFinished = false;
+
+        startTransaction({ name: BULK_RULE_ACTIONS.FILL_GAPS });
+        closePopover();
+
+        setIsPreflightInProgress(true);
+
+        const dryRunResult = await executeBulkActionsDryRun({
+          type: BulkActionTypeEnum.fill_gaps,
+          ...(isAllSelected ? globalQuery : { ids: selectedRuleIds }),
+          fillGapsPayload: {
+            start_date: new Date(Date.now() - 1000).toISOString(),
+            end_date: new Date().toISOString(),
+          },
+        });
+
+        setIsPreflightInProgress(false);
+
+        if ((dryRunResult?.succeededRulesCount ?? 0) > MAX_BULK_FILL_RULE_GAPS_BULK_SIZE) {
+          showBulkFillRuleGapsRuleLimitError();
+          return;
+        }
+
+        const hasActionBeenConfirmed = await showBulkActionConfirmation(
+          dryRunResult,
+          BulkActionTypeEnum.fill_gaps
+        );
+        if (hasActionBeenConfirmed === false) {
+          return;
+        }
+
+        const modalBulkFillRuleGapsConfirmationResult = await showBulkFillRuleGapsConfirmation();
+        startServices.telemetry.reportEvent(BulkFillRuleGapsEventTypes.BulkFillRuleGapsOpenModal, {
+          type: 'bulk',
+        });
+
+        if (modalBulkFillRuleGapsConfirmationResult === null) {
+          return;
+        }
+
+        const enabledIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
+
+        const hideWarningToast = () => {
+          if (longTimeWarningToast) {
+            toasts.api.remove(longTimeWarningToast);
+          }
+        };
+
+        // show warning toast only if bulk fill gaps action exceeds 5s
+        // if bulkAction already finished, we won't show toast at all (hence flag "isBulkFillGapsFinished")
+        setTimeout(() => {
+          if (isBulkFillGapsFinished) {
+            return;
+          }
+          longTimeWarningToast = toasts.addWarning(
+            {
+              title: i18n.BULK_FILL_RULE_GAPS_WARNING_TOAST_TITLE,
+              text: toMountPoint(
+                <>
+                  <p>
+                    {i18n.BULK_FILL_RULE_GAPS_WARNING_TOAST_DESCRIPTION(
+                      dryRunResult?.succeededRulesCount ?? 0
+                    )}
+                  </p>
+                  <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiButton color="warning" size="s" onClick={hideWarningToast}>
+                        {i18n.BULK_FILL_RULE_GAPS_WARNING_TOAST_NOTIFY}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </>,
+                startServices
+              ),
+              iconType: undefined,
+            },
+            { toastLifeTimeMs: 10 * 60 * 1000 }
+          );
+        }, 5 * 1000);
+
+        await executeBulkAction({
+          type: BulkActionTypeEnum.fill_gaps,
+          ...(isAllSelected ? globalQuery : { ids: enabledIds }),
+          fillGapsPayload: {
+            start_date: modalBulkFillRuleGapsConfirmationResult.startDate.toISOString(),
+            end_date: modalBulkFillRuleGapsConfirmationResult.endDate.toISOString(),
+          },
+        });
+
+        isBulkFillGapsFinished = true;
+        hideWarningToast();
+
+        startServices.telemetry.reportEvent(BulkFillRuleGapsEventTypes.BulkFillRuleGapsExecute, {
+          rangeInMs: modalBulkFillRuleGapsConfirmationResult.endDate.diff(
+            modalBulkFillRuleGapsConfirmationResult.startDate
+          ),
+          status: 'success',
+          rulesCount: enabledIds.length,
+        });
+      };
+
       const handleBulkEdit = (bulkEditActionType: BulkActionEditType) => async () => {
         let longTimeWarningToast: Toast;
         let isBulkEditFinished = false;
@@ -361,7 +481,12 @@ export const useBulkActions = ({
           type: BulkActionTypeEnum.edit,
           ...prepareSearchParams({
             ...(isAllSelected
-              ? { filterOptions, gapRange: globalQuery.gapRange }
+              ? {
+                  filterOptions,
+                  gapRange: globalQuery.gapRange,
+                  gapFillStatuses: filterOptions.gapFillStatuses,
+                  schedulerId: activeSchedulerId,
+                }
               : { selectedRuleIds }),
             dryRunResult,
           }),
@@ -373,7 +498,7 @@ export const useBulkActions = ({
         isBulkEditFinished = true;
       };
 
-      const isDeleteDisabled = containsLoading || selectedRuleIds.length === 0;
+      const isDeleteDisabled = !canEditRules || containsLoading || selectedRuleIds.length === 0;
       const isEditDisabled =
         missingActionPrivileges || containsLoading || selectedRuleIds.length === 0;
       const isAlertSuppressionDisabled = isEditDisabled || !isAlertSuppressionLicenseValid;
@@ -388,7 +513,10 @@ export const useBulkActions = ({
               name: i18n.BULK_ACTION_ENABLE,
               'data-test-subj': 'enableRuleBulk',
               disabled:
-                missingActionPrivileges || containsLoading || (!containsDisabled && !isAllSelected),
+                missingActionPrivileges ||
+                containsLoading ||
+                (!containsDisabled && !isAllSelected) ||
+                !canEnableDisableRules,
               onClick: handleEnableAction,
               toolTipContent: missingActionPrivileges
                 ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
@@ -400,7 +528,7 @@ export const useBulkActions = ({
               key: i18n.BULK_ACTION_DUPLICATE,
               name: i18n.BULK_ACTION_DUPLICATE,
               'data-test-subj': 'duplicateRuleBulk',
-              disabled: isEditDisabled,
+              disabled: !canEditRules || isEditDisabled,
               onClick: handleDuplicateAction,
               toolTipContent: missingActionPrivileges
                 ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
@@ -412,42 +540,38 @@ export const useBulkActions = ({
               key: i18n.BULK_ACTION_INDEX_PATTERNS,
               name: i18n.BULK_ACTION_INDEX_PATTERNS,
               'data-test-subj': 'indexPatternsBulkEditRule',
-              disabled: isEditDisabled,
+              disabled: !canEditRules || isEditDisabled,
               panel: 2,
             },
             {
               key: i18n.BULK_ACTION_TAGS,
               name: i18n.BULK_ACTION_TAGS,
               'data-test-subj': 'tagsBulkEditRule',
-              disabled: isEditDisabled,
+              disabled: !canEditRules || isEditDisabled,
               panel: 1,
             },
             {
               key: i18n.BULK_ACTION_INVESTIGATION_FIELDS,
               name: i18n.BULK_ACTION_INVESTIGATION_FIELDS,
               'data-test-subj': 'investigationFieldsBulkEditRule',
-              disabled: isEditDisabled,
+              disabled: !canEditCustomHighlightedFields || isEditDisabled,
               panel: 3,
             },
-            ...(isBulkEditAlertSuppressionFeatureEnabled
-              ? [
-                  {
-                    key: i18n.BULK_ACTION_ALERT_SUPPRESSION,
-                    name: i18n.BULK_ACTION_ALERT_SUPPRESSION,
-                    'data-test-subj': 'alertSuppressionBulkEditRule',
-                    disabled: isAlertSuppressionDisabled,
-                    toolTipContent: isAlertSuppressionLicenseValid
-                      ? undefined
-                      : alertSuppressionUpsellingMessage,
-                    panel: 4,
-                  },
-                ]
-              : []),
+            {
+              key: i18n.BULK_ACTION_ALERT_SUPPRESSION,
+              name: i18n.BULK_ACTION_ALERT_SUPPRESSION,
+              'data-test-subj': 'alertSuppressionBulkEditRule',
+              disabled: !canEditRules || isAlertSuppressionDisabled,
+              toolTipContent: isAlertSuppressionLicenseValid
+                ? undefined
+                : alertSuppressionUpsellingMessage,
+              panel: 4,
+            },
             {
               key: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
               name: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
               'data-test-subj': 'addRuleActionsBulk',
-              disabled: !hasActionsPrivileges || isEditDisabled,
+              disabled: !canEditRules || !hasActionsPrivileges || isEditDisabled,
               onClick: handleBulkEdit(BulkActionEditTypeEnum.add_rule_actions),
               toolTipContent: !hasActionsPrivileges
                 ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
@@ -459,7 +583,7 @@ export const useBulkActions = ({
               key: i18n.BULK_ACTION_SET_SCHEDULE,
               name: i18n.BULK_ACTION_SET_SCHEDULE,
               'data-test-subj': 'setScheduleBulk',
-              disabled: isEditDisabled,
+              disabled: !canEditRules || isEditDisabled,
               onClick: handleBulkEdit(BulkActionEditTypeEnum.set_schedule),
               toolTipContent: missingActionPrivileges
                 ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
@@ -491,8 +615,18 @@ export const useBulkActions = ({
               key: i18n.BULK_ACTION_MANUAL_RULE_RUN,
               name: i18n.BULK_ACTION_MANUAL_RULE_RUN,
               'data-test-subj': 'scheduleRuleRunBulk',
-              disabled: containsLoading || (!containsEnabled && !isAllSelected),
+              disabled:
+                containsLoading || (!containsEnabled && !isAllSelected) || !canManualRunRules,
               onClick: handleScheduleRuleRunAction,
+              icon: undefined,
+            },
+            {
+              key: i18n.BULK_ACTION_FILL_RULE_GAPS,
+              name: i18n.BULK_ACTION_FILL_RULE_GAPS,
+              'data-test-subj': 'scheduleFillGaps',
+              disabled:
+                containsLoading || (!containsEnabled && !isAllSelected) || !canManualRunRules,
+              onClick: handleScheduleFillGapsAction,
               icon: undefined,
             },
             {
@@ -500,7 +634,10 @@ export const useBulkActions = ({
               name: i18n.BULK_ACTION_DISABLE,
               'data-test-subj': 'disableRuleBulk',
               disabled:
-                missingActionPrivileges || containsLoading || (!containsEnabled && !isAllSelected),
+                missingActionPrivileges ||
+                containsLoading ||
+                (!containsEnabled && !isAllSelected) ||
+                !canEnableDisableRules,
               onClick: handleDisableActions,
               toolTipContent: missingActionPrivileges
                 ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
@@ -643,15 +780,21 @@ export const useBulkActions = ({
       rules,
       selectedRuleIds,
       hasActionsPrivileges,
+      canEditRules,
+      isAlertSuppressionLicenseValid,
       isAllSelected,
+      canEnableDisableRules,
+      canEditCustomHighlightedFields,
+      alertSuppressionUpsellingMessage,
+      canCreateTimelines,
+      canManualRunRules,
       loadingRuleIds,
       startTransaction,
       hasMlPermissions,
       executeBulkAction,
+      globalQuery,
       toasts,
       showBulkDuplicateConfirmation,
-      showManualRuleRunConfirmation,
-      showManualRuleRunLimitError,
       clearRulesSelection,
       confirmDeletion,
       bulkExport,
@@ -659,14 +802,14 @@ export const useBulkActions = ({
       downloadExportedRules,
       setIsPreflightInProgress,
       executeBulkActionsDryRun,
-      filterOptions,
-      completeBulkEditForm,
-      isBulkEditAlertSuppressionFeatureEnabled,
+      showManualRuleRunConfirmation,
       startServices,
-      canCreateTimelines,
-      isAlertSuppressionLicenseValid,
-      alertSuppressionUpsellingMessage,
-      globalQuery,
+      showManualRuleRunLimitError,
+      showBulkFillRuleGapsConfirmation,
+      showBulkFillRuleGapsRuleLimitError,
+      completeBulkEditForm,
+      filterOptions,
+      activeSchedulerId,
     ]
   );
 

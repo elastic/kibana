@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { Chart, Metric, Settings, ValueFormatter } from '@elastic/charts';
+import { Chart, Metric, Settings } from '@elastic/charts';
 import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
-import type { PartialTheme, Theme } from '@elastic/charts';
+import type { PartialTheme, Theme, ValueFormatter } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import type { COMPARATORS } from '@kbn/alerting-comparators';
 
 export interface ChartProps {
   theme?: PartialTheme[];
@@ -25,6 +25,10 @@ export interface Props {
   title: string;
   value: number;
   valueFormatter?: ValueFormatter;
+  warning?: {
+    threshold: number[];
+    comparator: COMPARATORS | string;
+  };
 }
 
 const NO_DATA_VALUE = i18n.translate('xpack.observability.customThreshold.rule.noDataValue', {
@@ -46,6 +50,7 @@ export function Threshold({
   title,
   value,
   valueFormatter = (d) => String(d),
+  warning,
 }: Props) {
   const color = useEuiBackgroundColor('danger');
 
@@ -84,13 +89,36 @@ export function Threshold({
                           }
                         )
                       : THRESHOLD_NO_DATA_TITLE}
+                    {warning && (
+                      <>
+                        <br />
+                        {i18n.translate(
+                          'xpack.observability.customThreshold.rule.warningThresholdExtraTitle',
+                          {
+                            values: {
+                              comparator: warning.comparator,
+                              threshold: warning.threshold
+                                .map((t) => valueFormatter(t))
+                                .join(' - '),
+                            },
+                            defaultMessage: `Warn when {comparator} {threshold}`,
+                          }
+                        )}
+                      </>
+                    )}
                   </span>
                 ),
                 color,
                 value: value ?? NO_DATA_VALUE,
                 valueFormatter,
                 icon: ({ width, height, color: iconColor }) => (
-                  <EuiIcon width={width} height={height} color={iconColor} type="alert" />
+                  <EuiIcon
+                    width={width}
+                    height={height}
+                    color={iconColor}
+                    type="warning"
+                    aria-hidden={true}
+                  />
                 ),
               },
             ],

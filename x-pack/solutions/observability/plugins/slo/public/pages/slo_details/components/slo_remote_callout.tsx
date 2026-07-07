@@ -9,7 +9,7 @@ import { EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { createRemoteSloDetailsUrl } from '../../../utils/slo/remote_slo_urls';
 import { useSpace } from '../../../hooks/use_space';
 
@@ -50,7 +50,7 @@ export function SloRemoteCallout({ slo }: { slo: SLOWithSummaryResponse }) {
         href={sloDetailsUrl}
         color="primary"
         target="_blank"
-        iconType="popout"
+        iconType="external"
         iconSide="right"
       >
         {i18n.translate('xpack.slo.headerTitle.linkButtonButtonLabel', {

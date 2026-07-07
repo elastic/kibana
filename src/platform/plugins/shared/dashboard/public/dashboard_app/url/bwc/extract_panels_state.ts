@@ -8,12 +8,12 @@
  */
 
 import semverSatisfies from 'semver/functions/satisfies';
-import { convertPanelsArrayToPanelSectionMaps } from '../../../../common/lib/dashboard_panel_converters';
-import { DashboardState } from '../../../../common';
+import type { Reference } from '@kbn/content-management-utils';
+import { SAVED_OBJECT_REF_NAME } from '@kbn/presentation-publishing';
+import type { DashboardState } from '../../../../common';
+import { prefixReferencesFromPanel } from '../../../../common';
 import { coreServices } from '../../../services/kibana_services';
 import { getPanelTooOldErrorString } from '../../_dashboard_app_strings';
-
-type PanelState = Pick<DashboardState, 'panels' | 'sections'>;
 
 /**
  * We no longer support loading panels from a version older than 7.3 in the URL.
@@ -28,8 +28,8 @@ const isPanelVersionTooOld = (panels: unknown[]) => {
     const panelAsObject = panel as { [key: string]: unknown };
 
     if (
-      !panelAsObject.gridData ||
-      !(panelAsObject.panelConfig || panelAsObject.embeddableConfig) ||
+      !(panelAsObject.gridData || panelAsObject.grid) ||
+      !(panelAsObject.config || panelAsObject.panelConfig || panelAsObject.embeddableConfig) ||
       (panelAsObject.version && semverSatisfies(panelAsObject.version as string, '<7.3'))
     )
       return true;
@@ -37,29 +37,109 @@ const isPanelVersionTooOld = (panels: unknown[]) => {
   return false;
 };
 
-export function extractPanelsState(state: { [key: string]: unknown }): Partial<PanelState> {
-  const panels = Array.isArray(state.panels) ? state.panels : [];
-
-  if (panels.length === 0) {
+export function extractPanelsState(state: { [key: string]: unknown }): {
+  panels?: DashboardState['panels'];
+  savedObjectReferences?: Reference[];
+} {
+  if (!state.panels) {
     return {};
   }
+  const panels = Array.isArray(state.panels) ? state.panels : [];
 
   if (isPanelVersionTooOld(panels)) {
     coreServices.notifications.toasts.addWarning(getPanelTooOldErrorString());
     return {};
   }
 
-  // < 8.17 panels state stored panelConfig as embeddableConfig
-  const standardizedPanels = panels.map((panel) => {
-    if (typeof panel === 'object' && panel?.embeddableConfig) {
-      const { embeddableConfig, ...rest } = panel;
-      return {
-        ...rest,
-        panelConfig: embeddableConfig,
-      };
+  const savedObjectReferences: Reference[] = [];
+  const standardizedPanels: DashboardState['panels'] = panels.map((legacyPanel) => {
+    const panel = typeof legacyPanel === 'object' ? { ...legacyPanel } : {};
+
+    if (panel.panels) {
+      // this is a section, since it has its own panels
+      const { panels: sectionPanels, savedObjectReferences: sectionPanelReferences } =
+        extractPanelsState({ panels: panel.panels });
+      savedObjectReferences.push(...(sectionPanelReferences ?? []));
+      panel.panels = sectionPanels;
     }
+
+    // < 8.17 panels state stored panelConfig as embeddableConfig
+    if (panel?.embeddableConfig) {
+      panel.config = panel.embeddableConfig;
+      delete panel.embeddableConfig;
+    }
+
+    // < 9.2 panels state stored config as panelConfig
+    if (panel?.panelConfig) {
+      panel.config = panel.panelConfig;
+      delete panel.panelConfig;
+    }
+
+    // < 9.2 grid stored as gridData
+    if (panel?.gridData) {
+      panel.grid = panel.gridData;
+      delete panel.gridData;
+    }
+
+    // < 9.2 id stored as panelIndex
+    if (panel?.panelIndex) {
+      /**
+       * <8.19 'id' (saved object id) stored as siblings to config;
+       * this is checked as part of the `panelIndex` check because...
+       * - <8.19 `id` refers to saved object id
+       * - >9.3  `id` refers to the unique panel index
+       */
+      if (panel.id && panel.config && typeof panel.config === 'object') {
+        panel.config.savedObjectId = panel.id;
+        delete panel.id;
+      }
+
+      panel.id = panel.panelIndex;
+      delete panel.panelIndex;
+    }
+
+    // <8.19 'title' stored as siblings to config
+    if (panel.title && panel.config && typeof panel.config === 'object') {
+      panel.config.title = panel.title;
+      delete panel.title;
+    }
+
+    // < 9.4 `id` is stored as `uid`
+    if (panel.uid) {
+      panel.id = panel.uid;
+      delete panel.uid;
+    }
+
+    // < 9.2 dashboard managed saved object refs for panels
+    // Add saved object ref for panels that contain savedObjectId
+    // TODO remove once all panels inject references in dashboard server api
+    const { config, id, type } = panel;
+    if (id && type && config?.savedObjectId && typeof config?.savedObjectId === 'string') {
+      savedObjectReferences.push(
+        ...prefixReferencesFromPanel(id, [
+          {
+            id: config.savedObjectId,
+            name: SAVED_OBJECT_REF_NAME,
+            type,
+          },
+        ])
+      );
+    }
+
+    // <9.4 panel state included "i" in grid
+    if (panel.grid) {
+      const { i, ...rest } = panel.grid;
+      panel.grid = rest;
+      if (i && !panel.id) {
+        panel.id = i;
+      }
+    }
+
     return panel;
   });
 
-  return convertPanelsArrayToPanelSectionMaps(standardizedPanels);
+  return {
+    panels: standardizedPanels,
+    savedObjectReferences: savedObjectReferences.length ? savedObjectReferences : undefined,
+  };
 }

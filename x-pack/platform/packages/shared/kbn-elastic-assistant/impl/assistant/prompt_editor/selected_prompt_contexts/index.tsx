@@ -16,7 +16,7 @@ import {
 import { isEmpty, omit } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
-import { Conversation } from '../../../assistant_context/types';
+import type { Conversation } from '../../../assistant_context/types';
 import { DataAnonymizationEditor } from '../../../data_anonymization_editor';
 import type { PromptContext, SelectedPromptContext } from '../../prompt_context/types';
 import * as i18n from './translations';
@@ -61,7 +61,7 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
                 'data-test-subj': `selectedPromptContext-${i}-button`,
               }}
               extraAction={
-                <EuiToolTip content={i18n.REMOVE_CONTEXT}>
+                <EuiToolTip content={i18n.REMOVE_CONTEXT} disableScreenReaderOutput>
                   <EuiButtonIcon
                     aria-label={i18n.REMOVE_CONTEXT}
                     data-test-subj={`removePromptContext-${id}`}

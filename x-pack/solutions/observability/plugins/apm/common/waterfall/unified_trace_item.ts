@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-export interface TraceItem {
-  id: string;
-  timestamp: string;
-  name: string;
-  traceId: string;
-  duration: number;
-  hasError?: boolean;
-  parentId?: string;
-  serviceName: string;
-}
+export type {
+  CompressionStrategy,
+  TraceItemComposite,
+  TraceItemDocType,
+  TraceItem,
+} from '@kbn/apm-types';

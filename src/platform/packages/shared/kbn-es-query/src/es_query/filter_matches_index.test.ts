@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter } from '../filters';
+import type { Filter } from '../filters';
 import { filterMatchesIndex } from './filter_matches_index';
-import { DataViewBase } from './types';
+import type { DataViewBase } from './types';
 
 describe('filterMatchesIndex', () => {
   it('should return true if the filter has no meta', () => {

@@ -9,7 +9,7 @@ delete:
     - cases
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
-    - $ref: '../components/parameters/case_id.yaml' 
+    - $ref: '../components/parameters/case_id.yaml'
     - $ref: '../components/parameters/comment_id.yaml'
   responses:
     '204':
@@ -19,7 +19,22 @@ delete:
       content:
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'
+  x-codeSamples:
+    - label: curl
+      lang: curl
+      source: |
+        curl \
+          --request DELETE 'https://localhost:5601/api/cases/9c235210-6834-11ea-a78c-6ffb38a34414/comments/71ec1870-725b-11ea-a0b2-c51ea50a58e2' \
+          --header "Authorization: $API_KEY" \
+          --header "kbn-xsrf: true"
+    - label: Console
+      lang: console
+      source: |
+        DELETE kbn:/api/cases/9c235210-6834-11ea-a78c-6ffb38a34414/comments/71ec1870-725b-11ea-a0b2-c51ea50a58e2
 
 get:
   summary: Get a case comment or alert
@@ -50,4 +65,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'

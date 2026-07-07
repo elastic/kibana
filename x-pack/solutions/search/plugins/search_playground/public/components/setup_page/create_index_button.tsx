@@ -5,42 +5,26 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SEARCH_INDICES, SEARCH_INDICES_CREATE_INDEX } from '@kbn/deeplinks-search/constants';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 
 export const CreateIndexButton: React.FC = () => {
   const {
-    services: { application, chrome },
+    services: { share },
   } = useKibana();
 
-  const createIndexUrl = chrome.navLinks.get(
-    `${SEARCH_INDICES}:${SEARCH_INDICES_CREATE_INDEX}`
-  )?.url;
+  const searchIndexDetailsUrl = share?.url.locators
+    .get('SEARCH_INDEX_MANAGEMENT_LOCATOR_ID')
+    ?.useUrl({ page: 'index_list' });
 
-  const handleCreateIndexClick = useCallback(
-    (event: React.MouseEvent<HTMLAnchorElement>) => {
-      event.preventDefault();
-
-      if (!createIndexUrl) {
-        return;
-      }
-
-      application?.navigateToUrl(createIndexUrl);
-    },
-    [application, createIndexUrl]
-  );
-
-  return createIndexUrl ? (
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
+  return searchIndexDetailsUrl ? (
     <EuiButton
-      iconType="plusInCircle"
+      iconType="plusCircle"
       data-test-subj="createIndexButton"
-      href={createIndexUrl}
-      onClick={handleCreateIndexClick}
+      href={searchIndexDetailsUrl}
     >
       <FormattedMessage
         id="xpack.searchPlayground.createIndexButton"
@@ -49,6 +33,7 @@ export const CreateIndexButton: React.FC = () => {
     </EuiButton>
   ) : (
     <EuiCallOut
+      announceOnMount
       title={i18n.translate('xpack.searchPlayground.createIndexCallout', {
         defaultMessage: 'You need to create an index first',
       })}

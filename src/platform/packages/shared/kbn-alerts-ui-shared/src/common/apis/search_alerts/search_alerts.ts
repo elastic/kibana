@@ -16,12 +16,11 @@ import type {
 import type {
   Alert,
   EsQuerySnapshot,
-  LegacyField,
   RuleRegistrySearchRequest,
   RuleRegistrySearchResponse,
 } from '@kbn/alerting-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { set } from '@kbn/safer-lodash-set';
+import type { ProjectRouting } from '@kbn/es-query';
 import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
 
 export interface SearchAlertsParams {
@@ -47,7 +46,7 @@ export interface SearchAlertsParams {
   /**
    * ES query to perform on the affected alert indices
    */
-  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  query: Partial<Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>>;
   /**
    * The alert document fields to include in the response
    */
@@ -69,6 +68,10 @@ export interface SearchAlertsParams {
    */
   pageSize: number;
   /**
+   * Force using the default context, otherwise use the AlertQueryContext
+   */
+  skipAlertsQueryContext?: boolean;
+  /**
    * The minimum score to apply to the query
    */
   minScore?: number;
@@ -76,14 +79,17 @@ export interface SearchAlertsParams {
    * Whether to track the score of the query
    */
   trackScores?: boolean;
+  /**
+   * CPS project routing override for the underlying search request
+   */
+  projectRouting?: ProjectRouting;
 }
 
 export interface SearchAlertsResult {
   alerts: Alert[];
-  oldAlertsData: LegacyField[][];
-  ecsAlertsData: unknown[];
   total: number;
   querySnapshot?: EsQuerySnapshot;
+  error?: Error;
 }
 
 /**
@@ -102,6 +108,7 @@ export const searchAlerts = ({
   pageSize,
   minScore,
   trackScores,
+  projectRouting,
 }: SearchAlertsParams): Promise<SearchAlertsResult> =>
   lastValueFrom(
     data.search
@@ -120,6 +127,7 @@ export const searchAlerts = ({
         {
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
           abortSignal: signal,
+          projectRouting,
         }
       )
       .pipe(
@@ -130,26 +138,24 @@ export const searchAlerts = ({
           const { rawResponse } = response;
           const total = parseTotalHits(rawResponse);
           const alerts = parseAlerts(rawResponse);
-          const { oldAlertsData, ecsAlertsData } = transformToLegacyFormat(alerts);
+          const alertsError = parseFailure(rawResponse);
 
           return {
             alerts,
-            oldAlertsData,
-            ecsAlertsData,
             total,
             querySnapshot: {
               request: response?.inspect?.dsl ?? [],
+              // @ts-expect-error upgrade typescript v5.9.3
               response: [JSON.stringify(rawResponse)] ?? [],
             },
+            error: alertsError,
           };
         }),
         catchError((error) => {
-          data.search.showError(error);
           return of({
             alerts: [],
-            oldAlertsData: [],
-            ecsAlertsData: [],
             total: 0,
+            error,
           });
         })
       )
@@ -187,29 +193,16 @@ const parseAlerts = (rawResponse: RuleRegistrySearchResponse['rawResponse']) =>
   }, []);
 
 /**
- * Transforms the alerts to legacy formats (will be removed)
- * @deprecated Will be removed in v8.16.0
+ * Extract failures from the raw response
  */
-const transformToLegacyFormat = (alerts: Alert[]) =>
-  alerts.reduce<{
-    oldAlertsData: LegacyField[][];
-    ecsAlertsData: unknown[];
-  }>(
-    (acc, alert) => {
-      const itemOldData = Object.entries(alert).reduce<Array<{ field: string; value: string[] }>>(
-        (oldData, [key, value]) => {
-          oldData.push({ field: key, value: value as string[] });
-          return oldData;
-        },
-        []
-      );
-      const ecsData = Object.entries(alert).reduce((ecs, [key, value]) => {
-        set(ecs, key, value ?? []);
-        return ecs;
-      }, {});
-      acc.oldAlertsData.push(itemOldData);
-      acc.ecsAlertsData.push(ecsData);
-      return acc;
-    },
-    { oldAlertsData: [], ecsAlertsData: [] }
-  );
+const parseFailure = (
+  rawResponse: RuleRegistrySearchResponse['rawResponse']
+): Error | undefined => {
+  // `_shards` is absent when the search strategy short-circuits with an empty
+  // response (e.g. internally managed rule types, which never expose alert
+  // indices to this strategy), so it must be guarded before dereferencing.
+  const failures = rawResponse._shards?.failures ?? [];
+  return failures.length && failures[0].reason?.reason
+    ? new Error(failures[0].reason.reason)
+    : undefined;
+};

@@ -9,8 +9,9 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { CategoryAxisPanel, CategoryAxisPanelProps } from './category_axis_panel';
-import { CategoryAxis } from '../../../../types';
+import type { CategoryAxisPanelProps } from './category_axis_panel';
+import { CategoryAxisPanel } from './category_axis_panel';
+import type { CategoryAxis } from '../../../../types';
 import { LabelOptions } from './label_options';
 import { TruncateLabelsOption } from '../../common';
 import { categoryAxis } from './mocks';

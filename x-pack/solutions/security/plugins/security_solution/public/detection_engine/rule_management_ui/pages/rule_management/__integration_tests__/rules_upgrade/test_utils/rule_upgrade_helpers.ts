@@ -41,14 +41,20 @@ export async function saveAndAcceptFieldValue(wrapper: HTMLElement): Promise<voi
   await clickFieldSaveButton(wrapper, 'Save and accept');
 }
 
+export function getSaveFieldValueButton(wrapper: HTMLElement): HTMLElement {
+  return within(wrapper).getByRole('button', { name: 'Save' });
+}
+
 async function clickFieldSaveButton(wrapper: HTMLElement, buttonName: string): Promise<void> {
   const saveButton = within(wrapper).getByRole('button', { name: buttonName });
 
   expect(saveButton).toBeVisible();
 
-  // Wait for async validation to finish
+  // Wait for async validation to finish.
+  // It has been noticed some fields (like "EQL") can take more than 500ms to validate since
+  // it sums up with the 300ms debounce time.
   await waitFor(() => expect(saveButton).toBeEnabled(), {
-    timeout: 500,
+    timeout: 1500,
   });
 
   await act(async () => {

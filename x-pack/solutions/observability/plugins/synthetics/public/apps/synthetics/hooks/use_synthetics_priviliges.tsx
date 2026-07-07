@@ -28,7 +28,7 @@ import {
   SYNTHETICS_INDEX_PATTERN,
 } from '../../../../common/constants';
 import { useSyntheticsSettingsContext } from '../contexts';
-import { ClientPluginsStart } from '../../../plugin';
+import type { ClientPluginsStart } from '../../../plugin';
 
 export const useSyntheticsPrivileges = () => {
   const { canRead: canReadSyntheticsIndex, loading: isCanReadLoading } =
@@ -72,7 +72,7 @@ const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }
   <EuiEmptyPrompt
     data-test-subj="syntheticsUnprivileged"
     color="plain"
-    icon={<EuiIcon type="logoObservability" size="xl" />}
+    icon={<EuiIcon type="logoObservability" size="xl" aria-hidden={true} />}
     title={
       <h2>
         <FormattedMessage

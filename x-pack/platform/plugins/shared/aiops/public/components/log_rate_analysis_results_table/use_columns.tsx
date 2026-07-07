@@ -14,6 +14,8 @@ import {
   EuiIcon,
   EuiIconTip,
   EuiText,
+  EuiTextTruncate,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
@@ -99,7 +101,7 @@ const LogRateColumnName = (
       size="s"
       position="top"
       color="subdued"
-      type="questionInCircle"
+      type="question"
       className="eui-alignTop"
       content={logRateChangeMessage}
     />
@@ -117,7 +119,7 @@ const ImpactColumnName = (
       size="s"
       position="top"
       color="subdued"
-      type="questionInCircle"
+      type="question"
       className="eui-alignTop"
       content={i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.impactLabelColumnTooltip', {
         defaultMessage: 'The level of impact of the field on the message rate difference.',
@@ -137,7 +139,7 @@ const GroupImpactColumnName = (
       size="s"
       position="top"
       color="subdued"
-      type="questionInCircle"
+      type="question"
       className="eui-alignTop"
       content={i18n.translate(
         'xpack.aiops.logRateAnalysis.resultsTableGroups.impactLabelColumnTooltip',
@@ -284,9 +286,7 @@ export const useColumns = (
                 </span>
               )}
 
-              <span title={fieldName} className="eui-textTruncate">
-                {fieldName}
-              </span>
+              <EuiTextTruncate text={fieldName} />
             </>
           );
         },
@@ -301,17 +301,19 @@ export const useColumns = (
           defaultMessage: 'Field value',
         }),
         render: (_, { fieldValue, type }) => (
-          <span title={String(fieldValue)}>
-            {type === 'keyword' ? (
-              String(fieldValue)
-            ) : (
-              <EuiText size="xs">
-                <EuiCode language="log" transparentBackground css={{ paddingInline: '0px' }}>
-                  {String(fieldValue)}
-                </EuiCode>
-              </EuiText>
-            )}
-          </span>
+          <EuiToolTip content={String(fieldValue)} disableScreenReaderOutput>
+            <span tabIndex={0}>
+              {type === 'keyword' ? (
+                String(fieldValue)
+              ) : (
+                <EuiText size="xs">
+                  <EuiCode language="log" transparentBackground css={{ paddingInline: '0px' }}>
+                    {String(fieldValue)}
+                  </EuiCode>
+                </EuiText>
+              )}
+            </span>
+          </EuiToolTip>
         ),
         sortable: true,
         textOnly: true,
@@ -333,7 +335,7 @@ export const useColumns = (
               size="s"
               position="top"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
               content={isGroupsTable ? groupLogRateHelpMessage : logRateHelpMessage}
             />
@@ -378,7 +380,7 @@ export const useColumns = (
               size="s"
               position="top"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
               content={baselineRateMessage}
             />
@@ -421,7 +423,7 @@ export const useColumns = (
               size="s"
               position="top"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
               content={deviationRateMessage}
             />
@@ -462,6 +464,7 @@ export const useColumns = (
           return (
             <>
               <EuiIcon
+                aria-hidden={true}
                 size="s"
                 color="subdued"
                 type={currentAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE ? 'sortUp' : 'sortDown'}
@@ -488,7 +491,7 @@ export const useColumns = (
               size="s"
               position="top"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
               content={i18n.translate(
                 'xpack.aiops.logRateAnalysis.resultsTable.pValueColumnTooltip',

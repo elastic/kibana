@@ -52,7 +52,7 @@ interface Props {
  */
 const ROW_OF_DATA_PROVIDERS_HEIGHT = 36; // px
 
-const listStyle: React.CSSProperties = {
+const listStyle = {
   alignItems: 'center',
   display: 'flex',
   height: `${ROW_OF_DATA_PROVIDERS_HEIGHT}px`,
@@ -69,10 +69,8 @@ const getItemStyle = (
 const DroppableContainer = styled.div`
   min-height: ${ROW_OF_DATA_PROVIDERS_HEIGHT}px;
   height: auto !important;
-  display: none;
 
   .${IS_DRAGGING_CLASS_NAME} &:hover {
-    display: flex;
     background-color: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.2)} !important;
   }
 `;
@@ -404,7 +402,7 @@ const DataProvidersGroup = React.memo<DataProvidersGroup>(
         <DroppableContainer
           className={isLastGroup ? EMPTY_PROVIDERS_GROUP_CLASS_NAME : ''}
           ref={droppableProvided.innerRef}
-          style={listStyle}
+          css={listStyle}
           {...droppableProvided.droppableProps}
         >
           {GroupDataProviders}

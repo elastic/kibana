@@ -10,13 +10,10 @@ import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { EuiOutsideClickDetector } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { css } from '@emotion/css';
-
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { useEnableExperimental } from '../../../../../common/hooks/use_experimental_features';
-import { useDataViewSpec } from '../../../../../data_view_manager/hooks/use_data_view_spec';
+import { PageScope } from '../../../../../data_view_manager/constants';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import type { EqlOptions } from '../../../../../../common/search_strategy';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { EqlQueryEdit } from '../../../../../detection_engine/rule_creation/components/eql_query_edit';
 import type { FieldValueQueryBar } from '../../../../../detection_engine/rule_creation_ui/components/query_bar_field';
 
@@ -25,7 +22,6 @@ import { Form, UseField, useForm } from '../../../../../shared_imports';
 import { timelineActions } from '../../../../store';
 import { getEqlOptions } from './selectors';
 import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 
 interface TimelineEqlQueryBar {
   index: string[];
@@ -63,31 +59,9 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
   const getOptionsSelected = useMemo(() => getEqlOptions(), []);
   const eqlOptions = useDeepEqualSelector((state) => getOptionsSelected(state, timelineId));
 
-  const {
-    loading: oldIndexPatternsLoading,
-    sourcererDataView: oldSourcererDataViewSpec,
-    selectedPatterns: oldSelectedPatterns,
-  } = useSourcererDataView(SourcererScopeName.timeline);
-
-  const { newDataViewPickerEnabled } = useEnableExperimental();
-
-  const { dataViewSpec: experimentalDataViewSpec, status } = useDataViewSpec(
-    SourcererScopeName.timeline
-  );
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-
-  const indexPatternsLoading = useMemo(
-    () => (newDataViewPickerEnabled ? status !== 'ready' : oldIndexPatternsLoading),
-    [newDataViewPickerEnabled, oldIndexPatternsLoading, status]
-  );
-  const dataViewSpec: DataViewSpec = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataViewSpec),
-    [experimentalDataViewSpec, newDataViewPickerEnabled, oldSourcererDataViewSpec]
-  );
-  const selectedPatterns = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
-    [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
-  );
+  const { dataView, status } = useDataView(PageScope.timeline);
+  const selectedPatterns = useSelectedPatterns(PageScope.timeline);
+  const indexPatternsLoading = useMemo(() => status !== 'ready', [status]);
 
   const initialState = useMemo(
     () => ({
@@ -178,17 +152,12 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
     }
   }, [getFields, selectedPatterns]);
 
-  const dataView = useMemo(
-    () => ({
-      ...dataViewSpec,
-      title: dataViewSpec.title ?? '',
-      fields: Object.values(dataViewSpec.fields || {}),
-    }),
-    [dataViewSpec]
-  );
+  const dv = useMemo(() => dataView || { title: '', fields: [] }, [dataView]);
 
   /* Force casting `dataViewSpec` to `DataViewBase` is required since EqlQueryEdit
-     accepts DataViewBase but `useSourcererDataView()` returns `DataViewSpec`.
+     accepts DataViewBase but `useSourcererDataView()` returns `DataViewSpec`. Since
+     the DataView class inherits from DataViewBase, it is safe to use directly and the prioir statement is only valid
+     while sourcerer is not migrated to the new data view picker.
 
      When using `UseField` with `EqlQueryBar` such casting isn't required by TS since
      `UseField` component props are types as `Record<string, any>`. */
@@ -201,7 +170,7 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
           path="eqlQueryBar"
           eqlOptionsPath="eqlOptions"
           showEqlSizeOption
-          dataView={dataView}
+          dataView={dv}
           loading={indexPatternsLoading}
           disabled={indexPatternsLoading}
         />

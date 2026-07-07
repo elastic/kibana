@@ -9,21 +9,21 @@ import React from 'react';
 
 import classNames from 'classnames';
 
+import type { EuiIconProps, EuiTitleProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiIconProps,
   EuiSplitPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiTitleProps,
 } from '@elastic/eui';
-import { _EuiPanelDivlike } from '@elastic/eui/src/components/panel/panel';
+import type { _EuiPanelDivlike } from '@elastic/eui/src/components/panel/panel';
 
-import './data_panel.scss';
 import { LoadingOverlay } from '../loading';
+
+import * as Styles from './styles';
 
 type Props = Omit<_EuiPanelDivlike, 'title'> & {
   title: React.ReactElement; // e.g., h2 tag
@@ -50,7 +50,7 @@ export const DataPanel: React.FC<Props> = ({
   children,
   ...props // e.g., data-test-subj
 }) => {
-  const classes = classNames('dataPanel', className, {
+  const classes = classNames(className, {
     'dataPanel--filled': filled,
   });
 
@@ -58,6 +58,7 @@ export const DataPanel: React.FC<Props> = ({
     <EuiSplitPanel.Outer
       color={filled ? 'subdued' : 'plain'}
       className={classes}
+      css={Styles.dataPanel}
       hasShadow={false}
       hasBorder={!filled}
       aria-busy={isLoading}

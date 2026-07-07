@@ -9,7 +9,8 @@
 
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiLink, EuiPopover, EuiSelectable, EuiSelectableOption } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiLink, EuiPopover, EuiSelectable } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export function ChooseColumnPopover({
@@ -54,7 +55,14 @@ export function ChooseColumnPopover({
   );
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
+    <EuiPopover
+      aria-label={i18n.translate('esql.flyout.chooseColumnPopoverLabel', {
+        defaultMessage: 'Choose a column',
+      })}
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+    >
       <EuiSelectable
         aria-label={i18n.translate('esql.flyout.chooseColumnList.label', {
           defaultMessage: 'Select a column',

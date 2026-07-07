@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { ContentReference } from '../../schemas';
-import { ContentReferenceBlock, ContentReferenceId } from '../types';
+import type { BaseMessage } from '@langchain/core/messages';
+import { knowledgeBaseReference } from '.';
+import type { ContentReference, DocumentEntry } from '../../schemas';
+import type { ContentReferenceBlock, ContentReferenceId, ContentReferencesStore } from '../types';
 
 /**
  * Returns "Arid2" from "{reference(Arid2)}"
@@ -76,4 +78,42 @@ export const removeContentReferences = (content: string) => {
   }
 
   return result;
+};
+
+/**
+ * Removes content references from chat history
+ */
+export const sanitizeMessages = (messages: BaseMessage[]): BaseMessage[] => {
+  return messages.map((message) => {
+    if (!Array.isArray(message.content)) {
+      message.content = removeContentReferences(message.content).trim();
+    } else {
+      message.content = message.content.map((item) => {
+        if (item && item.type === 'text' && 'text' in item && typeof item.text === 'string') {
+          item.text = removeContentReferences(item.text).trim();
+        }
+        return item;
+      });
+    }
+    return message;
+  });
+};
+
+/**
+ * Enriches a DocumentEntry with a content reference.
+ */
+export const enrichDocument = (contentReferencesStore: ContentReferencesStore) => {
+  return (document: DocumentEntry): DocumentEntry => {
+    if (document.id == null) {
+      return document;
+    }
+    const documentId = document.id;
+    const reference = contentReferencesStore.add((p) =>
+      knowledgeBaseReference(p.id, document.name, documentId)
+    );
+    return {
+      ...document,
+      text: `${contentReferenceString(reference)}\n${document.text}`,
+    };
+  };
 };

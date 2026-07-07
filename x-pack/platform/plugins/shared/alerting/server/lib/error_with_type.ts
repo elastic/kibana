@@ -5,6 +5,7 @@
  * 2.0.
  */
 export const CLUSTER_BLOCK_EXCEPTION = 'cluster_block_exception';
+export const OUTDATED_TASK_VERSION = 'outdated_task_version';
 
 export class ErrorWithType extends Error {
   public readonly type: string;
@@ -36,4 +37,8 @@ export function isErrorWithType(error: Error | ErrorWithType): error is ErrorWit
 
 export function isClusterBlockError(err: Error) {
   return getErrorType(err) === CLUSTER_BLOCK_EXCEPTION;
+}
+
+export function isOutdatedTaskVersionError(err: Error) {
+  return getErrorType(err) === OUTDATED_TASK_VERSION;
 }

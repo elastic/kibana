@@ -9,7 +9,6 @@
 
 import typeDetect from 'type-detect';
 import type {
-  ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
   SavedObjectsRawDoc,
   SavedObjectSanitizedDoc,
@@ -18,6 +17,10 @@ import type {
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { LEGACY_URL_ALIAS_TYPE } from '../legacy_alias';
 import { decodeVersion, encodeVersion } from '../version';
+import type {
+  ISavedObjectTypeRegistryInternal,
+  SavedObjectTypeRegistry,
+} from '../saved_objects_type_registry';
 
 /**
  * Core internal implementation of {@link ISavedObjectsSerializer}
@@ -27,12 +30,12 @@ import { decodeVersion, encodeVersion } from '../version';
  * @internal
  */
 export class SavedObjectsSerializer implements ISavedObjectsSerializer {
-  private readonly registry: ISavedObjectTypeRegistry;
+  private readonly registry: ISavedObjectTypeRegistryInternal;
 
   /**
    * @internal
    */
-  constructor(registry: ISavedObjectTypeRegistry) {
+  constructor(registry: ISavedObjectTypeRegistryInternal) {
     this.registry = registry;
   }
 
@@ -127,6 +130,10 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       ...(_source.created_at && { created_at: _source.created_at }),
       ...(_source.created_by && { created_by: _source.created_by }),
       ...(version && { version }),
+      ...((this.registry as SavedObjectTypeRegistry).isAccessControlEnabled() &&
+        _source.accessControl && {
+          accessControl: _source.accessControl,
+        }),
     };
   }
 
@@ -144,7 +151,6 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       originId,
       attributes,
       migrationVersion,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       updated_at,
       updated_by: updatedBy,
       created_at: createdAt,
@@ -154,6 +160,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       coreMigrationVersion,
       typeMigrationVersion,
       managed,
+      accessControl,
     } = savedObj;
     const source = {
       [type]: attributes,
@@ -170,6 +177,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       ...(updatedBy && { updated_by: updatedBy }),
       ...(createdAt && { created_at: createdAt }),
       ...(createdBy && { created_by: createdBy }),
+      ...(accessControl && { accessControl }),
     };
     return {
       _id: this.generateRawId(namespace, type, id),

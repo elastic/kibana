@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { ErrorToastOptions } from '@kbn/core-notifications-browser';
+import type { ErrorToastOptions } from '@kbn/core-notifications-browser';
 
-import { UseLogicalAndField } from '../../../../../common/constants';
+import type { UseLogicalAndField } from '../../../../../common/constants';
 import type { MonitorListSortField } from '../../../../../common/runtime_types/monitor_management/sort_field';
-import {
+import type {
   EncryptedSyntheticsMonitor,
   FetchMonitorManagementListQueryArgs,
   SyntheticsMonitor,
 } from '../../../../../common/runtime_types';
 
-import { IHttpSerializedFetchError } from '../utils/http_error';
+import type { IHttpSerializedFetchError } from '../utils/http_error';
 
 export interface MonitorFilterState {
   query?: string;
@@ -25,8 +25,19 @@ export interface MonitorFilterState {
   schedules?: string[];
   locations?: string[];
   monitorQueryIds?: string[]; // Monitor Query IDs
+  configIds?: string[]; // Config IDs (UUIDs)
+  // Remote cluster aliases; only meaningful when CCS is enabled. The overview
+  // status route translates these into wildcard `_index` filters so we surface
+  // pings only from the selected remote clusters.
+  remoteNames?: string[];
   showFromAllSpaces?: boolean;
   useLogicalAndFor?: UseLogicalAndField[];
+  // Date-range window for the overview list, sourced from the page-level date
+  // picker so it stays in sync with the visualizations. Each monitor's status
+  // is scoped to this window; monitors with no run in the window show as
+  // `pending` rather than being removed from the list.
+  dateRangeStart?: string;
+  dateRangeEnd?: string;
 }
 
 export interface MonitorListPageState extends MonitorFilterState {

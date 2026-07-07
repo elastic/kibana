@@ -6,8 +6,8 @@
  */
 
 import { random } from 'lodash';
-import { ToolingLog } from '@kbn/tooling-log';
-import { Config, ParsedSchedule } from '../../../types';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Config, ParsedSchedule } from '../../../types';
 import { computeEventsPerCycle } from './compute_events_per_cycle';
 import { getInterval } from './get_interval';
 

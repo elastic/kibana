@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import {
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type {
   SessionViewPluginStart,
   SessionViewPluginStartDeps,
   SessionViewPluginSetup,

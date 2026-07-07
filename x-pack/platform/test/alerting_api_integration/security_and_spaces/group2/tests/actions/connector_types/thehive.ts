@@ -17,7 +17,6 @@ const secrets = {
   apiKey: 'token12345',
 };
 
-// eslint-disable-next-line import/no-default-export
 export default function theHiveTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
@@ -76,6 +75,7 @@ export default function theHiveTest({ getService }: FtrProviderContext) {
           connector_type_id: connectorTypeId,
           is_missing_secrets: false,
           config,
+          is_connector_type_deprecated: false,
         });
       });
 
@@ -100,6 +100,7 @@ export default function theHiveTest({ getService }: FtrProviderContext) {
           connector_type_id: connectorTypeId,
           is_missing_secrets: false,
           config: { ...config, organisation: 'test-organisation' },
+          is_connector_type_deprecated: false,
         });
       });
 
@@ -118,8 +119,7 @@ export default function theHiveTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [url]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at url`,
             });
           });
       });
@@ -142,7 +142,7 @@ export default function theHiveTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error validating url: target url "http://thehive.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: error validating url: target url "http://thehive.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -161,8 +161,7 @@ export default function theHiveTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type secrets: [apiKey]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type secrets: ✖ Invalid input: expected string, received undefined\n  → at apiKey`,
             });
           });
       });
@@ -198,8 +197,7 @@ export default function theHiveTest({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             status: 'error',
             connector_id: theHiveActionId,
-            message:
-              'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
+            message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subAction`,
             retry: false,
             errorSource: TaskErrorSource.USER,
           });
@@ -244,7 +242,7 @@ export default function theHiveTest({ getService }: FtrProviderContext) {
             simulator.close();
           });
 
-          it('should send a formatted JSON object', async () => {
+          it('should create a case', async () => {
             const { body } = await supertest
               .post(`/api/actions/connector/${theHiveActionId}/_execute`)
               .set('kbn-xsrf', 'foo')
@@ -284,6 +282,67 @@ export default function theHiveTest({ getService }: FtrProviderContext) {
               },
             });
           });
+
+          it('should create an alert', async () => {
+            const { body } = await supertest
+              .post(`/api/actions/connector/${theHiveActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {
+                  subAction: 'createAlert',
+                  subActionParams: {
+                    title: 'title',
+                    description: 'description',
+                    tlp: 2,
+                    source: 'source',
+                    type: 'type',
+                    sourceRef: 'sourceRef',
+                    isRuleSeverity: false,
+                    severity: 1,
+                    tags: ['tags1', 'tags2'],
+                    body: '{"observables":[{"dataType":"url","data":"http://example.com"},{"dataType":"mail","data":"foo@example.org"},{"dataType":"ip","data":"127.0.0.1"}],"procedures":[{"patternId":"T1132","occurDate":1640000000000}]}',
+                  },
+                },
+              })
+              .expect(200);
+
+            expect(simulator.requestData).to.eql({
+              title: 'title',
+              description: 'description',
+              type: 'type',
+              source: 'source',
+              sourceRef: 'sourceRef',
+              severity: 1,
+              tags: ['tags1', 'tags2'],
+              tlp: 2,
+              observables: [
+                {
+                  dataType: 'url',
+                  data: 'http://example.com',
+                },
+                {
+                  dataType: 'mail',
+                  data: 'foo@example.org',
+                },
+                {
+                  dataType: 'ip',
+                  data: '127.0.0.1',
+                },
+              ],
+              procedures: [
+                {
+                  patternId: 'T1132',
+                  occurDate: 1640000000000,
+                },
+              ],
+            });
+
+            expect(body).to.eql({
+              status: 'ok',
+              connector_id: theHiveActionId,
+              data: {},
+            });
+          });
         });
 
         describe('error response simulator', () => {
@@ -317,8 +376,7 @@ export default function theHiveTest({ getService }: FtrProviderContext) {
             expect(body).to.eql({
               status: 'error',
               connector_id: theHiveActionId,
-              message:
-                'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
+              message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subAction`,
               retry: false,
               errorSource: TaskErrorSource.USER,
             });

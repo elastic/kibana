@@ -10,11 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
 
+import type { FormSchema, FieldConfig } from '../../../shared_imports';
 import {
-  FormSchema,
   FIELD_TYPES,
   VALIDATION_TYPES,
-  FieldConfig,
   fieldFormatters,
   fieldValidators,
 } from '../../../shared_imports';
@@ -178,84 +177,6 @@ export const schemas: Record<string, FormSchema> = {
         defaultMessage: 'Version (optional)',
       }),
       formatters: [toInt],
-    },
-
-    'lifecycle.enabled': {
-      type: FIELD_TYPES.TOGGLE,
-      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.enableDataRetentionLabel', {
-        defaultMessage: 'Enable data retention',
-      }),
-      defaultValue: false,
-    },
-    'lifecycle.infiniteDataRetention': {
-      type: FIELD_TYPES.TOGGLE,
-      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.infiniteDataRetentionLabel', {
-        defaultMessage: 'Keep data indefinitely',
-      }),
-      defaultValue: false,
-    },
-    'lifecycle.value': {
-      type: FIELD_TYPES.TEXT,
-      label: i18n.translate(
-        'xpack.idxMgmt.templateForm.stepLogistics.fieldDataRetentionValueLabel',
-        {
-          defaultMessage: 'Data Retention',
-        }
-      ),
-      formatters: [toInt],
-      validations: [
-        {
-          validator: ({ value, formData }) => {
-            // If infiniteRetentionPeriod is set, we dont need to validate the data retention field
-            if (formData['lifecycle.infiniteDataRetention']) {
-              return undefined;
-            }
-
-            if (!value) {
-              return {
-                message: i18n.translate(
-                  'xpack.idxMgmt.templateForm.stepLogistics.dataRetentionFieldRequiredError',
-                  {
-                    defaultMessage: 'A data retention value is required.',
-                  }
-                ),
-              };
-            }
-
-            if (value <= 0) {
-              return {
-                message: i18n.translate(
-                  'xpack.idxMgmt.templateForm.stepLogistics.dataRetentionFieldNonNegativeError',
-                  {
-                    defaultMessage: `A positive value is required.`,
-                  }
-                ),
-              };
-            }
-
-            if (value % 1 !== 0) {
-              return {
-                message: i18n.translate(
-                  'xpack.idxMgmt.templateForm.stepLogistics.dataRetentionFieldDecimalError',
-                  {
-                    defaultMessage: `The value should be an integer number.`,
-                  }
-                ),
-              };
-            }
-          },
-        },
-      ],
-    },
-    'lifecycle.unit': {
-      type: FIELD_TYPES.TEXT,
-      label: i18n.translate(
-        'xpack.idxMgmt.templateForm.stepLogistics.fieldDataRetentionUnitLabel',
-        {
-          defaultMessage: 'Time unit',
-        }
-      ),
-      defaultValue: 'd',
     },
 
     allowAutoCreate: {

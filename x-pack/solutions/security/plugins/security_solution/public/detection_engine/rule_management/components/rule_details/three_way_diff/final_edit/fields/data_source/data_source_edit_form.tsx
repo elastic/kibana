@@ -9,10 +9,11 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { indexPatternValidatorFactory } from '../../../../../../../rule_creation_ui/validators/index_pattern_validator_factory';
 import { dataViewIdValidatorFactory } from '../../../../../../../rule_creation_ui/validators/data_view_id_validator_factory';
-import type { ValidationFunc, ERROR_CODE } from '../../../../../../../../shared_imports';
 import {
   type FormData,
   type FormSchema,
+  type ValidationFunc,
+  type ERROR_CODE,
   FIELD_TYPES,
 } from '../../../../../../../../shared_imports';
 import { DataSourceType } from '../../../../../../../../../common/api/detection_engine/prebuilt_rules';

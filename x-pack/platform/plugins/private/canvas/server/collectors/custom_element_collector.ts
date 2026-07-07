@@ -6,10 +6,10 @@
  */
 
 import { get } from 'lodash';
-import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { parseExpression } from '@kbn/expressions-plugin/common';
 import { collectFns } from './collector_helpers';
-import {
+import type {
   TelemetryCollector,
   TelemetryCustomElement,
   TelemetryCustomElementDocument,

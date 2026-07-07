@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { registerSnapshotRepositoriesHelpers } from './snapshot_repositories.helpers';
 import { CLOUD_REPOSITORY_NAME } from './constants';
 

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { CommonFields, ConfigKey, SourceType } from '../../../../common/runtime_types';
+import type { CommonFields } from '../../../../common/runtime_types';
+import { ConfigKey, SourceType } from '../../../../common/runtime_types';
+import type { FormatterFn } from './formatting_utils';
 import {
   arrayToJsonFormatter,
   stringToJsonFormatter,
-  FormatterFn,
-  secondsToCronFormatter,
+  privateTimeoutFormatter,
 } from './formatting_utils';
 
 export type Formatter = null | FormatterFn;
@@ -39,13 +40,14 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.PARAMS]: null,
   [ConfigKey.MAX_ATTEMPTS]: null,
   [ConfigKey.MAINTENANCE_WINDOWS]: null,
+  [ConfigKey.KIBANA_SPACES]: null,
   retest_on_failure: null,
   [ConfigKey.SCHEDULE]: (fields) =>
     JSON.stringify(
       `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`
     ),
   [ConfigKey.TAGS]: arrayToJsonFormatter,
-  [ConfigKey.TIMEOUT]: secondsToCronFormatter,
+  [ConfigKey.TIMEOUT]: privateTimeoutFormatter,
   // @ts-expect-error upgrade typescript v5.1.6
   [ConfigKey.MONITOR_SOURCE_TYPE]: (fields) =>
     fields[ConfigKey.MONITOR_SOURCE_TYPE] || SourceType.UI,

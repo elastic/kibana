@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { Logger } from '@kbn/logging';
+import type { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
 import {
   installEntityDefinition,
   installationInProgress,
@@ -20,22 +20,18 @@ import { uninstallEntityDefinition } from './entities/uninstall_entity_definitio
 import { EntityDefinitionNotFound } from './entities/errors/entity_not_found';
 import { stopTransforms } from './entities/stop_transforms';
 import { deleteIndices } from './entities/delete_index';
-import { EntityDefinitionWithState } from './entities/types';
+import type { EntityDefinitionWithState } from './entities/types';
 import { EntityDefinitionUpdateConflict } from './entities/errors/entity_definition_update_conflict';
-import { EntityClient as EntityClient_v2 } from './v2/entity_client';
 
 export class EntityClient {
-  public v2: EntityClient_v2;
-
   constructor(
     private options: {
       clusterClient: IScopedClusterClient;
       soClient: SavedObjectsClientContract;
+      isServerless: boolean;
       logger: Logger;
     }
-  ) {
-    this.v2 = new EntityClient_v2(options);
-  }
+  ) {}
 
   async createEntityDefinition({
     definition,
@@ -51,6 +47,7 @@ export class EntityClient {
       definition,
       esClient: this.options.clusterClient.asCurrentUser,
       soClient: this.options.soClient,
+      isServerless: this.options.isServerless,
       logger: this.options.logger,
     });
 
@@ -103,6 +100,7 @@ export class EntityClient {
       definitionUpdate,
       soClient: this.options.soClient,
       esClient: this.options.clusterClient.asCurrentUser,
+      isServerless: this.options.isServerless,
       logger: this.options.logger,
     });
 
@@ -191,5 +189,9 @@ export class EntityClient {
       definition,
       this.options.logger
     );
+  }
+
+  public isServerless(): boolean {
+    return this.options.isServerless;
   }
 }

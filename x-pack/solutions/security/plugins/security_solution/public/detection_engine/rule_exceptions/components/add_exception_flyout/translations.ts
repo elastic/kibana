@@ -11,20 +11,6 @@ export const CANCEL = i18n.translate('xpack.securitySolution.ruleExceptions.addE
   defaultMessage: 'Cancel',
 });
 
-export const CREATE_RULE_EXCEPTION = i18n.translate(
-  'xpack.securitySolution.ruleExceptions.addException.createRuleExceptionLabel',
-  {
-    defaultMessage: 'Add rule exception',
-  }
-);
-
-export const ADD_ENDPOINT_EXCEPTION = i18n.translate(
-  'xpack.securitySolution.ruleExceptions.addException.addEndpointException',
-  {
-    defaultMessage: 'Add Endpoint Exception',
-  }
-);
-
 export const SUBMIT_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.ruleExceptions.addException.submitError.title',
   {

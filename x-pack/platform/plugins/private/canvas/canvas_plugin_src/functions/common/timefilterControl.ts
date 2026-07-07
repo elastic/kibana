@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { Render } from '../../../types';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { Render } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 export interface Arguments {

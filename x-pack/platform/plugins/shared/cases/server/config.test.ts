@@ -12,6 +12,27 @@ describe('config validation', () => {
     it('sets the defaults correctly', () => {
       expect(ConfigSchema.validate({})).toMatchInlineSnapshot(`
         Object {
+          "analytics": Object {
+            "index": Object {
+              "enabled": false,
+            },
+          },
+          "analyticsV2": Object {
+            "enableAdminRoutes": false,
+            "enabled": false,
+            "reconciliationIntervalMinutes": 30,
+            "resetPageDelayMs": 0,
+            "resetTaskTimeoutMinutes": 60,
+          },
+          "attachments": Object {
+            "enabled": false,
+          },
+          "casesRedesign": Object {
+            "details": false,
+            "list": false,
+            "settings": false,
+          },
+          "enabled": true,
           "files": Object {
             "allowedMimeTypes": Array [
               "image/aces",
@@ -95,6 +116,7 @@ describe('config validation', () => {
               "text/json",
               "application/json",
               "application/zip",
+              "application/x-zip-compressed",
               "application/gzip",
               "application/x-bzip",
               "application/x-bzip2",
@@ -103,14 +125,37 @@ describe('config validation', () => {
               "application/pdf",
             ],
           },
+          "incrementalId": Object {
+            "enabled": true,
+            "taskIntervalMinutes": 10,
+            "taskStartDelayMinutes": 10,
+          },
           "markdownPlugins": Object {
             "lens": true,
           },
           "stack": Object {
             "enabled": true,
           },
+          "templates": Object {
+            "enabled": false,
+          },
         }
       `);
+    });
+
+    it('sets attachments.enabled default to false', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.attachments.enabled).toBe(false);
+    });
+
+    it('allows attachments.enabled to be set to true', () => {
+      const config = ConfigSchema.validate({ attachments: { enabled: true } });
+      expect(config.attachments.enabled).toBe(true);
+    });
+
+    it('allows attachments.enabled to be set to false explicitly', () => {
+      const config = ConfigSchema.validate({ attachments: { enabled: false } });
+      expect(config.attachments.enabled).toBe(false);
     });
   });
 });

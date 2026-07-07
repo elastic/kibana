@@ -5,20 +5,32 @@
  * 2.0.
  */
 
+import { readFileSync } from 'fs';
+
 import { i18n } from '@kbn/i18n';
 import { tryCatch, map, mapNullable, getOrElse } from 'fp-ts/Option';
 import url from 'url';
 import { curry } from 'lodash';
 import { pipe } from 'fp-ts/pipeable';
 
-import type { ActionsConfig, CustomHostSettings } from './config';
+import {
+  getSSLSettingsFromConfig,
+  type CustomHostSettings,
+  type ProxySettings,
+  type SSLSettings,
+} from '@kbn/actions-utils';
+import type { ActionsConfig } from './config';
 import { AllowedHosts, EnabledActionTypes, DEFAULT_QUEUED_MAX } from './config';
 import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
-import type { AwsSesConfig, ProxySettings, ResponseSettings, SSLSettings } from './types';
-import { getSSLSettingsFromConfig } from './lib/get_node_ssl_options';
+import type { AwsSesConfig, ResponseSettings } from './types';
 import type { ValidateEmailAddressesOptions } from '../common';
-import { validateEmailAddresses, invalidEmailsAsMessage } from '../common';
+import {
+  validateEmailAddresses,
+  invalidEmailsAsMessage,
+  DEFAULT_EMAIL_BODY_LENGTH,
+  MAX_EMAIL_BODY_LENGTH,
+} from '../common';
 export { AllowedHosts, EnabledActionTypes } from './config';
 
 enum AllowListingField {
@@ -36,6 +48,7 @@ export interface ActionsConfigurationUtilities {
   ensureUriAllowed: (uri: string) => void;
   ensureActionTypeEnabled: (actionType: string) => void;
   getSSLSettings: () => SSLSettings;
+  getEARSSSLSettings: () => SSLSettings;
   getProxySettings: () => undefined | ProxySettings;
   getResponseSettings: () => ResponseSettings;
   getCustomHostSettings: (targetUrl: string) => CustomHostSettings | undefined;
@@ -64,6 +77,10 @@ export interface ActionsConfigurationUtilities {
   };
   getAwsSesConfig: () => AwsSesConfig;
   getEnabledEmailServices: () => string[];
+  getMaxEmailBodyLength: () => number;
+  getEarsUrl: () => string | undefined;
+  isEarsEnabled: () => boolean;
+  isEarsExperimentalEnabled: () => boolean;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -177,11 +194,12 @@ function validateEmails(
   addresses: string[],
   options: ValidateEmailAddressesOptions
 ): string | undefined {
-  if (config.email?.domain_allowlist == null) {
-    return;
-  }
-
-  const validated = validateEmailAddresses(config.email.domain_allowlist, addresses, options);
+  const validated = validateEmailAddresses(
+    config.email?.domain_allowlist ?? null,
+    addresses,
+    options,
+    config.email?.recipient_allowlist ?? null
+  );
   return invalidEmailsAsMessage(validated);
 }
 
@@ -192,6 +210,7 @@ export function getActionsConfigurationUtilities(
   const isUriAllowed = curry(isHostnameAllowedInUri)(config);
   const isActionTypeEnabled = curry(isActionTypeEnabledInConfig)(config);
   const validatedEmailCurried = curry(validateEmails)(config);
+  let earsSSLSettingsCache: SSLSettings | null = null;
   return {
     isHostnameAllowed,
     isUriAllowed,
@@ -199,6 +218,28 @@ export function getActionsConfigurationUtilities(
     getProxySettings: () => getProxySettingsFromConfig(config),
     getResponseSettings: () => getResponseSettingsFromConfig(config),
     getSSLSettings: () => getSSLSettingsFromConfig(config.ssl?.verificationMode),
+    getEARSSSLSettings: () => {
+      if (earsSSLSettingsCache !== null) {
+        return earsSSLSettingsCache;
+      }
+      const readSSLFile = (filePath: string, configKey: string): Buffer => {
+        try {
+          return readFileSync(filePath);
+        } catch (err) {
+          throw new Error(
+            `EARS SSL configuration error: failed to read ${configKey} file: ${err.message}`
+          );
+        }
+      };
+      earsSSLSettingsCache = {
+        ...getSSLSettingsFromConfig(config.auth.ears?.ssl?.verificationMode),
+        cert: config.auth.ears?.ssl?.certificate
+          ? readSSLFile(config.auth.ears.ssl.certificate, 'certificate')
+          : undefined,
+        key: config.auth.ears?.ssl?.key ? readSSLFile(config.auth.ears.ssl.key, 'key') : undefined,
+      };
+      return earsSSLSettingsCache;
+    },
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {
         throw new Error(allowListErrorMessage(AllowListingField.URL, uri));
@@ -262,5 +303,13 @@ export function getActionsConfigurationUtilities(
 
       return ['*'];
     },
+    getMaxEmailBodyLength() {
+      const configuredLength = config.email?.maximum_body_length ?? DEFAULT_EMAIL_BODY_LENGTH;
+      const nonNegativeLength = Math.max(0, configuredLength);
+      return Math.min(nonNegativeLength, MAX_EMAIL_BODY_LENGTH);
+    },
+    getEarsUrl: () => config.auth.ears?.url,
+    isEarsEnabled: () => config.auth.ears?.enabled ?? false,
+    isEarsExperimentalEnabled: () => config.auth.ears?.enableExperimental ?? false,
   };
 }

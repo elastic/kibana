@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { ApmSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/synthtrace-client';
 import expect from '@kbn/expect';
 import { createEsClientForFtrConfig } from '@kbn/test';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/types';
-import { RetryService } from '@kbn/ftr-common-functional-services';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/types';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
+import { LogLevel, SynthtraceClientsManager, createLogger } from '@kbn/synthtrace';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { getBettertest } from '../../common/bettertest';
 import {
   createAgentPolicy,
@@ -21,7 +21,7 @@ import {
   deleteAgentPolicyAndPackagePolicyByName,
   setupFleet,
 } from './helpers';
-import { ApmApiClient } from '../../common/config';
+import type { ApmApiClient } from '../../common/config';
 
 export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const { getService } = ftrProviderContext;
@@ -32,7 +32,6 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const log = getService('log');
   const bettertest = getBettertest(supertest);
   const config = getService('config');
-  const synthtraceKibanaClient = getService('synthtraceKibanaClient');
   const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
   const retry = getService('retry');
 
@@ -74,16 +73,18 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
     api_key: string;
   }) {
     const esClient = createEsClientWithApiKey({ id, apiKey });
-    const kibanaVersion = await synthtraceKibanaClient.fetchLatestApmPackageVersion();
-    return new ApmSynthtraceEsClient({
+    const clientsManager = new SynthtraceClientsManager({
       client: esClient,
       logger: createLogger(LogLevel.info),
-      version: kibanaVersion,
-      refreshAfterIndex: true,
     });
+
+    const { apmEsClient } = await clientsManager.getClients({
+      clients: ['apmEsClient'],
+    });
+
+    return apmEsClient;
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177384
   registry.when('APM package policy', { config: 'basic', archives: [] }, () => {
     async function getAgentPolicyPermissions(agentPolicyId: string, packagePolicyId: string) {
       const res = await bettertest<{
@@ -119,6 +120,8 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
         await cleanAll();
 
         await setupFleet(bettertest);
+        await apmSynthtraceEsClient.initializePackage({ skipInstallation: false });
+
         agentPolicyId = await createAgentPolicy({ bettertest, name: APM_AGENT_POLICY_NAME });
         packagePolicyId = await createPackagePolicy({
           bettertest,
@@ -130,6 +133,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
       });
 
       after(async () => {
+        await apmSynthtraceEsClient.uninstallPackage();
         await cleanAll();
       });
 
@@ -163,18 +167,25 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
           await scopedSynthtraceEsClient.index(scenario.events);
         });
 
-        it('the events can be seen on the Service Inventory Page', async () => {
+        const expectedService = {
+          latency: 2550000,
+          throughput: 2,
+          transactionErrorRate: 0.5,
+        };
+
+        it('the events can be seen on the Service inventory Page', async () => {
           const apmServices = await getApmServices(
             apmApiClient,
             scenario.start,
             scenario.end,
-            retry
+            retry,
+            expectedService
           );
           expect(apmServices[0].serviceName).to.be('opbeans-java');
           expect(apmServices[0].environments?.[0]).to.be('ingested-via-fleet');
-          expect(apmServices[0].latency).to.be(2550000);
-          expect(apmServices[0].throughput).to.be(2);
-          expect(apmServices[0].transactionErrorRate).to.be(0.5);
+          expect(apmServices[0].latency).to.be(expectedService.latency);
+          expect(apmServices[0].throughput).to.be(expectedService.throughput);
+          expect(apmServices[0].transactionErrorRate).to.be(expectedService.transactionErrorRate);
         });
       });
     });
@@ -185,7 +196,8 @@ async function getApmServices(
   apmApiClient: ApmApiClient,
   start: string,
   end: string,
-  retrySvc: RetryService
+  retrySvc: RetryService,
+  expected: { latency: number; throughput: number; transactionErrorRate: number }
 ) {
   return await retrySvc.tryWithRetries(
     'getApmServices',
@@ -206,8 +218,17 @@ async function getApmServices(
         },
       });
 
-      if (res.body.items.length === 0 || !res.body.items[0].latency)
-        throw new Error(`Timed-out: No APM Services were found`);
+      const service = res.body.items[0];
+      if (
+        res.body.items.length === 0 ||
+        service?.latency !== expected.latency ||
+        service?.throughput !== expected.throughput ||
+        service?.transactionErrorRate !== expected.transactionErrorRate
+      ) {
+        throw new Error(
+          `Timed-out: APM Service data not fully indexed yet (got latency=${service?.latency}, throughput=${service?.throughput}, transactionErrorRate=${service?.transactionErrorRate})`
+        );
+      }
 
       return res.body.items;
     },

@@ -46,7 +46,7 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
       isLoading,
       isFetching,
       isRefetching,
-      isUpgradingSecurityPackages,
+      isInitializingPrebuiltRulesPackage,
       pagination,
       sortingOptions,
     },
@@ -55,7 +55,7 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
   const [selected, setSelected] = useState<RuleUpgradeState[]>([]);
 
   const rulesColumns = useUpgradePrebuiltRulesTableColumns();
-  const shouldShowProgress = isUpgradingSecurityPackages || isRefetching;
+  const shouldShowProgress = isInitializingPrebuiltRulesPackage || isRefetching;
   const handleTableChange = useCallback(
     ({ page: { index, size }, sort }: CriteriaWithPagination<RuleUpgradeState>) => {
       setPagination({

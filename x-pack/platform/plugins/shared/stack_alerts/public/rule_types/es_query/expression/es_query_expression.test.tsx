@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { fireEvent, render, waitFor, screen, act } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { of, Subject } from 'rxjs';
@@ -14,9 +15,9 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { DataPublicPluginStart, ISearchStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart, ISearchStart } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EsQueryRuleParams, SearchType } from '../types';
+import type { EsQueryRuleParams, SearchType } from '../types';
 import { EsQueryExpression } from './es_query_expression';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
@@ -51,52 +52,6 @@ jest.mock('@kbn/es-ui-shared-plugin/public', () => ({
     }),
   },
 }));
-jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
-  const original = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
-  return {
-    ...original,
-    getIndexPatterns: () => {
-      return ['index1', 'index2'];
-    },
-    getTimeFieldOptions: () => {
-      return [
-        {
-          text: '@timestamp',
-          value: '@timestamp',
-        },
-      ];
-    },
-    getFields: () => {
-      return Promise.resolve([
-        {
-          name: '@timestamp',
-          type: 'date',
-        },
-        {
-          name: 'field',
-          type: 'text',
-        },
-      ]);
-    },
-    getIndexOptions: () => {
-      return Promise.resolve([
-        {
-          label: 'indexOption',
-          options: [
-            {
-              label: 'index1',
-              value: 'index1',
-            },
-            {
-              label: 'index2',
-              value: 'index2',
-            },
-          ],
-        },
-      ]);
-    },
-  };
-});
 
 const createDataPluginMock = () => {
   const dataMock = dataPluginMock.createStartContract() as DataPublicPluginStart & {
@@ -111,7 +66,28 @@ const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
 ));
 
 const dataMock = createDataPluginMock();
-const dataViewMock = dataViewPluginMocks.createStartContract();
+const dataViewMock = {
+  ...dataViewPluginMocks.createStartContract(),
+  getFieldsForWildcard: jest.fn().mockResolvedValue([
+    {
+      name: '@timestamp',
+      type: 'date',
+      esTypes: ['date'],
+      searchable: true,
+      aggregatable: true,
+      isMapped: true,
+    },
+    {
+      name: 'field',
+      type: 'string',
+      esTypes: ['text'],
+      searchable: true,
+      aggregatable: false,
+      isMapped: true,
+    },
+  ]),
+  getIndices: jest.fn().mockResolvedValue([]),
+};
 const unifiedSearchMock = unifiedSearchPluginMock.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
 

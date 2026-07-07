@@ -10,21 +10,16 @@ import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { v4 as uuidv4 } from 'uuid';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
-import { EuiToolTip, EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
-import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
 import { droppableTimelineProvidersPrefix } from '../../../../common/components/drag_and_drop/helpers';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-
 import { Empty } from './empty';
 import { Providers } from './providers';
 import { timelineSelectors } from '../../../store';
 import { timelineDefaults } from '../../../store/defaults';
-
 import * as i18n from './translations';
 import { options } from '../search_or_filter/helpers';
 import type { KqlMode } from '../../../store/model';
@@ -56,7 +51,7 @@ const DropTargetDataProviders = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   position: relative;
-  border: 0.2rem dashed ${({ theme }) => theme.euiTheme.colors.borderBaseFormsControl};
+  border: 0.2rem dashed ${({ theme }) => theme.euiTheme.colors.borderBaseProminent};
   border-radius: 5px;
   padding: ${({ theme }) => theme.euiTheme.size.s} 0;
   margin: 0px 0 0px 0;
@@ -107,13 +102,8 @@ const CustomTooltipDiv = styled.div`
 
 export const DataProviders = React.memo<Props>(({ timelineId }) => {
   const dispatch = useDispatch();
-  const { newDataViewPickerEnabled } = useEnableExperimental();
 
-  const { browserFields: oldBrowserFields } = useSourcererDataView(SourcererScopeName.timeline);
-
-  const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
-
-  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
+  const browserFields = useBrowserFields(PageScope.timeline);
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
@@ -145,12 +135,12 @@ export const DataProviders = React.memo<Props>(({ timelineId }) => {
               <EuiToolTip
                 className="timeline-select-search-filter-tooltip"
                 content={i18n.FILTER_OR_SEARCH_WITH_KQL}
+                disableScreenReaderOutput
               >
                 <EuiSuperSelect
+                  aria-label={i18n.FILTER_OR_SEARCH_WITH_KQL}
                   className="timeline-select-search-or-filter"
                   data-test-subj="timeline-select-search-or-filter"
-                  hasDividers={true}
-                  itemLayoutAlign="top"
                   itemClassName={timelineSelectModeItemsClassName}
                   onChange={handleChange}
                   options={options}

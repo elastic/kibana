@@ -18,3 +18,30 @@ export const PREBUILT_RULES_OPERATION_CONCURRENCY = 1;
  * is expected to be requested much more often than the other prebuilt rules API endpoints.
  */
 export const PREBUILT_RULES_UPGRADE_REVIEW_CONCURRENCY = 3;
+
+/**
+ * Prebuilt rules installation review API endpoint max concurrency.
+ *
+ * The value 5 was chosen as a result of performance testing the endpoint.
+ * Related issue: https://github.com/elastic/kibana/issues/241656
+ */
+export const PREBUILT_RULES_INSTALLATION_REVIEW_CONCURRENCY = 5;
+
+/**
+ * Maximum number of prebuilt rules processed per iteration of the upgrade loop.
+ */
+export const PREBUILT_RULES_UPGRADE_BATCH_SIZE = 100;
+
+/**
+ * Max prebuilt rules fetched from ES and processed by bulk-create per install handler iteration.
+ */
+export const PREBUILT_RULES_BULK_CREATE_BATCH_SIZE = 500;
+
+/**
+ * Batch size passed to the alerting plugin's `rulesClient.bulkCreateRules`,
+ * controlling how many rules it writes to ES per underlying bulk-create call.
+ *
+ * This is independent of PREBUILT_RULES_BULK_CREATE_BATCH_SIZE, which chunks
+ * the install queue before assets are fetched and handed off here.
+ */
+export const PREBUILT_RULES_ALERTING_BULK_CREATE_BATCH_SIZE = 100;

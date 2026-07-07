@@ -52,6 +52,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.LAMBDA]}
         >
           <EuiFieldNumber
+            isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.LAMBDA] !== undefined}
             aria-label={i18n.translate('xpack.ml.dataframe.analytics.create.lambdaInputAriaLabel', {
               defaultMessage: 'A multiplier of leaf weights in loss calculations.',
             })}
@@ -87,7 +88,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
             onChange={(e) =>
               setFormState({ maxTrees: e.target.value === '' ? undefined : +e.target.value })
             }
-            isInvalid={maxTrees !== undefined && !Number.isInteger(maxTrees)}
+            isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.MAX_TREES] !== undefined}
             step={1}
             min={1}
             max={MAX_TREES_LIMIT}
@@ -108,6 +109,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.GAMMA]}
         >
           <EuiFieldNumber
+            isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.GAMMA] !== undefined}
             aria-label={i18n.translate('xpack.ml.dataframe.analytics.create.gammaInputAriaLabel', {
               defaultMessage: 'A multiplier of the tree size in loss calculations.',
             })}
@@ -133,6 +135,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.ETA]}
         >
           <EuiFieldNumber
+            isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.ETA] !== undefined}
             aria-label={i18n.translate('xpack.ml.dataframe.analytics.create.etaInputAriaLabel', {
               defaultMessage: 'The shrinkage applied to the weights.',
             })}
@@ -176,8 +179,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
               })
             }
             isInvalid={
-              featureBagFraction !== undefined &&
-              (featureBagFraction > 1 || featureBagFraction <= 0)
+              advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.FEATURE_BAG_FRACTION] !== undefined
             }
             step={0.001}
             max={1}
@@ -198,6 +200,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.ALPHA]}
         >
           <EuiFieldNumber
+            isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.ALPHA] !== undefined}
             aria-label={i18n.translate('xpack.ml.dataframe.analytics.create.alphaInputAriaLabel', {
               defaultMessage: 'A multiplier of the tree depth in loss calculations.',
             })}
@@ -224,6 +227,9 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.DOWNSAMPLE_FACTOR]}
         >
           <EuiFieldNumber
+            isInvalid={
+              advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.DOWNSAMPLE_FACTOR] !== undefined
+            }
             aria-label={i18n.translate(
               'xpack.ml.dataframe.analytics.create.downsampleFactorInputAriaLabel',
               {
@@ -259,6 +265,9 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.ETA_GROWTH_RATE_PER_TREE]}
         >
           <EuiFieldNumber
+            isInvalid={
+              advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.ETA_GROWTH_RATE_PER_TREE] !== undefined
+            }
             aria-label={i18n.translate(
               'xpack.ml.dataframe.analytics.create.etaGrowthRatePerTreeInputAriaLabel',
               {
@@ -304,6 +313,11 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
           }
         >
           <EuiFieldNumber
+            isInvalid={
+              advancedParamErrors[
+                ANALYSIS_ADVANCED_FIELDS.MAX_OPTIMIZATION_ROUNDS_PER_HYPERPARAMETER
+              ] !== undefined
+            }
             aria-label={i18n.translate(
               'xpack.ml.dataframe.analytics.create.maxOptimizationRoundsPerHyperparameterInputAriaLabel',
               {
@@ -340,6 +354,9 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.SOFT_TREE_DEPTH_LIMIT]}
         >
           <EuiFieldNumber
+            isInvalid={
+              advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.SOFT_TREE_DEPTH_LIMIT] !== undefined
+            }
             aria-label={i18n.translate(
               'xpack.ml.dataframe.analytics.create.softTreeDepthLimitInputAriaLabel',
               {
@@ -377,6 +394,9 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.SOFT_TREE_DEPTH_TOLERANCE]}
         >
           <EuiFieldNumber
+            isInvalid={
+              advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.SOFT_TREE_DEPTH_TOLERANCE] !== undefined
+            }
             aria-label={i18n.translate(
               'xpack.ml.dataframe.analytics.create.softTreeDepthToleranceInputAriaLabel',
               {

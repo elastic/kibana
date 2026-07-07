@@ -10,7 +10,6 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { Spaces } from '../../scenarios';
 
-// eslint-disable-next-line import/no-default-export
 export default function createUnsecuredActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
@@ -24,6 +23,8 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       isDeprecated: false,
       isSystemAction: false,
       referencedByCount: 0,
+      isConnectorTypeDeprecated: false,
+      authMode: 'shared',
     },
     {
       id: 'notification-email',
@@ -33,6 +34,8 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       isDeprecated: false,
       isSystemAction: false,
       referencedByCount: 0,
+      isConnectorTypeDeprecated: false,
+      authMode: 'shared',
     },
     {
       id: 'preconfigured-es-index-action',
@@ -42,6 +45,8 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       isDeprecated: false,
       isSystemAction: false,
       referencedByCount: 0,
+      isConnectorTypeDeprecated: false,
+      authMode: 'shared',
     },
     {
       id: 'my-deprecated-servicenow',
@@ -51,6 +56,8 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       isDeprecated: true,
       isSystemAction: false,
       referencedByCount: 0,
+      isConnectorTypeDeprecated: false,
+      authMode: 'shared',
     },
     {
       id: 'my-deprecated-servicenow-default',
@@ -60,6 +67,8 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       isDeprecated: true,
       isSystemAction: false,
       referencedByCount: 0,
+      isConnectorTypeDeprecated: false,
+      authMode: 'shared',
     },
     {
       id: 'my-slack1',
@@ -69,6 +78,8 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       isDeprecated: false,
       isSystemAction: false,
       referencedByCount: 0,
+      isConnectorTypeDeprecated: false,
+      authMode: 'shared',
     },
     {
       id: 'custom-system-abc-connector',
@@ -78,6 +89,8 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       isDeprecated: false,
       isSystemAction: false,
       referencedByCount: 0,
+      isConnectorTypeDeprecated: false,
+      authMode: 'shared',
     },
     {
       id: 'preconfigured.test.index-record',
@@ -87,6 +100,8 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       isDeprecated: false,
       isSystemAction: false,
       referencedByCount: 0,
+      isConnectorTypeDeprecated: false,
+      authMode: 'shared',
     },
     {
       id: 'my-test-email',
@@ -96,6 +111,8 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       isDeprecated: false,
       isSystemAction: false,
       referencedByCount: 0,
+      isConnectorTypeDeprecated: false,
+      authMode: 'shared',
     },
   ];
 
@@ -163,6 +180,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
           id: createdConnector1.id,
           isPreconfigured: false,
           isDeprecated: false,
+          isConnectorTypeDeprecated: false,
           name: 'zzz - My action1',
           actionTypeId: 'test.index-record',
           isMissingSecrets: false,
@@ -171,6 +189,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
             unencrypted: `This value shouldn't get encrypted`,
           },
           referencedByCount: 0,
+          authMode: 'shared',
         },
       ]);
 
@@ -194,6 +213,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
           id: createdConnector2.id,
           isPreconfigured: false,
           isDeprecated: false,
+          isConnectorTypeDeprecated: false,
           name: 'zzz - My action2',
           actionTypeId: 'test.index-record',
           isMissingSecrets: false,
@@ -202,6 +222,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
             unencrypted: `This value shouldn't get encrypted`,
           },
           referencedByCount: 0,
+          authMode: 'shared',
         },
       ]);
     });

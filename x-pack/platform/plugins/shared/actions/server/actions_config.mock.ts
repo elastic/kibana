@@ -9,6 +9,7 @@ import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_GRAPH_API_URL,
+  DEFAULT_EMAIL_BODY_LENGTH,
 } from '../common';
 import type { ActionsConfigurationUtilities } from './actions_config';
 
@@ -21,6 +22,9 @@ const createActionsConfigMock = () => {
     ensureUriAllowed: jest.fn().mockReturnValue({}),
     ensureActionTypeEnabled: jest.fn().mockReturnValue({}),
     getSSLSettings: jest.fn().mockReturnValue({
+      verificationMode: 'full',
+    }),
+    getEARSSSLSettings: jest.fn().mockReturnValue({
       verificationMode: 'full',
     }),
     getProxySettings: jest.fn().mockReturnValue(undefined),
@@ -45,6 +49,10 @@ const createActionsConfigMock = () => {
     }),
     getAwsSesConfig: jest.fn().mockReturnValue(null),
     getEnabledEmailServices: jest.fn().mockReturnValue(['*']),
+    getMaxEmailBodyLength: jest.fn().mockReturnValue(DEFAULT_EMAIL_BODY_LENGTH),
+    getEarsUrl: jest.fn().mockReturnValue(undefined),
+    isEarsEnabled: jest.fn().mockReturnValue(false),
+    isEarsExperimentalEnabled: jest.fn().mockReturnValue(false),
   };
   return mocked;
 };

@@ -10,7 +10,7 @@ import React, { useEffect } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { ScopedHistory } from '@kbn/core/public';
+import type { ScopedHistory } from '@kbn/core/public';
 
 import { UIM_APP_LOAD, Section } from '../../common/constants';
 import { IndexManagementHome, homeSections } from './sections/home';

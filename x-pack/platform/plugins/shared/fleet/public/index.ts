@@ -23,6 +23,20 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
 export type { NewPackagePolicy, KibanaSavedObjectType } from './types';
 export { SetupTechnology } from './types';
 export type {
+  CloudConnector,
+  CloudConnectorListOptions,
+  CreateCloudConnectorRequest,
+  CloudConnectorVars,
+  CloudProvider,
+  AccountType,
+  CloudConnectorSecretVar,
+  AwsCloudConnectorVars,
+} from './types';
+export {
+  SetupTechnologySelector,
+  SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,
+} from './services/setup_technology_selector';
+export type {
   AgentDetailsReassignPolicyAction,
   AgentPolicyDetailsDeployAgentAction,
   AnyIntraAppRouteState,
@@ -41,8 +55,9 @@ export type {
   PackagePolicyCreateExtension,
   PackagePolicyCreateExtensionComponent,
   PackagePolicyCreateExtensionComponentProps,
-  PackagePolicyCreateMultiStepExtension,
-  PackagePolicyCreateMultiStepExtensionComponent,
+  PackagePolicyCreateBottomExtension,
+  PackagePolicyCreateBottomExtensionComponent,
+  PackagePolicyCreateBottomExtensionComponentProps,
   PackagePolicyEditExtension,
   PackagePolicyEditExtensionComponent,
   PackagePolicyEditExtensionComponentProps,
@@ -57,7 +72,7 @@ export type {
   UIExtensionsStorage,
 } from './types/ui_extensions';
 
-export { pagePathGetters, EPM_API_ROUTES } from './constants';
+export { pagePathGetters, EPM_API_ROUTES, CLOUD_CONNECTOR_API_ROUTES } from './constants';
 export { pkgKeyFromPackageInfo } from './services';
 export type { CustomAssetsAccordionProps } from './components/custom_assets_accordion';
 export { CustomAssetsAccordion } from './components/custom_assets_accordion';
@@ -100,5 +115,36 @@ export const LazyPackageCard = lazy(() =>
 export { useGetDataStreams } from './hooks/use_request/data_stream';
 export { useGetPackagesQuery, useGetPackageInfoByKeyQuery } from './hooks/use_request/epm';
 export { useGetSettingsQuery } from './hooks/use_request/settings';
+export { sendCreateAgentlessPolicy } from './hooks/use_request/agentless_policy';
+export { sendGetPackageInfoByKey } from './hooks/use_request/epm';
 export { useLink } from './hooks/use_link';
 export { NamespaceComboBox } from './components/namespace_combo_box';
+
+// Cloud Connector Setup - lazy loaded component for external plugins
+export const LazyCloudConnectorSetup = lazy(() =>
+  import('./components/cloud_connector').then((module) => ({
+    default: module.CloudConnectorSetup,
+  }))
+);
+export type { CloudConnectorSetupProps } from './components/cloud_connector';
+export { CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION } from './components/cloud_connector/constants';
+
+// AWS Connect Setup - auth method picker (Identity Federation + Static keys + Temporary keys) for external plugins
+export const LazyAwsConnectSetup = lazy(() =>
+  import('./components/cloud_connector').then((module) => ({
+    default: module.AwsConnectSetup,
+  }))
+);
+export type {
+  AwsConnectSetupProps,
+  AwsAuthType,
+  AwsStaticKeyCredentials,
+  AwsTemporaryKeyCredentials,
+  CloudSetupForCloudConnector,
+} from './components/cloud_connector';
+export {
+  AWS_AUTH_TYPE_SELECTOR_TEST_SUBJ,
+  AWS_AUTH_TYPE_IF_CARD_TEST_SUBJ,
+  AWS_AUTH_TYPE_STATIC_KEYS_CARD_TEST_SUBJ,
+  AWS_AUTH_TYPE_TEMPORARY_KEYS_CARD_TEST_SUBJ,
+} from './components/cloud_connector/aws_connect_setup/test_subjects';

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { MapAttributes } from '../content_management';
+import type { StoredMapAttributes } from '../../server';
 
 export function setDefaultAutoFitToBounds({
   attributes,
 }: {
-  attributes: MapAttributes;
-}): MapAttributes {
+  attributes: StoredMapAttributes;
+}): StoredMapAttributes {
   if (!attributes || !attributes.mapStateJSON) {
     return attributes;
   }

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HttpError } from '../../../../common/types/api';
+import type { HttpError } from '../../../../common/types/api';
 import { ErrorCode } from '../../../../common/types/error_codes';
 
 export const errorToText = (error?: HttpError): string | undefined => {

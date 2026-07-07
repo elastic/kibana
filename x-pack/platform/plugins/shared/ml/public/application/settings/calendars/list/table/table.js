@@ -15,7 +15,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { GLOBAL_CALENDAR } from '../../../../../../common/constants/calendars';
 import { useCreateAndNavigateToManagementMlLink } from '../../../../contexts/kibana/use_create_url';
-import { ML_PAGES } from '../../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { MANAGEMENT_SECTION_IDS } from '../../../../management';
 
 export const CalendarsListTable = ({
@@ -150,6 +150,9 @@ export const CalendarsListTable = ({
         sorting={sorting}
         loading={loading}
         selection={tableSelection}
+        tableCaption={i18n.translate('xpack.ml.calendarsList.tableCaption', {
+          defaultMessage: 'Calendars',
+        })}
         data-test-subj={loading ? 'mlCalendarTable loading' : 'mlCalendarTable loaded'}
         rowProps={(item) => ({
           'data-test-subj': `mlCalendarListRow row-${item.calendar_id}`,

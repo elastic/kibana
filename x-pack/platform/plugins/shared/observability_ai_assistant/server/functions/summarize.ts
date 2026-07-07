@@ -7,9 +7,7 @@
 
 import { v4 } from 'uuid';
 import type { FunctionRegistrationParameters } from '.';
-import { KnowledgeBaseEntryRole } from '../../common';
-
-export const SUMMARIZE_FUNCTION_NAME = 'summarize';
+import { KnowledgeBaseEntryRole, SUMMARIZE_FUNCTION_NAME } from '../../common';
 
 export function registerSummarizationFunction({
   client,

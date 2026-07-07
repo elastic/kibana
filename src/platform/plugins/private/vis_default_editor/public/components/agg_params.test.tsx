@@ -10,15 +10,14 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { IAggConfig, AggGroupNames } from '@kbn/data-plugin/public';
+import type { IAggConfig } from '@kbn/data-plugin/public';
+import { AggGroupNames } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {
-  DefaultEditorAggParams as PureDefaultEditorAggParams,
-  DefaultEditorAggParamsProps,
-} from './agg_params';
+import type { DefaultEditorAggParamsProps } from './agg_params';
+import { DefaultEditorAggParams as PureDefaultEditorAggParams } from './agg_params';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { EditorVisState } from './sidebar/state/reducers';
+import type { EditorVisState } from './sidebar/state/reducers';
 
 const mockEditorConfig = {
   useNormalizedEsInterval: { hidden: false, fixedValue: false },

@@ -10,12 +10,10 @@ import React from 'react';
 import { act, render, renderHook, waitFor } from '@testing-library/react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useFetchIndexNames } from '../../../hooks/use_fetch_index_names';
-import {
-  UseQueryRuleFlyoutStateProps,
-  useQueryRuleFlyoutState,
-} from './use_query_rule_flyout_state';
-import { QueryRuleEditorForm, SearchQueryRulesQueryRule } from '../../../../common/types';
-import { DropResult, ResponderProvided } from '@elastic/eui';
+import type { UseQueryRuleFlyoutStateProps } from './use_query_rule_flyout_state';
+import { useQueryRuleFlyoutState } from './use_query_rule_flyout_state';
+import type { QueryRuleEditorForm, SearchQueryRulesQueryRule } from '../../../../common/types';
+import type { DropResult, ResponderProvided } from '@elastic/eui';
 
 jest.mock('../../../hooks/use_fetch_index_names', () => ({
   useFetchIndexNames: jest.fn().mockReturnValue({
@@ -49,6 +47,7 @@ const MockFormProvider = ({
       ruleId: '',
       criteria: [],
       type: 'pinned',
+      isAlways: false,
       actions: { docs: [], ids: [] },
     },
   },
@@ -502,7 +501,6 @@ describe('useQueryRuleFlyoutState hook', () => {
         );
       });
 
-      await waitFor(() => expect(mockFlyoutState.isFlyoutDirty).toBe(true));
       await waitFor(() => {
         expect(mockFlyoutState.actionIdsFields).toEqual(['id-1', 'id-2']);
       });

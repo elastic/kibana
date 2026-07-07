@@ -10,16 +10,12 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { Tooltip } from './tooltip';
-import {
-  generateSeriesId,
-  InvertedRawValueMap,
-  LayersAccessorsTitles,
-  LayersFieldFormats,
-} from '../../helpers';
-import { XYChartSeriesIdentifier } from '@elastic/charts';
-import { sampleArgs, sampleLayer } from '../../../common/__mocks__';
-import { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
-import { RawValue } from '@kbn/data-plugin/common';
+import type { InvertedRawValueMap, LayersAccessorsTitles, LayersFieldFormats } from '../../helpers';
+import { generateSeriesId } from '../../helpers';
+import type { XYChartSeriesIdentifier } from '@elastic/charts';
+import { sampleArgs, sampleLayer } from '../../../common/test_utils';
+import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
+import type { RawValue } from '@kbn/data-plugin/common';
 
 const getSeriesIdentifier = ({
   layerId,
@@ -100,7 +96,7 @@ describe('Tooltip', () => {
       splitSeriesAccessors: {
         [splitAccessors[0] as string]: {
           format: { id: 'date' },
-          formatter: { convert: (value) => `formatted-date-${value}` } as FieldFormat,
+          formatter: { convertToText: (value) => `formatted-date-${value}` } as FieldFormat,
         },
       },
       splitRowAccessors: { [splitRowAccessor]: { id: 'number' } },
@@ -110,7 +106,7 @@ describe('Tooltip', () => {
 
   const formatFactory: FormatFactory = (format) =>
     ({
-      convert: (value) => `formatted-${format?.id}-${value}`,
+      convertToText: (value) => `formatted-${format?.id}-${value}`,
     } as FieldFormat);
 
   it('should render plain tooltip', () => {

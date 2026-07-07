@@ -12,7 +12,7 @@ import {
 import { getCspAgentPolicies } from '../../lib/fleet_util';
 import { defineGetBenchmarksRoute } from './benchmarks';
 import { getRulesCountForPolicy } from './utilities';
-import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
+import type { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 import { createMockAgentPolicyService } from '@kbn/fleet-plugin/server/mocks';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 

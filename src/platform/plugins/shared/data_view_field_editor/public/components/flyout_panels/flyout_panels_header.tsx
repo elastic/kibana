@@ -8,13 +8,21 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiFlyoutHeader, EuiFlyoutHeaderProps } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { EuiFlyoutHeaderProps } from '@elastic/eui';
+import { EuiSpacer, EuiFlyoutHeader, euiTextBreakWord } from '@elastic/eui';
 
 export const PanelHeader: React.FunctionComponent<
   { children: React.ReactNode } & Omit<EuiFlyoutHeaderProps, 'children'>
 > = (props) => (
   <>
-    <EuiFlyoutHeader className="fieldEditor__flyoutPanel__header" {...props} />
+    <EuiFlyoutHeader
+      css={css`
+        padding: 0 !important;
+        ${euiTextBreakWord()}
+      `}
+      {...props}
+    />
     <EuiSpacer />
   </>
 );

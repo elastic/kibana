@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
-  EXCEPTION_LIST_NAMESPACE,
+  EXCEPTION_LIST_NAMESPACE_AWARE,
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
 } from '@kbn/securitysolution-list-constants';
 
@@ -71,7 +71,7 @@ describe('extract_exceptions_list', () => {
       {
         id: '976',
         name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_1`,
-        type: EXCEPTION_LIST_NAMESPACE,
+        type: EXCEPTION_LIST_NAMESPACE_AWARE,
       },
     ]);
   });

@@ -7,28 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { DataViewsService } from '../../../../common/data_views';
-import { RuntimeField } from '../../../../common/types';
+import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import type { DataViewsService } from '../../../../common/data_views';
+import type { RuntimeField } from '../../../../common/types';
 import { handleErrors } from '../util/handle_errors';
 import { runtimeFieldSchema } from '../../../schemas';
 import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
 } from '../../../types';
+import type { SERVICE_KEY_TYPE } from '../../../constants';
 import {
   RUNTIME_FIELD_PATH,
   RUNTIME_FIELD_PATH_LEGACY,
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
-  SERVICE_KEY_TYPE,
   INITIAL_REST_VERSION,
+  CREATE_UPDATE_RUNTIME_FIELD_SUMMARY,
   CREATE_UPDATE_RUNTIME_FIELD_DESCRIPTION,
 } from '../../../constants';
 import { responseFormatter } from './response_formatter';
-import { RuntimeResponseType } from '../../route_types';
+import type { RuntimeResponseType } from '../../route_types';
 import { runtimeResponseSchema } from '../../schema';
 
 interface PutRuntimeFieldArgs {
@@ -69,7 +70,7 @@ export const putRuntimeField = async ({
 };
 
 const putRuntimeFieldRouteFactory =
-  (path: string, serviceKey: SERVICE_KEY_TYPE, description?: string) =>
+  (path: string, serviceKey: SERVICE_KEY_TYPE, summary?: string, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -82,6 +83,7 @@ const putRuntimeFieldRouteFactory =
       .put({
         path,
         access: 'public',
+        summary,
         description,
         security: {
           authz: {
@@ -98,12 +100,14 @@ const putRuntimeFieldRouteFactory =
                 id: schema.string({
                   minLength: 1,
                   maxLength: 1_000,
+                  meta: { description: 'The unique identifier of the data view.' },
                 }),
               }),
               body: schema.object({
                 name: schema.string({
                   minLength: 1,
                   maxLength: 1_000,
+                  meta: { description: 'The name for the runtime field.' },
                 }),
                 runtimeField: runtimeFieldSchema,
               }),
@@ -154,10 +158,13 @@ const putRuntimeFieldRouteFactory =
 export const registerPutRuntimeFieldRoute = putRuntimeFieldRouteFactory(
   RUNTIME_FIELD_PATH,
   SERVICE_KEY,
+  CREATE_UPDATE_RUNTIME_FIELD_SUMMARY,
   CREATE_UPDATE_RUNTIME_FIELD_DESCRIPTION
 );
 
 export const registerPutRuntimeFieldRouteLegacy = putRuntimeFieldRouteFactory(
   RUNTIME_FIELD_PATH_LEGACY,
-  SERVICE_KEY_LEGACY
+  SERVICE_KEY_LEGACY,
+  CREATE_UPDATE_RUNTIME_FIELD_SUMMARY,
+  'Deprecated in 8.0.0. Use the data_views/data_view/{id}/runtime_field endpoint instead.'
 );

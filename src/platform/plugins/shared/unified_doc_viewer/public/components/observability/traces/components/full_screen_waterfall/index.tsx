@@ -7,33 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFocusTrap,
-  EuiOverlayMask,
-  EuiPanel,
-  EuiSpacer,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
   EuiTitle,
+  useEuiTheme,
+  useGeneratedHtmlId,
+  type EuiFlyoutProps,
 } from '@elastic/eui';
-import { SERVICE_NAME_FIELD, SPAN_ID_FIELD, TRANSACTION_ID_FIELD } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import React from 'react';
+import { useDocViewerViewedEvent } from '@kbn/unified-doc-viewer';
+import { css } from '@emotion/react';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
-import { SpanFlyout } from './span_flyout';
-import { useRootTransactionContext } from '../../doc_viewer_transaction_overview/hooks/use_root_transaction';
-import { useDataSourcesContext } from '../../hooks/use_data_sources';
-import { ExitFullScreenButton } from './exit_full_screen_button';
+import { useFlyoutHistoryKey } from '../../../../doc_viewer_flyout/flyout_history_key_context';
+import { useOriginDocType } from '../../../../doc_viewer_flyout/origin_doc_type_context';
+import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
+import { DocumentDetailFlyout } from './waterfall_flyout/document_detail_flyout';
+import { FlyoutContentId } from '../../common/constants';
+import type { TraceDocFlyoutType } from '../../common/types';
+import { TRACES_DOC_VIEWER_EBT_ELEMENTS } from '../../ebt_constants';
 
 export interface FullScreenWaterfallProps {
   traceId: string;
   rangeFrom: string;
   rangeTo: string;
   dataView: DocViewRenderProps['dataView'];
-  tracesIndexPattern: string;
-  onExitFullScreen: () => void;
+  serviceName?: string;
+  contextSpanIds?: string[];
+  scrollToContextOnMount?: boolean;
+  docId: string | null;
+  docIndex?: string;
+  activeFlyoutType: TraceDocFlyoutType | null;
+  activeSection?: TraceOverviewSections;
+  skipOpenAnimation?: boolean;
+  onNodeClick: (nodeSpanId: string) => void;
+  onErrorClick: FullTraceWaterfallOnErrorClick;
+  onCloseFlyout: EuiFlyoutProps['onClose'];
+  onExitFullScreen: EuiFlyoutProps['onClose'];
+  skipNextEventReport?: boolean;
 }
 
 export const FullScreenWaterfall = ({
@@ -41,128 +56,124 @@ export const FullScreenWaterfall = ({
   rangeFrom,
   rangeTo,
   dataView,
-  tracesIndexPattern,
+  serviceName,
+  contextSpanIds,
+  scrollToContextOnMount,
+  docId,
+  docIndex,
+  activeFlyoutType,
+  activeSection,
+  skipOpenAnimation,
+  onNodeClick,
+  onErrorClick,
+  onCloseFlyout,
   onExitFullScreen,
+  skipNextEventReport,
 }: FullScreenWaterfallProps) => {
-  const { transaction } = useRootTransactionContext();
-  const [spanId, setSpanId] = useState<string | null>(null);
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const overlayMaskRef = useRef<HTMLDivElement>(null);
-  const {
-    share: {
-      url: { locators },
-    },
-    data: {
-      query: {
-        timefilter: { timefilter },
-      },
-    },
-  } = getUnifiedDocViewerServices();
-  const { indexes } = useDataSourcesContext();
+  const historyKey = useFlyoutHistoryKey();
+  const originDocType = useOriginDocType();
+  const { analytics, discoverShared } = getUnifiedDocViewerServices();
+  const FullTraceWaterfall = discoverShared.features.registry.getById(
+    'observability-full-trace-waterfall'
+  )?.render;
+  const { euiTheme } = useEuiTheme();
 
-  const discoverLocator = useMemo(() => locators.get('DISCOVER_APP_LOCATOR'), [locators]);
+  useDocViewerViewedEvent({
+    reportEvent: analytics.reportEvent,
+    originDocType,
+    contentId: FlyoutContentId.TRACE_TIMELINE,
+    skipNextReport: skipNextEventReport,
+  });
 
-  const generateRelatedErrorsDiscoverUrl = useCallback(
-    (docId: string) => {
-      if (!discoverLocator) {
-        return null;
-      }
+  const traceWaterfallTitleId = useGeneratedHtmlId({
+    prefix: 'traceWaterfallTitle',
+  });
 
-      const url = discoverLocator.getRedirectUrl({
-        timeRange: timefilter.getAbsoluteTime(),
-        filters: [],
-        query: {
-          language: 'kuery',
-          esql: `FROM ${indexes.apm.errors},${indexes.logs} | WHERE QSTR("trace.id:${traceId} AND span.id:${docId}")`,
-        },
-      });
-
-      return url;
-    },
-    [discoverLocator, timefilter, indexes.apm.errors, indexes.logs, traceId]
+  const traceWaterfallTitle = i18n.translate(
+    'unifiedDocViewer.observability.traces.fullScreenWaterfall.title',
+    {
+      defaultMessage: 'Trace timeline',
+    }
   );
 
-  const getParentApi = useCallback(
-    () => ({
-      getSerializedStateForChild: () => ({
-        rawState: {
-          traceId,
-          rangeFrom,
-          rangeTo,
-          serviceName: transaction?.[SERVICE_NAME_FIELD],
-          entryTransactionId: transaction?.[TRANSACTION_ID_FIELD] || transaction?.[SPAN_ID_FIELD],
-          scrollElement: overlayMaskRef.current,
-          getRelatedErrorsHref: generateRelatedErrorsDiscoverUrl,
-          onNodeClick: (nodeSpanId: string) => {
-            setSpanId(nodeSpanId);
-            setIsFlyoutVisible(true);
-          },
-        },
-      }),
-    }),
-    [traceId, rangeFrom, rangeTo, transaction, generateRelatedErrorsDiscoverUrl]
-  );
+  const minWidth = euiTheme.base * 30;
+
+  if (!FullTraceWaterfall) {
+    return null;
+  }
 
   return (
-    <>
-      <EuiOverlayMask
-        maskRef={overlayMaskRef}
-        css={{ paddingBlockEnd: '0 !important', overflowY: 'scroll' }}
+    <EuiFlyout
+      data-test-subj="traceWaterfallFlyout"
+      session="start"
+      historyKey={historyKey}
+      size="m"
+      onClose={onExitFullScreen}
+      ownFocus={false}
+      aria-labelledby={traceWaterfallTitleId}
+      flyoutMenuProps={{
+        title: traceWaterfallTitle,
+      }}
+      resizable={true}
+      minWidth={minWidth}
+      hasAnimation={!skipOpenAnimation}
+    >
+      <EuiFlyoutHeader>
+        <EuiTitle size="l">
+          <h2 id={traceWaterfallTitleId}>{traceWaterfallTitle}</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody
+        css={css`
+          .euiFlyoutBody__overflow,
+          .euiFlyoutBody__overflowContent {
+            height: 100%;
+          }
+          .euiFlyoutBody__overflow {
+            overflow: hidden;
+          }
+        `}
       >
-        <EuiFocusTrap css={{ height: '100%', width: '100%' }}>
-          <EuiPanel hasShadow={false} css={{ minHeight: '100%', width: '100%' }}>
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem grow={1}>
-                <EuiTitle size="l">
-                  <h2>
-                    {i18n.translate(
-                      'unifiedDocViewer.observability.traces.fullScreenWaterfall.title',
-                      {
-                        defaultMessage: 'Trace timeline',
-                      }
-                    )}
-                  </h2>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={1} css={{ alignItems: 'end' }}>
-                <ExitFullScreenButton
-                  onExitFullScreen={onExitFullScreen}
-                  dataTestSubj="unifiedDocViewerObservabilityTracesFullScreenWaterfallExitFullScreenButton"
-                  ariaLabel={i18n.translate(
-                    'unifiedDocViewer.observability.traces.fullScreenWaterfall.exitFullScreen.button',
-                    {
-                      defaultMessage: 'Exit full screen waterfall',
-                    }
-                  )}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EmbeddableRenderer
-                  type="APM_TRACE_WATERFALL_EMBEDDABLE"
-                  getParentApi={getParentApi}
-                  hidePanelChrome
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFocusTrap>
-      </EuiOverlayMask>
-
-      {isFlyoutVisible && spanId && (
-        <EuiFocusTrap>
-          <SpanFlyout
-            tracesIndexPattern={tracesIndexPattern}
-            spanId={spanId}
-            dataView={dataView}
-            onCloseFlyout={() => {
-              setIsFlyoutVisible(false);
+        <div
+          css={css`
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+          `}
+        >
+          <FullTraceWaterfall
+            traceId={traceId}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            serviceName={serviceName}
+            contextSpanIds={contextSpanIds}
+            scrollToContextOnMount={scrollToContextOnMount}
+            scrollStrategy="parent"
+            onNodeClick={onNodeClick}
+            onErrorClick={onErrorClick}
+            ebt={{
+              row: { element: TRACES_DOC_VIEWER_EBT_ELEMENTS.WATERFALL_ROW },
+              errorBadge: { element: TRACES_DOC_VIEWER_EBT_ELEMENTS.WATERFALL_ERROR_BADGE },
+              serviceBadge: { element: TRACES_DOC_VIEWER_EBT_ELEMENTS.WATERFALL_SERVICE_BADGE },
             }}
           />
-        </EuiFocusTrap>
-      )}
-    </>
+        </div>
+      </EuiFlyoutBody>
+
+      {docId && activeFlyoutType ? (
+        <DocumentDetailFlyout
+          type={activeFlyoutType}
+          docId={docId}
+          docIndex={docIndex}
+          traceId={traceId}
+          dataView={dataView}
+          dataTestSubj="traceWaterfallDocumentFlyout"
+          hasAnimation={!skipOpenAnimation}
+          onCloseFlyout={onCloseFlyout}
+          activeSection={activeSection}
+          skipNextEventReport={skipNextEventReport}
+        />
+      ) : null}
+    </EuiFlyout>
   );
 };

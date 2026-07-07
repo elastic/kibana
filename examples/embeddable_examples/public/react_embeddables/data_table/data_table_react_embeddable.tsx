@@ -10,13 +10,13 @@
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import {
+  initializeStateApi,
   initializeTimeRangeManager,
   initializeTitleManager,
   timeRangeComparators,
@@ -24,21 +24,22 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { DataLoadingState, UnifiedDataTable, UnifiedDataTableProps } from '@kbn/unified-data-table';
+import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
+import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, merge } from 'rxjs';
-import { StartDeps } from '../../plugin';
+import type { StartDeps } from '../../plugin';
 import { DATA_TABLE_ID } from './constants';
 import { initializeDataTableQueries } from './data_table_queries';
-import { DataTableApi, DataTableSerializedState } from './types';
+import type { DataTableApi, DataTableSerializedState } from './types';
 
 export const getDataTableFactory = (
   core: CoreStart,
   services: StartDeps
-): EmbeddableFactory<DataTableSerializedState, DataTableApi> => ({
+): EmbeddablePublicDefinition<DataTableSerializedState, DataTableApi> => ({
   type: DATA_TABLE_ID,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    const state = initialState.rawState;
+    const state = initialState;
     const timeRangeManager = initializeTimeRangeManager(state);
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
     const titleManager = initializeTitleManager(state);
@@ -52,19 +53,15 @@ export const getDataTableFactory = (
       toastNotifications: core.notifications.toasts,
     };
 
-    const serializeState = () => {
-      return {
-        rawState: {
-          ...titleManager.getLatestState(),
-          ...timeRangeManager.getLatestState(),
-        },
-      };
-    };
-
-    const unsavedChangesApi = initializeUnsavedChanges<DataTableSerializedState>({
+    const stateApi = initializeStateApi<DataTableSerializedState>({
       uuid,
       parentApi,
-      serializeState,
+      serializeState: () => {
+        return {
+          ...titleManager.getLatestState(),
+          ...timeRangeManager.getLatestState(),
+        };
+      },
       anyStateChange$: merge(titleManager.anyStateChange$, timeRangeManager.anyStateChange$),
       getComparators: () => {
         return {
@@ -72,19 +69,17 @@ export const getDataTableFactory = (
           ...timeRangeComparators,
         };
       },
-      onReset: (lastSaved) => {
-        const lastSavedState = lastSaved?.rawState;
-        timeRangeManager.reinitializeState(lastSavedState);
-        titleManager.reinitializeState(lastSavedState);
+      applySerializedState: (nextState) => {
+        timeRangeManager.reinitializeState(nextState);
+        titleManager.reinitializeState(nextState);
       },
     });
 
     const api = finalizeApi({
       ...timeRangeManager.api,
       ...titleManager.api,
-      ...unsavedChangesApi,
+      ...stateApi,
       dataLoading$,
-      serializeState,
     });
 
     const queryService = await initializeDataTableQueries(services, api, dataLoading$);

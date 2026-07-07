@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { containerSnapshotMetricTypes } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsAndGroupByToolbarItems } from './metrics_and_groupby_toolbar_items';
 import type { ToolbarProps } from './types';
 
@@ -20,11 +19,5 @@ export const containerGroupByFields = [
 ];
 
 export const ContainerToolbarItems = (props: ToolbarProps) => {
-  return (
-    <MetricsAndGroupByToolbarItems
-      {...props}
-      metricTypes={containerSnapshotMetricTypes}
-      groupByFields={containerGroupByFields}
-    />
-  );
+  return <MetricsAndGroupByToolbarItems {...props} groupByFields={containerGroupByFields} />;
 };

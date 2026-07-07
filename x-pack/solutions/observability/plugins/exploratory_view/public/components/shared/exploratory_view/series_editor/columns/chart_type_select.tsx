@@ -10,9 +10,9 @@ import { EuiPopover, EuiToolTip, EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { ExploratoryViewPublicPluginsStart } from '../../../../../plugin';
-import { SeriesUrl } from '../../../../..';
-import { SeriesConfig } from '../../types';
+import type { ExploratoryViewPublicPluginsStart } from '../../../../../plugin';
+import type { SeriesUrl } from '../../../../..';
+import type { SeriesConfig } from '../../types';
 import { SeriesChartTypesSelect } from './chart_types';
 
 interface Props {
@@ -36,6 +36,9 @@ export function SeriesChartTypes({ seriesId, series, seriesConfig }: Props) {
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.exploratoryView.seriesChartTypes.popoverAriaLabel', {
+        defaultMessage: 'Edit chart type for series',
+      })}
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       button={
@@ -48,7 +51,11 @@ export function SeriesChartTypes({ seriesId, series, seriesConfig }: Props) {
             flush="both"
           >
             {icon && (
-              <EuiIcon type={(data ?? []).find(({ id }) => id === seriesType)?.icon!} size="l" />
+              <EuiIcon
+                type={(data ?? []).find(({ id }) => id === seriesType)?.icon!}
+                size="l"
+                aria-hidden={true}
+              />
             )}
           </EuiButtonEmpty>
         </EuiToolTip>

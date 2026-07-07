@@ -58,6 +58,7 @@ export function CustomSelectionTable({
   setCurrentPaginationData,
   singleSelection,
   sortableProperties,
+  'aria-label': ariaLabel,
   tableItemId = 'id',
 }) {
   const [itemIdToSelectedMap, setItemIdToSelectedMap] = useState(getCurrentlySelectedItemIdsMap());
@@ -291,6 +292,7 @@ export function CustomSelectionTable({
               )}
               {singleSelection && (
                 <EuiRadio
+                  name="jobSelection"
                   id={item[tableItemId]}
                   data-test-subj={`${item[tableItemId]}-radio-button`}
                   checked={isItemSelected(item[tableItemId])}
@@ -393,7 +395,7 @@ export function CustomSelectionTable({
           <EuiFlexItem grow={false}>{renderSelectAll(true)}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiTableHeaderMobile>
-      <EuiTable data-test-subj="mlCustomSelectionTable">
+      <EuiTable aria-label={ariaLabel} data-test-subj="mlCustomSelectionTable">
         <EuiTableHeader>{renderHeaderCells()}</EuiTableHeader>
         <EuiTableBody>{renderRows()}</EuiTableBody>
       </EuiTable>
@@ -427,4 +429,5 @@ CustomSelectionTable.propTypes = {
   singleSelection: PropTypes.bool,
   sortableProperties: PropTypes.object,
   tableItemId: PropTypes.string,
+  'aria-label': PropTypes.string,
 };

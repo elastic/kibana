@@ -7,7 +7,6 @@
 
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function backfillTests({ loadTestFile }: FtrProviderContext) {
   describe('backfill rule runs', () => {
     loadTestFile(require.resolve('./api_key'));
@@ -16,5 +15,7 @@ export default function backfillTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./delete_rule'));
+    loadTestFile(require.resolve('./public_api'));
+    loadTestFile(require.resolve('./consumer_metrics_backfill'));
   });
 }

@@ -6,8 +6,9 @@
  */
 
 import { mapValues } from 'lodash';
-import { FieldAttribute, FieldMetadataPlain, PartialFieldMetadataPlain } from '../types';
-import { FieldMetadata } from './field_metadata';
+import type { FieldAttribute, FieldMetadataPlain, PartialFieldMetadataPlain } from '../types';
+import type { FieldMetadata } from './field_metadata';
+import { createProxiedFieldsMap } from '../utils/create_proxied_fields_map';
 
 export type FieldsMetadataMap = Record<string, FieldMetadata>;
 
@@ -27,6 +28,8 @@ export class FieldsMetadataDictionary {
   }
 
   public static create(fields: FieldsMetadataMap) {
-    return new FieldsMetadataDictionary(fields);
+    // Wrap fields in a proxy to handle prefixed field lookups dynamically
+    const proxiedFields = createProxiedFieldsMap(fields);
+    return new FieldsMetadataDictionary(proxiedFields);
   }
 }

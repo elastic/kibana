@@ -18,18 +18,23 @@ export function TransactionTypeSelect({
   onChange: (transactionType: string) => void;
 }) {
   const options = transactionTypes.map((t) => ({ text: t, value: t }));
+  const transactionTypeLabel = i18n.translate(
+    'xpack.apm.alertingVisualizations.transactionType.prepend',
+    {
+      defaultMessage: 'Transaction Type',
+    }
+  );
 
   return (
     <EuiSelect
       style={{ minWidth: 160 }}
       compressed
       data-test-subj="alertingFilterTransactionType"
-      prepend={i18n.translate('xpack.apm.alertingVisualizations.transactionType.prepend', {
-        defaultMessage: 'Transaction Type',
-      })}
+      prepend={transactionTypeLabel}
       onChange={(event) => onChange(event.target.value)}
       options={options}
       value={transactionType}
+      aria-label={transactionTypeLabel}
     />
   );
 }

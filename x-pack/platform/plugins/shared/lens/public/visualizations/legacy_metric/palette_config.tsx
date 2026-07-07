@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RequiredPaletteParamTypes } from '@kbn/coloring';
+import type { RequiredPaletteParamTypes } from '@kbn/coloring';
 import { defaultPaletteParams as sharedDefaultParams } from '../../shared_components';
 
 export const DEFAULT_PALETTE_NAME = 'status';
@@ -17,5 +17,9 @@ export const defaultPaletteParams: RequiredPaletteParamTypes = {
   name: DEFAULT_PALETTE_NAME,
   continuity: 'all',
   rangeType: 'number',
+  // Named palettes carry no user-defined range. Bounds are re-derived from live data at render time.
+  // Keep them consistent with `continuity: 'all'`.
+  rangeMin: -Infinity,
+  rangeMax: Infinity,
   steps: DEFAULT_COLOR_STEPS,
 };

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter, FILTERS } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { FILTERS } from '@kbn/es-query';
 
 // Use mapSpatialFilter mapper to avoid bloated meta with value and params for spatial filters.
 export const mapSpatialFilter = (filter: Filter) => {

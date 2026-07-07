@@ -2,12 +2,9 @@
 
 exports[`table vis cell should return a cell component with data in scope 1`] = `
 <div
-  className="tbvChartCellContent"
-  dangerouslySetInnerHTML={
-    Object {
-      "__html": undefined,
-    }
-  }
+  className="tbvChartCellContent eui-textTruncate"
   data-test-subj="tbvChartCellContent"
-/>
+>
+  formatted value
+</div>
 `;

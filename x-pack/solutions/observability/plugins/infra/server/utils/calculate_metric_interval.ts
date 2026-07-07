@@ -6,10 +6,9 @@
  */
 
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-// import { KibanaFramework } from '../lib/adapters/framework/kibana_framework_adapter';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { ESSearchClient } from '@kbn/metrics-data-access-plugin/server';
 import { TIMESTAMP_FIELD } from '../../common/constants';
-import type { ESSearchClient } from '../lib/metrics/types';
 
 interface Options {
   indexPattern: string;
@@ -27,7 +26,7 @@ export const calculateMetricInterval = async (
   client: ESSearchClient,
   options: Options,
   modules?: string[],
-  nodeType?: InventoryItemType // TODO: check that this type still makes sense
+  nodeType?: InventoryItemType
 ) => {
   let from = options.timerange.from;
   if (nodeType) {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
 
 /**
  * Properties for the LegacyUrlConflict component.
@@ -61,7 +61,7 @@ export interface RedirectLegacyUrlParams {
    * This is used to determine whether or not a toast should be shown when a user is redirected from a legacy URL; if the alias was created
    * because of saved object conversion, then we will display a toast telling the user that the object has a new URL.
    */
-  aliasPurpose: ResolvedSimpleSavedObject['alias_purpose'];
+  aliasPurpose: SavedObjectsResolveResponse['alias_purpose'];
   /**
    * The string that is used to describe the object in the toast, e.g., _The **object** you're looking for has a new location_.
    * Default value is 'object'.

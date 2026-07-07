@@ -7,12 +7,12 @@
 
 import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup } from '@kbn/core/public';
+import type { Plugin, CoreSetup } from '@kbn/core/public';
 
-import { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import { PLUGIN } from '../common/constants';
 
-import { PluginDependencies } from './types';
+import type { PluginDependencies } from './types';
 import { getLinks } from './links';
 
 const checkLicenseStatus = (license: ILicense) => {

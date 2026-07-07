@@ -7,6 +7,7 @@
 
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { get } from 'lodash';
 import type { GetSummarizedAlertsParams, IAlertsClient } from '../../../alerts_client/types';
 import type {
   AlertInstanceContext,
@@ -50,11 +51,9 @@ export const getSummarizedAlerts = async <
   }
 
   /**
-   * We need to remove all new alerts with maintenance windows retrieved from
-   * getSummarizedAlerts because they might not have maintenance window IDs
-   * associated with them from maintenance windows with scoped query updated
-   * yet (the update call uses refresh: false). So we need to rely on the in
-   * memory alerts to do this.
+   * We need to remove all new alerts with maintenance windows retrieved from getSummarizedAlerts
+   * because we update the alerts with maintenance window IDs after scheduling actions.
+   * So we need to rely on the in memory alerts to do this.
    */
   const newAlertsInMemory = Object.values(alertsClient.getProcessedAlerts('new'));
 
@@ -66,7 +65,7 @@ export const getSummarizedAlerts = async <
   }, []);
 
   const newAlerts = alerts.new.data.filter((alert) => {
-    return !newAlertsWithMaintenanceWindowIds.includes(alert[ALERT_UUID]);
+    return !newAlertsWithMaintenanceWindowIds.includes(get(alert, ALERT_UUID));
   });
 
   const total = newAlerts.length + alerts.ongoing.count + alerts.recovered.count;

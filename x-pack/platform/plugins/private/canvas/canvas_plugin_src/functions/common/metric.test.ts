@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
+import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { functionWrapper, fontStyle } from '@kbn/presentation-util-plugin/test_helpers';
 import { metric } from './metric';
 

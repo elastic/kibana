@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MouseEventHandler, HTMLAttributes } from 'react';
-import { Observable } from 'rxjs';
-import { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { MouseEventHandler, HTMLAttributes } from 'react';
+import type { Observable } from 'rxjs';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
 /**
  * Abstract external services for this component.

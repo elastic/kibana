@@ -10,8 +10,10 @@
 import { i18n } from '@kbn/i18n';
 
 import { AggGroupNames } from '@kbn/data-plugin/public';
-import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
-import { TableVisParams, VIS_TYPE_TABLE } from '../common';
+import type { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import type { TableVisParams } from '../common';
+import { VIS_TYPE_TABLE } from '../common';
 import { TableOptions } from './components/table_vis_options_lazy';
 import { toExpressionAst } from './to_ast';
 
@@ -20,7 +22,7 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
   title: i18n.translate('visTypeTable.tableVisTitle', {
     defaultMessage: 'Data table',
   }),
-  icon: 'visTable',
+  icon: 'table',
   description: i18n.translate('visTypeTable.tableVisDescription', {
     defaultMessage: 'Display data in rows and columns.',
   }),

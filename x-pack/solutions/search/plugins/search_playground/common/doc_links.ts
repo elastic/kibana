@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DocLinks } from '@kbn/doc-links';
+import type { DocLinks } from '@kbn/doc-links';
 
 class PlaygroundDocLinks {
   public chatPlayground: string = '';
@@ -13,6 +13,8 @@ class PlaygroundDocLinks {
   public retrieval: string = '';
   public context: string = '';
   public hiddenFields: string = '';
+  public elasticLLMCosts: string = '';
+  public elasticLLM: string = '';
 
   constructor() {}
 
@@ -22,6 +24,8 @@ class PlaygroundDocLinks {
     this.retrieval = newDocLinks.playground.retrieval;
     this.context = newDocLinks.playground.context;
     this.hiddenFields = newDocLinks.playground.hiddenFields;
+    this.elasticLLMCosts = newDocLinks.observability.elasticManagedLlmUsageCost;
+    this.elasticLLM = newDocLinks.observability.elasticManagedLlm;
   }
 }
 

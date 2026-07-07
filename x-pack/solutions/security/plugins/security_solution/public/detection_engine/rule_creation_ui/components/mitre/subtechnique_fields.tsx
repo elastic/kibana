@@ -7,11 +7,12 @@
 
 import {
   EuiButtonIcon,
-  EuiFormRow,
-  EuiSuperSelect,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiSuperSelect,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -21,7 +22,7 @@ import * as Rulei18n from '../../../common/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
-import type { MitreSubTechnique } from '../../../../detections/mitre/types';
+import type { MitreSubTechnique } from '../../../../../common/detection_engine/mitre/types';
 
 const lazyMitreConfiguration = () => {
   /**
@@ -30,7 +31,7 @@ const lazyMitreConfiguration = () => {
    */
   return import(
     /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../detections/mitre/mitre_tactics_techniques'
+    '../../../../../common/detection_engine/mitre/mitre_tactics_techniques'
   );
 };
 
@@ -208,13 +209,15 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
                   {getSelectSubtechnique(index, isDisabled, subtechnique)}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    color="danger"
-                    iconType="trash"
-                    isDisabled={isDisabled}
-                    onClick={() => removeSubtechnique(index)}
-                    aria-label={Rulei18n.DELETE}
-                  />
+                  <EuiToolTip content={Rulei18n.DELETE} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      color="danger"
+                      iconType="trash"
+                      isDisabled={isDisabled}
+                      onClick={() => removeSubtechnique(index)}
+                      aria-label={Rulei18n.DELETE}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFormRow>

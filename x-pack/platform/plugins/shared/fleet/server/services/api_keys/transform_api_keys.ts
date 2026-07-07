@@ -9,14 +9,12 @@ import type {
   CreateRestAPIKeyParams,
   CreateRestAPIKeyWithKibanaPrivilegesParams,
 } from '@kbn/security-plugin/server';
-import { type FakeRawRequest, type Headers } from '@kbn/core-http-server';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 
 import type { Logger } from '@kbn/logging';
 
-import { appContextService } from '..';
+import type { KibanaRequest } from '@kbn/core/server';
 
-import type { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
+import { appContextService } from '..';
 
 import type {
   TransformAPIKey,
@@ -32,49 +30,33 @@ export function isTransformApiKey(arg: any): arg is TransformAPIKey {
   );
 }
 
-function createKibanaRequestFromAuth(authorizationHeader: HTTPAuthorizationHeader) {
-  const requestHeaders: Headers = {
-    authorization: authorizationHeader.toString(),
-  };
-  const fakeRawRequest: FakeRawRequest = {
-    headers: requestHeaders,
-    path: '/',
-  };
-
-  // Since we're using API keys and accessing elasticsearch can only be done
-  // via a request, we're faking one with the proper authorization headers.
-  const fakeRequest = kibanaRequestFactory(fakeRawRequest);
-
-  return fakeRequest;
-}
-
 /** This function generates a new API based on current Kibana's user request.headers.authorization
  * then formats it into a es-secondary-authorization header object
- * @param authorizationHeader:
+ * @param request: The Kibana request to extract authorization from
  * @param createParams
  */
 export async function generateTransformSecondaryAuthHeaders({
-  authorizationHeader,
+  request,
   createParams,
   logger,
   username,
   pkgName,
   pkgVersion,
 }: {
-  authorizationHeader: HTTPAuthorizationHeader | null | undefined;
+  request?: KibanaRequest;
   logger: Logger;
   createParams?: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams;
   username?: string;
   pkgName?: string;
   pkgVersion?: string;
 }): Promise<SecondaryAuthorizationHeader | undefined> {
-  if (!authorizationHeader) {
+  if (!request) {
     return;
   }
 
-  const fakeKibanaRequest = createKibanaRequestFromAuth(authorizationHeader);
-
-  const user = username ?? authorizationHeader.getUsername();
+  const user = request
+    ? appContextService.getSecurityCore().authc.getCurrentUser(request)?.username
+    : undefined;
 
   const name = pkgName
     ? `${pkgName}${pkgVersion ? '-' + pkgVersion : ''}-transform${user ? '-by-' + user : ''}`
@@ -88,7 +70,7 @@ export async function generateTransformSecondaryAuthHeaders({
 
   try {
     const apiKeyWithCurrentUserPermission = await security?.authc.apiKeys.grantAsInternalUser(
-      fakeKibanaRequest,
+      request,
       createParams ?? {
         name,
         metadata: {

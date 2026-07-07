@@ -43,13 +43,11 @@ Array [
         "name": <React.Fragment>
           <EuiToolTip
             content="triggered:0"
-            delay="regular"
-            disableScreenReaderOutput={false}
-            display="inlineBlock"
             position="top"
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>
@@ -72,13 +70,11 @@ Array [
         "name": <React.Fragment>
           <EuiToolTip
             content="triggered:0"
-            delay="regular"
-            disableScreenReaderOutput={false}
-            display="inlineBlock"
             position="top"
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>
@@ -252,13 +248,11 @@ Array [
         "name": <React.Fragment>
           <EuiToolTip
             content="triggered:0"
-            delay="regular"
-            disableScreenReaderOutput={false}
-            display="inlineBlock"
             position="top"
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>
@@ -275,13 +269,11 @@ Array [
         "name": <React.Fragment>
           <EuiToolTip
             content="triggered:0"
-            delay="regular"
-            disableScreenReaderOutput={false}
-            display="inlineBlock"
             position="top"
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>
@@ -298,13 +290,11 @@ Array [
         "name": <React.Fragment>
           <EuiToolTip
             content="triggered:0"
-            delay="regular"
-            disableScreenReaderOutput={false}
-            display="inlineBlock"
             position="top"
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>
@@ -327,13 +317,11 @@ Array [
         "name": <React.Fragment>
           <EuiToolTip
             content="triggered:0"
-            delay="regular"
-            disableScreenReaderOutput={false}
-            display="inlineBlock"
             position="top"
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>
@@ -350,13 +338,11 @@ Array [
         "name": <React.Fragment>
           <EuiToolTip
             content="triggered:0"
-            delay="regular"
-            disableScreenReaderOutput={false}
-            display="inlineBlock"
             position="top"
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>
@@ -373,13 +359,11 @@ Array [
         "name": <React.Fragment>
           <EuiToolTip
             content="triggered:0"
-            delay="regular"
-            disableScreenReaderOutput={false}
-            display="inlineBlock"
             position="top"
           >
             <EuiText
               size="s"
+              tabIndex={0}
             >
               triggered:0
             </EuiText>

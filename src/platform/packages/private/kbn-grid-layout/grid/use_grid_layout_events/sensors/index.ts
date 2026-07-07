@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UserInteractionEvent } from '../types';
+import type { UserInteractionEvent } from '../types';
 import { isKeyboardEvent, getElementPosition } from './keyboard';
 import { isMouseEvent, getMouseSensorPosition } from './mouse';
 import { isTouchEvent, getTouchSensorPosition } from './touch';

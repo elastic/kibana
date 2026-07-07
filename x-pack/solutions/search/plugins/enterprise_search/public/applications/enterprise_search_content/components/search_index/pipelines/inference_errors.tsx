@@ -9,16 +9,22 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiBasicTable, EuiBasicTableColumn, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { MlInferenceError } from '../../../../../../common/types/pipelines';
+import type { MlInferenceError } from '../../../../../../common/types/pipelines';
 import { DataPanel } from '../../../../shared/data_panel/data_panel';
 
 import { FetchMlInferenceErrorsApiLogic } from '../../../api/pipelines/fetch_ml_inference_pipeline_errors';
 
 import { InferenceErrorsLogic } from './inference_errors_logic';
+
+const inferenceErrorsTitle = i18n.translate(
+  'xpack.enterpriseSearch.content.indices.pipelines.tabs.pipelineInferenceLogs.title',
+  { defaultMessage: 'Inference errors' }
+);
 
 export const InferenceErrors: React.FC = () => {
   const { indexName, isLoading, inferenceErrors } = useValues(InferenceErrorsLogic);
@@ -59,23 +65,13 @@ export const InferenceErrors: React.FC = () => {
   return (
     <>
       <EuiSpacer />
-      <DataPanel
-        hasBorder
-        iconType="documents"
-        title={
-          <h3>
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.indices.pipelines.tabs.pipelineInferenceLogs.title',
-              { defaultMessage: 'Inference errors' }
-            )}
-          </h3>
-        }
-      >
+      <DataPanel hasBorder iconType="documents" title={<h3>{inferenceErrorsTitle}</h3>}>
         {isLoading ? (
           <EuiLoadingSpinner />
         ) : (
           <EuiBasicTable
             tableLayout="auto"
+            tableCaption={inferenceErrorsTitle}
             columns={errorsColumns}
             items={inferenceErrors}
             rowHeader="message"

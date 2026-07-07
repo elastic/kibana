@@ -9,8 +9,11 @@ import type { AuthenticatedUser, CoreSetup, KibanaRequest } from '@kbn/core/serv
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 
+import { getImportTransformsFactory } from './access_control_transforms';
 import { SavedObjectsSecurityExtension } from './saved_objects_security_extension';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
+
+export { SecurityAction } from './types';
 
 interface SetupSavedObjectsParams {
   audit: AuditServiceSetup;
@@ -36,13 +39,17 @@ export function setupSavedObjects({
       ({ request, includedHiddenTypes, extensions }) => {
         return new SavedObjectsClient(
           authz.mode.useRbacForRequest(request)
-            ? repositoryFactory.createInternalRepository(includedHiddenTypes, extensions)
+            ? repositoryFactory.createInternalRepository(
+                includedHiddenTypes,
+                extensions,
+                request.serverTiming
+              )
             : repositoryFactory.createScopedRepository(request, includedHiddenTypes, extensions)
         );
       }
   );
 
-  savedObjects.setSecurityExtension(({ request }) => {
+  savedObjects.setSecurityExtension(({ request, typeRegistry }) => {
     return authz.mode.useRbacForRequest(request)
       ? new SavedObjectsSecurityExtension({
           actions: authz.actions,
@@ -50,8 +57,13 @@ export function setupSavedObjects({
           checkPrivileges: authz.checkSavedObjectsPrivilegesWithRequest(request),
           errors: SavedObjectsClient.errors,
           getCurrentUser: () => getCurrentUser(request),
+          typeRegistry,
         })
       : undefined;
+  });
+
+  savedObjects.setAccessControlTransforms({
+    createImportTransforms: getImportTransformsFactory(),
   });
 }
 

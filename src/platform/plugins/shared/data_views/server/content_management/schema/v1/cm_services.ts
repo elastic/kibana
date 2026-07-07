@@ -31,10 +31,11 @@ const dataViewAttributesSchema = schema.object(
         schema.object({
           value: schema.string(),
           clientId: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
-        })
+        }),
+        { maxSize: 1_000 }
       )
     ),
-    fields: schema.maybe(schema.arrayOf(fieldSpecSchema)),
+    fields: schema.maybe(schema.arrayOf(fieldSpecSchema, { maxSize: 500_000 })),
     typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     fieldFormatMap: schema.maybe(schema.recordOf(schema.string(), serializedFieldFormatSchema)),
     fieldAttrs: schema.maybe(
@@ -65,6 +66,7 @@ const dataViewCreateOptionsSchema = schema.object({
   id: createOptionsSchemas.id,
   initialNamespaces: createOptionsSchemas.initialNamespaces,
   overwrite: schema.maybe(createOptionsSchemas.overwrite),
+  managed: createOptionsSchemas.managed,
 });
 
 const dataViewSearchOptionsSchema = schema.object({

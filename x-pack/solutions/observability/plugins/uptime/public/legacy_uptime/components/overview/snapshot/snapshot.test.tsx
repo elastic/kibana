@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { SnapshotComponent } from './snapshot';
-import { Snapshot } from '../../../../../common/runtime_types/snapshot';
+import type { Snapshot } from '../../../../../common/runtime_types/snapshot';
 import * as hook from './use_snap_shot';
 
 describe('Snapshot component', () => {

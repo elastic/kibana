@@ -19,6 +19,13 @@ export function IndexLifecyclePhaseSelect() {
   const { query } = useProfilingParams('/storage-explorer');
   const { indexLifecyclePhase } = query;
 
+  const indexLifecyclePhaseLabel = i18n.translate(
+    'xpack.profiling.storageExplorer.indexLifecyclePhase.label',
+    {
+      defaultMessage: 'Index lifecycle phase',
+    }
+  );
+
   const options = [
     {
       value: IndexLifecyclePhaseSelectOption.All,
@@ -97,9 +104,8 @@ export function IndexLifecyclePhaseSelect() {
 
   return (
     <EuiSuperSelect
-      prepend={i18n.translate('xpack.profiling.storageExplorer.indexLifecyclePhase.label', {
-        defaultMessage: 'Index lifecycle phase',
-      })}
+      aria-label={indexLifecyclePhaseLabel}
+      prepend={indexLifecyclePhaseLabel}
       options={options}
       valueOfSelected={indexLifecyclePhase}
       onChange={(value) => {
@@ -108,7 +114,6 @@ export function IndexLifecyclePhaseSelect() {
           query: { ...query, indexLifecyclePhase: value },
         });
       }}
-      hasDividers
       style={{ minWidth: 200 }}
     />
   );

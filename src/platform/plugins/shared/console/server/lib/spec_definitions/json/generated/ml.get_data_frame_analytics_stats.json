@@ -20,6 +20,7 @@
       "_ml/data_frame/analytics/{id}/_stats"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-data-frame-analytics-stats",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-ml-get-data-frame-analytics-stats",
     "availability": {
       "stack": true,
       "serverless": true

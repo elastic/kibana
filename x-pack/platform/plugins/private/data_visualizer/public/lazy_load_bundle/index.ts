@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import type { ResultLinks } from '../../common/app';
-import type {
-  DataDriftSpec,
-  FileDataVisualizerSpec,
-  IndexDataVisualizerSpec,
-} from '../application';
+import type { ResultLinks } from '@kbn/file-upload-common';
+import type { DataDriftSpec, IndexDataVisualizerSpec } from '../application';
 
 let loadModulesPromise: Promise<LazyLoadedModules>;
 
 interface LazyLoadedModules {
-  FileDataVisualizer: FileDataVisualizerSpec;
   IndexDataVisualizer: IndexDataVisualizerSpec;
   DataDrift: DataDriftSpec;
   resultsLinks: ResultLinks;

@@ -6,7 +6,7 @@
  */
 
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { DataStream } from '@kbn/index-management-plugin/common';
+import type { DataStream } from '@kbn/index-management-plugin/common';
 import { useContext } from 'react';
 import { keyBy } from 'lodash';
 import { getDslPolicies } from './api';
@@ -95,6 +95,7 @@ function toMissingDataStream({
       delete_index: true,
       manage_data_stream_lifecycle: true,
       read_failure_store: true,
+      manage: true,
     },
     hidden: false,
     nextGenerationManagedBy: 'Data stream lifecycle',

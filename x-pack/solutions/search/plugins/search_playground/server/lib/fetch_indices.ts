@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 function isHidden(index: IndicesIndexState): boolean {
   return index.settings?.index?.hidden === true || index.settings?.index?.hidden === 'true';

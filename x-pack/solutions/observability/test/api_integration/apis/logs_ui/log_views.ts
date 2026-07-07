@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { defaultLogViewId, LogViewAttributes } from '@kbn/logs-shared-plugin/common/log_views';
+import type { LogViewAttributes } from '@kbn/logs-shared-plugin/common/log_views';
+import { defaultLogViewId } from '@kbn/logs-shared-plugin/common/log_views';
 import {
   defaultSourceConfiguration,
   infraSourceConfigurationSavedObjectName,
@@ -14,7 +15,7 @@ import {
 } from '@kbn/infra-plugin/server/lib/sources';
 import { extractSavedObjectReferences } from '@kbn/infra-plugin/server/lib/sources/saved_object_references';
 import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const logViewsService = getService('infraLogViews');

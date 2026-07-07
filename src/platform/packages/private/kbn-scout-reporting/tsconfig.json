@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -20,6 +20,7 @@
     "@kbn/scout-info",
     "@kbn/repo-info",
     "@kbn/code-owners",
+    "@kbn/get-repo-files",
     "@kbn/repo-packages",
     "@kbn/zod",
   ]

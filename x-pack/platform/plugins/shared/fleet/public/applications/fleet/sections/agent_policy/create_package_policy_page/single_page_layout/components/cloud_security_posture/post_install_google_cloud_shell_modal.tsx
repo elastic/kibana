@@ -17,9 +17,10 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import type { AgentPolicy, PackagePolicy } from '../../../../../../types';
 import {
@@ -39,6 +40,8 @@ export const PostInstallGoogleCloudShellModal: React.FunctionComponent<{
   agentPolicy: AgentPolicy;
   packagePolicy: PackagePolicy;
 }> = ({ onConfirm, onCancel, agentPolicy, packagePolicy }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { data: apyKeysData } = useQuery(['googleCloudShellApiKeys'], () =>
     sendGetEnrollmentAPIKeys({
       page: 1,
@@ -72,9 +75,13 @@ export const PostInstallGoogleCloudShellModal: React.FunctionComponent<{
   });
 
   return (
-    <EuiModal data-test-subj="postInstallGoogleCloudShellModal" onClose={onCancel}>
+    <EuiModal
+      data-test-subj="postInstallGoogleCloudShellModal"
+      onClose={onCancel}
+      aria-labelledby={modalTitleId}
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle data-test-subj="confirmGoogleCloudShellTitleText">
+        <EuiModalHeaderTitle id={modalTitleId} data-test-subj="confirmGoogleCloudShellTitleText">
           <FormattedMessage
             id="xpack.fleet.agentPolicy.postInstallGoogleCloudShellModalTitle"
             defaultMessage="Google Cloud Shell deployment"
@@ -90,7 +97,7 @@ export const PostInstallGoogleCloudShellModal: React.FunctionComponent<{
         {error && isError && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut title={error} color="danger" iconType="error" />
+            <EuiCallOut announceOnMount title={error} color="danger" iconType="error" />
           </>
         )}
       </EuiModalBody>

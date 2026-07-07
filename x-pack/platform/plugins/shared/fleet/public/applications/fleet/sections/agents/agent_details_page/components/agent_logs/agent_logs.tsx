@@ -69,7 +69,7 @@ const AgentPolicyLogsNotEnabledCallout: React.FunctionComponent<{ agentPolicy: A
       <EuiCallOut
         size="m"
         color="primary"
-        iconType="iInCircle"
+        iconType="info"
         title={
           <FormattedMessage
             id="xpack.fleet.agentLogs.logDisabledCallOutTitle"
@@ -207,6 +207,7 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
     if (!isLogFeatureAvailable) {
       return (
         <EuiCallOut
+          announceOnMount
           size="m"
           color="warning"
           title={

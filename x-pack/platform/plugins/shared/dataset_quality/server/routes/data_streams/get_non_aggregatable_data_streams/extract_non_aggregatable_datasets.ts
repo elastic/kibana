@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Indices } from '@elastic/elasticsearch/lib/api/types';
+import type { Indices } from '@elastic/elasticsearch/lib/api/types';
 import { extractIndexNameFromBackingIndex } from '../../../../common/utils';
 
 export const extractNonAggregatableDatasets = (

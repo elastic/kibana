@@ -23,6 +23,8 @@ import {
 import { useOnExpandableFlyoutClose } from '../../flyout/shared/hooks/use_on_expandable_flyout_close';
 
 interface InventoryFlyoutProps {
+  /** Raw _source from the asset document (required for EUID extraction) */
+  entityId: string;
   entityDocId?: string;
   entityType?: string;
   entityName?: string;
@@ -37,6 +39,7 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
 
   const openDynamicFlyout = ({
     entityDocId,
+    entityId,
     entityType,
     entityName,
     scopeId,
@@ -63,17 +66,26 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
     switch (entityType) {
       case 'user':
         openFlyout({
-          right: { id: UserPanelKey, params: { userName: entityName, scopeId, contextId } },
+          right: {
+            id: UserPanelKey,
+            params: { userName: entityName, entityId, scopeId, contextId },
+          },
         });
         break;
       case 'host':
         openFlyout({
-          right: { id: HostPanelKey, params: { hostName: entityName, scopeId, contextId } },
+          right: {
+            id: HostPanelKey,
+            params: { hostName: entityName, entityId, scopeId, contextId },
+          },
         });
         break;
       case 'service':
         openFlyout({
-          right: { id: ServicePanelKey, params: { serviceName: entityName, scopeId, contextId } },
+          right: {
+            id: ServicePanelKey,
+            params: { serviceName: entityName, entityId, scopeId, contextId },
+          },
         });
         break;
 
@@ -83,8 +95,10 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
             id: GenericEntityPanelKey,
             params: {
               entityDocId,
+              entityId,
               scopeId,
               contextId,
+              isEngineMetadataExist: Boolean(entityType), // Pass whether entityType exists to avoid error state in generic flyout
             },
           },
         });

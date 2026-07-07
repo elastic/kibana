@@ -122,6 +122,27 @@ export class CoreHttpPlugin implements Plugin {
         });
       }
     );
+
+    router.get(
+      {
+        path: '/api/core_http/non_ascii_deprecated_route',
+        validate: false,
+        security: { authz: { enabled: false, reason: '' } },
+        options: {
+          access: 'public',
+          deprecated: {
+            documentationUrl: 'fake url',
+            severity: 'warning',
+            // message: 'This API is deprecated and will be removed in a future version.'
+            message: 'このAPIは非推奨です。今後のバージョンでは削除される予定です。',
+            reason: { type: 'deprecate' },
+          },
+        },
+      },
+      async (ctx, req, res) => {
+        return res.ok({ body: { result: 'Called non-ASCII deprecated route.' } });
+      }
+    );
   }
 
   public start() {}

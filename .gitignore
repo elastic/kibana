@@ -1,4 +1,7 @@
+.artifacts
+docs/**/.artifacts
 .aws-config.json
+.bk.yaml
 .signing-config.json
 .ackrc
 /.es
@@ -19,12 +22,24 @@ target
 /build
 .jruby
 .idea
+.claude/*.local.json
+.claude/worktrees/
+/.cursor/*
+!/.cursor/hooks.json
+!/.cursor/hooks/
+!x-pack/solutions/security/.cursor
+!x-pack/solutions/security/test/security_solution_cypress/.cursor/
 .windsurf
 *.iml
 *.log
 types.eslint.config.js
 types.eslint.config.cjs
 __tmp__
+.bug-fixer-session/
+.playwright-mcp/
+.exploratory-session/
+.codex/
+config_sets/bug_fixer/
 
 # Ignore example plugin builds
 /examples/*/build
@@ -37,21 +52,21 @@ __tmp__
 /src/platform/test/*/screenshots/session
 /src/platform/test/*/screenshots/visual_regression_gallery.html
 
-# Ignore the same artifacts in x-pack
-/x-pack/test/*/failure_debug
-/x-pack/test/*/screenshots/diff
-/x-pack/test/*/screenshots/failure
-/x-pack/test/*/screenshots/session
-/x-pack/test/*/screenshots/visual_regression_gallery.html
-/x-pack/test/functional/apps/*/*/reporting/reports/failure
+# Ignore the same artifacts in x-pack/platform and and x-pack/solutions/*/test
+/x-pack/**/test/*/failure_debug
+/x-pack/**/test/*/screenshots/diff
+/x-pack/**/test/*/screenshots/failure
+/x-pack/**/test/*/screenshots/session
+/x-pack/**/test/*/screenshots/visual_regression_gallery.html
+/x-pack/**/test/functional/apps/*/*/reporting/reports/failure
 
-# Ignore the same artifacts in x-pack/test_serverless
-/x-pack/test_serverless/*/failure_debug
-/x-pack/test_serverless/*/screenshots/diff
-/x-pack/test_serverless/*/screenshots/failure
-/x-pack/test_serverless/*/screenshots/session
-/x-pack/test_serverless/*/screenshots/visual_regression_gallery.html
-/x-pack/test_serverless/functional/apps/*/*/reporting/reports/failure
+# Ignore the same artifacts in x-pack/platform/test/serverless and x-pack/solutions/*/test/serverless
+/x-pack/**/test/serverless/*/failure_debug
+/x-pack/**/test/serverless/*/screenshots/diff
+/x-pack/**/test/serverless/*/screenshots/failure
+/x-pack/**/test/serverless/*/screenshots/session
+/x-pack/**/test/serverless/*/screenshots/visual_regression_gallery.html
+/x-pack/**/test/serverless/functional/test_suites/*/*/reporting/reports/failure
 
 /html_docs
 .eslintcache
@@ -64,7 +79,8 @@ webpackstats.json
 !/config/README.md
 !/config/serverless.yml
 !/config/serverless.es.yml
-!/config/serverless.chat.yml
+!/config/serverless.workplaceai.yml
+!/config/serverless.vectordb.yml
 !/config/serverless.oblt.yml
 !/config/serverless.oblt.complete.yml
 !/config/serverless.oblt.logs_essentials.yml
@@ -78,6 +94,7 @@ coverage
 selenium
 .babel_register_cache.json
 .webpack.babelcache
+.swc
 *.swp
 *.swo
 *.swn
@@ -94,6 +111,9 @@ npm-debug.log*
 .vagrant
 .envrc
 
+# @kbn/evals vault config (local-only; never commit real secrets)
+/x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json
+
 ## Snyk
 .dccache
 
@@ -108,6 +128,10 @@ x-pack/platform/plugins/shared/fleet/cypress.config.d.ts
 x-pack/platform/plugins/shared/fleet/cypress.config.js
 x-pack/platform/plugins/shared/fleet/cypress.config.space_awareness.d.ts
 x-pack/platform/plugins/shared/fleet/cypress.config.space_awareness.js
+x-pack/platform/plugins/shared/fleet/cypress_ci.config.d.ts
+x-pack/platform/plugins/shared/fleet/cypress_ci.config.js
+x-pack/platform/plugins/shared/fleet/cypress_ci.config.space_awareness.d.ts
+x-pack/platform/plugins/shared/fleet/cypress_ci.config.space_awareness.js
 x-pack/platform/plugins/shared/osquery/cypress.config.d.ts
 x-pack/platform/plugins/shared/osquery/cypress.config.js
 x-pack/solutions/search/plugins/enterprise_search/cypress.config.d.ts
@@ -131,7 +155,7 @@ report.asciidoc
 # Yarn local mirror content
 .yarn-local-mirror
 
-# Bazel
+# Bazel | TODO: Remove later
 .ijwb
 /bazel
 /bazel-*
@@ -148,7 +172,8 @@ src/platform/packages/**/package-map.json
 **/.synthetics/
 **/.journeys/
 **/.rca/
-x-pack/test/security_api_integration/plugins/audit_log/audit.log
+x-pack/platform/test/security_api_integration/plugins/audit_log/audit.log
+x-pack/test
 
 # ignore FTR temp directory
 .ftr
@@ -157,6 +182,9 @@ role_users.json
 # ignore Scout temp directory
 .scout
 
+# Playwright
+**/test-results/.last-run.json
+
 .devcontainer/.env
 
 # Ignore temporary files in oas_docs
@@ -164,13 +192,26 @@ oas_docs/output/kibana.serverless.tmp*.yaml
 oas_docs/output/kibana.tmp*.yaml
 oas_docs/output/kibana.new.yaml
 oas_docs/output/kibana.serverless.new.yaml
+oas_docs/bundle.json
+oas_docs/bundle.serverless.json
 
-# Security Solution Playwright
-x-pack/test/security_solution_playwright/test-results/
-x-pack/test/security_solution_playwright/playwright-report/
-x-pack/test/security_solution_playwright/blob-report/
-x-pack/test/security_solution_playwright/playwright/.cache/
-x-pack/test/security_solution_playwright/.auth/
-x-pack/test/security_solution_playwright/.env
 .codeql
 .dependency-graph-log.json
+
+# Ignore the one-console translations build output folder
+src/platform/plugins/shared/console/packaging/react/translations
+
+.moon/cache
+
+# Batched commits marker, e.g.: from quick checks
+.collect_commits_marker
+
+# Agent skill working output (team-auto-tests-stats markdown only — never commit)
+.cursor/tmp/
+.agents/tmp/
+
+# Parallel step internal working notes (kept locally, not committed)
+src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_gaps.md
+src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_red_flags.md
+src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_p1_scope_brief.md
+src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_nested_flow_control_tradeoff.md

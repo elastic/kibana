@@ -15,6 +15,7 @@ import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
 import {
   deleteException,
@@ -56,6 +57,7 @@ export const useListExceptionItems = ({
   });
   const [lastUpdated, setLastUpdated] = useState<null | string | number>(null);
   const [viewerStatus, setViewerStatus] = useState<ViewerStatus | ''>('');
+  const { read: canReadExceptions } = useUserPrivileges().rulesPrivileges.exceptions;
 
   const handleErrorStatus = useCallback(
     (error: Error, errorTitle?: string, errorDescription?: string) => {
@@ -70,12 +72,14 @@ export const useListExceptionItems = ({
 
   const getReferences = useCallback(async () => {
     try {
-      const result: RuleReferences = await getExceptionItemsReferences([list]);
+      const result: RuleReferences = canReadExceptions
+        ? await getExceptionItemsReferences([list])
+        : {};
       setExceptionListReferences(result);
     } catch (error) {
       handleErrorStatus(error);
     }
-  }, [handleErrorStatus, list, setExceptionListReferences]);
+  }, [canReadExceptions, handleErrorStatus, list]);
 
   const updateViewer = useCallback(
     (

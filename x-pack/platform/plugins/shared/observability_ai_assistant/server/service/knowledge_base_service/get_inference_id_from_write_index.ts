@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { MappingSemanticTextProperty } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { MappingSemanticTextProperty } from '@elastic/elasticsearch/lib/api/types';
 import { first } from 'lodash';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { resourceNames } from '..';
 
 export async function getConcreteWriteIndex(

@@ -7,29 +7,39 @@
 
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { CoreSetup, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  IUiSettingsClient,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
+import type { ServerlessProjectType } from '../../common/constants/types';
 import type { CasesClient } from '../client';
 import { getCasesConnectorAdapter, getCasesConnectorType } from './cases';
 
-export * from './types';
+export type * from './types';
 export { casesConnectors } from './factory';
 
 export function registerConnectorTypes({
   alerting,
   actions,
   core,
+  logger,
   getCasesClient,
   getSpaceId,
-  isServerlessSecurity,
+  serverlessProjectType,
+  isCasesAttachmentsEnabled,
 }: {
   actions: ActionsPluginSetupContract;
   alerting: AlertingServerSetup;
   core: CoreSetup;
+  logger: Logger;
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
   getSpaceId: (request?: KibanaRequest) => string;
-  isServerlessSecurity?: boolean;
+  serverlessProjectType?: ServerlessProjectType;
+  isCasesAttachmentsEnabled: boolean;
 }) {
   const getUnsecuredSavedObjectsClient = async (
     request: KibanaRequest,
@@ -54,14 +64,23 @@ export function registerConnectorTypes({
     return unsecuredSavedObjectsClient;
   };
 
+  const getUiSettingsClient = async (request: KibanaRequest): Promise<IUiSettingsClient> => {
+    const [coreStart] = await core.getStartServices();
+    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+
+    return coreStart.uiSettings.asScopedToClient(savedObjectsClient);
+  };
+
   actions.registerSubActionConnectorType(
     getCasesConnectorType({
       getCasesClient,
       getSpaceId,
       getUnsecuredSavedObjectsClient,
-      isServerlessSecurity,
+      getUiSettingsClient,
+      serverlessProjectType,
+      isCasesAttachmentsEnabled,
     })
   );
 
-  alerting.registerConnectorAdapter(getCasesConnectorAdapter({ isServerlessSecurity }));
+  alerting.registerConnectorAdapter(getCasesConnectorAdapter({ serverlessProjectType, logger }));
 }

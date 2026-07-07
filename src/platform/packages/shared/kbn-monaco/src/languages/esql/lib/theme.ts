@@ -8,7 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { monaco } from '../../../monaco_imports';
+import type { monaco } from '../../../monaco_imports';
 
 export const buildEsqlTheme = ({
   euiTheme,
@@ -93,6 +93,19 @@ export const buildEsqlTheme = ({
       token: 'keyword.option',
       foreground: colors.primary,
       fontStyle: 'bold',
+    },
+
+    // ------------------------------------------------------------ promql query
+    // PromQL keywords are tokenized as "type"
+    {
+      token: 'type.promql',
+      foreground: colors.primary,
+    },
+
+    // PromQl tags (same as our identifiers)
+    {
+      token: 'tag.promql',
+      foreground: colors.textParagraph,
     },
   ];
 

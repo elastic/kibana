@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SlmPolicy, SlmPolicyEs, SlmPolicyPayload } from '../types';
+import type { SlmPolicy, SlmPolicyEs, SlmPolicyPayload } from '../types';
 import {
   deserializeSnapshotConfig,
   serializeSnapshotConfig,

@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/observability-onboarding-plugin",
   "owner": [
-    "@elastic/obs-ux-logs-team"
+    "@elastic/streams-ui"
   ],
   "group": "observability",
   "visibility": "private",
@@ -23,14 +23,16 @@
       "share",
       "fleet",
       "customIntegrations",
-      "apm"
     ],
     "optionalPlugins": [
       "cloud",
-      "usageCollection"
+      "usageCollection",
+      "streams",
+      "ingestHub",
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "ingestHub"
     ],
     "extraPublicDirs": [
       "common"

@@ -1,6 +1,6 @@
 # GREATEST
 
-The GREATEST function returns the maximum value from multiple columns.
+The GREATEST function returns the maximum value from multiple columns. When used with string fields, it returns the last string in alphabetical order. For boolean columns, it returns `true` if any value is `true`.
 
 ## Syntax
 
@@ -18,17 +18,8 @@ The remaining columns to evaluate.
 
 ## Examples
 
+Finds the maximum value between columns `a` and `b` and stores it in column `g`.
 ```esql
 ROW a = 10, b = 20
 | EVAL g = GREATEST(a, b)
 ```
-
-```esql
-ROW x = "apple", y = "banana", z = "cherry"
-| EVAL max_fruit = GREATEST(x, y, z)
-```
-
-## Notes
-
-- When applied to `keyword` or `text` fields, the GREATEST function returns the last string in alphabetical order.
-- When applied to `boolean` columns, it returns `true` if any values are `true`.

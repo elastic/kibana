@@ -7,6 +7,7 @@
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import {
@@ -23,6 +24,7 @@ import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
+import { getMockRulesAuthz } from '../../__mocks__/authz';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
@@ -32,7 +34,8 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
   let detectionRulesClient: IDetectionRulesClient;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
-  let actionsClient: jest.Mocked<ActionsClient>;
+  const rulesAuthz = getMockRulesAuthz();
+  const actionsClient: jest.Mocked<ActionsClient> = {} as unknown as jest.Mocked<ActionsClient>;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
@@ -43,6 +46,7 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
       actionsClient,
       rulesClient,
       mlAuthz,
+      rulesAuthz,
       savedObjectsClient,
       license: licenseMock.createLicenseMock(),
       productFeaturesService: createProductFeaturesServiceMock(),
@@ -52,7 +56,9 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
   it('creates a rule with the correct parameters and options', async () => {
     const params = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-id' };
 
-    await detectionRulesClient.createPrebuiltRule({ params });
+    await detectionRulesClient.createPrebuiltRule({
+      params,
+    });
 
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -63,6 +69,9 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
             ruleId: params.rule_id,
             immutable: true,
           }),
+        }),
+        changeTracking: expect.objectContaining({
+          action: SecurityRuleChangeTrackingAction.ruleInstall,
         }),
       })
     );

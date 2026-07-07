@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridControlColumn,
-  EuiFlexGroup,
   RenderCellValue,
 } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 import type { RowControlColumn } from '@kbn/discover-utils';
 import { DEFAULT_CONTROL_COLUMN_WIDTH } from '../../../constants';
@@ -28,10 +28,12 @@ export const getActionsColumn = ({
   baseColumns,
   externalControlColumns,
   rowAdditionalLeadingControls,
+  visibleRowLeadingControls,
 }: {
   baseColumns: RenderCellValue[];
   rowAdditionalLeadingControls?: RowControlColumn[];
   externalControlColumns?: EuiDataGridControlColumn[];
+  visibleRowLeadingControls?: number;
 }) => {
   if (
     !baseColumns.length &&
@@ -53,14 +55,18 @@ export const getActionsColumn = ({
     columnWidth += externalControlColumns.reduce((acc, column) => acc + column.width, 0);
   }
   if (rowAdditionalLeadingControls?.length) {
-    const additionalRowControColumns = getAdditionalRowControlColumns(rowAdditionalLeadingControls);
-    actions.push(...additionalRowControColumns);
-    columnWidth += DEFAULT_CONTROL_COLUMN_WIDTH * additionalRowControColumns.length;
+    const { columns: additionalRowControlColumns, totalWidth } = getAdditionalRowControlColumns(
+      rowAdditionalLeadingControls,
+      visibleRowLeadingControls
+    );
+    actions.push(...additionalRowControlColumns);
+    columnWidth += totalWidth;
   }
 
   return {
     id: COLUMN_ID,
     width: columnWidth,
+    headerCellProps: { className: 'unifiedDataTable__headerCell' },
     rowCellRender: (props: EuiDataGridCellValueElementProps) => (
       <EuiFlexGroup
         data-test-subj="unifiedDataTable_actionsColumnCell"

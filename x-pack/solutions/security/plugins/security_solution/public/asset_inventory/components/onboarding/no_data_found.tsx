@@ -72,7 +72,7 @@ export const NoDataFound = () => {
                         <strong>
                           <FormattedMessage
                             id="xpack.securitySolution.assetInventory.initializing.exploreTitle"
-                            defaultMessage="Explore Asset Discovery Integrations"
+                            defaultMessage="Explore Asset Inventory Integrations"
                           />
                         </strong>
                       </EuiTitle>
@@ -90,7 +90,7 @@ export const NoDataFound = () => {
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     size="s"
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     href={addIntegrationPath}
                     isDisabled={isLoading}
                   >

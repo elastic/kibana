@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionGroup } from '@kbn/alerting-plugin/common';
+import type { ActionGroup } from '@kbn/alerting-plugin/common';
 
 export type MonitorStatusActionGroup =
   ActionGroup<'xpack.uptime.alerts.actionGroups.monitorStatus'>;

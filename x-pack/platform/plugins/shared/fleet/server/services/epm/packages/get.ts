@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import pMap from 'p-map';
-import minimatch from 'minimatch';
+import type { MMRegExp } from 'minimatch';
+import { minimatch } from 'minimatch';
 import type {
   ElasticsearchClient,
+  SavedObject,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
 import type { Logger } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-
+import { errors } from '@elastic/elasticsearch';
 import type { IndicesDataStream, SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import { nodeBuilder } from '@kbn/es-query';
@@ -39,11 +42,16 @@ import type {
   PackageSpecManifest,
   AssetsMap,
   PackagePolicyAssetsMap,
+  PackageKnowledgeBase,
+  RegistryPolicyIntegrationTemplate,
+  ArchiveIterator,
 } from '../../../../common/types';
+
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
   MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS,
 } from '../../../constants';
+
 import type {
   ArchivePackage,
   RegistryPackage,
@@ -57,6 +65,7 @@ import {
   PackageNotFoundError,
   RegistryResponseError,
   PackageInvalidArchiveError,
+  FleetUnauthorizedError,
 } from '../../../errors';
 import { appContextService } from '../..';
 import { dataStreamService } from '../../data_streams';
@@ -71,7 +80,13 @@ import { getFilteredSearchPackages } from '../filtered_packages';
 import { filterAssetPathForParseAndVerifyArchive } from '../archive/parse';
 import { airGappedUtils } from '../airgapped';
 
+import type {
+  PackageAssetReference,
+  RegistryPolicyTemplate,
+} from '../../../../common/types/models/epm';
+
 import { createInstallableFrom } from '.';
+import { getPackageKnowledgeBaseFromIndex } from './knowledge_base_index';
 import {
   getPackageAssetsMapCache,
   setPackageAssetsMapCache,
@@ -80,6 +95,11 @@ import {
   getAgentTemplateAssetsMapCache,
   setAgentTemplateAssetsMapCache,
 } from './cache';
+import {
+  shouldIncludePackageWithDatastreamTypes,
+  filterOutExcludedDataStreamTypes,
+  shouldIncludePolicyTemplateWithDatastreamTypes,
+} from './exclude_datastreams_helper';
 
 export { getFile } from '../registry';
 
@@ -160,7 +180,7 @@ export async function getPackages(
   ).filter((p): p is Installable<any> => p !== null);
 
   const filteredPackages = getFilteredSearchPackages();
-  const packageList = registryItems
+  let packageList = registryItems
     .map((item) =>
       createInstallableFrom(
         item,
@@ -179,6 +199,10 @@ export async function getPackages(
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   }
+
+  const excludeDataStreamTypes =
+    appContextService.getConfig()?.internal?.excludeDataStreamTypes ?? [];
+  packageList = filterOutExcludedDataStreamTypes(packageList, excludeDataStreamTypes);
 
   if (!excludeInstallStatus) {
     return packageList;
@@ -207,15 +231,28 @@ interface GetInstalledPackagesOptions {
   perPage: number;
   sortOrder: 'asc' | 'desc';
   showOnlyActiveDataStreams?: boolean;
+  dependencyPackageName?: string;
 }
 export async function getInstalledPackages(options: GetInstalledPackagesOptions) {
   const { savedObjectsClient, esClient, showOnlyActiveDataStreams, ...otherOptions } = options;
   const { dataStreamType } = otherOptions;
 
-  const [packageSavedObjects, allFleetDataStreams] = await Promise.all([
-    getInstalledPackageSavedObjects(savedObjectsClient, otherOptions),
-    showOnlyActiveDataStreams ? dataStreamService.getAllFleetDataStreams(esClient) : undefined,
-  ]);
+  const packageSavedObjects = await getInstalledPackageSavedObjects(
+    savedObjectsClient,
+    otherOptions
+  );
+
+  let allFleetDataStreams: IndicesDataStream[] | undefined;
+
+  if (showOnlyActiveDataStreams) {
+    allFleetDataStreams = await dataStreamService.getAllFleetDataStreams(esClient).catch((err) => {
+      const isResponseError = err instanceof errors.ResponseError;
+      if (isResponseError && err?.body?.error?.type === 'security_exception') {
+        throw new FleetUnauthorizedError(`Unauthorized to query fleet datastreams: ${err.message}`);
+      }
+      throw err;
+    });
+  }
 
   const integrations = packageSavedObjects.saved_objects.map((integrationSavedObject) => {
     const {
@@ -236,6 +273,7 @@ export async function getInstalledPackages(options: GetInstalledPackagesOptions)
       version,
       status: installStatus,
       dataStreams,
+      rolledBack: integrationSavedObject.attributes.rolled_back,
     };
   });
 
@@ -326,7 +364,8 @@ export async function getInstalledPackageSavedObjects(
   savedObjectsClient: SavedObjectsClientContract,
   options: Omit<GetInstalledPackagesOptions, 'savedObjectsClient' | 'esClient'>
 ) {
-  const { searchAfter, sortOrder, perPage, nameQuery, dataStreamType } = options;
+  const { searchAfter, sortOrder, perPage, nameQuery, dataStreamType, dependencyPackageName } =
+    options;
 
   const result = await savedObjectsClient.find<Installation>({
     type: PACKAGES_SAVED_OBJECT_TYPE,
@@ -345,6 +384,15 @@ export async function getInstalledPackageSavedObjects(
         `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status`,
         installationStatuses.Installed
       ),
+      ...(dependencyPackageName
+        ? [
+            buildFunctionNode(
+              'nested',
+              `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.dependencies`,
+              nodeBuilder.is('name', dependencyPackageName)
+            ),
+          ]
+        : []),
       ...(dataStreamType
         ? [
             // Filter for a "queryable" marker
@@ -395,7 +443,7 @@ export async function getInstalledPackageManifests(
 
   const parsedManifests = result.saved_objects.reduce<Map<string, PackageSpecManifest>>(
     (acc, asset) => {
-      acc.set(asset.attributes.asset_path, load(asset.attributes.data_utf8));
+      acc.set(asset.attributes.asset_path, parse(asset.attributes.data_utf8));
       return acc;
     },
     new Map()
@@ -437,7 +485,7 @@ function getInstalledPackageSavedObjectDataStreams(
         const patternRegex = new minimatch.Minimatch(stream.name, {
           noglobstar: true,
           nonegate: true,
-        }).makeRe();
+        }).makeRe() as MMRegExp;
 
         return filterActiveDatastreamsName.some((dataStreamName) =>
           dataStreamName.match(patternRegex)
@@ -513,7 +561,6 @@ export async function getPackageInfo({
     }));
   }
 
-  // add properties that aren't (or aren't yet) on the package
   const additions: EpmPackageAdditions = {
     latestVersion:
       latestPackage?.version && semverGte(latestPackage.version, resolvedPkgVersion)
@@ -525,12 +572,78 @@ export async function getPackageInfo({
     licensePath: Registry.getLicensePath(paths || []),
     keepPoliciesUpToDate: savedObject?.attributes.keep_policies_up_to_date ?? false,
   };
-  const updated = { ...packageInfo, ...additions };
+
+  const { filteredDataStreams, filteredPolicyTemplates } =
+    getFilteredDataStreamsAndPolicyTemplates(packageInfo);
+
+  const excludeDataStreamTypes =
+    appContextService.getConfig()?.internal?.excludeDataStreamTypes ?? [];
+
+  if (
+    !savedObject &&
+    !shouldIncludePackageWithDatastreamTypes(packageInfo, excludeDataStreamTypes)
+  ) {
+    throw new PackageNotFoundError(
+      'Package is not compatible with the current project data stream types'
+    );
+  }
+
+  const updated = {
+    ...packageInfo,
+    ...additions,
+    data_streams: filteredDataStreams,
+    policy_templates: filteredPolicyTemplates,
+  };
 
   const installable = createInstallableFrom(updated, savedObject);
   setPackageInfoCache(pkgName, pkgVersion, installable);
 
   return installable;
+}
+
+function getFilteredDataStreamsAndPolicyTemplates(packageInfo: ArchivePackage | RegistryPackage) {
+  const excludeDataStreamTypes =
+    appContextService.getConfig()?.internal?.excludeDataStreamTypes ?? [];
+  let filteredDataStreams = packageInfo.data_streams;
+  let filteredPolicyTemplates = packageInfo.policy_templates;
+
+  if (excludeDataStreamTypes.length > 0) {
+    filteredDataStreams = packageInfo.data_streams?.filter(
+      (dataStream) => !excludeDataStreamTypes.includes(dataStream.type)
+    );
+    // filter out matching types e.g. nginx/metrics
+    filteredPolicyTemplates = packageInfo.policy_templates?.reduce(
+      (acc: RegistryPolicyTemplate[], policyTemplate: RegistryPolicyTemplate) => {
+        const policyTemplateIntegrationTemplate =
+          policyTemplate as RegistryPolicyIntegrationTemplate;
+
+        const shouldIncludePolicyTemplate = shouldIncludePolicyTemplateWithDatastreamTypes(
+          packageInfo,
+          policyTemplate,
+          excludeDataStreamTypes
+        );
+        if (!shouldIncludePolicyTemplate) {
+          return acc;
+        }
+
+        if (policyTemplateIntegrationTemplate.inputs) {
+          const filteredInputs = policyTemplateIntegrationTemplate.inputs.filter((input: any) => {
+            const shouldInclude = !excludeDataStreamTypes.some((excludedType) =>
+              input.type.includes(excludedType)
+            );
+            return shouldInclude;
+          });
+          acc.push({ ...policyTemplate, inputs: filteredInputs ?? [] });
+        } else {
+          acc.push(policyTemplate);
+        }
+        return acc;
+      },
+      []
+    );
+  }
+
+  return { filteredDataStreams, filteredPolicyTemplates };
 }
 
 export const getPackageUsageStats = async ({
@@ -544,48 +657,67 @@ export const getPackageUsageStats = async ({
 
   const filter = normalizeKuery(
     packagePolicySavedObjectType,
-    `${packagePolicySavedObjectType}.package.name: ${pkgName}`
+    `${packagePolicySavedObjectType}.package.name: ${pkgName} AND NOT ${packagePolicySavedObjectType}.latest_revision: false`
   );
   const agentPolicyCount = new Set<string>();
-  let page = 1;
-  let hasMore = true;
+  // using saved Objects client directly, instead of the `list()` method of `package_policy` service
+  // in order to not cause a circular dependency (package policy service imports from this module)
+  const packagePolicies = await savedObjectsClient.find<
+    Pick<PackagePolicySOAttributes, 'name' | 'policy_ids'>
+  >({
+    type: packagePolicySavedObjectType,
+    fields: ['name', 'policy_ids'],
+    perPage: SO_SEARCH_LIMIT,
+    filter,
+  });
 
-  while (hasMore) {
-    // using saved Objects client directly, instead of the `list()` method of `package_policy` service
-    // in order to not cause a circular dependency (package policy service imports from this module)
-    const packagePolicies = await savedObjectsClient.find<PackagePolicySOAttributes>({
-      type: packagePolicySavedObjectType,
-      perPage: 1000,
-      page: page++,
-      filter,
+  for (const packagePolicy of packagePolicies.saved_objects) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'find',
+      id: packagePolicy.id,
+      name: packagePolicy.attributes.name,
+      savedObjectType: packagePolicySavedObjectType,
     });
+  }
 
-    for (const packagePolicy of packagePolicies.saved_objects) {
-      auditLoggingService.writeCustomSoAuditLog({
-        action: 'find',
-        id: packagePolicy.id,
-        name: packagePolicy.attributes.name,
-        savedObjectType: packagePolicySavedObjectType,
-      });
-    }
-
-    for (let index = 0, total = packagePolicies.saved_objects.length; index < total; index++) {
-      packagePolicies.saved_objects[index].attributes.policy_ids.forEach((policyId) =>
-        agentPolicyCount.add(policyId)
-      );
-    }
-
-    hasMore = packagePolicies.saved_objects.length > 0;
+  for (const packagePolicy of packagePolicies.saved_objects) {
+    packagePolicy.attributes.policy_ids.forEach((policyId) => agentPolicyCount.add(policyId));
   }
 
   return {
+    package_policy_count: packagePolicies.saved_objects.length,
     agent_policy_count: agentPolicyCount.size,
   };
 };
 
-interface PackageResponse {
+export async function getPackageDependencies(
+  pkgName: string,
+  pkgVersion: string
+): Promise<Array<{ name: string; version: string; title: string }>> {
+  const pkg = await Registry.fetchInfo(pkgName, pkgVersion).catch(() => undefined);
+  if (!pkg) {
+    throw new PackageNotFoundError(`[${pkgName}-${pkgVersion}] package not found in registry`);
+  }
+
+  const deps = pkg.requires?.content ?? [];
+
+  return Promise.all(
+    deps.map(async (dep) => {
+      const depPkg = await Registry.fetchFindLatestPackageOrUndefined(dep.package);
+      return {
+        name: dep.package,
+        version: dep.version,
+        title: depPkg && 'title' in depPkg ? depPkg.title : dep.package,
+      };
+    })
+  );
+}
+
+export interface PackageResponse {
   paths: string[];
   packageInfo: ArchivePackage | RegistryPackage;
+  assetsMap?: AssetsMap;
+  archiveIterator?: ArchiveIterator;
 }
 type GetPackageResponse = PackageResponse | undefined;
 
@@ -641,6 +773,10 @@ export async function getPackageFromSource(options: {
         // in the unlikely event its missing from cache, storage, and never installed from registry
       }
     }
+    if (!res && pkgInstallSource === 'bundled') {
+      res = await Registry.getBundledArchive(pkgName, pkgVersion);
+      logger.debug(`retrieved bundled package ${pkgName}-${pkgVersion} from bundled archive`);
+    }
   } else {
     try {
       res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
@@ -660,6 +796,8 @@ export async function getPackageFromSource(options: {
   return {
     paths: res.paths,
     packageInfo: res.packageInfo,
+    assetsMap: res.assetsMap,
+    archiveIterator: res.archiveIterator,
   };
 }
 
@@ -699,7 +837,9 @@ async function getInstallationObjects(options: {
     pkgNames.map((pkgName) => ({ id: pkgName, type: PACKAGES_SAVED_OBJECT_TYPE }))
   );
 
-  const installations = res.saved_objects.filter((so) => so?.attributes);
+  const installations = res.saved_objects.filter(
+    (so): so is SavedObject<Installation> => !isSavedObjectErrorResult(so)
+  );
 
   for (const installation of installations) {
     auditLoggingService.writeCustomSoAuditLog({
@@ -736,18 +876,20 @@ export async function getInstalledPackageWithAssets(options: {
   if (!installation) {
     return;
   }
-  const assetsReference =
-    (typeof options.assetsFilter !== 'undefined'
-      ? installation.package_assets?.filter(({ path }) =>
-          typeof path !== 'undefined' ? options.assetsFilter!(path) : true
-        )
-      : installation.package_assets) ?? [];
 
   const esPackage = await getEsPackage(
     installation.name,
     installation.version,
-    assetsReference,
-    options.savedObjectsClient
+    installation.package_assets ?? [],
+    options.savedObjectsClient,
+    {
+      shouldFetchBuffer: (reference: PackageAssetReference) => {
+        if (typeof options.assetsFilter === 'undefined' || typeof reference.path === 'undefined') {
+          return true;
+        }
+        return options.assetsFilter(reference.path);
+      },
+    }
   );
 
   if (!esPackage) {
@@ -874,5 +1016,42 @@ export async function getAgentTemplateAssetsMap({
   } catch (error) {
     logger.warn(`getAgentTemplateAssetsMap error: ${error}`);
     throw error;
+  }
+}
+
+/**
+ * Get knowledge base content for a package
+ * @param options Object with esClient and package name
+ * @returns The knowledge base content or undefined if not found
+ */
+export async function getPackageKnowledgeBase(options: {
+  esClient: ElasticsearchClient;
+  pkgName: string;
+  abortController?: AbortController;
+}): Promise<PackageKnowledgeBase | undefined> {
+  const { esClient, pkgName, abortController } = options;
+
+  try {
+    const knowledgeBaseItems = await getPackageKnowledgeBaseFromIndex(
+      esClient,
+      pkgName,
+      abortController
+    );
+
+    if (knowledgeBaseItems.length === 0) {
+      return undefined;
+    }
+
+    return {
+      package: {
+        name: pkgName,
+      },
+      items: knowledgeBaseItems,
+    };
+  } catch (error) {
+    appContextService
+      .getLogger()
+      .warn(`Error fetching knowledge base for package ${pkgName}: ${error.message}`);
+    return undefined;
   }
 }

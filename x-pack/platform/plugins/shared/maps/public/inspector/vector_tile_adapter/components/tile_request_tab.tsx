@@ -56,7 +56,7 @@ export function TileRequestTab(props: Props) {
               <div>
                 <EuiCopy textToCopy={consoleRequest}>
                   {(copy) => (
-                    <EuiButtonEmpty size="xs" flush="right" iconType="copyClipboard" onClick={copy}>
+                    <EuiButtonEmpty size="xs" flush="right" iconType="copy" onClick={copy}>
                       {i18n.translate(
                         'xpack.maps.inspector.vectorTileRequest.copyToClipboardLabel',
                         {
@@ -117,7 +117,7 @@ export function TileRequestTab(props: Props) {
           defaultMessage: 'Unable to create Elasticsearch vector tile search request',
         })}
         color="warning"
-        iconType="help"
+        iconType="question"
       >
         <p>
           {i18n.translate('xpack.maps.inspector.vectorTileRequest.errorTitle', {

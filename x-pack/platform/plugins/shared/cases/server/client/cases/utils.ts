@@ -10,9 +10,11 @@ import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { v4 } from 'uuid';
+import type { SavedObject } from '@kbn/core/server';
 import type {
   ActionConnector,
-  Attachment,
+  AttachmentV2,
   Case,
   CaseAssignees,
   CaseAttributes,
@@ -22,21 +24,31 @@ import type {
   ConnectorMappingTarget,
   CustomFieldsConfiguration,
   ExternalService,
+  Observable,
   User,
 } from '../../../common/types/domain';
+import type { Template } from '../../../common/types/domain/template/latest';
 import { AttachmentType, CaseStatuses, UserActionTypes } from '../../../common/types/domain';
 import type {
+  AttachmentRequestV2,
   CasePostRequest,
   CaseRequestCustomFields,
   CaseUserActionsDeprecatedResponse,
+  ObservablePost,
 } from '../../../common/types/api';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
 import type { CasesClientGetAlertsResponse } from '../alerts/types';
 import type { ExternalServiceComment, ExternalServiceIncident } from './types';
-import { getAlertIds } from '../utils';
 import type { CasesConnectorsMap } from '../../connectors';
 import { getCaseViewPath } from '../../common/utils';
+import {
+  isCommentAttachmentType,
+  isLegacyAttachmentRequest,
+  isUnifiedAlertAttachment,
+  toStringArray,
+} from '../../../common/utils/attachments';
+import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import * as i18n from './translations';
 
 interface CreateIncidentArgs {
@@ -57,6 +69,9 @@ export const dedupAssignees = (assignees?: CaseAssignees): CaseAssignees | undef
 
   return uniqBy(assignees, 'uid');
 };
+
+export const getCloseReasonIfValid = (closeReason?: string): string | undefined =>
+  closeReason != null && closeReason.trim().length > 0 ? closeReason : undefined;
 
 type LatestPushInfo = { index: number; pushedInfo: ExternalService | null } | null;
 
@@ -83,23 +98,18 @@ export const getLatestPushInfo = (
   return null;
 };
 
-const getCommentContent = (comment: Attachment): string => {
-  if (comment.type === AttachmentType.user) {
+/**
+ * Returns the body text for a comment pushed to an external incident system
+ * (ServiceNow, Jira, Resilient, Swimlane).
+ */
+const getCommentContent = (comment: AttachmentV2): string => {
+  if (isLegacyAttachmentRequest(comment) && comment.type === AttachmentType.user) {
     return comment.comment;
-  } else if (comment.type === AttachmentType.alert) {
-    const ids = getAlertIds(comment);
-    return `Alert with ids ${ids.join(', ')} added to case`;
-  } else if (
-    comment.type === AttachmentType.actions &&
-    (comment.actions.type === 'isolate' || comment.actions.type === 'unisolate')
-  ) {
-    const firstHostname =
-      comment.actions.targets?.length > 0 ? comment.actions.targets[0].hostname : 'unknown';
-    const totalHosts = comment.actions.targets.length;
-    const actionText = comment.actions.type === 'isolate' ? 'Isolated' : 'Released';
-    const additionalHostsText = totalHosts - 1 > 0 ? `and ${totalHosts - 1} more ` : ``;
+  }
 
-    return `${actionText} host ${firstHostname} ${additionalHostsText}with comment: ${comment.comment}`;
+  if (comment.type === COMMENT_ATTACHMENT_TYPE && 'data' in comment) {
+    const content = comment.data?.content;
+    return typeof content === 'string' ? content : '';
   }
 
   return '';
@@ -111,6 +121,19 @@ interface CountAlertsInfo {
   totalAlerts: number;
 }
 
+// Returns the number of alert ids on the attachment, or `null` when the
+// attachment is not an alert
+const countAlertIds = (comment: AttachmentV2): number | null => {
+  if (isLegacyAttachmentRequest(comment) && comment.type === AttachmentType.alert) {
+    return toStringArray(comment.alertId).length;
+  }
+  const asRequest = comment as AttachmentRequestV2;
+  if (isUnifiedAlertAttachment(asRequest)) {
+    return toStringArray(asRequest.attachmentId).length;
+  }
+  return null;
+};
+
 const getAlertsInfo = (
   comments: Case['comments']
 ): { totalAlerts: number; hasUnpushedAlertComments: boolean } => {
@@ -118,14 +141,16 @@ const getAlertsInfo = (
 
   const res =
     comments?.reduce<CountAlertsInfo>(({ totalComments, pushed, totalAlerts }, comment) => {
-      if (comment.type === AttachmentType.alert) {
-        return {
-          totalComments: totalComments + 1,
-          pushed: comment.pushed_at != null ? pushed + 1 : pushed,
-          totalAlerts: totalAlerts + (Array.isArray(comment.alertId) ? comment.alertId.length : 1),
-        };
+      const alertIdCount = countAlertIds(comment);
+      if (alertIdCount === null) {
+        return { totalComments, pushed, totalAlerts };
       }
-      return { totalComments, pushed, totalAlerts };
+
+      return {
+        totalComments: totalComments + 1,
+        pushed: comment.pushed_at != null ? pushed + 1 : pushed,
+        totalAlerts: totalAlerts + alertIdCount,
+      };
     }, countingInfo) ?? countingInfo;
 
   return {
@@ -259,10 +284,8 @@ export const formatComments = ({
   );
 
   const commentsToBeUpdated = theCase.comments?.filter(
-    (comment) =>
-      // We push only user's comments
-      (comment.type === AttachmentType.user || comment.type === AttachmentType.actions) &&
-      commentsIdsToBeUpdated.has(comment.id)
+    // Push only user-authored comments — legacy `user` and unified `comment`.
+    (comment) => isCommentAttachmentType(comment.type) && commentsIdsToBeUpdated.has(comment.id)
   );
 
   let comments: ExternalServiceComment[] = [];
@@ -645,3 +668,81 @@ export const normalizeCreateCaseRequest = (
     customFieldsConfiguration,
   }),
 });
+
+export const isObservable = (observable: ObservablePost | Observable): observable is Observable =>
+  'id' in observable && 'typeKey' in observable && 'value' in observable;
+
+export const processObservables = (
+  observablesMap: Map<string, Observable>,
+  observable: ObservablePost | Observable
+) => {
+  const key = `${observable.typeKey}-${observable.value}`;
+  const isExistingObservable = observablesMap.has(key);
+  if (isExistingObservable) {
+    return;
+  }
+  if (isObservable(observable)) {
+    observablesMap.set(key, observable);
+  } else {
+    observablesMap.set(key, {
+      ...observable,
+      id: v4(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+  }
+};
+
+/**
+ *
+ * For cases that have a template and extended fields, fetches the template definitions
+ * and populates `extended_fields_labels` with a mapping from storage keys (e.g.,
+ * `priority_as_keyword`) to user-facing labels (e.g., "Priority"). Cases without templates
+ * or extended fields, or whose templates cannot be retrieved, are returned unchanged.
+ *
+ * @param cases - Array of cases to enrich
+ * @param templateSOs - Pre-fetched template saved objects
+ * @returns The enriched cases array, preserving original order
+ */
+export const enrichCasesWithFieldLabels = (
+  cases: Case[],
+  templateSOs: Array<SavedObject<Template>>
+): Case[] => {
+  type EligibleCase = Case & {
+    template: NonNullable<Case['template']>;
+    extended_fields: NonNullable<Case['extended_fields']>;
+  };
+  const isEligible = (c: Case): c is EligibleCase =>
+    c.template?.id != null && c.extended_fields != null;
+
+  const eligibleCases = cases.filter(isEligible);
+
+  if (eligibleCases.length === 0) {
+    return cases;
+  }
+
+  const labelsByTemplateKey = new Map<string, Record<string, string>>();
+  for (const so of templateSOs) {
+    const fieldKeyToLabel = Object.fromEntries(
+      (so.attributes.fieldNames ?? []).map((field) => [
+        `${field.name}_as_${field.type}`,
+        field.label,
+      ])
+    );
+    labelsByTemplateKey.set(
+      `${so.attributes.templateId}:${so.attributes.templateVersion}`,
+      fieldKeyToLabel
+    );
+  }
+
+  const enrichedCasesById = new Map(
+    eligibleCases.flatMap((c) => {
+      const fieldKeyToLabel = labelsByTemplateKey.get(`${c.template.id}:${c.template.version}`);
+      return fieldKeyToLabel != null
+        ? [[c.id, { ...c, extended_fields_labels: fieldKeyToLabel }]]
+        : [];
+    })
+  );
+
+  return cases.map((c) => enrichedCasesById.get(c.id) ?? c);
+};

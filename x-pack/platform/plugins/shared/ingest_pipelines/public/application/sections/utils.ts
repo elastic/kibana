@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Error } from '../../shared_imports';
+import type { Error } from '../../shared_imports';
 
 export const getErrorText = (error: Error) => {
   return error.message && error.message !== '{}' ? error.message : error.error;

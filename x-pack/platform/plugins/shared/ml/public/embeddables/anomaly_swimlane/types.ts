@@ -12,19 +12,22 @@ import type {
   PublishesUnifiedSearch,
   PublishesWritableTitle,
   PublishingSubject,
-  SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { apiIsOfType } from '@kbn/presentation-publishing';
-import type { SwimlaneType } from '../../application/explorer/explorer_constants';
 
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
-import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../constants';
 import type {
-  AnomalySwimlaneEmbeddableCustomInput,
-  AnomalySwimlaneEmbeddableUserInput,
-  MlEmbeddableBaseApi,
-} from '../types';
+  AnomalySwimLaneEmbeddableState,
+  SwimlaneType,
+} from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
+import type { MlEmbeddableBaseApi } from '../types';
+
+export type AnomalySwimLaneControlsState = Pick<
+  AnomalySwimLaneEmbeddableState,
+  'job_ids' | 'swimlane_type' | 'per_page'
+> & { view_by?: string };
 
 export interface AnomalySwimLaneComponentApi {
   jobIds: PublishingSubject<JobId[]>;
@@ -34,7 +37,7 @@ export interface AnomalySwimLaneComponentApi {
   fromPage: PublishingSubject<number>;
   interval: PublishingSubject<number | undefined>;
   setInterval: (interval: number | undefined) => void;
-  updateUserInput: (input: AnomalySwimlaneEmbeddableUserInput) => void;
+  updateUserInput: (input: AnomalySwimLaneEmbeddableState) => void;
   updatePagination: (update: { perPage?: number; fromPage: number }) => void;
 }
 
@@ -56,21 +59,3 @@ export function isSwimLaneEmbeddableContext(arg: unknown): arg is AnomalySwimLan
     apiIsOfType(arg.embeddable, ANOMALY_SWIMLANE_EMBEDDABLE_TYPE)
   );
 }
-
-/**
- * Persisted state for the Anomaly Swim Lane Embeddable.
- */
-export interface AnomalySwimLaneEmbeddableState
-  extends SerializedTitles,
-    AnomalySwimlaneEmbeddableCustomInput {}
-
-/**
- * The subset of the Anomaly Swim Lane Embeddable state that is actually used by the swimlane embeddable.
- *
- * TODO: Ideally this should be the same as the AnomalySwimLaneEmbeddableState, but that type is used in many
- * places, so we cannot change it at the moment.
- */
-export type AnomalySwimlaneRuntimeState = Omit<
-  AnomalySwimLaneEmbeddableState,
-  'id' | 'filters' | 'query' | 'refreshConfig'
->;

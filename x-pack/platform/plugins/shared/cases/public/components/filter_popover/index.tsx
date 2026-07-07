@@ -72,7 +72,7 @@ export const FilterPopoverComponent = ({
       button={
         <EuiFilterButton
           data-test-subj={`options-filter-popover-button-${buttonLabel}`}
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={setIsPopoverOpenCb}
           isSelected={isPopoverOpen}
           numFilters={options.length}
@@ -92,6 +92,7 @@ export const FilterPopoverComponent = ({
         <>
           <EuiHorizontalRule margin="none" />
           <EuiCallOut
+            announceOnMount={false}
             title={limitReachedMessage}
             color="warning"
             size="s"

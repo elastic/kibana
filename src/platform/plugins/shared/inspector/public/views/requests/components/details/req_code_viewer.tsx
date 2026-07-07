@@ -14,7 +14,8 @@
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { css } from '@emotion/react';
 
@@ -54,7 +55,7 @@ export const RequestCodeViewer = ({ value, actions }: RequestCodeViewerProps) =>
                   <EuiButtonEmpty
                     size="xs"
                     flush="right"
-                    iconType="copyClipboard"
+                    iconType="copy"
                     onClick={copy}
                     data-test-subj="inspectorRequestCopyClipboardButton"
                   >
@@ -76,6 +77,7 @@ export const RequestCodeViewer = ({ value, actions }: RequestCodeViewerProps) =>
         <CodeEditor
           languageId={XJsonLang.ID}
           value={value}
+          enableFindAction
           options={{
             readOnly: true,
             lineNumbers: 'off',

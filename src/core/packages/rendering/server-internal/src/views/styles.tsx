@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
-import { type DarkModeValue, ThemeName } from '@kbn/core-ui-settings-common';
+import type { FC } from 'react';
+import React from 'react';
+import type { ThemeName } from '@kbn/core-ui-settings-common';
+import { type DarkModeValue } from '@kbn/core-ui-settings-common';
 
 interface Props {
   darkMode: DarkModeValue;

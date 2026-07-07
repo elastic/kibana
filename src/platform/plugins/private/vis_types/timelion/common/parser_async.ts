@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ParsedExpression } from './parser';
+import type { ParsedExpression } from './parser';
 
 /** Build optimizations, we want to exclude the parser from the main bundle **/
 export const parseTimelionExpressionAsync = async (input: string): Promise<ParsedExpression> => {

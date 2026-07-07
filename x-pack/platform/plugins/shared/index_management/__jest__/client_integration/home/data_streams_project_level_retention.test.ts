@@ -5,23 +5,19 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import { createMemoryHistory } from 'history';
-import { notificationServiceMock } from '@kbn/core/public/mocks';
+import { screen } from '@testing-library/react';
+import { within } from '@testing-library/react';
 
 import { breadcrumbService } from '../../../public/application/services/breadcrumbs';
 import { MAX_DATA_RETENTION } from '../../../common/constants';
-import * as fixtures from '../../../test/fixtures';
-import { setupEnvironment } from '../helpers';
-import { notificationService } from '../../../public/application/services/notification';
+import { setupEnvironment } from '../helpers/setup_environment';
+import { renderHome } from '../helpers/render_home';
 
 import {
-  DataStreamsTabTestBed,
-  setup,
+  createDataStreamTabActions,
   createDataStreamPayload,
-  createDataStreamBackingIndex,
-  createNonDataStreamIndex,
-} from './data_streams_tab.helpers';
+  createDataRetentionFormActions,
+} from '../helpers/actions/data_stream_actions';
 
 const urlServiceMock = {
   locators: {
@@ -41,81 +37,18 @@ const urlServiceMock = {
 jest.mock('react-use/lib/useObservable', () => () => jest.fn());
 
 describe('Data Streams - Project level max retention', () => {
-  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
-  let testBed: DataStreamsTabTestBed;
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   jest.spyOn(breadcrumbService, 'setBreadcrumbs');
 
-  const notificationsServiceMock = notificationServiceMock.createStartContract();
-
-  beforeEach(async () => {
-    const {
-      setLoadIndicesResponse,
-      setLoadDataStreamsResponse,
-      setLoadDataStreamResponse,
-      setLoadTemplateResponse,
-      setLoadTemplatesResponse,
-    } = httpRequestsMockHelpers;
-
-    setLoadIndicesResponse([
-      createDataStreamBackingIndex('data-stream-index', 'dataStream1'),
-      createNonDataStreamIndex('non-data-stream-index'),
-    ]);
-
-    const dataStreamForDetailPanel = createDataStreamPayload({
-      name: 'dataStream1',
-      storageSize: '5b',
-      storageSizeBytes: 5,
-      // metering API mock
-      meteringStorageSize: '156kb',
-      meteringStorageSizeBytes: 156000,
-      meteringDocsCount: 10000,
-    });
-
-    setLoadDataStreamsResponse([
-      dataStreamForDetailPanel,
-      createDataStreamPayload({
-        name: 'dataStream2',
-        storageSize: '1kb',
-        storageSizeBytes: 1000,
-        // metering API mock
-        meteringStorageSize: '156kb',
-        meteringStorageSizeBytes: 156000,
-        meteringDocsCount: 10000,
-        lifecycle: {
-          enabled: true,
-          data_retention: '7d',
-          effective_retention: '5d',
-          globalMaxRetention: '20d',
-          retention_determined_by: MAX_DATA_RETENTION,
-        },
-      }),
-    ]);
-
-    setLoadDataStreamResponse(dataStreamForDetailPanel.name, dataStreamForDetailPanel);
-
-    const indexTemplate = fixtures.getTemplate({ name: 'indexTemplate' });
-    setLoadTemplatesResponse({ templates: [indexTemplate], legacyTemplates: [] });
-    setLoadTemplateResponse(indexTemplate.name, indexTemplate);
-
-    notificationService.setup(notificationsServiceMock);
-    testBed = await setup(httpSetup, {
-      history: createMemoryHistory(),
-      services: {
-        notificationService,
-      },
-      config: {
-        enableProjectLevelRetentionChecks: true,
-      },
-    });
-    await act(async () => {
-      testBed.actions.goToDataStreamsList();
-    });
-    testBed.component.update();
+  beforeEach(() => {
+    jest.clearAllMocks();
+    const env = setupEnvironment();
+    httpSetup = env.httpSetup;
+    httpRequestsMockHelpers = env.httpRequestsMockHelpers;
   });
 
   it('Should show error when retention value is bigger than project level retention', async () => {
-    const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
-
     const ds1 = createDataStreamPayload({
       name: 'dataStream1',
       lifecycle: {
@@ -127,26 +60,37 @@ describe('Data Streams - Project level max retention', () => {
       },
     });
 
-    setLoadDataStreamsResponse([ds1]);
-    setLoadDataStreamResponse(ds1.name, ds1);
+    httpRequestsMockHelpers.setLoadIndicesResponse([]);
+    httpRequestsMockHelpers.setLoadDataStreamsResponse([ds1]);
+    httpRequestsMockHelpers.setLoadDataStreamResponse(ds1.name, ds1);
+    httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
 
-    testBed = await setup(httpSetup, {
-      history: createMemoryHistory(),
-      url: urlServiceMock,
-      config: {
-        enableProjectLevelRetentionChecks: true,
+    await renderHome(httpSetup, {
+      initialEntries: ['/data_streams'],
+      appServicesContext: {
+        url: urlServiceMock,
+        config: {
+          enableProjectLevelRetentionChecks: true,
+        },
       },
     });
-    await act(async () => {
-      testBed.actions.goToDataStreamsList();
-    });
-    testBed.component.update();
 
-    const { actions } = testBed;
+    await screen.findByTestId('dataStreamTable');
+    const actions = createDataStreamTabActions();
+    const formActions = createDataRetentionFormActions();
 
-    await actions.clickNameAt(0);
-    actions.clickEditDataRetentionButton();
+    // The single data stream detail panel now edits the lifecycle via a flyout that does not
+    // enforce the project level max retention. That validation lives in the (bulk) edit data
+    // retention modal, so the check is exercised through the bulk edit flow here.
+    actions.selectDataStream('dataStream1', true);
+    await actions.clickBulkEditDataRetentionButton();
 
-    expect(testBed.form.getErrorsMessages().length).toBeGreaterThan(0);
+    await screen.findByTestId('dataRetentionValue');
+
+    await formActions.setDataRetentionValue('25');
+
+    const form = screen.getByTestId('editDataRetentionModal');
+    // Assert the specific validation message (do not rely on non-unique attributes like `aria-live`).
+    await within(form).findByText(/Maximum data retention period on this project is 20 days\./);
   });
 });

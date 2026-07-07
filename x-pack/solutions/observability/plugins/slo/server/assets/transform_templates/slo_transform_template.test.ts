@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TransformSource } from '@elastic/elasticsearch/lib/api/types';
+import type { TransformSource } from '@elastic/elasticsearch/lib/api/types';
 import { getSLOTransformTemplate } from './slo_transform_template';
 import { createKQLCustomIndicator, createSLO } from '../../services/fixtures/slo';
 
@@ -143,9 +143,10 @@ describe('slo transform template', () => {
       },
       defer_validation: true,
       _meta: {
-        version: 3.5,
+        version: 3.6,
         managed: true,
         managed_by: 'observability',
+        deletion_protected: true,
       },
     });
   });
@@ -247,9 +248,10 @@ describe('slo transform template', () => {
       },
       defer_validation: true,
       _meta: {
-        version: 3.5,
+        version: 3.6,
         managed: true,
         managed_by: 'observability',
+        deletion_protected: true,
       },
     });
   });

@@ -10,14 +10,10 @@ import * as rt from 'io-ts';
 import { i18n } from '@kbn/i18n';
 import { isRight } from 'fp-ts/Either';
 
-import { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
+import type { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
 import { isPlainObject } from 'lodash';
-import {
-  FieldConfig,
-  ValidationFunc,
-  fieldValidators,
-  isJSON,
-} from '../../../../../../shared_imports';
+import type { FieldConfig, ValidationFunc } from '../../../../../../shared_imports';
+import { fieldValidators, isJSON } from '../../../../../../shared_imports';
 import { collapseEscapedStrings } from '../../../utils';
 
 const { emptyField, isJsonField } = fieldValidators;
@@ -149,6 +145,26 @@ export const from = {
       return v;
     }
     return undefined;
+  },
+  optionalXJsonArray: (v: string) => {
+    const trimmed = v.trim();
+    if (!trimmed) {
+      return undefined;
+    }
+    const collapsed = collapseEscapedStrings(trimmed);
+    try {
+      const parsed = JSON.parse(collapsed);
+      if (Array.isArray(parsed) && parsed.length === 0) {
+        return undefined;
+      }
+    } catch {
+      // If invalid JSON, keep the value; validation should catch invalid content.
+      // Fall back to the simplest empty array literal check.
+      if (collapsed === '[]') {
+        return undefined;
+      }
+    }
+    return v;
   },
 };
 

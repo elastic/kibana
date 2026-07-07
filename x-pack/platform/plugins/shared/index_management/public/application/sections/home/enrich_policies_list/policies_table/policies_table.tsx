@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import {
-  EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiSearchBarProps,
-  EuiButton,
-  EuiLink,
-} from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+import type { EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
+import { EuiInMemoryTable, EuiButton, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -39,7 +35,7 @@ export const PoliciesTable: FunctionComponent<Props> = ({
     <EuiButton
       key="createPolicy"
       fill
-      iconType="plusInCircle"
+      iconType="plusCircle"
       data-test-subj="createPolicyButton"
       {...reactRouterNavigate(history, '/enrich_policies/create')}
     >
@@ -191,6 +187,9 @@ export const PoliciesTable: FunctionComponent<Props> = ({
       pagination={pagination}
       sorting={sorting}
       onTableChange={onTableChange}
+      tableCaption={i18n.translate('xpack.idxMgmt.enrichPolicies.table.caption', {
+        defaultMessage: 'Enrich policies',
+      })}
     />
   );
 };

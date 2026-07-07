@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiIsPresentationContainer, HasSerializedChildState } from '@kbn/presentation-containers';
-import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
-import React, { useImperativeHandle, useMemo, useRef } from 'react';
-import { BehaviorSubject } from 'rxjs';
-import { v4 as generateId } from 'uuid';
-import { PhaseTracker } from './phase_tracker';
-import { getReactEmbeddableFactory } from './react_embeddable_registry';
-import { DefaultEmbeddableApi, EmbeddableApiRegistration } from './types';
+import React, { useEffect } from 'react';
+import { css } from '@emotion/react';
+
+import type { HasSerializedChildState } from '@kbn/presentation-publishing';
+import useAsync from 'react-use/lib/useAsync';
+import { PanelLoader } from '@kbn/panel-loader';
+import { useEuiTheme } from '@elastic/eui';
+import type { PresentationPanelProps } from './panel_component/types';
+import type { DefaultEmbeddableApi } from './types';
+import { untilPluginStartServicesReady } from '../kibana_services';
+import { getEmbeddableDefinition } from './react_embeddable_registry';
 
 /**
  * Renders a component from the React Embeddable registry into a Presentation Panel.
@@ -35,109 +38,70 @@ export const EmbeddableRenderer = <
   maybeId?: string;
   getParentApi: () => ParentApi;
   onApiAvailable?: (api: Api) => void;
-  panelProps?: Pick<
-    PresentationPanelProps<Api>,
-    | 'showShadow'
-    | 'showBorder'
-    | 'showBadges'
-    | 'showNotifications'
-    | 'hideLoader'
-    | 'hideHeader'
-    | 'hideInspector'
-    | 'setDragHandles'
-    | 'getActions'
-  >;
+  panelProps?: Omit<PresentationPanelProps<Api>, 'Component' | 'componentApi'>;
   hidePanelChrome?: boolean;
 }) => {
-  const phaseTracker = useRef(new PhaseTracker());
+  const { euiTheme } = useEuiTheme();
+  const { loading, value, error } = useAsync(async () => {
+    const startTime = performance.now();
 
-  const componentPromise = useMemo(
-    () => {
-      const uuid = maybeId ?? generateId();
+    const [, factory, { buildEmbeddable, PhaseTracker, PresentationPanel }] = await Promise.all([
+      untilPluginStartServicesReady(),
+      getEmbeddableDefinition<SerializedState, Api>(type),
+      import('../async_module'),
+    ]);
 
-      /**
-       * Build the embeddable
-       */
-      return (async () => {
-        const parentApi = getParentApi();
+    const phaseTracker = new PhaseTracker(startTime);
 
-        const buildEmbeddable = async () => {
-          const factory = await getReactEmbeddableFactory<SerializedState, Api>(type);
+    const { Component, componentApi } = await buildEmbeddable<SerializedState, Api>({
+      factory,
+      maybeId,
+      parentApi: getParentApi(),
+      phaseTracker,
+      type,
+    });
 
-          const finalizeApi = (
-            apiRegistration: EmbeddableApiRegistration<SerializedState, Api>
-          ) => {
-            const hasLockedHoverActions$ = new BehaviorSubject(false);
-            return {
-              ...apiRegistration,
-              uuid,
-              phase$: phaseTracker.current.getPhase$(),
-              parentApi,
-              hasLockedHoverActions$,
-              lockHoverActions: (lock: boolean) => {
-                hasLockedHoverActions$.next(lock);
-              },
-              type: factory.type,
-            } as unknown as Api;
-          };
+    phaseTracker.trackPhaseEvents(componentApi);
+    onApiAvailable?.(componentApi);
 
-          const initialState = parentApi.getSerializedStateForChild(uuid) ?? {
-            rawState: {} as SerializedState,
-          };
-          const { api, Component } = await factory.buildEmbeddable({
-            initialState,
-            finalizeApi,
-            uuid,
-            parentApi,
-          });
+    return {
+      Component,
+      componentApi,
+      Panel: PresentationPanel,
+      phaseTracker,
+    };
+    // Ancestry chain is expected to use 'key' attribute to reset DOM and state
+    // when unwrappedComponent needs to be re-loaded
+  }, [type]);
 
-          phaseTracker.current.trackPhaseEvents(uuid, api);
+  useEffect(() => {
+    return () => {
+      value?.phaseTracker.cleanup();
+    };
+  }, [value]);
 
-          return { api, Component };
-        };
+  if (loading)
+    return panelProps?.hideLoader ? null : (
+      <PanelLoader
+        showShadow={panelProps?.showShadow}
+        showBorder={panelProps?.showBorder}
+        css={css`
+          border-radius: ${euiTheme.border.radius.medium};
+        `}
+        dataTestSubj="embeddablePanelLoadingIndicator"
+      />
+    );
 
-        try {
-          const { api, Component } = await buildEmbeddable();
-          onApiAvailable?.(api);
-          return React.forwardRef<typeof api>((_, ref) => {
-            // expose the api into the imperative handle
-            useImperativeHandle(ref, () => api, []);
-
-            return <Component />;
-          });
-        } catch (e) {
-          /**
-           * critical error encountered when trying to build the api / embeddable;
-           * since no API is available, create a dummy API that allows the panel to be deleted
-           * */
-          const errorApi = {
-            uuid,
-            blockingError$: new BehaviorSubject(e),
-          } as unknown as Api;
-          if (apiIsPresentationContainer(parentApi)) {
-            errorApi.parentApi = parentApi;
-          }
-          return React.forwardRef<Api>((_, ref) => {
-            // expose the dummy error api into the imperative handle
-            useImperativeHandle(ref, () => errorApi, []);
-            return null;
-          });
-        }
-      })();
-    },
-    /**
-     * Disabling exhaustive deps because we do not want to re-fetch the component
-     * from the embeddable registry unless the type changes.
-     */
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [type]
-  );
+  if (error || !value) {
+    return <div>{error?.message}</div>;
+  }
 
   return (
-    <PresentationPanel<Api, {}>
+    <value.Panel<Api, {}>
+      Component={value.Component}
+      componentApi={value.componentApi}
       hidePanelChrome={hidePanelChrome}
       {...panelProps}
-      Component={componentPromise}
     />
   );
 };

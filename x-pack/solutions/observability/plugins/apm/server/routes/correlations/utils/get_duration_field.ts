@@ -6,10 +6,12 @@
  */
 
 import {
+  DURATION,
   SPAN_DURATION,
   TRANSACTION_DURATION,
   TRANSACTION_DURATION_HISTOGRAM,
 } from '../../../../common/es_fields/apm';
+import type { EntityType } from '../../../../common/correlations/types';
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 
 const {
@@ -20,7 +22,19 @@ const {
   spanLatency,
 } = LatencyDistributionChartType;
 
-export function getDurationField(chartType: LatencyDistributionChartType, searchMetrics: boolean) {
+/** Resolve duration field from correlations API entity type (no chart-type dependency). */
+export function getDurationFieldFromEntityType(
+  entityType: EntityType,
+  isOtel: boolean = false
+): string {
+  return entityType === 'exit_span' ? (isOtel ? DURATION : SPAN_DURATION) : TRANSACTION_DURATION;
+}
+
+export function getDurationField(
+  chartType: LatencyDistributionChartType,
+  searchMetrics: boolean,
+  isOtel: boolean
+) {
   switch (chartType) {
     case transactionLatency:
       if (searchMetrics) {
@@ -33,7 +47,7 @@ export function getDurationField(chartType: LatencyDistributionChartType, search
       return TRANSACTION_DURATION;
     case dependencyLatency:
     case spanLatency:
-      return SPAN_DURATION;
+      return isOtel ? DURATION : SPAN_DURATION;
     default:
       return TRANSACTION_DURATION;
   }

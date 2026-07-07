@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/tracing-config",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "shared"
+}

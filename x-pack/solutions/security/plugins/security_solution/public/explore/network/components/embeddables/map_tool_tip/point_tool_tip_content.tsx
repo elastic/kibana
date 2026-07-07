@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { ITooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
+import { PageScope } from '../../../../../data_view_manager/constants';
 import { sourceDestinationFieldMappings } from '../map_config';
 import {
   getEmptyTagValue,
@@ -16,7 +17,6 @@ import { DescriptionListStyled } from '../../../../../common/components/page';
 import { HostDetailsLink, NetworkDetailsLink } from '../../../../../common/components/links';
 import { DefaultFieldRenderer } from '../../../../../timelines/components/field_renderers/default_renderer';
 import type { FlowTarget } from '../../../../../../common/search_strategy';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 
 interface PointToolTipContentProps {
   contextId: string;
@@ -43,7 +43,7 @@ export const PointToolTipContentComponent = ({
                   attrName={key}
                   idPrefix={`map-point-tooltip-${contextId}-${key}-${value}`}
                   render={(item) => getRenderedFieldValue(key, item)}
-                  scopeId={SourcererScopeName.default}
+                  scopeId={PageScope.explore}
                 />
               ) : (
                 getEmptyTagValue()

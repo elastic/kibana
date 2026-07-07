@@ -28,6 +28,7 @@ export interface UpdateAlertStatusRequest {
   id: string;
   index: string;
   status: CaseStatuses;
+  closingReason?: string;
 }
 
 export interface AlertUpdateStatus {

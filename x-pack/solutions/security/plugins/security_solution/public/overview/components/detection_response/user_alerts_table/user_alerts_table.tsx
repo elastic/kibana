@@ -20,7 +20,8 @@ import {
 } from '@elastic/eui';
 
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
-import { SecurityCellActionsTrigger } from '../../../../app/actions/constants';
+import { SECURITY_CELL_ACTIONS_ALERTS_COUNT } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { HeaderSection } from '../../../../common/components/header_section';
@@ -33,9 +34,8 @@ import * as i18n from '../translations';
 import { ITEMS_PER_PAGE } from '../utils';
 import type { UserAlertsItem } from './use_user_alerts_items';
 import { useUserAlertsItems } from './use_user_alerts_items';
-import { SecurityCellActions, CellActionsMode } from '../../../../common/components/cell_actions';
+import { CellActionsMode, SecurityCellActions } from '../../../../common/components/cell_actions';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useRiskSeverityColors } from '../../../../common/utils/risk_color_palette';
 
 interface UserAlertsTableProps {
@@ -57,16 +57,16 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
       openAlertsPageWithFilters([
         {
           title: i18n.OPEN_IN_ALERTS_TITLE_USERNAME,
-          selectedOptions: [userName],
-          fieldName: 'user.name',
+          selected_options: [userName],
+          field_name: 'user.name',
         },
 
         ...(severity
           ? [
               {
                 title: i18n.OPEN_IN_ALERTS_TITLE_SEVERITY,
-                selectedOptions: [severity],
-                fieldName: ALERT_SEVERITY,
+                selected_options: [severity],
+                field_name: ALERT_SEVERITY,
               },
             ]
           : []),
@@ -104,6 +104,7 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
               columns={columns}
               items={items}
               loading={isLoading}
+              tableCaption={i18n.USER_ALERTS_SECTION_TITLE}
               noItemsMessage={
                 <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
               }
@@ -157,8 +158,8 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
               field: 'user.name',
             }}
             mode={CellActionsMode.HOVER_RIGHT}
-            triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-            sourcererScopeId={SourcererScopeName.detections}
+            triggerId={SECURITY_CELL_ACTIONS_ALERTS_COUNT}
+            sourcererScopeId={PageScope.alerts}
             metadata={{
               andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
             }}
@@ -188,8 +189,8 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
                   field: 'user.name',
                 }}
                 mode={CellActionsMode.HOVER_RIGHT}
-                triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-                sourcererScopeId={SourcererScopeName.detections}
+                triggerId={SECURITY_CELL_ACTIONS_ALERTS_COUNT}
+                sourcererScopeId={PageScope.alerts}
                 metadata={{
                   andFilters: [
                     { field: 'kibana.alert.severity', value: 'critical' },
@@ -222,8 +223,8 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
                   field: 'user.name',
                 }}
                 mode={CellActionsMode.HOVER_RIGHT}
-                triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-                sourcererScopeId={SourcererScopeName.detections}
+                triggerId={SECURITY_CELL_ACTIONS_ALERTS_COUNT}
+                sourcererScopeId={PageScope.alerts}
                 metadata={{
                   andFilters: [
                     { field: 'kibana.alert.severity', value: 'high' },
@@ -253,8 +254,8 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
                   field: 'user.name',
                 }}
                 mode={CellActionsMode.HOVER_RIGHT}
-                triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-                sourcererScopeId={SourcererScopeName.detections}
+                triggerId={SECURITY_CELL_ACTIONS_ALERTS_COUNT}
+                sourcererScopeId={PageScope.alerts}
                 metadata={{
                   andFilters: [
                     { field: 'kibana.alert.severity', value: 'medium' },
@@ -284,8 +285,8 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
                   field: 'user.name',
                 }}
                 mode={CellActionsMode.HOVER_RIGHT}
-                triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-                sourcererScopeId={SourcererScopeName.detections}
+                triggerId={SECURITY_CELL_ACTIONS_ALERTS_COUNT}
+                sourcererScopeId={PageScope.alerts}
                 metadata={{
                   andFilters: [
                     { field: 'kibana.alert.severity', value: 'low' },

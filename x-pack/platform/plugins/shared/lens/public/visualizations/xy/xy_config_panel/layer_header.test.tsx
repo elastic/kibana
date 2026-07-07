@@ -7,13 +7,13 @@
 
 import React from 'react';
 
-import { FramePublicAPI } from '../../../types';
+import type { FramePublicAPI } from '@kbn/lens-common';
 import { LayerHeader } from './layer_header';
-import {
+import type {
   XYByReferenceAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
   XYLayerConfig,
-  XYState,
+  XYVisualizationState,
 } from '../types';
 import { mountWithProviders } from '../../../test_utils/test_utils';
 
@@ -47,7 +47,7 @@ describe('layer header', () => {
         ignoreGlobalFilters: false,
       };
 
-      const getStateWithLayers = (layers: XYLayerConfig[]): XYState => ({
+      const getStateWithLayers = (layers: XYLayerConfig[]): XYVisualizationState => ({
         preferredSeriesType: 'area',
         legend: { isVisible: false, position: 'left' },
         layers,

@@ -6,7 +6,7 @@
  */
 
 import type { HttpHandler } from '@kbn/core-http-browser';
-import {
+import type {
   IndicesGetMappingIndexMappingRecord,
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';

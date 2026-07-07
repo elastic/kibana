@@ -6,6 +6,7 @@
  */
 
 import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment } from 'react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
@@ -139,9 +140,17 @@ export class WrappedSetupModeRenderer extends React.Component {
                 <EuiFlexItem grow={false}>
                   <FormattedMessage
                     id="xpack.monitoring.setupMode.description"
+                    tagName="span"
                     defaultMessage="You are in setup mode. The ({flagIcon}) icon indicates configuration options."
                     values={{
-                      flagIcon: <EuiIcon type="flag" />,
+                      flagIcon: (
+                        <EuiIcon
+                          type="flag"
+                          aria-label={i18n.translate('xpack.monitoring.setupMode.flagIcon', {
+                            defaultMessage: 'Flag icon',
+                          })}
+                        />
+                      ),
                     }}
                   />
                 </EuiFlexItem>

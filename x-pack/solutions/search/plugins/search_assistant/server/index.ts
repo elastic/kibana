@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { PluginInitializerContext } from '@kbn/core/server';
-import { SearchAssistantPlugin } from './plugin';
+import type { PluginInitializerContext } from '@kbn/core/server';
 
 export { config } from './config';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new SearchAssistantPlugin(initializerContext);
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { SearchAssistantPlugin } = await import('./plugin');
+  return new SearchAssistantPlugin(initializerContext);
+};
 
 export type { SearchAssistantPluginSetup, SearchAssistantPluginStart } from './types';

@@ -5,26 +5,22 @@
  * 2.0.
  */
 
-import React, {
-  SetStateAction,
-  useRef,
-  useState,
-  KeyboardEvent,
-  ReactNode,
-  FormEventHandler,
-} from 'react';
+import type { SetStateAction, KeyboardEvent, ReactNode, FormEventHandler } from 'react';
+import React, { useRef, useState } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
+  EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPopover,
+  EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
   EuiSelectableMessage,
-  EuiPopoverFooter,
-  EuiButton,
-  EuiButtonIcon,
-  EuiSelectableOption,
+  EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useEvent from 'react-use/lib/useEvent';
@@ -78,6 +74,7 @@ export function SelectableUrlList({
 }: SelectableUrlListProps) {
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
 
+  const selectableUrlListPopoverTitleId = useGeneratedHtmlId();
   const titleRef = useRef<HTMLDivElement>(null);
 
   const formattedOptions = formatOptions(data.items ?? []);
@@ -129,21 +126,28 @@ export function SelectableUrlList({
 
   function PopOverTitle() {
     return (
-      <EuiPopoverTitle paddingSize="s">
+      <EuiPopoverTitle id={selectableUrlListPopoverTitleId} paddingSize="s">
         <EuiFlexGroup ref={titleRef} gutterSize="xs">
           <EuiFlexItem style={{ justifyContent: 'center' }}>
             {loading ? <EuiLoadingSpinner /> : titleText}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj="exploratoryViewPopOverTitleButton"
-              color="text"
-              onClick={() => closePopover()}
-              aria-label={i18n.translate('xpack.exploratoryView.search.url.close', {
+            <EuiToolTip
+              content={i18n.translate('xpack.exploratoryView.search.url.close', {
                 defaultMessage: 'Close',
               })}
-              iconType={'cross'}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                data-test-subj="exploratoryViewPopOverTitleButton"
+                color="text"
+                onClick={() => closePopover()}
+                aria-label={i18n.translate('xpack.exploratoryView.search.url.close', {
+                  defaultMessage: 'Close',
+                })}
+                iconType={'cross'}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopoverTitle>
@@ -179,6 +183,7 @@ export function SelectableUrlList({
     >
       {(list, search) => (
         <EuiPopover
+          aria-labelledby={selectableUrlListPopoverTitleId}
           panelPaddingSize="none"
           isOpen={popoverIsOpen}
           display={'block'}

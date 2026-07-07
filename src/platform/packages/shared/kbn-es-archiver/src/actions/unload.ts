@@ -9,9 +9,9 @@
 
 import { resolve, relative } from 'path';
 import { createReadStream } from 'fs';
-import { Readable, Writable } from 'stream';
+import type { Readable, Writable } from 'stream';
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import { createPromiseFromStreams } from '@kbn/utils';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -30,12 +30,11 @@ export async function unloadAction({
   inputDir,
   client,
   log,
-  kbnClient,
 }: {
   inputDir: string;
   client: Client;
   log: ToolingLog;
-  kbnClient: KbnClient;
+  kbnClient?: KbnClient;
 }) {
   const name = relative(REPO_ROOT, inputDir);
   const stats = createStats(name, log);

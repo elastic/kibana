@@ -26,7 +26,12 @@ export const TagList: FC<TagListProps> = ({ tags, onClick, tagRender }) => {
         tagRender ? (
           <span key={tag.name}>{tagRender(tag)}</span>
         ) : (
-          <TagBadge key={tag.name} tag={tag} onClick={onClick} />
+          <TagBadge
+            key={tag.name}
+            tag={tag}
+            onClick={onClick}
+            data-test-subj={`tag-badge-${tag.name}`}
+          />
         )
       )}
     </EuiBadgeGroup>

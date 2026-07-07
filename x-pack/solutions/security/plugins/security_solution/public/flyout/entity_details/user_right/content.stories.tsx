@@ -10,8 +10,8 @@ import type { Meta } from '@storybook/react';
 import { EuiFlyout } from '@elastic/eui';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
-import { mockRiskScoreState } from '../../shared/mocks';
-import { mockManagedUserData, mockObservedUser } from './mocks';
+import { mockEntityRiskScores, mockRiskScoreState } from '../../shared/mocks';
+import { mockObservedUser, mockEntityRecord } from './mocks';
 import { UserPanelContent } from './content';
 
 const riskScoreData = { ...mockRiskScoreState, data: [] };
@@ -35,16 +35,16 @@ export default {
 export const Default = {
   render: () => (
     <UserPanelContent
-      managedUser={mockManagedUserData}
       observedUser={mockObservedUser}
       riskScoreState={riskScoreData}
+      entityRiskScores={mockEntityRiskScores}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      userName={'test-user-name'}
+      identityFields={{ 'user.name': 'test-user-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
     />
   ),
 
@@ -54,43 +54,37 @@ export const Default = {
 export const IntegrationDisabled = {
   render: () => (
     <UserPanelContent
-      managedUser={{
-        data: undefined,
-        isLoading: false,
-        isIntegrationEnabled: false,
-      }}
       observedUser={mockObservedUser}
       riskScoreState={riskScoreData}
+      entityRiskScores={mockEntityRiskScores}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      userName={'test-user-name'}
+      identityFields={{ 'user.name': 'test-user-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
+      entityRecord={mockEntityRecord}
+      entityStoreEntityId={mockEntityRecord.entity?.id}
     />
   ),
 
-  name: 'integration disabled',
+  name: 'with graph visualization',
 };
 
 export const NoManagedData = {
   render: () => (
     <UserPanelContent
-      managedUser={{
-        data: undefined,
-        isLoading: false,
-        isIntegrationEnabled: true,
-      }}
       observedUser={mockObservedUser}
       riskScoreState={riskScoreData}
+      entityRiskScores={mockEntityRiskScores}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      userName={'test-user-name'}
+      identityFields={{ 'user.name': 'test-user-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
     />
   ),
 
@@ -100,7 +94,6 @@ export const NoManagedData = {
 export const NoObservedData = {
   render: () => (
     <UserPanelContent
-      managedUser={mockManagedUserData}
       observedUser={{
         details: {
           user: {
@@ -124,16 +117,16 @@ export const NoObservedData = {
           isLoading: false,
           date: undefined,
         },
-        anomalies: { isLoading: false, anomalies: null, jobNameById: {} },
       }}
       riskScoreState={riskScoreData}
+      entityRiskScores={mockEntityRiskScores}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      userName={'test-user-name'}
+      identityFields={{ 'user.name': 'test-user-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
     />
   ),
 
@@ -143,11 +136,6 @@ export const NoObservedData = {
 export const Loading = {
   render: () => (
     <UserPanelContent
-      managedUser={{
-        data: undefined,
-        isLoading: true,
-        isIntegrationEnabled: true,
-      }}
       observedUser={{
         details: {
           user: {
@@ -171,16 +159,16 @@ export const Loading = {
           isLoading: true,
           date: undefined,
         },
-        anomalies: { isLoading: true, anomalies: null, jobNameById: {} },
       }}
       riskScoreState={riskScoreData}
+      entityRiskScores={mockEntityRiskScores}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       openDetailsPanel={() => {}}
-      userName={'test-user-name'}
+      identityFields={{ 'user.name': 'test-user-name' }}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
     />
   ),
 

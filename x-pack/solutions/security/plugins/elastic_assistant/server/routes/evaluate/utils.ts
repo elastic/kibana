@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Client, Example } from 'langsmith';
+import type { Example } from 'langsmith';
+import { Client } from 'langsmith';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isLangSmithEnabled } from '@kbn/langchain/server/tracers/langsmith';
 import { isEmpty } from 'lodash';

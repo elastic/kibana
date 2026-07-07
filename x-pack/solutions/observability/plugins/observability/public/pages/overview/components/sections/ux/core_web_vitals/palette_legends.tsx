@@ -18,7 +18,8 @@ import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
-import { getCoreVitalTooltipMessage, Thresholds } from './core_vital_item';
+import type { Thresholds } from './core_vital_item';
+import { getCoreVitalTooltipMessage } from './core_vital_item';
 import {
   LEGEND_NEEDS_IMPROVEMENT_LABEL,
   LEGEND_GOOD_LABEL,
@@ -71,7 +72,7 @@ export function PaletteLegends({ ranks, title, onItemHover, thresholds, isCls }:
             content={getCoreVitalTooltipMessage(thresholds, ind, title, ranks[ind], isCls)}
             position="bottom"
           >
-            <StyledSpan darkMode={darkMode}>
+            <StyledSpan darkMode={darkMode} tabIndex={0}>
               <PaletteLegend color={color}>
                 <EuiText size="xs" data-test-subj={`${labels[ind]}-${ranks?.[ind]}`}>
                   <FormattedMessage

@@ -24,7 +24,7 @@ describe('solutionFormatter', () => {
   it('should convert a flat navItem using normalizedLinks', () => {
     const id = 'page-1' as SecurityPageName;
     const tree: NavigationTreeDefinition = {
-      body: [{ type: 'navItem', id }],
+      body: [{ id }],
     };
 
     const normalizedLinks: NormalizedLinks = {
@@ -37,7 +37,7 @@ describe('solutionFormatter', () => {
         id,
         path: `/path/${id}`,
         title: `Title for ${id}`,
-        visibleIn: ['globalSearch', 'sideNav'],
+        visibleIn: ['globalSearch', 'projectSideNav'],
       },
     ]);
   });
@@ -46,10 +46,7 @@ describe('solutionFormatter', () => {
     const id = 'page-1' as SecurityPageName;
     const id2 = 'page-2' as SecurityPageName;
     const tree: NavigationTreeDefinition = {
-      body: [
-        { type: 'navItem', id },
-        { type: 'navItem', id: id2 },
-      ],
+      body: [{ id }, { id: id2 }],
     };
 
     const normalizedLinks: NormalizedLinks = {
@@ -62,7 +59,7 @@ describe('solutionFormatter', () => {
         id,
         path: `/path/${id}`,
         title: `Title for ${id}`,
-        visibleIn: ['globalSearch', 'sideNav'],
+        visibleIn: ['globalSearch', 'projectSideNav'],
       },
     ]);
   });
@@ -71,10 +68,7 @@ describe('solutionFormatter', () => {
     const id = 'page-1' as SecurityPageName;
     const id2 = 'page-2' as SecurityPageName;
     const tree: NavigationTreeDefinition = {
-      body: [
-        { type: 'navItem', id },
-        { type: 'navItem', id: id2 },
-      ],
+      body: [{ id }, { id: id2 }],
     };
 
     const normalizedLinks: NormalizedLinks = {
@@ -88,19 +82,16 @@ describe('solutionFormatter', () => {
         id,
         path: `/path/${id}`,
         title: `Title for ${id}`,
-        visibleIn: ['globalSearch', 'sideNav'],
+        visibleIn: ['globalSearch', 'projectSideNav'],
       },
     ]);
   });
 
-  it('should include unavailable links with sideNav visibility only', () => {
+  it('should include unavailable links with projectSideNav visibility only', () => {
     const id = 'page-1' as SecurityPageName;
     const id2 = 'page-2' as SecurityPageName;
     const tree: NavigationTreeDefinition = {
-      body: [
-        { type: 'navItem', id },
-        { type: 'navItem', id: id2 },
-      ],
+      body: [{ id }, { id: id2 }],
     };
 
     const normalizedLinks: NormalizedLinks = {
@@ -114,13 +105,13 @@ describe('solutionFormatter', () => {
         id,
         path: `/path/${id}`,
         title: `Title for ${id}`,
-        visibleIn: ['globalSearch', 'sideNav'],
+        visibleIn: ['globalSearch', 'projectSideNav'],
       },
       {
         id: id2,
         path: `/path/${id2}`,
         title: `Title for ${id2}`,
-        visibleIn: ['sideNav'],
+        visibleIn: ['projectSideNav'],
       },
     ]);
   });
@@ -130,7 +121,6 @@ describe('solutionFormatter', () => {
     const tree: NavigationTreeDefinition = {
       body: [
         {
-          type: 'navGroup',
           id: 'group-1',
           children: [{ id }],
         },
@@ -147,7 +137,7 @@ describe('solutionFormatter', () => {
         id,
         path: `/path/${id}`,
         title: `Title for ${id}`,
-        visibleIn: ['globalSearch', 'sideNav'],
+        visibleIn: ['globalSearch', 'projectSideNav'],
       },
     ]);
   });
@@ -159,7 +149,6 @@ describe('solutionFormatter', () => {
         {
           // No id — should recurse into children
           title: 'Group 1',
-          type: 'navGroup',
           children: [{ id }],
         },
       ],
@@ -175,7 +164,7 @@ describe('solutionFormatter', () => {
         id,
         path: `/path/${id}`,
         title: `Title for ${id}`,
-        visibleIn: ['globalSearch', 'sideNav'],
+        visibleIn: ['globalSearch', 'projectSideNav'],
       },
     ]);
   });
@@ -187,7 +176,6 @@ describe('solutionFormatter', () => {
     const tree: NavigationTreeDefinition = {
       body: [
         {
-          type: 'navGroup',
           children: [
             {
               id: groupId,
@@ -224,7 +212,6 @@ describe('solutionFormatter', () => {
     const tree: NavigationTreeDefinition = {
       body: [
         {
-          type: 'navGroup',
           children: [
             {
               id: parentId,
@@ -275,7 +262,7 @@ describe('solutionFormatter', () => {
 
   it('should skip nodes that are not in normalizedLinks or SecurityLinkGroup', () => {
     const tree: NavigationTreeDefinition = {
-      body: [{ type: 'navItem', id: 'unknown-id' }],
+      body: [{ id: 'unknown-id' }],
     };
 
     const normalizedLinks: NormalizedLinks = {};

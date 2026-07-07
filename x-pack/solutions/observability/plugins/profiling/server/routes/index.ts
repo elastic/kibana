@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchCapabilities,
+  ElasticsearchClient,
+} from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { ProfilingConfig } from '..';
@@ -24,6 +27,7 @@ import { registerStorageExplorerRoute } from './storage_explorer/route';
 import {
   registerTraceEventsTopNContainersSearchRoute,
   registerTraceEventsTopNDeploymentsSearchRoute,
+  registerTraceEventsTopNExecutablesSearchRoute,
   registerTraceEventsTopNHostsSearchRoute,
   registerTraceEventsTopNStackTracesSearchRoute,
   registerTraceEventsTopNThreadsSearchRoute,
@@ -38,6 +42,7 @@ export interface RouteRegisterParameters {
     config: ProfilingConfig;
     stackVersion: string;
     telemetryUsageCounter?: TelemetryUsageCounter;
+    esCapabilities: ElasticsearchCapabilities;
   };
   services: {
     createProfilingEsClient: (params: {
@@ -55,6 +60,7 @@ export function registerRoutes(params: RouteRegisterParameters) {
   registerTopNFunctionsSearchRoute(params);
   registerTraceEventsTopNContainersSearchRoute(params);
   registerTraceEventsTopNDeploymentsSearchRoute(params);
+  registerTraceEventsTopNExecutablesSearchRoute(params);
   registerTraceEventsTopNHostsSearchRoute(params);
   registerTraceEventsTopNStackTracesSearchRoute(params);
   registerTraceEventsTopNThreadsSearchRoute(params);

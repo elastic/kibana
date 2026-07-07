@@ -12,17 +12,16 @@ import {
   EuiIcon,
   EuiLoadingElastic,
   EuiLoadingSpinner,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import type { GenerationInterval } from '@kbn/elastic-assistant-common';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { Countdown } from './countdown';
 import { LoadingMessages } from './loading_messages';
 import * as i18n from './translations';
-import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 import { getIsTerminalState } from './get_is_terminal_state';
 import { useDismissAttackDiscoveryGeneration } from '../use_dismiss_attack_discovery_generations';
 
@@ -35,7 +34,6 @@ interface Props {
   alertsContextCount: number | null;
   approximateFutureTime: Date | null;
   averageSuccessfulDurationNanoseconds?: number;
-  connectorIntervals: GenerationInterval[];
   connectorName?: string;
   end?: string | null;
   executionUuid?: string;
@@ -54,7 +52,6 @@ const LoadingCalloutComponent: React.FC<Props> = ({
   alertsContextCount,
   approximateFutureTime,
   averageSuccessfulDurationNanoseconds,
-  connectorIntervals,
   connectorName,
   discoveries,
   end,
@@ -70,7 +67,6 @@ const LoadingCalloutComponent: React.FC<Props> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const isDarkMode = useKibanaIsDarkMode();
-  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
 
   const isTerminalState = useMemo(() => getIsTerminalState(status), [status]);
 
@@ -79,7 +75,7 @@ const LoadingCalloutComponent: React.FC<Props> = ({
       <EuiFlexGroup alignItems="center" data-test-subj="leftContent" gutterSize="none">
         <EuiFlexItem grow={false}>
           {isTerminalState ? (
-            <EuiIcon type="logoElastic" size="l" />
+            <EuiIcon type="logoElastic" size="l" aria-hidden={true} />
           ) : (
             <EuiLoadingElastic data-test-subj="loadingElastic" size="l" />
           )}
@@ -173,18 +169,13 @@ const LoadingCalloutComponent: React.FC<Props> = ({
     try {
       if (executionUuid != null) {
         setIsDismissing(true);
-        await dismissAttackDiscoveryGeneration({ attackDiscoveryAlertsEnabled, executionUuid });
+        await dismissAttackDiscoveryGeneration({ executionUuid });
         refetchGenerations?.(); // force a refresh of the generations list
       }
     } finally {
       setIsDismissing(false);
     }
-  }, [
-    attackDiscoveryAlertsEnabled,
-    dismissAttackDiscoveryGeneration,
-    executionUuid,
-    refetchGenerations,
-  ]);
+  }, [dismissAttackDiscoveryGeneration, executionUuid, refetchGenerations]);
 
   return (
     <div
@@ -206,37 +197,37 @@ const LoadingCalloutComponent: React.FC<Props> = ({
                 <Countdown
                   approximateFutureTime={approximateFutureTime}
                   averageSuccessfulDurationNanoseconds={averageSuccessfulDurationNanoseconds}
-                  connectorIntervals={connectorIntervals}
                   successfulGenerations={successfulGenerations}
                 />
               </EuiFlexItem>
             )}
 
-            {attackDiscoveryAlertsEnabled && (
-              <EuiFlexItem
-                css={css`
-                  margin-left: ${euiTheme.size.m};
-                `}
-                grow={false}
-              >
-                {isDismissing ? (
-                  <EuiLoadingSpinner
-                    data-test-subj="loadingSpinner"
-                    size="m"
-                    css={css`
-                      color: ${euiTheme.colors.text};
-                    `}
-                  />
-                ) : (
+            <EuiFlexItem
+              css={css`
+                margin-left: ${euiTheme.size.m};
+              `}
+              grow={false}
+            >
+              {isDismissing ? (
+                <EuiLoadingSpinner
+                  data-test-subj="loadingSpinner"
+                  size="m"
+                  css={css`
+                    color: ${euiTheme.colors.text};
+                  `}
+                />
+              ) : (
+                <EuiToolTip content={i18n.CLOSE} disableScreenReaderOutput>
                   <EuiButtonIcon
                     aria-label={i18n.CLOSE}
                     disabled={isDismissing}
                     iconType="cross"
                     onClick={dismissGeneration}
+                    data-test-subj="dismissButton"
                   />
-                )}
-              </EuiFlexItem>
-            )}
+                </EuiToolTip>
+              )}
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

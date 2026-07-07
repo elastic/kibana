@@ -8,15 +8,17 @@
  */
 
 import { identity } from 'lodash';
-import { FieldFormat, IFieldFormatsRegistry } from '.';
+import type { IFieldFormatsRegistry } from '.';
+import { FieldFormat } from '.';
 
 export const fieldFormatsMock: IFieldFormatsRegistry = {
   getByFieldType: jest.fn(),
   getDefaultConfig: jest.fn(),
   getDefaultInstance: jest.fn().mockImplementation(() => ({
     type: { id: 'bytes' },
-    convert: jest.fn().mockImplementation((t: string) => t),
-    getConverterFor: jest.fn().mockImplementation(() => (t: string) => t),
+    convertToText: jest.fn().mockImplementation((t: string) => t),
+    convertToReact: jest.fn().mockImplementation((t: unknown) => t),
+    toJSON: jest.fn(),
   })),
   getDefaultInstanceCacheResolver: jest.fn(),
   getDefaultInstancePlain: jest.fn(),

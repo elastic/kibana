@@ -14,11 +14,14 @@ import { renderMutation } from '../../../../../management/hooks/test_utils';
 import { useInvalidateFindAttackDiscoverySchedule } from './use_find_schedules';
 import { deleteAttackDiscoverySchedule } from '../api';
 import { useInvalidateGetAttackDiscoverySchedule } from './use_get_schedule';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttackDiscoverySchedulesEventTypes } from '../../../../../common/lib/telemetry';
 
 jest.mock('./use_find_schedules');
 jest.mock('./use_get_schedule');
 jest.mock('../api');
 jest.mock('../../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../../common/lib/kibana');
 
 const deleteAttackDiscoveryScheduleMock = deleteAttackDiscoverySchedule as jest.MockedFunction<
   typeof deleteAttackDiscoverySchedule
@@ -38,9 +41,19 @@ const mockUseInvalidateGetAttackDiscoverySchedule =
 
 describe('useDeleteAttackDiscoverySchedule', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  let reportEventMock: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    reportEventMock = jest.fn();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        telemetry: {
+          reportEvent: reportEventMock,
+        },
+      },
+    });
 
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
@@ -66,17 +79,23 @@ describe('useDeleteAttackDiscoverySchedule', () => {
 
     await act(async () => {
       await result.mutateAsync({ id: 'test-0' });
-      expect(deleteAttackDiscoveryScheduleMock).toHaveBeenCalledWith({ id: 'test-0' });
+      expect(deleteAttackDiscoveryScheduleMock).toHaveBeenCalledWith({
+        id: 'test-0',
+      });
     });
   });
 
-  it('should invoke `addSuccess`', async () => {
+  it('should invoke `addSuccess` and `reportEvent`', async () => {
     const result = await renderMutation(() => useDeleteAttackDiscoverySchedule());
 
     await act(async () => {
       await result.mutateAsync({ id: 'test-1' });
       expect(appToastsMock.addSuccess).toHaveBeenCalledWith(
         '1 attack discovery schedule deleted successfully.'
+      );
+      expect(reportEventMock).toHaveBeenCalledWith(
+        AttackDiscoverySchedulesEventTypes.DeleteSuccess,
+        {}
       );
     });
   });
@@ -99,7 +118,7 @@ describe('useDeleteAttackDiscoverySchedule', () => {
     });
   });
 
-  it('should invoke `addError`', async () => {
+  it('should invoke `addError` and `reportEvent`', async () => {
     deleteAttackDiscoveryScheduleMock.mockRejectedValue('Royally failed!');
 
     const result = await renderMutation(() => useDeleteAttackDiscoverySchedule());
@@ -111,6 +130,10 @@ describe('useDeleteAttackDiscoverySchedule', () => {
         expect(appToastsMock.addError).toHaveBeenCalledWith('Royally failed!', {
           title: 'Failed to delete 1 attack discovery schedule',
         });
+        expect(reportEventMock).toHaveBeenCalledWith(
+          AttackDiscoverySchedulesEventTypes.DeleteFailed,
+          {}
+        );
       }
     });
   });

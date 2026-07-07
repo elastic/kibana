@@ -1,24 +1,20 @@
 # VALUES
 
-The VALUES function returns all values in a group as a multivalued field.
+The VALUES function returns the unique values from a field as a multivalued field. The order of the returned values is not guaranteed. If you need the values in a specific order, use the `MV_SORT` function.
 
 ## Syntax
 
-`VALUES (field)`
+`VALUES(field)`
 
 ### Parameters
 
 #### field
 
-The field for which all values are to be returned.
-
-## Description
-
-The VALUES function is used to return all values in a group as a multivalued field. It's important to note that the order of the returned values is not guaranteed. If you need the values returned in a specific order, you should use the `MV_SORT` function.
+The field from which to extract unique values.
 
 ## Examples
 
-The following example demonstrates how to use the VALUES function:
+Extracts the first letter from each employee's first name, then groups employees by this letter and collects all unique first names for each group, sorting them alphabetically.
 
 ```esql
 FROM employees
@@ -29,4 +25,4 @@ FROM employees
 
 ## Limitations
 
-- The VALUES function can consume a significant amount of memory. ES|QL does not currently support growing aggregations beyond memory. Therefore, if the function collects more values than can fit into memory, it will fail the query with a Circuit Breaker Error.
+This function can use a significant amount of memory. Aggregations do not grow beyond available memory, so if the number of collected values exceeds memory limits, the query will fail with a Circuit Breaker Error. If you need to keep repeated values, use the `TOP` function instead.

@@ -17,6 +17,7 @@ import type {
 export interface FleetConfigType {
   enabled: boolean;
   isAirGapped?: boolean;
+  productVersionsApiTimeoutMs?: number;
   registryUrl?: string;
   registryProxyUrl?: string;
   agents: {
@@ -59,6 +60,7 @@ export interface FleetConfigType {
   agentIdVerificationEnabled?: boolean;
   eventIngestedEnabled?: boolean;
   enableExperimental?: string[];
+  experimentalFeatures?: { [k: string]: boolean };
   enableManagedLogsAndMetricsDataviews?: boolean;
   packageVerification?: {
     gpgKeyPath?: string;
@@ -66,6 +68,14 @@ export interface FleetConfigType {
   setup?: {
     agentPolicySchemaUpgradeBatchSize?: number;
     uninstallTokenVerificationBatchSize?: number;
+  };
+  startupOptimization?: {
+    deferPackageBumpInstallVersion?: boolean;
+    maxConcurrentPackageOperations?: number;
+    packageUpgradeBatchSize?: number;
+  };
+  packageInstallation?: {
+    maxConcurrentDatastreamOperations?: number;
   };
   developer?: {
     maxAgentPoliciesWithInactivityTimeout?: number;
@@ -89,7 +99,9 @@ export interface FleetConfigType {
         max?: string;
       };
       excludePackages: string[];
+      searchAiLakePackageAllowlistEnabled?: boolean;
     };
+    excludeDataStreamTypes?: string[];
   };
   createArtifactsBulkBatchSize?: number;
   autoUpgrades?: {
@@ -99,9 +111,29 @@ export interface FleetConfigType {
   syncIntegrations?: {
     taskInterval?: string;
   };
+  autoInstallContentPackages?: {
+    taskInterval?: string;
+  };
+  agentStatusChange?: {
+    taskInterval?: string;
+  };
   integrationsHomeOverride?: string;
   prereleaseEnabledByDefault?: boolean;
   hideDashboards?: boolean;
+  integrationRollbackTTL?: string;
+  installIntegrationsKnowledge?: boolean;
+  fleetPolicyRevisionsCleanup?: {
+    maxRevisions: number;
+    interval: string;
+    maxPoliciesPerRun: number;
+  };
+  versionSpecificPolicyAssignment?: {
+    taskInterval?: string;
+  };
+  unenrollInactiveAgents?: {
+    taskInterval?: string;
+    gracePeriodMs?: number;
+  };
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

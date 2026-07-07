@@ -6,28 +6,28 @@
  */
 
 import React, { useCallback, useEffect, useRef } from 'react';
-import { Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
 import { useDispatch, useSelector } from 'react-redux';
 import { areFiltersEmpty } from '../common/utils';
 import { getOverviewStore } from './redux_store';
 import { ShowSelectedFilters } from '../common/show_selected_filters';
+import type { OverviewView } from '../../synthetics/state';
 import {
-  OverviewView,
   selectOverviewTrends,
   setFlyoutConfig,
   setOverviewPageStateAction,
   trendStatsBatch,
 } from '../../synthetics/state';
-import { MonitorFilters } from './types';
 import { EmbeddablePanelWrapper } from '../../synthetics/components/common/components/embeddable_panel_wrapper';
 import { SyntheticsEmbeddableContext } from '../synthetics_embeddable_context';
 import { OverviewGrid } from '../../synthetics/components/monitors_page/overview/overview/overview_grid';
 import { useMonitorsSortedByStatus } from '../../synthetics/hooks/use_monitors_sorted_by_status';
 import { MetricItem } from '../../synthetics/components/monitors_page/overview/overview/metric_item/metric_item';
-import { FlyoutParamProps } from '../../synthetics/components/monitors_page/overview/overview/types';
+import type { FlyoutParamProps } from '../../synthetics/components/monitors_page/overview/overview/types';
 import { MaybeMonitorDetailsFlyout } from '../../synthetics/components/monitors_page/overview/overview/monitor_detail_flyout';
 import { useOverviewStatus } from '../../synthetics/components/monitors_page/hooks/use_overview_status';
 import { OverviewLoader } from '../../synthetics/components/monitors_page/overview/overview/overview_loader';
+import type { MonitorFilters } from '../../../../common/types';
 
 export const StatusGridComponent = ({
   reload$,
@@ -42,7 +42,7 @@ export const StatusGridComponent = ({
 
   const hasFilters = !areFiltersEmpty(filters);
   const singleMonitor =
-    filters && filters.locations.length === 1 && filters.monitorIds.length === 1;
+    filters && filters.locations?.length === 1 && filters.monitor_ids?.length === 1;
 
   const monitorOverviewListComponent = (
     <SyntheticsEmbeddableContext reload$={reload$} reduxStore={overviewStore.current}>
@@ -86,12 +86,19 @@ const SingleMonitorView = () => {
   const monitor = monitorsSortedByStatus.length === 1 ? monitorsSortedByStatus[0] : undefined;
 
   useEffect(() => {
-    if (monitor && !trendData[monitor.configId + monitor.locationId]) {
+    if (!monitor) return;
+    // Trends are cached per `${configId}${locationId}`. Only fetch the
+    // locations that aren't already in the cache so multi-location monitors
+    // don't get skipped after the first location resolves.
+    const missingLocationIds = monitor.locations
+      .filter((loc) => trendData[monitor.configId + loc.id] === undefined)
+      .map((loc) => loc.id);
+    if (missingLocationIds.length) {
       dispatch(
         trendStatsBatch.get([
           {
             configId: monitor.configId,
-            locationId: monitor.locationId,
+            locationIds: missingLocationIds,
             schedule: monitor.schedule,
           },
         ])
@@ -99,7 +106,7 @@ const SingleMonitorView = () => {
     }
   }, [dispatch, monitor, trendData]);
 
-  const style = { height: '100%' };
+  const style = { height: '100%', overflow: 'hidden' };
 
   if (!monitor) return <OverviewLoader rows={1} columns={1} style={style} />;
 
@@ -121,15 +128,18 @@ const MonitorsOverviewList = ({
   view: OverviewView;
 }) => {
   const dispatch = useDispatch();
+
+  useOverviewStatus({ scopeStatusByLocation: true });
+
   useEffect(() => {
     if (!filters) return;
     dispatch(
       setOverviewPageStateAction({
-        tags: filters.tags.map((tag) => tag.value),
-        locations: filters.locations.map((location) => location.value),
-        monitorTypes: filters.monitorTypes.map((monitorType) => monitorType.value),
-        monitorQueryIds: filters.monitorIds.map((monitorId) => monitorId.value),
-        projects: filters.projects.map((project) => project.value),
+        tags: filters.tags?.map((tag) => tag.value) ?? [],
+        locations: filters.locations?.map((location) => location.value) ?? [],
+        monitorTypes: filters.monitor_types?.map((monitorType) => monitorType.value) ?? [],
+        monitorQueryIds: filters.monitor_ids?.map((monitorId) => monitorId.value) ?? [],
+        projects: filters.projects?.map((project) => project.value) ?? [],
       })
     );
   }, [dispatch, filters]);

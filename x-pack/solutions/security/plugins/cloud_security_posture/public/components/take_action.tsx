@@ -15,13 +15,15 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiText,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { HttpSetup } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n as kbnI18n } from '@kbn/i18n';
-import { QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { QueryClient } from '@kbn/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import {
   CREATE_DETECTION_FROM_TABLE_ROW_ACTION,
   uiMetricService,
@@ -31,7 +33,7 @@ import type { RuleResponse } from '@kbn/cloud-security-posture-common';
 import { CREATE_RULE_ACTION_SUBJ, TAKE_ACTION_SUBJ } from './test_subjects';
 import { useKibana } from '../common/hooks/use_kibana';
 import { DETECTION_ENGINE_ALERTS_KEY, DETECTION_ENGINE_RULES_KEY } from '../common/constants';
-import { CloudSecurityPostureStartServices } from '../types';
+import type { CloudSecurityPostureStartServices } from '../types';
 
 const RULE_PAGE_PATH = '/app/security/rules/id/';
 
@@ -139,22 +141,29 @@ export const TakeAction = ({
     <EuiButton
       isLoading={isLoading}
       fill
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={() => setPopoverOpen(!isPopoverOpen)}
     >
       <FormattedMessage id="xpack.csp.flyout.takeActionButton" defaultMessage="Take action" />
     </EuiButton>
   ) : (
-    <EuiButtonIcon
-      aria-label={kbnI18n.translate('xpack.csp.flyout.moreActionsButton', {
+    <EuiToolTip
+      content={kbnI18n.translate('xpack.csp.flyout.moreActionsButton', {
         defaultMessage: 'More actions',
       })}
-      iconType="boxesHorizontal"
-      color="primary"
-      isLoading={isLoading}
-      onClick={() => setPopoverOpen(!isPopoverOpen)}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        aria-label={kbnI18n.translate('xpack.csp.flyout.moreActionsButton', {
+          defaultMessage: 'More actions',
+        })}
+        iconType="boxesVertical"
+        color="primary"
+        isLoading={isLoading}
+        onClick={() => setPopoverOpen(!isPopoverOpen)}
+      />
+    </EuiToolTip>
   );
   const actionsItems = [];
 
@@ -198,7 +207,7 @@ export const TakeAction = ({
       anchorPosition="downLeft"
       data-test-subj={TAKE_ACTION_SUBJ}
     >
-      <EuiContextMenuPanel size="s" items={actionsItems} />
+      <EuiContextMenuPanel items={actionsItems} />
     </EuiPopover>
   );
 };

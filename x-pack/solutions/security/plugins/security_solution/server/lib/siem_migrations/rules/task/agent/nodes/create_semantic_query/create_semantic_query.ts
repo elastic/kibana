@@ -6,12 +6,11 @@
  */
 
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import type { ChatModel } from '../../../util/actions_client_chat';
-import type { GraphNode } from '../../types';
+import type { GraphNode, MigrateRuleGraphParams } from '../../types';
 import { CREATE_SEMANTIC_QUERY_PROMPT } from './prompts';
 
 interface GetCreateSemanticQueryNodeParams {
-  model: ChatModel;
+  model: MigrateRuleGraphParams['model'];
 }
 
 interface GetSemanticQueryResponse {
@@ -22,17 +21,20 @@ export const getCreateSemanticQueryNode = ({
   model,
 }: GetCreateSemanticQueryNodeParams): GraphNode => {
   const jsonParser = new JsonOutputParser();
-  const semanticQueryChain = CREATE_SEMANTIC_QUERY_PROMPT.pipe(model).pipe(jsonParser);
   return async (state) => {
-    const query = state.original_rule.query;
-    const integrationQuery = (await semanticQueryChain.invoke({
-      title: state.original_rule.title,
-      description: state.original_rule.description,
-      query,
-    })) as GetSemanticQueryResponse;
-    if (!integrationQuery.semantic_query) {
-      return {};
-    }
+    const ruleContext =
+      state.nl_query ||
+      `Title: ${state.original_rule.title}\nDescription: ${state.original_rule.description}\nQuery: ${state.original_rule.query}`;
+
+    const promptTemplate = await CREATE_SEMANTIC_QUERY_PROMPT.formatMessages({
+      ruleContext,
+    });
+
+    const semanticQueryChain = model.pipe(jsonParser);
+
+    const integrationQuery = (await semanticQueryChain.invoke([
+      ...promptTemplate,
+    ])) as unknown as GetSemanticQueryResponse;
 
     return { semantic_query: integrationQuery.semantic_query };
   };

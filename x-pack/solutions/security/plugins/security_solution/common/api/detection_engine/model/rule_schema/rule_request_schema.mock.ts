@@ -14,6 +14,7 @@ import type {
   EsqlRuleCreateProps,
   SavedQueryRuleCreateProps,
   ThreatMatchRuleCreateProps,
+  ThreatMatchRuleUpdateProps,
   ThresholdRuleCreateProps,
   NewTermsRuleCreateProps,
   NewTermsRuleUpdateProps,
@@ -27,6 +28,7 @@ export const getCreateRulesSchemaMock = (ruleId = 'rule-1'): QueryRuleCreateProp
   severity: 'high',
   type: 'query',
   risk_score: 55,
+  max_signals: 100,
   language: 'kuery',
   rule_id: ruleId,
 });
@@ -39,6 +41,7 @@ export const getCreateRulesSchemaMockWithDataView = (ruleId = 'rule-1'): QueryRu
   severity: 'high',
   type: 'query',
   risk_score: 55,
+  max_signals: 100,
   language: 'kuery',
   rule_id: ruleId,
 });
@@ -53,6 +56,7 @@ export const getCreateSavedQueryRulesSchemaMock = (
   type: 'saved_query',
   saved_id: 'some id',
   risk_score: 55,
+  max_signals: 100,
   language: 'kuery',
   rule_id: ruleId,
 });
@@ -68,6 +72,7 @@ export const getCreateThreatMatchRulesSchemaMock = (
   query: 'user.name: root or user.name: admin',
   severity: 'high',
   type: 'threat_match',
+  max_signals: 100,
   risk_score: 55,
   language: 'kuery',
   rule_id: ruleId,
@@ -114,6 +119,7 @@ export const getCreateMachineLearningRulesSchemaMock = (
   name: 'Query with a rule id',
   severity: 'high',
   risk_score: 55,
+  max_signals: 100,
   rule_id: ruleId,
   type: 'machine_learning',
   anomaly_threshold: 58,
@@ -125,6 +131,7 @@ export const getCreateThresholdRulesSchemaMock = (ruleId = 'rule-1'): ThresholdR
   name: 'Query with a rule id',
   severity: 'high',
   risk_score: 55,
+  max_signals: 100,
   rule_id: ruleId,
   type: 'threshold',
   query: 'user.name: root or user.name: admin',
@@ -145,6 +152,7 @@ export const getCreateNewTermsRulesSchemaMock = (
   query: '*',
   severity: 'high',
   type: 'new_terms',
+  max_signals: 100,
   risk_score: 55,
   language: 'kuery',
   rule_id: ruleId,
@@ -163,6 +171,7 @@ export const getCreateEsqlRulesSchemaMock = (
   name: 'Query with a rule id',
   query: 'from auditbeat-* | where user.name=="root" or user.name=="admin"',
   severity: 'high',
+  max_signals: 100,
   type: 'esql',
   risk_score: 55,
   language: 'esql',
@@ -178,6 +187,7 @@ export const getUpdateRulesSchemaMock = (
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',
   severity: 'high',
+  max_signals: 100,
   type: 'query',
   risk_score: 55,
   language: 'kuery',
@@ -191,6 +201,7 @@ export const getUpdateMachineLearningSchemaMock = (
   name: 'Query with a rule id',
   severity: 'high',
   risk_score: 55,
+  max_signals: 100,
   id,
   type: 'machine_learning',
   anomaly_threshold: 58,
@@ -207,6 +218,7 @@ export const getUpdateNewTermsSchemaMock = (
   severity: 'high',
   type: 'new_terms',
   risk_score: 55,
+  max_signals: 100,
   language: 'kuery',
   id,
   interval: '5m',
@@ -215,12 +227,44 @@ export const getUpdateNewTermsSchemaMock = (
   history_window_start: 'now-7d',
 });
 
+export const getUpdateThreatMatchRuleSchemaMock = (
+  id = '04128c15-0d1b-4716-a4c5-46997ac7f3bd'
+): ThreatMatchRuleUpdateProps => ({
+  description: 'Detecting root and admin users',
+  id,
+  index: ['auditbeat-*'],
+  name: 'Query with a rule id',
+  query: 'user.name: root or user.name: admin',
+  severity: 'high',
+  type: 'threat_match',
+  risk_score: 55,
+  max_signals: 100,
+  language: 'kuery',
+  threat_query: '*:*',
+  threat_index: ['auditbeat-*'],
+  threat_indicator_path: DEFAULT_INDICATOR_SOURCE_PATH,
+  interval: '5m',
+  from: 'now-6m',
+  threat_mapping: [
+    {
+      entries: [
+        {
+          field: 'host.name',
+          value: 'host.name',
+          type: 'mapping',
+        },
+      ],
+    },
+  ],
+});
+
 export const getCreateEqlRuleSchemaMock = (ruleId = 'rule-1'): EqlRuleCreateProps => ({
   description: 'Event correlation index pattern rule',
   name: 'Event correlation index pattern rule',
   index: ['auditbeat-*'],
   severity: 'high',
   risk_score: 55,
+  max_signals: 100,
   rule_id: ruleId,
   type: 'eql',
   language: 'eql',

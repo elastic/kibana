@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Interpolation, Theme } from '@emotion/react';
+import type { FC } from 'react';
+import React from 'react';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import type { Interpolation, Theme } from '@emotion/react';
+import * as i18n from '../translations';
 import { textWithEditContainerCss } from './text_with_edit.styles';
 interface TextWithEditProps {
   isReadonly: boolean;
@@ -33,12 +35,14 @@ const TextWithEditComponent: FC<TextWithEditProps> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false} component="span">
         {isReadonly ? null : (
-          <EuiButtonIcon
-            data-test-subj={`${dataTestSubj || ''}EditIcon`}
-            aria-label="Edit Text List Header"
-            iconType="pencil"
-            onClick={() => (typeof onEdit === 'function' ? onEdit() : null)}
-          />
+          <EuiToolTip content={i18n.TEXT_WITH_EDIT_ARIA_LABEL} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj={`${dataTestSubj || ''}EditIcon`}
+              aria-label={i18n.TEXT_WITH_EDIT_ARIA_LABEL}
+              iconType="pencil"
+              onClick={() => (typeof onEdit === 'function' ? onEdit() : null)}
+            />
+          </EuiToolTip>
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

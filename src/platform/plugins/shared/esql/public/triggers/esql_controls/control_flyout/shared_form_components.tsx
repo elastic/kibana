@@ -10,14 +10,15 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { ESQLControlVariable, EsqlControlType } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import { EsqlControlType } from '@kbn/esql-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import {
   EuiFieldText,
   EuiFormRow,
-  EuiComboBox,
-  type EuiComboBoxOptionOption,
+  EuiSuperSelect,
+  EuiRadioGroup,
   EuiButtonGroup,
   EuiSpacer,
   EuiSwitch,
@@ -27,6 +28,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  EuiLink,
   EuiFlyoutHeader,
   EuiTitle,
   EuiBetaBadge,
@@ -34,7 +36,12 @@ import {
   EuiText,
   EuiTextColor,
   EuiCode,
+  EuiCallOut,
+  useEuiTheme,
+  useEuiMemoizedStyles,
 } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ServiceDeps } from '../../../kibana_services';
 import { checkVariableExistence } from './helpers';
 
 const controlTypeOptions = [
@@ -75,6 +82,21 @@ const minimumWidthButtonGroup = [
   },
 ];
 
+const selectionTypeOptions = [
+  {
+    id: 'single',
+    label: i18n.translate('esql.flyout.selectionType.single', {
+      defaultMessage: 'Only allow a single selection',
+    }),
+  },
+  {
+    id: 'multi',
+    label: i18n.translate('esql.flyout.selectionType.multi', {
+      defaultMessage: 'Allow multiple selections',
+    }),
+  },
+];
+
 export function ControlType({
   isDisabled,
   initialControlFlyoutType,
@@ -84,19 +106,11 @@ export function ControlType({
   initialControlFlyoutType: EsqlControlType;
   onFlyoutTypeChange?: (flyoutType: EsqlControlType) => void;
 }) {
-  const controlFlyoutType = controlTypeOptions.find(
-    (option) => option.key === initialControlFlyoutType
-  )!;
-
-  const onTypeChange = useCallback(
-    (selectedOptions: EuiComboBoxOptionOption[]) => {
-      const flyoutType = controlTypeOptions.find(
-        (option) => option.key === selectedOptions[0].key
-      )!;
-      onFlyoutTypeChange?.(flyoutType.key);
-    },
-    [onFlyoutTypeChange]
-  );
+  const superSelectOptions = controlTypeOptions.map((opt) => ({
+    value: opt.key,
+    inputDisplay: opt.label,
+    'data-test-subj': opt['data-test-subj'],
+  }));
 
   return (
     <>
@@ -116,22 +130,15 @@ export function ControlType({
           })}
           fullWidth
         >
-          <EuiComboBox
-            aria-label={i18n.translate('esql.flyout.controlTypeOptionsOptions.placeholder', {
-              defaultMessage: 'Select a control type',
-            })}
-            placeholder={i18n.translate('esql.flyout.controlTypeOptionsOptions.placeholder', {
-              defaultMessage: 'Select a control type',
-            })}
-            singleSelection={{ asPlainText: true }}
-            options={controlTypeOptions}
-            selectedOptions={[controlFlyoutType]}
-            onChange={onTypeChange}
+          <EuiSuperSelect
+            options={superSelectOptions}
+            valueOfSelected={initialControlFlyoutType}
+            onChange={(value) => onFlyoutTypeChange?.(value)}
             fullWidth
-            isDisabled={isDisabled}
+            disabled={isDisabled}
             compressed
             data-test-subj="esqlControlTypeDropdown"
-            inputPopoverProps={{
+            popoverProps={{
               'data-test-subj': 'esqlControlTypeInputPopover',
             }}
           />
@@ -217,6 +224,7 @@ export function VariableName({
           data-test-subj="esqlVariableName"
           fullWidth
           compressed
+          tabIndex={0}
         />
       </EuiToolTip>
     </EuiFormRow>
@@ -230,6 +238,8 @@ export function ControlLabel({
   label: string;
   onLabelChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
+  const theme = useEuiTheme();
+
   return (
     <EuiFormRow
       label={i18n.translate('esql.flyout.label.label', {
@@ -245,6 +255,9 @@ export function ControlLabel({
         </EuiText>
       }
       fullWidth
+      css={css`
+        margin-block-start: ${theme.euiTheme.size.base};
+      `}
     >
       <EuiFieldText
         placeholder={i18n.translate('esql.flyout.label.placeholder', {
@@ -266,11 +279,13 @@ export function ControlLabel({
 export function ControlWidth({
   minimumWidth,
   grow,
+  hideFitToSpace,
   onMinimumSizeChange,
   onGrowChange,
 }: {
   minimumWidth: string;
   grow: boolean;
+  hideFitToSpace: boolean;
   onMinimumSizeChange: (id: string) => void;
   onGrowChange: (e: EuiSwitchEvent) => void;
 }) {
@@ -294,34 +309,117 @@ export function ControlWidth({
           data-test-subj="esqlControlMinimumWidth"
         />
       </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiSwitch
-        compressed
-        label={i18n.translate('esql.flyout.grow.label', {
-          defaultMessage: 'Expand width to fit available space',
-        })}
-        color="primary"
-        checked={grow ?? false}
-        onChange={(e) => onGrowChange(e)}
-        data-test-subj="esqlControlGrow"
-      />
+      {!hideFitToSpace && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiSwitch
+            compressed
+            label={i18n.translate('esql.flyout.grow.label', {
+              defaultMessage: 'Expand width to fit available space',
+            })}
+            color="primary"
+            checked={grow ?? false}
+            onChange={(e) => onGrowChange(e)}
+            data-test-subj="esqlControlGrow"
+          />
+        </>
+      )}
     </>
   );
 }
 
-export function Header({ isInEditMode }: { isInEditMode: boolean }) {
+export function ControlSelectionType({
+  singleSelect,
+  onSelectionTypeChange,
+}: {
+  singleSelect: boolean;
+  onSelectionTypeChange: (isSingleSelect: boolean) => void;
+}) {
+  const theme = useEuiTheme();
+  const {
+    services: { docLinks },
+  } = useKibana<ServiceDeps>();
+  const multiValuesGuideLink = docLinks?.links.query.queryESQLMultiValueControls ?? '';
+  const mvIntersectsLink = docLinks?.links.query.queryESQLMvIntersects ?? '';
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <EuiFormRow
+        label={i18n.translate('esql.flyout.selectionType.label', {
+          defaultMessage: 'Selections',
+        })}
+        fullWidth
+      >
+        <EuiRadioGroup
+          compressed
+          options={selectionTypeOptions}
+          idSelected={singleSelect ? 'single' : 'multi'}
+          onChange={(id) => {
+            const newSingleSelect = id === 'single';
+            onSelectionTypeChange(newSingleSelect);
+          }}
+          name="selectionType"
+          data-test-subj="esqlControlSelectionType"
+        />
+      </EuiFormRow>
+      {!singleSelect ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="primary"
+            iconType="info"
+            css={css`
+              .euiText {
+                color: ${theme.euiTheme.colors.textPrimary} !important;
+              }
+            `}
+          >
+            <EuiText size="s">
+              <FormattedMessage
+                id="esql.flyout.selectionType.callout"
+                defaultMessage="You must use {mvContainsLink} or {mvIntersectsLink} in your ES|QL query for multi-select controls to work."
+                values={{
+                  mvContainsLink: (
+                    <EuiLink href={multiValuesGuideLink} target="_blank">
+                      MV_CONTAINS
+                    </EuiLink>
+                  ),
+                  mvIntersectsLink: (
+                    <EuiLink href={mvIntersectsLink} target="_blank">
+                      MV_INTERSECTS
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </EuiText>
+          </EuiCallOut>
+        </>
+      ) : null}
+    </>
+  );
+}
+
+export function Header({
+  isInEditMode,
+  ariaLabelledBy,
+}: {
+  isInEditMode: boolean;
+  ariaLabelledBy: string;
+}) {
   return (
     <EuiFlyoutHeader hasBorder>
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h2>
+            <h2 id={ariaLabelledBy}>
               {isInEditMode
                 ? i18n.translate('esql.flyout.editTitle', {
-                    defaultMessage: 'Edit ES|QL control',
+                    defaultMessage: 'Edit variable control',
                   })
                 : i18n.translate('esql.flyout.title', {
-                    defaultMessage: 'Create ES|QL control',
+                    defaultMessage: 'Create variable control',
                   })}
             </h2>
           </EuiTitle>
@@ -337,8 +435,9 @@ export function Header({ isInEditMode }: { isInEditMode: boolean }) {
           >
             <EuiBetaBadge
               label=""
-              iconType="beaker"
+              iconType="flask"
               size="s"
+              tabIndex={0}
               css={css`
                 vertical-align: middle;
               `}
@@ -351,20 +450,20 @@ export function Header({ isInEditMode }: { isInEditMode: boolean }) {
 }
 
 export function Footer({
-  isControlInEditMode,
-  variableName,
-  onCancelControl,
+  type,
   isSaveDisabled,
   closeFlyout,
   onCreateControl,
+  onCancelControl,
 }: {
-  isControlInEditMode: boolean;
-  variableName: string;
+  type: EsqlControlType;
   isSaveDisabled: boolean;
   closeFlyout: () => void;
   onCreateControl: () => void;
   onCancelControl?: () => void;
 }) {
+  const disabledTooltipAnchorStyle = useEuiMemoizedStyles(() => css({ cursor: 'not-allowed' }));
+
   const onCancel = useCallback(() => {
     closeFlyout();
     onCancelControl?.();
@@ -389,21 +488,37 @@ export function Footer({
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            onClick={onCreateControl}
-            fill
-            aria-label={i18n.translate('esql.flyout..applyFlyoutAriaLabel', {
-              defaultMessage: 'Apply changes',
-            })}
-            disabled={isSaveDisabled}
-            color="primary"
-            iconType="check"
-            data-test-subj="saveEsqlControlsFlyoutButton"
+          <EuiToolTip
+            anchorProps={{ css: isSaveDisabled ? disabledTooltipAnchorStyle : undefined }}
+            content={
+              !isSaveDisabled
+                ? undefined
+                : type === EsqlControlType.STATIC_VALUES
+                ? i18n.translate('esql.flyout.staticValues.saveTooltip', {
+                    defaultMessage: 'Add at least one value to save.',
+                  })
+                : i18n.translate('esql.flyout.valuesFromQuery.saveTooltip', {
+                    defaultMessage: 'Add a valid query to save.',
+                  })
+            }
           >
-            {i18n.translate('esql.flyout.saveLabel', {
-              defaultMessage: 'Save',
-            })}
-          </EuiButton>
+            <EuiButton
+              onClick={onCreateControl}
+              fill
+              aria-label={i18n.translate('esql.flyout..applyFlyoutAriaLabel', {
+                defaultMessage: 'Apply changes',
+              })}
+              disabled={isSaveDisabled}
+              hasAriaDisabled={isSaveDisabled}
+              color="primary"
+              iconType="check"
+              data-test-subj="saveEsqlControlsFlyoutButton"
+            >
+              {i18n.translate('esql.flyout.saveLabel', {
+                defaultMessage: 'Save',
+              })}
+            </EuiButton>
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { ResolvedCase } from './types';
 import * as i18n from './translations';
 import { useToasts } from '../common/lib/kibana';
@@ -17,7 +17,7 @@ export const useGetCase = (caseId: string) => {
   const toasts = useToasts();
   return useQuery<ResolvedCase, ServerError>(
     casesQueriesKeys.case(caseId),
-    ({ signal }) => resolveCase({ caseId, signal }),
+    ({ signal }) => resolveCase({ caseId, signal, mode: 'unified' }),
     {
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {

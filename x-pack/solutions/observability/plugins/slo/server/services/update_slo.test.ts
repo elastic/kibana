@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
   httpServiceMock,
   loggingSystemMock,
-  ScopedClusterClientMock,
 } from '@kbn/core/server/mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
-import { UpdateSLOParams } from '@kbn/slo-schema';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import type { UpdateSLOParams } from '@kbn/slo-schema';
 import { cloneDeep, omit, pick } from 'lodash';
 
-import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   getSLOSummaryTransformId,
   getSLOTransformId,
@@ -23,7 +23,7 @@ import {
   SLO_RESOURCES_VERSION,
   SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
-import { SLODefinition } from '../domain/models';
+import type { SLODefinition } from '../domain/models';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import {
   createAPMTransactionErrorRateIndicator,
@@ -36,12 +36,12 @@ import {
   createSummaryTransformManagerMock,
   createTransformManagerMock,
 } from './mocks';
-import { SLORepository } from './slo_repository';
-import { TransformManager } from './transform_manager';
+import type { SLODefinitionRepository } from './slo_definition_repository';
+import type { TransformManager } from './transform_manager';
 import { UpdateSLO } from './update_slo';
 
 describe('UpdateSLO', () => {
-  let mockRepository: jest.Mocked<SLORepository>;
+  let mockRepository: jest.Mocked<SLODefinitionRepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
   let mockScopedClusterClient: ScopedClusterClientMock;
   let mockLogger: jest.Mocked<MockedLogger>;
@@ -359,6 +359,35 @@ describe('UpdateSLO', () => {
 
       expectInstallationOfUpdatedSLOResources();
       expectDeletionOfOriginalSLOResources(slo);
+    });
+
+    // SDH #6202: previously the catch block in deleteOriginalSLO swallowed
+    // failures silently, leaving stale transforms running and feeding orphan
+    // summary documents into the summary index.
+    it('logs an error but does not throw when cleanup of the previous revision fails', async () => {
+      const slo = createSLO();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const originalRollupTransformId = getSLOTransformId(slo.id, slo.revision);
+      mockTransformManager.uninstall.mockImplementation(async (id) => {
+        if (id === originalRollupTransformId) {
+          throw new Error('boom: ES transient failure while uninstalling old transform');
+        }
+      });
+
+      await expect(
+        updateSLO.execute(slo.id, {
+          indicator: createAPMTransactionErrorRateIndicator(),
+        })
+      ).resolves.not.toThrow();
+
+      expectInstallationOfUpdatedSLOResources();
+
+      const warnMessages = mockLogger.warn.mock.calls.map(([msg]) => String(msg));
+      expect(warnMessages).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining('Failed to clean up resources for previous SLO revision.'),
+        ])
+      );
     });
   });
 

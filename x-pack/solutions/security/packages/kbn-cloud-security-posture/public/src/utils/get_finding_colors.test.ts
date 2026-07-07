@@ -6,7 +6,7 @@
  */
 
 import { getCvsScoreColor, getSeverityStatusColor } from './get_finding_colors';
-import { EuiThemeComputed } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 const mockEuiThemeBorealis = {
   themeName: 'borialis',

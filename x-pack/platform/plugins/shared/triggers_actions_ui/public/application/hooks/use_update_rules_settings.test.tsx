@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { waitFor, renderHook, act } from '@testing-library/react';
 import { useUpdateRuleSettings } from './use_update_rules_settings';
 

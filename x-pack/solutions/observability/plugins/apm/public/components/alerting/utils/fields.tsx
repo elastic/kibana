@@ -221,8 +221,12 @@ export function IsAboveField({
   onChange: (value: number) => void;
   step?: number;
 }) {
-  const [thresholdPopoverOpen, serThresholdPopoverOpen] = useState(false);
+  const [thresholdPopoverOpen, setThresholdPopoverOpen] = useState(false);
   const [isAboveValue, setIsAboveValue] = useState(String(value));
+
+  const isAboveLabel = i18n.translate('xpack.apm.transactionErrorRateRuleType.isAbove', {
+    defaultMessage: 'is above',
+  });
 
   return (
     <EuiPopover
@@ -230,19 +234,19 @@ export function IsAboveField({
       anchorPosition={'downLeft'}
       ownFocus
       closePopover={() => {
-        serThresholdPopoverOpen(false);
+        setThresholdPopoverOpen(false);
       }}
+      aria-label={isAboveLabel}
       button={
         <EuiExpression
           value={`${value}${unit}`}
-          description={i18n.translate('xpack.apm.transactionErrorRateRuleType.isAbove', {
-            defaultMessage: 'is above',
-          })}
+          description={isAboveLabel}
           isInvalid={!isNumeric(isAboveValue)}
           isActive={thresholdPopoverOpen}
           onClick={() => {
-            serThresholdPopoverOpen(true);
+            setThresholdPopoverOpen(true);
           }}
+          data-test-subj="apmIsAboveExpression"
         />
       }
     >

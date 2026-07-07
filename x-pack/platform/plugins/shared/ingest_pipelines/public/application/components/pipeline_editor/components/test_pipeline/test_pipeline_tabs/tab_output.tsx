@@ -18,8 +18,8 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { Document } from '../../../types';
-import { TestPipelineConfig } from '../test_pipeline_flyout.container';
+import type { Document } from '../../../types';
+import type { TestPipelineConfig } from '../test_pipeline_flyout.container';
 
 interface Props {
   handleTestPipeline: (

@@ -17,7 +17,7 @@ import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_so
 import { createSearchRequestHandlerContext } from '@kbn/data-plugin/server/search/mocks';
 import type { SearchCursorSettings } from './search_cursor';
 import { SearchCursorPit } from './search_cursor_pit';
-import { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
 
 class TestSearchCursorPit extends SearchCursorPit {
   constructor(...args: ConstructorParameters<typeof SearchCursorPit>) {

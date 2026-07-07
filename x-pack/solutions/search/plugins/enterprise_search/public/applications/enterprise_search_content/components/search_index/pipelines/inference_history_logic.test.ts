@@ -8,11 +8,12 @@ import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { HttpError } from '../../../../../../common/types/api';
-import { MlInferenceHistoryResponse } from '../../../../../../common/types/pipelines';
+import type { HttpError } from '../../../../../../common/types/api';
+import type { MlInferenceHistoryResponse } from '../../../../../../common/types/pipelines';
 import { FetchMlInferencePipelineHistoryApiLogic } from '../../../api/pipelines/fetch_ml_inference_pipeline_history';
 
-import { InferenceHistoryValues, InferenceHistoryLogic } from './inference_history_logic';
+import type { InferenceHistoryValues } from './inference_history_logic';
+import { InferenceHistoryLogic } from './inference_history_logic';
 
 const DEFAULT_VALUES: InferenceHistoryValues = {
   fetchIndexInferenceHistoryStatus: 0,

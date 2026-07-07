@@ -22,10 +22,12 @@ import {
   hasArtifactOwnerSpaceId,
   isArtifactByPolicy,
   isArtifactGlobal,
-  isFilterProcessDescendantsEnabled,
+  isProcessDescendantsEnabled,
   isFilterProcessDescendantsTag,
   isPolicySelectionTag,
   setArtifactOwnerSpaceId,
+  removeGlobalPolicyTag,
+  addGlobalPolicyTag,
 } from './utils';
 
 describe('Endpoint artifact utilities', () => {
@@ -150,18 +152,46 @@ describe('Endpoint artifact utilities', () => {
     });
   });
 
-  describe('when using `isFilterProcessDescendantsEnabled()`', () => {
+  describe('when using `addGlobalPolicyTag()`', () => {
+    it('should add global tag to item without caring about per-policy or other tags', () => {
+      const output = addGlobalPolicyTag(['one', `${BY_POLICY_ARTIFACT_TAG_PREFIX}two`]);
+
+      expect(output).toEqual(['one', `${BY_POLICY_ARTIFACT_TAG_PREFIX}two`, GLOBAL_ARTIFACT_TAG]);
+    });
+
+    it('should not add global tag if it already exists', () => {
+      const output = addGlobalPolicyTag([GLOBAL_ARTIFACT_TAG, 'one', 'two']);
+
+      expect(output).toEqual([GLOBAL_ARTIFACT_TAG, 'one', 'two']);
+    });
+  });
+
+  describe('when using `removeGlobalPolicyTag()`', () => {
+    it('should remove global tag from item', () => {
+      const output = removeGlobalPolicyTag(['one', GLOBAL_ARTIFACT_TAG, 'two']);
+
+      expect(output).toEqual(['one', 'two']);
+    });
+
+    it('should do nothing if global tag is not present', () => {
+      const output = removeGlobalPolicyTag(['one', 'two']);
+
+      expect(output).toEqual(['one', 'two']);
+    });
+  });
+
+  describe('when using `isProcessDescendantsEnabled()`', () => {
     it('should return false when `tags` is undefined', () => {
-      expect(isFilterProcessDescendantsEnabled({})).toBe(false);
+      expect(isProcessDescendantsEnabled({})).toBe(false);
     });
 
     it('should return false when `tags` does not contain the relevant tag', () => {
-      expect(isFilterProcessDescendantsEnabled({ tags: ['aaa', 'bbb', 'ccc'] })).toBe(false);
+      expect(isProcessDescendantsEnabled({ tags: ['aaa', 'bbb', 'ccc'] })).toBe(false);
     });
 
     it('should return true when `tags` contain the relevant tag', () => {
       expect(
-        isFilterProcessDescendantsEnabled({
+        isProcessDescendantsEnabled({
           tags: ['aaa', 'bbb', FILTER_PROCESS_DESCENDANTS_TAG, 'ccc'],
         })
       ).toBe(true);

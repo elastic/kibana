@@ -16,11 +16,11 @@ import {
 } from '../../../profiles';
 import { DataSourceType, createDataViewDataSource } from '../../../../../common/data_sources';
 import { createTracesDataSourceProfileProvider } from './profile';
-import { createContextAwarenessMocks } from '../../../__mocks__';
+import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import type { ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 
-const mockServices = createContextAwarenessMocks().profileProviderServices;
+const mockServices = createProfileProviderSharedServicesMock();
 
 describe('tracesDataSourceProfileProvider', () => {
   const tracesDataSourceProfileProvider = createTracesDataSourceProfileProvider(mockServices);
@@ -75,6 +75,36 @@ describe('tracesDataSourceProfileProvider', () => {
         query: { esql: 'FROM traces' },
       } as DataSourceProfileProviderParams)
     ).toEqual(RESOLUTION_MATCH);
+  });
+
+  it('should NOT match when ES|QL query is transformational', () => {
+    expect(
+      tracesDataSourceProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSource: { type: DataSourceType.Esql },
+        query: { esql: 'FROM traces-* | STATS count()' },
+      } as DataSourceProfileProviderParams)
+    ).toEqual(RESOLUTION_MISMATCH);
+  });
+
+  it('should NOT match when ES|QL query is invalid', () => {
+    expect(
+      tracesDataSourceProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSource: { type: DataSourceType.Esql },
+        query: { esql: 'FROM traces-* | WHERE' },
+      } as DataSourceProfileProviderParams)
+    ).toEqual(RESOLUTION_MISMATCH);
+  });
+
+  it('should NOT match when ES|QL query is missing', () => {
+    expect(
+      tracesDataSourceProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSource: { type: DataSourceType.Esql },
+        query: undefined,
+      } as DataSourceProfileProviderParams)
+    ).toEqual(RESOLUTION_MISMATCH);
   });
 
   it('should NOT match when the index is not for traces', () => {

@@ -19,11 +19,6 @@ export const expectedCompleteUnitedIndexQuery = {
           },
           filter: [
             {
-              terms: {
-                'united.agent.policy_id': ['test-endpoint-policy-id'],
-              },
-            },
-            {
               exists: {
                 field: 'united.endpoint.agent.id',
               },
@@ -38,6 +33,11 @@ export const expectedCompleteUnitedIndexQuery = {
                 'united.agent.active': {
                   value: true,
                 },
+              },
+            },
+            {
+              terms: {
+                'united.agent.policy_id': ['test-endpoint-policy-id'],
               },
             },
           ],

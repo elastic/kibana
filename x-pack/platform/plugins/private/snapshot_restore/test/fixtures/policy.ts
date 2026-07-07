@@ -6,7 +6,7 @@
  */
 
 import { getRandomString, getRandomNumber } from '@kbn/test-jest-helpers';
-import { SlmPolicy } from '../../common/types';
+import type { SlmPolicy } from '../../common/types';
 import { DEFAULT_POLICY_SCHEDULE } from '../../public/application/constants';
 
 const dateNow = new Date();

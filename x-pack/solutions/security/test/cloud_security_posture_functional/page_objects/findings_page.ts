@@ -7,11 +7,10 @@
 
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS } from '@kbn/cloud-security-posture-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // Defined in CSP plugin
-const FINDINGS_INDEX = 'logs-cloud_security_posture.findings-default';
-const FINDINGS_LATEST_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 export const VULNERABILITIES_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.vulnerabilities-default';
 export const CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN =
@@ -55,14 +54,12 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
   };
 
   const index = {
-    remove: () =>
-      Promise.all([deleteByQuery(FINDINGS_INDEX), deleteByQuery(FINDINGS_LATEST_INDEX)]),
+    remove: () => Promise.all([deleteByQuery(CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS)]),
     add: async (findingsMock: Array<Record<string, unknown>>) => {
       await es.bulk({
         refresh: true,
         operations: [
-          ...insertOperation(FINDINGS_INDEX, findingsMock),
-          ...insertOperation(FINDINGS_LATEST_INDEX, findingsMock),
+          ...insertOperation(CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS, findingsMock),
         ],
       });
     },
@@ -294,9 +291,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
   const thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt = createNotInstalledObject(
     '3p-integrations-no-vulnerabilities-findings-prompt'
   );
-  const thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt = createNotInstalledObject(
-    '3p-integrations-no-misconfigurations-findings-prompt'
-  );
 
   const vulnerabilityDataGrid = {
     getVulnerabilityTable: async () => testSubjects.find('euiDataGrid'),
@@ -381,7 +375,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     latestVulnerabilitiesTable,
     notInstalledVulnerabilities,
     notInstalledCSP,
-    thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt,
     thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt,
     index,
     vulnerabilitiesIndex,

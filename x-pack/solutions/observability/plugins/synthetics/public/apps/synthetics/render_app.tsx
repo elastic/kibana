@@ -8,16 +8,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n as i18nFormatter } from '@kbn/i18n';
-import { AppMountParameters } from '@kbn/core-application-browser';
+import type { AppMountParameters } from '@kbn/core-application-browser';
 import { kibanaService } from '../../utils/kibana_service';
-import { SyntheticsAppProps } from './contexts';
+import type { SyntheticsAppProps } from './contexts';
 import { getIntegratedAppAvailability } from './utils/adapters';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES, INTEGRATED_SOLUTIONS } from '../../../common/constants';
 import { SyntheticsApp } from './synthetics_app';
 
 export const getSyntheticsAppProps = (): SyntheticsAppProps => {
-  const { isDev, isServerless, coreStart, startPlugins, setupPlugins, appMountParameters } =
-    kibanaService;
+  const {
+    isDev,
+    isServerless,
+    isCCSEnabled,
+    coreStart,
+    startPlugins,
+    setupPlugins,
+    appMountParameters,
+  } = kibanaService;
 
   const {
     application: { capabilities },
@@ -57,15 +64,12 @@ export const getSyntheticsAppProps = (): SyntheticsAppProps => {
             linkType: 'documentation',
             href: `${docLinks.links.observability.monitorUptimeSynthetics}`,
           },
-          {
-            linkType: 'discuss',
-            href: 'https://discuss.elastic.co/c/uptime', // Redirects to https://discuss.elastic.co/c/observability/synthetics/75
-          },
         ],
       }),
     setBadge,
     appMountParameters,
     isServerless,
+    isCCSEnabled,
   };
 };
 

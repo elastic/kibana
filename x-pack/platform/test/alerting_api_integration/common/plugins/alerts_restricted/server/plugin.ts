@@ -12,7 +12,6 @@ import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-obje
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { defineAlertTypes } from './alert_types';
 
 export interface FixtureSetupDeps {
@@ -25,6 +24,21 @@ export interface FixtureStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
 
+const alertingFeatures = [
+  {
+    ruleTypeId: 'test.restricted-noop',
+    consumers: ['alertsRestrictedFixture', ALERTING_FEATURE_ID],
+  },
+  {
+    ruleTypeId: 'test.unrestricted-noop',
+    consumers: ['alertsRestrictedFixture', ALERTING_FEATURE_ID],
+  },
+  {
+    ruleTypeId: 'test.noop',
+    consumers: ['alertsRestrictedFixture', ALERTING_FEATURE_ID],
+  },
+];
+
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
   public setup(core: CoreSetup<FixtureStartDeps>, { features, alerting }: FixtureSetupDeps) {
     features.registerKibanaFeature({
@@ -32,18 +46,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'AlertRestricted',
       app: ['alerts', 'kibana'],
       category: { id: 'foo', label: 'foo' },
-      alerting: [
-        {
-          ruleTypeId: 'test.restricted-noop',
-          consumers: ['alertsRestrictedFixture', ALERTING_FEATURE_ID],
-        },
-        {
-          ruleTypeId: 'test.unrestricted-noop',
-          consumers: ['alertsRestrictedFixture', ALERTING_FEATURE_ID],
-        },
-        { ruleTypeId: 'test.noop', consumers: ['alertsRestrictedFixture', ALERTING_FEATURE_ID] },
-      ],
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+      alerting: alertingFeatures,
       privileges: {
         all: {
           app: ['alerts', 'kibana'],
@@ -53,20 +56,10 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           },
           alerting: {
             rule: {
-              all: [
-                {
-                  ruleTypeId: 'test.restricted-noop',
-                  consumers: ['alertsRestrictedFixture', ALERTING_FEATURE_ID],
-                },
-                {
-                  ruleTypeId: 'test.unrestricted-noop',
-                  consumers: ['alertsRestrictedFixture', ALERTING_FEATURE_ID],
-                },
-                {
-                  ruleTypeId: 'test.noop',
-                  consumers: ['alertsRestrictedFixture', ALERTING_FEATURE_ID],
-                },
-              ],
+              all: alertingFeatures,
+              enable: alertingFeatures,
+              manual_run: alertingFeatures,
+              manage_rule_settings: alertingFeatures,
             },
           },
           ui: [],
@@ -79,20 +72,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           },
           alerting: {
             rule: {
-              read: [
-                {
-                  ruleTypeId: 'test.restricted-noop',
-                  consumers: ['alertsRestrictedFixture', ALERTING_FEATURE_ID],
-                },
-                {
-                  ruleTypeId: 'test.unrestricted-noop',
-                  consumers: ['alertsRestrictedFixture', ALERTING_FEATURE_ID],
-                },
-                {
-                  ruleTypeId: 'test.noop',
-                  consumers: ['alertsRestrictedFixture', ALERTING_FEATURE_ID],
-                },
-              ],
+              read: alertingFeatures,
             },
           },
           ui: [],

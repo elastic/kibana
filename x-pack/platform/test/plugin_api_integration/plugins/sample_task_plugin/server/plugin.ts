@@ -7,17 +7,23 @@
 
 import { random } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import type { Plugin, CoreSetup, CoreStart, KibanaRequest } from '@kbn/core/server';
 import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import { EventEmitter } from 'events';
 import { firstValueFrom, Subject } from 'rxjs';
-import {
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   ConcreteTaskInstance,
+  RunContext,
 } from '@kbn/task-manager-plugin/server';
 import { DEFAULT_MAX_WORKERS } from '@kbn/task-manager-plugin/server/config';
-import { getDeleteTaskRunResult, TaskPriority } from '@kbn/task-manager-plugin/server/task';
+import {
+  getDeleteTaskRunResult,
+  TaskCost,
+  TaskPriority,
+} from '@kbn/task-manager-plugin/server/task';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { initRoutes } from './init_routes';
 
 // this plugin's dependendencies
@@ -106,6 +112,92 @@ export class SampleTaskManagerFixturePlugin
             }),
           },
         },
+      },
+      sampleUserResolvingTask: {
+        title: 'Sample User Resolving Task',
+        description:
+          'A task that captures security.authc.getCurrentUser(fakeRequest) and the output of enriching a child request into task state, used to verify profile_uid enrichment end-to-end.',
+        timeout: '1m',
+        maxAttempts: 1,
+        stateSchemaByVersion: {
+          1: {
+            up: (state: Record<string, unknown>) => state,
+            schema: schema.object({
+              resolvedFromTaskRequest: schema.maybe(
+                schema.nullable(
+                  schema.object({
+                    profileUid: schema.maybe(schema.string()),
+                    username: schema.maybe(schema.string()),
+                  })
+                )
+              ),
+              resolvedFromChildRequest: schema.maybe(
+                schema.nullable(
+                  schema.object({
+                    profileUid: schema.maybe(schema.string()),
+                    username: schema.maybe(schema.string()),
+                  })
+                )
+              ),
+              ran: schema.maybe(schema.boolean()),
+            }),
+          },
+        },
+        createTaskRunner: ({ taskInstance, fakeRequest, enrichRequest }: RunContext) => ({
+          async run() {
+            // Use Core's wrapped security so getCurrentUser consults the
+            // fake-request enrichment map.
+            const [{ security, elasticsearch }] = await core.getStartServices();
+
+            const resolveUser = (request: KibanaRequest | undefined) => {
+              if (!request) {
+                return null;
+              }
+              const user = security.authc.getCurrentUser(request);
+              if (!user) {
+                return null;
+              }
+              // Capture the enriched identity fields exposed on the fake request.
+              return { profileUid: user.profile_uid, username: user.username };
+            };
+
+            const resolvedFromTaskRequest = resolveUser(fakeRequest);
+
+            let resolvedFromChildRequest = null;
+            if (fakeRequest && enrichRequest) {
+              const childFakeRequest = kibanaRequestFactory({
+                headers: {
+                  authorization: (fakeRequest.headers.authorization as string) ?? '',
+                },
+                path: '/',
+              });
+              enrichRequest(childFakeRequest);
+              resolvedFromChildRequest = resolveUser(childFakeRequest);
+            }
+
+            await elasticsearch.client.asInternalUser.index({
+              index: '.kibana_task_manager_test_result',
+              document: {
+                type: 'task',
+                taskId: taskInstance.id,
+                state: JSON.stringify({
+                  resolvedFromTaskRequest,
+                  resolvedFromChildRequest,
+                }),
+                ranAt: new Date(),
+              },
+              refresh: true,
+            });
+
+            return {
+              state: {
+                resolvedFromTaskRequest,
+                resolvedFromChildRequest,
+                ran: true,
+              },
+            };
+          },
+        }),
       },
       sampleRecurringTask: {
         timeout: '1m',
@@ -219,6 +311,21 @@ export class SampleTaskManagerFixturePlugin
           },
         },
       },
+      sampleRecurringTaskDisablesItself: {
+        title: 'Sample Recurring Task that disables itself',
+        description: 'A sample task that disables itself.',
+        maxAttempts: 3,
+        timeout: '60s',
+        createTaskRunner: () => ({
+          async run() {
+            await new Promise((resolve) => setTimeout(resolve, 3000)); // 3 seconds
+            return {
+              shouldDisableTask: true,
+              state: {},
+            };
+          },
+        }),
+      },
       sampleRecurringTaskTimingOut: {
         title: 'Sample Recurring Task that Times Out',
         description: 'A sample task that times out each run.',
@@ -226,9 +333,29 @@ export class SampleTaskManagerFixturePlugin
         timeout: '1s',
         createTaskRunner: () => ({
           async run() {
-            return await new Promise((resolve) => {});
+            return await new Promise((resolve) => setTimeout(resolve, 3000)); // 3 seconds
           },
         }),
+      },
+      sampleRecurringTaskTimingOutWithError: {
+        title: 'Sample Recurring Task that Times Out and Throws an Error',
+        description: 'A sample task that times out each run and throws an error.',
+        maxAttempts: 3,
+        timeout: '1s',
+        createTaskRunner: () => {
+          let isCancelled: boolean = false;
+          return {
+            async run() {
+              await new Promise((resolve) => setTimeout(resolve, 3000)); // 3 seconds
+              if (isCancelled) {
+                throw new Error('The task was cancelled and there was an error!');
+              }
+            },
+            async cancel() {
+              isCancelled = true;
+            },
+          };
+        },
       },
       sampleRecurringTaskThatDeletesItself: {
         title: 'Sample Recurring Task that Times Out',
@@ -311,6 +438,19 @@ export class SampleTaskManagerFixturePlugin
           },
         }),
       },
+      sampleLongRunningRecurringTask: {
+        title: 'Sample Long Running Recurring Task',
+        description: 'A sample long running task that hangs for 1m 30s.',
+        timeout: '365d',
+        createTaskRunner: () => ({
+          async run() {
+            await new Promise((resolve) => setTimeout(resolve, 90000));
+            return {
+              state: {},
+            };
+          },
+        }),
+      },
       sampleOneTimeTaskThrowingError: {
         title: 'Sample One-Time Task that throws an error',
         description: 'A sample task that throws an error each run.',
@@ -330,6 +470,35 @@ export class SampleTaskManagerFixturePlugin
           async run() {},
         }),
       },
+      extraLargeCostTask: {
+        title: 'Task used for testing task cost',
+        cost: TaskCost.ExtraLarge,
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+          async run() {
+            const { state, schedule } = taskInstance;
+            const prevState = state || { count: 0 };
+            const count = (prevState.count || 0) + 1;
+
+            const [{ elasticsearch }] = await core.getStartServices();
+            await elasticsearch.client.asInternalUser.index({
+              index: '.kibana_task_manager_test_result',
+              body: {
+                type: 'task',
+                taskType: 'extraLargeCostTask',
+                taskId: taskInstance.id,
+                state: JSON.stringify(state),
+                ranAt: new Date(),
+              },
+              refresh: true,
+            });
+
+            return {
+              state: { count },
+              schedule,
+            };
+          },
+        }),
+      },
       lowPriorityTask: {
         title: 'Task used for testing priority claiming',
         priority: TaskPriority.Low,
@@ -346,6 +515,36 @@ export class SampleTaskManagerFixturePlugin
               body: {
                 type: 'task',
                 taskType: 'lowPriorityTask',
+                taskId: taskInstance.id,
+                state: JSON.stringify(state),
+                ranAt: new Date(),
+              },
+              refresh: true,
+            });
+
+            return {
+              state: { count },
+              schedule,
+            };
+          },
+        }),
+      },
+      normalLongRunningPriorityTask: {
+        title: 'Task used for testing long running priority claiming',
+        priority: TaskPriority.Low,
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+          async run() {
+            const { state, schedule } = taskInstance;
+            const prevState = state || { count: 0 };
+
+            const count = (prevState.count || 0) + 1;
+
+            const [{ elasticsearch }] = await core.getStartServices();
+            await elasticsearch.client.asInternalUser.index({
+              index: '.kibana_task_manager_test_result',
+              body: {
+                type: 'task',
+                taskType: 'normalLongRunningPriorityTask',
                 taskId: taskInstance.id,
                 state: JSON.stringify(state),
                 ranAt: new Date(),
@@ -443,7 +642,12 @@ export class SampleTaskManagerFixturePlugin
         return context;
       },
     });
-    initRoutes(core.http.createRouter(), this.taskManagerStart, taskTestingEvents);
+    initRoutes(
+      core.http.createRouter(),
+      this.taskManagerStart,
+      core.getStartServices().then(([{ security }]) => security),
+      taskTestingEvents
+    );
   }
 
   public start(core: CoreStart, { taskManager }: SampleTaskManagerFixtureStartDeps) {

@@ -8,9 +8,20 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { EuiText } from '@elastic/eui';
+import type { OverviewTrend } from '../../../../../../../../../common/types';
 import { formatDuration } from '../../../../../../utils/formatting';
 import { selectOverviewTrends } from '../../../../../../state';
-import { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
+import type { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
+import { getTrendDuration } from '../../../../../../utils/formatting/trend_duration';
+
+const getDurationToDisplay = (trendData: OverviewTrend | 'loading' | null | undefined) => {
+  return getTrendDuration<React.JSX.Element | string>({
+    onLoading: (onLoadingComponent) => onLoadingComponent,
+    onNoData: (onNoDataComponent) => onNoDataComponent,
+    onData: ({ median }) => formatDuration(median),
+    trendData,
+  });
+};
 
 export const MonitorsDuration = ({
   monitor,
@@ -19,11 +30,13 @@ export const MonitorsDuration = ({
   monitor: OverviewStatusMetaData;
   onClickDuration: () => void;
 }) => {
-  const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.locationId];
-  const duration = trendData === 'loading' || !trendData?.median ? 0 : trendData.median;
+  const trendDataMap = useSelector(selectOverviewTrends);
+  const locationId = monitor.locations[0]?.id ?? '';
+
+  const trendData = trendDataMap[monitor.configId] ?? trendDataMap[monitor.configId + locationId];
   return (
     <EuiText size="s" onClick={onClickDuration}>
-      {formatDuration(duration)}
+      {getDurationToDisplay(trendData)}
     </EuiText>
   );
 };

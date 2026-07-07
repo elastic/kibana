@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, ReactEventHandler } from 'react';
-import PropTypes from 'prop-types';
+import type { FC, ReactEventHandler } from 'react';
+import React from 'react';
 import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
@@ -30,10 +30,4 @@ export const ArgAdd: FC<Props> = ({ onValueAdd = () => {}, displayName, help }) 
       </EuiDescriptionList>
     </button>
   );
-};
-
-ArgAdd.propTypes = {
-  displayName: PropTypes.string.isRequired,
-  help: PropTypes.string.isRequired,
-  onValueAdd: PropTypes.func,
 };

@@ -7,7 +7,7 @@
 
 import path from 'path';
 import type { SavedObject } from '@kbn/core/server';
-import type { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management/v2';
+import type { DashboardSavedObjectAttributes } from '@kbn/dashboard-plugin/server';
 import type { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common/data_views';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import type { ContentPackEntry } from '.';
@@ -34,7 +34,9 @@ export const isSupportedReferenceType = (type: string) => {
   return referenceTypes.some((refType) => refType === type);
 };
 
-export type ContentPackDashboard = SavedObject<DashboardAttributes> & { type: 'dashboard' };
+export type ContentPackDashboard = SavedObject<DashboardSavedObjectAttributes> & {
+  type: 'dashboard';
+};
 export type ContentPackDataView = SavedObject<DataViewSavedObjectAttrs> & { type: 'index-pattern' };
 export type ContentPackLens = SavedObject<LensAttributes> & { type: 'lens' };
 

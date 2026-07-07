@@ -38,7 +38,11 @@ describe('Agent metrics helper', () => {
           <div
             data-tooltip-content="0.0020 %"
           >
-            0.00 %
+            <span
+              tabindex="0"
+            >
+              0.00 %
+            </span>
           </div>
         </DocumentFragment>
       `);
@@ -57,7 +61,11 @@ describe('Agent metrics helper', () => {
           <div
             data-tooltip-content="0.5000 %"
           >
-            0.50 %
+            <span
+              tabindex="0"
+            >
+              0.50 %
+            </span>
           </div>
         </DocumentFragment>
       `);

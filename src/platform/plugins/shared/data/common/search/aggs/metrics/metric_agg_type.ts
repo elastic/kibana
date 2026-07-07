@@ -8,11 +8,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AggType, AggTypeConfig } from '../agg_type';
-import { AggParamType } from '../param_types/agg';
-import { AggConfig } from '../agg_config';
+import type { AggTypeConfig } from '../agg_type';
+import { AggType } from '../agg_type';
+import type { AggParamType } from '../param_types/agg';
+import type { AggConfig } from '../agg_config';
 import { METRIC_TYPES } from './metric_agg_types';
-import { BaseParamType, FieldTypes } from '../param_types';
+import type { FieldTypes } from '../param_types';
+import { BaseParamType } from '../param_types';
 import { AggGroupNames } from '../agg_groups';
 import { createMetricFilter } from './lib/create_filter';
 

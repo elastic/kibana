@@ -8,10 +8,18 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { PackageInstallContext } from '../../../../../common/types';
-import type { KibanaAssetReference, KibanaAssetType } from '../../../../types';
+import {
+  KibanaSavedObjectType,
+  type KibanaAssetReference,
+  type KibanaAssetType,
+  type PackageSpecTags,
+} from '../../../../types';
 import { getPathParts } from '../../archive';
+import { appContextService } from '../../../app_context';
 
 import { saveKibanaAssetsRefs } from '../../packages/install';
+
+import { indexPatternTypes } from '../index_pattern/install';
 
 import type { ArchiveAsset } from './install';
 import {
@@ -27,6 +35,7 @@ interface InstallKibanaAssetsWithStreamingArgs {
   pkgName: string;
   packageInstallContext: PackageInstallContext;
   spaceId: string;
+  assetTags?: PackageSpecTags[];
   savedObjectsClient: SavedObjectsClientContract;
 }
 
@@ -62,6 +71,27 @@ export async function installKibanaAssetsWithStreaming({
       return;
     }
 
+    if (
+      soType === KibanaSavedObjectType.alertingRuleTemplate &&
+      !appContextService.getExperimentalFeatures().enableAgentStatusAlerting
+    ) {
+      return;
+    }
+
+    if (
+      soType === KibanaSavedObjectType.sloTemplate &&
+      !appContextService.getExperimentalFeatures().enableSloTemplates
+    ) {
+      return;
+    }
+
+    if (
+      soType === KibanaSavedObjectType.indexPattern &&
+      indexPatternTypes.some((pattern) => `${pattern}-*` === savedObject.id)
+    ) {
+      return;
+    }
+
     batch.push(savedObject);
     assetRefs.push(toAssetReference(savedObject));
 
@@ -86,7 +116,7 @@ export async function installKibanaAssetsWithStreaming({
   }
 
   // Update the installation saved object with installed kibana assets
-  await saveKibanaAssetsRefs(savedObjectsClient, pkgName, assetRefs);
+  await saveKibanaAssetsRefs(savedObjectsClient, pkgName, assetRefs, spaceId);
 
   return assetRefs;
 }

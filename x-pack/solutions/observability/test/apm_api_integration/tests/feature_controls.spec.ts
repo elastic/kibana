@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { FtrProviderContext } from '../common/ftr_provider_context';
+import type { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { FtrProviderContext } from '../common/ftr_provider_context';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -132,7 +132,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/internal/apm/traces/foo?start=${start}&end=${end}&entryTransactionId=foo`,
+        url: `/internal/apm/unified_traces/foo?start=${start}&end=${end}&entryTransactionId=foo`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,

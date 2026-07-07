@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import type {
   EmbeddedConsoleView,
   EmbeddedConsoleViewButtonProps,
 } from '@kbn/console-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { QueryClient } from '@tanstack/react-query';
+import type { QueryClient } from '@kbn/react-query';
 
-import { NotebookListValue, AppMetricsTracker } from './types';
+import type { NotebookListValue, AppMetricsTracker } from './types';
 
 const SearchNotebooksButton = dynamic(async () => ({
   default: (await import('./components/notebooks_button')).SearchNotebooksButton,

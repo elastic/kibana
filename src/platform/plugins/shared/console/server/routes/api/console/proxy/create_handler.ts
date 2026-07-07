@@ -7,69 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Agent, IncomingMessage } from 'http';
-import { pick } from 'lodash';
-import { SemVer } from 'semver';
+import { STATUS_CODES } from 'http';
+import type { IncomingHttpHeaders } from 'http';
+import type { Readable } from 'stream';
 
-import { KibanaRequest, RequestHandler } from '@kbn/core/server';
+import type {
+  ICustomClusterClient,
+  KibanaRequest,
+  RequestHandler,
+  RequestHandlerContext,
+} from '@kbn/core/server';
 
 // TODO: find a better way to get information from the request like remoteAddress and remotePort
 // for forwarding.
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
-import { ESConfigForProxy } from '../../../../types';
-import {
-  getElasticsearchProxyConfig,
-  ProxyConfigCollection,
-  proxyRequest,
-  setHeaders,
-} from '../../../../lib';
 
-import { RouteDependencies } from '../../..';
+import type { RouteDependencies } from '../../..';
 
-import { Body, Query } from './validation_config';
-import { toURL } from '../../../../lib/utils';
-
-function filterHeaders(originalHeaders: object, headersToKeep: string[]): object {
-  const normalizeHeader = function (header: string) {
-    if (!header) {
-      return '';
-    }
-    header = header.toString();
-    return header.trim().toLowerCase();
-  };
-
-  // Normalize list of headers we want to allow in upstream request
-  const headersToKeepNormalized = headersToKeep.map(normalizeHeader);
-
-  return pick(originalHeaders, headersToKeepNormalized);
-}
-
-export function getRequestConfig(
-  headers: object,
-  esConfig: ESConfigForProxy,
-  uri: string,
-  kibanaVersion: SemVer,
-  proxyConfigCollection?: ProxyConfigCollection
-): { agent: Agent; timeout: number; headers: object; rejectUnauthorized?: boolean } {
-  const filteredHeaders = filterHeaders(headers, esConfig.requestHeadersWhitelist);
-  const newHeaders = setHeaders(filteredHeaders, esConfig.customHeaders);
-
-  if (kibanaVersion.major < 8) {
-    // In 7.x we still support the proxyConfig setting defined in kibana.yml
-    // From 8.x we don't support it anymore so we don't try to read it here.
-    if (proxyConfigCollection!.hasConfig()) {
-      return {
-        ...proxyConfigCollection!.configForUri(uri),
-        headers: newHeaders,
-      };
-    }
-  }
-
-  return {
-    ...getElasticsearchProxyConfig(esConfig),
-    headers: newHeaders,
-  };
-}
+import type { Body, Query } from './validation_config';
+import { toURL, stripCredentialsFromUrl } from '../../../../lib/utils';
 
 function getProxyHeaders(req: KibanaRequest) {
   const headers = Object.create(null);
@@ -89,113 +45,160 @@ function getProxyHeaders(req: KibanaRequest) {
     extendCommaList(headers, 'x-forwarded-host', _req.info.host);
   }
 
-  const contentType = req.headers['content-type'];
-  if (contentType) {
-    headers['content-type'] = contentType;
-  }
   return headers;
+}
+
+function closeCustomClientOnStreamEnd(customClient: ICustomClusterClient, stream: Readable) {
+  let isClosed = false;
+  const closeCustomClient = () => {
+    if (isClosed) {
+      return;
+    }
+    isClosed = true;
+    stream.off('end', closeCustomClient);
+    stream.off('close', closeCustomClient);
+    stream.off('error', closeCustomClient);
+    void customClient.close();
+  };
+
+  stream.once('end', closeCustomClient);
+  stream.once('close', closeCustomClient);
+  stream.once('error', closeCustomClient);
 }
 
 export const createHandler =
   ({
     log,
-    proxy: { readLegacyESConfig, pathFilters, proxyConfigCollection },
-    kibanaVersion,
-  }: RouteDependencies): RequestHandler<unknown, Query, Body> =>
+    getStartServices,
+    proxy: { readLegacyESConfig },
+  }: RouteDependencies): RequestHandler<unknown, Query, Body, RequestHandlerContext> =>
   async (ctx, request, response) => {
     const { body, query } = request;
-    const { method, path, withProductOrigin } = query;
-
-    if (kibanaVersion.major < 8) {
-      // The "console.proxyFilter" setting in kibana.yaml has been deprecated in 8.x
-      // We only read it on the 7.x branch
-      if (!pathFilters!.some((re) => re.test(path))) {
-        return response.forbidden({
-          body: `Error connecting to '${path}':\n\nUnable to send requests to that path.`,
-          headers: {
-            'Content-Type': 'text/plain',
-          },
-        });
-      }
-    }
+    const { method, path, withProductOrigin, host: requestHost } = query;
 
     const legacyConfig = await readLegacyESConfig();
     const { hosts } = legacyConfig;
-    let esIncomingMessage: IncomingMessage;
+    let customClient: ICustomClusterClient | undefined;
 
-    for (let idx = 0; idx < hosts.length; ++idx) {
-      const host = hosts[idx];
-      try {
-        const uri = toURL(host, path);
-
-        // Because this can technically be provided by a settings-defined proxy config, we need to
-        // preserve these property names to maintain BWC.
-        const { timeout, agent, headers, rejectUnauthorized } = getRequestConfig(
-          request.headers,
-          legacyConfig,
-          uri.toString(),
-          kibanaVersion,
-          proxyConfigCollection
-        );
-
-        const requestHeaders = {
-          ...headers,
-          ...getProxyHeaders(request),
-          // There are a few internal calls that console UI makes to ES in order to get mappings, aliases and templates
-          // in the autocomplete mechanism from the editor. At this particular time, those requests generate deprecation
-          // logs since they access system indices. With this header we can provide a way to the UI to determine which
-          // requests need to deprecation logs and which ones dont.
-          ...(withProductOrigin && { 'x-elastic-product-origin': 'kibana' }),
-        };
-
-        esIncomingMessage = await proxyRequest({
-          method: method.toLowerCase() as 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head',
-          headers: requestHeaders,
-          uri,
-          timeout,
-          payload: body,
-          rejectUnauthorized,
-          agent,
+    // Validate that the requested host is one of the configured Elasticsearch hosts.
+    // The client receives URLs with credentials stripped, so we match by comparing
+    // stripped versions to find the original configured host (which may contain
+    // credentials needed for auth). Reject any host not in the allowlist to prevent SSRF.
+    let host = hosts[0];
+    if (requestHost) {
+      // Normalize the incoming host the same way we normalize configured hosts
+      // (e.g. adding trailing slash, dropping default ports) so that old values
+      // stored in the client's localStorage still match after URL normalisation.
+      const normalizedRequestHost = stripCredentialsFromUrl(requestHost);
+      const match = hosts.find((h) => stripCredentialsFromUrl(h) === normalizedRequestHost);
+      if (!match) {
+        return response.badRequest({
+          body: 'Host is not configured in elasticsearch.hosts',
         });
-
-        break;
-      } catch (e) {
-        // If we reached here it means we hit a lower level network issue than just, for e.g., a 500.
-        // We try contacting another node in that case.
-        log.error(e);
-        if (idx === hosts.length - 1) {
-          log.warn(`Could not connect to any configured ES node [${hosts.join(', ')}]`);
-          return response.customError({
-            statusCode: 502,
-            body: e,
-            headers: {
-              'x-console-proxy-status-code': '502',
-              'x-console-proxy-status-text': 'Bad Gateway',
-            },
-          });
-        }
-        // Otherwise, try the next host...
       }
+      host = match;
     }
+    try {
+      const uri = toURL(host, path);
 
-    const {
-      statusCode,
-      statusMessage,
-      headers: { warning },
-    } = esIncomingMessage!;
+      const requestHeaders: IncomingHttpHeaders = {
+        ...getProxyHeaders(request),
+        'content-type': request.headers['content-type'] ?? 'application/json',
+        // Node's http client omits chunked framing for GET/DELETE bodies (it sets
+        // useChunkedEncodingByDefault=false for those methods), which would send the body
+        // unframed and drop it. ES allows bodies on GET/DELETE (e.g. `GET /_search`), so force
+        // chunked encoding to keep proxied Console request bodies intact.
+        'transfer-encoding': 'chunked',
+        // Console uses this proxy for both user-entered requests and internal autocomplete
+        // requests. Mark internal requests as Kibana-origin so system-index lookups do not
+        // produce user-actionable deprecation warnings. For user-entered requests, send an
+        // empty value to clear the Core ES client's default Kibana-origin header.
+        'x-elastic-product-origin': withProductOrigin ? 'kibana' : '',
+      };
 
-    const isHeadRequest = method.toUpperCase() === 'HEAD';
-    return response.ok({
-      body: isHeadRequest ? `${statusCode} - ${statusMessage}` : esIncomingMessage!,
-      headers: {
-        warning: warning || '',
-        // We need to set the status code and status text as headers so that the client can access them
-        // in the response. This is needed because the client is using them to show the status of the request
-        // in the UI. By sending them as headers we avoid logging out users if the status code is 403. E.g.
-        // if the user is not authorized to access the cluster, we don't want to log them out. (See https://github.com/elastic/kibana/issues/140536)
-        'x-console-proxy-status-code': String(statusCode) || '',
-        'x-console-proxy-status-text': statusMessage || '',
-        ...(isHeadRequest && { 'Content-Type': 'text/plain' }),
-      },
-    });
+      if (requestHost) {
+        const [coreStart] = await getStartServices();
+        customClient = coreStart.elasticsearch.createClient('console', {
+          hosts: [host],
+          sniffOnStart: false,
+          sniffOnConnectionFault: false,
+          sniffInterval: false,
+          customHeaders: legacyConfig.customHeaders,
+          requestHeadersWhitelist: legacyConfig.requestHeadersWhitelist,
+          requestTimeout: legacyConfig.requestTimeout,
+          ssl: legacyConfig.ssl,
+        });
+      }
+
+      const esClient = requestHost
+        ? customClient!.asScoped(request).asCurrentUser
+        : (await ctx.core).elasticsearch.client.asCurrentUser;
+
+      const esResponse = await esClient.transport.request<Readable>(
+        {
+          method: method.toUpperCase(),
+          path: `${uri.pathname}${uri.search || ''}`,
+          body,
+        },
+        {
+          asStream: true,
+          meta: true,
+          requestTimeout: legacyConfig.requestTimeout.asMilliseconds(),
+          headers: requestHeaders,
+          context: {
+            loggingOptions: {
+              loggerName: 'console',
+            },
+          },
+        }
+      );
+
+      const { statusCode, headers } = esResponse;
+      const statusMessage = STATUS_CODES[statusCode] ?? '';
+      const isHeadRequest = method.toUpperCase() === 'HEAD';
+
+      if (customClient) {
+        closeCustomClientOnStreamEnd(customClient, esResponse.body);
+      }
+
+      if (isHeadRequest) {
+        esResponse.body.resume();
+      }
+
+      return response.ok({
+        body: isHeadRequest ? `${statusCode} - ${statusMessage}` : esResponse.body,
+        headers: {
+          warning: headers.warning || '',
+          // We need to set the status code and status text as headers so that the client can access them
+          // in the response. This is needed because the client is using them to show the status of the request
+          // in the UI. By sending them as headers we avoid logging out users if the status code is 403. E.g.
+          // if the user is not authorized to access the cluster, we don't want to log them out. (See https://github.com/elastic/kibana/issues/140536)
+          'x-console-proxy-status-code': String(statusCode) || '',
+          'x-console-proxy-status-text': statusMessage,
+          ...(isHeadRequest && { 'Content-Type': 'text/plain' }),
+        },
+      });
+    } catch (e) {
+      log.error(e);
+      log.warn(`Could not connect to ES node [${host}]`);
+
+      const hasMultipleHosts = hosts.length > 1;
+      const errorMessage =
+        'Could not connect to Elasticsearch node. Try selecting a different host from Console > Config > General settings > Elasticsearch host.';
+
+      await customClient?.close();
+
+      return response.custom({
+        statusCode: 502,
+        body: {
+          message: 'An internal server error occurred. Check Kibana server logs for details.',
+        },
+        headers: {
+          'x-console-proxy-status-code': '502',
+          'x-console-proxy-status-text': 'Bad Gateway',
+          'content-type': 'application/json',
+          ...(hasMultipleHosts && { warning: errorMessage }),
+        },
+      });
+    }
   };

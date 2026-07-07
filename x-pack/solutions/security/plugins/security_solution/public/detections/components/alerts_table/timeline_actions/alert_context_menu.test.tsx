@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { mount, type ComponentType as EnzymeComponentType } from 'enzyme';
-import { AlertContextMenu } from './alert_context_menu';
+import { fireEvent, render, waitFor } from '@testing-library/react';
+import { AddExceptionFlyoutWrapper, AlertContextMenu } from './alert_context_menu';
 import { TestProviders } from '../../../../common/mock';
 import React from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { mockTimelines } from '../../../../common/mock/mock_timelines_plugin';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { TimelineId } from '../../../../../common/types/timeline';
+import { ALERTS_FEATURE_ID, SECURITY_FEATURE_ID } from '../../../../../common/constants';
+import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 jest.mock('../../../../common/components/user_privileges');
 
@@ -61,6 +64,31 @@ const props = {
   timelineId: 'alerts-page',
 };
 
+const mockUseKibanaReturnValue = {
+  services: {
+    timelines: { ...mockTimelines },
+    application: {
+      capabilities: { [ALERTS_FEATURE_ID]: { edit: true, read: true }, [SECURITY_FEATURE_ID]: {} },
+    },
+    cases: {
+      ...mockCasesContract(),
+      helpers: {
+        canUseCases: jest.fn().mockReturnValue({
+          all: true,
+          create: true,
+          read: true,
+          update: true,
+          delete: true,
+          push: true,
+          createComment: true,
+          reopenCase: true,
+          manageTemplates: true,
+        }),
+        getRuleIdFromEvent: jest.fn(),
+      },
+    },
+  },
+};
 jest.mock('../../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../../common/lib/kibana');
 
@@ -70,105 +98,319 @@ jest.mock('../../../../common/lib/kibana', () => {
       addError: jest.fn(),
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
+      addInfo: jest.fn(),
       remove: jest.fn(),
     }),
-    useKibana: () => ({
-      services: {
-        timelines: { ...mockTimelines },
-        application: {
-          capabilities: { siemV2: { crud_alerts: true, read_alerts: true } },
-        },
-        cases: {
-          ...mockCasesContract(),
-          helpers: {
-            canUseCases: jest.fn().mockReturnValue({
-              all: true,
-              create: true,
-              read: true,
-              update: true,
-              delete: true,
-              push: true,
-              createComment: true,
-              reopenCase: true,
-            }),
-            getRuleIdFromEvent: jest.fn(),
-          },
-        },
-      },
-    }),
+    useKibana: () => mockUseKibanaReturnValue,
   };
 });
 
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
-  useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
+  useAlertsPrivileges: jest.fn().mockReturnValue({ hasAlertsUpdate: true }),
 }));
 
-const actionMenuButton = '[data-test-subj="timeline-context-menu-button"] button';
-const addToExistingCaseButton = '[data-test-subj="add-to-existing-case-action"]';
-const addToNewCaseButton = '[data-test-subj="add-to-new-case-action"]';
-const markAsOpenButton = '[data-test-subj="open-alert-status"]';
-const markAsAcknowledgedButton = '[data-test-subj="acknowledged-alert-status"]';
-const markAsClosedButton = '[data-test-subj="close-alert-status"]';
-const addEndpointEventFilterButton = '[data-test-subj="add-event-filter-menu-item"]';
-const applyAlertTagsButton = '[data-test-subj="alert-tags-context-menu-item"]';
-const applyAlertAssigneesButton = '[data-test-subj="alert-assignees-context-menu-item"]';
+const mockUseRunAlertWorkflowPanel = jest.fn().mockReturnValue({
+  runWorkflowMenuItem: [],
+  runAlertWorkflowPanel: [],
+});
+jest.mock('./use_run_alert_workflow_panel', () => ({
+  useRunAlertWorkflowPanel: (...args: unknown[]) => mockUseRunAlertWorkflowPanel(...args),
+}));
+
+const mockUseRunDocumentWorkflowPanel = jest.fn().mockReturnValue({
+  runWorkflowMenuItem: [],
+  runDocumentWorkflowPanel: [],
+});
+jest.mock('./use_run_document_workflow_panel', () => ({
+  useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
+}));
+
+const mockUseAddToChatAction = jest.fn().mockReturnValue({ addToChatActionItems: [] });
+jest.mock('./use_add_to_chat_action', () => ({
+  useAddToChatAction: (...args: unknown[]) => mockUseAddToChatAction(...args),
+}));
+
+const actionMenuButton = 'timeline-context-menu-button';
+const addToExistingCaseButton = 'add-to-existing-case-action';
+const addToNewCaseButton = 'add-to-new-case-action';
+const markAsOpenButton = 'open-alert-status';
+const markAsAcknowledgedButton = 'acknowledged-alert-status';
+const markAsClosedButton = 'alert-close-context-menu-item';
+const addEndpointEventFilterButton = 'add-event-filter-menu-item';
+const applyAlertTagsButton = 'alert-tags-context-menu-item';
+const applyAlertAssigneesButton = 'alert-assignees-context-menu-item';
+const runWorkflowActionButton = 'run-workflow-action';
+const alertWorkflowContextMenuPanel = 'alert-workflow-context-menu-panel';
+const alertWorkflowPanelContent = 'alert-workflow-panel-content';
+const runDocumentWorkflowActionButton = 'run-document-workflow-action';
+const documentWorkflowPanelContent = 'document-workflow-panel-content';
+
+// `alert_context_menu.tsx` eagerly imports four flyout components that are
+// never opened by any test in this file. Their transitive module graphs add a
+// large one-time cost to the first render through `<TestProviders>` +
+// `<AlertContextMenu>`, which under CI load was pushing the first `Case
+// actions` test past Jest's default 5s test timeout (flake on
+// kibana-on-merge build 96698). Replacing the flyouts with no-op components
+// removes the cost at its source.
+jest.mock(
+  '../../../../management/pages/endpoint_exceptions/view/components/endpoint_exceptions_flyout',
+  () => ({ EndpointExceptionsFlyout: () => null })
+);
+jest.mock('../../osquery/osquery_flyout', () => ({ OsqueryFlyout: () => null }));
+jest.mock('../../../../detection_engine/rule_exceptions/components/add_exception_flyout', () => ({
+  AddExceptionFlyout: jest.fn().mockReturnValue(null),
+}));
+
+const mockUseRuleWithFallback = jest.fn();
+jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => ({
+  useRuleWithFallback: (...args: unknown[]) => mockUseRuleWithFallback(...args),
+}));
+
+const mockUseSignalIndex = jest.fn();
+jest.mock('../../../containers/detection_engine/alerts/use_signal_index', () => ({
+  useSignalIndex: () => mockUseSignalIndex(),
+}));
+
+const mockUseQueryAlerts = jest.fn();
+jest.mock('../../../containers/detection_engine/alerts/use_query', () => ({
+  useQueryAlerts: (...args: unknown[]) => mockUseQueryAlerts(...args),
+}));
+jest.mock(
+  '../../../../management/pages/event_filters/view/components/event_filters_flyout',
+  () => ({ EventFiltersFlyout: () => null })
+);
 
 describe('Alert table context menu', () => {
   describe('Case actions', () => {
     test('it render AddToCase context menu item if timelineId === TimelineId.detectionsPage', () => {
-      const wrapper = mount(<AlertContextMenu {...props} scopeId={TableId.alertsOnAlertsPage} />, {
-        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
-      });
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu {...props} scopeId={TableId.alertsOnAlertsPage} />
+        </TestProviders>
+      );
 
-      wrapper.find(actionMenuButton).simulate('click');
-      expect(wrapper.find(addToExistingCaseButton).first().exists()).toEqual(true);
-      expect(wrapper.find(addToNewCaseButton).first().exists()).toEqual(true);
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
+
+      expect(wrapper.getByTestId(addToExistingCaseButton)).toBeTruthy();
+      expect(wrapper.getByTestId(addToNewCaseButton)).toBeTruthy();
     });
 
     test('it render AddToCase context menu item if timelineId === TimelineId.detectionsRulesDetailsPage', () => {
-      const wrapper = mount(
-        <AlertContextMenu {...props} scopeId={TableId.alertsOnRuleDetailsPage} />,
-        {
-          wrappingComponent: TestProviders as EnzymeComponentType<{}>,
-        }
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu {...props} scopeId={TableId.alertsOnRuleDetailsPage} />
+        </TestProviders>
       );
 
-      wrapper.find(actionMenuButton).simulate('click');
-      expect(wrapper.find(addToExistingCaseButton).first().exists()).toEqual(true);
-      expect(wrapper.find(addToNewCaseButton).first().exists()).toEqual(true);
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
+
+      expect(wrapper.getByTestId(addToExistingCaseButton)).toBeTruthy();
+      expect(wrapper.getByTestId(addToNewCaseButton)).toBeTruthy();
     });
 
     test('it render AddToCase context menu item if timelineId === TimelineId.active', () => {
-      const wrapper = mount(<AlertContextMenu {...props} scopeId={TimelineId.active} />, {
-        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
-      });
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu {...props} scopeId={TimelineId.active} />
+        </TestProviders>
+      );
 
-      wrapper.find(actionMenuButton).simulate('click');
-      expect(wrapper.find(addToExistingCaseButton).first().exists()).toEqual(true);
-      expect(wrapper.find(addToNewCaseButton).first().exists()).toEqual(true);
-    });
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
-    test('it does NOT render AddToCase context menu item when timelineId is not in the allowed list', () => {
-      const wrapper = mount(<AlertContextMenu {...props} scopeId="timeline-test" />, {
-        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
-      });
-      wrapper.find(actionMenuButton).simulate('click');
-      expect(wrapper.find(addToExistingCaseButton).first().exists()).toEqual(false);
-      expect(wrapper.find(addToNewCaseButton).first().exists()).toEqual(false);
+      expect(wrapper.getByTestId(addToExistingCaseButton)).toBeTruthy();
+      expect(wrapper.getByTestId(addToNewCaseButton)).toBeTruthy();
     });
   });
 
   describe('Alert status actions', () => {
-    test('it renders the correct status action buttons', () => {
-      const wrapper = mount(<AlertContextMenu {...props} scopeId={TimelineId.active} />, {
-        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
+    test('it renders the correct status action buttons', async () => {
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu {...props} scopeId={TimelineId.active} />
+        </TestProviders>
+      );
+
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
+
+      expect(wrapper.queryByTestId(markAsOpenButton)).toBeNull();
+      expect(wrapper.getByTestId(markAsAcknowledgedButton)).toBeInTheDocument();
+      expect(wrapper.getByTestId(markAsClosedButton)).toBeInTheDocument();
+    });
+  });
+
+  describe('Workflow actions', () => {
+    const mockRunWorkflowMenuItem = [
+      {
+        'data-test-subj': runWorkflowActionButton,
+        key: 'run-workflow-action',
+        name: 'Run workflow',
+        panel: 'RUN_WORKFLOW_PANEL_ID',
+      },
+    ];
+    const mockRunAlertWorkflowPanel = [
+      {
+        id: 'RUN_WORKFLOW_PANEL_ID',
+        title: 'Alert workflows',
+        'data-test-subj': alertWorkflowContextMenuPanel,
+        content: <div data-test-subj={alertWorkflowPanelContent}>{'Workflow panel'}</div>,
+      },
+    ];
+
+    test('it does not render the run workflow action when workflow capability is disabled', async () => {
+      mockUseRunAlertWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [],
+        runAlertWorkflowPanel: [],
       });
 
-      wrapper.find(actionMenuButton).simulate('click');
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu {...props} scopeId={TimelineId.active} />
+        </TestProviders>
+      );
 
-      expect(wrapper.find(markAsOpenButton).first().exists()).toEqual(false);
-      expect(wrapper.find(markAsAcknowledgedButton).first().exists()).toEqual(true);
-      expect(wrapper.find(markAsClosedButton).first().exists()).toEqual(true);
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
+
+      expect(wrapper.queryByTestId(runWorkflowActionButton)).not.toBeInTheDocument();
+    });
+
+    test('it renders the run workflow action when workflow is enabled', async () => {
+      mockUseRunAlertWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: mockRunWorkflowMenuItem,
+        runAlertWorkflowPanel: mockRunAlertWorkflowPanel,
+      });
+
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu {...props} scopeId={TimelineId.active} />
+        </TestProviders>
+      );
+
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
+
+      expect(wrapper.getByTestId(runWorkflowActionButton)).toBeInTheDocument();
+    });
+
+    test('it shows the workflow panel when run workflow action is clicked', async () => {
+      mockUseRunAlertWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: mockRunWorkflowMenuItem,
+        runAlertWorkflowPanel: mockRunAlertWorkflowPanel,
+      });
+
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu {...props} scopeId={TimelineId.active} />
+        </TestProviders>
+      );
+
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
+      fireEvent.click(wrapper.getByTestId(runWorkflowActionButton));
+
+      await waitFor(() => {
+        expect(wrapper.getByTestId(alertWorkflowPanelContent)).toBeInTheDocument();
+        expect(wrapper.getByText('Workflow panel')).toBeInTheDocument();
+      });
+    });
+
+    afterEach(() => {
+      mockUseRunAlertWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [],
+        runAlertWorkflowPanel: [],
+      });
+    });
+  });
+
+  describe('Document workflow actions (events)', () => {
+    const eventEcsRowData: Ecs = {
+      _id: '1',
+      agent: { type: ['blah'] },
+      event: {
+        kind: ['event'],
+      },
+    };
+
+    const eventProps = {
+      ...props,
+      ecsRowData: eventEcsRowData,
+    };
+
+    const mockDocumentWorkflowMenuItem = [
+      {
+        'data-test-subj': runDocumentWorkflowActionButton,
+        key: 'run-document-workflow-action',
+        name: 'Run workflow',
+        panel: 'RUN_DOCUMENT_WORKFLOW_PANEL_ID',
+      },
+    ];
+    const mockDocumentWorkflowPanel = [
+      {
+        id: 'RUN_DOCUMENT_WORKFLOW_PANEL_ID',
+        title: 'Document workflows',
+        'data-test-subj': 'document-workflow-context-menu-panel',
+        content: (
+          <div data-test-subj={documentWorkflowPanelContent}>{'Document workflow panel'}</div>
+        ),
+      },
+    ];
+
+    test('it does not render the run document workflow action when workflow capability is disabled', async () => {
+      mockUseRunDocumentWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [],
+        runDocumentWorkflowPanel: [],
+      });
+
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu {...eventProps} scopeId={TableId.hostsPageEvents} />
+        </TestProviders>
+      );
+
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
+
+      expect(wrapper.queryByTestId(runDocumentWorkflowActionButton)).not.toBeInTheDocument();
+    });
+
+    test('it renders the run document workflow action for event rows when workflow is enabled', async () => {
+      mockUseRunDocumentWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: mockDocumentWorkflowMenuItem,
+        runDocumentWorkflowPanel: mockDocumentWorkflowPanel,
+      });
+
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu {...eventProps} scopeId={TableId.hostsPageEvents} />
+        </TestProviders>
+      );
+
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
+
+      expect(wrapper.getByTestId(runDocumentWorkflowActionButton)).toBeInTheDocument();
+    });
+
+    test('it shows the document workflow panel when run workflow action is clicked', async () => {
+      mockUseRunDocumentWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: mockDocumentWorkflowMenuItem,
+        runDocumentWorkflowPanel: mockDocumentWorkflowPanel,
+      });
+
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu {...eventProps} scopeId={TableId.hostsPageEvents} />
+        </TestProviders>
+      );
+
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
+      fireEvent.click(wrapper.getByTestId(runDocumentWorkflowActionButton));
+
+      await waitFor(() => {
+        expect(wrapper.getByTestId(documentWorkflowPanelContent)).toBeInTheDocument();
+      });
+    });
+
+    afterEach(() => {
+      mockUseRunDocumentWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [],
+        runDocumentWorkflowPanel: [],
+      });
     });
   });
 
@@ -187,140 +429,312 @@ describe('Alert table context menu', () => {
           });
         });
 
-        test('it disables AddEndpointEventFilter when timeline id is not host events page', () => {
-          const wrapper = mount(
-            <AlertContextMenu {...endpointEventProps} scopeId={TimelineId.active} />,
-            {
-              wrappingComponent: TestProviders as EnzymeComponentType<{}>,
-            }
+        test('it disables AddEndpointEventFilter when timeline id is not host events page', async () => {
+          const wrapper = render(
+            <TestProviders>
+              <AlertContextMenu {...endpointEventProps} scopeId={TimelineId.active} />
+            </TestProviders>
           );
 
-          wrapper.find(actionMenuButton).simulate('click');
-          expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
-          expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(true);
+          fireEvent.click(wrapper.getByTestId(actionMenuButton));
+
+          const button = wrapper.getByTestId(addEndpointEventFilterButton);
+
+          expect(button).toBeInTheDocument();
+          expect(button).toBeDisabled();
         });
 
-        test('it enables AddEndpointEventFilter when timeline id is host events page', () => {
-          const wrapper = mount(
-            <AlertContextMenu {...endpointEventProps} scopeId={TableId.hostsPageEvents} />,
-            {
-              wrappingComponent: TestProviders as EnzymeComponentType<{}>,
-            }
+        test('it enables AddEndpointEventFilter when timeline id is host events page', async () => {
+          const wrapper = render(
+            <TestProviders>
+              <AlertContextMenu {...endpointEventProps} scopeId={TableId.hostsPageEvents} />
+            </TestProviders>
           );
 
-          wrapper.find(actionMenuButton).simulate('click');
-          expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
-          expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(
-            false
-          );
+          fireEvent.click(wrapper.getByTestId(actionMenuButton));
+
+          const button = wrapper.getByTestId(addEndpointEventFilterButton);
+
+          expect(button).toBeInTheDocument();
+          expect(button).not.toBeDisabled();
         });
 
-        test('it disables AddEndpointEventFilter when timeline id is host events page but is not from endpoint', () => {
+        test('it disables AddEndpointEventFilter when timeline id is host events page but is not from endpoint', async () => {
           const customProps = {
             ...props,
             ecsRowData: { ...ecsRowData, agent: { type: ['other'] }, event: { kind: ['event'] } },
           };
-          const wrapper = mount(
-            <AlertContextMenu {...customProps} scopeId={TableId.hostsPageEvents} />,
-            {
-              wrappingComponent: TestProviders as EnzymeComponentType<{}>,
-            }
+          const wrapper = render(
+            <TestProviders>
+              <AlertContextMenu {...customProps} scopeId={TableId.hostsPageEvents} />
+            </TestProviders>
           );
 
-          wrapper.find(actionMenuButton).simulate('click');
-          expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
-          expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(true);
+          fireEvent.click(wrapper.getByTestId(actionMenuButton));
+
+          const button = wrapper.getByTestId(addEndpointEventFilterButton);
+
+          expect(button).toBeInTheDocument();
+          expect(button).toBeDisabled();
         });
 
-        test('it enables AddEndpointEventFilter when timeline id is user events page', () => {
-          const wrapper = mount(
-            <AlertContextMenu {...endpointEventProps} scopeId={TableId.usersPageEvents} />,
-            {
-              wrappingComponent: TestProviders as EnzymeComponentType<{}>,
-            }
+        test('it enables AddEndpointEventFilter when timeline id is user events page', async () => {
+          const wrapper = render(
+            <TestProviders>
+              <AlertContextMenu {...endpointEventProps} scopeId={TableId.usersPageEvents} />
+            </TestProviders>
           );
 
-          wrapper.find(actionMenuButton).simulate('click');
-          expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
-          expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(
-            false
-          );
+          fireEvent.click(wrapper.getByTestId(actionMenuButton));
+
+          const button = wrapper.getByTestId(addEndpointEventFilterButton);
+
+          expect(button).toBeInTheDocument();
+          expect(button).not.toBeDisabled();
         });
 
-        test('it disables AddEndpointEventFilter when timeline id is user events page but is not from endpoint', () => {
+        test('it disables AddEndpointEventFilter when timeline id is user events page but is not from endpoint', async () => {
           const customProps = {
             ...props,
             ecsRowData: { ...ecsRowData, agent: { type: ['other'] }, event: { kind: ['event'] } },
           };
-          const wrapper = mount(
-            <AlertContextMenu {...customProps} scopeId={TableId.usersPageEvents} />,
-            {
-              wrappingComponent: TestProviders as EnzymeComponentType<{}>,
-            }
+          const wrapper = render(
+            <TestProviders>
+              <AlertContextMenu {...customProps} scopeId={TableId.usersPageEvents} />
+            </TestProviders>
           );
 
-          wrapper.find(actionMenuButton).simulate('click');
-          expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
-          expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(true);
+          fireEvent.click(wrapper.getByTestId(actionMenuButton));
+
+          const button = wrapper.getByTestId(addEndpointEventFilterButton);
+
+          expect(button).toBeInTheDocument();
+          expect(button).toBeDisabled();
         });
       });
+    });
 
-      describe("when users don't have write event filters privilege", () => {
-        beforeEach(() => {
-          (useUserPrivileges as jest.Mock).mockReturnValue({
-            ...mockInitialUserPrivilegesState(),
-            endpointPrivileges: { loading: false, canWriteEventFilters: false },
-          });
+    describe('Apply alert tags action', () => {
+      test('it renders the apply alert tags action button', async () => {
+        const wrapper = render(
+          <TestProviders>
+            <AlertContextMenu {...props} scopeId={TimelineId.active} />
+          </TestProviders>
+        );
+
+        fireEvent.click(wrapper.getByTestId(actionMenuButton));
+
+        await waitFor(() => {
+          expect(wrapper.getByTestId(applyAlertTagsButton)).toBeTruthy();
         });
+      });
+    });
 
-        test('it removes AddEndpointEventFilter option when timeline id is host events page but does not has write event filters privilege', () => {
-          const wrapper = mount(
-            <AlertContextMenu {...endpointEventProps} scopeId={TableId.hostsPageEvents} />,
-            {
-              wrappingComponent: TestProviders as EnzymeComponentType<{}>,
-            }
-          );
+    describe('Assign alert action', () => {
+      test('it renders the assign alert action button', async () => {
+        const wrapper = render(
+          <TestProviders>
+            <AlertContextMenu {...props} scopeId={TimelineId.active} />
+          </TestProviders>
+        );
 
-          // Entire actionMenuButton is removed as there is no option available
-          expect(wrapper.find(actionMenuButton).first().exists()).toEqual(false);
-        });
+        fireEvent.click(wrapper.getByTestId(actionMenuButton));
 
-        test('it removes AddEndpointEventFilter option when timeline id is user events page but does not has write event filters privilege', () => {
-          const wrapper = mount(
-            <AlertContextMenu {...endpointEventProps} scopeId={TableId.usersPageEvents} />,
-            {
-              wrappingComponent: TestProviders as EnzymeComponentType<{}>,
-            }
-          );
-
-          // Entire actionMenuButton is removed as there is no option available
-          expect(wrapper.find(actionMenuButton).first().exists()).toEqual(false);
+        await waitFor(() => {
+          expect(wrapper.getByTestId(applyAlertAssigneesButton)).toBeTruthy();
         });
       });
     });
   });
 
-  describe('Apply alert tags action', () => {
-    test('it renders the apply alert tags action button', () => {
-      const wrapper = mount(<AlertContextMenu {...props} scopeId={TimelineId.active} />, {
-        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
+  describe('Add to chat action', () => {
+    const addToChatButton = 'add-to-chat-action';
+
+    test('it renders the add to chat action when agent builder returns an item', async () => {
+      mockUseAddToChatAction.mockReturnValue({
+        addToChatActionItems: [
+          {
+            'data-test-subj': addToChatButton,
+            name: 'Add to chat',
+            onClick: jest.fn(),
+          },
+        ],
       });
 
-      wrapper.find(actionMenuButton).simulate('click');
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu {...props} scopeId={TimelineId.active} />
+        </TestProviders>
+      );
 
-      expect(wrapper.find(applyAlertTagsButton).first().exists()).toEqual(true);
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
+
+      await waitFor(() => {
+        expect(wrapper.getByTestId(addToChatButton)).toBeInTheDocument();
+      });
+    });
+
+    test('it does not render the add to chat action when agent builder is disabled', async () => {
+      mockUseAddToChatAction.mockReturnValue({ addToChatActionItems: [] });
+
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu {...props} scopeId={TimelineId.active} />
+        </TestProviders>
+      );
+
+      fireEvent.click(wrapper.getByTestId(actionMenuButton));
+
+      expect(wrapper.queryByTestId(addToChatButton)).not.toBeInTheDocument();
+    });
+
+    afterEach(() => {
+      mockUseAddToChatAction.mockReturnValue({ addToChatActionItems: [] });
+    });
+  });
+});
+
+// ─── AddExceptionFlyoutWrapper ───────────────────────────────────────────────
+
+const createMockHit = (fields: Record<string, unknown> = {}): DataTableRecord => ({
+  id: 'test-id',
+  raw: { _id: 'test-id', _index: 'test-index' },
+  flattened: fields,
+  isAnchor: false,
+});
+
+// An enrichedAlert whose source has no index info, so the fallback values
+// derived from `hit` are what memoRuleIndices / memoDataViewId fall back to.
+const enrichedAlertWithoutIndex = {
+  loading: false,
+  data: { hits: { hits: [{ _id: 'test-id', _index: 'test-index', _source: {} }] } },
+};
+
+const mockAddExceptionFlyout = jest.requireMock(
+  '../../../../detection_engine/rule_exceptions/components/add_exception_flyout'
+).AddExceptionFlyout as jest.Mock;
+
+const wrapperDefaults = {
+  exceptionListType: null as ExceptionListTypeEnum | null,
+  eventId: 'test-id',
+  onCancel: jest.fn(),
+  onConfirm: jest.fn(),
+  alertStatus: 'open' as const,
+};
+
+describe('AddExceptionFlyoutWrapper', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseRuleWithFallback.mockReturnValue({ rule: null, loading: false });
+    mockUseSignalIndex.mockReturnValue({ loading: false, signalIndexName: '.siem-signals' });
+    mockUseQueryAlerts.mockReturnValue(enrichedAlertWithoutIndex);
+    mockAddExceptionFlyout.mockReturnValue(<div data-test-subj="mock-add-exception-flyout" />);
+  });
+
+  describe('ruleId derivation', () => {
+    it('reads ruleId from kibana.alert.rule.uuid', () => {
+      render(
+        <AddExceptionFlyoutWrapper
+          hit={createMockHit({
+            'kibana.alert.rule.uuid': 'rule-abc',
+            'kibana.alert.rule.parameters.index': ['test-index'],
+          })}
+          {...wrapperDefaults}
+        />
+      );
+      expect(mockUseRuleWithFallback).toHaveBeenCalledWith('rule-abc');
+    });
+
+    it('falls back to signal.rule.id when ALERT_RULE_UUID is absent', () => {
+      render(
+        <AddExceptionFlyoutWrapper
+          hit={createMockHit({
+            'signal.rule.id': 'legacy-rule-id',
+            'signal.rule.index': ['legacy-index'],
+          })}
+          {...wrapperDefaults}
+        />
+      );
+      expect(mockUseRuleWithFallback).toHaveBeenCalledWith('legacy-rule-id');
     });
   });
 
-  describe('Assign alert action', () => {
-    test('it renders the assign alert action button', () => {
-      const wrapper = mount(<AlertContextMenu {...props} scopeId={TimelineId.active} />, {
-        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
-      });
+  describe('ruleIndices derivation', () => {
+    it('renders when index array is available from hit', () => {
+      const { getByTestId } = render(
+        <AddExceptionFlyoutWrapper
+          hit={createMockHit({
+            'kibana.alert.rule.uuid': 'rule-abc',
+            'kibana.alert.rule.parameters.index': ['index-1', 'index-2'],
+          })}
+          {...wrapperDefaults}
+        />
+      );
+      expect(getByTestId('mock-add-exception-flyout')).toBeInTheDocument();
+    });
 
-      wrapper.find(actionMenuButton).simulate('click');
+    it('wraps a single string index into an array so the component renders', () => {
+      const { getByTestId } = render(
+        <AddExceptionFlyoutWrapper
+          hit={createMockHit({
+            'kibana.alert.rule.uuid': 'rule-abc',
+            'kibana.alert.rule.parameters.index': 'single-index',
+          })}
+          {...wrapperDefaults}
+        />
+      );
+      expect(getByTestId('mock-add-exception-flyout')).toBeInTheDocument();
+    });
 
-      expect(wrapper.find(applyAlertAssigneesButton).first().exists()).toEqual(true);
+    it('falls back to signal.rule.index', () => {
+      const { getByTestId } = render(
+        <AddExceptionFlyoutWrapper
+          hit={createMockHit({
+            'kibana.alert.rule.uuid': 'rule-abc',
+            'signal.rule.index': ['legacy-index'],
+          })}
+          {...wrapperDefaults}
+        />
+      );
+      expect(getByTestId('mock-add-exception-flyout')).toBeInTheDocument();
+    });
+
+    it('stays in loading state (renders nothing) when no index or data_view_id', () => {
+      const { queryByTestId } = render(
+        <AddExceptionFlyoutWrapper
+          hit={createMockHit({ 'kibana.alert.rule.uuid': 'rule-abc' })}
+          {...wrapperDefaults}
+        />
+      );
+      expect(queryByTestId('mock-add-exception-flyout')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('ruleDataViewId derivation', () => {
+    it('renders when kibana.alert.rule.parameters.data_view_id is present', () => {
+      const { getByTestId } = render(
+        <AddExceptionFlyoutWrapper
+          hit={createMockHit({
+            'kibana.alert.rule.uuid': 'rule-abc',
+            'kibana.alert.rule.parameters.data_view_id': 'my-data-view',
+          })}
+          {...wrapperDefaults}
+        />
+      );
+      expect(getByTestId('mock-add-exception-flyout')).toBeInTheDocument();
+    });
+
+    it('falls back to signal.rule.data_view_id', () => {
+      const { getByTestId } = render(
+        <AddExceptionFlyoutWrapper
+          hit={createMockHit({
+            'kibana.alert.rule.uuid': 'rule-abc',
+            'signal.rule.data_view_id': 'legacy-data-view',
+          })}
+          {...wrapperDefaults}
+        />
+      );
+      expect(getByTestId('mock-add-exception-flyout')).toBeInTheDocument();
     });
   });
 });

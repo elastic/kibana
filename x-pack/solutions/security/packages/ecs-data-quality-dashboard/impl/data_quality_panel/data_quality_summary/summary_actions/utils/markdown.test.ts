@@ -13,7 +13,7 @@ import {
   auditbeatWithAllResults,
 } from '../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { INDEX } from '../../../translations';
-import { ErrorSummary, PatternRollup } from '../../../types';
+import type { ErrorSummary, PatternRollup } from '../../../types';
 import { ERROR, ERRORS, PATTERN } from '../translations';
 import {
   getDataQualitySummaryMarkdownComment,

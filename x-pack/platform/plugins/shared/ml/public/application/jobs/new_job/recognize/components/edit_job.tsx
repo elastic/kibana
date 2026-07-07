@@ -21,17 +21,18 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { composeValidators, maxLengthValidator } from '@kbn/ml-validators';
 import { JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';
 
+import type { JobOverride } from '@kbn/ml-common-types/modules';
 import type { ModuleJobUI } from '../page';
 import { usePartialState } from '../../../../components/custom_hooks';
 import { isJobIdValid } from '../../../../../../common/util/job_utils';
 import { JobGroupsInput } from '../../common/components';
-import type { JobOverride } from '../../../../../../common/types/modules';
 
 interface EditJobProps {
   job: ModuleJobUI;
@@ -78,11 +79,13 @@ export const EditJob: FC<EditJobProps> = ({ job, jobOverride, existingGroupIds, 
     onClose(result);
   };
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout onClose={() => onClose(null)}>
+    <EuiFlyout onClose={() => onClose(null)} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>
+          <h2 id={flyoutTitleId}>
             <FormattedMessage
               id="xpack.ml.newJob.recognize.overrideConfigurationHeader"
               defaultMessage="Override configuration for {jobID}"

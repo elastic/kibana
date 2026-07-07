@@ -31,6 +31,11 @@ const mockDefaultInsight = () => {
 describe('Update Insights Route Handler', () => {
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
 
+  beforeEach(() => {
+    fetchMock.mockClear();
+    updateMock.mockClear();
+  });
+
   const callRoute = async (
     params: Record<string, string>,
     body: Record<string, unknown>,
@@ -103,6 +108,147 @@ describe('Update Insights Route Handler', () => {
       });
     });
 
+    describe('policy_response_failure feature flag validation', () => {
+      it('should accept policy_response_failure type when feature flag is enabled', async () => {
+        const mockEndpointContext = createMockEndpointAppContext();
+        // @ts-expect-error
+        mockEndpointContext.experimentalFeatures.defendInsightsPolicyResponseFailure = true;
+
+        mockDefaultInsight();
+        const mockUpdatedInsight = {
+          id: 1,
+          type: 'policy_response_failure',
+          name: 'Policy Response Failure Insight',
+        };
+        updateMock.mockResolvedValue(mockUpdatedInsight);
+
+        const updateBody = {
+          type: 'policy_response_failure',
+          name: 'Policy Response Failure Insight',
+        };
+
+        await callRoute({ insightId: '1' }, updateBody, undefined, mockEndpointContext);
+
+        expect(updateMock).toHaveBeenCalledWith('1', updateBody, 'index-123');
+        expect(mockResponse.ok).toHaveBeenCalledWith({
+          body: mockUpdatedInsight,
+        });
+      });
+
+      it('should reject policy_response_failure type when feature flag is disabled', async () => {
+        const mockEndpointContext = createMockEndpointAppContext();
+        // @ts-expect-error
+        mockEndpointContext.experimentalFeatures.defendInsightsPolicyResponseFailure = false;
+
+        mockDefaultInsight();
+        const updateBody = {
+          type: 'policy_response_failure',
+          name: 'Policy Response Failure Insight',
+        };
+
+        await callRoute({ insightId: '1' }, updateBody, undefined, mockEndpointContext);
+
+        expect(mockResponse.badRequest).toHaveBeenCalledWith({
+          body: 'policy_response_failure insight type requires defendInsightsPolicyResponseFailure feature flag',
+        });
+        expect(updateMock).not.toHaveBeenCalled();
+      });
+
+      it('should allow incompatible_antivirus type regardless of feature flag state', async () => {
+        const mockEndpointContext = createMockEndpointAppContext();
+        // @ts-expect-error
+        mockEndpointContext.experimentalFeatures.defendInsightsPolicyResponseFailure = false;
+
+        mockDefaultInsight();
+        const mockUpdatedInsight = {
+          id: 1,
+          type: 'incompatible_antivirus',
+          name: 'Antivirus Insight',
+        };
+        updateMock.mockResolvedValue(mockUpdatedInsight);
+
+        const updateBody = { type: 'incompatible_antivirus', name: 'Antivirus Insight' };
+
+        await callRoute({ insightId: '1' }, updateBody, undefined, mockEndpointContext);
+
+        expect(updateMock).toHaveBeenCalledWith('1', updateBody, 'index-123');
+        expect(mockResponse.ok).toHaveBeenCalledWith({
+          body: mockUpdatedInsight,
+        });
+      });
+
+      it('should allow action updates to existing policy_response_failure insights when feature flag is disabled', async () => {
+        const mockEndpointContext = createMockEndpointAppContext();
+        // @ts-expect-error
+        mockEndpointContext.experimentalFeatures.defendInsightsPolicyResponseFailure = false;
+
+        fetchMock.mockResolvedValue([
+          { _id: '1', _index: 'index-123', _source: { type: 'policy_response_failure' } },
+        ]);
+
+        const updateBody = { action: { type: 'remediated' } };
+        const mockUpdatedInsight = { id: 1, action: { type: 'remediated' } };
+        updateMock.mockResolvedValue(mockUpdatedInsight);
+
+        await callRoute(
+          { insightId: '1' },
+          updateBody,
+          { canWriteWorkflowInsights: false, canReadWorkflowInsights: true },
+          mockEndpointContext
+        );
+
+        expect(updateMock).toHaveBeenCalledWith('1', updateBody, 'index-123');
+        expect(mockResponse.ok).toHaveBeenCalledWith({
+          body: mockUpdatedInsight,
+        });
+      });
+
+      it('should allow action updates for policy_response_failure when feature flag is enabled', async () => {
+        const mockEndpointContext = createMockEndpointAppContext();
+        // @ts-expect-error
+        mockEndpointContext.experimentalFeatures.defendInsightsPolicyResponseFailure = true;
+
+        fetchMock.mockResolvedValue([
+          { _id: '1', _index: 'index-123', _source: { type: 'policy_response_failure' } },
+        ]);
+        const mockUpdatedInsight = { id: 1, action: { type: 'remediated' } };
+        updateMock.mockResolvedValue(mockUpdatedInsight);
+
+        const updateBody = { action: { type: 'remediated' } };
+
+        await callRoute(
+          { insightId: '1' },
+          updateBody,
+          { canWriteWorkflowInsights: false, canReadWorkflowInsights: true },
+          mockEndpointContext
+        );
+
+        expect(updateMock).toHaveBeenCalledWith('1', updateBody, 'index-123');
+        expect(mockResponse.ok).toHaveBeenCalledWith({
+          body: mockUpdatedInsight,
+        });
+      });
+
+      it('should validate feature flag when updating insight with target containing policy_response_failure type', async () => {
+        const mockEndpointContext = createMockEndpointAppContext();
+        // @ts-expect-error
+        mockEndpointContext.experimentalFeatures.defendInsightsPolicyResponseFailure = false;
+
+        mockDefaultInsight();
+        const updateBody = {
+          type: 'policy_response_failure',
+          target: { ids: ['agent-1', 'agent-2'] },
+        };
+
+        await callRoute({ insightId: '1' }, updateBody, undefined, mockEndpointContext);
+
+        expect(mockResponse.badRequest).toHaveBeenCalledWith({
+          body: 'policy_response_failure insight type requires defendInsightsPolicyResponseFailure feature flag',
+        });
+        expect(updateMock).not.toHaveBeenCalled();
+      });
+    });
+
     it('should handle missing body parameters', async () => {
       mockDefaultInsight();
       updateMock.mockResolvedValue({ id: 1, name: 'Insight 1' });
@@ -161,7 +307,9 @@ describe('Update Insights Route Handler', () => {
         reportEvent: reportEventMock,
       });
 
-      fetchMock.mockResolvedValue([{ _id: '1', _index: 'index-123', _source: {} }]);
+      fetchMock.mockResolvedValue([
+        { _id: '1', _index: 'index-123', _source: { type: 'incompatible_antivirus' } },
+      ]);
       updateMock.mockResolvedValue({ id: 1 });
 
       await callRoute(
@@ -176,6 +324,34 @@ describe('Update Insights Route Handler', () => {
 
       expect(reportEventMock).toHaveBeenCalledWith('endpoint_workflow_insights_remediated_event', {
         insightId: '1',
+        insightType: 'incompatible_antivirus',
+      });
+    });
+
+    it('should report telemetry when action.type is dismissed', async () => {
+      const reportEventMock = jest.fn();
+      const mockEndpointContext = createMockEndpointAppContext();
+      mockEndpointContext.service.getTelemetryService = jest.fn().mockReturnValue({
+        reportEvent: reportEventMock,
+      });
+
+      fetchMock.mockResolvedValue([
+        { _id: '1', _index: 'index-123', _source: { type: 'policy_response_failure' } },
+      ]);
+      updateMock.mockResolvedValue({ id: 1 });
+
+      await callRoute(
+        { insightId: '1' },
+        { action: { type: 'dismissed' } },
+        {
+          canWriteWorkflowInsights: false,
+          canReadWorkflowInsights: true,
+        },
+        mockEndpointContext
+      );
+
+      expect(reportEventMock).toHaveBeenCalledWith('endpoint_workflow_insights_dismissed_event', {
+        insightType: 'policy_response_failure',
       });
     });
 
@@ -196,8 +372,6 @@ describe('Update Insights Route Handler', () => {
   describe('space awareness', () => {
     const setupTest = () => {
       const mockEndpointContext = createMockEndpointAppContext();
-      // @ts-expect-error
-      mockEndpointContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
       return mockEndpointContext;
     };
 

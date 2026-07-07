@@ -58,7 +58,7 @@ export const ElasticManagedWebCrawlerEmptyPrompt: React.FC = () => {
                         gutterSize="s"
                       >
                         <EuiFlexItem grow={false}>
-                          <EuiIcon color="primary" size="l" type="globe" />
+                          <EuiIcon color="primary" size="l" type="globe" aria-hidden />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>
@@ -86,10 +86,10 @@ export const ElasticManagedWebCrawlerEmptyPrompt: React.FC = () => {
                         justifyContent="center"
                       >
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type="web" />
+                          <EuiIcon color="primary" size="l" type="web" aria-hidden />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type="logoElastic" />
+                          <EuiIcon color="primary" size="l" type="logoElastic" aria-hidden />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>

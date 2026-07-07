@@ -10,10 +10,9 @@
 import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { CreatedObject, SavedObject } from '@kbn/core-saved-objects-server';
-import {
-  LEGACY_URL_ALIAS_TYPE,
-  LegacyUrlAlias,
-} from '@kbn/core-saved-objects-base-server-internal';
+import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
+import type { LegacyUrlAlias } from '@kbn/core-saved-objects-base-server-internal';
+import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { extractErrors } from './extract_errors';
 import type { ImportStateMap } from './types';
@@ -146,7 +145,7 @@ export const createSavedObjects = async <T>({
     remappedResults.push({ ...result, id, ...(id !== result.id && { destinationId: result.id }) });
 
     // Indicates that object has been successfully imported.
-    const objectSuccessfullyImported = !hasResolvableErrors && !result.error;
+    const objectSuccessfullyImported = !hasResolvableErrors && !isSavedObjectErrorResult(result);
 
     // Indicates that the object has changed ID at some point with the original ID retained as the origin ID, so that
     // legacy URL alias is required to retrieve the object using its original ID.
@@ -182,7 +181,7 @@ export const createSavedObjects = async <T>({
         ).saved_objects
       : [];
   return {
-    createdObjects: remappedResults.filter((obj) => !obj.error),
+    createdObjects: remappedResults.filter((obj) => !isSavedObjectErrorResult(obj)),
     errors: extractErrors(remappedResults, objects, legacyUrlAliasResults, legacyUrlAliases),
   };
 };

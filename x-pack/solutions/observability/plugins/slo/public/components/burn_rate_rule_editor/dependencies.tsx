@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { EuiTableActionsColumnType } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiTableActionsColumnType,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 
 import React from 'react';
 import { useFetchSLOsWithBurnRateRules } from '../../hooks/use_fetch_slos_with_burn_rate_rules';
-import { Dependency } from '../../../common/types';
+import type { Dependency } from '../../../common/burn_rate_rule/types';
 import {
   ALERT_ACTION,
   HIGH_PRIORITY_ACTION,
@@ -160,7 +160,13 @@ export function Dependencies({ currentRuleId, dependencies, onChange }: Dependen
         </p>
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiBasicTable columns={columns} items={rows} />
+      <EuiBasicTable
+        columns={columns}
+        items={rows}
+        tableCaption={i18n.translate('xpack.slo.rules.dependencies.tableCaption', {
+          defaultMessage: 'Configured rule dependencies',
+        })}
+      />
       <EuiSpacer size="s" />
       <DependencyEditor
         rules={availableRules}

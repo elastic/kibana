@@ -9,7 +9,7 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import type { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
-import type { FieldDescriptor } from '@kbn/data-plugin/server';
+import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
 import type { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import type { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 

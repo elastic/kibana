@@ -6,22 +6,26 @@
  */
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { buildQueryFromFilters, Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { buildQueryFromFilters } from '@kbn/es-query';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import {
+import type {
   GetSLOResponse,
-  apmTransactionDurationIndicatorSchema,
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
 } from '@kbn/slo-schema';
+import { apmTransactionDurationIndicatorSchema } from '@kbn/slo-schema';
+import type {
+  APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE,
+  APM_ALERTING_LATENCY_CHART_EMBEDDABLE,
+  APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE,
+} from '@kbn/apm-embeddable-common';
 import type { BurnRateAlert, BurnRateRule, TimeRange } from '../../../types';
 
 type EmbeddableId =
-  | 'APM_THROUGHPUT_CHART_EMBEDDABLE'
-  | 'APM_LATENCY_CHART_EMBEDDABLE'
-  | 'APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE'
-  | 'APM_ALERTING_LATENCY_CHART_EMBEDDABLE'
-  | 'APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE';
+  | typeof APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE
+  | typeof APM_ALERTING_LATENCY_CHART_EMBEDDABLE
+  | typeof APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE;
 
 export type APMTransactionDurationSLOResponse = GetSLOResponse & {
   indicator: APMTransactionDurationIndicator;
@@ -86,7 +90,7 @@ export function APMEmbeddableRoot({
   return (
     <EmbeddableRenderer
       type={embeddableId}
-      getParentApi={() => ({ getSerializedStateForChild: () => ({ rawState: input }) })}
+      getParentApi={() => ({ getSerializedStateForChild: () => input })}
       hidePanelChrome={true}
     />
   );

@@ -193,6 +193,12 @@ export class StepMetrics extends Component {
     return (
       <Fragment>
         <EuiPopover
+          aria-label={i18n.translate(
+            'xpack.rollupJobs.create.stepMetrics.selectMetricsPopoverAriaLabel',
+            {
+              defaultMessage: 'Select metrics',
+            }
+          )}
           ownFocus
           isOpen={this.state.metricsPopoverOpen}
           closePopover={this.closeMetricsPopover}
@@ -389,7 +395,7 @@ export class StepMetrics extends Component {
               flush="right"
               href={documentationLinks.apis.createRollupJobsRequest}
               target="_blank"
-              iconType="help"
+              iconType="question"
               data-test-subj="rollupJobCreateMetricsDocsButton"
             >
               <FormattedMessage

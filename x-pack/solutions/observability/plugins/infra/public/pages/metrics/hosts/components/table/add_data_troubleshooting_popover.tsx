@@ -16,6 +16,7 @@ import {
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
@@ -47,6 +48,7 @@ const badgeContent = i18n.translate('xpack.infra.addDataPopover.naBadgeLabel', {
 
 export const AddDataTroubleshootingPopover = () => {
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
+  const popoverTitleId = useGeneratedHtmlId();
 
   const {
     services: { share },
@@ -59,15 +61,14 @@ export const AddDataTroubleshootingPopover = () => {
 
   return (
     <EuiPopover
+      aria-labelledby={popoverTitleId}
       button={
         <EuiBadge
           color="hollow"
-          iconType="iInCircle"
+          iconType="info"
           iconSide="left"
           onClick={onButtonClick}
           onClickAriaLabel={popoverContent.title}
-          iconOnClick={onButtonClick}
-          iconOnClickAriaLabel={popoverContent.title}
         >
           {badgeContent}
         </EuiBadge>
@@ -75,7 +76,7 @@ export const AddDataTroubleshootingPopover = () => {
       isOpen={isPopoverOpen}
       closePopover={closePopover}
     >
-      <EuiPopoverTitle>{popoverContent.title}</EuiPopoverTitle>
+      <EuiPopoverTitle id={popoverTitleId}>{popoverContent.title}</EuiPopoverTitle>
       <EuiText size="s" style={{ width: 300 }}>
         {popoverContent.content}
       </EuiText>

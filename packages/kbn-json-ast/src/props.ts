@@ -28,14 +28,18 @@ export function getEndOfLastProp(obj: T.ObjectExpression) {
 }
 
 /**
- * Removes a property from a JSONc object. If the property does not exist the source is just returned
+ * Removes a named property from a JSONC object. If the property does not exist
+ * the source is returned unchanged.
+ * @param source - The JSONC source text to modify.
+ * @param key - The property key to remove.
+ * @param opts - Optional configuration.
+ * @param opts.node - The AST node of the object to modify. When provided, skips
+ * re-parsing `source`.
+ * @returns The modified JSONC source text, or the original if the property does not exist.
  */
 export function removeProp(
-  /** the jsonc to modify */
   source: string,
-  /** The key to set */
   key: string,
-  /** extra key-value options */
   opts?: {
     node?: T.ObjectExpression;
   }
@@ -49,22 +53,32 @@ export function removeProp(
   return snip(source, [getExpandedEnds(source, prop)]);
 }
 
+/**
+ * Sets a property in a JSONC source string. If the property already exists its
+ * value is replaced; otherwise it is inserted according to the `opts` configuration.
+ * @param source - The JSONC source text to modify.
+ * @param key - The property key to set.
+ * @param value - The property value. Intentionally typed as `any` because valid JSON
+ * property values include booleans, strings, numbers, arrays, and objects.
+ * @param opts - Optional configuration.
+ * @param opts.insertAtTop - When `true`, new properties are inserted at the top of the
+ * object rather than at the bottom. Defaults to `false`.
+ * @param opts.insertAfter - An existing property node after which the new property is
+ * inserted. Takes precedence over `insertAtTop` when the key is new.
+ * @param opts.node - The AST node of the object to modify. When provided, skips
+ * re-parsing `source`.
+ * @param opts.spaces - Overrides the default `"  "` indentation used for new or
+ * multi-line properties.
+ * @returns The modified JSONC source text.
+ */
 export function setProp(
-  /** the jsonc to modify */
   source: string,
-  /** The key to set */
   key: string,
-  /** the value of the key */
   value: any,
-  /** extra key-value options */
   opts?: {
-    /** by default, if the key isn't already in the json, it will be added at the bottom. Set this to true to add the key at the top instead */
     insertAtTop?: boolean;
-    /** by default, if the key isn't already in the json, it will be added at the bottom. Set this to an existing property node to have the key added after this node */
     insertAfter?: T.ObjectProperty;
-    /** In order to set the property an object other than the root object, parse the source and pass the node of the desired object here (make sure to also pass spaces) */
     node?: T.ObjectExpression;
-    /** This overrides the default "  " spacing used for multi line or new properties that are added */
     spaces?: string;
   }
 ) {
@@ -90,6 +104,12 @@ export function setProp(
   return snip(source, [[...getEnds(prop), newPropJson]]);
 }
 
+/**
+ * Parses a JSONC source string and returns the AST node for a named property.
+ * @param source - The JSONC source text to parse.
+ * @param name - The property name to look up.
+ * @returns The matching `ObjectProperty` node, or `undefined` if not found.
+ */
 export function getPropFromSource(source: string, name: string) {
   return getProp(getAst(source), name);
 }

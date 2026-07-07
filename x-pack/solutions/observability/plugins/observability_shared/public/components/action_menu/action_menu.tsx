@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { EuiPopover, EuiHorizontalRule, EuiPopoverProps } from '@elastic/eui';
-import React, { HTMLAttributes } from 'react';
+import type { EuiPopoverProps } from '@elastic/eui';
+import { EuiPopover, EuiHorizontalRule } from '@elastic/eui';
+import type { HTMLAttributes } from 'react';
+import React from 'react';
 
 type Props = EuiPopoverProps & HTMLAttributes<HTMLDivElement>;
 

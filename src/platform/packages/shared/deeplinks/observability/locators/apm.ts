@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 export const TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR = 'TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR';
 
@@ -32,6 +32,29 @@ export const TRANSACTION_DETAILS_BY_NAME_LOCATOR = 'TransactionDetailsByNameLoca
 export interface TransactionDetailsByNameParams extends SerializableRecord {
   serviceName: string;
   transactionName: string;
+  environment?: string;
+  rangeFrom?: string;
+  rangeTo?: string;
+}
+
+export const SERVICE_TRANSACTIONS_LOCATOR_ID = 'serviceTransactionsLocator';
+
+export interface ServiceTransactionsLocatorParams extends SerializableRecord {
+  serviceName: string;
+  transactionType?: string;
+  environment?: string;
+  rangeFrom?: string;
+  rangeTo?: string;
+  latencyAggregationType?: string;
+}
+
+export const SERVICE_ALERTS_LOCATOR_ID = 'serviceAlertsLocator';
+
+export interface ServiceAlertsLocatorParams extends SerializableRecord {
+  serviceName: string;
+  transactionName?: string;
+  transactionType?: string;
+  kuery?: string;
   rangeFrom?: string;
   rangeTo?: string;
 }

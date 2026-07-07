@@ -18,7 +18,12 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import type { CaseUserActionWithoutReferenceIds } from '../../../common/types/domain';
 import type { UserActionEvent } from './types';
 
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+  SECURITY_SOLUTION_OWNER,
+} from '../../../common/constants';
+import { V2_NOOP_ACTIVITY_WRITER } from '../../cases_analytics_v2';
 import { createSOFindResponse } from '../test_utils';
 import {
   casePayload,
@@ -34,9 +39,14 @@ import {
   getAssigneesRemovedUserActions,
   getAssigneesAddedRemovedUserActions,
   getTagsAddedRemovedUserActions,
+  patchSyncAlertsCasesRequest,
+  patchExtractObservablesCasesRequest,
+  patchBothSettingsCasesRequest,
+  getSyncAlertsUserActions,
+  getExtractObservablesUserActions,
+  getBothSettingsUserActions,
 } from './mocks';
 import { CaseUserActionService } from '.';
-import { createPersistableStateAttachmentTypeRegistryMock } from '../../attachment_framework/mocks';
 import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
 import {
   createUserActionFindSO,
@@ -53,8 +63,6 @@ import {
 } from '../../../common/types/domain';
 
 describe('CaseUserActionService', () => {
-  const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
-
   beforeAll(() => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2022-01-09T22:00:00.000Z'));
@@ -98,9 +106,150 @@ describe('CaseUserActionService', () => {
       service = new CaseUserActionService({
         unsecuredSavedObjectsClient,
         log: mockLogger,
-        persistableStateAttachmentTypeRegistry,
         auditLogger: mockAuditLogger,
         savedObjectsSerializer: soSerializerMock,
+        analyticsV2ActivityWriter: V2_NOOP_ACTIVITY_WRITER,
+      });
+    });
+
+    describe('getCaseUserActionStats', () => {
+      const mockStatsResponse = {
+        total: 20,
+        saved_objects: [],
+        page: 1,
+        per_page: 1,
+        aggregations: {
+          totals: {
+            buckets: [
+              { key: 'user', doc_count: 4 },
+              { key: 'comment', doc_count: 6 },
+              { key: 'alert', doc_count: 3 },
+            ],
+          },
+          deletions: {
+            doc_count: 4,
+            deletions: {
+              buckets: [
+                { key: 'user', doc_count: 1 },
+                { key: 'comment', doc_count: 2 },
+                { key: 'alert', doc_count: 1 },
+              ],
+            },
+          },
+          creations: {
+            doc_count: 6,
+            creations: {
+              buckets: [
+                { key: 'user', doc_count: 2 },
+                { key: 'comment', doc_count: 3 },
+                { key: 'alert', doc_count: 1 },
+              ],
+            },
+          },
+          nonDeletedCommentUpdates: {
+            doc_count: 2,
+            comments: {
+              buckets: {
+                [CASE_COMMENT_SAVED_OBJECT]: {
+                  doc_count: 2,
+                  byCommentId: {
+                    buckets: [
+                      {
+                        key: 'deleted-comment',
+                        doc_count: 3,
+                        reverse: {
+                          doc_count: 3,
+                          hasDelete: { doc_count: 1 },
+                          updates: {
+                            doc_count: 3,
+                            byCommentType: {
+                              buckets: [
+                                { key: 'user', doc_count: 2 },
+                                { key: 'comment', doc_count: 4 },
+                                { key: 'alert', doc_count: 1 },
+                              ],
+                            },
+                          },
+                        },
+                      },
+                      {
+                        key: 'active-comment',
+                        doc_count: 2,
+                        reverse: {
+                          doc_count: 2,
+                          hasDelete: { doc_count: 0 },
+                          updates: {
+                            doc_count: 2,
+                            byCommentType: {
+                              buckets: [
+                                { key: 'user', doc_count: 5 },
+                                { key: 'comment', doc_count: 5 },
+                              ],
+                            },
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+                [CASE_ATTACHMENT_SAVED_OBJECT]: {
+                  doc_count: 0,
+                  byCommentId: { buckets: [] },
+                },
+              },
+            },
+          },
+        },
+      } as unknown as SavedObjectsFindResponse;
+
+      it('counts both legacy `user` and unified `comment` types as comments', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue(mockStatsResponse);
+
+        const stats = await service.getCaseUserActionStats({ caseId: '123' });
+
+        expect(stats).toEqual({
+          total: 20,
+          total_deletions: 4,
+          total_comments: 10,
+          total_comment_deletions: 3,
+          total_comment_creations: 5,
+          total_hidden_comment_updates: 6,
+          total_other_actions: 10,
+          total_other_action_deletions: 1,
+        });
+      });
+
+      it('groups non-deleted comment updates by both attachment saved object types', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue(mockStatsResponse);
+
+        await service.getCaseUserActionStats({ caseId: '123' });
+
+        expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            aggs: expect.objectContaining({
+              nonDeletedCommentUpdates: expect.objectContaining({
+                aggs: expect.objectContaining({
+                  comments: expect.objectContaining({
+                    filters: {
+                      filters: {
+                        [CASE_COMMENT_SAVED_OBJECT]: {
+                          term: {
+                            'cases-user-actions.references.type': CASE_COMMENT_SAVED_OBJECT,
+                          },
+                        },
+                        [CASE_ATTACHMENT_SAVED_OBJECT]: {
+                          term: {
+                            'cases-user-actions.references.type': CASE_ATTACHMENT_SAVED_OBJECT,
+                          },
+                        },
+                      },
+                    },
+                  }),
+                }),
+              }),
+            }),
+          })
+        );
       });
     });
 
@@ -144,7 +293,7 @@ describe('CaseUserActionService', () => {
                 },
                 description: 'testing sir',
                 owner: 'securitySolution',
-                settings: { syncAlerts: true },
+                settings: { syncAlerts: true, extractObservables: true },
                 status: 'open',
                 severity: 'low',
                 tags: ['sir'],
@@ -417,7 +566,7 @@ describe('CaseUserActionService', () => {
                 ...commonArgs,
                 type: UserActionTypes.comment,
                 action,
-                attachmentId: 'test-id',
+                savedObjectId: 'test-id',
                 payload: { attachment: comment },
               },
             });
@@ -461,7 +610,7 @@ describe('CaseUserActionService', () => {
                 ...commonArgs,
                 type: UserActionTypes.comment,
                 action,
-                attachmentId: 'test-id',
+                savedObjectId: 'test-id',
                 payload: { attachment: comment },
               },
             });
@@ -581,6 +730,33 @@ describe('CaseUserActionService', () => {
             isMock: false,
           })
         );
+      });
+
+      it('creates the correct user actions when sync alerts settings is changed', async () => {
+        expect(
+          await service.creator.buildUserActions({
+            updatedCases: patchSyncAlertsCasesRequest,
+            user: commonArgs.user,
+          })
+        ).toEqual(getSyncAlertsUserActions({ isMock: false }));
+      });
+
+      it('creates the correct user actions when extract observables settings is changed', async () => {
+        expect(
+          await service.creator.buildUserActions({
+            updatedCases: patchExtractObservablesCasesRequest,
+            user: commonArgs.user,
+          })
+        ).toEqual(getExtractObservablesUserActions({ isMock: false }));
+      });
+
+      it('creates the correct user actions when both settings are changed', async () => {
+        expect(
+          await service.creator.buildUserActions({
+            updatedCases: patchBothSettingsCasesRequest,
+            user: commonArgs.user,
+          })
+        ).toEqual(getBothSettingsUserActions({ isMock: false }));
       });
     });
 
@@ -2001,22 +2177,6 @@ describe('CaseUserActionService', () => {
                         Object {
                           "isQuoted": false,
                           "type": "literal",
-                          "value": "tags",
-                        },
-                      ],
-                      "function": "is",
-                      "type": "function",
-                    },
-                    Object {
-                      "arguments": Array [
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "cases-user-actions.attributes.type",
-                        },
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
                           "value": "title",
                         },
                       ],
@@ -2093,22 +2253,6 @@ describe('CaseUserActionService', () => {
                         Object {
                           "isQuoted": false,
                           "type": "literal",
-                          "value": "tags",
-                        },
-                      ],
-                      "function": "is",
-                      "type": "function",
-                    },
-                    Object {
-                      "arguments": Array [
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "cases-user-actions.attributes.type",
-                        },
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
                           "value": "title",
                         },
                       ],
@@ -2142,6 +2286,22 @@ describe('CaseUserActionService', () => {
                           "isQuoted": false,
                           "type": "literal",
                           "value": "status",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "cases-user-actions.attributes.type",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "tags",
                         },
                       ],
                       "function": "is",

@@ -6,12 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { monaco } from '@kbn/monaco';
-import { ESQLVariableType, ESQLControlVariable, VariableNamePrefix } from '@kbn/esql-types';
-import { timeUnits } from '@kbn/esql-validation-autocomplete';
+import type { monaco } from '@kbn/code-editor';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import { ESQLVariableType, VariableNamePrefix } from '@kbn/esql-types';
+import { TIME_SPAN_UNITS } from '@elastic/esql';
+import { css } from '@emotion/react';
+import { getVariableNamePrefix } from '@kbn/esql-utils';
 
 function inKnownTimeInterval(timeIntervalUnit: string): boolean {
-  return timeUnits.some((unit) => unit === timeIntervalUnit.toLowerCase());
+  return TIME_SPAN_UNITS.some((unit) => unit === timeIntervalUnit.toLowerCase());
 }
 
 const getQueryPart = (queryString: string, cursorColumn: number, variable: string) => {
@@ -92,6 +95,8 @@ export const getVariableSuggestion = (variableType: ESQLVariableType) => {
       return 'function';
     case ESQLVariableType.TIME_LITERAL:
       return 'interval';
+    case ESQLVariableType.MULTI_VALUES:
+      return 'values';
     default:
       return 'variable';
   }
@@ -107,19 +112,17 @@ export const getRecurrentVariableName = (name: string, existingNames: Set<string
   return newName;
 };
 
-export const getFlyoutStyling = () => {
-  return `
-          .euiFlyoutBody__overflow {
-            -webkit-mask-image: none;
-            padding-left: inherit;
-            margin-left: inherit;
-            transform: initial;
-          }
-          .euiFlyoutBody__overflowContent {
-            block-size: 100%;
-          }
-  `;
-};
+export const flyoutStyles = css({
+  '.euiFlyoutBody__overflow': {
+    WebkitMaskImage: 'none',
+    paddingLeft: 'inherit',
+    marginLeft: 'inherit',
+    transform: 'initial',
+  },
+  '.euiFlyoutBody__overflowContent': {
+    blockSize: '100%',
+  },
+});
 
 export const validateVariableName = (variableName: string, prefix: '??' | '?') => {
   let text = variableName
@@ -159,24 +162,13 @@ export const getVariableTypeFromQuery = (str: string, variableType: ESQLVariable
   if (
     leadingQuestionMarksCount === 1 &&
     variableType !== ESQLVariableType.TIME_LITERAL &&
-    variableType !== ESQLVariableType.VALUES
+    variableType !== ESQLVariableType.VALUES &&
+    variableType !== ESQLVariableType.MULTI_VALUES
   ) {
     return ESQLVariableType.VALUES;
   }
 
   return variableType;
-};
-
-export const getVariableNamePrefix = (type: ESQLVariableType) => {
-  switch (type) {
-    case ESQLVariableType.FIELDS:
-    case ESQLVariableType.FUNCTIONS:
-      return VariableNamePrefix.IDENTIFIER;
-    case ESQLVariableType.VALUES:
-    case ESQLVariableType.TIME_LITERAL:
-    default:
-      return VariableNamePrefix.VALUE;
-  }
 };
 
 export const checkVariableExistence = (

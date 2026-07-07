@@ -1,11 +1,12 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
   "include": [
     "public/**/*",
     "server/**/*",
+    "test/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -47,6 +48,12 @@
     "@kbn/rollup",
     "@kbn/share-plugin",
     "@kbn/shared-ux-table-persist",
+    "@kbn/css-utils",
+    "@kbn/saved-objects-tagging-oss-plugin",
+    "@kbn/cps-utils",
+    "@kbn/cps",
+    "@kbn/discover-utils",
+    "@kbn/scout",
   ],
   "exclude": [
     "target/**/*",

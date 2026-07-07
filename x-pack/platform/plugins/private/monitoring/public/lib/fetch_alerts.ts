@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpHandler } from '@kbn/core/public';
-import { CommonAlertFilter } from '../../common/types/alerts';
-import { AlertsByName } from '../alerts/types';
+import type { HttpHandler } from '@kbn/core/public';
+import type { CommonAlertFilter } from '../../common/types/alerts';
+import type { AlertsByName } from '../alerts/types';
 
 interface FetchAlertsParams {
   alertTypeIds?: string[];

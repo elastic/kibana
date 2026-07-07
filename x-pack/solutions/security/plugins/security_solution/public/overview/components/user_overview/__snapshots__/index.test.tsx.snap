@@ -34,37 +34,33 @@ exports[`User Summary Component it renders the default User Summary 1`] = `
   opacity: 1;
 }
 
-.c1 > span.euiToolTipAnchor {
-  display: block;
-}
-
-.c1 > span.euiToolTipAnchor.eui-textTruncate {
-  display: inline-block;
-}
-
 <div
   class="c0"
   data-test-subj="hoverVisibilityContainer"
 >
   <div
-    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-OverviewWrapper"
+    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-responsive-m-flexStart-stretch-row-OverviewWrapper"
     data-test-subj="user-overview"
   >
-    <button
-      aria-label="Inspect"
-      class="euiButtonIcon inspectButtonComponent emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
-      data-test-subj="inspect-icon-button"
-      disabled=""
-      title="Inspect"
-      type="button"
+    <span
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+      id="generated-id_euiToolTipAnchor"
     >
-      <span
-        aria-hidden="true"
-        class="euiButtonIcon__icon"
-        color="inherit"
-        data-euiicon-type="inspect"
-      />
-    </button>
+      <button
+        aria-label="Inspect"
+        class="euiButtonIcon inspectButtonComponent emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
+        data-test-subj="inspect-icon-button"
+        disabled=""
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="inspect"
+        />
+      </button>
+    </span>
     <div
       class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
@@ -91,15 +87,15 @@ exports[`User Summary Component it renders the default User Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-user-overview-user_id-aa7ca589f1b8220002f2fc61c64cfbf1"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-user.id"
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       aa7ca589f1b8220002f2fc61c64cfbf1
                     </span>
@@ -136,15 +132,15 @@ exports[`User Summary Component it renders the default User Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-user-overview-user_domain-domain"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-user.domain"
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       domain
                     </span>
@@ -229,15 +225,15 @@ exports[`User Summary Component it renders the default User Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-user-overview-host_os_name-Debian GNU/Linux"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-host.os.name"
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       Debian GNU/Linux
                     </span>
@@ -274,15 +270,15 @@ exports[`User Summary Component it renders the default User Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-user-overview-host_os_family-debian"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-host.os.family"
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       debian
                     </span>
@@ -319,19 +315,19 @@ exports[`User Summary Component it renders the default User Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-user-overview-host_ip-10_142_0_7"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-host.ip"
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       <button
                         class="euiLink emotion-euiLink-primary"
-                        data-test-subj="network-details"
+                        data-test-subj="securitySolutionFlyoutLink"
                         type="button"
                       >
                         10.142.0.7
@@ -362,7 +358,7 @@ exports[`User Summary Component it renders the default User Summary 1`] = `
                       class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                     >
                       <span
-                        class="eui-textTruncate euiButtonEmpty__text"
+                        class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                       >
                         +1 
                         More
@@ -414,20 +410,12 @@ exports[`User Summary Component it renders the panel view User Summary 1`] = `
   opacity: 1;
 }
 
-.c1 > span.euiToolTipAnchor {
-  display: block;
-}
-
-.c1 > span.euiToolTipAnchor.eui-textTruncate {
-  display: inline-block;
-}
-
 <div
   class="c0"
   data-test-subj="hoverVisibilityContainer"
 >
   <div
-    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-l-flexStart-stretch-column-OverviewWrapper"
+    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-m-flexStart-stretch-column-OverviewWrapper"
     data-test-subj="user-overview"
   >
     <div
@@ -456,15 +444,15 @@ exports[`User Summary Component it renders the panel view User Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-user-overview-user_id-aa7ca589f1b8220002f2fc61c64cfbf1"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-user.id"
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       aa7ca589f1b8220002f2fc61c64cfbf1
                     </span>
@@ -501,15 +489,15 @@ exports[`User Summary Component it renders the panel view User Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-user-overview-user_domain-domain"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-user.domain"
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       domain
                     </span>
@@ -594,15 +582,15 @@ exports[`User Summary Component it renders the panel view User Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-user-overview-host_os_name-Debian GNU/Linux"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-host.os.name"
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       Debian GNU/Linux
                     </span>
@@ -639,15 +627,15 @@ exports[`User Summary Component it renders the panel view User Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-user-overview-host_os_family-debian"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-host.os.family"
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       debian
                     </span>
@@ -684,19 +672,19 @@ exports[`User Summary Component it renders the panel view User Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-user-overview-host_ip-10_142_0_7"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-host.ip"
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       <button
                         class="euiLink emotion-euiLink-primary"
-                        data-test-subj="network-details"
+                        data-test-subj="securitySolutionFlyoutLink"
                         type="button"
                       >
                         10.142.0.7
@@ -727,7 +715,7 @@ exports[`User Summary Component it renders the panel view User Summary 1`] = `
                       class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                     >
                       <span
-                        class="eui-textTruncate euiButtonEmpty__text"
+                        class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                       >
                         +1 
                         More

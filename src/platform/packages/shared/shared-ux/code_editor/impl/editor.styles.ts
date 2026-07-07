@@ -15,12 +15,6 @@ export const styles = {
     position: relative;
     height: 100%;
   `,
-  fullscreenContainer: (euiTheme: EuiThemeComputed) => css`
-    position: absolute;
-    left: 0;
-    top: 0;
-    background: ${euiTheme.colors.body};
-  `,
   keyboardHint: (euiTheme: EuiThemeComputed) => css`
     position: absolute;
     top: 0;

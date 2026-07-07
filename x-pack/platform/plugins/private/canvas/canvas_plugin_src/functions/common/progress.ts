@@ -6,8 +6,10 @@
  */
 
 import { get } from 'lodash';
-import { Style, openSans } from '@kbn/expressions-plugin/common';
-import { Progress, ExpressionProgressFunction } from '../../renderers/progress/types';
+import type { Style } from '@kbn/expressions-plugin/common';
+import { openSans } from '@kbn/expressions-plugin/common';
+import type { ExpressionProgressFunction } from '../../renderers/progress/types';
+import { Progress } from '../../renderers/progress/types';
 import { help as strings, errors } from '../../../i18n/functions/dict/progress';
 
 export const progress: ExpressionProgressFunction = () => {

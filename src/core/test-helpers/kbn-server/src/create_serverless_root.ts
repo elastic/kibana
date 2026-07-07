@@ -10,13 +10,15 @@
 import Path from 'path';
 import { defaultsDeep } from 'lodash';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
-import { Cluster, ServerlessProjectType } from '@kbn/es';
+import type { ServerlessProjectType } from '@kbn/es';
+import { Cluster } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { esTestConfig } from '@kbn/test';
-import { CliArgs } from '@kbn/config';
-import { kibanaDevServiceAccount } from '@kbn/dev-utils';
+import type { CliArgs } from '@kbn/config';
+import { kibanaDevServiceAccount, CA_CERT_PATH } from '@kbn/dev-utils';
 import { systemIndicesSuperuser } from '@kbn/test';
+import { set } from '@kbn/safer-lodash-set';
 import { createRoot, type TestElasticsearchUtils, type TestKibanaUtils } from './create_root';
 
 export type TestServerlessESUtils = Pick<TestElasticsearchUtils, 'stop' | 'es'> & {
@@ -30,7 +32,7 @@ export interface TestServerlessUtils {
 }
 
 const ES_BASE_PATH_DIR = Path.join(REPO_ROOT, '.es/es_test_serverless');
-const projectType: ServerlessProjectType = 'es';
+const DEFAULT_PROJECT_TYPE: ServerlessProjectType = 'es';
 
 /**
  * See docs in {@link TestUtils}. This function provides the same utilities but
@@ -41,16 +43,80 @@ const projectType: ServerlessProjectType = 'es';
 export function createTestServerlessInstances({
   adjustTimeout,
   kibana = {},
+  enableCPS = false,
+  esArgs = [],
+  projectType = DEFAULT_PROJECT_TYPE,
 }: {
   kibana?: {
     settings?: {};
     cliArgs?: Partial<CliArgs>;
   };
   adjustTimeout?: (timeout: number) => void;
+  /**
+   * Enable Cross-Project Search (CPS) mode on the serverless ES instance.
+   * When true, starts ES with UIAM support and the required CPS settings:
+   *  - `serverless.cross_project.enabled=true`
+   *  - `remote_cluster_server.enabled=true`
+   *
+   * Equivalent to running:
+   *  `yarn es serverless --projectType observability --uiam --kill --clean \
+   *    -E serverless.cross_project.enabled=true -E remote_cluster_server.enabled=true`
+   *
+   * @default false
+   */
+  enableCPS?: boolean;
+  /**
+   * Additional Elasticsearch arguments to pass when starting the cluster.
+   * These are general-purpose ES configuration arguments that will be appended
+   * to any default arguments (including CPS args when enableCPS is true).
+   *
+   * Example: `['script.allowed_types=inline']`
+   *
+   * @default []
+   */
+  esArgs?: string[];
+  /**
+   * The serverless project type to run (`yarn es serverless --projectType`).
+   *
+   * Defaults to `es` for existing tests.
+   */
+  projectType?: ServerlessProjectType;
 } = {}): TestServerlessUtils {
   adjustTimeout?.(150_000);
 
-  const esUtils = createServerlessES();
+  const esUtils = createServerlessES({
+    enableCPS,
+    esArgs,
+    projectType,
+  });
+
+  if (enableCPS) {
+    if (!kibana.settings) kibana.settings = {};
+    const hasCpsKey = kibana.settings && 'cps' in kibana.settings;
+    if (!hasCpsKey) {
+      set(kibana.settings, 'cps.cpsEnabled', enableCPS);
+    }
+    // Match the default `yarn es serverless --uiam` setup, but allow tests to override
+    // auth by pre-setting `elasticsearch.username/password` (e.g. use `system_indices_superuser`).
+    const existingEsSettings = (kibana.settings as any).elasticsearch ?? {};
+    set(kibana.settings, 'elasticsearch.hosts', [`https://localhost:${esTestConfig.getPort()}`]);
+    set(kibana.settings, 'elasticsearch.ssl.certificateAuthorities', CA_CERT_PATH);
+    if (
+      (existingEsSettings.username || existingEsSettings.password) &&
+      existingEsSettings.serviceAccountToken
+    ) {
+      // Config schema forbids specifying both serviceAccountToken and username/password.
+      delete (kibana.settings as any).elasticsearch.serviceAccountToken;
+    }
+    if (
+      !existingEsSettings.serviceAccountToken &&
+      !existingEsSettings.username &&
+      !existingEsSettings.password
+    ) {
+      set(kibana.settings, 'elasticsearch.serviceAccountToken', kibanaDevServiceAccount.token);
+    }
+    kibana.cliArgs = { ...kibana.cliArgs, uiam: true, serverless: true };
+  }
   const kbUtils = createServerlessKibana(kibana.settings, kibana.cliArgs);
 
   return {
@@ -77,7 +143,15 @@ export function createTestServerlessInstances({
   };
 }
 
-function createServerlessES() {
+function createServerlessES({
+  enableCPS = false,
+  esArgs = [],
+  projectType = DEFAULT_PROJECT_TYPE,
+}: {
+  enableCPS?: boolean;
+  esArgs?: string[];
+  projectType?: ServerlessProjectType;
+} = {}) {
   const log = new ToolingLog({
     level: 'info',
     writeTo: process.stdout,
@@ -87,6 +161,10 @@ function createServerlessES() {
   const esServerlessImageParams = parseEsServerlessImageOverride(
     esTestConfig.getESServerlessImage()
   );
+  const baseArgs = enableCPS
+    ? ['serverless.cross_project.enabled=true', 'remote_cluster_server.enabled=true']
+    : [];
+
   return {
     es,
     start: async () => {
@@ -99,8 +177,15 @@ function createServerlessES() {
         kill: true,
         waitForReady: true,
         ...esServerlessImageParams,
+        ...(enableCPS
+          ? {
+              ssl: true,
+              uiam: true,
+              esArgs: [...baseArgs, ...esArgs],
+            }
+          : {}),
       });
-      const client = getServerlessESClient({ port: esPort });
+      const client = getServerlessESClient({ port: esPort, ssl: enableCPS });
 
       return {
         getClient: () => client,
@@ -112,12 +197,13 @@ function createServerlessES() {
   };
 }
 
-const getServerlessESClient = ({ port }: { port: number }) => {
+const getServerlessESClient = ({ port, ssl = false }: { port: number; ssl?: boolean }) => {
   return new Client({
-    node: `http://localhost:${port}`,
+    node: `${ssl ? 'https' : 'http'}://localhost:${port}`,
     Connection: HttpConnection,
     requestTimeout: 30_000,
     auth: { ...systemIndicesSuperuser },
+    ...(ssl ? { tls: { rejectUnauthorized: false } } : {}),
   });
 };
 
@@ -161,8 +247,17 @@ const getServerlessDefault = () => {
   };
 };
 
-function createServerlessKibana(settings = {}, cliArgs: Partial<CliArgs> = {}) {
-  return createRoot(defaultsDeep(settings, getServerlessDefault()), {
+export function createServerlessKibana(settings = {}, cliArgs: Partial<CliArgs> = {}) {
+  // Serverless defaults include `elasticsearch.serviceAccountToken`, but some tests may want
+  // to run with basic auth (`elasticsearch.username/password`). Kibana config schema forbids
+  // specifying both, so if username/password are provided, drop the token from defaults.
+  const defaults = getServerlessDefault();
+  const esOverrides = (settings as any)?.elasticsearch;
+  if (esOverrides?.username || esOverrides?.password) {
+    delete (defaults as any).elasticsearch.serviceAccountToken;
+  }
+
+  return createRoot(defaultsDeep(settings, defaults), {
     ...cliArgs,
     serverless: true,
   });

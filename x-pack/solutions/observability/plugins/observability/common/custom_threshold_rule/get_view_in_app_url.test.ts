@@ -6,9 +6,10 @@
  */
 
 import { Aggregators } from './types';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
-import { getViewInAppUrl, GetViewInAppUrlArgs } from './get_view_in_app_url';
+import type { GetViewInAppUrlArgs } from './get_view_in_app_url';
+import { getViewInAppUrl } from './get_view_in_app_url';
 
 describe('getViewInAppUrl', () => {
   const logsLocator = {
@@ -72,6 +73,42 @@ describe('getViewInAppUrl', () => {
       },
       {}
     );
+  });
+
+  it('should extend the time range with the lookback window', () => {
+    const mockDateNow = jest
+      .spyOn(global.Date, 'now')
+      .mockImplementation(() => new Date('2026-01-01T00:00:00.000Z').valueOf());
+
+    const args: GetViewInAppUrlArgs = {
+      logsLocator,
+      startedAt,
+      endedAt,
+      timeSize: 7,
+      timeUnit: 'd',
+    };
+
+    expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
+    expect(logsLocator.getRedirectUrl).toHaveBeenCalledWith(
+      {
+        dataset: undefined,
+        dataViewSpec: undefined,
+        timeRange: {
+          // startedAt - 7d * 20 = 2023-12-07 - 140d = 2023-07-20
+          from: '2023-07-20T16:30:15.403Z',
+          // endedAt + 7d * 20 = 2023-12-07 + 140d = 2024-04-25
+          to: '2024-04-25T20:30:15.403Z',
+        },
+        filters: [],
+        query: {
+          query: '',
+          language: 'kuery',
+        },
+      },
+      {}
+    );
+
+    mockDateNow.mockRestore();
   });
 
   it('should call getRedirectUrl with only count filter', () => {
@@ -272,7 +309,7 @@ describe('getViewInAppUrl', () => {
   });
 
   it('should call getRedirectUrl with spaceId', () => {
-    const spaceId = 'mockedSpaceId';
+    const spaceId = 'mocked-space-id';
     const args: GetViewInAppUrlArgs = {
       metrics: [
         {
@@ -302,8 +339,8 @@ describe('getViewInAppUrl', () => {
       { spaceId }
     );
   });
-  it('should call getRedirectUrl with dataViewSpec', () => {
-    const spaceId = 'mockedSpaceId';
+  it('should call getRedirectUrl with dataViewSpec of the AD-HOC data view', () => {
+    const spaceId = 'mocked-space-id';
     const dataViewSpec = {
       id: 'mockedDataViewId',
       title: 'mockedDataViewTitle',
@@ -335,6 +372,41 @@ describe('getViewInAppUrl', () => {
       {
         dataset: undefined,
         dataViewSpec,
+        timeRange: returnedTimeRange,
+        filters: [],
+        query: {
+          query: 'mockedFilter',
+          language: 'kuery',
+        },
+      },
+      { spaceId }
+    );
+  });
+  it('should call getRedirectUrl with the id of the SAVED data view ', () => {
+    const spaceId = 'mocked-space-id';
+    const mockedDataViewId = 'uuid-mocked-dataView-id';
+    const args: GetViewInAppUrlArgs = {
+      dataViewId: mockedDataViewId,
+      searchConfiguration: {
+        index: 'uuid-mockedDataViewId',
+        query: {
+          language: '',
+          query: 'mockedFilter',
+        },
+        filter: [],
+      },
+      logsLocator,
+      startedAt,
+      endedAt,
+      spaceId,
+    };
+
+    expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
+    expect(logsLocator.getRedirectUrl).toHaveBeenCalledWith(
+      {
+        dataset: undefined,
+        dataViewSpec: undefined,
+        dataViewId: mockedDataViewId,
         timeRange: returnedTimeRange,
         filters: [],
         query: {

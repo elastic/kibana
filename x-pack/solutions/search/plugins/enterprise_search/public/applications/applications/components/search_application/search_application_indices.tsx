@@ -9,20 +9,20 @@ import React, { useMemo, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
 import {
-  EuiBasicTableColumn,
   EuiCallOut,
   EuiConfirmModal,
   EuiIcon,
   EuiInMemoryTable,
   EuiSpacer,
-  EuiTableActionsColumnType,
   EuiText,
   useEuiBackgroundColor,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { EnterpriseSearchApplicationIndex } from '../../../../../common/types/search_applications';
+import type { EnterpriseSearchApplicationIndex } from '../../../../../common/types/search_applications';
 
 import { CANCEL_BUTTON_LABEL } from '../../../shared/constants';
 import { indexHealthToHealthColor } from '../../../shared/constants/health_colors';
@@ -39,10 +39,12 @@ export const SearchApplicationIndices: React.FC = () => {
   const { removeIndexFromSearchApplication } = useActions(SearchApplicationIndicesLogic);
   const { navigateToUrl, share } = useValues(KibanaLogic);
   const [removeIndexConfirm, setConfirmRemoveIndex] = useState<string | null>(null);
-  const searchIndicesLocator = useMemo(
-    () => share?.url.locators.get('SEARCH_INDEX_DETAILS_LOCATOR_ID'),
+  const indexManagementLocator = useMemo(
+    () => share?.url.locators.get('SEARCH_INDEX_MANAGEMENT_LOCATOR_ID'),
     [share]
   );
+
+  const confirmModalTitleId = useGeneratedHtmlId();
 
   if (!searchApplicationData) return null;
   const { indices } = searchApplicationData;
@@ -61,7 +63,7 @@ export const SearchApplicationIndices: React.FC = () => {
           defaultMessage: 'Remove this index from search application',
         }
       ),
-      icon: 'minusInCircle',
+      icon: 'minusCircle',
       isPrimary: false,
       name: (index: EnterpriseSearchApplicationIndex) =>
         i18n.translate(
@@ -114,7 +116,7 @@ export const SearchApplicationIndices: React.FC = () => {
       ),
       render: (health: 'red' | 'green' | 'yellow' | 'unavailable') => (
         <span>
-          <EuiIcon type="dot" color={indexHealthToHealthColor(health)} />
+          <EuiIcon type="dot" color={indexHealthToHealthColor(health)} aria-hidden />
           &nbsp;{health ?? '-'}
         </span>
       ),
@@ -144,7 +146,7 @@ export const SearchApplicationIndices: React.FC = () => {
     {
       actions: [
         {
-          enabled: () => searchIndicesLocator !== undefined,
+          enabled: () => indexManagementLocator !== undefined,
           available: (index) => index.health !== 'unknown',
           'data-test-subj': 'search-application-view-index-btn',
           description: i18n.translate(
@@ -167,8 +169,11 @@ export const SearchApplicationIndices: React.FC = () => {
             ),
 
           onClick: async (index) => {
-            if (searchIndicesLocator) {
-              const url = await searchIndicesLocator.getUrl({ indexName: index.name });
+            if (indexManagementLocator) {
+              const url = await indexManagementLocator.getUrl({
+                indexName: index.name,
+                page: 'index_details',
+              });
               navigateToUrl(url, {
                 shouldNotCreateHref: true,
                 shouldNotPrepend: true,
@@ -196,6 +201,7 @@ export const SearchApplicationIndices: React.FC = () => {
       {(hasAllUnreachableIndices || hasUnknownIndices) && (
         <>
           <EuiCallOut
+            announceOnMount
             color="warning"
             iconType="warning"
             title={
@@ -244,6 +250,12 @@ export const SearchApplicationIndices: React.FC = () => {
         </>
       )}
       <EuiInMemoryTable
+        tableCaption={i18n.translate(
+          'xpack.enterpriseSearch.searchApplications.searchApplication.indices.tableCaption',
+          {
+            defaultMessage: 'Search application indices',
+          }
+        )}
         items={indices}
         columns={columns}
         rowProps={(index: EnterpriseSearchApplicationIndex) => {
@@ -281,6 +293,8 @@ export const SearchApplicationIndices: React.FC = () => {
             'xpack.enterpriseSearch.searchApplications.searchApplication.indices.removeIndexConfirm.title',
             { defaultMessage: 'Remove this index from the search application' }
           )}
+          aria-labelledby={confirmModalTitleId}
+          titleProps={{ id: confirmModalTitleId }}
           buttonColor="danger"
           cancelButtonText={CANCEL_BUTTON_LABEL}
           confirmButtonText={i18n.translate(

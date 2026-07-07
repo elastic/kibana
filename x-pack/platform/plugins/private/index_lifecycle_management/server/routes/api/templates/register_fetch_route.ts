@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { schema, TypeOf } from '@kbn/config-schema';
-import {
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type {
   IndexSettings,
   LegacyTemplateSerialized,
   TemplateFromEs,
 } from '@kbn/index-management-plugin/common/types';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
 function isReservedSystemTemplate(templateName: string, indexPatterns: string[]): boolean {
@@ -31,7 +32,6 @@ function filterLegacyTemplates(templates: {
   const formattedTemplates = [];
   const templateNames = Object.keys(templates);
   for (const templateName of templateNames) {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { settings, index_patterns } = templates[templateName];
     if (isReservedSystemTemplate(templateName, index_patterns)) {
       continue;

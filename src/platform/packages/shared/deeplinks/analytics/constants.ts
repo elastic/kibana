@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
+
 export const CANVAS_APP_LOCATOR = 'CANVAS_APP_LOCATOR';
 
 export const DISCOVER_APP_ID = 'discover';
@@ -30,3 +32,5 @@ export const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
 export const LENS_APP_LOCATOR = 'LENS_APP_LOCATOR';
 
 export const VISUALIZE_APP_LOCATOR = 'VISUALIZE_APP_LOCATOR';
+
+export const AI_VALUE_REPORT_LOCATOR = 'AI_VALUE_REPORT_LOCATOR';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EsReplacementSchema } from '../conversations/types';
+import type { EsReplacementSchema } from '../conversations/types';
 
 export interface EsAlertSummarySchema {
   id: string;

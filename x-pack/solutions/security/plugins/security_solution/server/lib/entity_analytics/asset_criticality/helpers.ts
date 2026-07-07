@@ -22,7 +22,9 @@ import { type CriticalityValues } from './constants';
  * @param criticalityLevel The criticality level for which to get the modifier.
  * @returns The associated criticality modifier for the given criticality level.
  */
-export const getCriticalityModifier = (criticalityLevel?: CriticalityLevel): number | undefined => {
+export const getCriticalityModifier = (
+  criticalityLevel?: CriticalityLevel | null
+): number | undefined => {
   if (criticalityLevel == null) {
     return;
   }
@@ -60,11 +62,11 @@ export const applyCriticalityToScore = ({
  * @returns The updated score with modifiers applied
  */
 export const bayesianUpdate = ({
-  max,
+  max = RISK_SCORING_NORMALIZATION_MAX,
   modifier,
   score,
 }: {
-  max: number;
+  max?: number;
   modifier: number;
   score: number;
 }) => {

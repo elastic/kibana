@@ -6,7 +6,8 @@
  */
 
 import type { Decorator, StoryContext } from '@storybook/react';
-import React, { useEffect, useMemo, useState, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { CoreTheme } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
@@ -50,9 +51,9 @@ export const decorateWithGlobalStorybookThemeProviders: Decorator = (
 
 const euiThemeFromId = (themeId: string): CoreTheme => {
   switch (themeId) {
-    case 'v8.dark':
-      return { darkMode: true, name: 'amsterdam' };
+    case 'borealis.dark':
+      return { darkMode: true, name: 'borealis' };
     default:
-      return { darkMode: false, name: 'amsterdam' };
+      return { darkMode: false, name: 'borealis' };
   }
 };

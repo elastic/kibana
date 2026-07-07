@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { AttachMlInferencePipelineResponse } from '../../common/types/pipelines';
 
@@ -33,6 +33,7 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
       id: parentPipelineId,
     });
     parentPipeline = pipelineResponse[parentPipelineId];
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     // Swallow error; in this case the next step will return
   }
@@ -48,7 +49,7 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
   // Check if the sub-pipeline reference is already in the list of processors,
   // if so, don't modify it
   const existingSubPipeline = parentPipeline.processors.find(
-    (p) => p.pipeline?.name === pipelineName
+    (p) => p?.pipeline?.name === pipelineName
   );
   if (existingSubPipeline) {
     return Promise.resolve({
@@ -64,9 +65,18 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
     },
   });
 
+  // Remove system-managed properties (dates) that cannot be set during create/update of ingest pipelines
+  const {
+    created_date: _createdDate,
+    created_date_millis: _createdDateMillis,
+    modified_date: _modifiedDate,
+    modified_date_millis: _modifiedDateMillis,
+    ...pipelineWithoutManagedFields
+  } = parentPipeline;
+
   await esClient.ingest.putPipeline({
     id: parentPipelineId,
-    ...parentPipeline,
+    ...pipelineWithoutManagedFields,
   });
 
   return Promise.resolve({

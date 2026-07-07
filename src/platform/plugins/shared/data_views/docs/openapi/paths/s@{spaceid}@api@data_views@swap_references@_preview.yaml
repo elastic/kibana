@@ -1,10 +1,24 @@
 post:
-  summary: Preview a saved object reference swap
+  summary: Preview swap references
   operationId: previewSwapDataViews
   description: >
-    Preview the impact of swapping saved object references from one data view identifier to another.
+    Preview the effect of swapping saved object references from one data view to another.
+    Returns the list of affected saved objects without making any changes.
   tags:
     - data views
+  x-codeSamples:
+    - lang: curl
+      source: |
+        curl \
+          -X POST "${KIBANA_URL}/s/{spaceId}/api/data_views/swap_references/_preview" \
+          -H "Authorization: ApiKey ${API_KEY}" \
+          -H "kbn-xsrf: true" \
+          -H "Content-Type: application/json" \
+          -d '{"fromId":"abcd-efg","toId":"xyz-123"}'
+    - lang: Console
+      source: |
+        POST kbn://s/{spaceId}/api/data_views/swap_references/_preview
+        {"fromId":"abcd-efg","toId":"xyz-123"}
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - $ref: '../components/parameters/space_id.yaml'
@@ -36,3 +50,6 @@ post:
                     type:
                       type: string
                       description: The saved object type.
+          examples:
+            previewSwapDataViewResponse:
+              $ref: '../components/examples/preview_swap_data_view_response.yaml'

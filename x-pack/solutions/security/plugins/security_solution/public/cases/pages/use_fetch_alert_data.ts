@@ -7,26 +7,17 @@
 
 import { useMemo } from 'react';
 import type { Ecs } from '@kbn/cases-plugin/common';
-import { useSourcererDataView } from '../../sourcerer/containers';
-import { SourcererScopeName } from '../../sourcerer/store/model';
+import { PageScope } from '../../data_view_manager/constants';
 import { useQueryAlerts } from '../../detections/containers/detection_engine/alerts/use_query';
+import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { ALERTS_QUERY_NAMES } from '../../detections/containers/detection_engine/alerts/constants';
 import type { SignalHit } from '../../common/utils/alerts';
 import { buildAlertsQuery, formatAlertToEcsSignal } from '../../common/utils/alerts';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
 
 export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, unknown>] => {
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.detections);
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
+  const { hasAlertsRead } = useAlertsPrivileges();
+  const selectedPatterns = useSelectedPatterns(PageScope.alerts);
 
   const alertsQuery = useMemo(() => buildAlertsQuery(alertIds), [alertIds]);
 
@@ -34,6 +25,7 @@ export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, 
     query: alertsQuery,
     indexName: selectedPatterns[0],
     queryName: ALERTS_QUERY_NAMES.CASES,
+    skip: !hasAlertsRead,
   });
 
   const alerts = useMemo(

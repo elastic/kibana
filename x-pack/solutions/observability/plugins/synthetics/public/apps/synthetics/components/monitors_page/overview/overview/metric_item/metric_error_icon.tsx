@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import * as React from 'react';
 import { useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -22,7 +22,7 @@ export const MetricErrorIcon = ({ configIdByLocation }: { configIdByLocation: st
     dispatch(toggleErrorPopoverOpen(configIdByLocation));
   };
   const timer = useRef<NodeJS.Timeout | null>(null);
-  const euiShadow = useEuiShadow('s');
+  const euiShadow = useEuiShadow('s', { border: 'none' });
 
   const theme = useEuiTheme().euiTheme;
   const { darkMode } = useSyntheticsSettingsContext();
@@ -32,18 +32,15 @@ export const MetricErrorIcon = ({ configIdByLocation }: { configIdByLocation: st
       css={css`
         box-sizing: border-box;
         display: flex;
-        flex-direction: column;
         align-items: center;
-        gap: 10px;
+        justify-content: center;
         width: 32px;
         height: 32px;
         background: ${darkMode ? theme.colors.backgroundBaseSubdued : theme.colors.lightestShade};
-        border: 1px solid ${darkMode ? theme.colors.darkShade : theme.colors.lightShade};
+        border: ${theme.border.width.thin} solid
+          ${darkMode ? theme.colors.darkShade : theme.colors.lightShade};
         box-shadow: ${euiShadow};
         border-radius: 16px;
-        flex: none;
-        order: 0;
-        flex-grow: 0;
       `}
       onMouseEnter={() => {
         // show popover with delay
@@ -78,13 +75,15 @@ export const MetricErrorIcon = ({ configIdByLocation }: { configIdByLocation: st
         }
       }}
     >
-      <EuiButtonIcon
-        data-test-subj="syntheticsMetricItemIconButton"
-        iconType="warning"
-        color="danger"
-        size="m"
-        aria-label={ERROR_DETAILS}
-      />
+      <EuiToolTip content={ERROR_DETAILS} disableScreenReaderOutput>
+        <EuiButtonIcon
+          data-test-subj="syntheticsMetricItemIconButton"
+          iconType="warning"
+          color="danger"
+          size="m"
+          aria-label={ERROR_DETAILS}
+        />
+      </EuiToolTip>
     </div>
   );
 };

@@ -17,7 +17,7 @@ interface ModifiedBadgeProps {
 export function ModifiedBadge({ tooltip }: ModifiedBadgeProps): JSX.Element {
   return (
     <EuiToolTip content={tooltip}>
-      <EuiBadge color="hollow" iconType="indexEdit" iconSide="left">
+      <EuiBadge tabIndex={0} color="hollow" iconType="indexEdit" iconSide="left">
         {i18n.MODIFIED}
       </EuiBadge>
     </EuiToolTip>

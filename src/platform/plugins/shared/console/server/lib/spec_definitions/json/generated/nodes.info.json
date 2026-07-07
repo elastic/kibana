@@ -12,6 +12,24 @@
         "0"
       ]
     },
+    "url_components": {
+      "metric": [
+        "_all",
+        "_none",
+        "settings",
+        "os",
+        "process",
+        "jvm",
+        "thread_pool",
+        "transport",
+        "http",
+        "remote_cluster_server",
+        "plugins",
+        "ingest",
+        "aggregations",
+        "indices"
+      ]
+    },
     "methods": [
       "GET"
     ],

@@ -16,8 +16,8 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-import { ComponentTemplateListItem } from '../../../../../common';
-import { Forms } from '../../../../shared_imports';
+import type { ComponentTemplateListItem } from '../../../../../common';
+import type { Forms } from '../../../../shared_imports';
 import { ComponentTemplatesSelector } from '../../component_templates';
 import { documentationService } from '../../mappings_editor/shared_imports';
 
@@ -87,7 +87,13 @@ export const StepComponents = ({ defaultValue, onChange, esDocsBase }: Props) =>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" flush="right" href={docUri} target="_blank" iconType="help">
+            <EuiButtonEmpty
+              size="s"
+              flush="right"
+              href={docUri}
+              target="_blank"
+              iconType="question"
+            >
               <FormattedMessage
                 id="xpack.idxMgmt.formWizard.stepComponents.docsButtonLabel"
                 defaultMessage="Component templates docs"

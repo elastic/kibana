@@ -18,8 +18,8 @@ import {
   apmEnableTableSearchBar,
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
-  apmEnableServiceMapApiV2,
   apmProgressiveLoading,
+  apmTraceLogsDefaultColumns,
 } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React from 'react';
@@ -48,7 +48,7 @@ const SETTINGS_KEYS = [
   apmAWSLambdaRequestCostPerMillion,
   apmEnableTableSearchBar,
   apmEnableServiceInventoryTableSearchBar,
-  apmEnableServiceMapApiV2,
+  apmTraceLogsDefaultColumns,
 ];
 
 function getApmSettingsKeys(isProfilingPluginEnabled: boolean) {
@@ -99,6 +99,10 @@ export function GeneralSettings() {
       <EuiSpacer />
       {apmSettingsKeys.map((settingKey) => {
         const field = fields[settingKey];
+        if (!field) {
+          return null;
+        }
+
         return (
           <FieldRowProvider
             {...{

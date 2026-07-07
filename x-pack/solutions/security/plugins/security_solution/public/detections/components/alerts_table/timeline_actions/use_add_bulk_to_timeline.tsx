@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
@@ -18,11 +17,10 @@ import {
   TableId,
 } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import type { PageScope } from '../../../../data_view_manager/constants';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
-import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import type { CustomBulkAction } from '../../../../../common/types';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -30,19 +28,13 @@ import { BULK_ADD_TO_TIMELINE_LIMIT } from '../../../../../common/constants';
 import type { TimelineArgs } from '../../../../timelines/containers';
 import { useTimelineEventsHandler } from '../../../../timelines/containers';
 import type { State } from '../../../../common/store/types';
-import { useUpdateTimeline } from '../../../../timelines/components/open_timeline/use_update_timeline';
-import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import { INVESTIGATE_BULK_IN_TIMELINE } from '../translations';
-import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineTypeEnum } from '../../../../../common/api/timeline';
-import { sendBulkEventsToTimelineAction } from '../actions';
-import type { CreateTimelineProps } from '../types';
-import type { SourcererScopeName } from '../../../../sourcerer/store/model';
 import type { Direction } from '../../../../../common/search_strategy';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { globalFiltersQuerySelector } from '../../../../common/store/inputs/selectors';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useSendBulkToTimeline } from './use_send_bulk_to_timeline';
 
-const { setEventsLoading, setSelected } = dataTableActions;
+const { setEventsLoading } = dataTableActions;
 
 export interface UseAddBulkToTimelineActionProps {
   /* filters being passed to the Alert/events table */
@@ -54,7 +46,7 @@ export interface UseAddBulkToTimelineActionProps {
   /* End Time of the table being passed to the Events Table */
   to: string;
   /* Sourcerer Scope Id*/
-  scopeId: SourcererScopeName;
+  scopeId: PageScope;
 }
 
 const fields = ['_id', 'timestamp'];
@@ -73,37 +65,19 @@ export const useAddBulkToTimelineAction = ({
   scopeId,
 }: UseAddBulkToTimelineActionProps) => {
   const [disableActionOnSelectAll, setDisabledActionOnSelectAll] = useState(false);
-  const { newDataViewPickerEnabled } = useEnableExperimental();
-
-  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(scopeId);
-  const experimentalBrowserFields = useBrowserFields(scopeId);
-  const experimentalSelectedPatterns = useSelectedPatterns(scopeId);
 
   const {
-    browserFields: oldBrowserFields,
-    dataViewId: oldDataViewId,
-    sourcererDataView: oldSourcererDataViewSpec,
-    // important to get selectedPatterns from useSourcererDataView
-    // in order to include the exclude filters in the search that are not stored in the timeline
-    selectedPatterns: oldSelectedPatterns,
-  } = useSourcererDataView(scopeId);
+    timelinePrivileges: { read: canReadTimelines },
+  } = useUserPrivileges();
 
-  const dataViewId = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataViewSpec.id ?? '' : oldDataViewId),
-    [experimentalDataViewSpec.id, newDataViewPickerEnabled, oldDataViewId]
+  const { dataView } = useDataView(scopeId);
+  const browserFields = useBrowserFields(scopeId);
+  const selectedPatterns = useSelectedPatterns(scopeId);
+  const runtimeMappings = useMemo(
+    () => dataView.getRuntimeMappings() as RunTimeMappings,
+    [dataView]
   );
-  const browserFields = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields),
-    [experimentalBrowserFields, newDataViewPickerEnabled, oldBrowserFields]
-  );
-  const dataViewSpec: DataViewSpec = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataViewSpec),
-    [experimentalDataViewSpec, newDataViewPickerEnabled, oldSourcererDataViewSpec]
-  );
-  const selectedPatterns = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
-    [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
-  );
+  const dataViewId = useMemo(() => dataView.id ?? '', [dataView.id]);
 
   const dispatch = useDispatch();
   const { uiSettings } = useKibana().services;
@@ -132,13 +106,13 @@ export const useAddBulkToTimelineAction = ({
     return combineQueries({
       config: esQueryConfig,
       dataProviders: [],
-      dataViewSpec,
+      dataView,
       filters: combinedFilters,
       kqlQuery: { query: '', language: 'kuery' },
       browserFields,
       kqlMode: 'filter',
     });
-  }, [esQueryConfig, dataViewSpec, combinedFilters, browserFields]);
+  }, [esQueryConfig, dataView, combinedFilters, browserFields]);
 
   const filterQuery = useMemo(() => {
     if (!combinedQuery) return '';
@@ -156,7 +130,7 @@ export const useAddBulkToTimelineAction = ({
     sort: timelineQuerySortField,
     indexNames: selectedPatterns,
     filterQuery,
-    runtimeMappings: dataViewSpec.runtimeFieldMap as RunTimeMappings,
+    runtimeMappings,
     limit: Math.min(BULK_ADD_TO_TIMELINE_LIMIT, totalCount),
     timerangeKind: 'absolute',
   });
@@ -173,53 +147,7 @@ export const useAddBulkToTimelineAction = ({
     }
   }, [selectAll, totalCount]);
 
-  const clearActiveTimeline = useCreateTimeline({
-    timelineId: TimelineId.active,
-    timelineType: TimelineTypeEnum.default,
-  });
-
-  const updateTimeline = useUpdateTimeline();
-
-  const createTimeline = useCallback(
-    async ({ timeline, ruleNote, timeline: { filters: eventIdFilters } }: CreateTimelineProps) => {
-      await clearActiveTimeline();
-      updateTimeline({
-        duplicate: true,
-        from,
-        id: TimelineId.active,
-        notes: [],
-        timeline: {
-          ...timeline,
-          indexNames: timeline.indexNames ?? [],
-          show: true,
-          filters: eventIdFilters,
-        },
-        to,
-        ruleNote,
-      });
-    },
-    [updateTimeline, clearActiveTimeline, from, to]
-  );
-
-  const sendBulkEventsToTimelineHandler = useCallback(
-    (items: TimelineItem[]) => {
-      sendBulkEventsToTimelineAction(
-        createTimeline,
-        items.map((item) => item.ecs),
-        'KqlFilter'
-      );
-
-      dispatch(
-        setSelected({
-          id: tableId,
-          isSelectAllChecked: false,
-          isSelected: false,
-          eventIds: selectedEventIds,
-        })
-      );
-    },
-    [dispatch, createTimeline, selectedEventIds, tableId]
-  );
+  const { sendBulkEventsToTimelineHandler } = useSendBulkToTimeline({ tableId, from, to });
 
   const onActionClick = useCallback<
     NonNullable<BulkActionsConfig['onClick'] | CustomBulkAction['onClick']>
@@ -233,7 +161,7 @@ export const useAddBulkToTimelineAction = ({
        * */
       const onResponseHandler = (localResponse: TimelineArgs) => {
         sendBulkEventsToTimelineHandler(localResponse.events);
-        if (tableId === TableId.alertsOnAlertsPage) {
+        if (tableId === TableId.alertsOnAlertsPage || tableId === TableId.alertsOnAttacksPage) {
           setLoading(false);
           clearSelection();
         } else {
@@ -248,7 +176,7 @@ export const useAddBulkToTimelineAction = ({
       };
 
       if (isAllSelected || selectAll) {
-        if (tableId === TableId.alertsOnAlertsPage) {
+        if (tableId === TableId.alertsOnAlertsPage || tableId === TableId.alertsOnAttacksPage) {
           setLoading(true);
         } else {
           dispatch(
@@ -275,14 +203,19 @@ export const useAddBulkToTimelineAction = ({
   }, [disableActionOnSelectAll]);
 
   const memoized = useMemo(
-    () => ({
-      label: investigateInTimelineTitle,
-      key: 'add-bulk-to-timeline',
-      'data-test-subj': 'investigate-bulk-in-timeline',
-      disableOnQuery: disableActionOnSelectAll,
-      onClick: onActionClick,
-    }),
-    [disableActionOnSelectAll, investigateInTimelineTitle, onActionClick]
+    () =>
+      canReadTimelines
+        ? [
+            {
+              label: investigateInTimelineTitle,
+              key: 'add-bulk-to-timeline',
+              'data-test-subj': 'investigate-bulk-in-timeline',
+              disableOnQuery: disableActionOnSelectAll,
+              onClick: onActionClick,
+            },
+          ]
+        : [],
+    [canReadTimelines, disableActionOnSelectAll, investigateInTimelineTitle, onActionClick]
   );
   return memoized;
 };

@@ -49,7 +49,7 @@ const getRuleResultService = ({
 describe('lastRunFromState', () => {
   it('returns successful outcome if no errors or warnings reported', () => {
     const result = lastRunFromState(
-      { metrics: getMetrics({}) },
+      getMetrics({}),
       getRuleResultService({ outcomeMessage: 'Rule executed succesfully' })
     );
 
@@ -67,7 +67,7 @@ describe('lastRunFromState', () => {
 
   it('returns a warning outcome if rules last execution reported one', () => {
     const result = lastRunFromState(
-      { metrics: getMetrics({}) },
+      getMetrics({}),
       getRuleResultService({
         warnings: ['MOCK_WARNING'],
         outcomeMessage: 'Rule execution reported a warning',
@@ -88,15 +88,13 @@ describe('lastRunFromState', () => {
 
   it('returns warning if rule has reached alert limit and alert circuit breaker opens', () => {
     const result = lastRunFromState(
-      {
-        metrics: getMetrics({ hasReachedAlertLimit: true }),
-      },
+      getMetrics({ hasReachedAlertLimit: true }),
       getRuleResultService({})
     );
 
     expect(result.lastRun.outcome).toEqual('warning');
     expect(result.lastRun.outcomeMsg).toEqual([
-      'Rule reported more than the maximum number of alerts in a single run. Alerts may be missed and recovery notifications may be delayed',
+      "Rule reported more than the maximum number of alerts in a single run. This limit helps prevent actions being triggered excessively. Consider narrowing your rule's query results or adjusting the alert limit configuration. Alerts may be missed and recovery notifications may be delayed",
     ]);
     expect(result.lastRun.warning).toEqual('maxAlerts');
 
@@ -110,9 +108,7 @@ describe('lastRunFromState', () => {
 
   it('returns warning if rules actions completition is partial and action circuit breaker opens', () => {
     const result = lastRunFromState(
-      {
-        metrics: getMetrics({ triggeredActionsStatus: ActionsCompletion.PARTIAL }),
-      },
+      getMetrics({ triggeredActionsStatus: ActionsCompletion.PARTIAL }),
       getRuleResultService({})
     );
 
@@ -132,12 +128,10 @@ describe('lastRunFromState', () => {
 
   it('returns warning if rules actions completition is partial and queued action circuit breaker opens', () => {
     const result = lastRunFromState(
-      {
-        metrics: getMetrics({
-          triggeredActionsStatus: ActionsCompletion.PARTIAL,
-          hasReachedQueuedActionsLimit: true,
-        }),
-      },
+      getMetrics({
+        triggeredActionsStatus: ActionsCompletion.PARTIAL,
+        hasReachedQueuedActionsLimit: true,
+      }),
       getRuleResultService({})
     );
 
@@ -158,11 +152,9 @@ describe('lastRunFromState', () => {
   it('overwrites rule execution warning if rule has reached alert limit; outcome messages are merged', () => {
     const ruleExecutionOutcomeMessage = 'Rule execution reported a warning';
     const frameworkOutcomeMessage =
-      'Rule reported more than the maximum number of alerts in a single run. Alerts may be missed and recovery notifications may be delayed';
+      "Rule reported more than the maximum number of alerts in a single run. This limit helps prevent actions being triggered excessively. Consider narrowing your rule's query results or adjusting the alert limit configuration. Alerts may be missed and recovery notifications may be delayed";
     const result = lastRunFromState(
-      {
-        metrics: getMetrics({ hasReachedAlertLimit: true }),
-      },
+      getMetrics({ hasReachedAlertLimit: true }),
       getRuleResultService({
         warnings: ['MOCK_WARNING'],
         outcomeMessage: 'Rule execution reported a warning',
@@ -189,9 +181,7 @@ describe('lastRunFromState', () => {
     const frameworkOutcomeMessage =
       'The maximum number of actions for this rule type was reached; excess actions were not triggered.';
     const result = lastRunFromState(
-      {
-        metrics: getMetrics({ triggeredActionsStatus: ActionsCompletion.PARTIAL }),
-      },
+      getMetrics({ triggeredActionsStatus: ActionsCompletion.PARTIAL }),
       getRuleResultService({
         warnings: ['MOCK_WARNING'],
         outcomeMessage: 'Rule execution reported a warning',
@@ -218,12 +208,10 @@ describe('lastRunFromState', () => {
     const frameworkOutcomeMessage =
       'The maximum number of queued actions was reached; excess actions were not triggered.';
     const result = lastRunFromState(
-      {
-        metrics: getMetrics({
-          triggeredActionsStatus: ActionsCompletion.PARTIAL,
-          hasReachedQueuedActionsLimit: true,
-        }),
-      },
+      getMetrics({
+        triggeredActionsStatus: ActionsCompletion.PARTIAL,
+        hasReachedQueuedActionsLimit: true,
+      }),
       getRuleResultService({
         warnings: ['MOCK_WARNING'],
         outcomeMessage: 'Rule execution reported a warning',
@@ -247,9 +235,7 @@ describe('lastRunFromState', () => {
 
   it('overwrites warning outcome to error if rule execution reports an error', () => {
     const result = lastRunFromState(
-      {
-        metrics: getMetrics({ hasReachedAlertLimit: true }),
-      },
+      getMetrics({ hasReachedAlertLimit: true }),
       getRuleResultService({
         errors: [{ message: 'MOCK_ERROR', userError: false }],
         outcomeMessage: 'Rule execution reported an error',
@@ -258,7 +244,7 @@ describe('lastRunFromState', () => {
 
     expect(result.lastRun.outcome).toEqual('failed');
     expect(result.lastRun.outcomeMsg).toEqual([
-      'Rule reported more than the maximum number of alerts in a single run. Alerts may be missed and recovery notifications may be delayed',
+      "Rule reported more than the maximum number of alerts in a single run. This limit helps prevent actions being triggered excessively. Consider narrowing your rule's query results or adjusting the alert limit configuration. Alerts may be missed and recovery notifications may be delayed",
       'Rule execution reported an error',
     ]);
     expect(result.lastRun.warning).toEqual('maxAlerts');

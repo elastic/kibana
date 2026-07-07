@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { DEFAULT_TIMEOUT_MS, OPENAI_CONNECTOR_ID } from '../../../common/openai/constants';
+import {
+  DEFAULT_TIMEOUT_MS,
+  DEFAULT_MODEL,
+  CONNECTOR_ID,
+  OpenAiProviderType,
+  RunActionResponseSchema,
+} from '@kbn/connector-schemas/openai';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { DEFAULT_OPENAI_MODEL } from '../../../common/openai/constants';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { OpenAIConnector } from './openai';
-import { OpenAiProviderType } from '../../../common/openai/constants';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { RunActionResponseSchema } from '../../../common/openai/schema';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -49,7 +52,7 @@ describe('OpenAI with proxy config', () => {
 
   const configurationUtilities = actionsConfigMock.create();
   const PROXY_HOST = 'proxy.custom.elastic.co';
-  const PROXY_URL = `http://${PROXY_HOST}`;
+  const PROXY_URL = `http://${PROXY_HOST}:1234`;
 
   configurationUtilities.getProxySettings.mockReturnValue({
     proxyUrl: PROXY_URL,
@@ -62,11 +65,11 @@ describe('OpenAI with proxy config', () => {
 
   const connector = new OpenAIConnector({
     configurationUtilities,
-    connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+    connector: { id: '1', type: CONNECTOR_ID },
     config: {
       apiUrl: 'https://api.openai.com/v1/chat/completions',
       apiProvider: OpenAiProviderType.OpenAi,
-      defaultModel: DEFAULT_OPENAI_MODEL,
+      defaultModel: DEFAULT_MODEL,
       organizationId: 'org-id',
       projectId: 'proj-id',
       headers: {
@@ -107,8 +110,9 @@ describe('OpenAI with proxy config', () => {
     expect(openAIClient).toBeDefined();
     expect(openAIClient.httpAgent).toBeDefined();
     expect(openAIClient.httpAgent.proxy).toBeDefined();
-    expect(openAIClient.httpAgent.proxy.host).toBe(PROXY_HOST);
-    expect(openAIClient.httpAgent.proxy.port).toBe(80);
+    expect(openAIClient.httpAgent.proxy.host).toBe(`${PROXY_HOST}:1234`);
+    expect(openAIClient.httpAgent.proxy.hostname).toBe(PROXY_HOST);
+    expect(openAIClient.httpAgent.proxy.port).toBe('1234');
   });
 
   it('verifies that requests use the configured HTTP agent', async () => {
@@ -125,7 +129,7 @@ describe('OpenAI with proxy config', () => {
         data: JSON.stringify({
           ...sampleOpenAiBody,
           stream: false,
-          model: DEFAULT_OPENAI_MODEL,
+          model: DEFAULT_MODEL,
         }),
         headers: {
           Authorization: 'Bearer 123',

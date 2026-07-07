@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResponse, type SavedObject } from '@kbn/core/server';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import { type SavedObject } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type {
   PlaygroundSavedObject,

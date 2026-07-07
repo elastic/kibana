@@ -29,7 +29,7 @@ IF EXIST "%CONFIG_DIR%\node.options" (
 )
 
 TITLE Kibana Keystore
-"%NODE%" "%DIR%\src\cli_keystore\dist" %*
+"%NODE%" "%DIR%\src\cli\keystore\dist" %*
 
 :finally
 

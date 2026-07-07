@@ -9,12 +9,18 @@
 
 import type { JSXElementConstructor, MutableRefObject } from 'react';
 import React from 'react';
-import type { EuiDataGridColumnCellActionProps, EuiDataGridRefProps } from '@elastic/eui';
-import { EuiButtonEmpty, type EuiDataGridColumnCellAction } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  type EuiDataGridColumnCellAction,
+  type EuiDataGridColumnCellActionProps,
+  type EuiDataGridRefProps,
+} from '@elastic/eui';
 import { render, waitFor, renderHook } from '@testing-library/react';
 import { makeAction } from '../mocks/helpers';
-import type { UseDataGridColumnsCellActionsProps } from './use_data_grid_column_cell_actions';
-import { useDataGridColumnsCellActions } from './use_data_grid_column_cell_actions';
+import {
+  type UseDataGridColumnsCellActionsProps,
+  useDataGridColumnsCellActions,
+} from './use_data_grid_column_cell_actions';
 
 const action1 = makeAction('action-1', 'icon1', 1);
 action1.execute = jest.fn();

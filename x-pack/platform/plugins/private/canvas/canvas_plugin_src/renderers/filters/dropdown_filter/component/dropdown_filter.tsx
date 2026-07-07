@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, FocusEvent, FunctionComponent, useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
-import { EuiSelect, EuiSelectOption } from '@elastic/eui';
+import type { ChangeEvent, FocusEvent, FunctionComponent } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { EuiSelectOption } from '@elastic/eui';
+import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const strings = {
@@ -79,13 +80,10 @@ export const DropdownFilter: FunctionComponent<Props> = ({
         options={dropdownOptions}
         fullWidth
         compressed
+        aria-label={i18n.translate('xpack.canvas.renderer.dropdownFilter.selectAriaLabel', {
+          defaultMessage: 'Dropdown filter',
+        })}
       />
     </div>
   );
-};
-
-DropdownFilter.propTypes = {
-  choices: PropTypes.array,
-  initialValue: PropTypes.string,
-  commit: PropTypes.func.isRequired,
 };

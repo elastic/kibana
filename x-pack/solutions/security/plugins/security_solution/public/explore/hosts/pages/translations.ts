@@ -59,10 +59,3 @@ export const NAVIGATION_SESSIONS_TITLE = i18n.translate(
     defaultMessage: 'Sessions',
   }
 );
-
-export const ERROR_FETCHING_EVENTS_DATA = i18n.translate(
-  'xpack.securitySolution.hosts.navigaton.matrixHistogram.errorFetchingEventsData',
-  {
-    defaultMessage: 'Failed to query events data',
-  }
-);

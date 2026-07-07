@@ -8,10 +8,9 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const { common, discover, timePicker, header } = getPageObjects([
     'common',
     'discover',
@@ -32,9 +31,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover.json'
       );
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await common.navigateToApp('discover');
       await timePicker.setDefaultAbsoluteRange();
@@ -43,9 +39,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/discover.json'
-      );
-      await esArchiver.unload(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.uiSettings.replace({});
       await kibanaServer.savedObjects.cleanStandardList();
@@ -113,9 +106,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await discover.clickNewSearchButton();
       await discover.waitUntilSearchingHasFinished();
-      expect(await monacoEditor.getCodeEditorValue()).to.be('FROM logstash-* | LIMIT 10');
+      expect(await monacoEditor.getCodeEditorValue()).to.be('FROM logstash-*');
       expect(await discover.getVisContextSuggestionType()).to.be('histogramForESQL');
-      expect(await discover.getHitCount()).to.be('10');
+      expect(await discover.getHitCount()).to.be('1,000');
     });
 
     it('should work correctly for a saved search in ESQL mode', async () => {
@@ -134,8 +127,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await discover.clickNewSearchButton();
       await discover.waitUntilSearchingHasFinished();
-      expect(await monacoEditor.getCodeEditorValue()).to.be('FROM logstash-* | LIMIT 10');
-      expect(await discover.getHitCount()).to.be('10');
+      expect(await monacoEditor.getCodeEditorValue()).to.be('FROM logstash-*');
+      expect(await discover.getHitCount()).to.be('1,000');
     });
   });
 }

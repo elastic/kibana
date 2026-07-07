@@ -7,27 +7,32 @@ exports[`Should render cancel button when drawing 1`] = `
   <EuiFlexItem>
     <EuiPopover
       anchorPosition="leftUp"
+      aria-label="Tools"
       button={
         <EuiPanel
           className="mapToolbarOverlay__button"
           paddingSize="none"
         >
-          <EuiButtonIcon
-            aria-label="Tools"
-            className="mapToolbarOverlay__buttonIcon-empty"
-            color="text"
-            iconType="wrench"
-            isDisabled={false}
-            onClick={[Function]}
-            size="s"
-            title="Tools"
-          />
+          <EuiToolTip
+            anchorClassName="mapToolbarOverlay__buttonIcon-empty"
+            content="Tools"
+            disableScreenReaderOutput={true}
+          >
+            <EuiButtonIcon
+              aria-label="Tools"
+              color="text"
+              iconType="wrench"
+              isDisabled={false}
+              onClick={[Function]}
+              size="s"
+            />
+          </EuiToolTip>
         </EuiPanel>
       }
       closePopover={[Function]}
       data-test-subj="mapToolsControlPopover"
       display="inline-block"
-      hasArrow={true}
+      hasArrow={false}
       id="toolsControlPopover"
       isOpen={false}
       ownFocus={true}
@@ -109,27 +114,32 @@ exports[`Should render cancel button when drawing 1`] = `
 exports[`renders 1`] = `
 <EuiPopover
   anchorPosition="leftUp"
+  aria-label="Tools"
   button={
     <EuiPanel
       className="mapToolbarOverlay__button"
       paddingSize="none"
     >
-      <EuiButtonIcon
-        aria-label="Tools"
-        className="mapToolbarOverlay__buttonIcon-empty"
-        color="text"
-        iconType="wrench"
-        isDisabled={false}
-        onClick={[Function]}
-        size="s"
-        title="Tools"
-      />
+      <EuiToolTip
+        anchorClassName="mapToolbarOverlay__buttonIcon-empty"
+        content="Tools"
+        disableScreenReaderOutput={true}
+      >
+        <EuiButtonIcon
+          aria-label="Tools"
+          color="text"
+          iconType="wrench"
+          isDisabled={false}
+          onClick={[Function]}
+          size="s"
+        />
+      </EuiToolTip>
     </EuiPanel>
   }
   closePopover={[Function]}
   data-test-subj="mapToolsControlPopover"
   display="inline-block"
-  hasArrow={true}
+  hasArrow={false}
   id="toolsControlPopover"
   isOpen={false}
   ownFocus={true}

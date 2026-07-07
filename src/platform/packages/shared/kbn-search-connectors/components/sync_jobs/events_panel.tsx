@@ -11,7 +11,8 @@ import React from 'react';
 
 import moment from 'moment';
 
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -113,7 +114,13 @@ export const SyncJobEventsPanel: React.FC<SyncJobsEventPanelProps> = ({
         defaultMessage: 'Events',
       })}
     >
-      <EuiBasicTable columns={columns} items={events} />
+      <EuiBasicTable
+        columns={columns}
+        items={events}
+        tableCaption={i18n.translate('searchConnectors.index.syncJobs.events.tableCaption', {
+          defaultMessage: 'Sync job events',
+        })}
+      />
     </FlyoutPanel>
   );
 };

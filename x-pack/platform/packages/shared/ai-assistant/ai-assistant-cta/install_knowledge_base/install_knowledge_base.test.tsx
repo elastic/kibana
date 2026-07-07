@@ -9,10 +9,10 @@ import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 
+import type { InstallKnowledgeBaseProps } from './install_knowledge_base';
 import {
   DATA_TEST_SUBJ_INSTALL_KNOWLEDGE_BASE_BUTTON,
   InstallKnowledgeBase,
-  InstallKnowledgeBaseProps,
 } from './install_knowledge_base';
 import { translations } from './install_knowledge_base.translations';
 

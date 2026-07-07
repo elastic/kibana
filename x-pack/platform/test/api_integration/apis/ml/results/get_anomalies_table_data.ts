@@ -6,9 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { USER } from '../../../services/ml/security_common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -50,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('GetAnomaliesTableData', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await createMockJobs();
     });
@@ -65,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
         criteriaFields: [{ fieldName: 'detector_index', fieldValue: 0 }],
         influencers: [],
         aggregationInterval: 'auto',
-        threshold: 0,
+        threshold: [{ min: 0 }],
         earliestMs: 1454889600000, // February 8, 2016 12:00:00 AM GMT
         latestMs: 1454976000000, // February 9, 2016 12:00:00 AM GMT
         dateFormatTz: 'UTC',
@@ -89,7 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
         criteriaFields: [{ fieldName: 'detector_index', fieldValue: 0 }],
         influencers: [],
         aggregationInterval: 'auto',
-        threshold: 0,
+        threshold: [{ min: 0 }],
         // invalid earliest and latest instead of earliestMs and latestMs
         earliest: 1454889600000, // February 8, 2016 12:00:00 AM GMT
         latest: 1454976000000, // February 9, 2016 12:00:00 AM GMT
@@ -116,7 +117,7 @@ export default ({ getService }: FtrProviderContext) => {
         criteriaFields: [{ fieldName: 'detector_index', fieldValue: 0 }],
         influencers: [],
         aggregationInterval: 'auto',
-        threshold: 0,
+        threshold: [{ min: 0 }],
         earliestMs: 1454889600000, // February 8, 2016 12:00:00 AM GMT
         latestMs: 1454976000000, // February 9, 2016 12:00:00 AM GMT
         dateFormatTz: 'UTC',

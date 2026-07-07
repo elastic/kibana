@@ -7,12 +7,12 @@
 
 import React, { useMemo } from 'react';
 import type { Interpolation, Theme } from '@emotion/react';
-import { EuiFlyoutProps } from '@elastic/eui';
-import { EuiFlyoutResizableProps } from '@elastic/eui/src/components/flyout/flyout_resizable';
+import type { EuiFlyoutProps } from '@elastic/eui';
+import type { EuiFlyoutResizableProps } from '@elastic/eui/src/components/flyout/flyout_resizable';
 import { Container } from './components/container';
 import { useWindowWidth } from './hooks/use_window_width';
 import { useInitializeFromLocalStorage } from './hooks/use_initialize_from_local_storage';
-import { FlyoutCustomProps } from './components/settings_menu';
+import type { FlyoutCustomProps } from './components/settings_menu';
 import type { Panel } from './types';
 
 export interface ExpandableFlyoutProps extends Omit<EuiFlyoutResizableProps, 'onClose'> {

@@ -7,8 +7,8 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import type { SelectedDataView, SourcererDataView, SourcererScopeName } from './model';
-import type { SecurityDataView } from '../containers/create_sourcerer_data_view';
+import type { PageScope } from '../../data_view_manager/constants';
+import type { SelectedDataView, SecurityDataView, SourcererDataView } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/sourcerer');
 
@@ -19,19 +19,10 @@ export const setDataViewLoading = actionCreator<{
   loading: boolean;
 }>('SET_DATA_VIEW_LOADING');
 
-export const setSignalIndexName = actionCreator<{ signalIndexName: string }>(
-  'SET_SIGNAL_INDEX_NAME'
-);
-
 export const setSourcererDataViews = actionCreator<SecurityDataView>('SET_SOURCERER_DATA_VIEWS');
 
-export const setSourcererScopeLoading = actionCreator<{
-  id?: SourcererScopeName;
-  loading: boolean;
-}>('SET_SOURCERER_SCOPE_LOADING');
-
 export interface SelectedDataViewPayload {
-  id: SourcererScopeName;
+  id: PageScope;
   selectedDataViewId: SelectedDataView['dataViewId'];
   selectedPatterns: SelectedDataView['selectedPatterns'];
   shouldValidateSelectedPatterns?: boolean;

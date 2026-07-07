@@ -9,7 +9,7 @@ jest.mock('uuid', () => ({ v4: () => 'mock-report-id' }));
 
 import rison from '@kbn/rison';
 
-import {
+import type {
   AuditLogger,
   FakeRawRequest,
   KibanaRequest,
@@ -17,15 +17,15 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import type { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
-import { ReportingCore } from '../../..';
+import type { ReportingCore } from '../../..';
 import {
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../test_helpers';
-import { ReportingRequestHandlerContext, ReportingSetup } from '../../../types';
+import type { ReportingRequestHandlerContext, ReportingSetup, ReportingUser } from '../../../types';
 import { ScheduleRequestHandler } from './schedule_request_handler';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
@@ -64,7 +64,6 @@ const fakeRawRequest: FakeRawRequest = {
   headers: {
     authorization: `ApiKey skdjtq4u543yt3rhewrh`,
   },
-  path: '/',
 };
 
 describe('Handle request to schedule', () => {
@@ -141,7 +140,7 @@ describe('Handle request to schedule', () => {
 
     requestHandler = new ScheduleRequestHandler({
       reporting: reportingCore,
-      user: { username: 'testymcgee' },
+      user: { username: 'testymcgee' } as ReportingUser,
       context: mockContext,
       path: '/api/reporting/test/generate/pdf',
       // @ts-ignore
@@ -159,7 +158,7 @@ describe('Handle request to schedule', () => {
         schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
       });
 
-      const { id, created_at: _created_at, payload, ...snapObj } = report;
+      const { id, created_at, payload, ...snapObj } = report;
       expect(snapObj).toMatchInlineSnapshot(`
         Object {
           "created_by": "testymcgee",
@@ -248,7 +247,7 @@ describe('Handle request to schedule', () => {
         notification: { email: { to: ['a@b.com'] } },
       });
 
-      const { id, created_at: _created_at, payload, ...snapObj } = report;
+      const { id, created_at, payload, ...snapObj } = report;
       expect(snapObj).toMatchInlineSnapshot(`
         Object {
           "created_by": "testymcgee",
@@ -330,6 +329,100 @@ describe('Handle request to schedule', () => {
       );
     });
 
+    test('creates a scheduled_report saved object and rrule dtstart', async () => {
+      const report = await requestHandler.enqueueJob({
+        exportTypeId: 'printablePdfV2',
+        jobParams: mockJobParams,
+        schedule: {
+          rrule: { dtstart: '2025-06-23T14:17:19.765Z', freq: 1, interval: 2, tzid: 'UTC' },
+        },
+      });
+
+      const { id, created_at, payload, ...snapObj } = report;
+      expect(snapObj).toMatchInlineSnapshot(`
+        Object {
+          "created_by": "testymcgee",
+          "jobtype": "printable_pdf_v2",
+          "meta": Object {
+            "isDeprecated": false,
+            "layout": "preserve_layout",
+            "objectType": "cool_object_type",
+          },
+          "migration_version": "unknown",
+          "notification": undefined,
+          "schedule": Object {
+            "rrule": Object {
+              "dtstart": "2025-06-23T14:17:19.765Z",
+              "freq": 1,
+              "interval": 2,
+              "tzid": "UTC",
+            },
+          },
+        }
+      `);
+      expect(payload).toMatchInlineSnapshot(`
+        Object {
+          "browserTimezone": "UTC",
+          "isDeprecated": false,
+          "layout": Object {
+            "id": "preserve_layout",
+          },
+          "locatorParams": Array [],
+          "objectType": "cool_object_type",
+          "title": "cool_title",
+          "version": "unknown",
+        }
+      `);
+
+      expect(auditLogger.log).toHaveBeenCalledWith({
+        event: {
+          action: 'scheduled_report_schedule',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['creation'],
+        },
+        kibana: {
+          saved_object: { id: 'mock-report-id', name: 'cool_title', type: 'scheduled_report' },
+        },
+        message: 'User is creating scheduled report [id=mock-report-id] [name=cool_title]',
+      });
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        'scheduled_report',
+        {
+          jobType: 'printable_pdf_v2',
+          createdAt: expect.any(String),
+          createdBy: 'testymcgee',
+          title: 'cool_title',
+          enabled: true,
+          payload: JSON.stringify(payload),
+          schedule: {
+            rrule: {
+              dtstart: '2025-06-23T14:17:19.765Z',
+              freq: 1,
+              interval: 2,
+              tzid: 'UTC',
+            },
+          },
+          migrationVersion: 'unknown',
+          meta: {
+            objectType: 'cool_object_type',
+            layout: 'preserve_layout',
+            isDeprecated: false,
+          },
+        },
+        { id: 'mock-report-id' }
+      );
+
+      expect(reportingCore.scheduleRecurringTask).toHaveBeenCalledWith(mockRequest, {
+        id: 'foo',
+        jobtype: 'printable_pdf_v2',
+        schedule: {
+          rrule: { dtstart: '2025-06-23T14:17:19.765Z', freq: 1, interval: 2, tzid: 'UTC' },
+        },
+      });
+    });
+
     test('throws errors from so client create', async () => {
       soClient.create = jest.fn().mockImplementationOnce(async () => {
         throw new Error('SO create error');
@@ -398,6 +491,34 @@ describe('Handle request to schedule', () => {
         schedule: { rrule: { freq: 1, interval: 2 } },
       };
       expect(requestHandler.getSchedule()).toEqual({ rrule: { freq: 1, interval: 2 } });
+    });
+
+    test('parse schedule with dtstart from body', () => {
+      // @ts-ignore body is a read-only property
+      mockRequest.body = {
+        jobParams: rison.encode(mockJobParams),
+        schedule: { rrule: { dtstart: '2025-06-23T14:17:19.765Z', freq: 1, interval: 2 } },
+      };
+      expect(requestHandler.getSchedule()).toEqual({
+        rrule: { dtstart: '2025-06-23T14:17:19.765Z', freq: 1, interval: 2 },
+      });
+    });
+
+    test('handles invalid rrule.dtstart string', () => {
+      let error: { statusCode: number; body: string } | undefined;
+      try {
+        // @ts-ignore body is a read-only property
+        mockRequest.body = {
+          jobParams: rison.encode(mockJobParams),
+          schedule: { rrule: { dtstart: 'i am not a date', freq: 1, interval: 2 } },
+        };
+        requestHandler.getSchedule();
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error?.statusCode).toBe(400);
+      expect(error?.body).toBe('Invalid startedAt date: i am not a date');
     });
 
     test('handles missing schedule', () => {
@@ -673,25 +794,48 @@ describe('Handle request to schedule', () => {
     });
 
     test('disallows invalid browser timezone', async () => {
-      expect(
-        await requestHandler.handleRequest({
-          exportTypeId: 'csv_searchsource',
-          jobParams: {
-            ...mockJobParams,
-            browserTimezone: 'America/Amsterdam',
+      const handler = new ScheduleRequestHandler({
+        reporting: reportingCore,
+        user: { username: 'testymcgee' } as ReportingUser,
+        context: mockContext,
+        path: '/api/reporting/test/generate/pdf',
+        req: {
+          ...mockRequest,
+          query: {},
+          params: { exportType: 'printablePdfV2' },
+          body: {
+            schedule: { rrule: { freq: 1, interval: 2, tzid: 'America/Amsterdam' } },
+            jobParams: rison.encode({
+              ...mockJobParams,
+              browserTimezone: 'America/Amsterdam',
+            }),
           },
-        })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "body": "Invalid timezone \\"America/Amsterdam\\".",
-        }
-      `);
+        },
+        res: mockResponseFactory,
+        logger: mockLogger,
+      });
+      try {
+        await handler.getJobParams();
+      } catch (err) {
+        expect(err.statusCode).toBe(400);
+        expect(err.body).toMatchInlineSnapshot(`
+          "invalid params: [
+            {
+              \\"code\\": \\"custom\\",
+              \\"path\\": [
+                \\"browserTimezone\\"
+              ],
+              \\"message\\": \\"Invalid timezone\\"
+            }
+          ]"
+        `);
+      }
     });
 
-    test('disallows scheduling when user is "false"', async () => {
+    test('disallows scheduling when user is undefined', async () => {
       requestHandler = new ScheduleRequestHandler({
         reporting: reportingCore,
-        user: false,
+        user: undefined,
         context: mockContext,
         path: '/api/reporting/test/generate/pdf',
         // @ts-ignore

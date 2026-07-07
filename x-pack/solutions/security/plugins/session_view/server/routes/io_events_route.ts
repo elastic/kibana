@@ -6,10 +6,10 @@
  */
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { EVENT_ACTION, TIMESTAMP } from '@kbn/rule-data-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { Aggregate } from '../../common';
+import type { ProcessEvent, Aggregate } from '../../common';
 import {
   IO_EVENTS_ROUTE,
   IO_EVENTS_PER_PAGE,
@@ -19,6 +19,7 @@ import {
   PROCESS_EVENTS_PER_PAGE,
   IO_EVENT_FIELDS,
 } from '../../common/constants';
+import { normalizeEventProcessArgs } from '../../common/utils/process_args_normalizer';
 
 export const registerIOEventsRoute = (router: IRouter, logger: Logger) => {
   router.versioned
@@ -82,7 +83,10 @@ export const registerIOEventsRoute = (router: IRouter, logger: Logger) => {
             fields: IO_EVENT_FIELDS,
           });
 
-          const events = search.hits.hits;
+          const events = search.hits.hits.map((hit) => {
+            hit._source = normalizeEventProcessArgs(hit._source as ProcessEvent);
+            return hit;
+          });
           const total =
             typeof search.hits.total === 'number' ? search.hits.total : search.hits.total?.value;
 

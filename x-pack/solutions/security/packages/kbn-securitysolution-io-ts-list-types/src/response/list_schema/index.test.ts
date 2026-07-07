@@ -10,7 +10,8 @@ import { pipe } from 'fp-ts/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getListResponseMock } from './index.mock';
-import { ListSchema, listSchema } from '.';
+import type { ListSchema } from '.';
+import { listSchema } from '.';
 
 describe('list_schema', () => {
   test('it should validate a typical list response', () => {
@@ -38,28 +39,6 @@ describe('list_schema', () => {
   test('it should accept an undefined for "meta"', () => {
     const payload = getListResponseMock();
     delete payload.meta;
-    const decoded = listSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
-  });
-
-  test('it should accept an undefined for "serializer"', () => {
-    const payload = getListResponseMock();
-    delete payload.serializer;
-    const decoded = listSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
-  });
-
-  test('it should accept an undefined for "deserializer"', () => {
-    const payload = getListResponseMock();
-    delete payload.deserializer;
     const decoded = listSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);

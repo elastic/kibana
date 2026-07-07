@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChromeStart, DocLinksStart } from '@kbn/core/public';
+import type { ChromeStart, DocLinksStart } from '@kbn/core/public';
 
 export function addHelpMenuToAppChrome(chrome: ChromeStart, docLinks: DocLinksStart) {
   chrome.setHelpExtension({
@@ -14,11 +14,6 @@ export function addHelpMenuToAppChrome(chrome: ChromeStart, docLinks: DocLinksSt
       {
         linkType: 'documentation',
         href: docLinks.links.visualize.lensPanels,
-      },
-      {
-        linkType: 'github',
-        title: '[Lens]',
-        labels: ['Feature:Lens'],
       },
     ],
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { casesQueriesKeys } from './constants';
 import type { ServerError } from '../types';
 import { useCasesToast } from '../common/use_cases_toast';

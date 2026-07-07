@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { MlSummaryJob } from '@kbn/ml-plugin/public';
-import type { UseQueryOptions } from '@tanstack/react-query';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+import type { UseQueryOptions } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
 import type { GetJobsSummaryArgs } from '../api/get_jobs_summary';
 import { getJobsSummary } from '../api/get_jobs_summary';

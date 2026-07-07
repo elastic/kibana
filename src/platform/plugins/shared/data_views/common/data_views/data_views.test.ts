@@ -12,7 +12,7 @@ import { defaults } from 'lodash';
 import { DataViewsService, DataView, DataViewLazy } from '.';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
-import {
+import type {
   UiSettingsCommon,
   PersistenceAPI,
   SavedObject,
@@ -385,7 +385,7 @@ describe('IndexPatterns', () => {
     expect((await indexPatterns.get(id)).fields.length).toBe(1);
   });
 
-  test('existing indices, so dataView.matchedIndices.length equals 1 ', async () => {
+  test('existing indices, so dataView.matchedIndices.length equals 1 and hasMatchedIndices() returns true', async () => {
     const id = '1';
     setDocsourcePayload(id, {
       id: 'foo',
@@ -396,9 +396,10 @@ describe('IndexPatterns', () => {
     });
     const dataView = await indexPatterns.get(id);
     expect(dataView.matchedIndices.length).toBe(1);
+    expect(dataView.hasMatchedIndices()).toBe(true);
   });
 
-  test('missing indices, so dataView.matchedIndices.length equals 0 ', async () => {
+  test('missing indices, so dataView.matchedIndices.length equals 0 and hasMatchedIndices() returns false', async () => {
     const id = '1';
     setDocsourcePayload(id, {
       id: 'foo',
@@ -412,12 +413,13 @@ describe('IndexPatterns', () => {
     });
     const dataView = await indexPatterns.get(id);
     expect(dataView.matchedIndices.length).toBe(0);
+    expect(dataView.hasMatchedIndices()).toBe(false);
   });
 
   test('savedObjectCache pre-fetches title, type, typeMeta', async () => {
     expect(await indexPatterns.getIds()).toEqual(['id']);
     expect(savedObjectsClient.find).toHaveBeenCalledWith({
-      fields: ['title', 'type', 'typeMeta', 'name'],
+      fields: ['title', 'type', 'typeMeta', 'name', 'timeFieldName'],
       perPage: 10000,
     });
   });
@@ -665,7 +667,7 @@ describe('IndexPatterns', () => {
     expect(indexPatterns.getDataViewLazy(id)).resolves.toBeInstanceOf(DataViewLazy);
   });
 
-  test('failed request does not affect adhoc data view being created', () => {
+  test('failed request does not affect adhoc data view being created', async () => {
     const badRequest = new Error('bad request');
     savedObjectsClient.get = jest.fn().mockRejectedValue(badRequest);
 
@@ -673,11 +675,9 @@ describe('IndexPatterns', () => {
     const failedDataViewPromise = indexPatterns.get(id);
     const adhocDataViewPromise = indexPatterns.create({ id });
 
-    // failed request!
-    expect(failedDataViewPromise).rejects.toBe(badRequest);
+    await expect(failedDataViewPromise).rejects.toBe(badRequest);
 
-    // successful subsequent request
-    expect(adhocDataViewPromise).resolves.toBeInstanceOf(DataView);
+    await expect(adhocDataViewPromise).resolves.toBeInstanceOf(DataView);
   });
 
   test('can set and remove field format', async () => {

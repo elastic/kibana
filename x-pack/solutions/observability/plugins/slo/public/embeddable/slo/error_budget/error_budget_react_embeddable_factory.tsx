@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import {
   fetch$,
   initializeStateManager,
@@ -16,16 +16,20 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { Router } from '@kbn/shared-ux-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createBrowserHistory } from 'history';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { PluginContext } from '../../../context/plugin_context';
-import { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
-import { SLO_ERROR_BUDGET_ID } from './constants';
+import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
+import {
+  SLO_ERROR_BUDGET_ID,
+  SLO_ERROR_BUDGET_SUPPORTED_TRIGGERS,
+} from '../../../../common/embeddables/error_budget/constants';
 import { SloErrorBudget } from './error_budget_burn_down';
-import { ErrorBudgetApi, ErrorBudgetCustomInput, SloErrorBudgetEmbeddableState } from './types';
+import type { ErrorBudgetApi, ErrorBudgetEmbeddableState } from './types';
+import type { ErrorBudgetCustomState } from '../../../../common/embeddables/error_budget/types';
+import { ensureLicense } from '../ensure_license';
 
 const getErrorBudgetPanelTitle = () =>
   i18n.translate('xpack.slo.errorBudgetEmbeddable.title', {
@@ -41,51 +45,58 @@ export const getErrorBudgetEmbeddableFactory = ({
   pluginsStart: SLOPublicPluginsStart;
   sloClient: SLORepositoryClient;
 }) => {
-  const factory: EmbeddableFactory<SloErrorBudgetEmbeddableState, ErrorBudgetApi> = {
+  const factory: EmbeddablePublicDefinition<ErrorBudgetEmbeddableState, ErrorBudgetApi> = {
     type: SLO_ERROR_BUDGET_ID,
-    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+    buildEmbeddable: async ({
+      initializeDrilldownsManager,
+      initialState,
+      finalizeApi,
+      uuid,
+      parentApi,
+    }) => {
+      await ensureLicense(pluginsStart.licensing);
       const deps = { ...coreStart, ...pluginsStart };
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
+      const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getErrorBudgetPanelTitle());
-      const sloErrorBudgetManager = initializeStateManager<ErrorBudgetCustomInput>(
-        initialState.rawState,
-        {
-          sloId: undefined,
-          sloInstanceId: undefined,
-        }
-      );
+      const sloErrorBudgetManager = initializeStateManager<ErrorBudgetCustomState>(initialState, {
+        slo_id: '',
+        slo_instance_id: ALL_VALUE,
+      });
       const reload$ = new Subject<boolean>();
 
-      function serializeState() {
-        return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...sloErrorBudgetManager.getLatestState(),
-          },
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges({
+      const stateApi = initializeStateApi<ErrorBudgetEmbeddableState>({
         uuid,
         parentApi,
-        serializeState,
-        anyStateChange$: merge(titleManager.anyStateChange$, sloErrorBudgetManager.anyStateChange$),
+        serializeState: () => ({
+          ...titleManager.getLatestState(),
+          ...drilldownsManager.getLatestState(),
+          ...sloErrorBudgetManager.getLatestState(),
+        }),
+        anyStateChange$: merge(
+          drilldownsManager.anyStateChange$,
+          titleManager.anyStateChange$,
+          sloErrorBudgetManager.anyStateChange$
+        ),
         getComparators: () => ({
           ...titleComparators,
-          sloId: 'referenceEquality',
-          sloInstanceId: 'referenceEquality',
+          ...drilldownsManager.comparators,
+          slo_id: 'referenceEquality',
+          slo_instance_id: 'referenceEquality',
         }),
-        onReset: (lastState) => {
-          sloErrorBudgetManager.reinitializeState(lastState?.rawState);
-          titleManager.reinitializeState(lastState?.rawState);
+        applySerializedState: (nextState) => {
+          drilldownsManager.reinitializeState(nextState);
+          sloErrorBudgetManager.reinitializeState(nextState);
+          titleManager.reinitializeState(nextState);
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...unsavedChangesApi,
+        ...stateApi,
+        ...drilldownsManager.api,
         defaultTitle$,
-        serializeState,
+        supportedTriggers: () => SLO_ERROR_BUDGET_SUPPORTED_TRIGGERS,
       });
 
       const fetchSubscription = fetch$(api)
@@ -104,6 +115,7 @@ export const getErrorBudgetEmbeddableFactory = ({
 
           useEffect(() => {
             return () => {
+              drilldownsManager.cleanup();
               fetchSubscription.unsubscribe();
             };
           }, []);
@@ -111,27 +123,25 @@ export const getErrorBudgetEmbeddableFactory = ({
           const queryClient = new QueryClient();
 
           return (
-            <Router history={createBrowserHistory()}>
-              <KibanaContextProvider services={deps}>
-                <PluginContext.Provider
-                  value={{
-                    observabilityRuleTypeRegistry:
-                      pluginsStart.observability.observabilityRuleTypeRegistry,
-                    ObservabilityPageTemplate:
-                      pluginsStart.observabilityShared.navigation.PageTemplate,
-                    sloClient,
-                  }}
-                >
-                  <QueryClientProvider client={queryClient}>
-                    <SloErrorBudget
-                      sloId={sloId}
-                      sloInstanceId={sloInstanceId}
-                      reloadSubject={reload$}
-                    />
-                  </QueryClientProvider>
-                </PluginContext.Provider>
-              </KibanaContextProvider>
-            </Router>
+            <KibanaContextProvider services={deps}>
+              <PluginContext.Provider
+                value={{
+                  observabilityRuleTypeRegistry:
+                    pluginsStart.observability.observabilityRuleTypeRegistry,
+                  ObservabilityPageTemplate:
+                    pluginsStart.observabilityShared.navigation.PageTemplate,
+                  sloClient,
+                }}
+              >
+                <QueryClientProvider client={queryClient}>
+                  <SloErrorBudget
+                    sloId={sloId}
+                    sloInstanceId={sloInstanceId}
+                    reloadSubject={reload$}
+                  />
+                </QueryClientProvider>
+              </PluginContext.Provider>
+            </KibanaContextProvider>
           );
         },
       };

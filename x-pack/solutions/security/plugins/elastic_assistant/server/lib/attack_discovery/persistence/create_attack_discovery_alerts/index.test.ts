@@ -12,8 +12,11 @@ import { createAttackDiscoveryAlerts } from '.';
 import { mockAuthenticatedUser } from '../../../../__mocks__/mock_authenticated_user';
 import { mockCreateAttackDiscoveryAlertsParams } from '../../../../__mocks__/mock_create_attack_discovery_alerts_params';
 
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+
 const ADHOC_ALERTS_INDEX = 'mock-index' as const;
 const ruleDataClientMock = ruleRegistryMocks.createRuleDataClient(ADHOC_ALERTS_INDEX);
+const esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
 describe('createAttackDiscoveryAlerts', () => {
   const mockLogger = loggerMock.create();
@@ -36,6 +39,7 @@ describe('createAttackDiscoveryAlerts', () => {
       adhocAttackDiscoveryDataClient: ruleDataClientMock,
       authenticatedUser: mockAuthenticatedUser,
       createAttackDiscoveryAlertsParams: mockParams,
+      esClient: esClientMock,
       logger: mockLogger,
       spaceId,
     });
@@ -66,6 +70,7 @@ describe('createAttackDiscoveryAlerts', () => {
         adhocAttackDiscoveryDataClient: ruleDataClientMock,
         authenticatedUser: mockAuthenticatedUser,
         createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
+        esClient: esClientMock,
         logger: mockLogger,
         spaceId,
       })
@@ -99,6 +104,7 @@ describe('createAttackDiscoveryAlerts', () => {
         adhocAttackDiscoveryDataClient: ruleDataClientMock,
         authenticatedUser: mockAuthenticatedUser,
         createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
+        esClient: esClientMock,
         logger: mockLogger,
         spaceId,
       })
@@ -107,5 +113,21 @@ describe('createAttackDiscoveryAlerts', () => {
     expect(mockLogger.error).toHaveBeenCalledWith(
       expect.stringContaining('Error getting created Attack discovery alerts')
     );
+  });
+
+  it('returns an empty array if bulk response is undefined', async () => {
+    bulkMock.mockResolvedValue({ body: undefined });
+    (ruleDataClientMock.getWriter as jest.Mock).mockResolvedValue({ bulk: bulkMock });
+
+    const result = await createAttackDiscoveryAlerts({
+      adhocAttackDiscoveryDataClient: ruleDataClientMock,
+      authenticatedUser: mockAuthenticatedUser,
+      createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
+      esClient: esClientMock,
+      logger: mockLogger,
+      spaceId,
+    });
+
+    expect(result).toEqual([]);
   });
 });

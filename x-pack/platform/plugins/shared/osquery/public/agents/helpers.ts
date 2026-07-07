@@ -6,6 +6,7 @@
  */
 
 import { euiPaletteColorBlindBehindText } from '@elastic/eui';
+import type { FleetServerAgentComponentStatus } from '@kbn/fleet-plugin/common';
 import type {
   AgentOptionValue,
   AgentSelection,
@@ -15,6 +16,15 @@ import type {
   SelectedGroups,
 } from './types';
 import { AGENT_GROUP_KEY } from './types';
+
+// Component type constant for Osquery integration
+const OSQUERY_COMPONENT_TYPE = 'osquery' as const;
+
+// Minimal type definition for agent components - only what we need for Osquery
+export interface AgentComponent {
+  type: string;
+  status?: FleetServerAgentComponentStatus;
+}
 
 export const getNumOverlapped = (
   { policy = {}, platform = {} }: SelectedGroups,
@@ -35,12 +45,12 @@ export const generateColorPicker = () => {
   const visColorsBehindText = euiPaletteColorBlindBehindText();
   const typeColors = new Map<AGENT_GROUP_KEY, string>();
 
-  return (type: AGENT_GROUP_KEY) => {
+  return (type: AGENT_GROUP_KEY): string => {
     if (!typeColors.has(type)) {
       typeColors.set(type, visColorsBehindText[typeColors.size]);
     }
 
-    return typeColors.get(type);
+    return typeColors.get(type)!;
   };
 };
 
@@ -136,4 +146,97 @@ export const generateAgentSelection = (
   }
 
   return { newAgentSelection, selectedGroups, selectedAgents };
+};
+
+/**
+ * Get the Osquery component status from an agent
+ * @param agent - Agent object containing components array
+ * @returns Component status (Fleet API returns uppercase: HEALTHY, DEGRADED, FAILED, STOPPED) or undefined if component not found
+ */
+const getOsqueryStatus = (agent: {
+  components?: AgentComponent[];
+}): FleetServerAgentComponentStatus | undefined => {
+  if (!agent.components || agent.components.length === 0) {
+    return undefined;
+  }
+
+  const osqueryComponent = agent.components.find(
+    (component) => component.type === OSQUERY_COMPONENT_TYPE
+  );
+
+  return osqueryComponent?.status;
+};
+
+/**
+ * Check if the Osquery component can process queries.
+ * Returns true for HEALTHY or DEGRADED (both can process queries, though DEGRADED may have issues).
+ * Returns false for FAILED, STOPPED, or missing component.
+ *
+ * SECURITY NOTE: Component status is validated by Fleet server based on agent check-ins
+ * and integration health checks. This data is trusted as it comes from the Fleet API.
+ *
+ * @param agent - Agent object containing components array
+ * @returns true if Osquery can process queries, false otherwise
+ */
+export const isOsqueryComponentHealthy = (agent: { components?: AgentComponent[] }): boolean => {
+  const status = getOsqueryStatus(agent);
+
+  return status === 'HEALTHY' || status === 'DEGRADED';
+};
+
+/**
+ * Determine agent availability status for Osquery queries
+ *
+ * Decision Tree:
+ * 1. Agent offline? → 'offline'
+ * 2. Osquery missing/FAILED/STOPPED? → 'osquery_unavailable'
+ * 3. BOTH agent degraded AND Osquery DEGRADED? → 'osquery_unavailable' (too unreliable)
+ * 4. Agent online AND Osquery HEALTHY? → 'online'
+ * 5. Single degradation? → 'degraded'
+ *
+ * Examples:
+ * | Agent Status | Osquery Status | Result                  | Selectable | Description              |
+ * |--------------|----------------|-------------------------|------------|--------------------------|
+ * | online       | HEALTHY        | online                  | ✅ Yes     | Fully operational        |
+ * | degraded     | HEALTHY        | degraded                | ⚠️ Yes     | Queries work fine        |
+ * | online       | DEGRADED       | degraded                | ⚠️ Yes     | Queries work with issues |
+ * | degraded     | DEGRADED       | osquery_unavailable     | ❌ No      | Too unreliable           |
+ * | offline      | *              | offline                 | ❌ No      | Not reachable            |
+ * | *            | FAILED/STOPPED | osquery_unavailable     | ❌ No      | Osquery won't work       |
+ *
+ * @param agent - Agent object with status and components from Fleet API
+ */
+export const getAgentOsqueryAvailability = (agent: {
+  status?: string;
+  components?: AgentComponent[];
+  last_checkin?: string;
+}): 'online' | 'degraded' | 'osquery_unavailable' | 'offline' => {
+  if (agent.status === 'offline') {
+    return 'offline';
+  }
+
+  const osqueryStatus = getOsqueryStatus(agent);
+
+  if (!osqueryStatus || osqueryStatus === 'FAILED' || osqueryStatus === 'STOPPED') {
+    return 'osquery_unavailable';
+  }
+
+  if (agent.status === 'degraded' && osqueryStatus === 'DEGRADED') {
+    return 'osquery_unavailable';
+  }
+
+  if (agent.status === 'online' && osqueryStatus === 'HEALTHY') {
+    return 'online';
+  }
+
+  // Explicitly handle all "partially degraded but usable" scenarios
+  if (
+    (agent.status === 'online' || agent.status === 'degraded' || !agent.status) &&
+    (osqueryStatus === 'HEALTHY' || osqueryStatus === 'DEGRADED')
+  ) {
+    return 'degraded';
+  }
+
+  // Safety fallback: any other combination should be unavailable
+  return 'osquery_unavailable';
 };

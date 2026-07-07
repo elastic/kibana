@@ -100,7 +100,7 @@ export const StopActionName: FC<StopActionNameProps> = ({ items, forceDisable })
   if (forceDisable || stoppedTransformMessage) {
     return (
       <EuiToolTip position="top" content={stoppedTransformMessage}>
-        <>{stopActionNameText}</>
+        <span tabIndex={0}>{stopActionNameText}</span>
       </EuiToolTip>
     );
   }

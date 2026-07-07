@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiText, EuiToolTip, EuiIconTip } from '@elastic/eui';
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -43,7 +43,7 @@ export const DistinctValues = ({ showIcon, config }: Props) => {
             <strong>
               {fieldFormats
                 .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                .convert(sampleCount)}
+                .convertToText(sampleCount)}
             </strong>
           ),
         }}
@@ -52,11 +52,14 @@ export const DistinctValues = ({ showIcon, config }: Props) => {
 
   const icon = showIcon ? (
     type === SUPPORTED_FIELD_TYPES.TEXT ? (
-      <EuiToolTip content={tooltipContent}>
-        <EuiIcon type="partial" size={'m'} className={'columnHeader__icon'} />
-      </EuiToolTip>
+      <EuiIconTip
+        content={tooltipContent}
+        type="partial"
+        size={'m'}
+        className={'columnHeader__icon'}
+      />
     ) : (
-      <EuiIcon type="database" size={'m'} className={'columnHeader__icon'} />
+      <EuiIcon aria-hidden={true} type="database" size={'m'} className={'columnHeader__icon'} />
     )
   ) : null;
 

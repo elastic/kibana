@@ -14,6 +14,7 @@ describe('transformRequest', () => {
     location = global.window.location;
     // @ts-expect-error we need to set our own location value
     delete global.window.location;
+    // @ts-expect-error upgrade typescript v5.9.3
     global.window.location = {
       origin: 'https://transform.test.local',
     } as unknown as Location;

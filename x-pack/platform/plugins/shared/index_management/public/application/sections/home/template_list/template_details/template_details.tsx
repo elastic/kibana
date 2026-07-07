@@ -8,7 +8,8 @@
 import React from 'react';
 import { EuiFlyout } from '@elastic/eui';
 
-import { TemplateDetailsContent, Props } from './template_details_content';
+import type { Props } from './template_details_content';
+import { TemplateDetailsContent } from './template_details_content';
 
 export const TemplateDetails = (props: Props) => {
   return (

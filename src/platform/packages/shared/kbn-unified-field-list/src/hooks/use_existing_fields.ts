@@ -16,20 +16,17 @@ import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView, DataViewsContract, FieldSpec } from '@kbn/data-views-plugin/common';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import useLatest from 'react-use/lib/useLatest';
 import { loadFieldExisting } from '../services/field_existing';
-import { ExistenceFetchStatus } from '../types';
+import {
+  ExistenceFetchStatus,
+  type ExistingFieldsInfo,
+  type FetchedExistingFieldsInfo,
+} from '../types';
 
 const getBuildEsQueryAsync = async () => (await import('@kbn/es-query')).buildEsQuery;
 const generateId = htmlIdGenerator();
 const DEFAULT_EMPTY_NEW_FIELDS: FieldSpec[] = [];
-
-export interface ExistingFieldsInfo {
-  fetchStatus: ExistenceFetchStatus;
-  existingFieldsByFieldNameMap: Record<string, boolean>;
-  newFields?: FieldSpec[];
-  numberOfFetches: number;
-  hasDataViewRestrictions?: boolean;
-}
 
 export interface ExistingFieldsFetcherParams {
   disableAutoFetching?: boolean;
@@ -44,9 +41,14 @@ export interface ExistingFieldsFetcherParams {
     dataViews: DataViewsContract;
   };
   onNoData?: (dataViewId: string) => unknown;
+  /**
+   * Custom container for existing fields info map
+   */
+  initialExistingFieldsInfo?: FetchedExistingFieldsInfo;
+  onInitialExistingFieldsInfoChange?: (info: FetchedExistingFieldsInfo | undefined) => void;
 }
 
-type ExistingFieldsByDataViewMap = Record<string, ExistingFieldsInfo>;
+export type ExistingFieldsByDataViewMap = Record<string, ExistingFieldsInfo>;
 
 export interface ExistingFieldsFetcher {
   refetchFieldsExistenceInfo: (dataViewId?: string) => Promise<void>;
@@ -79,9 +81,18 @@ let lastFetchId: string = ''; // persist last fetch id to skip older requests/re
 export const useExistingFieldsFetcher = (
   params: ExistingFieldsFetcherParams
 ): ExistingFieldsFetcher => {
+  const { initialExistingFieldsInfo, onInitialExistingFieldsInfoChange } = params;
   const mountedRef = useRef<boolean>(true);
   const [activeRequests, setActiveRequests] = useState<number>(0);
   const isProcessing = activeRequests > 0;
+
+  const initialExistingFieldsInfoRef = useRef<FetchedExistingFieldsInfo | undefined>(
+    initialExistingFieldsInfo && Object.keys(initialExistingFieldsInfo).length
+      ? initialExistingFieldsInfo
+      : undefined
+  );
+  const onInitialExistingFieldsInfoChangeRef = useLatest(onInitialExistingFieldsInfoChange);
+  const latestInitialExistingFieldsInfoRef = useLatest(initialExistingFieldsInfo);
 
   const fetchFieldsExistenceInfo = useCallback(
     async ({
@@ -120,13 +131,35 @@ export const useExistingFieldsFetcher = (
         return;
       }
 
-      setActiveRequests((value) => value + 1);
-
-      const hasRestrictions = Boolean(dataView.getAggregationRestrictions?.());
-      const info: ExistingFieldsInfo = {
+      const dataViewHash = getDataViewsHash([dataView]);
+      let info: ExistingFieldsInfo = {
         ...unknownInfo,
         numberOfFetches,
       };
+      const providedInitialInfo = initialExistingFieldsInfoRef.current;
+      if (
+        providedInitialInfo?.dataViewHash === dataViewHash &&
+        providedInitialInfo?.info?.fetchStatus === ExistenceFetchStatus.succeeded &&
+        (providedInitialInfo?.info?.hasDataViewRestrictions ||
+          (providedInitialInfo?.info?.existingFieldsByFieldNameMap &&
+            Object.keys(providedInitialInfo.info.existingFieldsByFieldNameMap).length))
+      ) {
+        // restoring from the provided initial info
+        info = {
+          ...info,
+          ...providedInitialInfo.info,
+        };
+        initialExistingFieldsInfoRef.current = undefined;
+        globalMap$.next({
+          ...globalMap$.getValue(),
+          [dataViewId]: info,
+        });
+        return;
+      }
+
+      setActiveRequests((value) => value + 1);
+
+      const hasRestrictions = Boolean(dataView.getAggregationRestrictions?.());
 
       if (hasRestrictions) {
         info.fetchStatus = ExistenceFetchStatus.succeeded;
@@ -169,16 +202,23 @@ export const useExistingFieldsFetcher = (
       }
 
       // skip redundant and older results
-      if (mountedRef.current && fetchId === lastFetchId) {
-        globalMap$.next({
-          ...globalMap$.getValue(),
-          [dataViewId]: info,
+      if (fetchId === lastFetchId) {
+        onInitialExistingFieldsInfoChangeRef.current?.({
+          dataViewId,
+          dataViewHash,
+          info,
         });
+        if (mountedRef.current) {
+          globalMap$.next({
+            ...globalMap$.getValue(),
+            [dataViewId]: info,
+          });
+        }
       }
 
       setActiveRequests((value) => value - 1);
     },
-    [mountedRef, setActiveRequests]
+    [mountedRef, setActiveRequests, onInitialExistingFieldsInfoChangeRef]
   );
 
   const dataViewsHash = getDataViewsHash(params.dataViews);
@@ -221,6 +261,10 @@ export const useExistingFieldsFetcher = (
         duration: window.performance.now() - startTime,
         meta: { dataViewsCount: params.dataViews.length },
       });
+      if (!params.dataViews.length && latestInitialExistingFieldsInfoRef.current?.dataViewId) {
+        // after switching to ES|QL mode, reset the initial info
+        onInitialExistingFieldsInfoChangeRef.current?.(undefined);
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -355,7 +399,9 @@ function getDataViewsHash(dataViews: DataView[]): string {
       // From Lens it's coming as IndexPattern type and not the real DataView type
       .map(
         (dataView) =>
-          `${dataView.id}:${dataView.title}:${dataView.timeFieldName || 'no-timefield'}:${
+          `${dataView.id}:${dataView.title}:${dataView.timeFieldName || 'no-timefield'}:${Boolean(
+            dataView.getAggregationRestrictions?.()
+          )}:${
             dataView.fields?.length ?? 0 // adding a field will also trigger a refetch of fields existence data
           }`
       )

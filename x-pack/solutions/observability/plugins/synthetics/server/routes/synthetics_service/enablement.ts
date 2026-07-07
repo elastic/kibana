@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsServiceAPIKeySavedObject } from '../../saved_objects/service_api_key';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import {
@@ -36,7 +36,7 @@ export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = () =>
     if (apiKey && !isValid) {
       await syntheticsServiceAPIKeySavedObject.delete(savedObjectsClient);
       await security.authc.apiKeys?.invalidateAsInternalUser({
-        ids: [apiKey?.id || ''],
+        ids: [apiKey.id],
       });
     }
     const regenerationRequired = !isEnabled || !isValid;
@@ -80,7 +80,9 @@ export const disableSyntheticsRoute: SyntheticsRestApiRouteFactory = () => ({
       server,
     });
     await syntheticsServiceAPIKeySavedObject.delete(savedObjectsClient);
-    await security.authc.apiKeys?.invalidateAsInternalUser({ ids: [apiKey?.id || ''] });
+    if (apiKey?.id) {
+      await security.authc.apiKeys?.invalidateAsInternalUser({ ids: [apiKey.id] });
+    }
     return response.ok({});
   },
 });

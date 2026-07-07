@@ -17,8 +17,13 @@ import {
 import type { Logger } from '@kbn/logging';
 import { i18n } from '@kbn/i18n';
 import { AI_ASSISTANT_APP_ID } from '@kbn/deeplinks-observability';
-import { createAppService, AIAssistantAppService } from '@kbn/ai-assistant';
+import type { AIAssistantAppService } from '@kbn/ai-assistant';
+import { createAppService } from '@kbn/ai-assistant';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { observabilityAppId } from '@kbn/observability-plugin/common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { firstValueFrom } from 'rxjs';
 import type {
   ObservabilityAIAssistantAppPluginSetupDependencies,
   ObservabilityAIAssistantAppPluginStartDependencies,
@@ -62,7 +67,7 @@ export class ObservabilityAIAssistantAppPlugin
       euiIconType: 'logoObservability',
       appRoute: '/app/observabilityAIAssistant',
       category: DEFAULT_APP_CATEGORIES.observability,
-      visibleIn: [],
+      visibleIn: ['projectSideNav'],
       deepLinks: [
         {
           id: 'conversations',
@@ -73,13 +78,19 @@ export class ObservabilityAIAssistantAppPlugin
         },
       ],
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
-        // Load application bundle and Get start services
-        const [{ Application }, [coreStart, pluginsStart]] = await Promise.all([
-          import('./application'),
-          coreSetup.getStartServices() as Promise<
-            [CoreStart, ObservabilityAIAssistantAppPluginStartDependencies, unknown]
-          >,
-        ]);
+        const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+
+        const chatExperience$ =
+          coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+
+        // Restrict access when the chat experience is set to Agent (reactive while mounted)
+        const initialChatExperience = await firstValueFrom(chatExperience$);
+        if (initialChatExperience === AIChatExperience.Agent) {
+          coreStart.application.navigateToApp(observabilityAppId, { path: '/' });
+          return () => {};
+        }
+
+        const { Application } = await import('./application');
 
         ReactDOM.render(
           <Application
@@ -91,7 +102,14 @@ export class ObservabilityAIAssistantAppPlugin
           appMountParameters.element
         );
 
+        const subscription = chatExperience$.subscribe((chatExperience) => {
+          if (chatExperience === AIChatExperience.Agent) {
+            coreStart.application.navigateToApp(observabilityAppId, { path: '/' });
+          }
+        });
+
         return () => {
+          subscription.unsubscribe();
           ReactDOM.unmountComponentAtNode(appMountParameters.element);
         };
       },
@@ -111,25 +129,36 @@ export class ObservabilityAIAssistantAppPlugin
     const isEnabled = appService.isEnabled();
 
     if (isEnabled) {
-      coreStart.chrome.navControls.registerRight({
-        mount: (element) => {
-          ReactDOM.render(
-            <NavControlInitiator
-              appService={appService}
-              coreStart={coreStart}
-              pluginsStart={pluginsStart}
-              isServerless={this.isServerless}
-            />,
-            element,
-            () => {}
-          );
+      const mountObsAiAssistant = (element: HTMLElement) => {
+        ReactDOM.render(
+          <NavControlInitiator
+            appService={appService}
+            coreStart={coreStart}
+            pluginsStart={pluginsStart}
+            isServerless={this.isServerless}
+          />,
+          element,
+          () => {}
+        );
 
-          return () => {
-            ReactDOM.unmountComponentAtNode(element);
-          };
-        },
+        return () => {
+          ReactDOM.unmountComponentAtNode(element);
+        };
+      };
+
+      coreStart.chrome.navControls.registerRight({
+        mount: mountObsAiAssistant,
         // right before the user profile
         order: 1001,
+      });
+
+      // Chrome Next transition: also expose this control as an AI button so it renders in the
+      // Chrome Next global header (behind the `core.chrome.next` feature flag). Chrome Next does
+      // not render HeaderNavControls (`registerRight` mount points), so we dual-register for now.
+      // Remove the `registerRight` registration once Chrome Next is the only chrome.
+      // See https://github.com/elastic/kibana/issues/260010
+      coreStart.chrome.next.aiButton.register({
+        content: mountObsAiAssistant,
       });
     }
 
@@ -163,9 +192,20 @@ export class ObservabilityAIAssistantAppPlugin
       )
     );
 
-    pluginsStart.triggersActionsUi.actionTypeRegistry.register(
-      getObsAIAssistantConnectorType(service)
-    );
+    const chatExperience = coreStart.settings.client.get<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+    const getHideInUi = () => chatExperience !== AIChatExperience.Classic;
+
+    const isObservabilityAIAssistantEnabled = service.isEnabled();
+    if (isObservabilityAIAssistantEnabled) {
+      pluginsStart.triggersActionsUi.actionTypeRegistry.register(
+        getObsAIAssistantConnectorType({
+          service,
+          getHideInUi,
+          isDisabled: chatExperience !== AIChatExperience.Classic,
+        })
+      );
+    }
+
     return {
       RootCauseAnalysisContainer: LazilyLoadedRootCauseAnalysisContainer,
     };

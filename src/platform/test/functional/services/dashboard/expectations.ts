@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../../ftr_provider_context';
 
 export class DashboardExpectService extends FtrService {
@@ -274,14 +274,6 @@ export class DashboardExpectService extends FtrService {
     const savedSearchTable = await this.testSubjects.find('embeddedSavedSearchDocTable');
     const resultStr = await savedSearchTable.getVisibleText();
     expect(resultStr).to.be('No results found');
-  }
-
-  async savedSearchRowsExist() {
-    await this.testSubjects.existOrFail('docTableExpandToggleColumn');
-  }
-
-  async savedSearchRowsMissing() {
-    await this.testSubjects.missingOrFail('docTableExpandToggleColumn');
   }
 
   async dataTableRowCount(expectedCount: number) {

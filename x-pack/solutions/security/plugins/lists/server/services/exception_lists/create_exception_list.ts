@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   Description,
@@ -16,12 +16,13 @@ import type {
   MetaOrUndefined,
   Name,
   NamespaceType,
+  OsTypeArray,
   Tags,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { Version } from '@kbn/securitysolution-io-ts-types';
+import type { Version } from '@kbn/securitysolution-io-ts-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
-import { ExceptionListSoSchema } from '../../schemas/saved_objects';
+import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import { transformSavedObjectToExceptionList } from './utils';
 
@@ -35,6 +36,7 @@ interface CreateExceptionListOptions {
   meta: MetaOrUndefined;
   user: string;
   tags: Tags;
+  osTypes: OsTypeArray;
   tieBreaker?: string;
   type: ExceptionListType;
   version: Version;
@@ -47,6 +49,7 @@ export const createExceptionList = async ({
   namespaceType,
   name,
   description,
+  osTypes,
   meta,
   user,
   tags,
@@ -69,7 +72,7 @@ export const createExceptionList = async ({
     list_type: 'list',
     meta,
     name,
-    os_types: [],
+    os_types: osTypes,
     tags,
     tie_breaker_id: tieBreaker ?? uuidv4(),
     type,

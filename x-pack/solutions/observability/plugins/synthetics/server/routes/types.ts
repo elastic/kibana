@@ -6,8 +6,8 @@
  */
 
 import type { Subject } from 'rxjs';
-import { ObjectType } from '@kbn/config-schema';
-import {
+import type { ObjectType } from '@kbn/config-schema';
+import type {
   RequestHandler,
   RouteConfig,
   RouteMethod,
@@ -17,15 +17,16 @@ import {
   IKibanaResponse,
   RouteSecurity,
 } from '@kbn/core/server';
-import {
+import type {
   VersionedRouteValidation,
   HttpResponsePayload,
   ResponseError,
 } from '@kbn/core-http-server';
-import { MonitorConfigRepository } from '../services/monitor_config_repository';
-import { SyntheticsEsClient } from '../lib';
-import { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../types';
-import { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import type { MonitorConfigRepository } from '../services/monitor_config_repository';
+import type { MonitorIntegrationHealthApi } from '../services/monitor_integration_health_api';
+import type { SyntheticsEsClient } from '../lib';
+import type { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../types';
+import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 export type SyntheticsRequest = KibanaRequest<
   Record<string, any>,
   Record<string, any>,
@@ -103,6 +104,7 @@ export interface RouteContext<
   subject?: Subject<unknown>;
   spaceId: string;
   monitorConfigRepository: MonitorConfigRepository;
+  monitorIntegrationHealthApi: MonitorIntegrationHealthApi;
 }
 
 export type SyntheticsRouteHandler<

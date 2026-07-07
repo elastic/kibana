@@ -7,29 +7,32 @@
 
 import React from 'react';
 
+import type {
+  EuiButtonEmptyProps,
+  EuiButtonIconProps,
+  EuiButtonProps,
+  EuiLinkAnchorProps,
+  EuiListGroupItemProps,
+  EuiCardProps,
+  EuiBadgeProps,
+} from '@elastic/eui';
 import {
   EuiLink,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonEmptyProps,
   EuiButtonIcon,
-  EuiButtonIconProps,
-  EuiButtonProps,
-  EuiLinkAnchorProps,
   EuiListGroupItem,
-  EuiListGroupItemProps,
   EuiPanel,
   EuiCard,
-  EuiCardProps,
   EuiBadge,
-  EuiBadgeProps,
 } from '@elastic/eui';
-import { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
+import type { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useHistory } from 'react-router-dom';
-import { ScopedHistory } from '@kbn/core/public';
-import { CreateHrefOptions, generateReactRouterProps, ReactRouterProps } from '.';
+import type { ScopedHistory } from '@kbn/core/public';
+import type { CreateHrefOptions, ReactRouterProps } from '.';
+import { generateReactRouterProps } from '.';
 /**
  * Correctly typed component helpers with React-Router-friendly `href` and `onClick` props
  */
@@ -45,6 +48,7 @@ export const EuiLinkTo: React.FC<ReactRouterEuiLinkProps> = ({
   const history = useHistory();
   return (
     <EuiLink
+      data-test-subj="contentConnectorsEuiLinkToLink"
       {...rest}
       {...generateReactRouterProps({
         to,
@@ -69,6 +73,7 @@ export const EuiButtonTo: React.FC<ReactRouterEuiButtonProps> = ({
   const history = useHistory();
   return (
     <EuiButton
+      data-test-subj="contentConnectorsEuiButtonToButton"
       {...rest}
       {...generateReactRouterProps({
         to,
@@ -96,6 +101,7 @@ export const EuiButtonEmptyTo: React.FC<ReactRouterEuiButtonEmptyProps> = ({
   const history = useHistory();
   return (
     <EuiButtonEmpty
+      data-test-subj="contentConnectorsEuiButtonEmptyToButton"
       {...rest}
       {...generateReactRouterProps({
         to,
@@ -122,6 +128,7 @@ export const EuiButtonIconTo: React.FC<ReactRouterEuiButtonIconProps> = ({
   const history = useHistory();
   return (
     <EuiButtonIcon
+      data-test-subj="contentConnectorsEuiButtonIconToButton"
       {...rest}
       {...generateReactRouterProps({
         to,
@@ -245,8 +252,6 @@ export const EuiBadgeTo: React.FC<ReactRouterEuiBadgeProps> = ({
 
   const badgeProps: EuiBadgeProps = {
     ...rest,
-    iconOnClick: routerProps.onClick,
-    iconOnClickAriaLabel: label,
     onClick: routerProps.onClick,
     onClickAriaLabel: label,
   };

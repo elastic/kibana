@@ -66,4 +66,26 @@ describe('UnifiedFieldList <FieldNameSearch />', () => {
     await user.click(button);
     expect(screen.getByRole('searchbox')).toHaveValue('that');
   });
+
+  it('should be able to clear the initial value', async () => {
+    const FieldNameSearchWithWrapper = ({ defaultNameFilter = '' }) => {
+      const [nameFilter, setNameFilter] = useState(defaultNameFilter);
+      const props: FieldNameSearchProps = {
+        nameFilter,
+        onChange: setNameFilter,
+        screenReaderDescriptionId: 'htmlId',
+        'data-test-subj': 'searchInput',
+      };
+      return (
+        <div>
+          <FieldNameSearch {...props} />
+        </div>
+      );
+    };
+    render(<FieldNameSearchWithWrapper defaultNameFilter="initial" />);
+    expect(screen.getByRole('searchbox')).toHaveValue('initial');
+    const button = screen.getByTestId('clearSearchButton');
+    await user.click(button);
+    expect(screen.getByRole('searchbox')).toHaveValue('');
+  });
 });

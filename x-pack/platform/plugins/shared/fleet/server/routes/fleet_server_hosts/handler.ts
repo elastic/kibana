@@ -9,10 +9,13 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { RequestHandler, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEqual } from 'lodash';
-
 import Boom from '@hapi/boom';
 
-import { SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
+import { throwIfSslPathInvalid } from '../utils/ssl_utils';
+import {
+  SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
+  SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
+} from '../../constants';
 
 import { FleetServerHostUnauthorizedError } from '../../errors';
 import { agentPolicyService, appContextService, fleetServerHostService } from '../../services';
@@ -24,12 +27,32 @@ import type {
   PutFleetServerHostRequestSchema,
 } from '../../types';
 
+function validateFleetServerHostSsl(fleetServerHost: Partial<FleetServerHost>) {
+  throwIfSslPathInvalid([
+    ...(fleetServerHost.ssl?.certificate_authorities ?? []),
+    fleetServerHost.ssl?.certificate,
+    fleetServerHost.ssl?.key,
+    ...(fleetServerHost.ssl?.es_certificate_authorities ?? []),
+    fleetServerHost.ssl?.es_certificate,
+    fleetServerHost.ssl?.es_key,
+    ...(fleetServerHost.ssl?.agent_certificate_authorities ?? []),
+    fleetServerHost.ssl?.agent_certificate,
+    fleetServerHost.ssl?.agent_key,
+    fleetServerHost.secrets?.ssl?.key,
+    fleetServerHost.secrets?.ssl?.es_key,
+    fleetServerHost.secrets?.ssl?.agent_key,
+  ]);
+}
+
 function ensureNoDuplicateSecrets(fleetServerHost: Partial<FleetServerHost>) {
   if (fleetServerHost.ssl?.key && fleetServerHost.secrets?.ssl?.key) {
     throw Boom.badRequest('Cannot specify both ssl.key and secrets.ssl.key');
   }
   if (fleetServerHost.ssl?.es_key && fleetServerHost.secrets?.ssl?.es_key) {
     throw Boom.badRequest('Cannot specify both ssl.es_key and secrets.ssl.es_key');
+  }
+  if (fleetServerHost.ssl?.agent_key && fleetServerHost.secrets?.ssl?.agent_key) {
+    throw Boom.badRequest('Cannot specify both ssl.agent_key and secrets.ssl.agent_key');
   }
 }
 
@@ -42,16 +65,33 @@ async function checkFleetServerHostsWriteAPIsAllowed(
     return;
   }
 
-  // Fleet Server hosts must have the default host URL in serverless.
+  // Fleet Server hosts must have either the default or the private endpoint URL in serverless.
   const serverlessDefaultFleetServerHost = await fleetServerHostService.get(
-    soClient,
     SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
   );
-  if (!isEqual(hostUrls, serverlessDefaultFleetServerHost.host_urls)) {
-    throw new FleetServerHostUnauthorizedError(
-      `Fleet server host must have default URL in serverless: ${serverlessDefaultFleetServerHost.host_urls}`
-    );
+  if (isEqual(hostUrls, serverlessDefaultFleetServerHost.host_urls)) {
+    return;
   }
+
+  try {
+    const privateFleetServerHost = await fleetServerHostService.get(
+      SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID
+    );
+    if (isEqual(hostUrls, privateFleetServerHost.host_urls)) {
+      return;
+    }
+  } catch (e) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      throw e;
+    }
+    appContextService
+      .getLogger()
+      .debug(`Could not fetch private Fleet Server host SO: ${e?.message ?? e}`);
+  }
+
+  throw new FleetServerHostUnauthorizedError(
+    `Fleet server host must have default URL in serverless: ${serverlessDefaultFleetServerHost.host_urls}`
+  );
 }
 
 export const postFleetServerHost: RequestHandler<
@@ -67,6 +107,7 @@ export const postFleetServerHost: RequestHandler<
   await checkFleetServerHostsWriteAPIsAllowed(soClient, request.body.host_urls);
 
   const { id, ...data } = request.body;
+  validateFleetServerHostSsl(data);
   ensureNoDuplicateSecrets(data);
 
   const FleetServerHost = await fleetServerHostService.create(
@@ -75,9 +116,9 @@ export const postFleetServerHost: RequestHandler<
     { ...data, is_preconfigured: false },
     { id }
   );
-  if (FleetServerHost.is_default) {
-    await agentPolicyService.bumpAllAgentPolicies(esClient);
-  }
+  await agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(esClient, FleetServerHost.id, {
+    isDefault: FleetServerHost.is_default,
+  });
 
   const body = {
     item: FleetServerHost,
@@ -89,9 +130,8 @@ export const postFleetServerHost: RequestHandler<
 export const getFleetServerHostHandler: RequestHandler<
   TypeOf<typeof GetOneFleetServerHostRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
   try {
-    const item = await fleetServerHostService.get(soClient, request.params.itemId);
+    const item = await fleetServerHostService.get(request.params.itemId);
     const body = {
       item,
     };
@@ -113,10 +153,9 @@ export const deleteFleetServerHostHandler: RequestHandler<
 > = async (context, request, response) => {
   try {
     const coreContext = await context.core;
-    const soClient = coreContext.savedObjects.client;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-    await fleetServerHostService.delete(soClient, esClient, request.params.itemId);
+    await fleetServerHostService.delete(esClient, request.params.itemId);
     const body = {
       id: request.params.itemId,
     };
@@ -147,6 +186,7 @@ export const putFleetServerHostHandler: RequestHandler<
     if (request.body.host_urls) {
       await checkFleetServerHostsWriteAPIsAllowed(soClient, request.body.host_urls);
     }
+    validateFleetServerHostSsl(request.body);
     ensureNoDuplicateSecrets(request.body);
 
     const item = await fleetServerHostService.update(
@@ -159,11 +199,9 @@ export const putFleetServerHostHandler: RequestHandler<
       item,
     };
 
-    if (item.is_default) {
-      await agentPolicyService.bumpAllAgentPolicies(esClient);
-    } else {
-      await agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(esClient, item.id);
-    }
+    await agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(esClient, item.id, {
+      isDefault: item.is_default,
+    });
 
     return response.ok({ body });
   } catch (error) {
@@ -178,8 +216,7 @@ export const putFleetServerHostHandler: RequestHandler<
 };
 
 export const getAllFleetServerHostsHandler: RequestHandler = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
-  const res = await fleetServerHostService.list(soClient);
+  const res = await fleetServerHostService.list();
   const body = {
     items: res.items,
     page: res.page,

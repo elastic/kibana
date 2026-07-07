@@ -23,20 +23,23 @@
       "dashboard",
       "devTools",
       "discover",
+      "features",
       "management",
-      "searchIndices",
       "searchprofiler",
       "security",
       "serverless",
+      "searchHomepage",
       "share",
-      "visualizations"
+      "visualizations",
     ],
     "optionalPlugins": [
+      "agentBuilder",
       "indexManagement",
       "contentConnectors",
       "searchInferenceEndpoints",
       "searchPlayground",
-      "usageCollection"
+      "usageCollection",
+      "workflowsManagement",
     ],
     "requiredBundles": [
       "kibanaReact"

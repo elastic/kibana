@@ -70,4 +70,16 @@ describe('DatasetComponent', () => {
     expect(utils.queryByText('Dataset contains invalid characters')).toBeNull();
     expect(mockOnChange).toHaveBeenCalledWith({ dataset: 'fleet_server.test_ds', package: 'log' });
   });
+
+  it('should not call onChange on initial render when isDisabled and value is undefined', () => {
+    const { mockOnChange } = render(undefined, [], { isDisabled: true, value: undefined });
+
+    expect(mockOnChange).not.toHaveBeenCalled();
+  });
+
+  it('should call onChange on initial render when not disabled and value is undefined', () => {
+    const { mockOnChange } = render(undefined, [], { value: undefined });
+
+    expect(mockOnChange).toHaveBeenCalledWith({ dataset: 'generic', package: 'log' });
+  });
 });

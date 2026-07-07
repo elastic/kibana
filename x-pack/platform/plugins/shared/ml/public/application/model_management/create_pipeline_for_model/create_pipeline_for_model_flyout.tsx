@@ -15,13 +15,14 @@ import {
   EuiFlyoutFooter,
   EuiSpacer,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import type { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
 
-import type { TrainedModelItem } from '../../../../common/types/trained_models';
+import type { TrainedModelItem } from '@kbn/ml-common-types/trained_models';
 import type { AddInferencePipelineSteps } from '../../components/ml_inference/types';
 import { ADD_INFERENCE_PIPELINE_STEPS } from '../../components/ml_inference/constants';
 import { AddInferencePipelineFooter } from '../../components/shared';
@@ -111,15 +112,18 @@ export const CreatePipelineForModelFlyout: FC<CreatePipelineForModelFlyoutProps>
     return errors;
   }, [pipelineNames, formState.pipelineName]);
 
+  const titleId = useGeneratedHtmlId({ prefix: 'mlInferencePipelineFlyoutTitle' });
   return (
     <EuiFlyout
       onClose={onClose.bind(null, true)}
       size="l"
       data-test-subj="mlTrainedModelsFromTestInferencePipelineFlyout"
+      includeFixedHeadersInFocusTrap={false}
+      aria-labelledby={titleId}
     >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h3>
+          <h3 id={titleId}>
             {i18n.translate(
               'xpack.ml.trainedModels.content.indices.pipelines.createInferencePipeline.title',
               {

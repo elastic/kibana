@@ -5,30 +5,22 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import type { EsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base';
+import {
+  getFixEsqlQueryErrors,
+  type GetFixEsqlQueryErrorsParams,
+} from '../../../../../../../common/task/agent/helpers/fix_esql_query_errors';
 import type { GraphNode } from '../../types';
-import { RESOLVE_ESQL_ERRORS_TEMPLATE } from './prompts';
 
-interface GetFixQueryErrorsNodeParams {
-  esqlKnowledgeBase: EsqlKnowledgeBase;
-  logger: Logger;
-}
-
-export const getFixQueryErrorsNode = ({
-  esqlKnowledgeBase,
-  logger,
-}: GetFixQueryErrorsNodeParams): GraphNode => {
+export const getFixQueryErrorsNode = (params: GetFixEsqlQueryErrorsParams): GraphNode => {
+  const fixEsqlQueryErrors = getFixEsqlQueryErrors(params);
   return async (state) => {
-    const rule = state.elastic_rule;
-    const prompt = await RESOLVE_ESQL_ERRORS_TEMPLATE.format({
-      esql_errors: state.validation_errors.esql_errors,
-      esql_query: rule.query,
+    const { query } = await fixEsqlQueryErrors({
+      invalidQuery: state.elastic_rule.query,
+      validationErrors: state.validation_errors.esql_errors,
     });
-    const response = await esqlKnowledgeBase.translate(prompt);
-
-    const esqlQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1] ?? '';
-    rule.query = esqlQuery;
-    return { elastic_rule: rule };
+    if (!query) {
+      return {};
+    }
+    return { elastic_rule: { ...state.elastic_rule, query } };
   };
 };

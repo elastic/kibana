@@ -6,7 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+import type {
+  ActionConnector,
+  ActionTypeRegistryContract,
+} from '@kbn/triggers-actions-ui-plugin/public';
 
 import type { AttackDiscoveryScheduleSchema } from './types';
 import { debouncedValidateRuleActionsField } from '../../../../../common/containers/rule_actions/validate_rule_actions_field';
@@ -17,8 +20,10 @@ const { emptyField } = fieldValidators;
 
 export const getSchema = ({
   actionTypeRegistry,
+  connectors,
 }: {
   actionTypeRegistry: ActionTypeRegistryContract;
+  connectors?: ActionConnector[];
 }): FormSchema<AttackDiscoveryScheduleSchema> => ({
   name: {
     type: FIELD_TYPES.TEXT,
@@ -69,7 +74,7 @@ export const getSchema = ({
       {
         // Debounced validator is necessary here to prevent error validation
         // flashing when first adding an action. Also prevents additional renders
-        validator: debouncedValidateRuleActionsField(actionTypeRegistry),
+        validator: debouncedValidateRuleActionsField(actionTypeRegistry, connectors),
       },
     ],
   },

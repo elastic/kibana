@@ -23,7 +23,7 @@ export const MetricNonAvailable: React.FC<{ agentPolicy?: AgentPolicy }> = ({ ag
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiIconTip
-          type="iInCircle"
+          type="info"
           content={
             !isMonitoringEnabled ? (
               <FormattedMessage

@@ -8,7 +8,7 @@
 import { cloneDeep } from 'lodash/fp';
 import moment from 'moment';
 import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
-import { fireEvent, screen, render, waitFor } from '@testing-library/react';
+import { fireEvent, screen, render } from '@testing-library/react';
 import React from 'react';
 import '../../../../common/mock/formatted_relative';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -19,6 +19,8 @@ import { NotePreviews } from '.';
 import { useDeleteNote } from './hooks/use_delete_note';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
+const mockDispatch = jest.fn();
+
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_selector');
 
@@ -26,7 +28,7 @@ jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
   return {
     ...original,
-    useDispatch: () => jest.fn(),
+    useDispatch: () => mockDispatch,
   };
 });
 
@@ -305,10 +307,9 @@ describe('NotePreviews', () => {
   });
 
   describe('Delete Notes', () => {
-    it('should delete note correctly', async () => {
+    it('should dispatch correct action on delete', async () => {
       const timeline = {
         ...mockTimelineResults[0],
-        confirmingNoteId: 'noteId1',
       };
       (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
 
@@ -342,11 +343,12 @@ describe('NotePreviews', () => {
       );
 
       fireEvent.click(screen.queryAllByTestId('delete-note')[0]);
-      await waitFor(() => {
-        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-      });
-      expect(deleteMutateMock.mock.calls).toHaveLength(1);
-      expect(deleteMutateMock.mock.calls[0][0]).toBe('test-id-1');
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'notes/userSelectedNotesForDeletion',
+          payload: 'noteId1',
+        })
+      );
     });
   });
 

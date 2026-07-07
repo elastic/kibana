@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_BEDROCK_URL } from '../../../common/bedrock/constants';
+import { DEFAULT_URL } from '@kbn/connector-schemas/bedrock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { BedrockConnector } from './bedrock';
@@ -35,7 +35,7 @@ describe('Bedrock with proxy config', () => {
       configurationUtilities,
       connector: { id: '1', type: '.bedrock' },
       config: {
-        apiUrl: DEFAULT_BEDROCK_URL,
+        apiUrl: DEFAULT_URL,
         defaultModel: 'claude',
       },
       secrets: { accessKey: '123', secret: '567' },
@@ -54,8 +54,9 @@ describe('Bedrock with proxy config', () => {
     // @ts-ignore configProvider is private, but we need it to access the agent
     const config = await bedrockClient.config.requestHandler.configProvider;
     // Since DEFAULT_BEDROCK_URL is https, httpsAgent will be set, see: https://github.com/elastic/kibana/pull/224130#discussion_r2152632806
-    expect(config.httpsAgent.proxy.host).toBe(PROXY_HOST);
-    expect(config.httpsAgent.proxy.port).toBe(99);
+    expect(config.httpsAgent.proxy.host).toBe(`${PROXY_HOST}:99`);
+    expect(config.httpsAgent.proxy.hostname).toBe(PROXY_HOST);
+    expect(config.httpsAgent.proxy.port).toBe('99');
     expect(config.httpAgent.proxy).toBeUndefined();
   });
 
@@ -73,7 +74,7 @@ describe('Bedrock with proxy config', () => {
       configurationUtilities,
       connector: { id: '1', type: '.bedrock' },
       config: {
-        apiUrl: DEFAULT_BEDROCK_URL,
+        apiUrl: DEFAULT_URL,
         defaultModel: 'claude',
       },
       secrets: { accessKey: '123', secret: '567' },
@@ -88,8 +89,9 @@ describe('Bedrock with proxy config', () => {
     expect(bedrockClient.config.requestHandler).toBeDefined();
     // @ts-ignore configProvider is private, but we need it to access the agent
     const config = await bedrockClient.config.requestHandler.configProvider;
-    expect(config.httpsAgent.proxy.host).toBe(PROXY_HOST);
-    expect(config.httpsAgent.proxy.port).toBe(99);
+    expect(config.httpsAgent.proxy.host).toBe(`${PROXY_HOST}:99`);
+    expect(config.httpsAgent.proxy.hostname).toBe(PROXY_HOST);
+    expect(config.httpsAgent.proxy.port).toBe('99');
     expect(config.httpAgent.proxy).not.toBeDefined();
   });
 });

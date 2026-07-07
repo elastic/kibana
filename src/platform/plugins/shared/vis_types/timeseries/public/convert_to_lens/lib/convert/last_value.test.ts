@@ -9,11 +9,11 @@
 
 import { createSeries } from '../__mocks__';
 import { convertToLastValueParams, convertToLastValueColumn } from './last_value';
-import { Metric } from '../../../../common/types';
+import type { Metric } from '../../../../common/types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { LastValueColumn } from './types';
-import { LastValueParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { LastValueColumn } from './types';
+import type { LastValueParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
 
 describe('convertToLastValueParams', () => {
   const commonMetric: Metric = {

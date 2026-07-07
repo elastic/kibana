@@ -62,11 +62,13 @@ describe('ConnectorUsageReportingTask', () => {
     projectId,
     attempts = 0,
     enabled = true,
+    url,
   }: {
     lastReportedUsageDate: Date;
     projectId?: string;
     attempts?: number;
     enabled?: boolean;
+    url?: string;
   }) => {
     const timestamp = new Date(new Date().setMinutes(-15));
     const task = new ConnectorUsageReportingTask({
@@ -77,7 +79,7 @@ describe('ConnectorUsageReportingTask', () => {
       taskManager: mockTaskManagerSetup,
       config: {
         enabled,
-        url: 'usage-api',
+        url,
         ca: {
           path: './ca.crt',
         },
@@ -91,24 +93,26 @@ describe('ConnectorUsageReportingTask', () => {
         CONNECTOR_USAGE_REPORTING_TASK_TYPE
       ].createTaskRunner;
 
-    return createTaskRunnerFunction({
-      taskInstance: {
-        id: CONNECTOR_USAGE_REPORTING_TASK_ID,
-        runAt: timestamp,
-        attempts: 0,
-        ownerId: '',
-        status: TaskStatus.Running,
-        startedAt: timestamp,
-        scheduledAt: timestamp,
-        retryAt: null,
-        params: {},
-        state: {
-          lastReportedUsageDate,
-          attempts,
+    return createTaskRunnerFunction(
+      taskManagerMock.createRunContext({
+        taskInstance: {
+          id: CONNECTOR_USAGE_REPORTING_TASK_ID,
+          runAt: timestamp,
+          attempts: 0,
+          ownerId: '',
+          status: TaskStatus.Running,
+          startedAt: timestamp,
+          scheduledAt: timestamp,
+          retryAt: null,
+          params: {},
+          state: {
+            lastReportedUsageDate,
+            attempts,
+          },
+          taskType: CONNECTOR_USAGE_REPORTING_TASK_TYPE,
         },
-        taskType: CONNECTOR_USAGE_REPORTING_TASK_TYPE,
-      },
-    });
+      })
+    );
   };
 
   it('registers the task', async () => {
@@ -306,6 +310,32 @@ describe('ConnectorUsageReportingTask', () => {
     });
   });
 
+  it('returns the existing state and logs a warning when the usage API url is not defined', async () => {
+    readFileSpy.mockImplementationOnce(() => '---CA CERTIFICATE---');
+    const lastReportedUsageDateStr = '2024-01-01T00:00:00.000Z';
+    const lastReportedUsageDate = new Date(lastReportedUsageDateStr);
+
+    const taskRunner = await createTaskRunner({
+      lastReportedUsageDate,
+      projectId: 'test-id',
+    });
+
+    const response = await taskRunner.run();
+
+    expect(logger.error).toHaveBeenCalledTimes(1);
+
+    expect(logger.error).toHaveBeenCalledWith(
+      'Missing required Usage API url while running actions:connector_usage_reporting'
+    );
+
+    expect(response).toEqual({
+      state: {
+        attempts: 0,
+        lastReportedUsageDate,
+      },
+    });
+  });
+
   it('runs the task', async () => {
     readFileSpy.mockImplementationOnce(() => '---CA CERTIFICATE---');
     mockEsClient.search.mockResolvedValueOnce({
@@ -317,7 +347,11 @@ describe('ConnectorUsageReportingTask', () => {
     const lastReportedUsageDateStr = '2024-01-01T00:00:00.000Z';
     const lastReportedUsageDate = new Date(lastReportedUsageDateStr);
 
-    const taskRunner = await createTaskRunner({ lastReportedUsageDate, projectId: 'test-project' });
+    const taskRunner = await createTaskRunner({
+      lastReportedUsageDate,
+      projectId: 'test-project',
+      url: 'usage-api',
+    });
 
     const response = await taskRunner.run();
 
@@ -360,7 +394,11 @@ describe('ConnectorUsageReportingTask', () => {
 
     const lastReportedUsageDate = new Date('2024-01-01T00:00:00.000Z');
 
-    const taskRunner = await createTaskRunner({ lastReportedUsageDate, projectId: 'test-project' });
+    const taskRunner = await createTaskRunner({
+      lastReportedUsageDate,
+      projectId: 'test-project',
+      url: 'usage-api',
+    });
 
     const response = await taskRunner.run();
 
@@ -383,7 +421,11 @@ describe('ConnectorUsageReportingTask', () => {
 
     const lastReportedUsageDate = new Date('2024-01-01T00:00:00.000Z');
 
-    const taskRunner = await createTaskRunner({ lastReportedUsageDate, projectId: 'test-project' });
+    const taskRunner = await createTaskRunner({
+      lastReportedUsageDate,
+      projectId: 'test-project',
+      url: 'usage-api',
+    });
 
     const response = await taskRunner.run();
 
@@ -410,6 +452,7 @@ describe('ConnectorUsageReportingTask', () => {
       lastReportedUsageDate,
       projectId: 'test-project',
       attempts: 4,
+      url: 'usage-api',
     });
 
     const response = await taskRunner.run();

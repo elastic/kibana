@@ -7,7 +7,15 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import {
+  CUSTOM_HIGHLIGHTED_FIELDS_API_EDIT,
+  ENABLE_DISABLE_RULES_API_PRIVILEGE,
+  EXCEPTIONS_API_ALL,
+  INVESTIGATION_GUIDE_API_EDIT,
+  RULES_API_ALL,
+} from '@kbn/security-solution-features/constants';
+import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { PatchRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   PatchRuleRequestBody,
@@ -28,7 +36,17 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
       path: DETECTION_ENGINE_RULES_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                RULES_API_ALL,
+                EXCEPTIONS_API_ALL,
+                CUSTOM_HIGHLIGHTED_FIELDS_API_EDIT,
+                INVESTIGATION_GUIDE_API_EDIT,
+                ENABLE_DISABLE_RULES_API_PRIVILEGE,
+              ],
+            },
+          ],
         },
       },
     })
@@ -52,8 +70,10 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
         }
         try {
           const params = request.body;
+          const securitySolutionCtx = await context.securitySolution;
+
           const rulesClient = await (await context.alerting).getRulesClient();
-          const detectionRulesClient = (await context.securitySolution).getDetectionRulesClient();
+          const detectionRulesClient = securitySolutionCtx.getDetectionRulesClient();
 
           const existingRule = await readRules({
             rulesClient,
@@ -68,6 +88,16 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
               statusCode: error.statusCode,
             });
           }
+
+          await validateRuleResponseActions({
+            endpointAuthz: await securitySolutionCtx.getEndpointAuthz(),
+            endpointService: securitySolutionCtx.getEndpointService(),
+            rulePayload: request.body,
+            spaceId: securitySolutionCtx.getSpaceId(),
+            existingRule,
+            checkOsqueryResponseActionAuthz:
+              securitySolutionCtx.getCheckOsqueryResponseActionAuthz(),
+          });
 
           checkDefaultRuleExceptionListReferences({ exceptionLists: params.exceptions_list });
           await validateRuleDefaultExceptionList({

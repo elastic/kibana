@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { Headers, Logger } from '@kbn/core/server';
-import {
-  KBN_SCREENSHOT_MODE_HEADER,
-  ScreenshotModePluginSetup,
-} from '@kbn/screenshot-mode-plugin/server';
-import { ConfigType } from '@kbn/screenshotting-server';
+import type { Headers, Logger } from '@kbn/core/server';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
+import { KBN_SCREENSHOT_MODE_HEADER } from '@kbn/screenshot-mode-plugin/server';
+import type { ConfigType } from '@kbn/screenshotting-server';
+import type { CDPSession } from 'puppeteer';
 import { truncate } from 'lodash';
-import { ElementHandle, EvaluateFunc, HTTPResponse, Page } from 'puppeteer';
+import type { ElementHandle, EvaluateFunc, HTTPResponse, Page } from 'puppeteer';
 import { Subject } from 'rxjs';
 import { parse as parseUrl } from 'url';
 import { getDisallowedOutgoingUrlError } from '.';
-import { Layout } from '../../layouts';
+import type { Layout } from '../../layouts';
 import { getPrintLayoutSelectors } from '../../layouts/print_layout';
 import { allowRequest } from '../network_policy';
 import { stripUnsafeHeaders } from './strip_unsafe_headers';
@@ -31,6 +30,8 @@ declare module 'puppeteer' {
     _targetId: string;
   }
 }
+
+const allowedProtocols = new Set(['data:', 'http:', 'https:']);
 
 export type Context = Record<string, unknown>;
 
@@ -270,6 +271,11 @@ export class HeadlessChromiumDriver {
 
     const { boundingClientRect, scroll } = elementPosition;
 
+    layout.setPdfImageSize({
+      height: boundingClientRect.height,
+      width: boundingClientRect.width,
+    });
+
     const screenshot = await this.page.screenshot({
       clip: {
         x: boundingClientRect.left + scroll.x,
@@ -375,7 +381,8 @@ export class HeadlessChromiumDriver {
         request: { url: interceptedUrl },
       } = interceptedRequest;
 
-      const allowed = !interceptedUrl.startsWith('file://');
+      const interceptedUrlParsed = new URL(interceptedUrl);
+      const allowed = allowedProtocols.has(interceptedUrlParsed.protocol);
       const isData = interceptedUrl.startsWith('data:');
 
       // We should never ever let file protocol requests go through
@@ -384,7 +391,6 @@ export class HeadlessChromiumDriver {
           errorReason: 'Aborted',
           requestId,
         });
-        void this.page.browser().close();
         const error = getDisallowedOutgoingUrlError(interceptedUrl);
         this.screenshottingErrorSubject.next(error);
         logger.error(error);
@@ -409,7 +415,9 @@ export class HeadlessChromiumDriver {
             headers,
           });
         } catch (err) {
-          logger.error(`Failed to complete a request using headers: ${err.message}`);
+          logger.error(`Failed to complete a request using headers: ${err.message}`, {
+            error: { stack_trace: err.stack },
+          });
         }
       } else {
         const loggedUrl = isData ? this.truncateUrl(interceptedUrl) : interceptedUrl;
@@ -417,7 +425,9 @@ export class HeadlessChromiumDriver {
         try {
           await client.send('Fetch.continueRequest', { requestId });
         } catch (err) {
-          logger.error(`Failed to complete a request: ${err.message}`);
+          logger.error(`Failed to complete a request: ${err.message}`, {
+            error: { stack_trace: err.stack },
+          });
         }
       }
 
@@ -426,7 +436,8 @@ export class HeadlessChromiumDriver {
 
     this.page.on('response', (interceptedResponse: HTTPResponse) => {
       const interceptedUrl = interceptedResponse.url();
-      const allowed = !interceptedUrl.startsWith('file://');
+      const interceptedUrlParsed = new URL(interceptedUrl);
+      const allowed = allowedProtocols.has(interceptedUrlParsed.protocol);
       const status = interceptedResponse.status();
 
       if (status >= 400 && !interceptedResponse.ok()) {
@@ -436,7 +447,6 @@ export class HeadlessChromiumDriver {
       }
 
       if (!allowed || !this.allowRequest(interceptedUrl)) {
-        void this.page.browser().close();
         const error = getDisallowedOutgoingUrlError(interceptedUrl);
         this.screenshottingErrorSubject.next(error);
         logger.error(error);

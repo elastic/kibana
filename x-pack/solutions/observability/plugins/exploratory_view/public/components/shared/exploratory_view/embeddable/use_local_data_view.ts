@@ -9,8 +9,8 @@ import { useEffect } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { getDataTypeIndices } from '../../../../utils/observability_data_views';
-import { AppDataType } from '../types';
-import { ExploratoryEmbeddableProps } from '../../../..';
+import type { AppDataType } from '../types';
+import type { ExploratoryEmbeddableProps } from '../../../..';
 
 export function useLocalDataView(
   seriesDataType: AppDataType,
@@ -36,5 +36,10 @@ export function useLocalDataView(
     }
   }, [setDataViewTitle, updatedDataViewTitle]);
 
-  return { dataViewTitle: dataViewTitle || initDatViewTitle };
+  // When the caller passes an explicit `dataTypesIndexPatterns`, prefer that
+  // value over the localStorage cache. The cache is shared by all embeddables
+  // of the same data type within a browser session, so without this precedence
+  // a previously visited consumer (e.g. a CCS-prefixed `${remoteName}:synthetics-*`)
+  // could leak its title into a freshly mounted embeddable on the next render.
+  return { dataViewTitle: initDatViewTitle || dataViewTitle };
 }

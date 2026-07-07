@@ -13,14 +13,13 @@
       "positions": "__flag__",
       "preference": "",
       "realtime": "__flag__",
-      "routing": "",
+      "routing": [],
       "term_statistics": "__flag__",
       "version": "",
       "version_type": [
         "internal",
         "external",
-        "external_gte",
-        "force"
+        "external_gte"
       ]
     },
     "methods": [
@@ -32,6 +31,7 @@
       "{index}/_mtermvectors"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-mtermvectors",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-mtermvectors",
     "availability": {
       "stack": true,
       "serverless": true

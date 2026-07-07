@@ -17,10 +17,16 @@ import {
 import { requestContextMock, serverMock, requestMock } from '../../../routes/__mocks__';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import { findRuleExceptionReferencesRoute } from './route';
+import type {
+  MockClients,
+  SecuritySolutionRequestHandlerContextMock,
+} from '../../../routes/__mocks__/request_context';
 
 describe('findRuleExceptionReferencesRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let clients: MockClients;
+  let context: SecuritySolutionRequestHandlerContextMock;
+
   const mockList = {
     ...getExceptionListSchemaMock(),
     type: 'detection',
@@ -30,6 +36,7 @@ describe('findRuleExceptionReferencesRoute', () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
@@ -57,6 +64,11 @@ describe('findRuleExceptionReferencesRoute', () => {
     });
 
     findRuleExceptionReferencesRoute(server.router);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('happy paths', () => {

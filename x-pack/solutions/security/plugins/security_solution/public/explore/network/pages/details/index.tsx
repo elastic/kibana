@@ -8,19 +8,17 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
-
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-
 import { buildEsQuery } from '@kbn/es-query';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { LastEventIndexKey } from '../../../../../common/search_strategy';
 import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+import { LastEventIndexKey } from '../../../../../common/search_strategy';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -33,8 +31,9 @@ import { FlowTargetSelectConnected } from '../../components/flow_target_select_c
 import type { IpOverviewProps } from '../../components/details';
 import { IpOverview } from '../../components/details';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
+import { PageLoader } from '../../../../common/components/page_loader';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
-import { useNetworkDetails, ID } from '../../containers/details';
+import { ID, useNetworkDetails } from '../../containers/details';
 import { useKibana } from '../../../../common/lib/kibana';
 import { decodeIpv6 } from '../../../../common/lib/helpers';
 import { inputsSelectors } from '../../../../common/store';
@@ -43,7 +42,6 @@ import { setNetworkDetailsTablesActivePageToZero } from '../../store/actions';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { networkModel } from '../../store';
 import { SecurityPageName } from '../../../../app/types';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
@@ -55,14 +53,8 @@ import { useAlertsPrivileges } from '../../../../detections/containers/detection
 import { navTabsNetworkDetails } from './nav_tabs';
 import { NetworkDetailsTabs } from './details_tabs';
 import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
-import {
-  SecurityCellActions,
-  CellActionsMode,
-  SecurityCellActionsTrigger,
-} from '../../../../common/components/cell_actions';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { CellActionsMode, SecurityCellActions } from '../../../../common/components/cell_actions';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 const NetworkDetailsManage = manageQuery(IpOverview);
@@ -82,8 +74,8 @@ const NetworkDetailsComponent: React.FC = () => {
   );
 
   const { signalIndexName } = useSignalIndex();
-  const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
-  const canReadAlerts = hasKibanaREAD && hasIndexRead;
+  const { hasAlertsRead, hasIndexRead } = useAlertsPrivileges();
+  const canReadAlerts = hasAlertsRead && hasIndexRead;
 
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
@@ -110,25 +102,9 @@ const NetworkDetailsComponent: React.FC = () => {
     dispatch(setNetworkDetailsTablesActivePageToZero());
   }, [detailName, dispatch]);
 
-  const {
-    indicesExist: oldIndicesExist,
-    selectedPatterns: oldSelectedPatterns,
-    sourcererDataView: oldSourcererDataView,
-  } = useSourcererDataView();
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const { dataView } = useDataView();
-  const { dataViewSpec } = useDataViewSpec();
-  const experimentalSelectedPatterns = useSelectedPatterns();
-
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
-  const indicesExist = newDataViewPickerEnabled
-    ? !!dataView?.matchedIndices?.length
-    : oldIndicesExist;
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
+  const { dataView, status } = useDataView(PageScope.explore);
+  const selectedPatterns = useSelectedPatterns(PageScope.explore);
+  const indicesExist = dataView.hasMatchedIndices();
 
   const ip = decodeIpv6(detailName);
   const networkDetailsFilter = useMemo(() => getNetworkDetailsPageFilter(ip), [ip]);
@@ -137,7 +113,7 @@ const NetworkDetailsComponent: React.FC = () => {
     try {
       return [
         buildEsQuery(
-          dataViewSpecToViewBase(sourcererDataView),
+          dataView,
           [query],
           [...networkDetailsFilter, ...globalFilters],
           getEsQueryConfig(uiSettings)
@@ -146,7 +122,7 @@ const NetworkDetailsComponent: React.FC = () => {
     } catch (e) {
       return [undefined, e];
     }
-  }, [globalFilters, networkDetailsFilter, query, sourcererDataView, uiSettings]);
+  }, [dataView, globalFilters, networkDetailsFilter, query, uiSettings]);
 
   const additionalFilters = useMemo(
     () => (rawFilteredQuery ? [rawFilteredQuery] : []),
@@ -189,16 +165,18 @@ const NetworkDetailsComponent: React.FC = () => {
     [detailName, flowTarget]
   );
 
-  const indexPattern = useMemo(() => {
-    return dataViewSpecToViewBase(sourcererDataView);
-  }, [sourcererDataView]);
+  const indexPattern = useMemo(() => dataView || { title: '', fields: [] }, [dataView]);
+
+  if (status === 'pristine') {
+    return <PageLoader />;
+  }
 
   return (
     <div data-test-subj="network-details-page">
       {indicesExist ? (
         <>
           <FiltersGlobal>
-            <SiemSearchBar sourcererDataView={sourcererDataView} id={InputsModelId.global} />
+            <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper>
@@ -219,7 +197,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   }}
                   mode={CellActionsMode.HOVER_DOWN}
                   visibleCellActions={5}
-                  triggerId={SecurityCellActionsTrigger.DEFAULT}
+                  triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
                 >
                   {ip}
                 </SecurityCellActions>
@@ -246,7 +224,7 @@ const NetworkDetailsComponent: React.FC = () => {
               narrowDateRange={narrowDateRange}
               indexPatterns={selectedPatterns}
               jobNameById={jobNameById}
-              scopeId={SourcererScopeName.default}
+              scopeId={PageScope.explore}
             />
 
             <EuiHorizontalRule />
@@ -264,7 +242,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <AlertCountByRuleByStatus
-                      entityFilter={entityFilter}
+                      entityFilter={{ ...entityFilter, field: 'destination.ip', value: ip }}
                       signalIndexName={signalIndexName}
                       additionalFilters={additionalFilters}
                     />

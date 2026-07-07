@@ -7,25 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  createTestServers,
-  type TestElasticsearchUtils,
-  type TestKibanaUtils,
-} from '@kbn/core-test-helpers-kbn-server';
-import {
+import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import { esql } from '@elastic/esql';
+import type {
   SimpleIStorageClient,
   StorageClientBulkResponse,
   StorageClientIndexResponse,
   StorageDocumentOf,
-  StorageIndexAdapter,
-  type StorageSettings,
 } from '../../..';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { BulkOperationError, StorageIndexAdapter, type StorageSettings } from '../../..';
+import type { Logger } from '@kbn/core/server';
 import * as getSchemaVersionModule from '../../get_schema_version';
 import { isResponseError } from '@kbn/es-errors';
-import { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
-import { SimpleStorageIndexAdapter, StorageIndexAdapterOptions } from '..';
+import type { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SimpleStorageIndexAdapter, StorageIndexAdapterOptions } from '..';
+import type { Client } from '@elastic/elasticsearch';
 
 const TEST_INDEX_NAME = 'test_index';
 
@@ -44,8 +40,7 @@ const createLoggerMock = (): jest.Mocked<Logger> => {
 
 describe('StorageIndexAdapter', () => {
   let esServer: TestElasticsearchUtils;
-  let esClient: ElasticsearchClient;
-  let kibanaServer: TestKibanaUtils;
+  let esClient: Client;
 
   let loggerMock: jest.Mocked<Logger>;
 
@@ -62,16 +57,18 @@ describe('StorageIndexAdapter', () => {
 
   let adapter: SimpleStorageIndexAdapter<typeof storageSettings>;
   let client: SimpleIStorageClient<typeof storageSettings>;
+  beforeAll(async () => {
+    await createServers();
+  });
+
+  afterAll(async () => {
+    await stopServers();
+  });
 
   describe('with a clean Elasticsearch instance', () => {
-    beforeAll(async () => {
-      await createServers();
-    });
-
     afterAll(async () => {
-      await stopServers();
+      await client?.clean();
     });
-
     it('creates a named logger', () => {
       expect(loggerMock.get).toHaveBeenCalledWith('storage');
       expect(loggerMock.get).toHaveBeenCalledWith('test_index');
@@ -115,14 +112,9 @@ describe('StorageIndexAdapter', () => {
   });
 
   describe('when indexing into a clean Elasticsearch instance', () => {
-    beforeAll(async () => {
-      await createServers();
-    });
-
     afterAll(async () => {
-      await stopServers();
+      await client?.clean();
     });
-
     let indexResponse: StorageClientIndexResponse;
 
     beforeAll(async () => {
@@ -185,34 +177,12 @@ describe('StorageIndexAdapter', () => {
     it('deletes the document', async () => {
       await verifyClean();
     });
-
-    describe('after rolling over the index manually and indexing the same document', () => {
-      beforeAll(async () => {
-        await verifyClean();
-        await client.index({ id: 'doc1', document: { foo: 'bar' } });
-        await rolloverIndex();
-        await client.index({ id: 'doc1', document: { foo: 'bar' } });
-      });
-
-      it('puts the document in the new write index', async () => {
-        await verifyDocumentInNewWriteIndex();
-      });
-
-      it('deletes the document from the rolled over index', async () => {
-        await verifyDocumentDeletedInRolledOverIndex();
-      });
-    });
   });
 
   describe('when bulk indexing into a clean Elasticsearch instance', () => {
-    beforeAll(async () => {
-      await createServers();
-    });
-
     afterAll(async () => {
-      await stopServers();
+      await client?.clean();
     });
-
     let bulkIndexResponse: StorageClientBulkResponse;
 
     beforeAll(async () => {
@@ -285,6 +255,36 @@ describe('StorageIndexAdapter', () => {
       });
     });
 
+    it('bulk create fails when the document id already exists', async () => {
+      await client.index({
+        id: 'existing-doc',
+        document: { foo: 'first' },
+      });
+
+      const conflictResponse = await client.bulk({
+        refresh: 'wait_for',
+        operations: [
+          {
+            create: {
+              _id: 'existing-doc',
+              document: { foo: 'second' },
+            },
+          },
+        ],
+      });
+
+      expect(conflictResponse.errors).toBe(true);
+      expect(conflictResponse.items).toHaveLength(1);
+      expect(conflictResponse.items[0].create?.status).toBe(409);
+      expect(conflictResponse.items[0].create?.error).toEqual(
+        expect.objectContaining({
+          type: expect.stringMatching(
+            /version_conflict_engine_exception|document_already_exists_exception/
+          ),
+        })
+      );
+    });
+
     describe('migrates a document with a legacy property', () => {
       let migratingClient: SimpleIStorageClient<typeof storageSettings>;
       beforeAll(async () => {
@@ -344,56 +344,10 @@ describe('StorageIndexAdapter', () => {
         });
       });
     });
-
-    describe('after rolling over the index manually and indexing the same document', () => {
-      beforeAll(async () => {
-        await client.bulk({
-          operations: [
-            {
-              index: {
-                _id: 'doc1',
-                document: {
-                  foo: 'bar',
-                },
-              },
-            },
-          ],
-        });
-
-        await rolloverIndex();
-
-        await client.bulk({
-          operations: [
-            {
-              index: {
-                _id: 'doc1',
-                document: {
-                  foo: 'bar',
-                },
-              },
-            },
-          ],
-        });
-      });
-
-      it('puts the document in the new write index', async () => {
-        await verifyDocumentInNewWriteIndex();
-      });
-
-      it('deletes the document from the rolled over index', async () => {
-        await verifyDocumentDeletedInRolledOverIndex();
-      });
-
-      it('deletes the documents', async () => {
-        await verifyClean();
-      });
-    });
   });
 
   describe('when writing/bootstrapping with an legacy index', () => {
     beforeAll(async () => {
-      await createServers();
-
       await client.index({ id: 'foo', document: { foo: 'bar' } });
 
       jest.spyOn(getSchemaVersionModule, 'getSchemaVersion').mockReturnValue('next_version');
@@ -402,9 +356,8 @@ describe('StorageIndexAdapter', () => {
     });
 
     afterAll(async () => {
-      await stopServers();
+      await client?.clean();
     });
-
     it('updates the existing write index in place', async () => {
       await verifyIndex({ version: 'next_version' });
 
@@ -426,10 +379,151 @@ describe('StorageIndexAdapter', () => {
     });
   });
 
+  describe('when bulk operation encounters errors', () => {
+    afterAll(async () => {
+      await client?.clean();
+    });
+
+    it('throws BulkOperationError when bulk operation contains document-level errors', async () => {
+      // Create an adapter with strict mapping to trigger mapping errors
+      const strictAdapter = createStorageIndexAdapter({
+        name: 'test_strict_index',
+        schema: {
+          properties: {
+            foo: {
+              type: 'keyword',
+            },
+          },
+        },
+      });
+      const strictClient = strictAdapter.getClient();
+
+      // First create the index with strict mapping
+      await strictClient.index({
+        id: 'doc1',
+        document: { foo: 'bar' },
+      });
+
+      // Try to bulk index with an invalid field (should fail due to dynamic: strict)
+      await expect(
+        strictClient.bulk({
+          operations: [
+            {
+              index: {
+                _id: 'doc2',
+                document: { foo: 'baz', invalid_field: 'value' } as any,
+              },
+            },
+          ],
+          refresh: 'wait_for',
+          throwOnFail: true,
+        })
+      ).rejects.toThrow(BulkOperationError);
+
+      await strictClient.clean();
+    });
+
+    it('includes error details in the thrown BulkOperationError', async () => {
+      const strictAdapter = createStorageIndexAdapter({
+        name: 'test_strict_index_2',
+        schema: {
+          properties: {
+            foo: {
+              type: 'keyword',
+            },
+          },
+        },
+      });
+      const strictClient = strictAdapter.getClient();
+
+      // Create the index
+      await strictClient.index({
+        id: 'doc1',
+        document: { foo: 'bar' },
+      });
+
+      try {
+        await strictClient.bulk({
+          operations: [
+            {
+              index: {
+                _id: 'doc2',
+                document: { foo: 'baz', invalid_field: 'value' } as any,
+              },
+            },
+          ],
+          throwOnFail: true,
+          refresh: 'wait_for',
+        });
+        fail('Expected BulkOperationError to be thrown');
+      } catch (err) {
+        const error = err as BulkOperationError;
+        expect(error).toBeInstanceOf(BulkOperationError);
+        expect(error.message).toContain('Bulk operation failed');
+        expect(error.message).toContain('1 out of 1 items');
+        expect(error.response).toBeDefined();
+        expect(error.response.errors).toBe(true);
+        expect(error.response.items).toHaveLength(1);
+        expect(error.response.items[0].index?.error).toBeDefined();
+        expect(error.response.items[0].index?.error?.type).toBe('strict_dynamic_mapping_exception');
+      }
+
+      await strictClient.clean();
+    });
+  });
+
+  describe('automatic mapping reconciliation on read', () => {
+    const updatedStorageSettings = {
+      name: TEST_INDEX_NAME,
+      schema: {
+        properties: {
+          foo: { type: 'keyword' as const },
+          bar: { type: 'keyword' as const },
+        },
+      },
+    } satisfies StorageSettings;
+
+    afterAll(async () => {
+      await client?.clean();
+      jest.spyOn(getSchemaVersionModule, 'getSchemaVersion').mockReturnValue('current_version');
+    });
+
+    it('updates stale mappings before the first search', async () => {
+      jest.spyOn(getSchemaVersionModule, 'getSchemaVersion').mockReturnValue('current_version');
+      await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      await verifyIndex();
+
+      jest.spyOn(getSchemaVersionModule, 'getSchemaVersion').mockReturnValue('read_updated');
+
+      const updatedAdapter = createStorageIndexAdapter(updatedStorageSettings);
+      const updatedClient = updatedAdapter.getClient();
+
+      await updatedClient.search({ track_total_hits: true, size: 1, query: { match_all: {} } });
+
+      const getIndicesResponse = await esClient.indices.get({ index: TEST_INDEX_NAME });
+      const writeIndexName = `${TEST_INDEX_NAME}-000001`;
+
+      expect(getIndicesResponse[writeIndexName].mappings?._meta?.version).toEqual('read_updated');
+      expect(getIndicesResponse[writeIndexName].mappings?.properties).toMatchObject({
+        foo: { type: 'keyword' },
+        bar: { type: 'keyword' },
+      });
+    });
+
+    it('does not create resources when searching on a clean instance', async () => {
+      await client.clean();
+
+      const freshAdapter = createStorageIndexAdapter(storageSettings);
+      const freshClient = freshAdapter.getClient();
+
+      await freshClient.search({ track_total_hits: true, size: 1, query: { match_all: {} } });
+
+      await verifyNoIndex();
+    });
+  });
+
   describe('when writing/bootstrapping with an existing, incompatible index', () => {
     beforeAll(async () => {
-      await createServers();
-
       await client.index({ id: 'foo', document: { foo: 'bar' } });
 
       jest
@@ -438,7 +532,7 @@ describe('StorageIndexAdapter', () => {
     });
 
     afterAll(async () => {
-      await stopServers();
+      await client?.clean();
     });
 
     it('fails when indexing', async () => {
@@ -468,6 +562,148 @@ describe('StorageIndexAdapter', () => {
     });
   });
 
+  describe('esql method', () => {
+    afterAll(async () => {
+      await client?.clean();
+    });
+
+    describe('round-trips a basic pipeline against the storage index', () => {
+      beforeAll(async () => {
+        await client.bulk({
+          operations: [
+            { index: { _id: 'd1', document: { foo: 'bar' } } },
+            { index: { _id: 'd2', document: { foo: 'baz' } } },
+          ],
+        });
+      });
+
+      afterAll(async () => {
+        await client.clean();
+      });
+
+      it('returns both documents via _source', async () => {
+        const response = await client.esql({
+          metadata: ['_id', '_source'],
+          pipeline: esql`SORT _id ASC | LIMIT 10`,
+        });
+
+        const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
+        const idIdx = response.columns.findIndex((c) => c.name === '_id');
+        expect(sourceIdx).toBeGreaterThanOrEqual(0);
+        expect(idIdx).toBeGreaterThanOrEqual(0);
+
+        expect(response.values.map((row) => row[idIdx])).toEqual(['d1', 'd2']);
+        expect(response.values.map((row) => row[sourceIdx])).toEqual([
+          { foo: 'bar' },
+          { foo: 'baz' },
+        ]);
+      });
+
+      it('omits METADATA when metadata is not provided', async () => {
+        const response = await client.esql({
+          pipeline: esql`STATS count = COUNT(*)`,
+        });
+        const countIdx = response.columns.findIndex((c) => c.name === 'count');
+        expect(countIdx).toBeGreaterThanOrEqual(0);
+        expect(response.values[0]?.[countIdx]).toBe(2);
+      });
+    });
+
+    describe('forwards the body filter alongside the ES|QL pipeline', () => {
+      beforeAll(async () => {
+        await client.bulk({
+          operations: [
+            { index: { _id: 'd1', document: { foo: 'bar' } } },
+            { index: { _id: 'd2', document: { foo: 'baz' } } },
+          ],
+        });
+      });
+
+      afterAll(async () => {
+        await client.clean();
+      });
+
+      it('narrows the result set to docs matching the body filter', async () => {
+        const response = await client.esql({
+          metadata: ['_id'],
+          pipeline: esql`SORT _id ASC | LIMIT 10`,
+          filter: { bool: { filter: [{ term: { foo: 'bar' } }] } },
+        });
+
+        const idIdx = response.columns.findIndex((c) => c.name === '_id');
+        expect(response.values.map((row) => row[idIdx])).toEqual(['d1']);
+      });
+    });
+
+    describe('returns an empty response when the storage index does not exist', () => {
+      beforeAll(async () => {
+        await client.clean();
+      });
+
+      it('produces { columns: [], values: [] } instead of throwing', async () => {
+        const freshAdapter = createStorageIndexAdapter(storageSettings);
+        const freshClient = freshAdapter.getClient();
+
+        const response = await freshClient.esql({
+          metadata: ['_id', '_source'],
+          pipeline: esql`LIMIT 10`,
+        });
+
+        expect(response).toEqual({ columns: [], values: [] });
+      });
+    });
+
+    describe('migrateSource handling on _source columns', () => {
+      let migratingClient: SimpleIStorageClient<typeof storageSettings>;
+
+      beforeAll(async () => {
+        const migratingAdapter = createStorageIndexAdapter(storageSettings, {
+          migrateSource: (source) =>
+            ({
+              ...source,
+              migratedProp: String(source.foo).toUpperCase(),
+            } as StorageDocumentOf<typeof storageSettings>),
+        });
+        migratingClient = migratingAdapter.getClient();
+        await migratingClient.bulk({
+          operations: [
+            {
+              index: {
+                _id: 'm1',
+                document: { foo: 'xyz' } as StorageDocumentOf<typeof storageSettings>,
+              },
+            },
+          ],
+        });
+      });
+
+      afterAll(async () => {
+        await migratingClient.clean();
+      });
+
+      it('applies migrateSource by default when _source is in metadata', async () => {
+        const response = await migratingClient.esql({
+          metadata: ['_source'],
+          pipeline: esql`LIMIT 1`,
+        });
+
+        const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
+        expect(response.values[0]?.[sourceIdx]).toEqual({ foo: 'xyz', migratedProp: 'XYZ' });
+      });
+
+      it('returns the raw _source when migrateSource: false is passed', async () => {
+        const response = await migratingClient.esql({
+          metadata: ['_source'],
+          pipeline: esql`LIMIT 1`,
+          migrateSource: false,
+        });
+
+        const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
+        expect(response.values[0]?.[sourceIdx]).toEqual({ foo: 'xyz' });
+      });
+    });
+  });
+
   function createStorageIndexAdapter<TStorageSettings extends StorageSettings>(
     settings: TStorageSettings,
     options?: StorageIndexAdapterOptions<StorageDocumentOf<TStorageSettings>>
@@ -476,7 +712,7 @@ describe('StorageIndexAdapter', () => {
   }
 
   async function createServers() {
-    const { startES, startKibana } = createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: jest.setTimeout,
       settings: {
         kbn: {
@@ -490,26 +726,14 @@ describe('StorageIndexAdapter', () => {
     esServer = await startES();
 
     jest.spyOn(getSchemaVersionModule, 'getSchemaVersion').mockReturnValue('current_version');
-
-    kibanaServer = await startKibana();
-
-    esClient = kibanaServer.coreStart.elasticsearch.client.asScoped(
-      httpServerMock.createKibanaRequest()
-    ).asCurrentUser;
-
+    esClient = esServer.es.getClient();
     loggerMock = createLoggerMock();
-
     adapter = createStorageIndexAdapter(storageSettings);
     client = adapter.getClient();
   }
 
   async function stopServers() {
-    if (kibanaServer) {
-      await kibanaServer.stop();
-    }
-
-    await esServer.stop();
-
+    await esServer?.stop();
     jest.clearAllMocks();
   }
 
@@ -538,24 +762,6 @@ describe('StorageIndexAdapter', () => {
       });
 
     expect(getIndexResponse).toEqual({});
-  }
-
-  async function rolloverIndex() {
-    await esClient.indices.updateAliases({
-      actions: [
-        {
-          add: {
-            index: `${TEST_INDEX_NAME}-000001`,
-            alias: TEST_INDEX_NAME,
-            is_write_index: false,
-          },
-        },
-      ],
-    });
-
-    await esClient.indices.create({
-      index: `${TEST_INDEX_NAME}-000002`,
-    });
   }
 
   async function verifyIndex(options: { writeIndexName?: string; version?: string } = {}) {
@@ -593,59 +799,10 @@ describe('StorageIndexAdapter', () => {
         is_write_index: true,
       },
     });
-  }
 
-  async function verifyDocumentInNewWriteIndex() {
-    const searchResponse = await client.search({
-      track_total_hits: true,
-      size: 10_000,
-    });
+    expect(getIndexResponse[writeIndexName].settings?.index?.auto_expand_replicas).toEqual('0-1');
 
-    expect(searchResponse).toMatchObject({
-      hits: {
-        hits: [
-          {
-            _id: 'doc1',
-            _index: `${TEST_INDEX_NAME}-000002`,
-            _source: {
-              foo: 'bar',
-            },
-          },
-        ],
-        total: {
-          value: 1,
-          relation: 'eq',
-        },
-      },
-    });
-  }
-
-  async function verifyDocumentDeletedInRolledOverIndex() {
-    const searchResponse = await client.search({
-      track_total_hits: true,
-      size: 10_000,
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                _index: `${TEST_INDEX_NAME}-000001`,
-              },
-            },
-          ],
-        },
-      },
-    });
-
-    expect(searchResponse).toMatchObject({
-      hits: {
-        hits: [],
-        total: {
-          value: 0,
-          relation: 'eq',
-        },
-      },
-    });
+    expect(getIndexResponse[writeIndexName].settings?.index?.number_of_shards).toEqual('1');
   }
 
   async function verifyClean() {

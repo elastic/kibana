@@ -11,7 +11,8 @@ import { EuiSpacer, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from
 import { useKibana } from '../../../../shared_imports';
 
 import { i18nTexts } from './i18n_texts';
-import { toKnownError, PipelineError } from './error_utils';
+import type { PipelineError } from './error_utils';
+import { toKnownError } from './error_utils';
 
 interface Props {
   error: unknown;
@@ -73,7 +74,7 @@ export const PipelineFormError: React.FunctionComponent<Props> = ({ error }) => 
                   onClick={() => setIsShowingAllErrors(false)}
                   color="danger"
                   iconSide="right"
-                  iconType="arrowUp"
+                  iconType="chevronSingleUp"
                   data-test-subj="hideErrorsButton"
                 >
                   {i18nTexts.errors.hideErrors(hiddenErrorsCount)}
@@ -84,7 +85,7 @@ export const PipelineFormError: React.FunctionComponent<Props> = ({ error }) => 
                   onClick={() => setIsShowingAllErrors(true)}
                   color="danger"
                   iconSide="right"
-                  iconType="arrowDown"
+                  iconType="chevronSingleDown"
                   data-test-subj="showErrorsButton"
                 >
                   {i18nTexts.errors.showErrors(hiddenErrorsCount)}

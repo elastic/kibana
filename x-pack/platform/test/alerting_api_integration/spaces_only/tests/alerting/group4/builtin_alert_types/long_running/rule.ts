@@ -16,7 +16,6 @@ import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../../../comm
 
 const RULE_INTERVAL_SECONDS = 3;
 
-// eslint-disable-next-line import/no-default-export
 export default function ruleTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
@@ -45,7 +44,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       const errorStatuses: Array<{ status: string; error: { message: string; reason: string } }> =
         [];
       // get the events we're expecting
-      const events = await retry.try(async () => {
+      await retry.try(async () => {
         const { body: rule } = await supertest.get(
           `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`
         );
@@ -66,15 +65,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           ]),
         });
       });
-
-      // no active|recovered|new instance events should exist
-      expect(events.filter((event) => event?.event?.action === 'active-instance').length).to.equal(
-        0
-      );
-      expect(events.filter((event) => event?.event?.action === 'new-instance').length).to.equal(0);
-      expect(
-        events.filter((event) => event?.event?.action === 'recovered-instance').length
-      ).to.equal(0);
 
       // rule execution status should be in error with reason timeout
       const { status } = await supertest.get(
@@ -119,8 +109,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             // by the time we see 4 "execute" events, we should also see the following:
             ['execute-start', { gte: 4 }],
             ['execute-timeout', { gte: 1 }],
-            ['new-instance', { gte: 1 }],
-            ['active-instance', { gte: 2 }],
           ]),
         });
       });
@@ -163,8 +151,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             ['execute-start', { gte: 4 }],
             ['execute', { gte: 4 }],
             ['execute-timeout', { gte: 4 }],
-            ['new-instance', { gte: 1 }],
-            ['active-instance', { gte: 3 }],
           ]),
         });
       });

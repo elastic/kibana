@@ -8,12 +8,12 @@
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { API_BASE_PATH } from '../../../../../common/constants';
 
-type HttpResponse = Record<string, any> | any[];
+type HttpResponse = unknown;
 type HttpMethod = 'GET' | 'POST';
 export interface ResponseError {
   statusCode: number;
   message: string | Error;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, unknown>;
 }
 
 // Register helpers to mock HTTP Requests

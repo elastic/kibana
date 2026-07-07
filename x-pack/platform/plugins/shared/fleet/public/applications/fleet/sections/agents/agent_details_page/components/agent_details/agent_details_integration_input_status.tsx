@@ -22,6 +22,7 @@ export const AgentDetailsIntegrationInputStatus: React.FunctionComponent<{
 }> = memo(({ inputStatusFormatter }) => {
   return inputStatusFormatter.hasError ? (
     <EuiCallOut
+      announceOnMount
       title={inputStatusFormatter.getErrorTitleFromStatus()}
       color="danger"
       iconType="error"

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { ColorMapping } from '@kbn/coloring';
-import { MultiFieldKey, RangeKey, SerializedValue } from '@kbn/data-plugin/common';
-import { DeprecatedColorMappingConfig } from './types';
-import { ColumnMeta } from './utils';
+import type { ColorMapping } from '@kbn/coloring';
+import type { KbnPaletteId } from '@kbn/palettes';
+import type { SerializedValue } from '@kbn/data-plugin/common';
+import { MultiFieldKey, RangeKey } from '@kbn/data-plugin/common';
+import type { DeprecatedColorMappingConfig } from './types';
+import type { ColumnMeta } from './utils';
 
 /**
  * Converts old stringified colorMapping configs to new raw value configs
@@ -17,8 +19,11 @@ export function convertToRawColorMappings(
   colorMapping: DeprecatedColorMappingConfig | ColorMapping.Config,
   columnMeta?: ColumnMeta | null
 ): ColorMapping.Config {
+  const paletteId = colorMapping.paletteId as KbnPaletteId;
+
   return {
     ...colorMapping,
+    paletteId,
     assignments: colorMapping.assignments.map((oldAssignment) => {
       if (isValidColorMappingAssignment(oldAssignment)) return oldAssignment;
       return convertColorMappingAssignment(oldAssignment, columnMeta);
@@ -26,12 +31,12 @@ export function convertToRawColorMappings(
     specialAssignments: colorMapping.specialAssignments.map((oldAssignment) => {
       if (isValidColorMappingAssignment(oldAssignment)) return oldAssignment;
       return {
-        color: oldAssignment.color,
+        color: oldAssignment.color as ColorMapping.Config['specialAssignments'][number]['color'],
         touched: oldAssignment.touched,
         rules: [oldAssignment.rule],
       };
     }),
-  };
+  } as ColorMapping.Config;
 }
 
 function convertColorMappingAssignment(
@@ -39,7 +44,7 @@ function convertColorMappingAssignment(
   columnMeta?: ColumnMeta | null
 ): ColorMapping.Assignment {
   return {
-    color: oldAssignment.color,
+    color: oldAssignment.color as ColorMapping.Assignment['color'],
     touched: oldAssignment.touched,
     rules: convertColorMappingRule(oldAssignment.rule, columnMeta),
   };

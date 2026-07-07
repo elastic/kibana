@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectDoc } from '../serialization';
-import { SavedObjectsModelUnsafeTransformChange } from './model_change';
-import {
+import type { SavedObjectDoc } from '../serialization';
+import type { SavedObjectsModelUnsafeTransformChange } from './model_change';
+import type {
   SavedObjectModelTransformationContext,
   SavedObjectModelTransformationDoc,
   SavedObjectModelUnsafeTransformFn,

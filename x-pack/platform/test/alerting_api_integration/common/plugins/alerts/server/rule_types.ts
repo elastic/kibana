@@ -19,6 +19,15 @@ import type {
   RuleTypeParams,
 } from '@kbn/alerting-plugin/server';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { Dataset, createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
+import { alertFieldMap } from '@kbn/alerts-as-data-utils';
+import {
+  ENHANCED_ES_SEARCH_STRATEGY,
+  ESQL_ASYNC_SEARCH_STRATEGY,
+  EQL_SEARCH_STRATEGY,
+} from '@kbn/data-plugin/common';
+import type { AsyncSearchStrategies } from '@kbn/alerting-plugin/server/types';
 import type { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 
 export const EscapableStrings = {
@@ -181,6 +190,48 @@ function getCumulativeFiringRuleType() {
     },
     validate: {
       params: schema.any(),
+    },
+  };
+  return result;
+}
+
+function getConsumerMetricsRuleType() {
+  const paramsSchema = schema.object({
+    index: schema.string(),
+    reference: schema.string(),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const result: RuleType<ParamsType, never, {}, {}, {}, 'default'> = {
+    id: 'test.consumer-metrics',
+    name: 'Test: Consumer metrics',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
+    producer: 'alertsFixture',
+    solution: 'stack',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    autoRecoverAlerts: false,
+    async executor({ services, params }) {
+      services.ruleMonitoringService?.setMetrics({
+        alerts_candidate_count: 90357,
+        alerts_suppressed_count: 42,
+        total_indexing_duration_ms: 987,
+        total_enrichment_duration_ms: 654,
+        frozen_indices_queried_count: 3,
+      });
+      await services.scopedClusterClient.asCurrentUser.index({
+        index: params.index,
+        refresh: 'wait_for',
+        document: {
+          reference: params.reference,
+          source: 'alert:test.consumer-metrics',
+        },
+      });
+      return { state: {} };
+    },
+    validate: {
+      params: paramsSchema,
     },
   };
   return result;
@@ -543,6 +594,16 @@ function getPatternFiringAlertsAsDataRuleType() {
       schema.string(),
       schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()]))
     ),
+    // Per-instance severity values indexed by run number (patternIndex).
+    // When provided, the value at position [patternIndex] is emitted as
+    // `kibana.alert.severity` in the alert payload for that run.
+    severityPattern: schema.maybe(
+      schema.recordOf(schema.string(), schema.arrayOf(schema.maybe(schema.string())))
+    ),
+    // Tests that need an empty `cleanedPayload` on the run that recovers an
+    // alert (e.g. to assert the alert builder falls back to the predecessor
+    // doc) can opt out of the default recovery payload.
+    setRecoveryPayload: schema.maybe(schema.boolean()),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
   interface State extends RuleTypeState {
@@ -556,7 +617,7 @@ function getPatternFiringAlertsAsDataRuleType() {
     {},
     'default',
     'recovered',
-    { patternIndex: number; instancePattern: boolean[] }
+    { patternIndex: number; instancePattern: boolean[]; 'kibana.alert.severity'?: string }
   > = {
     id: 'test.patternFiringAad',
     name: 'Test: Firing on a Pattern and writing Alerts as Data',
@@ -597,29 +658,38 @@ function getPatternFiringAlertsAsDataRuleType() {
       // fire if pattern says to
       for (const [instanceId, instancePattern] of Object.entries(pattern)) {
         const scheduleByPattern = instancePattern[patternIndex];
+        const severity = params.severityPattern?.[instanceId]?.[patternIndex];
+        const severityField: { 'kibana.alert.severity'?: string } =
+          severity !== undefined && severity !== null ? { 'kibana.alert.severity': severity } : {};
         if (scheduleByPattern === true) {
           alertsClient.report({
             id: instanceId,
             actionGroup: 'default',
             state: { patternIndex },
-            payload: { patternIndex, instancePattern: instancePattern as boolean[] },
+            payload: {
+              patternIndex,
+              instancePattern: instancePattern as boolean[],
+              ...severityField,
+            },
           });
         } else if (typeof scheduleByPattern === 'string') {
           alertsClient.report({
             id: instanceId,
             actionGroup: 'default',
             state: { patternIndex },
-            payload: { patternIndex, instancePattern: [true] },
+            payload: { patternIndex, instancePattern: [true], ...severityField },
           });
         }
       }
 
       // set recovery payload
-      for (const recoveredAlert of alertsClient.getRecoveredAlerts()) {
-        alertsClient.setAlertData({
-          id: recoveredAlert.alert.getId(),
-          payload: { patternIndex: -1, instancePattern: [] },
-        });
+      if (params.setRecoveryPayload !== false) {
+        for (const recoveredAlert of alertsClient.getRecoveredAlerts()) {
+          alertsClient.setAlertData({
+            id: recoveredAlert.alert.getId(),
+            payload: { patternIndex: -1, instancePattern: [] },
+          });
+        }
       }
 
       return {
@@ -762,7 +832,7 @@ function getPatternFiringAutoRecoverFalseRuleType() {
             throw new Error('rule executor error');
           } else if (scheduleByPattern === 'timeout') {
             // delay longer than the timeout
-            await new Promise((r) => setTimeout(r, 12000));
+            await new Promise((r) => setTimeout(r, 15000));
           } else if (scheduleByPattern === 'run_long') {
             // delay so rule runs a little longer
             await new Promise((r) => setTimeout(r, 4000));
@@ -919,6 +989,101 @@ function getCancellableRuleType() {
     },
     validate: {
       params: paramsSchema,
+    },
+  };
+  return result;
+}
+
+function getAsyncSearchRuleType() {
+  const result: RuleType<
+    { strategy: AsyncSearchStrategies },
+    never,
+    {},
+    {},
+    {},
+    'default',
+    'recovered',
+    { number_of_docs: number }
+  > = {
+    id: 'test.ruleWithAsyncSearch',
+    name: 'Test: Rule That uses async search client',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
+    producer: 'alertsFixture',
+    solution: 'stack',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    ruleTaskTimeout: '3s',
+    alerts: {
+      context: 'test.async.search',
+      shouldWrite: true,
+      mappings: {
+        fieldMap: {
+          number_of_docs: {
+            required: false,
+            type: 'long',
+          },
+        },
+      },
+    },
+    async executor(ruleExecutorOptions) {
+      const { services, params } = ruleExecutorOptions;
+      const strategy = params.strategy || ENHANCED_ES_SEARCH_STRATEGY;
+      const client = services.getAsyncSearchClient(strategy);
+
+      const strategies = {
+        [ENHANCED_ES_SEARCH_STRATEGY]: {
+          request: {
+            params: {
+              query: { match_all: {} },
+            },
+          },
+          count: (response: any) => {
+            return response.hits.total;
+          },
+        },
+        [ESQL_ASYNC_SEARCH_STRATEGY]: {
+          request: {
+            params: {
+              query: `FROM ${ES_TEST_INDEX_NAME}`,
+            },
+          },
+          count: (response: any) => {
+            return response.documents_found;
+          },
+        },
+        [EQL_SEARCH_STRATEGY]: {
+          request: {
+            params: {
+              index: ES_TEST_INDEX_NAME,
+              query: `any where true`,
+            },
+          },
+          count: (response: any) => {
+            return response.hits.total.value;
+          },
+        },
+      };
+
+      const response = await client.search({
+        request: strategies[strategy].request,
+      });
+
+      const numberOfDocs = strategies[strategy].count(response);
+
+      if (numberOfDocs > 0) {
+        services.alertsClient?.report({
+          id: 'async-search-rule-alert-1',
+          actionGroup: 'default',
+          payload: { number_of_docs: numberOfDocs },
+        });
+      }
+
+      return { state: {} };
+    },
+    validate: {
+      params: schema.any(),
     },
   };
   return result;
@@ -1295,6 +1460,112 @@ export function defineRuleTypes(
   { alerting, ruleRegistry }: Pick<FixtureSetupDeps, 'alerting' | 'ruleRegistry'>,
   logger: Logger
 ) {
+  const ruleDataClient = ruleRegistry.ruleDataService.initializeIndex({
+    feature: 'AlertingExample',
+    registrationContext: 'test.dangerouslycreatealertsinallspaces',
+    dataset: Dataset.alerts,
+    componentTemplateRefs: [],
+    componentTemplates: [
+      {
+        name: 'mappings',
+        mappings: mappingFromFieldMap(alertFieldMap, false),
+      },
+    ],
+  });
+
+  const persistenceRuleTypeWrapper = createPersistenceRuleTypeWrapper({
+    ruleDataClient,
+    logger,
+    formatAlert: undefined,
+  });
+
+  const dangerouslyCreateAlertsInAllSpacesPersistenceRuleType = persistenceRuleTypeWrapper({
+    id: 'test.persistenceDangerouslyCreateAlertsInAllSpaces',
+    name: 'Test Persistence Rule Type - All Spaces',
+    validate: { params: schema.any() },
+    defaultActionGroupId: 'default',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    minimumLicenseRequired: 'basic',
+    category: 'kibana',
+    producer: 'alertsFixture',
+    solution: 'stack',
+    isExportable: true,
+    async executor(ruleExecutorOptions) {
+      const { services } = ruleExecutorOptions;
+      const { alertWithPersistence } = services;
+
+      // generate some alerts
+      const alerts = range(0, 5).map((i) => {
+        const id = uuidv4();
+        return {
+          _id: id,
+          _source: {
+            original_source: {
+              _id: `${id}-${i}`,
+              '@timestamp': new Date().toISOString(),
+            },
+          },
+        };
+      });
+
+      await alertWithPersistence(alerts, true, 100);
+
+      return { state: {} };
+    },
+    autoRecoverAlerts: false,
+    alerts: {
+      context: 'test.dangerouslycreatealertsinallspaces',
+      mappings: { dynamic: false, fieldMap: { ...alertFieldMap } },
+      shouldWrite: false,
+      isSpaceAware: false,
+      dangerouslyCreateAlertsInAllSpaces: true,
+    },
+  });
+
+  const dangerouslyCreateAlertsInAllSpacesRuleType: RuleType<
+    {},
+    {},
+    {},
+    {},
+    {},
+    'default',
+    'recovered',
+    { original_source: { _id: string } }
+  > = {
+    id: 'test.dangerouslyCreateAlertsInAllSpaces',
+    name: 'Test Alerts Client Rule Type - All Spaces',
+    validate: { params: schema.any() },
+    defaultActionGroupId: 'default',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    minimumLicenseRequired: 'basic',
+    category: 'kibana',
+    producer: 'alertsFixture',
+    solution: 'stack',
+    isExportable: true,
+    async executor(ruleExecutorOptions) {
+      const { services } = ruleExecutorOptions;
+      const { alertsClient } = services;
+
+      range(0, 5).forEach((i) => {
+        alertsClient?.report({
+          id: `instance-${i}`,
+          actionGroup: 'default',
+          payload: { original_source: { _id: `instance-${i}` } },
+        });
+      });
+
+      return { state: {} };
+    },
+    autoRecoverAlerts: false,
+    alerts: {
+      context: 'test.dangerouslycreatealertsinallspaces',
+      mappings: { dynamic: false, fieldMap: { ...alertFieldMap } },
+      shouldWrite: true,
+      isSpaceAware: false,
+      dangerouslyCreateAlertsInAllSpaces: true,
+    },
+  };
+
   const noopRuleType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.noop',
     name: 'Test: Noop',
@@ -1540,6 +1811,7 @@ export function defineRuleTypes(
 
   alerting.registerType(getAlwaysFiringRuleType());
   alerting.registerType(getCumulativeFiringRuleType());
+  alerting.registerType(getConsumerMetricsRuleType());
   alerting.registerType(getNeverFiringRuleType());
   alerting.registerType(getFailingRuleType());
   alerting.registerType(getValidationRuleType());
@@ -1567,4 +1839,7 @@ export function defineRuleTypes(
   alerting.registerType(getWaitingRuleType(logger));
   alerting.registerType(getSeverityRuleType());
   alerting.registerType(getInternalRuleType());
+  alerting.registerType(dangerouslyCreateAlertsInAllSpacesPersistenceRuleType);
+  alerting.registerType(dangerouslyCreateAlertsInAllSpacesRuleType);
+  alerting.registerType(getAsyncSearchRuleType());
 }

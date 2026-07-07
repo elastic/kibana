@@ -12,6 +12,7 @@ import {
   EuiPopoverTitle,
   EuiIconTip,
   EuiDescriptionListDescription,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import * as selectors from '../../store/selectors';
@@ -33,6 +34,7 @@ export const SchemaInformation = ({
   isOpen: boolean;
 }) => {
   const colorMap = useColors();
+  const schemaInfoTitleId = useGeneratedHtmlId();
   const sourceAndSchema = useSelector((state: State) =>
     selectors.resolverTreeSourceAndSchema(state.analyzer[id])
   );
@@ -61,7 +63,7 @@ export const SchemaInformation = ({
           title={schemaInfoButtonTitle}
           aria-label={schemaInfoButtonTitle}
           onClick={setAsActivePopover}
-          iconType="iInCircle"
+          iconType="info"
           $backgroundColor={colorMap.graphControlsBackground}
           $iconColor={colorMap.graphControls}
           $borderColor={colorMap.graphControlsBorderColor}
@@ -70,8 +72,9 @@ export const SchemaInformation = ({
       isOpen={isOpen}
       closePopover={closePopover}
       anchorPosition="leftCenter"
+      aria-labelledby={schemaInfoTitleId}
     >
-      <EuiPopoverTitle style={{ textTransform: 'uppercase' }}>
+      <EuiPopoverTitle id={schemaInfoTitleId} css={{ textTransform: 'uppercase' }}>
         {i18n.translate('xpack.securitySolution.resolver.graphControls.schemaInfoTitle', {
           defaultMessage: 'process tree',
         })}
@@ -87,7 +90,7 @@ export const SchemaInformation = ({
       </EuiPopoverTitle>
       <div
         // Limit the width based on UX design
-        style={{ maxWidth: '268px' }}
+        css={{ maxWidth: '268px' }}
       >
         <StyledDescriptionList
           data-test-subj="resolver:graph-controls:schema-info"

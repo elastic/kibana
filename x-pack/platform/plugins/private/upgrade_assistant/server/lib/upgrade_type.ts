@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import semver, { SemVer } from 'semver';
+import type { SemVer } from 'semver';
+import semver from 'semver';
 
 export interface UpgradeTypeParams {
   current: SemVer;

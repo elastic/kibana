@@ -9,11 +9,13 @@ import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -24,6 +26,8 @@ import { useEnableRule } from '../../../hooks/use_enable_rule';
 import { useDisableRule } from '../../../hooks/use_disable_rule';
 import { useRunRule } from '../../../hooks/use_run_rule';
 import { useUpdateAPIKey } from '../../../hooks/use_update_api_key';
+import { useAppLink } from '../../../hooks/use_app_link';
+
 interface HeaderActionsProps {
   ruleId: string;
   isLoading: boolean;
@@ -119,6 +123,8 @@ export function HeaderActions({
     ruleId,
   });
 
+  const { linkUrl, buttonText } = useAppLink({ rule });
+
   if (!isRuleEditable || !rule) {
     return null;
   }
@@ -202,7 +208,7 @@ export function HeaderActions({
                 disabled={isLoading}
                 fill
                 iconSide="right"
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 onClick={togglePopover}
               >
                 {i18n.translate('xpack.observability.ruleDetails.actionsButtonLabel', {
@@ -221,15 +227,38 @@ export function HeaderActions({
             />
           </EuiPopover>
         </EuiFlexItem>
+        {linkUrl ? (
+          <EuiFlexItem grow={false} data-test-subj="ruleSidebarViewInAppAction">
+            <EuiButtonEmpty
+              color={'primary'}
+              href={linkUrl}
+              data-test-subj="ruleViewLinkedObjectButton"
+              iconType={'eye'}
+              aria-label={buttonText}
+            >
+              {buttonText}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem grow={1}>
-          <EuiButtonIcon
-            className="snoozeButton"
-            data-test-subj="snoozeRuleButton"
-            iconType={getRuleHelpers(rule).isRuleSnoozed ? 'bellSlash' : 'bell'}
-            onClick={() => {
-              setSnoozeModalOpen(true);
-            }}
-          />
+          <EuiToolTip
+            content={i18n.translate('xpack.observability.ruleDetails.snoozeButtonAriaLabel', {
+              defaultMessage: 'Manage rule snooze',
+            })}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              className="snoozeButton"
+              data-test-subj="snoozeRuleButton"
+              iconType={getRuleHelpers(rule).isRuleSnoozed ? 'bellSlash' : 'bell'}
+              onClick={() => {
+                setSnoozeModalOpen(true);
+              }}
+              aria-label={i18n.translate('xpack.observability.ruleDetails.snoozeButtonAriaLabel', {
+                defaultMessage: 'Manage rule snooze',
+              })}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
 

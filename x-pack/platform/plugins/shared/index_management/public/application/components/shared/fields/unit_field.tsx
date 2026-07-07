@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useState } from 'react';
 import { EuiSelectable, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
 import { UseField } from '../../../../shared_imports';
 
@@ -37,7 +38,7 @@ export const UnitField: FunctionComponent<Props> = ({ path, disabled, options, e
                 size="xs"
                 color="text"
                 iconSide="right"
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 onClick={() => setOpen((isOpen) => !isOpen)}
                 data-test-subj="show-filters-button"
                 disabled={disabled}

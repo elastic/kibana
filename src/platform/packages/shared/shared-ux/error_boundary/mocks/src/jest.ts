@@ -8,7 +8,7 @@
  */
 
 import { KibanaErrorService } from '../../src/services/error_service';
-import { KibanaErrorBoundaryServices } from '../../types';
+import type { KibanaErrorBoundaryServices } from '../../types';
 
 export const getServicesMock = (): KibanaErrorBoundaryServices => {
   const mockDeps = {

@@ -14,7 +14,7 @@ import type { Logger } from '@kbn/core/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { stateSchemaByVersion } from '@kbn/alerting-state-types';
-import { TaskCost } from '@kbn/task-manager-plugin/server/task';
+import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server/task';
 import type { TaskRunnerFactory } from './task_runner';
 import type {
   RuleType,
@@ -71,7 +71,9 @@ export interface RegistryRuleType
     | 'defaultScheduleInterval'
     | 'doesSetRecoveryContext'
     | 'alerts'
+    | 'priority'
     | 'internallyManaged'
+    | 'autoRecoverAlerts'
   > {
   id: string;
   enabledInLicense: boolean;
@@ -275,6 +277,20 @@ export class RuleTypeRegistry {
       }
     }
 
+    if (ruleType.priority) {
+      if (![TaskPriority.Normal, TaskPriority.NormalLongRunning].includes(ruleType.priority)) {
+        throw new Error(
+          i18n.translate('xpack.alerting.ruleTypeRegistry.register.invalidPriorityRuleTypeError', {
+            defaultMessage: 'Rule type "{id}" has invalid priority: {errorMessage}.',
+            values: {
+              id: ruleType.id,
+              errorMessage: ruleType.priority,
+            },
+          })
+        );
+      }
+    }
+
     const normalizedRuleType = augmentActionGroupsWithReserved<
       Params,
       ExtractedParams,
@@ -297,6 +313,7 @@ export class RuleTypeRegistry {
     this.taskManager.registerTaskDefinitions({
       [`alerting:${ruleType.id}`]: {
         title: ruleType.name,
+        priority: ruleType.priority,
         timeout: ruleType.ruleTaskTimeout,
         stateSchemaByVersion,
         createTaskRunner: (context: RunContext) =>
@@ -406,7 +423,10 @@ export class RuleTypeRegistry {
         ).isValid,
         hasAlertsMappings: !!_ruleType.alerts,
         ...(_ruleType.alerts ? { alerts: _ruleType.alerts } : {}),
+        ...(_ruleType.priority ? { priority: _ruleType.priority } : {}),
         validLegacyConsumers: _ruleType.validLegacyConsumers,
+        autoRecoverAlerts: _ruleType.autoRecoverAlerts,
+        internallyManaged: _ruleType.internallyManaged,
       };
 
       ruleTypesMap.set(ruleType.id, ruleType);
@@ -419,10 +439,23 @@ export class RuleTypeRegistry {
     return [...this.ruleTypes.keys()];
   }
 
-  public getAllTypesForCategories(categories: string[]): string[] {
-    return [...this.ruleTypes.values()]
-      .filter((ruleType) => categories.includes(ruleType.category))
-      .map((ruleType) => ruleType.id);
+  public getFilteredTypes({
+    excludeInternallyManaged = false,
+    categories,
+  }: {
+    excludeInternallyManaged?: boolean;
+    categories: string[];
+  }): string[] {
+    return [...this.ruleTypes.keys()].filter((id) => {
+      const ruleType = this.get(id);
+      if (excludeInternallyManaged && ruleType.internallyManaged) {
+        return false;
+      }
+      if (categories && categories.length > 0) {
+        return categories.includes(ruleType.category);
+      }
+      return true;
+    });
   }
 }
 

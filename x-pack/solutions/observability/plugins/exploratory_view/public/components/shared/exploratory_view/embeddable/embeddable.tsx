@@ -6,21 +6,22 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { Position } from '@elastic/charts';
+import type { Position } from '@elastic/charts';
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
-import { FormulaPublicApi, LensPublicStart, XYState } from '@kbn/lens-plugin/public';
+import type { LensPublicStart, XYVisualizationState } from '@kbn/lens-plugin/public';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
 import styled from '@emotion/styled';
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useEBTTelemetry } from '../hooks/use_ebt_telemetry';
-import { AllSeries } from '../../../..';
-import { AppDataType, ReportViewType } from '../types';
+import type { AllSeries } from '../../../..';
+import type { AppDataType, ReportViewType } from '../types';
 import { OperationTypeComponent } from '../series_editor/columns/operation_type_select';
-import { DataViewState } from '../hooks/use_app_data_view';
-import { ReportConfigMap } from '../contexts/exploratory_view_config';
-import { ActionTypes, useActions } from './use_actions';
+import type { DataViewState } from '../hooks/use_app_data_view';
+import type { ReportConfigMap } from '../contexts/exploratory_view_config';
+import type { ActionTypes } from './use_actions';
+import { useActions } from './use_actions';
 import { AddToCaseAction } from '../header/add_to_case_action';
 import { useEmbeddableAttributes } from './use_embeddable_attributes';
 
@@ -28,8 +29,8 @@ export interface ExploratoryEmbeddableProps {
   id?: string;
   appendTitle?: JSX.Element;
   attributes: AllSeries;
-  axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
-  gridlinesVisibilitySettings?: XYState['gridlinesVisibilitySettings'];
+  axisTitlesVisibility?: XYVisualizationState['axisTitlesVisibilitySettings'];
+  gridlinesVisibilitySettings?: XYVisualizationState['gridlinesVisibilitySettings'];
   customHeight?: string;
   customTimeRange?: { from: string; to: string }; // required if rendered with LensAttributes
   dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
@@ -58,7 +59,6 @@ export interface ExploratoryEmbeddableProps {
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
   lens: LensPublicStart;
   dataViewState: DataViewState;
-  lensFormulaHelper?: FormulaPublicApi;
   analytics?: AnalyticsServiceSetup;
 }
 
@@ -127,24 +127,24 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
   }
 
   if (typeof axisTitlesVisibility !== 'undefined') {
-    (attributesJSON.state.visualization as XYState).axisTitlesVisibilitySettings =
+    (attributesJSON.state.visualization as XYVisualizationState).axisTitlesVisibilitySettings =
       axisTitlesVisibility;
   }
 
   if (typeof gridlinesVisibilitySettings !== 'undefined') {
-    (attributesJSON.state.visualization as XYState).gridlinesVisibilitySettings =
+    (attributesJSON.state.visualization as XYVisualizationState).gridlinesVisibilitySettings =
       gridlinesVisibilitySettings;
   }
 
   if (typeof legendIsVisible !== 'undefined') {
-    (attributesJSON.state.visualization as XYState).legend.isVisible = legendIsVisible;
+    (attributesJSON.state.visualization as XYVisualizationState).legend.isVisible = legendIsVisible;
   }
   if (typeof legendPosition !== 'undefined') {
-    (attributesJSON.state.visualization as XYState).legend.position = legendPosition;
+    (attributesJSON.state.visualization as XYVisualizationState).legend.position = legendPosition;
   }
 
   if (hideTicks) {
-    (attributesJSON.state.visualization as XYState).tickLabelsVisibilitySettings = {
+    (attributesJSON.state.visualization as XYVisualizationState).tickLabelsVisibilitySettings = {
       x: false,
       yRight: false,
       yLeft: false,

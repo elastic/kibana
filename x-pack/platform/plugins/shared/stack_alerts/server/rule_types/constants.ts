@@ -5,8 +5,12 @@
  * 2.0.
  */
 import type { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
-import { ALERT_EVALUATION_THRESHOLD, ALERT_EVALUATION_VALUE } from '@kbn/rule-data-utils';
-import { ALERT_NAMESPACE } from '@kbn/rule-data-utils';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_GROUPING,
+  ALERT_NAMESPACE,
+} from '@kbn/rule-data-utils';
 import type { StackAlertType } from './types';
 
 export const STACK_AAD_INDEX_NAME = 'stack';
@@ -27,7 +31,22 @@ export const STACK_ALERTS_AAD_CONFIG: IRuleTypeAlerts<StackAlertType> = {
         scaling_factor: 100,
         required: false,
       },
+      [ALERT_GROUPING]: {
+        type: 'object',
+        dynamic: true,
+        array: false,
+        required: false,
+      },
     },
+    dynamicTemplates: [
+      {
+        strings_as_keywords: {
+          path_match: `${ALERT_GROUPING}.*`,
+          match_mapping_type: 'string',
+          mapping: { type: 'keyword', ignore_above: 1024 },
+        },
+      },
+    ],
   },
   shouldWrite: true,
   useEcs: true,

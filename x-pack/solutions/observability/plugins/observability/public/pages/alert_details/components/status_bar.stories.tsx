@@ -10,7 +10,8 @@ import type { StoryFn, StoryObj } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-import { StatusBar as Component, StatusBarProps } from './status_bar';
+import type { StatusBarProps } from './status_bar';
+import { StatusBar as Component } from './status_bar';
 import { alert } from '../mock/alert';
 
 export default {

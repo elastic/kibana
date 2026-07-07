@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LogRecord } from '@kbn/logging';
+import type { LogRecord } from '@kbn/logging';
 import { takeWhile } from 'lodash';
-import { Conversion } from './types';
+import type { Conversion } from './types';
 
 // From https://www.ascii-code.com/characters/control-characters,
 // but explicitly allowing the range \u0008-\u000F (line breaks, tabs, etc.)

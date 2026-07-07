@@ -11,7 +11,7 @@ import { useRouteMatch } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isPipelineMonitoringSupportedInVersion } from '../../../lib/logstash/pipelines';
 import { GlobalStateContext } from '../../contexts/global_state_context';
-import { ComponentProps } from '../../route_init';
+import type { ComponentProps } from '../../route_init';
 import { LogstashTemplate } from './logstash_template';
 import { DetailStatus } from '../../../components/logstash/detail_status';
 import { useTable } from '../../hooks/use_table';

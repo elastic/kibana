@@ -36,7 +36,7 @@ export const SearchApplicationDocumentation = () => {
               {i18n.translate(
                 'xpack.enterpriseSearch.searchApplications.searchApplication.documentation.searchApplication.title',
                 {
-                  defaultMessage: 'Learn more about Search Applications',
+                  defaultMessage: 'Learn more about search applications',
                 }
               )}
             </h2>
@@ -48,7 +48,7 @@ export const SearchApplicationDocumentation = () => {
                 'xpack.enterpriseSearch.searchApplications.searchApplication.documentation.searchApplication.description',
                 {
                   defaultMessage:
-                    'Search Applications help make your Elasticsearch data easily searchable for end users.',
+                    'Search applications help make your Elasticsearch data easily searchable for end users.',
                 }
               )}
             </p>
@@ -68,7 +68,7 @@ export const SearchApplicationDocumentation = () => {
             <EuiPanel grow paddingSize="l">
               <EuiFlexGroup direction="row">
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="lock" size="l" />
+                  <EuiIcon aria-hidden type="lock" size="l" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="s">
@@ -115,7 +115,7 @@ export const SearchApplicationDocumentation = () => {
             <EuiPanel grow paddingSize="l">
               <EuiFlexGroup direction="row">
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="keyboard" size="l" />
+                  <EuiIcon aria-hidden type="keyboard" size="l" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="s">
@@ -162,7 +162,7 @@ export const SearchApplicationDocumentation = () => {
             <EuiPanel grow paddingSize="l">
               <EuiFlexGroup direction="row">
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="securitySignal" size="l" />
+                  <EuiIcon aria-hidden type="radar" size="l" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="s">

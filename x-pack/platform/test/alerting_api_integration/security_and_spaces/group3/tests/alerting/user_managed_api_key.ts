@@ -19,7 +19,6 @@ import {
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { SuperuserAtSpace1 } from '../../../scenarios';
 
-// eslint-disable-next-line import/no-default-export
 export default function userManagedApiKeyTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
@@ -258,13 +257,14 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
                   total_alerts_detected: null,
                   total_alerts_created: null,
                   gap_duration_s: null,
-                  // TODO: uncomment after intermidiate release
-                  // gap_range: null,
+                  gap_range: null,
+                  gap_reason: null,
                 },
               },
             },
           },
           snooze_schedule: [],
+          is_snoozed_until: response.body.is_snoozed_until,
         });
 
         // Ensure AAD isn't broken
@@ -343,13 +343,14 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
                   total_alerts_detected: null,
                   total_alerts_created: null,
                   gap_duration_s: null,
-                  // TODO: uncomment after intermidiate release
-                  // gap_range: null,
+                  gap_range: null,
+                  gap_reason: null,
                 },
               },
             },
           },
           snooze_schedule: [],
+          is_snoozed_until: response.body.is_snoozed_until,
         });
 
         // Ensure AAD isn't broken

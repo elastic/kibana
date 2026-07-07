@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+export { getSloApmLabels } from './get_slo_apm_labels';
 import { get } from 'lodash';
-import { Groupings } from '../../domain/models';
+import type { Groupings } from '../../domain/models';
 
 /**
  * Takes a list of groupBy fields and the nested groupings object provided from

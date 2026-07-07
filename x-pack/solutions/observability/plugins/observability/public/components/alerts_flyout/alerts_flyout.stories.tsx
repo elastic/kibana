@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import React, { ComponentType } from 'react';
-import { ALERT_UUID } from '@kbn/rule-data-utils';
+import type { ComponentType } from 'react';
+import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { Alert } from '@kbn/alerting-types';
-import { PluginContext, PluginContextValue } from '../../context/plugin_context/plugin_context';
+import type { PluginContextValue } from '../../context/plugin_context/plugin_context';
+import { PluginContext } from '../../context/plugin_context/plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { apmAlertResponseExample } from './alerts_flyout.mock';
 import { AlertsFlyout } from './alerts_flyout';
-
-interface Args {
-  alerts: Alert[];
-}
 
 export default {
   title: 'app/Alerts/AlertsFlyout',
@@ -48,18 +44,13 @@ export default {
   ],
 };
 
-export function Example({ alerts }: Args) {
-  const selectedAlertId = apmAlertResponseExample[0]![ALERT_UUID]![0] as string;
+export function Example() {
   const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
   return (
     <AlertsFlyout
-      alerts={alerts}
+      alert={apmAlertResponseExample[0]!}
       observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
-      selectedAlertId={selectedAlertId}
       onClose={() => {}}
     />
   );
 }
-Example.args = {
-  alerts: apmAlertResponseExample,
-} as Args;

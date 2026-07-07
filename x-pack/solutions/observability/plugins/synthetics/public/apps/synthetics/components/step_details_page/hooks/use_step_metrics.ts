@@ -8,6 +8,7 @@
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
+import { useGetUrlParams } from '../../../hooks';
 import { formatBytes } from './use_object_metrics';
 import { formatMillisecond } from '../step_metrics/step_metrics';
 import {
@@ -17,8 +18,8 @@ import {
   LCP_HELP_LABEL,
   TRANSFER_SIZE_HELP,
 } from '../step_metrics/labels';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
-import { JourneyStep } from '../../../../../../common/runtime_types';
+import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
+import type { JourneyStep } from '../../../../../../common/runtime_types';
 
 export const MONITOR_DURATION_US = 'monitor.duration.us';
 export const SYNTHETICS_CLS = 'browser.experience.cls';
@@ -36,9 +37,12 @@ export const useStepMetrics = (step?: JourneyStep) => {
   const checkGroupId = step?.monitor.check_group ?? urlParams.checkGroupId;
   const stepIndex = step?.synthetics.step?.index ?? urlParams.stepIndex;
 
+  const { remoteName } = useGetUrlParams();
+  const index = getSyntheticsCcsIndex(remoteName);
+
   const { data } = useReduxEsSearch(
     {
-      index: SYNTHETICS_INDEX_PATTERN,
+      index,
       size: 0,
       query: {
         bool: {
@@ -89,13 +93,13 @@ export const useStepMetrics = (step?: JourneyStep) => {
         },
       },
     },
-    [],
+    [remoteName],
     { name: `stepMetrics/${checkGroupId}/${stepIndex}` }
   );
 
   const { data: transferData } = useReduxEsSearch(
     {
-      index: SYNTHETICS_INDEX_PATTERN,
+      index,
       size: 0,
       runtime_mappings: {
         'synthetics.payload.transfer_size': {
@@ -131,7 +135,7 @@ export const useStepMetrics = (step?: JourneyStep) => {
         },
       },
     },
-    [],
+    [remoteName],
     {
       name: `stepMetricsFromNetworkInfos/${checkGroupId}/${stepIndex}`,
     }
@@ -146,36 +150,42 @@ export const useStepMetrics = (step?: JourneyStep) => {
         label: STEP_DURATION_LABEL,
         value: metrics?.totalDuration.value,
         formatted: formatMillisecond((metrics?.totalDuration.value ?? 0) / 1000),
+        dataTestSubj: 'synth-step-metric-step-duration',
       },
       {
         value: metrics?.lcp.value,
         label: LCP_LABEL,
         helpText: LCP_HELP_LABEL,
         formatted: formatMillisecond((metrics?.lcp.value ?? 0) / 1000),
+        dataTestSubj: 'synth-step-metric-lcp',
       },
       {
         value: metrics?.fcp.value,
         label: FCP_LABEL,
         helpText: FCP_TOOLTIP,
         formatted: formatMillisecond((metrics?.fcp.value ?? 0) / 1000),
+        dataTestSubj: 'synth-step-metric-fcp',
       },
       {
         value: metrics?.cls.value,
         label: CLS_LABEL,
         helpText: CLS_HELP_LABEL,
         formatted: metrics?.cls.value ?? 0,
+        dataTestSubj: 'synth-step-metric-cls',
       },
       {
         value: metrics?.dcl.value,
         label: DCL_LABEL,
         helpText: DCL_TOOLTIP,
         formatted: formatMillisecond((metrics?.dcl.value ?? 0) / 1000),
+        dataTestSubj: 'synth-step-metric-dcl',
       },
       {
         value: transferDataVal,
         label: TRANSFER_SIZE,
         helpText: TRANSFER_SIZE_HELP,
         formatted: formatBytes(transferDataVal ?? 0),
+        dataTestSubj: 'synth-step-metric-transfer-size',
       },
     ],
   };

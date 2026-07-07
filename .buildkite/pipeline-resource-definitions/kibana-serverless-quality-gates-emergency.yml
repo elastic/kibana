@@ -16,10 +16,15 @@ spec:
     kind: Pipeline
     metadata:
       name: kibana-tests-emergency
-      description: Pipeline that tests the service integration in various environments
+      description: Kibana serverless emergency release quality gates
     spec:
       repository: elastic/kibana
-      pipeline_file: ./.buildkite/pipelines/quality-gates/emergency/pipeline.emergency.kibana-tests.yaml
+      pipeline_file: .buildkite/pipelines/quality-gates/emergency/pipeline.emergency.kibana-tests.yaml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/quality-gates/emergency/pipeline.emergency.kibana-tests.yaml
+            cleanup_sparse_state: true
       provider_settings:
         trigger_mode: none
       teams:
@@ -33,4 +38,4 @@ spec:
           access_level: READ_ONLY
       tags:
         - kibana
-        - kibana-serverless-release
+        - ':kibana: Kibana release path'

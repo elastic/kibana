@@ -9,11 +9,12 @@ Object {
     "checkForFormulas": true,
     "escapeFormulaValues": false,
     "maxConcurrentShardRequests": 5,
+    "maxRows": 10000,
     "maxSizeBytes": ByteSizeValue {
       "valueInBytes": 262144000,
     },
     "scroll": Object {
-      "duration": "30s",
+      "duration": "120s",
       "size": 500,
       "strategy": "pit",
     },
@@ -65,11 +66,12 @@ Object {
     "checkForFormulas": true,
     "escapeFormulaValues": false,
     "maxConcurrentShardRequests": 5,
+    "maxRows": 10000,
     "maxSizeBytes": ByteSizeValue {
       "valueInBytes": 262144000,
     },
     "scroll": Object {
-      "duration": "30s",
+      "duration": "120s",
       "size": 500,
       "strategy": "pit",
     },

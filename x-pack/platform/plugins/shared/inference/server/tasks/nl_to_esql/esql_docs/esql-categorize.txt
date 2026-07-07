@@ -1,30 +1,45 @@
 # CATEGORIZE
 
-The `CATEGORIZE` function organizes textual data into groups of similar format.
-
-> **Note:** The `CATEGORIZE` function is currently in technical preview and may undergo changes or be removed in future releases.
+The CATEGORIZE function groups text messages into categories based on similarly formatted text values. It is useful for identifying patterns and grouping similar log messages or textual data.
 
 ## Syntax
 
-`CATEGORIZE(field)`
+`CATEGORIZE(field, options, output_format, similarity_threshold, analyzer)`
 
 ### Parameters
 
 #### field
 
-The expression that is to be categorized.
+Expression to categorize.
+
+#### options
+
+(Optional) Additional options for categorization, provided as function named parameters.
+
+#### output_format
+
+(keyword) Specifies the output format of the categories. Defaults to regex.
+
+#### similarity_threshold
+
+(integer) Sets the minimum percentage of token weight that must match for text to be added to a category bucket. Must be between 1 and 100. Higher values create narrower categories and increase memory usage. Defaults to 70.
+
+#### analyzer
+
+(keyword) Analyzer used to convert the field into tokens for text categorization.
 
 ## Examples
 
-The following example demonstrates how to use `CATEGORIZE` to group server log messages into categories and then aggregate their counts.
+Groups similar log messages from the `sample_data` source into categories and counts how many messages fall into each category.
 
 ```esql
 FROM sample_data
-| STATS count = COUNT() BY category=CATEGORIZE(message)
+| STATS count=COUNT() BY category=CATEGORIZE(message)
 ```
+This example groups similar log messages into categories and counts the number of messages in each category.
 
 ## Limitations
 
-- `CATEGORIZE` can't be used within other expressions
-- `CATEGORIZE` can't be used with multiple groupings
-- `CATEGORIZE` can't be used or referenced within aggregate functions
+- Cannot be used within other expressions.
+- Cannot be used more than once in the groupings.
+- Cannot be used or referenced within aggregate functions and must be the first grouping.

@@ -6,16 +6,19 @@
  */
 
 import {
-  BooleanRelation,
-  buildCombinedFilter,
   buildPhraseFilter,
+  buildPhrasesFilter,
   type Filter,
   isCombinedFilter,
 } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InfraCustomDashboardAssetType } from '../../../common/custom_dashboards';
 
+// Emits a single `terms` clause (one `TermInSetQuery`) instead of an OR of
+// `match_phrase` filters, which is materially faster at scale (up to 500 host
+// names). `buildPhrasesFilter` supplies the `meta` so the filter bar still
+// renders the "field is one of [...]" pill.
 export const buildCombinedAssetFilter = ({
   field,
   values,
@@ -26,19 +29,20 @@ export const buildCombinedAssetFilter = ({
   dataView?: DataView;
 }) => {
   const indexField = dataView?.getFieldByName(field);
+
+  const termsQuery = { terms: { [field]: values } };
+
   if (!dataView || !indexField) {
     return {
-      query: {
-        terms: {
-          [field]: values,
-        },
-      },
+      query: termsQuery,
       meta: {},
     };
   }
 
-  const filtersFromValues = values.map((value) => buildPhraseFilter(indexField, value, dataView));
-  return buildCombinedFilter(BooleanRelation.OR, filtersFromValues, dataView);
+  return {
+    ...buildPhrasesFilter(indexField, values, dataView),
+    query: termsQuery,
+  };
 };
 
 export const retrieveFieldsFromFilter = (filters: Filter[], fields: string[] = []) => {
@@ -57,7 +61,7 @@ export const retrieveFieldsFromFilter = (filters: Filter[], fields: string[] = [
 
 export const buildAssetIdFilter = (
   assetId: string,
-  assetType: InventoryItemType,
+  assetType: InfraCustomDashboardAssetType,
   dataView: DataView
 ): Filter[] => {
   const assetIdField = dataView.getFieldByName(findInventoryFields(assetType).id);

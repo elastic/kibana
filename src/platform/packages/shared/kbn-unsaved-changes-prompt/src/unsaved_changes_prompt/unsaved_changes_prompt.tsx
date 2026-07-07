@@ -10,7 +10,7 @@
 import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { ApplicationStart, ScopedHistory, OverlayStart, HttpStart } from '@kbn/core/public';
+import type { ApplicationStart, ScopedHistory, OverlayStart, HttpStart } from '@kbn/core/public';
 
 const DEFAULT_BODY_TEXT = i18n.translate('unsavedChangesPrompt.defaultModalText', {
   defaultMessage: `The data will be lost if you leave this page without saving the changes.`,
@@ -42,10 +42,12 @@ interface SpaBlockingProps extends BaseProps {
   cancelButtonText?: string;
   confirmButtonText?: string;
   blockSpaNavigation?: true;
+  shouldPromptOnReplace?: boolean;
 }
 
 interface BrowserBlockingProps extends BaseProps {
   blockSpaNavigation: false;
+  shouldPromptOnReplace?: boolean;
 }
 
 type Props = SpaBlockingProps | BrowserBlockingProps;
@@ -54,7 +56,7 @@ const isSpaBlocking = (props: Props): props is SpaBlockingProps =>
   props.blockSpaNavigation !== false;
 
 export const useUnsavedChangesPrompt = (props: Props) => {
-  const { hasUnsavedChanges, blockSpaNavigation = true } = props;
+  const { hasUnsavedChanges, blockSpaNavigation = true, shouldPromptOnReplace = true } = props;
 
   useEffect(() => {
     if (hasUnsavedChanges) {
@@ -87,7 +89,11 @@ export const useUnsavedChangesPrompt = (props: Props) => {
       cancelButtonText = DEFAULT_CANCEL_BUTTON,
     } = props;
 
-    const unblock = history.block((state) => {
+    const unblock = history.block((state, action) => {
+      if (!shouldPromptOnReplace && action === 'REPLACE') {
+        return;
+      }
+
       async function confirmAsync() {
         const confirmResponse = await openConfirm(messageText, {
           title: titleText,
@@ -113,5 +119,5 @@ export const useUnsavedChangesPrompt = (props: Props) => {
     });
 
     return unblock;
-  }, [hasUnsavedChanges, blockSpaNavigation, props]);
+  }, [hasUnsavedChanges, blockSpaNavigation, shouldPromptOnReplace, props]);
 };

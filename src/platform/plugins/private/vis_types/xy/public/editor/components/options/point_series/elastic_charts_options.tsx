@@ -14,8 +14,8 @@ import { EuiFormRow, EuiRange } from '@elastic/eui';
 import { SelectOption, SwitchOption, PalettePicker } from '@kbn/vis-default-editor-plugin/public';
 
 import { ChartType } from '../../../../../common';
-import { VisParams } from '../../../../types';
-import { ValidationVisOptionsProps } from '../../common';
+import type { VisParams } from '../../../../types';
+import type { ValidationVisOptionsProps } from '../../common';
 import { getPalettesService } from '../../../../services';
 import { getFittingFunctions } from '../../../collections';
 

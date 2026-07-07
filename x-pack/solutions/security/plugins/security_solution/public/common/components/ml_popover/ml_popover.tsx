@@ -11,6 +11,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState, useMemo } from 'react';
@@ -46,6 +47,7 @@ const defaultFilterProps: JobsFilters = {
 };
 
 export const MlPopover = React.memo(() => {
+  const mlPopoverTitleId = useGeneratedHtmlId();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [filterProperties, setFilterProperties] = useState(defaultFilterProps);
   const [mlNodesAvailable, setMlNodesAvailable] = useState(false);
@@ -93,6 +95,7 @@ export const MlPopover = React.memo(() => {
     return (
       <EuiPopover
         anchorPosition="downRight"
+        aria-label={i18n.ML_JOB_SETTINGS}
         id="integrations-popover"
         button={
           <EuiHeaderSectionItemButton
@@ -101,7 +104,7 @@ export const MlPopover = React.memo(() => {
             aria-label={i18n.ML_JOB_SETTINGS}
             color="primary"
             data-test-subj="integrations-button"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
             textProps={{ style: { fontSize: '1rem' } }}
@@ -121,6 +124,7 @@ export const MlPopover = React.memo(() => {
     return (
       <EuiPopover
         anchorPosition="downRight"
+        aria-labelledby={mlPopoverTitleId}
         id="integrations-popover"
         button={
           <EuiHeaderSectionItemButton
@@ -129,7 +133,7 @@ export const MlPopover = React.memo(() => {
             aria-label={i18n.ML_JOB_SETTINGS}
             color="primary"
             data-test-subj="integrations-button"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             onClick={() => {
               setIsPopoverOpen(!isPopoverOpen);
@@ -145,7 +149,7 @@ export const MlPopover = React.memo(() => {
         repositionOnScroll
       >
         <PopoverContentsDiv data-test-subj="ml-popover-contents">
-          <EuiPopoverTitle>{i18n.ML_JOB_SETTINGS}</EuiPopoverTitle>
+          <EuiPopoverTitle id={mlPopoverTitleId}>{i18n.ML_JOB_SETTINGS}</EuiPopoverTitle>
           <PopoverDescription />
 
           <EuiSpacer />
@@ -159,6 +163,7 @@ export const MlPopover = React.memo(() => {
           {incompatibleJobCount > 0 && (
             <>
               <EuiCallOut
+                announceOnMount={false}
                 title={i18n.MODULE_NOT_COMPATIBLE_TITLE(incompatibleJobCount)}
                 color="warning"
                 iconType="warning"

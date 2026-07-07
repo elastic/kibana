@@ -10,6 +10,8 @@ import type { EcsError } from '@elastic/ecs';
 import moment from 'moment/moment';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { keyBy } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { doesActionHaveFileAccess } from '../../../routes/actions/utils';
 import { catchAndWrapError } from '../../../utils';
 import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
 import type { FetchActionResponsesResult } from '../..';
@@ -18,6 +20,7 @@ import type {
   ResponseActionsApiCommandNames,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
+  ACTION_AGENT_FILE_DOWNLOAD_ROUTE,
   ENDPOINT_ACTION_RESPONSES_DS,
   ENDPOINT_ACTIONS_DS,
   failedFleetActionErrorCode,
@@ -38,6 +41,7 @@ import type {
   WithAllKeys,
 } from '../../../../../common/endpoint/types';
 import { ActivityLogItemTypes } from '../../../../../common/endpoint/types';
+import { getFileDownloadId } from '../../../../../common/endpoint/service/response_actions/get_file_download_id';
 
 /**
  * Type guard to check if a given Action is in the shape of the Endpoint Action.
@@ -158,7 +162,13 @@ export const mapResponsesByActionId = (
 
 type ActionCompletionInfo = Pick<
   Required<ActionDetails>,
-  'isCompleted' | 'completedAt' | 'wasSuccessful' | 'errors' | 'outputs' | 'agentState'
+  | 'isCompleted'
+  | 'completedAt'
+  | 'wasSuccessful'
+  | 'wasCanceled'
+  | 'errors'
+  | 'outputs'
+  | 'agentState'
 >;
 
 export const getActionCompletionInfo = <
@@ -178,16 +188,17 @@ export const getActionCompletionInfo = <
     agentState: {},
     isCompleted: Boolean(agentIds.length),
     wasSuccessful: Boolean(agentIds.length),
+    wasCanceled: false,
   };
 
   const responsesByAgentId: ActionResponseByAgentId = mapActionResponsesByAgentId(actionResponses);
 
   for (const agentId of agentIds) {
-    const agentResponses = responsesByAgentId[agentId];
+    const agentResponse = responsesByAgentId[agentId];
 
     // Set the overall Action to not completed if at least
     // one of the agent responses is not complete yet.
-    if (!agentResponses || !agentResponses.isCompleted) {
+    if (!agentResponse || !agentResponse.isCompleted) {
       completedInfo.isCompleted = false;
       completedInfo.wasSuccessful = false;
     }
@@ -196,23 +207,39 @@ export const getActionCompletionInfo = <
     completedInfo.agentState[agentId] = {
       isCompleted: false,
       wasSuccessful: false,
+      wasCanceled: false,
       errors: undefined,
       completedAt: undefined,
     };
 
     // Store the outputs and agent state for any agent that sent a response
-    if (agentResponses) {
-      completedInfo.agentState[agentId].isCompleted = agentResponses.isCompleted;
-      completedInfo.agentState[agentId].wasSuccessful = agentResponses.wasSuccessful;
-      completedInfo.agentState[agentId].completedAt = agentResponses.completedAt;
-      completedInfo.agentState[agentId].errors = agentResponses.errors;
+    if (agentResponse) {
+      completedInfo.agentState[agentId].isCompleted = agentResponse.isCompleted;
+      completedInfo.agentState[agentId].wasSuccessful = agentResponse.wasSuccessful;
+      completedInfo.agentState[agentId].wasCanceled = agentResponse.wasCanceled;
+      completedInfo.agentState[agentId].completedAt = agentResponse.completedAt;
+      completedInfo.agentState[agentId].errors = agentResponse.errors;
 
       if (
-        agentResponses.endpointResponse &&
-        agentResponses.endpointResponse.EndpointActions.data.output
+        agentResponse.endpointResponse &&
+        agentResponse.endpointResponse.EndpointActions.data.output
       ) {
-        completedInfo.outputs[agentId] =
-          agentResponses.endpointResponse.EndpointActions.data.output;
+        completedInfo.outputs[agentId] = agentResponse.endpointResponse.EndpointActions.data.output;
+
+        if (
+          doesActionHaveFileAccess(action.agentType, action.command) &&
+          completedInfo.agentState[agentId].isCompleted &&
+          completedInfo.agentState[agentId].wasSuccessful
+        ) {
+          set(
+            completedInfo.outputs[agentId],
+            'content.downloadUri',
+            ACTION_AGENT_FILE_DOWNLOAD_ROUTE.replace(`{action_id}`, action.id).replace(
+              `{file_id}`,
+              getFileDownloadId(action, agentId)
+            )
+          );
+        }
       }
     }
   }
@@ -234,6 +261,11 @@ export const getActionCompletionInfo = <
         responseErrors.push(
           ...(normalizedAgentResponse.errors ? normalizedAgentResponse.errors : [])
         );
+      }
+
+      if (normalizedAgentResponse.wasCanceled) {
+        completedInfo.wasSuccessful = false;
+        completedInfo.wasCanceled = true;
       }
     }
 
@@ -268,19 +300,27 @@ export const getActionStatus = ({
   expirationDate,
   isCompleted,
   wasSuccessful,
+  wasCanceled,
 }: {
   expirationDate: string;
   isCompleted: boolean;
   wasSuccessful: boolean;
+  wasCanceled: boolean;
 }): { status: ActionDetails['status']; isExpired: boolean } => {
   const isExpired = !isCompleted && expirationDate < new Date().toISOString();
-  const status = isExpired
-    ? 'failed'
-    : isCompleted
-    ? wasSuccessful
-      ? 'successful'
-      : 'failed'
-    : 'pending';
+  let status: ActionDetails['status'] = 'pending';
+
+  if (isExpired) {
+    status = 'failed';
+  } else if (isCompleted) {
+    if (wasCanceled) {
+      status = 'canceled';
+    } else if (wasSuccessful) {
+      status = 'successful';
+    } else {
+      status = 'failed';
+    }
+  }
 
   return { isExpired, status };
 };
@@ -292,6 +332,7 @@ interface NormalizedAgentActionResponse<
   isCompleted: boolean;
   completedAt: undefined | string;
   wasSuccessful: boolean;
+  wasCanceled: boolean;
   errors: undefined | string[];
   fleetResponse: undefined | EndpointActionResponse;
   endpointResponse: undefined | LogsEndpointActionResponse<TOutputContent, TResponseMeta>;
@@ -321,6 +362,7 @@ const mapActionResponsesByAgentId = <
         isCompleted: false,
         completedAt: undefined,
         wasSuccessful: false,
+        wasCanceled: false,
         errors: undefined,
         fleetResponse: undefined,
         endpointResponse: undefined,
@@ -380,6 +422,14 @@ const mapActionResponsesByAgentId = <
       if (errors.length) {
         agentNormalizedResponse.wasSuccessful = false;
         agentNormalizedResponse.errors = errors;
+      }
+
+      if (
+        agentNormalizedResponse.endpointResponse?.EndpointActions?.data?.output?.content
+          ?.canceled_by
+      ) {
+        agentNormalizedResponse.wasSuccessful = false;
+        agentNormalizedResponse.wasCanceled = true;
       }
     }
   }
@@ -581,13 +631,14 @@ export const createActionDetailsRecord = <T extends ActionDetails = ActionDetail
   actionResponses: FetchActionResponsesResult,
   agentHostInfo: Record<string, string>
 ): T => {
-  const { isCompleted, completedAt, wasSuccessful, errors, outputs, agentState } =
+  const { isCompleted, completedAt, wasSuccessful, wasCanceled, errors, outputs, agentState } =
     getActionCompletionInfo(actionRequest, actionResponses);
 
   const { isExpired, status } = getActionStatus({
     expirationDate: actionRequest.expiration,
     isCompleted,
     wasSuccessful,
+    wasCanceled,
   });
 
   const actionDetails: WithAllKeys<ActionDetails> = {
@@ -604,6 +655,7 @@ export const createActionDetailsRecord = <T extends ActionDetails = ActionDetail
     isCompleted,
     completedAt,
     wasSuccessful,
+    wasCanceled,
     errors,
     isExpired,
     status,

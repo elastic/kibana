@@ -11,7 +11,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
-import { NumberOrNull } from '../../../../..';
+import type { NumberOrNull } from '../../../../..';
 import { useChartThemes } from '../../../../../hooks/use_chart_themes';
 
 interface Props {
@@ -27,7 +27,7 @@ export function MetricWithSparkline({ id, formatter, value, timeseries, color }:
   if (!value) {
     return (
       <EuiTextColor color="subdued">
-        <EuiIcon type="visLine" />
+        <EuiIcon type="chartLine" />
          
         <FormattedMessage
           id="xpack.observability.metricWithSparkline.nATextColorLabel"

@@ -5,22 +5,20 @@
  * 2.0.
  */
 
-import { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
-import { Ast } from '@kbn/interpreter';
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { Reference } from '@kbn/content-management-utils';
+import type { IUiSettingsClient, HttpStart } from '@kbn/core/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { difference } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import {
   type EventAnnotationGroupConfig,
   EVENT_ANNOTATION_GROUP_TYPE,
 } from '@kbn/event-annotation-common';
-import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../../../common/constants';
-
 import type {
   Datasource,
   DatasourceMap,
@@ -31,13 +29,23 @@ import type {
   VisualizationMap,
   VisualizeEditorContext,
   SuggestionRequest,
-} from '../../types';
+  DatasourceState,
+  DatasourceStates,
+  VisualizationState,
+  DocumentToExpressionReturnType,
+  LensDocument,
+  TextBasedPersistedState,
+} from '@kbn/lens-common';
+import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../../../common/constants';
+
 import { buildExpression } from './expression_helpers';
-import { LensDocument } from '../../persistence/saved_object_store';
 import { getActiveDatasourceIdFromDoc, sortDataViewRefs } from '../../utils';
-import type { DatasourceState, DatasourceStates, VisualizationState } from '../../state_management';
 import { readFromStorage } from '../../settings_storage';
-import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
+import {
+  loadIndexPatternRefs,
+  loadIndexPatterns,
+  ensureESQLTimeFieldOnAdHocDataViews,
+} from '../../data_views_service/loader';
 import { getDatasourceLayers } from '../../state_management/utils';
 
 // there are 2 ways of coloring, the color mapping where the user can map specific colors to
@@ -55,7 +63,7 @@ const COLORING_METHOD: SuggestionRequest['mainPalette'] = COLOR_MAPPING_OFF_BY_D
 
 function getIndexPatterns(
   annotationGroupDataviewIds: string[],
-  references?: SavedObjectReference[],
+  references?: Reference[],
   initialContext?: VisualizeFieldContext | VisualizeEditorContext,
   initialId?: string,
   adHocDataviews?: string[]
@@ -126,7 +134,7 @@ export async function initializeDataViews(
     datasourceStates: DatasourceStates;
     defaultIndexPatternId: string;
     storage: IStorageWrapper;
-    references?: SavedObjectReference[];
+    references?: Reference[];
     initialContext?: VisualizeFieldContext | VisualizeEditorContext;
     adHocDataViews?: Record<string, DataViewSpec>;
     annotationGroups: Record<string, EventAnnotationGroupConfig>;
@@ -199,7 +207,7 @@ export async function initializeDataViews(
 
 const initializeEventAnnotationGroups = async (
   eventAnnotationService: EventAnnotationServiceType,
-  references?: SavedObjectReference[]
+  references?: Reference[]
 ) => {
   const annotationGroups: Record<string, EventAnnotationGroupConfig> = {};
 
@@ -232,6 +240,7 @@ export async function initializeSources(
     references,
     initialContext,
     adHocDataViews,
+    http,
   }: {
     dataViews: DataViewsContract;
     eventAnnotationService: EventAnnotationServiceType;
@@ -241,9 +250,10 @@ export async function initializeSources(
     datasourceStates: DatasourceStates;
     defaultIndexPatternId: string;
     storage: IStorageWrapper;
-    references?: SavedObjectReference[];
+    references?: Reference[];
     initialContext?: VisualizeFieldContext | VisualizeEditorContext;
     adHocDataViews?: Record<string, DataViewSpec>;
+    http?: HttpStart;
   },
   options?: InitializationOptions
 ) {
@@ -251,6 +261,17 @@ export async function initializeSources(
     eventAnnotationService,
     references
   );
+
+  // Regenerate ESQL ad-hoc DataViews once at editor initialization.
+  // This replaces potentially stale persisted specs with fresh ones derived
+  // from the actual ES|QL queries, including time field detection via http.
+  const textBasedState = datasourceStates.textBased?.state as TextBasedPersistedState | undefined;
+  const refreshedAdHocDataViews = await ensureESQLTimeFieldOnAdHocDataViews({
+    adHocDataViews: adHocDataViews ?? {},
+    textBasedState,
+    dataViewsService: dataViews,
+    http,
+  });
 
   const { indexPatternRefs, indexPatterns } = await initializeDataViews(
     {
@@ -261,7 +282,7 @@ export async function initializeSources(
       storage,
       defaultIndexPatternId,
       references,
-      adHocDataViews,
+      adHocDataViews: refreshedAdHocDataViews,
       annotationGroups,
     },
     options
@@ -302,7 +323,7 @@ export function initializeVisualization({
   visualizationState: VisualizationState;
   visualizationMap: VisualizationMap;
   datasourceStates: DatasourceStates;
-  references?: SavedObjectReference[];
+  references?: Reference[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   annotationGroups: Record<string, EventAnnotationGroupConfig>;
 }) {
@@ -334,7 +355,7 @@ export function initializeDatasources({
   datasourceStates: DatasourceStates;
   indexPatterns: Record<string, IndexPattern>;
   indexPatternRefs: IndexPatternRef[];
-  references?: SavedObjectReference[];
+  references?: Reference[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
 }) {
   // init datasources
@@ -354,14 +375,6 @@ export function initializeDatasources({
   return states;
 }
 
-export interface DocumentToExpressionReturnType {
-  ast: Ast | null;
-  indexPatterns: IndexPatternMap;
-  indexPatternRefs: IndexPatternRef[];
-  activeVisualizationState: unknown;
-  activeDatasourceState: unknown;
-}
-
 export async function persistedStateToExpression(
   datasourceMap: DatasourceMap,
   visualizations: VisualizationMap,
@@ -374,6 +387,7 @@ export async function persistedStateToExpression(
     nowProvider: DataPublicPluginStart['nowProvider'];
     eventAnnotationService: EventAnnotationServiceType;
     forceDSL?: boolean;
+    http?: HttpStart;
   }
 ): Promise<DocumentToExpressionReturnType> {
   const {
@@ -410,6 +424,19 @@ export async function persistedStateToExpression(
       { isLoading: false, state },
     ])
   );
+
+  // Ensure ESQL ad-hoc DataViews have the correct time field before
+  // initializing DataViews — same as in initializeSources for the editor path.
+  const textBasedState = datasourceStatesFromSO.textBased?.state as
+    | TextBasedPersistedState
+    | undefined;
+  const refreshedAdHocDataViews = await ensureESQLTimeFieldOnAdHocDataViews({
+    adHocDataViews: adHocDataViews ?? {},
+    textBasedState,
+    dataViewsService: services.dataViews,
+    http: services.http,
+  });
+
   const { indexPatterns, indexPatternRefs } = await initializeDataViews(
     {
       datasourceMap,
@@ -418,7 +445,7 @@ export async function persistedStateToExpression(
       dataViews: services.dataViews,
       storage: services.storage,
       defaultIndexPatternId: services.uiSettings.get('defaultIndex'),
-      adHocDataViews,
+      adHocDataViews: refreshedAdHocDataViews,
       annotationGroups,
     },
     { isFullEditor: false }
@@ -436,6 +463,7 @@ export async function persistedStateToExpression(
     visualizationState: {
       state: persistedVisualizationState,
       activeId: visualizationType,
+      selectedLayerId: null,
     },
     datasourceStates,
     annotationGroups,

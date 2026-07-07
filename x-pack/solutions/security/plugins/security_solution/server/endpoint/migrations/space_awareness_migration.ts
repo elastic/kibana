@@ -7,18 +7,18 @@
 
 /* eslint-disable require-atomic-updates */
 
-import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { UpdateExceptionListItemOptions } from '@kbn/lists-plugin/server';
 import pMap from 'p-map';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
+import { type Logger } from '@kbn/core/server';
 import type {
   BulkRequest,
   SearchRequest,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { clone, pick } from 'lodash';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../services/actions/constants';
 import { GLOBAL_ARTIFACT_TAG } from '../../../common/endpoint/service/artifacts';
 import { ensureActionRequestsIndexIsConfigured } from '../services';
@@ -34,30 +34,26 @@ import type {
 } from '../../../common/endpoint/types';
 import { createEsSearchIterable } from '../utils/create_es_search_iterable';
 import { stringify } from '../utils/stringify';
-import { REFERENCE_DATA_SAVED_OBJECT_TYPE } from '../lib/reference_data';
+import type { MigrationMetadata, ReferenceDataClientInterface } from '../lib/reference_data';
+import { REF_DATA_KEYS } from '../lib/reference_data';
 import {
   buildSpaceOwnerIdTag,
   hasArtifactOwnerSpaceId,
   hasGlobalOrPerPolicyTag,
 } from '../../../common/endpoint/service/artifacts/utils';
-import { catchAndWrapError, wrapErrorIfNeeded } from '../utils';
+import { catchAndWrapError } from '../utils';
 import { QueueProcessor } from '../utils/queue_processor';
 import type { EndpointAppContextService } from '../endpoint_app_context_services';
 import type { ReferenceDataSavedObject } from '../lib/reference_data/types';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../common/endpoint/constants';
 
 const LOGGER_KEY = 'migrateEndpointDataToSupportSpaces';
-export const ARTIFACTS_MIGRATION_REF_DATA_ID = 'SPACE-AWARENESS-ARTIFACT-MIGRATION' as const;
+export const ARTIFACTS_MIGRATION_REF_DATA_ID = REF_DATA_KEYS.spaceAwarenessArtifactMigration;
 export const RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID =
-  'SPACE-AWARENESS-RESPONSE-ACTIONS-MIGRATION' as const;
+  REF_DATA_KEYS.spaceAwarenessResponseActionsMigration;
 export const NOT_FOUND_VALUE = 'MIGRATION:NOT-FOUND';
 
-export type MigrationStateReferenceData = ReferenceDataSavedObject<{
-  started: string;
-  finished: string;
-  status: 'not-started' | 'complete' | 'pending';
-  data?: unknown;
-}>;
+export type MigrationStateReferenceData = ReferenceDataSavedObject<MigrationMetadata>;
 
 type PolicyPartialUpdate = Pick<LogsEndpointAction, 'originSpaceId'> & {
   tags?: LogsEndpointAction['tags'];
@@ -67,97 +63,66 @@ type PolicyPartialUpdate = Pick<LogsEndpointAction, 'originSpaceId'> & {
 export const migrateEndpointDataToSupportSpaces = async (
   endpointService: EndpointAppContextService
 ): Promise<void> => {
-  const logger = endpointService.createLogger(LOGGER_KEY);
-
-  if (!endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-    logger.debug('Space awareness feature flag is disabled. Nothing to do.');
-    return;
-  }
-
   await Promise.all([
     migrateArtifactsToSpaceAware(endpointService),
     migrateResponseActionsToSpaceAware(endpointService),
   ]);
 };
 
-// TODO:PT move this to a new data access client
 const getMigrationState = async (
-  soClient: SavedObjectsClientContract,
-  logger: Logger,
+  refDataClient: ReferenceDataClientInterface,
   id: typeof ARTIFACTS_MIGRATION_REF_DATA_ID | typeof RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID
 ): Promise<MigrationStateReferenceData> => {
-  return soClient
-    .get<MigrationStateReferenceData>(REFERENCE_DATA_SAVED_OBJECT_TYPE, id)
-    .then((response) => {
-      logger.debug(`Retrieved migration state for [${id}]\n${stringify(response)}`);
-      return response.attributes;
-    })
-    .catch(async (err) => {
-      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        logger.debug(`Creating migration state for [${id}]`);
-
-        const createResponse = await soClient
-          .create<MigrationStateReferenceData>(
-            REFERENCE_DATA_SAVED_OBJECT_TYPE,
-            {
-              id,
-              type: 'MIGRATION',
-              owner: 'EDR',
-              metadata: {
-                started: '',
-                finished: '',
-                status: 'not-started',
-              },
-            },
-            { id }
-          )
-          .catch(catchAndWrapError);
-
-        return createResponse.attributes;
-      }
-
-      throw wrapErrorIfNeeded(err, `Failed to retrieve migration state for [${id}]`);
-    });
+  return refDataClient.get<MigrationStateReferenceData['metadata']>(id);
 };
 
-// TODO:PT move this to a new data access client
 const updateMigrationState = async (
-  soClient: SavedObjectsClientContract,
+  refDataClient: ReferenceDataClientInterface,
   id: typeof ARTIFACTS_MIGRATION_REF_DATA_ID | typeof RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID,
   update: MigrationStateReferenceData
 ): Promise<MigrationStateReferenceData> => {
-  await soClient
-    .update<MigrationStateReferenceData>(REFERENCE_DATA_SAVED_OBJECT_TYPE, id, update, {
-      refresh: 'wait_for',
-    })
-    .catch(catchAndWrapError);
-
-  return update;
+  return refDataClient.update<MigrationStateReferenceData['metadata']>(id, update);
 };
 
 const migrateArtifactsToSpaceAware = async (
   endpointService: EndpointAppContextService
 ): Promise<void> => {
   const logger = endpointService.createLogger(LOGGER_KEY, 'artifacts');
-  const soClient = endpointService.savedObjects.createInternalScopedSoClient({ readonly: false });
-  const migrationState = await getMigrationState(soClient, logger, ARTIFACTS_MIGRATION_REF_DATA_ID);
+  const refDataClient = endpointService.getReferenceDataClient();
+  const migrationState = await getMigrationState(refDataClient, ARTIFACTS_MIGRATION_REF_DATA_ID);
 
-  if (migrationState.metadata.status !== 'not-started') {
+  // If migration has already been run and the version was 2 or higher -or- the status is pending (already running),
+  // then we don't need to run it again
+  if (
+    (migrationState.metadata.status === 'complete' &&
+      (migrationState.metadata.version ?? 0) >= 2) ||
+    migrationState.metadata.status === 'pending'
+  ) {
     logger.debug(
-      `Migration for endpoint artifacts in support of spaces has a status of [${migrationState.metadata.status}]. Nothing to do.`
+      `Migration (v2) for endpoint artifacts in support of spaces has a status of [${migrationState.metadata.status}], version [${migrationState.metadata.version}]. Nothing to do.`
     );
     return;
   }
 
-  logger.info(`starting migration of endpoint artifacts in support of spaces`);
+  logger.debug(`starting migration (v2) of endpoint artifacts in support of spaces`);
 
+  // If there are statuses about a prior run, then store a clone of it in the migration object for reference
+  const priorRunData =
+    migrationState.metadata.status === 'complete' ? clone(migrationState.metadata) : undefined;
+
+  // Migration version history:
+  // V1: original migration of artifacts with release 9.1.0
+  // v2: fixes for migration issue: https://github.com/elastic/kibana/issues/238711
+  migrationState.metadata.version = 2;
   migrationState.metadata.status = 'pending';
   migrationState.metadata.started = new Date().toISOString();
-  await updateMigrationState(soClient, ARTIFACTS_MIGRATION_REF_DATA_ID, migrationState);
+  migrationState.metadata.finished = '';
+  migrationState.metadata.data = undefined;
+
+  await updateMigrationState(refDataClient, ARTIFACTS_MIGRATION_REF_DATA_ID, migrationState);
 
   const exceptionsClient = endpointService.getExceptionListsClient();
   const listIds: string[] = Object.values(ENDPOINT_ARTIFACT_LISTS).map(({ id }) => id);
-  listIds.push(ENDPOINT_LIST_ID);
 
   logger.debug(`artifact list ids to process: ${listIds.join(', ')}`);
 
@@ -175,15 +140,36 @@ const migrateArtifactsToSpaceAware = async (
 
       return acc;
     }, {} as Record<string, { success: number; failed: number; errors: string[] }>),
+    priorRuns: [] as Array<typeof migrationState.metadata>,
   };
 
   migrationState.metadata.data = migrationStats;
 
+  if (priorRunData) {
+    migrationStats.priorRuns.push(
+      ...((priorRunData.data as typeof migrationStats)?.priorRuns ?? [])
+    );
+
+    migrationStats.priorRuns.push({
+      ...(pick(priorRunData, [
+        'status',
+        'started',
+        'finished',
+        'version',
+      ]) as typeof migrationState.metadata),
+      data: pick(priorRunData.data as typeof migrationStats, [
+        'totalItems',
+        'itemsNeedingUpdates',
+        'successUpdates',
+        'failedUpdates',
+        'artifacts',
+      ]),
+    });
+  }
+
   const updateProcessor = new QueueProcessor<UpdateExceptionListItemOptions & { listId: string }>({
     batchSize: 50,
     batchHandler: async ({ data: artifactUpdates }) => {
-      // TODO:PT add a `bulkUpdate()` to the exceptionsListClient
-
       migrationStats.itemsNeedingUpdates += artifactUpdates.length;
 
       await pMap(
@@ -207,7 +193,7 @@ const migrateArtifactsToSpaceAware = async (
         { stopOnError: false, concurrency: 10 }
       );
 
-      await updateMigrationState(soClient, ARTIFACTS_MIGRATION_REF_DATA_ID, migrationState);
+      await updateMigrationState(refDataClient, ARTIFACTS_MIGRATION_REF_DATA_ID, migrationState);
     },
   });
 
@@ -217,9 +203,9 @@ const migrateArtifactsToSpaceAware = async (
       namespaceType: listIds.map(() => 'agnostic'),
       filter: listIds.map(
         // Find all artifacts that do NOT have a space owner id tag
-        () => `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`
+        () => `NOT exception-list-agnostic.attributes.tags:(ownerSpaceId*)`
       ),
-      perPage: undefined,
+      perPage: 1_000,
       sortField: undefined,
       sortOrder: undefined,
       maxSize: undefined,
@@ -252,7 +238,10 @@ const migrateArtifactsToSpaceAware = async (
             };
 
             // Ensure that Endpoint Exceptions all have the `global` tag if no assignment tag is currently assigned to the artifact
-            if (artifact.list_id === ENDPOINT_LIST_ID && !hasGlobalOrPerPolicyTag(artifact)) {
+            if (
+              artifact.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id &&
+              !hasGlobalOrPerPolicyTag(artifact)
+            ) {
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               artifactUpdate.tags!.push(GLOBAL_ARTIFACT_TAG);
             }
@@ -268,9 +257,9 @@ const migrateArtifactsToSpaceAware = async (
 
   migrationState.metadata.status = 'complete';
   migrationState.metadata.finished = new Date().toISOString();
-  await updateMigrationState(soClient, ARTIFACTS_MIGRATION_REF_DATA_ID, migrationState);
+  await updateMigrationState(refDataClient, ARTIFACTS_MIGRATION_REF_DATA_ID, migrationState);
 
-  logger.info(
+  logger.debug(
     `migration of endpoint artifacts in support of spaces done.\n${JSON.stringify(
       migrationStats,
       null,
@@ -283,10 +272,9 @@ const migrateResponseActionsToSpaceAware = async (
   endpointService: EndpointAppContextService
 ): Promise<void> => {
   const logger = endpointService.createLogger(LOGGER_KEY, 'responseActions');
-  const soClient = endpointService.savedObjects.createInternalScopedSoClient({ readonly: false });
+  const refDataClient = endpointService.getReferenceDataClient();
   const migrationState = await getMigrationState(
-    soClient,
-    logger,
+    refDataClient,
     RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID
   );
 
@@ -297,7 +285,7 @@ const migrateResponseActionsToSpaceAware = async (
     return;
   }
 
-  logger.info(`starting migration of endpoint response actions in support of spaces`);
+  logger.debug(`starting migration of endpoint response actions in support of spaces`);
 
   const migrationStats = {
     totalItems: 0,
@@ -311,7 +299,7 @@ const migrateResponseActionsToSpaceAware = async (
   migrationState.metadata.status = 'pending';
   migrationState.metadata.started = new Date().toISOString();
   migrationState.metadata.data = migrationStats;
-  await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
+  await updateMigrationState(refDataClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
 
   const indexInfo = await ensureResponseActionsIndexHasRequiredMappings(endpointService);
 
@@ -322,7 +310,11 @@ const migrateResponseActionsToSpaceAware = async (
   if (!indexInfo.successful) {
     migrationState.metadata.status = 'complete';
     migrationState.metadata.finished = new Date().toISOString();
-    await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
+    await updateMigrationState(
+      refDataClient,
+      RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID,
+      migrationState
+    );
 
     return;
   }
@@ -334,7 +326,11 @@ const migrateResponseActionsToSpaceAware = async (
     migrationState.metadata.status = 'complete';
     migrationState.metadata.finished = new Date().toISOString();
     migrationStats.warnings.push(exitMessage);
-    await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
+    await updateMigrationState(
+      refDataClient,
+      RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID,
+      migrationState
+    );
 
     return;
   }
@@ -399,7 +395,11 @@ const migrateResponseActionsToSpaceAware = async (
       }
 
       // Write stats so we can see intermediate stats if required
-      await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
+      await updateMigrationState(
+        refDataClient,
+        RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID,
+        migrationState
+      );
     },
   });
 
@@ -454,9 +454,9 @@ const migrateResponseActionsToSpaceAware = async (
 
   migrationState.metadata.status = 'complete';
   migrationState.metadata.finished = new Date().toISOString();
-  await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
+  await updateMigrationState(refDataClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
 
-  logger.info(
+  logger.debug(
     `migration of endpoint response actions in support of spaces done.\n${JSON.stringify(
       migrationStats,
       null,
@@ -500,8 +500,6 @@ class AgentPolicyInfoBuilder {
   ) {}
 
   public async buildPolicyUpdate(actionRequest: LogsEndpointAction): Promise<ActionPolicyInfo> {
-    // TODO: trigger retrieval of agent records and package polices for those agents in bulk??
-
     const agentsPolicyInfo = (
       Array.isArray(actionRequest.agent.id) ? actionRequest.agent.id : [actionRequest.agent.id]
     ).map((agentId) => {
@@ -838,20 +836,10 @@ const ensureResponseActionsIndexHasRequiredMappings = async (
 
   logger.debug(
     () =>
-      `Index already exists [${indexExists}]. Currently installed endpoint package:${stringify(
+      `Does DS index already exists: ${indexExists}\nCurrently installed endpoint package:${stringify(
         installedEndpointPackages
       )}`
   );
-
-  // If current installed package is 9.1, then nothing to do. Mapping are included in that package version.
-  if (
-    installedEndpointPackages.items.some((endpointPackage) =>
-      endpointPackage.version.startsWith('9.1')
-    )
-  ) {
-    logger.debug(`Endpoint package version 9.1.* already installed. Nothing to do.`);
-    return response;
-  }
 
   // If the index does not exist and Endpoint package is not installed, then this must be an env.
   // where the use of security and/or Fleet is not being utilized.

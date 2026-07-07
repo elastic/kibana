@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import {
+import type {
   ExecutedWatchDetails,
   ExecutedWatchResults,
 } from '../../../../../../common/types/watch_types';
@@ -207,7 +207,7 @@ export const SimulateWatchResultsFlyout = ({
 
   const conditionMetStatus = (details?.result?.condition?.met && (
     <>
-      <EuiIcon color="green" type="check" data-test-subj="conditionMetStatus" />{' '}
+      <EuiIcon color="green" type="check" data-test-subj="conditionMetStatus" aria-hidden={true} />{' '}
       <FormattedMessage
         id="xpack.watcher.sections.watchEdit.simulateResults.conditionMetStatus"
         defaultMessage="Condition met"
@@ -215,7 +215,12 @@ export const SimulateWatchResultsFlyout = ({
     </>
   )) || (
     <>
-      <EuiIcon color="subdued" type="cross" data-test-subj="conditionNotMetStatus" />{' '}
+      <EuiIcon
+        color="subdued"
+        type="cross"
+        data-test-subj="conditionNotMetStatus"
+        aria-hidden={true}
+      />{' '}
       <FormattedMessage
         id="xpack.watcher.sections.watchEdit.simulateResults.conditionNotMetStatus"
         defaultMessage="Condition not met"
@@ -256,6 +261,12 @@ export const SimulateWatchResultsFlyout = ({
             </EuiText>
             <EuiSpacer size="m" />
             <EuiBasicTable
+              tableCaption={i18n.translate(
+                'xpack.watcher.sections.watchEdit.simulateResults.actionsTableCaption',
+                {
+                  defaultMessage: 'Simulation action results',
+                }
+              )}
               columns={columns}
               items={actionsTableData}
               data-test-subj="simulateResultsTable"

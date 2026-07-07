@@ -6,15 +6,16 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import {
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import type {
   ITelemetryClient,
   DatasetDetailsEbtProps,
-  DatasetQualityTelemetryEventTypes,
   DatasetDetailsNavigatedEbtProps,
   DatasetDetailsTrackingState,
   DatasetNavigatedEbtProps,
+  FailureStoreUpdateEbtProps,
 } from './types';
+import { DatasetQualityTelemetryEventTypes } from './types';
 
 export class TelemetryClient implements ITelemetryClient {
   private datasetDetailsTrackingId = '';
@@ -61,5 +62,9 @@ export class TelemetryClient implements ITelemetryClient {
       ...eventProps,
       tracking_id: this.datasetDetailsTrackingId,
     });
+  };
+
+  public trackFailureStoreUpdated = (eventProps: FailureStoreUpdateEbtProps) => {
+    this.analytics.reportEvent(DatasetQualityTelemetryEventTypes.FAILURE_STORE_UPDATED, eventProps);
   };
 }

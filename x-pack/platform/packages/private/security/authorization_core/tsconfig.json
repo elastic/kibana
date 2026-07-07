@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": ["jest", "node", "react"]
@@ -12,7 +12,7 @@
     "@kbn/security-authorization-core-common",
     "@kbn/security-plugin-types-common",
     "@kbn/security-plugin-types-server",
-    "@kbn/licensing-plugin",
     "@kbn/core-security-server",
+    "@kbn/licensing-types",
   ]
 }

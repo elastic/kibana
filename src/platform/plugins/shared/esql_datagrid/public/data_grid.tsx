@@ -8,13 +8,13 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { zipObject } from 'lodash';
+import { zipObject, isEqual } from 'lodash';
+import type { UnifiedDataTableRenderCustomToolbarProps } from '@kbn/unified-data-table';
 import {
   UnifiedDataTable,
   DataLoadingState,
   type SortOrder,
   renderCustomToolbar,
-  UnifiedDataTableRenderCustomToolbarProps,
 } from '@kbn/unified-data-table';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText, EuiIcon } from '@elastic/eui';
@@ -45,6 +45,7 @@ interface ESQLDataGridProps {
   initialColumns?: DatatableColumn[];
   initialRowHeight?: number;
   controlColumnIds?: string[];
+  isApproximate?: boolean;
 }
 
 const sortOrder: SortOrder[] = [];
@@ -54,9 +55,16 @@ const ROWS_PER_PAGE_OPTIONS = [10, 25];
 
 const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
-  const [activeColumns, setActiveColumns] = useState<string[]>(
-    (props.initialColumns || (props.isTableView ? props.columns : [])).map((c) => c.name)
+  const columnsIdentity = useMemo(
+    () => (props.initialColumns || (props.isTableView ? props.columns : [])).map((c) => c.name),
+    [props.initialColumns, props.isTableView, props.columns]
   );
+  const [prevColumnsIdentity, setPrevColumnsIdentity] = useState(columnsIdentity);
+  const [activeColumns, setActiveColumns] = useState<string[]>(columnsIdentity);
+  if (!isEqual(columnsIdentity, prevColumnsIdentity)) {
+    setPrevColumnsIdentity(columnsIdentity);
+    setActiveColumns(columnsIdentity);
+  }
   const [rowHeight, setRowHeight] = useState<number>(
     props.initialRowHeight ?? DEFAULT_INITIAL_ROW_HEIGHT
   );
@@ -76,6 +84,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       <RowViewer
         dataView={props.dataView}
         notifications={props.core.notifications}
+        chrome={props.core.chrome}
         hit={hit}
         hits={displayedRows}
         columns={displayedColumns}
@@ -91,7 +100,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         setExpandedDoc={setExpandedDoc}
       />
     ),
-    [activeColumns, props.core.notifications, props.dataView, props.flyoutType]
+    [activeColumns, props.core.notifications, props.core.chrome, props.dataView, props.flyoutType]
   );
 
   const columnsMeta = useMemo(() => {
@@ -147,6 +156,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         timeRange: props.data.query.timefilter.timefilter.getTime(),
         query: props.query,
         columns: activeColumns,
+        ...(typeof props.isApproximate === 'boolean' && { isApproximate: props.isApproximate }),
       });
       return renderCustomToolbar({
         ...customToolbarProps,
@@ -171,6 +181,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
                 type="discoverApp"
                 size="s"
                 color="primary"
+                aria-hidden={true}
                 css={css`
                   margin-right: 4px;
                 `}
@@ -191,6 +202,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       props.data.query.timefilter.timefilter,
       props.dataView,
       props.query,
+      props.isApproximate,
     ]
   );
 

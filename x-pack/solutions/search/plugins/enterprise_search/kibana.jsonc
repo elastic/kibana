@@ -16,26 +16,26 @@
     "requiredPlugins": [
       "data",
       "features",
+      "indexManagement",
       "licensing",
       "logsShared",
       "logsDataAccess",
       "esUiShared",
       "navigation",
+      "searchHomepage",
+      "searchNavigation",
       "uiActions"
     ],
     "optionalPlugins": [
       "customIntegrations",
       "globalSearch",
       "home",
-      "indexManagement",
       "ml",
       "security",
       "spaces",
       "usageCollection",
-      "guidedOnboarding",
       "console",
       "contentConnectors",
-      "searchNavigation",
       "searchPlayground",
       "embeddable",
       "discover",
@@ -43,8 +43,7 @@
       "cloud",
       "lens",
       "share",
-      "fleet",
-      "searchIndices"
+      "fleet"
     ],
     "requiredBundles": ["kibanaReact"]
   }

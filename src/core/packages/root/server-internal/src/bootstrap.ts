@@ -9,7 +9,8 @@
 
 import chalk from 'chalk';
 import { getPackages } from '@kbn/repo-packages';
-import { CliArgs, Env, RawConfigService } from '@kbn/config';
+import type { CliArgs } from '@kbn/config';
+import { Env, RawConfigService } from '@kbn/config';
 import { CriticalError } from '@kbn/core-base-server-internal';
 import { Root } from './root';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
@@ -53,6 +54,14 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   const rootLogger = root.logger.get('root');
 
   rootLogger.info('Kibana is starting');
+
+  // We will invert this message once we switch from opt-in to opt-out for code generation from strings.
+  // See https://github.com/elastic/kibana/issues/272315
+  if (isCodeGenerationFromStringsDisallowed()) {
+    rootLogger.info(
+      'Code generation from strings has been disallowed on this Kibana instance (--disallow-code-generation-from-strings)'
+    );
+  }
 
   cliLogger.debug('Kibana configurations evaluated in this order: ' + env.configs.join(', '));
 
@@ -129,17 +138,27 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   }
 }
 
-function onRootShutdown(reason?: any) {
-  if (reason !== undefined) {
-    if (reason.code !== MIGRATION_EXCEPTION_CODE) {
+function isCodeGenerationFromStringsDisallowed(): boolean {
+  try {
+    // eslint-disable-next-line no-new-func -- we are intentionally trying to execute code generation from strings
+    new Function('');
+    return false;
+  } catch {
+    return true;
+  }
+}
+
+function onRootShutdown(error?: any) {
+  if (error !== undefined) {
+    if (error.code !== MIGRATION_EXCEPTION_CODE) {
       // There is a chance that logger wasn't configured properly and error that
       // that forced root to shut down could go unnoticed. To prevent this we always
       // mirror such fatal errors in standard output with `console.error`.
       // eslint-disable-next-line no-console
-      console.error(`\n${chalk.white.bgRed(' FATAL ')} ${reason}\n`);
+      console.error(`\n${chalk.white.bgRed(' FATAL ')} ${error}\n`);
     }
 
-    process.exit(reason instanceof CriticalError ? reason.processExitCode : 1);
+    process.exit(error instanceof CriticalError ? error.processExitCode : 1);
   }
 
   process.exit(0);

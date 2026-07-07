@@ -21,7 +21,8 @@ function dynamic<TElement extends React.ComponentType<any>, TRef = {}>(loader: L
   ));
 }
 
-export { usePerformanceContext } from './context/use_performance_context';
+export { PerformanceContext, usePerformanceContext } from './context/use_performance_context';
 export { perfomanceMarkers } from './performance_markers';
 export { usePageReady } from './context/use_page_ready';
+export { type Meta } from './context/performance_context';
 export const PerformanceContextProvider = dynamic(() => import('./context/performance_context'));

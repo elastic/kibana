@@ -10,13 +10,14 @@ import nodeCrypto from '@elastic/node-crypto';
 import { createHash, randomBytes } from 'crypto';
 import { promisify } from 'util';
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger, SessionStorageSetOptions } from '@kbn/core/server';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { SessionCookie } from './session_cookie';
 import {
   SessionConcurrencyLimitError,
+  SessionErrorReason,
   SessionExpiredError,
   SessionMissingError,
   SessionUnexpectedError,
@@ -29,7 +30,7 @@ import type { ConfigType } from '../config';
 /**
  * The shape of the value that represents user's session information.
  */
-export interface SessionValue {
+export interface SessionValue<TState = unknown> {
   /**
    * Unique session ID.
    */
@@ -68,7 +69,7 @@ export interface SessionValue {
    * Session value that is fed to the authentication provider. The shape is unknown upfront and
    * entirely determined by the authentication provider that owns the current session.
    */
-  state: unknown;
+  state: TState;
 
   /**
    * Unique identifier of the user profile, if any. Not all users that have session will have an associated user
@@ -138,12 +139,19 @@ export class Session {
   private readonly crypto: Crypto;
 
   /**
+   * Dedicated logger for session invalidation events, allowing them to be managed
+   * independently of general session logs.
+   */
+  private readonly invalidationLogger: Logger;
+
+  /**
    * Promise-based version of the NodeJS native `randomBytes`.
    */
   private readonly randomBytes = promisify(randomBytes);
 
   constructor(private readonly options: Readonly<SessionOptions>) {
     this.crypto = nodeCrypto({ encryptionKey: this.options.config.encryptionKey });
+    this.invalidationLogger = this.options.logger.get('invalidation');
   }
 
   /**
@@ -170,14 +178,22 @@ export class Session {
 
     const sessionLogger = this.getLoggerForSID(sessionCookieValue.sid);
     const now = Date.now();
-    if (
-      (sessionCookieValue.idleTimeoutExpiration &&
-        sessionCookieValue.idleTimeoutExpiration < now) ||
-      (sessionCookieValue.lifespanExpiration && sessionCookieValue.lifespanExpiration < now)
-    ) {
+    const idleExpired =
+      sessionCookieValue.idleTimeoutExpiration && sessionCookieValue.idleTimeoutExpiration < now;
+    const lifespanExpired =
+      sessionCookieValue.lifespanExpiration && sessionCookieValue.lifespanExpiration < now;
+
+    if (idleExpired || lifespanExpired) {
       sessionLogger.debug('Session has expired and will be invalidated.');
+      this.invalidationLogger.debug(
+        `Invalidating session: ${lifespanExpired ? 'lifespan' : 'idle'} timeout expired.`
+      );
       await this.invalidate(request, { match: 'current' });
-      return { error: new SessionExpiredError(), value: null };
+      // Prefer lifespan if both expired (lifespan is the hard limit)
+      const reason = lifespanExpired
+        ? SessionErrorReason.SESSION_LIFESPAN_TIMEOUT
+        : SessionErrorReason.SESSION_IDLE_TIMEOUT;
+      return { error: new SessionExpiredError(reason), value: null };
     }
 
     const sessionIndexValue = await this.options.sessionIndex.get(sessionCookieValue.sid);
@@ -198,6 +214,7 @@ export class Session {
       sessionLogger.warn(
         `Unable to decrypt session content, session will be invalidated: ${err.message}`
       );
+      this.invalidationLogger.warn('Invalidating session: content decryption failed.');
       await this.invalidate(request, { match: 'current' });
       return { error: new SessionUnexpectedError(), value: null };
     }
@@ -218,6 +235,7 @@ export class Session {
       sessionLogger.warn(
         'Session is outside the concurrent session limit and will be invalidated.'
       );
+      this.invalidationLogger.warn('Invalidating session: concurrent session limit exceeded.');
       await this.invalidate(request, { match: 'current' });
       return { error: new SessionConcurrencyLimitError(), value: null };
     }
@@ -236,6 +254,7 @@ export class Session {
    * Creates new session document in the session index encrypting sensitive state.
    * @param request Request instance to create session value for.
    * @param sessionValue Session value parameters.
+   * @param stateCookieOptions Options to change the associated session cookie's properties
    */
   async create(
     request: KibanaRequest,
@@ -244,7 +263,8 @@ export class Session {
         SessionValue,
         'sid' | 'idleTimeoutExpiration' | 'lifespanExpiration' | 'createdAt' | 'metadata'
       >
-    >
+    >,
+    stateCookieOptions?: SessionStorageSetOptions
   ) {
     const [sid, aad] = await Promise.all([
       this.randomBytes(SID_BYTE_LENGTH).then((sidBuffer) => sidBuffer.toString('base64')),
@@ -268,7 +288,11 @@ export class Session {
       content: await this.crypto.encrypt(JSON.stringify({ username, userProfileId, state }), aad),
     });
 
-    await this.options.sessionCookie.set(request, { ...sessionExpirationInfo, sid, aad });
+    await this.options.sessionCookie.set(
+      request,
+      { ...sessionExpirationInfo, sid, aad },
+      stateCookieOptions
+    );
 
     sessionLogger.debug('Successfully created a new session.');
 

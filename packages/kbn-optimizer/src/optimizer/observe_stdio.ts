@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import * as Rx from 'rxjs';
 
 // match newline characters followed either by a non-space character or another newline

@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IKibanaResponse } from '@kbn/core/server';
-import { getProxyRouteHandlerDeps } from './mocks';
+import type { IKibanaResponse } from '@kbn/core/server';
+import { getProxyRouteHandlerDeps, getRequestHandlerContext } from './mocks';
 
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { createHandler } from './create_handler';
-import * as requestModule from '../../../../lib/proxy_request';
-import { createResponseStub } from './stubs';
 
 describe('Console Proxy Route', () => {
   let request: (
@@ -26,11 +24,11 @@ describe('Console Proxy Route', () => {
 
   beforeEach(() => {
     request = (method, path, response) => {
-      (requestModule.proxyRequest as jest.Mock).mockResolvedValue(createResponseStub(response));
       const handler = createHandler(getProxyRouteHandlerDeps({}));
+      const { core } = getRequestHandlerContext(response);
 
       return handler(
-        {} as any,
+        { core } as any,
         {
           headers: {},
           query: { method, path },

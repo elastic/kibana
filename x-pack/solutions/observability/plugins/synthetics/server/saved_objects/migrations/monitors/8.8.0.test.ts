@@ -165,6 +165,7 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
           urls: 'https://elastic.co',
           labels: {},
           maintenance_windows: [],
+          spaces: [],
         },
         coreMigrationVersion: '8.8.0',
         created_at: '2023-03-31T20:31:24.177Z',

@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { OpsgenieSubActions } from '../../../common';
+import { SUB_ACTION } from '@kbn/connector-schemas/opsgenie';
 import { renderParameterTemplates } from './render_template_variables';
 
 const ruleTagsTemplate = '{{rule.tags}}';
@@ -48,7 +48,7 @@ describe('renderParameterTemplates', () => {
       renderParameterTemplates(
         logger,
         {
-          subAction: OpsgenieSubActions.CreateAlert,
+          subAction: SUB_ACTION.CreateAlert,
           subActionParams: {
             tags: ['a tag'],
           },
@@ -72,7 +72,7 @@ describe('renderParameterTemplates', () => {
       renderParameterTemplates(
         logger,
         {
-          subAction: OpsgenieSubActions.CreateAlert,
+          subAction: SUB_ACTION.CreateAlert,
           subActionParams: {
             tags: [ruleTagsTemplate],
           },
@@ -94,7 +94,7 @@ describe('renderParameterTemplates', () => {
       renderParameterTemplates(
         logger,
         {
-          subAction: OpsgenieSubActions.CreateAlert,
+          subAction: SUB_ACTION.CreateAlert,
           subActionParams: {},
         },
         {}
@@ -112,7 +112,7 @@ describe('renderParameterTemplates', () => {
       renderParameterTemplates(
         logger,
         {
-          subAction: OpsgenieSubActions.CreateAlert,
+          subAction: SUB_ACTION.CreateAlert,
           subActionParams: {
             tags: [ruleTagsTemplate],
           },
@@ -141,7 +141,7 @@ describe('renderParameterTemplates', () => {
       renderParameterTemplates(
         logger,
         {
-          subAction: OpsgenieSubActions.CreateAlert,
+          subAction: SUB_ACTION.CreateAlert,
           subActionParams: {
             tags: [ruleTagsTemplate, 'a tag', ruleTagsTemplate],
           },
@@ -171,7 +171,7 @@ describe('renderParameterTemplates', () => {
       renderParameterTemplates(
         logger,
         {
-          subAction: OpsgenieSubActions.CreateAlert,
+          subAction: SUB_ACTION.CreateAlert,
           subActionParams: {
             tags: ['a tag', ruleTagsTemplate],
           },
@@ -197,7 +197,7 @@ describe('renderParameterTemplates', () => {
       renderParameterTemplates(
         logger,
         {
-          subAction: OpsgenieSubActions.CreateAlert,
+          subAction: SUB_ACTION.CreateAlert,
           subActionParams: {
             tags: ['a tag', ruleTagsTemplate],
           },
@@ -224,7 +224,7 @@ describe('renderParameterTemplates', () => {
       renderParameterTemplates(
         logger,
         {
-          subAction: OpsgenieSubActions.CreateAlert,
+          subAction: SUB_ACTION.CreateAlert,
           subActionParams: {
             tags: ['a tag', ruleTagsTemplate, '{{rule.other}}'],
           },

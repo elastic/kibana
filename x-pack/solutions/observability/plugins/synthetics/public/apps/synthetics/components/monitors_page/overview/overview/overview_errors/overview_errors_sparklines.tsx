@@ -7,11 +7,12 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
-import { euiPaletteColorBlindBehindText, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { ERRORS_LABEL } from '../../../../monitor_details/monitor_summary/monitor_errors_count';
-import { ClientPluginsStart } from '../../../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../../../plugin';
 import { useMonitorFilters } from '../../../hooks/use_monitor_filters';
 import { useMonitorQueryFilters } from '../../../hooks/use_monitor_query_filters';
+import { useOverviewDataViewIndexPatterns } from '../../../hooks/use_overview_data_view_index_patterns';
 
 interface Props {
   from: string;
@@ -24,9 +25,16 @@ export const OverviewErrorsSparklines = ({ from, to }: Props) => {
 
   const filters = useMonitorFilters({});
   const { euiTheme } = useEuiTheme();
-  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
 
   const time = useMemo(() => ({ from, to }), [from, to]);
+  const queryFilters = useMonitorQueryFilters();
+  const { dataTypesIndexPatterns, loading } = useOverviewDataViewIndexPatterns();
+
+  // Wait for the CCS index pattern to resolve before mounting the embeddable;
+  // it latches its first data view title (see useOverviewDataViewIndexPatterns).
+  if (loading) {
+    return null;
+  }
 
   return (
     <ExploratoryViewEmbeddable
@@ -36,7 +44,8 @@ export const OverviewErrorsSparklines = ({ from, to }: Props) => {
       axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
       legendIsVisible={false}
       hideTicks={true}
-      dslFilters={useMonitorQueryFilters()}
+      dslFilters={queryFilters}
+      dataTypesIndexPatterns={dataTypesIndexPatterns}
       attributes={[
         {
           time,
@@ -47,9 +56,7 @@ export const OverviewErrorsSparklines = ({ from, to }: Props) => {
           dataType: 'synthetics',
           selectedMetricField: 'monitor_errors',
           name: ERRORS_LABEL,
-          color: isAmsterdam
-            ? euiPaletteColorBlindBehindText()[1]
-            : euiTheme.colors.vis.euiColorVis6,
+          color: euiTheme.colors.vis.euiColorVis6,
           operationType: 'unique_count',
           filters,
         },

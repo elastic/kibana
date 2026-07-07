@@ -16,16 +16,13 @@ import {
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getIndexPatterns } from '../../../../../common/get_index_patterns';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
-import {
-  getMetrics,
-  MetricDescriptor,
-  NamedMetricDescriptor,
-} from '../../../../lib/details/get_metrics';
+import type { MetricDescriptor, NamedMetricDescriptor } from '../../../../lib/details/get_metrics';
+import { getMetrics } from '../../../../lib/details/get_metrics';
 import { getNodeSummary } from '../../../../lib/elasticsearch/nodes';
 import { getShardAllocation, getShardStats } from '../../../../lib/elasticsearch/shards';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { getLogs } from '../../../../lib/logs/get_logs';
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 import { metricSets } from './metric_set_node_detail';
 
 const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSets;

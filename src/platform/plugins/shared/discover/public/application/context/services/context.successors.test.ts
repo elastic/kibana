@@ -18,6 +18,7 @@ import { fetchSurroundingDocs, SurrDocType } from './context';
 import { buildDataTableRecord, buildDataTableRecordList } from '@kbn/discover-utils';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../context_awareness';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ANCHOR_TIMESTAMP = new Date(MS_PER_DAY).toJSON();
@@ -88,7 +89,10 @@ describe('context successors', function () {
           [],
           dataPluginMock,
           discoverServiceMock,
-          discoverServiceMock.profilesManager.createScopedProfilesManager()
+          discoverServiceMock.profilesManager.createScopedProfilesManager({
+            scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+            toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+          })
         );
       };
     });
@@ -241,7 +245,10 @@ describe('context successors', function () {
           [],
           dataPluginMock,
           discoverServiceMock,
-          discoverServiceMock.profilesManager.createScopedProfilesManager()
+          discoverServiceMock.profilesManager.createScopedProfilesManager({
+            scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+            toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+          })
         );
       };
     });
@@ -316,7 +323,10 @@ describe('context successors', function () {
             ...discoverServiceMock,
             data: dataPluginMock,
           },
-          discoverServiceMock.profilesManager.createScopedProfilesManager()
+          discoverServiceMock.profilesManager.createScopedProfilesManager({
+            scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+            toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+          })
         );
       };
     });

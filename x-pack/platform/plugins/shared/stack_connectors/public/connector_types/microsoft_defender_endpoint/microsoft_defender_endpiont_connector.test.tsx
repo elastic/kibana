@@ -9,9 +9,9 @@ import React from 'react';
 import { type RenderResult } from '@testing-library/react';
 import { ConnectorFormTestProvider, createAppMockRenderer } from '../lib/test_utils';
 import MicrosoftDefenderEndpointActionConnectorFields from './microsoft_defender_endpoint_connector';
-import { ActionConnectorFieldsProps } from '@kbn/alerts-ui-shared';
-import { MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID } from '../../../common/microsoft_defender_endpoint/constants';
-import { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionConnectorFieldsProps } from '@kbn/alerts-ui-shared';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/microsoft_defender_endpoint/constants';
+import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 
 describe('Microsoft Defender for Endpoint Connector UI', () => {
   let renderProps: ActionConnectorFieldsProps;
@@ -30,7 +30,7 @@ describe('Microsoft Defender for Endpoint Connector UI', () => {
       id: 'test',
       name: 'email',
       isDeprecated: false,
-      actionTypeId: MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
+      actionTypeId: CONNECTOR_ID,
       secrets: {
         clientSecret: 'shhhh',
       },

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { UseMutationOptions } from '@tanstack/react-query';
+import type { UseMutationOptions } from '@kbn/react-query';
 import type { ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import { createListItem } from '@kbn/securitysolution-list-api';
 import type { CreateListItemParams } from '@kbn/securitysolution-list-api';
 import { withOptionalSignal } from '@kbn/securitysolution-hook-utils';

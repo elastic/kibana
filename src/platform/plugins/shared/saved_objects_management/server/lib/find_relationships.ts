@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { injectMetaAttributes } from './inject_meta_attributes';
-import { ISavedObjectsManagement } from '../services';
-import { v1 } from '../../common';
-import { SavedObjectInvalidRelation, SavedObjectWithMetadata } from '../types';
+import type { ISavedObjectsManagement } from '../services';
+import type { v1 } from '../../common';
+import type { SavedObjectInvalidRelation, SavedObjectWithMetadata } from '../types';
 
 export async function findRelationships({
   type,
@@ -49,7 +50,7 @@ export async function findRelationships({
   ]);
 
   const invalidRelations: SavedObjectInvalidRelation[] = childReferencesResponse.saved_objects
-    .filter((obj) => Boolean(obj.error))
+    .filter(isSavedObjectErrorResult)
     .map((obj) => ({
       id: obj.id,
       type: obj.type,
@@ -59,7 +60,7 @@ export async function findRelationships({
 
   const relations = [
     ...childReferencesResponse.saved_objects
-      .filter((obj) => !obj.error)
+      .filter((obj) => !isSavedObjectErrorResult(obj))
       .map((obj) => injectMetaAttributes(obj, savedObjectsManagement))
       .map(extractCommonProperties)
       .map((obj) => ({
@@ -86,5 +87,7 @@ function extractCommonProperties(savedObject: SavedObjectWithMetadata) {
     id: savedObject.id,
     type: savedObject.type,
     meta: savedObject.meta,
+    managed: Boolean(savedObject.managed),
+    references: savedObject.references,
   };
 }

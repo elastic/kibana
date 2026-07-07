@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
-import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
+import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 import { getDocsCount, getSizeInBytes } from '../../../../../utils/stats';
 import { getIlmPhase } from '../../../../../utils/get_ilm_phase';
 import { ErrorEmptyPrompt } from '../../error_empty_prompt';

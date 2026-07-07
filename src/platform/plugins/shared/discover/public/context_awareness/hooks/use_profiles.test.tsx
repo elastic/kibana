@@ -16,6 +16,7 @@ import { useProfiles } from './use_profiles';
 import type { CellRenderersExtensionParams } from '../types';
 import type { AppliedProfile } from '../composable_profile';
 import { SolutionType } from '../profiles';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../toolkit';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 
 const {
@@ -28,6 +29,7 @@ const {
   contextRecordMock,
   contextRecordMock2,
   profilesManagerMock,
+  scopedEbtManagerMock,
 } = createContextAwarenessMocks({ shouldRegisterProviders: false });
 
 rootProfileServiceMock.registerProvider({
@@ -46,7 +48,10 @@ rootProfileServiceMock.registerProvider(rootProfileProviderMock);
 dataSourceProfileServiceMock.registerProvider(dataSourceProfileProviderMock);
 documentProfileServiceMock.registerProvider(documentProfileProviderMock);
 
-const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager();
+const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager({
+  scopedEbtManager: scopedEbtManagerMock,
+  toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+});
 const record = scopedProfilesManager.resolveDocumentProfile({ record: contextRecordMock });
 const record2 = scopedProfilesManager.resolveDocumentProfile({ record: contextRecordMock2 });
 const services = createDiscoverServicesMock();

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Range } from '@kbn/expressions-plugin/common';
+import type { Range } from '@kbn/expressions-plugin/common';
 import { getConvertToLensModule } from '@kbn/visualizations-plugin/public';
-import { HeatmapVisParams } from '../../types';
+import type { HeatmapVisParams } from '../../types';
 import { getStopsWithColorsFromColorsNumber } from '../../utils/palette';
 
 type HeatmapVisParamsWithRanges = Omit<HeatmapVisParams, 'colorsRange'> & {

@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
 import type { CoreSetup } from '@kbn/core/server';
-import { getEcsGroups } from '@kbn/alerting-rule-utils';
+import { getEcsGroupsFromFlattenGrouping } from '@kbn/alerting-rule-utils';
 import {
   isGroupAggregation,
   isPerRowAggregation,
@@ -17,6 +15,7 @@ import {
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_GROUPING,
   ALERT_REASON,
   ALERT_URL,
 } from '@kbn/rule-data-utils';
@@ -33,15 +32,20 @@ import type {
   OnlyEsQueryRuleParams,
   OnlySearchSourceRuleParams,
   OnlyEsqlQueryRuleParams,
+  EsQuerySourceFields,
 } from './types';
 import { ActionGroupId, ConditionMetAlertInstanceId } from '../../../common/es_query';
 import { fetchEsQuery } from './lib/fetch_es_query';
 import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
-import { isEsqlQueryRule, isSearchSourceRule } from './util';
+import { isEsqlQueryRule, isSearchSourceRule, getSourceFieldsFromHit } from './util';
 import { fetchEsqlQuery } from './lib/fetch_esql_query';
 import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE } from '..';
 
-export async function executor(core: CoreSetup, options: ExecutorOptions<EsQueryRuleParams>) {
+export async function executor(
+  core: CoreSetup,
+  options: ExecutorOptions<EsQueryRuleParams>,
+  sourceFields: EsQuerySourceFields
+) {
   const searchSourceRule = isSearchSourceRule(options.params.searchType);
   const esqlQueryRule = isEsqlQueryRule(options.params.searchType);
   const {
@@ -93,6 +97,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         },
         dateStart,
         dateEnd,
+        sourceFields,
       })
     : esqlQueryRule
     ? await fetchEsqlQuery({
@@ -108,6 +113,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         },
         dateStart,
         dateEnd,
+        sourceFields,
       })
     : await fetchEsQuery({
         ruleId,
@@ -124,12 +130,8 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         },
         dateStart,
         dateEnd,
+        sourceFields,
       });
-
-  const resultGroupSet = new Set<string>();
-  for (const result of parsedResults.results) {
-    resultGroupSet.add(result.group);
-  }
 
   const unmetGroupValues: Record<string, number> = {};
   for (const result of parsedResults.results) {
@@ -177,12 +179,12 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     });
 
     const id = alertId === UngroupedGroupId && !isGroupAgg ? ConditionMetAlertInstanceId : alertId;
-    const ecsGroups = getEcsGroups(result.groups);
+    const ecsGroups = getEcsGroupsFromFlattenGrouping(result.groupingObject);
 
     alertsClient.report({
       id,
       actionGroup: ActionGroupId,
-      state: { latestTimestamp, dateStart, dateEnd, grouping: groupingObject },
+      state: { latestTimestamp, dateStart, dateEnd },
       context: actionContext,
       payload: {
         [ALERT_URL]: actionContext.link,
@@ -191,6 +193,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         [ALERT_EVALUATION_CONDITIONS]: actionContext.conditions,
         [ALERT_EVALUATION_VALUE]: `${actionContext.value}`,
         [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
+        [ALERT_GROUPING]: groupingObject,
         ...ecsGroups,
         ...actionContext.sourceFields,
       },
@@ -214,7 +217,6 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
 
   for (const recoveredAlert of recoveredAlerts) {
     const alertId = recoveredAlert.alert.getId();
-    const recoveredAlertState = recoveredAlert.alert.getState();
 
     const baseRecoveryContext: EsQueryRuleActionContext = {
       title: name,
@@ -231,8 +233,8 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         aggField: params.aggField,
         ...(isGroupAgg ? { group: alertId } : {}),
       }),
-      sourceFields: [],
-      grouping: recoveredAlertState?.grouping,
+      sourceFields: getSourceFieldsFromHit(recoveredAlert.hit, sourceFields),
+      grouping: recoveredAlert.hit?.[ALERT_GROUPING],
     } as EsQueryRuleActionContext;
     const recoveryContext = addMessages({
       ruleName: name,
@@ -274,10 +276,6 @@ export function tryToParseAsDate(sortValue?: string | number | null): undefined 
   if (sortDate && !isNaN(sortDate)) {
     return new Date(sortDate).toISOString();
   }
-}
-
-export function getChecksum(params: OnlyEsQueryRuleParams) {
-  return sha256.create().update(JSON.stringify(params));
 }
 
 export function getInvalidComparatorError(comparator: string) {

@@ -79,8 +79,10 @@ export const ExpandableContent = (props: ExpandableContentProps) => {
             </EuiLink>
           </EuiFlexItem>
         )}
-        <EuiToolTip delay="long" content={first}>
-          <p className="eui-textTruncate">{first}</p>
+        <EuiToolTip content={first}>
+          <p className="eui-textTruncate" tabIndex={0}>
+            {first}
+          </p>
         </EuiToolTip>
       </EuiFlexItem>
       {isExpanded && others.map((item, index) => <EuiFlexItem key={index}>{item}</EuiFlexItem>)}

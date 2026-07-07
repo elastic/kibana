@@ -21,7 +21,9 @@
         "desc"
       ],
       "offset": "",
-      "size": "",
+      "size": [
+        "-1"
+      ],
       "slm_policy_filter": "",
       "sort": [
         "start_time",
@@ -31,6 +33,13 @@
         "repository",
         "shard_count",
         "failed_shard_count"
+      ],
+      "state": [
+        "IN_PROGRESS",
+        "SUCCESS",
+        "FAILED",
+        "PARTIAL",
+        "INCOMPATIBLE"
       ],
       "verbose": "__flag__"
     },

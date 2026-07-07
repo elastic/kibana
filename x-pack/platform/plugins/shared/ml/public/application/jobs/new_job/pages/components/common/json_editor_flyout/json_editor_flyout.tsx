@@ -20,12 +20,11 @@ import {
   EuiFlyoutBody,
   EuiSpacer,
   EuiCallOut,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import type {
-  CombinedJob,
-  Datafeed,
-} from '../../../../../../../../common/types/anomaly_detection_jobs';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import { ML_EDITOR_MODE, MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { isValidJson } from '../../../../../../../../common/util/validation_utils';
 import { JobCreatorContext } from '../../job_creator_context';
@@ -168,6 +167,8 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
     setShowJsonFlyout(false);
   }
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
     <Fragment>
       <FlyoutButton
@@ -177,7 +178,12 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
       />
 
       {showJsonFlyout === true && isDisabled === false && (
-        <EuiFlyout onClose={() => setShowJsonFlyout(false)} hideCloseButton size={'l'}>
+        <EuiFlyout
+          onClose={() => setShowJsonFlyout(false)}
+          hideCloseButton
+          size={'l'}
+          aria-labelledby={flyoutTitleId}
+        >
           <EuiFlyoutBody>
             <EuiFlexGroup>
               {jobEditorMode !== EDITOR_MODE.HIDDEN ? (
@@ -190,6 +196,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                   value={jobConfigString}
                   heightOffset={showChangedIndicesWarning ? WARNING_CALLOUT_OFFSET : 0}
                   schema={jobSchema}
+                  flyoutTitleId={flyoutTitleId}
                 />
               ) : null}
               {datafeedEditorMode !== EDITOR_MODE.HIDDEN ? (
@@ -203,6 +210,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                     value={datafeedConfigString}
                     heightOffset={showChangedIndicesWarning ? WARNING_CALLOUT_OFFSET : 0}
                     schema={datafeedSchema}
+                    flyoutTitleId={flyoutTitleId}
                   />
                   {datafeedEditorMode === EDITOR_MODE.EDITABLE && (
                     <EuiFlexItem>
@@ -219,6 +227,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
               <>
                 <EuiSpacer />
                 <EuiCallOut
+                  announceOnMount
                   color="warning"
                   size="s"
                   title={i18n.translate(
@@ -297,7 +306,8 @@ const Contents: FC<{
   onChange(s: string): void;
   heightOffset?: number;
   schema?: object;
-}> = ({ title, value, editJson, onChange, heightOffset = 0, schema }) => {
+  flyoutTitleId?: string;
+}> = ({ title, flyoutTitleId, value, editJson, onChange, heightOffset = 0, schema }) => {
   // the editor requires a fixed height
   const editorHeight = useMemo(
     () => `${window.innerHeight - 230 - heightOffset}px`,
@@ -306,7 +316,7 @@ const Contents: FC<{
   return (
     <EuiFlexItem>
       <EuiTitle size="s">
-        <h5>{title}</h5>
+        <h2 id={flyoutTitleId}>{title}</h2>
       </EuiTitle>
       <EuiSpacer size="s" />
       <MLJobEditor

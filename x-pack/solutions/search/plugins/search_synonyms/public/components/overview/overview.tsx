@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { PLUGIN_TITLE } from '../../../common';
 import { docLinks } from '../../../common/doc_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { SynonymSets } from '../synonym_sets/synonym_sets';
@@ -51,9 +52,8 @@ export const SearchSynonymsOverview = () => {
     >
       {!isInitialLoading && !isError && synonymsData?._meta.totalItemCount !== 0 && (
         <KibanaPageTemplate.Header
-          pageTitle="Synonyms"
+          pageTitle={PLUGIN_TITLE}
           restrictWidth
-          color="primary"
           rightSideItems={[
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={false}>
@@ -73,7 +73,7 @@ export const SearchSynonymsOverview = () => {
                 <EuiButton
                   data-test-subj="searchSynonymsSearchSynonymsOverviewCreateButton"
                   fill
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   onClick={() => {
                     setIsCreateModalVisible(true);
                   }}

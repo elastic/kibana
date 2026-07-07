@@ -15,7 +15,7 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { css } from '@emotion/css';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
@@ -62,8 +62,6 @@ import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list
 import { UninstallTokenListPage } from './sections/agents/uninstall_token_list_page';
 import { SettingsApp } from './sections/settings';
 import { DebugPage } from './sections/debug';
-
-const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -287,7 +285,7 @@ const FleetTopNav = memo(
         }),
         disableButton: true,
         className: readOnlyBtnClass,
-        iconType: 'glasses',
+        iconType: 'readOnly',
         tooltip: i18n.translate('xpack.fleet.appNavigation.readOnlyTooltip', {
           defaultMessage:
             "You can view most Fleet settings, but your current privileges don't allow you to perform all actions.",
@@ -295,14 +293,6 @@ const FleetTopNav = memo(
         run: () => {},
       });
     }
-    topNavConfig.push({
-      label: i18n.translate('xpack.fleet.appNavigation.sendFeedbackButton', {
-        defaultMessage: 'Send feedback',
-      }),
-      iconType: 'popout',
-      run: () => window.open(FEEDBACK_URL),
-    });
-
     return (
       <TopNavMenu
         appName={i18n.translate('xpack.fleet.appTitle', { defaultMessage: 'Fleet' })}

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AwaitedProperties } from '@kbn/utility-types';
-import { RequestHandler, RequestHandlerContext } from '@kbn/core/server';
+import type { AwaitedProperties } from '@kbn/utility-types';
+import type { RequestHandler, RequestHandlerContext } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,

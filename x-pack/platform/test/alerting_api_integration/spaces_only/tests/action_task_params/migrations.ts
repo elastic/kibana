@@ -11,18 +11,17 @@ import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-serve
 import type { ActionTaskParams } from '@kbn/actions-plugin/server/types';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
 
   describe('migrations', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/action_task_params');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/action_task_params');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/action_task_params');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/action_task_params');
     });
 
     it('7.16.0 migrates action_task_params to use references array', async () => {

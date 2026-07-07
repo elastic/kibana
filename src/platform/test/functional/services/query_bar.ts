@@ -58,6 +58,15 @@ export class QueryBarService extends FtrService {
     await this.testSubjects.click('querySubmitButton');
   }
 
+  public async verifyQueryUpdateButtonEnabled(enabled: boolean = true) {
+    this.log.debug(`Checking that query update button is ${enabled ? 'enabled' : 'not enabled'}`);
+    const queryButton = await this.testSubjects.find('querySubmitButton');
+    await this.retry.try(async () => {
+      expect(await queryButton.getVisibleText()).to.be(enabled ? 'Update' : 'Refresh');
+      expect(await queryButton.isEnabled()).to.be(enabled);
+    });
+  }
+
   public async switchQueryLanguage(lang: 'kql' | 'lucene'): Promise<void> {
     await this.testSubjects.click('switchQueryLanguageButton');
     await this.testSubjects.click(`${lang}LanguageMenuItem`);
@@ -71,8 +80,11 @@ export class QueryBarService extends FtrService {
   }
 
   public async expectQueryLanguageOrFail(lang: 'kql' | 'lucene'): Promise<void> {
-    const queryLanguageButton = await this.testSubjects.find('switchQueryLanguageButton');
-    expect((await queryLanguageButton.getVisibleText()).toLowerCase()).to.eql(`language: ${lang}`);
+    await this.retry.try(async () => {
+      const queryLanguageButton = await this.testSubjects.find('switchQueryLanguageButton');
+      const text = (await queryLanguageButton.getVisibleText()).toLowerCase();
+      expect(text).to.eql(`language: ${lang}`);
+    });
   }
 
   /**

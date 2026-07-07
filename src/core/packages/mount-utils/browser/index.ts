@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { MountPoint, UnmountCallback } from './src/mount_point';
+export type { MountPoint, UnmountCallback, ChromeExtensionContent } from './src/mount_point';
+export { isMountPoint } from './src/mount_point';
 export type { OverlayRef } from './src/overlay_ref';

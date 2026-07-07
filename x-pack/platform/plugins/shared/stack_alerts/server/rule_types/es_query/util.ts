@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
+import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
 import type { OnlyEsQueryRuleParams } from './types';
 
 export function isEsQueryRule(searchType: EsQueryRuleParams['searchType']) {
@@ -68,3 +69,39 @@ export function checkForShardFailures(searchResult: SearchResponse<unknown>): st
     }
   }
 }
+
+export const getSourceFields = () => {
+  const alertFields = Object.keys(alertFieldMap);
+  return (
+    Object.keys(ecsFieldMap)
+      // exclude the alert fields that we don't want to override
+      .filter((key) => !alertFields.includes(key))
+      .map((key) => ({
+        label: key,
+        searchPath: key,
+      }))
+  );
+};
+
+/**
+ * Reads source field values off a persisted alert document (hit) using the candidate
+ * source-field list. Keys are stored as literal dotted strings in the alert _source,
+ * so we use bracket access rather than lodash.get to avoid traversing nested paths.
+ */
+export const getSourceFieldsFromHit = (
+  hit: Record<string, unknown> | undefined,
+  sourceFieldsParams: Array<{ label: string; searchPath: string }>
+): Record<string, string[]> => {
+  if (!hit || sourceFieldsParams.length === 0) {
+    return {};
+  }
+  const result: Record<string, string[]> = {};
+  for (const { label } of sourceFieldsParams) {
+    const raw = hit[label];
+    if (raw == null) {
+      continue;
+    }
+    result[label] = Array.isArray(raw) ? (raw as unknown[]).map(String) : [String(raw)];
+  }
+  return result;
+};

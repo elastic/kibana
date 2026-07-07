@@ -8,7 +8,8 @@
  */
 
 import { get } from 'lodash';
-import { Filter, isExistsFilter, FILTERS } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { isExistsFilter, FILTERS } from '@kbn/es-query';
 
 export const mapExists = (filter: Filter) => {
   if (isExistsFilter(filter)) {

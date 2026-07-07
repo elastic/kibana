@@ -12,7 +12,7 @@ import {
   overviewDegradedFieldsTableLoadingText,
   qualityIssuesTableNoData,
 } from '../../../../../common/translations';
-import { useQualityIssues } from '../../../../hooks/use_quality_issues';
+import { useQualityIssues } from '../../../../hooks';
 import { getQualityIssuesColumns } from './columns';
 
 export const QualityIssuesTable = () => {
@@ -26,9 +26,11 @@ export const QualityIssuesTable = () => {
     expandedDegradedField,
     openDegradedFieldFlyout,
   } = useQualityIssues();
+
   const dateFormatter = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE, [
     ES_FIELD_TYPES.DATE,
   ]);
+
   const columns = getQualityIssuesColumns({
     dateFormatter,
     isLoading: isDegradedFieldsLoading,

@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NAME = i18n.translate('xpack.stackConnectors.swimlane.title', {
-  defaultMessage: 'Swimlane',
-});
-
 export const ALLOWED_HOSTS_ERROR = (message: string) =>
   i18n.translate('xpack.stackConnectors.swimlane.configuration.apiAllowedHostsError', {
     defaultMessage: 'error configuring connector action: {message}',

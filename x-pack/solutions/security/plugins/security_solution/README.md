@@ -17,13 +17,14 @@ the tests given the constraint on an available package registry.
 
 These scenarios will be outlined the sections below.
 
+TODO: update tests location and run commands https://github.com/elastic/kibana/issues/233838
 ### Endpoint API Integration Tests Location
 
 The endpoint api integration tests are located [here](../../../../test/security_solution_endpoint_api_int)
 
 ### Endpoint Functional Tests Location
 
-The endpoint functional tests are located [here](../../../../test/security_solution_endpoint)
+The endpoint functional tests are located [here](../../test/security_solution_endpoint)
 
 ### Using Docker
 
@@ -51,13 +52,13 @@ FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/secu
 In one terminal, run:
 
 ```bash
-FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test/security_solution_endpoint/config.ts
+FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/solutions/security/test/security_solution_endpoint/configs/integrations.config.ts
 ```
 
 In another terminal, run:
 
 ```bash
-FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/security_solution_endpoint/config.ts
+FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/solutions/security/test/security_solution_endpoint/configs/integrations.config.ts
 ```
 
 ### Running your own package registry
@@ -86,13 +87,13 @@ PACKAGE_REGISTRY_URL_OVERRIDE=<url to your package registry like http://localhos
 In one terminal, run:
 
 ```bash
-PACKAGE_REGISTRY_URL_OVERRIDE=<url to your package registry like http://localhost:8080> yarn test:ftr:server --config x-pack/test/security_solution_endpoint/config.ts
+PACKAGE_REGISTRY_URL_OVERRIDE=<url to your package registry like http://localhost:8080> yarn test:ftr:server --config x-pack/solutions/security/test/security_solution_endpoint/configs/integrations.config.ts
 ```
 
 In another terminal, run:
 
 ```bash
-PACKAGE_REGISTRY_URL_OVERRIDE=<url to your package registry like http://localhost:8080>  yarn test:ftr:runner --config x-pack/test/security_solution_endpoint/config.ts
+PACKAGE_REGISTRY_URL_OVERRIDE=<url to your package registry like http://localhost:8080>  yarn test:ftr:runner --config x-pack/solutions/security/test/security_solution_endpoint/configs/integrations.config.ts
 ```
 
 ### Using the default public registry
@@ -120,13 +121,13 @@ yarn test:ftr:runner --config x-pack/test/security_solution_endpoint_api_int/con
 In one terminal, run:
 
 ```bash
-yarn test:ftr:server --config x-pack/test/security_solution_endpoint/config.ts
+yarn test:ftr:server --config x-pack/solutions/security/test/security_solution_endpoint/configs/integrations.config.ts
 ```
 
 In another terminal, run:
 
 ```bash
-yarn test:ftr:runner --config x-pack/test/security_solution_endpoint/config.ts
+yarn test:ftr:runner --config x-pack/solutions/security/test/security_solution_endpoint/configs/integrations.config.ts
 ```
 
 #### Generate huge amount of indices with huge amount of fields

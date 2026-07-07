@@ -5,22 +5,20 @@
  * 2.0.
  */
 
-import React, {
-  createContext,
-  useContext,
-  Context,
-  Dispatch,
-  SetStateAction,
-  PropsWithChildren,
-} from 'react';
-import { JourneyStep } from '../../../../../../../../common/runtime_types';
-import {
+import type { Context, Dispatch, SetStateAction, PropsWithChildren } from 'react';
+import React, { createContext, useContext } from 'react';
+import type { JourneyStep } from '../../../../../../../../common/runtime_types';
+import type {
   WaterfallData,
   WaterfallDataEntry,
   WaterfallMetadata,
 } from '../../../common/network_data/types';
-import { OnSidebarClick, OnElementClick, OnProjectionClick } from '../waterfall_flyout/use_flyout';
-import { WaterfallNetworkItem } from '../../../common/network_data/types';
+import type {
+  OnSidebarClick,
+  OnElementClick,
+  OnProjectionClick,
+} from '../waterfall_flyout/use_flyout';
+import type { WaterfallNetworkItem } from '../../../common/network_data/types';
 
 export type MarkerItems = Array<{
   id:

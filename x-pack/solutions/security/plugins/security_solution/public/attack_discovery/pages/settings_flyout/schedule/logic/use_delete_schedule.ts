@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import type { DeleteAttackDiscoverySchedulesResponse } from '@kbn/elastic-assistant-common';
 import { ATTACK_DISCOVERY_SCHEDULES_BY_ID } from '@kbn/elastic-assistant-common';
 
@@ -14,6 +14,8 @@ import { deleteAttackDiscoverySchedule } from '../api';
 import { useInvalidateGetAttackDiscoverySchedule } from './use_get_schedule';
 import { useInvalidateFindAttackDiscoverySchedule } from './use_find_schedules';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttackDiscoverySchedulesEventTypes } from '../../../../../common/lib/telemetry';
 
 export const DELETE_ATTACK_DISCOVERY_SCHEDULE_MUTATION_KEY = [
   'DELETE',
@@ -25,6 +27,9 @@ interface DeleteAttackDiscoveryScheduleParams {
 }
 
 export const useDeleteAttackDiscoverySchedule = () => {
+  const {
+    services: { telemetry },
+  } = useKibana();
   const { addError, addSuccess } = useAppToasts();
 
   const invalidateGetAttackDiscoverySchedule = useInvalidateGetAttackDiscoverySchedule();
@@ -40,9 +45,11 @@ export const useDeleteAttackDiscoverySchedule = () => {
       invalidateGetAttackDiscoverySchedule(id);
       invalidateFindAttackDiscoverySchedule();
       addSuccess(i18n.DELETE_ATTACK_DISCOVERY_SCHEDULES_SUCCESS());
+      telemetry.reportEvent(AttackDiscoverySchedulesEventTypes.DeleteSuccess, {});
     },
     onError: (error) => {
       addError(error, { title: i18n.DELETE_ATTACK_DISCOVERY_SCHEDULES_FAILURE() });
+      telemetry.reportEvent(AttackDiscoverySchedulesEventTypes.DeleteFailed, {});
     },
   });
 };

@@ -8,25 +8,290 @@
  */
 
 import moment from 'moment/moment';
-import { log, timerange } from '@kbn/apm-synthtrace-client';
-import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { log, timerange } from '@kbn/synthtrace-client';
+import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { MORE_THAN_1024_CHARS, STACKTRACE_MESSAGE } from '../const';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover']);
+  const PageObjects = getPageObjects(['common', 'discover', 'dashboard', 'header']);
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
-  const dataViews = getService('dataViews');
-  const synthtrace = getService('logSynthtraceEsClient');
+  const dashboardAddPanel = getService('dashboardAddPanel');
+  const synthtrace = getService('synthtrace');
   const queryBar = getService('queryBar');
+  const kibanaServer = getService('kibanaServer');
+  const dataViews = getService('dataViews');
 
   const start = moment().subtract(30, 'minutes').valueOf();
   const end = moment().add(30, 'minutes').valueOf();
 
-  describe('extension getDocViewer ', () => {
+  const searchQuery = 'error.stack_trace : * and _ignored : *';
+
+  function defineDocViewerTests(rowIndices: { qualityIssue: number; stacktrace: number }) {
+    describe('renders docViewer', () => {
+      it('should open the flyout with stacktrace and quality issues accordion closed when expand is clicked', async () => {
+        await dataGrid.clickRowToggle({ rowIndex: 0 });
+
+        // Ensure Log overview flyout is open
+        const tabButton = await testSubjects.find('docViewerTab-doc_view_logs_overview');
+        await tabButton.click();
+
+        // Quality Issues accordion to be present and collapsed
+        await testSubjects.existOrFail('unifiedDocViewLogsOverviewDegradedFieldsAccordion');
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewDegradedFieldsAccordion',
+          'false'
+        );
+
+        // Stacktrace accordion to be present and collapsed
+        await testSubjects.existOrFail('unifiedDocViewLogsOverviewStacktraceAccordion');
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewStacktraceAccordion',
+          'false'
+        );
+      });
+
+      it('should open the flyout with stacktrace accordion open and quality issues accordion closed when stacktrace icon is clicked', async () => {
+        await dataGrid.clickStacktraceLeadingControl(1);
+
+        // Ensure Log overview flyout is open
+        await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
+
+        // Quality Issues accordion to be present and collapsed
+        await testSubjects.existOrFail('unifiedDocViewLogsOverviewDegradedFieldsAccordion');
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewDegradedFieldsAccordion',
+          'false'
+        );
+
+        // Stacktrace accordion to be present and collapsed
+        await testSubjects.existOrFail('unifiedDocViewLogsOverviewStacktraceAccordion');
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewStacktraceAccordion',
+          'true'
+        );
+      });
+
+      it('should open the flyout with stacktrace accordion closed and quality issues accordion open when quality issues icon is clicked', async () => {
+        await dataGrid.clickQualityIssueLeadingControl(2);
+
+        // Ensure Log overview flyout is open
+        await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
+
+        // Quality Issues accordion to be present and collapsed
+        await testSubjects.existOrFail('unifiedDocViewLogsOverviewDegradedFieldsAccordion');
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewDegradedFieldsAccordion',
+          'true'
+        );
+
+        // Stacktrace accordion to be present and collapsed
+        await testSubjects.existOrFail('unifiedDocViewLogsOverviewStacktraceAccordion');
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewStacktraceAccordion',
+          'false'
+        );
+      });
+
+      it('should keep old accordion open when 1st stacktrace and then quality issue control for the same row is clicked', async () => {
+        await dataGrid.clickStacktraceLeadingControl(0);
+
+        // 1st stack trace accordion should be opened and quality issues should be closed
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewStacktraceAccordion',
+          'true'
+        );
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewDegradedFieldsAccordion',
+          'false'
+        );
+
+        // Clicking on Quality Issue control of the same row while the Flyout is still open
+        await dataGrid.clickQualityIssueLeadingControl(0);
+
+        // Expect the previous one to stay open and new one to also open. This shows component did not remount
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewStacktraceAccordion',
+          'true'
+        );
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewDegradedFieldsAccordion',
+          'true'
+        );
+      });
+
+      it('should toggle to quality issue accordion when 1st stacktrace and then quality issue control is clicked for different row', async () => {
+        await dataGrid.clickStacktraceLeadingControl(0);
+
+        // 1st stack trace accordion should be opened and quality issues should be closed
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewStacktraceAccordion',
+          'true'
+        );
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewDegradedFieldsAccordion',
+          'false'
+        );
+
+        // Clicking on Quality Issue control of a different row while the Flyout is still open
+        await dataGrid.clickQualityIssueLeadingControl(1);
+
+        // Expect toggle to have happened
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewStacktraceAccordion',
+          'false'
+        );
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewDegradedFieldsAccordion',
+          'true'
+        );
+      });
+
+      it('should keep old accordion open when 1st quality issue and then stacktrace control for the same row is clicked', async () => {
+        await dataGrid.clickQualityIssueLeadingControl(0);
+
+        // 1st quality issues accordion should be opened and stacktrace should be closed
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewDegradedFieldsAccordion',
+          'true'
+        );
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewStacktraceAccordion',
+          'false'
+        );
+
+        // Clicking on Stacktrace control of the same row while the Flyout is still open
+        await dataGrid.clickStacktraceLeadingControl(0);
+
+        // Expect the previous one to stay open and new one to also open. This shows component did not remount
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewStacktraceAccordion',
+          'true'
+        );
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewDegradedFieldsAccordion',
+          'true'
+        );
+      });
+
+      it('should toggle to stacktrace accordion when 1st quality issue and then stacktrace control is clicked for different row', async () => {
+        await dataGrid.clickQualityIssueLeadingControl(rowIndices.qualityIssue);
+
+        // 1st quality issues accordion should be opened and stacktrace should be closed
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewDegradedFieldsAccordion',
+          'true'
+        );
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewStacktraceAccordion',
+          'false'
+        );
+
+        // Clicking on Stacktrace control of a different row while the Flyout is still open
+        await dataGrid.clickStacktraceLeadingControl(rowIndices.stacktrace);
+
+        // Expect toggle to have happened
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewStacktraceAccordion',
+          'true'
+        );
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewDegradedFieldsAccordion',
+          'false'
+        );
+      });
+
+      it('should switch tab to logs overview and open quality issues accordion, when user clicks on quality issue control of same row and flyout is already open with some other tab', async () => {
+        await dataGrid.clickRowToggle({ rowIndex: 0 });
+
+        // Switch to JSON tab
+        const jsonTabButton = await testSubjects.find('docViewerTab-doc_view_source');
+        await jsonTabButton.click();
+
+        // Click to open Quality Issue control on the same row
+        await dataGrid.clickQualityIssueLeadingControl(0);
+
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewDegradedFieldsAccordion',
+          'true'
+        );
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewStacktraceAccordion',
+          'false'
+        );
+      });
+
+      it('should switch tab to logs overview and open quality issues accordion, when user clicks on quality issue control of different row and flyout is already open with some other tab', async () => {
+        await dataGrid.clickRowToggle({ rowIndex: 0 });
+
+        // Switch to JSON tab
+        const jsonTabButton = await testSubjects.find('docViewerTab-doc_view_source');
+        await jsonTabButton.click();
+
+        // Click to open Quality Issue control on a different row
+        await dataGrid.clickQualityIssueLeadingControl(1);
+
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewDegradedFieldsAccordion',
+          'true'
+        );
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewStacktraceAccordion',
+          'false'
+        );
+      });
+
+      it('should switch tab to logs overview and open stacktrace accordion, when user clicks on stacktrace control of same row and flyout is already open with some other tab', async () => {
+        await dataGrid.clickRowToggle({ rowIndex: 0 });
+
+        // Switch to JSON tab
+        const jsonTabButton = await testSubjects.find('docViewerTab-doc_view_source');
+        await jsonTabButton.click();
+
+        // Click to open Stacktrace control on the same row
+        await dataGrid.clickStacktraceLeadingControl(0);
+
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewDegradedFieldsAccordion',
+          'false'
+        );
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewStacktraceAccordion',
+          'true'
+        );
+      });
+
+      it('should switch tab to logs overview and open stacktrace accordion, when user clicks on stacktrace control of different row and flyout is already open with some other tab', async () => {
+        await dataGrid.clickRowToggle({ rowIndex: 0 });
+
+        // Switch to JSON tab
+        const jsonTabButton = await testSubjects.find('docViewerTab-doc_view_source');
+        await jsonTabButton.click();
+
+        // Click to open Stacktrace control on a different row
+        await dataGrid.clickStacktraceLeadingControl(1);
+
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewDegradedFieldsAccordion',
+          'false'
+        );
+        await testSubjects.waitForAccordionState(
+          'unifiedDocViewLogsOverviewStacktraceAccordion',
+          'true'
+        );
+      });
+    });
+  }
+
+  describe('getDocViewer', () => {
+    let synthEsLogsClient: LogsSynthtraceEsClient;
+
     before(async () => {
-      await synthtrace.index([
+      const { logsEsClient } = synthtrace.getClients(['logsEsClient']);
+      synthEsLogsClient = logsEsClient;
+
+      await synthEsLogsClient.index([
         timerange(start, end)
           .interval('1m')
           .rate(5)
@@ -44,313 +309,73 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               })
           ),
       ]);
-
-      await PageObjects.common.navigateToActualUrl('discover', undefined, {
-        ensureCurrentUrl: false,
-      });
-
-      // Required as some other test switches data view to metric-*
-      await dataViews.switchTo('All logs');
-
-      await queryBar.setQuery('error.stack_trace : * and _ignored : *');
-      await queryBar.submitQuery();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
     });
 
     after(async () => {
-      await synthtrace.clean();
+      await synthEsLogsClient.clean();
     });
 
-    afterEach(async () => {
-      await dataGrid.closeFlyout();
+    describe('in Discover', () => {
+      before(async () => {
+        await PageObjects.common.navigateToActualUrl('discover', undefined, {
+          ensureCurrentUrl: false,
+        });
+
+        // Required as some other test switches data view to metric-*
+        await dataViews.switchTo('All logs');
+
+        await queryBar.setQuery(searchQuery);
+        await queryBar.submitQuery();
+        await PageObjects.discover.waitUntilTabIsLoaded();
+      });
+
+      afterEach(async () => {
+        await dataGrid.closeFlyout();
+      });
+
+      defineDocViewerTests({ qualityIssue: 0, stacktrace: 1 });
     });
 
-    describe('renders docViewer', () => {
-      it('should open the flyout with stacktrace and quality issues accordion closed when expand is clicked', async () => {
-        await dataGrid.clickRowToggle({ rowIndex: 0 });
+    describe('in Dashboard saved search embeddable', () => {
+      before(async () => {
+        await PageObjects.common.navigateToActualUrl('discover', undefined, {
+          ensureCurrentUrl: false,
+        });
 
-        // Ensure Log overview flyout is open
-        const tabButton = await testSubjects.find('docViewerTab-doc_view_logs_overview');
-        await tabButton.click();
+        // Required as some other test switches data view to metric-*
+        await dataViews.switchTo('All logs');
 
-        // Quality Issues accordion to be present and collapsed
-        await testSubjects.existOrFail('unifiedDocViewLogsOverviewDegradedFieldsAccordion');
+        await queryBar.setQuery(searchQuery);
+        await queryBar.submitQuery();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
 
-        const isQualityIssuesAccordionExpanded = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewDegradedFieldsAccordion'
-        );
+        // Required to access Dashboard page
+        await dataViews.createFromSearchBar({
+          name: 'logs-synth',
+        });
 
-        expect(isQualityIssuesAccordionExpanded).to.equal('false');
+        await PageObjects.discover.saveSearch('synth-search-doc-viewer');
 
-        // Stacktrace accordion to be present and collapsed
-        await testSubjects.existOrFail('unifiedDocViewLogsOverviewStacktraceAccordion');
+        await PageObjects.dashboard.navigateToApp();
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
 
-        const isStacktraceAccordionExpanded = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewStacktraceAccordion'
-        );
-
-        expect(isStacktraceAccordionExpanded).to.equal('false');
+        await dashboardAddPanel.addSavedSearch('synth-search-doc-viewer');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.waitForRenderComplete();
       });
 
-      it('should open the flyout with stacktrace accordion open and quality issues accordion closed when stacktrace icon is clicked', async () => {
-        await dataGrid.clickStacktraceLeadingControl(0);
-
-        // Ensure Log overview flyout is open
-        await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
-
-        // Quality Issues accordion to be present and collapsed
-        await testSubjects.existOrFail('unifiedDocViewLogsOverviewDegradedFieldsAccordion');
-
-        const isQualityIssuesAccordionExpanded = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewDegradedFieldsAccordion'
-        );
-
-        expect(isQualityIssuesAccordionExpanded).to.equal('false');
-
-        // Stacktrace accordion to be present and collapsed
-        await testSubjects.existOrFail('unifiedDocViewLogsOverviewStacktraceAccordion');
-
-        const isStacktraceAccordionExpanded = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewStacktraceAccordion'
-        );
-
-        expect(isStacktraceAccordionExpanded).to.equal('true');
+      after(async () => {
+        await kibanaServer.savedObjects.clean({
+          types: ['search', 'index-pattern', 'dashboard'],
+        });
       });
 
-      it('should open the flyout with stacktrace accordion closed and quality issues accordion open when quality issues icon is clicked', async () => {
-        await dataGrid.clickQualityIssueLeadingControl(0);
-
-        // Ensure Log overview flyout is open
-        await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
-
-        // Quality Issues accordion to be present and collapsed
-        await testSubjects.existOrFail('unifiedDocViewLogsOverviewDegradedFieldsAccordion');
-
-        const isQualityIssuesAccordionExpanded = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewDegradedFieldsAccordion'
-        );
-
-        expect(isQualityIssuesAccordionExpanded).to.equal('true');
-
-        // Stacktrace accordion to be present and collapsed
-        await testSubjects.existOrFail('unifiedDocViewLogsOverviewStacktraceAccordion');
-
-        const isStacktraceAccordionExpanded = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewStacktraceAccordion'
-        );
-
-        expect(isStacktraceAccordionExpanded).to.equal('false');
+      afterEach(async () => {
+        await dataGrid.closeFlyout();
       });
 
-      it('should keep old accordion open when 1st stacktrace and then quality issue control for the same row is clicked', async () => {
-        await dataGrid.clickStacktraceLeadingControl(0);
-
-        const stacktraceAccordionState = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewStacktraceAccordion'
-        );
-
-        const qualityIssuesAccordionState = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewDegradedFieldsAccordion'
-        );
-
-        // 1st stack trace accordion should be opened and quality issues should be closed
-        expect(stacktraceAccordionState).to.equal('true');
-        expect(qualityIssuesAccordionState).to.equal('false');
-
-        // Clicking on Quality Issue control of the same row while the Flyout is still open
-
-        await dataGrid.clickQualityIssueLeadingControl(0);
-
-        const stacktraceAccordionState2 = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewStacktraceAccordion'
-        );
-
-        const qualityIssuesAccordionState2 = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewDegradedFieldsAccordion'
-        );
-
-        // Expect the previous one to stay open and new one to also open. This shows component did not remount
-        expect(stacktraceAccordionState2).to.equal('true');
-        expect(qualityIssuesAccordionState2).to.equal('true');
-      });
-
-      it('should toggle to quality issue accordion when 1st stacktrace and then quality issue control is clicked for different row', async () => {
-        await dataGrid.clickStacktraceLeadingControl(0);
-
-        const stacktraceAccordionState = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewStacktraceAccordion'
-        );
-
-        const qualityIssuesAccordionState = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewDegradedFieldsAccordion'
-        );
-
-        // 1st stack trace accordion should be opened and quality issues should be closed
-        expect(stacktraceAccordionState).to.equal('true');
-        expect(qualityIssuesAccordionState).to.equal('false');
-
-        // Clicking on Quality Issue control of the same row while the Flyout is still open
-
-        await dataGrid.clickQualityIssueLeadingControl(1);
-
-        const stacktraceAccordionState2 = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewStacktraceAccordion'
-        );
-
-        const qualityIssuesAccordionState2 = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewDegradedFieldsAccordion'
-        );
-
-        // Expect toggle to have happened
-        expect(stacktraceAccordionState2).to.equal('false');
-        expect(qualityIssuesAccordionState2).to.equal('true');
-      });
-
-      it('should keep old accordion open when 1st quality issue and then stacktrace control for the same row is clicked', async () => {
-        await dataGrid.clickQualityIssueLeadingControl(0);
-
-        const stacktraceAccordionState = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewStacktraceAccordion'
-        );
-
-        const qualityIssuesAccordionState = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewDegradedFieldsAccordion'
-        );
-
-        // 1st quality issues accordion should be opened and stacktrace should be closed
-        expect(stacktraceAccordionState).to.equal('false');
-        expect(qualityIssuesAccordionState).to.equal('true');
-
-        // Clicking on Stacktrace control of the same row while the Flyout is still open
-        await dataGrid.clickStacktraceLeadingControl(0);
-
-        const stacktraceAccordionState2 = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewStacktraceAccordion'
-        );
-
-        const qualityIssuesAccordionState2 = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewDegradedFieldsAccordion'
-        );
-
-        // Expect the previous one to stay open and new one to also open. This shows component did not remount
-        expect(stacktraceAccordionState2).to.equal('true');
-        expect(qualityIssuesAccordionState2).to.equal('true');
-      });
-
-      it('should toggle to stacktrace accordion when 1st quality issue and then stacktrace control is clicked for different row', async () => {
-        await dataGrid.clickQualityIssueLeadingControl(0);
-
-        const stacktraceAccordionState = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewStacktraceAccordion'
-        );
-
-        const qualityIssuesAccordionState = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewDegradedFieldsAccordion'
-        );
-
-        // 1st quality issues accordion should be opened and stacktrace should be closed
-        expect(stacktraceAccordionState).to.equal('false');
-        expect(qualityIssuesAccordionState).to.equal('true');
-
-        // Clicking on Stacktrace control of the same row while the Flyout is still open
-        await dataGrid.clickStacktraceLeadingControl(1);
-
-        const stacktraceAccordionState2 = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewStacktraceAccordion'
-        );
-
-        const qualityIssuesAccordionState2 = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewDegradedFieldsAccordion'
-        );
-
-        // Expect toggle to have happened
-        expect(stacktraceAccordionState2).to.equal('true');
-        expect(qualityIssuesAccordionState2).to.equal('false');
-      });
-
-      it('should switch tab to logs overview and open quality issues accordion, when user clicks on quality issue control of same row and flyout is already open with some other tab', async () => {
-        await dataGrid.clickRowToggle({ rowIndex: 0 });
-
-        // Switch to JSON tab
-        const jsonTabButton = await testSubjects.find('docViewerTab-doc_view_source');
-        await jsonTabButton.click();
-
-        // Click to open Quality Issue control on the same row
-        await dataGrid.clickQualityIssueLeadingControl(0);
-
-        const qualityIssuesAccordionState = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewDegradedFieldsAccordion'
-        );
-        const stacktraceAccordionState = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewStacktraceAccordion'
-        );
-
-        expect(qualityIssuesAccordionState).to.equal('true');
-        expect(stacktraceAccordionState).to.equal('false');
-      });
-
-      it('should switch tab to logs overview and open quality issues accordion, when user clicks on quality issue control of different row and flyout is already open with some other tab', async () => {
-        await dataGrid.clickRowToggle({ rowIndex: 0 });
-
-        // Switch to JSON tab
-        const jsonTabButton = await testSubjects.find('docViewerTab-doc_view_source');
-        await jsonTabButton.click();
-
-        // Click to open Quality Issue control on the same row
-        await dataGrid.clickQualityIssueLeadingControl(1);
-
-        const qualityIssuesAccordionState = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewDegradedFieldsAccordion'
-        );
-        const stacktraceAccordionState = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewStacktraceAccordion'
-        );
-
-        expect(qualityIssuesAccordionState).to.equal('true');
-        expect(stacktraceAccordionState).to.equal('false');
-      });
-
-      it('should switch tab to logs overview and open stacktrace accordion, when user clicks on stacktrace control of same row and flyout is already open with some other tab', async () => {
-        await dataGrid.clickRowToggle({ rowIndex: 0 });
-
-        // Switch to JSON tab
-        const jsonTabButton = await testSubjects.find('docViewerTab-doc_view_source');
-        await jsonTabButton.click();
-
-        // Click to open Quality Issue control on the same row
-        await dataGrid.clickStacktraceLeadingControl(0);
-
-        const qualityIssuesAccordionState = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewDegradedFieldsAccordion'
-        );
-        const stacktraceAccordionState = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewStacktraceAccordion'
-        );
-
-        expect(qualityIssuesAccordionState).to.equal('false');
-        expect(stacktraceAccordionState).to.equal('true');
-      });
-
-      it('should switch tab to logs overview and open stacktrace accordion, when user clicks on stacktrace control of different row and flyout is already open with some other tab', async () => {
-        await dataGrid.clickRowToggle({ rowIndex: 0 });
-
-        // Switch to JSON tab
-        const jsonTabButton = await testSubjects.find('docViewerTab-doc_view_source');
-        await jsonTabButton.click();
-
-        // Click to open Quality Issue control on the same row
-        await dataGrid.clickStacktraceLeadingControl(1);
-
-        const qualityIssuesAccordionState = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewDegradedFieldsAccordion'
-        );
-        const stacktraceAccordionState = await testSubjects.getAccordionState(
-          'unifiedDocViewLogsOverviewStacktraceAccordion'
-        );
-
-        expect(qualityIssuesAccordionState).to.equal('false');
-        expect(stacktraceAccordionState).to.equal('true');
-      });
+      defineDocViewerTests({ qualityIssue: 1, stacktrace: 2 });
     });
   });
 }

@@ -8,8 +8,8 @@
 import { merge } from 'lodash';
 import { MissingRequiredError } from '../error_missing_required';
 import { calculateAvailability } from '../calculate_availability';
-import { LegacyRequest } from '../../types';
-import { ElasticsearchResponse } from '../../../common/types/es';
+import type { LegacyRequest } from '../../types';
+import type { ElasticsearchResponse } from '../../../common/types/es';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 import { standaloneClusterFilter } from '../standalone_clusters/standalone_cluster_query_filter';
 import { getIndexPatterns } from '../../../common/get_index_patterns';

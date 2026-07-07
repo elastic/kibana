@@ -9,8 +9,9 @@ import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_lo
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { HttpError, Status } from '../../../../../common/types/api';
-import { EnterpriseSearchApplication } from '../../../../../common/types/search_applications';
+import type { HttpError } from '../../../../../common/types/api';
+import { Status } from '../../../../../common/types/api';
+import type { EnterpriseSearchApplication } from '../../../../../common/types/search_applications';
 
 import { FetchSearchApplicationsAPILogic } from '../../api/search_applications/fetch_search_applications_api_logic';
 
@@ -228,7 +229,7 @@ describe('SearchApplicationsListLogic', () => {
         });
       });
     });
-    describe('request to delete Search Application', () => {
+    describe('request to delete search application', () => {
       it('should set isDeleteLoading to true on delete search application request', () => {
         SearchApplicationsListLogic.actions.deleteSearchApplication({
           searchApplicationName: results[0].name,

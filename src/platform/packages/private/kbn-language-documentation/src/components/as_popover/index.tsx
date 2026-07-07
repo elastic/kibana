@@ -9,13 +9,8 @@
 
 import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiPopover,
-  EuiToolTip,
-  EuiButtonIcon,
-  EuiButtonIconProps,
-  EuiOutsideClickDetector,
-} from '@elastic/eui';
+import type { EuiButtonIconProps } from '@elastic/eui';
+import { EuiPopover, EuiToolTip, EuiButtonIcon, EuiOutsideClickDetector } from '@elastic/eui';
 import { LanguageDocumentationPopoverContent } from './popover_content';
 import type { LanguageDocumentationSections } from '../../types';
 
@@ -53,6 +48,12 @@ function DocumentationPopover({
       }}
     >
       <EuiPopover
+        aria-label={i18n.translate('languageDocumentation.popoverAriaLabel', {
+          defaultMessage: '{lang} reference',
+          values: {
+            lang: language,
+          },
+        })}
         panelClassName="documentation__docs--overlay"
         panelPaddingSize="none"
         isOpen={isHelpMenuOpen}

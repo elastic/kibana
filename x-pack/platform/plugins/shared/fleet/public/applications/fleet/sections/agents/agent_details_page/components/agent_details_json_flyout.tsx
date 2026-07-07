@@ -21,6 +21,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import type { Agent } from '../../../../types';
@@ -44,11 +45,13 @@ export const AgentDetailsJsonFlyout = memo<{ agent: Agent; onClose: () => void }
 
     const { docLinks } = useStartServices();
 
+    const flyoutTitleId = useGeneratedHtmlId();
+
     return (
-      <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
+      <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH} aria-labelledby={flyoutTitleId}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>
+            <h2 id={flyoutTitleId}>
               <FormattedMessage
                 id="xpack.fleet.agentDetails.jsonFlyoutTitle"
                 defaultMessage="''{name}'' agent details"

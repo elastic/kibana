@@ -15,25 +15,32 @@ import type {
   CaseUserActionWithoutReferenceIds,
   AttachmentAttributesWithoutRefs,
 } from '../../../common/types/domain';
-import { SAVED_OBJECT_TYPES } from '../../../common/constants';
+import type { AttachmentAttributesV2 } from '../../../common/types/domain/attachment/v2';
 import { createCaseError } from '../../common/error';
 import type { CasePersistedAttributes } from '../../common/types/case';
+import type { ConfigType } from '../../config';
 import { getAttachmentsAndUserActionsForCases } from './utils';
+import { getSavedObjectsTypes } from '../../../common';
 
 export async function handleExport({
   context,
   objects,
   coreSetup,
   logger,
+  config,
 }: {
   context: SavedObjectsExportTransformContext;
   objects: Array<SavedObject<CasePersistedAttributes>>;
   coreSetup: CoreSetup;
   logger: Logger;
+  config: ConfigType;
 }): Promise<
   Array<
     SavedObject<
-      CasePersistedAttributes | AttachmentAttributesWithoutRefs | CaseUserActionWithoutReferenceIds
+      | CasePersistedAttributes
+      | AttachmentAttributesWithoutRefs
+      | AttachmentAttributesV2
+      | CaseUserActionWithoutReferenceIds
     >
   >
 > {
@@ -51,7 +58,7 @@ export async function handleExport({
     }));
     const [{ savedObjects }] = await coreSetup.getStartServices();
     const savedObjectsClient = savedObjects.getScopedClient(context.request, {
-      includedHiddenTypes: SAVED_OBJECT_TYPES,
+      includedHiddenTypes: getSavedObjectsTypes(config),
     });
 
     const caseIds = cleanedObjects.map((caseObject) => caseObject.id);

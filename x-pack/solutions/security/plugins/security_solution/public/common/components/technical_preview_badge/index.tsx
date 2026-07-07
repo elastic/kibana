@@ -19,7 +19,7 @@ export const TechnicalPreviewBadge = ({ label }: TechnicalPreviewBadgeProps) => 
     {label}
     <EuiBetaBadge
       label={i18n.TECHNICAL_PREVIEW}
-      style={{ verticalAlign: 'middle', marginLeft: '8px' }}
+      css={{ verticalAlign: 'middle', marginLeft: '8px' }}
       size="s"
     />
   </>

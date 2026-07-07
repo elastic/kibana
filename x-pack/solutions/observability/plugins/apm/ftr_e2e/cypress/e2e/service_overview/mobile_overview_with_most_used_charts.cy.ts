@@ -7,7 +7,7 @@
 import url from 'url';
 import moment from 'moment/moment';
 import { synthtrace } from '../../../synthtrace';
-import { generateMobileData } from './generate_mobile.data';
+import { generateMobileData } from '../mobile/generate_data';
 
 const start = Date.now() - 1000;
 const end = Date.now();
@@ -74,8 +74,7 @@ describe.skip('Mobile Service overview page', () => {
         const timeEnd = moment(end).subtract(5, 'm').toISOString();
 
         cy.selectAbsoluteTimeRange(timeStart, timeEnd);
-
-        cy.contains('Update').click();
+        // selectAbsoluteTimeRange submits the query itself.
 
         cy.wait(aliasNames);
 

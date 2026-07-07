@@ -5,24 +5,28 @@
  * 2.0.
  */
 
-import { AuthenticatedUser, Logger } from '@kbn/core/server';
-import {
-  AttackDiscoveryAlert,
+import type { AuthenticatedUser, Logger, ElasticsearchClient } from '@kbn/core/server';
+import type {
+  AttackDiscoveryApiAlert,
   CreateAttackDiscoveryAlertsParams,
 } from '@kbn/elastic-assistant-common';
+import { ALERT_ATTACK_DISCOVERY_ALERT_IDS } from '@kbn/elastic-assistant-common';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
-import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 
 import { transformToAlertDocuments } from '../transforms/transform_to_alert_documents';
 import { getCreatedDocumentIds } from './get_created_document_ids';
 import { getCreatedAttackDiscoveryAlerts } from './get_created_attack_discovery_alerts';
 
+import { updateAlertsWithAttackIds } from '../../schedules/register_schedule/updateAlertsWithAttackIds';
+
 interface CreateAttackDiscoveryAlerts {
   adhocAttackDiscoveryDataClient: IRuleDataClient;
   authenticatedUser: AuthenticatedUser;
   createAttackDiscoveryAlertsParams: CreateAttackDiscoveryAlertsParams;
+  esClient: ElasticsearchClient;
   logger: Logger;
   spaceId: string;
 }
@@ -33,9 +37,10 @@ export const createAttackDiscoveryAlerts = async ({
   adhocAttackDiscoveryDataClient,
   authenticatedUser,
   createAttackDiscoveryAlertsParams,
+  esClient,
   logger,
   spaceId,
-}: CreateAttackDiscoveryAlerts): Promise<AttackDiscoveryAlert[]> => {
+}: CreateAttackDiscoveryAlerts): Promise<AttackDiscoveryApiAlert[]> => {
   const attackDiscoveryAlertsIndex = adhocAttackDiscoveryDataClient.indexNameWithNamespace(spaceId);
   const readDataClient = adhocAttackDiscoveryDataClient.getReader({ namespace: spaceId });
   const writeDataClient = await adhocAttackDiscoveryDataClient.getWriter({ namespace: spaceId });
@@ -109,6 +114,29 @@ export const createAttackDiscoveryAlerts = async ({
       throw new Error(`Failed to bulk insert Attack discovery alerts ${allErrorDetails}`);
     }
 
+    // Build a map of underlying detection alert IDs to the newly created ad-hoc attack discovery alert IDs.
+    // This allows us to link the detection alerts back to the attack discovery alerts that group them.
+    const alertIdToAttackIdsMap: Record<string, string[]> = {};
+    for (const alertDocument of alertDocuments) {
+      const alertDocId = alertDocument[ALERT_UUID];
+      if (alertDocId) {
+        const underlyingAlertIds =
+          (alertDocument[ALERT_ATTACK_DISCOVERY_ALERT_IDS] as string[]) ?? [];
+        for (const alertId of underlyingAlertIds) {
+          alertIdToAttackIdsMap[alertId] = alertIdToAttackIdsMap[alertId] ?? [];
+          alertIdToAttackIdsMap[alertId].push(alertDocId);
+        }
+      }
+    }
+
+    // Update the underlying detection alerts with the new ad-hoc attack discovery alert IDs.
+    // This ensures that the detection alerts are properly linked to the ad-hoc attacks they belong to.
+    await updateAlertsWithAttackIds({
+      esClient,
+      alertIdToAttackIdsMap,
+      spaceId,
+    });
+
     logger.debug(
       () =>
         `Created Attack discovery alerts in index ${attackDiscoveryAlertsIndex} with document ids: ${createdDocumentIds.join(
@@ -116,11 +144,15 @@ export const createAttackDiscoveryAlerts = async ({
         )}`
     );
 
+    const { enableFieldRendering, withReplacements } = createAttackDiscoveryAlertsParams;
+
     return getCreatedAttackDiscoveryAlerts({
       attackDiscoveryAlertsIndex,
       createdDocumentIds,
+      enableFieldRendering,
       logger,
       readDataClient,
+      withReplacements,
     });
   } catch (err) {
     logger.error(

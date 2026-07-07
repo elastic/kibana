@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
+import { findTestPluginPaths } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import path from 'path';
 
@@ -23,14 +24,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./test_suites/core'),
       require.resolve('./test_suites/custom_visualizations'),
       require.resolve('./test_suites/hardening'),
-      require.resolve('./test_suites/panel_actions'),
       require.resolve('./test_suites/core_plugins'),
       require.resolve('./test_suites/management'),
       require.resolve('./test_suites/application_links'),
       require.resolve('./test_suites/data_plugin'),
       require.resolve('./test_suites/saved_objects_management'),
       require.resolve('./test_suites/saved_objects_hidden_type'),
-      require.resolve('./test_suites/shared_ux'),
     ],
     services: {
       ...functionalConfig.get('services'),

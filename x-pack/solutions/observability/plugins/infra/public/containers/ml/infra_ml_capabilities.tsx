@@ -6,11 +6,13 @@
  */
 
 import createContainer from 'constate';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { fold } from 'fp-ts/Either';
 import { pipe } from 'fp-ts/pipeable';
 import { identity } from 'fp-ts/function';
 import { throwErrors, createPlainError } from '@kbn/io-ts-utils';
+import { useBoolean } from '@kbn/react-hooks';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { useTrackedPromise } from '../../hooks/use_tracked_promise';
 import type { GetMlCapabilitiesResponsePayload } from './api/ml_api_types';
 import { getMlCapabilitiesResponsePayloadRT } from './api/ml_api_types';
@@ -20,6 +22,7 @@ export const useInfraMLCapabilities = () => {
   const { services } = useKibanaContextForPlugin();
   const [mlCapabilities, setMlCapabilities] =
     useState<GetMlCapabilitiesResponsePayload>(initialMlCapabilities);
+  const [isTopbarMenuVisible, { on: showTopbarMenu, off: hideTopbarMenu }] = useBoolean(true);
 
   const [fetchMlCapabilitiesRequest, fetchMlCapabilities] = useTrackedPromise(
     {
@@ -50,6 +53,21 @@ export const useInfraMLCapabilities = () => {
     [fetchMlCapabilitiesRequest.state]
   );
 
+  const updateTopbarMenuVisibilityBySchema = useCallback(
+    (schema?: DataSchemaFormat | null) => {
+      if (schema === null) {
+        return;
+      }
+
+      if (schema === 'semconv') {
+        hideTopbarMenu();
+      } else {
+        showTopbarMenu();
+      }
+    },
+    [hideTopbarMenu, showTopbarMenu]
+  );
+
   const hasInfraMLSetupCapabilities = mlCapabilities.capabilities.canCreateJob;
   const hasInfraMLReadCapabilities = mlCapabilities.capabilities.canGetJobs;
   const hasInfraMLCapabilities =
@@ -60,6 +78,8 @@ export const useInfraMLCapabilities = () => {
     hasInfraMLReadCapabilities,
     hasInfraMLSetupCapabilities,
     isLoading,
+    isTopbarMenuVisible,
+    updateTopbarMenuVisibilityBySchema,
   };
 };
 

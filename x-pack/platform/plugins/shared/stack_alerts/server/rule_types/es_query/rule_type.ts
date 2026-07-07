@@ -23,7 +23,7 @@ import { validateServerless } from './rule_type_params';
 import type { ExecutorOptions } from './types';
 import { ActionGroupId } from '../../../common/es_query';
 import { executor } from './executor';
-import { isSearchSourceRule } from './util';
+import { isSearchSourceRule, getSourceFields } from './util';
 import type { StackAlertType } from '../types';
 
 export function getRuleType(
@@ -156,6 +156,8 @@ export function getRuleType(
     }
   );
 
+  const sourceFields = getSourceFields();
+
   return {
     id: ES_QUERY_ID,
     name: ruleTypeName,
@@ -222,7 +224,7 @@ export function getRuleType(
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: async (options: ExecutorOptions<EsQueryRuleParams>) => {
-      return await executor(core, options);
+      return await executor(core, options, sourceFields);
     },
     category: DEFAULT_APP_CATEGORIES.management.id,
     producer: STACK_ALERTS_FEATURE_ID,

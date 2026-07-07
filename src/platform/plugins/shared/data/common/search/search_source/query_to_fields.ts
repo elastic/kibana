@@ -7,10 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewLazy } from '@kbn/data-views-plugin/common';
-import { fromKueryExpression, getKqlFieldNames, isFilter, isOfQueryType } from '@kbn/es-query';
+import type { DataViewLazy } from '@kbn/data-views-plugin/common';
+import {
+  fromKueryExpression,
+  getFilterField,
+  getKqlFieldNames,
+  isCombinedFilter,
+  isFilter,
+  isOfQueryType,
+  type Filter,
+} from '@kbn/es-query';
 import type { SearchRequest } from './fetch';
-import { EsQuerySortValue } from '../..';
+import type { EsQuerySortValue } from '../..';
+
+const collectFilterFields = (filter: Filter, acc: string[] = []): string[] => {
+  if (!isFilter(filter) || filter.meta?.disabled === true) return acc;
+
+  if (isCombinedFilter(filter)) {
+    for (const nested of filter.meta.params ?? []) {
+      collectFilterFields(nested, acc);
+    }
+
+    return acc;
+  }
+
+  const field = filter.meta?.key ?? getFilterField(filter);
+  if (field) acc.push(field);
+
+  return acc;
+};
 
 export async function queryToFields({
   dataView,
@@ -33,15 +58,10 @@ export async function queryToFields({
       fields = fields.concat(queryFields);
     }
   }
+
   const { filters = [] } = request;
-  for (const f of typeof filters === 'function' ? filters() : filters) {
-    // unified search bar filters have meta object and key (regular filters)
-    // unified search bar "custom" filters ("Edit as query DSL", where meta.key is not present but meta is)
-    // Any other Elasticsearch query DSL filter that gets passed in by consumers (not coming from unified search, and these probably won't have a meta key at all)
-    if (isFilter(f) && f?.meta?.key && f.meta.disabled !== true) {
-      fields.push(f.meta.key);
-    }
-  }
+  const requestFilters = typeof filters === 'function' ? filters() : filters;
+  fields = fields.concat(requestFilters.flatMap((filter) => collectFilterFields(filter)));
 
   // if source filtering is enabled, we need to fetch all the fields
   const fieldName =

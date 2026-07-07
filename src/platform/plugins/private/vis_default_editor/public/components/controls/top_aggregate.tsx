@@ -12,13 +12,13 @@ import { EuiFormRow, EuiIconTip, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
+import type {
   IAggConfig,
   AggParam,
   OptionedValueProp,
   OptionedParamType,
 } from '@kbn/data-plugin/public';
-import { AggParamEditorProps, OptionedParamEditorProps } from '../agg_param_props';
+import type { AggParamEditorProps, OptionedParamEditorProps } from '../agg_param_props';
 
 export interface AggregateValueProp extends OptionedValueProp {
   isCompatible(aggConfig: IAggConfig): boolean;
@@ -61,7 +61,7 @@ export function TopAggregateParamEditor({
       />{' '}
       <EuiIconTip
         position="right"
-        type="questionInCircle"
+        type="question"
         content={i18n.translate('visDefaultEditor.controls.aggregateWithTooltip', {
           defaultMessage:
             'Choose a strategy for combining multiple hits or a multi-valued field into a single metric.',

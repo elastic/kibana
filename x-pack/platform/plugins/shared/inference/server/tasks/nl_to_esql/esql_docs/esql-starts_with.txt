@@ -1,6 +1,6 @@
 # STARTS_WITH
 
-The STARTS_WITH function returns a boolean value indicating whether a keyword string begins with a specified string.
+The STARTS_WITH function returns a boolean value indicating whether a keyword string begins with a specified prefix string.
 
 ## Syntax
 
@@ -10,25 +10,18 @@ The STARTS_WITH function returns a boolean value indicating whether a keyword st
 
 #### str
 
-This is a string expression.
+The string expression to evaluate. If this value is `null`, the function returns `null`.
 
 #### prefix
 
-This is a string expression that will be checked if it is the starting sequence of the `str` parameter.
+The string expression to check as the prefix. If this value is `null`, the function returns `null`.
 
 ## Examples
 
-This example checks if the last name of employee records starts with "B":
+Checks whether each employee's last name begins with the letter "B" and adds the result as a new column.
 
 ```esql
 FROM employees
 | KEEP last_name
 | EVAL ln_S = STARTS_WITH(last_name, "B")
-```
-
-```esql
-FROM employees
-| KEEP first_name, last_name
-| EVAL fn_S = STARTS_WITH(first_name, "A")
-| WHERE fn_S
 ```

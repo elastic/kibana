@@ -40,10 +40,7 @@ import type {
 } from '@kbn/apm-data-access-plugin/server';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
 import type { ServerlessPluginStart } from '@kbn/serverless/server';
-import type {
-  EntityManagerServerPluginStart,
-  EntityManagerServerPluginSetup,
-} from '@kbn/entityManager-plugin/server';
+import type { ObservabilityAgentBuilderPluginSetup } from '@kbn/observability-agent-builder-plugin/server';
 
 export interface InfraServerPluginSetupDeps {
   alerting: AlertingServerSetup;
@@ -62,7 +59,7 @@ export interface InfraServerPluginSetupDeps {
   profilingDataAccess?: ProfilingDataAccessPluginSetup;
   apmDataAccess: ApmDataAccessPluginSetup;
   serverless?: ServerlessPluginStart;
-  entityManager: EntityManagerServerPluginSetup;
+  observabilityAgentBuilder?: ObservabilityAgentBuilderPluginSetup;
 }
 
 export interface InfraServerPluginStartDeps {
@@ -73,7 +70,6 @@ export interface InfraServerPluginStartDeps {
   ruleRegistry: RuleRegistryPluginStartContract;
   apmDataAccess: ApmDataAccessPluginStart;
   logsDataAccess: LogsDataAccessPluginStart;
-  entityManager: EntityManagerServerPluginStart;
 }
 
 export interface CallWithRequestParams extends estypes.RequestBase {

@@ -50,7 +50,7 @@ describe('checkVersionCompatibility', () => {
     });
 
     expect(getVirtualVersionMapMock).toHaveBeenCalledTimes(1);
-    expect(getVirtualVersionMapMock).toHaveBeenCalledWith(types);
+    expect(getVirtualVersionMapMock).toHaveBeenCalledWith({ types, useModelVersionsOnly: true });
   });
 
   it('calls getModelVersionsFromMappings with the correct parameters', () => {
@@ -66,6 +66,7 @@ describe('checkVersionCompatibility', () => {
       mappings,
       source: 'mappingVersions',
       knownTypes: ['foo', 'bar'],
+      minimumVirtualVersion: '10.0.0',
     });
   });
 

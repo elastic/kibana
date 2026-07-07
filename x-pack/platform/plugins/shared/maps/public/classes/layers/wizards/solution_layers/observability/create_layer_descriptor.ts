@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { getStaticDataViewId } from '@kbn/apm-data-view';
-import {
+import type {
   AggDescriptor,
   ColorDynamicOptions,
   LayerDescriptor,
@@ -60,7 +60,7 @@ function createDynamicFillColorDescriptor(
 function createLayerLabel(
   layer: OBSERVABILITY_LAYER_TYPE,
   metric: OBSERVABILITY_METRIC_TYPE
-): string | null {
+): string | undefined {
   let layerName;
   if (layer === OBSERVABILITY_LAYER_TYPE.APM_RUM_PERFORMANCE) {
     layerName = i18n.translate('xpack.maps.observability.apmRumPerformanceLayerName', {

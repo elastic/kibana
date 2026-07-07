@@ -2,7 +2,7 @@
 
 exports[`Intro component renders correctly 1`] = `
 <header
-  class="euiPageHeader emotion-euiPageHeader"
+  class="euiPageHeader emotion-euiPageHeader-transparent"
 >
   <div
     class="euiPageHeaderContent emotion-euiPageHeaderContent-border-l"

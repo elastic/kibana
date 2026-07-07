@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 
 export class DocumentationService {
   private esDocBasePath: string = '';
@@ -13,6 +13,7 @@ export class DocumentationService {
   private processorsUrl: string = '';
   private handlingFailureUrl: string = '';
   private createPipelineUrl: string = '';
+  private fieldAccessPatternUrl: string = '';
   private createPipelineCSVUrl: string = '';
   private simulatePipelineApiUrl: string = '';
   private enrichDataUrl: string = '';
@@ -33,7 +34,8 @@ export class DocumentationService {
     this.ingestNodeUrl = links.ingest.pipelines;
     this.processorsUrl = links.ingest.processors;
     this.handlingFailureUrl = links.ingest.pipelineFailure;
-    this.createPipelineUrl = links.ingest.pipelines;
+    this.createPipelineUrl = links.ingest.pipelineCreate;
+    this.fieldAccessPatternUrl = links.ingest.fieldAccessPattern;
     this.createPipelineCSVUrl = links.ingest.csvPipelines;
     this.simulatePipelineApiUrl = links.apis.simulatePipeline;
     this.enrichDataUrl = links.ingest.enrich;
@@ -63,6 +65,10 @@ export class DocumentationService {
 
   public getCreatePipelineUrl() {
     return this.createPipelineUrl;
+  }
+
+  public getFieldAccessPatternUrl() {
+    return this.fieldAccessPatternUrl;
   }
 
   public getCreatePipelineCSVUrl() {

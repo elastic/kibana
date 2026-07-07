@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
@@ -31,6 +31,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_text_input'));
       loadTestFile(require.resolve('./_settings'));
       loadTestFile(require.resolve('./_output_panel'));
+      loadTestFile(require.resolve('./_output_filter'));
       loadTestFile(require.resolve('./_onboarding_tour'));
     }
   });

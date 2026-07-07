@@ -173,4 +173,42 @@ describe('UrlParamsContext', () => {
       ]);
     });
   });
+
+  it('parses logs table customization parameters from URL', () => {
+    const location = {
+      pathname: '/services/test-service/transactions/view',
+      search:
+        '?logsColumns=["field1","field2"]&logsSort=[["@timestamp","desc"]]&logsGrid={"columns":{"field1":{"width":200}}}&logsRowHeight=3&logsRowsPerPage=50&logsDensity=compact',
+    } as Location;
+
+    renderParams(location);
+    const params = getUrlParams();
+
+    expect(params.logsColumns).toBe('["field1","field2"]');
+    expect(params.logsSort).toBe('[["@timestamp","desc"]]');
+    expect(params.logsGrid).toBe('{"columns":{"field1":{"width":200}}}');
+    expect(params.logsRowHeight).toBe(3);
+    expect(params.logsRowsPerPage).toBe(50);
+    expect(params.logsDensity).toBe('compact');
+    // Verify numeric parameters are numbers, not strings
+    expect(typeof params.logsRowHeight).toBe('number');
+    expect(typeof params.logsRowsPerPage).toBe('number');
+  });
+
+  it('handles missing logs table parameters gracefully', () => {
+    const location = {
+      pathname: '/services/test-service/transactions/view',
+      search: '?rangeFrom=now-15m&rangeTo=now',
+    } as Location;
+
+    renderParams(location);
+    const params = getUrlParams();
+
+    expect(params.logsColumns).toBeUndefined();
+    expect(params.logsSort).toBeUndefined();
+    expect(params.logsGrid).toBeUndefined();
+    expect(params.logsRowHeight).toBeUndefined();
+    expect(params.logsRowsPerPage).toBeUndefined();
+    expect(params.logsDensity).toBeUndefined();
+  });
 });

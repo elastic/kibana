@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { GetGroupStats } from '@kbn/grouping/src';
+import type { GetGroupStats } from '@kbn/grouping/src';
 import { ALERT_INSTANCE_ID, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import { AlertsByGroupingAgg } from '../types';
+import type { AlertsByGroupingAgg } from '../types';
 
 export const getGroupStats: GetGroupStats<AlertsByGroupingAgg> = (selectedGroup, bucket) => {
   const defaultBadges = [

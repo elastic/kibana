@@ -9,8 +9,17 @@ import React from 'react';
 import type { ValuesType } from 'utility-types';
 import { get } from 'lodash';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiText, EuiButton, EuiButtonIcon, copyToClipboard } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButton,
+  EuiButtonIcon,
+  EuiFieldPassword,
+  EuiText,
+  EuiToolTip,
+  copyToClipboard,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { secretTokenKeys } from '../../../tutorial/config_agent/commands/get_apm_agent_commands';
 function ConfigurationValueColumn({
   columnKey,
   value,
@@ -41,19 +50,30 @@ function ConfigurationValueColumn({
 
   return (
     <>
-      <EuiText size="s" color="accent">
-        {value}
-      </EuiText>
+      {(secretTokenKeys.includes(columnKey) || columnKey === 'apiKey') && !!value ? (
+        <EuiFieldPassword type="dual" value={value ?? ''} data-test-subj="secret_key" />
+      ) : (
+        <EuiText size="s" color="accent">
+          {value}
+        </EuiText>
+      )}
       {value && (
-        <EuiButtonIcon
-          data-test-subj="apmConfigurationValueColumnButton"
-          aria-label={i18n.translate('xpack.apm.onboarding.column.value.copyIconText', {
+        <EuiToolTip
+          content={i18n.translate('xpack.apm.onboarding.column.value.copyIconText', {
             defaultMessage: 'Copy to clipboard',
           })}
-          color="text"
-          iconType="copy"
-          onClick={() => copyToClipboard(value)}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj="apmConfigurationValueColumnButton"
+            aria-label={i18n.translate('xpack.apm.onboarding.column.value.copyIconText', {
+              defaultMessage: 'Copy to clipboard',
+            })}
+            color="text"
+            iconType="copy"
+            onClick={() => copyToClipboard(value)}
+          />
+        </EuiToolTip>
       )}
     </>
   );
@@ -109,5 +129,14 @@ export function AgentConfigurationTable({
     value: get({ ...data, ...defaultValues }, key),
     key,
   }));
-  return <EuiBasicTable items={items} columns={columns} />;
+
+  return (
+    <EuiBasicTable
+      items={items}
+      columns={columns}
+      tableCaption={i18n.translate('xpack.apm.onboarding.agent.table.caption', {
+        defaultMessage: 'Agent configuration settings',
+      })}
+    />
+  );
 }

@@ -26,7 +26,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
@@ -259,6 +259,7 @@ export const CreateConnector: React.FC = () => {
                               css={css`
                                 margin-right: ${euiTheme.size.m};
                               `}
+                              aria-hidden
                             />
                             {selectedConnector?.name}
                           </>

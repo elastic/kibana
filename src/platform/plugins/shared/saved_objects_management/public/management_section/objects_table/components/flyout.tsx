@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Component, Fragment, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { Component, Fragment } from 'react';
 import { take } from 'lodash';
 import {
   EuiFlyout,
@@ -30,26 +31,24 @@ import {
   EuiSpacer,
   EuiLink,
   EuiLoadingSpinner,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { HttpStart, IBasePath } from '@kbn/core/public';
-import { ISearchStart } from '@kbn/data-plugin/public';
+import type { HttpStart, IBasePath } from '@kbn/core/public';
+import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import {
   withEuiTablePersist,
   type EuiTablePersistInjectedProps,
 } from '@kbn/shared-ux-table-persist';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
-import {
-  importFile,
-  resolveImportErrors,
-  processImportResponse,
-  ProcessedImportResponse,
-} from '../../../lib';
-import { FailedImportConflict, RetryDecision } from '../../../lib/resolve_import_errors';
+import type { ProcessedImportResponse } from '../../../lib';
+import { importFile, resolveImportErrors, processImportResponse } from '../../../lib';
+import type { FailedImportConflict, RetryDecision } from '../../../lib/resolve_import_errors';
 import { OverwriteModal } from './overwrite_modal';
-import { ImportModeControl, ImportMode } from './import_mode_control';
+import type { ImportMode } from './import_mode_control';
+import { ImportModeControl } from './import_mode_control';
 import { ImportSummary } from './import_summary';
 
 const CREATE_NEW_COPIES_DEFAULT = false;
@@ -103,6 +102,8 @@ export class FlyoutClass extends Component<
   FlyoutProps & EuiTablePersistInjectedProps<any>,
   FlyoutState
 > {
+  private flyoutTitleId = htmlIdGenerator()();
+
   constructor(props: FlyoutProps & EuiTablePersistInjectedProps<unknown>) {
     super(props);
 
@@ -362,6 +363,10 @@ export class FlyoutClass extends Component<
 
           return (
             <EuiSelect
+              aria-label={i18n.translate(
+                'savedObjectsManagement.objectsTable.flyout.renderConflicts.selectNewIndexPatternAriaLabel',
+                { defaultMessage: 'Data view' }
+              )}
               value={selectedValue}
               data-test-subj={`managementChangeIndexSelection-${id}`}
               onChange={(e) => this.onIndexChanged(id, e)}
@@ -383,6 +388,10 @@ export class FlyoutClass extends Component<
         columns={columns}
         pagination={pagination}
         onTableChange={onTableChange}
+        tableCaption={i18n.translate(
+          'savedObjectsManagement.objectsTable.flyout.renderConflicts.tableCaption',
+          { defaultMessage: 'Conflicting data views' }
+        )}
       />
     );
   }
@@ -569,6 +578,7 @@ export class FlyoutClass extends Component<
     if (this.hasUnmatchedReferences) {
       indexPatternConflictsWarning = (
         <EuiCallOut
+          announceOnMount
           data-test-subj="importSavedObjectsConflictsWarning"
           title={
             <FormattedMessage
@@ -577,7 +587,7 @@ export class FlyoutClass extends Component<
             />
           }
           color="warning"
-          iconType="help"
+          iconType="question"
         >
           <p>
             <FormattedMessage
@@ -630,10 +640,15 @@ export class FlyoutClass extends Component<
     }
 
     return (
-      <EuiFlyout onClose={close} size="s" data-test-subj="importSavedObjectsFlyout">
+      <EuiFlyout
+        onClose={close}
+        size="s"
+        data-test-subj="importSavedObjectsFlyout"
+        aria-labelledby={this.flyoutTitleId}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>
+            <h2 id={this.flyoutTitleId}>
               <FormattedMessage
                 id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
                 defaultMessage="Import saved objects"

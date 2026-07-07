@@ -8,6 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
   savedObjectSchema,
@@ -16,6 +17,8 @@ import {
   createOptionsSchemas,
   objectTypeToGetResultSchema,
 } from '@kbn/content-management-utils';
+import { dashboardNavigationOptionsSchema } from '@kbn/dashboard-navigation-options-schema';
+import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../../../common/constants';
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../../../common/content_management/v1';
 import {
   LINKS_HORIZONTAL_LAYOUT,
@@ -23,90 +26,85 @@ import {
 } from '../../../../common/content_management/v1/constants';
 
 const baseLinkSchema = {
-  id: schema.string({ meta: { description: 'The unique ID of the link' } }),
   label: schema.maybe(
     schema.string({ meta: { description: 'The label of the link to be displayed in the UI' } })
   ),
-  order: schema.number({
-    meta: { description: 'The position this link should appear in the order of the list' },
-  }),
 };
 
-const dashboardLinkSchema = schema.object({
-  ...baseLinkSchema,
-  destinationRefName: schema.string({
-    meta: { description: 'The name of the SavedObject reference to the linked dashboard' },
-  }),
-  type: schema.literal(DASHBOARD_LINK_TYPE),
-  options: schema.maybe(
-    schema.object(
-      {
-        openInNewTab: schema.boolean({
-          meta: {
-            description: 'Whether to open this link in a new tab when clicked',
-          },
-        }),
-        useCurrentFilters: schema.boolean({
-          meta: {
-            description: 'Whether to use the filters and query from the origin dashboard',
-          },
-        }),
-        useCurrentDateRange: schema.boolean({
-          meta: {
-            description: 'Whether to use the date range from the origin dashboard',
-          },
-        }),
-      },
-      { unknowns: 'forbid' }
-    )
-  ),
-});
-
-const externalLinkSchema = schema.object({
-  ...baseLinkSchema,
-  type: schema.literal(EXTERNAL_LINK_TYPE),
-  destination: schema.string({ meta: { description: 'The external URL to link to' } }),
-  options: schema.maybe(
-    schema.object(
-      {
-        openInNewTab: schema.boolean({
-          meta: {
-            description: 'Whether to open this link in a new tab when clicked',
-          },
-        }),
-        encodeUrl: schema.boolean({
-          meta: {
-            description: 'Whether to escape the URL with percent encoding',
-          },
-        }),
-      },
-      { unknowns: 'forbid' }
-    )
-  ),
-});
-
-export const linksAttributesSchema = schema.object(
+export const dashboardLinkSchema = schema.object(
   {
-    title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
-    description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
-    links: schema.arrayOf(schema.oneOf([dashboardLinkSchema, externalLinkSchema]), {
-      meta: { description: 'The list of links to display' },
+    ...baseLinkSchema,
+    type: schema.literal(DASHBOARD_LINK_TYPE),
+    destination: schema.string({
+      meta: { description: 'Linked dashboard saved object id' },
     }),
-    layout: schema.maybe(
-      schema.oneOf(
-        [schema.literal(LINKS_HORIZONTAL_LAYOUT), schema.literal(LINKS_VERTICAL_LAYOUT)],
-        {
-          meta: {
-            description: 'Denote whether to display the links in a horizontal or vertical layout',
-          },
-        }
-      )
-    ),
+    options: dashboardNavigationOptionsSchema,
+  },
+  {
+    meta: {
+      id: `kbn-link-panel-type-${DASHBOARD_LINK_TYPE}`,
+    },
+  }
+);
+
+export const externalLinkOptionsSchema = schema.object(
+  {
+    open_in_new_tab: schema.boolean({
+      meta: {
+        description: 'Whether to open this link in a new tab when clicked',
+      },
+      defaultValue: DEFAULT_EXTERNAL_LINK_OPTIONS.open_in_new_tab,
+    }),
+    encode_url: schema.boolean({
+      meta: {
+        description: 'Whether to escape the URL with percent encoding',
+      },
+      defaultValue: DEFAULT_EXTERNAL_LINK_OPTIONS.encode_url,
+    }),
+  },
+  { defaultValue: DEFAULT_EXTERNAL_LINK_OPTIONS, unknowns: 'forbid' }
+);
+
+export const externalLinkSchema = schema.object(
+  {
+    ...baseLinkSchema,
+    type: schema.literal(EXTERNAL_LINK_TYPE),
+    destination: schema.string({ meta: { description: 'The external URL to link to' } }),
+    options: externalLinkOptionsSchema,
+  },
+  {
+    meta: {
+      id: `kbn-link-type-${EXTERNAL_LINK_TYPE}`,
+    },
+  }
+);
+
+export const linksArraySchema = schema.arrayOf(
+  schema.discriminatedUnion('type', [dashboardLinkSchema, externalLinkSchema]),
+  {
+    meta: { description: 'The list of links to display' },
+    maxSize: 100,
+  }
+);
+
+// Shared schema for layout - used by both saved objects and embeddables
+export const layoutSchema = schema.maybe(
+  schema.oneOf([schema.literal(LINKS_HORIZONTAL_LAYOUT), schema.literal(LINKS_VERTICAL_LAYOUT)], {
+    meta: {
+      description: 'Denote whether to display the links in a horizontal or vertical layout',
+    },
+  })
+);
+
+export const linksSchema = serializedTitlesSchema.extends(
+  {
+    links: linksArraySchema,
+    layout: layoutSchema,
   },
   { unknowns: 'forbid' }
 );
 
-const linksSavedObjectSchema = savedObjectSchema(linksAttributesSchema);
+const linksSavedObjectSchema = savedObjectSchema(linksSchema);
 
 export const linksSearchOptionsSchema = schema.maybe(
   schema.object(
@@ -118,10 +116,12 @@ export const linksSearchOptionsSchema = schema.maybe(
 );
 
 export const linksCreateOptionsSchema = schema.object({
-  references: schema.maybe(createOptionsSchemas.references),
   overwrite: createOptionsSchemas.overwrite,
 });
 
+// update references needed because visualize listing table uses content management
+// to update title/description/tags and tags passes references in this use case
+// TODO remove linksUpdateOptionsSchema once visualize listing table updated to pass in tags without references
 export const linksUpdateOptionsSchema = schema.object({
   references: updateOptionsSchema.references,
 });
@@ -145,7 +145,7 @@ export const serviceDefinition: ServicesDefinition = {
         schema: linksCreateOptionsSchema,
       },
       data: {
-        schema: linksAttributesSchema,
+        schema: linksSchema,
       },
     },
     out: {
@@ -157,10 +157,10 @@ export const serviceDefinition: ServicesDefinition = {
   update: {
     in: {
       options: {
-        schema: linksUpdateOptionsSchema, // same schema as "create"
+        schema: linksUpdateOptionsSchema,
       },
       data: {
-        schema: linksAttributesSchema,
+        schema: linksSchema,
       },
     },
   },

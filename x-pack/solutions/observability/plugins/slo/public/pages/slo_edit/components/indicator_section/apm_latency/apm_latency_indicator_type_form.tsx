@@ -6,7 +6,7 @@
  */
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFormRow, EuiIconTip } from '@elastic/eui';
-import { APMTransactionDurationIndicator } from '@kbn/slo-schema';
+import type { APMTransactionDurationIndicator } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
@@ -14,8 +14,8 @@ import { useApmDefaultValues } from '../apm_common/use_apm_default_values';
 import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 import { GroupByField } from '../../common/group_by_field';
 import { useCreateDataView } from '../../../../../hooks/use_create_data_view';
-import { useFetchApmIndex } from '../../../../../hooks/use_fetch_apm_indices';
-import { CreateSLOForm } from '../../../types';
+import { useFetchApmIndices } from '../../../../../hooks/use_fetch_apm_indices';
+import type { CreateSLOForm } from '../../../types';
 import { FieldSelector } from '../apm_common/field_selector';
 import { DataPreviewChart } from '../../common/data_preview_chart';
 import { QueryBuilder } from '../../common/query_builder';
@@ -25,7 +25,9 @@ import { getGroupByCardinalityFilters } from '../apm_common/get_group_by_cardina
 export function ApmLatencyIndicatorTypeForm() {
   const { control, watch, getFieldState } =
     useFormContext<CreateSLOForm<APMTransactionDurationIndicator>>();
-  const { data: apmIndex } = useFetchApmIndex();
+  const {
+    data: { metric: apmIndex },
+  } = useFetchApmIndices();
 
   const [
     serviceName = '',

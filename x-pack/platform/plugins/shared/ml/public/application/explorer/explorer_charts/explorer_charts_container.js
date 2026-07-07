@@ -337,6 +337,7 @@ function ExplorerChartContainer({
               {(tooltipService) => (
                 <ExplorerChartDistribution
                   id={id}
+                  isEmbeddable={isEmbeddable}
                   tableData={tableData}
                   timeBuckets={timeBuckets}
                   tooManyBuckets={tooManyBuckets}
@@ -347,6 +348,7 @@ function ExplorerChartContainer({
                   onPointerUpdate={handleCursorUpdate}
                   chartTheme={chartTheme}
                   cursor$={chartsService.activeCursor.activeCursor$}
+                  euiTheme={euiTheme}
                 />
               )}
             </MlTooltipComponent>
@@ -358,6 +360,7 @@ function ExplorerChartContainer({
               {(tooltipService) => (
                 <ExplorerChartSingleMetric
                   id={id}
+                  isEmbeddable={isEmbeddable}
                   tableData={tableData}
                   timeBuckets={timeBuckets}
                   tooManyBuckets={tooManyBuckets}
@@ -368,6 +371,7 @@ function ExplorerChartContainer({
                   onPointerUpdate={handleCursorUpdate}
                   chartTheme={chartTheme}
                   cursor$={chartsService.activeCursor.activeCursor$}
+                  euiTheme={euiTheme}
                 />
               )}
             </MlTooltipComponent>

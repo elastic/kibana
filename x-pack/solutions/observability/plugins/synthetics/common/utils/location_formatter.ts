@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PrivateLocation, ServiceLocation } from '../runtime_types';
+import type { PrivateLocation, ServiceLocation } from '../runtime_types';
 
 export const formatLocation = (location: ServiceLocation | PrivateLocation) => {
   if ('agentPolicyId' in location) {

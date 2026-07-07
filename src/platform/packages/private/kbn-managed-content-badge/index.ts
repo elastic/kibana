@@ -9,12 +9,12 @@
 
 import { i18n } from '@kbn/i18n';
 import type { EuiToolTipProps } from '@elastic/eui';
-import type { TopNavMenuBadgeProps } from '@kbn/navigation-plugin/public';
+import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser';
 
 export const getManagedContentBadge: (
   tooltipText: string,
   disableTooltipProps?: boolean
-) => TopNavMenuBadgeProps = (tooltipText, enableTooltipProps = true) => ({
+) => ChromeBreadcrumbsBadge = (tooltipText, enableTooltipProps = true) => ({
   'data-test-subj': 'managedContentBadge',
   badgeText: i18n.translate('managedContentBadge.text', {
     defaultMessage: 'Managed',
@@ -23,7 +23,7 @@ export const getManagedContentBadge: (
     defaultMessage: 'Managed',
   }),
   color: 'primary',
-  iconType: 'glasses',
+  iconType: 'readOnly',
   toolTipProps: enableTooltipProps
     ? ({
         content: tooltipText,

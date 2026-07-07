@@ -33,10 +33,60 @@ import { useFleetStatus, useStartServices } from '../../../../../../../../hooks'
 
 import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
 
-import type { DataStream, RegistryVarsEntry } from '../../../../../../types';
+import type {
+  DataStream,
+  RegistryVarsEntry,
+  RegistryVarsMigrateFrom,
+} from '../../../../../../types';
 
 import { MultiTextInput } from './multi_text_input';
 import { DatasetComponent } from './dataset_component';
+
+const VarMigrationTooltip = ({
+  migrateFrom: migrateFromProp,
+}: {
+  migrateFrom: RegistryVarsMigrateFrom | string;
+}) => {
+  const migrateFrom: RegistryVarsMigrateFrom =
+    typeof migrateFromProp === 'string' ? { name: migrateFromProp } : migrateFromProp;
+  const { name, scope } = migrateFrom;
+  let content: string;
+  if (name && scope) {
+    content = i18n.translate(
+      'xpack.fleet.createPackagePolicy.stepConfigure.varMigratedNameAndScopeTooltip',
+      {
+        defaultMessage:
+          'This variable was previously named {name} at {scope} level. Its value was carried over from the previous package version.',
+        values: { name, scope },
+      }
+    );
+  } else if (scope) {
+    content = i18n.translate(
+      'xpack.fleet.createPackagePolicy.stepConfigure.varMigratedScopeTooltip',
+      {
+        defaultMessage:
+          'This variable was previously at {scope} level. Its value was carried over from the previous package version.',
+        values: { scope },
+      }
+    );
+  } else if (name) {
+    content = i18n.translate(
+      'xpack.fleet.createPackagePolicy.stepConfigure.varMigratedNameTooltip',
+      {
+        defaultMessage:
+          'This variable was previously named {name}. Its value was carried over from the previous package version.',
+        values: { name },
+      }
+    );
+  } else {
+    return null;
+  }
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiIconTip type="info" color="subdued" content={content} />
+    </EuiFlexItem>
+  );
+};
 
 const FixedHeightDiv = styled.div`
   height: 300px;
@@ -63,6 +113,8 @@ export interface InputFieldProps {
   packageName?: string;
   datastreams?: DataStream[];
   isEditPage?: boolean;
+  isRequiredByVarGroup?: boolean;
+  isUpgrade?: boolean;
 }
 
 type InputComponentProps = InputFieldProps & {
@@ -86,6 +138,8 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     packageName,
     datastreams = [],
     isEditPage = false,
+    isRequiredByVarGroup = false,
+    isUpgrade = false,
   }) => {
     const fleetStatus = useFleetStatus();
     const [isDirty, setIsDirty] = useState<boolean>(false);
@@ -96,12 +150,21 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     const fieldLabel = title || name;
     const fieldTestSelector = fieldLabel.replace(/\s/g, '-').toLowerCase();
     // Boolean cannot be optional by default set to false
-    const isOptional = useMemo(() => type !== 'bool' && !required, [required, type]);
+    // A var is optional if it's not a bool, not required by varDef, and not required by var_group
+    const isOptional = useMemo(
+      () => type !== 'bool' && !required && !isRequiredByVarGroup,
+      [required, type, isRequiredByVarGroup]
+    );
 
     const secretsStorageEnabled = fleetStatus.isReady && fleetStatus.isSecretsStorageEnabled;
     const useSecretsUi = secretsStorageEnabled && varDef.secret;
 
-    if (name === DATASET_VAR_NAME && packageType === 'input') {
+    // Hide deprecated variables on new installations
+    if (!isEditPage && !!varDef.deprecated) {
+      return null;
+    }
+
+    if (name === DATASET_VAR_NAME) {
       return (
         <DatasetComponent
           pkgName={packageName}
@@ -151,6 +214,38 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
       });
     }
 
+    const isDeprecated = !!varDef.deprecated;
+    const deprecationTooltip = varDef.deprecated
+      ? varDef.deprecated.replaced_by
+        ? i18n.translate(
+            'xpack.fleet.createPackagePolicy.stepConfigure.deprecatedVarReplacedByTooltip',
+            {
+              defaultMessage: '{description} Replaced by: {replacedBy}',
+              values: {
+                description: varDef.deprecated.description,
+                replacedBy: Object.values(varDef.deprecated.replaced_by).join(', '),
+              },
+            }
+          )
+        : varDef.deprecated.description
+      : undefined;
+
+    const deprecatedIcon = isDeprecated ? (
+      <EuiIconTip type="warning" color="warning" position="top" content={deprecationTooltip} />
+    ) : undefined;
+    const migrationTooltip =
+      isUpgrade && varDef.migrate_from ? (
+        <VarMigrationTooltip migrateFrom={varDef.migrate_from} />
+      ) : undefined;
+    const labelAppend = isOptional ? (
+      <EuiText size="xs" color="subdued">
+        <FormattedMessage
+          id="xpack.fleet.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
+          defaultMessage="Optional"
+        />
+      </EuiText>
+    ) : undefined;
+
     const formRow = (
       <FormRow
         isInvalid={isInvalid}
@@ -158,14 +253,11 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
         hasChildLabel={!varDef.multi}
         label={useSecretsUi ? <SecretFieldLabel fieldLabel={fieldLabel} /> : fieldLabel}
         labelAppend={
-          isOptional ? (
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
-                defaultMessage="Optional"
-              />
-            </EuiText>
-          ) : undefined
+          <>
+            {deprecatedIcon}&nbsp;
+            {migrationTooltip}&nbsp;
+            {labelAppend}
+          </>
         }
         helpText={description && <ReactMarkdown children={description} />}
         fullWidth
@@ -198,6 +290,7 @@ function getInputComponent({
         onChange={onChange}
         onBlur={() => setIsDirty(true)}
         isDisabled={frozen}
+        isSecret={varDef.secret}
         data-test-subj={`multiTextInput-${fieldTestSelector}`}
       />
     );
@@ -227,6 +320,7 @@ function getInputComponent({
             <>
               <FixedHeightDiv>
                 <CodeEditor
+                  fullWidth
                   languageId="yaml"
                   width="100%"
                   height="300px"
@@ -276,10 +370,11 @@ function getInputComponent({
     case 'password':
       return (
         <EuiFieldPassword
+          fullWidth
           type="dual"
           isInvalid={isInvalid}
-          value={value === undefined ? '' : value}
-          onChange={(e) => onChange(e.target.value)}
+          value={value}
+          onChange={(e) => onChange(e.target.value ? e.target.value : undefined)}
           onBlur={() => setIsDirty(true)}
           disabled={frozen}
           data-test-subj={`passwordInput-${fieldTestSelector}`}
@@ -298,6 +393,9 @@ function getInputComponent({
             defaultMessage: 'Select an option',
           })}
           singleSelection={{ asPlainText: true }}
+          aria-label={i18n.translate('xpack.fleet.packagePolicyField.selectAriaLabel', {
+            defaultMessage: 'Select an option',
+          })}
           options={selectOptions}
           selectedOptions={selectedOptions}
           isClearable={true}
@@ -313,9 +411,10 @@ function getInputComponent({
     default:
       return (
         <EuiFieldText
+          fullWidth
           isInvalid={isInvalid}
-          value={value === undefined ? '' : value}
-          onChange={(e) => onChange(e.target.value)}
+          value={value}
+          onChange={(e) => onChange(e.target.value ? e.target.value : undefined)}
           onBlur={() => setIsDirty(true)}
           disabled={frozen}
           data-test-subj={`textInput-${fieldTestSelector}`}
@@ -354,7 +453,7 @@ const SecretFieldLabel = ({ fieldLabel }: { fieldLabel: string }) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiIconTip
-            type="iInCircle"
+            type="info"
             position="top"
             content={
               <FormattedMessage
@@ -430,7 +529,11 @@ function SecretInputField({
         </EuiText>
         <EuiSpacer size="s" />
         <EuiButtonEmpty
-          onClick={() => setIsReplacing(true)}
+          onClick={() => {
+            setIsReplacing(true);
+            setIsDirty(false);
+            onChange('');
+          }}
           color="primary"
           iconType="refresh"
           iconSide="left"
@@ -473,7 +576,7 @@ function SecretInputField({
     );
     return (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
-        <EuiFlexItem grow={false} style={{ width: '100%' }}>
+        <EuiFlexItem grow={false} css={{ width: '100%' }}>
           {inputComponent}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{cancelButton}</EuiFlexItem>

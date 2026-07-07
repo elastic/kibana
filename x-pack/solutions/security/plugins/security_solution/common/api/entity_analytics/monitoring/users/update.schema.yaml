@@ -1,0 +1,62 @@
+openapi: 3.0.0
+info:
+  title: Privileged User Monitoring API
+  version: "2023-10-31"
+
+paths:
+  /api/entity_analytics/monitoring/users/{id}:
+    put:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: UpdatePrivMonUser
+      summary: Update a monitored user
+      description: Updates the details of an existing monitored privileged user by their document ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The document ID of the monitored user to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./common.schema.yaml#/components/schemas/MonitoredUserUpdateDoc"
+            examples:
+              UpdatePrivMonUserRequest:
+                summary: Update a monitored user
+                value:
+                  user:
+                    name: john.doe
+                    is_privileged: true
+                  entity_analytics_monitoring:
+                    labels:
+                      - field: department
+                        value: Security
+                        source: api
+
+      responses:
+        "200":
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "./common.schema.yaml#/components/schemas/MonitoredUserDoc"
+              examples:
+                UpdatePrivMonUserResponse:
+                  summary: Updated monitored user
+                  value:
+                    id: user-abc-123
+                    user:
+                      name: john.doe
+                      is_privileged: true
+                    entity_analytics_monitoring:
+                      labels:
+                        - field: department
+                          value: Security
+                          source: api
+                    "@timestamp": "2026-01-28T12:00:00.000Z"
+                    event:
+                      ingested: "2026-01-28T12:00:00.000Z"

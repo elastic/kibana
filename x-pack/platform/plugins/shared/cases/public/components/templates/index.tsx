@@ -106,7 +106,7 @@ const TemplatesComponent: React.FC<Props> = ({
                 isDisabled={disabled || error}
                 size="s"
                 onClick={handleAddTemplate}
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 data-test-subj="add-template"
               >
                 {i18n.ADD_TEMPLATE}

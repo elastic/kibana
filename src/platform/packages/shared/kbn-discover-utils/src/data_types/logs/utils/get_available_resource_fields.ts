@@ -8,6 +8,7 @@
  */
 
 import type { ResourceFields } from '../../..';
+import { getFieldValueWithFallback } from '../../../utils/get_field_value_with_fallback';
 
 // Use first available field from each group
 const AVAILABLE_RESOURCE_FIELDS: Array<Array<keyof ResourceFields>> = [
@@ -34,11 +35,23 @@ const AVAILABLE_RESOURCE_FIELDS: Array<Array<keyof ResourceFields>> = [
   ],
 ];
 
-export const getAvailableResourceFields = (resourceDoc: ResourceFields) =>
-  AVAILABLE_RESOURCE_FIELDS.reduce((acc, fields) => {
-    const field = fields.find((fieldName) => resourceDoc[fieldName]);
-    if (field) {
-      acc.push(field);
+const isEmptyScalar = (value: unknown): boolean =>
+  value === undefined || value === null || value === '';
+
+// In Classic mode the `fields` API returns values wrapped in arrays, so a blank
+// field arrives as `['']`. Treat empty arrays and arrays containing only
+// empty/null values as empty, consistent with how scalar null/'' are handled.
+const isEmptyResourceValue = (value: unknown): boolean =>
+  Array.isArray(value) ? value.every(isEmptyScalar) : isEmptyScalar(value);
+
+export const getAvailableResourceFields = (resourceDoc: Record<string, unknown>): string[] =>
+  AVAILABLE_RESOURCE_FIELDS.reduce<string[]>((acc, fields) => {
+    for (const fieldName of fields) {
+      const result = getFieldValueWithFallback(resourceDoc, fieldName);
+      if (result.field && !isEmptyResourceValue(result.value)) {
+        acc.push(result.field);
+        break;
+      }
     }
     return acc;
   }, []);

@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Task, exec } from '../lib';
+import type { Task } from '../lib';
+import { exec } from '../lib';
 
 const YARN_EXEC = process.env.npm_execpath || 'yarn';
 
 export const InstallDependencies: Task = {
   description: 'Installing node_modules, including production builds of packages',
 
-  async run(config, log, build) {
+  async run(_config, log, build) {
     await exec(
       log,
       YARN_EXEC,

@@ -7,7 +7,7 @@
 
 import { MVTSingleLayerVectorSource } from './mvt_single_layer_vector_source';
 import { MVT_FIELD_TYPE, SOURCE_TYPES } from '../../../../common/constants';
-import { TiledSingleLayerVectorSourceDescriptor } from '../../../../common/descriptor_types';
+import type { TiledSingleLayerVectorSourceDescriptor } from '../../../../common/descriptor_types';
 
 const descriptor: TiledSingleLayerVectorSourceDescriptor = {
   type: SOURCE_TYPES.MVT_SINGLE_LAYER,

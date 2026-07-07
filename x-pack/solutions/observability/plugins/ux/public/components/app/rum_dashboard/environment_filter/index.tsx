@@ -7,7 +7,7 @@
 
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { History } from 'history';
+import type { History } from 'history';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
@@ -82,14 +82,15 @@ export function EnvironmentFilter({
   const minWidth = 200;
 
   const options = getOptions(environments);
+  const environmentLabel = i18n.translate('xpack.ux.filter.environment.label', {
+    defaultMessage: 'Environment',
+  });
 
   return (
     <EuiSelect
       data-test-subj="uxEnvironmentFilterSelect"
       fullWidth
-      prepend={i18n.translate('xpack.ux.filter.environment.label', {
-        defaultMessage: 'Environment',
-      })}
+      prepend={environmentLabel}
       options={options}
       value={environment}
       onChange={(event) => {
@@ -97,6 +98,7 @@ export function EnvironmentFilter({
       }}
       isLoading={loading}
       style={{ minWidth }}
+      aria-label={environmentLabel}
     />
   );
 }

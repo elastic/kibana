@@ -9,20 +9,23 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
-import type { AgentsRequestOptions } from '../../../../../../common/search_strategy/osquery/agents';
+
 import { getQueryFilter } from '../../../../../utils/build_query';
 import { ACTIONS_INDEX } from '../../../../../../common/constants';
+
+import type { ActionsRequestOptions } from '../../../../../../common/search_strategy/osquery/actions';
 
 export const buildActionsQuery = ({
   kuery = '',
   sort,
   pagination: { cursorStart, querySize },
   componentTemplateExists,
-}: AgentsRequestOptions): ISearchRequestParams => {
+}: ActionsRequestOptions): ISearchRequestParams => {
   const {
     bool: { filter },
   } = getQueryFilter({ filter: kuery });
 
+  // Space scoping is enforced centrally in the search strategy (enforceSpaceScope).
   return {
     allow_no_indices: true,
     index: componentTemplateExists ? `${ACTIONS_INDEX}*` : AGENT_ACTIONS_INDEX,

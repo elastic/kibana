@@ -17,7 +17,10 @@ import {
   COUNTER_TEST_SUBJ,
   HIGHLIGHT_CLASS_NAME,
 } from '@kbn/data-grid-in-table-search';
-import { WebElementWrapper, CustomCheerioStatic } from '@kbn/ftr-common-functional-ui-services';
+import type {
+  WebElementWrapper,
+  CustomCheerioStatic,
+} from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 export interface TabbedGridData {
@@ -174,9 +177,13 @@ export class DataGridService extends FtrService {
     );
   }
 
+  private getCellElementByColumnNameSelector(rowIndex: number, columnName: string) {
+    return `[data-test-subj="euiDataGridBody"] [data-test-subj="dataGridRowCell"][data-gridcell-column-id="${columnName}"][data-gridcell-visible-row-index="${rowIndex}"]`;
+  }
+
   public async getCellElementByColumnName(rowIndex: number, columnName: string) {
     return await this.find.byCssSelector(
-      `[data-test-subj="euiDataGridBody"] [data-test-subj="dataGridRowCell"][data-gridcell-column-id="${columnName}"][data-gridcell-visible-row-index="${rowIndex}"]`
+      this.getCellElementByColumnNameSelector(rowIndex, columnName)
     );
   }
 
@@ -315,6 +322,12 @@ export class DataGridService extends FtrService {
    */
   public async getAllCellElements(rowIndex: number = 0, columnIndex: number = 0) {
     return await this.find.allByCssSelector(this.getCellElementSelector(rowIndex, columnIndex));
+  }
+
+  public async getAllCellElementsByColumnName(rowIndex: number, columnName: string) {
+    return await this.find.allByCssSelector(
+      this.getCellElementByColumnNameSelector(rowIndex, columnName)
+    );
   }
 
   public async getDocCount(): Promise<number> {
@@ -490,8 +503,18 @@ export class DataGridService extends FtrService {
     return await this.testSubjects.exists('kbnDocViewer');
   }
 
+  public async isDocViewerNavigationVisible() {
+    return await this.testSubjects.exists('docViewerFlyoutNavigation');
+  }
+
   public async clickDocViewerTab(id: string) {
     return await this.find.clickByCssSelector(`#kbn_doc_viewer_tab_${id}`);
+  }
+
+  public async isDocViewerTabSelected(id: string) {
+    const tabTestSubj = `docViewerTab-${id}`;
+    const ariaSelected = await this.testSubjects.getAttribute(tabTestSubj, 'aria-selected');
+    return ariaSelected === 'true';
   }
 
   public async getDetailsRows(): Promise<WebElementWrapper[]> {
@@ -500,6 +523,30 @@ export class DataGridService extends FtrService {
 
   public async closeFlyout() {
     await this.testSubjects.click('euiFlyoutCloseButton');
+  }
+
+  public async waitForDocViewerFieldsToRender() {
+    await this.retry.waitFor('doc viewer fields to render', async () => {
+      return (await this.find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
+    });
+  }
+
+  public async getDocViewerFieldValue(fieldName: string) {
+    return await this.testSubjects.getVisibleText(`tableDocViewRow-${fieldName}-value`);
+  }
+
+  public async getDocViewerActivePage() {
+    const activePage = await this.find.byCssSelector(
+      '[data-test-subj^="docViewerFlyoutNavigationPage-"]'
+    );
+    const dataTestSubj = await activePage.getAttribute('data-test-subj');
+    const match = dataTestSubj?.match(/docViewerFlyoutNavigationPage-(\d+)/);
+
+    if (!match) {
+      throw new Error(`Unable to parse active flyout page from "${dataTestSubj}"`);
+    }
+
+    return Number(match[1]);
   }
 
   public async getHeaderFields(): Promise<string[]> {
@@ -524,10 +571,8 @@ export class DataGridService extends FtrService {
     return textArr;
   }
 
-  public async getRowActions(
-    options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
-  ): Promise<WebElementWrapper[]> {
-    const detailsRow = (await this.getDetailsRows())[options.rowIndex || 0];
+  public async getRowActions(): Promise<WebElementWrapper[]> {
+    const detailsRow = await this.testSubjects.find('docViewerFlyout');
     return await detailsRow.findAllByTestSubject('~docTableRowAction');
   }
 
@@ -848,9 +893,13 @@ export class DataGridService extends FtrService {
     await this.testSubjects.click('unifiedDataTableCompareSelectedDocuments');
   }
 
+  public async isComparisonModeActive() {
+    return await this.testSubjects.exists('unifiedDataTableCompareDocuments');
+  }
+
   public async waitForComparisonModeToLoad() {
-    await this.retry.try(async () => {
-      return await this.testSubjects.exists('unifiedDataTableCompareDocuments');
+    await this.retry.waitFor('comparison mode', async () => {
+      return await this.isComparisonModeActive();
     });
   }
 
@@ -901,6 +950,16 @@ export class DataGridService extends FtrService {
     await menuEntry.click();
   }
 
+  public async getComparisonDiffMode() {
+    await this.openComparisonSettingsMenu();
+    const modes = await this.testSubjects.findAll('^unifiedDataTableDiffMode-');
+    for (const mode of modes) {
+      if ((await mode.getAttribute('aria-current')) === 'true') {
+        return await mode.getVisibleText();
+      }
+    }
+  }
+
   public async getComparisonDiffSegments(rowIndex: number, cellIndex: number) {
     const columns = await this.getRow({ rowIndex }, 'unifiedDataTableCompareDocuments');
     const segments = await columns[cellIndex].findAllByClassName(
@@ -948,6 +1007,13 @@ export class DataGridService extends FtrService {
   public async getCurrentPageNumber() {
     const currentPage = await this.find.byCssSelector('.euiPaginationButton[aria-current="page"]');
     return await currentPage.getVisibleText();
+  }
+
+  public async getInTableSearchTerm() {
+    if (!(await this.testSubjects.exists(INPUT_TEST_SUBJ))) {
+      return null;
+    }
+    return await this.testSubjects.getAttribute(INPUT_TEST_SUBJ, 'value');
   }
 
   public async runInTableSearch(searchTerm: string) {
@@ -1037,5 +1103,22 @@ export class DataGridService extends FtrService {
       // Delay to make sure content is loaded
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
+  }
+
+  public async getScrollPosition() {
+    const container = await this.find.byCssSelector('.euiDataGrid__virtualized');
+    const scrollTop = await this.browser.execute(
+      'return arguments[0].scrollTop',
+      container._webElement
+    );
+    const scrollLeft = await this.browser.execute(
+      'return arguments[0].scrollLeft',
+      container._webElement
+    );
+
+    return {
+      scrollTop,
+      scrollLeft,
+    };
   }
 }

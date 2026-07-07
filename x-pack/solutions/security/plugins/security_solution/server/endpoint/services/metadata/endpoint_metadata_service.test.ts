@@ -17,6 +17,8 @@ import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data'
 import {
   buildUnitedIndexQuery,
   getESQueryHostMetadataByFleetAgentIds,
+  getESQueryHostMetadataByID,
+  getESQueryHostMetadataByIDs,
 } from '../../routes/metadata/query_builders';
 import type { HostMetadata } from '../../../../common/endpoint/types';
 import type { Agent, PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -61,6 +63,18 @@ describe('EndpointMetadataService', () => {
       await metadataService.findHostMetadataForFleetAgents(fleetAgentIds);
       expect(esClient.search).toHaveBeenCalledWith(
         { ...getESQueryHostMetadataByFleetAgentIds(fleetAgentIds), size: fleetAgentIds.length },
+        { ignore: [404] }
+      );
+    });
+
+    it('should query the CCS-prefixed index when CCS is enabled', async () => {
+      testMockedContext.endpointAppContextService.isCcsEnabled.mockResolvedValue(true);
+      await metadataService.findHostMetadataForFleetAgents(fleetAgentIds);
+      expect(esClient.search).toHaveBeenCalledWith(
+        {
+          ...getESQueryHostMetadataByFleetAgentIds(fleetAgentIds, true),
+          size: fleetAgentIds.length,
+        },
         { ignore: [404] }
       );
     });
@@ -123,6 +137,21 @@ describe('EndpointMetadataService', () => {
         data: [],
         total: 0,
       });
+    });
+
+    it('should query the CCS-prefixed index when CCS is enabled', async () => {
+      esClient.search.mockRejectedValue({
+        meta: { body: { error: { type: 'index_not_found_exception' } } },
+      });
+      testMockedContext.endpointAppContextService.isCcsEnabled.mockResolvedValue(true);
+
+      const queryOptions = { page: 0, pageSize: 10, kuery: '', hostStatuses: [] };
+      await metadataService.getHostMetadataList(queryOptions);
+
+      const expectedQuery = await buildUnitedIndexQuery(soClient, queryOptions, [], true);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ index: expectedQuery.index })
+      );
     });
 
     it('should correctly list HostMetadata', async () => {
@@ -244,9 +273,37 @@ describe('EndpointMetadataService', () => {
         agentIds: [data.unitedMetadata.agent.id],
       });
     });
+
+    it('should query the CCS-prefixed index when CCS is enabled', async () => {
+      const endpointMetadataDoc = endpointDocGenerator.generateHostMetadata();
+      esClient.search.mockResponse(legacyMetadataSearchResponseMock(endpointMetadataDoc));
+      testMockedContext.endpointAppContextService.isCcsEnabled.mockResolvedValue(true);
+
+      await metadataService.getHostMetadata(endpointMetadataDoc.agent.id);
+
+      const expectedQuery = getESQueryHostMetadataByID(endpointMetadataDoc.agent.id, true);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ index: expectedQuery.index })
+      );
+    });
   });
 
   describe('#getMetadataForEndpoints()', () => {
+    it('should call Elastic Search with correct `size`', async () => {
+      testMockedContext.applyMetadataMocks(
+        testMockedContext.esClient,
+        testMockedContext.fleetServices
+      );
+      const agentIds = Array.from({ length: 25 }, () => Math.random().toString(32));
+
+      await metadataService.getMetadataForEndpoints(agentIds);
+
+      expect(testMockedContext.esClient.search).toBeCalledWith({
+        ...getESQueryHostMetadataByIDs(agentIds),
+        size: agentIds.length,
+      });
+    });
+
     it('should validate agent is visible in current space', async () => {
       const data = testMockedContext.applyMetadataMocks(
         testMockedContext.esClient,
@@ -257,6 +314,20 @@ describe('EndpointMetadataService', () => {
       expect(testMockedContext.fleetServices.ensureInCurrentSpace).toHaveBeenCalledWith({
         agentIds: [data.unitedMetadata.agent.id],
       });
+    });
+
+    it('should query the CCS-prefixed index when ccsEnabled is true', async () => {
+      const data = testMockedContext.applyMetadataMocks(
+        testMockedContext.esClient,
+        testMockedContext.fleetServices
+      );
+      testMockedContext.endpointAppContextService.isCcsEnabled.mockResolvedValue(true);
+      await metadataService.getMetadataForEndpoints([data.unitedMetadata.agent.id]);
+
+      const expectedQuery = getESQueryHostMetadataByIDs([data.unitedMetadata.agent.id], true);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ index: expectedQuery.index })
+      );
     });
   });
 });

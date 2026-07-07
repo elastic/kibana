@@ -10,6 +10,8 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { EsQueryConfig } from '@kbn/es-query';
 
+export const ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID = 'attack-discovery' as const;
+
 /**
  * registering a new instance of the rule data client
  * in a new plugin will require updating the below data structure
@@ -103,4 +105,4 @@ export const getEsQueryConfig = (params?: GetEsQueryConfigParamType): EsQueryCon
  *in the codebase.
  */
 export const isSiemRuleType = (ruleTypeId: string) =>
-  ruleTypeId.startsWith('siem.') || ruleTypeId === 'attack-discovery';
+  ruleTypeId.startsWith('siem.') || ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID;

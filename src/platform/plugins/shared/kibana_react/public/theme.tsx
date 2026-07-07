@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
+import type { KibanaThemeProviderProps as KbnThemeProviderProps } from '@kbn/react-kibana-context-theme';
 import {
   KibanaThemeProvider as KbnThemeProvider,
-  KibanaThemeProviderProps as KbnThemeProviderProps,
   wrapWithTheme as kbnWrapWithTheme,
 } from '@kbn/react-kibana-context-theme';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';

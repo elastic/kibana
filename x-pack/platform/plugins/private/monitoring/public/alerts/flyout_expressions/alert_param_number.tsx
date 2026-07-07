@@ -21,6 +21,7 @@ export const AlertParamNumber: React.FC<Props> = (props: Props) => {
   return (
     <EuiFormRow label={details.label as string} error={errors} isInvalid={errors?.length > 0}>
       <EuiFieldNumber
+        isInvalid={errors?.length > 0}
         compressed
         value={value}
         append={details.append as string}

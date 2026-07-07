@@ -6,16 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { first, isEmpty, last, orderBy, uniq } from 'lodash';
-import { ServiceConnectionNode } from '@kbn/apm-plugin/common/service_map';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { ApmApiError, SupertestReturnType } from '../../common/apm_api_supertest';
+import { first, last, orderBy, uniq } from 'lodash';
+import type { ApmApiError, SupertestReturnType } from '../../common/apm_api_supertest';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 type DependencyResponse = SupertestReturnType<'GET /internal/apm/service-map/dependency'>;
-type ServiceNodeResponse =
-  SupertestReturnType<'GET /internal/apm/service-map/service/{serviceName}'>;
 type ServiceMapResponse = SupertestReturnType<'GET /internal/apm/service-map'>;
 
 export default function serviceMapsApiTests({ getService }: FtrProviderContext) {
@@ -25,15 +21,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
 
-  const getElements = ({ body }: { body: APIReturnType<'GET /internal/apm/service-map'> }) => {
-    if ('elements' in body) {
-      return body.elements;
-    }
-
-    return [];
-  };
-
-  registry.when('Service Map with a basic license', { config: 'basic', archives: [] }, () => {
+  registry.when('Service map with a basic license', { config: 'basic', archives: [] }, () => {
     describe('basic license', function () {
       this.tags('skipFIPS');
       it('is only be available to users with Platinum license (or higher)', async () => {
@@ -54,14 +42,14 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           const err = e as ApmApiError;
           expect(err.res.status).to.be(403);
           expectSnapshot(err.res.body.message).toMatchInline(
-            `"In order to access Service Maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data."`
+            `"In order to access Service maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data."`
           );
         }
       });
     });
   });
 
-  registry.when('Service Map with data', { config: 'trial', archives: ['apm_8.0.0'] }, () => {
+  registry.when('Service map with data', { config: 'trial', archives: ['apm_8.0.0'] }, () => {
     describe('/internal/apm/service-map with data', () => {
       let response: ServiceMapResponse;
       before(async () => {
@@ -79,41 +67,28 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
       it('returns service map elements', () => {
         expect(response.status).to.be(200);
-        expect(getElements(response).length).to.be.greaterThan(0);
+        expect(response.body.spans.length).to.be.greaterThan(0);
       });
 
-      it('returns the correct data', () => {
-        const elements: Array<{ data: Record<string, any> }> = getElements(response);
-        const serviceNames = uniq(
-          elements
-            .filter((element) => element.data['service.name'] !== undefined)
-            .map((element) => element.data['service.name'])
-        ).sort();
-        expectSnapshot(serviceNames).toMatchInline(`
-              Array [
-                "auditbeat",
-                "opbeans-dotnet",
-                "opbeans-go",
-                "opbeans-java",
-                "opbeans-node",
-                "opbeans-python",
-                "opbeans-ruby",
-                "opbeans-rum",
-              ]
-            `);
+      it('returns servicesData equal empty array if services have no traces', () => {
+        const { spans, servicesData } = response.body;
+
+        expect(servicesData.length).to.be.equal(0);
 
         const externalDestinations = uniq(
-          elements
-            .filter((element) => element.data.target?.startsWith('>'))
-            .map((element) => element.data.target)
+          spans
+            .filter((element) => element.spanDestinationServiceResource)
+            .map((element) => element.spanDestinationServiceResource)
         ).sort();
 
         expectSnapshot(externalDestinations).toMatchInline(`
               Array [
-                ">elasticsearch",
-                ">postgresql",
-                ">redis",
-                ">sqlite",
+                "elasticsearch",
+                "opbeans-frontend:3000",
+                "opbeans:3000",
+                "postgresql",
+                "redis",
+                "sqlite",
               ]
             `);
       });
@@ -132,76 +107,66 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
               },
             });
           });
-          it('returns service map elements with anomaly stats', () => {
-            expect(response.status).to.be(200);
-            const dataWithAnomalies = getElements(response).filter(
-              (el) => !isEmpty((el.data as ServiceConnectionNode).serviceAnomalyStats)
-            );
-            expect(dataWithAnomalies).not.to.be.empty();
-            dataWithAnomalies.forEach(({ data }: any) => {
-              expect(
-                Object.values(data.serviceAnomalyStats).filter((value) => isEmpty(value))
-              ).to.not.empty();
-            });
-          });
+
           it('returns the correct anomaly stats', () => {
-            const dataWithAnomalies = getElements(response).filter(
-              (el) => !isEmpty((el.data as ServiceConnectionNode).serviceAnomalyStats)
-            );
+            const dataWithAnomalies = response.body.anomalies?.serviceAnomalies;
             expect(dataWithAnomalies).not.to.be.empty();
             expectSnapshot(dataWithAnomalies.length).toMatchInline(`7`);
-            expectSnapshot(orderBy(dataWithAnomalies, 'data.id').slice(0, 3)).toMatchInline(`
+            expectSnapshot(orderBy(dataWithAnomalies, 'serviceName').slice(0, 3)).toMatchInline(`
                     Array [
                       Object {
-                        "data": Object {
-                          "agent.name": "dotnet",
-                          "id": "opbeans-dotnet",
-                          "service.environment": "production",
-                          "service.name": "opbeans-dotnet",
-                          "serviceAnomalyStats": Object {
-                            "actualValue": 868025.86875,
-                            "anomalyScore": 0,
-                            "healthStatus": "healthy",
-                            "jobId": "apm-production-6117-high_mean_transaction_duration",
-                            "serviceName": "opbeans-dotnet",
-                            "transactionType": "request",
-                          },
-                        },
+                        "actualValue": 868025.86875,
+                        "anomalyEnvironment": "production",
+                        "anomalyScore": 0,
+                        "detectorType": "txLatency",
+                        "jobId": "apm-production-6117-high_mean_transaction_duration",
+                        "serviceName": "opbeans-dotnet",
+                        "transactionType": "request",
                       },
                       Object {
-                        "data": Object {
-                          "agent.name": "go",
-                          "id": "opbeans-go",
-                          "service.environment": "testing",
-                          "service.name": "opbeans-go",
-                          "serviceAnomalyStats": Object {
-                            "actualValue": 102786.319148936,
-                            "anomalyScore": 0,
-                            "healthStatus": "healthy",
-                            "jobId": "apm-testing-41e5-high_mean_transaction_duration",
-                            "serviceName": "opbeans-go",
-                            "transactionType": "request",
-                          },
-                        },
+                        "actualValue": 102786.319148936,
+                        "anomalyEnvironment": "testing",
+                        "anomalyScore": 0,
+                        "detectorType": "txLatency",
+                        "jobId": "apm-testing-41e5-high_mean_transaction_duration",
+                        "serviceName": "opbeans-go",
+                        "transactionType": "request",
                       },
                       Object {
-                        "data": Object {
-                          "agent.name": "java",
-                          "id": "opbeans-java",
-                          "service.environment": "production",
-                          "service.name": "opbeans-java",
-                          "serviceAnomalyStats": Object {
-                            "actualValue": 175568.855769231,
-                            "anomalyScore": 0,
-                            "healthStatus": "healthy",
-                            "jobId": "apm-production-6117-high_mean_transaction_duration",
-                            "serviceName": "opbeans-java",
-                            "transactionType": "request",
-                          },
-                        },
+                        "actualValue": 175568.855769231,
+                        "anomalyEnvironment": "production",
+                        "anomalyScore": 0,
+                        "detectorType": "txLatency",
+                        "jobId": "apm-production-6117-high_mean_transaction_duration",
+                        "serviceName": "opbeans-java",
+                        "transactionType": "request",
                       },
                     ]
                   `);
+          });
+
+          it('ensures anomaly scores are never null or undefined', () => {
+            // Validates the fix for the bug where top_metrics on mixed document types
+            // (record + model_plot) could return model_plot docs with null record_score
+            const dataWithAnomalies = response.body.anomalies?.serviceAnomalies;
+            expect(dataWithAnomalies).not.to.be.empty();
+
+            dataWithAnomalies.forEach((anomaly) => {
+              // anomalyScore must be a valid finite number >= 0 (never null/undefined/NaN)
+              expect(anomaly.anomalyScore).to.be.a('number');
+              expect(anomaly.anomalyScore).not.to.be(null);
+              expect(Number.isFinite(anomaly.anomalyScore)).to.be(true);
+              expect(anomaly.anomalyScore >= 0).to.be(true);
+
+              // All monitored services must have complete, valid data
+              expect(anomaly.actualValue).to.be.a('number');
+              expect(Number.isFinite(anomaly.actualValue)).to.be(true);
+              expect(anomaly.transactionType).to.be.a('string');
+              expect(anomaly.transactionType.length).to.be.greaterThan(0);
+              expect(anomaly.serviceName).to.be.a('string');
+              expect(anomaly.serviceName.length).to.be.greaterThan(0);
+              expect(anomaly.jobId).to.match(/^apm-/);
+            });
           });
         });
         describe('with a user that does not have access to ML', () => {
@@ -219,9 +184,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           });
           it('returns service map elements without anomaly stats', () => {
             expect(response.status).to.be(200);
-            const dataWithAnomalies = getElements(response).filter(
-              (el) => !isEmpty((el.data as ServiceConnectionNode).serviceAnomalyStats)
-            );
+            const dataWithAnomalies = response.body.anomalies?.serviceAnomalies;
             expect(dataWithAnomalies).to.be.empty();
           });
         });
@@ -248,58 +211,9 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           });
 
           it('returns some elements', () => {
-            expect(getElements(response).length).to.be.greaterThan(1);
+            expect(response.body.spans.length).to.be.greaterThan(1);
           });
         });
-      });
-    });
-
-    describe('/internal/apm/service-map/service/{serviceName} with data', () => {
-      let response: ServiceNodeResponse;
-      before(async () => {
-        response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/service-map/service/{serviceName}`,
-          params: {
-            path: { serviceName: 'opbeans-node' },
-            query: {
-              start: metadata.start,
-              end: metadata.end,
-              environment: 'ENVIRONMENT_ALL',
-            },
-          },
-        });
-      });
-
-      it('retuns status code 200', () => {
-        expect(response.status).to.be(200);
-      });
-
-      it('returns some error rate', () => {
-        expect(response.body.currentPeriod?.failedTransactionsRate?.value).to.eql(0);
-        expect(
-          response.body.currentPeriod?.failedTransactionsRate?.timeseries?.length
-        ).to.be.greaterThan(0);
-      });
-
-      it('returns some latency', () => {
-        expect(response.body.currentPeriod?.transactionStats?.latency?.value).to.be.greaterThan(0);
-        expect(
-          response.body.currentPeriod?.transactionStats?.latency?.timeseries?.length
-        ).to.be.greaterThan(0);
-      });
-
-      it('returns some throughput', () => {
-        expect(response.body.currentPeriod?.transactionStats?.throughput?.value).to.be.greaterThan(
-          0
-        );
-        expect(
-          response.body.currentPeriod?.transactionStats?.throughput?.timeseries?.length
-        ).to.be.greaterThan(0);
-      });
-
-      it('returns some cpu usage', () => {
-        expect(response.body.currentPeriod?.cpuUsage?.value).to.be.greaterThan(0);
-        expect(response.body.currentPeriod?.cpuUsage?.timeseries?.length).to.be.greaterThan(0);
       });
     });
 
@@ -310,7 +224,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           endpoint: `GET /internal/apm/service-map/dependency`,
           params: {
             query: {
-              dependencyName: 'postgresql',
+              dependencies: 'postgresql',
               start: metadata.start,
               end: metadata.end,
               environment: 'ENVIRONMENT_ALL',
@@ -355,7 +269,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             endpoint: `GET /internal/apm/service-map/dependency`,
             params: {
               query: {
-                dependencyName: 'postgresql',
+                dependencies: 'postgresql',
                 start: metadata.start,
                 end: metadata.end,
                 environment: 'ENVIRONMENT_ALL',
@@ -399,58 +313,31 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         });
       });
 
-      describe('/internal/apm/service-map/service/{serviceName} with comparison', () => {
-        let response: ServiceNodeResponse;
+      describe('/internal/apm/service-map/dependency with sourceServiceName and array of dependencies', () => {
+        let response: DependencyResponse;
         before(async () => {
           response = await apmApiClient.readUser({
-            endpoint: `GET /internal/apm/service-map/service/{serviceName}`,
+            endpoint: `GET /internal/apm/service-map/dependency`,
             params: {
-              path: { serviceName: 'opbeans-node' },
               query: {
+                dependencies: ['postgresql', 'redis'],
+                sourceServiceName: 'opbeans-java',
                 start: metadata.start,
                 end: metadata.end,
                 environment: 'ENVIRONMENT_ALL',
-                offset: '5m',
               },
             },
           });
         });
 
-        it('returns some data', () => {
-          const { currentPeriod, previousPeriod } = response.body;
-          [
-            currentPeriod.failedTransactionsRate,
-            previousPeriod?.failedTransactionsRate,
-            currentPeriod.transactionStats?.latency,
-            previousPeriod?.transactionStats?.latency,
-            currentPeriod.transactionStats?.throughput,
-            previousPeriod?.transactionStats?.throughput,
-            currentPeriod.cpuUsage,
-            previousPeriod?.cpuUsage,
-            currentPeriod.memoryUsage,
-            previousPeriod?.memoryUsage,
-          ].map((value) => expect(value?.timeseries?.length).to.be.greaterThan(0));
+        it('returns status code 200', () => {
+          expect(response.status).to.be(200);
         });
 
-        it('has same start time for both periods', () => {
-          const { currentPeriod, previousPeriod } = response.body;
-          expect(first(currentPeriod.failedTransactionsRate?.timeseries)?.x).to.equal(
-            first(previousPeriod?.failedTransactionsRate?.timeseries)?.x
-          );
-        });
-
-        it('has same end time for both periods', () => {
-          const { currentPeriod, previousPeriod } = response.body;
-          expect(last(currentPeriod.failedTransactionsRate?.timeseries)?.x).to.equal(
-            last(previousPeriod?.failedTransactionsRate?.timeseries)?.x
-          );
-        });
-
-        it('returns same number of buckets for both periods', () => {
-          const { currentPeriod, previousPeriod } = response.body;
-          expect(currentPeriod.failedTransactionsRate?.timeseries?.length).to.be(
-            previousPeriod?.failedTransactionsRate?.timeseries?.length
-          );
+        it('returns edge data with source service filter applied', () => {
+          expect(response.body.currentPeriod?.failedTransactionsRate).to.not.be(undefined);
+          expect(response.body.currentPeriod?.transactionStats?.latency).to.not.be(undefined);
+          expect(response.body.currentPeriod?.transactionStats?.throughput).to.not.be(undefined);
         });
       });
     });

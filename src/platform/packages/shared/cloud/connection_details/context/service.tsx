@@ -8,7 +8,7 @@
  */
 
 import * as React from 'react';
-import { ConnectionDetailsService } from '../service';
+import type { ConnectionDetailsService } from '../service';
 
 export const context = React.createContext<ConnectionDetailsService>(null!);
 

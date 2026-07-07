@@ -14,7 +14,8 @@ const getEventsContextPrompt = ({
 }: {
   anonymizedEvents: string[];
   defendInsightsPrompt: string;
-}) => `${defendInsightsPrompt}
+}): string => `
+${defendInsightsPrompt}
 
 Use context from the following events to provide insights:
 

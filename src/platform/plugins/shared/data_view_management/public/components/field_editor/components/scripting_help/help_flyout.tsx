@@ -9,12 +9,13 @@
 
 import React from 'react';
 import { EuiFlyout, EuiFlyoutBody, EuiTabbedContent } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { ScriptingSyntax } from './scripting_syntax';
 import { TestScript } from './test_script';
 
-import { ExecuteScript } from '../../types';
+import type { ExecuteScript } from '../../types';
 
 interface ScriptingHelpFlyoutProps {
   indexPattern: DataView;
@@ -59,7 +60,14 @@ export const ScriptingHelpFlyout: React.FC<ScriptingHelpFlyoutProps> = ({
   ];
 
   return isVisible ? (
-    <EuiFlyout onClose={onClose} data-test-subj="scriptedFieldsHelpFlyout">
+    <EuiFlyout
+      onClose={onClose}
+      data-test-subj="scriptedFieldsHelpFlyout"
+      aria-label={i18n.translate(
+        'indexPatternManagement.fieldEditor.scriptingHelpFlyout.ariaLabel',
+        { defaultMessage: 'Help' }
+      )}
+    >
       <EuiFlyoutBody>
         <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
       </EuiFlyoutBody>

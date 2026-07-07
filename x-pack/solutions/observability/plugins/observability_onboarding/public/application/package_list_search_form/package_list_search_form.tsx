@@ -48,7 +48,7 @@ const PackageListGridWrapper = ({
   excludePackageIdList = [],
 }: WrapperProps) => {
   const { filteredCards: integrationCards, isLoading } = useAvailablePackages({
-    prereleaseIntegrationsEnabled: false,
+    prereleaseIntegrationsEnabled: true,
   });
   const rewriteUrl = useCardUrlRewrite({ category: flowCategory, search: searchQuery });
 

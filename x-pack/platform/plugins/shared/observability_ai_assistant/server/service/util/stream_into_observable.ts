@@ -6,9 +6,8 @@
  */
 
 import { Observable } from 'rxjs';
-import type { Readable } from 'stream';
 
-export function streamIntoObservable(readable: Readable): Observable<any> {
+export function streamIntoObservable(readable: NodeJS.AsyncIterator<string>): Observable<any> {
   return new Observable<string>((subscriber) => {
     const decodedStream = readable;
 

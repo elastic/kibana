@@ -13,10 +13,10 @@ import {
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   STACK_ALERTS_FEATURE_ID,
+  STACK_ALERTS_ONLY_FEATURE_ID,
 } from '@kbn/rule-data-utils';
 import { ES_QUERY_ID as ElasticsearchQuery } from '@kbn/rule-data-utils';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { ID as IndexThreshold } from './rule_types/index_threshold/rule_type';
 import { GEO_CONTAINMENT_ID as GeoContainment } from './rule_types/geo_containment';
 
@@ -74,9 +74,9 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
   name: i18n.translate('xpack.stackAlerts.featureRegistry.actionsFeatureName', {
     defaultMessage: 'Stack Rules',
   }),
+  order: 2000,
   app: [],
   category: DEFAULT_APP_CATEGORIES.management,
-  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
@@ -91,6 +91,9 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
       alerting: {
         rule: {
           all: alertingFeatures,
+          enable: alertingFeatures,
+          manual_run: alertingFeatures,
+          manage_rule_settings: alertingFeatures,
         },
         alert: {
           all: alertingFeatures,
@@ -123,6 +126,51 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
       },
       api: ['rac'],
       ui: [],
+    },
+  },
+};
+
+export const STACK_ALERTS_ONLY_FEATURE: KibanaFeatureConfig = {
+  id: STACK_ALERTS_ONLY_FEATURE_ID,
+  name: i18n.translate('xpack.stackAlerts.featureRegistry.stackAlertsOnlyFeatureName', {
+    defaultMessage: 'Stack Alerts',
+  }),
+  order: 2001,
+  category: DEFAULT_APP_CATEGORIES.management,
+  app: [],
+  catalogue: [],
+  management: {
+    insightsAndAlerting: ['triggersActions'],
+  },
+  alerting: alertingFeatures,
+  privileges: {
+    all: {
+      app: [],
+      catalogue: [],
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
+      alerting: {
+        alert: { all: alertingFeatures },
+        rule: { mute_alerts: alertingFeatures },
+      },
+      savedObject: { all: [], read: [] },
+      api: ['rac'],
+      ui: ['show', 'write'],
+    },
+    read: {
+      app: [],
+      catalogue: [],
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
+      alerting: {
+        alert: { read: alertingFeatures },
+        rule: { read_muted_alerts: alertingFeatures },
+      },
+      savedObject: { all: [], read: [] },
+      api: ['rac'],
+      ui: ['show'],
     },
   },
 };

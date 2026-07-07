@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { getSortingCriteria } from '@kbn/sort-predicates';
+import { getSortingCriteria, NonStringSortableFieldType } from '@kbn/sort-predicates';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { useMemo } from 'react';
 import type { EuiDataGridColumnSortingConfig, EuiDataGridProps } from '@elastic/eui';
 import type { SortOrder } from '../components/data_table';
 import type { DataTableColumnsMeta } from '../types';
+import { kibanaJSON } from '../constants';
+import { SOURCE_COLUMN } from '../utils/columns';
 
 export const useSorting = ({
   rows,
@@ -24,6 +26,7 @@ export const useSorting = ({
   dataView,
   isPlainRecord,
   isSortEnabled,
+  isInMemorySortEnabled,
   defaultColumns,
   onSort,
 }: {
@@ -34,8 +37,9 @@ export const useSorting = ({
   dataView: DataView;
   isPlainRecord: boolean;
   isSortEnabled: boolean;
+  isInMemorySortEnabled: boolean;
   defaultColumns: boolean;
-  onSort: ((sort: string[][]) => void) | undefined;
+  onSort: ((sort: SortOrder[]) => void) | undefined;
 }) => {
   const sortingColumns = useMemo(() => {
     return sort
@@ -44,7 +48,7 @@ export const useSorting = ({
   }, [sort, visibleColumns]);
 
   const comparators = useMemo(() => {
-    if (!isPlainRecord || !rows || !sortingColumns.length) {
+    if (!isInMemorySortEnabled || !isPlainRecord || !rows || !sortingColumns.length) {
       return;
     }
 
@@ -68,7 +72,7 @@ export const useSorting = ({
       },
       []
     );
-  }, [columnsMeta, dataView, isPlainRecord, rows, sortingColumns]);
+  }, [columnsMeta, dataView, isInMemorySortEnabled, isPlainRecord, rows, sortingColumns]);
 
   const sortedRows = useMemo(() => {
     if (!rows || !comparators) {
@@ -106,10 +110,38 @@ export const useSorting = ({
     return {
       columns: sortingColumns,
       onSort: (sortingColumnsData) => {
-        onSort?.(sortingColumnsData.map(({ id, direction }) => [id, direction]));
+        onSort?.(sortingColumnsData.map(({ id, direction }): SortOrder => [id, direction]));
       },
     };
   }, [isSortEnabled, isPlainRecord, defaultColumns, sortingColumns, onSort]);
 
   return { sortedRows, sorting };
+};
+
+export const isSortable = ({
+  isPlainRecord,
+  columnName,
+  columnSchema,
+  dataViewField,
+}: {
+  isPlainRecord: boolean | undefined;
+  columnName: string;
+  columnSchema: string;
+  dataViewField: DataViewField | undefined;
+}): boolean => {
+  if (isPlainRecord) {
+    // TODO: would be great to have something like `sortable` flag for text based columns too
+    if (columnName === SOURCE_COLUMN) {
+      return false; // _source column is not sortable
+    }
+    return Boolean(
+      columnSchema !== kibanaJSON ||
+        (dataViewField?.type &&
+          Object.values(NonStringSortableFieldType).includes(
+            dataViewField.type as NonStringSortableFieldType
+          ))
+    );
+  }
+
+  return dataViewField?.sortable === true;
 };

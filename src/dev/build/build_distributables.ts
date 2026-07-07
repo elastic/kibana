@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import execa from 'execa';
+import chalk from 'chalk';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 import { Config, createRunner } from './lib';
 import * as Tasks from './tasks';
@@ -23,7 +25,6 @@ export interface BuildOptions {
   downloadFreshNode: boolean;
   downloadCloudDependencies: boolean;
   initialize: boolean;
-  buildCanvasShareableRuntime: boolean;
   createGenericFolders: boolean;
   createPlatformFolders: boolean;
   createArchives: boolean;
@@ -40,15 +41,25 @@ export interface BuildOptions {
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
   targetServerlessPlatforms: boolean;
+  skipServerless: boolean;
+  tarZstd: boolean;
   withExamplePlugins: boolean;
   withTestPlugins: boolean;
   eprRegistry: 'production' | 'snapshot';
 }
 
 export async function buildDistributables(log: ToolingLog, options: BuildOptions): Promise<void> {
+  if (options.tarZstd) {
+    try {
+      await execa('zstd', ['--version']);
+    } catch {
+      throw new Error('--tar-zstd requires zstd to be installed.');
+    }
+  }
+
   log.verbose('building distributables with options:', options);
 
-  log.write('--- Running global Kibana build tasks');
+  log.write(`--- ${chalk`{dim [ global ]}`} Kibana build tasks`);
 
   const config = await Config.create(options);
   const globalRun = createRunner({ config, log });
@@ -70,18 +81,19 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
    * run platform-generic build tasks
    */
   if (options.createGenericFolders) {
-    // Build before copying source files
-    if (options.buildCanvasShareableRuntime) {
-      await globalRun(Tasks.BuildCanvasShareableRuntime);
-    }
-
     await globalRun(Tasks.CopyLegacySource);
 
     await globalRun(Tasks.CreateEmptyDirsAndFiles);
     await globalRun(Tasks.CreateReadme);
     await globalRun(Tasks.BuildPackages);
     await globalRun(Tasks.ReplaceFavicon);
-    await globalRun(Tasks.BuildKibanaPlatformPlugins);
+    // [rspack-transition] Use rspack or legacy webpack optimizer based on env var.
+    // When legacy is removed, keep only Tasks.BuildRspackBundles.
+    if (process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1') {
+      await globalRun(Tasks.BuildRspackBundles);
+    } else {
+      await globalRun(Tasks.BuildKibanaPlatformPlugins);
+    }
     await globalRun(Tasks.CreatePackageJson);
     await globalRun(Tasks.InstallDependencies);
     await globalRun(Tasks.GeneratePackagesOptimizedAssets);
@@ -93,10 +105,12 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.CreateXPackNoticeFile);
 
     await globalRun(Tasks.DeletePackagesFromBuildRoot);
+
     await globalRun(Tasks.UpdateLicenseFile);
     await globalRun(Tasks.RemovePackageJsonDeps);
     await globalRun(Tasks.CleanPackageManagerRelatedFiles);
     await globalRun(Tasks.CleanExtraFilesFromModules);
+
     await globalRun(Tasks.CleanEmptyFolders);
     await globalRun(Tasks.FetchAgentVersionsList);
   }
@@ -142,42 +156,49 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
 
     if (options.createDebPackage) {
       // control w/ --deb or --skip-os-packages
-      artifactTasks.push(Tasks.CreateDebPackage);
+      artifactTasks.push(Tasks.CreateDebPackageX64);
+      artifactTasks.push(Tasks.CreateDebPackageARM64);
     }
     if (options.createRpmPackage) {
       // control w/ --rpm or --skip-os-packages
-      artifactTasks.push(Tasks.CreateRpmPackage);
+      artifactTasks.push(Tasks.CreateRpmPackageX64);
+      artifactTasks.push(Tasks.CreateRpmPackageARM64);
     }
   }
 
   if (options.createDockerUBI) {
     // control w/ --docker-images or --skip-docker-ubi or --skip-os-packages
-    artifactTasks.push(Tasks.CreateDockerUBI);
+    artifactTasks.push(Tasks.CreateDockerUBIX64);
+    artifactTasks.push(Tasks.CreateDockerUBIARM64);
   }
 
   if (options.createDockerWolfi) {
     // control w/ --docker-images or --skip-docker-wolfi or --skip-os-packages
-    artifactTasks.push(Tasks.CreateDockerWolfi);
+    artifactTasks.push(Tasks.CreateDockerWolfiX64);
+    artifactTasks.push(Tasks.CreateDockerWolfiARM64);
   }
 
   if (options.createDockerCloud) {
     // control w/ --docker-images and --skip-docker-cloud
-    artifactTasks.push(Tasks.CreateDockerCloud);
+    artifactTasks.push(Tasks.CreateDockerCloudX64);
+    artifactTasks.push(Tasks.CreateDockerCloudARM64);
   }
 
   if (options.createDockerServerless) {
     // control w/ --docker-images and --skip-docker-serverless
-    artifactTasks.push(Tasks.CreateDockerServerless);
+    artifactTasks.push(Tasks.CreateDockerServerless('x64'));
+    artifactTasks.push(Tasks.CreateDockerServerless('aarch64'));
   }
 
   if (options.createDockerFIPS) {
     // control w/ --docker-images or --skip-docker-fips or --skip-os-packages
-    artifactTasks.push(Tasks.CreateDockerFIPS);
+    artifactTasks.push(Tasks.CreateDockerFIPSX64);
   }
 
   if (options.createDockerCloudFIPS) {
     // control w/ --docker-images and --skip-docker-cloud-fips
-    artifactTasks.push(Tasks.CreateDockerCloudFIPS);
+    artifactTasks.push(Tasks.CreateDockerCloudFIPSX64);
+    artifactTasks.push(Tasks.CreateDockerCloudFIPSARM64);
   }
 
   if (options.createDockerContexts) {

@@ -10,8 +10,6 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 
 import { merge } from 'lodash';
 
-import { getRegistryDataStreamAssetBaseName } from '../../../common/services';
-
 import type { ExperimentalIndexingFeature } from '../../../common/types';
 import { PackageNotFoundError } from '../../errors';
 import type {
@@ -21,8 +19,11 @@ import type {
   IndexTemplateEntry,
 } from '../../types';
 import { appContextService } from '../app_context';
-import { prepareTemplate } from '../epm/elasticsearch/template/install';
-import { updateCurrentWriteIndices } from '../epm/elasticsearch/template/template';
+import { prepareDataStreamTemplates } from '../epm/elasticsearch/template/install';
+import {
+  isTotalFieldsLimitError,
+  updateCurrentWriteIndices,
+} from '../epm/elasticsearch/template/template';
 import { getInstalledPackageWithAssets } from '../epm/packages/get';
 import { updateDatastreamExperimentalFeatures } from '../epm/packages/update';
 
@@ -66,26 +67,19 @@ export async function handleExperimentalDatastreamFeatureOptIn({
     installation = installedPackageWithAssets.installation;
     const { packageInfo, paths, assetsMap } = installedPackageWithAssets;
 
-    // prepare template from package spec to find original index:false values
-    const templates = packageInfo.data_streams?.map((dataStream: any) => {
-      const experimentalDataStreamFeature =
-        packagePolicy.package?.experimental_data_stream_features?.find(
-          (datastreamFeature) =>
-            datastreamFeature.data_stream === getRegistryDataStreamAssetBaseName(dataStream)
-        );
-      return prepareTemplate({
-        packageInstallContext: {
-          archiveIterator: createArchiveIteratorFromMap(assetsMap),
-          packageInfo,
-          paths,
-        },
-        fieldAssetsMap: assetsMap,
-        dataStream,
-        experimentalDataStreamFeature,
-      });
-    });
+    const packageInstallContext = {
+      archiveIterator: createArchiveIteratorFromMap(assetsMap),
+      packageInfo,
+      paths,
+    };
+    const templates = await prepareDataStreamTemplates(
+      packageInfo.data_streams ?? [],
+      packageInstallContext,
+      assetsMap,
+      packagePolicy.package?.experimental_data_stream_features
+    );
 
-    templates?.forEach((template) => {
+    templates.forEach((template) => {
       Object.keys(template.componentTemplates).forEach((templateName) => {
         templateMappings[templateName] =
           (template.componentTemplates[templateName].template as any).mappings ?? {};
@@ -199,8 +193,17 @@ export async function handleExperimentalDatastreamFeatureOptIn({
       });
     }
 
-    const indexTemplate = indexTemplateRes.index_templates[0].index_template;
-    let updatedIndexTemplate = indexTemplate as IndexTemplate;
+    const rawIndexTemplate = indexTemplateRes.index_templates[0].index_template;
+
+    // Remove system-managed properties (dates) that cannot be set during create/update of index templates
+    const {
+      created_date: createdDate,
+      created_date_millis: createdDateMillis,
+      modified_date: modifiedDate,
+      modified_date_millis: modifiedDateMillis,
+      ...indexTemplate
+    } = rawIndexTemplate as IndexTemplate;
+    let updatedIndexTemplate = indexTemplate;
 
     if (isTSDBOptInChanged) {
       const indexTemplateBody = {
@@ -239,7 +242,24 @@ export async function handleExperimentalDatastreamFeatureOptIn({
 
   // Trigger rollover for updated datastreams
   if (updatedIndexTemplates.length > 0) {
-    await updateCurrentWriteIndices(esClient, appContextService.getLogger(), updatedIndexTemplates);
+    try {
+      await updateCurrentWriteIndices(
+        esClient,
+        appContextService.getLogger(),
+        updatedIndexTemplates
+      );
+    } catch (err) {
+      if (isTotalFieldsLimitError(err)) {
+        appContextService
+          .getLogger()
+          .warn(
+            `Mappings update for experimental datastream features failed because the index mapping total_fields limit has been exceeded. ` +
+              `The total_fields limit must be raised on the index template to allow this mapping update: ${err}`
+          );
+        return;
+      }
+      throw err;
+    }
   }
 
   // Update the installation object to persist the experimental feature map

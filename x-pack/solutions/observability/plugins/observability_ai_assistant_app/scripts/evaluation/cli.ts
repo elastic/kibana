@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { format, parse } from 'url';
-import { Argv } from 'yargs';
+import type { Argv } from 'yargs';
 import { readKibanaConfig } from './read_kibana_config';
 
 export enum EvaluateWith {

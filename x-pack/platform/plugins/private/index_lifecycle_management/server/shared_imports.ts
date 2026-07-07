@@ -6,4 +6,4 @@
  */
 
 export { handleEsError } from '@kbn/es-ui-shared-plugin/server';
-export type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
+export type { ILicense, LicenseType } from '@kbn/licensing-types';

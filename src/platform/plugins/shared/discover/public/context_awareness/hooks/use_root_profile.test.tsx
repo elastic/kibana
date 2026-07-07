@@ -14,10 +14,9 @@ import { useRootProfile } from './use_root_profile';
 import { BehaviorSubject } from 'rxjs';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { SolutionId } from '@kbn/core-chrome-browser';
+import { SolutionType } from '../profiles';
 
-const mockSolutionNavId$ = new BehaviorSubject<SolutionId>(
-  'solutionNavId' as unknown as SolutionId
-);
+const mockSolutionNavId$ = new BehaviorSubject<SolutionId>(SolutionType.Search);
 
 jest
   .spyOn(discoverServiceMock.core.chrome, 'getActiveSolutionNavId$')
@@ -33,14 +32,14 @@ const render = () => {
 
 describe('useRootProfile', () => {
   beforeEach(() => {
-    mockSolutionNavId$.next('solutionNavId' as unknown as SolutionId);
+    mockSolutionNavId$.next(SolutionType.Search);
   });
 
   it('should return rootProfileLoading as true', async () => {
     const { result } = render();
     expect(result.current.rootProfileLoading).toBe(true);
-    expect((result.current as Record<string, unknown>).AppWrapper).toBeUndefined();
     expect((result.current as Record<string, unknown>).getDefaultAdHocDataViews).toBeUndefined();
+    expect((result.current as Record<string, unknown>).getDefaultEsqlQuery).toBeUndefined();
     // avoid act warning
     await waitFor(() => new Promise((resolve) => resolve(null)));
   });
@@ -49,8 +48,8 @@ describe('useRootProfile', () => {
     const { result } = render();
     await waitFor(() => {
       expect(result.current.rootProfileLoading).toBe(false);
-      expect((result.current as Record<string, unknown>).AppWrapper).toBeDefined();
       expect((result.current as Record<string, unknown>).getDefaultAdHocDataViews).toBeDefined();
+      expect((result.current as Record<string, unknown>).getDefaultEsqlQuery).toBeDefined();
     });
   });
 
@@ -58,18 +57,18 @@ describe('useRootProfile', () => {
     const { result, rerender } = render();
     await waitFor(() => {
       expect(result.current.rootProfileLoading).toBe(false);
-      expect((result.current as Record<string, unknown>).AppWrapper).toBeDefined();
       expect((result.current as Record<string, unknown>).getDefaultAdHocDataViews).toBeDefined();
+      expect((result.current as Record<string, unknown>).getDefaultEsqlQuery).toBeDefined();
     });
-    act(() => mockSolutionNavId$.next('newSolutionNavId' as unknown as SolutionId));
+    act(() => mockSolutionNavId$.next(SolutionType.Observability));
     rerender();
     expect(result.current.rootProfileLoading).toBe(true);
-    expect((result.current as Record<string, unknown>).AppWrapper).toBeUndefined();
     expect((result.current as Record<string, unknown>).getDefaultAdHocDataViews).toBeUndefined();
+    expect((result.current as Record<string, unknown>).getDefaultEsqlQuery).toBeUndefined();
     await waitFor(() => {
       expect(result.current.rootProfileLoading).toBe(false);
-      expect((result.current as Record<string, unknown>).AppWrapper).toBeDefined();
       expect((result.current as Record<string, unknown>).getDefaultAdHocDataViews).toBeDefined();
+      expect((result.current as Record<string, unknown>).getDefaultEsqlQuery).toBeDefined();
     });
   });
 });

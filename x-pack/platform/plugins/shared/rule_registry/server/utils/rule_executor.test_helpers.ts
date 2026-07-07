@@ -74,13 +74,14 @@ export const createDefaultAlertExecutorOptions = <
     snoozeSchedule: [],
   },
   params,
-  spaceId: 'SPACE_ID',
+  spaceId: 'space-id',
   services: {
     alertFactory: alertsMock.createRuleExecutorServices<InstanceState, InstanceContext>()
       .alertFactory,
     alertsClient: null,
     getDataViews: async () => dataViewPluginMocks.createStartContract(),
     getMaintenanceWindowIds: async () => ['test-id-1', 'test-id-2'],
+    getMaintenanceWindowNames: async () => ['test-name-1', 'test-name-2'],
     getSearchSourceClient: async () => searchSourceCommonMock,
     savedObjectsClient: savedObjectsClientMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
@@ -88,6 +89,7 @@ export const createDefaultAlertExecutorOptions = <
     shouldStopExecution: () => false,
     shouldWriteAlerts: () => shouldWriteAlerts,
     uiSettingsClient: uiSettingsServiceMock.createClient(),
+    getAsyncSearchClient: () => ({ search: jest.fn() }),
   },
   state,
   previousStartedAt: null,

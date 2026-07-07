@@ -22,14 +22,14 @@ const capitalizeFirstLetter = (value: string): string =>
 
 export interface KibanaAlertSeverityCellRendererProps {
   /**
-   * Alert data passed from the renderCellValue callback via the AlertWithLegacyFormats interface
+   * Alert data passed from the renderCellValue callback
    */
   alert: Alert;
 }
 
 /**
  * Renders a EuiBadge for the kibana.alert.severity field.
- * Used in AI for SOC alert summary table.
+ * Used in EASE alert summary table.
  */
 export const KibanaAlertSeverityCellRenderer = memo(
   ({ alert }: KibanaAlertSeverityCellRendererProps) => {

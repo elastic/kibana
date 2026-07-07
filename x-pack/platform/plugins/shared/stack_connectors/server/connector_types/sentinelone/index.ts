@@ -13,14 +13,14 @@ import {
   ENDPOINT_SECURITY_EXECUTE_PRIVILEGE,
   ENDPOINT_SECURITY_SUB_ACTIONS_EXECUTE_PRIVILEGE,
 } from '@kbn/actions-plugin/server/feature';
-import { SENTINELONE_CONNECTOR_ID, SENTINELONE_TITLE } from '../../../common/sentinelone/constants';
-import { SUB_ACTION } from '../../../common/sentinelone/constants';
-
 import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  SUB_ACTION,
   SentinelOneConfigSchema,
   SentinelOneSecretsSchema,
-} from '../../../common/sentinelone/schema';
-import type { SentinelOneConfig, SentinelOneSecrets } from '../../../common/sentinelone/types';
+} from '@kbn/connector-schemas/sentinelone';
+import type { SentinelOneConfig, SentinelOneSecrets } from '@kbn/connector-schemas/sentinelone';
 import { SentinelOneConnector } from './sentinelone';
 import { renderParameterTemplates } from './render';
 
@@ -28,8 +28,8 @@ export const getSentinelOneConnectorType = (): SubActionConnectorType<
   SentinelOneConfig,
   SentinelOneSecrets
 > => ({
-  id: SENTINELONE_CONNECTOR_ID,
-  name: SENTINELONE_TITLE,
+  id: CONNECTOR_ID,
+  name: CONNECTOR_NAME,
   getService: (params) => new SentinelOneConnector(params),
   schema: {
     config: SentinelOneConfigSchema,

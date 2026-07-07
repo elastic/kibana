@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { HttpFetchQuery } from '@kbn/core/public';
+import type { HttpFetchQuery } from '@kbn/core/public';
 import { API_BASE_PATH } from '../../../../common';
 import { UIM_SNAPSHOT_DELETE, UIM_SNAPSHOT_DELETE_MANY } from '../../constants';
-import { SnapshotListParams } from '../../lib';
-import { UiMetricService } from '../ui_metric';
+import type { SnapshotListParams } from '../../lib';
+import type { UiMetricService } from '../ui_metric';
 import { sendRequest, useRequest } from './use_request';
 
 // Temporary hack to provide the uiMetricService instance to this file.

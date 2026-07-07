@@ -17,7 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 export const EmptyConnectorsPrompt = ({
   onCTAClicked,
@@ -41,18 +41,21 @@ export const EmptyConnectorsPrompt = ({
             size="xl"
             className="actEmptyConnectorsPrompt__logo"
             css={emptyConnectorsLogoCss}
+            aria-hidden={true}
           />
           <EuiIcon
             type="logoGmail"
             size="xl"
             className="actEmptyConnectorsPrompt__logo"
             css={emptyConnectorsLogoCss}
+            aria-hidden={true}
           />
           <EuiIcon
             type="logoWebhook"
             size="xl"
             className="actEmptyConnectorsPrompt__logo"
             css={emptyConnectorsLogoCss}
+            aria-hidden={true}
           />
           <EuiSpacer size="s" />
           <EuiTitle size="m">
@@ -79,7 +82,7 @@ export const EmptyConnectorsPrompt = ({
             data-test-subj="createFirstActionButton"
             key="create-action"
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             iconSide="left"
             onClick={onCTAClicked}
           >
@@ -94,7 +97,7 @@ export const EmptyConnectorsPrompt = ({
             key="documentation-button"
             target="_blank"
             href={docLinks.links.alerting.connectors}
-            iconType="help"
+            iconType="question"
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.actionsConnectorsList.documentationButtonLabel"

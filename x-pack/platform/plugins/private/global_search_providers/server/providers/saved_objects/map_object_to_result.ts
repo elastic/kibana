@@ -6,13 +6,13 @@
  */
 
 import { get } from 'lodash';
-import {
+import type {
   SavedObjectsType,
   ISavedObjectTypeRegistry,
   SavedObjectsFindResult,
   Capabilities,
 } from '@kbn/core/server';
-import { GlobalSearchProviderResult } from '@kbn/global-search-plugin/server';
+import type { GlobalSearchProviderResult } from '@kbn/global-search-plugin/server';
 
 export const mapToResults = (
   objects: Array<SavedObjectsFindResult<unknown>>,

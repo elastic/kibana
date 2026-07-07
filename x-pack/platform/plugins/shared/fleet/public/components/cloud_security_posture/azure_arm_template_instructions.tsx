@@ -37,7 +37,7 @@ export const AzureArmTemplateInstructions: React.FunctionComponent<Props> = ({
     return (
       <>
         <EuiSpacer size="m" />
-        <EuiCallOut title={error} color="danger" iconType="error" />
+        <EuiCallOut announceOnMount title={error} color="danger" iconType="error" />
       </>
     );
   }
@@ -65,7 +65,7 @@ export const AzureArmTemplateInstructions: React.FunctionComponent<Props> = ({
         fill
         target="_blank"
         iconSide="left"
-        iconType="launch"
+        iconType="rocket"
         fullWidth
         href={azureArmTemplateUrl}
       >

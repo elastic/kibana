@@ -11,7 +11,7 @@ import type { DateMath } from '@elastic/elasticsearch/lib/api/types';
 import type { DefendInsight, Replacements } from '@kbn/elastic-assistant-common';
 
 import type { DefendInsightsGraphState } from '../../../../langchain/graphs';
-import { DefendInsightsPrompts } from '../prompts/incompatible_antivirus';
+import type { DefendInsightsPrompts } from '../prompts';
 import {
   DEFAULT_MAX_GENERATION_ATTEMPTS,
   DEFAULT_MAX_HALLUCINATION_FAILURES,

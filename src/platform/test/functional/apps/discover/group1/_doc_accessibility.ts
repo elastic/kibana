@@ -9,12 +9,11 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
@@ -31,10 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
-      // and load a set of makelogs data
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.uiSettings.replace(defaultSettings);
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await common.navigateToApp('discover');
@@ -47,12 +42,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should give focus to the first tab link when Tab is pressed', async () => {
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+      const rowActions = await dataGrid.getRowActions();
       await rowActions[0].click();
       await header.waitUntilLoadingHasFinished();
+      // Skip to main content button
       await browser.pressKeys(browser.keys.TAB);
-      await browser.pressKeys(browser.keys.SPACE);
+      await browser.pressKeys(browser.keys.ENTER);
       await browser.pressKeys(browser.keys.TAB);
+
       const tableTab = await testSubjects.find('docViewerTab-doc_view_table');
       const activeElement = await find.activeElement();
       expect(await tableTab.getAttribute('data-test-subj')).to.eql(

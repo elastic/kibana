@@ -12,19 +12,18 @@ import {
   documentationMap,
   tinymathFunctions,
   sections as formulasSections,
+  getTypeLabel,
 } from '@kbn/lens-formula-docs';
 import { groupBy } from 'lodash';
-import type { IndexPattern } from '../../../../../../types';
+import type {
+  FormulaIndexPatternColumn,
+  GenericIndexPatternColumn,
+  IndexPattern,
+} from '@kbn/lens-common';
 import { getPossibleFunctions } from './math_completion';
 import { hasFunctionFieldArgument } from '../validation';
 
-import type {
-  GenericOperationDefinition,
-  GenericIndexPatternColumn,
-  OperationDefinition,
-  ParamEditorProps,
-} from '../..';
-import type { FormulaIndexPatternColumn } from '../formula';
+import type { GenericOperationDefinition, OperationDefinition, ParamEditorProps } from '../..';
 
 function createNewSection(
   label: string,
@@ -39,13 +38,11 @@ function createNewSection(
       const fnDescription = getFunctionDescriptionAndExamples(key);
       return {
         label: key,
-        description: (
-          <>
-            <h3>{getFunctionSignatureLabel(key, operationDefinitionMap, false)}</h3>
-
-            {fnDescription ? <Markdown readOnly>{fnDescription}</Markdown> : null}
-          </>
-        ),
+        description: {
+          markdownContent: `### ${getFunctionSignatureLabel(key, operationDefinitionMap, false)}
+          ${fnDescription ?? ''}
+        `,
+        },
       };
     }),
   };
@@ -69,7 +66,7 @@ export function getDocumentationSections({
   const helpGroups: Array<{
     label: string;
     description?: string;
-    items: Array<{ label: string; description?: JSX.Element }>;
+    items: Array<{ label: string; description: { markdownContent: string } }>;
   }> = [];
 
   helpGroups.push({
@@ -85,7 +82,9 @@ export function getDocumentationSections({
     items: formulasSections.common.items.map(
       ({ label, description }: { label: string; description: string }) => ({
         label,
-        description: <Markdown readOnly>{description}</Markdown>,
+        description: {
+          markdownContent: description,
+        },
       })
     ),
   });
@@ -167,7 +166,10 @@ export function getFunctionSignatureLabel(
 ): string {
   if (tinymathFunctions[name]) {
     return `${name}(${tinymathFunctions[name].positionalArguments
-      .map(({ name: argName, optional, type }) => `[${argName}]${optional ? '?' : ''}: ${type}`)
+      .map(
+        ({ name: argName, optional, type }) =>
+          `[${argName}]${optional ? '?' : ''}: ${type ? getTypeLabel(type) : ''}`
+      )
       .join(', ')})`;
   }
   if (operationDefinitionMap[name]) {

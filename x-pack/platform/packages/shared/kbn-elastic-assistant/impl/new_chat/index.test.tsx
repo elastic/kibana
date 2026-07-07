@@ -9,7 +9,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { Props, NewChat } from '.';
+import type { Props } from '.';
+import { NewChat } from '.';
 
 const mockUseAssistantOverlay = {
   showAssistantOverlay: jest.fn(),
@@ -18,7 +19,10 @@ jest.mock('../assistant/use_assistant_overlay', () => ({
   useAssistantOverlay: () => mockUseAssistantOverlay,
 }));
 
-let mockUseAssistantContext = { codeBlockRef: { current: null } };
+let mockUseAssistantContext = {
+  codeBlockRef: { current: null },
+  assistantAvailability: { isAssistantVisible: true },
+};
 jest.mock('../..', () => ({
   useAssistantContext: () => mockUseAssistantContext,
 }));
@@ -33,24 +37,41 @@ const defaultProps: Props = {
 
 describe('NewChat', () => {
   beforeEach(() => {
-    mockUseAssistantContext = { codeBlockRef: { current: null } };
+    mockUseAssistantContext = {
+      codeBlockRef: { current: null },
+      assistantAvailability: {
+        isAssistantVisible: true,
+      },
+    };
   });
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders the default New Chat button with a discuss icon', () => {
+  it('renders the default New Chat button with an assistant (AiButton) icon', () => {
     render(<NewChat {...defaultProps} />);
 
-    const newChatButton = screen.getByTestId('newChat');
+    const newChatButton = screen.getByTestId('plusCircle');
 
     expect(newChatButton.querySelector('[data-euiicon-type="discuss"]')).toBeInTheDocument();
+  });
+
+  it('does not render the default New Chat button with a discuss icon when assistant is not visible', () => {
+    mockUseAssistantContext = {
+      codeBlockRef: { current: null },
+      assistantAvailability: {
+        isAssistantVisible: false,
+      },
+    };
+    render(<NewChat {...defaultProps} />);
+
+    expect(screen.queryByTestId('plusCircle')).not.toBeInTheDocument();
   });
 
   it('renders the default New Chat button even if the Assistant is disabled', () => {
     render(<NewChat {...defaultProps} isAssistantEnabled={false} />);
 
-    const newChatButton = screen.getByTestId('newChat');
+    const newChatButton = screen.getByTestId('plusCircle');
 
     expect(newChatButton.querySelector('[data-euiicon-type="discuss"]')).toBeInTheDocument();
   });
@@ -58,7 +79,7 @@ describe('NewChat', () => {
   it('renders the default "New Chat" text when children are NOT provided', () => {
     render(<NewChat {...defaultProps} />);
 
-    const newChatButton = screen.getByTestId('newChat');
+    const newChatButton = screen.getByTestId('plusCircle');
 
     expect(newChatButton.textContent).toContain('Chat');
   });
@@ -66,23 +87,23 @@ describe('NewChat', () => {
   it('renders custom children', () => {
     render(<NewChat {...defaultProps}>{'🪄✨'}</NewChat>);
 
-    const newChatButton = screen.getByTestId('newChat');
+    const newChatButton = screen.getByTestId('plusCircle');
 
     expect(newChatButton.textContent).toContain('🪄✨');
   });
 
   it('renders custom icons', () => {
-    render(<NewChat {...defaultProps} iconType="help" />);
+    render(<NewChat {...defaultProps} iconType="question" />);
 
-    const newChatButton = screen.getByTestId('newChat');
+    const newChatButton = screen.getByTestId('plusCircle');
 
-    expect(newChatButton.querySelector('[data-euiicon-type="help"]')).toBeInTheDocument();
+    expect(newChatButton.querySelector('[data-euiicon-type="question"]')).toBeInTheDocument();
   });
 
   it('does NOT render an icon when iconType is null', () => {
     render(<NewChat {...defaultProps} iconType={null} />);
 
-    const newChatButton = screen.getByTestId('newChat');
+    const newChatButton = screen.getByTestId('plusCircle');
 
     expect(newChatButton.querySelector('.euiButtonContent__icon')).not.toBeInTheDocument();
   });
@@ -90,7 +111,7 @@ describe('NewChat', () => {
   it('calls showAssistantOverlay on click', async () => {
     render(<NewChat {...defaultProps} />);
 
-    const newChatButton = screen.getByTestId('newChat');
+    const newChatButton = screen.getByTestId('plusCircle');
 
     await userEvent.click(newChatButton);
 
@@ -109,7 +130,7 @@ describe('NewChat', () => {
     const onShowOverlaySpy = jest.fn();
     render(<NewChat {...defaultProps} onShowOverlay={onShowOverlaySpy} />);
 
-    const newChatButton = screen.getByTestId('newChat');
+    const newChatButton = screen.getByTestId('plusCircle');
 
     await userEvent.click(newChatButton);
 

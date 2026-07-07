@@ -10,8 +10,9 @@
 import { Role } from './role';
 import { User } from './user';
 import { RoleMappings } from './role_mappings';
-import { FtrProviderContext } from '../ftr_provider_context';
-import { createTestUserService, TestUserSupertestProvider, TestUser } from './test_user';
+import type { FtrProviderContext } from '../ftr_provider_context';
+import type { TestUser } from './test_user';
+import { createTestUserService, TestUserSupertestProvider } from './test_user';
 import { createSystemIndicesUser } from './system_indices_user';
 
 export class SecurityService {

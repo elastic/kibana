@@ -23,13 +23,16 @@ export const buildActionDetailsQuery = ({
     filter = filter + ` AND ${kuery}`;
   }
 
-  const filterQuery = getQueryFilter({ filter });
+  const {
+    bool: { filter: baseFilter },
+  } = getQueryFilter({ filter });
 
+  // Space scoping is enforced centrally in the search strategy (enforceSpaceScope).
   const dslQuery = {
     allow_no_indices: true,
     index: componentTemplateExists ? `${ACTIONS_INDEX}*` : AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
-    query: { bool: { filter: filterQuery } },
+    query: { bool: { filter: baseFilter } },
     size: 1,
     fields: ['*'],
   };

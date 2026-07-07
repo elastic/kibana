@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
+import { getProjectRoutingFromRequest } from '@kbn/observability-utils-server/es/get_project_routing_from_request';
 import { logAnalysisResultsV1 } from '../../../../common/http_api';
 
 import type { InfraBackendLibs } from '../../../lib/infra_types';
@@ -18,9 +19,6 @@ export const initGetLogEntryCategoryExamplesRoute = ({
   framework,
   getStartServices,
 }: Pick<InfraBackendLibs, 'framework' | 'getStartServices'>) => {
-  if (!framework.config.featureFlags.logsUIEnabled) {
-    return;
-  }
   framework
     .registerVersionedRoute({
       access: 'internal',
@@ -65,7 +63,8 @@ export const initGetLogEntryCategoryExamplesRoute = ({
             endTime,
             categoryId,
             exampleCount,
-            resolvedLogView
+            resolvedLogView,
+            getProjectRoutingFromRequest(request)
           );
 
           return response.ok({

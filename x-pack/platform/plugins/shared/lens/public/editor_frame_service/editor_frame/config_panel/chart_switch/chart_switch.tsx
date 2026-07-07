@@ -7,32 +7,39 @@
 
 import React, { useState, useMemo, memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ExperimentalBadge } from '../../../../shared_components';
-import {
-  Visualization,
-  FramePublicAPI,
-  VisualizationType,
-  VisualizationMap,
+import type {
   DatasourceMap,
-  Suggestion,
   DatasourcePublicAPI,
-} from '../../../../types';
+  FormBasedPrivateState,
+  FramePublicAPI,
+  LensDocument,
+  Visualization,
+  VisualizationMap,
+  VisualizationState,
+  VisualizationType,
+  DatasourceStates,
+  Suggestion,
+} from '@kbn/lens-common';
+import { ExperimentalBadge } from '../../../../shared_components';
 import { getSuggestions, switchToSuggestion } from '../../suggestion_helpers';
 import { showMemoizedErrorNotification } from '../../../../lens_ui_errors';
 import {
   insertLayer,
   removeLayers,
+  updateDatasourceState,
   useLensDispatch,
   useLensSelector,
-  VisualizationState,
-  DatasourceStates,
   selectActiveDatasourceId,
   selectVisualization,
   selectDatasourceStates,
+  selectPersistedDoc,
 } from '../../../../state_management';
+import { applyVisualizationTypeDatasourceDefaults } from '../../../../datasources/form_based/visualization_type_defaults';
 import { generateId } from '../../../../id_generator/id_generator';
-import { ChartSwitchSelectable, SelectableEntry } from './chart_switch_selectable';
+import type { SelectableEntry } from './chart_switch_selectable';
+import { ChartSwitchSelectable } from './chart_switch_selectable';
 import { ChartSwitchOptionPrepend } from './chart_option';
+import { useEditorFrameService } from '../../../editor_frame_service_context';
 
 type VisChartSwitchPosition = VisualizationType & {
   visualizationId: string;
@@ -51,9 +58,8 @@ interface VisualizationSelection {
 }
 
 export interface ChartSwitchProps {
+  filteredVisualizationMap: VisualizationMap;
   framePublicAPI: FramePublicAPI;
-  visualizationMap: VisualizationMap;
-  datasourceMap: DatasourceMap;
   layerId: string;
   onChartSelect: () => void;
 }
@@ -83,28 +89,86 @@ function safeFnCall<TReturn>(action: () => TReturn, defaultReturnValue: TReturn)
 }
 
 export const ChartSwitch = memo(function ChartSwitch({
+  filteredVisualizationMap,
   framePublicAPI,
-  visualizationMap,
-  datasourceMap,
   layerId,
   onChartSelect,
 }: ChartSwitchProps) {
+  const visualizationMap = filteredVisualizationMap;
+  const { datasourceMap } = useEditorFrameService();
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const visualization = useLensSelector(selectVisualization);
   const datasourceStates = useLensSelector(selectDatasourceStates);
+  const persistedDoc = useLensSelector(selectPersistedDoc);
 
   const [searchTerm, setSearchTerm] = useState('');
 
   const commitSelection = (selection: VisualizationSelection) => {
+    const newVisualizationState = selection.getVisualizationState();
+    const targetVisualizationTypeId = getVisualizationTypeId(
+      visualizationMap[selection.visualizationId],
+      newVisualizationState,
+      layerId
+    );
+    const getPersistedVisualizationTypeId = (lId: string) =>
+      getPersistedLayerVisualizationTypeId(persistedDoc, visualizationMap, lId);
+
+    // Intentional `as FormBasedPrivateState` type assertion as the editor frame stores datasource state opaquely (`DatasourceState['state']` is `unknown`); `applyVisualizationTypeDatasourceDefaults` re-checks `datasourceId === formBased` before touching it.
+    const selectionDatasourceState = selection.datasourceState as FormBasedPrivateState | undefined;
+
     switchToSuggestion(
       dispatchLens,
       {
         ...selection,
-        visualizationState: selection.getVisualizationState(),
+        visualizationState: newVisualizationState,
+        // A cross-visualization switch carries new datasource state; reconcile
+        // it with the target visualization type's defaults.
+        datasourceState: selectionDatasourceState
+          ? applyVisualizationTypeDatasourceDefaults({
+              kind: 'typeSwitch',
+              datasourceId: selection.datasourceId,
+              datasourceState: selectionDatasourceState,
+              persistedDoc,
+              targetVisualizationTypeId,
+              getPersistedVisualizationTypeId,
+            })
+          : selection.datasourceState,
       },
       { clearStagedPreview: true }
     );
+
+    // A same-visualization subtype switch (e.g. XY bar -> line) reuses the
+    // existing datasource state, so the defaults are reconciled through a
+    // follow-up datasource update.
+    if (selection.sameDatasources && !selection.datasourceState && activeDatasourceId) {
+      // Intentional `as FormBasedPrivateState` type assertion as the redux datasource state is opaque (`DatasourceState['state']` is `unknown`);
+      const currentState = datasourceStates[activeDatasourceId]?.state as
+        | FormBasedPrivateState
+        | undefined;
+      if (currentState) {
+        const nextState = applyVisualizationTypeDatasourceDefaults({
+          kind: 'typeSwitch',
+          datasourceId: activeDatasourceId,
+          datasourceState: currentState,
+          persistedDoc,
+          targetVisualizationTypeId,
+          getPersistedVisualizationTypeId,
+          // A subtype switch only changes this layer's type, so reconcile only
+          // its columns and leave sibling layers (e.g. other XY series) intact.
+          targetLayerId: layerId,
+        });
+        if (nextState !== currentState) {
+          dispatchLens(
+            updateDatasourceState({
+              datasourceId: activeDatasourceId,
+              newDatasourceState: nextState,
+              clearStagedPreview: true,
+            })
+          );
+        }
+      }
+    }
 
     if (
       (!selection.datasourceId && !selection.sameDatasources) ||
@@ -348,6 +412,25 @@ const getVisualizationTypeId = (
     () => activeVisualization.getVisualizationTypeId(visualizationState, layerId),
     undefined
   );
+
+/**
+ * Resolves the subtype-aware visualization type id a layer was saved with, or
+ * `undefined` when the visualization was never saved.
+ */
+export const getPersistedLayerVisualizationTypeId = (
+  persistedDoc: LensDocument | undefined,
+  visualizationMap: VisualizationMap,
+  layerId: string
+): string | undefined => {
+  const persistedVisualizationId = persistedDoc?.visualizationType;
+  const persistedVisualization = persistedVisualizationId
+    ? visualizationMap[persistedVisualizationId]
+    : undefined;
+  if (!persistedDoc || !persistedVisualization) {
+    return undefined;
+  }
+  return getVisualizationTypeId(persistedVisualization, persistedDoc.state.visualization, layerId);
+};
 
 const findSubtypeId = (visType: VisualizationType, subtypeId?: string) => {
   if (visType.subtypes) {

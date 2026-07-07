@@ -6,6 +6,7 @@
  */
 
 import { createChatModel } from './create_chat_model';
+import { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -20,6 +21,7 @@ const getConnectorByIdMock = getConnectorById as unknown as jest.MockedFn<typeof
 
 jest.mock('@kbn/inference-langchain');
 import { InferenceChatModel } from '@kbn/inference-langchain';
+import { createRegexWorkerServiceMock } from '../test_utils';
 const InferenceChatModelMock = InferenceChatModel as unknown as jest.Mock<
   typeof InferenceChatModel
 >;
@@ -28,11 +30,18 @@ describe('createChatModel', () => {
   let logger: MockedLogger;
   let actions: ReturnType<typeof actionsMock.createStart>;
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
+  let regexWorker: ReturnType<typeof createRegexWorkerServiceMock>;
+  const mockEsClient = {
+    ml: {
+      inferTrainedModel: jest.fn(),
+    },
+  } as any;
 
   beforeEach(() => {
     logger = loggerMock.create();
     actions = actionsMock.createStart();
     request = httpServerMock.createKibanaRequest();
+    regexWorker = createRegexWorkerServiceMock();
 
     createClientMock.mockReturnValue({
       chatComplete: jest.fn(),
@@ -54,6 +63,10 @@ describe('createChatModel', () => {
       chatModelOptions: {
         temperature: 0.3,
       },
+      anonymizationRulesPromise: Promise.resolve([]),
+      regexWorker,
+      esClient: mockEsClient,
+      endpointIdCache: new InferenceEndpointIdCache(),
     });
 
     expect(createClientMock).toHaveBeenCalledTimes(1);
@@ -61,13 +74,14 @@ describe('createChatModel', () => {
       actions,
       request,
       logger,
+      esClient: mockEsClient,
+      anonymizationRulesPromise: Promise.resolve([]),
+      regexWorker,
+      endpointIdCache: expect.any(InferenceEndpointIdCache),
     });
   });
 
   it('calls getConnectorById with the right parameters', async () => {
-    const actionsClient = Symbol('actionsClient') as any;
-    actions.getActionsClientWithRequest.mockResolvedValue(actionsClient);
-
     await createChatModel({
       request,
       connectorId: '.my-connector',
@@ -76,12 +90,19 @@ describe('createChatModel', () => {
       chatModelOptions: {
         temperature: 0.3,
       },
+      anonymizationRulesPromise: Promise.resolve([]),
+      regexWorker,
+      esClient: mockEsClient,
+      endpointIdCache: new InferenceEndpointIdCache(),
     });
 
     expect(getConnectorById).toHaveBeenCalledTimes(1);
     expect(getConnectorById).toHaveBeenCalledWith({
       connectorId: '.my-connector',
-      actionsClient,
+      actions,
+      request,
+      esClient: mockEsClient,
+      logger,
     });
   });
 
@@ -102,6 +123,10 @@ describe('createChatModel', () => {
       chatModelOptions: {
         temperature: 0.3,
       },
+      anonymizationRulesPromise: Promise.resolve([]),
+      regexWorker,
+      esClient: mockEsClient,
+      endpointIdCache: new InferenceEndpointIdCache(),
     });
 
     expect(InferenceChatModelMock).toHaveBeenCalledTimes(1);

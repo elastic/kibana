@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, useEffect, useCallback, ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useState, Fragment, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -18,22 +19,20 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { HttpSetup } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  getFields,
   builtInComparators,
+  convertFieldSpecToFieldOption,
   OfExpression,
   ThresholdExpression,
   ForLastExpression,
   GroupByExpression,
   WhenExpression,
   builtInAggregationTypes,
-  RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { ThresholdVisualization } from './visualization';
-import { IndexThresholdRuleParams } from './types';
+import type { IndexThresholdRuleParams } from './types';
 import { IndexSelectPopover } from '../components/index_select_popover';
 
 export const DEFAULT_VALUES = {
@@ -57,10 +56,6 @@ const expressionFieldsWithValidation = [
   'timeWindowSize',
 ];
 
-interface KibanaDeps {
-  http: HttpSetup;
-}
-
 function isString(value: unknown): value is string {
   return typeof value === 'string';
 }
@@ -82,7 +77,16 @@ const EMPTY_ARRAY: EsField[] = [];
 
 export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
   Omit<RuleTypeParamsExpressionProps<IndexThresholdRuleParams>, 'unifiedSearch'>
-> = ({ ruleParams, ruleInterval, setRuleParams, setRuleProperty, errors, charts, data }) => {
+> = ({
+  ruleParams,
+  ruleInterval,
+  setRuleParams,
+  setRuleProperty,
+  errors,
+  charts,
+  data,
+  dataViews,
+}) => {
   const {
     index,
     timeField,
@@ -101,7 +105,6 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
   const { euiTheme } = useEuiTheme();
 
   const indexArray = indexParamToArray(index);
-  const { http } = useKibana<KibanaDeps>().services;
 
   const [esFields, setEsFields] = useState<EsField[] | undefined>(undefined);
 
@@ -148,7 +151,11 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
   };
 
   const refreshEsFields = async (indices: string[]) => {
-    const currentEsFields = await getFields(http, indices);
+    const fieldSpecs = await dataViews.getFieldsForWildcard({
+      pattern: indices.join(','),
+      allowNoIndex: true,
+    });
+    const currentEsFields = convertFieldSpecToFieldOption(fieldSpecs, false);
     setEsFields(currentEsFields);
   };
 
@@ -169,7 +176,7 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
       {hasExpressionErrors ? (
         <Fragment>
           <EuiSpacer />
-          <EuiCallOut color="danger" size="s" title={expressionErrorMessage} />
+          <EuiCallOut announceOnMount color="danger" size="s" title={expressionErrorMessage} />
           <EuiSpacer />
         </Fragment>
       ) : null}
@@ -188,6 +195,7 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
           esFields={esFields ?? EMPTY_ARRAY}
           timeField={timeField}
           errors={errors}
+          dataViews={dataViews}
           onIndexChange={async (indices: string[]) => {
             setRuleParams('index', indices);
 
@@ -325,7 +333,7 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
           <Fragment>
             <EuiEmptyPrompt
               data-test-subj="visualizationPlaceholder"
-              iconType="visBarVertical"
+              iconType="chartBarVertical"
               body={
                 <EuiText color="subdued">
                   <FormattedMessage

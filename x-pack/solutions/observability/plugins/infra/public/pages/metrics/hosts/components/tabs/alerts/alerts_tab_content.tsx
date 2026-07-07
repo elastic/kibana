@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import type { BrushEndListener } from '@elastic/charts';
@@ -19,6 +19,7 @@ import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { useAlertsQuery } from '../../../hooks/use_alerts_query';
 import type { HostsState } from '../../../hooks/use_unified_search_url_state';
 import type { AlertsEsQuery } from '../../../../../../utils/filters/create_alerts_es_query';
+import { createFocusTrapProps } from '../../../../../../utils/create_focus_trap_props';
 import {
   ALERTS_PER_PAGE,
   ALERTS_TABLE_ID,
@@ -30,16 +31,30 @@ import { AlertFlyout } from '../../../../../../alerting/inventory/components/ale
 import { usePluginConfig } from '../../../../../../containers/plugin_config_context';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 
+// Escape characters that would otherwise break out of a quoted KQL literal.
+const escapeKqlLiteral = (value: string): string => value.replace(/[\\"]/g, '\\$&');
+
 export const AlertsTabContent = () => {
   const { featureFlags } = usePluginConfig();
   const { hostNodes } = useHostsViewContext();
+  const { services } = useKibanaContextForPlugin();
+  const { data, http, notifications, fieldFormats, application, licensing, cases, settings } =
+    services;
 
   const { alertStatus, setAlertStatus, alertsEsQueryByStatus } = useAlertsQuery();
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
+  const createAlertRuleButtonRef = useRef<HTMLButtonElement>(null);
 
   const { onDateRangeChange, searchCriteria } = useUnifiedSearchContext();
 
-  const hostNamesKuery = hostNodes.map((host) => `host.name: "${host.name}"`).join(' OR ');
+  // `host.name: (a or b or c)` compiles to a single terms-style clause, far
+  // cheaper than one `match_phrase` per host at 500-host capacity. Escape the
+  // quoted literals to keep the query well-formed.
+  const hostNamesKuery = hostNodes.length
+    ? `host.name: (${hostNodes.map((host) => `"${escapeKqlLiteral(host.name)}"`).join(' or ')})`
+    : '';
+
+  const focusTrapProps = createFocusTrapProps(createAlertRuleButtonRef.current);
 
   return (
     <HeightRetainer>
@@ -52,6 +67,7 @@ export const AlertsTabContent = () => {
             {featureFlags.inventoryThresholdAlertRuleEnabled && (
               <EuiFlexItem grow={false}>
                 <CreateAlertRuleButton
+                  buttonRef={createAlertRuleButtonRef}
                   onClick={toggleAlertFlyout}
                   data-test-subj="infraHostAlertsTabCreateAlertsRuleButton"
                 />
@@ -79,8 +95,18 @@ export const AlertsTabContent = () => {
               id={ALERTS_TABLE_ID}
               ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
               consumers={INFRA_ALERT_CONSUMERS}
-              initialPageSize={ALERTS_PER_PAGE}
+              pageSize={ALERTS_PER_PAGE}
               query={alertsEsQueryByStatus}
+              services={{
+                data,
+                http,
+                notifications,
+                fieldFormats,
+                application,
+                licensing,
+                cases,
+                settings,
+              }}
             />
           </EuiFlexItem>
         )}
@@ -90,6 +116,8 @@ export const AlertsTabContent = () => {
           nodeType="host"
           setVisible={toggleAlertFlyout}
           visible={isAlertFlyoutVisible}
+          schema={searchCriteria.preferredSchema}
+          focusTrapProps={focusTrapProps}
         />
       )}
     </HeightRetainer>

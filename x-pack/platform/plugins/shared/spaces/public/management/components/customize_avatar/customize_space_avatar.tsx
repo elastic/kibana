@@ -190,6 +190,12 @@ export class CustomizeSpaceAvatar extends Component<Props> {
           <EuiColorPicker
             color={space.color ?? ''}
             onChange={this.onColorChange}
+            placeholder={i18n.translate(
+              'xpack.spaces.management.customizeSpaceAvatar.colorPickerPlaceholder',
+              {
+                defaultMessage: 'Auto-generated',
+              }
+            )}
             isInvalid={this.props.validator.validateAvatarColor(space).isInvalid}
             fullWidth
           />

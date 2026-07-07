@@ -39,5 +39,6 @@
     "managed": true,
     "created_by": "ml-module-logs-ui-categories",
     "job_revision": 2
-  }
+  },
+  "results_retention_days": 120
 }

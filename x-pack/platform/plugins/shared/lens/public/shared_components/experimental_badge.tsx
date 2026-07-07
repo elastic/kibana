@@ -25,10 +25,11 @@ export const ExperimentalBadge = ({
   return (
     <EuiToolTip content={label}>
       <EuiBetaBadge
+        tabIndex={0}
         css={css`
           vertical-align: middle;
         `}
-        iconType="beaker"
+        iconType="flask"
         label={label}
         size={size}
         color={color}

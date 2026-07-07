@@ -48,13 +48,6 @@ export const RISK_SCORE_TITLE = (riskEntity: EntityType) =>
     },
   });
 
-export const RISK_SCORING_TITLE = i18n.translate(
-  'xpack.securitySolution.riskScore.overview.riskScoringTitle',
-  {
-    defaultMessage: 'Entity Risk Scoring',
-  }
-);
-
 export const ENTITY_RISK_LEVEL = (riskEntity?: EntityType) =>
   riskEntity
     ? i18n.translate('xpack.securitySolution.entityAnalytics.riskDashboard.riskLevelTitle', {

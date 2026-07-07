@@ -13,7 +13,7 @@ import { getGroupFromPath, getLayersMultiDimensional } from './get_layers_multi_
 import { getPathToFlattenedBucketMap } from './get_path_to_flattened_bucket_map';
 import { alertIndexWithAllResults } from '../../../../mock/pattern_rollup/mock_alerts_pattern_rollup';
 import { packetbeatNoResults } from '../../../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
-import { PatternRollup } from '../../../../types';
+import type { PatternRollup } from '../../../../types';
 import { EMPTY_STAT } from '../../../../constants';
 
 const defaultBytesFormat = '0,0.[0]b';

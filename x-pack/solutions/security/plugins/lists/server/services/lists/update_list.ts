@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   DescriptionOrUndefined,
   Id,
@@ -14,9 +14,9 @@ import type {
   NameOrUndefined,
   _VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
+import type { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
 
-import { UpdateEsListSchema } from '../../schemas/elastic_query';
+import type { UpdateEsListSchema } from '../../schemas/elastic_query';
 import { checkVersionConflict, waitUntilDocumentIndexed } from '../utils';
 
 import { getList } from '.';
@@ -126,12 +126,10 @@ export const updateList = async ({
       created_at: list.created_at,
       created_by: list.created_by,
       description: description ?? list.description,
-      deserializer: list.deserializer,
       id,
       immutable: list.immutable,
       meta: isPatch ? meta ?? list.meta : meta,
       name: name ?? list.name,
-      serializer: list.serializer,
       tie_breaker_id: list.tie_breaker_id,
       type: list.type,
       updated_at: updatedAt,

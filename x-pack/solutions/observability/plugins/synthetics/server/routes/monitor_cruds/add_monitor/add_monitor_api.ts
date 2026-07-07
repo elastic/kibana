@@ -6,23 +6,28 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
-import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
+import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
+import { getPackagePolicySavedObjectType } from '@kbn/fleet-plugin/server/services/package_policy';
 import { i18n } from '@kbn/i18n';
+import {
+  legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorAttributes,
+  syntheticsMonitorSavedObjectType,
+} from '../../../../common/types/saved_objects';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 import { parseMonitorLocations } from './utils';
 import { MonitorValidationError } from '../monitor_validation';
 import { getSavedObjectKqlFilter } from '../../common';
-import { monitorAttributes } from '../../../../common/types/saved_objects';
-import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
+import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { ConfigKey } from '../../../../common/constants/monitor_management';
-import {
+import type {
   EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
-  MonitorTypeEnum,
   ServiceLocations,
   SyntheticsMonitor,
 } from '../../../../common/runtime_types';
+import { MonitorTypeEnum } from '../../../../common/runtime_types';
 import {
   getMaxAttempts,
   getMonitorLocations,
@@ -33,11 +38,11 @@ import {
   DEFAULT_NAMESPACE_STRING,
 } from '../../../../common/constants/monitor_defaults';
 import { triggerTestNow } from '../../synthetics_service/test_now_monitor';
-import { DefaultAlertService } from '../../default_alerts/default_alert_service';
-import { RouteContext } from '../../types';
+import { DefaultRuleService } from '../../default_alerts/default_alert_service';
+import type { RouteContext } from '../../types';
 import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
 import { formatKibanaNamespace } from '../../../../common/formatters';
-import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
+import { getPrivateLocationsForNamespaces } from '../../../synthetics_service/get_private_locations';
 
 export type CreateMonitorPayLoad = MonitorFields & {
   url?: string;
@@ -57,9 +62,11 @@ export class AddEditMonitorAPI {
   async syncNewMonitor({
     id,
     normalizedMonitor,
+    savedObjectType,
   }: {
     id?: string;
     normalizedMonitor: SyntheticsMonitor;
+    savedObjectType?: string;
   }) {
     const { server, syntheticsMonitorClient, spaceId } = this.routeContext;
     const newMonitorId = id ?? uuidV4();
@@ -71,9 +78,22 @@ export class AddEditMonitorAPI {
     });
 
     try {
+      const monitorPrivateLocations = monitorWithNamespace[ConfigKey.LOCATIONS].filter(
+        (loc) => !loc.isServiceManaged
+      );
+      const packagePolicySoType = await getPackagePolicySavedObjectType();
+      const references = monitorPrivateLocations.map((loc) => ({
+        id: `${newMonitorId}-${loc.id}`,
+        name: `${newMonitorId}-${loc.id}`,
+        type: packagePolicySoType,
+      }));
+
       const newMonitorPromise = this.routeContext.monitorConfigRepository.create({
         normalizedMonitor: monitorWithNamespace,
         id: newMonitorId,
+        spaceId,
+        savedObjectType,
+        references: references.length > 0 ? references : undefined,
       });
 
       const syncErrorsPromise = syntheticsMonitorClient.addMonitors(
@@ -151,7 +171,7 @@ export class AddEditMonitorAPI {
     monitorPayload: CreateMonitorPayLoad,
     prevLocations?: MonitorFields['locations']
   ) {
-    const { savedObjectsClient, syntheticsMonitorClient, request } = this.routeContext;
+    const { syntheticsMonitorClient, request } = this.routeContext;
     const internal = Boolean((request.query as { internal?: boolean })?.internal);
     const {
       locations,
@@ -175,11 +195,34 @@ export class AddEditMonitorAPI {
 
     if (!locations && !privateLocations && prevLocations) {
       locationsVal = prevLocations;
+
+      const prevPrivateLocations = prevLocations.filter((loc) => !loc.isServiceManaged);
+      if (prevPrivateLocations.length > 0) {
+        const monitorSpaces = monitor[ConfigKey.KIBANA_SPACES] ?? [];
+        const namespacesForLookup = [
+          ...new Set([this.routeContext.spaceId, ...monitorSpaces]),
+        ].filter(Boolean);
+        const internalClient =
+          this.routeContext.server.coreStart.savedObjects.createInternalRepository();
+        this.allPrivateLocations = await getPrivateLocationsForNamespaces(
+          internalClient,
+          namespacesForLookup
+        );
+      }
     } else {
       const monitorLocations = parseMonitorLocations(monitorPayload, prevLocations, internal);
 
       if (monitorLocations.privateLocations.length > 0) {
-        this.allPrivateLocations = await getPrivateLocations(savedObjectsClient);
+        const monitorSpaces = monitor[ConfigKey.KIBANA_SPACES] ?? [];
+        const namespacesForLookup = [
+          ...new Set([this.routeContext.spaceId, ...monitorSpaces]),
+        ].filter(Boolean);
+        const internalClient =
+          this.routeContext.server.coreStart.savedObjects.createInternalRepository();
+        this.allPrivateLocations = await getPrivateLocationsForNamespaces(
+          internalClient,
+          namespacesForLookup
+        );
       } else {
         this.allPrivateLocations = [];
       }
@@ -205,7 +248,9 @@ export class AddEditMonitorAPI {
     const kqlFilter = getSavedObjectKqlFilter({ field: 'name.keyword', values: name });
     const { total } = await monitorConfigRepository.find({
       perPage: 0,
-      filter: id ? `${kqlFilter} and not (${monitorAttributes}.config_id: ${id})` : kqlFilter,
+      filter: id
+        ? `${kqlFilter} and not (${syntheticsMonitorAttributes}.config_id: ${id})`
+        : kqlFilter,
     });
 
     if (total > 0) {
@@ -218,11 +263,12 @@ export class AddEditMonitorAPI {
 
   initDefaultAlerts(name: string) {
     const { server, savedObjectsClient, context } = this.routeContext;
+
     try {
       // we do this async, so we don't block the user, error handling will be done on the UI via separate api
-      const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
+      const defaultAlertService = new DefaultRuleService(context, server, savedObjectsClient);
       defaultAlertService
-        .setupDefaultAlerts()
+        .setupDefaultRules()
         .then(() => {
           server.logger.debug(`Successfully created default alert for monitor: ${name}`);
         })
@@ -305,7 +351,10 @@ export class AddEditMonitorAPI {
     try {
       const encryptedMonitor = await monitorConfigRepository.get(newMonitorId);
       if (encryptedMonitor) {
-        await monitorConfigRepository.delete(newMonitorId);
+        await monitorConfigRepository.bulkDelete([
+          { id: newMonitorId, type: syntheticsMonitorSavedObjectType },
+          { id: newMonitorId, type: legacySyntheticsMonitorTypeSingle },
+        ]);
 
         const deleteMonitorAPI = new DeleteMonitorAPI(this.routeContext);
         await deleteMonitorAPI.execute({

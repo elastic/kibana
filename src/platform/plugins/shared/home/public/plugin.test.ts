@@ -11,7 +11,7 @@ import { registryMock, environmentMock, tutorialMock } from './plugin.test.mocks
 import { HomePublicPlugin } from './plugin';
 import { coreMock } from '@kbn/core/public/mocks';
 import { urlForwardingPluginMock } from '@kbn/url-forwarding-plugin/public/mocks';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 
 const mockInitializerContext = coreMock.createPluginInitializerContext();

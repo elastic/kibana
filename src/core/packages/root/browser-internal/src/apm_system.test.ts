@@ -170,6 +170,7 @@ describe('ApmSystem', () => {
             hostname: 'mykibanadomain.com',
             port: '5601',
           },
+          addEventListener: jest.fn(),
         }));
       });
 
@@ -281,6 +282,105 @@ describe('ApmSystem', () => {
             name: 'GET /alpha/beta/',
           } as Transaction)
         ).toEqual({ type: 'http-request', name: 'GET /beta/' });
+      });
+    });
+
+    describe('window click event listener', () => {
+      let addEventListenerSpy: jest.SpyInstance;
+      let mockTransaction: MockedKeys<Transaction>;
+
+      beforeEach(() => {
+        addEventListenerSpy = jest.spyOn(window, 'addEventListener');
+        mockTransaction = {
+          name: 'initial-name',
+        } as MockedKeys<Transaction>;
+        apmMock.getCurrentTransaction.mockReturnValue(mockTransaction);
+      });
+
+      afterEach(() => {
+        addEventListenerSpy.mockRestore();
+      });
+
+      it('adds a click event listener during setup', async () => {
+        const apmSystem = new ApmSystem({ active: true });
+        await apmSystem.setup();
+        expect(addEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function), true);
+      });
+
+      it('updates transaction name when clicking element with data-test-subj', async () => {
+        const apmSystem = new ApmSystem({ active: true });
+        await apmSystem.setup();
+
+        // Create a button with a data-test-subj attribute
+        const button = document.createElement('button');
+        button.setAttribute('data-test-subj', 'my-test-element');
+        document.body.appendChild(button);
+
+        // Simulate clicking the button
+        const clickEvent = new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+        });
+        button.dispatchEvent(clickEvent);
+
+        expect(mockTransaction.name).toBe('Click - my-test-element');
+      });
+
+      it('updates transaction name when clicking closest element with data-test-subj', async () => {
+        const apmSystem = new ApmSystem({ active: true });
+        await apmSystem.setup();
+
+        // Create a button with a data-test-subj attribute and child span
+        const button = document.createElement('button');
+        button.setAttribute('data-test-subj', 'parent-element');
+        const span = document.createElement('span');
+        button.appendChild(span);
+        document.body.appendChild(button);
+
+        // Simulate clicking the button
+        const clickEvent = new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+        });
+        span.dispatchEvent(clickEvent);
+
+        expect(mockTransaction.name).toBe('Click - parent-element');
+      });
+
+      it('does not update transaction name when no data-test-subj found', async () => {
+        const apmSystem = new ApmSystem({ active: true });
+        await apmSystem.setup();
+
+        // Create a button with a data-test-subj attribute
+        const button = document.createElement('button');
+        document.body.appendChild(button);
+
+        // Simulate clicking the button
+        const clickEvent = new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+        });
+        button.dispatchEvent(clickEvent);
+
+        expect(mockTransaction.name).toBe('initial-name');
+      });
+
+      it('does nothing when no current transaction exists', async () => {
+        const apmSystem = new ApmSystem({ active: true });
+        apmMock.getCurrentTransaction.mockReturnValue(undefined);
+        await apmSystem.setup();
+
+        // Create a button with a data-test-subj attribute
+        const button = document.createElement('button');
+        document.body.appendChild(button);
+
+        // Simulate clicking the button
+        const clickEvent = new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+        });
+
+        expect(() => button.dispatchEvent(clickEvent)).not.toThrow();
       });
     });
   });

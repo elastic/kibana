@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, ReactElement, CSSProperties } from 'react';
-import PropTypes from 'prop-types';
+import type { FC, ReactElement, CSSProperties } from 'react';
+import React from 'react';
 import { matrixToCSS } from '../../lib/dom';
-import { TransformMatrix3d } from '../../lib/aeroelastic';
+import type { TransformMatrix3d } from '../../lib/aeroelastic';
 
 interface Props {
   children: ReactElement;
@@ -39,11 +39,4 @@ export const Positionable: FC<Props> = ({ children, transformMatrix, width, heig
       {childNode}
     </div>
   );
-};
-
-Positionable.propTypes = {
-  children: PropTypes.element.isRequired,
-  transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
 };

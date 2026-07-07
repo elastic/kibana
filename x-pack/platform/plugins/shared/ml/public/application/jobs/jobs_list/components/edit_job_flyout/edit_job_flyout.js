@@ -8,6 +8,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { cloneDeep, isEqual, pick } from 'lodash';
+import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
@@ -24,6 +25,7 @@ import {
   EuiTabbedContent,
   EuiConfirmModal,
   EuiSpacer,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import { EditJobDetailsTab, EditDetectorsTab, EditDatafeedTab } from './tabs';
@@ -36,6 +38,8 @@ import { DATAFEED_STATE, JOB_STATE } from '../../../../../../common/constants/st
 import { CustomUrlsWrapper, isValidCustomUrls } from '../../../../components/custom_urls';
 import { isManagedJob } from '../../../jobs_utils';
 import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
+import { createJobActionFocusTrapProps } from '../../../../util/create_focus_trap_props';
+import { createJobActionFocusRestoration } from '../../../../util/create_focus_restoration';
 
 const { collapseLiteralStrings } = XJson;
 
@@ -67,6 +71,7 @@ export class EditJobFlyoutUI extends Component {
       jobGroupsValidationError: '',
       isValidJobDetails: true,
       isValidJobCustomUrls: true,
+      modelMemoryEstimation: undefined,
     };
 
     this.refreshJobs = this.props.refreshJobs;
@@ -182,6 +187,17 @@ export class EditJobFlyoutUI extends Component {
     this.extractInitialJobFormState(job, hasDatafeed);
     const datafeedRunning = hasDatafeed && job.datafeed_config.state !== DATAFEED_STATE.STOPPED;
     const jobClosed = job.state === JOB_STATE.CLOSED;
+
+    if (jobClosed && job.datafeed_config && job.data_counts) {
+      this.estimateModelMemoryLimit({
+        earliestMs: job.data_counts.earliest_record_timestamp,
+        latestMs: job.data_counts.latest_record_timestamp,
+        indexPattern: job.datafeed_config.indices.join(','),
+        query: job.datafeed_config.query,
+        timeFieldName: job.data_description.time_field,
+        analysisConfig: job.analysis_config,
+      });
+    }
 
     this.setState({
       job,
@@ -304,7 +320,33 @@ export class EditJobFlyoutUI extends Component {
       });
   };
 
+  async estimateModelMemoryLimit(payload) {
+    this.setState({ modelMemoryEstimation: undefined });
+
+    if (
+      payload === undefined ||
+      payload.earliestMs === undefined ||
+      payload.latestMs === undefined
+    ) {
+      this.setState({ modelMemoryEstimation: null });
+      return;
+    }
+
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
+
+    try {
+      const { modelMemoryLimit } = await firstValueFrom(mlApi.calculateModelMemoryLimit$(payload));
+      this.setState({ modelMemoryEstimation: modelMemoryLimit ?? null });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Model memory limit could not be calculated', error);
+      this.setState({ modelMemoryEstimation: undefined });
+    }
+  }
+
   render() {
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
+
     let flyout;
     let confirmationModal;
 
@@ -330,6 +372,8 @@ export class EditJobFlyoutUI extends Component {
         isValidJobCustomUrls,
         datafeedRunning,
         jobClosed,
+        modelMemoryEstimation,
+        hasDatafeed,
       } = this.state;
 
       const tabs = [
@@ -352,6 +396,8 @@ export class EditJobFlyoutUI extends Component {
               setJobDetails={this.setJobDetails}
               jobGroupsValidationError={jobGroupsValidationError}
               jobModelMemoryLimitValidationError={jobModelMemoryLimitValidationError}
+              modelMemoryEstimation={modelMemoryEstimation}
+              hasDatafeed={hasDatafeed}
             />
           ),
         },
@@ -410,6 +456,10 @@ export class EditJobFlyoutUI extends Component {
           }}
           size="m"
           data-test-subj="mlJobEditFlyout"
+          aria-label={i18n.translate('xpack.ml.jobsList.editJobFlyout.ariaLabel', {
+            defaultMessage: 'Edit job flyout',
+          })}
+          focusTrapProps={createJobActionFocusTrapProps(job.job_id)}
         >
           <EuiFlyoutHeader>
             <EuiTitle>
@@ -477,13 +527,22 @@ export class EditJobFlyoutUI extends Component {
     }
 
     if (this.state.isConfirmationModalVisible) {
+      const returnFocus = createJobActionFocusRestoration(this.state.job.job_id);
       confirmationModal = (
         <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
           title={i18n.translate('xpack.ml.jobsList.editJobFlyout.unsavedChangesDialogTitle', {
             defaultMessage: 'Save changes before leaving?',
           })}
-          onCancel={() => this.closeFlyout(true)}
-          onConfirm={() => this.save()}
+          titleProps={{ id: confirmModalTitleId }}
+          onCancel={() => {
+            this.closeFlyout(true);
+            returnFocus();
+          }}
+          onConfirm={() => {
+            this.save();
+            returnFocus();
+          }}
           cancelButtonText={i18n.translate(
             'xpack.ml.jobsList.editJobFlyout.leaveAnywayButtonLabel',
             { defaultMessage: 'Leave anyway' }

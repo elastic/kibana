@@ -138,35 +138,11 @@ describe('columns', () => {
       expect(screen.getByText('Console')).toBeInTheDocument();
     });
 
-    it('renders type column as "Direct" for /api/v1/authn*', () => {
+    it('renders type column', () => {
       const col = columns[4] as EuiTableFieldDataColumnType<TableItemType>;
-      render(<>{col.render?.('/api/v1/authn/something', baseRecord)}</>, {
+      render(<>{col.render?.('Direct', baseRecord)}</>, {
         wrapper: TestProviders,
       });
-      expect(screen.getByText('Direct')).toBeInTheDocument();
-    });
-
-    it('renders type column as "Federated" for /oauth2/v1/authorize', () => {
-      const col = columns[4] as EuiTableFieldDataColumnType<TableItemType>;
-      render(<>{col.render?.('/oauth2/v1/authorize', baseRecord)}</>, { wrapper: TestProviders });
-      expect(screen.getByText('Federated')).toBeInTheDocument();
-    });
-
-    it('renders type column as "Federated" for /oauth2/v1/token', () => {
-      const col = columns[4] as EuiTableFieldDataColumnType<TableItemType>;
-      render(<>{col.render?.('/oauth2/v1/token', baseRecord)}</>, { wrapper: TestProviders });
-      expect(screen.getByText('Federated')).toBeInTheDocument();
-    });
-
-    it('renders type column as "Federated" for string containing /sso/saml', () => {
-      const col = columns[4] as EuiTableFieldDataColumnType<TableItemType>;
-      render(<>{col.render?.('/some/path/sso/saml', baseRecord)}</>, { wrapper: TestProviders });
-      expect(screen.getByText('Federated')).toBeInTheDocument();
-    });
-
-    it('renders type column as original value for unmatched string', () => {
-      const col = columns[4] as EuiTableFieldDataColumnType<TableItemType>;
-      render(<>{col.render?.('/api/v1/authn', baseRecord)}</>, { wrapper: TestProviders });
       expect(screen.getByText('Direct')).toBeInTheDocument();
     });
 

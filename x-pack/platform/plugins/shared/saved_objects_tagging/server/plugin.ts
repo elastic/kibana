@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { savedObjectsTaggingFeature } from './features';
 import { tagType } from './saved_objects';
 import type {
@@ -43,7 +43,10 @@ export class SavedObjectTaggingPlugin
     savedObjects.registerType(tagType);
 
     const router = http.createRouter<TagsHandlerContext>();
-    registerRoutes({ router });
+    const apiUsageCounter: UsageCounter | undefined = usageCollection?.createUsageCounter(
+      'saved_objects_tagging_api'
+    );
+    registerRoutes({ router, usageCounter: apiUsageCounter });
 
     http.registerRouteHandlerContext<TagsHandlerContext, 'tags'>(
       'tags',

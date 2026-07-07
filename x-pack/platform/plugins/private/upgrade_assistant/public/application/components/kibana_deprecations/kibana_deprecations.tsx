@@ -7,7 +7,8 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import { EuiCode, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -15,20 +16,18 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { DomainDeprecationDetails } from '@kbn/core/public';
 import {
+  type MissingPrivileges,
   WithPrivileges,
-  MissingPrivileges,
   SectionLoading,
   GlobalFlyout,
-} from '../../../shared_imports';
+} from '@kbn/es-ui-shared-plugin/public';
 import { APP_LOGS_COUNT_CLUSTER_PRIVILEGES } from '../../../../common/constants';
 import { useAppContext } from '../../app_context';
 import { uiMetricService, UIM_KIBANA_DEPRECATIONS_PAGE_LOAD } from '../../lib/ui_metric';
 import { DeprecationsPageLoadingError, NoDeprecationsPrompt, DeprecationCount } from '../shared';
 import { KibanaDeprecationsTable } from './kibana_deprecations_table';
-import {
-  DeprecationDetailsFlyout,
-  DeprecationDetailsFlyoutProps,
-} from './deprecation_details_flyout';
+import type { DeprecationDetailsFlyoutProps } from './deprecation_details_flyout';
+import { DeprecationDetailsFlyout } from './deprecation_details_flyout';
 
 const { useGlobalFlyout } = GlobalFlyout;
 
@@ -293,6 +292,7 @@ export const KibanaDeprecationsList = ({
       {(!hasPrivileges || kibanaDeprecationErrors.length > 0) && (
         <>
           <EuiCallOut
+            announceOnMount={false}
             title={i18nTexts.kibanaDeprecationErrorTitle}
             color="warning"
             iconType="warning"

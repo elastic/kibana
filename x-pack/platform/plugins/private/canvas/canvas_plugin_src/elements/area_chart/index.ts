@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ElementFactory } from '../../../types';
+import type { ElementFactory } from '../../../types';
 
 export const areaChart: ElementFactory = () => ({
   name: 'areaChart',
   displayName: 'Area',
   help: 'A line chart with a filled body',
   type: 'chart',
-  icon: 'visArea',
+  icon: 'chartArea',
   expression: `kibana
 | selectFilter
 | demodata

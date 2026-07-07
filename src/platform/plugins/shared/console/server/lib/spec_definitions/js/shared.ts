@@ -10,3 +10,12 @@
 export const BOOLEAN = Object.freeze({
   __one_of: [true, false],
 });
+
+export const ChunkingSettings = {
+  strategy: {
+    __one_of: ['sentence', 'word', 'none', 'recursive'],
+  },
+  max_chunk_size: 250,
+  sentence_overlap: 1,
+  overlap: 1,
+};

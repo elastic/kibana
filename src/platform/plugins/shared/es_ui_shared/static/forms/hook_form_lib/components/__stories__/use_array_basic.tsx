@@ -9,17 +9,18 @@
 
 import React from 'react';
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
-  EuiButtonEmpty,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { TextField } from '../../../components';
 import { fieldValidators } from '../../../helpers';
-import { FormConfig } from '../../types';
+import type { FormConfig } from '../../types';
 import { UseField } from '../use_field';
 import { UseArray } from '../use_array';
 import { FormWrapper } from './form_utils';
@@ -76,11 +77,13 @@ export function Basic() {
                       </EuiFlexItem>
                       {items.length > 1 && (
                         <EuiFlexItem grow={false}>
-                          <EuiButtonIcon
-                            iconType="minusInCircle"
-                            onClick={() => removeItem(id)}
-                            aria-label="Remove item"
-                          />
+                          <EuiToolTip content="Remove item" disableScreenReaderOutput>
+                            <EuiButtonIcon
+                              iconType="minusCircle"
+                              onClick={() => removeItem(id)}
+                              aria-label="Remove item"
+                            />
+                          </EuiToolTip>
                         </EuiFlexItem>
                       )}
                     </EuiFlexGroup>
@@ -160,7 +163,7 @@ const MyFormComponent = () => {
                     {items.length > 1 && (
                       <EuiFlexItem grow={false}>
                         <EuiButtonIcon
-                          iconType="minusInCircle"
+                          iconType="minusCircle"
                           onClick={() => removeItem(id)}
                           aria-label="Remove item"
                         />

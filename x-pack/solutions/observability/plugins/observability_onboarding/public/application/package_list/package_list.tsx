@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
+import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import React, { Suspense, lazy } from 'react';
 
 export const LazyPackageList = lazy(async () => ({
@@ -18,9 +18,10 @@ interface Props {
   list: IntegrationCardItem[];
   searchTerm?: string;
   showCardLabels?: boolean;
+  backgroundColor?: 'plain' | 'transparent';
 }
 
-export function PackageList({ list, searchTerm = '', showCardLabels }: Props) {
+export function PackageList({ list, searchTerm = '', showCardLabels, backgroundColor }: Props) {
   return (
     /**
      * Suspense wrapper is required by PackageListGrid, but
@@ -42,6 +43,8 @@ export function PackageList({ list, searchTerm = '', showCardLabels }: Props) {
         setUrlandReplaceHistory={() => {}}
         setUrlandPushHistory={() => {}}
         showCardLabels={showCardLabels}
+        sortByFeaturedIntegrations={false}
+        backgroundColor={backgroundColor}
       />
     </Suspense>
   );

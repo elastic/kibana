@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useMemo, useRef, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useHistory, useParams, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
@@ -14,6 +15,7 @@ import { PageLoader } from '../common/components/page_loader';
 import { resetMonitorLastRunAction } from '../../state';
 import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
 import { useSyntheticsRefreshContext } from '../../contexts';
+import { MonitorRemoteCallout } from './monitor_remote_callout';
 
 export const MonitorPendingWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const dispatch = useDispatch();
@@ -61,6 +63,7 @@ export const MonitorPendingWrapper: FC<PropsWithChildren<unknown>> = ({ children
 
   return (
     <>
+      <MonitorRemoteCallout />
       {!loaded ? (
         <PageLoader
           icon={<EuiLoadingSpinner size="xxl" />}

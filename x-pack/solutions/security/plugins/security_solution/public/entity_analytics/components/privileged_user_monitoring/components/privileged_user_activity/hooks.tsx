@@ -8,6 +8,10 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { encode } from '@kbn/rison';
+import * as E from 'fp-ts/Either';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 import {
   generateListESQLQuery,
@@ -21,15 +25,34 @@ import {
 } from './columns';
 import { getLensAttributes } from './get_lens_attributes';
 import {
-  getAccountSwitchesEsqlSource,
-  getAuthenticationsEsqlSource,
-  getGrantedRightsEsqlSource,
-} from './esql_source_query';
-import {
   ACCOUNT_SWITCH_STACK_BY,
   AUTHENTICATIONS_STACK_BY,
   GRANTED_RIGHTS_STACK_BY,
+  ERROR_ENCODING_ESQL_QUERY,
 } from './constants';
+import { getAuthenticationsEsqlSource } from '../../queries/authentications_esql_query';
+import { getAccountSwitchesEsqlSource } from '../../queries/account_switches_esql_query';
+import { getGrantedRightsEsqlSource } from '../../queries/granted_rights_esql_query';
+
+export const useDiscoverPath = (query: string) => {
+  const { addWarning } = useAppToasts();
+
+  const discoverUrl = useMemo(() => {
+    try {
+      const encodedAppState = encode({
+        query: {
+          esql: query,
+        },
+      });
+      return `#/?_a=${encodedAppState}`;
+    } catch (error) {
+      addWarning(error, { title: ERROR_ENCODING_ESQL_QUERY });
+      return '#/'; // Fallback to root if encoding fails
+    }
+  }, [query, addWarning]);
+
+  return discoverUrl;
+};
 
 const toggleOptionsConfig = {
   [VisualizationToggleOptions.GRANTED_RIGHTS]: {
@@ -50,21 +73,31 @@ const toggleOptionsConfig = {
 };
 
 export const usePrivilegedUserActivityParams = (
-  selectedToggleOption: VisualizationToggleOptions
+  selectedToggleOption: VisualizationToggleOptions,
+  sourcererDataView: DataViewSpec
 ) => {
   const spaceId = useSpaceId();
+
+  const indexPattern = sourcererDataView?.title ?? '';
+  const fields = sourcererDataView?.fields;
+
   const esqlSource = useMemo(
     () =>
-      spaceId ? toggleOptionsConfig[selectedToggleOption].generateEsqlSource(spaceId) : undefined,
-    [selectedToggleOption, spaceId]
+      spaceId && indexPattern && fields
+        ? toggleOptionsConfig[selectedToggleOption].generateEsqlSource(
+            spaceId,
+            indexPattern,
+            fields
+          )
+        : E.left({
+            error: 'GenerateEsqlSource requires spaceId, indexPattern, fields to be defined',
+          }),
+    [selectedToggleOption, spaceId, indexPattern, fields]
   );
 
-  const generateTableQuery = useMemo(
-    () => (esqlSource ? generateListESQLQuery(esqlSource) : undefined),
-    [esqlSource]
-  );
+  const generateTableQuery = useMemo(() => generateListESQLQuery(esqlSource), [esqlSource]);
   const generateVisualizationQuery = useMemo(
-    () => (esqlSource ? generateVisualizationESQLQuery(esqlSource) : undefined),
+    () => generateVisualizationESQLQuery(esqlSource),
     [esqlSource]
   );
 

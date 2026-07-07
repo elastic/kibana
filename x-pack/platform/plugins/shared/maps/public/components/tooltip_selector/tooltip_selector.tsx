@@ -5,22 +5,25 @@
  * 2.0.
  */
 
-import React, { Component, ComponentProps, Fragment } from 'react';
+import type { ComponentProps } from 'react';
+import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
 import {
   EuiButtonIcon,
   EuiDragDropContext,
   EuiDraggable,
   EuiDroppable,
+  EuiSpacer,
   EuiText,
   EuiTextAlign,
   EuiTextColor,
-  EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { AddTooltipFieldPopover, FieldProps } from './add_tooltip_field_popover';
-import { IField } from '../../classes/fields/field';
+import type { FieldProps } from './add_tooltip_field_popover';
+import { AddTooltipFieldPopover } from './add_tooltip_field_popover';
+import type { IField } from '../../classes/fields/field';
 
 // TODO import reorder from EUI once its exposed as service
 // https://github.com/elastic/eui/issues/2372
@@ -197,35 +200,43 @@ export class TooltipSelector extends Component<Props, State> {
                         {this._getPropertyLabel(field.name)}
                       </EuiText>
                       <div className="mapTooltipSelector__propertyIcons">
-                        <EuiButtonIcon
-                          iconType="trash"
-                          color="danger"
-                          onClick={this._removeProperty.bind(null, idx)}
-                          title={i18n.translate('xpack.maps.tooltipSelector.trashButtonTitle', {
+                        <EuiToolTip
+                          content={i18n.translate('xpack.maps.tooltipSelector.trashButtonTitle', {
                             defaultMessage: 'Remove property',
                           })}
-                          aria-label={i18n.translate(
-                            'xpack.maps.tooltipSelector.trashButtonAriaLabel',
-                            {
-                              defaultMessage: 'Remove property',
-                            }
-                          )}
-                        />
-                        <EuiButtonIcon
-                          className="mapTooltipSelector__grab"
-                          iconType="grab"
-                          color="text"
-                          title={i18n.translate('xpack.maps.tooltipSelector.grabButtonTitle', {
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            iconType="trash"
+                            color="danger"
+                            onClick={this._removeProperty.bind(null, idx)}
+                            aria-label={i18n.translate(
+                              'xpack.maps.tooltipSelector.trashButtonAriaLabel',
+                              {
+                                defaultMessage: 'Remove property',
+                              }
+                            )}
+                          />
+                        </EuiToolTip>
+                        <EuiToolTip
+                          content={i18n.translate('xpack.maps.tooltipSelector.grabButtonTitle', {
                             defaultMessage: 'Reorder property',
                           })}
-                          aria-label={i18n.translate(
-                            'xpack.maps.tooltipSelector.grabButtonAriaLabel',
-                            {
-                              defaultMessage: 'Reorder property',
-                            }
-                          )}
-                          {...provided.dragHandleProps}
-                        />
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            className="mapTooltipSelector__grab"
+                            iconType="dragVertical"
+                            color="text"
+                            aria-label={i18n.translate(
+                              'xpack.maps.tooltipSelector.grabButtonAriaLabel',
+                              {
+                                defaultMessage: 'Reorder property',
+                              }
+                            )}
+                            {...provided.dragHandleProps}
+                          />
+                        </EuiToolTip>
                       </div>
                     </div>
                   )}

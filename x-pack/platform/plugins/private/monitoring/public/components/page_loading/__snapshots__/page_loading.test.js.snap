@@ -2,7 +2,7 @@
 
 exports[`PageLoading should show a simple page loading component 1`] = `
 <div
-  class="euiPage emotion-euiPage-row-grow"
+  class="euiPage emotion-euiPage-row-transparent-grow"
   style="height:calc(100vh - 50px)"
 >
   <div

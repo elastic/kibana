@@ -6,9 +6,9 @@
  */
 
 import { alertSearchBarStateContainer, DEFAULT_STATE } from './state_container';
-import { AlertStatus } from '../../../../common/typings';
-import { Filter } from '@kbn/es-query';
-import { FilterControlConfig } from '@kbn/alerts-ui-shared';
+import type { AlertStatus } from '../../../../common/typings';
+import type { Filter } from '@kbn/es-query';
+import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 
 describe('alertSearchBarStateContainer', () => {
   it('should initialize with the default state', () => {
@@ -57,7 +57,7 @@ describe('alertSearchBarStateContainer', () => {
   });
 
   it('should update controlConfigs using setControlConfigs', () => {
-    const newControlConfigs: FilterControlConfig[] = [{ fieldName: 'host.name' }];
+    const newControlConfigs: FilterControlConfig[] = [{ field_name: 'host.name' }];
     alertSearchBarStateContainer.transitions.setControlConfigs(newControlConfigs);
     expect(alertSearchBarStateContainer.get().controlConfigs).toEqual(newControlConfigs);
   });

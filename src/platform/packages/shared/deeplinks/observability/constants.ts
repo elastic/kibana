@@ -22,6 +22,8 @@ export const APM_APP_ID = 'apm';
 
 export const SYNTHETICS_APP_ID = 'synthetics';
 
+export const UPTIME_APP_ID = 'uptime';
+
 export const OBSERVABILITY_ONBOARDING_APP_ID = 'observabilityOnboarding';
 
 export const SLO_APP_ID = 'slo';
@@ -35,3 +37,7 @@ export const OBLT_PROFILING_APP_ID = 'profiling';
 export const INVENTORY_APP_ID = 'inventory';
 
 export const STREAMS_APP_ID = 'streams';
+
+export const INGEST_HUB_APP_ID = 'ingestHub';
+
+export const ONBOARDING_APP_ID = 'onboarding';

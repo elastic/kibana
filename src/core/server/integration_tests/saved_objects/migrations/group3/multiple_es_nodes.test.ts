@@ -17,8 +17,9 @@ import {
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Root } from '@kbn/core-root-server-internal';
+import type { Root } from '@kbn/core-root-server-internal';
 import { getFips } from 'crypto';
+import type { SavedObjectModelUnsafeTransformFn } from '@kbn/core-saved-objects-server';
 
 const LOG_FILE_PREFIX = 'migration_test_multiple_es_nodes';
 
@@ -97,7 +98,20 @@ function createRoot({ logFileName, hosts }: RootConfig) {
 describe('migration v2', () => {
   let esServer: TestElasticsearchUtils;
   let root: Root;
-  const migratedIndexAlias = `.kibana_${pkg.version}`;
+  const migratedIndexAlias: string = `.kibana_${pkg.version}`;
+
+  interface SomeObjectV1 {
+    status: string;
+  }
+
+  type SomeObjectV2 = SomeObjectV1;
+
+  const transformFn: SavedObjectModelUnsafeTransformFn<SomeObjectV1, SomeObjectV2> = (document) => {
+    if (document.attributes?.status) {
+      document.attributes.status = document.attributes.status.replace('not_migrated', 'migrated');
+    }
+    return { document };
+  };
 
   beforeAll(async () => {
     await removeLogFile();
@@ -109,7 +123,7 @@ describe('migration v2', () => {
     }
 
     if (esServer) {
-      await esServer.stop();
+      await esServer?.stop();
     }
   });
 
@@ -131,11 +145,11 @@ describe('migration v2', () => {
                 //   { id: 'foo:2', type: 'foo', foo: { status: 'not_migrated_2' } },
                 //   { id: 'bar:2', type: 'bar', bar: { status: 'not_migrated_2' } },
                 // ];
-                dataArchive: Path.join(__dirname, '..', 'archives', '7.13.0_5k_so_node_01.zip'),
+                dataArchive: Path.join(__dirname, '..', 'archives', '8.19.0_5k_so_node_01.zip'),
               },
               {
                 name: 'node-02',
-                dataArchive: Path.join(__dirname, '..', 'archives', '7.13.0_5k_so_node_02.zip'),
+                dataArchive: Path.join(__dirname, '..', 'archives', '8.19.0_5k_so_node_02.zip'),
               },
             ],
           },
@@ -151,31 +165,37 @@ describe('migration v2', () => {
 
       await root.preboot();
       const setup = await root.setup();
+      // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- integration test: suite gated by getFips() === 0 above
       setup.savedObjects.registerType({
         name: 'foo',
         hidden: false,
         mappings: { properties: { status: { type: 'text' } } },
         namespaceType: 'agnostic',
-        migrations: {
-          '7.14.0': (doc) => {
-            if (doc.attributes?.status) {
-              doc.attributes.status = doc.attributes.status.replace('not_migrated', 'migrated');
-            }
-            return doc;
+        modelVersions: {
+          '1': {
+            changes: [
+              {
+                type: 'unsafe_transform',
+                transformFn: (typeSafeGuard) => typeSafeGuard(transformFn),
+              },
+            ],
           },
         },
       });
+      // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- integration test: suite gated by getFips() === 0 above
       setup.savedObjects.registerType({
         name: 'bar',
         hidden: false,
         mappings: { properties: { status: { type: 'text' } } },
         namespaceType: 'agnostic',
-        migrations: {
-          '7.14.0': (doc) => {
-            if (doc.attributes?.status) {
-              doc.attributes.status = doc.attributes.status.replace('not_migrated', 'migrated');
-            }
-            return doc;
+        modelVersions: {
+          '1': {
+            changes: [
+              {
+                type: 'unsafe_transform',
+                transformFn: (typeSafeGuard) => typeSafeGuard(transformFn),
+              },
+            ],
           },
         },
       });
@@ -188,7 +208,7 @@ describe('migration v2', () => {
       migratedFooDocs.forEach((doc, i) => {
         expect(doc.id).toBe(`foo:${i}`);
         expect(doc.foo.status).toBe(`migrated_${i}`);
-        expect(doc.typeMigrationVersion).toBe('7.14.0');
+        expect(doc.typeMigrationVersion).toBe('10.1.0');
       });
 
       const migratedBarDocs = await fetchDocs(esClient, migratedIndexAlias, 'bar');
@@ -196,7 +216,7 @@ describe('migration v2', () => {
       migratedBarDocs.forEach((doc, i) => {
         expect(doc.id).toBe(`bar:${i}`);
         expect(doc.bar.status).toBe(`migrated_${i}`);
-        expect(doc.typeMigrationVersion).toBe('7.14.0');
+        expect(doc.typeMigrationVersion).toBe('10.1.0');
       });
     });
   } else {

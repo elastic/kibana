@@ -13,6 +13,7 @@ import { AnomalyDetectionSettings } from './anomaly_detection_settings';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
 import { MlPageHeader } from '../components/page_header';
+import { PageTitle } from '../components/page_title';
 
 export const Settings: FC = () => {
   const {
@@ -24,9 +25,13 @@ export const Settings: FC = () => {
       <EuiSpacer size="m" />
       <div data-test-subj="mlPageSettings">
         <MlPageHeader>
-          <FormattedMessage
-            id="xpack.ml.anomalyDetectionSettings.title"
-            defaultMessage="Anomaly Detection Settings"
+          <PageTitle
+            title={
+              <FormattedMessage
+                id="xpack.ml.anomalyDetectionSettings.title"
+                defaultMessage="Anomaly Detection Settings"
+              />
+            }
           />
         </MlPageHeader>
         <AnomalyDetectionSettings />

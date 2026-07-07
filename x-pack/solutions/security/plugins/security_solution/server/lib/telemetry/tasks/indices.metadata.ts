@@ -14,6 +14,7 @@ import {
   createUsageCounterLabel,
   getPreviousDailyTaskTimestamp,
   newTelemetryLogger,
+  withErrorMessage,
 } from '../helpers';
 import {
   TELEMETRY_DATA_STREAM_EVENT,
@@ -181,8 +182,8 @@ export function createTelemetryIndicesMetadataTaskConfig() {
             incrementCounter(TelemetryCounter.DOCS_SENT, 'indices-stats', count);
             return count;
           })
-          .catch((err) => {
-            log.warn(`Error getting indices stats`, { error: err.message } as LogMeta);
+          .catch((error) => {
+            log.warn(`Error getting indices stats`, withErrorMessage(error));
             incrementCounter(TelemetryCounter.RUNTIME_ERROR, 'indices-stats', 1);
             return 0;
           });
@@ -193,8 +194,8 @@ export function createTelemetryIndicesMetadataTaskConfig() {
             incrementCounter(TelemetryCounter.DOCS_SENT, 'ilm-stats', names.size);
             return names;
           })
-          .catch((err) => {
-            log.warn(`Error getting ILM stats`, { error: err.message } as LogMeta);
+          .catch((error) => {
+            log.warn(`Error getting ILM stats`, withErrorMessage(error));
             incrementCounter(TelemetryCounter.RUNTIME_ERROR, 'ilm-stats', 1);
             return new Set<string>();
           });
@@ -205,8 +206,8 @@ export function createTelemetryIndicesMetadataTaskConfig() {
             incrementCounter(TelemetryCounter.DOCS_SENT, 'ilm-policies', count);
             return count;
           })
-          .catch((err) => {
-            log.warn(`Error getting ILM policies`, { error: err.message } as LogMeta);
+          .catch((error) => {
+            log.warn(`Error getting ILM policies`, withErrorMessage(error));
             incrementCounter(TelemetryCounter.RUNTIME_ERROR, 'ilm-policies', 1);
             return 0;
           });
@@ -219,8 +220,8 @@ export function createTelemetryIndicesMetadataTaskConfig() {
             incrementCounter(TelemetryCounter.DOCS_SENT, 'index-templates', count);
             return count;
           })
-          .catch((err) => {
-            log.warn(`Error getting index templates`, { error: err.message } as LogMeta);
+          .catch((error) => {
+            log.warn(`Error getting index templates`, withErrorMessage(error));
             incrementCounter(TelemetryCounter.RUNTIME_ERROR, 'index-templates', 1);
             return 0;
           });
@@ -237,11 +238,9 @@ export function createTelemetryIndicesMetadataTaskConfig() {
         await taskMetricsService.end(trace);
 
         return indicesCount;
-      } catch (err) {
-        log.warn(`Error running indices metadata task`, {
-          error: err.message,
-        } as LogMeta);
-        await taskMetricsService.end(trace, err);
+      } catch (error) {
+        log.warn(`Error running indices metadata task`, withErrorMessage(error));
+        await taskMetricsService.end(trace, error);
         return 0;
       }
     },

@@ -72,7 +72,7 @@ const expectedArtificialLogsFieldCandidatesWithTextfield = {
 export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestData<T>> => [
   {
     testName: 'ecommerce',
-    esArchive: 'x-pack/test/functional/es_archives/ml/ecommerce',
+    esArchive: 'x-pack/platform/test/fixtures/es_archives/ml/ecommerce',
     requestBody: {
       baselineMax: 1687949483292,
       baselineMin: 1687184547006,

@@ -8,9 +8,15 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { EuiTitle, EuiAccordion, EuiSpacer, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiAccordion,
+  EuiSpacer,
+  EuiFlexItem,
+  EuiNotificationBadge,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { AggregateQuery } from '@kbn/es-query';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
 import type { ESQLDataGridAttrs } from './helpers';
 
@@ -19,6 +25,7 @@ interface ESQLDataGridAccordionProps {
   dataGridAttrs: ESQLDataGridAttrs;
   query: AggregateQuery;
   isTableView: boolean;
+  isApproximate?: boolean;
   setIsAccordionOpen: (flag: boolean) => void;
   onAccordionToggleCb: (status: boolean) => void;
 }
@@ -28,6 +35,7 @@ export const ESQLDataGridAccordion = ({
   dataGridAttrs,
   query,
   isTableView,
+  isApproximate,
   setIsAccordionOpen,
   onAccordionToggleCb,
 }: ESQLDataGridAccordionProps) => {
@@ -38,6 +46,7 @@ export const ESQLDataGridAccordion = ({
     },
     [isAccordionOpen, onAccordionToggleCb, setIsAccordionOpen]
   );
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexItem
       grow={isAccordionOpen ? 1 : false}
@@ -46,8 +55,8 @@ export const ESQLDataGridAccordion = ({
         .euiAccordion__childWrapper {
           flex: ${isAccordionOpen ? 1 : 'none'};
         }
-        padding: 0 ${euiThemeVars.euiSize};
-        border-bottom: ${euiThemeVars.euiBorderThin};
+        padding: 0 ${euiTheme.size.base};
+        border-bottom: ${euiTheme.border.thin};
       `}
     >
       <EuiAccordion
@@ -95,6 +104,7 @@ export const ESQLDataGridAccordion = ({
               query={query}
               flyoutType="overlay"
               isTableView={isTableView}
+              isApproximate={isApproximate}
               initialRowHeight={0}
               controlColumnIds={['openDetails']}
             />

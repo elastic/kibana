@@ -8,18 +8,20 @@
 import moment from 'moment';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { EsQueryConfig } from '@kbn/es-query';
+import type { DataViewBase, EsQueryConfig } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
-import {
-  Aggregators,
+import type {
   CustomMetricExpressionParams,
   SearchConfigurationType,
 } from '../../../../../common/custom_threshold_rule/types';
-import { AdditionalContext } from '../utils';
+import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
+import type { AdditionalContext } from '../utils';
+import { UNGROUPED_FACTORY_KEY } from '../constants';
 import { createTimerange } from './create_timerange';
 import { getData } from './get_data';
-import { checkMissingGroups, MissingGroupsRecord } from './check_missing_group';
+import type { MissingGroupsRecord } from './check_missing_group';
+import { checkMissingGroups } from './check_missing_group';
 
 export interface EvaluatedRuleParams {
   criteria: CustomMetricExpressionParams[];
@@ -31,16 +33,23 @@ export type Evaluation = CustomMetricExpressionParams & {
   currentValue: number | null;
   timestamp: string;
   shouldFire: boolean;
+  shouldWarn: boolean;
   isNoData: boolean;
   bucketKey: Record<string, string>;
   flattenGrouping?: Record<string, any>;
   context?: AdditionalContext;
 };
 
+export interface CriterionEvaluationResult {
+  evaluations: Record<string, Evaluation>;
+  timeRange: { start: number; end: number };
+}
+
 export const evaluateRule = async <Params extends EvaluatedRuleParams = EvaluatedRuleParams>(
   esClient: ElasticsearchClient,
   params: Params,
   dataView: string,
+  dataViewDefinition: DataViewBase | undefined,
   timeFieldName: string,
   compositeSize: number,
   alertOnGroupDisappear: boolean,
@@ -50,7 +59,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
   runtimeMappings?: estypes.MappingRuntimeFields,
   lastPeriodEnd?: number,
   missingGroups: MissingGroupsRecord[] = []
-): Promise<Array<Record<string, Evaluation>>> => {
+): Promise<CriterionEvaluationResult[]> => {
   const { criteria, groupBy, searchConfiguration } = params;
 
   return Promise.all(
@@ -75,6 +84,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         timeFieldName,
         groupBy,
         searchConfiguration,
+        dataViewDefinition,
         esQueryConfig,
         compositeSize,
         alertOnGroupDisappear,
@@ -91,6 +101,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         timeFieldName,
         groupBy,
         searchConfiguration,
+        dataViewDefinition,
         logger,
         calculatedTimerange,
         esQueryConfig,
@@ -103,20 +114,30 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
           currentValues[missingGroup.key] = {
             value: null,
             trigger: false,
+            warn: false,
             bucketKey: missingGroup.bucketKey,
           };
         }
       }
 
+      // When getData returns the global '*' no-data entry (e.g. 0 composite buckets) and
+      // checkMissingGroups reinjected per-group entries, drop the redundant '*' so the
+      // executor doesn't emit a duplicate ungrouped alert alongside per-group ones.
+      const keys = Object.keys(currentValues);
+      if (keys.includes(UNGROUPED_FACTORY_KEY) && keys.some((k) => k !== UNGROUPED_FACTORY_KEY)) {
+        delete currentValues[UNGROUPED_FACTORY_KEY];
+      }
+
       const evaluations: Record<string, Evaluation> = {};
       for (const key of Object.keys(currentValues)) {
         const result = currentValues[key];
-        if (result.trigger || result.value === null) {
+        if (result.trigger || result.warn || result.value === null) {
           evaluations[key] = {
             ...criterion,
             currentValue: result.value,
             timestamp: moment(calculatedTimerange.end).toISOString(),
             shouldFire: result.trigger,
+            shouldWarn: result.warn,
             isNoData: result.value === null,
             bucketKey: result.bucketKey,
             flattenGrouping: result.flattenGrouping,
@@ -131,7 +152,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
           };
         }
       }
-      return evaluations;
+      return { evaluations, timeRange: calculatedTimerange };
     })
   );
 };

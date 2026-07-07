@@ -16,7 +16,7 @@ import { Welcome } from './welcome';
 
 let mockHasIntegrationsPermission = true;
 const mockNavigateToUrl = jest.fn();
-let mockIsEnabled = false;
+const mockSetBreadcrumbs = jest.fn();
 
 jest.mock('../kibana_services', () => ({
   getServices: () => ({
@@ -24,7 +24,7 @@ jest.mock('../kibana_services', () => ({
     tutorialVariables: () => ({}),
     homeConfig: { disableWelcomeScreen: false },
     chrome: {
-      setBreadcrumbs: () => {},
+      setBreadcrumbs: mockSetBreadcrumbs,
     },
     application: {
       navigateToUrl: mockNavigateToUrl,
@@ -33,9 +33,6 @@ jest.mock('../kibana_services', () => ({
           integrations: mockHasIntegrationsPermission,
         },
       },
-    },
-    guidedOnboardingService: {
-      isEnabled: mockIsEnabled,
     },
   }),
 }));
@@ -51,6 +48,7 @@ describe('home', () => {
 
   beforeEach(() => {
     mockHasIntegrationsPermission = true;
+    mockSetBreadcrumbs.mockClear();
     defaultProps = {
       directories: [],
       solutions: [],
@@ -239,17 +237,6 @@ describe('home', () => {
 
       expect(component.find(Welcome).exists()).toBe(false);
     });
-
-    test('should redirect to guided onboarding on Cloud instead of welcome screen if guided onboarding is enabled', async () => {
-      mockIsEnabled = true;
-      const isCloudEnabled = true;
-      const hasUserDataView = jest.fn(async () => false);
-
-      const component = await renderHome({ isCloudEnabled, hasUserDataView });
-
-      expect(component.find(Welcome).exists()).toBe(false);
-      expect(mockNavigateToUrl).toHaveBeenCalledTimes(1);
-    });
   });
 
   describe('isNewKibanaInstance', () => {
@@ -280,6 +267,13 @@ describe('home', () => {
       expect(component.state().isNewKibanaInstance).toBe(false);
 
       expect(component).toMatchSnapshot();
+    });
+  });
+
+  describe('breadcrumbs', () => {
+    test('should set breadcrumbs to Home on mount', async () => {
+      await renderHome();
+      expect(mockSetBreadcrumbs).toHaveBeenCalledWith([{ text: 'Home' }]);
     });
   });
 });

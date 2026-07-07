@@ -5,50 +5,53 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import { isEmpty } from 'lodash/fp';
-import { parseEsqlQuery } from '@kbn/securitysolution-utils';
-import type { GraphNode } from '../../types';
-
-interface GetValidationNodeParams {
-  logger: Logger;
-}
+import { generateAssistantComment } from '../../../../../../../common/task/util/comments';
+import {
+  getValidateEsql,
+  type GetValidateEsqlParams,
+} from '../../../../../../../common/task/agent/helpers/validate_esql';
+import type { GraphNode, TranslateRuleState } from '../../types';
 
 /**
  * This node runs all validation steps, and will redirect to the END of the graph if no errors are found.
  * Any new validation steps should be added here.
  */
-export const getValidationNode = ({ logger }: GetValidationNodeParams): GraphNode => {
-  return async (state) => {
-    const query = state.elastic_rule.query;
+export const getValidationNode = (params: GetValidateEsqlParams): GraphNode => {
+  const validateEsql = getValidateEsql(params);
+  return async (state): Promise<Partial<TranslateRuleState>> => {
+    if (!state.elastic_rule.query) {
+      params.logger.warn('Missing query in validation node');
 
-    // We want to prevent infinite loops, so we increment the iterations counter for each validation run.
-    const currentIteration = state.validation_errors.iterations + 1;
-    let esqlErrors: string = '';
-    try {
-      const sanitizedQuery = query ? removePlaceHolders(query) : '';
-      if (!isEmpty(sanitizedQuery)) {
-        const { errors, isEsqlQueryAggregating, hasMetadataOperator } =
-          parseEsqlQuery(sanitizedQuery);
-        if (!isEmpty(errors)) {
-          esqlErrors = JSON.stringify(errors);
-        } else if (!isEsqlQueryAggregating && !hasMetadataOperator) {
-          esqlErrors = `Queries that do't use the STATS...BY function (non-aggregating queries) must include the "metadata _id, _version, _index" operator after the source command. For example: FROM logs* metadata _id, _version, _index.`;
-        }
-      }
-      if (esqlErrors) {
-        logger.debug(`ESQL query validation failed: ${esqlErrors}`);
-      }
-    } catch (error) {
-      esqlErrors = error.message;
-      logger.info(`Error parsing ESQL query: ${error.message}`);
+      return {
+        validation_errors: { esql_errors: 'Missing query', retries_left: 0 },
+        comments: [
+          generateAssistantComment(
+            '## ESQL Validation Summary\n\nMissing query from translation response. Skipping self-healing loop'
+          ),
+        ],
+      };
     }
-    return { validation_errors: { iterations: currentIteration, esql_errors: esqlErrors } };
+
+    const { error } = await validateEsql({ query: state.elastic_rule.query });
+
+    if (error && state.elastic_rule.query.match(/\[(macro|lookup):.*?\]/)) {
+      // The fix_query_errors tends to remove all the macro and lookup placeholder from the query to make the query valid,
+      // we need to keep them so we skip validation unless the missing resources are provided
+      return {
+        validation_errors: { esql_errors: error, retries_left: 0 },
+        comments: [
+          generateAssistantComment(
+            '## ESQL Validation Summary\n\nFound missing macro or lookup placeholders in query, can not generate a valid query unless they are provided.\nSkipping self-healing loop'
+          ),
+        ],
+      };
+    }
+
+    return {
+      validation_errors: {
+        esql_errors: error,
+        retries_left: state.validation_errors.retries_left - 1,
+      },
+    };
   };
 };
-
-function removePlaceHolders(query: string): string {
-  return query
-    .replaceAll(/\[(macro|lookup):.*?\]/g, '') // Removes any macro or lookup placeholders
-    .replaceAll(/\n(\s*?\|\s*?\n)*/g, '\n'); // Removes any empty lines with | (pipe) alone after removing the placeholders
-}

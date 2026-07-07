@@ -20,25 +20,21 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import type { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
 import {
-  CHANGE_POINT_CHART_DATA_VIEW_REF_NAME,
   CHANGE_POINT_DETECTION_VIEW_TYPE,
   EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
 } from '@kbn/aiops-change-point-detection/constants';
-import type { ChangePointEmbeddableState } from '../../embeddables/change_point_chart/types';
 import { MaxSeriesControl } from './max_series_control';
 import { useCasesModal } from '../../hooks/use_cases_modal';
 import { useDataSource } from '../../hooks/use_data_source';
@@ -58,12 +54,9 @@ import { useChangePointResults } from './use_change_point_agg_request';
 import { useSplitFieldCardinality } from './use_split_field_cardinality';
 import { ViewTypeSelector } from './view_type_selector';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
-import { getDataviewReferences } from '../../embeddables/get_dataview_references';
 import { NoChangePointsCallout } from './no_change_points_callout';
 
 const selectControlCss = { width: '350px' };
-
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 /**
  * Contains panels with controls and change point results.
@@ -257,7 +250,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                       : i18n.translate('xpack.aiops.changePointDetection.attachChartsLabel', {
                           defaultMessage: 'Attach charts',
                         }),
-                  icon: 'plusInCircle',
+                  icon: 'plusCircle',
                   panel: 'attachMainPanel',
                   'data-test-subj': 'aiopsChangePointDetectionAttachButton',
                 },
@@ -433,14 +426,14 @@ const FieldPanel: FC<FieldPanelProps> = ({
                 onClick={() => {
                   setIsActionMenuOpen(false);
                   openCasesModalCallback({
-                    timeRange,
-                    viewType: caseAttachment.viewType,
-                    fn: fieldConfig.fn,
-                    metricField: fieldConfig.metricField,
-                    dataViewId: dataView.id,
+                    time_range: timeRange,
+                    view_type: caseAttachment.viewType,
+                    aggregation_function: fieldConfig.fn,
+                    metric_field: fieldConfig.metricField,
+                    data_view_id: dataView.id,
                     ...(fieldConfig.splitField
                       ? {
-                          splitField: fieldConfig.splitField,
+                          split_field: fieldConfig.splitField,
                           partitions: selectedPartitions,
                         }
                       : {}),
@@ -479,35 +472,30 @@ const FieldPanel: FC<FieldPanelProps> = ({
     timeRange,
   ]);
 
-  const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(
-    ({ dashboardId, newTitle, newDescription }) => {
+  const onSaveCallback = useCallback<SaveModalDashboardProps['onSave']>(
+    async ({ dashboardId, newTitle, newDescription }) => {
       const stateTransfer = embeddable!.getStateTransfer();
-
-      const embeddableInput: Partial<ChangePointEmbeddableState> = {
-        title: newTitle,
-        description: newDescription,
-        viewType: dashboardAttachment.viewType,
-        dataViewId: dataView.id,
-        metricField: fieldConfig.metricField,
-        splitField: fieldConfig.splitField,
-        fn: fieldConfig.fn,
-        ...(dashboardAttachment.applyTimeRange ? { timeRange } : {}),
-        maxSeriesToPlot: dashboardAttachment.maxSeriesToPlot,
-        ...(selectedChangePoints[panelIndex]?.length ? { partitions: selectedPartitions } : {}),
-      };
 
       const state = {
         serializedState: {
-          rawState: embeddableInput,
-          references: getDataviewReferences(dataView.id, CHANGE_POINT_CHART_DATA_VIEW_REF_NAME),
+          title: newTitle,
+          description: newDescription,
+          view_type: dashboardAttachment.viewType,
+          data_view_id: dataView.id,
+          metric_field: fieldConfig.metricField,
+          split_field: fieldConfig.splitField,
+          aggregation_function: fieldConfig.fn,
+          ...(dashboardAttachment.applyTimeRange ? { time_range: timeRange } : {}),
+          max_series_to_plot: dashboardAttachment.maxSeriesToPlot,
+          ...(selectedChangePoints[panelIndex]?.length ? { partitions: selectedPartitions } : {}),
         },
         type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
       };
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-        state,
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+        state: [state],
         path,
       });
     },
@@ -531,15 +519,29 @@ const FieldPanel: FC<FieldPanelProps> = ({
     <EuiPanel paddingSize="s" hasBorder hasShadow={false} data-test-subj={dataTestSubj}>
       <EuiFlexGroup alignItems={'flexStart'} justifyContent={'spaceBetween'} gutterSize={'s'}>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            data-test-subj="aiopsChangePointDetectionExpandConfigButton"
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-            onClick={setIsExpanded.bind(null, (prevState) => !prevState)}
-            aria-label={i18n.translate('xpack.aiops.changePointDetection.expandConfigLabel', {
-              defaultMessage: 'Expand configuration',
-            })}
-            size="s"
-          />
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.aiops.changePointDetection.toggleChangePointsTableLabel',
+              {
+                defaultMessage: 'Toggle change points table',
+              }
+            )}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj="aiopsChangePointDetectionExpandConfigButton"
+              iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+              onClick={setIsExpanded.bind(null, (prevState) => !prevState)}
+              aria-label={i18n.translate(
+                'xpack.aiops.changePointDetection.toggleChangePointsTableLabel',
+                {
+                  defaultMessage: 'Toggle change points table',
+                }
+              )}
+              aria-expanded={isExpanded}
+              size="s"
+            />
+          </EuiToolTip>
         </EuiFlexItem>
 
         <EuiFlexItem>
@@ -567,22 +569,35 @@ const FieldPanel: FC<FieldPanelProps> = ({
             <EuiFlexItem grow={false}>
               <EuiPopover
                 id={`panelContextMenu_${panelIndex}`}
+                aria-label={i18n.translate(
+                  'xpack.aiops.changePointDetection.panelContextMenuLabel',
+                  {
+                    defaultMessage: 'Context menu',
+                  }
+                )}
                 button={
-                  <EuiButtonIcon
-                    data-test-subj="aiopsChangePointDetectionContextMenuButton"
-                    aria-label={i18n.translate(
-                      'xpack.aiops.changePointDetection.configActionsLabel',
-                      {
-                        defaultMessage: 'Context menu',
-                      }
-                    )}
-                    color="text"
-                    display="base"
-                    size="s"
-                    isSelected={isActionMenuOpen}
-                    iconType="boxesHorizontal"
-                    onClick={setIsActionMenuOpen.bind(null, !isActionMenuOpen)}
-                  />
+                  <EuiToolTip
+                    content={i18n.translate('xpack.aiops.changePointDetection.configActionsLabel', {
+                      defaultMessage: 'Context menu',
+                    })}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      data-test-subj="aiopsChangePointDetectionContextMenuButton"
+                      aria-label={i18n.translate(
+                        'xpack.aiops.changePointDetection.configActionsLabel',
+                        {
+                          defaultMessage: 'Context menu',
+                        }
+                      )}
+                      color="text"
+                      display="base"
+                      size="s"
+                      isSelected={isActionMenuOpen}
+                      iconType="boxesVertical"
+                      onClick={setIsActionMenuOpen.bind(null, !isActionMenuOpen)}
+                    />
+                  </EuiToolTip>
                 }
                 isOpen={isActionMenuOpen}
                 closePopover={setIsActionMenuOpen.bind(null, false)}
@@ -694,7 +709,7 @@ export const FieldsControls: FC<PropsWithChildren<FieldsControlsProps>> = ({
       }
     >
       <EuiFlexGroup alignItems={'center'} responsive={true} wrap={true} gutterSize={'s'}>
-        <EuiFlexItem grow={false} css={{ width: '200px' }}>
+        <EuiFlexItem grow={false} css={{ width: '224px' }}>
           <FunctionPicker value={fieldConfig.fn} onChange={(v) => onChangeFn('fn', v)} />
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={selectControlCss}>
@@ -748,6 +763,7 @@ export const ChangePointResults: FC<ChangePointResultsProps> = ({
       {cardinalityExceeded ? (
         <>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.aiops.changePointDetection.cardinalityWarningTitle', {
               defaultMessage: 'Analysis has been limited',
             })}

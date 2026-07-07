@@ -9,44 +9,19 @@
 
 import * as React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 
 import { AddFromLibraryFlyout } from './add_from_library_flyout';
 import { usageCollection } from '../kibana_services';
-import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
+import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { registerAddFromLibraryType } from './registry';
-import { PresentationContainer } from '@kbn/presentation-containers';
-import { HasType } from '@kbn/presentation-publishing';
+import type { PresentationContainer, HasType } from '@kbn/presentation-publishing';
 
-// Mock saved objects finder component so we can call the onChoose method.
+import * as SavedObjectsFinderPlugin from '@kbn/saved-objects-finder-plugin/public';
 jest.mock('@kbn/saved-objects-finder-plugin/public', () => {
   return {
-    SavedObjectFinder: jest
-      .fn()
-      .mockImplementation(
-        ({
-          onChoose,
-        }: {
-          onChoose: (id: string, type: string, name: string, so: unknown) => Promise<void>;
-        }) => (
-          <>
-            <button
-              id="soFinderAddButton"
-              data-test-subj="soFinderAddButton"
-              onClick={() =>
-                onChoose?.(
-                  'awesomeId',
-                  'AWESOME_EMBEDDABLE',
-                  'Awesome sauce',
-                  {} as unknown as SavedObjectCommon
-                )
-              }
-            >
-              Add embeddable!
-            </button>
-          </>
-        )
-      ),
+    __esModule: true, // allows us to overwrite saved object finder via spyOn
+    ...jest.requireActual('@kbn/saved-objects-finder-plugin/public'),
   };
 });
 
@@ -55,6 +30,26 @@ describe('add from library flyout', () => {
   const onAdd = jest.fn();
 
   beforeAll(() => {
+    // Mock saved objects finder component so we can call the onChoose method.
+    jest.spyOn(SavedObjectsFinderPlugin, 'SavedObjectFinder').mockImplementation(({ onChoose }) => (
+      <>
+        <button
+          id="soFinderAddButton"
+          data-test-subj="soFinderAddButton"
+          onClick={() =>
+            onChoose?.(
+              'awesomeId',
+              'AWESOME_EMBEDDABLE',
+              'Awesome sauce',
+              {} as unknown as SavedObjectCommon
+            )
+          }
+        >
+          Add embeddable!
+        </button>
+      </>
+    ));
+
     registerAddFromLibraryType({
       onAdd,
       savedObjectType: 'AWESOME_EMBEDDABLE',

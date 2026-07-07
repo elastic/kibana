@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SyntheticsParamRequest, SyntheticsParams } from '../../../../../common/runtime_types';
+import type { SyntheticsParamRequest, SyntheticsParams } from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';
 
 export const getGlobalParamAction = createAsyncAction<void, SyntheticsParams[]>(

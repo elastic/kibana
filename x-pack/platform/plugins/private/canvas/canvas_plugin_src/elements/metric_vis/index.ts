@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ElementFactory } from '../../../types';
+import type { ElementFactory } from '../../../types';
 
 export const metricVis: ElementFactory = () => ({
   name: 'metricVis',
   displayName: 'Metric Vis',
   type: 'chart',
   help: 'Metric visualization',
-  icon: 'visMetric',
+  icon: 'chartMetric',
   expression: `kibana
   | selectFilter
   | demodata

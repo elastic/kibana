@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { isObject, chunk } from 'lodash';
+import { isObject, chunk, sum } from 'lodash';
 
 import { NEW_TERMS_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import { NewTermsRuleParams } from '../../rule_schema';
@@ -20,7 +21,7 @@ import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
 import { bulkCreateSuppressedNewTermsAlertsInMemory } from './bulk_create_suppressed_alerts_in_memory';
 import type { EventsAndTerms } from './types';
 import type { CreateAlertsHook } from './build_new_terms_aggregation';
-import type { NewTermsFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import type { NewTermsAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import {
   buildRecentTermsAgg,
   buildNewTermsAgg,
@@ -77,7 +78,10 @@ export const createNewTermsAlertType = (): SecurityAlertType<
       },
     },
     schemas: {
-      params: { type: 'zod', schema: NewTermsRuleParams },
+      params: {
+        type: 'zod',
+        schema: NewTermsRuleParams,
+      },
     },
     actionGroups: [
       {
@@ -154,6 +158,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
         result.warningMessages.push(exceptionsWarning);
       }
       let pageNumber = 0;
+      let alertsCandidateCount: number | undefined;
 
       // There are 2 conditions that mean we're finished: either there were still too many alerts to create
       // after deduplication and the array of alerts was truncated before being submitted to ES, or there were
@@ -230,7 +235,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
           });
 
           let bulkCreateResult: Omit<
-            GenericBulkCreateResponse<NewTermsFieldsLatest>,
+            GenericBulkCreateResponse<NewTermsAlertLatest>,
             'suppressedItemsCount'
           > = {
             errors: [],
@@ -409,6 +414,12 @@ export const createNewTermsAlertType = (): SecurityAlertType<
               throw new Error('Aggregations were missing on document fetch search result');
             }
 
+            // Collect rule execution metrics
+            alertsCandidateCount = sum([
+              alertsCandidateCount,
+              docFetchSearchResult.aggregations.new_terms.buckets.length,
+            ]);
+
             const bulkCreateResult = await createAlertsHook(docFetchSearchResult);
 
             if (bulkCreateResult.alertsWereTruncated) {
@@ -431,7 +442,12 @@ export const createNewTermsAlertType = (): SecurityAlertType<
         responseActions: completeRule.ruleParams.responseActions,
       });
 
-      return { ...result, state, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
+      return {
+        ...result,
+        state,
+        alertsCandidateCount,
+        ...(isLoggedRequestsEnabled ? { loggedRequests } : {}),
+      };
     },
   };
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 
 import { packagePolicyRouteService } from '../../services';
 import type {
@@ -29,8 +29,20 @@ import { API_VERSIONS } from '../../../common/constants';
 import type { RequestError } from './use_request';
 import { sendRequest, sendRequestForRq, useRequest } from './use_request';
 
+/**
+ * @deprecated use sendCreatePackagePolicyForRq instead
+ */
 export const sendCreatePackagePolicy = (body: CreatePackagePolicyRequest['body']) => {
   return sendRequest<CreatePackagePolicyResponse>({
+    path: packagePolicyRouteService.getCreatePath(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: JSON.stringify(body),
+  });
+};
+
+export const sendCreatePackagePolicyForRq = (body: CreatePackagePolicyRequest['body']) => {
+  return sendRequestForRq<CreatePackagePolicyResponse>({
     path: packagePolicyRouteService.getCreatePath(),
     method: 'post',
     version: API_VERSIONS.public.v1,
@@ -114,7 +126,10 @@ export const sendGetPackagePolicies = (query: GetPackagePoliciesRequest['query']
   });
 };
 
-export const useGetOnePackagePolicyQuery = (packagePolicyId: string) => {
+export const useGetOnePackagePolicyQuery = (
+  packagePolicyId: string,
+  options?: { enabled?: boolean }
+) => {
   return useQuery<GetOnePackagePolicyResponse, RequestError>(
     ['packagePolicy', packagePolicyId],
     () =>
@@ -122,7 +137,8 @@ export const useGetOnePackagePolicyQuery = (packagePolicyId: string) => {
         method: 'get',
         version: API_VERSIONS.public.v1,
         path: packagePolicyRouteService.getInfoPath(packagePolicyId),
-      })
+      }),
+    { enabled: options?.enabled }
   );
 };
 
@@ -156,7 +172,9 @@ export function useUpgradePackagePolicyDryRunQuery(
   }
 
   return useQuery<UpgradePackagePolicyDryRunResponse, RequestError>(
-    ['upgradePackagePolicyDryRun', packagePolicyIds, packageVersion],
+    // Sorted ids + no focus refetching, for the same reasons as
+    // `useUpgradeAgentlessPoliciesDryRunQuery`: each spurious refetch is another dry-run POST.
+    ['upgradePackagePolicyDryRun', [...packagePolicyIds].sort(), packageVersion],
     () =>
       sendRequestForRq<UpgradePackagePolicyDryRunResponse>({
         path: packagePolicyRouteService.getDryRunPath(),
@@ -164,7 +182,10 @@ export function useUpgradePackagePolicyDryRunQuery(
         version: API_VERSIONS.public.v1,
         body: JSON.stringify(body),
       }),
-    { enabled }
+    {
+      enabled,
+      refetchOnWindowFocus: false,
+    }
   );
 }
 

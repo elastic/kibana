@@ -55,17 +55,19 @@ describe('calculateRuleSource', () => {
     rule.immutable = true;
 
     const baseRule = getSampleRuleAsset();
-    prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([baseRule]);
+    prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [baseRule] });
 
     const result = await calculateRuleSource({
       prebuiltRuleAssetClient,
       nextRule: rule,
-      currentRule: rule,
+      currentRule: undefined,
     });
     expect(result).toEqual(
       expect.objectContaining({
         type: 'external',
         is_customized: false,
+        customized_fields: [],
+        has_base_version: true,
       })
     );
   });
@@ -73,20 +75,22 @@ describe('calculateRuleSource', () => {
   it('returns is_customized true when the rule is prebuilt and has been customized', async () => {
     const rule = getSampleRule();
     rule.immutable = true;
-    rule.name = 'Updated name';
+    rule.tags = ['Updated tag'];
 
     const baseRule = getSampleRuleAsset();
-    prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([baseRule]);
+    prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [baseRule] });
 
     const result = await calculateRuleSource({
       prebuiltRuleAssetClient,
       nextRule: rule,
-      currentRule: rule,
+      currentRule: getSampleRule(),
     });
     expect(result).toEqual(
       expect.objectContaining({
         type: 'external',
         is_customized: true,
+        customized_fields: [{ field_name: 'tags' }],
+        has_base_version: true,
       })
     );
   });
@@ -99,17 +103,19 @@ describe('calculateRuleSource', () => {
     rule.updated_by = 'new-user';
 
     const baseRule = getSampleRuleAsset();
-    prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([baseRule]);
+    prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [baseRule] });
 
     const result = await calculateRuleSource({
       prebuiltRuleAssetClient,
       nextRule: rule,
-      currentRule: rule,
+      currentRule: getSampleRule(),
     });
     expect(result).toEqual(
       expect.objectContaining({
         type: 'external',
         is_customized: false,
+        customized_fields: [],
+        has_base_version: true,
       })
     );
   });
@@ -120,7 +126,7 @@ describe('calculateRuleSource', () => {
       rule.immutable = true;
 
       // No base version
-      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([]);
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [] });
 
       const result = await calculateRuleSource({
         prebuiltRuleAssetClient,
@@ -131,6 +137,8 @@ describe('calculateRuleSource', () => {
         expect.objectContaining({
           type: 'external',
           is_customized: false,
+          customized_fields: [],
+          has_base_version: false,
         })
       );
     });
@@ -141,10 +149,12 @@ describe('calculateRuleSource', () => {
       rule.rule_source = {
         type: 'external',
         is_customized: true,
+        customized_fields: [],
+        has_base_version: false,
       };
 
       // No base version
-      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([]);
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [] });
 
       const result = await calculateRuleSource({
         prebuiltRuleAssetClient,
@@ -155,6 +165,8 @@ describe('calculateRuleSource', () => {
         expect.objectContaining({
           type: 'external',
           is_customized: true,
+          customized_fields: [],
+          has_base_version: false,
         })
       );
     });
@@ -165,10 +177,12 @@ describe('calculateRuleSource', () => {
       rule.rule_source = {
         type: 'external',
         is_customized: false,
+        customized_fields: [],
+        has_base_version: false,
       };
 
       // No base version
-      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([]);
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [] });
 
       const result = await calculateRuleSource({
         prebuiltRuleAssetClient,
@@ -179,6 +193,8 @@ describe('calculateRuleSource', () => {
         expect.objectContaining({
           type: 'external',
           is_customized: false,
+          customized_fields: [],
+          has_base_version: false,
         })
       );
     });
@@ -189,6 +205,8 @@ describe('calculateRuleSource', () => {
       rule.rule_source = {
         type: 'external',
         is_customized: false,
+        customized_fields: [],
+        has_base_version: false,
       };
 
       const nextRule = {
@@ -197,7 +215,7 @@ describe('calculateRuleSource', () => {
       };
 
       // No base version
-      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([]);
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [] });
 
       const result = await calculateRuleSource({
         prebuiltRuleAssetClient,
@@ -208,6 +226,37 @@ describe('calculateRuleSource', () => {
         expect.objectContaining({
           type: 'external',
           is_customized: true,
+          customized_fields: [],
+          has_base_version: false,
+        })
+      );
+    });
+
+    it('returns an empty field array when rule was previously customized with a base version', async () => {
+      const rule = getSampleRule();
+      rule.immutable = true;
+      rule.tags = ['Updated tag'];
+      rule.rule_source = {
+        type: 'external',
+        is_customized: true,
+        customized_fields: [{ field_name: 'tags' }],
+        has_base_version: true,
+      };
+
+      // No base version
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [] });
+
+      const result = await calculateRuleSource({
+        prebuiltRuleAssetClient,
+        nextRule: rule,
+        currentRule: rule,
+      });
+      expect(result).toEqual(
+        expect.objectContaining({
+          type: 'external',
+          is_customized: true,
+          customized_fields: [],
+          has_base_version: false,
         })
       );
     });

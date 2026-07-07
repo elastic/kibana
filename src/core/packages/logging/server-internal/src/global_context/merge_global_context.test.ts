@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LogMeta } from '@kbn/logging';
-import { GlobalContext } from './types';
+import type { LogMeta } from '@kbn/logging';
+import type { GlobalContext } from './types';
 import { mergeGlobalContext } from './merge_global_context';
 
 describe('mergeGlobalContext', () => {

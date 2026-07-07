@@ -19,7 +19,7 @@ describe('when using parsed command input utils', () => {
         args: {},
         hasArgs: Object.keys(overrides.args || {}).length > 0,
         ...overrides,
-      } as ParsedCommandInterface;
+      } as unknown as ParsedCommandInterface;
     };
 
     it.each([

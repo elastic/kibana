@@ -42,14 +42,14 @@ export const determineDiffOutcome = <TValue>(
   currentVersion: TValue,
   targetVersion: TValue
 ): ThreeWayDiffOutcome => {
-  const baseEqlCurrent = isEqual(baseVersion, currentVersion);
-  const baseEqlTarget = isEqual(baseVersion, targetVersion);
-  const currentEqlTarget = isEqual(currentVersion, targetVersion);
+  const baseEqualsCurrent = isEqual(baseVersion, currentVersion);
+  const baseEqualsTarget = isEqual(baseVersion, targetVersion);
+  const currentEqualsTarget = isEqual(currentVersion, targetVersion);
 
   return getThreeWayDiffOutcome({
-    baseEqlCurrent,
-    baseEqlTarget,
-    currentEqlTarget,
+    baseEqualsCurrent,
+    baseEqualsTarget,
+    currentEqualsTarget,
     hasBaseVersion: baseVersion !== MissingVersion,
   });
 };
@@ -65,14 +65,13 @@ export const determineOrderAgnosticDiffOutcome = <TValue>(
   const baseSet = baseVersion === MissingVersion ? MissingVersion : new Set<TValue>(baseVersion);
   const currentSet = new Set<TValue>(currentVersion);
   const targetSet = new Set<TValue>(targetVersion);
-  const baseEqlCurrent = isEqual(baseSet, currentSet);
-  const baseEqlTarget = isEqual(baseSet, targetSet);
-  const currentEqlTarget = isEqual(currentSet, targetSet);
-
+  const baseEqualsCurrent = isEqual(baseSet, currentSet);
+  const baseEqualsTarget = isEqual(baseSet, targetSet);
+  const currentEqualsTarget = isEqual(currentSet, targetSet);
   return getThreeWayDiffOutcome({
-    baseEqlCurrent,
-    baseEqlTarget,
-    currentEqlTarget,
+    baseEqualsCurrent,
+    baseEqualsTarget,
+    currentEqualsTarget,
     hasBaseVersion: baseVersion !== MissingVersion,
   });
 };
@@ -105,16 +104,16 @@ export const determineDiffOutcomeForDataSource = (
 };
 
 interface DetermineDiffOutcomeProps {
-  baseEqlCurrent: boolean;
-  baseEqlTarget: boolean;
-  currentEqlTarget: boolean;
+  baseEqualsCurrent: boolean;
+  baseEqualsTarget: boolean;
+  currentEqualsTarget: boolean;
   hasBaseVersion: boolean;
 }
 
 const getThreeWayDiffOutcome = ({
-  baseEqlCurrent,
-  baseEqlTarget,
-  currentEqlTarget,
+  baseEqualsCurrent,
+  baseEqualsTarget,
+  currentEqualsTarget,
   hasBaseVersion,
 }: DetermineDiffOutcomeProps): ThreeWayDiffOutcome => {
   if (!hasBaseVersion) {
@@ -123,22 +122,22 @@ const getThreeWayDiffOutcome = ({
      * version comparison is not possible. We assume that the rule is
      * customized and the value can be updated if there's an update.
      */
-    return currentEqlTarget
+    return currentEqualsTarget
       ? ThreeWayDiffOutcome.MissingBaseNoUpdate
       : ThreeWayDiffOutcome.MissingBaseCanUpdate;
   }
 
-  if (baseEqlCurrent) {
-    return currentEqlTarget
+  if (baseEqualsCurrent) {
+    return currentEqualsTarget
       ? ThreeWayDiffOutcome.StockValueNoUpdate
       : ThreeWayDiffOutcome.StockValueCanUpdate;
   }
 
-  if (baseEqlTarget) {
+  if (baseEqualsTarget) {
     return ThreeWayDiffOutcome.CustomizedValueNoUpdate;
   }
 
-  return currentEqlTarget
+  return currentEqualsTarget
     ? ThreeWayDiffOutcome.CustomizedValueSameUpdate
     : ThreeWayDiffOutcome.CustomizedValueCanUpdate;
 };

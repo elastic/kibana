@@ -10,11 +10,20 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useHistory } from 'react-router-dom';
+import { useStore } from 'react-redux';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
+import { useKibana, useUiSetting } from '../../../common/lib/kibana';
+import { ENABLE_NEW_FLYOUT_SETTING } from '../../../../common/constants';
 import { NetworkDetailsLink } from '../../../common/components/links';
 import { NetworkPanelKey } from '../../../flyout/network_details';
+import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
+import { OpenFlyoutLink } from '../../../flyout_v2/shared/components/open_flyout_link';
+import { Network } from '../../../flyout_v2/network/main';
+import { flyoutProviders } from '../../../flyout_v2/shared/components/flyout_provider';
+import { useDefaultDocumentFlyoutProperties } from '../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 
 const tryStringify = (value: string | object | null | undefined): string => {
   try {
@@ -53,10 +62,14 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   title,
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
+  const { services } = useKibana();
+  const { overlays } = services;
+  const store = useStore();
+  const history = useHistory();
+  const enableNewFlyout = useUiSetting<boolean>(ENABLE_NEW_FLYOUT_SETTING, false);
+  const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const eventContext = useContext(StatefulEventContext);
-  const isInTimelineContext =
-    address && eventContext?.enableIpDetailsFlyout && eventContext?.timelineID;
 
   const openNetworkDetailsSidePanel = useCallback(
     (ip: string) => {
@@ -64,22 +77,48 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
         onClick();
       }
 
-      if (eventContext && isInTimelineContext) {
+      const flowTarget = fieldName.includes(FlowTargetSourceDest.destination)
+        ? FlowTargetSourceDest.destination
+        : FlowTargetSourceDest.source;
+
+      if (enableNewFlyout) {
+        overlays.openSystemFlyout(
+          flyoutProviders({
+            services,
+            store,
+            history,
+            children: <Network ip={ip} flowTarget={flowTarget} />,
+          }),
+          {
+            ...defaultDocumentFlyoutProperties,
+            session: 'start',
+          }
+        );
+      } else if (eventContext) {
         openFlyout({
           right: {
             id: NetworkPanelKey,
             params: {
               ip,
               scopeId: eventContext.timelineID,
-              flowTarget: fieldName.includes(FlowTargetSourceDest.destination)
-                ? FlowTargetSourceDest.destination
-                : FlowTargetSourceDest.source,
+              flowTarget,
             },
           },
         });
       }
     },
-    [onClick, eventContext, isInTimelineContext, fieldName, openFlyout]
+    [
+      onClick,
+      eventContext,
+      fieldName,
+      openFlyout,
+      enableNewFlyout,
+      defaultDocumentFlyoutProperties,
+      overlays,
+      services,
+      store,
+      history,
+    ]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
@@ -91,19 +130,35 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
           Component={Component}
           ip={address}
           isButton={isButton}
-          onClick={isInTimelineContext ? openNetworkDetailsSidePanel : undefined}
+          onClick={openNetworkDetailsSidePanel}
           title={title}
+        />
+      ) : enableNewFlyout ? (
+        <OpenFlyoutLink
+          field={fieldName}
+          value={address}
+          asParent
+          data-test-subj="network-details"
         />
       ) : (
-        <NetworkDetailsLink
-          Component={Component}
-          ip={address}
-          isButton={isButton}
-          onClick={isInTimelineContext ? openNetworkDetailsSidePanel : undefined}
-          title={title}
+        <FlyoutLink
+          field={fieldName}
+          value={address}
+          identityFields={{ [fieldName]: address }}
+          scopeId={eventContext?.timelineID ?? ''}
+          data-test-subj="network-details"
         />
       ),
-    [Component, address, isButton, isInTimelineContext, openNetworkDetailsSidePanel, title]
+    [
+      Component,
+      address,
+      isButton,
+      openNetworkDetailsSidePanel,
+      title,
+      eventContext?.timelineID,
+      fieldName,
+      enableNewFlyout,
+    ]
   );
 
   return content;

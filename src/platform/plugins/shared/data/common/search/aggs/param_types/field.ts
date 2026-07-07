@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { SavedFieldTypeInvalidForAgg } from '@kbn/kibana-utils-plugin/common';
 import { isNestedField, DataViewField } from '@kbn/data-views-plugin/common';
-import { IAggConfig } from '../agg_config';
+import type { IAggConfig } from '../agg_config';
 import { BaseParamType } from './base';
 import { propFilter } from '../utils';
 import { KBN_FIELD_TYPES } from '../../../kbn_field_types/types';

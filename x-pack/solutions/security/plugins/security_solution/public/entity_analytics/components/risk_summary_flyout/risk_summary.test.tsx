@@ -8,8 +8,11 @@
 import {
   mockHostRiskScoreState,
   mockUserRiskScoreState,
+  mockHostEntityRiskScores,
+  mockHostEntityRiskScoresWithResolution,
+  mockUserEntityRiskScores,
 } from '../../../flyout/entity_details/mocks';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { FlyoutRiskSummary } from './risk_summary';
@@ -19,6 +22,10 @@ import type {
 } from '../../../common/components/visualization_actions/types';
 import type { Query } from '@kbn/es-query';
 import { EntityType } from '../../../../common/search_strategy';
+import {
+  EntityDetailsLeftPanelTab,
+  RiskScoreLeftPanelSubTab,
+} from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
 const mockVisualizationEmbeddable = jest
   .fn()
@@ -39,10 +46,11 @@ describe('FlyoutRiskSummary', () => {
       <TestProviders>
         <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
+          entityRiskScores={mockHostEntityRiskScores}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
-          isLinkEnabled
+          isPreviewMode={false}
           entityType={EntityType.host}
         />
       </TestProviders>
@@ -67,8 +75,8 @@ describe('FlyoutRiskSummary', () => {
       }`
     );
 
-    expect(getByTestId('riskInputsTitleLink')).toBeInTheDocument();
-    expect(getByTestId('riskInputsTitleIcon')).toBeInTheDocument();
+    expect(getByTestId('entityRiskInputsTitleLink')).toBeInTheDocument();
+    expect(getByTestId('entityRiskInputsTitleIcon')).toBeInTheDocument();
   });
 
   it('renders link without icon when in preview mode', () => {
@@ -76,10 +84,10 @@ describe('FlyoutRiskSummary', () => {
       <TestProviders>
         <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
+          entityRiskScores={mockHostEntityRiskScores}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
-          isLinkEnabled
           isPreviewMode
           entityType={EntityType.host}
         />
@@ -87,8 +95,8 @@ describe('FlyoutRiskSummary', () => {
     );
 
     expect(getByTestId('risk-summary-table')).toBeInTheDocument();
-    expect(getByTestId('riskInputsTitleLink')).toBeInTheDocument();
-    expect(queryByTestId('riskInputsTitleIcon')).not.toBeInTheDocument();
+    expect(getByTestId('entityRiskInputsTitleLink')).toBeInTheDocument();
+    expect(queryByTestId('entityRiskInputsTitleIcon')).not.toBeInTheDocument();
   });
 
   it('renders risk summary table when riskScoreData is empty', () => {
@@ -96,10 +104,11 @@ describe('FlyoutRiskSummary', () => {
       <TestProviders>
         <FlyoutRiskSummary
           riskScoreData={{ ...mockHostRiskScoreState, data: undefined }}
+          entityRiskScores={mockHostEntityRiskScores}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
-          isLinkEnabled
+          isPreviewMode={false}
           entityType={EntityType.host}
         />
       </TestProviders>
@@ -112,34 +121,17 @@ describe('FlyoutRiskSummary', () => {
       <TestProviders>
         <FlyoutRiskSummary
           riskScoreData={{ ...mockHostRiskScoreState, data: undefined, loading: true }}
+          entityRiskScores={mockHostEntityRiskScores}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
-          isLinkEnabled
+          isPreviewMode={false}
           entityType={EntityType.host}
         />
       </TestProviders>
     );
 
-    expect(queryByTestId('riskInputsTitleLink')).not.toBeInTheDocument();
-  });
-
-  it('risk summary header does not render link when link is not enabled', () => {
-    const { queryByTestId } = render(
-      <TestProviders>
-        <FlyoutRiskSummary
-          riskScoreData={{ ...mockHostRiskScoreState, data: undefined, loading: true }}
-          queryId={'testQuery'}
-          openDetailsPanel={() => {}}
-          recalculatingScore={false}
-          isLinkEnabled={false}
-          isPreviewMode
-          entityType={EntityType.host}
-        />
-      </TestProviders>
-    );
-
-    expect(queryByTestId('riskInputsTitleLink')).not.toBeInTheDocument();
+    expect(queryByTestId('entityRiskInputsTitleLink')).not.toBeInTheDocument();
   });
 
   it('renders visualization embeddable', () => {
@@ -147,10 +139,11 @@ describe('FlyoutRiskSummary', () => {
       <TestProviders>
         <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
+          entityRiskScores={mockHostEntityRiskScores}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
-          isLinkEnabled
+          isPreviewMode={false}
           entityType={EntityType.host}
         />
       </TestProviders>
@@ -164,10 +157,11 @@ describe('FlyoutRiskSummary', () => {
       <TestProviders>
         <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
+          entityRiskScores={mockHostEntityRiskScores}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
-          isLinkEnabled
+          isPreviewMode={false}
           entityType={EntityType.host}
         />
       </TestProviders>
@@ -181,10 +175,11 @@ describe('FlyoutRiskSummary', () => {
       <TestProviders>
         <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
+          entityRiskScores={mockHostEntityRiskScores}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
-          isLinkEnabled
+          isPreviewMode={false}
           entityType={EntityType.host}
         />
       </TestProviders>
@@ -197,7 +192,9 @@ describe('FlyoutRiskSummary', () => {
     );
     const firstColumn = Object.values(datasourceLayers[0].columns)[0];
 
-    expect((lensAttributes.state.query as Query).query).toEqual('host.name: test');
+    expect((lensAttributes.state.query as Query).query).toEqual(
+      'host.name: "test" AND NOT host.risk.score_type: "resolution"'
+    );
     expect(firstColumn).toEqual(
       expect.objectContaining({
         sourceField: 'host.risk.calculated_score_norm',
@@ -210,10 +207,11 @@ describe('FlyoutRiskSummary', () => {
       <TestProviders>
         <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
+          entityRiskScores={mockHostEntityRiskScores}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
-          isLinkEnabled
+          isPreviewMode={false}
           entityType={EntityType.host}
         />
       </TestProviders>
@@ -234,10 +232,11 @@ describe('FlyoutRiskSummary', () => {
       <TestProviders>
         <FlyoutRiskSummary
           riskScoreData={mockUserRiskScoreState}
+          entityRiskScores={mockUserEntityRiskScores}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
-          isLinkEnabled
+          isPreviewMode={false}
           entityType={EntityType.user}
         />
       </TestProviders>
@@ -258,10 +257,11 @@ describe('FlyoutRiskSummary', () => {
       <TestProviders>
         <FlyoutRiskSummary
           riskScoreData={mockUserRiskScoreState}
+          entityRiskScores={mockUserEntityRiskScores}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
           recalculatingScore={false}
-          isLinkEnabled
+          isPreviewMode={false}
           entityType={EntityType.user}
         />
       </TestProviders>
@@ -274,11 +274,193 @@ describe('FlyoutRiskSummary', () => {
     );
     const firstColumn = Object.values(datasourceLayers[0].columns)[0];
 
-    expect((lensAttributes.state.query as Query).query).toEqual('user.name: test');
+    expect((lensAttributes.state.query as Query).query).toEqual(
+      'user.name: "test" AND NOT user.risk.score_type: "resolution"'
+    );
     expect(firstColumn).toEqual(
       expect.objectContaining({
         sourceField: 'user.risk.calculated_score_norm',
       })
     );
+  });
+
+  it('entity risk inputs link calls openDetailsPanel with entity sub-tab', () => {
+    const openDetailsPanel = jest.fn();
+    const { getByTestId } = render(
+      <TestProviders>
+        <FlyoutRiskSummary
+          riskScoreData={mockHostRiskScoreState}
+          entityRiskScores={mockHostEntityRiskScores}
+          queryId={'testQuery'}
+          openDetailsPanel={openDetailsPanel}
+          recalculatingScore={false}
+          isPreviewMode={false}
+          entityType={EntityType.host}
+        />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId('entityRiskInputsTitleLink'));
+
+    expect(openDetailsPanel).toHaveBeenCalledWith({
+      tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
+      subTab: RiskScoreLeftPanelSubTab.ENTITY,
+    });
+  });
+
+  it('resolution risk inputs link calls openDetailsPanel with resolution sub-tab', () => {
+    const openDetailsPanel = jest.fn();
+    const { getByTestId } = render(
+      <TestProviders>
+        <FlyoutRiskSummary
+          riskScoreData={mockHostRiskScoreState}
+          entityRiskScores={mockHostEntityRiskScoresWithResolution}
+          queryId={'testQuery'}
+          openDetailsPanel={openDetailsPanel}
+          recalculatingScore={false}
+          isPreviewMode={false}
+          entityType={EntityType.host}
+          entityId="host:alias-entity"
+        />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId('resolutionRiskInputsTitleLink'));
+
+    expect(openDetailsPanel).toHaveBeenCalledWith({
+      tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
+      subTab: RiskScoreLeftPanelSubTab.RESOLUTION,
+    });
+  });
+
+  it('does not render resolution risk inputs link when resolution score is loading', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <FlyoutRiskSummary
+          riskScoreData={mockHostRiskScoreState}
+          entityRiskScores={{
+            base: { ...mockHostRiskScoreState },
+            resolution: {
+              state: { ...mockHostRiskScoreState, loading: true },
+              hasResolutionGroup: true,
+              resolutionTargetEntityId: 'host:target-entity',
+            },
+            refetch: jest.fn(),
+          }}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+          recalculatingScore={false}
+          isPreviewMode={false}
+          entityType={EntityType.host}
+          entityId="host:alias-entity"
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('resolutionRiskInputsTitleLink')).not.toBeInTheDocument();
+  });
+
+  it('renders resolution risk score block when resolution score exists', () => {
+    const { getByTestId, getAllByTestId } = render(
+      <TestProviders>
+        <FlyoutRiskSummary
+          riskScoreData={mockHostRiskScoreState}
+          entityRiskScores={mockHostEntityRiskScoresWithResolution}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+          recalculatingScore={false}
+          isPreviewMode={false}
+          entityType={EntityType.host}
+          entityId="host:alias-entity"
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId('resolution-risk-summary-table')).toBeInTheDocument();
+    expect(getAllByTestId('visualization-embeddable')).toHaveLength(2);
+  });
+
+  it('falls back to prefetchedResolutionRisk when the inner risk-index lookup returns no data', () => {
+    const prefetchedResolutionRisk = mockHostRiskScoreState.data?.[0];
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <FlyoutRiskSummary
+          riskScoreData={mockHostRiskScoreState}
+          entityRiskScores={{
+            base: { ...mockHostRiskScoreState },
+            resolution: {
+              state: { ...mockHostRiskScoreState, data: undefined },
+              hasResolutionGroup: true,
+              resolutionTargetEntityId: 'host:target-entity',
+            },
+            refetch: jest.fn(),
+          }}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+          recalculatingScore={false}
+          isPreviewMode={false}
+          entityType={EntityType.host}
+          entityId="host:alias-entity"
+          prefetchedResolutionRisk={prefetchedResolutionRisk}
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId('resolution-risk-summary-table')).toBeInTheDocument();
+  });
+
+  it('does not render resolution risk block when neither the lookup nor prefetchedResolutionRisk has data', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <FlyoutRiskSummary
+          riskScoreData={mockHostRiskScoreState}
+          entityRiskScores={{
+            base: { ...mockHostRiskScoreState },
+            resolution: {
+              state: { ...mockHostRiskScoreState, data: undefined },
+              hasResolutionGroup: true,
+              resolutionTargetEntityId: 'host:target-entity',
+            },
+            refetch: jest.fn(),
+          }}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+          recalculatingScore={false}
+          isPreviewMode={false}
+          entityType={EntityType.host}
+          entityId="host:alias-entity"
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
+  });
+
+  it('does not render resolution risk score block for standalone entities', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <FlyoutRiskSummary
+          riskScoreData={mockHostRiskScoreState}
+          entityRiskScores={{
+            base: { ...mockHostRiskScoreState },
+            resolution: {
+              state: { ...mockHostRiskScoreState },
+              hasResolutionGroup: false,
+              resolutionTargetEntityId: 'host:target-entity',
+            },
+            refetch: jest.fn(),
+          }}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+          recalculatingScore={false}
+          isPreviewMode={false}
+          entityType={EntityType.host}
+          entityId="host:alias-entity"
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
   });
 });

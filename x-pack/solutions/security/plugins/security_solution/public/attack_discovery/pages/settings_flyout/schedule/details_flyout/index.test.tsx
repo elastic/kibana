@@ -8,22 +8,24 @@
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
-import { useLoadConnectors } from '@kbn/elastic-assistant/impl/connectorland/use_load_connectors';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 
 import { DetailsFlyout } from '.';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useUpdateAttackDiscoverySchedule } from '../logic/use_update_schedule';
 import { useGetAttackDiscoverySchedule } from '../logic/use_get_schedule';
 import { mockAttackDiscoverySchedule } from '../../../mock/mock_attack_discovery_schedule';
+import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../../common/constants';
 
-jest.mock('@kbn/elastic-assistant/impl/connectorland/use_load_connectors');
+jest.mock('@kbn/inference-connectors');
 jest.mock('../logic/use_update_schedule');
 jest.mock('../logic/use_get_schedule');
 jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../sourcerer/containers');
+jest.mock('../utils/convert_form_data', () => ({
+  convertFormDataInBaseSchedule: jest.fn().mockReturnValue({}),
+}));
 jest.mock('react-router-dom', () => ({
   matchPath: jest.fn(),
   useLocation: jest.fn().mockReturnValue({
@@ -44,10 +46,6 @@ const mockConnectors: unknown[] = [
 ];
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
-  typeof useSourcererDataView
->;
-const getBooleanValueMock = jest.fn();
 const updateAttackDiscoveryScheduleMock = jest.fn();
 
 const defaultProps = {
@@ -65,38 +63,39 @@ const renderComponent = async () => {
   });
 };
 
+const setupUseKibana = (updateAttackDiscoverySchedule = true) => {
+  mockUseKibana.mockReturnValue({
+    services: {
+      application: {
+        capabilities: {
+          [ATTACK_DISCOVERY_FEATURE_ID]: {
+            updateAttackDiscoverySchedule,
+          },
+        },
+      },
+      lens: {
+        EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
+      },
+      triggersActionsUi: {
+        ...triggersActionsUiMock.createStart(),
+      },
+      uiSettings: {
+        get: jest.fn(),
+      },
+      unifiedSearch: {
+        ui: {
+          SearchBar: () => <div data-test-subj="mockSearchBar" />,
+        },
+      },
+    },
+  } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+};
+
 describe('DetailsFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    getBooleanValueMock.mockReturnValue(true);
-
-    mockUseKibana.mockReturnValue({
-      services: {
-        featureFlags: {
-          getBooleanValue: getBooleanValueMock,
-        },
-        lens: {
-          EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
-        },
-        triggersActionsUi: {
-          ...triggersActionsUiMock.createStart(),
-        },
-        uiSettings: {
-          get: jest.fn(),
-        },
-        unifiedSearch: {
-          ui: {
-            SearchBar: () => <div data-test-subj="mockSearchBar" />,
-          },
-        },
-      },
-    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
-
-    mockUseSourcererDataView.mockReturnValue({
-      sourcererDataView: {},
-      loading: false,
-    } as unknown as jest.Mocked<ReturnType<typeof useSourcererDataView>>);
+    setupUseKibana();
 
     (useLoadConnectors as jest.Mock).mockReturnValue({
       isLoading: false,
@@ -172,6 +171,140 @@ describe('DetailsFlyout', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('save')).toBeInTheDocument();
+    });
+  });
+
+  describe('confirmation modal', () => {
+    beforeEach(async () => {
+      await renderComponent();
+
+      // Enter edit mode
+      const editButton = screen.getByTestId('edit');
+      fireEvent.click(editButton);
+      // Simulate unsaved changes
+      const input = screen.getByTestId('alertsRange');
+      fireEvent.change(input, { target: { value: 'changed' } });
+      // Click the close button to trigger the confirmation modal
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+    });
+
+    it('renders the confirmation modal when there are unsaved changes and close is clicked', () => {
+      expect(screen.getByTestId('confirmationModal')).toBeInTheDocument();
+    });
+
+    it('calls onClose when discard is clicked in confirmation modal', () => {
+      fireEvent.click(screen.getByTestId('discardChanges'));
+
+      expect(defaultProps.onClose).toHaveBeenCalled();
+    });
+
+    it('closes the confirmation modal when cancel is clicked', () => {
+      fireEvent.click(screen.getByTestId('cancel'));
+
+      expect(screen.queryByTestId('confirmationModal')).not.toBeInTheDocument();
+    });
+
+    it('renders the confirmation modal when there are unsaved changes and escape key is pressed', () => {
+      // First, close the modal that was opened in beforeEach
+      fireEvent.click(screen.getByTestId('cancel'));
+
+      // Verify modal is closed
+      expect(screen.queryByTestId('confirmationModal')).not.toBeInTheDocument();
+
+      // Now press escape key on the flyout
+      const flyout = screen.getByTestId('scheduleDetailsFlyout');
+      fireEvent.keyDown(flyout, { key: 'Escape' });
+
+      // Verify the confirmation modal is shown
+      expect(screen.getByTestId('confirmationModal')).toBeInTheDocument();
+    });
+  });
+
+  describe('after a successful save', () => {
+    beforeEach(() => {
+      // Override connectors to include the connector that matches the mock schedule's connectorId
+      (useLoadConnectors as jest.Mock).mockReturnValue({
+        isLoading: false,
+        data: [
+          {
+            id: mockAttackDiscoverySchedule.params.apiConfig.connectorId,
+            name: mockAttackDiscoverySchedule.params.apiConfig.name,
+            actionTypeId: mockAttackDiscoverySchedule.params.apiConfig.actionTypeId,
+          },
+        ],
+      });
+    });
+
+    it('should clear unsaved changes so close does not prompt confirmation modal', async () => {
+      await renderComponent();
+
+      // Enter edit mode
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('edit'));
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('attackDiscoveryScheduleForm')).toBeInTheDocument();
+      });
+
+      // Simulate unsaved changes
+      act(() => {
+        fireEvent.change(screen.getByTestId('alertsRange'), { target: { value: 'changed' } });
+      });
+
+      // Save changes
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('save'));
+      });
+
+      // Wait for save to complete — form disappears when setIsEditing(false) is called
+      await waitFor(() => {
+        expect(screen.queryByTestId('attackDiscoveryScheduleForm')).not.toBeInTheDocument();
+      });
+
+      // Close the flyout
+      act(() => {
+        fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+      });
+
+      // Confirmation modal must NOT appear — unsaved changes flag should have been cleared on save
+      expect(screen.queryByTestId('confirmationModal')).not.toBeInTheDocument();
+      expect(defaultProps.onClose).toHaveBeenCalled();
+    });
+  });
+
+  describe('update schedule kibana privilege', () => {
+    it('should return enabled edit button if update schedule privilege is granted', async () => {
+      setupUseKibana(true);
+
+      await renderComponent();
+      await waitFor(() => {
+        expect(screen.getByTestId('edit')).toBeEnabled();
+      });
+    });
+
+    it('should return disabled edit button if update schedule privilege is missing', async () => {
+      setupUseKibana(false);
+
+      await renderComponent();
+      await waitFor(() => {
+        expect(screen.getByTestId('edit')).toBeDisabled();
+      });
+    });
+
+    it('should render missing privileges tooltip if update schedule privilege is missing', async () => {
+      setupUseKibana(false);
+
+      await renderComponent();
+      await waitFor(() => {
+        expect(screen.getByTestId('edit')).toBeInTheDocument();
+      });
+
+      const editButton = screen.getByTestId('edit');
+      fireEvent.mouseOver(editButton.parentElement as Node);
+
+      const tooltip = screen.getByRole('tooltip');
+      expect(tooltip).toHaveTextContent('Missing privileges');
     });
   });
 });

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryCloudAccount } from '../../../../../../common/http_api/inventory_meta_api';
 import type {
   SnapshotCustomMetricInput,
@@ -23,4 +24,5 @@ export interface ToolbarProps extends Omit<WaffleOptionsState, 'boundsOverride' 
   accounts: InventoryCloudAccount[];
   regions: string[];
   changeCustomMetrics: (payload: SnapshotCustomMetricInput[]) => void;
+  changePreferredSchema: (preferredSchema: DataSchemaFormat | null) => void;
 }

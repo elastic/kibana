@@ -1,6 +1,11 @@
 {
   "type": "shared-common",
   "id": "@kbn/styled-components-mapping-cli",
-  "owner": ["@elastic/kibana-operations", "@elastic/eui-team"],
+  "owner": [
+    "@elastic/kibana-operations",
+    "@elastic/eui-team"
+  ],
+  "group": "platform",
+  "visibility": "private",
   "devOnly": true
 }

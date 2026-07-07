@@ -1,6 +1,6 @@
 # NOW
 
-The NOW function returns the current date and time.
+Returns the current date and time.
 
 ## Syntax
 
@@ -8,13 +8,17 @@ The NOW function returns the current date and time.
 
 ### Parameters
 
-This function does not require any parameters.
+This function does not take any parameters.
 
 ## Examples
+
+Returns a single row with the current date and time as the value of the `current_date` column:
 
 ```esql
 ROW current_date = NOW()
 ```
+
+Filters and retrieves log entries from the `sample_data` index where the `@timestamp` is within the last hour:
 
 ```esql
 FROM sample_data

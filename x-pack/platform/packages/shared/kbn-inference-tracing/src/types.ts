@@ -5,52 +5,70 @@
  * 2.0.
  */
 
-import { Context, Span } from '@opentelemetry/api';
+import type { Context, Span } from '@opentelemetry/api';
 
 export enum GenAISemanticConventions {
   GenAIUsageCost = 'gen_ai.usage.cost',
   GenAIUsageInputTokens = 'gen_ai.usage.input_tokens',
-  GenAIUsageCachedInputTokens = 'gen_ai.usage.cached_input_tokens',
+  GenAIUsageCacheReadInputTokens = 'gen_ai.usage.cache_read.input_tokens',
   GenAIUsageOutputTokens = 'gen_ai.usage.output_tokens',
   GenAIOperationName = 'gen_ai.operation.name',
   GenAIResponseModel = 'gen_ai.response.model',
+  GenAIRequestModel = 'gen_ai.request.model',
+  /** @deprecated Use GenAIProviderName instead */
   GenAISystem = 'gen_ai.system',
+  GenAIProviderName = 'gen_ai.provider.name',
   GenAIOutputType = 'gen_ai.output.type',
   GenAIToolCallId = 'gen_ai.tool.call.id',
+  GenAIToolCallArguments = 'gen_ai.tool.call.arguments',
+  GenAIToolCallResult = 'gen_ai.tool.call.result',
   GenAIToolName = 'gen_ai.tool.name',
+  GenAIToolDescription = 'gen_ai.tool.description',
+  GenAIToolType = 'gen_ai.tool.type',
+  GenAIToolDefinitions = 'gen_ai.tool.definitions',
   GenAISystemMessage = 'gen_ai.system.message',
   GenAIUserMessage = 'gen_ai.user.message',
   GenAIAssistantMessage = 'gen_ai.assistant.message',
   GenAIToolMessage = 'gen_ai.tool.message',
   GenAIChoice = 'gen_ai.choice',
+  GenAIAgentId = 'gen_ai.agent.id',
+  GenAIAgentName = 'gen_ai.agent.name',
+  GenAIConversationId = 'gen_ai.conversation.id',
+  GenAIWorkflowName = 'gen_ai.workflow.name',
 }
 
 export enum ElasticGenAIAttributes {
-  ToolDescription = 'elastic.tool.description',
-  ToolParameters = 'elastic.tool.parameters',
   InferenceSpanKind = 'elastic.inference.span.kind',
-  Tools = 'elastic.llm.tools',
   ToolChoice = 'elastic.llm.toolChoice',
 }
 
 export interface GenAISemConvAttributes {
   [GenAISemanticConventions.GenAIUsageCost]?: number;
   [GenAISemanticConventions.GenAIUsageInputTokens]?: number;
-  [GenAISemanticConventions.GenAIUsageCachedInputTokens]?: number;
+  [GenAISemanticConventions.GenAIUsageCacheReadInputTokens]?: number;
   [GenAISemanticConventions.GenAIUsageOutputTokens]?: number;
-  [GenAISemanticConventions.GenAIOperationName]?: 'chat' | 'execute_tool';
+  [GenAISemanticConventions.GenAIOperationName]?:
+    | 'chat'
+    | 'execute_tool'
+    | 'invoke_agent'
+    | 'invoke_workflow';
+  [GenAISemanticConventions.GenAIRequestModel]?: string;
   [GenAISemanticConventions.GenAIResponseModel]?: string;
-  [GenAISemanticConventions.GenAISystem]?: string;
+  [GenAISemanticConventions.GenAIProviderName]?: string;
   'error.type'?: string;
   [GenAISemanticConventions.GenAIOutputType]?: 'text' | 'image' | 'json';
   [GenAISemanticConventions.GenAIToolCallId]?: string;
+  [GenAISemanticConventions.GenAIToolCallArguments]?: string;
+  [GenAISemanticConventions.GenAIToolCallResult]?: string;
   [GenAISemanticConventions.GenAIToolName]?: string;
-  'input.value'?: any;
-  'output.value'?: any;
-  [ElasticGenAIAttributes.InferenceSpanKind]?: 'CHAIN' | 'LLM' | 'TOOL';
-  [ElasticGenAIAttributes.ToolDescription]?: string;
-  [ElasticGenAIAttributes.ToolParameters]?: string;
-  [ElasticGenAIAttributes.Tools]?: string;
+  [GenAISemanticConventions.GenAIToolDescription]?: string;
+  [GenAISemanticConventions.GenAIToolType]?: string;
+  [GenAISemanticConventions.GenAIToolDefinitions]?: string;
+  [GenAISemanticConventions.GenAIAgentId]?: string;
+  [GenAISemanticConventions.GenAIAgentName]?: string;
+  [GenAISemanticConventions.GenAIConversationId]?: string;
+  [GenAISemanticConventions.GenAIWorkflowName]?: string;
+  [ElasticGenAIAttributes.InferenceSpanKind]?: 'CHAIN' | 'AGENT' | 'LLM' | 'TOOL';
   [ElasticGenAIAttributes.ToolChoice]?: string;
 }
 
@@ -72,7 +90,7 @@ export type SystemMessageEvent = GenAISemConvEvent<
     role: 'system';
     content: string;
   },
-  GenAISemanticConventions.GenAISystem
+  GenAISemanticConventions.GenAIProviderName
 >;
 
 export type UserMessageEvent = GenAISemConvEvent<
@@ -81,7 +99,7 @@ export type UserMessageEvent = GenAISemConvEvent<
     role: 'user';
     content: string;
   },
-  GenAISemanticConventions.GenAISystem
+  GenAISemanticConventions.GenAIProviderName
 >;
 
 export type AssistantMessageEvent = GenAISemConvEvent<
@@ -98,7 +116,7 @@ export type AssistantMessageEvent = GenAISemConvEvent<
       type: 'function';
     }>;
   },
-  GenAISemanticConventions.GenAISystem
+  GenAISemanticConventions.GenAIProviderName
 >;
 
 export type ToolMessageEvent = GenAISemConvEvent<
@@ -108,7 +126,7 @@ export type ToolMessageEvent = GenAISemConvEvent<
     id: string;
     role: 'tool' | 'function';
   },
-  GenAISemanticConventions.GenAISystem
+  GenAISemanticConventions.GenAIProviderName
 >;
 
 export type ChoiceEvent = GenAISemConvEvent<
@@ -129,7 +147,7 @@ export type ChoiceEvent = GenAISemConvEvent<
       }>;
     };
   },
-  GenAISemanticConventions.GenAISystem
+  GenAISemanticConventions.GenAIProviderName
 >;
 
 export type MessageEvent =

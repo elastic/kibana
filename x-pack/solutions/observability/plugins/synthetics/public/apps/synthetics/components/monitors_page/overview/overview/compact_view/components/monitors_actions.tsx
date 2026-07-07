@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
+import type { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
 import { ActionsPopover } from '../../actions_popover';
 
 export const MonitorsActions = ({ monitor }: { monitor: OverviewStatusMetaData }) => {
@@ -15,7 +15,7 @@ export const MonitorsActions = ({ monitor }: { monitor: OverviewStatusMetaData }
   return (
     <ActionsPopover
       isPopoverOpen={isPopoverOpen}
-      locationId={monitor.locationId}
+      locationId={monitor.locations[0]?.id ?? ''}
       monitor={monitor}
       position="default"
       setIsPopoverOpen={setIsPopoverOpen}

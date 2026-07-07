@@ -1,0 +1,17 @@
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          updateSpaceResponse:
+            summary: Update the marketing space
+            description: A response that contains the updated configuration of the Kibana space.
+            value:
+              id: marketing
+              name: Marketing
+              description: An updated description for the Marketing Space
+              color: '#aabbcc'
+              initials: MK
+              disabledFeatures: []
+              imageUrl: ''
+              solution: es

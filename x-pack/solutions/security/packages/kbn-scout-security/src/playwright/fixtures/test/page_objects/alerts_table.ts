@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ScoutPage, Locator, expect } from '@kbn/scout';
+import type { ScoutPage, Locator } from '@kbn/scout';
+import { expect } from '../../../../../ui';
 
 const PAGE_URL = 'security/alerts';
 
@@ -13,31 +14,85 @@ export class AlertsTablePage {
   public detectionsAlertsWrapper: Locator;
   public alertRow: Locator;
   public alertsTable: Locator;
+  public contextMenuButton: Locator;
+  public actionsContextMenu: Locator;
+  public runWorkflowMenuItem: Locator;
+  public workflowPanel: Locator;
+  public executeWorkflowButton: Locator;
+  public bulkRunWorkflowMenuItem: Locator;
+  public bulkWorkflowPanel: Locator;
+  public selectedShowBulkActionsButton: Locator;
+  public bulkAddToChatMenuItem: Locator;
+  public selectAllAlertsButton: Locator;
+  public bulkActionsHeaderCheckbox: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.detectionsAlertsWrapper = this.page.testSubj.locator('detectionsAlertsPage');
-    this.alertRow = this.page.locator('div.euiDataGridRow');
+    this.detectionsAlertsWrapper = this.page.testSubj.locator('alerts-by-rule-table');
     this.alertsTable = this.page.testSubj.locator('alertsTableIsLoaded'); // Search for loaded Alerts table
+    this.alertRow = this.page.testSubj.locator('alertsTableIsLoaded').locator('div.euiDataGridRow');
+    this.contextMenuButton = this.page.testSubj.locator('timeline-context-menu-button');
+    this.actionsContextMenu = this.page.testSubj.locator('actions-context-menu');
+    this.runWorkflowMenuItem = this.page.testSubj.locator('run-workflow-action');
+    this.workflowPanel = this.page.testSubj.locator('alert-workflow-context-menu-panel');
+    this.executeWorkflowButton = this.page.testSubj.locator('execute-alert-workflow-button');
+    this.bulkRunWorkflowMenuItem = this.page.testSubj.locator('bulk-run-alert-workflow-action');
+    this.bulkWorkflowPanel = this.page.testSubj.locator('bulk-alert-workflow-context-menu-panel');
+    this.selectedShowBulkActionsButton = this.page.testSubj.locator(
+      'selectedShowBulkActionsButton'
+    );
+    this.bulkAddToChatMenuItem = this.page.testSubj.locator('bulk-add-to-chat');
+    this.selectAllAlertsButton = this.page.testSubj.locator('selectAllAlertsButton');
+    this.bulkActionsHeaderCheckbox = this.page.testSubj.locator('bulk-actions-header');
   }
 
   async navigate() {
     await this.page.gotoApp(PAGE_URL);
   }
 
+  async openAlertContextMenu(ruleName: string) {
+    await this.alertsTable.waitFor({ state: 'visible' });
+    const ruleNameCell = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
+
+    await expect(
+      ruleNameCell,
+      `Alert with rule '${ruleName}' is not displayed in the alerts table`
+    ).toHaveCount(1);
+
+    const row = ruleNameCell.locator('xpath=ancestor::div[contains(@class,"euiDataGridRow")]');
+    await row.getByTestId('timeline-context-menu-button').click();
+  }
+
   async expandAlertDetailsFlyout(ruleName: string) {
     await this.alertsTable.waitFor({ state: 'visible' });
-    // Filter alert by unique rule name
-    const row = this.alertRow.filter({ hasText: ruleName });
-    await expect(
-      row,
-      `Alert with rule '${ruleName}' is not displayed in the alerts table`
-    ).toBeVisible();
+    // 1. Find the rule name cell (unique per alert)
+    const ruleNameCell = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
 
-    return row.locator(`[data-test-subj='expand-event']`).click();
+    await expect(
+      ruleNameCell,
+      `Alert with rule '${ruleName}' is not displayed in the alerts table`
+    ).toHaveCount(1);
+
+    // 2. Climb up to the DataGrid row
+    const row = ruleNameCell.locator('xpath=ancestor::div[contains(@class,"euiDataGridRow")]');
+
+    // 3. Click expand button in the row
+    await row.getByTestId('expand-event').click();
   }
 
   async waitForDetectionsAlertsWrapper() {
     // Increased timeout to 20 seconds because this page sometimes takes longer to load
     return this.detectionsAlertsWrapper.waitFor({ state: 'visible', timeout: 20_000 });
+  }
+
+  async waitForRuleAlert(ruleName: string) {
+    const cell = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
+    await expect(cell).toBeVisible({ timeout: 60_000 });
+    return cell;
+  }
+
+  async checkAlertRowCheckbox(ruleName: string) {
+    const cell = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
+    const row = cell.locator('xpath=ancestor::div[contains(@class,"euiDataGridRow")]');
+    await row.getByRole('checkbox').check();
   }
 }

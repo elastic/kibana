@@ -6,8 +6,8 @@
  */
 
 import { LogicMounter } from '../../../__mocks__';
+import type { Connector } from '@kbn/search-connectors';
 import {
-  Connector,
   ConnectorStatus,
   DisplayType,
   FieldType,

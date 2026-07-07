@@ -9,6 +9,7 @@ import { createLiteralValueFromUndefinedRT } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 import { SnapshotMetricTypeRT, ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsAPISeriesRT } from '@kbn/metrics-data-access-plugin/common';
+import { DataSchemaFormatRT } from './shared/data_schema_format';
 
 export const SnapshotNodePathRT = rt.intersection([
   rt.type({
@@ -74,7 +75,7 @@ export const SnapshotNamedMetricInputRT = rt.type({
   type: SnapshotMetricTypeRT,
 });
 
-export const SNAPSHOT_CUSTOM_AGGREGATIONS = ['avg', 'max', 'min', 'rate'] as const;
+export const SNAPSHOT_CUSTOM_AGGREGATIONS = ['avg', 'max', 'min', 'rate', 'last_value'] as const;
 
 export type SnapshotCustomAggregation = (typeof SNAPSHOT_CUSTOM_AGGREGATIONS)[number];
 
@@ -108,14 +109,15 @@ export const SnapshotRequestRT = rt.intersection([
     groupBy: rt.union([SnapshotGroupByRT, rt.null]),
     nodeType: ItemTypeRT,
     sourceId: rt.string,
-    includeTimeseries: rt.union([rt.boolean, createLiteralValueFromUndefinedRT(true)]),
   }),
   rt.partial({
+    includeTimeseries: rt.union([rt.boolean, createLiteralValueFromUndefinedRT(false)]),
     accountId: rt.string,
     region: rt.string,
-    filterQuery: rt.union([rt.string, rt.null]),
+    kuery: rt.string,
     overrideCompositeSize: rt.number,
     dropPartialBuckets: rt.boolean,
+    schema: DataSchemaFormatRT,
   }),
 ]);
 

@@ -35,11 +35,16 @@ describe('maybeAddCloudLinks', () => {
     );
     const core = coreMock.createStart();
     const { chrome } = core;
+    const cloud = {
+      ...cloudMock.createStart(),
+      isCloudEnabled: true,
+      getPrivilegedUrls: jest.fn().mockResolvedValue({ billingUrl: 'billing-url' }),
+    };
     maybeAddCloudLinks({
       security,
       core,
       share: sharePluginMock.createStartContract(),
-      cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
+      cloud,
       isServerless: false,
     });
     // Since there's a promise, let's wait for the next tick
@@ -66,7 +71,7 @@ describe('maybeAddCloudLinks', () => {
       },
       {
         href: 'billing-url',
-        iconType: 'visGauge',
+        iconType: 'chartGauge',
         label: 'Billing',
         order: 200,
       },
@@ -77,6 +82,7 @@ describe('maybeAddCloudLinks', () => {
         order: 300,
       },
       expect.any(Object),
+      expect.any(Object),
     ]);
 
     expect(chrome.setHelpMenuLinks).toHaveBeenCalledTimes(1);
@@ -85,18 +91,17 @@ describe('maybeAddCloudLinks', () => {
         Array [
           Object {
             "href": "https://www.elastic.co/docs/get-started",
-            "title": "Documentation",
+            "iconType": "documentation",
+            "title": "Kibana documentation",
           },
           Object {
             "href": "https://www.elastic.co/support",
-            "title": "Support",
-          },
-          Object {
-            "href": "https://www.elastic.co/products/kibana/feedback?blade=kibanafeedback",
-            "title": "Give feedback",
+            "iconType": "question",
+            "title": "Ask support",
           },
           Object {
             "dataTestSubj": "connectionDetailsHelpLink",
+            "iconType": "plugs",
             "onClick": [Function],
             "title": "Connection details",
           },
@@ -110,11 +115,16 @@ describe('maybeAddCloudLinks', () => {
     security.authc.getCurrentUser.mockRejectedValue(new Error('Something went terribly wrong'));
     const core = coreMock.createStart();
     const { chrome } = core;
+    const cloud = {
+      ...cloudMock.createStart(),
+      isCloudEnabled: true,
+      getPrivilegedUrls: jest.fn().mockResolvedValue({ billingUrl: 'billing-url' }),
+    };
     maybeAddCloudLinks({
       security,
       core,
       share: sharePluginMock.createStartContract(),
-      cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
+      cloud,
       isServerless: false,
     });
     // Since there's a promise, let's wait for the next tick
@@ -141,7 +151,7 @@ describe('maybeAddCloudLinks', () => {
       },
       {
         href: 'billing-url',
-        iconType: 'visGauge',
+        iconType: 'chartGauge',
         label: 'Billing',
         order: 200,
       },
@@ -152,6 +162,7 @@ describe('maybeAddCloudLinks', () => {
         order: 300,
       },
       expect.any(Object),
+      expect.any(Object),
     ]);
     expect(chrome.setHelpMenuLinks).toHaveBeenCalledTimes(1);
     expect(chrome.setHelpMenuLinks.mock.calls[0]).toMatchInlineSnapshot(`
@@ -159,18 +170,17 @@ describe('maybeAddCloudLinks', () => {
         Array [
           Object {
             "href": "https://www.elastic.co/docs/get-started",
-            "title": "Documentation",
+            "iconType": "documentation",
+            "title": "Kibana documentation",
           },
           Object {
             "href": "https://www.elastic.co/support",
-            "title": "Support",
-          },
-          Object {
-            "href": "https://www.elastic.co/products/kibana/feedback?blade=kibanafeedback",
-            "title": "Give feedback",
+            "iconType": "question",
+            "title": "Ask support",
           },
           Object {
             "dataTestSubj": "connectionDetailsHelpLink",
+            "iconType": "plugs",
             "onClick": [Function],
             "title": "Connection details",
           },

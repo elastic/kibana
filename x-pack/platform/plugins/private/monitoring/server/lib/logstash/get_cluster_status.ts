@@ -6,7 +6,7 @@
  */
 
 import { getLogstashForClusters } from './get_logstash_for_clusters';
-import { LegacyRequest } from '../../types';
+import type { LegacyRequest } from '../../types';
 
 /**
  * Get the cluster status for Logstash instances.

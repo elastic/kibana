@@ -7,6 +7,8 @@
 
 import { setTimeout } from 'timers/promises';
 
+import { v5 } from 'uuid';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
   SavedObject,
   SavedObjectsBulkCreateObject,
@@ -16,7 +18,9 @@ import type {
   SavedObjectsImportFailure,
   Logger,
 } from '@kbn/core/server';
+import { SavedObjectsUtils, SPACES_EXTENSION_ID } from '@kbn/core/server';
 import { createListStream } from '@kbn/utils';
+
 import { partition, chunk, once } from 'lodash';
 
 import { getPathParts } from '../../archive';
@@ -40,13 +44,31 @@ import { getSpaceAwareSaveobjectsClients } from './saved_objects';
 
 const MAX_ASSETS_TO_INSTALL_IN_PARALLEL = 200;
 
+// SO types that are "multiple-isolated" and can accumulate orphaned UUID copies when
+// installs fail or two install operations race in the same space. These orphans cause
+// "ambiguous_conflict" errors on the next import attempt (checkOriginConflicts.ts).
+const MULTIPLE_ISOLATED_KIBANA_SO_TYPES: ReadonlySet<KibanaSavedObjectType> = new Set([
+  KibanaSavedObjectType.tag,
+  KibanaSavedObjectType.alertingRuleTemplate,
+]);
+
+// Replicates core's createOriginQuery() from import-export-server-internal, which is not
+// exported publicly. Produces a simple_query_string that matches objects by raw _id or
+// originId field value, as used by checkOriginConflicts.ts.
+function buildOriginSearchQuery(type: string, id: string): string {
+  const escape = (s: string) => s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return `"${escape(`${type}:${id}`)}" | "${escape(id)}"`;
+}
+
 type SavedObjectsImporterContract = Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
 const formatImportErrorsForLog = (errors: SavedObjectsImportFailure[]) =>
   JSON.stringify(
     errors.map(({ type, id, error }) => ({ type, id, error })) // discard other fields
   );
 const validKibanaAssetTypes = new Set(Object.values(KibanaAssetType));
-type SavedObjectToBe = Required<Pick<SavedObjectsBulkCreateObject, keyof ArchiveAsset>> & {
+type SavedObjectToBe = Required<
+  Pick<SavedObjectsBulkCreateObject, keyof ArchiveAsset | 'originId'>
+> & {
   type: KibanaSavedObjectType;
 };
 export type ArchiveAsset = Pick<
@@ -75,6 +97,8 @@ export const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedOb
   [KibanaAssetType.securityRule]: KibanaSavedObjectType.securityRule,
   [KibanaAssetType.cloudSecurityPostureRuleTemplate]:
     KibanaSavedObjectType.cloudSecurityPostureRuleTemplate,
+  [KibanaAssetType.alertingRuleTemplate]: KibanaSavedObjectType.alertingRuleTemplate,
+  [KibanaAssetType.sloTemplate]: KibanaSavedObjectType.sloTemplate,
   [KibanaAssetType.tag]: KibanaSavedObjectType.tag,
   [KibanaAssetType.osqueryPackAsset]: KibanaSavedObjectType.osqueryPackAsset,
   [KibanaAssetType.osquerySavedQuery]: KibanaSavedObjectType.osquerySavedQuery,
@@ -84,11 +108,30 @@ const AssetFilters: Record<string, (kibanaAssets: ArchiveAsset[]) => ArchiveAsse
   [KibanaAssetType.indexPattern]: removeReservedIndexPatterns,
 };
 
-export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectToBe {
+export function getSpaceScopedAssetId(originalId: string, spaceId: string): string {
+  return v5(`$${spaceId}:${originalId}`, v5.DNS);
+}
+
+export function createSavedObjectKibanaAsset(
+  asset: ArchiveAsset,
+  options?: {
+    installAsAdditionalSpace?: boolean;
+    spaceId?: string;
+  }
+): SavedObjectToBe {
+  // Rewrite IDs for dashboards and multiple-isolated SO types (e.g. alerting_rule_template)
+  // to avoid conflicts when installing in additional spaces.
+  const rewriteId =
+    options?.installAsAdditionalSpace &&
+    (asset.type === KibanaSavedObjectType.dashboard ||
+      asset.type === KibanaSavedObjectType.alertingRuleTemplate);
   // convert that to an object
   const so: Partial<SavedObjectToBe> = {
     type: asset.type,
-    id: asset.id,
+    id: rewriteId
+      ? getSpaceScopedAssetId(asset.id, options?.spaceId ?? DEFAULT_SPACE_ID)
+      : asset.id,
+    ...(rewriteId ? { originId: asset.id } : {}),
     attributes: asset.attributes,
     references: asset.references || [],
   };
@@ -106,15 +149,19 @@ export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectTo
   return so as SavedObjectToBe;
 }
 
-export async function installKibanaAssets(options: {
+export async function installKibanaAssets({
+  kibanaAssetsArchiveIterator,
+  savedObjectsClient,
+  savedObjectsImporter,
+  logger,
+  options,
+}: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: SavedObjectsImporterContract;
   logger: Logger;
-  pkgName: string;
   kibanaAssetsArchiveIterator: ReturnType<typeof getKibanaAssetsArchiveIterator>;
+  options: { installAsAdditionalSpace?: boolean; spaceId?: string };
 }): Promise<SavedObjectsImportSuccess[]> {
-  const { kibanaAssetsArchiveIterator, savedObjectsClient, savedObjectsImporter, logger } = options;
-
   let assetsToInstall: ArchiveAsset[] = [];
   let res: SavedObjectsImportSuccess[] = [];
 
@@ -133,6 +180,7 @@ export async function installKibanaAssets(options: {
       savedObjectsImporter,
       kibanaAssets: assetsToInstall,
       assetsChunkSize: MAX_ASSETS_TO_INSTALL_IN_PARALLEL,
+      options,
     });
     assetsToInstall = [];
     res = [...res, ...installedAssets];
@@ -195,7 +243,6 @@ export async function installKibanaAssetsAndReferencesMultispace({
   installedPkg,
   spaceId,
   assetTags,
-  installAsAdditionalSpace,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
@@ -205,8 +252,13 @@ export async function installKibanaAssetsAndReferencesMultispace({
   installedPkg?: SavedObject<Installation>;
   spaceId: string;
   assetTags?: PackageSpecTags[];
-  installAsAdditionalSpace?: boolean;
 }) {
+  // Derive whether this is an additional-space install from the package's sticky primary space.
+  // Any request from a space other than installed_kibana_space_id is an additional-space install.
+  const installAsAdditionalSpace = installedPkg
+    ? (installedPkg.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID) !== spaceId
+    : false;
+
   if (installedPkg && !installAsAdditionalSpace) {
     // Install in every space => upgrades
     const refs = await installKibanaAssetsAndReferences({
@@ -221,9 +273,10 @@ export async function installKibanaAssetsAndReferencesMultispace({
       installAsAdditionalSpace,
     });
 
+    const primarySpaceId = installedPkg.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
     for (const additionnalSpaceId of Object.keys(
       installedPkg.attributes.additional_spaces_installed_kibana ?? {}
-    )) {
+    ).filter((s) => s !== primarySpaceId)) {
       await installKibanaAssetsAndReferences({
         savedObjectsClient,
         logger,
@@ -250,6 +303,121 @@ export async function installKibanaAssetsAndReferencesMultispace({
     assetTags,
     installAsAdditionalSpace,
   });
+}
+
+/**
+ * Before importing kibana assets, delete any saved objects of multiple-isolated types
+ * that share an origin with an incoming archive asset but are NOT tracked in
+ * installed_kibana. These orphans accumulate from failed installs or concurrent installs
+ * in the same space and cause "ambiguous_conflict" errors on the next import attempt.
+ */
+export async function deleteOrphanedMultipleIsolatedAssets({
+  kibanaAssetsArchiveIterator,
+  installedPkg,
+  spaceId,
+  logger,
+}: {
+  kibanaAssetsArchiveIterator: ReturnType<typeof getKibanaAssetsArchiveIterator>;
+  installedPkg: SavedObject<Installation> | undefined;
+  spaceId: string;
+  logger: Logger;
+}): Promise<void> {
+  const trackedIds = new Set<string>();
+  if (installedPkg) {
+    const { installed_kibana_space_id: installedSpaceId } = installedPkg.attributes;
+    const refsForSpace =
+      !spaceId || spaceId === installedSpaceId
+        ? installedPkg.attributes.installed_kibana
+        : installedPkg.attributes.additional_spaces_installed_kibana?.[spaceId] ?? [];
+
+    for (const ref of refsForSpace) {
+      trackedIds.add(ref.id);
+      if (ref.originId) trackedIds.add(ref.originId);
+    }
+  }
+
+  // The Spaces extension must be excluded here. For multiple-isolated types the namespaces
+  // filter below is applied at the repository layer (not by the extension), so namespace
+  // isolation is preserved. Keeping the extension active triggers a _has_privileges ES call
+  // that the unsafe internal client has no credentials to satisfy, crashing the server.
+  const internalSoClient = appContextService.getSavedObjects().getUnsafeInternalClient({
+    includedHiddenTypes: [KibanaSavedObjectType.alertingRuleTemplate],
+    excludedExtensions: [SPACES_EXTENSION_ID],
+  });
+
+  const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);
+
+  // Collect all multiple-isolated-type asset ids from the archive in one pass,
+  // grouped by SO type so we can issue batched OR-joined search requests below
+  // instead of one find() per asset.
+  const assetIdsByType = new Map<string, string[]>();
+  await kibanaAssetsArchiveIterator(async ({ asset }) => {
+    if (!MULTIPLE_ISOLATED_KIBANA_SO_TYPES.has(asset.type)) return;
+    const ids = assetIdsByType.get(asset.type) ?? [];
+    ids.push(asset.id);
+    assetIdsByType.set(asset.type, ids);
+  });
+
+  if (assetIdsByType.size === 0) return;
+
+  const SEARCH_BATCH_SIZE = 100;
+  const orphansToDelete: Array<{ id: string; type: string }> = [];
+
+  for (const [assetType, assetIds] of assetIdsByType) {
+    for (const idsBatch of chunk(assetIds, SEARCH_BATCH_SIZE)) {
+      const searchQuery = idsBatch.map((id) => buildOriginSearchQuery(assetType, id)).join(' | ');
+      const batchIdSet = new Set(idsBatch);
+
+      try {
+        for (let page = 1, fetched = 0; ; page++) {
+          const findResult = await internalSoClient.find<Record<string, unknown>>({
+            type: assetType,
+            search: searchQuery,
+            rootSearchFields: ['_id', 'originId'],
+            fields: ['name'],
+            perPage: 100,
+            page,
+            namespaces: [spaceId],
+          });
+
+          for (const foundObj of findResult.saved_objects) {
+            // A genuine orphan always has a UUID id with originId pointing to one of the
+            // archive asset ids. An object whose raw _id matches an asset id (no originId)
+            // is a legitimately shared package/user object and must not be deleted.
+            if (
+              foundObj.originId !== undefined &&
+              batchIdSet.has(foundObj.originId) &&
+              !trackedIds.has(foundObj.id)
+            ) {
+              orphansToDelete.push({ id: foundObj.id, type: foundObj.type });
+            }
+          }
+
+          fetched += findResult.saved_objects.length;
+          if (findResult.saved_objects.length === 0 || fetched >= findResult.total) break;
+        }
+      } catch (err) {
+        logger.warn(
+          `[Fleet] Error searching for orphaned saved objects of type '${assetType}' in space '${spaceId}': ${err.message}`
+        );
+      }
+    }
+  }
+
+  if (!orphansToDelete.length) return;
+
+  logger.info(
+    `[Fleet] Deleting ${orphansToDelete.length} orphaned saved object(s) in space '${spaceId}' before package install ` +
+      `to prevent ambiguous_conflict errors`
+  );
+  logger.debug(
+    () =>
+      `Orphaned objects: ${JSON.stringify(orphansToDelete.map(({ id, type }) => ({ id, type })))}`
+  );
+
+  for (const assetsChunk of chunk(orphansToDelete, 1000)) {
+    await internalSoClient.bulkDelete(assetsChunk, { namespace });
+  }
 }
 
 export async function installKibanaAssetsAndReferences({
@@ -279,16 +447,22 @@ export async function installKibanaAssetsAndReferences({
   const kibanaAssetsArchiveIterator = getKibanaAssetsArchiveIterator(packageInstallContext);
 
   if (installedPkg) {
-    await deleteKibanaSavedObjectsAssets({ installedPkg, spaceId });
+    await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg, spaceId });
   }
+  await deleteOrphanedMultipleIsolatedAssets({
+    kibanaAssetsArchiveIterator,
+    installedPkg,
+    spaceId,
+    logger,
+  });
   let installedKibanaAssetsRefs: KibanaAssetReference[] = [];
 
   const importedAssets = await installKibanaAssets({
     savedObjectsClient,
     logger,
     savedObjectsImporter,
-    pkgName,
     kibanaAssetsArchiveIterator,
+    options: { installAsAdditionalSpace, spaceId },
   });
   const assets = importedAssets.map(
     ({ id, type, destinationId }) =>
@@ -298,10 +472,21 @@ export async function installKibanaAssetsAndReferences({
         type,
       } as KibanaAssetReference)
   );
+
+  await replaceInMarkdown({
+    assets,
+    savedObjectsClient,
+    logger,
+    savedObjectsImporter,
+    kibanaAssetsArchiveIterator,
+    options: { installAsAdditionalSpace, spaceId },
+  });
+
   installedKibanaAssetsRefs = await saveKibanaAssetsRefs(
     savedObjectsClient,
     pkgName,
     assets,
+    spaceId,
     installedPkg && installedPkg.attributes.installed_kibana_space_id === spaceId
       ? false
       : installAsAdditionalSpace
@@ -344,8 +529,8 @@ export async function deleteKibanaAssetsAndReferencesForSpace({
       'Impossible to delete kibana assets from the space where the package was installed, you must uninstall the package.'
     );
   }
-  await deleteKibanaSavedObjectsAssets({ installedPkg, spaceId });
-  await saveKibanaAssetsRefs(savedObjectsClient, pkgName, null, true);
+  await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg, spaceId });
+  await saveKibanaAssetsRefs(savedObjectsClient, pkgName, null, spaceId, true);
 }
 
 const kibanaAssetTypes = Object.values(KibanaAssetType);
@@ -373,6 +558,20 @@ function getKibanaAssetsArchiveIterator(packageInstallContext: PackageInstallCon
       const assetType = getPathParts(entry.path).type as KibanaAssetType;
       const soType = KibanaSavedObjectTypeMapping[assetType];
       if (!validKibanaAssetTypes.has(assetType)) {
+        return;
+      }
+
+      if (
+        soType === KibanaSavedObjectType.alertingRuleTemplate &&
+        !appContextService.getExperimentalFeatures().enableAgentStatusAlerting
+      ) {
+        return;
+      }
+
+      if (
+        soType === KibanaSavedObjectType.sloTemplate &&
+        !appContextService.getExperimentalFeatures().enableSloTemplates
+      ) {
         return;
       }
 
@@ -422,11 +621,13 @@ export async function installKibanaSavedObjects({
   kibanaAssets,
   assetsChunkSize,
   logger,
+  options,
 }: {
   kibanaAssets: ArchiveAsset[];
   savedObjectsImporter: SavedObjectsImporterContract;
   logger: Logger;
   assetsChunkSize?: number;
+  options?: { installAsAdditionalSpace?: boolean; spaceId?: string };
 }): Promise<SavedObjectsImportSuccess[]> {
   if (!assetsChunkSize || kibanaAssets.length <= assetsChunkSize || hasReferences(kibanaAssets)) {
     return await installKibanaSavedObjectsChunk({
@@ -434,6 +635,7 @@ export async function installKibanaSavedObjects({
       savedObjectsImporter,
       kibanaAssets,
       refresh: 'wait_for',
+      options,
     });
   }
 
@@ -455,6 +657,7 @@ export async function installKibanaSavedObjects({
       savedObjectsImporter,
       kibanaAssets: assetChunk,
       refresh: false,
+      options,
     });
 
     installedAssets.push(...result);
@@ -465,6 +668,7 @@ export async function installKibanaSavedObjects({
     savedObjectsImporter,
     kibanaAssets: lastAssetChunk,
     refresh: 'wait_for',
+    options,
   });
 
   installedAssets.push(...result);
@@ -478,17 +682,21 @@ async function installKibanaSavedObjectsChunk({
   kibanaAssets,
   logger,
   refresh,
+  options,
 }: {
   kibanaAssets: ArchiveAsset[];
   savedObjectsImporter: SavedObjectsImporterContract;
   logger: Logger;
   refresh?: boolean | 'wait_for';
+  options?: { installAsAdditionalSpace?: boolean; spaceId?: string };
 }) {
   if (!kibanaAssets.length) {
     return [];
   }
 
-  const toBeSavedObjects = kibanaAssets.map((asset) => createSavedObjectKibanaAsset(asset));
+  const toBeSavedObjects = kibanaAssets.map((asset) =>
+    createSavedObjectKibanaAsset(asset, options)
+  );
 
   let allSuccessResults: SavedObjectsImportSuccess[] = [];
 
@@ -496,15 +704,28 @@ async function installKibanaSavedObjectsChunk({
     successResults: importSuccessResults = [],
     errors: importErrors = [],
     success,
-  } = await retryImportOnConflictError(() => {
+  } = await retryImportOnConflictError(async () => {
     const readStream = createListStream(toBeSavedObjects);
-    return savedObjectsImporter.import({
+
+    const res = await savedObjectsImporter.import({
       overwrite: true,
       readStream,
       createNewCopies: false,
       managed: true,
       refresh,
     });
+
+    for (const r of res?.successResults || []) {
+      const originId = toBeSavedObjects.find(
+        (so) => so.id === r.id && so.type === r.type
+      )?.originId;
+      if (originId) {
+        r.destinationId = r.id;
+        r.id = originId;
+      }
+    }
+
+    return res;
   });
 
   if (success) {
@@ -589,4 +810,107 @@ export function toAssetReference({ id, type }: SavedObject) {
 
 function hasReferences(assetsToInstall: ArchiveAsset[]) {
   return assetsToInstall.some((asset) => asset.references?.length);
+}
+async function replaceInMarkdown({
+  assets,
+  savedObjectsClient,
+  logger,
+  savedObjectsImporter,
+  kibanaAssetsArchiveIterator,
+  options,
+}: {
+  assets: KibanaAssetReference[];
+  savedObjectsClient: SavedObjectsClientContract;
+  logger: Logger;
+  savedObjectsImporter: ISavedObjectsImporter;
+  kibanaAssetsArchiveIterator: (
+    onEntry: (entry: {
+      path: string;
+      asset: ArchiveAsset;
+      assetType: KibanaAssetType;
+    }) => Promise<void>
+  ) => Promise<void>;
+  options?: { installAsAdditionalSpace?: boolean; spaceId?: string };
+}) {
+  const assetsWithDifferentIds = assets.filter(
+    (asset) => asset.originId && asset.originId !== asset.id
+  );
+
+  if (assetsWithDifferentIds.length === 0) {
+    return;
+  }
+
+  let assetsToInstall = [] as ArchiveAsset[];
+
+  async function flushAssetsToInstall() {
+    if (assetsToInstall.length === 0) {
+      return;
+    }
+
+    await installKibanaSavedObjectsChunk({
+      logger,
+      savedObjectsImporter,
+      kibanaAssets: assetsToInstall,
+      refresh: false, // No need to wait for here as it's already been imported once
+    });
+
+    assetsToInstall = [];
+  }
+
+  await kibanaAssetsArchiveIterator(async ({ assetType, asset }) => {
+    const kibanaAsset = createSavedObjectKibanaAsset(asset, options);
+    if (assetType !== KibanaAssetType.dashboard && assetType !== KibanaAssetType.visualization) {
+      return;
+    }
+
+    const idsReplacements = getIdsReplacements(assetsWithDifferentIds);
+    const { updated, updatedAsset } = replaceIdsInKibanaAsset(kibanaAsset, idsReplacements);
+
+    if (updated) {
+      logger.debug(
+        `Updating references in ${assetType} [id=${updatedAsset.id}, originId=${updatedAsset.originId}]`
+      );
+
+      assetsToInstall.push(updatedAsset);
+
+      if (assetsToInstall.length >= MAX_ASSETS_TO_INSTALL_IN_PARALLEL) {
+        await flushAssetsToInstall();
+      }
+    }
+  });
+
+  await flushAssetsToInstall();
+}
+
+function getIdsReplacements(assets: KibanaAssetReference[]) {
+  const idReplacements: Record<string, string> = {};
+  for (const asset of assets) {
+    const assetType = asset.type as unknown as KibanaAssetType;
+    if (assetType !== KibanaAssetType.dashboard && assetType !== KibanaAssetType.visualization) {
+      continue;
+    }
+    if (asset.originId && asset.originId !== asset.id) {
+      idReplacements[asset.originId] = asset.id;
+    }
+  }
+  return idReplacements;
+}
+
+/**
+ * Exported only for testing
+ */
+export function replaceIdsInKibanaAsset(
+  kibanaAsset: SavedObjectToBe,
+  idReplacements: Record<string, string>
+): { updated: boolean; updatedAsset: SavedObjectToBe } {
+  let assetStr = JSON.stringify(kibanaAsset);
+  const originalAssetStr = assetStr;
+
+  for (const [originId, newId] of Object.entries(idReplacements)) {
+    const regex = new RegExp(`${originId}`, 'g');
+    assetStr = assetStr.replace(regex, newId);
+  }
+
+  const updatedAsset = JSON.parse(assetStr);
+  return { updated: originalAssetStr !== assetStr, updatedAsset };
 }

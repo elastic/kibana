@@ -8,7 +8,7 @@
 import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { TRANSPOSE_VISUAL_SEPARATOR, getTransposeId } from '@kbn/transpose-utils';
-import { DatatableArgs } from '../../defs/datatable/datatable';
+import type { DatatableArgs } from '../../defs/datatable/datatable';
 import type { DatatableColumnConfig, DatatableColumnArgs } from './datatable_column';
 
 /**
@@ -117,7 +117,7 @@ function getUniqueValues(table: Datatable, formatter: FieldFormat, columnId: str
   const values = new Map<string, unknown>();
   table.rows.forEach((row) => {
     const rawValue = row[columnId];
-    values.set(formatter.convert(row[columnId]), rawValue);
+    values.set(formatter.convertToText(row[columnId]), rawValue);
   });
   const uniqueValues = [...values.keys()];
   const uniqueRawValues = [...values.values()];
@@ -186,7 +186,7 @@ function mergeRowGroups(
       mergedRow[c.columnId] = rows[0][c.columnId];
     });
     rows.forEach((row) => {
-      const transposalValue = formatter.convert(row[transposedColumnId]);
+      const transposalValue = formatter.convertToText(row[transposedColumnId]);
       metricColumns.forEach((c) => {
         mergedRow[getTransposeId(transposalValue, c.columnId)] = row[c.columnId];
       });
@@ -206,7 +206,9 @@ function groupRowsByBucketColumns(
 ) {
   const rowsByBucketColumns: Record<string, DatatableRow[]> = {};
   firstTable.rows.forEach((row) => {
-    const key = bucketColumns.map((c) => formatters[c.columnId].convert(row[c.columnId])).join(',');
+    const key = bucketColumns
+      .map((c) => formatters[c.columnId].convertToText(row[c.columnId]))
+      .join(',');
     if (!rowsByBucketColumns[key]) {
       rowsByBucketColumns[key] = [];
     }

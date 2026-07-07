@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
-import { CreateKnowledgeBaseRequestParams } from '@kbn/elastic-assistant-common';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { CreateKnowledgeBaseRequestParams } from '@kbn/elastic-assistant-common';
 
 /**
  * Returns the optional resource, e.g. `esql` from the request params, or undefined if it doesn't exist

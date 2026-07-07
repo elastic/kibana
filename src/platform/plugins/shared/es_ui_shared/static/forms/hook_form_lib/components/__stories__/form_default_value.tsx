@@ -15,7 +15,7 @@ import { useForm } from '../../hooks/use_form';
 import { Form } from '../form';
 import { UseField } from '../use_field';
 import { titleConfigBase } from './constants';
-import { FormArgs } from './types';
+import type { FormArgs } from './types';
 import { submitForm } from './form_utils';
 
 // The defaultValue would probably come from an HTTP request

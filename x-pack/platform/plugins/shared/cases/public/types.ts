@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, IToasts } from '@kbn/core/public';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { ReactElement, PropsWithChildren } from 'react';
 import type React from 'react';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -16,6 +17,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ManagementSetup, ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
@@ -29,9 +31,12 @@ import type { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 import type { UseIsAddToCaseOpen } from './components/cases_context/state/use_is_add_to_case_open';
@@ -47,6 +52,7 @@ import type { getUICapabilities } from './client/helpers/capabilities';
 import type { AttachmentFramework } from './client/attachment_framework/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
+import type { UnifiedAttachmentTypeRegistry } from './client/attachment_framework/unified_attachment_registry';
 import type {
   CasesByAlertIDRequest,
   GetRelatedCasesByAlertResponse,
@@ -61,7 +67,12 @@ import type {
   PersistableStateAttachmentPayload,
   ExternalReferenceNoSOAttachmentPayload,
   ExternalReferenceSOAttachmentPayload,
+  EventAttachmentPayload,
+  UnifiedAttachmentPayload,
 } from '../common/types/domain';
+import type { DashboardAttachmentPayload } from '../common/types/domain_zod/attachment/dashboard/v2';
+import type { MapAttachmentPayload } from '../common/types/domain_zod/attachment/map/v2';
+import type { DiscoverSessionAttachmentPayload } from '../common/types/domain_zod/attachment/saved_object/v2';
 
 export interface CasesPublicSetupDependencies {
   files: FilesSetup;
@@ -70,16 +81,19 @@ export interface CasesPublicSetupDependencies {
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
   triggersActionsUi: TriggersActionsSetup;
+  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
 }
 
 export interface CasesPublicStartDependencies {
   apm?: ApmBase;
   cloud?: CloudStart;
+  dashboard?: DashboardStart;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   features: FeaturesPluginStart;
   files: FilesStart;
   lens: LensPublicStart;
+  maps?: MapsStartApi;
   /**
    * Cases in used by other plugins. Plugins pass the
    * service to their KibanaContext. ML does not pass
@@ -94,6 +108,9 @@ export interface CasesPublicStartDependencies {
   triggersActionsUi: TriggersActionsStart;
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
+  toastNotifications: IToasts;
+  agentBuilder?: AgentBuilderPluginStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
 
 /**
@@ -112,6 +129,7 @@ export interface RenderAppProps {
   kibanaVersion: string;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
 }
 
 export interface CasesPublicSetup {
@@ -119,6 +137,15 @@ export interface CasesPublicSetup {
 }
 
 export interface CasesPublicStart {
+  config: {
+    templatesEnabled: boolean;
+    attachmentsEnabled: boolean;
+    casesRedesign: {
+      list: boolean;
+      details: boolean;
+      settings: boolean;
+    };
+  };
   api: {
     getRelatedCases: (
       alertId: string,
@@ -177,14 +204,22 @@ export interface CasesPublicStart {
 
 export type SupportedCaseAttachment =
   | AlertAttachmentPayload
+  | EventAttachmentPayload
   | UserCommentAttachmentPayload
   | PersistableStateAttachmentPayload
   | ExternalReferenceNoSOAttachmentPayload
-  | ExternalReferenceSOAttachmentPayload;
+  | ExternalReferenceSOAttachmentPayload
+  | UnifiedAttachmentPayload
+  // Born-unified, SO-backed reference attachments. Listed explicitly so the
+  // SO attach hook can build typed payloads without casting through the
+  // generic `UnifiedAttachmentPayload` shape.
+  | DashboardAttachmentPayload
+  | MapAttachmentPayload
+  | DiscoverSessionAttachmentPayload;
 
 export type CaseAttachments = SupportedCaseAttachment[];
 export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;
 export type CaseAttachmentsWithoutOwner = CaseAttachmentWithoutOwner[];
-export type { LensProps } from './components/visualizations/types';
+export type { LensProps } from './components/attachments/lens/types';
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;

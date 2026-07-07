@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -27,8 +28,9 @@ import { css } from '@emotion/react';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Controller } from 'react-hook-form';
+import { isQueryRuleFieldError } from '../../../utils/field_error_utils';
 import { useKibana } from '../../../hooks/use_kibana';
-import { SearchQueryRulesQueryRule } from '../../../types';
+import type { SearchQueryRulesQueryRule } from '../../../types';
 import { QueryRuleFlyoutBody, QueryRuleFlyoutPanel } from '../styles';
 import { QueryRuleMetadataEditor } from './query_rule_metadata_editor';
 import { useQueryRuleFlyoutState } from './use_query_rule_flyout_state';
@@ -62,27 +64,24 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
     actionIdsFields,
     appendAction: appendNewAction,
     control,
-    documentCount,
-    dragEndHandle,
     criteria,
     criteriaCount,
+    documentCount,
+    dragEndHandle,
+    formState,
     handleAddCriteria,
     handleSave,
     indexNames,
-    isAlways,
     isFlyoutDirty,
     isIdRule,
+    onDeleteDocument,
+    onIdSelectorChange,
     onIndexSelectorChange,
     pinType,
     remove,
-    onIdSelectorChange,
-    onDeleteDocument,
     setCriteriaCalloutActive,
-    setIsAlways,
-    setIsFlyoutDirty,
     shouldShowCriteriaCallout,
     shouldShowMetadataEditor,
-    update,
   } = useQueryRuleFlyoutState({
     createMode,
     rulesetId,
@@ -120,6 +119,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
       onClose={onClose}
       ownFocus={false}
       size="l"
+      data-test-subj="searchQueryRulesQueryRuleFlyout"
       aria-labelledby="flyoutTitle"
       css={css({
         overflowY: 'hidden',
@@ -127,9 +127,15 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
     >
       <QueryRuleFlyoutHeader ruleId={ruleId} createMode={createMode} />
       <EuiFlyoutBody css={QueryRuleFlyoutBody}>
-        <EuiFlexGroup gutterSize="none" css={QueryRuleFlyoutPanel(euiTheme)}>
+        <EuiFlexGroup gutterSize="none" css={QueryRuleFlyoutPanel}>
           <EuiFlexItem grow>
-            <EuiPanel hasBorder paddingSize="l" borderRadius="none" className="eui-yScroll">
+            <EuiPanel
+              hasBorder={false}
+              hasShadow={false}
+              paddingSize="l"
+              borderRadius="none"
+              className="eui-yScroll"
+            >
               <EuiText size="s">
                 <b>
                   <FormattedMessage
@@ -145,11 +151,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                     control={control}
                     name="type"
                     render={({ field: { value, onChange } }) => (
-                      <QueryRuleTypeSelector
-                        setIsFlyoutDirty={setIsFlyoutDirty}
-                        onChange={onChange}
-                        selectedId={value}
-                      />
+                      <QueryRuleTypeSelector onChange={onChange} selectedId={value} />
                     )}
                   />
                 </EuiFlexItem>
@@ -177,7 +179,6 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   id="xpack.search.queryRulesetDetail.queryRuleFlyout.findDocuments"
                   defaultMessage="Find your documents IDs into "
                 />
-                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                 <EuiLink
                   data-test-subj="searchQueryRulesQueryRuleFlyoutLink"
                   external
@@ -197,6 +198,30 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               </EuiText>
 
               <EuiSpacer size="m" />
+
+              {isIdRule && (
+                <>
+                  <EuiCallOut
+                    announceOnMount
+                    title={i18n.translate(
+                      'xpack.search.queryRuleset.queryRuleFlyout.documentActionUsingidsLabel',
+                      { defaultMessage: "Document action using 'ids' are unsupported" }
+                    )}
+                    color="warning"
+                    size="s"
+                  >
+                    <EuiText size="s">
+                      <p>
+                        <FormattedMessage
+                          id="xpack.search.queryRuleset.queryRuleFlyout.idsActionDeprecation"
+                          defaultMessage="Query rules pinning/excluding documents using ids only are not supported in the UIs. Please convert them to pinning by docs"
+                        />
+                      </p>
+                    </EuiText>
+                  </EuiCallOut>
+                  <EuiSpacer size="m" />
+                </>
+              )}
               <EuiFlexItem css={dndBackgroundColor}>
                 <DraggableList
                   onIndexSelectorChange={onIndexSelectorChange}
@@ -208,10 +233,12 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   indexNames={indexNames}
                   dragEndHandle={dragEndHandle}
                   onDeleteDocument={onDeleteDocument}
+                  errors={formState.errors}
                 />
               </EuiFlexItem>
               {pinType === 'pinned' && documentCount !== 0 && (
                 <EuiCallOut
+                  announceOnMount
                   iconType="transitionTopIn"
                   size="s"
                   title={
@@ -230,8 +257,14 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               />
             </EuiPanel>
           </EuiFlexItem>
-          <EuiFlexItem grow>
-            <EuiPanel hasBorder paddingSize="l" borderRadius="none" className="eui-yScroll">
+          <EuiFlexItem grow css={QueryRuleFlyoutPanel}>
+            <EuiPanel
+              hasBorder={false}
+              hasShadow={false}
+              paddingSize="l"
+              borderRadius="none"
+              className="eui-yScroll"
+            >
               <EuiText size="s">
                 <b>
                   <FormattedMessage
@@ -243,10 +276,12 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               <EuiSpacer size="s" />
               <EuiFlexGroup responsive={false} alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <MetadataTypeSelector
-                    setIsFlyoutDirty={setIsFlyoutDirty}
-                    isAlways={isAlways}
-                    setIsAlways={setIsAlways}
+                  <Controller
+                    control={control}
+                    name="isAlways"
+                    render={({ field: { value, onChange } }) => (
+                      <MetadataTypeSelector isAlways={value} onChange={onChange} />
+                    )}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -264,11 +299,16 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               {shouldShowCriteriaCallout && (
                 <>
                   <EuiCallOut
-                    iconType="iInCircle"
+                    announceOnMount
+                    iconType="info"
                     size="s"
                     onDismiss={() => {
                       setCriteriaCalloutActive(false);
                     }}
+                    aria-label={i18n.translate(
+                      'xpack.search.queryRulesetDetail.queryRuleFlyout.allCriteriaCallout.ariaLabel',
+                      { defaultMessage: 'All criteria must be met for the rule to be applied' }
+                    )}
                     title={
                       <FormattedMessage
                         id="xpack.search.queryRulesetDetail.queryRuleFlyout.allCriteriaCallout"
@@ -281,28 +321,56 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               )}
               {shouldShowMetadataEditor && (
                 <>
-                  {criteria.map((field, index) => (
-                    <React.Fragment key={field.id}>
-                      <QueryRuleMetadataEditor
-                        criteria={field}
-                        key={field.id}
-                        onChange={(newCriteria) => {
-                          setIsFlyoutDirty(true);
-                          update(index, newCriteria);
-                        }}
-                        onRemove={() => {
-                          setIsFlyoutDirty(true);
-                          remove(index);
-                        }}
+                  {criteria.length ? (
+                    criteria.map((field, index) => {
+                      const error = formState.errors?.criteria?.[index];
+                      return (
+                        <React.Fragment key={field.id}>
+                          <Controller
+                            control={control}
+                            name={`criteria.${index}`}
+                            render={({ field: { onChange, value } }) => {
+                              return (
+                                <QueryRuleMetadataEditor
+                                  criteria={value}
+                                  key={field.id}
+                                  onRemove={() => {
+                                    remove(index);
+                                  }}
+                                  error={isQueryRuleFieldError(error) ? error : undefined}
+                                  onChange={(newCriteria) => {
+                                    onChange(newCriteria);
+                                  }}
+                                />
+                              );
+                            }}
+                          />
+                          <EuiSpacer size="m" />
+                        </React.Fragment>
+                      );
+                    })
+                  ) : (
+                    <>
+                      <EuiCallOut
+                        announceOnMount
+                        iconType="info"
+                        size="s"
+                        color="warning"
+                        title={
+                          <FormattedMessage
+                            id="xpack.search.queryRulesetDetail.queryRuleFlyout.criteriaRequiredCallout"
+                            defaultMessage="At least one criteria is required."
+                          />
+                        }
                       />
                       <EuiSpacer size="m" />
-                    </React.Fragment>
-                  ))}
+                    </>
+                  )}
 
                   <EuiButton
                     data-test-subj="searchQueryRulesQueryRuleMetadataEditorAddCriteriaButton"
                     onClick={handleAddCriteria}
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     iconSide="left"
                     size="s"
                     color={criteriaCount === 0 ? 'primary' : 'text'}
@@ -337,7 +405,14 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               data-test-subj="searchQueryRulesQueryRuleFlyoutUpdateButton"
               fill
               onClick={handleSave}
-              disabled={!isFlyoutDirty}
+              disabled={
+                // Id rule is not supported in the UI. We still allow saving it.
+                // To make it properly, we need to reimplement the action logic in RHF
+                (!isIdRule && !isFlyoutDirty) ||
+                !formState.isValid ||
+                formState.isSubmitting ||
+                formState.isValidating
+              }
             >
               {createMode ? (
                 <FormattedMessage

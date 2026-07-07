@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Suspense, ComponentType, ReactElement, Ref } from 'react';
+import type { ComponentType, ReactElement, Ref } from 'react';
+import React, { Suspense } from 'react';
 import { EuiLoadingSpinner, EuiErrorBoundary } from '@elastic/eui';
+import type { SaveModalDashboardProps } from './types';
 
 /**
  * A HOC which supplies React.Suspense with a fallback component, and a `EuiErrorBoundary` to contain errors.
@@ -35,35 +37,23 @@ export const LazyLabsFlyout = React.lazy(() => import('./labs/labs_flyout'));
 
 export const LazyDashboardPicker = React.lazy(() => import('./dashboard_picker/dashboard_picker'));
 
-export const LazySavedObjectSaveModalDashboard = React.lazy(
-  () => import('./saved_object_save_modal_dashboard')
-);
+const LazySavedObjectSaveModalDashboard = React.lazy(async () => {
+  const { SavedObjectSaveModalDashboard } = await import('./saved_object_save_modal_dashboard');
+
+  return { default: SavedObjectSaveModalDashboard };
+});
+export const SavedObjectSaveModalDashboard = <SaveResponse = void,>(
+  props: SaveModalDashboardProps<SaveResponse>
+) => {
+  return (
+    <Suspense>
+      <LazySavedObjectSaveModalDashboard {...props} />
+    </Suspense>
+  );
+};
 
 export const LazyDataViewPicker = React.lazy(() => import('./data_view_picker/data_view_picker'));
 
 export const LazyFieldPicker = React.lazy(() => import('./field_picker/field_picker'));
 
-const LazyDashboardDrilldownOptionsComponent = React.lazy(() =>
-  import('./dashboard_drilldown_options/dashboard_drilldown_options').then(
-    ({ DashboardDrilldownOptionsComponent }) => ({
-      default: DashboardDrilldownOptionsComponent,
-    })
-  )
-);
-
-export const DashboardDrilldownOptionsComponent = withSuspense(
-  LazyDashboardDrilldownOptionsComponent,
-  null
-);
-
-export {
-  type DashboardDrilldownOptions,
-  DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
-} from './dashboard_drilldown_options/types';
-
-/**
- * A lazily-loaded ExpressionInput component.
- */
-export const LazyExpressionInput = React.lazy(() => import('./expression_input'));
-
-export * from './types';
+export type * from './types';

@@ -8,18 +8,21 @@
 import React, { useCallback, useMemo } from 'react';
 import moment from 'moment';
 import { EuiLink } from '@elastic/eui';
-import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
+import type { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
 import { useHistory } from 'react-router-dom';
 import { getRuleDetailsRoute as internalGetRuleDetailsRoute } from '@kbn/rule-data-utils';
+import { getSpaceUrlPrefix, type SpaceId } from '@kbn/core-spaces-common';
 import { formatRuleAlertCount } from '../../../../../common/lib/format_rule_alert_count';
 import { useKibana, useSpacesData } from '../../../../../common/lib/kibana';
 import { EventLogListStatus } from './event_log_list_status';
 import { RuleDurationFormat } from '../../../rules_list/components/rule_duration_format';
-import {
+import type {
   RULE_EXECUTION_LOG_COLUMN_IDS,
+  CONNECTOR_EXECUTION_LOG_COLUMN_IDS,
+} from '../../../../constants';
+import {
   RULE_EXECUTION_LOG_DURATION_COLUMNS,
   RULE_EXECUTION_LOG_ALERT_COUNT_COLUMNS,
-  CONNECTOR_EXECUTION_LOG_COLUMN_IDS,
 } from '../../../../constants';
 
 export const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
@@ -75,10 +78,12 @@ export const EventLogListCellRenderer = (props: EventLogListCellRendererProps) =
     if (ruleOnDifferentSpace) {
       const [linkedSpaceId] = spaceIds ?? [];
       const basePath = http.basePath.get();
-      const spacePath = linkedSpaceId !== 'default' ? `/s/${linkedSpaceId}` : '';
+      // linkedSpaceId / activeSpace.id come from spaces plugin Space.id (string) and event metadata —
+      // both are server-rendered from saved-object data. Trusted boundary.
+      const spacePath = getSpaceUrlPrefix(linkedSpaceId as SpaceId);
       const historyPathname = history.location.pathname;
       const newPathname = `${basePath.replace(
-        `/s/${activeSpace!.id}`,
+        getSpaceUrlPrefix(activeSpace!.id as SpaceId),
         ''
       )}${spacePath}${window.location.pathname
         .replace(basePath, '')

@@ -104,6 +104,7 @@ export const getMetricMetadata = async (
       query: {
         match: { [fields.id]: nodeId },
       },
+      schema: 'ecs',
     });
 
     return {

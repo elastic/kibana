@@ -12,11 +12,13 @@ import { EuiCheckbox } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import { dataTableActions } from '@kbn/securitysolution-data-table';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { PageScope } from '../../../data_view_manager/constants';
+import { useBulkAddEventsToCaseActions } from '../../../cases/attachments/event/hooks/use_bulk_event_actions';
 import type { CustomBulkAction } from '../../../../common/types';
 import { RowRendererValues } from '../../../../common/api/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
-import { eventsDefaultModel } from '../events_viewer/default_model';
+import { getEventsDefaultModelForTable } from '../events_viewer/default_model';
 import { MatrixHistogram } from '../matrix_histogram';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import * as i18n from './translations';
@@ -29,7 +31,6 @@ import {
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import type { QueryTabBodyProps as UserQueryTabBodyProps } from '../../../explore/users/pages/navigation/types';
 import type { QueryTabBodyProps as HostQueryTabBodyProps } from '../../../explore/hosts/pages/navigation/types';
@@ -45,7 +46,6 @@ import {
   useReplaceUrlParams,
 } from '../../utils/global_query_string/helpers';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
-import { SecurityCellActionsTrigger } from '../cell_actions';
 import { useUserPrivileges } from '../user_privileges';
 
 export const ALERTS_EVENTS_HISTOGRAM_ID = 'alertsOrEventsHistogramQuery';
@@ -92,10 +92,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   const {
     notesPrivileges: { read: canReadNotes },
   } = useUserPrivileges();
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
-  );
-  if (!canReadNotes || securitySolutionNotesDisabled) {
+  if (!canReadNotes) {
     ACTION_BUTTON_COUNT--;
   }
 
@@ -118,17 +115,22 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
     [defaultNumberFormat, showExternalAlerts]
   );
 
+  const eventsDefaultModelForTable = useMemo(
+    () => getEventsDefaultModelForTable(tableId),
+    [tableId]
+  );
+
   useEffect(() => {
     dispatch(
       dataTableActions.initializeDataTableSettings({
         id: tableId,
-        defaultColumns: eventsDefaultModel.columns,
+        defaultColumns: eventsDefaultModelForTable.columns,
         title: i18n.EVENTS_GRAPH_TITLE,
         showCheckboxes: true,
         selectAll: true,
       })
     );
-  }, [dispatch, showExternalAlerts, tableId]);
+  }, [dispatch, eventsDefaultModelForTable, tableId]);
 
   useEffect(() => {
     return () => {
@@ -155,10 +157,10 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
 
   const defaultModel = useMemo(
     () => ({
-      ...eventsDefaultModel,
+      ...eventsDefaultModelForTable,
       excludedRowRendererIds: showExternalAlerts ? RowRendererValues : [],
     }),
-    [showExternalAlerts]
+    [eventsDefaultModelForTable, showExternalAlerts]
   );
 
   const composedPageFilters = useMemo(
@@ -166,20 +168,24 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
     [additionalFilters, showExternalAlerts]
   );
 
-  const addBulkToTimelineAction = useAddBulkToTimelineAction({
+  const addBulkToTimelineActions = useAddBulkToTimelineAction({
     localFilters: composedPageFilters,
     tableId,
     from: startDate,
     to: endDate,
-    scopeId: SourcererScopeName.default,
-  }) as CustomBulkAction;
+    scopeId: PageScope.default,
+  }) as CustomBulkAction[];
+
+  const caseEventsBulkActions = useBulkAddEventsToCaseActions({
+    clearSelection: () => dispatch(dataTableActions.clearSelected({ id: tableId })),
+  });
 
   const bulkActions = useMemo<BulkActionsProp | boolean>(() => {
     return {
       alertStatusActions: false,
-      customBulkActions: [addBulkToTimelineAction],
+      customBulkActions: [...addBulkToTimelineActions, ...caseEventsBulkActions],
     };
-  }, [addBulkToTimelineAction]);
+  }, [addBulkToTimelineActions, caseEventsBulkActions]);
 
   return (
     <>
@@ -189,19 +195,21 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
           startDate={startDate}
           endDate={endDate}
           filterQuery={filterQuery}
+          applyPageAndTabsFilters={false}
           {...(showExternalAlerts ? alertsHistogramConfig : eventsHistogramConfig)}
           subtitle={getHistogramSubtitle}
+          pageScope={PageScope.explore}
         />
       )}
       <StatefulEventsViewer
         topRightMenuOptions={toggleExternalAlertsCheckbox}
-        cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
+        cellActionsTriggerId={SECURITY_CELL_ACTIONS_DEFAULT}
         start={startDate}
         end={endDate}
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
-        sourcererScope={SourcererScopeName.default}
+        pageScope={PageScope.explore}
         tableId={tableId}
         unit={showExternalAlerts ? i18n.EXTERNAL_ALERTS_UNIT : i18n.EVENTS_UNIT}
         defaultModel={defaultModel}

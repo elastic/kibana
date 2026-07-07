@@ -9,17 +9,20 @@ import type { FC } from 'react';
 import React from 'react';
 import { pick } from 'lodash';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LogCategorization } from '@kbn/aiops-plugin/public';
 import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 
+import { MlDataSourcePicker } from '@kbn/aiops-components';
+import { DataViewPicker } from '@kbn/unified-search-plugin/public';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { NoDataViewPrompt } from './no_data_view_prompt';
 import { useDataSource } from '../contexts/ml/data_source_context';
 import { useMlKibana } from '../contexts/kibana';
 import { useEnabledFeatures } from '../contexts/ml';
 import { HelpMenu } from '../components/help_menu';
 import { MlPageHeader } from '../components/page_header';
+import { PageTitle } from '../components/page_title';
 
 export const LogCategorizationPage: FC = () => {
   const { services } = useMlKibana();
@@ -27,19 +30,29 @@ export const LogCategorizationPage: FC = () => {
 
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
+  const pageTitle = (
+    <FormattedMessage
+      id="xpack.ml.logCategorization.pageHeader"
+      defaultMessage="Log pattern analysis"
+    />
+  );
+
   return (
     <>
       <MlPageHeader>
-        <EuiFlexGroup responsive={false} wrap={false} alignItems={'center'} gutterSize={'m'}>
-          <EuiFlexItem grow={false}>
-            <FormattedMessage
-              id="xpack.ml.logCategorization.pageHeader"
-              defaultMessage="Log pattern analysis"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <PageTitle title={pageTitle} />
       </MlPageHeader>
-      {dataView && (
+      {!dataView ? (
+        <>
+          <MlDataSourcePicker
+            currentDataView={dataView ?? null}
+            services={services}
+            DataViewPickerComponent={DataViewPicker}
+            SavedObjectFinderComponent={SavedObjectFinder}
+          />
+          <NoDataViewPrompt />
+        </>
+      ) : (
         <LogCategorization
           dataView={dataView}
           savedSearch={savedSearch}
@@ -50,7 +63,10 @@ export const LogCategorizationPage: FC = () => {
               'analytics',
               'application',
               'charts',
+              'contentManagement',
               'data',
+              'dataViewEditor',
+              'dataViewFieldEditor',
               'executionContext',
               'fieldFormats',
               'http',
@@ -66,6 +82,7 @@ export const LogCategorizationPage: FC = () => {
               'userProfile',
               'embeddable',
               'cases',
+              'cps',
             ]),
           }}
         />

@@ -8,6 +8,7 @@
  */
 
 import type { CoreContext } from '@kbn/core-base-browser-internal';
+import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { Logger } from '@kbn/logging';
 import type {
@@ -19,14 +20,19 @@ import type {
 import { apm } from '@elastic/apm-rum';
 import { type Client, ClientProviderEvents, OpenFeature } from '@openfeature/web-sdk';
 import deepMerge from 'deepmerge';
-import { filter, map, startWith, Subject } from 'rxjs';
+import { filter, map, merge, startWith, Subject } from 'rxjs';
 import { get } from 'lodash';
+import { buildPath } from '@kbn/core-http-browser';
 
 /**
  * setup method dependencies
- * @private
+ * @internal
  */
 export interface FeatureFlagsSetupDeps {
+  /**
+   * Used to hit the counter endpoint.
+   */
+  http: InternalHttpSetup;
   /**
    * Used to read the flag overrides set up in the configuration file.
    */
@@ -35,14 +41,16 @@ export interface FeatureFlagsSetupDeps {
 
 /**
  * The browser-side Feature Flags Service
- * @private
+ * @internal
  */
 export class FeatureFlagsService {
   private readonly featureFlagsClient: Client;
   private readonly logger: Logger;
+  private readonly contextChanged$ = new Subject<void>();
   private isProviderReadyPromise?: Promise<void>;
   private context: MultiContextEvaluationContext = { kind: 'multi' };
   private overrides: Record<string, unknown> = {};
+  private http?: InternalHttpSetup;
 
   /**
    * The core service's constructor
@@ -63,7 +71,9 @@ export class FeatureFlagsService {
     if (featureFlagsInjectedMetadata) {
       this.overrides = featureFlagsInjectedMetadata.overrides;
     }
+    this.http = deps.http;
     return {
+      getInitialFeatureFlags: () => featureFlagsInjectedMetadata?.initialFeatureFlags ?? {},
       setProvider: (provider) => {
         if (this.isProviderReadyPromise) {
           throw new Error('A provider has already been set. This API cannot be called twice.');
@@ -103,7 +113,12 @@ export class FeatureFlagsService {
       }
     });
     const observeFeatureFlag$ = (flagName: string) =>
-      featureFlagsChanged$.pipe(
+      merge(
+        // Flag changes
+        featureFlagsChanged$,
+        // Context changes (we need to reevaluate)
+        this.contextChanged$.pipe(map(() => [flagName]))
+      ).pipe(
         filter((flagNames) => flagNames.includes(flagName)),
         startWith([flagName]) // only to emit on the first call
       );
@@ -159,7 +174,7 @@ export class FeatureFlagsService {
 
   /**
    * Waits for the provider initialization with a timeout to avoid holding the page load for too long
-   * @private
+   * @internal
    */
   private async waitForProviderInitialization() {
     // Adding a timeout here to avoid hanging the start for too long if the provider is unresponsive
@@ -185,7 +200,7 @@ export class FeatureFlagsService {
    * @param evaluationFn The actual evaluation API
    * @param flagName The name of the flag to evaluate
    * @param fallbackValue The fallback value
-   * @private
+   * @internal
    */
   private evaluateFlag<T extends string | boolean | number>(
     evaluationFn: (flagName: string, fallbackValue: T) => T,
@@ -198,15 +213,23 @@ export class FeatureFlagsService {
         ? (override as T)
         : // We have to bind the evaluation or the client will lose its internal context
           evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
-    apm.addLabels({ [`flag_${flagName}`]: value });
-    // TODO: increment usage counter
+    apm.addLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
+
+    // Increment usage counter
+    // TODO: When UI has OTel instrumented, we can increment the counter in the browser directly.
+    this.http
+      ?.post(buildPath('/internal/feature-flags/{flagName}/counter', { flagName }), {
+        body: JSON.stringify({ value }),
+      })
+      .catch();
+
     return value;
   }
 
   /**
    * Formats the provided context to fulfill the expected multi-context structure.
    * @param contextToAppend The {@link EvaluationContext} to append.
-   * @private
+   * @internal
    */
   private async appendContext(contextToAppend: EvaluationContext): Promise<void> {
     // If no kind provided, default to the project|deployment level.
@@ -220,5 +243,6 @@ export class FeatureFlagsService {
     // Merge the formatted context to append to the global context, and set it in the OpenFeature client.
     this.context = deepMerge(this.context, formattedContextToAppend);
     await OpenFeature.setContext(this.context);
+    this.contextChanged$.next();
   }
 }

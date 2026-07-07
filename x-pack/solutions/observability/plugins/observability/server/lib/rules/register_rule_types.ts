@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import type { CoreSetup } from '@kbn/core/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
-import { IBasePath, Logger } from '@kbn/core/server';
-import { CustomThresholdLocators } from './custom_threshold/custom_threshold_executor';
-import { ObservabilityConfig } from '../..';
+import type { IBasePath, Logger } from '@kbn/core/server';
+import type { CustomThresholdLocators } from './custom_threshold/custom_threshold_executor';
+import type { ObservabilityConfig } from '../..';
 import { thresholdRuleType } from './custom_threshold/register_custom_threshold_rule_type';
 
 export function registerRuleTypes(
   alertingPlugin: AlertingServerSetup,
+  core: CoreSetup,
   basePath: IBasePath,
   config: ObservabilityConfig,
   logger: Logger,
   locators: CustomThresholdLocators
 ) {
-  alertingPlugin.registerType(thresholdRuleType(basePath, config, logger, locators));
+  // @ts-expect-error upgrade typescript v5.9.3
+  alertingPlugin.registerType(thresholdRuleType(core, basePath, config, logger, locators));
 }

@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import type { PerformInstallResponse } from '@kbn/product-doc-base-plugin/common/http_api/installation';
 import { REACT_QUERY_KEYS } from './const';
 import { useAssistantContext } from '../../../..';
-
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useInstallProductDoc() {
   const { productDocBase, toasts } = useAssistantContext();
   const queryClient = useQueryClient();
 
-  return useMutation<PerformInstallResponse, ServerError, void>(
+  return useMutation<PerformInstallResponse, ServerError, string>(
     [REACT_QUERY_KEYS.INSTALL_PRODUCT_DOC],
-    () => {
-      return productDocBase.installation.install();
+    (inferenceId: string) => {
+      return productDocBase.installation.install({ inferenceId });
     },
     {
       onSuccess: () => {

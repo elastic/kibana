@@ -9,12 +9,10 @@
 
 import { setTimeout } from 'timers/promises';
 
-import Axios from 'axios';
-import { isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
-import { GithubIssueMini } from './github_api';
-import { TestFailure } from './get_failures';
+import type { TestFailure } from './get_failures';
+import type { GithubIssueMini } from './github_api';
 
 export interface FailedTestIssue {
   classname: string;
@@ -84,12 +82,38 @@ export class ExistingFailedTestIssues {
     this.log.debug('loaded', this.results.size - initialResultSize, 'existing test issues');
   }
 
+  isScoutFailure(failure: TestFailure): boolean {
+    return 'id' in failure && 'target' in failure && 'location' in failure;
+  }
+
   getForFailure(failure: TestFailure) {
+    // Check if this is a Scout failure
+    const isScout = this.isScoutFailure(failure);
+
     for (const [f, issue] of this.results) {
-      if (f.classname === failure.classname && f.name === failure.name) {
-        return issue;
+      if (!issue) {
+        continue;
+      }
+
+      // Verify both input and key are the same type (both Scout or both FTR)
+      const isKeyScoutFailure = this.isScoutFailure(f);
+
+      if (isScout) {
+        // For Scout failures, match by test name only (ignore target)
+        // Both must be Scout failures and names must match
+        if (isKeyScoutFailure && f.name === failure.name) {
+          return issue;
+        }
+      } else {
+        // For FTR failures, match by classname and name
+        // Both must be FTR failures (not Scout) and classname+name must match
+        if (!isKeyScoutFailure && f.classname === failure.classname && f.name === failure.name) {
+          return issue;
+        }
       }
     }
+
+    return undefined;
   }
 
   addNewlyCreated(failure: TestFailure, newIssue: GithubIssueMini) {
@@ -115,42 +139,59 @@ export class ExistingFailedTestIssues {
     while (true) {
       attempt += 1;
 
+      let response: Response;
       try {
-        const resp = await Axios.request<FindFailedTestIssuesResponse>({
+        response = await fetch(`${BASE_URL}/v1/find_failed_test_issues`, {
           method: 'POST',
-          baseURL: BASE_URL,
-          allowAbsoluteUrls: false,
-          url: '/v1/find_failed_test_issues',
-          data: {
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
             failures: failures.map((f) => ({
               classname: f.classname,
               name: f.name,
             })),
-          },
+          }),
         });
-
-        return resp.data.existingIssues;
       } catch (error: unknown) {
-        if (
-          attempt < maxAttempts &&
-          ((isAxiosResponseError(error) && error.response.status >= 500) ||
-            isAxiosRequestError(error))
-        ) {
-          this.log.error(error);
+        // Network-level error (fetch throws TypeError for DNS/connection failures).
+        if (attempt < maxAttempts) {
+          this.log.error(error as Error);
           this.log.warning(`Failure talking to ci-stats, waiting ${attempt} before retrying`);
           await setTimeout(attempt * 1000);
           continue;
         }
-
         throw error;
       }
+
+      if (!response.ok) {
+        // Server error: retry on 5xx, throw immediately on 4xx.
+        if (attempt < maxAttempts && response.status >= 500) {
+          this.log.warning(`Failure talking to ci-stats, waiting ${attempt} before retrying`);
+          await setTimeout(attempt * 1000);
+          continue;
+        }
+        throw new Error(`${response.status}:${await response.text()}`);
+      }
+
+      return ((await response.json()) as FindFailedTestIssuesResponse).existingIssues;
     }
   }
 
   private isFailureSeen(failure: TestFailure) {
+    // Check if this is a Scout failure
+    const isScout = this.isScoutFailure(failure);
+
     for (const seen of this.results.keys()) {
-      if (seen.classname === failure.classname && seen.name === failure.name) {
-        return true;
+      if (isScout) {
+        // For Scout failures, match by test name only (ignore target)
+        const isExistingScoutFailure = this.isScoutFailure(seen);
+        if (isExistingScoutFailure && seen.name === failure.name) {
+          return true;
+        }
+      } else {
+        // For FTR failures, use original matching logic
+        if (seen.classname === failure.classname && seen.name === failure.name) {
+          return true;
+        }
       }
     }
 

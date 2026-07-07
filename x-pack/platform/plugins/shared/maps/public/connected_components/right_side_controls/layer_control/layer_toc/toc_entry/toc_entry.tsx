@@ -8,9 +8,16 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiIcon, EuiButtonIcon, EuiConfirmModal, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiConfirmModal,
+  EuiIcon,
+  EuiToolTip,
+  htmlIdGenerator,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 import {
@@ -20,7 +27,7 @@ import {
   FIT_TO_DATA_LABEL,
 } from './action_labels';
 import { LegendDetails } from './legend_details';
-import { ILayer } from '../../../../../classes/layers/layer';
+import type { ILayer } from '../../../../../classes/layers/layer';
 import { isLayerGroup } from '../../../../../classes/layers/layer_group';
 
 function escapeLayerName(name: string) {
@@ -153,6 +160,8 @@ export class TOCEntry extends Component<Props, State> {
       return null;
     }
 
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
+
     const closeModal = () => {
       this.setState({
         shouldShowModal: false,
@@ -166,7 +175,9 @@ export class TOCEntry extends Component<Props, State> {
 
     return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
         title="Discard changes"
+        titleProps={{ id: confirmModalTitleId }}
         onCancel={closeModal}
         onConfirm={openPanel}
         cancelButtonText="Do not proceed"
@@ -182,51 +193,61 @@ export class TOCEntry extends Component<Props, State> {
 
   _renderQuickActions() {
     const quickActions = [
-      <EuiButtonIcon
-        key="toggleVisiblity"
-        iconType={getVisibilityToggleIcon(this.props.layer.isVisible())}
-        title={getVisibilityToggleLabel(this.props.layer.isVisible())}
-        aria-label={getVisibilityToggleLabel(this.props.layer.isVisible())}
-        onClick={this._toggleVisible}
-      />,
+      <EuiToolTip
+        content={getVisibilityToggleLabel(this.props.layer.isVisible())}
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          key="toggleVisiblity"
+          iconType={getVisibilityToggleIcon(this.props.layer.isVisible())}
+          aria-label={getVisibilityToggleLabel(this.props.layer.isVisible())}
+          onClick={this._toggleVisible}
+        />
+      </EuiToolTip>,
     ];
 
     if (this.state.supportsFitToBounds) {
       quickActions.push(
-        <EuiButtonIcon
-          key="fitToBounds"
-          iconType="expand"
-          title={FIT_TO_DATA_LABEL}
-          aria-label={FIT_TO_DATA_LABEL}
-          onClick={this._fitToBounds}
-        />
+        <EuiToolTip content={FIT_TO_DATA_LABEL} disableScreenReaderOutput>
+          <EuiButtonIcon
+            key="fitToBounds"
+            iconType="maximize"
+            aria-label={FIT_TO_DATA_LABEL}
+            onClick={this._fitToBounds}
+          />
+        </EuiToolTip>
       );
     }
 
     if (!this.props.isReadOnly) {
       quickActions.push(
-        <EuiButtonIcon
-          key="settings"
-          isDisabled={this.props.isEditButtonDisabled}
-          iconType="pencil"
-          aria-label={EDIT_LAYER_SETTINGS_LABEL}
-          title={EDIT_LAYER_SETTINGS_LABEL}
-          onClick={this._openLayerPanelWithCheck}
-        />
+        <EuiToolTip content={EDIT_LAYER_SETTINGS_LABEL} disableScreenReaderOutput>
+          <EuiButtonIcon
+            key="settings"
+            isDisabled={this.props.isEditButtonDisabled}
+            iconType="pencil"
+            aria-label={EDIT_LAYER_SETTINGS_LABEL}
+            onClick={this._openLayerPanelWithCheck}
+          />
+        </EuiToolTip>
       );
       quickActions.push(
-        <EuiButtonIcon
-          key="reorder"
-          iconType="grab"
-          title={i18n.translate('xpack.maps.layerControl.tocEntry.grabButtonTitle', {
+        <EuiToolTip
+          content={i18n.translate('xpack.maps.layerControl.tocEntry.grabButtonTitle', {
             defaultMessage: 'Reorder layer',
           })}
-          aria-label={i18n.translate('xpack.maps.layerControl.tocEntry.grabButtonAriaLabel', {
-            defaultMessage: 'Reorder layer',
-          })}
-          className="mapTocEntry__grab"
-          {...this.props.dragHandleProps}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            key="reorder"
+            iconType="dragVertical"
+            aria-label={i18n.translate('xpack.maps.layerControl.tocEntry.grabButtonAriaLabel', {
+              defaultMessage: 'Reorder layer',
+            })}
+            className="mapTocEntry__grab"
+            {...this.props.dragHandleProps}
+          />
+        </EuiToolTip>
       );
     }
 
@@ -265,8 +286,9 @@ export class TOCEntry extends Component<Props, State> {
         >
           <EuiIcon
             className="eui-alignBaseline"
-            type={isLegendDetailsOpen ? 'arrowUp' : 'arrowDown'}
+            type={isLegendDetailsOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
             size="s"
+            aria-hidden={true}
           />
         </button>
       </span>
@@ -347,7 +369,7 @@ export class TOCEntry extends Component<Props, State> {
 
         {this.props.isFeatureEditorOpenForLayer && (
           <div className="mapTocEntry-isInEditingMode__row">
-            <EuiIcon type="vector" size="s" />
+            <EuiIcon type="vectorSquare" size="s" aria-hidden={true} />
             <span className="mapTocEntry-isInEditingMode__editFeatureText">
               <FormattedMessage
                 id="xpack.maps.layerControl.tocEntry.EditFeatures"

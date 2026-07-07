@@ -6,12 +6,12 @@
  */
 
 import React, { Fragment, useState } from 'react';
-import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { deleteDataStreams } from '../../../../services/api';
-import { notificationService } from '../../../../services/notification';
+import { useServices } from '../../../../app_context';
 
 interface Props {
   dataStreams: string[];
@@ -25,7 +25,10 @@ export const DeleteDataStreamConfirmationModal: React.FunctionComponent<Props> =
   dataStreams: string[];
   onClose: (data?: { hasDeletedDataStreams: boolean }) => void;
 }) => {
+  const { notificationService } = useServices();
   const [isLoading, setLoading] = useState(false);
+
+  const modalTitleId = useGeneratedHtmlId();
 
   const dataStreamsCount = dataStreams.length;
 
@@ -88,6 +91,8 @@ export const DeleteDataStreamConfirmationModal: React.FunctionComponent<Props> =
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       buttonColor="danger"
       data-test-subj="deleteDataStreamsConfirmation"
       title={

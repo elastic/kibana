@@ -34,9 +34,13 @@ import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plu
 import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import type { InferenceServerStart, InferenceServerSetup } from '@kbn/inference-plugin/server';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
-import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
-import type { SLOServerStart, SLOServerSetup } from '@kbn/slo-plugin/server';
+import type { LlmTasksPluginStart, LlmTasksPluginSetup } from '@kbn/llm-tasks-plugin/server';
 import type { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import type { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
+import type {
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityAIAssistantAppServerStart {}
@@ -57,9 +61,10 @@ export interface ObservabilityAIAssistantAppPluginStartDependencies {
   serverless?: ServerlessPluginStart;
   inference: InferenceServerStart;
   logsDataAccess: LogsDataAccessPluginStart;
-  slo: SLOServerStart;
   spaces: SpacesPluginStart;
   llmTasks: LlmTasksPluginStart;
+  productDocBase: ProductDocBaseStartContract;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }
 
 export interface ObservabilityAIAssistantAppPluginSetupDependencies {
@@ -76,6 +81,8 @@ export interface ObservabilityAIAssistantAppPluginSetupDependencies {
   cloud?: CloudSetup;
   serverless?: ServerlessPluginSetup;
   inference: InferenceServerSetup;
-  slo: SLOServerSetup;
   spaces: SpacesPluginSetup;
+  llmTasks: LlmTasksPluginSetup;
+  productDocBase: ProductDocBaseStartContract;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup;
 }

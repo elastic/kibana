@@ -15,20 +15,27 @@ export interface FancySelectProps {
   value: string;
   options: FancySelectOption[];
   onChange: (value: string) => void;
+  ariaLabel: string;
 }
 
-export const FancySelect: React.FC<FancySelectProps> = ({ value, options, onChange }) => {
+export const FancySelect: React.FC<FancySelectProps> = ({
+  value,
+  options,
+  onChange,
+  ariaLabel,
+}) => {
   return (
     <EuiSuperSelect
+      aria-label={ariaLabel}
       valueOfSelected={value}
       options={options.map((option) => ({
         value: option.id,
-        icon: option.icon,
+        prepend: option.icon,
         layoutAlign: 'center',
         inputDisplay: (
           <EuiFlexGroup justifyContent={'spaceBetween'} alignItems={'center'} gutterSize={'s'}>
             <EuiFlexItem grow={false}>
-              <EuiIcon type={option.icon} />
+              <EuiIcon type={option.icon} aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={true}>
               <EuiText size={'s'} textAlign={'left'}>

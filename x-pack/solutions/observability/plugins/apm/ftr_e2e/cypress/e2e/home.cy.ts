@@ -64,7 +64,7 @@ describe('Home page', () => {
     it('navigates to service overview page with transaction type', () => {
       cy.visitKibana(serviceInventoryHref);
 
-      cy.contains('Services');
+      cy.contains('Service inventory');
       cy.contains('opbeans-rum').click({ force: true });
 
       cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'page-load');

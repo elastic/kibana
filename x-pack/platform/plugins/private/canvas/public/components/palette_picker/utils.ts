@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
+import type { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import { isEqual } from 'lodash';
-import { ColorPalette } from '../../../common/lib/palettes';
-import { CustomColorPalette } from './types';
+import type { ColorPalette } from '../../../common/lib/palettes';
+import type { CustomColorPalette } from './types';
 
 export const findPalette = (
   colorPalette: ColorPalette | CustomColorPalette | null,

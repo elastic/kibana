@@ -20,7 +20,9 @@ import { Direction, OsqueryQueries } from '../../../common/search_strategy';
 export const getActionResponses = (
   search: IScopedSearchClient,
   actionId: string,
-  agentsCount: number
+  agentsCount: number,
+  integrationNamespaces: string[] | undefined,
+  spaceId: string
 ): Observable<{
   action_id: string;
   docs: number;
@@ -59,6 +61,8 @@ export const getActionResponses = (
           direction: Direction.desc,
           field: '@timestamp',
         },
+        integrationNamespaces,
+        spaceId,
       },
       {
         strategy: 'osquerySearchStrategy',

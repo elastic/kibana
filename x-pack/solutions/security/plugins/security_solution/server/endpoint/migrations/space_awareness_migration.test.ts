@@ -14,14 +14,13 @@ import {
   migrateEndpointDataToSupportSpaces,
 } from './space_awareness_migration';
 import { ExceptionsListItemGenerator } from '../../../common/endpoint/data_generators/exceptions_list_item_generator';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { REFERENCE_DATA_SAVED_OBJECT_TYPE } from '../lib/reference_data';
+import { type ReferenceDataClientInterface } from '../lib/reference_data';
 import { GLOBAL_ARTIFACT_TAG } from '../../../common/endpoint/service/artifacts';
 import {
   buildPerPolicyTag,
   buildSpaceOwnerIdTag,
 } from '../../../common/endpoint/service/artifacts/utils';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
 import { applyEsClientSearchMock } from '../mocks/utils.mock';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../common/endpoint/constants';
@@ -32,8 +31,9 @@ import { FleetPackagePolicyGenerator } from '../../../common/endpoint/data_gener
 import type { LogsEndpointAction, PolicyData } from '../../../common/endpoint/types';
 import type { Agent } from '@kbn/fleet-plugin/common';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../services/actions/constants';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 describe('Space awareness migration', () => {
   let endpointServiceMock: ReturnType<typeof createMockEndpointAppContextService>;
@@ -44,8 +44,6 @@ describe('Space awareness migration', () => {
 
   beforeEach(() => {
     endpointServiceMock = createMockEndpointAppContextService();
-    // @ts-expect-error
-    endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
     migrationsState = {
       [ARTIFACTS_MIGRATION_REF_DATA_ID]: {
         id: ARTIFACTS_MIGRATION_REF_DATA_ID,
@@ -55,6 +53,7 @@ describe('Space awareness migration', () => {
           started: '',
           finished: '',
           status: 'not-started',
+          version: 2,
         },
       },
       [RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID]: {
@@ -69,34 +68,16 @@ describe('Space awareness migration', () => {
       },
     };
 
-    const soClientMock =
-      endpointServiceMock.savedObjects.createInternalScopedSoClient() as jest.Mocked<SavedObjectsClientContract>;
+    const refDataMock =
+      endpointServiceMock.getReferenceDataClient() as DeeplyMockedKeys<ReferenceDataClientInterface>;
 
-    // @ts-expect-error
-    soClientMock.get.mockImplementation(async (type, id) => {
-      if (type === REFERENCE_DATA_SAVED_OBJECT_TYPE) {
-        return { attributes: migrationsState[id as keyof typeof migrationsState] };
-      }
-
-      return { attributes: {} };
+    refDataMock.get.mockImplementation(async (id) => {
+      return migrationsState[id as keyof typeof migrationsState];
     });
-    // @ts-expect-error
-    soClientMock.update.mockImplementation(async (type, _id, update) => {
-      if (type === REFERENCE_DATA_SAVED_OBJECT_TYPE) {
-        return { attributes: update };
-      }
 
-      return { attributes: {} };
+    refDataMock.update.mockImplementation(async (id, data) => {
+      return data;
     });
-  });
-
-  it('should do nothing if feature flag is disabled', async () => {
-    // @ts-expect-error
-    endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = false;
-
-    await expect(migrateEndpointDataToSupportSpaces(endpointServiceMock)).resolves.toBeUndefined();
-    expect(endpointServiceMock.getInternalFleetServices).not.toHaveBeenCalled();
-    expect(endpointServiceMock.getInternalEsClient).not.toHaveBeenCalled();
   });
 
   describe('for Artifacts', () => {
@@ -155,19 +136,21 @@ describe('Space awareness migration', () => {
         expect.objectContaining({
           executeFunctionOnStream: expect.any(Function),
           listId: [
+            'endpoint_list',
             'endpoint_trusted_apps',
+            'endpoint_trusted_devices',
             'endpoint_event_filters',
             'endpoint_host_isolation_exceptions',
             'endpoint_blocklists',
-            'endpoint_list',
           ],
-          namespaceType: ['agnostic', 'agnostic', 'agnostic', 'agnostic', 'agnostic'],
+          namespaceType: ['agnostic', 'agnostic', 'agnostic', 'agnostic', 'agnostic', 'agnostic'],
           filter: [
-            `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`,
-            `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`,
-            `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`,
-            `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`,
-            `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`,
+            `NOT exception-list-agnostic.attributes.tags:(ownerSpaceId*)`,
+            `NOT exception-list-agnostic.attributes.tags:(ownerSpaceId*)`,
+            `NOT exception-list-agnostic.attributes.tags:(ownerSpaceId*)`,
+            `NOT exception-list-agnostic.attributes.tags:(ownerSpaceId*)`,
+            `NOT exception-list-agnostic.attributes.tags:(ownerSpaceId*)`,
+            `NOT exception-list-agnostic.attributes.tags:(ownerSpaceId*)`,
           ],
         })
       );
@@ -190,7 +173,7 @@ describe('Space awareness migration', () => {
     });
 
     it('should add the global artifact tag to endpoint exceptions', async () => {
-      findExceptionsResultData[0].list_id = ENDPOINT_LIST_ID;
+      findExceptionsResultData[0].list_id = ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id;
       findExceptionsResultData[0].tags = [];
 
       await expect(
@@ -211,13 +194,24 @@ describe('Space awareness migration', () => {
         migrateEndpointDataToSupportSpaces(endpointServiceMock)
       ).resolves.toBeUndefined();
 
-      expect(
-        endpointServiceMock.savedObjects.createInternalScopedSoClient().update
-      ).toHaveBeenCalledWith(
-        REFERENCE_DATA_SAVED_OBJECT_TYPE,
+      expect(endpointServiceMock.getReferenceDataClient().update).toHaveBeenCalledWith(
         ARTIFACTS_MIGRATION_REF_DATA_ID,
-        expect.objectContaining({ metadata: expect.objectContaining({ status: 'complete' }) }),
-        expect.anything()
+        expect.objectContaining({ metadata: expect.objectContaining({ status: 'complete' }) })
+      );
+    });
+
+    it('should re-run migration if version is less than 2', async () => {
+      artifactMigrationState.metadata.status = 'complete';
+      artifactMigrationState.metadata.version = 1;
+
+      await expect(
+        migrateEndpointDataToSupportSpaces(endpointServiceMock)
+      ).resolves.toBeUndefined();
+      expect(endpointServiceMock.getReferenceDataClient().update).toHaveBeenCalledWith(
+        ARTIFACTS_MIGRATION_REF_DATA_ID,
+        expect.objectContaining({
+          metadata: expect.objectContaining({ status: 'complete', version: 2 }),
+        })
       );
     });
   });
@@ -293,7 +287,7 @@ describe('Space awareness migration', () => {
         await expect(
           migrateEndpointDataToSupportSpaces(endpointServiceMock)
         ).resolves.toBeUndefined();
-        expect(endpointServiceMock.getExceptionListsClient).not.toHaveBeenCalled();
+        expect(endpointServiceMock.getInternalEsClient().indices.exists).not.toHaveBeenCalled();
       }
     );
 
@@ -403,13 +397,9 @@ describe('Space awareness migration', () => {
       await expect(
         migrateEndpointDataToSupportSpaces(endpointServiceMock)
       ).resolves.toBeUndefined();
-      expect(
-        endpointServiceMock.savedObjects.createInternalScopedSoClient().update
-      ).toHaveBeenCalledWith(
-        REFERENCE_DATA_SAVED_OBJECT_TYPE,
+      expect(endpointServiceMock.getReferenceDataClient().update).toHaveBeenCalledWith(
         RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID,
-        expect.objectContaining({ metadata: expect.objectContaining({ status: 'complete' }) }),
-        expect.anything()
+        expect.objectContaining({ metadata: expect.objectContaining({ status: 'complete' }) })
       );
     });
   });

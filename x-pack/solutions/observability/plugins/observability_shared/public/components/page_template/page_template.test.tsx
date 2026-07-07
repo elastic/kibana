@@ -11,11 +11,12 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 import { getKibanaPageTemplateKibanaDependenciesMock as getPageTemplateServices } from '@kbn/shared-ux-page-kibana-template-mocks';
-import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 
 import { createLazyObservabilityPageTemplate } from './lazy_page_template';
 import { ObservabilityPageTemplate } from './page_template';
 import { createNavigationRegistry } from './helpers/navigation_registry';
+import { applicationServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -23,6 +24,24 @@ jest.mock('react-router-dom', () => ({
     pathname: '/test-path',
   }),
 }));
+
+const mockNotifications = notificationServiceMock.createStartContract();
+const mockApplication = applicationServiceMock.createStartContract();
+const mockSpaces = spacesPluginMock.createStartContract();
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        notifications: mockNotifications,
+        application: mockApplication,
+        spaces: mockSpaces,
+      },
+    }),
+  };
+});
 
 const navigationRegistry = createNavigationRegistry();
 
@@ -55,7 +74,6 @@ describe('Page template', () => {
       navigateToApp: async () => {},
       navigationSections$: navigationRegistry.sections$,
       getPageTemplateServices,
-      guidedOnboardingApi: guidedOnboardingMock.createStart().guidedOnboardingApi,
       isSidebarEnabled$: new BehaviorSubject<boolean>(true),
     });
 
@@ -85,7 +103,6 @@ describe('Page template', () => {
           rightSideItems: [<span>Test side item</span>],
         }}
         getPageTemplateServices={getPageTemplateServices}
-        guidedOnboardingApi={guidedOnboardingMock.createStart().guidedOnboardingApi}
       >
         <div>Test structure</div>
       </ObservabilityPageTemplate>
@@ -107,7 +124,6 @@ describe('Page template', () => {
             rightSideItems: [<span>Test side item</span>],
           }}
           getPageTemplateServices={getPageTemplateServices}
-          guidedOnboardingApi={guidedOnboardingMock.createStart().guidedOnboardingApi}
         >
           <div>Test structure</div>
         </ObservabilityPageTemplate>
@@ -118,5 +134,70 @@ describe('Page template', () => {
     expect(container).toHaveTextContent('Section A Url B');
     expect(container).toHaveTextContent('Section B Url A');
     expect(container).toHaveTextContent('Section B Url B');
+  });
+
+  describe('solution view switch callout', () => {
+    const templateProps = {
+      currentAppId$: of('Test app ID'),
+      getUrlForApp: () => '/test-url',
+      navigateToApp: async () => {},
+      navigationSections$: navigationRegistry.sections$,
+      getPageTemplateServices,
+    };
+
+    const MockSolutionViewSwitchCallout = () => <div data-test-subj="solutionViewSwitchCallout" />;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockNotifications.tours.isEnabled.mockReturnValue(true);
+      mockApplication.capabilities = {
+        ...mockApplication.capabilities,
+        spaces: { manage: true },
+      };
+      mockSpaces.ui.components.getSolutionViewSwitchCallout = MockSolutionViewSwitchCallout;
+    });
+
+    it('renders SolutionViewSwitchCallout when all conditions are met', () => {
+      const { getByTestId } = render(
+        <I18nProvider>
+          <ObservabilityPageTemplate {...templateProps}>
+            <div>Test</div>
+          </ObservabilityPageTemplate>
+        </I18nProvider>
+      );
+
+      expect(getByTestId('solutionViewSwitchCallout')).toBeInTheDocument();
+    });
+
+    it('does not render SolutionViewSwitchCallout when announcements are disabled', () => {
+      mockNotifications.tours.isEnabled.mockReturnValue(false);
+
+      const { queryByTestId } = render(
+        <I18nProvider>
+          <ObservabilityPageTemplate {...templateProps}>
+            <div>Test</div>
+          </ObservabilityPageTemplate>
+        </I18nProvider>
+      );
+
+      expect(queryByTestId('solutionViewSwitchCallout')).not.toBeInTheDocument();
+    });
+
+    it('does not render SolutionViewSwitchCallout when canManageSpaces is false', () => {
+      mockApplication.capabilities = {
+        ...mockApplication.capabilities,
+        spaces: { manage: false },
+      };
+
+      const { queryByTestId } = render(
+        <I18nProvider>
+          <ObservabilityPageTemplate {...templateProps}>
+            <div>Test</div>
+          </ObservabilityPageTemplate>
+        </I18nProvider>
+      );
+
+      expect(queryByTestId('solutionViewSwitchCallout')).not.toBeInTheDocument();
+    });
   });
 });

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { ElementType, FC, memo } from 'react';
+import type { ElementType, FC } from 'react';
+import React, { memo } from 'react';
 import { EuiExpression, EuiToken, EuiFlexGroup, useEuiTheme, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import type { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { Entry } from '../types';
 import * as i18n from '../../translations';
 import { getValue, getValueExpression } from './entry_content.helper';

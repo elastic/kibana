@@ -6,11 +6,17 @@
  */
 
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { ActionVariable } from '@kbn/alerting-plugin/common';
 import { useEffect, useMemo, useState } from 'react';
+/**
+ * ## IMPORTANT TODO ##
+ * This file imports @elastic/ecs directly, which imports all ECS fields into the bundle.
+ * This should be migrated to using the unified fields metadata plugin instead.
+ * See https://github.com/elastic/kibana/tree/main/x-pack/platform/plugins/shared/fields_metadata for more details.
+ */
+// eslint-disable-next-line no-restricted-imports
 import { EcsFlat } from '@elastic/ecs';
-
+import type { GetBrowserFieldsResponse } from '@kbn/alerting-types';
 import {
   fetchRuleTypeAlertFields,
   getDescription,
@@ -23,7 +29,7 @@ export function useRuleTypeAlertFields(
 ): { isLoading: boolean; fields: ActionVariable[] } {
   // Reimplement useQuery here; this hook is sometimes called in contexts without a QueryClientProvider
   const [isLoading, setIsLoading] = useState(false);
-  const [data, setData] = useState<DataViewField[]>([]);
+  const [data, setData] = useState<GetBrowserFieldsResponse['fields']>([]);
 
   useEffect(() => {
     if (enabled && data.length === 0 && ruleTypeId) {

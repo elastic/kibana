@@ -1,9 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/apm-plugin",
-  "owner": [
-    "@elastic/obs-ux-infra_services-team"
-  ],
+  "owner": ["@elastic/obs-presentation-team", "@elastic/obs-exploration-team"],
   "group": "observability",
   "visibility": "private",
   "description": "The user interface for Elastic APM",
@@ -11,15 +9,13 @@
     "id": "apm",
     "browser": true,
     "server": true,
-    "configPath": [
-      "xpack",
-      "apm"
-    ],
+    "configPath": ["xpack", "apm"],
     "requiredPlugins": [
       "apmSourcesAccess",
       "apmDataAccess",
       "data",
       "dashboard",
+      "contentManagement",
       "controls",
       "embeddable",
       "features",
@@ -34,18 +30,21 @@
       "triggersActionsUi",
       "share",
       "unifiedSearch",
+      "kql",
       "dataViews",
+      "presentationUtil",
       "lens",
       "maps",
       "uiActions",
       "logsDataAccess",
       "savedSearch",
-      "entityManager",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "discoverShared"
     ],
     "optionalPlugins": [
       "actions",
       "alerting",
+      "cases",
       "charts",
       "cloud",
       "discover",
@@ -54,6 +53,7 @@
       "home",
       "ml",
       "security",
+      "slo",
       "spaces",
       "serverless",
       "taskManager",
@@ -61,9 +61,12 @@
       "customIntegrations",
       "licenseManagement",
       "profilingDataAccess",
-      "cases",
       "observabilityAIAssistant",
-      "share"
+      "observabilityAgentBuilder",
+      "share",
+      "agentBuilder",
+      "slo",
+      "cps",
     ],
     "requiredBundles": [
       "fleet",
@@ -71,7 +74,9 @@
       "kibanaUtils",
       "ml",
       "observability",
-      "maps"
+      "maps",
+      "observabilityAgentBuilder",
+      "unifiedDocViewer"
     ]
   }
 }

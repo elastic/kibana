@@ -6,12 +6,18 @@
  */
 
 import YAML from 'yaml';
-import {
+import { DeepStrict } from '@kbn/zod-helpers/v4';
+import type {
   ContentPack,
   ContentPackDashboard,
   ContentPackEntry,
   ContentPackManifest,
   ContentPackSavedObject,
+  ContentPackStream,
+  ContentPackStreamRequest,
+} from '@kbn/content-packs-schema';
+import {
+  SUPPORTED_ENTRY_TYPE,
   SUPPORTED_SAVED_OBJECT_TYPE,
   contentPackManifestSchema,
   getEntryTypeByFile,
@@ -19,13 +25,48 @@ import {
   isSupportedFile,
   isSupportedReferenceType,
 } from '@kbn/content-packs-schema';
+import { Streams } from '@kbn/streams-schema';
 import AdmZip from 'adm-zip';
 import path from 'path';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import { compact, pick, uniqBy } from 'lodash';
 import { InvalidContentPackError } from './error';
 
 const ARCHIVE_ENTRY_MAX_SIZE_BYTES = 1 * 1024 * 1024; // 1MB
+
+// Strict wired upsert schema: `DeepStrict` over the wired upsert shape (equivalent to
+// `Streams.WiredStream.UpsertRequest.is`), applied so the parsed request can be `safeParse`d
+// without a type assertion.
+const wiredUpsertRequestSchema = DeepStrict(Streams.WiredStream.UpsertRequest.right);
+
+/**
+ * Content-pack stream entries match the wired stream upsert request. Significant-event
+ * queries are not part of content packs (they are managed via the dedicated
+ * `/api/streams/{name}/queries` endpoints), so this guard validates the strict wired upsert
+ * shape. `extractEntries` calls `rejectStreamQueries` first, so any entry that still carries a
+ * `queries` field is rejected upfront and this guard only ever sees a queries-free request.
+ */
+export function isContentPackStreamRequest(value: unknown): value is ContentPackStreamRequest {
+  return wiredUpsertRequestSchema.safeParse(value).success;
+}
+
+/**
+ * Significant-event queries are not part of content packs; they are managed via the dedicated
+ * `/api/streams/{name}/queries` endpoints. Content packs are tech preview, so rather than
+ * half-supporting a legacy shape we reject any stream entry that carries a `queries` field at
+ * all (including an empty `queries: []`) so detections are never silently dropped on import.
+ */
+export function rejectStreamQueries(
+  streamName: string | undefined,
+  entryName: string,
+  request: Record<string, unknown>
+): void {
+  if (request.queries !== undefined) {
+    throw new InvalidContentPackError(
+      `Stream [${streamName}] in entry [${entryName}] contains significant-event queries, which are not supported by content packs. Manage them via the /api/streams/{name}/queries endpoints.`
+    );
+  }
+}
 
 export async function parseArchive(archive: Readable): Promise<ContentPack> {
   const zip: AdmZip = await new Promise((resolve, reject) => {
@@ -42,7 +83,9 @@ export async function parseArchive(archive: Readable): Promise<ContentPack> {
   });
 
   const rootDir = getRootDir(zip.getEntries());
+  // @ts-expect-error upgrade typescript v5.9.3
   const manifest = await extractManifest(rootDir, zip);
+  // @ts-expect-error upgrade typescript v5.9.3
   const entries = await extractEntries(rootDir, zip);
 
   return { ...manifest, entries };
@@ -59,13 +102,23 @@ export async function generateArchive(manifest: ContentPackManifest, objects: Co
       switch (type) {
         case 'dashboard':
         case 'index-pattern':
-        case 'lens':
+        case 'lens': {
           const subDir = SUPPORTED_SAVED_OBJECT_TYPE[object.type];
           zip.addFile(
             path.join(rootDir, 'kibana', subDir, `${object.id}.json`),
             Buffer.from(JSON.stringify(object, null, 2))
           );
           return;
+        }
+
+        case 'stream': {
+          const subDir = SUPPORTED_ENTRY_TYPE.stream;
+          zip.addFile(
+            path.join(rootDir, subDir, `${object.name}.json`),
+            Buffer.from(JSON.stringify({ name: object.name, request: object.request }, null, 2))
+          );
+          return;
+        }
 
         default:
           missingEntryTypeImpl(type);
@@ -128,6 +181,36 @@ async function extractEntries(rootDir: string, zip: AdmZip): Promise<ContentPack
 
         case 'dashboard':
           return resolveDashboard(rootDir, zip, entry);
+
+        case 'stream':
+          return readEntry(entry).then((data) => {
+            const parsed = JSON.parse(data.toString()) as {
+              name?: string;
+              request?: Record<string, unknown>;
+            };
+            const requestObject =
+              parsed.request && typeof parsed.request === 'object' && !Array.isArray(parsed.request)
+                ? parsed.request
+                : undefined;
+
+            if (requestObject) {
+              rejectStreamQueries(parsed.name, entry.entryName, requestObject);
+            }
+
+            const request = parsed.request;
+            if (!parsed.name || !isContentPackStreamRequest(request)) {
+              throw new InvalidContentPackError(
+                `Invalid stream definition in entry [${entry.entryName}]`
+              );
+            }
+
+            const streamEntry: ContentPackStream = {
+              type: 'stream',
+              name: parsed.name,
+              request,
+            };
+            return streamEntry;
+          });
 
         default:
           missingEntryTypeImpl(type);

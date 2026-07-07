@@ -6,118 +6,116 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
+import '@kbn/code-editor-mock/jest_helper';
 
 import { getExecuteDetails } from '../../__fixtures__';
-import { API_BASE_PATH } from '../../common/constants';
+import { API_BASE_PATH, WATCH_TYPES } from '../../common/constants';
 import { defaultWatch } from '../../public/application/models/watch';
-import { setupEnvironment, pageHelpers } from './helpers';
-import type { WatchCreateJsonTestBed } from './helpers/watch_create_json_page.helpers';
 import { WATCH } from './helpers/jest_constants';
+import type { HttpSetup } from '@kbn/core/public';
+import { WatchEditPage } from '../../public/application/sections/watch_edit_page/watch_edit_page';
+import { registerRouter } from '../../public/application/lib/navigation';
+import { setupEnvironment, WithAppDependencies } from './helpers/setup_environment';
 
-const { setup } = pageHelpers.watchCreateJsonPage;
+const renderCreateJsonWatch = (httpSetup: HttpSetup) => {
+  const Wrapped = WithAppDependencies(WatchEditPage, httpSetup);
+  render(
+    <I18nProvider>
+      <Wrapped match={{ params: { id: undefined, type: WATCH_TYPES.JSON } }} />
+    </I18nProvider>
+  );
+};
 
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
-  return {
-    ...original,
-    // Mocking CodeEditor, which uses React Monaco under the hood
-    CodeEditor: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-        data-currentvalue={props.value}
-        onChange={(e: any) => {
-          props.onChange(e.jsonContent);
-        }}
-      />
-    ),
-  };
-});
+const selectSimulateTab = async (user: ReturnType<typeof userEvent.setup>) => {
+  await user.click(screen.getByText('Simulate'));
+  await screen.findByTestId('jsonWatchSimulateForm');
+};
 
 describe('<JsonWatchEditPage /> create route', () => {
-  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
-  let testBed: WatchCreateJsonTestBed;
+  let httpSetup: HttpSetup;
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let routerHistoryPush: jest.Mock;
 
-  beforeAll(() => {
-    jest.useFakeTimers();
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    ({ httpSetup, httpRequestsMockHelpers } = setupEnvironment());
+    routerHistoryPush = jest.fn();
+    registerRouter({ history: { push: routerHistoryPush } });
+
+    renderCreateJsonWatch(httpSetup);
+    await screen.findByTestId('jsonWatchForm');
   });
 
-  afterAll(() => {
-    jest.useRealTimers();
+  test('should set the correct page title', () => {
+    expect(screen.getByTestId('pageTitle')).toHaveTextContent('Create advanced watch');
   });
 
-  describe('on component mount', () => {
-    beforeEach(async () => {
-      await act(async () => {
-        testBed = await setup(httpSetup);
-      });
-
-      testBed.component.update();
+  describe('tabs', () => {
+    test('should have 2 tabs', () => {
+      const tabs = screen.getAllByTestId('tab');
+      expect(tabs).toHaveLength(2);
+      expect(tabs.map((t) => t.textContent)).toEqual(['Edit', 'Simulate']);
     });
 
-    test('should set the correct page title', () => {
-      const { find } = testBed;
-      expect(find('pageTitle').text()).toBe('Create advanced watch');
+    test('should navigate to the "Simulate" tab', async () => {
+      const user = userEvent.setup();
+
+      expect(screen.getByTestId('jsonWatchForm')).toBeInTheDocument();
+      expect(screen.queryByTestId('jsonWatchSimulateForm')).not.toBeInTheDocument();
+
+      // Set watch id (required field) and switch to simulate tab
+      fireEvent.change(screen.getByTestId('idInput'), { target: { value: WATCH.watch.id } });
+      await selectSimulateTab(user);
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('jsonWatchForm')).not.toBeInTheDocument();
+      });
+      expect(screen.getByTestId('jsonWatchSimulateForm')).toBeInTheDocument();
     });
+  });
 
-    describe('tabs', () => {
-      test('should have 2 tabs', () => {
-        const { find } = testBed;
+  describe('create', () => {
+    describe('form validation', () => {
+      test('should not allow empty ID field', async () => {
+        const user = userEvent.setup();
+        fireEvent.change(screen.getByTestId('idInput'), { target: { value: '' } });
 
-        expect(find('tab').length).toBe(2);
-        expect(find('tab').map((t) => t.text())).toEqual(['Edit', 'Simulate']);
+        await user.click(screen.getByTestId('saveWatchButton'));
+        expect(await screen.findByText('ID is required')).toBeInTheDocument();
       });
 
-      test('should navigate to the "Simulate" tab', async () => {
-        const { exists, actions } = testBed;
+      test('should not allow invalid characters for ID field', async () => {
+        const user = userEvent.setup();
+        fireEvent.change(screen.getByTestId('idInput'), { target: { value: 'invalid$id*field/' } });
 
-        expect(exists('jsonWatchForm')).toBe(true);
-        expect(exists('jsonWatchSimulateForm')).toBe(false);
-
-        await actions.selectTab('simulate');
-
-        expect(exists('jsonWatchForm')).toBe(false);
-        expect(exists('jsonWatchSimulateForm')).toBe(true);
-      });
-    });
-
-    describe('create', () => {
-      describe('form validation', () => {
-        test('should not allow empty ID field', async () => {
-          const { form, actions } = testBed;
-          form.setInputValue('idInput', '');
-
-          await actions.clickSubmitButton();
-
-          expect(form.getErrorsMessages()).toContain('ID is required');
-        });
-        test('should not allow invalid characters for ID field', async () => {
-          const { form, actions } = testBed;
-          form.setInputValue('idInput', 'invalid$id*field/');
-
-          await actions.clickSubmitButton();
-
-          expect(form.getErrorsMessages()).toContain(
+        await user.click(screen.getByTestId('saveWatchButton'));
+        expect(
+          await screen.findByText(
             'ID can only contain letters, underscores, dashes, periods and numbers.'
-          );
-        });
+          )
+        ).toBeInTheDocument();
       });
+    });
 
-      describe('form payload & API errors', () => {
-        test('should send the correct payload', async () => {
-          const { form, actions } = testBed;
-          const { watch } = WATCH;
+    describe('form payload & API errors', () => {
+      test('should send the correct payload', async () => {
+        const user = userEvent.setup();
+        const { watch } = WATCH;
 
-          form.setInputValue('nameInput', watch.name);
-          form.setInputValue('idInput', watch.id);
+        fireEvent.change(screen.getByTestId('nameInput'), { target: { value: watch.name } });
+        fireEvent.change(screen.getByTestId('idInput'), { target: { value: watch.id } });
 
-          await actions.clickSubmitButton();
+        await user.click(screen.getByTestId('saveWatchButton'));
 
-          const DEFAULT_LOGGING_ACTION_ID = 'logging_1';
-          const DEFAULT_LOGGING_ACTION_TYPE = 'logging';
-          const DEFAULT_LOGGING_ACTION_TEXT =
-            'There are {{ctx.payload.hits.total}} documents in your index. Threshold is 10.';
+        const DEFAULT_LOGGING_ACTION_ID = 'logging_1';
+        const DEFAULT_LOGGING_ACTION_TYPE = 'logging';
+        const DEFAULT_LOGGING_ACTION_TEXT =
+          'There are {{ctx.payload.hits.total}} documents in your index. Threshold is 10.';
 
+        await waitFor(() => {
           expect(httpSetup.put).toHaveBeenLastCalledWith(
             `${API_BASE_PATH}/watch/${watch.id}`,
             expect.objectContaining({
@@ -143,66 +141,67 @@ describe('<JsonWatchEditPage /> create route', () => {
           );
         });
 
-        test('should surface the API errors from the "save" HTTP request', async () => {
-          const { form, actions, exists, find } = testBed;
-          const { watch } = WATCH;
+        expect(routerHistoryPush).toHaveBeenCalledWith({ pathname: '/watches' });
+      });
 
-          form.setInputValue('nameInput', watch.name);
-          form.setInputValue('idInput', watch.id);
+      test('should surface the API errors from the "save" HTTP request', async () => {
+        const user = userEvent.setup();
+        const { watch } = WATCH;
 
-          const error = {
-            statusCode: 400,
-            error: 'Bad request',
-            message: 'Watch payload is invalid',
-            response: {},
-          };
+        fireEvent.change(screen.getByTestId('nameInput'), { target: { value: watch.name } });
+        fireEvent.change(screen.getByTestId('idInput'), { target: { value: watch.id } });
 
-          httpRequestsMockHelpers.setSaveWatchResponse(watch.id, undefined, error);
+        const error: import('./helpers/http_requests').ResponseError = {
+          statusCode: 400,
+          message: 'Watch payload is invalid',
+          response: {},
+        };
 
-          await actions.clickSubmitButton();
+        httpRequestsMockHelpers.setSaveWatchResponse(watch.id, undefined, error);
 
-          expect(exists('sectionError')).toBe(true);
-          expect(find('sectionError').text()).toContain(error.message);
-        });
+        await user.click(screen.getByTestId('saveWatchButton'));
+
+        const sectionError = await screen.findByTestId('sectionError');
+        expect(sectionError).toHaveTextContent(error.message as string);
       });
     });
+  });
 
-    describe('simulate', () => {
-      beforeEach(async () => {
-        const { actions, form } = testBed;
+  describe('simulate', () => {
+    beforeEach(async () => {
+      const user = userEvent.setup();
+      // Set watch id (required field) and switch to simulate tab
+      fireEvent.change(screen.getByTestId('idInput'), { target: { value: WATCH.watch.id } });
+      await selectSimulateTab(user);
+    });
 
-        // Set watch id (required field) and switch to simulate tab
-        form.setInputValue('idInput', WATCH.watch.id);
+    describe('form payload & API errors', () => {
+      test('should execute a watch with no input', async () => {
+        const user = userEvent.setup();
+        const {
+          watch: { id, type },
+        } = WATCH;
 
-        await actions.selectTab('simulate');
-      });
+        await user.click(screen.getByTestId('simulateWatchButton'));
 
-      describe('form payload & API errors', () => {
-        test('should execute a watch with no input', async () => {
-          const { actions } = testBed;
-          const {
-            watch: { id, type },
-          } = WATCH;
+        const actionModes = Object.keys(defaultWatch.actions).reduce<Record<string, string>>(
+          (actionAccum, action) => {
+            actionAccum[action] = 'simulate';
+            return actionAccum;
+          },
+          {}
+        );
 
-          await actions.clickSimulateButton();
+        const executedWatch = {
+          id,
+          type,
+          isNew: true,
+          isActive: true,
+          actions: [],
+          watch: defaultWatch,
+        };
 
-          const actionModes = Object.keys(defaultWatch.actions).reduce(
-            (actionAccum: any, action) => {
-              actionAccum[action] = 'simulate';
-              return actionAccum;
-            },
-            {}
-          );
-
-          const executedWatch = {
-            id,
-            type,
-            isNew: true,
-            isActive: true,
-            actions: [],
-            watch: defaultWatch,
-          };
-
+        await waitFor(() => {
           expect(httpSetup.put).toHaveBeenLastCalledWith(
             `${API_BASE_PATH}/watch/execute`,
             expect.objectContaining({
@@ -215,56 +214,64 @@ describe('<JsonWatchEditPage /> create route', () => {
             })
           );
         });
+      });
 
-        test('should execute a watch with a valid payload', async () => {
-          const { actions, form, find, exists } = testBed;
-          const {
-            watch: { id, type },
-          } = WATCH;
+      test('should execute a watch with a valid payload', async () => {
+        const user = userEvent.setup();
+        const {
+          watch: { id, type },
+        } = WATCH;
 
-          const SCHEDULED_TIME = '5';
-          const TRIGGERED_TIME = '5';
-          const IGNORE_CONDITION = true;
-          const ACTION_MODE = 'force_execute';
+        const SCHEDULED_TIME = '5';
+        const TRIGGERED_TIME = '5';
+        const IGNORE_CONDITION = true;
+        const ACTION_MODE = 'force_execute';
 
-          form.setInputValue('scheduledTimeInput', SCHEDULED_TIME);
-          form.setInputValue('triggeredTimeInput', TRIGGERED_TIME);
-          form.toggleEuiSwitch('ignoreConditionSwitch');
-          form.setInputValue('actionModesSelect', ACTION_MODE);
+        fireEvent.change(screen.getByTestId('scheduledTimeInput'), {
+          target: { value: SCHEDULED_TIME },
+        });
+        fireEvent.change(screen.getByTestId('triggeredTimeInput'), {
+          target: { value: TRIGGERED_TIME },
+        });
+        fireEvent.click(screen.getByTestId('ignoreConditionSwitch'));
+        fireEvent.change(screen.getByTestId('actionModesSelect'), {
+          target: { value: ACTION_MODE },
+        });
 
-          expect(exists('simulateResultsFlyout')).toBe(false);
+        expect(screen.queryByTestId('simulateResultsFlyout')).not.toBeInTheDocument();
 
-          httpRequestsMockHelpers.setLoadExecutionResultResponse({
-            watchHistoryItem: {
-              details: {},
-              watchStatus: {
-                actionStatuses: [],
-              },
+        httpRequestsMockHelpers.setLoadExecutionResultResponse({
+          watchHistoryItem: {
+            details: {},
+            watchStatus: {
+              actionStatuses: [],
             },
-          });
+          },
+        });
 
-          await actions.clickSimulateButton();
+        await user.click(screen.getByTestId('simulateWatchButton'));
 
-          const actionModes = Object.keys(defaultWatch.actions).reduce(
-            (actionAccum: any, action) => {
-              actionAccum[action] = ACTION_MODE;
-              return actionAccum;
-            },
-            {}
-          );
+        const actionModes = Object.keys(defaultWatch.actions).reduce<Record<string, string>>(
+          (actionAccum, action) => {
+            actionAccum[action] = ACTION_MODE;
+            return actionAccum;
+          },
+          {}
+        );
 
-          const executedWatch = {
-            id,
-            type,
-            isNew: true,
-            isActive: true,
-            actions: [],
-            watch: defaultWatch,
-          };
+        const executedWatch = {
+          id,
+          type,
+          isNew: true,
+          isActive: true,
+          actions: [],
+          watch: defaultWatch,
+        };
 
-          const triggeredTime = `now+${TRIGGERED_TIME}s`;
-          const scheduledTime = `now+${SCHEDULED_TIME}s`;
+        const triggeredTime = `now+${TRIGGERED_TIME}s`;
+        const scheduledTime = `now+${SCHEDULED_TIME}s`;
 
+        await waitFor(() => {
           expect(httpSetup.put).toHaveBeenLastCalledWith(
             `${API_BASE_PATH}/watch/execute`,
             expect.objectContaining({
@@ -281,134 +288,107 @@ describe('<JsonWatchEditPage /> create route', () => {
               }),
             })
           );
-
-          expect(exists('simulateResultsFlyout')).toBe(true);
-          expect(find('simulateResultsFlyoutTitle').text()).toEqual('Simulation results');
         });
-      });
 
-      describe('results flyout', () => {
-        describe('correctly displays execution results', () => {
-          const actionModes = ['simulate', 'force_simulate', 'execute', 'force_execute', 'skip'];
-          const actionModeStatusesConditionMet = [
-            'simulated',
-            'simulated',
-            'executed',
-            'executed',
-            'throttled',
-          ];
-          const actionModeStatusesConditionNotMet = [
-            'not simulated',
-            'not simulated',
-            'not executed',
-            'not executed',
-            'throttled',
-          ];
-          const conditionMetStatuses = [true, false];
-          const ACTION_NAME = 'my-logging-action';
+        expect(await screen.findByTestId('simulateResultsFlyout')).toBeInTheDocument();
+        expect(screen.getByTestId('simulateResultsFlyoutTitle')).toHaveTextContent(
+          'Simulation results'
+        );
+      });
+    });
+
+    describe('results flyout', () => {
+      test.each([
+        { actionMode: 'simulate', conditionMet: true, expectedStatus: 'simulated' },
+        { actionMode: 'simulate', conditionMet: false, expectedStatus: 'not simulated' },
+        { actionMode: 'force_simulate', conditionMet: true, expectedStatus: 'simulated' },
+        { actionMode: 'force_simulate', conditionMet: false, expectedStatus: 'not simulated' },
+        { actionMode: 'execute', conditionMet: true, expectedStatus: 'executed' },
+        { actionMode: 'execute', conditionMet: false, expectedStatus: 'not executed' },
+        { actionMode: 'force_execute', conditionMet: true, expectedStatus: 'executed' },
+        { actionMode: 'force_execute', conditionMet: false, expectedStatus: 'not executed' },
+        { actionMode: 'skip', conditionMet: true, expectedStatus: 'throttled' },
+        { actionMode: 'skip', conditionMet: false, expectedStatus: 'throttled' },
+      ])(
+        'should render correct table status for $actionMode (conditionMet=$conditionMet)',
+        async ({ actionMode, conditionMet, expectedStatus }) => {
+          const user = userEvent.setup();
+
+          fireEvent.change(screen.getByTestId('actionModesSelect'), {
+            target: { value: actionMode },
+          });
+
+          const ACTION_NAME = Object.keys(defaultWatch.actions)[0];
           const ACTION_TYPE = 'logging';
           const ACTION_STATE = 'OK';
 
-          actionModes.forEach((actionMode, i) => {
-            conditionMetStatuses.forEach((conditionMet) => {
-              describe('for ' + actionMode + ' action mode', () => {
-                describe(
-                  conditionMet ? 'when the condition is met' : 'when the condition is not met',
-                  () => {
-                    beforeEach(async () => {
-                      const { actions, form } = testBed;
-                      form.setInputValue('actionModesSelect', actionMode);
-
-                      httpRequestsMockHelpers.setLoadExecutionResultResponse({
-                        watchHistoryItem: {
-                          details: {
-                            result: {
-                              condition: {
-                                met: conditionMet,
-                              },
-                              actions:
-                                (conditionMet && [
-                                  {
-                                    id: ACTION_NAME,
-                                    type: ACTION_TYPE,
-                                    status: conditionMet && actionModeStatusesConditionMet[i],
-                                  },
-                                ]) ||
-                                [],
-                            },
-                          },
-                          watchStatus: {
-                            actionStatuses: [
-                              {
-                                id: ACTION_NAME,
-                                state: ACTION_STATE,
-                              },
-                            ],
-                          },
-                        },
-                      });
-
-                      await actions.clickSimulateButton();
-                    });
-
-                    test('should set the correct condition met status', () => {
-                      const { exists } = testBed;
-                      expect(exists('conditionMetStatus')).toBe(conditionMet);
-                      expect(exists('conditionNotMetStatus')).toBe(!conditionMet);
-                    });
-
-                    test('should set the correct values in the table', () => {
-                      const { table } = testBed;
-                      const { tableCellsValues } = table.getMetaData('simulateResultsTable');
-                      const row = tableCellsValues[0];
-                      expect(row).toEqual([
-                        ACTION_NAME,
-                        ACTION_TYPE,
-                        actionMode,
-                        ACTION_STATE,
-                        '',
-                        conditionMet
-                          ? actionModeStatusesConditionMet[i]
-                          : actionModeStatusesConditionNotMet[i],
-                      ]);
-                    });
-                  }
-                );
-              });
-            });
-          });
-        });
-
-        describe('when API returns no results', () => {
-          beforeEach(async () => {
-            const { actions } = testBed;
-
-            httpRequestsMockHelpers.setLoadExecutionResultResponse({
-              watchHistoryItem: {
-                details: {
-                  result: {},
-                },
-                watchStatus: {
-                  actionStatuses: [],
+          httpRequestsMockHelpers.setLoadExecutionResultResponse({
+            watchHistoryItem: {
+              details: {
+                result: {
+                  condition: {
+                    met: conditionMet,
+                  },
+                  actions:
+                    (conditionMet && [
+                      {
+                        id: ACTION_NAME,
+                        type: ACTION_TYPE,
+                        status: expectedStatus,
+                      },
+                    ]) ||
+                    [],
                 },
               },
-            });
-
-            await actions.clickSimulateButton();
+              watchStatus: {
+                actionStatuses: [
+                  {
+                    id: ACTION_NAME,
+                    state: ACTION_STATE,
+                  },
+                ],
+              },
+            },
           });
 
-          test('flyout renders', () => {
-            const { exists } = testBed;
-            expect(exists('simulateResultsFlyout')).toBe(true);
-            expect(exists('simulateResultsFlyoutTitle')).toBe(true);
-          });
+          await user.click(screen.getByTestId('simulateWatchButton'));
 
-          test('condition status is not displayed', () => {
-            const { exists } = testBed;
-            expect(exists('conditionMetStatus')).toBe(false);
-            expect(exists('conditionNotMetStatus')).toBe(false);
-          });
+          expect(await screen.findByTestId('simulateResultsFlyout')).toBeInTheDocument();
+          if (conditionMet) {
+            expect(screen.getByTestId('conditionMetStatus')).toBeInTheDocument();
+          } else {
+            expect(screen.getByTestId('conditionNotMetStatus')).toBeInTheDocument();
+          }
+
+          const table = screen.getByTestId('simulateResultsTable');
+          expect(table).toHaveTextContent(ACTION_NAME);
+          expect(table).toHaveTextContent(ACTION_TYPE);
+          expect(table).toHaveTextContent(actionMode);
+          expect(table).toHaveTextContent(ACTION_STATE);
+          expect(table).toHaveTextContent(expectedStatus);
+        }
+      );
+
+      test('when API returns no results, flyout renders and condition status is not displayed', async () => {
+        const user = userEvent.setup();
+
+        httpRequestsMockHelpers.setLoadExecutionResultResponse({
+          watchHistoryItem: {
+            details: {
+              result: {},
+            },
+            watchStatus: {
+              actionStatuses: [],
+            },
+          },
         });
+
+        await user.click(screen.getByTestId('simulateWatchButton'));
+
+        expect(await screen.findByTestId('simulateResultsFlyout')).toBeInTheDocument();
+        expect(screen.getByTestId('simulateResultsFlyoutTitle')).toBeInTheDocument();
+        expect(screen.queryByTestId('conditionMetStatus')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('conditionNotMetStatus')).not.toBeInTheDocument();
       });
     });
   });

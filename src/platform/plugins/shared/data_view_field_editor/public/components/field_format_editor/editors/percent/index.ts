@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { NumberFormatEditorParams } from '../number/number';
-import { FieldFormatEditorFactory } from '../types';
+import type { NumberFormatEditorParams } from '../number/number';
+import type { FieldFormatEditorFactory } from '../types';
 import { formatId } from './constants';
 
 export type { PercentFormatEditor } from './percent';

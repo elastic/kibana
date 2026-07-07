@@ -8,14 +8,11 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash/fp';
-import { useEnableExperimental } from '../../../common/hooks/use_experimental_features';
-import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useSelectDataView } from '../../../data_view_manager/hooks/use_select_data_view';
 import type { Note } from '../../../../common/api/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { createNote } from '../notes/helpers';
-import { sourcererActions } from '../../../sourcerer/store';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import {
@@ -23,13 +20,13 @@ import {
   updateNote as dispatchUpdateNote,
 } from '../../../common/store/app/actions';
 import {
-  setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker,
   setRelativeRangeDatePicker as dispatchSetRelativeRangeDatePicker,
+  setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker,
 } from '../../../common/store/inputs/actions';
 import {
-  applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
-  addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
+  addTimeline as dispatchAddTimeline,
+  applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
 } from '../../store/actions';
 import {
   DEFAULT_FROM_MOMENT,
@@ -40,11 +37,10 @@ import type { UpdateTimeline } from './types';
 export const useUpdateTimeline = () => {
   const dispatch = useDispatch();
   const selectDataView = useSelectDataView();
-  const { newDataViewPickerEnabled } = useEnableExperimental();
 
   return useCallback(
     // NOTE: this is only enabled for the data view picker test
-    // eslint-disable-next-line complexity
+
     ({
       duplicate,
       id,
@@ -65,25 +61,12 @@ export const useUpdateTimeline = () => {
         _timeline = { ...timeline, updated: undefined, changed: true, version: null };
       }
 
-      if (newDataViewPickerEnabled) {
-        selectDataView({
-          id: _timeline.dataViewId,
-          fallbackPatterns: _timeline.indexNames,
-          scope: DataViewManagerScopeName.timeline,
-        });
-      }
+      selectDataView({
+        id: _timeline.dataViewId,
+        fallbackPatterns: _timeline.indexNames,
+        scope: PageScope.timeline,
+      });
 
-      if (!isEmpty(_timeline.indexNames)) {
-        if (!newDataViewPickerEnabled) {
-          dispatch(
-            sourcererActions.setSelectedDataView({
-              id: SourcererScopeName.timeline,
-              selectedDataViewId: _timeline.dataViewId,
-              selectedPatterns: _timeline.indexNames,
-            })
-          );
-        }
-      }
       if (
         _timeline.status === TimelineStatusEnum.immutable &&
         _timeline.timelineType === TimelineTypeEnum.template
@@ -156,6 +139,6 @@ export const useUpdateTimeline = () => {
         );
       }
     },
-    [dispatch, newDataViewPickerEnabled, selectDataView]
+    [dispatch, selectDataView]
   );
 };

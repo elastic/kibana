@@ -8,15 +8,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import type { FilesClient } from '../../../common/files_client';
 import type { FileKind } from '../../../common/types';
 import { fileNameWithExt } from '../common_schemas';
 import { fileErrors } from '../../file';
-import { getDownloadHeadersForFile, getDownloadedFileName } from '../common';
-import { getById } from './helpers';
+import { getFileHttpResponseOptions, getDownloadedFileName } from '../common';
+import { getById, validateFileNameExtension } from './helpers';
 import type { CreateHandler, FileKindRouter } from './types';
-import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
+import type { CreateRouteDefinition } from '../api_routes';
+import { FILES_API_ROUTES } from '../api_routes';
 
 export const method = 'get' as const;
 
@@ -36,14 +37,27 @@ export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req,
   const {
     params: { id, fileName },
   } = req;
+
   const { error, result: file } = await getById(fileService.asCurrentUser(), id, fileKind);
   if (error) return error;
+
   try {
+    const invalidExtensionResponse = validateFileNameExtension(fileName, file);
+    if (invalidExtensionResponse) {
+      return invalidExtensionResponse;
+    }
+
+    if (file.data.size === 0) {
+      return res.noContent();
+    }
+
     const body: Response = await file.downloadContent();
+    const fileHttpResponseOptions = getFileHttpResponseOptions(file);
+
     return res.file({
       body,
       filename: fileName ?? getDownloadedFileName(file),
-      headers: getDownloadHeadersForFile({ file, fileName }),
+      ...fileHttpResponseOptions,
     });
   } catch (e) {
     if (e instanceof fileErrors.NoDownloadAvailableError) {

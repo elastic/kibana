@@ -10,24 +10,26 @@ import * as E from 'fp-ts/Either';
 import { i18n } from '@kbn/i18n';
 import type { Either } from 'fp-ts/Either';
 
-export const parseMonitoredPrivilegedUserCsvRow = (row: string[]): Either<string, string> => {
-  if (row.length !== 1) {
+export const parseMonitoredPrivilegedUserCsvRow = (
+  row: string[]
+): Either<string, { username: string; label?: string }> => {
+  if (row.length > 2 || row.length === 0) {
     return E.left(expectedColumnsError(row.length));
   }
 
-  const [username] = row;
+  const [username, label] = row;
   if (!username) {
     return E.left(missingUserNameError());
   }
 
-  return E.right(username);
+  return E.right({ username, label });
 };
 
 const expectedColumnsError = (rowLength: number) =>
   i18n.translate(
     'xpack.securitySolution.entityAnalytics.monitoring.privilegedUsers.csvUpload.expectedColumnsError',
     {
-      defaultMessage: 'Expected 1 column, got {rowLength}',
+      defaultMessage: 'Expected 1 or 2 columns, got {rowLength}',
       values: { rowLength },
     }
   );

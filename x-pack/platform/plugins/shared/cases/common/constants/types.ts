@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { OWNERS } from './owners';
+import type { SERVERLESS_PROJECT_TYPES, OWNERS } from './owners';
 
 export enum HttpApiPrivilegeOperation {
   Read = 'Read',
@@ -14,3 +14,4 @@ export enum HttpApiPrivilegeOperation {
 }
 
 export type Owner = (typeof OWNERS)[number];
+export type ServerlessProjectType = (typeof SERVERLESS_PROJECT_TYPES)[number];

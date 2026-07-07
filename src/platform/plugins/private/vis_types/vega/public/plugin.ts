@@ -7,17 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
-import { Setup as InspectorSetup } from '@kbn/inspector-plugin/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { Setup as InspectorSetup } from '@kbn/inspector-plugin/public';
 
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { ADD_PANEL_TRIGGER, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import {
+  ADD_CANVAS_ELEMENT_TRIGGER,
+  ADD_PANEL_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   setNotifications,
   setData,
@@ -29,14 +33,11 @@ import {
   setUsageCollectionStart,
 } from './services';
 
-import { createVegaFn } from './vega_fn';
-import { vegaVisType } from './vega_type';
 import type { IServiceSettings } from './vega_view/vega_map_view/service_settings/service_settings_types';
 
 import type { ConfigSchema } from '../server/config';
 
 import { getVegaInspectorView } from './vega_inspector';
-import { getVegaVisRenderer } from './vega_vis_renderer';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
 
 /** @internal */
@@ -60,6 +61,7 @@ export interface VegaPluginSetupDependencies {
 export interface VegaPluginStartDependencies {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
+  expressions: ReturnType<ExpressionsPublicPlugin['start']>;
   mapsEms: MapsEmsPluginPublicStart;
   dataViews: DataViewsPublicPluginStart;
   uiActions: UiActionsStart;
@@ -75,7 +77,7 @@ export class VegaPlugin implements Plugin<void, void> {
   }
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<VegaPluginStartDependencies>,
     { inspector, data, expressions, visualizations }: VegaPluginSetupDependencies
   ) {
     setInjectedVars({
@@ -92,10 +94,15 @@ export class VegaPlugin implements Plugin<void, void> {
 
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
 
-    expressions.registerFunction(() => createVegaFn(visualizationDependencies));
-    expressions.registerRenderer(getVegaVisRenderer(visualizationDependencies));
-
-    visualizations.createBaseVisualization(vegaVisType);
+    visualizations.createBaseVisualizationAsync('vega', async () => {
+      const [[, startPlugins], { vegaVisType, createVegaFn, getVegaVisRenderer }] =
+        await Promise.all([core.getStartServices(), import('./async_module')]);
+      if (!startPlugins.expressions.getFunction('vega')) {
+        expressions.registerFunction(() => createVegaFn(visualizationDependencies));
+        expressions.registerRenderer(getVegaVisRenderer(visualizationDependencies));
+      }
+      return vegaVisType;
+    });
   }
 
   public start(core: CoreStart, deps: VegaPluginStartDependencies) {
@@ -112,10 +119,7 @@ export class VegaPlugin implements Plugin<void, void> {
       return getAddVegaPanelAction(deps);
     });
     deps.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addVegaPanelAction');
-    if (deps.uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
-      // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
-      // the create action if the Canvas-specific trigger does indeed exist.
-      deps.uiActions.attachAction('ADD_CANVAS_ELEMENT_TRIGGER', 'addVegaPanelAction');
-    }
+
+    deps.uiActions.attachAction(ADD_CANVAS_ELEMENT_TRIGGER, 'addVegaPanelAction');
   }
 }

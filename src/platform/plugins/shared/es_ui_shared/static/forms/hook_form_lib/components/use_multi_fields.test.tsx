@@ -8,69 +8,70 @@
  */
 
 import React, { useState } from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-import { registerTestBed } from '../shared_imports';
-import { FieldHook } from '../types';
+import type { FieldHook } from '../types';
 import { useForm } from '../hooks/use_form';
 import { Form } from './form';
 import { UseMultiFields } from './use_multi_fields';
 
-describe('<UseMultiFields />', () => {
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
+const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+const onFieldsMock = jest.fn();
 
-  afterAll(() => {
-    jest.useRealTimers();
-  });
+const fields = {
+  foo: { path: 'foo' },
+  bar: { path: 'bar' },
+};
 
-  const fields = {
-    foo: { path: 'foo' },
-    bar: { path: 'bar' },
-  };
+const TestComp = ({ onFields }: { onFields: (fields: { [x: string]: FieldHook }) => void }) => {
+  const { form } = useForm();
+  const [stateFields, setStateFields] = useState<{ [key: string]: any }>(fields);
 
-  const TestComp = ({ onFields }: { onFields: (fields: { [x: string]: FieldHook }) => void }) => {
-    const { form } = useForm();
-    const [stateFields, setStateFields] = useState<{ [key: string]: any }>(fields);
+  const changeStateFields = () => {
+    // We'll make sure that if other fields are passed down after the initial
+    // rendering of <UseMultiField /> the change does not create new FieldHook as that
+    // would break the **order** of hooks declared inside <UseMultiFields />
 
-    const changeStateFields = () => {
-      // We'll make sure that if other fields are passed down after the initial
-      // rendering of <UseMultiField /> the change does not create new FieldHook as that
-      // would break the **order** of hooks declared inside <UseMultiFields />
-
-      setStateFields({
-        aaa: { path: 'aaa' }, // we add this field that will come first when sorting() A-Z
-        ...fields,
-      });
-    };
-
-    return (
-      <Form form={form}>
-        <UseMultiFields fields={stateFields}>
-          {(hookFields) => {
-            onFields(hookFields);
-            return null;
-          }}
-        </UseMultiFields>
-        <button onClick={changeStateFields} data-test-subj="changeFields">
-          Change fields
-        </button>
-      </Form>
-    );
-  };
-
-  test('it should return 2 hook fields', () => {
-    const onFields = jest.fn();
-
-    const setup = registerTestBed(TestComp, {
-      defaultProps: { onFields },
-      memoryRouter: { wrapComponent: false },
+    setStateFields({
+      aaa: { path: 'aaa' }, // we add this field that will come first when sorting() A-Z
+      ...fields,
     });
+  };
 
-    setup();
+  return (
+    <Form form={form}>
+      <UseMultiFields fields={stateFields}>
+        {(hookFields) => {
+          onFields(hookFields);
+          return null;
+        }}
+      </UseMultiFields>
+      <button onClick={changeStateFields} data-test-subj="changeFields">
+        Change fields
+      </button>
+    </Form>
+  );
+};
 
-    expect(onFields).toHaveBeenCalled();
-    const fieldsReturned = onFields.mock.calls[0][0];
+beforeAll(() => {
+  jest.useFakeTimers();
+});
+
+afterAll(() => {
+  jest.useRealTimers();
+});
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
+describe('<UseMultiFields />', () => {
+  test('it should return 2 hook fields', () => {
+    render(<TestComp onFields={onFieldsMock} />);
+
+    expect(onFieldsMock).toHaveBeenCalled();
+    const fieldsReturned = onFieldsMock.mock.calls[0][0];
 
     expect(fieldsReturned.foo.path).toBe(fields.foo.path);
     expect(fieldsReturned.foo.isPristine).toBeDefined(); // It's a FieldHook!
@@ -78,25 +79,23 @@ describe('<UseMultiFields />', () => {
     expect(fieldsReturned.bar.isPristine).toBeDefined();
   });
 
-  test('it should keep a stable ref of initial fields passed', () => {
-    const onFields = jest.fn();
+  test('it should keep a stable ref of initial fields passed', async () => {
+    render(<TestComp onFields={onFieldsMock} />);
 
-    const setup = registerTestBed(TestComp, {
-      defaultProps: { onFields },
-      memoryRouter: { wrapComponent: false },
-    });
-
-    const { find } = setup();
-
-    expect(onFields).toBeCalledTimes(1);
-    let fieldsReturned = onFields.mock.calls[0][0] as { [key: string]: FieldHook };
+    expect(onFieldsMock).toBeCalledTimes(1);
+    let fieldsReturned = onFieldsMock.mock.calls[0][0] as { [key: string]: FieldHook };
     let paths = Object.values(fieldsReturned).map(({ path }) => path);
     expect(paths).toEqual(['bar', 'foo']);
 
     // We change the fields passed down to <UseMultiFields />
-    find('changeFields').simulate('click');
-    expect(onFields).toBeCalledTimes(2);
-    fieldsReturned = onFields.mock.calls[1][0] as { [key: string]: FieldHook };
+    const button = await screen.findByTestId('changeFields');
+    await user.click(button);
+
+    // Check that onFields was called again (button click may trigger multiple re-renders)
+    expect(onFieldsMock.mock.calls.length).toBeGreaterThan(1);
+    fieldsReturned = onFieldsMock.mock.calls[onFieldsMock.mock.calls.length - 1][0] as {
+      [key: string]: FieldHook;
+    };
     paths = Object.values(fieldsReturned).map(({ path }) => path);
 
     // We still get the same 2 fields originally passed

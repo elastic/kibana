@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import type {
   SavedObjectsImportFailure,
   SavedObjectsImportResponse,
 } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type {
+  AccessControlImportTransformsFactory,
   ISavedObjectTypeRegistry,
   SavedObjectsImportHook,
 } from '@kbn/core-saved-objects-server';
@@ -60,6 +61,9 @@ export interface ImportSavedObjectsOptions {
    * If provided, Kibana will apply the given option to the `managed` property.
    */
   managed?: boolean;
+  /** The factory function for creating the access control import transforms */
+  createAccessControlImportTransforms?: AccessControlImportTransformsFactory;
+  /** The logger to use during the import operation */
   log: Logger;
 }
 
@@ -82,6 +86,7 @@ export async function importSavedObjectsFromStream({
   compatibilityMode,
   managed,
   log,
+  createAccessControlImportTransforms,
 }: ImportSavedObjectsOptions): Promise<SavedObjectsImportResponse> {
   log.debug(
     `Importing with overwrite ${overwrite ? 'enabled' : 'disabled'} and size limit ${objectLimit}`
@@ -95,6 +100,8 @@ export async function importSavedObjectsFromStream({
     objectLimit,
     supportedTypes,
     managed,
+    typeRegistry,
+    createAccessControlImportTransforms,
   });
   log.debug(
     `Importing types: ${[

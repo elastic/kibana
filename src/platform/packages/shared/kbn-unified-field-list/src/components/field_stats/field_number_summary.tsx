@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode } from 'react';
-import {
-  EuiBasicTable,
-  HorizontalAlignment,
-  LEFT_ALIGNMENT,
-  RIGHT_ALIGNMENT,
-  euiScreenReaderOnly,
-} from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React from 'react';
+import type { HorizontalAlignment } from '@elastic/eui';
+import { EuiBasicTable, LEFT_ALIGNMENT, RIGHT_ALIGNMENT, euiScreenReaderOnly } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -51,14 +47,14 @@ export const FieldNumberSummary: React.FC<FieldNumberSummaryProps> = ({
       label: i18n.translate('unifiedFieldList.fieldStats.numberSummary.minLabel', {
         defaultMessage: 'min',
       }),
-      value: formatter.convert(numberSummary.minValue, 'text'),
+      value: formatter.convertToText(numberSummary.minValue),
     },
     {
       key: 'max',
       label: i18n.translate('unifiedFieldList.fieldStats.numberSummary.maxLabel', {
         defaultMessage: 'max',
       }),
-      value: formatter.convert(numberSummary.maxValue, 'text'),
+      value: formatter.convertToText(numberSummary.maxValue),
     },
   ];
   const summaryTableColumns = [

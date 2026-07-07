@@ -13,7 +13,7 @@ import { calculateAggRoot } from './calculate_agg_root';
 
 import type { TableRequestProcessorsFunction } from './types';
 import type { Metric } from '../../../../../common/types';
-import { BASIC_AGGS_TYPES } from '../../../../../common/enums';
+import type { BASIC_AGGS_TYPES } from '../../../../../common/enums';
 
 const filter = (metric: Metric) => metric.type === 'filter_ratio';
 

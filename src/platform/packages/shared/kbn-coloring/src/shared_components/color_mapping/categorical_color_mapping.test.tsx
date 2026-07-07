@@ -14,12 +14,12 @@ import '@testing-library/jest-dom';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { getKbnPalettes } from '@kbn/palettes';
 
-import {
-  CategoricalColorMapping,
+import type {
   ColorMappingInputCategoricalData,
   ColorMappingInputData,
   ColorMappingProps,
 } from './categorical_color_mapping';
+import { CategoricalColorMapping } from './categorical_color_mapping';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from './config/default_color_mapping';
 
 const ASSIGNMENTS_LIST = 'lns-colorMapping-assignmentsList';
@@ -42,7 +42,7 @@ const mockFormatter = fieldFormatsServiceMock.createStartContract().deserialize(
 describe('color mapping', () => {
   let defaultProps: ColorMappingProps;
 
-  mockFormatter.convert = jest.fn(
+  mockFormatter.convertToText = jest.fn(
     (v: any) => (typeof v === 'string' ? specialTokens.get(v) ?? v : JSON.stringify(v)) // simple way to check formatting is applied
   );
   const onModelUpdateFn = jest.fn();

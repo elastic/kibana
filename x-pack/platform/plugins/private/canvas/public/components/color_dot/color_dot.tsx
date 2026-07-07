@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode } from 'react';
-import PropTypes from 'prop-types';
+import type { FC, ReactNode } from 'react';
+import React from 'react';
 import chroma from 'chroma-js';
 
 interface Props {
@@ -31,9 +31,4 @@ export const ColorDot: FC<Props> = ({ value, children }) => {
       </div>
     </div>
   );
-};
-
-ColorDot.propTypes = {
-  children: PropTypes.node,
-  value: PropTypes.string,
 };

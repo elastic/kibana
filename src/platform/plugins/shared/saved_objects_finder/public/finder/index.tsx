@@ -9,7 +9,7 @@
 
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import React from 'react';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { HOCProps } from '@kbn/shared-ux-table-persist';

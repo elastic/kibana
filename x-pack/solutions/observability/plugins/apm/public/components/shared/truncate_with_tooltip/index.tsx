@@ -35,7 +35,7 @@ export function TruncateWithTooltip(props: Props) {
 
   return (
     <TooltipWrapper {...rest}>
-      <EuiToolTip delay="long" content={text} anchorClassName={tooltipAnchorClassname}>
+      <EuiToolTip content={text} anchorClassName={tooltipAnchorClassname} disableScreenReaderOutput>
         <ContentWrapper>{content || text}</ContentWrapper>
       </EuiToolTip>
     </TooltipWrapper>

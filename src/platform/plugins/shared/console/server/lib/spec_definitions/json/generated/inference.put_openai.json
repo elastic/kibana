@@ -4,13 +4,19 @@
       "error_trace": "__flag__",
       "filter_path": [],
       "human": "__flag__",
-      "pretty": "__flag__"
+      "pretty": "__flag__",
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
     },
     "url_components": {
       "task_type": [
         "chat_completion",
         "completion",
-        "text_embedding"
+        "text_embedding",
+        "embedding"
       ]
     },
     "methods": [
@@ -20,6 +26,7 @@
       "_inference/{task_type}/{openai_inference_id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-openai",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-inference-put-openai",
     "availability": {
       "stack": true,
       "serverless": true

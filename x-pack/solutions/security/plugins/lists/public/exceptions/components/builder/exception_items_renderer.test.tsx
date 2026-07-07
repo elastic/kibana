@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { ReactWrapper, mount } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { EuiProvider } from '@elastic/eui';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
 
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
@@ -21,7 +22,7 @@ import { MockedShowValueListModal } from '../__mock__/show_value_list_modal.mock
 import { ExceptionBuilderComponent } from './exception_items_renderer';
 
 const mockKibanaHttpService = coreMock.createStart().http;
-const { autocomplete: autocompleteStartMock } = unifiedSearchPluginMock.createStartContract();
+const { autocomplete: autocompleteStartMock } = kqlPluginMock.createStartContract();
 
 describe('ExceptionBuilderComponent', () => {
   let wrapper: ReactWrapper;
@@ -36,7 +37,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it displays empty entry if no "exceptionListItems" are passed in', () => {
     wrapper = mount(
-      <EuiThemeProvider>
+      <EuiProvider>
         <ExceptionBuilderComponent
           allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
@@ -57,7 +58,7 @@ describe('ExceptionBuilderComponent', () => {
           onChange={jest.fn()}
           showValueListModal={MockedShowValueListModal}
         />
-      </EuiThemeProvider>
+      </EuiProvider>
     );
 
     // console.log(wrapper.find('[data-test-subj="valuesAutocompleteMatch"] input').html());
@@ -78,7 +79,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it displays "exceptionListItems" that are passed in', async () => {
     wrapper = mount(
-      <EuiThemeProvider>
+      <EuiProvider>
         <ExceptionBuilderComponent
           allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
@@ -106,7 +107,7 @@ describe('ExceptionBuilderComponent', () => {
           onChange={jest.fn()}
           showValueListModal={MockedShowValueListModal}
         />
-      </EuiThemeProvider>
+      </EuiProvider>
     );
 
     expect(wrapper.find('EuiFlexGroup[data-test-subj="exceptionItemEntryContainer"]')).toHaveLength(
@@ -125,7 +126,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it displays "is in list" operators if "allowLargeValueLists" is true', async () => {
     wrapper = mount(
-      <EuiThemeProvider>
+      <EuiProvider>
         <ExceptionBuilderComponent
           allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
@@ -153,7 +154,7 @@ describe('ExceptionBuilderComponent', () => {
           onChange={jest.fn()}
           showValueListModal={MockedShowValueListModal}
         />
-      </EuiThemeProvider>
+      </EuiProvider>
     );
 
     expect(
@@ -163,7 +164,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it still displays "is in list" operators if "allowLargeValueLists" is false', async () => {
     wrapper = mount(
-      <EuiThemeProvider>
+      <EuiProvider>
         <ExceptionBuilderComponent
           allowLargeValueLists={false}
           autocompleteService={autocompleteStartMock}
@@ -191,7 +192,7 @@ describe('ExceptionBuilderComponent', () => {
           onChange={jest.fn()}
           showValueListModal={MockedShowValueListModal}
         />
-      </EuiThemeProvider>
+      </EuiProvider>
     );
 
     expect(
@@ -201,7 +202,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it displays "or", "and" and "add nested button" enabled', () => {
     wrapper = mount(
-      <EuiThemeProvider>
+      <EuiProvider>
         <ExceptionBuilderComponent
           allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
@@ -223,7 +224,7 @@ describe('ExceptionBuilderComponent', () => {
           onChange={jest.fn()}
           showValueListModal={MockedShowValueListModal}
         />
-      </EuiThemeProvider>
+      </EuiProvider>
     );
 
     expect(
@@ -239,7 +240,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it adds an entry when "and" clicked', async () => {
     wrapper = mount(
-      <EuiThemeProvider>
+      <EuiProvider>
         <ExceptionBuilderComponent
           allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
@@ -260,7 +261,7 @@ describe('ExceptionBuilderComponent', () => {
           onChange={jest.fn()}
           showValueListModal={MockedShowValueListModal}
         />
-      </EuiThemeProvider>
+      </EuiProvider>
     );
 
     expect(wrapper.find('EuiFlexGroup[data-test-subj="exceptionItemEntryContainer"]')).toHaveLength(
@@ -299,7 +300,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it adds an exception item when "or" clicked', async () => {
     wrapper = mount(
-      <EuiThemeProvider>
+      <EuiProvider>
         <ExceptionBuilderComponent
           allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
@@ -320,7 +321,7 @@ describe('ExceptionBuilderComponent', () => {
           onChange={jest.fn()}
           showValueListModal={MockedShowValueListModal}
         />
-      </EuiThemeProvider>
+      </EuiProvider>
     );
 
     expect(wrapper.find('EuiFlexGroup[data-test-subj="exceptionEntriesContainer"]')).toHaveLength(
@@ -361,7 +362,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it displays empty entry if user deletes last remaining entry', () => {
     wrapper = mount(
-      <EuiThemeProvider>
+      <EuiProvider>
         <ExceptionBuilderComponent
           allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
@@ -389,7 +390,7 @@ describe('ExceptionBuilderComponent', () => {
           onChange={jest.fn()}
           showValueListModal={MockedShowValueListModal}
         />
-      </EuiThemeProvider>
+      </EuiProvider>
     );
 
     expect(
@@ -417,7 +418,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it displays "and" badge if at least one exception item includes more than one entry', () => {
     wrapper = mount(
-      <EuiThemeProvider>
+      <EuiProvider>
         <ExceptionBuilderComponent
           allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
@@ -438,7 +439,7 @@ describe('ExceptionBuilderComponent', () => {
           onChange={jest.fn()}
           showValueListModal={MockedShowValueListModal}
         />
-      </EuiThemeProvider>
+      </EuiProvider>
     );
 
     expect(
@@ -454,7 +455,7 @@ describe('ExceptionBuilderComponent', () => {
 
   test('it does not display "and" badge if none of the exception items include more than one entry', () => {
     wrapper = mount(
-      <EuiThemeProvider>
+      <EuiProvider>
         <ExceptionBuilderComponent
           allowLargeValueLists={true}
           autocompleteService={autocompleteStartMock}
@@ -475,7 +476,7 @@ describe('ExceptionBuilderComponent', () => {
           onChange={jest.fn()}
           showValueListModal={MockedShowValueListModal}
         />
-      </EuiThemeProvider>
+      </EuiProvider>
     );
 
     wrapper.find('[data-test-subj="exceptionsOrButton"] button').simulate('click');
@@ -494,7 +495,7 @@ describe('ExceptionBuilderComponent', () => {
   describe('nested entry', () => {
     test('it adds a nested entry when "add nested entry" clicked', async () => {
       wrapper = mount(
-        <EuiThemeProvider>
+        <EuiProvider>
           <ExceptionBuilderComponent
             allowLargeValueLists={true}
             autocompleteService={autocompleteStartMock}
@@ -515,7 +516,7 @@ describe('ExceptionBuilderComponent', () => {
             onChange={jest.fn()}
             showValueListModal={MockedShowValueListModal}
           />
-        </EuiThemeProvider>
+        </EuiProvider>
       );
 
       wrapper.find('[data-test-subj="exceptionsNestedButton"] button').simulate('click');

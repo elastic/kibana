@@ -22,6 +22,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -29,8 +30,8 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
 import { findLast } from 'lodash';
-import { KbnPalettes } from '@kbn/palettes';
-import { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { KbnPalettes } from '@kbn/palettes';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { deserializeField } from '@kbn/data-plugin/common';
 import { Assignment } from '../assignment/assignment';
 import {
@@ -39,8 +40,8 @@ import {
   removeAllAssignments,
 } from '../../state/color_mapping';
 import { selectColorMode, selectComputedAssignments, selectPalette } from '../../state/selectors';
-import { ColorMappingInputData } from '../../categorical_color_mapping';
-import { ColorMapping } from '../../config';
+import type { ColorMappingInputData } from '../../categorical_color_mapping';
+import type { ColorMapping } from '../../config';
 import { getColorAssignmentMatcher } from '../../color/color_assignment_matcher';
 
 export function Assignments({
@@ -234,18 +235,34 @@ export function Assignments({
             </EuiButton>
             {data.type === 'categories' && (
               <EuiPopover
+                aria-label={i18n.translate(
+                  'coloring.colorMapping.container.additionalActionsPopoverAriaLabel',
+                  {
+                    defaultMessage: 'Additional assignments actions',
+                  }
+                )}
                 button={
-                  <EuiButtonIcon
-                    iconType="boxesVertical"
-                    color="text"
-                    aria-label={i18n.translate(
+                  <EuiToolTip
+                    content={i18n.translate(
                       'coloring.colorMapping.container.OpenAdditionalActionsButtonLabel',
                       {
                         defaultMessage: 'Open additional assignments actions',
                       }
                     )}
-                    onClick={() => setShowOtherActions(true)}
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      iconType="boxesVertical"
+                      color="text"
+                      aria-label={i18n.translate(
+                        'coloring.colorMapping.container.OpenAdditionalActionsButtonLabel',
+                        {
+                          defaultMessage: 'Open additional assignments actions',
+                        }
+                      )}
+                      onClick={() => setShowOtherActions(true)}
+                    />
+                  </EuiToolTip>
                 }
                 isOpen={showOtherActions}
                 closePopover={() => setShowOtherActions(false)}
@@ -254,13 +271,11 @@ export function Assignments({
                 ownFocus
               >
                 <EuiContextMenuPanel
-                  size="s"
                   items={[
                     <EuiContextMenuItem
                       data-test-subj="lns-colorMapping-addAllAssignments"
                       key="item-1"
-                      icon="listAdd"
-                      size="s"
+                      icon="plusCircle"
                       onClick={() => {
                         setShowOtherActions(false);
                         requestAnimationFrame(() => {
@@ -289,8 +304,7 @@ export function Assignments({
                     </EuiContextMenuItem>,
                     <EuiContextMenuItem
                       data-test-subj="lns-colorMapping-clearAllAssignments"
-                      size="s"
-                      icon={<EuiIcon type="eraser" size="m" color="danger" />}
+                      icon={<EuiIcon type="eraser" size="m" color="danger" aria-hidden={true} />}
                       onClick={() => {
                         setShowOtherActions(false);
                         dispatch(removeAllAssignments());

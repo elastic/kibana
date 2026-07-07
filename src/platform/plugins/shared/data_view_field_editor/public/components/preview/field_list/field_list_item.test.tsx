@@ -12,7 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { PreviewListItem } from './field_list_item';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { useFieldPreviewContext } from '../field_preview_context';
-import { PreviewController } from '../preview_controller';
+import type { PreviewController } from '../preview_controller';
 import { BehaviorSubject } from 'rxjs';
 
 jest.mock('../field_preview_context', () => ({
@@ -58,6 +58,47 @@ afterAll(() => {
 });
 
 describe('<PreviewListItem />', () => {
+  describe('formattedValue rendering', () => {
+    it('should render a plain ReactNode formattedValue inline', () => {
+      setup({
+        field: {
+          key: 'test',
+          value: 'hello',
+          formattedValue: <span>hello world</span>,
+          isPinned: false,
+        },
+      });
+
+      expect(screen.getByText('hello world')).toBeInTheDocument();
+    });
+
+    it('should fall back to JSON.stringify when formattedValue is undefined', () => {
+      setup({
+        field: { key: 'test', value: { foo: 'bar' }, formattedValue: undefined, isPinned: false },
+      });
+
+      expect(screen.getByText('{"foo":"bar"}')).toBeInTheDocument();
+    });
+
+    it('should render a "View image" button instead of the formatted value', async () => {
+      const { user } = setup({
+        field: {
+          key: 'test',
+          value: 'http://example.com/img.png',
+          formattedValue: <img src="http://example.com/img.png" alt="test" />,
+          isPinned: false,
+        },
+      });
+
+      expect(screen.getByRole('button', { name: /view image/i })).toBeInTheDocument();
+      expect(screen.queryByText('http://example.com/img.png')).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: /view image/i }));
+
+      expect(screen.getByRole('dialog', { name: /image preview/i })).toBeInTheDocument();
+    });
+  });
+
   describe('when toggleIsPinned is not provided', () => {
     it('should not render the pin button', () => {
       // When

@@ -7,20 +7,19 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
-import type { HttpResponseOptions } from '@kbn/core/server';
 
+import { type HttpResponseOptions } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { omit, pick } from 'lodash';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common';
 
-import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 import { generateTransformSecondaryAuthHeaders } from '../../services/api_keys/transform_api_keys';
 import { handleTransformReauthorizeAndStart } from '../../services/epm/elasticsearch/transform/reauthorize';
 
 import type {
   GetInfoResponse,
   InstallPackageResponse,
-  DeletePackageResponse,
   GetCategoriesResponse,
   GetPackagesResponse,
   GetLimitedPackagesResponse,
@@ -29,12 +28,16 @@ import type {
   IBulkInstallPackageHTTPError,
   GetStatsResponse,
   UpdatePackageResponse,
+  ReviewUpgradeResponse,
   GetVerificationKeyIdResponse,
   GetBulkAssetsResponse,
   GetInstalledPackagesResponse,
   GetEpmDataStreamsResponse,
+  RollbackPackageResponse,
   AssetSOObject,
   PackageSpecCategory,
+  RollbackAvailableCheckResponse,
+  BulkRollbackAvailableCheckResponse,
 } from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
@@ -42,19 +45,29 @@ import type {
   GetInstalledPackagesRequestSchema,
   GetDataStreamsRequestSchema,
   GetInfoRequestSchema,
+  GetInfoWithoutVersionRequestSchema,
   InstallPackageFromRegistryRequestSchema,
+  InstallPackageFromRegistryWithoutVersionRequestSchema,
   InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
+  DeletePackageWithoutVersionRequestSchema,
   BulkInstallPackagesFromRegistryRequestSchema,
   GetStatsRequestSchema,
+  GetDependenciesRequestSchema,
   FleetRequestHandler,
   UpdatePackageRequestSchema,
+  UpdatePackageWithoutVersionRequestSchema,
   GetLimitedPackagesRequestSchema,
   GetBulkAssetsRequestSchema,
   CreateCustomIntegrationRequestSchema,
   GetInputsRequestSchema,
   CustomIntegrationRequestSchema,
+  RollbackPackageRequestSchema,
+  GetKnowledgeBaseRequestSchema,
+  DeletePackageResponseSchema,
+  ReviewUpgradeRequestSchema,
 } from '../../types';
+import { KibanaSavedObjectType } from '../../types';
 import {
   bulkInstallPackages,
   getCategories,
@@ -70,10 +83,37 @@ import {
   updateCustomIntegration,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
-import { fleetErrorToResponseOptions, FleetError, FleetTooManyRequestsError } from '../../errors';
-import { appContextService, checkAllowedPackages, packagePolicyService } from '../../services';
-import { getPackageUsageStats } from '../../services/epm/packages/get';
-import { updatePackage } from '../../services/epm/packages/update';
+import {
+  fleetErrorToResponseOptions,
+  FleetError,
+  FleetTooManyRequestsError,
+  FleetUnauthorizedError,
+} from '../../errors';
+import {
+  appContextService,
+  checkAllowedPackages,
+  licenseService,
+  packagePolicyService,
+} from '../../services';
+import {
+  getInstallation,
+  getPackageUsageStats,
+  getPackageDependencies,
+} from '../../services/epm/packages/get';
+import {
+  getAllowedNamespacePrefixesForSpace,
+  isNamespaceAllowedByPrefixes,
+} from '../../services/spaces/policy_namespaces';
+import { PolicyNamespaceValidationError } from '../../../common/errors';
+import {
+  bulkRollbackAvailableCheck,
+  isIntegrationRollbackTTLExpired,
+  rollbackAvailableCheck,
+  rollbackInstallation,
+} from '../../services/epm/packages/rollback';
+import { updatePackage, reviewUpgrade } from '../../services/epm/packages/update';
+import { scheduleSyncNamespaceTemplatesTask } from '../../tasks/sync_namespace_templates_task';
+import { scheduleSyncIlmPolicyTask } from '../../tasks/sync_ilm_policy_task';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 import type {
   ReauthorizeTransformRequestSchema,
@@ -87,6 +127,9 @@ import { NamingCollisionError } from '../../services/epm/packages/custom_integra
 import { DatasetNamePrefixError } from '../../services/epm/packages/custom_integrations/validation/check_dataset_name_format';
 import { UPLOAD_RETRY_AFTER_MS } from '../../services/epm/packages/install';
 import { getPackagePoliciesCountByPackageName } from '../../services/package_policies/package_policies_aggregation';
+import { getPackageKnowledgeBase } from '../../services/epm/packages';
+
+import { getPackagePolicyIdsForCurrentUser } from './bulk_handler';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -115,7 +158,11 @@ export const getListHandler: FleetRequestHandler<
     savedObjectsClient,
     ...request.query,
   });
-  const flattenedRes = res.map((pkg) => soToInstallationInfo(pkg)) as PackageList;
+  const flattenedRes = res
+    // exclude the security_ai_prompts package from being shown in Kibana UI
+    // https://github.com/elastic/kibana/pull/227308
+    .filter((pkg) => pkg.id !== 'security_ai_prompts')
+    .map((pkg) => soToInstallationInfo(pkg)) as PackageList;
 
   if (request.query.withPackagePoliciesCount) {
     const countByPackage = await getPackagePoliciesCountByPackageName(
@@ -199,12 +246,14 @@ export const getLimitedListHandler: FleetRequestHandler<
 };
 
 export const getInfoHandler: FleetRequestHandler<
-  TypeOf<typeof GetInfoRequestSchema.params>,
+  | TypeOf<typeof GetInfoRequestSchema.params>
+  | TypeOf<typeof GetInfoWithoutVersionRequestSchema.params>,
   TypeOf<typeof GetInfoRequestSchema.query>
 > = async (context, request, response) => {
   const savedObjectsClient = (await context.fleet).internalSoClient;
   const { limitedToPackages } = await context.fleet;
-  const { pkgName, pkgVersion } = request.params;
+  const { pkgName } = request.params;
+  const pkgVersion = 'pkgVersion' in request.params ? request.params.pkgVersion : undefined;
 
   checkAllowedPackages([pkgName], limitedToPackages);
 
@@ -249,7 +298,13 @@ export const getBulkAssetsHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const { assetIds } = request.body;
-  const savedObjectsClient = coreContext.savedObjects.client;
+  const savedObjectsClient = coreContext.savedObjects.getClient({
+    includedHiddenTypes: [
+      KibanaSavedObjectType.alertingRuleTemplate,
+      KibanaSavedObjectType.alert,
+      KibanaSavedObjectType.sloTemplate,
+    ],
+  });
   const savedObjectsTypeRegistry = coreContext.savedObjects.typeRegistry;
   const assets = await getBulkAssets(
     savedObjectsClient,
@@ -263,18 +318,140 @@ export const getBulkAssetsHandler: FleetRequestHandler<
   return response.ok({ body });
 };
 
+function getTaskManagerStart() {
+  const taskManagerStart = appContextService.getTaskManagerStart();
+  if (!taskManagerStart) {
+    throw new Error('Task manager not defined');
+  }
+  return taskManagerStart;
+}
+
 export const updatePackageHandler: FleetRequestHandler<
-  TypeOf<typeof UpdatePackageRequestSchema.params>,
+  | TypeOf<typeof UpdatePackageRequestSchema.params>
+  | TypeOf<typeof UpdatePackageWithoutVersionRequestSchema.params>,
   unknown,
   TypeOf<typeof UpdatePackageRequestSchema.body>
 > = async (context, request, response) => {
   const savedObjectsClient = (await context.fleet).internalSoClient;
   const { pkgName } = request.params;
+  const spaceId = savedObjectsClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
 
-  const res = await updatePackage({ savedObjectsClient, pkgName, ...request.body });
+  // Gate both added and removed namespaces on the current space's allowed_namespace_prefixes.
+  const requestedList = request.body.namespace_customization_enabled_for;
+  const requestedSettings = request.body.namespace_customization_settings;
+  let installation: Awaited<ReturnType<typeof getInstallation>> | undefined;
+  if (requestedList || requestedSettings) {
+    installation = await getInstallation({ savedObjectsClient, pkgName });
+  }
+  if (requestedList && installation !== undefined) {
+    const currentList = installation?.namespace_customization_enabled_for ?? [];
+    const added = requestedList.filter((ns) => !currentList.includes(ns));
+    const removed = currentList.filter((ns) => !requestedList.includes(ns));
+    const changed = [...added, ...removed];
+    if (changed.length > 0) {
+      const prefixes = await getAllowedNamespacePrefixesForSpace(spaceId);
+      const blocked = changed.filter((ns) => !isNamespaceAllowedByPrefixes(ns, prefixes));
+      if (blocked.length > 0) {
+        throw new PolicyNamespaceValidationError(
+          `Cannot change namespace customization for: ${blocked.join(
+            ', '
+          )}. Allowed prefixes in this space: ${(prefixes ?? []).join(', ')}`
+        );
+      }
+    }
+  }
+  if (requestedSettings) {
+    // The effective opted-in list is the incoming one (if also being updated) or the current one.
+    const effectiveOptInList =
+      requestedList ?? installation?.namespace_customization_enabled_for ?? [];
+    const notOptedIn = Object.keys(requestedSettings).filter(
+      (ns) => !effectiveOptInList.includes(ns)
+    );
+    if (notOptedIn.length > 0) {
+      throw new PolicyNamespaceValidationError(
+        `Cannot set ILM policy for namespace(s) not opted in for namespace customization: ${notOptedIn.join(
+          ', '
+        )}`
+      );
+    }
+
+    // Reject ILM policies that don't exist: a component template pointing at a
+    // non-existent lifecycle is silently broken (ES accepts it, but rollover never applies).
+    const requestedIlmPolicies = [
+      ...new Set(
+        Object.values(requestedSettings)
+          .map((settings) => settings.ilm_policy)
+          .filter((ilmPolicy): ilmPolicy is string => !!ilmPolicy)
+      ),
+    ];
+    if (requestedIlmPolicies.length > 0) {
+      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+      // Enforce the manage_ilm privilege on the write path. Without this the privilege
+      // gate would be UI-only: the route is authorized with integration-install privileges
+      // and syncIlmPolicy runs as the Fleet internal user, so a caller lacking manage_ilm
+      // could otherwise assign an ILM policy to every backing index by calling the API directly.
+      const { has_all_requested: hasManageIlm } = await esClient.security.hasPrivileges({
+        cluster: ['manage_ilm'],
+      });
+      if (!hasManageIlm) {
+        throw new FleetUnauthorizedError(
+          'The manage_ilm cluster privilege is required to assign an ILM policy.'
+        );
+      }
+      const existingLifecycles = await esClient.ilm.getLifecycle();
+      const missing = requestedIlmPolicies.filter((ilmPolicy) => !existingLifecycles[ilmPolicy]);
+      if (missing.length > 0) {
+        throw new PolicyNamespaceValidationError(
+          `The following ILM policies do not exist: ${missing.join(', ')}`
+        );
+      }
+    }
+  }
+
+  const { packageInfo, namespaceCustomizationDiff, ilmPolicyChanges } = await updatePackage({
+    savedObjectsClient,
+    pkgName,
+    ...request.body,
+  });
+
+  if (
+    namespaceCustomizationDiff.addedNamespaces.length > 0 ||
+    namespaceCustomizationDiff.removedNamespaces.length > 0
+  ) {
+    await scheduleSyncNamespaceTemplatesTask(getTaskManagerStart(), {
+      spaceId,
+      packageName: pkgName,
+      addedNamespaces: namespaceCustomizationDiff.addedNamespaces,
+      removedNamespaces: namespaceCustomizationDiff.removedNamespaces,
+    });
+  }
+
+  for (const { namespace } of ilmPolicyChanges) {
+    await scheduleSyncIlmPolicyTask(getTaskManagerStart(), {
+      spaceId,
+      packageName: pkgName,
+      namespace,
+    });
+  }
+
   const body: UpdatePackageResponse = {
-    item: res,
+    item: packageInfo,
   };
+
+  return response.ok({ body });
+};
+
+export const reviewUpgradeHandler: FleetRequestHandler<
+  TypeOf<typeof ReviewUpgradeRequestSchema.params>,
+  unknown,
+  TypeOf<typeof ReviewUpgradeRequestSchema.body>
+> = async (context, request, response) => {
+  const savedObjectsClient = (await context.fleet).internalSoClient;
+  const { pkgName } = request.params;
+  const { action, target_version: targetVersion } = request.body;
+
+  await reviewUpgrade({ savedObjectsClient, pkgName, action, targetVersion });
+  const body: ReviewUpgradeResponse = { success: true };
 
   return response.ok({ body });
 };
@@ -290,8 +467,17 @@ export const getStatsHandler: FleetRequestHandler<
   return response.ok({ body });
 };
 
+export const getDependenciesHandler: FleetRequestHandler<
+  TypeOf<typeof GetDependenciesRequestSchema.params>
+> = async (context, request, response) => {
+  const { pkgName, pkgVersion } = request.params;
+  const items = await getPackageDependencies(pkgName, pkgVersion);
+  return response.ok({ body: { items } });
+};
+
 export const installPackageFromRegistryHandler: FleetRequestHandler<
-  TypeOf<typeof InstallPackageFromRegistryRequestSchema.params>,
+  | TypeOf<typeof InstallPackageFromRegistryRequestSchema.params>
+  | TypeOf<typeof InstallPackageFromRegistryWithoutVersionRequestSchema.params>,
   TypeOf<typeof InstallPackageFromRegistryRequestSchema.query>,
   TypeOf<typeof InstallPackageFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
@@ -299,11 +485,9 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
 
-  const { pkgName, pkgVersion } = request.params;
-
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
+  const { pkgName } = request.params;
+  const pkgVersion = 'pkgVersion' in request.params ? request.params.pkgVersion : undefined;
 
   const spaceId = fleetContext.spaceId;
   const installSource = 'registry';
@@ -316,9 +500,10 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     force: request.body?.force,
     ignoreConstraints: request.body?.ignore_constraints,
     prerelease: request.query?.prerelease,
-    authorizationHeader,
+    request,
     ignoreMappingUpdateErrors: request.query?.ignoreMappingUpdateErrors,
     skipDataStreamRollover: request.query?.skipDataStreamRollover,
+    skipDependencyCheck: request.query?.skipDependencyCheck,
   });
 
   if (!res.error) {
@@ -344,9 +529,7 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const kibanaVersion = appContextService.getKibanaVersion();
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   const spaceId = fleetContext.spaceId;
   const { integrationName, force, datasets } = request.body;
   const installSource = 'custom';
@@ -359,7 +542,7 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
       esClient,
       spaceId,
       force,
-      authorizationHeader,
+      request,
       kibanaVersion,
     });
 
@@ -445,8 +628,6 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const spaceId = fleetContext.spaceId;
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   const bulkInstalledResponses = await bulkInstallPackages({
     savedObjectsClient,
@@ -455,7 +636,7 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
     spaceId,
     prerelease: request.query.prerelease,
     force: request.body.force,
-    authorizationHeader,
+    request,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {
@@ -476,8 +657,6 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
   const archiveBuffer = Buffer.from(request.body);
   const spaceId = fleetContext.spaceId;
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   const installSource = 'upload';
   const res = await installPackage({
     installSource,
@@ -486,7 +665,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
     archiveBuffer,
     spaceId,
     contentType,
-    authorizationHeader,
+    request,
     ignoreMappingUpdateErrors: request.query?.ignoreMappingUpdateErrors,
     skipDataStreamRollover: request.query?.skipDataStreamRollover,
   });
@@ -517,10 +696,12 @@ export const installPackageByUploadHandler: FleetRequestHandler<
 };
 
 export const deletePackageHandler: FleetRequestHandler<
-  TypeOf<typeof DeletePackageRequestSchema.params>,
+  | TypeOf<typeof DeletePackageRequestSchema.params>
+  | TypeOf<typeof DeletePackageWithoutVersionRequestSchema.params>,
   TypeOf<typeof DeletePackageRequestSchema.query>
 > = async (context, request, response) => {
-  const { pkgName, pkgVersion } = request.params;
+  const { pkgName } = request.params;
+  const pkgVersion = 'pkgVersion' in request.params ? request.params.pkgVersion : undefined;
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
@@ -532,7 +713,7 @@ export const deletePackageHandler: FleetRequestHandler<
     esClient,
     force: request.query?.force,
   });
-  const body: DeletePackageResponse = {
+  const body: TypeOf<typeof DeletePackageResponseSchema> = {
     items: res,
   };
   return response.ok({ body });
@@ -580,9 +761,8 @@ export const reauthorizeTransformsHandler: FleetRequestHandler<
   }
 
   const logger = appContextService.getLogger();
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, username);
   const secondaryAuth = await generateTransformSecondaryAuthHeaders({
-    authorizationHeader,
+    request,
     logger,
     username,
     pkgName,
@@ -620,20 +800,42 @@ export const getInputsHandler: FleetRequestHandler<
       pkgName,
       pkgVersion,
       'json',
+      undefined,
       prerelease,
       ignoreUnverified
     );
+    return response.ok({ body });
   } else if (format === 'yml' || format === 'yaml') {
     body = await getTemplateInputs(
       soClient,
       pkgName,
       pkgVersion,
       'yml',
+      undefined,
       prerelease,
       ignoreUnverified
     );
+
+    return response.ok({ body, headers: { 'content-type': 'text/yaml;charset=utf-8' } });
   }
-  return response.ok({ body });
+  throw new FleetError(`Fleet error template format not supported ${format}`);
+};
+
+export const getKnowledgeBaseHandler: FleetRequestHandler<
+  TypeOf<typeof GetKnowledgeBaseRequestSchema.params>
+> = async (context, request, response) => {
+  const { pkgName } = request.params;
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
+
+  const knowledgeBase = await getPackageKnowledgeBase({ esClient, pkgName });
+
+  if (!knowledgeBase) {
+    return response.notFound({ body: `Knowledge base not found for package: ${pkgName}` });
+  }
+
+  return response.ok({
+    body: knowledgeBase,
+  });
 };
 
 // Don't expose the whole SO in the API response, only selected fields
@@ -645,7 +847,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       installed_kibana: attributes.installed_kibana,
       installed_kibana_space_id: attributes.installed_kibana_space_id,
       additional_spaces_installed_kibana: attributes.additional_spaces_installed_kibana,
-      installed_es: attributes.installed_es,
+      installed_es: attributes.installed_es ?? [],
       install_status: attributes.install_status,
       install_source: attributes.install_source,
       name: attributes.name,
@@ -655,6 +857,13 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       experimental_data_stream_features: attributes.experimental_data_stream_features,
       latest_install_failed_attempts: attributes.latest_install_failed_attempts,
       latest_executed_state: attributes.latest_executed_state,
+      previous_version: attributes.previous_version,
+      rolled_back: attributes.rolled_back,
+      is_rollback_ttl_expired: isIntegrationRollbackTTLExpired(attributes.install_started_at),
+      pending_upgrade_review: attributes.pending_upgrade_review,
+      keep_policies_up_to_date: attributes.keep_policies_up_to_date,
+      namespace_customization_enabled_for: attributes.namespace_customization_enabled_for,
+      namespace_customization_settings: attributes.namespace_customization_settings,
     };
 
     return {
@@ -663,4 +872,71 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
     };
   }
   return pkg;
+};
+
+export const rollbackPackageHandler: FleetRequestHandler<
+  TypeOf<typeof RollbackPackageRequestSchema.params>
+> = async (context, request, response) => {
+  const { pkgName } = request.params;
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const fleetContext = await context.fleet;
+  const spaceId = fleetContext.spaceId;
+
+  if (!licenseService.isEnterprise()) {
+    throw new FleetUnauthorizedError('Rollback integration requires an enterprise license.');
+  }
+
+  const packagePolicyIdsForCurrentUser = await getPackagePolicyIdsForCurrentUser(request, [
+    { name: pkgName },
+  ]);
+
+  try {
+    const body: RollbackPackageResponse = await rollbackInstallation({
+      esClient,
+      currentUserPolicyIds: packagePolicyIdsForCurrentUser[pkgName],
+      pkgName,
+      spaceId,
+    });
+    return response.ok({ body });
+  } catch (error) {
+    error.message = `Failed to roll back package ${pkgName}: ${error.message}`;
+    throw error;
+  }
+};
+
+export const rollbackAvailableCheckHandler: FleetRequestHandler<
+  TypeOf<typeof RollbackPackageRequestSchema.params>
+> = async (context, request, response) => {
+  const { pkgName } = request.params;
+
+  try {
+    const packagePolicyIdsForCurrentUser = await getPackagePolicyIdsForCurrentUser(request, [
+      { name: pkgName },
+    ]);
+    const body: RollbackAvailableCheckResponse = await rollbackAvailableCheck(
+      pkgName,
+      packagePolicyIdsForCurrentUser[pkgName]
+    );
+    return response.ok({ body });
+  } catch (error) {
+    const reason = `Failed to check if rollback is available for ${pkgName} integration`;
+    appContextService.getLogger().warn(`${reason}: ${error}`);
+    return response.ok({ body: { isAvailable: false, reason } });
+  }
+};
+
+export const bulkRollbackAvailableCheckHandler: FleetRequestHandler = async (
+  context,
+  request,
+  response
+) => {
+  try {
+    const body: BulkRollbackAvailableCheckResponse = await bulkRollbackAvailableCheck(request);
+    return response.ok({ body });
+  } catch (error) {
+    const reason = `Failed to check if rollback is available for installed integrations`;
+    appContextService.getLogger().warn(`${reason}: ${error}`);
+    return response.ok({ body: {} });
+  }
 };

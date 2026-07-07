@@ -19,7 +19,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { i18n } from '@kbn/i18n';
@@ -27,9 +27,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { RequestError } from '../../hooks';
 import { useLink, useStartServices } from '../../hooks';
+import { ExperimentalFeaturesService } from '../../../../services';
 
 import {
   AgentPolicyDebugger,
+  AgentlessResourcesToggle,
+  CloudOnboardingDeploymentDebugger,
   IntegrationDebugger,
   PreconfigurationDebugger,
   FleetIndexDebugger,
@@ -42,64 +45,83 @@ import {
 // setup if we end up pursuing wider adoption of react-query.
 export const queryClient = new QueryClient();
 
-const panels = [
-  {
-    title: i18n.translate('xpack.fleet.debug.HealthCheckStatus.title', {
-      defaultMessage: 'Health Check Status',
-    }),
-    id: 'healthCheckStatus',
-    component: <HealthCheckPanel />,
-  },
-  {
-    title: i18n.translate('xpack.fleet.debug.agentPolicyDebugger.title', {
-      defaultMessage: 'Agent Policy Debugger',
-    }),
-    id: 'agentPolicyDebugger',
-    component: <AgentPolicyDebugger />,
-  },
-  {
-    title: i18n.translate('xpack.fleet.debug.integrationDebugger.title', {
-      defaultMessage: 'Integration Debugger',
-    }),
-    id: 'integrationDebugger',
-    component: <IntegrationDebugger />,
-  },
-  {
-    title: i18n.translate('xpack.fleet.debug.savedObjectDebugger.title', {
-      defaultMessage: 'Saved Object Debugger',
-    }),
-    id: 'savedObjectDebugger',
-    component: <SavedObjectDebugger />,
-  },
-  {
-    title: i18n.translate('xpack.fleet.debug.fleetIndexDebugger.title', {
-      defaultMessage: 'Fleet Index Debugger',
-    }),
-    id: 'fleetIndexDebugger',
-    component: <FleetIndexDebugger />,
-  },
-  {
-    title: i18n.translate('xpack.fleet.debug.preconfigurationDebugger.title', {
-      defaultMessage: 'Preconfiguration Debugger',
-    }),
-    id: 'preconfigurationDebugger',
-    component: <PreconfigurationDebugger />,
-  },
-  {
-    title: i18n.translate('xpack.fleet.debug.orphanedIntegrationPolicyDebugger.title', {
-      defaultMessage: 'Orphaned Integration Policy Debugger',
-    }),
-    id: 'orphanedIntegrationPolicyDebugger',
-    component: <OrphanedIntegrationPolicyDebugger />,
-  },
-];
-
 export const DebugPage: React.FunctionComponent<{
   isInitialized: boolean;
   setupError: RequestError | null;
 }> = ({ isInitialized, setupError }) => {
   const { chrome } = useStartServices();
   const { getHref } = useLink();
+  const { enableCloudOnboardingDeployments } = ExperimentalFeaturesService.get();
+
+  const panels = [
+    {
+      title: i18n.translate('xpack.fleet.debug.HealthCheckStatus.title', {
+        defaultMessage: 'Health Check Status',
+      }),
+      id: 'healthCheckStatus',
+      component: <HealthCheckPanel />,
+    },
+    {
+      title: i18n.translate('xpack.fleet.debug.agentPolicyDebugger.title', {
+        defaultMessage: 'Agent Policy Debugger',
+      }),
+      id: 'agentPolicyDebugger',
+      component: <AgentPolicyDebugger />,
+    },
+    {
+      title: i18n.translate('xpack.fleet.debug.integrationDebugger.title', {
+        defaultMessage: 'Integration Debugger',
+      }),
+      id: 'integrationDebugger',
+      component: <IntegrationDebugger />,
+    },
+    {
+      title: i18n.translate('xpack.fleet.debug.savedObjectDebugger.title', {
+        defaultMessage: 'Saved Object Debugger',
+      }),
+      id: 'savedObjectDebugger',
+      component: <SavedObjectDebugger />,
+    },
+    {
+      title: i18n.translate('xpack.fleet.debug.fleetIndexDebugger.title', {
+        defaultMessage: 'Fleet Index Debugger',
+      }),
+      id: 'fleetIndexDebugger',
+      component: <FleetIndexDebugger />,
+    },
+    {
+      title: i18n.translate('xpack.fleet.debug.preconfigurationDebugger.title', {
+        defaultMessage: 'Preconfiguration Debugger',
+      }),
+      id: 'preconfigurationDebugger',
+      component: <PreconfigurationDebugger />,
+    },
+    {
+      title: i18n.translate('xpack.fleet.debug.orphanedIntegrationPolicyDebugger.title', {
+        defaultMessage: 'Orphaned Integration Policy Debugger',
+      }),
+      id: 'orphanedIntegrationPolicyDebugger',
+      component: <OrphanedIntegrationPolicyDebugger />,
+    },
+    {
+      title: i18n.translate('xpack.fleet.debug.agentlessResourcesToggle.title', {
+        defaultMessage: 'Show Agentless Resources',
+      }),
+      id: 'agentlessResourcesToggle',
+      component: <AgentlessResourcesToggle />,
+    },
+    ...(enableCloudOnboardingDeployments
+      ? [
+          {
+            title: i18n.translate('xpack.fleet.debug.cloudOnboardingDeploymentDebugger.title', {
+              defaultMessage: 'Cloud Onboarding Deployment Debugger',
+            }),
+            id: 'cloudOnboardingDeploymentDebugger',
+            component: <CloudOnboardingDeploymentDebugger />,
+          },
+        ]
+      : []),
+  ];
 
   chrome.docTitle.change(['Debug', 'Fleet']);
 
@@ -144,7 +166,7 @@ export const DebugPage: React.FunctionComponent<{
             {!isInitialized && setupError?.message && (
               <>
                 <EuiSpacer size="s" />
-                <EuiCallOut color="danger" iconType="warning" title="Setup error">
+                <EuiCallOut announceOnMount color="danger" iconType="warning" title="Setup error">
                   <EuiText grow={false}>
                     <FormattedMessage
                       id="xpack.fleet.debug.initializationError.description"
@@ -206,7 +228,7 @@ export const DebugPage: React.FunctionComponent<{
                     defaultMessage: 'Troubleshooting Guide',
                   }),
                   href: 'https://www.elastic.co/guide/en/fleet/current/fleet-troubleshooting.html',
-                  iconType: 'popout',
+                  iconType: 'external',
                   target: '_blank',
                 },
               ]}

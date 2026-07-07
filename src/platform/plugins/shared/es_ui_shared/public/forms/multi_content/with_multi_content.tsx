@@ -10,7 +10,7 @@
 import React from 'react';
 
 import { MultiContentProvider } from './multi_content_context';
-import { HookProps } from './use_multi_content';
+import type { HookProps } from './use_multi_content';
 
 /**
  * HOC to wrap a component with the MultiContentProvider

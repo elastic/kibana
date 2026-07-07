@@ -6,13 +6,13 @@
  */
 
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { omit } from 'lodash/fp';
 
 import { getGenAiConfig, getRequestBody } from './helpers';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
-const connector: ActionConnector = {
+const connector = createMockActionConnector({
   actionTypeId: '.gen-ai',
   config: {
     apiProvider: 'Azure OpenAI',
@@ -20,13 +20,10 @@ const connector: ActionConnector = {
       'https://example.com/openai/deployments/example/chat/completions?api-version=2024-02-15-preview',
   },
   id: '15b4f8df-e2ca-4060-81a1-3bd2a2bffc7e',
-  isDeprecated: false,
   isMissingSecrets: false,
-  isPreconfigured: false,
-  isSystemAction: false,
   name: 'Azure OpenAI GPT-4o',
   secrets: { secretTextField: 'a secret' },
-};
+});
 
 describe('getGenAiConfig', () => {
   it('returns undefined when the connector is preconfigured', () => {
@@ -101,7 +98,7 @@ describe('getGenAiConfig', () => {
   });
 
   it('returns the expected GenAiConfig when the connector config is undefined', () => {
-    const connectorWithoutConfig = omit('config', connector) as ActionConnector<
+    const connectorWithoutConfig = omit('config', connector) as unknown as ActionConnector<
       Record<string, unknown>,
       Record<string, unknown>
     >;
@@ -144,6 +141,7 @@ describe('getRequestBody', () => {
     const result = getRequestBody({
       alertsIndexPattern,
       anonymizationFields,
+      connectorId: connector.id,
       size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
       traceOptions,
     });
@@ -153,9 +151,7 @@ describe('getRequestBody', () => {
       anonymizationFields: anonymizationFields.data,
       apiConfig: {
         actionTypeId: '',
-        connectorId: '',
-        model: undefined,
-        provider: undefined,
+        connectorId: connector.id,
       },
       langSmithProject: undefined,
       langSmithApiKey: undefined,
@@ -169,6 +165,7 @@ describe('getRequestBody', () => {
     const result = getRequestBody({
       alertsIndexPattern: undefined,
       anonymizationFields,
+      connectorId: connector.id,
       size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
       traceOptions,
     });
@@ -178,9 +175,7 @@ describe('getRequestBody', () => {
       anonymizationFields: anonymizationFields.data,
       apiConfig: {
         actionTypeId: '',
-        connectorId: '',
-        model: undefined,
-        provider: undefined,
+        connectorId: connector.id,
       },
       langSmithProject: undefined,
       langSmithApiKey: undefined,
@@ -194,6 +189,7 @@ describe('getRequestBody', () => {
     const withLangSmith = {
       alertsIndexPattern,
       anonymizationFields,
+      connectorId: connector.id,
       size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
       traceOptions: {
         apmUrl: '/app/apm',
@@ -209,72 +205,12 @@ describe('getRequestBody', () => {
       anonymizationFields: anonymizationFields.data,
       apiConfig: {
         actionTypeId: '',
-        connectorId: '',
-        model: undefined,
-        provider: undefined,
+        connectorId: connector.id,
       },
       langSmithApiKey: withLangSmith.traceOptions.langSmithApiKey,
       langSmithProject: withLangSmith.traceOptions.langSmithProject,
       size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
       replacements: {},
-      subAction: 'invokeAI',
-    });
-  });
-
-  it('returns the expected AttackDiscoveryPostRequestBody with the expected apiConfig when selectedConnector is provided', () => {
-    const result = getRequestBody({
-      alertsIndexPattern,
-      anonymizationFields,
-      selectedConnector: connector, // <-- selectedConnector is provided
-      size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
-      traceOptions,
-    });
-
-    expect(result).toEqual({
-      alertsIndexPattern,
-      anonymizationFields: anonymizationFields.data,
-      apiConfig: {
-        actionTypeId: connector.actionTypeId,
-        connectorId: connector.id,
-        model: undefined,
-        provider: undefined,
-      },
-      langSmithProject: undefined,
-      langSmithApiKey: undefined,
-      size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
-      replacements: {},
-      subAction: 'invokeAI',
-    });
-  });
-
-  it('returns the expected AttackDiscoveryPostRequestBody with the expected apiConfig when genAiConfig is provided', () => {
-    const genAiConfig = {
-      apiProvider: OpenAiProviderType.AzureAi,
-      defaultModel: '2024-02-15-preview',
-    };
-
-    const result = getRequestBody({
-      alertsIndexPattern,
-      anonymizationFields,
-      genAiConfig, // <-- genAiConfig is provided
-      selectedConnector: connector, // <-- selectedConnector is provided
-      size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
-      traceOptions,
-    });
-
-    expect(result).toEqual({
-      alertsIndexPattern,
-      anonymizationFields: anonymizationFields.data,
-      apiConfig: {
-        actionTypeId: connector.actionTypeId,
-        connectorId: connector.id,
-        model: genAiConfig.defaultModel,
-        provider: genAiConfig.apiProvider,
-      },
-      langSmithProject: undefined,
-      langSmithApiKey: undefined,
-      replacements: {},
-      size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
       subAction: 'invokeAI',
     });
   });

@@ -16,11 +16,11 @@ import { useQueryTimelineByIdOnUrlChange } from './timeline/use_query_timeline_b
 export const useUrlState = () => {
   useSyncGlobalQueryString();
   useInitSearchBarFromUrlParams();
-  useInitTimerangeFromUrlParam();
-  useUpdateTimerangeOnPageChange();
   useInitTimelineFromUrlParam();
   useSyncTimelineUrlParam();
   useQueryTimelineByIdOnUrlChange();
+  useInitTimerangeFromUrlParam();
+  useUpdateTimerangeOnPageChange();
 };
 
 export { URL_PARAM_KEY } from './constants';

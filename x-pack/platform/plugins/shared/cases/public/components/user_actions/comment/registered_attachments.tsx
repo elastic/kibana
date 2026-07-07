@@ -14,7 +14,7 @@
 import React, { Suspense } from 'react';
 import { memoize, partition } from 'lodash';
 
-import { EuiCallOut, EuiCode, EuiLoadingSpinner, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiCode, EuiFlexItem, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 
 import type {
   AttachmentType,
@@ -25,7 +25,7 @@ import type {
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import { UserActionTimestamp } from '../timestamp';
 import type { AttachmentTypeRegistry } from '../../../../common/registry';
-import type { Attachment } from '../../../../common/types/domain';
+import type { AttachmentV2 } from '../../../../common/types/domain';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import type { SnakeToCamelCase } from '../../../../common/types';
 import {
@@ -36,6 +36,8 @@ import {
 import { UserActionContentToolbar } from '../content_toolbar';
 import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
 import { RegisteredAttachmentsPropertyActions } from '../property_actions/registered_attachments_property_actions';
+import { AttachmentErrorCallout } from './attachment_error_callout';
+import { AttachmentRenderErrorBoundary } from './attachment_render_error_boundary';
 
 type BuilderArgs<C, R> = Pick<
   UserActionBuilderArgs,
@@ -69,14 +71,18 @@ const getAttachmentRenderer = memoize((cachingKey: string) => {
       AttachmentElement = React.cloneElement(AttachmentElement, props);
     }
 
-    return <Suspense fallback={<EuiLoadingSpinner />}>{AttachmentElement}</Suspense>;
+    return (
+      <AttachmentRenderErrorBoundary>
+        <Suspense fallback={<EuiLoadingSpinner />}>{AttachmentElement}</Suspense>
+      </AttachmentRenderErrorBoundary>
+    );
   };
 
   return renderCallback;
 });
 
 export const createRegisteredAttachmentUserActionBuilder = <
-  C extends Attachment,
+  C extends AttachmentV2,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   R extends AttachmentTypeRegistry<AttachmentType<any>>
 >({
@@ -112,9 +118,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
           className: `comment-${attachment.type}-not-found`,
           'data-test-subj': `comment-${attachment.type}-not-found`,
           timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-          children: (
-            <EuiCallOut title={ATTACHMENT_NOT_REGISTERED_ERROR} color="danger" iconType="warning" />
-          ),
+          children: <AttachmentErrorCallout title={ATTACHMENT_NOT_REGISTERED_ERROR} />,
         },
       ];
     }
@@ -123,17 +127,21 @@ export const createRegisteredAttachmentUserActionBuilder = <
 
     const props = {
       ...getAttachmentViewProps(),
-      attachmentId: attachment.id,
+      savedObjectId: attachment.id,
       caseData: { id: caseData.id, title: caseData.title },
     };
 
     const attachmentViewObject = attachmentType.getAttachmentViewObject(props);
+    const deleteSuccessTitle =
+      attachmentViewObject.deleteSuccessTitle ?? DELETE_REGISTERED_ATTACHMENT;
 
     const renderer = getAttachmentRenderer(userAction.id);
     const actions = attachmentViewObject.getActions?.(props) ?? [];
     const [primaryActions, nonPrimaryActions] = partition(actions, 'isPrimary');
     const visiblePrimaryActions = primaryActions.slice(0, 2);
     const nonVisiblePrimaryActions = primaryActions.slice(2, primaryActions.length);
+    const className =
+      attachmentViewObject.className ?? `comment-${attachment.type}-attachment-${attachmentTypeId}`;
 
     return [
       {
@@ -143,8 +151,10 @@ export const createRegisteredAttachmentUserActionBuilder = <
             userProfiles={userProfiles}
           />
         ),
-        className: `comment-${attachment.type}-attachment-${attachmentTypeId}`,
+        className,
+        css: attachmentViewObject.css,
         event: attachmentViewObject.event,
+        eventColor: attachmentViewObject.eventColor,
         'data-test-subj': `comment-${attachment.type}-${attachmentTypeId}`,
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
         timelineAvatar: attachmentViewObject.timelineAvatar,
@@ -158,21 +168,23 @@ export const createRegisteredAttachmentUserActionBuilder = <
                     data-test-subj={`attachment-${attachmentTypeId}-${attachment.id}`}
                     key={`attachment-${attachmentTypeId}-${attachment.id}`}
                   >
-                    <EuiButtonIcon
-                      aria-label={action.label}
-                      iconType={action.iconType}
-                      color={action.color ?? 'text'}
-                      onClick={action.onClick}
-                      data-test-subj={`attachment-${attachmentTypeId}-${attachment.id}-${action.iconType}`}
-                      key={`attachment-${attachmentTypeId}-${attachment.id}-${action.iconType}`}
-                    />
+                    <EuiToolTip content={action.label} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        aria-label={action.label}
+                        iconType={action.iconType}
+                        color={action.color ?? 'text'}
+                        onClick={action.onClick}
+                        data-test-subj={`attachment-${attachmentTypeId}-${attachment.id}-${action.iconType}`}
+                        key={`attachment-${attachmentTypeId}-${attachment.id}-${action.iconType}`}
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 )) ||
                 (action.type === AttachmentActionType.CUSTOM && action.render())
             )}
             <RegisteredAttachmentsPropertyActions
               isLoading={isLoading}
-              onDelete={() => handleDeleteComment(attachment.id, DELETE_REGISTERED_ATTACHMENT)}
+              onDelete={() => handleDeleteComment(attachment.id, deleteSuccessTitle)}
               registeredAttachmentActions={[...nonVisiblePrimaryActions, ...nonPrimaryActions]}
               hideDefaultActions={!!attachmentViewObject.hideDefaultActions}
             />

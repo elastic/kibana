@@ -8,12 +8,15 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { EcsError } from '@elastic/ecs';
 import type { BaseFileMetadata, FileCompression, FileJSON } from '@kbn/files-plugin/common';
+import type { SupportedHostOsType } from '../constants';
+import type { MemoryDumpActionRequestBody } from '../../api/endpoint/actions/response_actions/memory_dump';
 import type {
-  UploadActionApiRequestBody,
   ActionStatusRequestSchema,
+  EndpointRunScriptActionRequestParams,
   KillProcessRequestBody,
-  SuspendProcessRequestBody,
   RunScriptActionRequestBody,
+  SuspendProcessRequestBody,
+  UploadActionApiRequestBody,
 } from '../../api/endpoint';
 
 import type {
@@ -29,7 +32,19 @@ export interface ActionResponseOutput<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
 > {
   type: 'json' | 'text';
-  content: TOutputContent;
+  content: {
+    /**
+     * If action was canceled, this property would include a static value of `manual` or `action`.
+     * `manual`: the action was canceled by a user directly on the host using the `elastic-defend` executable.
+     * `action`: the action was canceled by a `cancel` action
+     */
+    canceled_by?: string;
+    /**
+     * If action was canceled by an `action`, this property MAY have the cancel's action id. For 3rd party EDR
+     * this value may not be available and thus will be empty string in those cases
+     */
+    canceled_id?: string;
+  } & TOutputContent;
 }
 
 export interface ProcessesEntry {
@@ -42,6 +57,11 @@ export interface ProcessesEntry {
 export interface GetProcessesActionOutputContent {
   code: string;
   entries: ProcessesEntry[];
+  /**
+   * The relative API path to download the output file for this response action.
+   * Only supported by some `agentType`'s
+   */
+  downloadUri?: string;
 }
 
 export interface SuspendProcessActionOutputContent {
@@ -70,6 +90,10 @@ export interface ResponseActionGetFileOutputContent {
     file_name: string;
     type: string;
   }>;
+  /**
+   * The relative API path to download the output file for this response action
+   */
+  downloadUri?: string;
 }
 
 export interface ResponseActionExecuteOutputContent {
@@ -91,6 +115,10 @@ export interface ResponseActionExecuteOutputContent {
    * */
   output_file_stdout_truncated: boolean;
   output_file_stderr_truncated: boolean;
+  /**
+   * The relative API path to download the output file for this response action
+   */
+  downloadUri?: string;
 }
 
 export interface ResponseActionScanOutputContent {
@@ -100,6 +128,16 @@ export interface ResponseActionScanOutputContent {
 export interface ResponseActionRunScriptOutputContent {
   stdout: string;
   stderr: string;
+  code: string;
+  /**
+   * The relative API path to download the output file for this response action
+   */
+  downloadUri?: string;
+}
+
+export type ResponseActionEndpointRunScriptOutputContent = ResponseActionExecuteOutputContent;
+
+export interface ResponseActionCancelOutputContent {
   code: string;
 }
 
@@ -253,7 +291,23 @@ export interface ResponseActionScanParameters {
   path: string;
 }
 
+export interface ResponseActionCancelParameters {
+  id: string;
+}
+
 export type ResponseActionRunScriptParameters = RunScriptActionRequestBody['parameters'];
+
+export type ResponseActionMemoryDumpParameters = MemoryDumpActionRequestBody['parameters'];
+
+export interface ResponseActionMemoryDumpOutputContent {
+  code: string;
+  /** The zip file size */
+  file_size: number;
+  /** The full path of the file on the host machine */
+  path: string;
+  /** The remaining free disk space in bytes (after creating memory dump) */
+  disk_free_space: number;
+}
 
 export type EndpointActionDataParameterTypes =
   | undefined
@@ -262,7 +316,9 @@ export type EndpointActionDataParameterTypes =
   | ResponseActionGetFileParameters
   | ResponseActionUploadParameters
   | ResponseActionScanParameters
-  | ResponseActionRunScriptParameters;
+  | ResponseActionRunScriptParameters
+  | ResponseActionCancelParameters
+  | ResponseActionMemoryDumpParameters;
 
 /** Output content of the different response actions */
 export type EndpointActionResponseDataOutput =
@@ -274,7 +330,8 @@ export type EndpointActionResponseDataOutput =
   | SuspendProcessActionOutputContent
   | KillProcessActionOutputContent
   | ResponseActionScanOutputContent
-  | ResponseActionRunScriptOutputContent;
+  | ResponseActionRunScriptOutputContent
+  | ResponseActionCancelOutputContent;
 
 /**
  * The data stored with each Response Action under `EndpointActions.data` property
@@ -430,6 +487,7 @@ export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema
 export interface ActionDetailsAgentState {
   isCompleted: boolean;
   wasSuccessful: boolean;
+  wasCanceled: boolean;
   errors: undefined | string[];
   completedAt: string | undefined;
 }
@@ -472,6 +530,8 @@ export interface ActionDetails<
   isCompleted: boolean;
   /** If the action was successful */
   wasSuccessful: boolean;
+  /** If the action was canceled */
+  wasCanceled: boolean;
   /** Any errors encountered if `wasSuccessful` is `false` */
   errors: undefined | string[];
   /** The date when the initial action request was submitted */
@@ -612,3 +672,42 @@ export interface ResponseActionUploadOutputContent {
   /** The free space available (after saving the file) of the drive where the file was saved to, In Bytes  */
   disk_free_space: number;
 }
+
+/**
+ * A Response Action script
+ */
+export interface ResponseActionScript<TMeta extends {} = {}> {
+  /**
+   * Unique identifier for the script
+   */
+  id: string;
+  /**
+   * Display name of the script
+   */
+  name: string;
+  /**
+   * Description of what the script does
+   */
+  description: string;
+
+  /**
+   * Additional meta info. about the script. Can be used to store EDR specific
+   * information about the script for use in the UI
+   */
+  meta?: TMeta;
+}
+
+/**
+ * API response with list of Response Actions scripts available on the system
+ */
+export interface ResponseActionScriptsApiResponse<TMeta extends {} = {}> {
+  data: ResponseActionScript<TMeta>[];
+}
+
+/**
+ * Type used in Rules when setting up the `runscript` response action for Elastic Defend
+ */
+export type AutomatedRunScriptConfig = Record<
+  SupportedHostOsType,
+  EndpointRunScriptActionRequestParams
+>;

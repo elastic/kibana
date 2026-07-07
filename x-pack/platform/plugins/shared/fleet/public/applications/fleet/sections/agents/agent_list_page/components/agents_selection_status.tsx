@@ -81,7 +81,7 @@ export const AgentsSelectionStatus: React.FunctionComponent<{
                   values={{ count: totalAgents }}
                 />{' '}
                 <EuiIconTip
-                  type="iInCircle"
+                  type="info"
                   content={
                     <FormattedMessage
                       data-test-subj="selectedAgentCountTooltip"
@@ -120,7 +120,7 @@ export const AgentsSelectionStatus: React.FunctionComponent<{
                 />{' '}
                 {selectionMode === 'query' && (
                   <EuiIconTip
-                    type="iInCircle"
+                    type="info"
                     content={
                       <FormattedMessage
                         data-test-subj="selectedAgentCountTooltip"
@@ -145,7 +145,7 @@ export const AgentsSelectionStatus: React.FunctionComponent<{
                 <EuiFlexItem grow={false}>
                   <Button
                     size="xs"
-                    flush="left"
+                    flush="both"
                     data-test-subj="selectedEverythingOnAllPagesButton"
                     onClick={() => setSelectionMode('query')}
                   >
@@ -163,7 +163,7 @@ export const AgentsSelectionStatus: React.FunctionComponent<{
             <EuiFlexItem grow={false}>
               <Button
                 size="xs"
-                flush="left"
+                flush="both"
                 data-test-subj="clearAgentSelectionButton"
                 onClick={() => {
                   setSelectionMode('manual');

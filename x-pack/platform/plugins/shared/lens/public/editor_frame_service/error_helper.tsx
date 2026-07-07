@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ExpressionRenderError } from '@kbn/expressions-plugin/public';
+import type { ExpressionRenderError } from '@kbn/expressions-plugin/public';
 import { renderSearchError } from '@kbn/search-errors';
 import React from 'react';
-import { UserMessage } from '../types';
+import type { UserMessage } from '@kbn/lens-common';
 
 export function getOriginalRequestErrorMessages(
   error: ExpressionRenderError | null

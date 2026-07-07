@@ -9,7 +9,7 @@ import React from 'react';
 import 'jest-canvas-mock';
 import { fireEvent } from '@testing-library/react';
 
-import { WaterfallNetworkItem } from '../../common/network_data/types';
+import type { WaterfallNetworkItem } from '../../common/network_data/types';
 import { WaterfallSidebarItem } from './waterfall_sidebar_item';
 import { SIDEBAR_FILTER_MATCHES_SCREENREADER_LABEL } from './translations';
 import { getChunks } from './middle_truncated_text';

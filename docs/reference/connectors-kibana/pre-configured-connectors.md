@@ -19,6 +19,8 @@ Preconfigured connectors offer the following benefits:
 * Cannot be edited or deleted.
 
 
+{applies_to}`stack: ga 9.4+`Each entry’s key in `xpack.actions.preconfigured` is the connector’s ID. That ID must not match a connector that's already stored in {{kib}}, for example, a user-created connector with the same ID. If there is a conflict, {{kib}} logs an error at startup, skips loading the preconfigured connector, and shows a warning in the UI.
+
 ## Create preconfigured connectors [create-preconfigured-connectors]
 
 Add `xpack.actions.preconfigured` settings to your `kibana.yml` file. The settings vary depending on which type of connector you’re adding. Refer to [Preconfigured connector settings](/reference/configuration-reference/alerting-settings.md#preconfigured-connector-settings).
@@ -64,7 +66,7 @@ Sensitive properties, such as passwords, can also be stored in the [{{kib}} keys
 
 ## View preconfigured connectors [managing-preconfigured-connectors]
 
-go to the **{{connectors-ui}}** page using the navigation menu or the [global search field](docs-content://get-started/the-stack.md#kibana-navigation-search). Preconfigured connectors appear regardless of which space you are in. They are tagged as “preconfigured”, and you cannot delete them.
+go to the **{{connectors-ui}}** page using the navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md). Preconfigured connectors appear regardless of which space you are in. They are tagged as “preconfigured”, and you cannot delete them.
 
 % TO DO: Use `:class: screenshot`
 ![Connectors managing tab with pre-configured](../images/preconfigured-connectors-managing.png)
@@ -140,7 +142,7 @@ xpack.actions.preconfigured:
     actionTypeId: .bedrock
     config:
       apiUrl: https://bedrock-runtime.us-east-1.amazonaws.com <1>
-      defaultModel: anthropic.claude-3-5-sonnet-20240620-v1:0 <2>
+      defaultModel: us.anthropic.claude-sonnet-4-5-20250929-v1:0 <2>
     secrets:
       accessKey: key-value <3>
       secret: secret-value <4>
@@ -163,7 +165,7 @@ xpack.actions.preconfigured:
     name: preconfigured-d3security-connector-type
     actionTypeId: .d3security
     config:
-      url: https://testurl.com/elasticsearch/VSOC/api/Data/Kibana/Security%20Operations/CreateEvents <1>
+      url: <example-url>/elasticsearch/VSOC/api/Data/Kibana/Security%20Operations/CreateEvents <1>
     secrets:
       token: superlongtoken <2>
 ```
@@ -447,7 +449,7 @@ xpack.actions.preconfigured:
     name: preconfigured-pagerduty-connector-type
     actionTypeId: .pagerduty
     config:
-      apiUrl: https://test.host <1>
+      apiUrl: <EXAMPLE_URL> <1>
     secrets:
       routingKey: testroutingkey <2>
 ```
@@ -479,7 +481,7 @@ xpack.actions.preconfigured:
     name: preconfigured-servicenow-connector-type
     actionTypeId: .servicenow-itom
     config:
-      apiUrl: https://example.service-now.com/ <1>
+      apiUrl: <SERVICENOW_INSTANCE_URL> <1>
     secrets:
       username: testuser <2>
       password: passwordkeystorevalue <3>
@@ -502,7 +504,7 @@ xpack.actions.preconfigured:
     name: preconfigured-oauth-servicenow-connector-type
     actionTypeId: .servicenow-itom
     config:
-      apiUrl: https://example.service-now.com/
+      apiUrl: <SERVICENOW_INSTANCE_URL>
       isOAuth: true <1>
       userIdentifierValue: testuser@email.com <2>
       clientId: abcdefghijklmnopqrstuvwxyzabcdef <3>
@@ -536,7 +538,7 @@ xpack.actions.preconfigured:
     name: preconfigured-servicenow-connector-type
     actionTypeId: .servicenow
     config:
-      apiUrl: https://example.service-now.com/ <1>
+      apiUrl: <SERVICENOW_INSTANCE_URL> <1>
       usesTableApi: false <2>
     secrets:
       username: testuser <3>
@@ -561,7 +563,7 @@ xpack.actions.preconfigured:
     name: preconfigured-oauth-servicenow-connector-type
     actionTypeId: .servicenow
     config:
-      apiUrl: https://example.service-now.com/
+      apiUrl: <SERVICENOW_INSTANCE_URL>
       usesTableApi: false
       isOAuth: true <1>
       userIdentifierValue: testuser@email.com <2>
@@ -596,7 +598,7 @@ xpack.actions.preconfigured:
     name: preconfigured-servicenow-connector-type
     actionTypeId: .servicenow-sir
     config:
-      apiUrl: https://example.service-now.com/ <1>
+      apiUrl: <SERVICENOW_INSTANCE_URL> <1>
       usesTableApi: false <2>
     secrets:
       username: testuser <3>
@@ -621,7 +623,7 @@ xpack.actions.preconfigured:
     name: preconfigured-oauth-servicenow-connector-type
     actionTypeId: .servicenow-sir
     config:
-      apiUrl: https://example.service-now.com/
+      apiUrl: <SERVICENOW_INSTANCE_URL>
       usesTableApi: false
       isOAuth: true <1>
       userIdentifierValue: testuser@email.com <2>
@@ -687,7 +689,7 @@ xpack.actions.preconfigured:
     name: preconfigured-swimlane-connector-type
     actionTypeId: .swimlane
     config:
-      apiUrl: https://elastic.swimlaneurl.us <1>
+      apiUrl: <SWIMLANE_INSTANCE_URL> <1>
       appId: app-id <2>
       mappings: <3>
         alertIdConfig:
@@ -750,7 +752,7 @@ my-tines:
     name: preconfigured-tines-connector-type
     actionTypeId: .tines
     config:
-      url: https://some-tenant-2345.tines.com <1>
+      url: <TINES_TENANT_URL> <1>
     secrets:
       email: some.address@test.com <2>
       token: ausergeneratedapitoken <3>
@@ -772,7 +774,7 @@ xpack.actions.preconfigured:
     name: preconfigured-torq-connector-type
     actionTypeId: .torq
     config:
-      webhookIntegrationUrl: https://hooks.torq.io/v1/somehook <1>
+      webhookIntegrationUrl: <TORQ_ENDPOINT_URL>/v1/somehook <1>
     secrets:
       token: mytorqtoken <2>
 ```
@@ -792,7 +794,7 @@ xpack.actions.preconfigured:
     name: preconfigured-webhook-connector-type
     actionTypeId: .webhook
     config:
-      url: https://test.host <1>
+      url: <EXAMPLE_URL> <1>
       method: post <2>
       headers: <3>
         testheader: testvalue
@@ -832,17 +834,17 @@ xpack.actions.preconfigured:
       hasAuth: true <1>
       headers: <2>
         'content-type': 'application/json'
-      createIncidentUrl: 'https://example.com/rest/api/2/issue' <3>
+      createIncidentUrl: '<EXAMPLE_URL>/rest/api/2/issue' <3>
       createIncidentMethod: 'post' <4>
       createIncidentJson: '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}}' <5>
-      getIncidentUrl: 'https://example.com/rest/api/2/issue/{{{external.system.id}}}' <6>
+      getIncidentUrl: '<EXAMPLE_URL>/rest/api/2/issue/{{{external.system.id}}}' <6>
       getIncidentResponseExternalTitleKey: 'key' <7>
-      viewIncidentUrl: 'https://example.com/browse/{{{external.system.title}}}' <8>
-      updateIncidentUrl: 'https://example.com/rest/api/2/issue/{{{external.system.id}}}' <9>
+      viewIncidentUrl: '<EXAMPLE_URL>/browse/{{{external.system.title}}}' <8>
+      updateIncidentUrl: '<EXAMPLE_URL>/rest/api/2/issue/{{{external.system.id}}}' <9>
       updateIncidentMethod: 'put' <10>
       updateIncidentJson: '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}}' <11>
       createCommentMethod: 'post', <12>
-      createCommentUrl: 'https://example.com/rest/api/2/issue/{{{external.system.id}}}/comment', <13>
+      createCommentUrl: '<EXAMPLE_URL>/rest/api/2/issue/{{{external.system.id}}}/comment', <13>
       createCommentJson: '{"body": {{{case.comment}}}}', <14>
     secrets:
       user: testuser <15>
@@ -878,7 +880,7 @@ xpack.actions.preconfigured:
     name: preconfigured-xmatters-connector-type
     actionTypeId: .xmatters
     config:
-      configUrl: https://test.host <1>
+      configUrl: <EXAMPLE_REQUEST_URL> <1>
       usesBasic: true <2>
     secrets:
       user: testuser <3>
@@ -905,7 +907,7 @@ xpack.actions.preconfigured:
     config:
       usesBasic: false <1>
     secrets:
-      secretsUrl: https://test.host?apiKey=1234-abcd <2>
+      secretsUrl: <EXAMPLE_HOST_URL>?apiKey=1234-abcd <2>
 ```
 
 1. Indicates whether the connector uses HTTP basic authentication. Set to `false` to use URL authentication. Defaults to `true`.

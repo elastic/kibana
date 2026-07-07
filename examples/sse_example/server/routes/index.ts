@@ -8,9 +8,10 @@
  */
 
 import type { IRouter, Logger } from '@kbn/core/server';
-import { Observable, defer, map, timer } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { defer, map, timer } from 'rxjs';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
-import { ServerSentEvent } from '@kbn/sse-utils/src/events';
+import type { ServerSentEvent } from '@kbn/sse-utils/src/events';
 
 export function defineRoutes(router: IRouter, logger: Logger) {
   router.versioned

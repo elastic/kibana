@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 import { ExampleCurrencyFormat } from '../../common';
 
@@ -34,7 +34,7 @@ export function getSample(fieldFormats: FieldFormatsStart) {
 
   const pairs = [1000, 100000, 100000000].map((value) => ({
     raw: value,
-    formatted: fieldFormat.convert(value),
+    formatted: fieldFormat.convertToText(value),
   }));
 
   return pairs;

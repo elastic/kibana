@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useState } from 'react';
 import { EuiFieldSearch } from '@elastic/eui';
 import styled from 'styled-components';
 import useDebounce from 'react-use/lib/useDebounce';
 import * as labels from './translations';
 
 const WrapFieldSearch = styled('div')`
-  max-width: 700px;
+  width: 100%;
 `;
 
 interface Props {
   setSearch: (val: string) => void;
+  initialValue?: string;
 }
 
-export const CertificateSearch: React.FC<Props> = ({ setSearch }) => {
-  const [debouncedValue, setDebouncedValue] = useState('');
+export const CertificateSearch: React.FC<Props> = ({ setSearch, initialValue = '' }) => {
+  const [debouncedValue, setDebouncedValue] = useState(initialValue);
 
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     setDebouncedValue(e.target.value);
@@ -39,6 +41,7 @@ export const CertificateSearch: React.FC<Props> = ({ setSearch }) => {
       <EuiFieldSearch
         data-test-subj="uptimeCertSearch"
         placeholder={labels.SEARCH_CERTS}
+        defaultValue={initialValue}
         onChange={onChange}
         isClearable={true}
         aria-label={labels.SEARCH_CERTS}

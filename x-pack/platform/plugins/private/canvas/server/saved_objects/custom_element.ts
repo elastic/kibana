@@ -6,9 +6,10 @@
  */
 
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { CUSTOM_ELEMENT_TYPE } from '../../common/lib/constants';
-import { customElementMigrationsFactory, CanvasSavedObjectTypeMigrationsDeps } from './migrations';
+import type { CanvasSavedObjectTypeMigrationsDeps } from './migrations';
+import { customElementMigrationsFactory } from './migrations';
 
 export const customElementType = (deps: CanvasSavedObjectTypeMigrationsDeps): SavedObjectsType => ({
   name: CUSTOM_ELEMENT_TYPE,

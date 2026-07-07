@@ -18,7 +18,7 @@ export const CreateRuleButton = (props: CreateRuleButtonProps) => {
 
   return (
     <EuiButton
-      iconType="plusInCircle"
+      iconType="plusCircle"
       key="create-rule"
       data-test-subj="createRuleButton"
       fill

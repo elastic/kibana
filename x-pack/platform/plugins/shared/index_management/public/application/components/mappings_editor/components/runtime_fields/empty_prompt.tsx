@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
@@ -52,7 +53,7 @@ export const EmptyPrompt: FunctionComponent<Props> = ({ createField, runtimeFiel
       actions={
         <EuiButton
           onClick={() => createField()}
-          iconType="plusInCircle"
+          iconType="plusCircle"
           data-test-subj="createRuntimeFieldButton"
           fill
         >

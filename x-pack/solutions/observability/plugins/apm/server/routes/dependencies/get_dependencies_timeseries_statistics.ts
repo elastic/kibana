@@ -6,6 +6,7 @@
  */
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import type { DependenciesTimeseriesStatisticsResponse } from '@kbn/apm-api-shared';
 import { EVENT_OUTCOME, SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/es_fields/apm';
 import { EventOutcome } from '../../../common/event_outcome';
 import { getBucketSize } from '../../../common/utils/get_bucket_size';
@@ -68,6 +69,7 @@ async function fetchDependenciesTimeseriesStatistics({
       dependencies: {
         terms: {
           field: SPAN_DESTINATION_SERVICE_RESOURCE,
+          size: dependencyNames.length,
         },
         aggs: {
           timeseries: {
@@ -198,11 +200,6 @@ export function parseDependenciesStats({
       return acc;
     }, {}) ?? {}
   );
-}
-
-export interface DependenciesTimeseriesStatisticsResponse {
-  currentTimeseries: Record<string, Statistics>;
-  comparisonTimeseries: Record<string, Statistics> | null;
 }
 
 export async function getDependenciesTimeseriesStatistics({

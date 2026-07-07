@@ -19,12 +19,11 @@ import {
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as i18n from '../../common/translations';
-import type { MarkdownEditorRef } from './editor';
-import { MarkdownEditor } from './editor';
 import { CommentEditorContext } from './context';
 import { useMarkdownSessionStorage } from './use_markdown_session_storage';
+import { type MarkdownEditorRef } from './types';
+import { CommentEditor } from './comment_editor';
 
-/* eslint-disable react/no-unused-prop-types */
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   id: string;
   field: FieldHook<string>;
@@ -33,6 +32,7 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   isDisabled?: boolean;
   bottomRightContent?: React.ReactNode;
   caseTitle?: string;
+  caseId?: string;
   caseTags?: string[];
   draftStorageKey?: string;
   disabledUiPlugins?: string[];
@@ -50,6 +50,7 @@ export const MarkdownEditorForm = React.memo(
         bottomRightContent,
         caseTitle,
         caseTags,
+        caseId,
         draftStorageKey,
         disabledUiPlugins,
         initialValue,
@@ -90,14 +91,16 @@ export const MarkdownEditorForm = React.memo(
             label={field.label}
             labelAppend={field.labelAppend}
           >
-            <MarkdownEditor
-              ref={ref}
+            <CommentEditor
               ariaLabel={idAria}
+              data-test-subj={`${dataTestSubj}-markdown-editor`}
               editorId={id}
+              disabledUiPlugins={disabledUiPlugins}
+              field={field}
+              caseId={caseId}
+              ref={ref}
               onChange={field.setValue}
               value={field.value}
-              disabledUiPlugins={disabledUiPlugins}
-              data-test-subj={`${dataTestSubj}-markdown-editor`}
             />
           </EuiFormRow>
           {bottomRightContent && (

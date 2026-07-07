@@ -9,8 +9,8 @@
 
 import type { RequestHandler, RouteMethod, RouteRegistrar } from '@kbn/core/server';
 
-import { FilesRouter } from '../types';
-import { FileKindRouter, FileKindsRequestHandlerContext } from './types';
+import type { FilesRouter } from '../types';
+import type { FileKindRouter, FileKindsRequestHandlerContext } from './types';
 
 interface Args {
   router: FilesRouter;

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
@@ -23,26 +23,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     );
   }
 
-  async function unloadCurrentData() {
-    await esArchiver.unload(
-      'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
-    );
-  }
-
   describe('dashboard app - group 5', function () {
     before(loadCurrentData);
-    after(unloadCurrentData);
 
-    // This has to be first since the other tests create some embeddables as side affects and our counting assumes
-    // a fresh index.
-    loadTestFile(require.resolve('./empty_dashboard'));
     loadTestFile(require.resolve('./dashboard_settings'));
     loadTestFile(require.resolve('./data_shared_attributes'));
-    loadTestFile(require.resolve('./embed_mode'));
-    loadTestFile(require.resolve('./dashboard_back_button'));
-    loadTestFile(require.resolve('./legacy_urls'));
-    loadTestFile(require.resolve('./saved_search_embeddable'));
-    loadTestFile(require.resolve('./dashboard_panel_listing'));
 
     // Note: This one must be last because it unloads some data for one of its tests!
     // No, this isn't ideal, but loading/unloading takes so much time and these are all bunched

@@ -11,10 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import type { ValuesType } from 'utility-types';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { AgentExplorerFieldName } from '../../../../../../common/agent_explorer';
 import type { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
-import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { EnvironmentBadge } from '../../../../shared/environment_badge';
 import { ItemsBadge } from '../../../../shared/item_badge';
 import type { ITableColumn } from '../../../../shared/managed_table';
@@ -54,7 +54,6 @@ export function getAgentsColumns({
             content={i18n.translate('xpack.apm.agentExplorerTable.viewAgentInstances', {
               defaultMessage: 'Toggle agent instances view',
             })}
-            delay="long"
           >
             <EuiButtonIcon
               size="xs"
@@ -165,8 +164,9 @@ export function getAgentsColumns({
                   <EuiIcon
                     size="s"
                     color="subdued"
-                    type="questionInCircle"
+                    type="question"
                     className="eui-alignCenter"
+                    aria-hidden={true}
                   />
                 </>
               </EuiToolTip>

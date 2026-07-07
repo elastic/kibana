@@ -4,30 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import {
-  EuiButtonIcon,
   EuiBasicTable,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiPanel,
   EuiSpacer,
+  EuiToolTip,
   useCurrentEuiBreakpoint,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { X509Expiry } from '../../../../../common/runtime_types';
-import { MonitorSummary } from '../../../../../common/runtime_types';
+import type { X509Expiry } from '../../../../../common/runtime_types';
+import type { MonitorSummary } from '../../../../../common/runtime_types';
 import { MonitorListStatusColumn } from './columns/monitor_status_column';
-import { ExpandedRowMap } from './types';
+import type { ExpandedRowMap } from './types';
 import { MonitorBarSeries } from '../../common/charts';
 import { OverviewPageLink } from './overview_page_link';
 import * as labels from './translations';
 import { MonitorListPageSizeSelect } from './monitor_list_page_size_select';
 import { MonitorListDrawer } from './monitor_list_drawer/list_drawer_container';
-import { MonitorListProps } from './monitor_list_container';
-import { MonitorList } from '../../../state/reducers/monitor_list';
+import type { MonitorListProps } from './monitor_list_container';
+import type { MonitorList } from '../../../state/reducers/monitor_list';
 import { CertStatusColumn } from './columns/cert_status_column';
 import { MonitorListHeader } from './monitor_list_header';
 import { TAGS_LABEL, URL_LABEL } from '../../../../../common/translations/translations';
@@ -205,12 +207,16 @@ export const MonitorListComponent: ({
             width: '40px',
             render: (id: string) => {
               return (
-                <EuiButtonIcon
-                  aria-label={labels.getExpandDrawerLabel(id)}
-                  data-test-subj={`xpack.synthetics.monitorList.${id}.expandMonitorDetail`}
-                  iconType={expandedDrawerIds.includes(id) ? 'arrowUp' : 'arrowDown'}
-                  onClick={() => toggleDrawer(id)}
-                />
+                <EuiToolTip content={labels.getExpandDrawerLabel(id)} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    aria-label={labels.getExpandDrawerLabel(id)}
+                    data-test-subj={`xpack.synthetics.monitorList.${id}.expandMonitorDetail`}
+                    iconType={
+                      expandedDrawerIds.includes(id) ? 'chevronSingleUp' : 'chevronSingleDown'
+                    }
+                    onClick={() => toggleDrawer(id)}
+                  />
+                </EuiToolTip>
               );
             },
           },
@@ -224,6 +230,9 @@ export const MonitorListComponent: ({
       <EuiSpacer size="m" />
       <EuiBasicTable
         aria-label={labels.getDescriptionLabel(items.length)}
+        tableCaption={i18n.translate('xpack.uptime.monitorList.monitorListCaption', {
+          defaultMessage: 'Monitors list',
+        })}
         error={error?.body?.message || error?.message}
         loading={loading || isPending}
         itemId="monitor_id"

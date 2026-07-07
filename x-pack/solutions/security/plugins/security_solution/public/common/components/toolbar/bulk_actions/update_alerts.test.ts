@@ -6,6 +6,7 @@
  */
 
 import { updateAlertStatus } from './update_alerts';
+import { DefaultClosingReasonSchema } from '../../../../../common/types';
 
 const mockUpdateAlertStatusByIds = jest.fn().mockReturnValue(new Promise(() => {}));
 const mockUpdateAlertStatusByQuery = jest.fn().mockReturnValue(new Promise(() => {}));
@@ -39,6 +40,22 @@ describe('updateAlertStatus', () => {
     expect(mockUpdateAlertStatusByIds).toHaveBeenCalledWith({
       status,
       signalIds,
+    });
+    expect(mockUpdateAlertStatusByQuery).not.toHaveBeenCalled();
+  });
+
+  it('should call updateAlertStatusByIds with `reason` if provided', () => {
+    const signalIds = ['1', '2'];
+    const mockReason = DefaultClosingReasonSchema.enum.benign_positive;
+    updateAlertStatus({
+      status,
+      signalIds,
+      reason: mockReason,
+    });
+    expect(mockUpdateAlertStatusByIds).toHaveBeenCalledWith({
+      status,
+      signalIds,
+      reason: mockReason,
     });
     expect(mockUpdateAlertStatusByQuery).not.toHaveBeenCalled();
   });

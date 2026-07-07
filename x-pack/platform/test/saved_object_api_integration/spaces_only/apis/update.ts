@@ -7,7 +7,7 @@
 
 import { SPACES } from '../../common/lib/spaces';
 import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { updateTestSuiteFactory, TEST_CASES as CASES } from '../../common/suites/update';
 
 const {
@@ -42,11 +42,8 @@ const createTestCases = (spaceId: string) => [
   { ...CASES.DOES_NOT_EXIST, ...fail404() },
 ];
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
-
-  const { addTests, createTestDefinitions } = updateTestSuiteFactory(esArchiver, supertest);
+export default function (context: FtrProviderContext) {
+  const { addTests, createTestDefinitions } = updateTestSuiteFactory(context);
   const createTests = (spaceId: string) => {
     const testCases = createTestCases(spaceId);
     return createTestDefinitions(testCases, false);

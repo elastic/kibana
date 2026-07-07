@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
-import { SelectedPromptContext } from '../assistant/prompt_context/types';
+import type { SelectedPromptContext } from '../assistant/prompt_context/types';
 import { TestProviders } from '../mock/test_providers/test_providers';
 import { DataAnonymizationEditor } from '.';
 

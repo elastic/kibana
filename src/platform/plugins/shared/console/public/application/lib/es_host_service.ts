@@ -7,15 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Api } from './api';
+import type { Api } from './api';
 
 /**
- * Very simple state for holding the current ES host.
+ * Service for managing ES host information.
  *
- * This is used to power the copy as cURL functionality.
+ * This holds the current ES host (used for copy as cURL functionality)
+ * and the list of all available hosts (used for host selection dropdown).
  */
 export class EsHostService {
   private host = 'http://localhost:9200';
+  private allHosts: string[] = [];
+  private initialized = false;
+  private initPromise: Promise<void> | null = null;
 
   constructor(private readonly api: Api) {}
 
@@ -23,21 +27,64 @@ export class EsHostService {
     this.host = host;
   }
 
+  private setAllHosts(hosts: string[]): void {
+    this.allHosts = hosts;
+  }
+
   /**
-   * Initialize the host value based on the value set on the server.
+   * Initialize the host values based on the values set on the server.
    *
-   * This call is necessary because this value can only be retrieved at
+   * This call is necessary because these values can only be retrieved at
    * runtime.
    */
   public async init() {
-    const { data } = await this.api.getEsConfig();
-    if (data && data.host) {
-      this.setHost(data.host);
+    if (this.initPromise) {
+      return this.initPromise;
+    }
+
+    this.initPromise = this.doInit();
+    return this.initPromise;
+  }
+
+  private async doInit() {
+    try {
+      const { data } = await this.api.getEsConfig();
+      if (data) {
+        if (data.host) {
+          this.setHost(data.host);
+        }
+        if (data.allHosts) {
+          this.setAllHosts(data.allHosts);
+        }
+      }
+      this.initialized = true;
+    } catch (error) {
+      return Promise.resolve();
     }
   }
 
   public getHost(): string {
     return this.host;
+  }
+
+  public getAllHosts(): string[] {
+    return this.allHosts;
+  }
+
+  public isInitialized(): boolean {
+    return this.initialized;
+  }
+
+  /**
+   * Wait for the service to be initialized before using it
+   */
+  public async waitForInitialization(): Promise<void> {
+    if (this.initialized) {
+      return;
+    }
+    if (this.initPromise) {
+      await this.initPromise;
+    }
   }
 }
 

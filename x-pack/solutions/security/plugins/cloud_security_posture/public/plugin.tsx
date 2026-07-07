@@ -21,6 +21,7 @@ import type {
   FindingsVulnerabilityPanelExpandableFlyoutProps,
 } from '@kbn/cloud-security-posture';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { NoDataCardKibanaProvider } from '@kbn/shared-ux-card-no-data';
 import { CspLoadingState } from './components/csp_loading_state';
 import type { CspRouterProps } from './application/csp_router';
 import type { CspClientPluginSetup, CspClientPluginStart, CspClientPluginSetupDeps } from './types';
@@ -137,13 +138,15 @@ export class CspPlugin
     // Keep as constant to prevent remounts https://github.com/elastic/kibana/issues/146773
     const App = (props: CspRouterProps) => (
       <KibanaContextProvider services={{ ...core, ...plugins, storage }}>
-        <RedirectAppLinks coreStart={core}>
-          <div style={{ width: '100%', height: '100%' }}>
-            <SetupContext.Provider value={{ isCloudEnabled: this.isCloudEnabled }}>
-              <CspRouter {...props} />
-            </SetupContext.Provider>
-          </div>
-        </RedirectAppLinks>
+        <NoDataCardKibanaProvider coreStart={core}>
+          <RedirectAppLinks coreStart={core}>
+            <div css={{ width: '100%', height: '100%' }}>
+              <SetupContext.Provider value={{ isCloudEnabled: this.isCloudEnabled }}>
+                <CspRouter {...props} />
+              </SetupContext.Provider>
+            </div>
+          </RedirectAppLinks>
+        </NoDataCardKibanaProvider>
       </KibanaContextProvider>
     );
 
@@ -152,36 +155,52 @@ export class CspPlugin
       getCloudSecurityPostureMisconfigurationFlyout: () => {
         return {
           Component: (props: FindingsMisconfigurationPanelExpandableFlyoutProps['params']) => (
-            <LazyCspFindingsMisconfigurationFlyout {...props}>
-              {props.children}
-            </LazyCspFindingsMisconfigurationFlyout>
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsMisconfigurationFlyout {...props}>
+                {props.children}
+              </LazyCspFindingsMisconfigurationFlyout>
+            </Suspense>
           ),
           Header: (props: FindingsMisconfigurationFlyoutHeaderProps) => (
-            <LazyCspFindingsMisconfigurationFlyoutHeader {...props} />
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsMisconfigurationFlyoutHeader {...props} />
+            </Suspense>
           ),
           Body: (props: FindingsMisconfigurationFlyoutContentProps) => (
-            <LazyCspFindingsMisconfigurationFlyoutBody {...props} />
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsMisconfigurationFlyoutBody {...props} />
+            </Suspense>
           ),
           Footer: (props: FindingMisconfigurationFlyoutFooterProps) => (
-            <LazyCspFindingsMisconfigurationFlyoutFooter {...props} />
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsMisconfigurationFlyoutFooter {...props} />
+            </Suspense>
           ),
         };
       },
       getCloudSecurityPostureVulnerabilityFlyout: () => {
         return {
           Component: (props: FindingsVulnerabilityPanelExpandableFlyoutProps['params']) => (
-            <LazyCspFindingsVulnerabilityFlyout {...props}>
-              {props.children}
-            </LazyCspFindingsVulnerabilityFlyout>
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsVulnerabilityFlyout {...props}>
+                {props.children}
+              </LazyCspFindingsVulnerabilityFlyout>
+            </Suspense>
           ),
           Header: (props: FindingsVulnerabilityFlyoutHeaderProps) => (
-            <LazyCspFindingsVulnerabilityFlyoutHeader {...props} />
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsVulnerabilityFlyoutHeader {...props} />
+            </Suspense>
           ),
           Body: (props: FindingsVulnerabilityFlyoutContentProps) => (
-            <LazyCspFindingsVulnerabilityFlyoutBody {...props} />
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsVulnerabilityFlyoutBody {...props} />
+            </Suspense>
           ),
           Footer: (props: FindingsVulnerabilityFlyoutFooterProps) => (
-            <LazyCspFindingsVulnerabilityFlyoutFooter {...props} />
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyCspFindingsVulnerabilityFlyoutFooter {...props} />
+            </Suspense>
           ),
         };
       },

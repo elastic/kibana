@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { RouteDependencies } from '../types';
+import type { RouteDependencies } from '../types';
 import { registerAppRoutes } from './api/app';
+import { registerDefaultRepositoryRoutes } from './api/default_repository';
 import { registerRepositoriesRoutes } from './api/repositories';
 import { registerSnapshotsRoutes } from './api/snapshots';
 import { registerRestoreRoutes } from './api/restore';
@@ -15,6 +16,7 @@ import { registerPolicyRoutes } from './api/policy';
 export class ApiRoutes {
   setup(dependencies: RouteDependencies) {
     registerAppRoutes(dependencies);
+    registerDefaultRepositoryRoutes(dependencies);
     registerRepositoriesRoutes(dependencies);
     registerSnapshotsRoutes(dependencies);
     registerRestoreRoutes(dependencies);

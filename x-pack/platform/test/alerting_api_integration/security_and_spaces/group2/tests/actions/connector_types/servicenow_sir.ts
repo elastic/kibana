@@ -15,11 +15,10 @@ import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import { getServiceNowServer } from '@kbn/actions-simulators-plugin/server/plugin';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { MAX_ADDITIONAL_FIELDS_LENGTH } from '@kbn/stack-connectors-plugin/common/servicenow/constants';
+import { MAX_ADDITIONAL_FIELDS_LENGTH } from '@kbn/connector-schemas/servicenow/constants';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
@@ -150,6 +149,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
             jwtKeyId: null,
             userIdentifierValue: null,
           },
+          is_connector_type_deprecated: false,
         });
 
         const { body: fetchedAction } = await supertest
@@ -172,6 +172,8 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
             jwtKeyId: null,
             userIdentifierValue: null,
           },
+          is_connector_type_deprecated: false,
+          auth_mode: 'shared',
         });
       });
 
@@ -206,6 +208,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
             jwtKeyId: mockServiceNowOAuth.config.jwtKeyId,
             userIdentifierValue: mockServiceNowOAuth.config.userIdentifierValue,
           },
+          is_connector_type_deprecated: false,
         });
 
         const { body: fetchedConnector } = await supertest
@@ -228,6 +231,8 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
             jwtKeyId: mockServiceNowOAuth.config.jwtKeyId,
             userIdentifierValue: mockServiceNowOAuth.config.userIdentifierValue,
           },
+          is_connector_type_deprecated: false,
+          auth_mode: 'shared',
         });
       });
 
@@ -266,8 +271,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at apiUrl`,
             });
           });
       });
@@ -289,8 +293,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at apiUrl`,
             });
           });
       });
@@ -313,7 +316,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error configuring connector action: target url "http://servicenow.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: error configuring connector action: target url "http://servicenow.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -335,7 +338,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: Either basic auth or OAuth credentials must be specified',
+                'error validating connector type secrets: Either basic auth or OAuth credentials must be specified',
             });
           });
       });
@@ -358,7 +361,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: Either basic auth or OAuth credentials must be specified',
+                'error validating connector type secrets: Either basic auth or OAuth credentials must be specified',
             });
           });
       });
@@ -372,7 +375,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
               clientId: null,
             },
             secrets: mockServiceNowOAuth.secrets,
-            errorMessage: `error validating action type config: clientId must be provided when isOAuth = true`,
+            errorMessage: `error validating connector type config: clientId must be provided when isOAuth = true`,
           },
           {
             config: {
@@ -381,7 +384,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
               userIdentifierValue: null,
             },
             secrets: mockServiceNowOAuth.secrets,
-            errorMessage: `error validating action type config: userIdentifierValue must be provided when isOAuth = true`,
+            errorMessage: `error validating connector type config: userIdentifierValue must be provided when isOAuth = true`,
           },
           {
             config: {
@@ -390,7 +393,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
               jwtKeyId: null,
             },
             secrets: mockServiceNowOAuth.secrets,
-            errorMessage: `error validating action type config: jwtKeyId must be provided when isOAuth = true`,
+            errorMessage: `error validating connector type config: jwtKeyId must be provided when isOAuth = true`,
           },
           {
             config: {
@@ -401,7 +404,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
               ...mockServiceNowOAuth.secrets,
               clientSecret: null,
             },
-            errorMessage: `error validating action type secrets: clientSecret and privateKey must both be specified`,
+            errorMessage: `error validating connector type secrets: clientSecret and privateKey must both be specified`,
           },
           {
             config: {
@@ -412,7 +415,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
               ...mockServiceNowOAuth.secrets,
               privateKey: null,
             },
-            errorMessage: `error validating action type secrets: clientSecret and privateKey must both be specified`,
+            errorMessage: `error validating connector type secrets: clientSecret and privateKey must both be specified`,
           },
         ];
 
@@ -490,8 +493,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subAction]: expected value to equal [pushToService]\n- [4.subAction]: expected value to equal [getChoices]',
+                message: `error validating action params: ✖ Invalid discriminator value. Expected 'getFields' | 'getIncident' | 'handshake' | 'pushToService' | 'getChoices'\n  → at subAction`,
               });
             });
         });
@@ -509,8 +511,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.short_description]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [getChoices]',
+                message: `error validating action params: ✖ Invalid input: expected object, received undefined\n  → at subActionParams`,
               });
             });
         });
@@ -533,8 +534,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.short_description]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [getChoices]',
+                message: `error validating action params: ✖ Unrecognized key: "savedObjectId"\n  → at subActionParams\n✖ Invalid input: expected object, received undefined\n  → at subActionParams.incident`,
               });
             });
         });
@@ -561,8 +561,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [getChoices]',
+                message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subActionParams.comments[0].commentId`,
               });
             });
         });
@@ -589,8 +588,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [getChoices]',
+                message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subActionParams.comments[0].comment`,
               });
             });
         });
@@ -687,8 +685,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                   status: 'error',
                   retry: false,
                   errorSource: TaskErrorSource.USER,
-                  message:
-                    'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subAction]: expected value to equal [pushToService]\n- [4.subActionParams.fields]: expected value of type [array] but got [undefined]',
+                  message: `error validating action params: ✖ Invalid input: expected array, received undefined\n  → at subActionParams.fields`,
                 });
               });
           });
@@ -733,13 +730,13 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                 id: simulatedActionId,
                 provider: 'actions',
                 actions: new Map([
-                  ['execute-start', { equal: 1 }],
-                  ['execute', { equal: 1 }],
+                  ['execute-start', { equal: 11 }],
+                  ['execute', { equal: 11 }],
                 ]),
               });
             });
 
-            const executeEvent = events[1];
+            const executeEvent = events[events.length - 1];
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(645);
           });
         });

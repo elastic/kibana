@@ -21,6 +21,10 @@ import {
   EuiResizeObserver,
   EuiProgress,
 } from '@elastic/eui';
+import type {
+  MlJobWithTimeRange,
+  MlJobTimeRange,
+} from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { NewSelectionIdBadges } from './new_selection_id_badges';
 // @ts-ignore
 import { JobSelectorTable } from './job_selector_table';
@@ -29,10 +33,6 @@ import {
   getTimeRangeFromSelection,
   normalizeTimes,
 } from './job_select_service_utils';
-import type {
-  MlJobTimeRange,
-  MlJobWithTimeRange,
-} from '../../../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../../contexts/kibana';
 import type { JobSelectionMaps } from './job_selector';
 
@@ -57,6 +57,7 @@ export interface JobSelectorFlyoutProps {
   withTimeRangeSelector?: boolean;
   applyTimeRangeConfig?: boolean;
   onTimeRangeConfigChange?: (v: boolean) => void;
+  flyoutTitleId?: string;
 }
 
 export interface MlJobGroupWithTimeRange {
@@ -76,6 +77,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
   applyTimeRangeConfig: initialApplyTimeRangeConfig,
   onTimeRangeConfigChange,
   withTimeRangeSelector = true,
+  flyoutTitleId = 'flyoutTitle',
 }) => {
   const {
     services: {
@@ -194,7 +196,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="flyoutTitle">
+          <h2 id={flyoutTitleId}>
             {i18n.translate('xpack.ml.jobSelector.flyoutTitle', {
               defaultMessage: 'Job selection',
             })}

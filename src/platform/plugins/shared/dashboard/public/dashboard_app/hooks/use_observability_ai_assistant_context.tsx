@@ -10,8 +10,8 @@
 import { getESQLQueryColumns } from '@kbn/esql-utils';
 import {
   LensConfigBuilder,
-  LensDataset,
   type LensConfig,
+  type LensDataset,
   type LensGaugeConfig,
   type LensHeatmapConfig,
   type LensMetricConfig,
@@ -22,10 +22,11 @@ import {
   type LensTagCloudConfig,
   type LensTreeMapConfig,
   type LensXYConfig,
-} from '@kbn/lens-embeddable-utils/config_builder';
-import { LensEmbeddableInput } from '@kbn/lens-plugin/public';
+} from '@kbn/lens-embeddable-utils';
+import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { useEffect } from 'react';
-import { DashboardApi } from '../../dashboard_api/types';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import type { DashboardApi } from '../../dashboard_api/types';
 import { dataService, observabilityAssistantService } from '../../services/kibana_services';
 
 const chartTypes = [
@@ -357,9 +358,9 @@ export function useObservabilityAIAssistantContext({
 
                 return dashboardApi
                   .addNewPanel({
-                    panelType: 'lens',
+                    panelType: LENS_EMBEDDABLE_TYPE,
                     serializedState: {
-                      rawState: { embeddableInput },
+                      embeddableInput,
                     },
                   })
                   .then(() => {

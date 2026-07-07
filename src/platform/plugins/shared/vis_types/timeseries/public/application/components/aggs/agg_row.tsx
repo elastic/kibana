@@ -15,7 +15,7 @@ import { AddDeleteButtons } from '../add_delete_buttons';
 import { SeriesDragHandler } from '../series_drag_handler';
 import { tsvbEditorRowStyles, aggRowChildrenStyles } from '../../styles/common.styles';
 import type { Metric } from '../../../../common/types';
-import { DragHandleProps } from '../../../types';
+import type { DragHandleProps } from '../../../types';
 
 interface AggRowProps {
   disableDelete: boolean;
@@ -28,7 +28,7 @@ interface AggRowProps {
 }
 
 export function AggRow(props: AggRowProps) {
-  let iconType = 'eyeClosed';
+  let iconType = 'eyeSlash';
   let iconColor = 'subdued';
   const lastSibling = last(props.siblings) as Metric;
 
@@ -48,7 +48,12 @@ export function AggRow(props: AggRowProps) {
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type={iconType} color={iconColor} css={{ marginTop: euiTheme.size.xs }} />
+          <EuiIcon
+            type={iconType}
+            color={iconColor}
+            css={{ marginTop: euiTheme.size.xs }}
+            aria-hidden={true}
+          />
         </EuiFlexItem>
         <EuiFlexItem css={aggRowChildrenStyles(euiTheme)}>{props.children}</EuiFlexItem>
 

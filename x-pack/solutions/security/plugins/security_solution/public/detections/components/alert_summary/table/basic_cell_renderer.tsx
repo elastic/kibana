@@ -17,7 +17,7 @@ export const BASIC_CELL_RENDERER_TRUNCATE_TEST_ID =
 
 export interface BasicCellRendererProps {
   /**
-   * Alert data passed from the renderCellValue callback via the AlertWithLegacyFormats interface
+   * Alert data passed from the renderCellValue callback
    */
   alert: Alert;
   /**
@@ -28,7 +28,7 @@ export interface BasicCellRendererProps {
 
 /**
  * Renders all the basic table cell values.
- * Component used in the AI for SOC alert summary table.
+ * Component used in EASE alert summary table.
  */
 export const BasicCellRenderer = memo(({ alert, field }: BasicCellRendererProps) => {
   const displayValue: string | null = useMemo(
@@ -51,7 +51,7 @@ export const BasicCellRenderer = memo(({ alert, field }: BasicCellRendererProps)
           </EuiFlexGroup>
         }
       >
-        <span>{getOrEmptyTagFromValue(displayValue)}</span>
+        <span tabIndex={0}>{getOrEmptyTagFromValue(displayValue)}</span>
       </EuiToolTip>
     </TruncatableText>
   );

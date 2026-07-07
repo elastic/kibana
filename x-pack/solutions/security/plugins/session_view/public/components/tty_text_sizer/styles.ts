@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { CSSObject } from '@emotion/react';
+import type { CSSObject } from '@emotion/react';
 import { useEuiTheme } from '../../hooks';
 
 export const useStyles = () => {
@@ -16,7 +16,7 @@ export const useStyles = () => {
 
     const ratio: CSSObject = {
       fontSize: size.m,
-      color: colors.ghost,
+      color: colors.textGhost,
     };
 
     const separator: CSSObject = {

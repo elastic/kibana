@@ -33,6 +33,7 @@ Object {
   "fieldAttrs": undefined,
   "fieldFormats": Object {},
   "id": "test-pattern",
+  "managed": false,
   "name": "Name",
   "runtimeFieldMap": Object {
     "runtime_field": Object {
@@ -57,6 +58,7 @@ Object {
   "fieldAttrs": Object {},
   "fieldFormats": Object {},
   "id": "test-pattern",
+  "managed": false,
   "name": "Name",
   "runtimeFieldMap": Object {
     "runtime_field": Object {
@@ -707,6 +709,7 @@ Object {
     },
   },
   "id": "test-pattern",
+  "managed": false,
   "name": "Name",
   "runtimeFieldMap": Object {
     "runtime_field": Object {

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { SLOConfig, configSchema } from '../common/config';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { SLOConfig } from '../common/config';
+import { configSchema } from '../common/config';
 
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
@@ -25,4 +26,5 @@ export const config: PluginConfigDescriptor<SLOConfig> = {
   exposeToBrowser: {
     experimental: true,
   },
+  deprecations: ({ unused }) => [unused('experimental.compositeSlo', { level: 'warning' })],
 };

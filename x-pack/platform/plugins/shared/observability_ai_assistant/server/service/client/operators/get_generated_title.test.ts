@@ -5,9 +5,15 @@
  * 2.0.
  */
 import { filter, lastValueFrom, of, throwError } from 'rxjs';
-import { ChatCompleteResponse } from '@kbn/inference-common';
-import { Message, MessageRole } from '../../../../common';
-import { TITLE_CONVERSATION_FUNCTION_NAME, getGeneratedTitle } from './get_generated_title';
+import type { ChatCompleteResponse } from '@kbn/inference-common';
+import type { Message } from '../../../../common';
+import { MessageRole } from '../../../../common';
+import {
+  TITLE_CONVERSATION_FUNCTION_NAME,
+  getTitleSystemMessage,
+  getGeneratedTitle,
+} from './get_generated_title';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 
 describe('getGeneratedTitle', () => {
   const messages: Message[] = [
@@ -40,7 +46,10 @@ describe('getGeneratedTitle', () => {
     };
   }
 
-  function callGenerateTitle(...rest: [ChatCompleteResponse[]] | [{}, ChatCompleteResponse[]]) {
+  function callGenerateTitle(
+    scopes: AssistantScope[],
+    ...rest: [ChatCompleteResponse[]] | [{}, ChatCompleteResponse[]]
+  ) {
     const options = rest.length === 1 ? {} : rest[0];
     const chunks = rest.length === 1 ? rest[0] : rest[1];
 
@@ -54,20 +63,24 @@ describe('getGeneratedTitle', () => {
       },
       messages,
       ...options,
+      scopes,
     });
 
     return { chatSpy, title$ };
   }
 
   it('returns the given title as a string', async () => {
-    const { title$ } = callGenerateTitle([
-      createChatCompletionResponse({
-        function_call: {
-          name: 'title_conversation',
-          arguments: { title: 'My title' },
-        },
-      }),
-    ]);
+    const { title$ } = callGenerateTitle(
+      ['observability'],
+      [
+        createChatCompletionResponse({
+          function_call: {
+            name: 'title_conversation',
+            arguments: { title: 'My title' },
+          },
+        }),
+      ]
+    );
 
     const title = await lastValueFrom(
       title$.pipe(filter((event): event is string => typeof event === 'string'))
@@ -75,15 +88,19 @@ describe('getGeneratedTitle', () => {
 
     expect(title).toEqual('My title');
   });
+
   it('calls chat with the user message', async () => {
-    const { chatSpy, title$ } = callGenerateTitle([
-      createChatCompletionResponse({
-        function_call: {
-          name: TITLE_CONVERSATION_FUNCTION_NAME,
-          arguments: { title: 'My title' },
-        },
-      }),
-    ]);
+    const { chatSpy, title$ } = callGenerateTitle(
+      ['observability'],
+      [
+        createChatCompletionResponse({
+          function_call: {
+            name: TITLE_CONVERSATION_FUNCTION_NAME,
+            arguments: { title: 'My title' },
+          },
+        }),
+      ]
+    );
 
     await lastValueFrom(title$);
 
@@ -95,14 +112,17 @@ describe('getGeneratedTitle', () => {
 
   it('strips quotes from the title', async () => {
     async function testTitle(title: string) {
-      const { title$ } = callGenerateTitle([
-        createChatCompletionResponse({
-          function_call: {
-            name: 'title_conversation',
-            arguments: { title },
-          },
-        }),
-      ]);
+      const { title$ } = callGenerateTitle(
+        ['observability'],
+        [
+          createChatCompletionResponse({
+            function_call: {
+              name: 'title_conversation',
+              arguments: { title },
+            },
+          }),
+        ]
+      );
 
       return await lastValueFrom(
         title$.pipe(filter((event): event is string => typeof event === 'string'))
@@ -128,6 +148,7 @@ describe('getGeneratedTitle', () => {
       chat: chatSpy,
       logger,
       messages,
+      scopes: ['observability'],
     });
 
     const title = await lastValueFrom(title$);
@@ -135,5 +156,80 @@ describe('getGeneratedTitle', () => {
     expect(title).toEqual('New conversation');
 
     expect(logger.error).toHaveBeenCalledWith('Error generating title');
+  });
+
+  it('should generate title with Elastic Observability scope when scopes include observability', () => {
+    const response = createChatCompletionResponse({
+      function_call: {
+        name: TITLE_CONVERSATION_FUNCTION_NAME,
+        arguments: { title: 'My title' },
+      },
+    });
+    const chatSpy = jest.fn().mockImplementation(() => of(response));
+
+    const scopes = ['observability'] as AssistantScope[];
+    getGeneratedTitle({
+      chat: chatSpy,
+      logger: {
+        debug: jest.fn(),
+        error: jest.fn(),
+      },
+      messages,
+      scopes,
+    });
+
+    expect(chatSpy).toHaveBeenCalledTimes(1);
+    expect(chatSpy).toHaveBeenCalledWith(
+      'generate_title',
+      expect.objectContaining({
+        systemMessage: getTitleSystemMessage(scopes),
+      })
+    );
+  });
+
+  it('should generate title with Elasticsearch scope when scopes include search', () => {
+    const response = createChatCompletionResponse({
+      function_call: {
+        name: TITLE_CONVERSATION_FUNCTION_NAME,
+        arguments: { title: 'My title' },
+      },
+    });
+    const chatSpy = jest.fn().mockImplementation(() => of(response));
+
+    const scopes = ['search'] as AssistantScope[];
+    getGeneratedTitle({
+      chat: chatSpy,
+      logger: {
+        debug: jest.fn(),
+        error: jest.fn(),
+      },
+      messages,
+      scopes,
+    });
+
+    expect(chatSpy).toHaveBeenCalledTimes(1);
+    expect(chatSpy).toHaveBeenCalledWith(
+      'generate_title',
+      expect.objectContaining({
+        systemMessage: getTitleSystemMessage(scopes),
+      })
+    );
+  });
+
+  it('falls back to response.content when toolCalls is empty', async () => {
+    const { title$ } = callGenerateTitle(
+      ['observability'],
+      [
+        createChatCompletionResponse({
+          content: '"My fallback title"',
+        }),
+      ]
+    );
+
+    const title = await lastValueFrom(
+      title$.pipe(filter((event): event is string => typeof event === 'string'))
+    );
+
+    expect(title).toEqual('My fallback title');
   });
 });

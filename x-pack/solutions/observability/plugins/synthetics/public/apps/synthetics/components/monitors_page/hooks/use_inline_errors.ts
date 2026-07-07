@@ -7,9 +7,10 @@
 
 import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
-import { useEsSearch } from '@kbn/observability-shared-plugin/public';
+import { useSyntheticsEsSearch } from '../../../hooks/use_synthetics_es_search';
 import { selectEncryptedSyntheticsSavedMonitors } from '../../../state';
-import { ConfigKey, Ping } from '../../../../../../common/runtime_types';
+import type { Ping } from '../../../../../../common/runtime_types';
+import { ConfigKey } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   getTimeSpanFilter,
@@ -74,7 +75,7 @@ export function useInlineErrors({
 
   const doFetch = configIds.length > 0 || onlyInvalidMonitors;
 
-  const { data } = useEsSearch(
+  const { data } = useSyntheticsEsSearch(
     {
       index: doFetch ? SYNTHETICS_INDEX_PATTERN : '',
       size: 1000,

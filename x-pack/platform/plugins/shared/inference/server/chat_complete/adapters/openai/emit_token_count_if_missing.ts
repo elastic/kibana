@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { OperatorFunction, Observable } from 'rxjs';
-import {
+import type { OperatorFunction } from 'rxjs';
+import { Observable } from 'rxjs';
+import type {
   ChatCompletionChunkEvent,
-  ChatCompletionEventType,
   ChatCompletionTokenCountEvent,
+} from '@kbn/inference-common';
+import {
+  ChatCompletionEventType,
   isChatCompletionTokenCountEvent,
   isChatCompletionChunkEvent,
 } from '@kbn/inference-common';
@@ -25,34 +28,41 @@ import { manuallyCountPromptTokens, manuallyCountCompletionTokens } from './manu
  *
  * @param request the OpenAI request that was sent to the connector.
  */
-export function emitTokenCountEstimateIfMissing<
-  T extends ChatCompletionChunkEvent | ChatCompletionTokenCountEvent
->({ request }: { request: OpenAIRequest }): OperatorFunction<T, T | ChatCompletionTokenCountEvent> {
+export function emitTokenCountEstimateIfMissing({
+  request,
+}: {
+  request: OpenAIRequest;
+}): OperatorFunction<
+  ChatCompletionChunkEvent | ChatCompletionTokenCountEvent,
+  ChatCompletionChunkEvent | ChatCompletionTokenCountEvent
+> {
   return (source$) => {
     let tokenCountEmitted = false;
     const chunks: ChatCompletionChunkEvent[] = [];
 
-    return new Observable<T | ChatCompletionTokenCountEvent>((subscriber) => {
-      return source$.subscribe({
-        next: (value) => {
-          if (isChatCompletionTokenCountEvent(value)) {
-            tokenCountEmitted = true;
-          } else if (isChatCompletionChunkEvent(value)) {
-            chunks.push(value);
-          }
-          subscriber.next(value);
-        },
-        error: (err) => {
-          subscriber.error(err);
-        },
-        complete: () => {
-          if (!tokenCountEmitted) {
-            subscriber.next(manuallyCountTokens(request, chunks));
-          }
-          subscriber.complete();
-        },
-      });
-    });
+    return new Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>(
+      (subscriber) => {
+        return source$.subscribe({
+          next: (value) => {
+            if (isChatCompletionTokenCountEvent(value)) {
+              tokenCountEmitted = true;
+            } else if (isChatCompletionChunkEvent(value)) {
+              chunks.push(value);
+            }
+            subscriber.next(value);
+          },
+          error: (err) => {
+            subscriber.error(err);
+          },
+          complete: () => {
+            if (!tokenCountEmitted) {
+              subscriber.next(manuallyCountTokens(request, chunks));
+            }
+            subscriber.complete();
+          },
+        });
+      }
+    );
   };
 }
 
@@ -70,5 +80,6 @@ export function manuallyCountTokens(
       completion: completionTokens,
       total: promptTokens + completionTokens,
     },
+    ...(request.model ? { model: request.model } : {}),
   };
 }

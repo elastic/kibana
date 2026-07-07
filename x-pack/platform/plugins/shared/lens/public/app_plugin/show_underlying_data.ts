@@ -5,28 +5,34 @@
  * 2.0.
  */
 
-import {
+import type {
   Query,
   Filter,
   DataViewBase,
+  TimeRange,
+  EsQueryConfig,
+  AggregateQuery,
+} from '@kbn/es-query';
+import {
   buildCustomFilter,
   buildEsQuery,
   FilterStateStore,
-  TimeRange,
-  EsQueryConfig,
   isOfQueryType,
-  AggregateQuery,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { RecursiveReadonly } from '@kbn/utility-types';
-import { Capabilities } from '@kbn/core/public';
+import type { RecursiveReadonly } from '@kbn/utility-types';
+import type { Capabilities } from '@kbn/core/public';
 import { partition } from 'lodash';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type {
+  TableInspectorAdapter,
+  Datasource,
+  DatasourcePublicAPI,
+  IndexPatternMap,
+} from '@kbn/lens-common';
 import { showMemoizedErrorNotification } from '../lens_ui_errors';
-import { TableInspectorAdapter } from '../editor_frame_service/types';
-import { Datasource, DatasourcePublicAPI, IndexPatternMap } from '../types';
-import { Visualization } from '..';
+import type { Visualization } from '..';
 
 function getLayerType(visualization: Visualization, state: unknown, layerId: string) {
   return visualization.getLayerType(layerId, state) || LayerTypes.DATA;
@@ -87,6 +93,22 @@ const sortByDateFieldsFirst = (
 
   return dateFieldsFirst;
 };
+
+/**
+ * The config builder will create predictable ad hoc index pattern IDs that do not
+ * necessarily match the data view IDs in the current Kibana instance.
+ * This function tries to find a data view matching the given index pattern ID
+ * either by ID or by title.
+ */
+export function findDataViewByIndexPatternId(
+  indexPatternId: string,
+  indexPatterns: IndexPatternMap
+) {
+  return (
+    indexPatterns[indexPatternId] ??
+    Object.values(indexPatterns).find((dv) => dv.title === indexPatternId)
+  );
+}
 
 export function getLayerMetaInfo(
   currentDatasource: Datasource | undefined,

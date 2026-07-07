@@ -49,9 +49,10 @@ const ZDT_SUCCESSFUL_MIGRATION_RESULT: MigrationResult[] = [
 
 jest.mock('./run_v2_migration', () => {
   return {
-    runV2Migration: jest.fn(
-      (): Promise<MigrationResult[]> => Promise.resolve(V2_SUCCESSFUL_MIGRATION_RESULT)
-    ),
+    runV2Migration: jest.fn((options): Promise<MigrationResult[]> => {
+      options.logger.info('Running v2 migrations');
+      return Promise.resolve(V2_SUCCESSFUL_MIGRATION_RESULT);
+    }),
   };
 });
 
@@ -233,6 +234,31 @@ describe('KibanaMigrator', () => {
       migrator.prepareMigrations();
       expect(migrator.runMigrations()).rejects.toEqual(fatal);
     });
+
+    it('does not log intermediate steps when `useCumulativeLogger: true`', async () => {
+      const options = mockOptions();
+      (options.soMigrationsConfig.useCumulativeLogger as boolean) = true; // casting because soMigrationsConfig are readonly
+      const migrator = new KibanaMigrator(options);
+      migrator.prepareMigrations();
+      await migrator.runMigrations();
+
+      expect(options.logger.info).toHaveBeenCalledTimes(0);
+      expect(options.logger.warn).toHaveBeenCalledTimes(0);
+      expect(options.logger.error).toHaveBeenCalledTimes(0);
+    });
+
+    it('logs the intermediate steps when `useCumulativeLogger: false`', async () => {
+      const options = mockOptions();
+      (options.soMigrationsConfig.useCumulativeLogger as boolean) = false; // casting because soMigrationsConfig are readonly
+      const migrator = new KibanaMigrator(options);
+      migrator.prepareMigrations();
+      await migrator.runMigrations();
+
+      expect(options.logger.info).toHaveBeenCalledTimes(1);
+      expect(options.logger.warn).toHaveBeenCalledTimes(0);
+      expect(options.logger.error).toHaveBeenCalledTimes(0);
+      expect(options.logger.info).toHaveBeenNthCalledWith(1, 'Running v2 migrations');
+    });
   });
 });
 
@@ -244,14 +270,6 @@ const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2'): KibanaMigratorOptions => {
     logger: loggingSystemMock.create().get(),
     kibanaVersion: '8.2.3',
     waitForMigrationCompletion: false,
-    defaultIndexTypesMap: {
-      '.my_index': ['testtype', 'testtype2'],
-      '.task_index': ['testtasktype'],
-      // this index no longer has any types registered in typeRegistry
-      // but we still need a migrator for it, so that 'testtype3' documents
-      // are moved over to their new index (.my_index)
-      '.my_complementary_index': ['testtype3'],
-    },
     hashToVersionMap: {},
     typeRegistry: createRegistry([
       // typeRegistry depicts an updated index map:
@@ -321,6 +339,7 @@ const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2'): KibanaMigratorOptions => {
         metaPickupSyncDelaySec: 120,
         runOnRoles: ['migrator'],
       },
+      useCumulativeLogger: true,
     },
     client: mockedClient,
     docLinks: docLinksServiceMock.createSetupContract(),

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PreviewController, PreviewControllerDependencies } from './preview_controller';
-import { DebouncedFuncLeading } from 'lodash';
+import type { PreviewControllerDependencies } from './preview_controller';
+import { PreviewController } from './preview_controller';
+import type { DebouncedFuncLeading } from 'lodash';
 import type { InternalFieldType } from '../../types';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { coreMock } from '@kbn/core/public/mocks';

@@ -1,0 +1,23 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node", "@kbn/ambient-common-types"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/evals",
+    "@kbn/evals-phoenix-executor",
+    "@kbn/object-utils",
+    "@kbn/repo-info",
+    "@kbn/datemath",
+    "@kbn/scout",
+    "@kbn/scout-synthtrace",
+    "@kbn/streamlang",
+    "@kbn/streams-schema",
+    "@kbn/kibana-api-cli",
+    "@kbn/dev-cli-runner",
+    "@kbn/core",
+  ]
+}

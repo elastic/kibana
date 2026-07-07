@@ -1,0 +1,9 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [".storybook/**/*.ts", ".storybook/**/*.tsx"],
+  "exclude": ["target/**/*"],
+  "kbn_references": ["@kbn/storybook", "@kbn/react-query", "@kbn/core", "@kbn/kibana-react-plugin"]
+}
