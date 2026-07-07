@@ -56,20 +56,67 @@ describe('CensysConnector', () => {
     });
 
     it('calls the host endpoint with organization_id and User-Agent for IPv6', async () => {
-      mockClient.get.mockResolvedValue({ data: { result: { resource: { ip: '2001:4860:4860::8888' } } } });
+      mockClient.get.mockResolvedValue({
+        data: { result: { resource: { ip: '2001:4860:4860::8888' } } },
+      });
       await CensysConnector.actions.getHost.handler(mockContext, {
         host: '2001:4860:4860::8888',
       });
 
       const call = mockClient.get.mock.calls[0];
-      expect(call[0]).toBe('https://api.platform.censys.io/v3/global/asset/host/2001:4860:4860::8888');
+      expect(call[0]).toBe(
+        'https://api.platform.censys.io/v3/global/asset/host/2001:4860:4860::8888'
+      );
       expectOrgAndUserAgent(call);
+    });
+  });
+
+  describe('getHostEnrichment', () => {
+    it('calls the host enrichment endpoint with organization_id and User-Agent', async () => {
+      mockClient.get.mockResolvedValue({ data: { result: { resource: { ip: '8.8.8.8' } } } });
+      const result = await CensysConnector.actions.getHostEnrichment.handler(mockContext, {
+        host: '8.8.8.8',
+      });
+
+      const call = mockClient.get.mock.calls[0];
+      expect(call[0]).toBe(
+        'https://api.platform.censys.io/v3/global/asset/enrichment/host/8.8.8.8'
+      );
+      expectOrgAndUserAgent(call);
+      expect(result).toEqual({ result: { resource: { ip: '8.8.8.8' } } });
+    });
+
+    it('calls the host enrichment endpoint with organization_id and User-Agent for IPv6', async () => {
+      mockClient.get.mockResolvedValue({
+        data: { result: { resource: { ip: '2001:4860:4860::8888' } } },
+      });
+      await CensysConnector.actions.getHostEnrichment.handler(mockContext, {
+        host: '2001:4860:4860::8888',
+      });
+
+      const call = mockClient.get.mock.calls[0];
+      expect(call[0]).toBe(
+        'https://api.platform.censys.io/v3/global/asset/enrichment/host/2001:4860:4860::8888'
+      );
+      expectOrgAndUserAgent(call);
+    });
+
+    it('surfaces an enriched Censys error when the enrichment endpoint fails', async () => {
+      mockClient.get.mockRejectedValue({
+        response: { status: 409, data: { detail: 'Feature not enabled' } },
+      });
+
+      await expect(
+        CensysConnector.actions.getHostEnrichment.handler(mockContext, { host: '8.8.8.8' })
+      ).rejects.toThrow('Censys API error (409): Feature not enabled');
     });
   });
 
   describe('getWebProperty', () => {
     it('composes the webproperty_id as hostname:port', async () => {
-      mockClient.get.mockResolvedValue({ data: { result: { resource: { hostname: 'example.com', port: 443 } } } });
+      mockClient.get.mockResolvedValue({
+        data: { result: { resource: { hostname: 'example.com', port: 443 } } },
+      });
       await CensysConnector.actions.getWebProperty.handler(mockContext, {
         hostname: 'example.com',
         port: 443,
@@ -82,7 +129,9 @@ describe('CensysConnector', () => {
     });
 
     it('composes the webproperty_id for an IPv4 host', async () => {
-      mockClient.get.mockResolvedValue({ data: { result: { resource: { hostname: '8.8.8.8', port: 443 } } } });
+      mockClient.get.mockResolvedValue({
+        data: { result: { resource: { hostname: '8.8.8.8', port: 443 } } },
+      });
       await CensysConnector.actions.getWebProperty.handler(mockContext, {
         hostname: '8.8.8.8',
         port: 443,
@@ -95,7 +144,9 @@ describe('CensysConnector', () => {
     });
 
     it('brackets IPv6 when composing the webproperty_id', async () => {
-      mockClient.get.mockResolvedValue({ data: { result: { resource: { hostname: '2001:4860:4860::8888', port: 443 } } } });
+      mockClient.get.mockResolvedValue({
+        data: { result: { resource: { hostname: '2001:4860:4860::8888', port: 443 } } },
+      });
       await CensysConnector.actions.getWebProperty.handler(mockContext, {
         hostname: '2001:4860:4860::8888',
         port: 443,
@@ -111,7 +162,9 @@ describe('CensysConnector', () => {
   describe('getCertificate', () => {
     it('hits the certificate endpoint with the sha256', async () => {
       const sha256 = 'a'.repeat(64);
-      mockClient.get.mockResolvedValue({ data: { result: { resource: { fingerprint_sha256: sha256 } } } });
+      mockClient.get.mockResolvedValue({
+        data: { result: { resource: { fingerprint_sha256: sha256 } } },
+      });
       await CensysConnector.actions.getCertificate.handler(mockContext, {
         certificate: sha256,
       });
@@ -155,7 +208,9 @@ describe('CensysConnector', () => {
       const call = mockClient.post.mock.calls[0];
       expect(call[0]).toBe('https://api.platform.censys.io/v3/global/scans/rescan');
       expect(call[1]).toEqual({
-        target: { service_id: { ip: '8.8.8.8', port: 443, protocol: 'HTTP', transport_protocol: 'tcp' } },
+        target: {
+          service_id: { ip: '8.8.8.8', port: 443, protocol: 'HTTP', transport_protocol: 'tcp' },
+        },
       });
     });
 
@@ -228,9 +283,9 @@ describe('CensysConnector', () => {
       expect(
         CensEyeCreateAnalysisJobInputSchema.safeParse({ type: 'host', host: '8.8.8.8' }).success
       ).toBe(true);
-      expect(
-        CensEyeCreateAnalysisJobInputSchema.safeParse({ host: '8.8.8.8' }).success
-      ).toBe(false);
+      expect(CensEyeCreateAnalysisJobInputSchema.safeParse({ host: '8.8.8.8' }).success).toBe(
+        false
+      );
     });
 
     it('submits a host Censeye job', async () => {

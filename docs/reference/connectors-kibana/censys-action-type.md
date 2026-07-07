@@ -34,7 +34,11 @@ You can test connectors as you're creating or editing the connector in {{kib}}.
 The Censys connector has the following actions:
 
 Get Host
-:   Retrieve information about a host using its IP address.
+:   Retrieve the full host record using its IP address. This is the credit-consuming deep-dive lookup.
+    - **Host** (required): IPv4 or IPv6 address.
+
+Get Host Enrichment
+:   Retrieve a compact, SOC-optimized enrichment record for a host using its IP address. Returns a fixed subset of the latest-scan host data and is credit-free, making it suited to high-volume alert triage. Requires a Censys Core plan or higher.
     - **Host** (required): IPv4 or IPv6 address.
 
 Get Web Property
@@ -88,6 +92,29 @@ CensEye Job Result
     - **Job ID** (required): The job ID returned by **CensEye Create Analysis Job**.
 
 ## Workflow examples [censys-workflow-examples]
+
+Enrich an IP with the credit-free enrichment lookup, falling back to the full host record if the enrichment endpoint is unavailable:
+
+```yaml
+steps:
+  - name: get_host_enrichment
+    type: censys.getHostEnrichment
+    connector-id: <connector-id>
+    with:
+      host: 8.8.8.8
+    on-failure:
+      continue: true
+
+  - name: fallback_to_get_host
+    type: if
+    condition: '{{ steps.get_host_enrichment.error != blank }}'
+    steps:
+      - name: get_host
+        type: censys.getHost
+        connector-id: <connector-id>
+        with:
+          host: 8.8.8.8
+```
 
 Rescan a host service and re-fetch the host enrichment once the scan completes:
 

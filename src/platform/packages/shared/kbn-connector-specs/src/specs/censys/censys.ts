@@ -171,11 +171,28 @@ export const CensysConnector: ConnectorSpec = {
     getHost: {
       isTool: true,
       description:
-        'Retrieve enrichment data for a single host by IP address. Returns the host record including services, ports, location, ASN, and last-scan metadata.',
+        'Retrieve the full enrichment record for a single host by IP address. Returns services, ports, location, ASN, and last-scan metadata. This is the credit-consuming deep-dive lookup; prefer getHostEnrichment for high-volume alert triage.',
       input: GetHostInputSchema,
       handler: async (ctx, input: GetHostInput) => {
         try {
           const url = `${CENSYS_API_BASE_URL}/v3/global/asset/host/${input.host}`;
+          const response = await ctx.client.get(url, await buildRequestConfig(ctx));
+          return response.data;
+        } catch (error: unknown) {
+          throwCensysError(error);
+          throw error;
+        }
+      },
+    },
+
+    getHostEnrichment: {
+      isTool: true,
+      description:
+        'Retrieve a compact, SOC-optimized enrichment record for a single host by IP address. Returns a fixed subset of the latest-scan host data (location, WHOIS, ASN, DNS, services, labels, reputation, and threat fields) under `result.resource`, shaped like getHost. This lookup is credit-free and built for high-volume alert triage; use getHost for a full deep-dive record. Requires a Censys Core plan or higher.',
+      input: GetHostInputSchema,
+      handler: async (ctx, input: GetHostInput) => {
+        try {
+          const url = `${CENSYS_API_BASE_URL}/v3/global/asset/enrichment/host/${input.host}`;
           const response = await ctx.client.get(url, await buildRequestConfig(ctx));
           return response.data;
         } catch (error: unknown) {
@@ -366,7 +383,9 @@ export const CensysConnector: ConnectorSpec = {
     "Every request is scoped to the connector's configured Censys organization (sent as `?organization_id=<uuid>`).",
     '',
     '## Enrichment',
-    '- Use `getHost` for IP-based enrichment (services, ports, ASN, geo).',
+    '- Use `getHostEnrichment` for IP-based triage: a compact, credit-free lookup that returns a fixed subset of the latest host data. Prefer it for high-volume alert enrichment and SOAR playbooks.',
+    '- Use `getHost` for a full deep-dive host record (services, ports, ASN, geo). It consumes credits, so reserve it for manual investigation or when `getHostEnrichment` lacks a needed field.',
+    '- `getHostEnrichment` and `getHost` take the same `host` input and both return the host under `result.resource`, so a caller can fall back from one to the other without reshaping the result.',
     '- Use `getWebProperty` for a hostname-or-IP+port listener (HTTP banners, TLS, software).',
     '- Use `getCertificate` for SHA-256 certificate fingerprints.',
     "- Use `getHostHistory` to see how a host's services and banners changed over a time window.",
