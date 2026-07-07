@@ -7,10 +7,7 @@
 
 import type { CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
-import {
-  AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
-  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-} from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_TRACING_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 
 export async function getTracingFeaturesEnabled(
   coreStart: Pick<CoreStart, 'savedObjects' | 'uiSettings'>,
@@ -20,10 +17,9 @@ export async function getTracingFeaturesEnabled(
     savedObjectsClient ?? new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
   const uiSettingsClient = coreStart.uiSettings.asScopedToClient(client);
 
-  const [tracingEnabled, experimentalFeaturesEnabled] = await Promise.all([
-    uiSettingsClient.get<boolean>(AGENT_BUILDER_TRACING_ENABLED_SETTING_ID),
-    uiSettingsClient.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID),
-  ]);
+  const tracingEnabled = await uiSettingsClient.get<boolean>(
+    AGENT_BUILDER_TRACING_ENABLED_SETTING_ID
+  );
 
-  return tracingEnabled && experimentalFeaturesEnabled;
+  return tracingEnabled;
 }
