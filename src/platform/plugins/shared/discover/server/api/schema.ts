@@ -31,6 +31,12 @@ export const MAX_BREAKDOWN_FIELD_LENGTH = 1000;
 export const MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH = 256;
 export const MAX_DISCOVER_SESSION_CONTROL_PANELS = 100;
 
+const validateUniqueIds = (ids: string[], message: string): string | undefined => {
+  if (new Set(ids).size !== ids.length) {
+    return message;
+  }
+};
+
 const visContextSchema = schema.object({
   suggestion_type: schema.oneOf(
     [
@@ -104,6 +110,12 @@ export const discoverSessionControlPanelsSchema = schema.arrayOf(
   {
     defaultValue: [],
     maxSize: MAX_DISCOVER_SESSION_CONTROL_PANELS,
+    validate(value) {
+      return validateUniqueIds(
+        value.map((panel) => panel.id),
+        'control_panels must have unique ids'
+      );
+    },
     meta: {
       description: 'An array of Discover ES|QL control panels.',
     },
@@ -203,6 +215,12 @@ export const discoverSessionApiDataSchema = schema.object(
     tabs: schema.arrayOf(discoverSessionApiTabSchema, {
       minSize: 1,
       maxSize: MAX_DISCOVER_SESSION_TABS,
+      validate(value) {
+        return validateUniqueIds(
+          value.map((tab) => tab.id),
+          'tabs must have unique ids'
+        );
+      },
       meta: {
         description: 'Ordered list of tabs in the Discover session.',
       },

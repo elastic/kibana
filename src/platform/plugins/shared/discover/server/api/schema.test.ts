@@ -338,6 +338,64 @@ describe('discoverSessionApiDataSchema', () => {
     ).toThrow();
   });
 
+  it('rejects duplicate tab ids', () => {
+    expect(() =>
+      discoverSessionApiDataSchema.validate({
+        title: 'Duplicate tabs',
+        tabs: [
+          classicTab,
+          {
+            ...esqlTab,
+            id: classicTab.id,
+          },
+        ],
+      })
+    ).toThrow('tabs must have unique ids');
+  });
+
+  it('rejects duplicate control_panels ids', () => {
+    expect(() =>
+      discoverSessionApiDataSchema.validate({
+        title: 'Duplicate controls',
+        tabs: [
+          {
+            ...esqlTab,
+            control_panels: [
+              {
+                id: 'control-1',
+                type: 'esql_control',
+                width: 'medium',
+                grow: false,
+                config: {
+                  control_type: 'STATIC_VALUES',
+                  variable_name: 'foo',
+                  variable_type: 'values',
+                  available_options: ['bar'],
+                  selected_options: ['bar'],
+                  single_select: true,
+                },
+              },
+              {
+                id: 'control-1',
+                type: 'esql_control',
+                width: 'small',
+                grow: true,
+                config: {
+                  control_type: 'STATIC_VALUES',
+                  variable_name: 'baz',
+                  variable_type: 'values',
+                  available_options: ['qux'],
+                  selected_options: ['qux'],
+                  single_select: true,
+                },
+              },
+            ],
+          },
+        ],
+      })
+    ).toThrow('control_panels must have unique ids');
+  });
+
   it('rejects sessions with no tabs', () => {
     expect(() =>
       discoverSessionApiDataSchema.validate({

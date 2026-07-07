@@ -256,40 +256,5 @@ describe('control panel transforms', () => {
       expect(transformControlPanelsIn(undefined)).toBeUndefined();
       expect(transformControlPanelsIn([])).toBeUndefined();
     });
-
-    it('throws when control_panels contain duplicate ids', () => {
-      expect(() =>
-        transformControlPanelsIn([
-          {
-            id: 'control-1',
-            type: ESQL_CONTROL,
-            width: 'small',
-            grow: true,
-            config: {
-              control_type: 'STATIC_VALUES',
-              variable_name: 'foo',
-              variable_type: 'values',
-              available_options: ['x'],
-              selected_options: ['x'],
-              single_select: true,
-            },
-          },
-          {
-            id: 'control-1',
-            type: ESQL_CONTROL,
-            width: 'medium',
-            grow: false,
-            config: {
-              control_type: 'STATIC_VALUES',
-              variable_name: 'bar',
-              variable_type: 'values',
-              available_options: ['y'],
-              selected_options: ['y'],
-              single_select: true,
-            },
-          },
-        ])
-      ).toThrow('control_panels must have unique ids');
-    });
   });
 });
