@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { unescape } from 'lodash';
-
 /**
  * Pretty-prints a field value that contains JSON blocks, replacing every JSON block with its pretty-printed
  * form and placing each block (and each surrounding run of text) on its own line so
@@ -16,8 +14,8 @@ import { unescape } from 'lodash';
  * when the value contains no JSON to format, so the caller can render it as-is.
  */
 export const tryPrettyPrintJsonBlocks = (value: unknown): string | undefined => {
-  const unescapedValue = unescape(String(value));
-  const segments = extractEmbeddedJsonSegments(unescapedValue);
+  const stringValue = String(value);
+  const segments = extractEmbeddedJsonSegments(stringValue);
   if (!segments.length) {
     return undefined;
   }
@@ -26,7 +24,7 @@ export const tryPrettyPrintJsonBlocks = (value: unknown): string | undefined => 
   let cursor = 0;
 
   for (const segment of segments) {
-    const precedingText = unescapedValue.slice(cursor, segment.start).trim();
+    const precedingText = stringValue.slice(cursor, segment.start).trim();
     if (precedingText) {
       parts.push(precedingText);
     }
@@ -34,7 +32,7 @@ export const tryPrettyPrintJsonBlocks = (value: unknown): string | undefined => 
     cursor = segment.end;
   }
 
-  const trailingText = unescapedValue.slice(cursor).trim();
+  const trailingText = stringValue.slice(cursor).trim();
   if (trailingText) {
     parts.push(trailingText);
   }

@@ -287,7 +287,7 @@ function renderPopoverContent({
     >
       <EuiFlexItem>
         <DataTablePopoverCellValue>
-          <span
+          <div
             data-test-subj="dataTableExpandCellActionPopoverValue"
             css={css`
               white-space: pre-wrap;
@@ -303,7 +303,7 @@ function renderPopoverContent({
               dataView,
               field,
             })}
-          </span>
+          </div>
         </DataTablePopoverCellValue>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>
