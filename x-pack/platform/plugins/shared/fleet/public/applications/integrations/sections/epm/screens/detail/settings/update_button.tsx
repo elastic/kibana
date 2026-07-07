@@ -107,10 +107,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
 
   const agentBasedPolicyCount = packagePolicyIds.length;
   const agentlessPolicyCount = agentlessPolicyIds.length;
-  const packagePolicyCount = useMemo(
-    () => agentBasedPolicyCount + agentlessPolicyCount,
-    [agentBasedPolicyCount, agentlessPolicyCount]
-  );
+  const totalPolicyCount = agentBasedPolicyCount + agentlessPolicyCount;
   // Only break the count down by deployment mode when the integration actually has both kinds.
   const hasMixedPolicyTypes = agentBasedPolicyCount > 0 && agentlessPolicyCount > 0;
 
@@ -445,13 +442,13 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
           Fleet has detected that {packagePolicyCountText} {packagePolicyCount, plural, one { is} other { are}} ready to be upgraded
           and {packagePolicyCount, plural, one { is} other { are}} already in use by {agentCountText}."
           values={{
-            packagePolicyCount,
+            packagePolicyCount: totalPolicyCount,
             packagePolicyCountText: (
               <strong>
                 <FormattedMessage
                   id="xpack.fleet.integrations.confirmUpdateModal.body.policyCount"
                   defaultMessage="{packagePolicyCount, plural, one {# integration policy} other {# integration policies}}"
-                  values={{ packagePolicyCount }}
+                  values={{ packagePolicyCount: totalPolicyCount }}
                 />
               </strong>
             ),
@@ -517,7 +514,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
             />
           </EuiButton>
         </EuiFlexItem>
-        {packagePolicyCount > 0 && (
+        {totalPolicyCount > 0 && (
           <EuiFlexItem grow={false}>
             <EuiCheckbox
               labelProps={{
