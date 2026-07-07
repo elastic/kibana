@@ -67,6 +67,8 @@ export interface DataLifecycleSummaryUiState {
   editedPhaseName?: string;
   editedDownsampleStepIndex?: number;
   isEditLifecycleFlyoutOpen?: boolean;
+  /** While true, all click interactions are disabled: no popover opens and no navigation occurs. */
+  disableInteractions?: boolean;
   invalidPhases?: PhaseName[];
   invalidStepIndices?: number[];
 }
@@ -102,6 +104,7 @@ export const DataLifecycleSummary = ({
     editedPhaseName,
     editedDownsampleStepIndex,
     isEditLifecycleFlyoutOpen = false,
+    disableInteractions = false,
     invalidPhases,
     invalidStepIndices,
   } = uiState ?? {};
@@ -179,6 +182,7 @@ export const DataLifecycleSummary = ({
                   testSubjPrefix={testSubjPrefix}
                   canManageLifecycle={canManageLifecycle}
                   isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
+                  disableInteractions={disableInteractions}
                   frozenPhaseCallouts={frozenPhaseCallouts}
                 />
                 {showDownsampling && downsamplingSegments && (
@@ -191,6 +195,7 @@ export const DataLifecycleSummary = ({
                     editedDownsampleStepIndex={editedDownsampleStepIndex}
                     canManageLifecycle={canManageLifecycle}
                     isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
+                    disableInteractions={disableInteractions}
                   />
                 )}
                 <EuiSpacer size="xs" />
