@@ -127,6 +127,31 @@ steps:
     with:
       name: ${{ env.PR_CONTEXT_ARTIFACT_NAME }}
       path: /tmp/gh-aw/agent
+  - name: Precompute flaky run count
+    env:
+      PR_CONTEXT_DIR: /tmp/gh-aw/agent
+    run: |
+      # Deterministic count of /flaky runs already triggered by kibanamachine so the agent
+      # reads a number instead of hand-tallying comments; author filter keeps a developer's
+      # manual /flaky from draining the bot's budget.
+      node <<'NODE'
+      const fs = require('fs');
+      const path = require('path');
+      const dir = process.env.PR_CONTEXT_DIR;
+      const comments = JSON.parse(fs.readFileSync(path.join(dir, 'pr-issue-comments.json'), 'utf8'));
+      const triggers = comments.filter(
+        (comment) =>
+          comment?.user?.login === 'kibanamachine' &&
+          typeof comment.body === 'string' &&
+          comment.body.startsWith('/flaky ')
+      );
+      const value = {
+        triggeredByBot: triggers.length,
+        triggerCommentUrls: triggers.map((comment) => comment.html_url),
+      };
+      fs.writeFileSync(path.join(dir, 'flaky-run-count.json'), `${JSON.stringify(value, null, 2)}\n`);
+      console.log(`Flaky runs already triggered by kibanamachine: ${triggers.length}`);
+      NODE
   - name: Install Buildkite CLI and export BUILDKITE_API_TOKEN
     env:
       BK_VERSION: 3.44.0
@@ -204,6 +229,7 @@ A prior job has already fetched this PR's data into `/tmp/gh-aw/agent/`. Prefer 
 - `pr-diff.txt` — unified diff of every changed file.
 - `pr-files.json` — changed-file metadata (paths, status).
 - `pr-issue-comments.json` — every PR comment, including prior `## Flaky Test Runner Stats` result comments and the `/flaky` comments this workflow posted.
+- `flaky-run-count.json` — `{ triggeredByBot }`: the deterministic, pre-computed number of `/flaky` runs `kibanamachine` has already triggered on this PR (see [Number of runs](#number-of-runs)).
 - `pr-review-comments.json`, `pr-reviews.json` — review threads and reviews.
 
 Only fetch data live when it is not in these files. In particular, the linked `failed-test` issue's investigator comment lives on a **different** issue (not this PR), so fetch it directly.
@@ -217,7 +243,7 @@ You run in one of two modes, selected from the triggering event:
 
 ## Number of runs
 
-Trigger the flaky test runner at most 6 times per PR; run a given config up to 50 times at most. To know how many runs you have already triggered, count only the comments in `pr-issue-comments.json` whose body starts with `/flaky ` and are authored by `kibanamachine`. Developers can post their own `/flaky` comments; do not count those against this budget. Never post a `/flaky` comment that would take your own total past 6.
+Trigger the flaky test runner at most 6 times per PR; run a given config up to 50 times at most. Do not hand-count the comments — a pre-step already did it deterministically: read `triggeredByBot` from `flaky-run-count.json`, which counts only the `/flaky ` comments authored by `kibanamachine` (developer-posted `/flaky` comments are excluded, so they never drain this budget). Never post a `/flaky` comment that would take `triggeredByBot` past 6.
 
 ## State
 
@@ -288,7 +314,7 @@ The `/flaky` trigger comment is not an update comment: it contains nothing but t
    - Deduplicate; include each config once. If you cannot resolve any config, add `flaky-fix-check:skipped`, post a skipped comment (see [Update comment](#update-comment)) asking a human to identify the config, and stop.
    - If the PR touches a page object in one of the Scout packages (e.g., `@kbn/scout`, `@kbn/scout-oblt`, etc.) determine if it is worthwhile to run extra configs to test the fix is stable and won't create flakiness.
 
-4. **Trigger the run.** Confirm you have not already triggered 6 runs (count only your own prior `/flaky ` comments authored by `kibanamachine`; ignore any posted by developers). Then post the trigger command as its own comment (it must start with `/flaky ` so the trigger workflow picks it up):
+4. **Trigger the run.** Confirm `triggeredByBot` in `flaky-run-count.json` is below 6 (this precomputed count already ignores developer-posted `/flaky` comments). Then post the trigger command as its own comment (it must start with `/flaky ` so the trigger workflow picks it up):
 
    ```
    /flaky <type>:<path>:50 [<type>:<path>:50 ...]
@@ -317,7 +343,7 @@ The `/flaky` trigger comment is not an update comment: it contains nothing but t
 
    Record the per-config `N/M` and the Buildkite build URL.
 
-2. **Recover context from the PR.** From the prefetched context, read `pr-metadata.json` for the `flaky-fix-check:*` labels, and `pr-issue-comments.json` for the prior `## Flaky Test Runner Stats` comments (your run history and build links) and the `/flaky` comments you posted (the configs run and how many runs you have triggered). Re-derive `targetedTests` from `pr-diff.txt` and the title/body in `pr-metadata.json`. If you have already acted on this results comment (a later `/flaky` comment exists after it), do nothing.
+2. **Recover context from the PR.** From the prefetched context, read `pr-metadata.json` for the `flaky-fix-check:*` labels, and `pr-issue-comments.json` for the prior `## Flaky Test Runner Stats` comments (your run history and build links) and the `/flaky` comments you posted (the configs run; for the run total use `triggeredByBot` from `flaky-run-count.json`). Re-derive `targetedTests` from `pr-diff.txt` and the title/body in `pr-metadata.json`. If you have already acted on this results comment (a later `/flaky` comment exists after it), do nothing.
 
    Each run's results are tied to the commit the runner built from (the PR head when that `/flaky` was triggered). When you judge the final verdict, only count a config as green if its green run was against the **current** PR head — a green from before a fix you have since pushed is stale and must be re-verified.
 
@@ -350,7 +376,7 @@ When you iterate, you are editing a PR you did not open. This is allowed because
 
 ## Guardrails
 
-- Never exceed 6 total `/flaky` triggers of your own (kibanamachine-authored) for this PR; developer-triggered `/flaky` comments don't count toward this.
+- Never exceed 6 total `/flaky` triggers of your own for this PR; use the precomputed `triggeredByBot` in `flaky-run-count.json` (kibanamachine-authored only) rather than re-tallying, so developer-triggered `/flaky` comments don't count toward this.
 - Comments are costly noise: post one only when strictly necessary and genuinely useful, keep the summary to 1–3 sentences (any extra depth goes in a terse `<details>` block, per [Update comment](#update-comment)), and prefer none: a routine run needs only its `/flaky` comment, and a `passed` verdict posts nothing.
 - The `/flaky` command must be its own comment and start with `/flaky ` (it is consumed by `.github/workflows/trigger-flaky.yml`).
 - Never include the literal phrase `Flaky Test Runner Stats` in any comment you post — that header is how this workflow detects the runner's results comment, and reusing it would make the workflow re-trigger on its own comment.
