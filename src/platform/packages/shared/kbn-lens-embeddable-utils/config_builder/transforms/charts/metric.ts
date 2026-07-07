@@ -505,10 +505,9 @@ function enrichConfigurationWithVisualizationProperties(
       primaryMetric.color = colorByValue && !hasInvalidRangeType ? colorByValue : AUTO_COLOR;
     } else if (visualization.color) {
       primaryMetric.color = fromStaticColorLensStateToAPI(visualization.color);
-    } else {
-      if (visualization.applyColorTo) {
-        primaryMetric.color = AUTO_COLOR;
-      }
+    } else if (visualization.applyColorTo) {
+      // fallback to AUTO color when no color/palette is set but applyColorTo is set
+      primaryMetric.color = AUTO_COLOR;
     }
   }
 
