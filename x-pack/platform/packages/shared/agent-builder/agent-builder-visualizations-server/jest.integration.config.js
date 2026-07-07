@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-export const FLYOUT_STORAGE_KEYS = {
-  ATTACK_DETAILS_OVERVIEW_TAB_EXPANDED_SECTIONS:
-    'securitySolution.attackDetailsFlyout.overviewSectionExpanded.v9.4',
-  RIGHT_PANEL_SELECTED_TABS: 'securitySolution.attackDetailsFlyout.rightPanel.selectedTabs.v9.3',
+module.exports = {
+  preset: '@kbn/test/jest_integration_node',
+  rootDir: '../../../../../..',
+  roots: [
+    '<rootDir>/x-pack/platform/packages/shared/agent-builder/agent-builder-visualizations-server',
+  ],
 };
