@@ -447,7 +447,8 @@ export const createSkillAttachmentDefinition = ({
       };
 
       const saveChanges = async () => {
-        const { id: skillId, ...skillContent } = skill;
+        const { id: skillId, referenced_content: referencedContent, ...rest } = skill;
+        const skillContent = { ...rest, referenced_content: referencedContent ?? [] };
         try {
           const response = await http.fetch<CreateSkillResponse>(
             `${SKILLS_API_PATH}/${encodeURIComponent(skillId)}`,
