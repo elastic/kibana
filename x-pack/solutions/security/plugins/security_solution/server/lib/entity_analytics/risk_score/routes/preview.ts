@@ -6,7 +6,6 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/common';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
@@ -52,9 +51,6 @@ export const riskScorePreviewRoute = (
         const coreContext = await context.core;
         const soClient = coreContext.savedObjects.client;
         const securityConfig = await securityContext.getConfig();
-        const v2PreviewEnabled =
-          Boolean(securityConfig.experimentalFeatures.entityAnalyticsEntityStoreV2) &&
-          (await coreContext.uiSettings.client.get<boolean>(FF_ENABLE_ENTITY_STORE_V2));
 
         const riskScoreService = buildRiskScoreServiceForRequest(
           securityContext,
@@ -95,44 +91,28 @@ export const riskScorePreviewRoute = (
           const excludeAlertStatuses = excludedStatuses || ['closed'];
           const excludeAlertTags = excludedTags || [];
           const filters = customFilters || [];
-          if (v2PreviewEnabled && debug === true) {
+          if (debug === true) {
             logger.warn('Risk score preview debug mode is unsupported in v2 preview path');
           }
-          const result = v2PreviewEnabled
-            ? await calculateScoresWithESQLV2({
-                afterKeys,
-                filter,
-                identifierType: identifierType as EntityType,
-                index,
-                pageSize,
-                range,
-                runtimeMappings,
-                weights,
-                alertSampleSizePerShard,
-                excludeAlertStatuses,
-                excludeAlertTags,
-                filters,
-                esClient: coreContext.elasticsearch.client.asCurrentUser,
-                logger,
-                crudClient: securityContext.getEntityStoreUpdateClient(),
-                soClient,
-                namespace: securityContext.getSpaceId(),
-              })
-            : await riskScoreService.calculateScores({
-                afterKeys,
-                debug,
-                filter,
-                identifierType: identifierType as EntityType,
-                index,
-                pageSize,
-                range,
-                runtimeMappings,
-                weights,
-                alertSampleSizePerShard,
-                excludeAlertStatuses,
-                excludeAlertTags,
-                filters,
-              });
+          const result = await calculateScoresWithESQLV2({
+            afterKeys,
+            filter,
+            identifierType: identifierType as EntityType,
+            index,
+            pageSize,
+            range,
+            runtimeMappings,
+            weights,
+            alertSampleSizePerShard,
+            excludeAlertStatuses,
+            excludeAlertTags,
+            filters,
+            esClient: coreContext.elasticsearch.client.asCurrentUser,
+            logger,
+            crudClient: securityContext.getEntityStoreUpdateClient(),
+            soClient,
+            namespace: securityContext.getSpaceId(),
+          });
 
           securityContext.getAuditLogger()?.log({
             message: 'User triggered custom manual scoring',

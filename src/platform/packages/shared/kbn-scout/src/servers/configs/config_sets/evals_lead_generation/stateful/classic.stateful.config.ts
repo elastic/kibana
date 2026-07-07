@@ -32,7 +32,7 @@ export const servers: ScoutServerConfig = {
     ...evalsEntityAnalyticsV2Config.kbnTestServer,
     serverArgs: [
       ...evalsEntityAnalyticsV2Config.kbnTestServer.serverArgs,
-      `--xpack.securitySolution.enableExperimental=["entityAnalyticsEntityStoreV2","leadGenerationEnabled"]`,
+      `--xpack.securitySolution.enableExperimental=["leadGenerationEnabled"]`,
     ],
   },
 };

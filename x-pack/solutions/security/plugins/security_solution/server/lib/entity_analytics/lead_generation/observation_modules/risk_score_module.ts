@@ -227,9 +227,7 @@ const extractEntityInternals = (entity: LeadEntity): EntityInternals | undefined
  *
  * Identity is resolved via `<entityType>.risk.id_field`/`<entityType>.risk.id_value`
  * inside the data client, which authoritatively selects V2-shaped documents regardless of
- * which writer last ran. Correct under both `entityAnalyticsEntityStoreV2 = true`
- * (entity-store risk-score maintainer) and `= false` (legacy scoring task);
- * legacy-shaped documents are excluded from the lookback window. The returned
+ * which writer last ran. Legacy-shaped documents are excluded from the lookback window. The returned
  * map is keyed directly by EUID.
  */
 const fetchTimeSeriesRiskScores = async (

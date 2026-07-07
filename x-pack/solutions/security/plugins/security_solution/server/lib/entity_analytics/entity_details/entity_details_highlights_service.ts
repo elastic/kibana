@@ -16,7 +16,6 @@ import {
   getVulnerabilitiesQuery,
   VULNERABILITIES_RESULT_EVALUATION,
 } from '@kbn/cloud-security-posture-common/utils/findings_query_builders';
-import { buildVulnerabilityEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import { getAnonymizedValue, getRawDataOrDefault } from '@kbn/elastic-assistant-common';
 import { omit } from 'lodash';
@@ -37,11 +36,7 @@ import type { RiskEngineDataClient } from '../risk_engine/risk_engine_data_clien
 import type { EntityDetailsHighlightsRequestBody } from '../../../../common/api/entity_analytics/entity_details/highlights.gen';
 import { getThreshold } from '../../../../common/utils/ml';
 import { isSecurityJob } from '../../../../common/machine_learning/is_security_job';
-import {
-  EntityType,
-  EntityTypeToIdentifierField,
-  type EntityIdentifierFields,
-} from '../../../../common/entity_analytics/types';
+import { EntityType, type EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../types';
 import type { AssetCriticalityDataClient, IdentifierValuesByField } from '../asset_criticality';
@@ -396,36 +391,6 @@ export const entityDetailsHighlightsServiceFactory = ({
     };
   };
 
-  const getV1Data = async ({
-    entityType,
-    entityIdentifier,
-    anomalyFromDate,
-    anomalyToDate,
-  }: GetDataFnOpts) => {
-    const entityField = EntityTypeToIdentifierField[entityType as EntityType];
-    const anonymizedRiskScore = await getRiskScoreData(entityType, entityIdentifier);
-    const assetCriticalityAnonymized = await getAssetCriticalityData(entityField, entityIdentifier);
-
-    const { vulnerabilitiesAnonymized, vulnerabilitiesTotal } = await getVulnerabilityData(
-      entityType as EntityType,
-      buildVulnerabilityEntityFlyoutPreviewQuery(entityField, entityIdentifier)
-    );
-
-    const anomaliesAnonymized: Record<string, string[]>[] = await getAnomaliesData(
-      [{ fieldName: entityField, fieldValue: entityIdentifier }],
-      anomalyFromDate,
-      anomalyToDate
-    );
-
-    return {
-      assetCriticality: assetCriticalityAnonymized,
-      riskScore: anonymizedRiskScore ?? undefined,
-      vulnerabilities: vulnerabilitiesAnonymized ?? [],
-      vulnerabilitiesTotal, // Prevents the UI from displaying the wrong number of vulnerabilities
-      anomalies: anomaliesAnonymized,
-    };
-  };
-
   const getV2Data = async ({ entityIdentifier, anomalyFromDate, anomalyToDate }: GetDataFnOpts) => {
     const enrichedEntityService = new EnrichEntityService({
       entityStoreClient,
@@ -463,7 +428,6 @@ export const entityDetailsHighlightsServiceFactory = ({
 
   return {
     getLocalReplacements,
-    getV1Data,
     getV2Data,
   };
 };

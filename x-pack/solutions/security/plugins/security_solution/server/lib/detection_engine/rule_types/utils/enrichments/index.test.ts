@@ -134,534 +134,305 @@ describe('enrichEvents', () => {
     mockGetEuidFromObject.mockReset();
   });
 
-  describe(`with entityAnalyticsEntityStoreV2 = false`, () => {
-    it('return the same events, if risk indexes are not available', async () => {
-      mockSearchEnrichments.mockImplementation(() => []);
-      mockIsIndexExist.mockImplementation(() => false);
-      const events = [
-        createAlert('1', createEntity('host', 'host name')),
-        createAlert('2', createEntity('user', 'user name')),
-      ];
-      const enrichedEvents = await enrichEvents({
-        logger: ruleExecutionLogger,
-        services: ruleServices,
-        events,
-        spaceId: 'default',
-        experimentalFeatures: {
-          entityAnalyticsEntityStoreV2: false,
-        } as unknown as ExperimentalFeatures,
-      });
+  let mockListEntities: jest.Mock;
+  let entityStoreCrudClient: EntityStoreCRUDClient;
 
-      expect(enrichedEvents).toEqual(events);
-    });
-
-    it('return the same events, if there no fields', async () => {
-      mockSearchEnrichments.mockImplementation(() => []);
-      mockIsIndexExist.mockImplementation(() => true);
-      const events = [createAlert('1'), createAlert('2')];
-      const enrichedEvents = await enrichEvents({
-        logger: ruleExecutionLogger,
-        services: ruleServices,
-        events,
-        spaceId: 'default',
-        experimentalFeatures: {
-          entityAnalyticsEntityStoreV2: false,
-        } as unknown as ExperimentalFeatures,
-      });
-
-      expect(enrichedEvents).toEqual(events);
-    });
-
-    it('return enriched events with risk score', async () => {
-      mockSearchEnrichments
-        .mockReturnValueOnce(hostEnrichmentResponse)
-        .mockReturnValueOnce(userEnrichmentResponse)
-        .mockReturnValueOnce(serviceEnrichmentResponse);
-      mockIsIndexExist.mockImplementation(() => true);
-
-      const enrichedEvents = await enrichEvents({
-        logger: ruleExecutionLogger,
-        services: ruleServices,
-        events: [
-          createAlert('1', {
-            ...createEntity('host', 'host name 1'),
-            ...createEntity('user', 'user name 1'),
-            ...createEntity('service', 'service name 1'),
-          }),
-          createAlert('2', createEntity('service', 'service name 2')),
-        ],
-        spaceId: 'default',
-        experimentalFeatures: {
-          entityAnalyticsEntityStoreV2: false,
-        } as unknown as ExperimentalFeatures,
-      });
-
-      expect(enrichedEvents).toEqual([
-        createAlert('1', {
-          host: {
-            name: 'host name 1',
-            risk: {
-              calculated_level: 'Low',
-              calculated_score_norm: 20,
-            },
-          },
-          user: {
-            name: 'user name 1',
-            risk: {
-              calculated_level: 'Moderate',
-              calculated_score_norm: 50,
-            },
-          },
-          service: {
-            name: 'service name 1',
-            risk: {
-              calculated_level: 'Moderate',
-              calculated_score_norm: 50,
-            },
-          },
-        }),
-        createAlert('2', {
-          service: {
-            name: 'service name 2',
-            risk: {
-              calculated_level: 'Critical',
-              calculated_score_norm: 90,
-            },
-          },
-        }),
-      ]);
-    });
-
-    it('return enriched events with asset criticality', async () => {
-      mockSearchEnrichments
-        .mockReturnValueOnce(assetCriticalityHostResponse)
-        .mockReturnValueOnce(assetCriticalityUserResponse)
-        .mockReturnValueOnce(assetCriticalityServiceResponse);
-
-      // disable risk score enrichments
-      mockIsIndexExist.mockImplementationOnce(() => false);
-      // enable for asset criticality
-      mockIsIndexExist.mockImplementation(() => true);
-
-      const enrichedEvents = await enrichEvents({
-        logger: ruleExecutionLogger,
-        services: ruleServices,
-        events: [
-          createAlert('1', {
-            ...createEntity('host', 'host name 1'),
-            ...createEntity('user', 'user name 1'),
-            ...createEntity('service', 'service name 1'),
-          }),
-          createAlert('2', createEntity('host', 'user name 1')),
-        ],
-        spaceId: 'default',
-        experimentalFeatures: {
-          entityAnalyticsEntityStoreV2: false,
-        } as unknown as ExperimentalFeatures,
-      });
-
-      expect(enrichedEvents).toEqual([
-        createAlert('1', {
-          ...createEntity('user', 'user name 1'),
-          ...createEntity('host', 'host name 1'),
-          ...createEntity('service', 'service name 1'),
-          'host.asset.criticality': 'low',
-          'user.asset.criticality': 'important',
-          'service.asset.criticality': 'high',
-        }),
-        createAlert('2', {
-          ...createEntity('host', 'user name 1'),
-        }),
-      ]);
-    });
-
-    it('if some enrichments failed, another work as expected', async () => {
-      mockSearchEnrichments
-        .mockImplementationOnce(() => {
-          throw new Error('1');
-        })
-        .mockImplementationOnce(() => userEnrichmentResponse);
-      mockIsIndexExist.mockImplementation(() => true);
-
-      const enrichedEvents = await enrichEvents({
-        logger: ruleExecutionLogger,
-        services: ruleServices,
-        events: [
-          createAlert('1', {
-            ...createEntity('host', 'host name 1'),
-            ...createEntity('user', 'user name 1'),
-          }),
-          createAlert('2', createEntity('user', 'user name 2')),
-        ],
-        spaceId: 'default',
-        experimentalFeatures: {
-          entityAnalyticsEntityStoreV2: false,
-        } as unknown as ExperimentalFeatures,
-      });
-
-      expect(enrichedEvents).toEqual([
-        createAlert('1', {
-          host: {
-            name: 'host name 1',
-          },
-          user: {
-            name: 'user name 1',
-            risk: {
-              calculated_level: 'Moderate',
-              calculated_score_norm: 50,
-            },
-          },
-        }),
-        createAlert('2', {
-          user: {
-            name: 'user name 2',
-            risk: {
-              calculated_level: 'Critical',
-              calculated_score_norm: 90,
-            },
-          },
-        }),
-      ]);
-    });
+  beforeEach(() => {
+    mockListEntities = jest.fn().mockResolvedValue({ entities: [] });
+    entityStoreCrudClient = {
+      listEntities: mockListEntities,
+    } as unknown as EntityStoreCRUDClient;
+    mockGetEuidFromObject.mockImplementation(
+      (entityType: string, source: Record<string, { name?: string } | undefined>) => {
+        const name = source?.[entityType]?.name;
+        return name ? `${entityType}:${name}` : undefined;
+      }
+    );
   });
 
-  describe(`with entityAnalyticsEntityStoreV2 = true`, () => {
-    let mockListEntities: jest.Mock;
-    let entityStoreCrudClient: EntityStoreCRUDClient;
+  it('return the same events, if entityStoreCrudClient is undefined', async () => {
+    mockIsIndexExist.mockImplementation(() => true);
+    const events = [
+      createAlert('1', createEntity('host', 'host name')),
+      createAlert('2', createEntity('user', 'user name')),
+    ];
+    const enrichedEvents = await enrichEvents({
+      logger: ruleExecutionLogger,
+      services: ruleServices,
+      events,
+      spaceId: 'default',
+    });
 
-    beforeEach(() => {
-      mockListEntities = jest.fn().mockResolvedValue({ entities: [] });
-      entityStoreCrudClient = {
-        listEntities: mockListEntities,
-      } as unknown as EntityStoreCRUDClient;
-      mockGetEuidFromObject.mockImplementation(
-        (entityType: string, source: Record<string, { name?: string } | undefined>) => {
-          const name = source?.[entityType]?.name;
-          return name ? `${entityType}:${name}` : undefined;
+    expect(enrichedEvents).toEqual(events);
+  });
+
+  it('return the same events, if entity store index is not available', async () => {
+    mockIsIndexExist.mockImplementation(() => false);
+    const events = [
+      createAlert('1', createEntity('host', 'host name')),
+      createAlert('2', createEntity('user', 'user name')),
+    ];
+    const enrichedEvents = await enrichEvents({
+      logger: ruleExecutionLogger,
+      services: ruleServices,
+      events,
+      spaceId: 'default',
+      entityStoreCrudClient,
+    });
+
+    expect(enrichedEvents).toEqual(events);
+    expect(mockListEntities).not.toHaveBeenCalled();
+  });
+
+  it('return the same events, if there are no fields', async () => {
+    mockListEntities.mockImplementation(
+      ({ filter }: { filter: { terms: { 'entity.id': string[] } } }) => {
+        const requestedIds = filter?.terms?.['entity.id'] ?? [];
+        const entities: Array<{ entity: { id: string } }> = [];
+        const fieldsList: Array<Record<string, unknown[]>> = [];
+        for (const euidStr of requestedIds) {
+          entities.push({ entity: { id: euidStr } });
+          fieldsList.push({});
         }
-      );
+        return Promise.resolve({ entities, fields: fieldsList });
+      }
+    );
+    mockIsIndexExist.mockImplementation(() => true);
+    const events = [createAlert('1'), createAlert('2')];
+    const enrichedEvents = await enrichEvents({
+      logger: ruleExecutionLogger,
+      services: ruleServices,
+      events,
+      spaceId: 'default',
+      entityStoreCrudClient,
     });
 
-    it('return the same events, if entityStoreCrudClient is undefined', async () => {
-      mockIsIndexExist.mockImplementation(() => true);
-      const events = [
-        createAlert('1', createEntity('host', 'host name')),
-        createAlert('2', createEntity('user', 'user name')),
-      ];
-      const enrichedEvents = await enrichEvents({
-        logger: ruleExecutionLogger,
-        services: ruleServices,
-        events,
-        spaceId: 'default',
-        experimentalFeatures: {
-          entityAnalyticsEntityStoreV2: true,
-        } as unknown as ExperimentalFeatures,
-      });
+    expect(enrichedEvents).toEqual(events);
+    expect(mockListEntities).not.toHaveBeenCalled();
+  });
 
-      expect(enrichedEvents).toEqual(events);
-    });
+  it('return enriched events with risk score', async () => {
+    mockIsIndexExist.mockImplementation(() => true);
 
-    it('return the same events, if entity store index is not available', async () => {
-      mockIsIndexExist.mockImplementation(() => false);
-      const events = [
-        createAlert('1', createEntity('host', 'host name')),
-        createAlert('2', createEntity('user', 'user name')),
-      ];
-      const enrichedEvents = await enrichEvents({
-        logger: ruleExecutionLogger,
-        services: ruleServices,
-        events,
-        spaceId: 'default',
-        experimentalFeatures: {
-          entityAnalyticsEntityStoreV2: true,
-        } as unknown as ExperimentalFeatures,
-        entityStoreCrudClient,
-      });
+    const riskByEuid: Record<string, Record<string, unknown[]>> = {
+      'host:host name 1': {
+        'entity.risk.calculated_level': ['Low'],
+        'entity.risk.calculated_score_norm': [20],
+      },
+      'user:user name 1': {
+        'entity.risk.calculated_level': ['Moderate'],
+        'entity.risk.calculated_score_norm': [50],
+      },
+      'service:service name 1': {
+        'entity.risk.calculated_level': ['Moderate'],
+        'entity.risk.calculated_score_norm': [50],
+      },
+      'service:service name 2': {
+        'entity.risk.calculated_level': ['Critical'],
+        'entity.risk.calculated_score_norm': [90],
+      },
+    };
 
-      expect(enrichedEvents).toEqual(events);
-      expect(mockListEntities).not.toHaveBeenCalled();
-    });
-
-    it('return the same events, if there are no fields', async () => {
-      mockListEntities.mockImplementation(
-        ({ filter }: { filter: { terms: { 'entity.id': string[] } } }) => {
-          const requestedIds = filter?.terms?.['entity.id'] ?? [];
-          const entities: Array<{ entity: { id: string } }> = [];
-          const fieldsList: Array<Record<string, unknown[]>> = [];
-          for (const euidStr of requestedIds) {
-            entities.push({ entity: { id: euidStr } });
-            fieldsList.push({});
-          }
-          return Promise.resolve({ entities, fields: fieldsList });
-        }
-      );
-      mockIsIndexExist.mockImplementation(() => true);
-      const events = [createAlert('1'), createAlert('2')];
-      const enrichedEvents = await enrichEvents({
-        logger: ruleExecutionLogger,
-        services: ruleServices,
-        events,
-        spaceId: 'default',
-        experimentalFeatures: {
-          entityAnalyticsEntityStoreV2: true,
-        } as unknown as ExperimentalFeatures,
-        entityStoreCrudClient,
-      });
-
-      expect(enrichedEvents).toEqual(events);
-      expect(mockListEntities).not.toHaveBeenCalled();
-    });
-
-    it('return enriched events with risk score', async () => {
-      mockIsIndexExist.mockImplementation(() => true);
-
-      const riskByEuid: Record<string, Record<string, unknown[]>> = {
-        'host:host name 1': {
-          'entity.risk.calculated_level': ['Low'],
-          'entity.risk.calculated_score_norm': [20],
-        },
-        'user:user name 1': {
-          'entity.risk.calculated_level': ['Moderate'],
-          'entity.risk.calculated_score_norm': [50],
-        },
-        'service:service name 1': {
-          'entity.risk.calculated_level': ['Moderate'],
-          'entity.risk.calculated_score_norm': [50],
-        },
-        'service:service name 2': {
-          'entity.risk.calculated_level': ['Critical'],
-          'entity.risk.calculated_score_norm': [90],
-        },
-      };
-
-      mockListEntities.mockImplementation(
-        ({
-          filter,
-          fields,
-        }: {
-          filter: { terms: { 'entity.id': string[] } };
-          fields: string[];
-        }) => {
-          if (!fields.includes('entity.risk.calculated_level')) {
-            return Promise.resolve({ entities: [] });
-          }
-          const requestedIds = filter?.terms?.['entity.id'] ?? [];
-          const entities: Array<{ entity: { id: string } }> = [];
-          const fieldsList: Array<Record<string, unknown[]>> = [];
-          for (const euidStr of requestedIds) {
-            if (riskByEuid[euidStr]) {
-              entities.push({ entity: { id: euidStr } });
-              fieldsList.push(riskByEuid[euidStr]);
-            }
-          }
-          return Promise.resolve({ entities, fields: fieldsList });
-        }
-      );
-
-      const enrichedEvents = await enrichEvents({
-        logger: ruleExecutionLogger,
-        services: ruleServices,
-        events: [
-          createAlert('1', {
-            ...createEntity('host', 'host name 1'),
-            ...createEntity('user', 'user name 1'),
-            ...createEntity('service', 'service name 1'),
-          }),
-          createAlert('2', createEntity('service', 'service name 2')),
-        ],
-        spaceId: 'default',
-        experimentalFeatures: {
-          entityAnalyticsEntityStoreV2: true,
-        } as unknown as ExperimentalFeatures,
-        entityStoreCrudClient,
-      });
-
-      expect(enrichedEvents).toEqual([
-        createAlert('1', {
-          host: {
-            name: 'host name 1',
-            risk: {
-              calculated_level: 'Low',
-              calculated_score_norm: 20,
-            },
-          },
-          user: {
-            name: 'user name 1',
-            risk: {
-              calculated_level: 'Moderate',
-              calculated_score_norm: 50,
-            },
-          },
-          service: {
-            name: 'service name 1',
-            risk: {
-              calculated_level: 'Moderate',
-              calculated_score_norm: 50,
-            },
-          },
-        }),
-        createAlert('2', {
-          service: {
-            name: 'service name 2',
-            risk: {
-              calculated_level: 'Critical',
-              calculated_score_norm: 90,
-            },
-          },
-        }),
-      ]);
-    });
-
-    it('return enriched events with asset criticality', async () => {
-      mockIsIndexExist.mockImplementation(() => true);
-
-      const criticalityByEuid: Record<string, Record<string, unknown[]>> = {
-        'host:host name 1': { 'asset.criticality': ['low'] },
-        'user:user name 1': { 'asset.criticality': ['important'] },
-        'service:service name 1': { 'asset.criticality': ['high'] },
-      };
-
-      mockListEntities.mockImplementation(
-        ({
-          filter,
-          fields,
-        }: {
-          filter: { terms: { 'entity.id': string[] } };
-          fields: string[];
-        }) => {
-          if (!fields.includes('asset.criticality')) {
-            return Promise.resolve({ entities: [] });
-          }
-          const requestedIds = filter?.terms?.['entity.id'] ?? [];
-          const entities: Array<{ entity: { id: string } }> = [];
-          const fieldsList: Array<Record<string, unknown[]>> = [];
-          for (const euidStr of requestedIds) {
-            if (criticalityByEuid[euidStr]) {
-              entities.push({ entity: { id: euidStr } });
-              fieldsList.push(criticalityByEuid[euidStr]);
-            }
-          }
-          return Promise.resolve({ entities, fields: fieldsList });
-        }
-      );
-
-      const enrichedEvents = await enrichEvents({
-        logger: ruleExecutionLogger,
-        services: ruleServices,
-        events: [
-          createAlert('1', {
-            ...createEntity('host', 'host name 1'),
-            ...createEntity('user', 'user name 1'),
-            ...createEntity('service', 'service name 1'),
-          }),
-          createAlert('2', createEntity('host', 'user name 1')),
-        ],
-        spaceId: 'default',
-        experimentalFeatures: {
-          entityAnalyticsEntityStoreV2: true,
-        } as unknown as ExperimentalFeatures,
-        entityStoreCrudClient,
-      });
-
-      expect(enrichedEvents).toEqual([
-        createAlert('1', {
-          ...createEntity('user', 'user name 1'),
-          ...createEntity('host', 'host name 1'),
-          ...createEntity('service', 'service name 1'),
-          'host.asset.criticality': 'low',
-          'user.asset.criticality': 'important',
-          'service.asset.criticality': 'high',
-        }),
-        createAlert('2', {
-          ...createEntity('host', 'user name 1'),
-        }),
-      ]);
-    });
-
-    it('if some enrichments failed, another work as expected', async () => {
-      mockIsIndexExist.mockImplementation(() => true);
-
-      const userRiskByEuid: Record<string, Record<string, unknown[]>> = {
-        'user:user name 1': {
-          'entity.risk.calculated_level': ['Moderate'],
-          'entity.risk.calculated_score_norm': [50],
-        },
-        'user:user name 2': {
-          'entity.risk.calculated_level': ['Critical'],
-          'entity.risk.calculated_score_norm': [90],
-        },
-      };
-
-      mockListEntities.mockImplementation(
-        ({
-          filter,
-          fields,
-        }: {
-          filter: { terms: { 'entity.id': string[] } };
-          fields: string[];
-        }) => {
-          const requestedIds = filter?.terms?.['entity.id'] ?? [];
-          if (requestedIds.some((id) => id.startsWith('host:'))) {
-            throw new Error('host enrichment failed');
-          }
-          if (
-            fields.includes('entity.risk.calculated_level') &&
-            requestedIds.some((id) => id.startsWith('user:'))
-          ) {
-            const entities: Array<{ entity: { id: string } }> = [];
-            const fieldsList: Array<Record<string, unknown[]>> = [];
-            for (const euidStr of requestedIds) {
-              if (userRiskByEuid[euidStr]) {
-                entities.push({ entity: { id: euidStr } });
-                fieldsList.push(userRiskByEuid[euidStr]);
-              }
-            }
-            return Promise.resolve({ entities, fields: fieldsList });
-          }
+    mockListEntities.mockImplementation(
+      ({ filter, fields }: { filter: { terms: { 'entity.id': string[] } }; fields: string[] }) => {
+        if (!fields.includes('entity.risk.calculated_level')) {
           return Promise.resolve({ entities: [] });
         }
-      );
+        const requestedIds = filter?.terms?.['entity.id'] ?? [];
+        const entities: Array<{ entity: { id: string } }> = [];
+        const fieldsList: Array<Record<string, unknown[]>> = [];
+        for (const euidStr of requestedIds) {
+          if (riskByEuid[euidStr]) {
+            entities.push({ entity: { id: euidStr } });
+            fieldsList.push(riskByEuid[euidStr]);
+          }
+        }
+        return Promise.resolve({ entities, fields: fieldsList });
+      }
+    );
 
-      const enrichedEvents = await enrichEvents({
-        logger: ruleExecutionLogger,
-        services: ruleServices,
-        events: [
-          createAlert('1', {
-            ...createEntity('host', 'host name 1'),
-            ...createEntity('user', 'user name 1'),
-          }),
-          createAlert('2', createEntity('user', 'user name 2')),
-        ],
-        spaceId: 'default',
-        experimentalFeatures: {
-          entityAnalyticsEntityStoreV2: true,
-        } as unknown as ExperimentalFeatures,
-        entityStoreCrudClient,
-      });
-
-      expect(enrichedEvents).toEqual([
+    const enrichedEvents = await enrichEvents({
+      logger: ruleExecutionLogger,
+      services: ruleServices,
+      events: [
         createAlert('1', {
-          host: {
-            name: 'host name 1',
-          },
-          user: {
-            name: 'user name 1',
-            risk: {
-              calculated_level: 'Moderate',
-              calculated_score_norm: 50,
-            },
-          },
+          ...createEntity('host', 'host name 1'),
+          ...createEntity('user', 'user name 1'),
+          ...createEntity('service', 'service name 1'),
         }),
-        createAlert('2', {
-          user: {
-            name: 'user name 2',
-            risk: {
-              calculated_level: 'Critical',
-              calculated_score_norm: 90,
-            },
-          },
-        }),
-      ]);
+        createAlert('2', createEntity('service', 'service name 2')),
+      ],
+      spaceId: 'default',
+      entityStoreCrudClient,
     });
+
+    expect(enrichedEvents).toEqual([
+      createAlert('1', {
+        host: {
+          name: 'host name 1',
+          risk: {
+            calculated_level: 'Low',
+            calculated_score_norm: 20,
+          },
+        },
+        user: {
+          name: 'user name 1',
+          risk: {
+            calculated_level: 'Moderate',
+            calculated_score_norm: 50,
+          },
+        },
+        service: {
+          name: 'service name 1',
+          risk: {
+            calculated_level: 'Moderate',
+            calculated_score_norm: 50,
+          },
+        },
+      }),
+      createAlert('2', {
+        service: {
+          name: 'service name 2',
+          risk: {
+            calculated_level: 'Critical',
+            calculated_score_norm: 90,
+          },
+        },
+      }),
+    ]);
+  });
+
+  it('return enriched events with asset criticality', async () => {
+    mockIsIndexExist.mockImplementation(() => true);
+
+    const criticalityByEuid: Record<string, Record<string, unknown[]>> = {
+      'host:host name 1': { 'asset.criticality': ['low'] },
+      'user:user name 1': { 'asset.criticality': ['important'] },
+      'service:service name 1': { 'asset.criticality': ['high'] },
+    };
+
+    mockListEntities.mockImplementation(
+      ({ filter, fields }: { filter: { terms: { 'entity.id': string[] } }; fields: string[] }) => {
+        if (!fields.includes('asset.criticality')) {
+          return Promise.resolve({ entities: [] });
+        }
+        const requestedIds = filter?.terms?.['entity.id'] ?? [];
+        const entities: Array<{ entity: { id: string } }> = [];
+        const fieldsList: Array<Record<string, unknown[]>> = [];
+        for (const euidStr of requestedIds) {
+          if (criticalityByEuid[euidStr]) {
+            entities.push({ entity: { id: euidStr } });
+            fieldsList.push(criticalityByEuid[euidStr]);
+          }
+        }
+        return Promise.resolve({ entities, fields: fieldsList });
+      }
+    );
+
+    const enrichedEvents = await enrichEvents({
+      logger: ruleExecutionLogger,
+      services: ruleServices,
+      events: [
+        createAlert('1', {
+          ...createEntity('host', 'host name 1'),
+          ...createEntity('user', 'user name 1'),
+          ...createEntity('service', 'service name 1'),
+        }),
+        createAlert('2', createEntity('host', 'user name 1')),
+      ],
+      spaceId: 'default',
+      entityStoreCrudClient,
+    });
+
+    expect(enrichedEvents).toEqual([
+      createAlert('1', {
+        ...createEntity('user', 'user name 1'),
+        ...createEntity('host', 'host name 1'),
+        ...createEntity('service', 'service name 1'),
+        'host.asset.criticality': 'low',
+        'user.asset.criticality': 'important',
+        'service.asset.criticality': 'high',
+      }),
+      createAlert('2', {
+        ...createEntity('host', 'user name 1'),
+      }),
+    ]);
+  });
+
+  it('if some enrichments failed, another work as expected', async () => {
+    mockIsIndexExist.mockImplementation(() => true);
+
+    const userRiskByEuid: Record<string, Record<string, unknown[]>> = {
+      'user:user name 1': {
+        'entity.risk.calculated_level': ['Moderate'],
+        'entity.risk.calculated_score_norm': [50],
+      },
+      'user:user name 2': {
+        'entity.risk.calculated_level': ['Critical'],
+        'entity.risk.calculated_score_norm': [90],
+      },
+    };
+
+    mockListEntities.mockImplementation(
+      ({ filter, fields }: { filter: { terms: { 'entity.id': string[] } }; fields: string[] }) => {
+        const requestedIds = filter?.terms?.['entity.id'] ?? [];
+        if (requestedIds.some((id) => id.startsWith('host:'))) {
+          throw new Error('host enrichment failed');
+        }
+        if (
+          fields.includes('entity.risk.calculated_level') &&
+          requestedIds.some((id) => id.startsWith('user:'))
+        ) {
+          const entities: Array<{ entity: { id: string } }> = [];
+          const fieldsList: Array<Record<string, unknown[]>> = [];
+          for (const euidStr of requestedIds) {
+            if (userRiskByEuid[euidStr]) {
+              entities.push({ entity: { id: euidStr } });
+              fieldsList.push(userRiskByEuid[euidStr]);
+            }
+          }
+          return Promise.resolve({ entities, fields: fieldsList });
+        }
+        return Promise.resolve({ entities: [] });
+      }
+    );
+
+    const enrichedEvents = await enrichEvents({
+      logger: ruleExecutionLogger,
+      services: ruleServices,
+      events: [
+        createAlert('1', {
+          ...createEntity('host', 'host name 1'),
+          ...createEntity('user', 'user name 1'),
+        }),
+        createAlert('2', createEntity('user', 'user name 2')),
+      ],
+      spaceId: 'default',
+      entityStoreCrudClient,
+    });
+
+    expect(enrichedEvents).toEqual([
+      createAlert('1', {
+        host: {
+          name: 'host name 1',
+        },
+        user: {
+          name: 'user name 1',
+          risk: {
+            calculated_level: 'Moderate',
+            calculated_score_norm: 50,
+          },
+        },
+      }),
+      createAlert('2', {
+        user: {
+          name: 'user name 2',
+          risk: {
+            calculated_level: 'Critical',
+            calculated_score_norm: 90,
+          },
+        },
+      }),
+    ]);
   });
 });

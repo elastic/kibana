@@ -177,12 +177,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             params;
           const { savedObjectsClient, ruleMonitoringService, ruleResultService } = services;
           const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
-          const entityStoreCrudClient = experimentalFeatures.entityAnalyticsEntityStoreV2
-            ? (await getEntityStore()).createCRUDClient(
-                services.scopedClusterClient.asCurrentUser,
-                spaceId
-              )
-            : undefined;
+          const entityStoreCrudClient = (await getEntityStore()).createCRUDClient(
+            services.scopedClusterClient.asCurrentUser,
+            spaceId
+          );
           const ruleExecutionLogger = await ruleExecutionLoggerFactory({
             savedObjectsClient,
             ruleMonitoringService,

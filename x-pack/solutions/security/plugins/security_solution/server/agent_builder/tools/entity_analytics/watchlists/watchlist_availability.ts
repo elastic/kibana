@@ -44,7 +44,7 @@ export const getWatchlistToolAvailability = async ({
     return { status: 'unavailable', reason: 'Entity Analytics watchlists are not enabled.' };
   }
 
-  if (requireEntityStoreV2 && !experimentalFeatures.entityAnalyticsEntityStoreV2) {
+  if (requireEntityStoreV2) {
     return {
       status: 'unavailable',
       reason:

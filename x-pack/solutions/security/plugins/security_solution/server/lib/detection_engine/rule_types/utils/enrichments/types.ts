@@ -16,7 +16,6 @@ import type {
 } from '../../../../../../common/api/detection_engine/model/alerts';
 import type { SecurityRuleServices } from '../../types';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
-import type { ExperimentalFeatures } from '../../../../../../common/experimental_features';
 
 export type EnrichmentType = estypes.SearchHit<unknown>;
 
@@ -119,7 +118,6 @@ export type CreateFieldsMatchEnrichment = <T extends DetectionAlertLatest>(
 
 export type EnrichEventsParams<T extends DetectionAlertLatest> = BasedEnrichParameters<T> & {
   spaceId: string;
-  experimentalFeatures: ExperimentalFeatures;
 };
 
 export type EnrichEvents = <T extends DetectionAlertLatest>(

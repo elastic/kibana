@@ -7,7 +7,6 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { createToolTestMocks } from '../../../__mocks__/test_helpers';
-import type { ExperimentalFeatures } from '../../../../../common';
 import { getAgentBuilderResourceAvailability } from '../../../utils/get_agent_builder_resource_availability';
 import { getWatchlistToolAvailability } from './watchlist_availability';
 
@@ -16,11 +15,6 @@ jest.mock('../../../utils/get_agent_builder_resource_availability', () => ({
 }));
 
 const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as jest.Mock;
-
-const mockExperimentalFeatures = {
-  entityAnalyticsWatchlistEnabled: true,
-  entityAnalyticsEntityStoreV2: true,
-} as ExperimentalFeatures;
 
 describe('getWatchlistToolAvailability', () => {
   const { mockCore, mockLogger, mockRequest } = createToolTestMocks();
@@ -100,35 +94,5 @@ describe('getWatchlistToolAvailability', () => {
 
     expect(result.status).toBe('unavailable');
     expect(result.reason).toContain('Platinum');
-  });
-
-  it('returns unavailable when requireEntityStoreV2 is set and entityAnalyticsEntityStoreV2 is false', async () => {
-    const result = await getWatchlistToolAvailability({
-      core: mockCore,
-      request: mockRequest,
-      logger: mockLogger,
-      experimentalFeatures: {
-        ...mockExperimentalFeatures,
-        entityAnalyticsEntityStoreV2: false,
-      },
-      requireEntityStoreV2: true,
-    });
-
-    expect(result.status).toBe('unavailable');
-    expect(result.reason).toContain('Entity Store V2');
-  });
-
-  it('returns available when requireEntityStoreV2 is not set even if entityAnalyticsEntityStoreV2 is false', async () => {
-    const result = await getWatchlistToolAvailability({
-      core: mockCore,
-      request: mockRequest,
-      logger: mockLogger,
-      experimentalFeatures: {
-        ...mockExperimentalFeatures,
-        entityAnalyticsEntityStoreV2: false,
-      },
-    });
-
-    expect(result.status).toBe('available');
   });
 });

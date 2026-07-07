@@ -105,9 +105,6 @@ export const setAssetCriticalityTool = (
           if (availability.status !== 'available') {
             return availability;
           }
-          if (!experimentalFeatures.entityAnalyticsEntityStoreV2) {
-            return { status: 'unavailable', reason: 'Entity Store V2 is not enabled.' };
-          }
           return { status: 'available' };
         } catch (error) {
           return {

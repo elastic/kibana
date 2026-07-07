@@ -22,7 +22,6 @@ import {
   createToolTestMocks,
   setupMockCoreStartServices,
 } from '../../__mocks__/test_helpers';
-import type { ExperimentalFeatures } from '../../../../common';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
@@ -43,10 +42,6 @@ jest.mock('../../../lib/entity_analytics/enriched_entity', () => ({
 }));
 
 const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as jest.Mock;
-
-const mockExperimentalFeatures = {
-  entityAnalyticsEntityStoreV2: true,
-} as ExperimentalFeatures;
 
 const buildEmptyRiskSearchResponse = () => ({
   took: 1,
@@ -115,20 +110,6 @@ describe('getEntityTool', () => {
       );
 
       expect(result.status).toBe('unavailable');
-    });
-
-    it('returns unavailable when entity store v2 experimental feature is disabled', async () => {
-      const disabledTool = getEntityTool(mockCore, mockLogger, null as unknown as SharedServices, {
-        ...mockExperimentalFeatures,
-        entityAnalyticsEntityStoreV2: false,
-      });
-
-      const result = await disabledTool.availability!.handler(
-        createToolAvailabilityContext(mockRequest, 'default')
-      );
-
-      expect(result.status).toBe('unavailable');
-      expect(result.reason).toContain('Entity Store V2 is not enabled');
     });
 
     it('returns unavailable when entity store v2 index does not exist', async () => {

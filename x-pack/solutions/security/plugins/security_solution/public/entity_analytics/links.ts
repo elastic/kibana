@@ -15,33 +15,8 @@ import {
   ENTITY_ANALYTICS_HOME_PAGE_PATH,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
-import { ENTITY_ANALYTICS, ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING } from '../app/translations';
-import privilegedUserMonitoringPageImg from '../common/images/privileged_user_monitoring_page.png';
+import { ENTITY_ANALYTICS } from '../app/translations';
 import eaOverviewPageImg from '../common/images/ea_overview_page.png';
-
-const privMonLinks: LinkItem = {
-  id: SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
-  title: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING,
-  description: i18n.translate(
-    'xpack.securitySolution.navigation.privilegedUserMonitoring.description',
-    {
-      defaultMessage:
-        'Provides visibility into privileged user activity, helping security teams analyze account usage, track access events, and spot potential risks.',
-    }
-  ),
-  landingImage: privilegedUserMonitoringPageImg,
-  path: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
-  globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.appLinks.privilegedUserMonitoring', {
-      defaultMessage: 'Privileged user monitoring',
-    }),
-  ],
-  hideTimeline: false,
-  skipUrlState: false,
-  capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
-  licenseType: 'platinum',
-  hideWhenExperimentalKey: 'entityAnalyticsEntityStoreV2',
-};
 
 const eaOverviewLinks: LinkItem = {
   id: SecurityPageName.entityAnalyticsOverview,
@@ -104,7 +79,7 @@ export const entityAnalyticsLinks: LinkItem = {
       defaultMessage: 'Entity analytics',
     }),
   ],
-  links: [eaOverviewLinks, privMonLinks, homePageLinks],
+  links: [eaOverviewLinks, homePageLinks],
   hideTimeline: true,
   skipUrlState: true,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],

@@ -18,12 +18,10 @@ import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskEngineAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
-import { withEntityStoreV2Disabled } from './utils';
 
 export const riskEngineScheduleNowRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
-  isEntityAnalyticsEntityStoreV2Enabled: boolean
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   router.versioned
     .post({
@@ -37,52 +35,45 @@ export const riskEngineScheduleNowRoute = (
     })
     .addVersion(
       { version: API_VERSIONS.public.v1, validate: {} },
-      withEntityStoreV2Disabled(
-        isEntityAnalyticsEntityStoreV2Enabled,
-        withRiskEnginePrivilegeCheck(
-          'run',
-          getStartServices,
-          async (context, request, response) => {
-            const siemResponse = buildSiemResponse(response);
+      withRiskEnginePrivilegeCheck('run', getStartServices, async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
 
-            const securitySolution = await context.securitySolution;
+        const securitySolution = await context.securitySolution;
 
-            securitySolution.getAuditLogger()?.log({
-              message: 'User attempted to schedule the risk engine.',
-              event: {
-                action: RiskEngineAuditActions.RISK_ENGINE_SCHEDULE_NOW,
-                category: AUDIT_CATEGORY.DATABASE,
-                type: AUDIT_TYPE.CHANGE,
-                outcome: AUDIT_OUTCOME.UNKNOWN,
-              },
-            });
+        securitySolution.getAuditLogger()?.log({
+          message: 'User attempted to schedule the risk engine.',
+          event: {
+            action: RiskEngineAuditActions.RISK_ENGINE_SCHEDULE_NOW,
+            category: AUDIT_CATEGORY.DATABASE,
+            type: AUDIT_TYPE.CHANGE,
+            outcome: AUDIT_OUTCOME.UNKNOWN,
+          },
+        });
 
-            const [_, { taskManager }] = await getStartServices();
+        const [_, { taskManager }] = await getStartServices();
 
-            const riskEngineClient = securitySolution.getRiskEngineDataClient();
+        const riskEngineClient = securitySolution.getRiskEngineDataClient();
 
-            if (!taskManager) {
-              return siemResponse.error({
-                statusCode: 400,
-                body: TASK_MANAGER_UNAVAILABLE_ERROR,
-              });
-            }
+        if (!taskManager) {
+          return siemResponse.error({
+            statusCode: 400,
+            body: TASK_MANAGER_UNAVAILABLE_ERROR,
+          });
+        }
 
-            try {
-              await riskEngineClient.scheduleNow({ taskManager });
-              const body: RiskEngineScheduleNowResponse = { success: true };
-              return response.ok({ body });
-            } catch (e) {
-              const error = transformError(e);
+        try {
+          await riskEngineClient.scheduleNow({ taskManager });
+          const body: RiskEngineScheduleNowResponse = { success: true };
+          return response.ok({ body });
+        } catch (e) {
+          const error = transformError(e);
 
-              return siemResponse.error({
-                statusCode: error.statusCode,
-                body: { message: error.message, full_error: JSON.stringify(e) },
-                bypassErrorFormat: true,
-              });
-            }
-          }
-        )
-      )
+          return siemResponse.error({
+            statusCode: error.statusCode,
+            body: { message: error.message, full_error: JSON.stringify(e) },
+            bypassErrorFormat: true,
+          });
+        }
+      })
     );
 };

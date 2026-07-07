@@ -82,21 +82,20 @@ export const entityDetailsHighlightsRoute = ({
               spaceId,
             });
 
-            const { getV1Data, getV2Data, getLocalReplacements } =
-              entityDetailsHighlightsServiceFactory({
-                riskEngineClient,
-                entityStoreClient,
-                experimentalFeatures: config.experimentalFeatures,
-                spaceId,
-                logger,
-                esClient,
-                request,
-                assetCriticalityClient,
-                soClient,
-                uiSettingsClient: coreContext.uiSettings.client,
-                ml,
-                anonymizationFields,
-              });
+            const { getV2Data, getLocalReplacements } = entityDetailsHighlightsServiceFactory({
+              riskEngineClient,
+              entityStoreClient,
+              experimentalFeatures: config.experimentalFeatures,
+              spaceId,
+              logger,
+              esClient,
+              request,
+              assetCriticalityClient,
+              soClient,
+              uiSettingsClient: coreContext.uiSettings.client,
+              ml,
+              anonymizationFields,
+            });
 
             const getDataOpts = {
               entityType,
@@ -105,9 +104,7 @@ export const entityDetailsHighlightsRoute = ({
               anomalyToDate: toDate,
             };
 
-            const entitySummary = config.experimentalFeatures.entityAnalyticsEntityStoreV2
-              ? await getV2Data(getDataOpts)
-              : await getV1Data(getDataOpts);
+            const entitySummary = await getV2Data(getDataOpts);
 
             const prompt = await getPrompt({
               getInferenceConnectorById: (id) => inference.getConnectorById(id, request),

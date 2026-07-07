@@ -58,17 +58,13 @@ export const assetCriticalityPublicCSVUploadRoute = ({
             }),
           },
         },
-        ...(config.experimentalFeatures.entityAnalyticsEntityStoreV2
-          ? {
-              options: {
-                deprecated: {
-                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
-                  severity: 'warning',
-                  reason: { type: 'remove' },
-                },
-              },
-            }
-          : {}),
+        options: {
+          deprecated: {
+            documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+            severity: 'warning',
+            reason: { type: 'remove' },
+          },
+        },
       },
       async (
         context,

@@ -18,7 +18,6 @@ import type {
   MockClients,
   SecuritySolutionRequestHandlerContextMock,
 } from '../../../detection_engine/routes/__mocks__/request_context';
-import { configMock } from '../../../../config.mock';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import { riskScoreEntityCalculationRouteV2 } from './entity_calculation_v2';
 import { riskEnginePrivilegesMock } from '../../risk_engine/routes/risk_engine_privileges.mock';
@@ -85,10 +84,6 @@ describe('entity risk score V2 calculation route', () => {
     logger = loggerMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    context.securitySolution.getConfig.mockReturnValue(
-      configMock.withExperimentalFeature(clients.config, 'entityAnalyticsEntityStoreV2')
-    );
-
     mockCrudClient = {
       listEntities: jest.fn().mockResolvedValue({ entities: [entityDocMock] }),
     } as unknown as jest.Mocked<EntityStoreCRUDClient>;
@@ -137,25 +132,6 @@ describe('entity risk score V2 calculation route', () => {
 
     expect(response.status).toEqual(400);
     expect(response.body.message).toEqual('Entity ID is required');
-  });
-
-  it('throws an error when Entity Store V2 feature flag is disabled', async () => {
-    const defaultConfig = configMock.createDefault();
-    context.securitySolution.getConfig.mockReturnValue({
-      ...defaultConfig,
-      experimentalFeatures: {
-        ...defaultConfig.experimentalFeatures,
-        entityAnalyticsEntityStoreV2: false,
-      },
-    });
-
-    const response = await server.inject(
-      buildRequest(),
-      requestContextMock.convertContext(context)
-    );
-
-    expect(response.status).toEqual(400);
-    expect(response.body.message).toEqual('Entity Store V2 is not enabled');
   });
 
   it('throws an error when no risk engine configuration is found', async () => {

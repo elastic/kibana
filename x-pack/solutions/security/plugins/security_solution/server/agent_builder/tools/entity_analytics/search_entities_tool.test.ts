@@ -41,10 +41,6 @@ jest.mock('@kbn/agent-builder-genai-utils', () => ({
 
 const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as jest.Mock;
 
-const mockExperimentalFeatures = {
-  entityAnalyticsEntityStoreV2: true,
-} as ExperimentalFeatures;
-
 const EXPECTED_KEEP_CLAUSE =
   'KEEP @timestamp, entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.risk.calculated_level, asset.criticality, entity.source, entity.lifecycle.first_seen, entity.lifecycle.last_activity, entity.attributes.watchlists, entity.attributes.managed, entity.attributes.mfa_enabled, entity.attributes.asset, entity.behaviors.rule_names, entity.behaviors.anomaly_job_ids';
 
@@ -247,20 +243,6 @@ describe('searchEntitiesTool', () => {
       );
 
       expect(result.status).toBe('unavailable');
-    });
-
-    it('returns unavailable when entity store v2 experimental feature is disabled', async () => {
-      const disabledTool = searchEntitiesTool(mockCore, mockLogger, {
-        ...mockExperimentalFeatures,
-        entityAnalyticsEntityStoreV2: false,
-      });
-
-      const result = await disabledTool.availability!.handler(
-        createToolAvailabilityContext(mockRequest, 'default')
-      );
-
-      expect(result.status).toBe('unavailable');
-      expect(result.reason).toContain('Entity Store V2 is not enabled');
     });
 
     it('returns unavailable when entity store v2 index does not exist', async () => {
