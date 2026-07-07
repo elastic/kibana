@@ -12,7 +12,10 @@ import type { Logger } from '@kbn/core/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { stripMetadata, deriveQueryType } from '@kbn/streams-schema';
 import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
-import { MATCH_LOOKBACK_MINUTES } from '../../../../significant_events/rules/esql/common';
+import {
+  MATCH_LOOKBACK_MINUTES,
+  MAX_ALERTS_PER_EXECUTION,
+} from '../../../../significant_events/rules/esql/common';
 import {
   STREAMS_RULE_CONSUMER,
   STREAMS_ESQL_RULE_TYPE_ID,
@@ -144,7 +147,8 @@ function assertMatchQuery(esqlQuery: string): void {
 
 function toV2BreachQuery(esqlQuery: string): string {
   assertMatchQuery(esqlQuery);
-  return stripMetadata(esqlQuery, V2_QUERY_METADATA_TO_STRIP);
+  const stripped = stripMetadata(esqlQuery, V2_QUERY_METADATA_TO_STRIP);
+  return `${stripped.trimEnd()} | LIMIT ${MAX_ALERTS_PER_EXECUTION}`;
 }
 
 /**
