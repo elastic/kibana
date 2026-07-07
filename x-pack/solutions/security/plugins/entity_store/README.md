@@ -41,7 +41,7 @@ generation (graceful degradation).
 > Elasticsearch repository, not in this fork. Whether they already include
 > `.entities.v2.metadata.security_*` read is a verification item against a live cluster,
 > not something enforced here. Kibana test fixtures cover the model via custom roles
-> (see `test/scout_security_entity_ai_summary`).
+> (see `security_solution/test/scout/entity_analytics/api/tests/ai_summary`).
 
 ## Entity Maintainers Framework
 
