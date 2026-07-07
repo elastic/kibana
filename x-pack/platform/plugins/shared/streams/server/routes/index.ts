@@ -33,6 +33,7 @@ import { queryRoutes } from './significant_events/queries/route';
 import { internalSignificantEventsAvailabilityRoutes } from './internal/significant_events/availability/route';
 import { internalSignificantEventsDetectionsRoutes } from './internal/significant_events/detections/route';
 import { internalSignificantEventsDetectionsWorkflowRoutes } from './internal/significant_events/detections/workflow_route';
+import { internalSignificantEventsResetKisRoutes } from './internal/significant_events/knowledge_indicators/reset_kis/route';
 import { internalSignificantEventsDiscoveriesRoutes } from './internal/significant_events/discoveries/route';
 import { internalSignificantEventsDiscoveryRoutes } from './internal/significant_events/discovery/route';
 import { internalSignificantEventsEligibleStreamsRoutes } from './internal/significant_events/extraction/eligible_streams_route';
@@ -63,6 +64,7 @@ export const streamsRouteRepository = {
   ...internalSignificantEventsAvailabilityRoutes,
   ...internalSignificantEventsDetectionsRoutes,
   ...internalSignificantEventsDetectionsWorkflowRoutes,
+  ...internalSignificantEventsResetKisRoutes,
   ...internalSignificantEventsDiscoveryRoutes,
   ...internalSignificantEventsDiscoveriesRoutes,
   ...internalSignificantEventsEligibleStreamsRoutes,

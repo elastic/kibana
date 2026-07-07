@@ -6,6 +6,7 @@
  */
 import type { EventTypeOpts } from '@kbn/core/server';
 import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
+import type { CsvErrorCategory } from '../../entity_analytics/entity_resolution/csv_upload';
 import type {
   ResponseActionAgentType,
   ResponseActionStatus,
@@ -2074,6 +2075,68 @@ export const LEAD_GENERATION_EXECUTION_EVENT: EventTypeOpts<{
   },
 };
 
+interface ResolutionCsvUploadEvent {
+  total: number;
+  successful: number;
+  failed: number;
+  unmatched: number;
+  durationMs: number;
+  errors?: Array<{
+    errorCategory: CsvErrorCategory;
+    count: number;
+  }>;
+  namespace: string;
+}
+
+export const ENTITY_STORE_RESOLUTION_CSV_UPLOAD_EVENT: EventTypeOpts<ResolutionCsvUploadEvent> = {
+  eventType: 'entity_store_resolution_csv_upload',
+  schema: {
+    total: {
+      type: 'long',
+      _meta: { description: 'Total number of CSV rows processed' },
+    },
+    successful: {
+      type: 'long',
+      _meta: { description: 'Number of rows successfully linked' },
+    },
+    failed: {
+      type: 'long',
+      _meta: { description: 'Number of rows that failed processing' },
+    },
+    unmatched: {
+      type: 'long',
+      _meta: { description: 'Number of rows with no matching entities found' },
+    },
+    durationMs: {
+      type: 'long',
+      _meta: { description: 'Duration of the CSV upload processing in milliseconds' },
+    },
+    errors: {
+      type: 'array',
+      _meta: {
+        optional: true,
+        description: 'Per-category error counts for failed rows',
+      },
+      items: {
+        properties: {
+          errorCategory: {
+            type: 'keyword',
+            _meta: { description: 'Error category for failed rows' },
+          },
+          count: {
+            type: 'long',
+            _meta: { description: 'Number of rows with this error category' },
+          },
+        },
+      },
+    },
+    namespace: {
+      type: 'keyword',
+      _meta: { description: 'Kibana space ID where the upload was performed' },
+    },
+  },
+};
+
 // Telemetry event sent when the alert analysis workflow settings are saved through the
 // dedicated settings page, whether the save succeeds or fails.
 export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT: EventTypeOpts<{
@@ -2160,5 +2223,6 @@ export const events = [
   GAP_DETECTED_EVENT,
   ...TRIAL_COMPANION_EVENTS,
   LEAD_GENERATION_EXECUTION_EVENT,
+  ENTITY_STORE_RESOLUTION_CSV_UPLOAD_EVENT,
   ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT,
 ];
