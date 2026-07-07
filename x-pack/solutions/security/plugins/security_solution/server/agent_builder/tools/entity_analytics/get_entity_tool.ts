@@ -30,7 +30,6 @@ import type {
   SetupPlugins,
 } from '../../../plugin_contract';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
-import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
 import { securityTool } from '../constants';
 import {
   buildRenderAttachmentTag,
@@ -45,6 +44,7 @@ import {
   stripRiskRecordForAttachment,
   type EntityAttachmentRiskStats,
 } from './entity_attachment_utils';
+import { createToolTelemetryTracker } from './tool_telemetry_tracker';
 
 const schema = z.object({
   entityType: IdentifierType.describe(
@@ -626,9 +626,14 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
         `${SECURITY_GET_ENTITY_TOOL_ID} tool called with parameters ${JSON.stringify(params)}`
       );
 
-      let success = false;
-      let entitiesReturned = 0;
-      let errorMessage: string | undefined;
+      const telemetryTracker = createToolTelemetryTracker({
+        core,
+        toolId: SECURITY_GET_ENTITY_TOOL_ID,
+        spaceId,
+        actionType: 'read',
+        entityTypes: params.entityType ? [params.entityType] : [],
+      });
+      telemetryTracker.recordResultCount(0);
 
       try {
         const { entityType, entityId, interval, date } = params;
@@ -661,7 +666,6 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
         });
 
         if (values.length === 0) {
-          success = true;
           return {
             results: [
               {
@@ -782,8 +786,7 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
             )
           );
 
-          success = true;
-          entitiesReturned = enrichedResults.length;
+          telemetryTracker.recordResultCount(enrichedResults.length);
           return { results: [...enrichedResults, ...attachmentSideEffectResults] };
         } catch (error) {
           logger.debug(
@@ -791,8 +794,7 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
               error instanceof Error ? error.message : 'Unknown error'
             }, returning profile without enrichment`
           );
-          success = true;
-          entitiesReturned = values.length;
+          telemetryTracker.recordResultCount(values.length);
           return {
             results: [
               ...values.map((row) => ({
@@ -805,7 +807,8 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
           };
         }
       } catch (error) {
-        errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        telemetryTracker.recordFailure(errorMessage);
         return {
           results: [
             {
@@ -816,15 +819,7 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
           ],
         };
       } finally {
-        const [coreStart] = await core.getStartServices();
-        coreStart.analytics.reportEvent(ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType, {
-          toolId: SECURITY_GET_ENTITY_TOOL_ID,
-          entityTypes: params.entityType ? [params.entityType] : [],
-          spaceId,
-          success,
-          entitiesReturned,
-          errorMessage,
-        });
+        await telemetryTracker.report();
       }
     },
   };
