@@ -5,25 +5,28 @@
  * 2.0.
  */
 
-import { recurse } from 'cypress-recurse';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { API_VERSIONS } from '@kbn/osquery-plugin/common/constants';
 import {
   ADD_PACK_HEADER_BUTTON,
   ADD_QUERY_BUTTON,
+  PACK_QUERIES_TABLE,
   SAVE_PACK_BUTTON,
   FLYOUT_SAVED_QUERY_SAVE_BUTTON,
   customActionEditSavedQuerySelector,
   POLICY_SELECT_COMBOBOX,
-  EDIT_PACK_HEADER_BUTTON,
   SAVED_QUERY_DROPDOWN_SELECT,
   UPDATE_PACK_BUTTON,
   TABLE_ROWS,
   formFieldInputSelector,
 } from '../../screens/packs';
 import { navigateTo } from '../../tasks/navigation';
-import { deleteAndConfirm, inputQuery } from '../../tasks/live_query';
-import { changePackActiveStatus, preparePack } from '../../tasks/packs';
+import { checkResults, deleteAndConfirm, inputQuery } from '../../tasks/live_query';
+import {
+  changePackActiveStatus,
+  preparePack,
+  openScheduledPackExecutionDetails,
+} from '../../tasks/packs';
 import {
   closeModalIfVisible,
   closeToastIfVisible,
@@ -160,7 +163,7 @@ describe(
         cy.getBySel('tablePagination-50-rows').click();
         cy.contains(packName).click();
 
-        cy.getBySel('edit-pack-button').click();
+        cy.contains(`Edit ${packName}`);
 
         cy.contains('Query1');
         cy.contains('Query2');
@@ -315,8 +318,6 @@ describe(
 
       it('', () => {
         preparePack(packName);
-        cy.getBySel('edit-pack-button').click();
-
         cy.contains(`Edit ${packName}`);
         cy.getBySel(ADD_QUERY_BUTTON).click();
 
@@ -376,24 +377,33 @@ describe(
 
       it('', { tags: ['@ess', '@brokenInServerless'] }, () => {
         let lensUrl = '';
-        cy.window().then((win) => {
-          cy.stub(win, 'open')
-            .as('windowOpen')
-            .callsFake((url) => {
-              lensUrl = url;
+        openScheduledPackExecutionDetails(packName);
+        // Scheduled results key off scheduleId (from the details-page URL), not
+        // the legacy action id; the Lens viz is titled `Action {scheduleId} results`.
+        cy.location('pathname')
+          .should('match', /\/history\/scheduled\/[^/]+\/\d+$/)
+          .then((pathname) => {
+            const scheduleId = pathname.split('/history/scheduled/')[1].split('/')[0];
+
+            // Stub window.open AFTER navigation. openScheduledPackExecutionDetails
+            // reloads the page while polling History, which would discard a stub
+            // installed on the earlier window object.
+            cy.window().then((win) => {
+              cy.stub(win, 'open')
+                .as('windowOpen')
+                .callsFake((url) => {
+                  lensUrl = url;
+                });
             });
-        });
-        preparePack(packName);
-        cy.getBySel('docsLoading').should('exist');
-        cy.getBySel('docsLoading').should('not.exist');
-        cy.get(`[aria-label="View in Lens"]`).eq(0).click();
-        cy.window()
-          .its('open')
-          .then(() => {
-            cy.visit(lensUrl);
+            cy.get(`[aria-label="View in Lens"]`).eq(0).click();
+            cy.window()
+              .its('open')
+              .then(() => {
+                cy.visit(lensUrl);
+              });
+            cy.getBySel('lnsWorkspace').should('exist');
+            cy.getBySel('breadcrumbs').contains(`Action ${scheduleId} results`);
           });
-        cy.getBySel('lnsWorkspace').should('exist');
-        cy.getBySel('breadcrumbs').contains(`Action pack_default--${packName}_${savedQueryName}`);
       });
     });
 
@@ -431,18 +441,24 @@ describe(
       });
 
       it('', () => {
-        preparePack(packName);
-        cy.getBySel('docsLoading').should('exist');
-        cy.getBySel('docsLoading').should('not.exist');
-        cy.get(`[aria-label="View in Discover"]`)
-          .eq(0)
-          .should('have.attr', 'href')
-          .then(($href) => {
-            const actionId = `pack_default--${packName}_${savedQueryName}`;
-            expect($href).to.include(encodeURIComponent(actionId));
-            // @ts-expect-error-next-line href string - check types
-            cy.visit($href);
-            cy.getBySel('breadcrumbs').contains('Discover').should('exist');
+        openScheduledPackExecutionDetails(packName);
+        // Scheduled results filter Discover by scheduleId (from the details-page
+        // URL), not the legacy action id.
+        cy.location('pathname')
+          .should('match', /\/history\/scheduled\/[^/]+\/\d+$/)
+          .then((pathname) => {
+            const scheduleId = pathname.split('/history/scheduled/')[1].split('/')[0];
+
+            cy.get(`[aria-label="View in Discover"]`)
+              .eq(0)
+              .should('have.attr', 'href')
+              .then(($href) => {
+                expect($href).to.include(encodeURIComponent(scheduleId));
+                expect($href).to.include('schedule_id');
+                // @ts-expect-error-next-line href string - check types
+                cy.visit($href);
+                cy.getBySel('breadcrumbs').contains('Discover').should('exist');
+              });
           });
       });
     });
@@ -517,30 +533,11 @@ describe(
       });
 
       it('', () => {
-        preparePack(packName);
-        cy.contains(`${packName} details`).should('exist');
+        openScheduledPackExecutionDetails(packName);
 
-        recurse<string>(
-          () => {
-            cy.getBySel('docsLoading').should('exist');
-            cy.getBySel('docsLoading').should('not.exist');
-
-            return cy
-              .get('tbody .euiTableRow > td:nth-child(5) > .euiTableCellContent')
-              .invoke('text');
-          },
-          (response) => response !== '-',
-          {
-            timeout: 300000,
-            post: () => {
-              cy.reload();
-            },
-          }
-        );
-        cy.getBySel('last-results-date').should('exist');
-        cy.getBySel('docs-count-badge').contains('1');
-        cy.getBySel('agent-count-badge').contains('1');
-        cy.getBySel('packResultsErrorsEmpty').should('have.length', 1);
+        // The details page auto-expands the single query row into ResultTabs,
+        // surfacing the osqueryResultsTable with at least one result row.
+        checkResults();
       });
     });
 
@@ -579,7 +576,7 @@ describe(
 
       it('', () => {
         preparePack(packName);
-        cy.contains(/^Edit$/).click();
+        cy.contains(`Edit ${packName}`);
 
         cy.getBySel('checkboxSelectAll').click();
 
@@ -589,8 +586,12 @@ describe(
         closeModalIfVisible();
 
         cy.get('a').contains(packName).click();
-        cy.contains(`${packName} details`).should('exist');
-        cy.contains(/^No items found/).should('exist');
+        cy.contains(`Edit ${packName}`).should('exist');
+        // Assert on the pack queries table, not savedQueryName: that id also
+        // belongs to the suite-wide standalone saved query, so a text match
+        // would find it even after the pack is emptied.
+        cy.getBySel(ADD_QUERY_BUTTON).should('exist');
+        cy.getBySel(PACK_QUERIES_TABLE).should('not.exist');
       });
     });
 
@@ -632,8 +633,8 @@ describe(
 
       it('', { tags: ['@ess', '@serverless'] }, () => {
         preparePack(packName);
+        cy.contains(`Edit ${packName}`);
 
-        cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
         deleteAndConfirm('pack');
       });
     });

@@ -198,6 +198,11 @@ export const FailureStoreSummary = ({
       uiState={{
         editedPhaseName: isDeletePhaseFlyoutOpen ? 'delete' : undefined,
         isEditLifecycleFlyoutOpen: isDeletePhaseFlyoutOpen,
+        // `isExternalFlyoutOpen` also turns true purely because the delete phase flyout itself is
+        // open (see isAnyFlyoutOpen in use_edit_failed_lifecycle_flyout) — that case must stay
+        // interactive (navigate mode above). Only disable for genuinely unrelated flyouts, e.g. the
+        // edit failed lifecycle method switcher.
+        disableInteractions: isExternalFlyoutOpen && !isDeletePhaseFlyoutOpen,
       }}
       phaseActions={
         onEditDeletePhase || canRemoveDeletePhase
