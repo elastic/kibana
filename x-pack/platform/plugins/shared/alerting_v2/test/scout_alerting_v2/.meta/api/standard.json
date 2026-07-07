@@ -1,5 +1,5 @@
 {
-  "sha1": "809697187ae84c99acfecc0ecb22cec2836cec00",
+  "sha1": "d95577d3b507846de5498fe5aa101d5f6faa9506",
   "tests": [
     {
       "id": "9932666685095b3-d8099f4a61f66f4",
@@ -3034,8 +3034,8 @@
       }
     },
     {
-      "id": "7f265c4c979f2ab-5fc3e1026b2bfac",
-      "title": "Bulk create alert actions API bulk: processes mixed action types and persists each side effect",
+      "id": "7f265c4c979f2ab-1cee0bc023cdbc2",
+      "title": "Bulk create alert actions API bulk: processes mixed (non-lifecycle) action types and persists each side effect",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -3073,6 +3073,58 @@
       }
     },
     {
+      "id": "7f265c4c979f2ab-605da2258a1772e",
+      "title": "Bulk create alert actions API lifecycle: bulk deactivate writes the synthetic .rule-events doc and flips episode.status to inactive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
+        "line": 208,
+        "column": 10
+      }
+    },
+    {
+      "id": "7f265c4c979f2ab-4fd23b6f5bb61d7",
+      "title": "Bulk create alert actions API lifecycle: bulk activate writes the synthetic .rule-events doc and flips episode.status to active + breached",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
+        "line": 264,
+        "column": 10
+      }
+    },
+    {
+      "id": "7f265c4c979f2ab-91a49e4b8781a2a",
+      "title": "Bulk create alert actions API lifecycle: silently skips a bulk deactivate item whose episode is already inactive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
+        "line": 317,
+        "column": 10
+      }
+    },
+    {
+      "id": "7f265c4c979f2ab-9a233f228a6590a",
+      "title": "Bulk create alert actions API lifecycle: silently skips a bulk activate item whose episode is still active",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
+        "line": 371,
+        "column": 10
+      }
+    },
+    {
       "id": "7f265c4c979f2ab-c55706ee9bd2e93",
       "title": "Bulk create alert actions API schema: rejects an empty array with 400",
       "expectedStatus": "passed",
@@ -3081,7 +3133,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
-        "line": 208,
+        "line": 412,
         "column": 10
       }
     },
@@ -3094,7 +3146,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
-        "line": 217,
+        "line": 421,
         "column": 10
       }
     },
@@ -3107,7 +3159,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
-        "line": 232,
+        "line": 436,
         "column": 10
       }
     },
@@ -3120,7 +3172,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
-        "line": 241,
+        "line": 445,
         "column": 10
       }
     },
@@ -3133,7 +3185,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
-        "line": 250,
+        "line": 454,
         "column": 10
       }
     },
@@ -3146,7 +3198,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
-        "line": 264,
+        "line": 468,
         "column": 10
       }
     },
@@ -3159,7 +3211,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
-        "line": 273,
+        "line": 477,
         "column": 10
       }
     },
@@ -3172,7 +3224,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
-        "line": 285,
+        "line": 489,
         "column": 10
       }
     },
@@ -3185,7 +3237,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
-        "line": 294,
+        "line": 498,
         "column": 10
       }
     },
@@ -3198,7 +3250,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
-        "line": 316,
+        "line": 520,
         "column": 10
       }
     },
@@ -3346,6 +3398,19 @@
       }
     },
     {
+      "id": "01393b66d46e76a-fbc270f956a66b1",
+      "title": "Create activate alert action API activate: writes a synthetic .rule-events doc that flips the episode back to active + breached",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
+        "line": 78,
+        "column": 10
+      }
+    },
+    {
       "id": "01393b66d46e76a-f761fefd7afc051",
       "title": "Create activate alert action API schema: rejects body missing reason with 400",
       "expectedStatus": "passed",
@@ -3354,7 +3419,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
-        "line": 72,
+        "line": 131,
         "column": 10
       }
     },
@@ -3367,7 +3432,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
-        "line": 80,
+        "line": 139,
         "column": 10
       }
     },
@@ -3380,7 +3445,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
-        "line": 88,
+        "line": 147,
         "column": 10
       }
     },
@@ -3393,7 +3458,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
-        "line": 96,
+        "line": 155,
         "column": 10
       }
     },
@@ -3406,7 +3471,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
-        "line": 104,
+        "line": 163,
         "column": 10
       }
     },
@@ -3419,7 +3484,59 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
-        "line": 112,
+        "line": 171,
+        "column": 10
+      }
+    },
+    {
+      "id": "01393b66d46e76a-269eb6a0af52c8f",
+      "title": "Create activate alert action API precondition: rejects activate when the episode is already active",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
+        "line": 179,
+        "column": 10
+      }
+    },
+    {
+      "id": "01393b66d46e76a-6165a3f45c82dc6",
+      "title": "Create activate alert action API activate: allows a recovering episode to be reopened (cancel the wind-down)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
+        "line": 214,
+        "column": 10
+      }
+    },
+    {
+      "id": "01393b66d46e76a-e67ad6d28fe9cbf",
+      "title": "Create activate alert action API activate: allows a pending episode to be forced past the activation counter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
+        "line": 246,
+        "column": 10
+      }
+    },
+    {
+      "id": "01393b66d46e76a-841c7e2e739604d",
+      "title": "Create activate alert action API activate: allows reopen of a naturally-recovered (never user-deactivated) episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
+        "line": 278,
         "column": 10
       }
     },
@@ -3432,7 +3549,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
-        "line": 120,
+        "line": 326,
         "column": 10
       }
     },
@@ -3445,7 +3562,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
-        "line": 137,
+        "line": 343,
         "column": 10
       }
     },
@@ -3645,6 +3762,19 @@
       }
     },
     {
+      "id": "a7e7965b0f2cbf1-2edcb1c95a530e0",
+      "title": "Create deactivate alert action API deactivate: writes a synthetic recovered/inactive rule event carrying the prior event data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
+        "line": 76,
+        "column": 10
+      }
+    },
+    {
       "id": "a7e7965b0f2cbf1-487e1bf243ad021",
       "title": "Create deactivate alert action API schema: rejects body missing reason with 400",
       "expectedStatus": "passed",
@@ -3653,7 +3783,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
-        "line": 76,
+        "line": 128,
         "column": 10
       }
     },
@@ -3666,7 +3796,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
-        "line": 85,
+        "line": 137,
         "column": 10
       }
     },
@@ -3679,7 +3809,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
-        "line": 94,
+        "line": 146,
         "column": 10
       }
     },
@@ -3692,7 +3822,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
-        "line": 103,
+        "line": 155,
         "column": 10
       }
     },
@@ -3705,7 +3835,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
-        "line": 112,
+        "line": 164,
         "column": 10
       }
     },
@@ -3718,7 +3848,46 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
-        "line": 121,
+        "line": 173,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7e7965b0f2cbf1-359c682ca921e0c",
+      "title": "Create deactivate alert action API precondition: rejects deactivate of an already-inactive episode with INVALID_EPISODE_STATE_TRANSITION (400)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
+        "line": 182,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7e7965b0f2cbf1-cd5d4a474d3646f",
+      "title": "Create deactivate alert action API precondition: allows deactivate of a pending episode (forces it closed before activation)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
+        "line": 216,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7e7965b0f2cbf1-e7c8b4f02c36693",
+      "title": "Create deactivate alert action API precondition: allows deactivate of a recovering episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
+        "line": 248,
         "column": 10
       }
     },
@@ -3731,7 +3900,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
-        "line": 130,
+        "line": 279,
         "column": 10
       }
     },
@@ -3744,7 +3913,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
-        "line": 149,
+        "line": 298,
         "column": 10
       }
     },
@@ -4420,7 +4589,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history_rule_lookup.spec.ts",
-        "line": 85,
+        "line": 82,
         "column": 12
       }
     },
