@@ -16,6 +16,7 @@ import {
 import { useRuleFormScreenContext, useRuleFormState } from '../hooks';
 import { hasRuleErrors } from '../validation';
 import { ConfirmCreateRule } from '../components';
+import { getRuleSaveEbtProps } from '../utils';
 
 export interface RulePageFooterProps {
   isEdit?: boolean;
@@ -33,13 +34,26 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
 
   const {
     plugins: { application },
-    formData: { actions },
+    formData,
+    id,
     connectors,
     baseErrors = {},
     paramsErrors = {},
     actionsErrors = {},
     actionsParamsErrors = {},
   } = useRuleFormState();
+
+  const { actions } = formData;
+
+  const saveButtonEbtProps = useMemo(
+    () =>
+      getRuleSaveEbtProps({
+        element: 'rulePageFooterSaveButton',
+        ruleId: isEdit ? id : undefined,
+        formData,
+      }),
+    [isEdit, id, formData]
+  );
 
   const hasErrors = useMemo(() => {
     const hasBrokenConnectors = actions.some((action) => {
@@ -121,6 +135,7 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
                 onClick={onSaveClick}
                 disabled={isSaving || hasErrors}
                 isLoading={isSaving}
+                {...saveButtonEbtProps}
               >
                 {saveButtonText}
               </EuiButton>

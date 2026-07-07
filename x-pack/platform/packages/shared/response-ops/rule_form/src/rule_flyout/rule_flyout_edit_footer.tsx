@@ -12,12 +12,14 @@ import {
   EuiFlexItem,
   EuiFlyoutFooter,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   RULE_FLYOUT_FOOTER_CANCEL_TEXT,
   RULE_FLYOUT_FOOTER_SAVE_TEXT,
   RULE_PAGE_FOOTER_SHOW_REQUEST_TEXT,
 } from '../translations';
+import { useRuleFormState } from '../hooks';
+import { getRuleSaveEbtProps } from '../utils';
 
 export interface RuleFlyoutEditFooterProps {
   isSaving: boolean;
@@ -33,6 +35,14 @@ export const RuleFlyoutEditFooter = ({
   hasErrors,
   isSaving,
 }: RuleFlyoutEditFooterProps) => {
+  const { formData, id } = useRuleFormState();
+
+  const saveButtonEbtProps = useMemo(
+    () =>
+      getRuleSaveEbtProps({ element: 'ruleFlyoutEditFooterSaveButton', ruleId: id, formData }),
+    [id, formData]
+  );
+
   return (
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -63,6 +73,7 @@ export const RuleFlyoutEditFooter = ({
                 isDisabled={isSaving || hasErrors}
                 isLoading={isSaving}
                 onClick={onSave}
+                {...saveButtonEbtProps}
               >
                 {RULE_FLYOUT_FOOTER_SAVE_TEXT}
               </EuiButton>

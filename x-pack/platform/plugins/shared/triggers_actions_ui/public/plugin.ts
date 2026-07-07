@@ -47,10 +47,12 @@ import { ON_OPEN_PANEL_MENU, ALERT_RULE_TRIGGER } from '@kbn/ui-actions-plugin/c
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import { registerRuleCreatedEventType } from '@kbn/response-ops-rule-form';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { RulesLocatorDefinition } from './locators/rules';
 import type { Rule, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
+import { registerRuleEngagementEventType } from './application/lib/telemetry';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getAddConnectorFormLazy } from './common/get_add_connector_form';
@@ -237,6 +239,14 @@ export class Plugin
     };
 
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
+
+    // Rule save/creation click attributes are reported via the core `click` EBT tracker
+    // (see `@kbn/ebt-click`'s `getEbtProps`) and need no registration. These two are bespoke
+    // events that do need it: `rule_created` (fired on create-flow save success, once the new
+    // rule's id is known) and `rule_engagement_action` (fired for the rules list row actions --
+    // edit, snooze, mute, disable, delete, clone).
+    registerRuleCreatedEventType(core.analytics);
+    registerRuleEngagementEventType(core.analytics);
 
     plugins.share.url.locators.create(new RulesLocatorDefinition());
     plugins.share.url.locators.create(new RuleDetailsLocatorDefinition());

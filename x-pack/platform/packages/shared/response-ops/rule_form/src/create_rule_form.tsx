@@ -14,6 +14,7 @@ import type { RuleFormData, RuleFormPlugins, RuleTypeMetaData } from './types';
 import { DEFAULT_VALID_CONSUMERS, getDefaultFormData } from './constants';
 import { RuleFormStateProvider } from './rule_form_state';
 import { useCreateRule } from './common/hooks';
+import { reportRuleCreatedEvent } from './common/telemetry';
 import { RulePage } from './rule_page';
 import { RuleFlyout } from './rule_flyout';
 import {
@@ -28,6 +29,7 @@ import {
   getInitialConsumer,
   getInitialMultiConsumer,
   getInitialSchedule,
+  getRuleCreatedEventData,
   parseRuleCircuitBreakerErrorMessage,
 } from './utils';
 import { RULE_CREATE_SUCCESS_TEXT, RULE_CREATE_ERROR_TEXT } from './translations';
@@ -78,9 +80,20 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
 
   const { mutate, isLoading: isSaving } = useCreateRule({
     http,
-    onSuccess: ({ name, id }) => {
+    onSuccess: ({ name, id }, { formData: createdFormData }) => {
       toasts.addSuccess(RULE_CREATE_SUCCESS_TEXT(name));
       onSubmit?.(id);
+
+      if (plugins.analytics) {
+        reportRuleCreatedEvent(
+          plugins.analytics,
+          getRuleCreatedEventData({
+            ruleId: id,
+            pathname: window.location.pathname,
+            formData: createdFormData,
+          })
+        );
+      }
     },
     onError: (error) => {
       const message = parseRuleCircuitBreakerErrorMessage(

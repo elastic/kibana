@@ -59,6 +59,7 @@ import { bulkEnableRules } from '../../../lib/rule_api/bulk_enable';
 import { bulkDisableRules } from '../../../lib/rule_api/bulk_disable';
 
 import { useKibana } from '../../../../common/lib/kibana';
+import { reportRuleEngagementEvent } from '../../../lib/telemetry';
 
 export interface ComponentOpts {
   muteRules: (rules: Rule[]) => Promise<void>;
@@ -102,7 +103,7 @@ export function withBulkRuleOperations<T>(
   WrappedComponent: React.ComponentType<T & ComponentOpts>
 ): React.FunctionComponent<PropsWithOptionalApiHandlers<T>> {
   return (props: PropsWithOptionalApiHandlers<T>) => {
-    const { http } = useKibana().services;
+    const { http, analytics } = useKibana().services;
     return (
       <WrappedComponent
         {...(props as T)}
@@ -117,6 +118,11 @@ export function withBulkRuleOperations<T>(
         }
         muteRule={async (rule: Rule) => {
           if (!isRuleMuted(rule)) {
+            reportRuleEngagementEvent(analytics, {
+              action: 'mute',
+              rule_id: rule.id,
+              rule_type_id: rule.ruleTypeId,
+            });
             return await muteRule({ http, id: rule.id });
           }
         }}

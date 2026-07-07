@@ -13,6 +13,7 @@ import { CollapsedItemActions } from './collapsed_item_actions';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import type { RuleTableItem, RuleTypeModel } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
+import { RULE_ENGAGEMENT_EVENT_TYPE } from '../../../lib/telemetry';
 jest.mock('../../../../common/lib/kibana');
 
 const onRuleChanged = jest.fn();
@@ -467,6 +468,95 @@ describe('CollapsedItemActions', () => {
 
       await userEvent.click(screen.getByTestId('cloneRule'));
       expect(onCloneRule).toHaveBeenCalled();
+    });
+
+    describe('rule_engagement_action telemetry', () => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const reportEvent = useKibana().services.analytics.reportEvent as jest.Mock;
+
+      afterEach(() => {
+        reportEvent.mockClear();
+      });
+
+      test('reports an edit action when edit rule is clicked', async () => {
+        render(<CollapsedItemActions {...getPropsWithRule()} />);
+
+        await userEvent.click(screen.getByTestId('selectActionButton'));
+        await waitForEuiPopoverOpen();
+
+        await userEvent.click(screen.getByTestId('editRule'));
+        expect(reportEvent).toHaveBeenCalledWith(RULE_ENGAGEMENT_EVENT_TYPE, {
+          action: 'edit',
+          rule_id: '1',
+          rule_type_id: 'test_rule_type',
+        });
+      });
+
+      test('reports a delete action when delete rule is clicked', async () => {
+        render(<CollapsedItemActions {...getPropsWithRule()} />);
+
+        await userEvent.click(screen.getByTestId('selectActionButton'));
+        await waitForEuiPopoverOpen();
+
+        await userEvent.click(screen.getByTestId('deleteRule'));
+        expect(reportEvent).toHaveBeenCalledWith(RULE_ENGAGEMENT_EVENT_TYPE, {
+          action: 'delete',
+          rule_id: '1',
+          rule_type_id: 'test_rule_type',
+        });
+      });
+
+      test('reports a clone action when clone rule is clicked', async () => {
+        render(<CollapsedItemActions {...getPropsWithRule()} />);
+
+        await userEvent.click(screen.getByTestId('selectActionButton'));
+        await waitForEuiPopoverOpen();
+
+        await userEvent.click(screen.getByTestId('cloneRule'));
+        expect(reportEvent).toHaveBeenCalledWith(RULE_ENGAGEMENT_EVENT_TYPE, {
+          action: 'clone',
+          rule_id: '1',
+          rule_type_id: 'test_rule_type',
+        });
+      });
+
+      test('reports a disable action when disable is confirmed', async () => {
+        render(<CollapsedItemActions {...getPropsWithRule({ autoRecoverAlerts: false })} />);
+
+        await userEvent.click(screen.getByTestId('selectActionButton'));
+        await waitForEuiPopoverOpen();
+
+        await userEvent.click(screen.getByTestId('disableButton'));
+
+        await waitFor(() => {
+          expect(reportEvent).toHaveBeenCalledWith(RULE_ENGAGEMENT_EVENT_TYPE, {
+            action: 'disable',
+            rule_id: '1',
+            rule_type_id: 'test_rule_type',
+          });
+        });
+      });
+
+      test('reports a snooze action when a snooze schedule is applied', async () => {
+        render(<CollapsedItemActions {...getPropsWithRule()} />);
+
+        await userEvent.click(screen.getByTestId('selectActionButton'));
+        await waitForEuiPopoverOpen();
+
+        await userEvent.click(screen.getByTestId('snoozeButton'));
+
+        // One of the "commonly used" quick-snooze links; avoids depending on the default
+        // value of the custom interval input.
+        await userEvent.click(await screen.findByTestId('linkSnooze1h'));
+
+        await waitFor(() => {
+          expect(reportEvent).toHaveBeenCalledWith(RULE_ENGAGEMENT_EVENT_TYPE, {
+            action: 'snooze',
+            rule_id: '1',
+            rule_type_id: 'test_rule_type',
+          });
+        });
+      });
     });
   });
 });

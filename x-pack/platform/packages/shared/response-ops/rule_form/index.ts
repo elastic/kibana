@@ -31,3 +31,10 @@ export {
   RuleActionsAlertsFilterTimeframe,
   NOTIFY_WHEN_OPTIONS,
 } from './src/rule_actions';
+
+export {
+  RULE_CREATED_EVENT_TYPE,
+  registerRuleCreatedEventType,
+  reportRuleCreatedEvent,
+  type RuleCreatedEventData,
+} from './src/common/telemetry';

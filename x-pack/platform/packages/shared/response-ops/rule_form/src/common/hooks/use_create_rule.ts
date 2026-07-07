@@ -13,7 +13,12 @@ import type { Rule } from '../types';
 
 export interface UseCreateRuleProps {
   http: HttpStart;
-  onSuccess?: (rule: Rule) => void;
+  /**
+   * `variables` is the same object passed to `mutate` (i.e. `{ formData }`), so callers can
+   * access the request payload -- e.g. `ruleTypeId`, `params`, `artifacts` -- alongside the
+   * created rule returned by the API, without having to track it separately.
+   */
+  onSuccess?: (rule: Rule, variables: { formData: CreateRuleBody }) => void;
   onError?: (error: IHttpFetchError<{ message: string }>) => void;
 }
 

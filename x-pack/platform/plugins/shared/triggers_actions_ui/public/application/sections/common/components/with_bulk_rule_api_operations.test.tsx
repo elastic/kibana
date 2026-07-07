@@ -14,6 +14,7 @@ import { withBulkRuleOperations } from './with_bulk_rule_api_operations';
 import type { SortField } from '../../../lib/rule_api/load_execution_log_aggregations';
 import type { Rule } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
+import { RULE_ENGAGEMENT_EVENT_TYPE } from '../../../lib/telemetry';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../lib/rule_api/load_execution_log_aggregations', () => ({
@@ -128,6 +129,39 @@ describe('with_bulk_rule_api_operations', () => {
 
     expect(muteRule).toHaveBeenCalledTimes(1);
     expect(muteRule).toHaveBeenCalledWith({ id: rule.id, http });
+  });
+
+  it('muteRule reports a rule_engagement_action mute event when the rule is not already muted', async () => {
+    const { analytics } = useKibanaMock().services;
+    const user = userEvent.setup();
+    const ComponentToExtend = invoker('muteRule', (p) => p.rule);
+
+    const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
+    const rule = mockRule({ muteAll: false });
+    render(<ExtendedComponent rule={rule} />);
+    await user.click(screen.getByRole('button', { name: /call api/i }));
+
+    expect(analytics.reportEvent).toHaveBeenCalledWith(RULE_ENGAGEMENT_EVENT_TYPE, {
+      action: 'mute',
+      rule_id: rule.id,
+      rule_type_id: rule.ruleTypeId,
+    });
+  });
+
+  it('muteRule does not report an event when the rule is already muted', async () => {
+    const { analytics } = useKibanaMock().services;
+    const user = userEvent.setup();
+    const ComponentToExtend = invoker('muteRule', (p) => p.rule);
+
+    const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
+    const rule = mockRule({ muteAll: true });
+    render(<ExtendedComponent rule={rule} />);
+    await user.click(screen.getByRole('button', { name: /call api/i }));
+
+    expect(analytics.reportEvent).not.toHaveBeenCalledWith(
+      RULE_ENGAGEMENT_EVENT_TYPE,
+      expect.anything()
+    );
   });
 
   it('unmuteRule calls the unmuteRule api', async () => {

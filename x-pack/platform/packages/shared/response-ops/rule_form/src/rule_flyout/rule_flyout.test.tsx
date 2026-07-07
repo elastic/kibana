@@ -209,4 +209,51 @@ describe('ruleFlyout', () => {
     fireEvent.click(screen.getByTestId('ruleFlyoutFooterCancelButton'));
     expect(screen.getByTestId('confirmRuleCloseModal')).toBeInTheDocument();
   });
+
+  test('should add ebt click attributes to the create footer save button', async () => {
+    render(<RuleFlyout onCancel={onCancel} onSave={onSave} />);
+
+    fireEvent.click(screen.getByTestId('ruleFlyoutFooterNextStepButton'));
+    expect(await screen.findByTestId('ruleFlyoutFooterPreviousStepButton')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('ruleFlyoutFooterNextStepButton'));
+
+    const saveButton = await screen.findByTestId('ruleFlyoutFooterSaveButton');
+    expect(saveButton).toHaveAttribute('data-ebt-action', 'ruleSave');
+    expect(saveButton).toHaveAttribute('data-ebt-element', 'ruleFlyoutCreateFooterSaveButton');
+    // formDataMock has no ruleTypeId/artifacts, so there's nothing to put in the detail
+    expect(saveButton).not.toHaveAttribute('data-ebt-detail');
+  });
+
+  test('should add ebt click attributes with the ruleId to the edit footer save button', () => {
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        application: {
+          navigateToUrl,
+          capabilities: {
+            actions: {
+              show: true,
+              save: true,
+              execute: true,
+            },
+          },
+        },
+      },
+      baseErrors: {},
+      paramsErrors: {},
+      id: 'rule-1',
+      formData: formDataMock,
+      connectors: [],
+      connectorTypes: [],
+      aadTemplateFields: [],
+    });
+
+    render(<RuleFlyout isEdit onCancel={onCancel} onSave={onSave} />);
+
+    const saveButton = screen.getByTestId('ruleFlyoutFooterSaveButton');
+    expect(saveButton).toHaveAttribute('data-ebt-action', 'ruleSave');
+    expect(saveButton).toHaveAttribute('data-ebt-element', 'ruleFlyoutEditFooterSaveButton');
+    expect(JSON.parse(saveButton.getAttribute('data-ebt-detail')!)).toEqual({
+      ruleId: 'rule-1',
+    });
+  });
 });

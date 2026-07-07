@@ -8,6 +8,7 @@
 import type { ActionType } from '@kbn/actions-types';
 import type { ActionVariable, RulesSettingsFlapping } from '@kbn/alerting-types';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -73,6 +74,12 @@ export interface RuleFormPlugins {
   fieldsMetadata: FieldsMetadataPublicStart;
   contentManagement?: ContentManagementPublicStart;
   uiActions?: UiActionsStart;
+  /**
+   * Used to report the `rule_created` EBT event on create-flow save success. Optional so that
+   * consumers who haven't registered the event type (see `registerRuleCreatedEventType`) don't
+   * have to pass it -- the event just won't be reported for them.
+   */
+  analytics?: Pick<AnalyticsServiceStart, 'reportEvent'>;
 }
 
 export interface RuleFormState<

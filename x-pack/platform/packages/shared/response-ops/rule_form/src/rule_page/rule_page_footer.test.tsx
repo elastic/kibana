@@ -146,4 +146,70 @@ describe('rulePageFooter', () => {
     expect(screen.getByTestId('rulePageFooterSaveButton')).toBeDisabled();
     expect(screen.getByTestId('rulePageFooterCancelButton')).not.toBeDisabled();
   });
+
+  test('should add ebt click attributes to the save button without a ruleId in create mode', () => {
+    render(<RulePageFooter onSave={onSave} onCancel={onCancel} />);
+
+    const saveButton = screen.getByTestId('rulePageFooterSaveButton');
+    expect(saveButton).toHaveAttribute('data-ebt-action', 'ruleSave');
+    expect(saveButton).toHaveAttribute('data-ebt-element', 'rulePageFooterSaveButton');
+    expect(saveButton).not.toHaveAttribute('data-ebt-detail');
+  });
+
+  test('should include the ruleId in the ebt detail in edit mode', () => {
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        application: {
+          capabilities: {
+            actions: {
+              show: true,
+            },
+          },
+        },
+      },
+      baseErrors: {},
+      paramsErrors: {},
+      id: 'rule-1',
+      formData: {
+        actions: [],
+      },
+    });
+
+    render(<RulePageFooter isEdit onSave={onSave} onCancel={onCancel} />);
+
+    const saveButton = screen.getByTestId('rulePageFooterSaveButton');
+    expect(JSON.parse(saveButton.getAttribute('data-ebt-detail')!)).toEqual({
+      ruleId: 'rule-1',
+    });
+  });
+
+  test('should include sloId and dashboardIds in the ebt detail when available', () => {
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        application: {
+          capabilities: {
+            actions: {
+              show: true,
+            },
+          },
+        },
+      },
+      baseErrors: {},
+      paramsErrors: {},
+      formData: {
+        actions: [],
+        ruleTypeId: 'slo.rules.burnRate',
+        params: { sloId: 'slo-1' },
+        artifacts: { dashboards: [{ id: 'dash-1' }] },
+      },
+    });
+
+    render(<RulePageFooter onSave={onSave} onCancel={onCancel} />);
+
+    const saveButton = screen.getByTestId('rulePageFooterSaveButton');
+    expect(JSON.parse(saveButton.getAttribute('data-ebt-detail')!)).toEqual({
+      sloId: 'slo-1',
+      dashboardIds: ['dash-1'],
+    });
+  });
 });

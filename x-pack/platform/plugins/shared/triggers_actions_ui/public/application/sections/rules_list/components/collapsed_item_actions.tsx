@@ -35,6 +35,7 @@ import {
   UNSNOOZE_SUCCESS_MESSAGE,
 } from './notify_badge';
 import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
+import { reportRuleEngagementEvent } from '../../../lib/telemetry';
 
 export type ComponentOpts = {
   item: RuleTableItem;
@@ -67,6 +68,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   const {
     ruleTypeRegistry,
     notifications: { toasts },
+    analytics,
   } = useKibana().services;
 
   const { euiTheme } = useEuiTheme();
@@ -91,6 +93,11 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
 
   const snoozeRuleInternal = useCallback(
     async (snoozeSchedule: SnoozeSchedule) => {
+      reportRuleEngagementEvent(analytics, {
+        action: 'snooze',
+        rule_id: item.id,
+        rule_type_id: item.ruleTypeId,
+      });
       try {
         onLoading(true);
         await snoozeRule(item, snoozeSchedule);
@@ -104,7 +111,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
       }
       await snoozeRule(item, snoozeSchedule);
     },
-    [onLoading, snoozeRule, item, onRuleChanged, toasts, onClose]
+    [onLoading, snoozeRule, item, onRuleChanged, toasts, onClose, analytics]
   );
 
   const unsnoozeRuleInternal = useCallback(
@@ -195,13 +202,18 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
 
   const onDisable = useCallback(
     async (untrack: boolean) => {
+      reportRuleEngagementEvent(analytics, {
+        action: 'disable',
+        rule_id: item.id,
+        rule_type_id: item.ruleTypeId,
+      });
       onDisableModalClose();
       await bulkDisableRules({ ids: [item.id], untrack });
       onRuleChanged();
       setIsDisabled(true);
       setIsPopoverOpen(false);
     },
-    [onDisableModalClose, bulkDisableRules, onRuleChanged, item.id]
+    [onDisableModalClose, bulkDisableRules, onRuleChanged, item.id, item.ruleTypeId, analytics]
   );
 
   const onDisableClick = useCallback(() => {
@@ -268,6 +280,11 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
               'data-test-subj': 'cloneRule',
               onClick: async () => {
                 setIsPopoverOpen(!isPopoverOpen);
+                reportRuleEngagementEvent(analytics, {
+                  action: 'clone',
+                  rule_id: item.id,
+                  rule_type_id: item.ruleTypeId,
+                });
                 onCloneRule(item.id);
               },
               name: i18n.translate(
@@ -280,6 +297,11 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
               'data-test-subj': 'editRule',
               onClick: () => {
                 setIsPopoverOpen(!isPopoverOpen);
+                reportRuleEngagementEvent(analytics, {
+                  action: 'edit',
+                  rule_id: item.id,
+                  rule_type_id: item.ruleTypeId,
+                });
                 onEditRule(item);
               },
               name: i18n.translate(
@@ -306,6 +328,11 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
               'data-test-subj': 'deleteRule',
               onClick: () => {
                 setIsPopoverOpen(!isPopoverOpen);
+                reportRuleEngagementEvent(analytics, {
+                  action: 'delete',
+                  rule_id: item.id,
+                  rule_type_id: item.ruleTypeId,
+                });
                 onDeleteRule(item);
               },
               name: i18n.translate(
