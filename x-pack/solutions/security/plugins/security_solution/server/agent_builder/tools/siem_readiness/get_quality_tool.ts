@@ -11,9 +11,13 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
 import type { MainCategories } from '@kbn/siem-readiness';
-import { getIndexCategoryMap, isQualityIncompatible, enrichFindings } from '@kbn/siem-readiness';
 import {
-  fetchRuleFieldCaps,
+  getIndexCategoryMap,
+  getQualityVerdict,
+  isQualityIncompatible,
+  enrichFindings,
+} from '@kbn/siem-readiness';
+import {
   getSiemReadinessSharedContext,
   fetchSiemReadinessSharedContext,
 } from '../../../lib/siem_readiness/fetchers';
@@ -60,46 +64,28 @@ export const getQualityTool = (
           });
         });
 
-      // Phase 2: dimension-specific data (quality check results)
+      // Phase 2: dimension-specific data. getQuality is the shared orchestrator: it computes both
+      // ECS field compatibility AND rule required-field coverage (missingFieldsByRule + findings),
+      // so the agent tool and any future HTTP route return identical results.
       const payload = await getQuality({
         esClient: esClient.asCurrentUser,
         logger: handlerLogger,
+        reverseMapResult,
       });
 
-      // Phase 2.5: rule required-field coverage check
-      // Identifies rules whose required_fields are not fully mapped in the indices they query —
-      // fully unmapped fields cause silent non-matching; partially unmapped fields cause partial matching.
-      const { ruleRequiredFields, indexToRules, errors } = reverseMapResult;
-      const missingFieldsByRule = await fetchRuleFieldCaps({
-        esClient: esClient.asCurrentUser,
-        indexToRules,
-        ruleRequiredFields,
-      });
-
-      const missingFieldFindings = missingFieldsByRule.flatMap((entry) =>
-        entry.fields.map((fieldDetail) => {
-          const message =
-            fieldDetail.status === 'partial'
-              ? `Rule "${entry.ruleName}" declares required field "${
-                  fieldDetail.name
-                }" which is unmapped in some queried indices (${(fieldDetail.unmappedIn ?? []).join(
-                  ', '
-                )}) - the rule may match only partially`
-              : `Rule "${entry.ruleName}" declares required field "${fieldDetail.name}" which is not mapped in any of its queried indices - the rule may fail to match events it is meant to detect`;
-
-          return {
-            severity: 'WARNING' as const,
-            type: 'missing_field' as const,
-            message,
-            resource: fieldDetail.name,
-          };
-        })
-      );
+      const { errors } = reverseMapResult;
+      const { missingFieldsByRule } = payload;
 
       // Phase 3: blast radius enrichment — ECS quality findings only.
       // missing_field findings already name the affected rule directly in the message;
-      // blast radius is circular and always empty for field-name resources.
-      const enrichedEcsFindings = enrichFindings(payload.actionableFindings ?? [], {
+      // blast radius is circular and always empty for field-name resources, so pass them through.
+      const payloadFindings = payload.actionableFindings ?? [];
+      const ecsFindings = payloadFindings.filter((finding) => finding.type !== 'missing_field');
+      const missingFieldFindings = payloadFindings.filter(
+        (finding) => finding.type === 'missing_field'
+      );
+
+      const enrichedEcsFindings = enrichFindings(ecsFindings, {
         ...reverseMapResult,
         indexToPlatform,
         dimension: 'quality',
@@ -125,40 +111,18 @@ export const getQualityTool = (
           (finding) => finding.type === 'missing_field' || indexToCategoryMap.has(finding.resource)
         );
 
+      // Status/summary are derived from the category-filtered counts via the shared verdict helper,
+      // so the tool phrases its conclusion identically to the getQuality orchestrator (which uses
+      // the same helper on the unfiltered counts).
       const incompatibleCount = categorizedItems.filter((item) =>
         isQualityIncompatible(item.incompatibleFieldCount)
       ).length;
-      const missingFieldCount = missingFieldsByRule.length;
-      const filteredStatus =
-        categorizedItems.length === 0 && missingFieldCount === 0
-          ? ('noData' as const)
-          : incompatibleCount > 0 || missingFieldCount > 0
-          ? ('actionsRequired' as const)
-          : ('healthy' as const);
-
-      const parts: string[] = [];
-      if (incompatibleCount > 0)
-        parts.push(
-          `${incompatibleCount} of ${categorizedItems.length} indices have incompatible ECS field mappings`
-        );
-      if (missingFieldCount > 0)
-        parts.push(
-          `${missingFieldCount} rule(s) have required fields not fully mapped in their queried indices`
-        );
-      if (errors.rulesPartial)
-        parts.push(
-          'index resolution failed for some rules — the required-field coverage list may be incomplete'
-        );
-      const baseNoDataSummary =
-        'No quality check results available. Run the Data Quality dashboard to see results.';
-      const filteredSummary =
-        filteredStatus === 'noData'
-          ? errors.rulesPartial
-            ? `${baseNoDataSummary} Note: index resolution failed for some rules — the required-field coverage list may be incomplete.`
-            : baseNoDataSummary
-          : parts.length > 0
-          ? `${parts.join('; ')}.`
-          : `All ${categorizedItems.length} checked indices have compatible ECS field mappings.`;
+      const { status: filteredStatus, summary: filteredSummary } = getQualityVerdict({
+        checkedCount: categorizedItems.length,
+        incompatibleCount,
+        missingFieldCount: missingFieldsByRule.length,
+        rulesPartial: errors.rulesPartial,
+      });
 
       return {
         results: [

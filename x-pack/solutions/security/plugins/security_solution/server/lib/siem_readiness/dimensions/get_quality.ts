@@ -10,9 +10,12 @@ import type { Logger } from '@kbn/logging';
 import type {
   ActionableFinding,
   DataQualityResultDocument,
+  MissingFieldsEntry,
   QualityPayload,
+  ReverseMapResult,
 } from '@kbn/siem-readiness';
-import { isQualityIncompatible } from '@kbn/siem-readiness';
+import { getQualityVerdict, isQualityIncompatible } from '@kbn/siem-readiness';
+import { fetchRuleFieldCaps } from '../fetchers';
 
 const DATA_QUALITY_RESULTS_INDEX = '.kibana-data-quality-dashboard-results-*';
 
@@ -53,16 +56,63 @@ const fetchDataQualityResults = async ({
   }
 };
 
+/**
+ * Build one WARNING finding per unmapped or partially-mapped required field. required_fields is an
+ * informational property (it does not drive the query), so these are strong signals — not
+ * guaranteed failures: fully unmapped fields may cause silent under-matching, partially unmapped
+ * fields may cause partial matching.
+ */
+const buildMissingFieldFindings = (
+  missingFieldsByRule: MissingFieldsEntry[]
+): ActionableFinding[] =>
+  missingFieldsByRule.flatMap((entry) =>
+    entry.fields.map((fieldDetail) => {
+      const message =
+        fieldDetail.status === 'partial'
+          ? `Rule "${entry.ruleName}" declares required field "${
+              fieldDetail.name
+            }" which is unmapped in some queried indices (${(fieldDetail.unmappedIn ?? []).join(
+              ', '
+            )}) - the rule may match only partially`
+          : `Rule "${entry.ruleName}" declares required field "${fieldDetail.name}" which is not mapped in any of its queried indices - the rule may fail to match events it is meant to detect`;
+
+      return {
+        severity: 'WARNING' as const,
+        type: 'missing_field' as const,
+        message,
+        resource: fieldDetail.name,
+      };
+    })
+  );
+
+/**
+ * Quality orchestrator — the single source of truth shared by the agent tool and any future HTTP
+ * route. It computes both quality signals so every caller sees the same result:
+ * 1. ECS field compatibility (from the Data Quality dashboard results index).
+ * 2. Rule required-field coverage — detection rules whose declared required_fields are not fully
+ *    mapped in the indices they query (needs the rules reverse map, which is request-scoped and
+ *    therefore passed in via `reverseMapResult`).
+ */
 export const getQuality = async ({
   esClient,
   logger,
+  reverseMapResult,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
+  /** Rules reverse map (index → rules, rule → required fields). Built once per request by the
+   * shared context and passed in, since the orchestrator cannot build it without request-scoped
+   * clients. */
+  reverseMapResult: ReverseMapResult;
 }): Promise<QualityPayload> => {
-  const qualityResults = await fetchDataQualityResults({ esClient, logger });
+  const { indexToRules, ruleRequiredFields, errors } = reverseMapResult;
 
-  const actionableFindings: ActionableFinding[] = qualityResults
+  const [qualityResults, missingFieldsByRule] = await Promise.all([
+    fetchDataQualityResults({ esClient, logger }),
+    fetchRuleFieldCaps({ esClient, indexToRules, ruleRequiredFields }),
+  ]);
+
+  const ecsFindings: ActionableFinding[] = qualityResults
     .filter((result) => isQualityIncompatible(result.incompatibleFieldCount))
     .map((result) => ({
       severity: 'WARNING' as const,
@@ -70,27 +120,15 @@ export const getQuality = async ({
       resource: result.indexName,
     }));
 
-  const status =
-    qualityResults.length === 0
-      ? ('noData' as const)
-      : actionableFindings.length > 0
-      ? ('actionsRequired' as const)
-      : ('healthy' as const);
+  const missingFieldFindings = buildMissingFieldFindings(missingFieldsByRule);
+  const actionableFindings = [...ecsFindings, ...missingFieldFindings];
 
-  const summary = buildQualitySummary(status, qualityResults.length, actionableFindings.length);
+  const { status, summary } = getQualityVerdict({
+    checkedCount: qualityResults.length,
+    incompatibleCount: ecsFindings.length,
+    missingFieldCount: missingFieldsByRule.length,
+    rulesPartial: errors.rulesPartial,
+  });
 
-  return { status, summary, items: qualityResults, actionableFindings, missingFieldsByRule: [] };
-};
-
-const buildQualitySummary = (
-  status: string,
-  checkedCount: number,
-  incompatibleCount: number
-): string => {
-  if (status === 'noData')
-    return 'No data quality check results found. Run a data quality check to see results.';
-  if (incompatibleCount > 0) {
-    return `${incompatibleCount} of ${checkedCount} checked indices have incompatible ECS field mappings.`;
-  }
-  return `All ${checkedCount} checked indices are ECS-compatible.`;
+  return { status, summary, items: qualityResults, actionableFindings, missingFieldsByRule };
 };
