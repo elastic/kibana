@@ -600,9 +600,7 @@ export function isColorByValuePalette(color?: AllColoringTypes): color is ColorB
   return !!color && 'type' in color && color.type === 'dynamic_palette';
 }
 
-export function isColorByValueAbsolute(
-  color?: AllColoringTypes
-): color is ColorByValueAbsolute | ColorByValuePaletteType {
+export function isColorByValueAbsolute(color?: AllColoringTypes): color is ColorByValueAbsolute {
   return isColorByValueColor(color) && 'range' in color && color.range === 'absolute';
 }
 
