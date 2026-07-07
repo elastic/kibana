@@ -39,6 +39,7 @@ import { parseYamlToFormValues, serializeFormToYaml } from '../../form/utils/yam
 import { isNonRepresentableRule } from '../../form/utils/is_non_representable';
 import { ComposeDiscoverFooter } from './compose_discover_footer';
 import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
+import type { ResolvedSteps } from './compose_discover_form';
 import {
   composeFormToCreateRequest,
   composeFormToUpdateRequest,
@@ -54,9 +55,17 @@ import {
   parseDiscoverQueryForBuilder,
   type BuilderState,
 } from './rule_builder';
-import type { ComposeDiscoverAction, ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
+import type {
+  ComposeDiscoverAction,
+  ComposeDiscoverMode,
+  ComposeDiscoverState,
+  QueryTab,
+  RecoveryType,
+  SandboxConfig,
+  StepSandboxConfig,
+} from './types';
 import { isBuilderConditionStepId } from './types';
-import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_state';
+import { useComposeDiscoverState } from './use_compose_discover_state';
 import { useEsqlAutocomplete } from './use_esql_providers';
 import {
   guessRecoveryBlock,
@@ -177,6 +186,13 @@ export interface ComposeDiscoverFlyoutProps {
   initialQuery?: string;
   /** ES|QL control variables from Discover — inlined into initialQuery when provided. */
   esqlVariables?: ESQLControlVariable[];
+  /**
+   * Resolves the step sequence for the current `isAlert` value. The caller owns this
+   * decision (e.g. a Builder wrapper supplies `(isAlert) => getSteps(isAlert, builderType)`)
+   * so the flyout itself never needs to know whether it's rendering a builder flow.
+   * Defaults to the plain (non-builder) step sequence when omitted.
+   */
+  resolveSteps?: (isAlert: boolean) => ResolvedSteps;
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
@@ -233,8 +249,15 @@ export function ComposeDiscoverFlyout({
   initialBuilderState,
   initialQuery,
   esqlVariables,
+  resolveSteps,
 }: ComposeDiscoverFlyoutProps): React.ReactElement | null {
   const isBuilderMode = Boolean(builderType);
+  /*
+   * Whether the sandbox owns an independent, losable draft right now (feeds
+   * sandboxConfig.isEditable below). In builder mode the sandbox read-only-mirrors
+   * external state instead.
+   */
+  const isEditable = !isBuilderMode;
   /*
    * ── UI state (step navigation, sandbox open/close, tab selection, etc.) ──
    * In edit mode, seed the sandbox draft with the rule's existing query so the
@@ -606,14 +629,66 @@ export function ComposeDiscoverFlyout({
     [methods, dispatch]
   );
 
+  const { steps, renderCustomRecovery } = resolveSteps ? resolveSteps(isAlert) : getSteps(isAlert);
+  const currentStep = steps[uiState.step];
+  const isLastStep = uiState.step === steps.length - 1;
+
+  /*
+   * YAML isn't a step, so it can't get its config from STEP_REGISTRY the same way — a
+   * standalone object with the same shape, selected by a plain ternary right below. Captures
+   * sandboxQuery.format via closure rather than adding it as a function param, keeping
+   * getSandboxConfig's (state) => StepSandboxConfig shape uniform between steps and this source.
+   */
+  const yamlSandboxConfig = useMemo<{
+    getSandboxConfig: (state: ComposeDiscoverState) => StepSandboxConfig;
+  }>(
+    () => ({
+      getSandboxConfig: (state) => {
+        /*
+         * In YAML mode the sandbox stays open (and is forced open for non-representable
+         * rules). A standalone query can't be represented as base/alert tabs, so it uses
+         * the single unified editor; composed queries keep the split tabs.
+         * TODO: recoveryType drives whether the recovery tab appears here. Follow schema
+         * decisions in #268984 — if recoveryType is superseded by a field on RuleQuery
+         * itself, gate this on query shape instead.
+         */
+        if (sandboxQuery.format === 'standalone') {
+          return { tabs: undefined, autoSplitOnApply: false };
+        }
+        return {
+          tabs: state.recoveryType === 'custom' ? ['base', 'alert', 'recovery'] : ['base', 'alert'],
+          autoSplitOnApply: false,
+        };
+      },
+    }),
+    [sandboxQuery.format]
+  );
+
+  const stepSandboxConfig: StepSandboxConfig = uiState.yamlMode
+    ? yamlSandboxConfig.getSandboxConfig(uiState)
+    : currentStep?.getSandboxConfig?.(uiState) ?? { tabs: undefined, autoSplitOnApply: false };
+
+  /*
+   * tabs/autoSplitOnApply only apply to alert-condition-shaped editing (isAlert, or YAML
+   * mode, which represents either kind) — a signal rule's alertCondition step never has an
+   * independent base/alert split to show or auto-split on Apply. isEditable is uniform
+   * across every builder step (confirmed with Jason), so it's computed once here rather
+   * than per-step.
+   */
+  const sandboxConfig: SandboxConfig = {
+    tabs: uiState.yamlMode || isAlert ? stepSandboxConfig.tabs : undefined,
+    autoSplitOnApply: uiState.yamlMode || isAlert ? stepSandboxConfig.autoSplitOnApply : false,
+    isEditable,
+  };
+
   useEffect(() => {
-    if (!isBuilderMode) return;
+    if (sandboxConfig.isEditable) return;
     const sub = methods.watch((values) => {
       if (values.query) setSandboxQuery(values.query as RuleQuery);
       if (values.timeField) setSandboxTimeField(values.timeField);
     });
     return () => sub.unsubscribe();
-  }, [isBuilderMode, methods]);
+  }, [sandboxConfig.isEditable, methods]);
 
   const handleRecoveryTypeChange = useCallback(
     (type: RecoveryType) => {
@@ -675,12 +750,17 @@ export function ComposeDiscoverFlyout({
           dispatch({ type: 'CLOSE_CHILD' });
         }
       }
-      dispatch({ type: 'SET_RECOVERY_TYPE', recoveryType: type, isBuilderMode });
+      dispatch({
+        type: 'SET_RECOVERY_TYPE',
+        recoveryType: type,
+        isEditable: sandboxConfig.isEditable,
+      });
     },
     [
       dispatch,
       methods,
       isBuilderMode,
+      sandboxConfig.isEditable,
       builderState,
       uiState.queryCommitted,
       uiState.childOpen,
@@ -693,10 +773,6 @@ export function ComposeDiscoverFlyout({
   /** Create, edit, and clone share the unified ↔ split-tab sandbox toggle. */
   const supportsUnifiedEditorToggle = isCreate || isEditing;
   const title = getFlyoutTitle(mode);
-
-  const { steps } = getSteps(isAlert, builderType);
-  const currentStep = steps[uiState.step];
-  const isLastStep = uiState.step === steps.length - 1;
 
   // ── YAML mode state ──────────────────────────────────────────────────────
   const [yamlText, setYamlText] = useState(() => {
@@ -780,21 +856,8 @@ export function ComposeDiscoverFlyout({
   );
 
   const handleSandboxApply = useCallback(() => {
-    /*
-     * Create/edit/clone default to a single unified editor on the Alert Condition
-     * step — no base/alert tabs. On Apply, derive the base query and alert condition
-     * from that unified text via the heuristic split.
-     * When the user has opted in to manual split, Apply commits the already-separated
-     * base/alert verbatim without running the heuristic.
-     */
-    const shouldRunHeuristicSplit =
-      currentStep?.id === 'alertCondition' &&
-      !uiState.yamlMode &&
-      isAlert &&
-      !uiState.manualSplitEnabled;
-
     let queryToCommit: RuleQuery = sandboxQuery;
-    if (shouldRunHeuristicSplit) {
+    if (sandboxConfig.autoSplitOnApply) {
       const split = splitResultToRuleQuery(getBreachQuery(sandboxQuery)).query;
       queryToCommit = resolveUnifiedAlertApplyQuery(sandboxQuery, split);
     }
@@ -817,10 +880,8 @@ export function ComposeDiscoverFlyout({
   }, [
     sandboxQuery,
     sandboxTimeField,
-    currentStep?.id,
+    sandboxConfig.autoSplitOnApply,
     uiState.yamlMode,
-    uiState.manualSplitEnabled,
-    isAlert,
     methods,
     dispatch,
     cancelYamlParse,
@@ -885,14 +946,14 @@ export function ComposeDiscoverFlyout({
       const valid = await currentStep.validate(methods, uiState, baseServices, builderState);
       if (!valid) return;
     }
-    dispatch({ type: 'GO_NEXT', isAlert, isBuilderMode });
+    dispatch({ type: 'GO_NEXT', stepCount: steps.length, isEditable: sandboxConfig.isEditable });
   }, [
     hasValidationErrors,
     currentStep,
     methods,
     uiState,
-    isAlert,
-    isBuilderMode,
+    steps.length,
+    sandboxConfig.isEditable,
     dispatch,
     baseServices,
     builderState,
@@ -947,37 +1008,6 @@ export function ComposeDiscoverFlyout({
     </>
   ) : null;
 
-  /*
-   * TODO: recoveryType drives whether the recovery tab appears in YAML mode.
-   * Follow schema decisions in #268984 — if recoveryType is superseded by a
-   * field on RuleQuery itself, gate this on query shape instead.
-   */
-  const sandboxTabs = useMemo<QueryTab[] | undefined>(() => {
-    if (!uiState.yamlMode) {
-      return getSandboxTabs(isAlert, {
-        step: uiState.step,
-        recoveryType: uiState.recoveryType,
-        mode: uiState.mode,
-        manualSplitEnabled: uiState.manualSplitEnabled,
-      });
-    }
-    /*
-     * In YAML mode the sandbox stays open (and is forced open for non-representable
-     * rules). A standalone query can't be represented as base/alert tabs, so it uses
-     * the single unified editor; composed queries keep the split tabs.
-     */
-    if (sandboxQuery.format === 'standalone') return undefined;
-    return uiState.recoveryType === 'custom' ? ['base', 'alert', 'recovery'] : ['base', 'alert'];
-  }, [
-    uiState.yamlMode,
-    uiState.recoveryType,
-    uiState.step,
-    uiState.mode,
-    uiState.manualSplitEnabled,
-    sandboxQuery.format,
-    isAlert,
-  ]);
-
   const isAlertConditionStep = currentStep?.id === 'alertCondition';
 
   /*
@@ -988,7 +1018,7 @@ export function ComposeDiscoverFlyout({
    */
   const sandboxHelpText =
     isAlert &&
-    !isBuilderMode &&
+    sandboxConfig.isEditable &&
     !uiState.yamlMode &&
     supportsUnifiedEditorToggle &&
     isAlertConditionStep ? (
@@ -1011,7 +1041,7 @@ export function ComposeDiscoverFlyout({
 
   const handleSandboxTabChange = useCallback(
     (tab: QueryTab) => {
-      const tabs = sandboxTabs ?? [];
+      const tabs = sandboxConfig.tabs ?? [];
 
       if (tab === 'alert' && isAlertTabDisabled(tabs, sandboxQuery)) {
         return;
@@ -1019,7 +1049,7 @@ export function ComposeDiscoverFlyout({
 
       dispatch({ type: 'SET_TAB', tab });
     },
-    [dispatch, sandboxQuery, sandboxTabs]
+    [dispatch, sandboxQuery, sandboxConfig.tabs]
   );
 
   /*
@@ -1074,7 +1104,7 @@ export function ComposeDiscoverFlyout({
    */
   const sandboxHeaderActions = useMemo(() => {
     if (
-      isBuilderMode ||
+      !sandboxConfig.isEditable ||
       uiState.yamlMode ||
       !supportsUnifiedEditorToggle ||
       !isAlert ||
@@ -1127,7 +1157,7 @@ export function ComposeDiscoverFlyout({
       </EuiToolTip>
     );
   }, [
-    isBuilderMode,
+    sandboxConfig.isEditable,
     uiState.yamlMode,
     supportsUnifiedEditorToggle,
     uiState.manualSplitEnabled,
@@ -1259,6 +1289,8 @@ export function ComposeDiscoverFlyout({
                       isEditing={isEditing}
                       ruleId={ruleId}
                       builderType={builderType}
+                      currentStep={currentStep}
+                      renderCustomRecovery={renderCustomRecovery}
                       onManualSplit={
                         supportsUnifiedEditorToggle ? handleManualSplitFromForm : undefined
                       }
@@ -1276,7 +1308,7 @@ export function ComposeDiscoverFlyout({
               isCreate={isCreate}
               hasValidationErrors={hasValidationErrors}
               yamlHasErrors={yamlHasErrors}
-              isBuilderMode={isBuilderMode}
+              isEditable={sandboxConfig.isEditable}
               isBuilderStepValid={isBuilderStepValid}
               isSaving={isSaving}
               onNext={handleNext}
@@ -1287,10 +1319,10 @@ export function ComposeDiscoverFlyout({
             {uiState.childOpen && (
               <QuerySandboxFlyout
                 query={sandboxQuery}
-                onQueryChange={isBuilderMode ? undefined : setSandboxQuery}
-                tabs={sandboxTabs}
+                onQueryChange={sandboxConfig.isEditable ? setSandboxQuery : undefined}
+                tabs={sandboxConfig.tabs}
                 timeField={sandboxTimeField || '@timestamp'}
-                onTimeFieldChange={isBuilderMode ? undefined : setSandboxTimeField}
+                onTimeFieldChange={sandboxConfig.isEditable ? setSandboxTimeField : undefined}
                 timeFieldOptions={timeFieldOptions}
                 isTimeFieldResolved={sandboxIsTimeFieldResolved}
                 dateRange={dateRange}
@@ -1302,7 +1334,7 @@ export function ComposeDiscoverFlyout({
                 onClose={handleSandboxClose}
                 helpText={sandboxHelpText}
                 headerActions={sandboxHeaderActions}
-                onApply={isBuilderMode ? undefined : handleSandboxApply}
+                onApply={sandboxConfig.isEditable ? handleSandboxApply : undefined}
               />
             )}
           </EuiFlyout>

@@ -99,8 +99,9 @@ const createComposeFormWrapper = (
   };
 };
 
-const renderComposeDiscoverDetailsStep = (defaultValues: FormValues = BASE_COMPOSE_VALUES) =>
-  render(
+const renderComposeDiscoverDetailsStep = (defaultValues: FormValues = BASE_COMPOSE_VALUES) => {
+  const { steps, renderCustomRecovery } = getSteps(defaultValues.kind === 'alert');
+  return render(
     <ComposeDiscoverForm
       state={createState({ step: 2 })}
       dispatch={jest.fn()}
@@ -108,9 +109,12 @@ const renderComposeDiscoverDetailsStep = (defaultValues: FormValues = BASE_COMPO
       onRecoveryTypeChange={jest.fn()}
       onKindChange={jest.fn()}
       isEditing={false}
+      currentStep={steps[2]}
+      renderCustomRecovery={renderCustomRecovery}
     />,
     { wrapper: createComposeFormWrapper(defaultValues) }
   );
+};
 
 describe('step validation', () => {
   beforeEach(() => {
@@ -380,6 +384,53 @@ describe('step validation', () => {
       'notifications',
     ]);
   });
+
+  describe('getSandboxConfig', () => {
+    const alertStep = getSteps(true).steps.find((s) => s.id === 'alertCondition')!;
+    // getStepIds (no builderType) never includes 'builderCondition' — use the builder step list.
+    const builderStep = getSteps(true, 'threshold').steps.find((s) => s.id === 'builderCondition')!;
+    const recoveryStep = getSteps(true).steps.find((s) => s.id === 'recoveryCondition')!;
+    const detailsStep = getSteps(true).steps.find((s) => s.id === 'details')!;
+
+    it('alertCondition: single editor by default, auto-splits on Apply', () => {
+      const state = createState({ manualSplitEnabled: false });
+      expect(alertStep.getSandboxConfig!(state)).toEqual({
+        tabs: undefined,
+        autoSplitOnApply: true,
+      });
+    });
+
+    it('alertCondition: split tabs and no auto-split once manual split is enabled', () => {
+      const state = createState({ manualSplitEnabled: true });
+      expect(alertStep.getSandboxConfig!(state)).toEqual({
+        tabs: ['base', 'alert'],
+        autoSplitOnApply: false,
+      });
+    });
+
+    it('builderCondition: never has tabs or auto-split — every builder sandbox is read-only', () => {
+      const state = createState({ manualSplitEnabled: false });
+      expect(builderStep.getSandboxConfig!(state)).toEqual({
+        tabs: undefined,
+        autoSplitOnApply: false,
+      });
+    });
+
+    it('recoveryCondition: shows the recovery tab only when recoveryType is custom', () => {
+      expect(recoveryStep.getSandboxConfig!(createState({ recoveryType: 'custom' }))).toEqual({
+        tabs: ['recovery'],
+        autoSplitOnApply: false,
+      });
+      expect(recoveryStep.getSandboxConfig!(createState({ recoveryType: 'default' }))).toEqual({
+        tabs: undefined,
+        autoSplitOnApply: false,
+      });
+    });
+
+    it('details: no getSandboxConfig defined — caller defaults to a single editor, no auto-split', () => {
+      expect(detailsStep.getSandboxConfig).toBeUndefined();
+    });
+  });
 });
 
 describe('shell shared fields', () => {
@@ -388,14 +439,19 @@ describe('shell shared fields', () => {
     formOverrides: Partial<FormValues> = {}
   ) => {
     const services = { ...createMockServices(), dashboard: mockDashboard };
+    const state = createState({ queryCommitted: true, ...stateOverrides });
+    const isAlert = (formOverrides.kind ?? BASE_COMPOSE_VALUES.kind) === 'alert';
+    const { steps, renderCustomRecovery } = getSteps(isAlert);
     return render(
       <ComposeDiscoverForm
-        state={createState({ queryCommitted: true, ...stateOverrides })}
+        state={state}
         dispatch={jest.fn()}
         services={services}
         onRecoveryTypeChange={jest.fn()}
         onKindChange={jest.fn()}
         isEditing={false}
+        currentStep={steps[state.step]}
+        renderCustomRecovery={renderCustomRecovery}
       />,
       { wrapper: createComposeFormWrapper({ ...BASE_COMPOSE_VALUES, ...formOverrides }, services) }
     );
@@ -440,6 +496,7 @@ describe('shell shared fields', () => {
 
   it('disables ModeSelect in edit mode', () => {
     const services = { ...createMockServices(), dashboard: mockDashboard };
+    const { steps, renderCustomRecovery } = getSteps(true);
     render(
       <ComposeDiscoverForm
         state={createState({ queryCommitted: true, step: 0 })}
@@ -448,6 +505,8 @@ describe('shell shared fields', () => {
         onRecoveryTypeChange={jest.fn()}
         onKindChange={jest.fn()}
         isEditing={true}
+        currentStep={steps[0]}
+        renderCustomRecovery={renderCustomRecovery}
       />,
       { wrapper: createComposeFormWrapper({ ...BASE_COMPOSE_VALUES }, services) }
     );

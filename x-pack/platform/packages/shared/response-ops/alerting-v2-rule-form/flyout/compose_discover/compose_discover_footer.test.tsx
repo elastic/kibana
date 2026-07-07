@@ -84,7 +84,7 @@ const renderFooter = ({
     isCreate: true,
     hasValidationErrors: false,
     yamlHasErrors: false,
-    isBuilderMode: false,
+    isEditable: true,
     isBuilderStepValid: true,
     isSaving: false,
     onNext,
@@ -162,7 +162,7 @@ describe('ComposeDiscoverFooter', () => {
     it('dispatches GO_BACK when Back is clicked', () => {
       const { dispatch } = renderFooter({ stateOverrides: { step: 1 } });
       fireEvent.click(screen.getByTestId('composeDiscoverBack'));
-      expect(dispatch).toHaveBeenCalledWith({ type: 'GO_BACK', isBuilderMode: false });
+      expect(dispatch).toHaveBeenCalledWith({ type: 'GO_BACK', isEditable: true });
     });
   });
 
@@ -352,10 +352,10 @@ describe('ComposeDiscoverFooter', () => {
       expect(screen.getByTestId('composeDiscoverBack')).toBeDisabled();
     });
 
-    it('does not disable Back when child flyout is open in builder mode', () => {
+    it('does not disable Back when child flyout is open and not editable (builder mode)', () => {
       renderFooter({
         stateOverrides: { step: 1, childOpen: true },
-        propsOverrides: { isBuilderMode: true },
+        propsOverrides: { isEditable: false },
       });
       expect(screen.getByTestId('composeDiscoverBack')).not.toBeDisabled();
     });
@@ -366,7 +366,7 @@ describe('ComposeDiscoverFooter', () => {
       renderFooter({
         propsOverrides: {
           currentStep: BUILDER_CONDITION_STEP,
-          isBuilderMode: true,
+          isEditable: false,
           isBuilderStepValid: false,
         },
       });
@@ -377,19 +377,19 @@ describe('ComposeDiscoverFooter', () => {
       renderFooter({
         propsOverrides: {
           currentStep: BUILDER_CONDITION_STEP,
-          isBuilderMode: true,
+          isEditable: false,
           isBuilderStepValid: true,
         },
       });
       expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
     });
 
-    it('does not block Next due to childOpen in builder mode', () => {
+    it('does not block Next due to childOpen and not editable (builder mode)', () => {
       renderFooter({
         stateOverrides: { childOpen: true },
         propsOverrides: {
           currentStep: BUILDER_CONDITION_STEP,
-          isBuilderMode: true,
+          isEditable: false,
           isBuilderStepValid: true,
         },
       });

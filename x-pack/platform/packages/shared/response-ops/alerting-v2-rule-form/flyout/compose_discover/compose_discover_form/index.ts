@@ -6,3 +6,4 @@
  */
 
 export { ComposeDiscoverForm, getSteps } from './compose_discover_form';
+export type { ResolvedSteps } from './compose_discover_form';

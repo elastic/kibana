@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useWatch } from 'react-hook-form';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
@@ -44,8 +44,11 @@ interface Props {
   onKindChange: (kind: 'signal' | 'alert') => void;
   isEditing: boolean;
   ruleId?: string;
+  /** Only used for the ModeSelect disable condition below — not step resolution (see `currentStep`). */
   builderType?: string;
   onManualSplit?: () => void;
+  currentStep: StepDefinition;
+  renderCustomRecovery: StepRenderProps['renderCustomRecovery'];
 }
 
 const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
@@ -78,6 +81,24 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
       }
       return getBreachQuery(query).trim().length > 0;
     },
+    getSandboxConfig: (state) => {
+      /*
+       * create/edit/clone default to a single unified editor — no base/alert tabs — and
+       * derive the split heuristically on Apply. Manual split opts out of both: separate
+       * tabs, verbatim commit. (state.mode is remapped 'clone' -> 'edit' before it reaches
+       * state, so this is always true today; kept explicit to match the pre-refactor check.)
+       */
+      const usesUnifiedEditorByDefault =
+        state.mode === 'create' || state.mode === 'edit' || state.mode === 'clone';
+      return {
+        tabs: usesUnifiedEditorByDefault
+          ? state.manualSplitEnabled
+            ? ['base', 'alert']
+            : undefined
+          : ['base', 'alert'],
+        autoSplitOnApply: !state.manualSplitEnabled,
+      };
+    },
   },
   builderCondition: {
     id: 'builderCondition',
@@ -86,6 +107,9 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
     }),
     render: () => null,
     validate: (_methods, s) => s.queryCommitted,
+    // Every builder sandbox is read-only (isEditable: false, computed by the caller) — no
+    // tabs or auto-split concept applies since there's no independent draft to split.
+    getSandboxConfig: () => ({ tabs: undefined, autoSplitOnApply: false }),
   },
   recoveryCondition: {
     id: 'recoveryCondition',
@@ -100,6 +124,10 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         renderCustomRecovery={props.renderCustomRecovery}
       />
     ),
+    getSandboxConfig: (state) => ({
+      tabs: state.recoveryType === 'custom' ? ['recovery'] : undefined,
+      autoSplitOnApply: false,
+    }),
   },
   details: {
     id: 'details',
@@ -131,7 +159,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
   },
 };
 
-interface ResolvedSteps {
+export interface ResolvedSteps {
   steps: StepDefinition[];
   renderCustomRecovery?: StepRenderProps['renderCustomRecovery'];
 }
@@ -176,13 +204,10 @@ export const ComposeDiscoverForm = ({
   ruleId,
   builderType,
   onManualSplit,
+  currentStep,
+  renderCustomRecovery,
 }: Props) => {
   const isAlert = useWatch<FormValues, 'kind'>({ name: 'kind' }) === 'alert';
-  const { steps, renderCustomRecovery } = useMemo(
-    () => getSteps(isAlert, builderType),
-    [isAlert, builderType]
-  );
-  const currentStep = steps[state.step];
   const isAlertConditionStep = isAlertConditionStepId(currentStep.id);
 
   const stepContent = currentStep.render({

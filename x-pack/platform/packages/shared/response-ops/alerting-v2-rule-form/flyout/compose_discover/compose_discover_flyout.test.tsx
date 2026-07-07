@@ -44,6 +44,36 @@ jest.mock('./compose_discover_form', () => {
     'react-hook-form'
   ) as typeof import('react-hook-form');
   const actual = jest.requireActual('./use_compose_discover_state');
+  /*
+   * Mirrors STEP_REGISTRY's real getSandboxConfig for 'alertCondition'/'recoveryCondition' —
+   * kept in sync manually since this mock replaces the real STEP_REGISTRY entirely (to avoid
+   * rendering the real, heavy step components). Anything wrong here shows up as a real
+   * behavioral test failure (autoSplitOnApply not running, tabs not appearing), not a silent gap.
+   */
+  const getSandboxConfigForId = (
+    id: string,
+    state: { mode: string; manualSplitEnabled: boolean; recoveryType: string }
+  ) => {
+    if (id === 'alertCondition') {
+      const usesUnifiedEditorByDefault =
+        state.mode === 'create' || state.mode === 'edit' || state.mode === 'clone';
+      return {
+        tabs: usesUnifiedEditorByDefault
+          ? state.manualSplitEnabled
+            ? ['base', 'alert']
+            : undefined
+          : ['base', 'alert'],
+        autoSplitOnApply: !state.manualSplitEnabled,
+      };
+    }
+    if (id === 'recoveryCondition') {
+      return {
+        tabs: state.recoveryType === 'custom' ? ['recovery'] : undefined,
+        autoSplitOnApply: false,
+      };
+    }
+    return { tabs: undefined, autoSplitOnApply: false };
+  };
   return {
     getSteps: (isAlert: boolean) => ({
       steps: actual.getStepIds(isAlert).map((id: string) => {
@@ -52,7 +82,16 @@ jest.mock('./compose_discover_form', () => {
           recoveryCondition: 'Recovery Condition',
           details: 'Details & Artifacts',
         };
-        return { id, title: titles[id], render: () => <div /> };
+        return {
+          id,
+          title: titles[id],
+          render: () => <div />,
+          getSandboxConfig: (state: {
+            mode: string;
+            manualSplitEnabled: boolean;
+            recoveryType: string;
+          }) => getSandboxConfigForId(id, state),
+        };
       }),
     }),
     ComposeDiscoverForm: (props: FormProps) => {
