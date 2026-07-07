@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import { v4 as uuidv4 } from 'uuid';
-import { streamsApiTest as apiTest } from '../../fixtures';
+import { significantEventsApiTest as apiTest } from '../../fixtures';
 import { COMMON_API_HEADERS } from '../../fixtures/constants';
 
 interface MemoryCategoryNode {

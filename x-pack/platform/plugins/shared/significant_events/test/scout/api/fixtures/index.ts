@@ -14,10 +14,6 @@ import type {
   SamlAuth,
 } from '@kbn/scout';
 import {
-  getStreamsTestApiService,
-  type StreamsTestApiService,
-} from '../services/streams_api_service';
-import {
   getSignificantEventsTestApiService,
   type SignificantEventsTestApiService,
 } from '../services/significant_events_api_service';
@@ -34,15 +30,14 @@ export interface StreamsRequestAuthFixture extends RequestAuthFixture {
   loginAsStreamsReadOnly: () => Promise<RoleApiCredentials>;
 }
 
-export interface StreamsApiServicesFixture extends ApiServicesFixture {
-  streamsTest: StreamsTestApiService;
+export interface SignificantEventsApiServicesFixture extends ApiServicesFixture {
   significantEventsTest: SignificantEventsTestApiService;
 }
 
-export const streamsApiTest = apiTest.extend<{
+export const significantEventsApiTest = apiTest.extend<{
   requestAuth: StreamsRequestAuthFixture;
   samlAuth: StreamsSamlAuthFixture;
-  apiServices: StreamsApiServicesFixture;
+  apiServices: SignificantEventsApiServicesFixture;
 }>({
   requestAuth: async ({ requestAuth, config }, use) => {
     const streamsUsers = getStreamsUsers(config);
@@ -82,8 +77,7 @@ export const streamsApiTest = apiTest.extend<{
   },
 
   apiServices: async ({ apiServices, kbnClient, log }, use) => {
-    const extendedApiServices = apiServices as StreamsApiServicesFixture;
-    extendedApiServices.streamsTest = getStreamsTestApiService({ kbnClient, log });
+    const extendedApiServices = apiServices as SignificantEventsApiServicesFixture;
     extendedApiServices.significantEventsTest = getSignificantEventsTestApiService({
       kbnClient,
       log,

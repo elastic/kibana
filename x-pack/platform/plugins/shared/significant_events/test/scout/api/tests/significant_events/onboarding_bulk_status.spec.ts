@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import { v4 as uuidv4 } from 'uuid';
-import { streamsApiTest as apiTest } from '../../fixtures';
+import { significantEventsApiTest as apiTest } from '../../fixtures';
 import { COMMON_API_HEADERS } from '../../fixtures/constants';
 
 const BULK_STATUS_ENDPOINT = 'internal/streams/onboarding/_bulk_status';
@@ -18,7 +18,7 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest.beforeAll(async ({ apiServices }) => {
-      await apiServices.streamsTest.enable();
+      await apiServices.streams.enable();
       await apiServices.significantEventsTest.enableSignificantEvents();
     });
 

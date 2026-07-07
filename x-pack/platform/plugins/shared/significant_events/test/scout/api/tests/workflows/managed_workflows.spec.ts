@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import { streamsApiTest as apiTest } from '../../fixtures';
+import { significantEventsApiTest as apiTest } from '../../fixtures';
 import { PUBLIC_API_HEADERS } from '../../fixtures/constants';
 
 // Inline IDs to avoid pulling in @kbn/workflows which imports YAML files that

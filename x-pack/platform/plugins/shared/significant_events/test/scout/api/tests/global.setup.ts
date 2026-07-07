@@ -10,18 +10,10 @@ import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management
 
 globalSetupHook(
   'Setup environment for Significant Events API tests',
-  async ({ kbnClient, log }) => {
+  async ({ apiServices, kbnClient, log }) => {
     log.debug('[setup] Enabling Streams...');
-
-    try {
-      await kbnClient.request({
-        method: 'POST',
-        path: '/api/streams/_enable',
-      });
-      log.debug('[setup] Streams enabled successfully');
-    } catch (error) {
-      log.debug(`[setup] Streams may already be enabled: ${error}`);
-    }
+    await apiServices.streams.enable();
+    log.debug('[setup] Streams enabled successfully');
 
     log.debug('[setup] Enabling significant events feature...');
     try {
