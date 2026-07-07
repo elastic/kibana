@@ -42,7 +42,7 @@ const INITIAL_EDITOR_VALUE = `{
   }
 }`;
 
-const SEARCH_PROFILER_HASH_PATH = '#/searchprofiler';
+const SEARCH_PROFILER_ROUTE = '/searchprofiler';
 
 const getSearchProfilerQuery = (searchProfilerQueryURI: string | null): string | null => {
   if (searchProfilerQueryURI === null) {
@@ -53,16 +53,6 @@ const getSearchProfilerQuery = (searchProfilerQueryURI: string | null): string |
     decompressFromEncodedURIComponent(searchProfilerQueryURI.replace(/^data:text\/plain,/, '')) ??
     ''
   );
-};
-
-const getSearchParamsFromHash = () => {
-  const [hashPath, hashSearch = ''] = window.location.hash.split('?');
-
-  if (hashPath !== SEARCH_PROFILER_HASH_PATH) {
-    return null;
-  }
-
-  return new URLSearchParams(hashSearch);
 };
 
 const styles = {
@@ -85,7 +75,7 @@ export const ProfileQueryEditor = memo(() => {
 
   const dispatch = useProfilerActionContext();
 
-  const { getLicenseStatus, notifications, location } = useAppContext();
+  const { getLicenseStatus, history, notifications, location } = useAppContext();
 
   const { data: indicesData, isLoading, error: indicesDataError } = useHasIndices();
 
@@ -150,20 +140,16 @@ export const ProfileQueryEditor = memo(() => {
   }, []);
 
   useEffect(() => {
-    const handleHashChange = () => {
-      const params = getSearchParamsFromHash();
-
-      if (params) {
-        applyUrlParams(params);
+    const unlisten = history.listen((nextLocation) => {
+      if (nextLocation.pathname !== SEARCH_PROFILER_ROUTE) {
+        return;
       }
-    };
 
-    window.addEventListener('hashchange', handleHashChange);
+      applyUrlParams(new URLSearchParams(nextLocation.search));
+    });
 
-    return () => {
-      window.removeEventListener('hashchange', handleHashChange);
-    };
-  }, [applyUrlParams]);
+    return unlisten;
+  }, [applyUrlParams, history]);
 
   const handleProfileClick = async () => {
     dispatch({ type: 'setProfiling', value: true });
