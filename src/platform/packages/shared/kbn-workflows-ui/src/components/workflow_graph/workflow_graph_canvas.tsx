@@ -155,16 +155,6 @@ function CanvasZoomControls({ onResetView }: { onResetView: () => void }) {
           gap: 2,
         }}
       >
-        <EuiToolTip content={zoomOutLabel} position="left" disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="minusInCircle"
-            aria-label={zoomOutLabel}
-            color="text"
-            size="s"
-            onClick={handleZoomOut}
-            data-test-subj="workflowCanvas-zoom-out"
-          />
-        </EuiToolTip>
         <EuiToolTip content={zoomInLabel} position="left" disableScreenReaderOutput>
           <EuiButtonIcon
             iconType="plusInCircle"
@@ -173,6 +163,16 @@ function CanvasZoomControls({ onResetView }: { onResetView: () => void }) {
             size="s"
             onClick={handleZoomIn}
             data-test-subj="workflowCanvas-zoom-in"
+          />
+        </EuiToolTip>
+        <EuiToolTip content={zoomOutLabel} position="left" disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="minusInCircle"
+            aria-label={zoomOutLabel}
+            color="text"
+            size="s"
+            onClick={handleZoomOut}
+            data-test-subj="workflowCanvas-zoom-out"
           />
         </EuiToolTip>
         <EuiToolTip content={resetZoomLabel} position="left" disableScreenReaderOutput>
