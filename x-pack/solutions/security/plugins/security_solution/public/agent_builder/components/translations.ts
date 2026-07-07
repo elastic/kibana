@@ -20,9 +20,3 @@ export const UPGRADE_TO_ENTERPRISE_TO_USE_AGENT_BUILDER_CHAT = i18n.translate(
     defaultMessage: 'Upgrade your license to use Agent builder chat.',
   }
 );
-
-export const getNonEsqlRuleActionDisabledReason = (ruleTypeLabel: string) =>
-  i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.nonEsqlDisabledReason', {
-    defaultMessage: 'AI rule creation is only supported for ES|QL rules. This rule is {ruleType}.',
-    values: { ruleType: ruleTypeLabel },
-  });

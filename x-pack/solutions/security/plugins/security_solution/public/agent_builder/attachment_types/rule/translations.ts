@@ -91,6 +91,12 @@ export const LOOKBACK_LABEL = i18n.translate(
   { defaultMessage: 'Lookback time:' }
 );
 
+export const getNonEsqlRuleActionDisabledReason = (ruleTypeLabel: string) =>
+  i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.nonEsqlDisabledReason', {
+    defaultMessage: 'AI rule creation is only supported for ES|QL rules. This rule is {ruleType}.',
+    values: { ruleType: ruleTypeLabel },
+  });
+
 export const LIMITATIONS_TITLE = i18n.translate(
   'xpack.securitySolution.agentBuilder.ruleAttachment.limitationsTitle',
   { defaultMessage: 'AI rule creation limitations' }

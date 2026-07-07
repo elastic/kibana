@@ -19,8 +19,13 @@ import {
 } from '../../../common/components/link_to/redirect_to_detection_engine';
 import { type RuleAttachmentIntent, getRuleTypeLabel } from './helpers';
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
-import { getNonEsqlRuleActionDisabledReason } from '../../components/translations';
-import { APPLY_TO_RULE_FORM, VIEW_RULE, UPDATE_RULE, CREATE_RULE } from './translations';
+import {
+  getNonEsqlRuleActionDisabledReason,
+  APPLY_TO_RULE_FORM,
+  VIEW_RULE,
+  UPDATE_RULE,
+  CREATE_RULE,
+} from './translations';
 
 interface BuildRuleActionButtonsParams {
   rule: RuleResponse | null;
