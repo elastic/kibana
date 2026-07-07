@@ -9,11 +9,8 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
-import {
-  ExecutionStatus,
-  isRequestAbortedError,
-  type SerializedExecutionError,
-} from '@kbn/agent-builder-common';
+import { ExecutionStatus, isRequestAbortedError } from '@kbn/agent-builder-common';
+import type { ChatCallbackFailurePayload } from '../../../../common/http_api/chat_callback';
 import { createAgentExecutionClient, type AgentExecutionClient } from '../persistence';
 import {
   handleAgentExecution,
@@ -43,15 +40,7 @@ export const createTaskHandler = (deps: TaskHandlerDeps): TaskHandler => {
   return new TaskHandlerImpl(deps);
 };
 
-type FailureOutcome =
-  | {
-      error: SerializedExecutionError;
-      status: ExecutionStatus.failed;
-    }
-  | {
-      error?: undefined;
-      status: ExecutionStatus.aborted;
-    };
+type FailureOutcome = Pick<ChatCallbackFailurePayload, 'error' | 'status'>;
 
 class TaskHandlerImpl implements TaskHandler {
   private readonly deps: TaskHandlerDeps;
@@ -138,18 +127,22 @@ class TaskHandlerImpl implements TaskHandler {
     executionId: string;
     execution: AgentExecution;
     executionClient: AgentExecutionClient;
-    error: unknown;
+    error?: unknown;
   }): Promise<void> {
     const message = error instanceof Error ? error.message : String(error);
     this.logger.error(`Execution ${executionId} failed: ${message}`);
 
     try {
-      const initialFailureOutcome: FailureOutcome = isRequestAbortedError(error)
-        ? { status: ExecutionStatus.aborted }
-        : {
-            error: serializeExecutionError(error),
-            status: ExecutionStatus.failed,
-          };
+      const serializedError = error ? serializeExecutionError(error) : undefined;
+
+      const status = isRequestAbortedError(error)
+        ? ExecutionStatus.aborted
+        : ExecutionStatus.failed;
+
+      const initialFailureOutcome: FailureOutcome = {
+        ...(serializedError ? { error: serializedError } : {}),
+        status,
+      };
 
       const finalFailureOutcome = await this.deliverFailureCallbackRequest({
         executionId,
@@ -157,7 +150,6 @@ class TaskHandlerImpl implements TaskHandler {
         initialFailureOutcome,
       });
 
-      // Only persist error details for failed executions, not aborted ones.
       await executionClient.updateStatus(
         executionId,
         finalFailureOutcome.status,

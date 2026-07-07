@@ -226,18 +226,21 @@ describe('makeFailureCallbackRequestIfConfigured', () => {
 
   it('omits conversation_id when not provided', async () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
+    const payload: ChatCallbackFailurePayload = {
+      execution_id: 'execution-1',
+      error,
+      status: ExecutionStatus.aborted,
+    };
 
     await makeFailureCallbackRequestIfConfigured({
       callbackUrl,
-      payload: {
-        execution_id: 'execution-1',
-        status: ExecutionStatus.aborted,
-      },
+      payload,
     });
 
     const body = fetchMock.mock.calls[0][1]?.body as string;
     expect(JSON.parse(body)).toEqual({
       execution_id: 'execution-1',
+      error,
       status: ExecutionStatus.aborted,
     });
   });

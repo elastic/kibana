@@ -191,25 +191,19 @@ describe('TaskHandler callback finalization', () => {
       payload: {
         execution_id: 'execution-1',
         conversation_id: 'conversation-1',
+        error: { code: 'internal_error', message: 'Converse request was aborted' },
         status: ExecutionStatus.aborted,
       },
     });
     expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
       'execution-1',
       ExecutionStatus.aborted,
-      undefined
+      { code: 'internal_error', message: 'Converse request was aborted' }
     );
   });
 
-  it('marks the execution failed when failure callback delivery fails', async () => {
-    handleAgentExecutionMock.mockRejectedValue(
-      createRequestAbortedError('Converse request was aborted')
-    );
-    makeFailureCallbackRequestIfConfiguredMock.mockRejectedValue(new Error('callback failed'));
-    serializeExecutionErrorMock.mockReturnValueOnce({
-      code: 'internal_error' as never,
-      message: 'callback failed',
-    });
+  it('omits error from failure callbacks when no error value was thrown', async () => {
+    handleAgentExecutionMock.mockRejectedValue(undefined);
 
     await createHandler().run({
       executionId: 'execution-1',
@@ -221,6 +215,42 @@ describe('TaskHandler callback finalization', () => {
       payload: {
         execution_id: 'execution-1',
         conversation_id: 'conversation-1',
+        status: ExecutionStatus.failed,
+      },
+    });
+    expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
+      'execution-1',
+      ExecutionStatus.failed,
+      undefined
+    );
+  });
+
+  it('marks an aborted execution failed when aborted callback delivery fails', async () => {
+    handleAgentExecutionMock.mockRejectedValue(
+      createRequestAbortedError('Converse request was aborted')
+    );
+    makeFailureCallbackRequestIfConfiguredMock.mockRejectedValue(new Error('callback failed'));
+    serializeExecutionErrorMock
+      .mockReturnValueOnce({
+        code: 'internal_error' as never,
+        message: 'Converse request was aborted',
+      })
+      .mockReturnValueOnce({
+        code: 'internal_error' as never,
+        message: 'callback failed',
+      });
+
+    await createHandler().run({
+      executionId: 'execution-1',
+      fakeRequest: httpServerMock.createKibanaRequest(),
+    });
+
+    expect(makeFailureCallbackRequestIfConfiguredMock).toHaveBeenCalledWith({
+      callbackUrl: 'https://relay.example.com/events?token=abc',
+      payload: {
+        execution_id: 'execution-1',
+        conversation_id: 'conversation-1',
+        error: { code: 'internal_error', message: 'Converse request was aborted' },
         status: ExecutionStatus.aborted,
       },
     });

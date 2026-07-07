@@ -9,7 +9,6 @@ import pRetry, { AbortError } from 'p-retry';
 import { ExecutionStatus, type ChatEvent } from '@kbn/agent-builder-common';
 import type {
   CallbackPayload,
-  ChatCallbackAbortedPayload,
   ChatCallbackFailurePayload,
 } from '../../../common/http_api/chat_callback';
 import { buildChatResponseFromEvents } from './utils/chat_response';
@@ -53,7 +52,7 @@ export const makeFailureCallbackRequestIfConfigured = async ({
   payload,
 }: {
   callbackUrl: string | undefined;
-  payload: ChatCallbackFailurePayload | ChatCallbackAbortedPayload;
+  payload: ChatCallbackFailurePayload;
 }): Promise<void> => {
   await makeCallbackRequestIfConfigured({ callbackUrl, payload });
 };

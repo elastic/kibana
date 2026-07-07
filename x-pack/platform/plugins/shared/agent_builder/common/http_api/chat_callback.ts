@@ -45,17 +45,8 @@ export interface ChatCallbackSuccessPayload {
 export interface ChatCallbackFailurePayload {
   execution_id: string;
   conversation_id?: string;
-  status: ExecutionStatus.failed;
-  error: SerializedExecutionError;
+  status: ExecutionStatus.failed | ExecutionStatus.aborted;
+  error?: SerializedExecutionError;
 }
 
-export interface ChatCallbackAbortedPayload {
-  execution_id: string;
-  conversation_id?: string;
-  status: ExecutionStatus.aborted;
-}
-
-export type CallbackPayload =
-  | ChatCallbackSuccessPayload
-  | ChatCallbackFailurePayload
-  | ChatCallbackAbortedPayload;
+export type CallbackPayload = ChatCallbackSuccessPayload | ChatCallbackFailurePayload;
