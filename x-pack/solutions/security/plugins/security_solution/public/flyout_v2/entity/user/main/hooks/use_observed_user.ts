@@ -7,23 +7,23 @@
 
 import { useMemo } from 'react';
 import deepmerge from 'deepmerge';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { type inputsModel, inputsSelectors } from '../../../../common/store';
-import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
-import type { UserItem } from '../../../../../common/search_strategy';
-import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../common/search_strategy';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
-import { isActiveTimeline } from '../../../../helpers';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
-import { useQueryInspector } from '../../../../common/components/page/manage_query';
-import type { InspectResponse } from '../../../../types';
+import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
+import { type inputsModel, inputsSelectors } from '../../../../../common/store';
+import { useObservedUserDetails } from '../../../../../explore/users/containers/users/observed_details';
+import type { UserItem } from '../../../../../../common/search_strategy';
+import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../../common/search_strategy';
+import { useGlobalTime } from '../../../../../common/containers/use_global_time';
+import { useFirstLastSeen } from '../../../../../common/containers/use_first_last_seen';
+import { isActiveTimeline } from '../../../../../helpers';
+import { useSecurityDefaultPatterns } from '../../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useQueryInspector } from '../../../../../common/components/page/manage_query';
+import type { InspectResponse } from '../../../../../types';
 import type {
   EntityFromStoreResult,
   EntityStoreRecord,
-} from '../../shared/hooks/use_entity_from_store';
-import type { ObservedEntityData } from '../../../../flyout_v2/entity/shared/components/observed_entity/types';
-import { USER_PANEL_OBSERVED_USER_QUERY_ID, USER_PANEL_RISK_SCORE_QUERY_ID } from '..';
+} from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { ObservedEntityData } from '../../../shared/components/observed_entity/types';
+import { USER_PANEL_OBSERVED_USER_QUERY_ID, USER_PANEL_RISK_SCORE_QUERY_ID } from '../constants';
 
 export type ObservedUserResult = Omit<ObservedEntityData<UserItem>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;

@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
+import { ManagedUserDatasetKey } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import { render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../common/mock';
-import { UserPanelHeader } from './header';
-import { managedUserDetails, mockManagedUserData } from './mocks';
-import { RiskSeverity } from '../../../../common/search_strategy';
+import { TestProviders } from '../../../../common/mock';
+import { Header } from './header';
+import {
+  managedUserDetails,
+  mockManagedUserData,
+} from '../../../../flyout/entity_details/user_right/mocks';
+import { RiskSeverity } from '../../../../../common/search_strategy';
 
 const defaultLastSeen = {
   date: '2023-02-23T20:03:17.489Z',
@@ -20,18 +23,17 @@ const defaultLastSeen = {
 
 const mockProps = {
   userName: 'test',
-  scopeId: 'test-scope-id',
   managedUser: mockManagedUserData,
   lastSeen: defaultLastSeen,
 };
 
-jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
+jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
 
-describe('UserPanelHeader', () => {
+describe('Header', () => {
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <UserPanelHeader {...mockProps} />
+        <Header {...mockProps} />
       </TestProviders>
     );
 
@@ -42,7 +44,7 @@ describe('UserPanelHeader', () => {
     const futureDay = '2989-03-07T20:00:00.000Z';
     const { getByTestId } = render(
       <TestProviders>
-        <UserPanelHeader {...mockProps} lastSeen={{ date: futureDay, isLoading: false }} />
+        <Header {...mockProps} lastSeen={{ date: futureDay, isLoading: false }} />
       </TestProviders>
     );
 
@@ -54,7 +56,7 @@ describe('UserPanelHeader', () => {
     const entraManagedUser = managedUserDetails[ManagedUserDatasetKey.ENTRA]!;
     const { getByTestId } = render(
       <TestProviders>
-        <UserPanelHeader
+        <Header
           {...mockProps}
           lastSeen={{ date: '2020-01-01T00:00:00.000Z', isLoading: false }}
           managedUser={{
@@ -79,7 +81,7 @@ describe('UserPanelHeader', () => {
   it('renders observed and managed badges when lastSeen is defined', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <UserPanelHeader {...mockProps} />
+        <Header {...mockProps} />
       </TestProviders>
     );
 
@@ -90,7 +92,7 @@ describe('UserPanelHeader', () => {
   it('does not render observed badge when lastSeen date is undefined', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <UserPanelHeader {...mockProps} lastSeen={{ date: undefined, isLoading: false }} />
+        <Header {...mockProps} lastSeen={{ date: undefined, isLoading: false }} />
       </TestProviders>
     );
 
@@ -100,7 +102,7 @@ describe('UserPanelHeader', () => {
   it('does not render managed badge when managed data is undefined', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <UserPanelHeader
+        <Header
           {...mockProps}
           managedUser={{
             ...mockManagedUserData,
@@ -116,7 +118,7 @@ describe('UserPanelHeader', () => {
   it('renders skeleton when loading', () => {
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <UserPanelHeader {...mockProps} lastSeen={{ date: undefined, isLoading: true }} />
+        <Header {...mockProps} lastSeen={{ date: undefined, isLoading: true }} />
       </TestProviders>
     );
 
@@ -128,7 +130,7 @@ describe('UserPanelHeader', () => {
   it('does not render lastSeen element when isEntityInStore is true', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <UserPanelHeader {...mockProps} isEntityInStore />
+        <Header {...mockProps} isEntityInStore />
       </TestProviders>
     );
 
@@ -138,7 +140,7 @@ describe('UserPanelHeader', () => {
   it('renders entity store badge when isEntityInStore is true', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <UserPanelHeader {...mockProps} isEntityInStore />
+        <Header {...mockProps} isEntityInStore />
       </TestProviders>
     );
 
@@ -148,7 +150,7 @@ describe('UserPanelHeader', () => {
   it('renders observed badge text when isEntityInStore is false', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <UserPanelHeader {...mockProps} />
+        <Header {...mockProps} />
       </TestProviders>
     );
 
@@ -158,7 +160,7 @@ describe('UserPanelHeader', () => {
   it('renders risk level badge when isEntityInStore and riskLevel are provided', () => {
     const { getByText } = render(
       <TestProviders>
-        <UserPanelHeader {...mockProps} isEntityInStore riskLevel={RiskSeverity.High} />
+        <Header {...mockProps} isEntityInStore riskLevel={RiskSeverity.High} />
       </TestProviders>
     );
 
@@ -168,7 +170,7 @@ describe('UserPanelHeader', () => {
   it('does not render risk level badge when isEntityInStore is false', () => {
     const { queryByText } = render(
       <TestProviders>
-        <UserPanelHeader {...mockProps} riskLevel={RiskSeverity.High} />
+        <Header {...mockProps} riskLevel={RiskSeverity.High} />
       </TestProviders>
     );
 
@@ -178,7 +180,7 @@ describe('UserPanelHeader', () => {
   it('renders the user name as a link to the details page when isEntityInStore is false', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <UserPanelHeader {...mockProps} isEntityInStore={false} />
+        <Header {...mockProps} isEntityInStore={false} />
       </TestProviders>
     );
 
@@ -188,7 +190,7 @@ describe('UserPanelHeader', () => {
   it('renders the user name without a link when isEntityInStore is true', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <UserPanelHeader {...mockProps} isEntityInStore />
+        <Header {...mockProps} isEntityInStore />
       </TestProviders>
     );
 
