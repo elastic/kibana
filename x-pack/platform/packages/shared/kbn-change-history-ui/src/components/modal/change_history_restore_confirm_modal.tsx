@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import { useChangeHistoryRestore } from '../../hooks/use_change_history_restore';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
 import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
@@ -29,6 +29,7 @@ export function ChangeHistoryRestoreConfirmModal({
 }: ChangeHistoryRestoreConfirmModalProps): JSX.Element | null {
   const { objectId, supports, telemetry } = useChangeHistoryConfig();
   const { restoreChange, isRestoring, error, clearError } = useChangeHistoryRestore({ onRestored });
+  const confirmModalTitleId = useGeneratedHtmlId();
 
   const restoreTelemetry = useMemo(
     () => buildChangeHistoryRestoreTelemetryParams(change, currentChange),
@@ -70,6 +71,8 @@ export function ChangeHistoryRestoreConfirmModal({
   return (
     <EuiConfirmModal
       title={i18n.RESTORE_CONFIRM_TITLE(versionLabel)}
+      aria-labelledby={confirmModalTitleId}
+      titleProps={{ id: confirmModalTitleId }}
       onCancel={handleClose}
       onConfirm={handleConfirmRestore}
       cancelButtonText={i18n.RESTORE_CANCEL_BUTTON}
