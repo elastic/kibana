@@ -21,6 +21,7 @@ import type { KbnPalettes } from '@kbn/palettes';
 import type {
   VisualizationDimensionEditorProps,
   DatatableVisualizationState,
+  ColumnCellDecorationMode,
 } from '@kbn/lens-common';
 import { DatatableInspectorTables } from '../../../../common/expressions';
 
@@ -54,10 +55,9 @@ import { getDatatableColumn } from '../../../../common/expressions/impl/datatabl
 const idPrefix = htmlIdGenerator()();
 
 type ColumnType = DatatableVisualizationState['columns'][number];
-type CellDecorationMode = NonNullable<ColumnType['colorMode']>;
 
 /** Decoration modes in editor display order. */
-const COLOR_MODE_ORDER: readonly CellDecorationMode[] = [
+const COLOR_MODE_ORDER: readonly ColumnCellDecorationMode[] = [
   'none',
   'cell',
   'badge',
