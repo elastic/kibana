@@ -11,59 +11,72 @@ import {
   EuiPanel,
   EuiScreenReaderOnly,
   EuiSpacer,
+  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { CaseUI } from '../../../../../../common';
+import type { CaseConnector } from '../../../../../../common/types/domain';
 import * as i18n from '../../../../case_view/translations';
-import { AssigneesField } from './assignees_field';
-import { ParticipantsField } from './participants_field';
-import { SeverityField } from './severity_field';
-import { CategoryField } from './category_field';
-import { TagsField } from './tags_field';
-import { ConnectorField } from './connector_field';
+import { AttributesFields } from './attributes_fields';
+import { EditConnector } from '../../../../edit_connector';
 import { CustomFields } from '../../../../case_view/components/custom_fields';
 import { TemplateFields } from '../../../../case_view/components/template_fields';
 import * as redesignI18n from '../../../translations';
 import { SidebarAccordionSection } from './sidebar_accordion_section';
 import { TemplateSettingsPopover } from './template_settings_popover';
 import { ConnectorSettingsPopover } from './connector_settings_popover';
-import { useCaseViewSidebar } from './hooks/use_case_view_sidebar';
+import { useSidebarAccordionsState } from './hooks/use_sidebar_accordions_state';
+import { useTemplateFieldsActions } from './hooks/use_template_fields_actions';
+import { useOnUpdateField } from '../../../../case_view/use_on_update_field';
+import { isFieldUpdating } from './utils/sidebar_helpers';
+import { useCasesContext } from '../../../../cases_context/use_cases_context';
+import { useCasesFeatures } from '../../../../../common/use_cases_features';
+import { useGetCaseConnectors } from '../../../../../containers/use_get_case_connectors';
+import { useGetCaseConfiguration } from '../../../../../containers/configure/use_get_case_configuration';
+import { useGetSupportedActionConnectors } from '../../../../../containers/configure/use_get_supported_action_connectors';
+import { useGetTemplate } from '../../../../templates_v2/hooks/use_get_template';
+import { KibanaServices } from '../../../../../common/lib/kibana';
 
 export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
   const { euiTheme } = useEuiTheme();
   const fieldsGroupStyles = useMemo(() => css({ gap: euiTheme.size.m }), [euiTheme]);
 
+  const { isOpen, onToggle } = useSidebarAccordionsState();
+
+  const { permissions } = useCasesContext();
+  const { pushToServiceAuthorized } = useCasesFeatures();
+  const { data: caseConnectors } = useGetCaseConnectors(caseData.id);
+  const { data: casesConfiguration } = useGetCaseConfiguration();
+  const { isLoading: isLoadingAllAvailableConnectors, data: supportedActionConnectors } =
+    useGetSupportedActionConnectors();
+  const isTemplatesV2Enabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
+
+  const { data: templateData } = useGetTemplate(caseData.template?.id, caseData.template?.version);
+  const templateFieldsTitle = templateData?.name ?? redesignI18n.TEMPLATE_FIELDS_TITLE;
+
+  const { onUpdateField, onSubmitCustomField, isCustomFieldsLoading } = useTemplateFieldsActions({
+    caseData,
+  });
+
   const {
-    permissions,
-    caseAssignmentAuthorized,
-    pushToServiceAuthorized,
-    isOpen,
-    onToggle,
-    caseConnectors,
-    casesConfiguration,
-    currentUserProfile,
-    userProfiles,
-    participants,
-    supportedActionConnectors,
-    isTemplatesV2Enabled,
-    templateFieldsTitle,
-    onUpdateField,
-    onSubmitTags,
-    onSubmitCategory,
-    onUpdateSeverity,
-    onUpdateAssignees,
-    onSubmitConnector,
-    onSubmitCustomField,
-    isLoadingCaseUsers,
-    isLoadingAssigneeData,
-    isSeverityLoading,
-    isTagsLoading,
-    isCategoryLoading,
-    isCustomFieldsLoading,
-    isConnectorLoading,
-  } = useCaseViewSidebar({ caseData });
+    onUpdateField: onUpdateConnectorField,
+    isLoading: isConnectorFieldUpdating,
+    loadingKey: connectorLoadingKey,
+  } = useOnUpdateField({ caseData });
+
+  const onSubmitConnector = useCallback(
+    (connector: CaseConnector) => onUpdateConnectorField({ key: 'connector', value: connector }),
+    [onUpdateConnectorField]
+  );
+
+  const isConnectorLoading = useMemo(
+    () =>
+      isLoadingAllAvailableConnectors ||
+      isFieldUpdating(isConnectorFieldUpdating, connectorLoadingKey, 'connector'),
+    [isLoadingAllAvailableConnectors, isConnectorFieldUpdating, connectorLoadingKey]
+  );
 
   return (
     <EuiFlexItem grow={2}>
@@ -73,6 +86,7 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
         hasShadow={false}
         hasBorder={true}
         paddingSize="l"
+        grow={false}
       >
         <EuiScreenReaderOnly>
           <h2>{i18n.CASE_SETTINGS}</h2>
@@ -84,78 +98,53 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
           onToggle={onToggle}
           data-test-subj="case-view-sidebar-attributes"
         >
-          <EuiFlexGroup direction="column" responsive={false} css={fieldsGroupStyles}>
-            {caseAssignmentAuthorized ? (
-              <AssigneesField
-                title={redesignI18n.ASSIGNED_TITLE}
-                dataTestSubj="case-view-assignees-field-panel"
-                caseAssignees={caseData.assignees}
-                currentUserProfile={currentUserProfile}
-                onAssigneesChanged={onUpdateAssignees}
-                isLoading={isLoadingAssigneeData}
-                userProfiles={userProfiles ?? new Map()}
-                caseId={caseData.id}
-                caseTitle={caseData.title}
-              />
-            ) : null}
-            <SeverityField
-              isDisabled={!permissions.update}
-              isLoading={isSeverityLoading}
-              selectedSeverity={caseData.severity}
-              onSeverityChange={onUpdateSeverity}
-            />
-            {participants != null ? (
-              <ParticipantsField
-                title={redesignI18n.PARTICIPANTS_TITLE}
-                users={participants}
-                userProfiles={userProfiles ?? new Map()}
-                isLoading={isLoadingCaseUsers}
-                dataTestSubj="case-view-participants-field-panel"
-                caseId={caseData.id}
-                caseTitle={caseData.title}
-              />
-            ) : null}
-            <TagsField tags={caseData.tags} onSubmit={onSubmitTags} isLoading={isTagsLoading} />
-            <CategoryField
-              category={caseData.category}
-              onSubmit={onSubmitCategory}
-              isLoading={isCategoryLoading}
-            />
-          </EuiFlexGroup>
+          <AttributesFields caseData={caseData} />
         </SidebarAccordionSection>
-        <EuiSpacer size="m" />
-        <SidebarAccordionSection
-          id="templateFields"
-          title={templateFieldsTitle}
-          extraAction={
-            permissions.update && isTemplatesV2Enabled ? (
-              <TemplateSettingsPopover
-                caseData={caseData}
-                isTemplatesEnabled={isTemplatesV2Enabled}
-                data-test-subj="case-view-sidebar-template-fields-settings"
-              />
-            ) : undefined
-          }
-          isOpen={isOpen('templateFields')}
-          onToggle={onToggle}
-          data-test-subj="case-view-sidebar-template-fields"
-        >
-          <EuiFlexGroup direction="column" responsive={false} css={fieldsGroupStyles}>
-            <CustomFields
-              isLoading={isCustomFieldsLoading}
-              customFields={caseData.customFields}
-              customFieldsConfiguration={casesConfiguration.customFields}
-              onSubmit={onSubmitCustomField}
-            />
-            {isTemplatesV2Enabled && (
-              <TemplateFields
-                caseData={caseData}
-                onUpdateField={onUpdateField}
-                showHeader={false}
-              />
-            )}
-          </EuiFlexGroup>
-        </SidebarAccordionSection>
+        {isTemplatesV2Enabled ? (
+          <>
+            <EuiSpacer size="m" />
+            <SidebarAccordionSection
+              id="templateFields"
+              title={templateFieldsTitle}
+              extraAction={
+                permissions.update ? (
+                  <TemplateSettingsPopover
+                    caseData={caseData}
+                    isTemplatesEnabled={isTemplatesV2Enabled}
+                    data-test-subj="case-view-sidebar-template-fields-settings"
+                  />
+                ) : undefined
+              }
+              isOpen={isOpen('templateFields')}
+              onToggle={onToggle}
+              data-test-subj="case-view-sidebar-template-fields"
+            >
+              <EuiFlexGroup direction="column" responsive={false} css={fieldsGroupStyles}>
+                <CustomFields
+                  isLoading={isCustomFieldsLoading}
+                  customFields={caseData.customFields}
+                  customFieldsConfiguration={casesConfiguration.customFields}
+                  onSubmit={onSubmitCustomField}
+                />
+                {caseData.template?.id ? (
+                  <TemplateFields
+                    caseData={caseData}
+                    onUpdateField={onUpdateField}
+                    showHeader={false}
+                  />
+                ) : (
+                  <EuiText
+                    size="s"
+                    color="subdued"
+                    data-test-subj="case-view-sidebar-no-template-selected"
+                  >
+                    {redesignI18n.NO_TEMPLATE_SELECTED}
+                  </EuiText>
+                )}
+              </EuiFlexGroup>
+            </SidebarAccordionSection>
+          </>
+        ) : null}
         {pushToServiceAuthorized && caseConnectors && supportedActionConnectors ? (
           <>
             <EuiSpacer size="m" />
@@ -171,12 +160,14 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
               onToggle={onToggle}
               data-test-subj="case-view-sidebar-connectors"
             >
-              <ConnectorField
+              <EditConnector
                 caseData={caseData}
                 caseConnectors={caseConnectors}
                 supportedActionConnectors={supportedActionConnectors}
                 isLoading={isConnectorLoading}
                 onSubmit={onSubmitConnector}
+                showHeader={false}
+                actionsVariant="outlined"
                 key={caseData.connector.id}
               />
             </SidebarAccordionSection>

@@ -132,7 +132,6 @@ describe('CaseViewSidebar (redesign)', () => {
     const caseViewSidebar = await screen.findByTestId('case-view-page-sidebar');
     expect(caseViewSidebar).toHaveClass('euiPanel');
     expect(screen.getByTestId('case-view-sidebar-attributes')).toBeInTheDocument();
-    expect(screen.getByTestId('case-view-sidebar-template-fields')).toBeInTheDocument();
     expect(screen.getByTestId('case-view-sidebar-connectors')).toBeInTheDocument();
     expect(await within(caseViewSidebar).findByTestId('case-tags')).toBeInTheDocument();
     expect(await within(caseViewSidebar).findByTestId('cases-categories')).toBeInTheDocument();
@@ -273,6 +272,11 @@ describe('CaseViewSidebar (redesign)', () => {
   });
 
   it('should call useReplaceCustomField correctly', async () => {
+    jest
+      .spyOn(KibanaServices, 'getConfig')
+      .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+        typeof KibanaServices.getConfig
+      >);
     (useGetCaseConfiguration as jest.Mock).mockReturnValue({
       data: {
         customFields: [customFieldsConfigurationMock[1]],
@@ -343,7 +347,7 @@ describe('CaseViewSidebar (redesign)', () => {
   });
 
   describe('TemplateFields', () => {
-    it('does not render TemplateFields when templates v2 is disabled', async () => {
+    it('does not render the template fields section when templates v2 is disabled', async () => {
       jest.spyOn(KibanaServices, 'getConfig').mockReturnValue(undefined);
 
       renderWithTestingProviders(<CaseViewSidebar caseData={caseData} />);
@@ -352,6 +356,7 @@ describe('CaseViewSidebar (redesign)', () => {
         expect(screen.getByTestId('case-view-page-sidebar')).toBeInTheDocument();
       });
 
+      expect(screen.queryByTestId('case-view-sidebar-template-fields')).not.toBeInTheDocument();
       expect(screen.queryByTestId('case-view-template-fields')).not.toBeInTheDocument();
       // The settings popover has nothing to configure when templates v2 itself is disabled.
       expect(
@@ -359,7 +364,29 @@ describe('CaseViewSidebar (redesign)', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('renders TemplateFields when templates v2 is enabled', async () => {
+    it('renders TemplateFields when templates v2 is enabled and a template is applied', async () => {
+      jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+
+      const caseDataWithTemplate: CaseUI = {
+        ...caseData,
+        template: { id: 'test-template-id', version: 1 },
+      };
+
+      renderWithTestingProviders(<CaseViewSidebar caseData={caseDataWithTemplate} />);
+
+      expect(await screen.findByTestId('case-view-sidebar-template-fields')).toBeInTheDocument();
+      expect(screen.getByTestId('case-view-template-fields')).toBeInTheDocument();
+      expect(screen.getByTestId('case-view-sidebar-template-fields-settings')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('case-view-sidebar-no-template-selected')
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows a "No template selected" placeholder when templates v2 is enabled but no template is applied', async () => {
       jest
         .spyOn(KibanaServices, 'getConfig')
         .mockReturnValue({ templates: { enabled: true } } as ReturnType<
@@ -368,11 +395,19 @@ describe('CaseViewSidebar (redesign)', () => {
 
       renderWithTestingProviders(<CaseViewSidebar caseData={caseData} />);
 
-      expect(await screen.findByTestId('case-view-template-fields')).toBeInTheDocument();
-      expect(screen.getByTestId('case-view-sidebar-template-fields-settings')).toBeInTheDocument();
+      expect(
+        await screen.findByTestId('case-view-sidebar-no-template-selected')
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('case-view-template-fields')).not.toBeInTheDocument();
     });
 
     it('does not render the template settings popover for users without update permissions', async () => {
+      jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+
       renderWithTestingProviders(<CaseViewSidebar caseData={caseData} />, {
         wrapperProps: { permissions: noUpdateCasesPermissions() },
       });

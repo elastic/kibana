@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiComboBox, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { CaseUI } from '../../../../../../common';
@@ -16,6 +16,8 @@ import { useGetTemplate } from '../../../../templates_v2/hooks/use_get_template'
 import { useChangeAppliedTemplate } from '../../../../case_view/use_change_applied_template';
 import * as commonI18n from '../../../../../common/translations';
 import { SidebarSectionSettingsButton } from './sidebar_section_settings_button';
+import { ConfirmChangeTemplateModal } from './confirm_change_template_modal';
+import type { TemplateSummary } from './confirm_change_template_modal';
 
 export interface TemplateSettingsPopoverProps {
   caseData: CaseUI;
@@ -30,6 +32,7 @@ export const TemplateSettingsPopover: FC<TemplateSettingsPopoverProps> = ({
 }) => {
   const { owner } = useCasesContext();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const appliedTemplateId = caseData.template?.id ?? '';
 
   const togglePopover = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -37,8 +40,6 @@ export const TemplateSettingsPopover: FC<TemplateSettingsPopoverProps> = ({
   const { data: templatesData, isLoading: isLoadingTemplates } = useGetTemplates({
     queryParams: { page: 1, perPage: 10000, owner, isEnabled: true },
   });
-
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>(caseData.template?.id ?? '');
 
   const options: Array<EuiComboBoxOptionOption<string>> = useMemo(
     () =>
@@ -51,69 +52,133 @@ export const TemplateSettingsPopover: FC<TemplateSettingsPopoverProps> = ({
   );
 
   const selectedOptions = useMemo(
-    () => options.filter((o) => o.value === selectedTemplateId),
-    [options, selectedTemplateId]
+    () => options.filter((o) => o.value === appliedTemplateId),
+    [options, appliedTemplateId]
   );
 
-  const { data: selectedTemplateData } = useGetTemplate(
-    isTemplatesEnabled ? selectedTemplateId || undefined : undefined
-  );
-  const { mutate: changeTemplate } = useChangeAppliedTemplate();
+  // `null` means no pending confirmation. An empty string represents the user
+  // clearing the selection (i.e. removing the currently applied template).
+  const [pendingTemplateId, setPendingTemplateId] = useState<string | null>(null);
 
-  // Applied via useEffect rather than inside onTemplateChange because the
-  // template definition (fields, version) is fetched asynchronously by
-  // useGetTemplate and isn't available at the time the user selects a template.
-  useEffect(() => {
-    if (
-      isTemplatesEnabled &&
-      selectedTemplateId &&
-      selectedTemplateData &&
-      selectedTemplateData.templateId === selectedTemplateId &&
-      caseData.template?.id !== selectedTemplateId
-    ) {
-      changeTemplate({
-        caseData,
-        newTemplate: {
-          id: selectedTemplateData.templateId,
-          version: selectedTemplateData.templateVersion,
-          fields: selectedTemplateData.definition.fields,
-        },
-      });
+  const { data: appliedTemplateData } = useGetTemplate(
+    isTemplatesEnabled ? caseData.template?.id : undefined,
+    caseData.template?.version
+  );
+
+  const { data: pendingTemplateData, isFetching: isFetchingPendingTemplate } = useGetTemplate(
+    pendingTemplateId || undefined
+  );
+
+  const { mutate: changeTemplate, isLoading: isChangingTemplate } = useChangeAppliedTemplate();
+
+  const onTemplateChange = useCallback(
+    (selected: Array<EuiComboBoxOptionOption<string>>) => {
+      const newTemplateId = selected[0]?.value ?? '';
+      if (newTemplateId === appliedTemplateId) {
+        return;
+      }
+      setPendingTemplateId(newTemplateId);
+    },
+    [appliedTemplateId]
+  );
+
+  const closeConfirmModal = useCallback(() => setPendingTemplateId(null), []);
+
+  const oldTemplateSummary: TemplateSummary | undefined = useMemo(
+    () =>
+      appliedTemplateData
+        ? { name: appliedTemplateData.name, fieldNames: appliedTemplateData.fieldNames }
+        : undefined,
+    [appliedTemplateData]
+  );
+
+  const newTemplateSummary: TemplateSummary | undefined = useMemo(() => {
+    if (!pendingTemplateId) {
+      return undefined;
     }
-  }, [isTemplatesEnabled, selectedTemplateId, selectedTemplateData, caseData, changeTemplate]);
+    const template = templatesData?.templates.find((t) => t.templateId === pendingTemplateId);
+    return template ? { name: template.name, fieldNames: template.fieldNames } : undefined;
+  }, [pendingTemplateId, templatesData?.templates]);
 
-  const onTemplateChange = useCallback((selected: Array<EuiComboBoxOptionOption<string>>) => {
-    setSelectedTemplateId(selected[0]?.value ?? '');
-  }, []);
+  const isPendingNewTemplateDataReady =
+    !pendingTemplateId ||
+    (Boolean(pendingTemplateData) &&
+      pendingTemplateData?.templateId === pendingTemplateId &&
+      !isFetchingPendingTemplate);
+
+  const onConfirmChangeTemplate = useCallback(() => {
+    if (pendingTemplateId === null || !isPendingNewTemplateDataReady) {
+      return;
+    }
+
+    const newTemplate =
+      pendingTemplateId && pendingTemplateData
+        ? {
+            id: pendingTemplateData.templateId,
+            version: pendingTemplateData.templateVersion,
+            fields: pendingTemplateData.definition.fields,
+          }
+        : null;
+
+    changeTemplate(
+      { caseData, newTemplate },
+      {
+        onSuccess: () => {
+          closeConfirmModal();
+          closePopover();
+        },
+      }
+    );
+  }, [
+    pendingTemplateId,
+    isPendingNewTemplateDataReady,
+    pendingTemplateData,
+    caseData,
+    changeTemplate,
+    closeConfirmModal,
+    closePopover,
+  ]);
 
   return (
-    <EuiPopover
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      anchorPosition="downRight"
-      panelPaddingSize="m"
-      data-test-subj={`${dataTestSubj}-popover`}
-      button={
-        <SidebarSectionSettingsButton data-test-subj={dataTestSubj} onClick={togglePopover} />
-      }
-    >
-      {isTemplatesEnabled && (
-        <>
-          <EuiPopoverTitle>{commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_LABEL}</EuiPopoverTitle>
-          <EuiComboBox
-            fullWidth
-            singleSelection={{ asPlainText: true }}
-            options={options}
-            selectedOptions={selectedOptions}
-            onChange={onTemplateChange}
-            isLoading={isLoadingTemplates}
-            placeholder={commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_PLACEHOLDER}
-            data-test-subj={`${dataTestSubj}-template-select`}
-            compressed
-          />
-        </>
+    <>
+      <EuiPopover
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        anchorPosition="downRight"
+        panelPaddingSize="m"
+        data-test-subj={`${dataTestSubj}-popover`}
+        button={
+          <SidebarSectionSettingsButton data-test-subj={dataTestSubj} onClick={togglePopover} />
+        }
+      >
+        {isTemplatesEnabled && (
+          <>
+            <EuiPopoverTitle>{commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_LABEL}</EuiPopoverTitle>
+            <EuiComboBox
+              fullWidth
+              singleSelection={{ asPlainText: true }}
+              options={options}
+              selectedOptions={selectedOptions}
+              onChange={onTemplateChange}
+              isLoading={isLoadingTemplates}
+              placeholder={commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_PLACEHOLDER}
+              data-test-subj={`${dataTestSubj}-template-select`}
+              compressed
+            />
+          </>
+        )}
+      </EuiPopover>
+      {pendingTemplateId !== null && (
+        <ConfirmChangeTemplateModal
+          oldTemplate={oldTemplateSummary}
+          newTemplate={newTemplateSummary}
+          isLoading={isChangingTemplate}
+          isConfirmDisabled={!isPendingNewTemplateDataReady}
+          onConfirm={onConfirmChangeTemplate}
+          onCancel={closeConfirmModal}
+        />
       )}
-    </EuiPopover>
+    </>
   );
 };
 

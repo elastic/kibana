@@ -73,6 +73,47 @@ export const TEMPLATE_FIELDS_TITLE = i18n.translate(
   }
 );
 
+export const NO_TEMPLATE_SELECTED = i18n.translate(
+  'xpack.cases.casesRedesign.details.noTemplateSelected',
+  {
+    defaultMessage: 'No template selected',
+  }
+);
+
+export const CHANGE_TEMPLATE_MODAL_TITLE = i18n.translate(
+  'xpack.cases.casesRedesign.details.changeTemplateModalTitle',
+  {
+    defaultMessage: 'Change template',
+  }
+);
+
+export const CHANGE_TEMPLATE_MODAL_CHANGE_BUTTON = i18n.translate(
+  'xpack.cases.casesRedesign.details.changeTemplateModalChangeButtonLabel',
+  {
+    defaultMessage: 'Change',
+  }
+);
+
+export const CHANGE_TEMPLATE_MODAL_APPLY_BUTTON = i18n.translate(
+  'xpack.cases.casesRedesign.details.changeTemplateModalApplyButtonLabel',
+  {
+    defaultMessage: 'Apply',
+  }
+);
+
+export const CHANGE_TEMPLATE_MODAL_REMOVE_BUTTON = i18n.translate(
+  'xpack.cases.casesRedesign.details.changeTemplateModalRemoveButtonLabel',
+  {
+    defaultMessage: 'Remove',
+  }
+);
+
+export const TEMPLATE_FIELDS_TOOLTIP_ARIA = (templateName: string) =>
+  i18n.translate('xpack.cases.casesRedesign.details.templateFieldsTooltipAriaLabel', {
+    defaultMessage: 'View fields included in the {templateName} template',
+    values: { templateName },
+  });
+
 export const CONNECTORS_TITLE = i18n.translate(
   'xpack.cases.casesRedesign.details.connectorsTitle',
   {
