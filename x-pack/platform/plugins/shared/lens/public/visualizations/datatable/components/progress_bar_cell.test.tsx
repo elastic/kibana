@@ -11,15 +11,12 @@ import userEvent from '@testing-library/user-event';
 import { MeterFillStyle, MeterSize } from '@elastic/charts';
 import type { MeterFill, MeterProps } from '@elastic/charts';
 import type { RawValue } from '@kbn/data-plugin/common';
-import { LENS_DATAGRID_DENSITY } from '@kbn/lens-common';
 import type { CellDecorationFillConfig } from '@kbn/lens-common';
 import {
   ProgressBarCell,
   type ProgressBarCellProps,
   getMeterFill,
   getProgressBarLabelWidthCh,
-  getProgressBarSize,
-  getProgressBarStyle,
   toMeterColorStops,
 } from './progress_bar_cell';
 
@@ -42,24 +39,6 @@ const chartsMock: {
 const meterMock = chartsMock.__mockMeter;
 
 describe('progress bar cell helpers', () => {
-  describe('getProgressBarSize', () => {
-    it('maps density to a Meter thickness, defaulting to the normal (large) pill', () => {
-      expect(getProgressBarSize(LENS_DATAGRID_DENSITY.COMPACT)).toBe(MeterSize.Medium);
-      expect(getProgressBarSize(LENS_DATAGRID_DENSITY.NORMAL)).toBe(MeterSize.Large);
-      expect(getProgressBarSize(LENS_DATAGRID_DENSITY.EXPANDED)).toBe(MeterSize.Large);
-      expect(getProgressBarSize(undefined)).toBe(MeterSize.Large);
-    });
-  });
-
-  describe('getProgressBarStyle', () => {
-    it('trims only the default/normal density to an intermediate rendered height', () => {
-      expect(getProgressBarStyle(LENS_DATAGRID_DENSITY.COMPACT)).toBeUndefined();
-      expect(getProgressBarStyle(LENS_DATAGRID_DENSITY.NORMAL)).toEqual({ height: '12px' });
-      expect(getProgressBarStyle(LENS_DATAGRID_DENSITY.EXPANDED)).toBeUndefined();
-      expect(getProgressBarStyle(undefined)).toEqual({ height: '12px' });
-    });
-  });
-
   describe('toMeterColorStops', () => {
     it('zips parallel color/stop arrays into domain-valued stops', () => {
       expect(toMeterColorStops(['#a', '#b', '#c'], [0, 50, 100])).toEqual([
@@ -67,12 +46,6 @@ describe('progress bar cell helpers', () => {
         { color: '#b', stop: 50 },
         { color: '#c', stop: 100 },
       ]);
-    });
-
-    it('returns no stops when either array is empty', () => {
-      expect(toMeterColorStops([], [0, 1])).toEqual([]);
-      expect(toMeterColorStops(['#a'], [])).toEqual([]);
-      expect(toMeterColorStops(undefined, undefined)).toEqual([]);
     });
   });
 

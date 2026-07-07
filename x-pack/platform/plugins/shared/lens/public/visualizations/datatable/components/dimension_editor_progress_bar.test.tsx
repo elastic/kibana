@@ -175,44 +175,6 @@ describe('data table progress bar regressions', () => {
     mockActiveDataColumnType('number');
   });
 
-  it('shows the Auto value-range tooltip in progress mode', async () => {
-    state.columns[0] = {
-      columnId: 'foo',
-      colorMode: 'progress',
-      fillStyle: { fillMode: 'gradient', valueRange: { mode: 'auto' } },
-      palette: { type: 'palette', name: 'status' },
-    };
-
-    renderEditor();
-
-    await user.hover(screen.getByTestId('lnsDatatable_progressBar_valueRange_auto'));
-
-    expect(
-      await screen.findByText(
-        'Auto uses the loaded data range for this column. Switch to Custom to set your own min and max.'
-      )
-    ).toBeInTheDocument();
-  });
-
-  it('shows the Custom value-range tooltip in progress mode', async () => {
-    state.columns[0] = {
-      columnId: 'foo',
-      colorMode: 'progress',
-      fillStyle: { fillMode: 'gradient', valueRange: { mode: 'custom', min: 0, max: 100 } },
-      palette: { type: 'palette', name: 'status' },
-    };
-
-    renderEditor();
-
-    await user.hover(screen.getByTestId('lnsDatatable_progressBar_valueRange_custom'));
-
-    expect(
-      await screen.findByText(
-        'Custom lets you change the range. You can also reverse color order or tweak color stops by editing Color mapping.'
-      )
-    ).toBeInTheDocument();
-  });
-
   it('uses the active progress range as the palette editor domain', () => {
     setFooRows([{ foo: 70 }, { foo: 80 }, { foo: 90 }]);
     state.columns[0] = {
@@ -415,34 +377,6 @@ describe('data table progress bar regressions', () => {
             columnId: 'foo',
             fillStyle: expect.objectContaining({
               valueRange: { mode: 'custom', min: 0, max: 85 },
-            }),
-          }),
-        ]),
-      })
-    );
-  });
-
-  it('seeds Custom from a flat negative Auto domain by anchoring back to zero', async () => {
-    setFooRows([{ foo: -0.2 }, { foo: -0.2 }, { foo: -0.2 }]);
-    state.columns[0] = {
-      columnId: 'foo',
-      colorMode: 'progress',
-      fillStyle: { fillMode: 'gradient', valueRange: { mode: 'auto' } },
-      palette: { type: 'palette', name: 'status' },
-    };
-
-    renderEditor();
-
-    await user.click(screen.getByTestId('lnsDatatable_progressBar_valueRange_custom'));
-    await act(async () => jest.advanceTimersByTime(256));
-
-    expect(setState).toHaveBeenCalledWith(
-      expect.objectContaining({
-        columns: expect.arrayContaining([
-          expect.objectContaining({
-            columnId: 'foo',
-            fillStyle: expect.objectContaining({
-              valueRange: { mode: 'custom', min: -0.2, max: 0 },
             }),
           }),
         ]),

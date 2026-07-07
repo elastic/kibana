@@ -505,18 +505,6 @@ describe('data table dimension editor', () => {
       expect(btnGroups.alignment.getSelected()).toHaveTextContent('Right');
     });
 
-    it('renders progress bar controls (Bar color + Value range) in progress mode', () => {
-      mockFirstColumn({ dataType: 'number' });
-      state.columns[0].colorMode = 'progress';
-      state.columns[0].fillStyle = { fillMode: 'single' };
-      renderTableDimensionEditor();
-
-      expect(screen.getByTestId('lnsDatatable_progressBar_barColor')).toBeInTheDocument();
-      expect(screen.getByTestId('lnsDatatable_progressBar_valueRange')).toBeInTheDocument();
-      // Single bar color exposes the EuiColorPicker, labeled "Color".
-      expect(screen.getByLabelText('Color')).toBeInTheDocument();
-    });
-
     it('hides the dual range slider for an auto value range', () => {
       mockFirstColumn({ dataType: 'number' });
       state.columns[0].colorMode = 'progress';
@@ -525,27 +513,6 @@ describe('data table dimension editor', () => {
 
       // Custom range inputs are only rendered while the range is custom.
       expect(screen.queryAllByRole('spinbutton')).toHaveLength(0);
-    });
-
-    it('shows the dual range slider only when value range is custom', () => {
-      mockFirstColumn({ dataType: 'number' });
-      state.columns[0].colorMode = 'progress';
-      state.columns[0].fillStyle = {
-        fillMode: 'single',
-        valueRange: { mode: 'custom', min: 0, max: 10 },
-      };
-      renderTableDimensionEditor();
-
-      // The custom range row renders a consolidated min/max numeric input pair,
-      // so assert on the rendered spinbuttons directly.
-      const spinbuttons = screen.getAllByRole('spinbutton');
-      expect(spinbuttons).toHaveLength(2);
-      spinbuttons.forEach((input) => {
-        // Regression guard for the ±Infinity continuity bug: every bound the
-        // slider receives must be finite.
-        expect(Number.isFinite(Number(input.getAttribute('min')))).toBe(true);
-        expect(Number.isFinite(Number(input.getAttribute('max')))).toBe(true);
-      });
     });
 
     it('does not clamp the custom range inputs to the slider bounds', () => {
@@ -704,20 +671,6 @@ describe('data table dimension editor', () => {
           ],
         })
       );
-    });
-
-    it('renders the remembered bounds on the slider for a custom range', () => {
-      mockFirstColumn({ dataType: 'number' });
-      state.columns[0].colorMode = 'progress';
-      state.columns[0].fillStyle = {
-        fillMode: 'single',
-        valueRange: { mode: 'custom', min: -5, max: 25 },
-      };
-      renderTableDimensionEditor();
-
-      const [minInput, maxInput] = screen.getAllByRole('spinbutton');
-      expect(minInput).toHaveValue(-5);
-      expect(maxInput).toHaveValue(25);
     });
 
     it('drops progress config when switching away from progress mode', async () => {

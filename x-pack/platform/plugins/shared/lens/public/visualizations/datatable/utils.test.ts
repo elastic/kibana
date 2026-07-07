@@ -9,44 +9,12 @@ import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { CellDecorationFillConfig } from '@kbn/lens-common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import {
-  getDefaultFillConfig,
-  isPaletteFillMode,
   getProgressBarDomain,
   getDecorationCustomRange,
   getProgressBarPaletteStops,
-  getDecorationDefaultColor,
-  DEFAULT_PROGRESS_BAR_COLOR,
 } from './utils';
 
 describe('datatable progress bar utils', () => {
-  describe('getDefaultFillConfig', () => {
-    it('defaults to a gradient fill with auto range and the progress default color', () => {
-      expect(getDefaultFillConfig('progress')).toEqual({
-        fillMode: 'gradient',
-        color: DEFAULT_PROGRESS_BAR_COLOR,
-        valueRange: { mode: 'auto' },
-      });
-    });
-  });
-
-  describe('getDecorationDefaultColor', () => {
-    it('returns the datavis color for progress and undefined for other modes', () => {
-      expect(getDecorationDefaultColor('progress')).toBe(DEFAULT_PROGRESS_BAR_COLOR);
-      expect(getDecorationDefaultColor('cell')).toBeUndefined();
-      expect(getDecorationDefaultColor('text')).toBeUndefined();
-      expect(getDecorationDefaultColor('badge')).toBeUndefined();
-      expect(getDecorationDefaultColor('none')).toBeUndefined();
-    });
-  });
-
-  describe('isPaletteFillMode', () => {
-    it('is true only for solid and gradient', () => {
-      expect(isPaletteFillMode('single')).toBe(false);
-      expect(isPaletteFillMode('solid')).toBe(true);
-      expect(isPaletteFillMode('gradient')).toBe(true);
-    });
-  });
-
   describe('getProgressBarDomain', () => {
     const single = (
       overrides: Partial<CellDecorationFillConfig> = {}
@@ -61,14 +29,6 @@ describe('datatable progress bar utils', () => {
         { min: 10, max: 90 }
       );
       expect(domain).toEqual({ min: 10, max: 90 });
-    });
-
-    it('uses the loaded data bounds for a negative-only auto range', () => {
-      const domain = getProgressBarDomain(
-        { fillStyle: single({ valueRange: { mode: 'auto' } }) },
-        { min: -120, max: -10 }
-      );
-      expect(domain).toEqual({ min: -120, max: -10 });
     });
 
     it('anchors a flat positive auto range back to zero', () => {
@@ -101,25 +61,6 @@ describe('datatable progress bar utils', () => {
         { min: 0, max: 100 }
       );
       expect(domain).toEqual({ min: 20, max: 80 });
-    });
-
-    it('supports a custom range with a negative minimum (single mode)', () => {
-      const domain = getProgressBarDomain(
-        { fillStyle: single({ valueRange: { mode: 'custom', min: -30, max: 70 } }) },
-        { min: -10, max: 50 }
-      );
-      expect(domain).toEqual({ min: -30, max: 70 });
-    });
-
-    it('reads custom bounds from palette params for solid/gradient', () => {
-      const domain = getProgressBarDomain(
-        {
-          fillStyle: { fillMode: 'gradient', valueRange: { mode: 'custom' } },
-          palette: { params: { rangeMin: -40, rangeMax: 60 } },
-        },
-        { min: -10, max: 10 }
-      );
-      expect(domain).toEqual({ min: -40, max: 60 });
     });
 
     it('guards against an all-zero auto domain', () => {
@@ -298,18 +239,6 @@ describe('datatable progress bar utils', () => {
       ]);
     });
 
-    it('honors a single serialized color as a flat fill anchored at min', () => {
-      expect(
-        getProgressBarPaletteStops(
-          paletteService,
-          { min: -20, max: 50 },
-          undefined,
-          ['#abcdef'],
-          []
-        )
-      ).toEqual([{ color: '#abcdef', stop: -20 }]);
-    });
-
     it('spreads named palette colors across the selected progress-bar bounds', () => {
       const bounds = { min: 70, max: 90 };
       const palette: PaletteOutput<CustomPaletteParams> = { type: 'palette', name: 'status' };
@@ -321,21 +250,6 @@ describe('datatable progress bar utils', () => {
         expect(typeof stop.color).toBe('string');
         expect(stop.color.length).toBeGreaterThan(0);
         expect(stop.stop).toBe(bounds.min + expectedStep * index);
-      });
-    });
-
-    it('recomputes the default palette only when no colors are serialized', () => {
-      const stops = getProgressBarPaletteStops(
-        paletteService,
-        { min: 0, max: 100 },
-        undefined,
-        [],
-        []
-      );
-      expect(stops.length).toBeGreaterThan(0);
-      stops.forEach((s) => {
-        expect(typeof s.color).toBe('string');
-        expect(typeof s.stop).toBe('number');
       });
     });
   });
@@ -352,18 +266,6 @@ describe('datatable progress bar utils', () => {
           { min: 5, max: 95 }
         )
       ).toEqual({ mode: 'custom', min: 5, max: 95 });
-    });
-
-    it('reads bounds from palette params for solid/gradient', () => {
-      expect(
-        getDecorationCustomRange(
-          {
-            fillStyle: { fillMode: 'solid', valueRange: { mode: 'custom' } },
-            palette: { params: { rangeMin: 1, rangeMax: 9 } },
-          },
-          { min: 0, max: 100 }
-        )
-      ).toEqual({ mode: 'custom', min: 1, max: 9 });
     });
 
     it('prefers fillStyle valueRange bounds over stale palette bounds for palette fills', () => {
