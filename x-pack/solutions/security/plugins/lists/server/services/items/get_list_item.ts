@@ -39,8 +39,11 @@ export const getListItem = async ({
       realtime: esRealtime,
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const source = response._source!;
+    const { _source: source } = response;
+    if (source == null) {
+      return null;
+    }
+
     const type = findSourceType(source);
     if (type == null) {
       return null;

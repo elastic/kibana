@@ -66,6 +66,35 @@ describe('get_list_item', () => {
     expect(list).toEqual(null);
   });
 
+  test('it forwards esRealtime: true to the esClient.get call', async () => {
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.get.mockResolvedValue({
+      _id: LIST_ITEM_ID,
+      _index: LIST_INDEX,
+      _source: getSearchEsListItemMock(),
+      found: true,
+    });
+    await getListItem({
+      esClient,
+      esRealtime: true,
+      id: LIST_ITEM_ID,
+      listItemIndex: LIST_INDEX,
+    });
+    expect(esClient.get).toHaveBeenCalledWith(expect.objectContaining({ realtime: true }));
+  });
+
+  test('it returns null if _source is undefined', async () => {
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.get.mockResolvedValue({
+      _id: LIST_ITEM_ID,
+      _index: LIST_INDEX,
+      _source: undefined,
+      found: true,
+    });
+    const list = await getListItem({ esClient, id: LIST_ITEM_ID, listItemIndex: LIST_INDEX });
+    expect(list).toEqual(null);
+  });
+
   test('it re-throws non-404 errors', async () => {
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     const serverError = new errors.ResponseError({
