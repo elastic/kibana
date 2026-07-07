@@ -13,18 +13,7 @@ import { FEEDBACK_SUBMITTED_EVENT_TYPE } from '../src';
 const mockAnalytics = analyticsServiceMock.createAnalyticsServiceSetup();
 const router = mockRouter.create();
 
-const mockUser = {
-  uid: 'test-user-id',
-  enabled: true,
-  user: {
-    username: 'test_user',
-    email: 'test@elastic.co',
-    roles: ['superuser'],
-    realm_name: 'native',
-  },
-  labels: {},
-  data: {},
-};
+const mockUserProfileId = 'test-user-id';
 
 describe('registerSendFeedbackRoute', () => {
   beforeEach(() => {
@@ -47,7 +36,7 @@ describe('registerSendFeedbackRoute', () => {
     const [, handler] = router.post.mock.calls[0];
 
     const coreContext = coreMock.createRequestHandlerContext();
-    coreContext.userProfile.getCurrent.mockResolvedValue(mockUser);
+    coreContext.userProfile.getCurrentProfileId.mockResolvedValue(mockUserProfileId);
 
     const mockContext = {
       core: Promise.resolve(coreContext),
@@ -110,7 +99,7 @@ describe('registerSendFeedbackRoute', () => {
     });
 
     const coreContext = coreMock.createRequestHandlerContext();
-    coreContext.userProfile.getCurrent.mockResolvedValue(mockUser);
+    coreContext.userProfile.getCurrentProfileId.mockResolvedValue(mockUserProfileId);
 
     const mockContext = {
       core: Promise.resolve(coreContext),

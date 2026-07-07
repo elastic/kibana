@@ -44,11 +44,11 @@ export function registerSendFeedbackRoute(router: IRouter, analytics: AnalyticsS
     async (context, request, response) => {
       const core = await context.core;
 
-      const user = await core.userProfile.getCurrent();
+      const userId = await core.userProfile.getCurrentProfileId();
       try {
         analytics.reportEvent(FEEDBACK_SUBMITTED_EVENT_TYPE, {
           ...request.body,
-          user_id: user?.uid,
+          user_id: userId ?? undefined,
           source: 'kibana',
         });
 
