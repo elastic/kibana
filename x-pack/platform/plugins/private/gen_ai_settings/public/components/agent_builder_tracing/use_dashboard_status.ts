@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -13,7 +14,7 @@ const QUERY_KEY = ['agentBuilderTracingDashboardStatus'];
 
 export const useDashboardStatus = () => {
   const {
-    services: { spaces, dashboard, genAiSettingsApi },
+    services: { spaces, dashboard, notifications, genAiSettingsApi },
   } = useKibana();
   const queryClient = useQueryClient();
 
@@ -43,6 +44,14 @@ export const useDashboardStatus = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+    },
+    onError: (error: { body?: { message?: string }; message?: string }) => {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.genAiSettings.agentBuilderTracing.installDashboardError', {
+          defaultMessage: 'Failed to install traces dashboard',
+        }),
+        text: error?.body?.message ?? error?.message,
+      });
     },
   });
 

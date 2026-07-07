@@ -289,7 +289,10 @@ export const AgentBuilderTracingSection: React.FC = () => {
                           onClick={() => installDashboard()}
                           iconType="download"
                           isLoading={isInstalling}
-                          isDisabled={isDashboardLoading}
+                          isDisabled={
+                            isDashboardLoading ||
+                            !!unsavedChanges[AGENT_BUILDER_TRACING_ENABLED_SETTING_ID]
+                          }
                           data-test-subj="agentBuilderTracingInstallDashboard"
                         >
                           <FormattedMessage
