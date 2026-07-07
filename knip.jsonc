@@ -1,19 +1,25 @@
 // Configuration for `knip` (https://knip.dev).
 //
-// Kibana uses a single root `package.json` and links packages via `link:` rather than yarn workspaces,
-// so this file is the source of truth for what knip should analyze. Add more workspaces here as
-// additional areas of the monorepo are brought under knip-managed lint coverage.
+// Kibana is a pnpm workspace monorepo. Knip auto-discovers workspaces from `pnpm-workspace.yaml`.
 //
 // Usage:
 //   node scripts/knip [...args]
 //
-// Check for unused root dependencies (ignores @kbn/* and @elastic/*):
-//   node scripts/knip --workspace . --include dependencies,devDependencies
+// Find unused root dependencies/devDependencies:
+//   node scripts/knip --include dependencies,devDependencies
 //
-// Scope to a single workspace:
+// Scope to a single workspace (its ancestors, including root, are included automatically):
 //   node scripts/knip --workspace src/platform/packages/shared/kbn-safer-lodash-set --include unlisted
 {
   "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
+  // Disable the Playwright and Cypress plugins for every workspace (top-level plugin config
+  // is applied to all workspaces as a default). Knip's config loader tries to import each
+  // `playwright.config.ts` / `cypress.config.ts`, which transitively pulls in `*.text`
+  // mustache templates from @kbn/evals (Node can't load the `.text` extension without our
+  // runtime require hook) and hits a colorette bundling issue in the cypress configs. We
+  // don't need these config files for dependency analysis, so we skip loading them.
+  "playwright": false,
+  "cypress": false,
   // @kbn/* and @elastic/* are internal linked packages managed outside of knip.
   // @babel/plugin-* and babel-plugin-* are consumed via require.resolve() in
   // packages/kbn-babel-preset/ which knip cannot trace (it only detects require/import).
@@ -37,30 +43,15 @@
     "mocha-junit-reporter",
     "mocha-multi-reporters",
     "mochawesome",
-    "mochawesome-merge",
-    // nyc is invoked from shell scripts (.buildkite/scripts/steps/code_coverage/)
-    // and osquery's package.json scripts; knip can't trace shell usage.
-    "nyc",
+    // used by APM's Cypress e2e support files (ftr_e2e/); with the cypress plugin disabled
+    // (see above) knip no longer traces it through the cypress config/support chain.
+    "@frsource/cypress-plugin-visual-regression-diff",
     // oxlint is invoked as a binary via procRunner in @kbn/lint-cli;
     // knip can't trace dynamic cmd invocations.
     "oxlint"
   ],
   "workspaces": {
     ".": {
-      "entry": [
-        "src/**/*.{ts,tsx,js,jsx}",
-        "x-pack/**/*.{ts,tsx,js,jsx}",
-        "packages/**/*.{ts,tsx,js,jsx}",
-        "examples/**/*.{ts,tsx,js,jsx}",
-        "plugins/**/*.{ts,tsx,js,jsx}"
-      ],
-      "project": [
-        "src/**/*.{ts,tsx,js,jsx}",
-        "x-pack/**/*.{ts,tsx,js,jsx}",
-        "packages/**/*.{ts,tsx,js,jsx}",
-        "examples/**/*.{ts,tsx,js,jsx}",
-        "plugins/**/*.{ts,tsx,js,jsx}"
-      ],
       "ignore": [
         "**/node_modules/**",
         "**/target/**",
@@ -102,6 +93,17 @@
     },
     "src/platform/packages/shared/kbn-safer-lodash-set": {
       "entry": ["set.js", "setWith.js", "fp/*.js"]
+    },
+    "src/platform/packages/private/kbn-esql-scripts": {
+      // These are standalone CLI scripts invoked via ts-node from the package's shell scripts
+      // (definitions/make_defs.sh, documentation/make_docs.sh), not from an index/main entry.
+      // Declaring them as entries lets knip follow their imports.
+      "entry": ["definitions/generate_*.ts", "documentation/generate_*.ts"]
+    },
+    "src/platform/packages/shared/kbn-test": {
+      // Jest setup/polyfill/serializer files referenced from jest-preset.js via `<rootDir>/...`.
+      // knip can't resolve `<rootDir>` inside a shared preset.
+      "entry": ["src/jest/setup/*.{js,ts}"]
     }
   }
 }
