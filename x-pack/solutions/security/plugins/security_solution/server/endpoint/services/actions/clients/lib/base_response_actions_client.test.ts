@@ -47,6 +47,7 @@ import {
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
 } from '../../../../../lib/telemetry/event_based/events';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+
 jest.mock('../../action_details_by_id', () => {
   const original = jest.requireActual('../../action_details_by_id');
 
@@ -745,9 +746,7 @@ describe('ResponseActionsClientImpl base class', () => {
     it('should return an async iterable', () => {
       const iterable = baseClassMock.fetchAllPendingActions();
 
-      expect(iterable).toEqual({
-        [Symbol.asyncIterator]: expect.any(Function),
-      });
+      expect(iterable[Symbol.asyncIterator]).toEqual(expect.any(Function));
     });
 
     it('should query ES with expected criteria', async () => {
