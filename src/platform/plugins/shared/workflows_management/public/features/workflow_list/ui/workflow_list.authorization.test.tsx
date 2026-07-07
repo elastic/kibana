@@ -291,7 +291,7 @@ describe('Authorization matrix', () => {
     });
     renderList({ item: createWorkflowListItem({ id: 'managed-wf', managed: true }) });
 
-    expect(screen.getByTestId('editWorkflowAction')).toBeDisabled();
+    expectControlDisabled('editWorkflowAction', true);
   });
 
   it('explains why managed workflows cannot be edited', async () => {
