@@ -17,8 +17,9 @@ export { RuleCreatedTriggerId } from '../../../../../common/workflows/triggers';
 
 /**
  * Binding from the bus `rule.created` event to the `alerting.ruleCreated`
- * workflow trigger. The publisher already shapes the payload, so the
- * subscriber forwards it unchanged.
+ * workflow trigger. The internal event payload also carries change-history
+ * data (snapshot/author/sequence); `toPayload` projects only the rule ref so
+ * that state never reaches workflows.
  */
 export const ruleCreatedTrigger: RuleWorkflowTriggerBinding<
   RuleCreatedEvent,
@@ -27,5 +28,5 @@ export const ruleCreatedTrigger: RuleWorkflowTriggerBinding<
   eventType: RULE_CREATED_EVENT_TYPE,
   triggerId: RuleCreatedTriggerId,
   definition: ruleCreatedTriggerCommonDefinition,
-  toPayload: (event) => event.payload,
+  toPayload: (event) => ({ rule: event.payload.rule }),
 };

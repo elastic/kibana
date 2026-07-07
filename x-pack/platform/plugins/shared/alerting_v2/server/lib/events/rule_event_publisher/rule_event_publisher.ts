@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
-import type { RuleLifecycleEvent } from '../../../../common/workflows/triggers';
+import type { RuleChangeHistoryAuthor, RuleSnapshot } from '../../rule_change_history';
 import {
   AlertingDomainEventBusToken,
   type AlertingDomainEvent,
@@ -21,17 +21,20 @@ import {
   RULE_ENABLED_EVENT_TYPE,
   RULE_UPDATED_EVENT_TYPE,
   type RuleEvent,
+  type RuleLifecycleEvent,
 } from './events';
 
 /**
- * Minimal rule reference carried in a rule-lifecycle event. Kept intentionally
- * small (a workflow step fetches any further rule data itself); modelled as an
- * object so fields like `version` can be added later without changing the
- * publisher signatures.
+ * Rule reference plus optional change-history data carried in a rule-lifecycle
+ * event.
  */
 export interface EventRule {
   id: string;
   spaceId: string;
+  snapshot?: RuleSnapshot;
+  sequence?: number;
+  author?: RuleChangeHistoryAuthor;
+  correlationId?: string;
 }
 
 /**
@@ -91,17 +94,19 @@ export class RuleEventPublisher implements RuleEventPublisherContract {
     for (const rule of rules) {
       this.publish(request, {
         type: eventType,
-        payload: this.toLifecyclePayload(rule),
+        payload: this.toEventPayload(rule),
       });
     }
   }
 
-  private toLifecyclePayload(rule: EventRule): RuleLifecycleEvent {
+  private toEventPayload(rule: EventRule): RuleLifecycleEvent {
+    const { id, spaceId, snapshot, sequence, author, correlationId } = rule;
     return {
-      rule: {
-        ruleId: rule.id,
-        spaceId: rule.spaceId,
-      },
+      rule: { ruleId: id, spaceId },
+      ...(snapshot ? { snapshot } : {}),
+      ...(sequence !== undefined ? { sequence } : {}),
+      ...(author ? { author } : {}),
+      ...(correlationId ? { correlationId } : {}),
     };
   }
 

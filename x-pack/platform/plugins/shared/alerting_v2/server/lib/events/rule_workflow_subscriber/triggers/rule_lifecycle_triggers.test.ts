@@ -20,7 +20,20 @@ import { ruleDeletedTrigger } from './rule_deleted';
 import { ruleEnabledTrigger } from './rule_enabled';
 import { ruleDisabledTrigger } from './rule_disabled';
 
-const payload = { rule: { ruleId: 'rule-1', spaceId: 'default' } } as const;
+const ruleRef = { ruleId: 'rule-1', spaceId: 'default' } as const;
+
+/**
+ * Internal event payload deliberately enriched with change-history data. The
+ * bindings must project this down to just the rule ref so snapshot/author/
+ * sequence never leak into the workflow trigger payload.
+ */
+const enrichedPayload: RuleEvent['payload'] = {
+  rule: ruleRef,
+  snapshot: { attributes: { metadata: { name: 'secret rule' } }, references: [] },
+  sequence: 7,
+  author: { uid: 'profile-uid', username: 'elastic' },
+  correlationId: 'bulk-1',
+};
 
 interface Case {
   name: string;
@@ -32,27 +45,27 @@ const cases: Case[] = [
   {
     name: 'ruleCreatedTrigger',
     trigger: ruleCreatedTrigger,
-    event: { type: RULE_CREATED_EVENT_TYPE, payload },
+    event: { type: RULE_CREATED_EVENT_TYPE, payload: enrichedPayload },
   },
   {
     name: 'ruleUpdatedTrigger',
     trigger: ruleUpdatedTrigger,
-    event: { type: RULE_UPDATED_EVENT_TYPE, payload },
+    event: { type: RULE_UPDATED_EVENT_TYPE, payload: enrichedPayload },
   },
   {
     name: 'ruleDeletedTrigger',
     trigger: ruleDeletedTrigger,
-    event: { type: RULE_DELETED_EVENT_TYPE, payload },
+    event: { type: RULE_DELETED_EVENT_TYPE, payload: enrichedPayload },
   },
   {
     name: 'ruleEnabledTrigger',
     trigger: ruleEnabledTrigger,
-    event: { type: RULE_ENABLED_EVENT_TYPE, payload },
+    event: { type: RULE_ENABLED_EVENT_TYPE, payload: enrichedPayload },
   },
   {
     name: 'ruleDisabledTrigger',
     trigger: ruleDisabledTrigger,
-    event: { type: RULE_DISABLED_EVENT_TYPE, payload },
+    event: { type: RULE_DISABLED_EVENT_TYPE, payload: enrichedPayload },
   },
 ];
 
@@ -63,8 +76,8 @@ describe('rule lifecycle workflow trigger bindings', () => {
       expect(trigger.definition.id).toBe(trigger.triggerId);
     });
 
-    it('forwards the publisher-shaped payload unchanged', () => {
-      expect(trigger.toPayload(event)).toEqual(event.payload);
+    it('projects only the rule ref, dropping change-history fields (no snapshot/author/sequence leak)', () => {
+      expect(trigger.toPayload(event)).toEqual({ rule: ruleRef });
     });
 
     it('produces a payload that parses cleanly against the registered Zod schema', () => {

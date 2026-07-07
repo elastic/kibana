@@ -5,14 +5,30 @@
  * 2.0.
  */
 
-import type { RuleLifecycleEvent } from '../../../../common/workflows/triggers';
+import type { RuleChangeHistoryAuthor, RuleSnapshot } from '../../rule_change_history';
+
+/**
+ * Full data carried by every rule-lifecycle domain event.
+ *
+ * This is the internal event payload.
+ */
+export interface RuleLifecycleEvent {
+  readonly rule: { ruleId: string; spaceId: string };
+  /** Post-change rule state (metadata-only for deletions). */
+  readonly snapshot?: RuleSnapshot;
+  /** Monotonic rule change counter (`change_history_sequence`). */
+  readonly sequence?: number;
+  /** Author resolved at operation time. */
+  readonly author?: RuleChangeHistoryAuthor;
+  /** Shared id linking events emitted by the same bulk operation. */
+  readonly correlationId?: string;
+}
 
 /**
  * Structure of every rule-lifecycle domain event.
  *
  * Concrete events specialise `TType` — the string-literal discriminator
- * (e.g. `'rule.created'`). Per-event data lives under `payload`, which
- * matches the workflow trigger schema shape.
+ * (e.g. `'rule.created'`). Per-event data lives under `payload`.
  */
 export interface BaseRuleEvent<TType extends string> {
   readonly type: TType;
