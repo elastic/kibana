@@ -939,7 +939,95 @@ steps:
                 {%- endif %}
                 {%- endif %}
 
-          - name: onechat_runAgent_step
+          # Trim the alert before sending it to the model. The full alert _source is mostly noise
+          # (tens of thousands of tokens); this keeps the alert id/index plus the high-signal fields
+          # that mirror the elastic-assistant default anonymization allow-list (DEFAULT_ALLOW in
+          # elastic_assistant/common/anonymization). Absent fields render empty and are cheap. The
+          # richer vendor-specific identifiers (aws/azure/gcp) already reach the model through the
+          # observable-context section of the agent message above.
+          - name: build_minimal_alert
+            type: data.set
+            with:
+              minimal_alert:
+                _id: "{{ foreach.item._id }}"
+                _index: "{{ foreach.item._index }}"
+                "@timestamp": '{{ foreach.item["@timestamp"] }}'
+                event:
+                  category: "${{ foreach.item.event.category }}"
+                  action: "{{ foreach.item.event.action }}"
+                  type: "${{ foreach.item.event.type }}"
+                  outcome: "{{ foreach.item.event.outcome }}"
+                  code: "{{ foreach.item.event.code }}"
+                  severity: "${{ foreach.item.event.severity }}"
+                  dataset: "{{ foreach.item.event.dataset }}"
+                  module: "{{ foreach.item.event.module }}"
+                host:
+                  name: "{{ foreach.item.host.name }}"
+                  architecture: "{{ foreach.item.host.architecture }}"
+                  os:
+                    name: "{{ foreach.item.host.os.name }}"
+                    version: "{{ foreach.item.host.os.version }}"
+                user:
+                  name: "{{ foreach.item.user.name }}"
+                  domain: "{{ foreach.item.user.domain }}"
+                  id: "{{ foreach.item.user.id }}"
+                process:
+                  name: "{{ foreach.item.process.name }}"
+                  executable: "{{ foreach.item.process.executable }}"
+                  command_line: "{{ foreach.item.process.command_line }}"
+                  args: "${{ foreach.item.process.args }}"
+                  pid: "${{ foreach.item.process.pid }}"
+                  working_directory: "{{ foreach.item.process.working_directory }}"
+                  hash:
+                    sha256: "{{ foreach.item.process.hash.sha256 }}"
+                  code_signature:
+                    exists: "${{ foreach.item.process.code_signature.exists }}"
+                    trusted: "${{ foreach.item.process.code_signature.trusted }}"
+                    status: "{{ foreach.item.process.code_signature.status }}"
+                    subject_name: "{{ foreach.item.process.code_signature.subject_name }}"
+                  parent:
+                    name: "{{ foreach.item.process.parent.name }}"
+                    executable: "{{ foreach.item.process.parent.executable }}"
+                    command_line: "{{ foreach.item.process.parent.command_line }}"
+                    args: "${{ foreach.item.process.parent.args }}"
+                    code_signature:
+                      trusted: "${{ foreach.item.process.parent.code_signature.trusted }}"
+                      subject_name: "{{ foreach.item.process.parent.code_signature.subject_name }}"
+                file:
+                  name: "{{ foreach.item.file.name }}"
+                  path: "{{ foreach.item.file.path }}"
+                  hash:
+                    sha256: "{{ foreach.item.file.hash.sha256 }}"
+                source:
+                  ip: "{{ foreach.item.source.ip }}"
+                destination:
+                  ip: "{{ foreach.item.destination.ip }}"
+                network:
+                  protocol: "{{ foreach.item.network.protocol }}"
+                url:
+                  full: "{{ foreach.item.url.full }}"
+                dns:
+                  question:
+                    name: "{{ foreach.item.dns.question.name }}"
+                    type: "{{ foreach.item.dns.question.type }}"
+                cloud:
+                  provider: "{{ foreach.item.cloud.provider }}"
+                  region: "{{ foreach.item.cloud.region }}"
+                  account:
+                    id: "{{ foreach.item.cloud.account.id }}"
+                message: "{{ foreach.item.message }}"
+                kibana:
+                  alert:
+                    severity: "{{ foreach.item.kibana.alert.severity }}"
+                    risk_score: "${{ foreach.item.kibana.alert.risk_score }}"
+                    workflow_status: "{{ foreach.item.kibana.alert.workflow_status }}"
+                    rule:
+                      name: "{{ foreach.item.kibana.alert.rule.name }}"
+                      description: "{{ foreach.item.kibana.alert.rule.description }}"
+                      references: "${{ foreach.item.kibana.alert.rule.references }}"
+                      threat: "${{ foreach.item.kibana.alert.rule.threat }}"
+
+          - name: runAgent_step
             type: ai.agent
             agent-id: "elastic-ai-agent"
             connector-id: "{{ variables.connector_id }}"
@@ -953,7 +1041,9 @@ steps:
               attachments:
                 - type: "security.alert"
                   data:
-                    alert: "{{ foreach.item | json:2 }}"
+                    # Trimmed alert (see build_minimal_alert), serialized to keep the previous string
+                    # shape the attachment expects, but far smaller than the full _source.
+                    alert: "{{ variables.minimal_alert | json:2 }}"
                     attachmentLabel: "{{ steps.get_seed_timeline_string.output.attachment_label }}"
 
               # Structured output schema the AI agent must conform to.
@@ -993,7 +1083,7 @@ steps:
           # and abort processing for this alert.
           - name: check_if_output_exists
             type: if
-            condition: "not steps.onechat_runAgent_step.output.structured_output.classification:*"
+            condition: "not steps.runAgent_step.output.structured_output.classification:*"
             steps:
               - name: add_no_data_note_to_alert
                 type: kibana.request
@@ -1038,24 +1128,38 @@ steps:
                         ---
                         ## Automated Alert Analysis
                         ### Classification
-                        **{{ steps.onechat_runAgent_step.output.structured_output.classification }}**
+                        **{{ steps.runAgent_step.output.structured_output.classification }}**
 
                         ### Confidence Score
-                        {{ steps.onechat_runAgent_step.output.structured_output.confidence_score }}
+                        {{ steps.runAgent_step.output.structured_output.confidence_score }}
 
                         ### Rationale
-                        {{ steps.onechat_runAgent_step.output.structured_output.rationale }}
+                        {{ steps.runAgent_step.output.structured_output.rationale }}
 
                         ### Contributing Factors
-                        {% for factor in steps.onechat_runAgent_step.output.structured_output.contributing_factors %}
+                        {% for factor in steps.runAgent_step.output.structured_output.contributing_factors %}
                         - {{ factor }}
                         {%- endfor %}
 
-                        ### Timestamp
-                        {{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S' }}
+                        ### Analysis Details
+                        - Workflow version: {{ variables.normalized_version }}
+                        - Tag prefix: {{ variables.tag_prefix }}
+                        - Connector: {{ steps.runAgent_step.output.metadata.usage.connectorId | default: variables.connector_id }}
+                        {% if variables.auto_close_enabled -%}
+                        - Auto-close confidence range: {{ variables.auto_close_confidence_score_min_threshold }} to {{ variables.auto_close_confidence_score_max_threshold }}
+                        {%- endif %}
 
-                        {% if steps.onechat_runAgent_step.output.conversation_id -%}
-                        [Continue conversation](/app/agent_builder/conversations/{{ steps.onechat_runAgent_step.output.conversation_id }})
+                        ### Token Usage
+                        - Input tokens: {{ steps.runAgent_step.output.metadata.usage.inputTokens | default: 0 }}
+                        - Output tokens: {{ steps.runAgent_step.output.metadata.usage.outputTokens | default: 0 }}
+                        - Cached tokens: {{ steps.runAgent_step.output.metadata.usage.cachedTokens | default: 0 }}
+                        - Total tokens: {{ steps.runAgent_step.output.metadata.usage.totalTokens | default: 0 }}
+
+                        ### Timestamp
+                        {{ execution.startedAt | date: '%B %d, %Y at %H:%M:%S UTC' }}
+
+                        {% if steps.runAgent_step.output.conversation_id -%}
+                        [Continue conversation](/app/agent_builder/conversations/{{ steps.runAgent_step.output.conversation_id }})
                         {%- endif %}
 
                       timelineId: ''
@@ -1085,8 +1189,8 @@ steps:
                   tags_to_add:
                     - "{{ variables.tag_prefix }}"
                     - "{{ variables.tag_prefix }}.version.{{ variables.normalized_version }}"
-                    - "{{ variables.tag_prefix }}.classification.{{ steps.onechat_runAgent_step.output.structured_output.classification | downcase }}"
-                    - "{{ variables.tag_prefix }}.confidence.{{ steps.onechat_runAgent_step.output.structured_output.confidence_score }}"
+                    - "{{ variables.tag_prefix }}.classification.{{ steps.runAgent_step.output.structured_output.classification | downcase }}"
+                    - "{{ variables.tag_prefix }}.confidence.{{ steps.runAgent_step.output.structured_output.confidence_score }}"
                   tags_to_remove: "${{ foreach.item.kibana.alert.workflow_tags | where_exp: 'tag', variables.tags_filter_expr }}"
 
               # Remove stale tags first (if any) to avoid conflicts with the add.
@@ -1127,9 +1231,9 @@ steps:
                 type: if
                 condition: >-
                   variables.auto_close_enabled: true
-                  and steps.onechat_runAgent_step.output.structured_output.classification: "false_positive"
-                  and steps.onechat_runAgent_step.output.structured_output.confidence_score >= {{ variables.auto_close_confidence_score_min_threshold }}
-                  and steps.onechat_runAgent_step.output.structured_output.confidence_score <= {{ variables.auto_close_confidence_score_max_threshold }}
+                  and steps.runAgent_step.output.structured_output.classification: "false_positive"
+                  and steps.runAgent_step.output.structured_output.confidence_score >= {{ variables.auto_close_confidence_score_min_threshold }}
+                  and steps.runAgent_step.output.structured_output.confidence_score <= {{ variables.auto_close_confidence_score_max_threshold }}
                 steps:
                   # Tag the alert so it can be identified as auto-closed.
                   - name: set_close_tags

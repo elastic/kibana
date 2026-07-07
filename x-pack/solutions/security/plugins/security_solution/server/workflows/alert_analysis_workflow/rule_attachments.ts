@@ -8,6 +8,7 @@
 import pMap from 'p-map';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { systemConnectorActionRefPrefix } from '@kbn/alerting-plugin/common';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import type {
   AlertAnalysisWorkflowRuleAttachmentService,
@@ -74,18 +75,12 @@ const normalizeSearch = (search: string): string | undefined => {
   return trimmed.length > 0 ? trimmed : undefined;
 };
 
-const compareRulesByStableDefaultSort = (ruleA: RuleAlertType, ruleB: RuleAlertType): number => {
-  if (ruleA.enabled !== ruleB.enabled) {
-    return ruleA.enabled ? -1 : 1;
-  }
-
-  const nameComparison = ruleA.name.localeCompare(ruleB.name);
-  if (nameComparison !== 0) {
-    return nameComparison;
-  }
-
-  return ruleA.id.localeCompare(ruleB.id);
-};
+// KQL matching rules that have this workflow's system action attached. Mirrors how the connector
+// rules list finds rules using a system connector (see triggers_actions_ui connector_rules_list),
+// but also pins the flattened `workflowId` so a rule attached to a *different* workflow via the same
+// shared `.workflows` system connector is not counted as attached to this one.
+const buildAttachedRulesFilter = (workflowId: string): string =>
+  `alert.attributes.actions:{ actionRef: "${systemConnectorActionRefPrefix}${ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID}" and params.subActionParams.workflowId: "${workflowId}" }`;
 
 const getRuleActions = (
   rule: Pick<RuleAlertType, 'actions' | 'systemActions'>
@@ -159,40 +154,61 @@ const toRuleAttachmentSummary = (
   attached: hasAlertAnalysisWorkflowAction(rule, workflowId),
 });
 
-const getMatchingRules = async ({
+// Count-only find (no hits fetched) so the preview scales to any number of matching rules instead
+// of throwing once more than MAX_RULES_TO_ATTACH match. An optional `filter` narrows the count, e.g.
+// to rules that already have the workflow action attached.
+const countMatchingRules = async ({
   rulesClient,
   search,
+  filter,
 }: {
   rulesClient: RulesClient;
   search: string;
-}): Promise<MatchingRulesResult> => {
+  filter?: string;
+}): Promise<number> => {
   const normalizedSearch = normalizeSearch(search);
-  const result = await findRules({
+  const { total } = await findRules({
     rulesClient,
-    filter: undefined,
+    filter,
     fields: undefined,
     page: 1,
-    perPage: MAX_RULES_TO_ATTACH,
+    perPage: 0,
     sortField: undefined,
     sortOrder: undefined,
     search: normalizedSearch,
     searchFields: normalizedSearch ? ['name'] : undefined,
   });
 
-  if (result.total > MAX_RULES_TO_ATTACH) {
-    throw new BadRequestError(
-      `More than ${MAX_RULES_TO_ATTACH} rules matched the filter query. Try to narrow it down.`
-    );
-  }
-
-  return {
-    total: result.total,
-    rules: result.data.sort(compareRulesByStableDefaultSort),
-  };
+  return total;
 };
 
-const countAttachedRules = (rules: RuleAlertType[], workflowId: string): number => {
-  return rules.filter((rule) => hasAlertAnalysisWorkflowAction(rule, workflowId)).length;
+// Server-side sorted + paginated fetch. Sorting is delegated to the rules client (by name) so the
+// order is stable across pages without pulling every matching rule into memory.
+const fetchMatchingRules = async ({
+  rulesClient,
+  search,
+  page,
+  perPage,
+}: {
+  rulesClient: RulesClient;
+  search: string;
+  page: number;
+  perPage: number;
+}): Promise<MatchingRulesResult> => {
+  const normalizedSearch = normalizeSearch(search);
+  const { data, total } = await findRules({
+    rulesClient,
+    filter: undefined,
+    fields: undefined,
+    page,
+    perPage,
+    sortField: 'name',
+    sortOrder: 'asc',
+    search: normalizedSearch,
+    searchFields: normalizedSearch ? ['name'] : undefined,
+  });
+
+  return { total, rules: data };
 };
 
 const getRulesMissingWorkflowAction = (
@@ -257,30 +273,40 @@ export const createAlertAnalysisWorkflowRuleAttachmentService = (
 
   return {
     async getRuleAttachmentStats({ search }) {
-      const { total, rules } = await getMatchingRules({ rulesClient, search });
+      const [total, attached] = await Promise.all([
+        countMatchingRules({ rulesClient, search }),
+        countMatchingRules({ rulesClient, search, filter: buildAttachedRulesFilter(workflowId) }),
+      ]);
 
-      return {
-        total,
-        attached: countAttachedRules(rules, workflowId),
-      };
+      return { total, attached };
     },
 
     async getRuleAttachments({ search, page, perPage }) {
-      const { total, rules } = await getMatchingRules({ rulesClient, search });
-      const startIndex = (page - 1) * perPage;
-      const pageRules = rules.slice(startIndex, startIndex + perPage);
+      const [{ total, rules }, attached] = await Promise.all([
+        fetchMatchingRules({ rulesClient, search, page, perPage }),
+        countMatchingRules({ rulesClient, search, filter: buildAttachedRulesFilter(workflowId) }),
+      ]);
 
       return {
         total,
-        attached: countAttachedRules(rules, workflowId),
+        attached,
         page,
         perPage,
-        rules: pageRules.map((rule) => toRuleAttachmentSummary(rule, workflowId)),
+        rules: rules.map((rule) => toRuleAttachmentSummary(rule, workflowId)),
       };
     },
 
     async getRuleAttachmentSelection({ search }): Promise<RuleAttachmentSelection> {
-      const { total, rules } = await getMatchingRules({ rulesClient, search });
+      // Bulk attach/detach is bounded platform-wide (the rules client turns ids into KQL OR clauses,
+      // capped by ES maxClauseCount), so selection enumerates at most MAX_RULES_TO_ATTACH matching
+      // rules by name order rather than every match. Browsing/preview stays uncapped via the
+      // count-only + paginated read paths above.
+      const { total, rules } = await fetchMatchingRules({
+        rulesClient,
+        search,
+        page: 1,
+        perPage: MAX_RULES_TO_ATTACH,
+      });
       const rulesMissingWorkflowAction = getRulesMissingWorkflowAction(rules, workflowId);
       const rulesWithWorkflowAction = getRulesWithWorkflowAction(rules, workflowId);
 
