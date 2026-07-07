@@ -146,7 +146,7 @@ export const observabilityOnboardingFlow: SavedObjectsType = {
   mappings: {
     properties: {
       type: { type: 'keyword' },
-      createdBy: { type: 'keyword' },
+      createdBy: { type: 'keyword', ignore_above: MAX_CREATED_BY_LENGTH },
       state: { type: 'object', dynamic: false },
       progress: { type: 'object', dynamic: false },
     },
@@ -199,7 +199,7 @@ export const observabilityOnboardingFlow: SavedObjectsType = {
         {
           type: 'mappings_addition',
           addedMappings: {
-            createdBy: { type: 'keyword' },
+            createdBy: { type: 'keyword', ignore_above: MAX_CREATED_BY_LENGTH },
           },
         },
       ],
