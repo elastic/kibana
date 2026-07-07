@@ -11,6 +11,13 @@ import type { LensByValueSerializedState } from '@kbn/lens-common';
 import { simpleMetricAttributes } from '@kbn/lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock';
 import { getTransformOut } from './transform_out';
 
+interface MetricPanelWithDurationFormat {
+  layers?: Array<{ metrics?: Array<{ format?: unknown }> }>;
+}
+
+const getDurationFormat = (result: unknown) =>
+  (result as MetricPanelWithDurationFormat).layers?.[0]?.metrics?.[0]?.format;
+
 describe('getTransformOut', () => {
   const transformDrilldownsOut = jest.fn(<T extends { drilldowns?: unknown }>(state: T) => state);
 
@@ -66,6 +73,24 @@ describe('getTransformOut', () => {
     expect(result.data_source).toEqual(expect.objectContaining({ ref_id: remappedDataViewId }));
   });
 
+  it('keeps legacy metric panels without density on compact density in apiFormat', () => {
+    const builder = new LensConfigBuilder(undefined, true);
+    const transformOut = getTransformOut(builder, transformDrilldownsOut, true);
+
+    const storedState: LensByValueSerializedState = {
+      title: 'Metric',
+      attributes: {
+        ...simpleMetricAttributes,
+      },
+      references: [],
+    };
+
+    const result = transformOut(storedState, []) as { styling?: { density?: string } };
+
+    expect(simpleMetricAttributes.state.visualization).not.toHaveProperty('density');
+    expect(result.styling?.density).toEqual('compact');
+  });
+
   // When the panel has no title (key absent or `undefined`), fall back to the attributes
   // title so legacy by-value panels keep their title through the apiFormat round-trip.
   // See https://github.com/elastic/kibana/issues/268821
@@ -107,5 +132,65 @@ describe('getTransformOut', () => {
     const result = transformOut(storedState, []);
 
     expect(result.title).toEqual('Attributes title');
+  });
+
+  it('down-converts GA duration units when GA schemas are disabled', () => {
+    const builder = new LensConfigBuilder(undefined, true);
+    const toAPIFormatSpy = jest.spyOn(builder, 'toAPIFormat').mockReturnValue({
+      title: 'Attributes title',
+      description: '',
+      type: 'metric',
+      layers: [
+        {
+          metrics: [{ format: { type: 'duration', from: 'min', to: 'auto-approximate' } }],
+        },
+      ],
+    } as unknown as ReturnType<LensConfigBuilder['toAPIFormat']>);
+    const transformOut = getTransformOut(builder, transformDrilldownsOut, true);
+
+    const storedState: LensByValueSerializedState = {
+      attributes: simpleMetricAttributes,
+      references: [],
+    };
+
+    const result = transformOut(storedState, [], undefined, undefined, false);
+
+    expect(getDurationFormat(result)).toEqual({
+      type: 'duration',
+      from: 'minutes',
+      to: 'humanize',
+    });
+
+    toAPIFormatSpy.mockRestore();
+  });
+
+  it('preserves GA duration units when GA schemas are active', () => {
+    const builder = new LensConfigBuilder(undefined, true);
+    const toAPIFormatSpy = jest.spyOn(builder, 'toAPIFormat').mockReturnValue({
+      title: 'Attributes title',
+      description: '',
+      type: 'metric',
+      layers: [
+        {
+          metrics: [{ format: { type: 'duration', from: 'min', to: 'auto-approximate' } }],
+        },
+      ],
+    } as unknown as ReturnType<LensConfigBuilder['toAPIFormat']>);
+    const transformOut = getTransformOut(builder, transformDrilldownsOut, true);
+
+    const storedState: LensByValueSerializedState = {
+      attributes: simpleMetricAttributes,
+      references: [],
+    };
+
+    const result = transformOut(storedState, [], undefined, undefined, true);
+
+    expect(getDurationFormat(result)).toEqual({
+      type: 'duration',
+      from: 'min',
+      to: 'auto-approximate',
+    });
+
+    toAPIFormatSpy.mockRestore();
   });
 });
