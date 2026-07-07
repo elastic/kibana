@@ -258,7 +258,7 @@ describe('createContextAwarenessToolkit', () => {
 
     expect(setProfileStateSpy).toHaveBeenCalledWith({
       tabId,
-      key: TEST_PROFILE_STATE_DEF.key,
+      profileStateDefinition: TEST_PROFILE_STATE_DEF,
       profileState,
       historyMethod: 'replace',
     });
