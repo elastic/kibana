@@ -71,7 +71,9 @@ export const McpClientsTable = memo(() => {
 
   return (
     <>
-      <EuiSearchBar {...searchConfig} />
+      <div data-test-subj="mcpClientsTableSearch">
+        <EuiSearchBar {...searchConfig} />
+      </div>
       <EuiSpacer size="m" />
       {hasClients && <McpClientsNotConnectedBanner clients={clients} />}
       <McpClientsTableHeader
