@@ -45,6 +45,10 @@ export class CallbackDeliveryService {
     events: ChatEvent[];
     callbackUrl: string | undefined;
   }): Promise<void> {
+    if (!callbackUrl) {
+      return;
+    }
+
     await this.makeCallbackRequestIfConfigured({
       callbackUrl,
       payload: {
