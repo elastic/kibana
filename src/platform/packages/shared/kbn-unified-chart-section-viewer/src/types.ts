@@ -47,7 +47,7 @@ export type SimpleAggregation =
  */
 export type HistogramPercentile = 'p50' | 'p75' | 'p90' | 'p95' | 'p99';
 
-export interface MetricsAggregationSettings {
+export interface MetricsGridSettings {
   counterAggregation: SimpleAggregation;
   gaugeAggregation: SimpleAggregation;
   histogramPercentile: HistogramPercentile;
@@ -75,14 +75,14 @@ export interface UnifiedMetricsGridProps extends ChartSectionProps {
   externalServices?: ExternalServices;
   /**
    * Current per-`metric_type` aggregation overrides (counter/gauge/histogram).
-   * Falls back to `METRICS_AGGREGATION_SETTINGS_DEFAULTS` when not provided by the host.
+   * Falls back to `METRICS_GRID_SETTINGS_DEFAULTS` when not provided by the host.
    */
-  aggregationSettings?: MetricsAggregationSettings;
+  gridSettings?: MetricsGridSettings;
   /**
-   * Optional callback used to push aggregation setting changes back to the host
+   * Optional callback used to push grid setting changes back to the host
    * (e.g. Discover's persistent profile state).
    */
-  onAggregationSettingsChange?: (update: Partial<MetricsAggregationSettings>) => void;
+  onGridSettingsChange?: (update: Partial<MetricsGridSettings>) => void;
 }
 
 export interface Dimension {

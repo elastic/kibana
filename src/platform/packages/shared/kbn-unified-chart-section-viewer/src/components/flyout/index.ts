@@ -8,4 +8,4 @@
  */
 
 export { MetricInsightsFlyout } from './metrics_insights_flyout';
-export { AggregationSettingsFlyout } from './metrics_aggregation_settings_flyout';
+export { GridSettingsFlyout } from './metrics_grid_settings_flyout';

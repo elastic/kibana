@@ -24,7 +24,7 @@ interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderTo
   isLoading?: boolean;
   /** Forwarded to {@link DimensionsSelector}; see its prop docs. */
   metricItems?: ParsedMetricItem[];
-  onOpenAggregationSettings: () => void;
+  onOpenGridSettings: () => void;
 }
 
 export const useToolbarActions = ({
@@ -35,7 +35,7 @@ export const useToolbarActions = ({
   hideRightSideActions = false,
   isLoading = false,
   metricItems,
-  onOpenAggregationSettings,
+  onOpenGridSettings,
 }: UseToolbarActionsProps) => {
   const { selectedDimensions, onDimensionsChange, isFullscreen, onToggleFullscreen } =
     useMetricsExperienceState();
@@ -78,7 +78,7 @@ export const useToolbarActions = ({
       return [];
     }
 
-    const editGridLabel = i18n.translate('metricsExperience.editAggregationsButton', {
+    const editGridLabel = i18n.translate('metricsExperience.editGridButton', {
       defaultMessage: 'Edit grid of metrics',
     });
 
@@ -95,7 +95,7 @@ export const useToolbarActions = ({
         iconType: 'pencil',
         label: editGridLabel,
         toolTipContent: editGridLabel,
-        onClick: onOpenAggregationSettings,
+        onClick: onOpenGridSettings,
         'data-test-subj': 'metricsExperienceEditGridButton',
       },
       {
@@ -106,7 +106,7 @@ export const useToolbarActions = ({
         'data-test-subj': 'metricsExperienceToolbarFullScreen',
       },
     ];
-  }, [isFullscreen, hideRightSideActions, onToggleFullscreen, onOpenAggregationSettings]);
+  }, [isFullscreen, hideRightSideActions, onToggleFullscreen, onOpenGridSettings]);
 
   return {
     toggleActions,

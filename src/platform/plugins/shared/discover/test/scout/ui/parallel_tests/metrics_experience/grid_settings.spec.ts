@@ -8,9 +8,9 @@
  */
 
 /**
- * Aggregation settings tests.
+ * Grid settings tests.
  *
- * These tests validate that the toolbar edit button opens the aggregation
+ * These tests validate that the toolbar edit button opens the grid
  * settings flyout, that selections are only staged (not applied) until
  * "Apply and close" is clicked, that "Cancel" discards a staged selection,
  * and that an applied selection persists across a page reload via
@@ -21,7 +21,7 @@ import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData, DEFAULT_TIME_RANGE } from '../../fixtures/metrics_experience';
 
 spaceTest.describe(
-  'Metrics in Discover - Aggregation Settings',
+  'Metrics in Discover - Grid Settings',
   { tag: testData.METRICS_EXPERIENCE_TAGS },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
@@ -45,37 +45,37 @@ spaceTest.describe(
     spaceTest(
       'stages a counter selection without applying it until "Apply and close" is clicked',
       async ({ pageObjects }) => {
-        const { aggregationSettings } = pageObjects.metricsExperience;
+        const { gridSettings } = pageObjects.metricsExperience;
 
         await spaceTest.step('open the flyout via the edit button', async () => {
-          await aggregationSettings.open();
-          await expect(aggregationSettings.flyout).toBeVisible();
+          await gridSettings.open();
+          await expect(gridSettings.flyout).toBeVisible();
         });
 
         await spaceTest.step(
           '"Apply and close" starts disabled with no pending changes',
           async () => {
-            await expect(aggregationSettings.applyButton).toBeDisabled();
+            await expect(gridSettings.applyButton).toBeDisabled();
           }
         );
 
         await spaceTest.step(
           'selecting MAX for counters enables "Apply and close" but does not change the dropdown label yet',
           async () => {
-            await aggregationSettings.selectCounterAggregation('max');
-            await expect(aggregationSettings.applyButton).toBeEnabled();
-            await expect(aggregationSettings.counterSelect).toContainText('Maximum');
+            await gridSettings.selectCounterAggregation('max');
+            await expect(gridSettings.applyButton).toBeEnabled();
+            await expect(gridSettings.counterSelect).toContainText('Maximum');
           }
         );
 
         await spaceTest.step('applying commits the change and closes the flyout', async () => {
-          await aggregationSettings.apply();
-          await expect(aggregationSettings.flyout).toBeHidden();
+          await gridSettings.apply();
+          await expect(gridSettings.flyout).toBeHidden();
         });
 
         await spaceTest.step('reopening the flyout still shows the applied value', async () => {
-          await aggregationSettings.open();
-          await expect(aggregationSettings.counterSelect).toContainText('Maximum');
+          await gridSettings.open();
+          await expect(gridSettings.counterSelect).toContainText('Maximum');
         });
       }
     );
@@ -83,26 +83,26 @@ spaceTest.describe(
     spaceTest(
       'discards a staged gauge selection when "Cancel" is clicked',
       async ({ pageObjects }) => {
-        const { aggregationSettings } = pageObjects.metricsExperience;
+        const { gridSettings } = pageObjects.metricsExperience;
 
         await spaceTest.step('open the flyout and note the current gauge value', async () => {
-          await aggregationSettings.open();
-          await expect(aggregationSettings.gaugeSelect).toContainText('Average');
+          await gridSettings.open();
+          await expect(gridSettings.gaugeSelect).toContainText('Average');
         });
 
         await spaceTest.step('select MINIMUM for gauges without applying', async () => {
-          await aggregationSettings.selectGaugeAggregation('min');
-          await expect(aggregationSettings.gaugeSelect).toContainText('Minimum');
+          await gridSettings.selectGaugeAggregation('min');
+          await expect(gridSettings.gaugeSelect).toContainText('Minimum');
         });
 
         await spaceTest.step('cancel discards the staged change and closes', async () => {
-          await aggregationSettings.cancel();
-          await expect(aggregationSettings.flyout).toBeHidden();
+          await gridSettings.cancel();
+          await expect(gridSettings.flyout).toBeHidden();
         });
 
         await spaceTest.step('reopening the flyout still shows the original value', async () => {
-          await aggregationSettings.open();
-          await expect(aggregationSettings.gaugeSelect).toContainText('Average');
+          await gridSettings.open();
+          await expect(gridSettings.gaugeSelect).toContainText('Average');
         });
       }
     );
@@ -110,15 +110,15 @@ spaceTest.describe(
     spaceTest(
       'persists an applied histogram percentile selection across a page reload',
       async ({ pageObjects, page }) => {
-        const { aggregationSettings } = pageObjects.metricsExperience;
+        const { gridSettings } = pageObjects.metricsExperience;
 
         await spaceTest.step(
           'select and apply the 50th percentile for the histogram aggregation',
           async () => {
-            await aggregationSettings.selectHistogramPercentile('p50');
-            await expect(aggregationSettings.histogramSelect).toContainText('50th percentile');
-            await aggregationSettings.apply();
-            await expect(aggregationSettings.flyout).toBeHidden();
+            await gridSettings.selectHistogramPercentile('p50');
+            await expect(gridSettings.histogramSelect).toContainText('50th percentile');
+            await gridSettings.apply();
+            await expect(gridSettings.flyout).toBeHidden();
           }
         );
 
@@ -128,8 +128,8 @@ spaceTest.describe(
         });
 
         await spaceTest.step('reopening the flyout still shows the applied value', async () => {
-          await aggregationSettings.open();
-          await expect(aggregationSettings.histogramSelect).toContainText('50th percentile');
+          await gridSettings.open();
+          await expect(gridSettings.histogramSelect).toContainText('50th percentile');
         });
       }
     );

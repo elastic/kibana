@@ -173,22 +173,22 @@ describe('MetricsExperienceStateProvider', () => {
     });
   });
 
-  describe('aggregationSettings', () => {
-    it('defaults to METRICS_AGGREGATION_SETTINGS_DEFAULTS when not provided', () => {
+  describe('gridSettings', () => {
+    it('defaults to METRICS_GRID_SETTINGS_DEFAULTS when not provided', () => {
       const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
 
-      expect(result.current.aggregationSettings).toEqual({
+      expect(result.current.gridSettings).toEqual({
         counterAggregation: 'sum',
         gaugeAggregation: 'avg',
         histogramPercentile: 'p95',
       });
     });
 
-    it('uses the provided aggregationSettings instead of the defaults', () => {
+    it('uses the provided gridSettings instead of the defaults', () => {
       const customWrapper = ({ children }: { children: React.ReactNode }) => (
         <MetricsExperienceStateProvider
           profileId="test-profile"
-          aggregationSettings={{
+          gridSettings={{
             counterAggregation: 'max',
             gaugeAggregation: 'min',
             histogramPercentile: 'p50',
@@ -199,19 +199,19 @@ describe('MetricsExperienceStateProvider', () => {
       );
       const { result } = renderHook(() => useMetricsExperienceState(), { wrapper: customWrapper });
 
-      expect(result.current.aggregationSettings).toEqual({
+      expect(result.current.gridSettings).toEqual({
         counterAggregation: 'max',
         gaugeAggregation: 'min',
         histogramPercentile: 'p50',
       });
     });
 
-    it('forwards updates to the onAggregationSettingsChange prop', () => {
-      const onAggregationSettingsChange = jest.fn();
+    it('forwards updates to the onGridSettingsChange prop', () => {
+      const onGridSettingsChange = jest.fn();
       const customWrapper = ({ children }: { children: React.ReactNode }) => (
         <MetricsExperienceStateProvider
           profileId="test-profile"
-          onAggregationSettingsChange={onAggregationSettingsChange}
+          onGridSettingsChange={onGridSettingsChange}
         >
           {children}
         </MetricsExperienceStateProvider>
@@ -219,18 +219,18 @@ describe('MetricsExperienceStateProvider', () => {
       const { result } = renderHook(() => useMetricsExperienceState(), { wrapper: customWrapper });
 
       act(() => {
-        result.current.onAggregationSettingsChange({ counterAggregation: 'max' });
+        result.current.onGridSettingsChange({ counterAggregation: 'max' });
       });
 
-      expect(onAggregationSettingsChange).toHaveBeenCalledWith({ counterAggregation: 'max' });
+      expect(onGridSettingsChange).toHaveBeenCalledWith({ counterAggregation: 'max' });
     });
 
-    it('does not throw when onAggregationSettingsChange is not provided', () => {
+    it('does not throw when onGridSettingsChange is not provided', () => {
       const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
 
       expect(() => {
         act(() => {
-          result.current.onAggregationSettingsChange({ counterAggregation: 'max' });
+          result.current.onGridSettingsChange({ counterAggregation: 'max' });
         });
       }).not.toThrow();
     });

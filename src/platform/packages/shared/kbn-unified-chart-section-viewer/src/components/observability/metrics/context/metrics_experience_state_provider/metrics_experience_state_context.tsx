@@ -9,8 +9,8 @@
 
 import React, { useCallback } from 'react';
 import { createContext } from 'react';
-import type { Dimension, MetricsAggregationSettings } from '../../../../../types';
-import { METRICS_AGGREGATION_SETTINGS_DEFAULTS } from '../../../../flyout/metrics_aggregation_settings_flyout/constants';
+import type { Dimension, MetricsGridSettings } from '../../../../../types';
+import { METRICS_GRID_SETTINGS_DEFAULTS } from '../../../../flyout/metrics_grid_settings_flyout/constants';
 import {
   type FlyoutState,
   type FlyoutTabId,
@@ -20,14 +20,14 @@ import {
 
 export interface MetricsExperienceStateContextValue extends MetricsExperienceRestorableState {
   profileId: string;
-  aggregationSettings: MetricsAggregationSettings;
+  gridSettings: MetricsGridSettings;
   onPageChange: (value: number) => void;
   onDimensionsChange: (value: Dimension[]) => void;
   onSearchTermChange: (value: string) => void;
   onToggleFullscreen: () => void;
   onFlyoutStateChange: (value: FlyoutState | undefined) => void;
   onFlyoutSelectedTabChange: (value: FlyoutTabId) => void;
-  onAggregationSettingsChange: (update: Partial<MetricsAggregationSettings>) => void;
+  onGridSettingsChange: (update: Partial<MetricsGridSettings>) => void;
 }
 
 export const MetricsExperienceStateContext =
@@ -36,13 +36,13 @@ export const MetricsExperienceStateContext =
 export function MetricsExperienceStateProvider({
   children,
   profileId,
-  aggregationSettings = METRICS_AGGREGATION_SETTINGS_DEFAULTS,
-  onAggregationSettingsChange,
+  gridSettings = METRICS_GRID_SETTINGS_DEFAULTS,
+  onGridSettingsChange,
 }: {
   children: React.ReactNode;
   profileId: string;
-  aggregationSettings?: MetricsAggregationSettings;
-  onAggregationSettingsChange?: (update: Partial<MetricsAggregationSettings>) => void;
+  gridSettings?: MetricsGridSettings;
+  onGridSettingsChange?: (update: Partial<MetricsGridSettings>) => void;
 }) {
   const [currentPage, setCurrentPage] = useRestorableState('currentPage', 0);
   const [selectedDimensions, setSelectedDimensions] = useRestorableState('selectedDimensions', []);
@@ -94,18 +94,18 @@ export function MetricsExperienceStateProvider({
     [setFlyoutState]
   );
 
-  const handleAggregationSettingsChange = useCallback(
-    (update: Partial<MetricsAggregationSettings>) => {
-      onAggregationSettingsChange?.(update);
+  const handleGridSettingsChange = useCallback(
+    (update: Partial<MetricsGridSettings>) => {
+      onGridSettingsChange?.(update);
     },
-    [onAggregationSettingsChange]
+    [onGridSettingsChange]
   );
 
   return (
     <MetricsExperienceStateContext.Provider
       value={{
         profileId,
-        aggregationSettings,
+        gridSettings,
         currentPage,
         isFullscreen,
         searchTerm,
@@ -117,7 +117,7 @@ export function MetricsExperienceStateProvider({
         onToggleFullscreen,
         onFlyoutStateChange,
         onFlyoutSelectedTabChange,
-        onAggregationSettingsChange: handleAggregationSettingsChange,
+        onGridSettingsChange: handleGridSettingsChange,
       }}
     >
       {children}

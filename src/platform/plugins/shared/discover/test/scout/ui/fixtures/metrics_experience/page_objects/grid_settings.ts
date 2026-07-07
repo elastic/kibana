@@ -12,7 +12,7 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 export type SimpleAggregationOption = 'avg' | 'sum' | 'min' | 'max';
 export type HistogramPercentileOption = 'p50' | 'p75' | 'p90' | 'p95' | 'p99';
 
-export interface AggregationSettings {
+export interface GridSettings {
   readonly editButton: Locator;
   readonly flyout: Locator;
   readonly counterSelect: Locator;
@@ -33,16 +33,14 @@ export interface AggregationSettings {
   readonly cancel: () => Promise<void>;
 }
 
-export function createAggregationSettings(page: ScoutPage): AggregationSettings {
-  const editButton = page.testSubj.locator('metricsExperienceEditAggregationsButton');
-  const flyout = page.testSubj.locator('metricsExperienceAggregationSettingsFlyout');
-  const counterSelect = page.testSubj.locator('metricsExperienceAggregationSettingsCounterSelect');
-  const gaugeSelect = page.testSubj.locator('metricsExperienceAggregationSettingsGaugeSelect');
-  const histogramSelect = page.testSubj.locator(
-    'metricsExperienceAggregationSettingsHistogramSelect'
-  );
-  const applyButton = page.testSubj.locator('metricsExperienceAggregationSettingsApplyButton');
-  const cancelButton = page.testSubj.locator('metricsExperienceAggregationSettingsCancelButton');
+export function createGridSettings(page: ScoutPage): GridSettings {
+  const editButton = page.testSubj.locator('metricsExperienceEditGridButton');
+  const flyout = page.testSubj.locator('metricsExperienceGridSettingsFlyout');
+  const counterSelect = page.testSubj.locator('metricsExperienceGridSettingsCounterSelect');
+  const gaugeSelect = page.testSubj.locator('metricsExperienceGridSettingsGaugeSelect');
+  const histogramSelect = page.testSubj.locator('metricsExperienceGridSettingsHistogramSelect');
+  const applyButton = page.testSubj.locator('metricsExperienceGridSettingsApplyButton');
+  const cancelButton = page.testSubj.locator('metricsExperienceGridSettingsCancelButton');
 
   const open = async () => {
     if (!(await flyout.isVisible())) {
@@ -69,16 +67,13 @@ export function createAggregationSettings(page: ScoutPage): AggregationSettings 
     cancelButton,
     open,
     selectCounterAggregation: (option) =>
-      selectFromDropdown(
-        counterSelect,
-        `metricsExperienceAggregationSettingsCounterOption-${option}`
-      ),
+      selectFromDropdown(counterSelect, `metricsExperienceGridSettingsCounterOption-${option}`),
     selectGaugeAggregation: (option) =>
-      selectFromDropdown(gaugeSelect, `metricsExperienceAggregationSettingsGaugeOption-${option}`),
+      selectFromDropdown(gaugeSelect, `metricsExperienceGridSettingsGaugeOption-${option}`),
     selectHistogramPercentile: (option) =>
       selectFromDropdown(
         histogramSelect,
-        `metricsExperienceAggregationSettingsHistogramOption-${option}`
+        `metricsExperienceGridSettingsHistogramOption-${option}`
       ),
     apply: async () => {
       await applyButton.click();

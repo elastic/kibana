@@ -32,7 +32,7 @@ import {
 import type { ParsedMetricItem, Dimension, UnifiedMetricsGridProps } from '../../../types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
-import { METRICS_AGGREGATION_SETTINGS_DEFAULTS } from '../../flyout/metrics_aggregation_settings_flyout/constants';
+import { METRICS_GRID_SETTINGS_DEFAULTS } from '../../flyout/metrics_grid_settings_flyout/constants';
 import { EuiSuperSelectTestHarness } from '@kbn/test-eui-helpers';
 
 jest.mock('./context/metrics_experience_state_provider');
@@ -260,8 +260,8 @@ describe('MetricsExperienceGrid', () => {
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
       profileId: 'test-profile-id',
-      aggregationSettings: METRICS_AGGREGATION_SETTINGS_DEFAULTS,
-      onAggregationSettingsChange: jest.fn(),
+      gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      onGridSettingsChange: jest.fn(),
     });
 
     useFetchMetricsDataMock.mockReturnValue({
@@ -437,8 +437,8 @@ describe('MetricsExperienceGrid', () => {
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
       profileId: 'test-profile-id',
-      aggregationSettings: METRICS_AGGREGATION_SETTINGS_DEFAULTS,
-      onAggregationSettingsChange: jest.fn(),
+      gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      onGridSettingsChange: jest.fn(),
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -485,8 +485,8 @@ describe('MetricsExperienceGrid', () => {
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
       profileId: 'test-profile-id',
-      aggregationSettings: METRICS_AGGREGATION_SETTINGS_DEFAULTS,
-      onAggregationSettingsChange: jest.fn(),
+      gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      onGridSettingsChange: jest.fn(),
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -528,8 +528,8 @@ describe('MetricsExperienceGrid', () => {
         onFlyoutStateChange: jest.fn(),
         onFlyoutSelectedTabChange: jest.fn(),
         profileId: 'test-profile-id',
-        aggregationSettings: METRICS_AGGREGATION_SETTINGS_DEFAULTS,
-        onAggregationSettingsChange: jest.fn(),
+        gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+        onGridSettingsChange: jest.fn(),
       });
 
       // Stream's universe only has `host.name`; `environment` is mapped but
@@ -570,8 +570,8 @@ describe('MetricsExperienceGrid', () => {
         onFlyoutStateChange: jest.fn(),
         onFlyoutSelectedTabChange: jest.fn(),
         profileId: 'test-profile-id',
-        aggregationSettings: METRICS_AGGREGATION_SETTINGS_DEFAULTS,
-        onAggregationSettingsChange: jest.fn(),
+        gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+        onGridSettingsChange: jest.fn(),
       });
 
       useFetchMetricsDataMock.mockReturnValue({
@@ -617,8 +617,8 @@ describe('MetricsExperienceGrid', () => {
         onFlyoutStateChange: jest.fn(),
         onFlyoutSelectedTabChange: jest.fn(),
         profileId: 'test-profile-id',
-        aggregationSettings: METRICS_AGGREGATION_SETTINGS_DEFAULTS,
-        onAggregationSettingsChange: jest.fn(),
+        gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+        onGridSettingsChange: jest.fn(),
       });
 
       const { getByTestId } = render(
@@ -638,9 +638,9 @@ describe('MetricsExperienceGrid', () => {
     });
   });
 
-  describe('aggregation settings flyout', () => {
+  describe('grid settings flyout', () => {
     it('opens the flyout when the edit button is clicked and forwards a selection change on Apply', async () => {
-      const onAggregationSettingsChange = jest.fn();
+      const onGridSettingsChange = jest.fn();
 
       useMetricsExperienceStateMock.mockReturnValue({
         currentPage: 0,
@@ -655,35 +655,35 @@ describe('MetricsExperienceGrid', () => {
         onFlyoutStateChange: jest.fn(),
         onFlyoutSelectedTabChange: jest.fn(),
         profileId: 'test-profile-id',
-        aggregationSettings: METRICS_AGGREGATION_SETTINGS_DEFAULTS,
-        onAggregationSettingsChange,
+        gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+        onGridSettingsChange,
       });
 
       const { getByTestId, queryByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
         wrapper: IntlProvider,
       });
 
-      expect(queryByTestId('metricsExperienceAggregationSettingsFlyout')).not.toBeInTheDocument();
+      expect(queryByTestId('metricsExperienceGridSettingsFlyout')).not.toBeInTheDocument();
 
       act(() => {
-        getByTestId('metricsExperienceEditAggregationsButton').click();
+        getByTestId('metricsExperienceEditGridButton').click();
       });
 
-      expect(getByTestId('metricsExperienceAggregationSettingsFlyout')).toBeInTheDocument();
+      expect(getByTestId('metricsExperienceGridSettingsFlyout')).toBeInTheDocument();
 
       const counterSelect = new EuiSuperSelectTestHarness(
-        'metricsExperienceAggregationSettingsCounterSelect'
+        'metricsExperienceGridSettingsCounterSelect'
       );
-      await counterSelect.select('metricsExperienceAggregationSettingsCounterOption-max');
+      await counterSelect.select('metricsExperienceGridSettingsCounterOption-max');
 
-      expect(onAggregationSettingsChange).not.toHaveBeenCalled();
+      expect(onGridSettingsChange).not.toHaveBeenCalled();
 
       act(() => {
-        getByTestId('metricsExperienceAggregationSettingsApplyButton').click();
+        getByTestId('metricsExperienceGridSettingsApplyButton').click();
       });
 
-      expect(onAggregationSettingsChange).toHaveBeenCalledWith({ counterAggregation: 'max' });
-      expect(queryByTestId('metricsExperienceAggregationSettingsFlyout')).not.toBeInTheDocument();
+      expect(onGridSettingsChange).toHaveBeenCalledWith({ counterAggregation: 'max' });
+      expect(queryByTestId('metricsExperienceGridSettingsFlyout')).not.toBeInTheDocument();
     });
   });
 });

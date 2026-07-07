@@ -10,11 +10,11 @@
 import { FunctionNames } from '@kbn/esql-language';
 import type {
   HistogramPercentile,
-  MetricsAggregationSettings,
+  MetricsGridSettings,
   SimpleAggregation,
 } from '../../../types';
 
-export const METRICS_AGGREGATION_SETTINGS_DEFAULTS: MetricsAggregationSettings = {
+export const METRICS_GRID_SETTINGS_DEFAULTS: MetricsGridSettings = {
   counterAggregation: FunctionNames.SUM,
   gaugeAggregation: FunctionNames.AVG,
   histogramPercentile: 'p95',

@@ -10,7 +10,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useObservable } from '@kbn/use-observable';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import type { MetricsAggregationSettings } from '@kbn/unified-chart-section-viewer';
+import type { MetricsGridSettings } from '@kbn/unified-chart-section-viewer';
 import { UnifiedMetricsExperienceGrid } from '@kbn/unified-chart-section-viewer';
 import {
   internalStateActions,
@@ -23,7 +23,7 @@ import type { DiscoverAppState } from '../../../../../application/main/state_man
 import type { DataSourceProfileProvider } from '../../../../profiles';
 import type { ContextAwarenessToolkitActions } from '../../../../toolkit';
 import type { ProfileStateAdapter } from '../../../../profile_state';
-import { METRICS_AGGREGATION_STATE_DEF } from '../profile_state';
+import { METRICS_GRID_SETTINGS_STATE_DEF } from '../profile_state';
 import { METRICS_DATA_SOURCE_PROFILE_ID } from '../profile';
 /**
  * Wrapper component that reads breakdownField from Discover's app state
@@ -32,25 +32,25 @@ import { METRICS_DATA_SOURCE_PROFILE_ID } from '../profile';
 const MetricsExperienceGridWrapper = (
   props: ChartSectionProps & {
     actions: ContextAwarenessToolkitActions;
-    aggregationStateAdapter: ProfileStateAdapter<MetricsAggregationSettings>;
+    gridSettingsStateAdapter: ProfileStateAdapter<MetricsGridSettings>;
   }
 ) => {
-  const { aggregationStateAdapter } = props;
+  const { gridSettingsStateAdapter } = props;
   const breakdownField = useAppStateSelector((state: DiscoverAppState) => state.breakdownField);
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const { discoverShared, dataViews, notifications, docLinks, logger } = useDiscoverServices();
 
-  const aggregationSettings = useObservable(
-    aggregationStateAdapter.getState$(),
-    aggregationStateAdapter.getState()
+  const gridSettings = useObservable(
+    gridSettingsStateAdapter.getState$(),
+    gridSettingsStateAdapter.getState()
   );
 
-  const onAggregationSettingsChange = useCallback(
-    (update: Partial<MetricsAggregationSettings>) => {
-      aggregationStateAdapter.updateState(update);
+  const onGridSettingsChange = useCallback(
+    (update: Partial<MetricsGridSettings>) => {
+      gridSettingsStateAdapter.updateState(update);
     },
-    [aggregationStateAdapter]
+    [gridSettingsStateAdapter]
   );
 
   const onBreakdownFieldChange = useCallback(
@@ -79,8 +79,8 @@ const MetricsExperienceGridWrapper = (
       breakdownField={breakdownField}
       onBreakdownFieldChange={onBreakdownFieldChange}
       externalServices={externalServices}
-      aggregationSettings={aggregationSettings}
-      onAggregationSettingsChange={onAggregationSettingsChange}
+      gridSettings={gridSettings}
+      onGridSettingsChange={onGridSettingsChange}
     />
   );
 };
@@ -89,7 +89,7 @@ export const createChartSection =
   (): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
   (prev, { toolkit }) =>
   () => {
-    const aggregationStateAdapter = toolkit.getStateAdapter(METRICS_AGGREGATION_STATE_DEF);
+    const gridSettingsStateAdapter = toolkit.getStateAdapter(METRICS_GRID_SETTINGS_STATE_DEF);
     return {
       ...prev(),
       renderChartSection: (props) => {
@@ -97,7 +97,7 @@ export const createChartSection =
           <MetricsExperienceGridWrapper
             {...props}
             actions={toolkit.actions}
-            aggregationStateAdapter={aggregationStateAdapter}
+            gridSettingsStateAdapter={gridSettingsStateAdapter}
           />
         );
       },

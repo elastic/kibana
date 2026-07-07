@@ -14,11 +14,11 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { FunctionNames } from '@kbn/esql-language';
 import { isLegacyHistogram } from '../legacy_histogram';
 import { resolveConflictingFieldTypes } from './resolve_conflicting_field_types';
-import type { MetricsAggregationSettings } from '../../../types';
+import type { MetricsGridSettings } from '../../../types';
 import {
   HISTOGRAM_PERCENTILE_VALUES,
-  METRICS_AGGREGATION_SETTINGS_DEFAULTS,
-} from '../../../components/flyout/metrics_aggregation_settings_flyout/constants';
+  METRICS_GRID_SETTINGS_DEFAULTS,
+} from '../../../components/flyout/metrics_grid_settings_flyout/constants';
 
 /**
  * Gets the appropriate casting function name for a field type.
@@ -54,7 +54,7 @@ function applyCastIfNeeded(types: ES_FIELD_TYPES[], field: ESQLAstExpression): E
   return field;
 }
 
-function resolvePercentileValue(settings: MetricsAggregationSettings): number {
+function resolvePercentileValue(settings: MetricsGridSettings): number {
   return HISTOGRAM_PERCENTILE_VALUES[settings.histogramPercentile];
 }
 
@@ -69,10 +69,10 @@ function buildAggregationNode(
   instrument: MappingTimeSeriesMetricType,
   field: ESQLAstExpression,
   customFunction?: string,
-  aggregationSettings?: MetricsAggregationSettings
+  gridSettings?: MetricsGridSettings
 ): ESQLAstExpression | undefined {
   const resolvedField = applyCastIfNeeded(types, field);
-  const settings = aggregationSettings ?? METRICS_AGGREGATION_SETTINGS_DEFAULTS;
+  const settings = gridSettings ?? METRICS_GRID_SETTINGS_DEFAULTS;
   const primaryType = types[0];
 
   if (customFunction) {
@@ -121,7 +121,7 @@ function buildAggregationNode(
  * @param metricName - The actual name of the metric field to aggregate.
  * @param placeholderName - The name of the placeholder to use in the template.
  * @param customFunction - Optional custom aggregation function to use for default case.
- * @param aggregationSettings - Optional per-`metric_type` aggregation overrides (counter/gauge/histogram).
+ * @param gridSettings - Optional per-`metric_type` aggregation overrides (counter/gauge/histogram).
  * @returns The ES|QL aggregation string.
  */
 export function createMetricAggregation({
@@ -130,17 +130,17 @@ export function createMetricAggregation({
   metricName,
   placeholderName = 'metricName',
   customFunction,
-  aggregationSettings,
+  gridSettings,
 }: {
   types: ES_FIELD_TYPES[];
   instrument: MappingTimeSeriesMetricType;
   metricName?: string;
   placeholderName?: string;
   customFunction?: string;
-  aggregationSettings?: MetricsAggregationSettings;
+  gridSettings?: MetricsGridSettings;
 }): string {
   const field = metricName ? synth.col(metricName.split('.')) : synth.dpar(placeholderName);
-  const node = buildAggregationNode(types, instrument, field, customFunction, aggregationSettings);
+  const node = buildAggregationNode(types, instrument, field, customFunction, gridSettings);
   if (!node) {
     return '';
   }

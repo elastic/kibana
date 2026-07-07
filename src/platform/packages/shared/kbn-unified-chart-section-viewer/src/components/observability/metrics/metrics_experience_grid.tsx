@@ -20,7 +20,7 @@ import { useToolbarActions } from '../../toolbar/hooks/use_toolbar_actions';
 import { SearchButton } from '../../toolbar/right_side_actions/search_button';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import { ChartSectionSearchError } from '../../chart_section_search_error/chart_section_search_error';
-import { AggregationSettingsFlyout } from '../../flyout';
+import { GridSettingsFlyout } from '../../flyout';
 import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
 import {
   useDimensionsWipe,
@@ -54,17 +54,13 @@ export const MetricsExperienceGrid = ({
     onDimensionsChange,
     onPageChange,
     profileId,
-    aggregationSettings,
-    onAggregationSettingsChange,
+    gridSettings,
+    onGridSettingsChange,
   } = useMetricsExperienceState();
 
-  const [isAggregationSettingsFlyoutOpen, setIsAggregationSettingsFlyoutOpen] = useState(false);
-  const openAggregationSettingsFlyout = useCallback(
-    () => setIsAggregationSettingsFlyoutOpen(true),
-    []
-  );
-  const closeAggregationSettingsFlyout = useCallback(
-    () => setIsAggregationSettingsFlyoutOpen(false),
+  const [isGridSettingsFlyoutOpen, setIsGridSettingsFlyoutOpen] = useState(false);
+  const toggleGridSettingsFlyout = useCallback(
+    () => setIsGridSettingsFlyoutOpen((isOpen) => !isOpen),
     []
   );
 
@@ -142,7 +138,7 @@ export const MetricsExperienceGrid = ({
     renderToggleActions,
     onDimensionsChange: onToolbarDimensionsChange,
     isLoading: isDiscoverLoading,
-    onOpenAggregationSettings: openAggregationSettingsFlyout,
+    onOpenGridSettings: toggleGridSettingsFlyout,
   });
 
   const onKeyDown = useCallback(
@@ -213,11 +209,11 @@ export const MetricsExperienceGrid = ({
           isTabSelected={isTabSelected}
         />
       </ChartsGrid>
-      {isAggregationSettingsFlyoutOpen && (
-        <AggregationSettingsFlyout
-          aggregationSettings={aggregationSettings}
-          onAggregationSettingsChange={onAggregationSettingsChange}
-          onClose={closeAggregationSettingsFlyout}
+      {isGridSettingsFlyoutOpen && (
+        <GridSettingsFlyout
+          gridSettings={gridSettings}
+          onGridSettingsChange={onGridSettingsChange}
+          onClose={toggleGridSettingsFlyout}
         />
       )}
     </>

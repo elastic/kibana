@@ -105,8 +105,8 @@ describe('createMetricAggregation', () => {
   });
 });
 
-describe('createMetricAggregation with aggregationSettings override', () => {
-  const aggregationSettings = {
+describe('createMetricAggregation with gridSettings override', () => {
+  const gridSettings = {
     counterAggregation: 'max' as const,
     gaugeAggregation: 'min' as const,
     histogramPercentile: 'p90' as const,
@@ -117,7 +117,7 @@ describe('createMetricAggregation with aggregationSettings override', () => {
       types: [ES_FIELD_TYPES.LONG],
       instrument: 'counter',
       metricName: 'requests.count',
-      aggregationSettings,
+      gridSettings,
     });
     expect(result).toBe('MAX(RATE(requests.count))');
   });
@@ -127,7 +127,7 @@ describe('createMetricAggregation with aggregationSettings override', () => {
       types: [ES_FIELD_TYPES.DOUBLE],
       instrument: 'gauge',
       metricName: 'cpu.usage',
-      aggregationSettings,
+      gridSettings,
     });
     expect(result).toBe('MIN(cpu.usage)');
   });
@@ -137,7 +137,7 @@ describe('createMetricAggregation with aggregationSettings override', () => {
       types: [ES_FIELD_TYPES.HISTOGRAM],
       instrument: 'histogram',
       metricName: 'histogram.legacy',
-      aggregationSettings,
+      gridSettings,
     });
     expect(result).toBe('PERCENTILE(TO_TDIGEST(histogram.legacy), 90)');
   });
@@ -147,7 +147,7 @@ describe('createMetricAggregation with aggregationSettings override', () => {
       types: [ES_FIELD_TYPES.TDIGEST],
       instrument: 'counter',
       metricName: 'http.request.duration',
-      aggregationSettings,
+      gridSettings,
     });
     expect(result).toBe('PERCENTILE(http.request.duration, 90)');
   });
@@ -157,23 +157,23 @@ describe('createMetricAggregation with aggregationSettings override', () => {
       types: [ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM],
       instrument: 'gauge',
       metricName: 'http.request.duration',
-      aggregationSettings,
+      gridSettings,
     });
     expect(result).toBe('PERCENTILE(http.request.duration, 90)');
   });
 
-  it('customFunction still takes priority over aggregationSettings', () => {
+  it('customFunction still takes priority over gridSettings', () => {
     const result = createMetricAggregation({
       types: [ES_FIELD_TYPES.LONG],
       instrument: 'counter',
       metricName: 'requests.count',
       customFunction: 'COUNT',
-      aggregationSettings,
+      gridSettings,
     });
     expect(result).toBe('COUNT(requests.count)');
   });
 
-  it('falls back to the 95th percentile and SUM/AVG defaults when aggregationSettings is omitted', () => {
+  it('falls back to the 95th percentile and SUM/AVG defaults when gridSettings is omitted', () => {
     expect(
       createMetricAggregation({
         types: [ES_FIELD_TYPES.TDIGEST],

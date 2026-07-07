@@ -628,11 +628,11 @@ TS edge-case-gauge-to-counter
     });
   });
 
-  describe('aggregationSettings overrides', () => {
+  describe('gridSettings overrides', () => {
     it('applies a custom simple aggregation for counter instruments', () => {
       const query = createESQLQuery({
         metricItem: mockCounterMetric,
-        aggregationSettings: {
+        gridSettings: {
           counterAggregation: 'max',
           gaugeAggregation: 'avg',
           histogramPercentile: 'p95',
@@ -649,7 +649,7 @@ TS metrics-*
     it('applies a custom simple aggregation for gauge instruments', () => {
       const query = createESQLQuery({
         metricItem: { ...mockMetric, metricTypes: ['gauge'] },
-        aggregationSettings: {
+        gridSettings: {
           counterAggregation: 'sum',
           gaugeAggregation: 'sum',
           histogramPercentile: 'p95',
@@ -666,7 +666,7 @@ TS metrics-*
     it('applies a custom percentile for legacy histogram instruments', () => {
       const query = createESQLQuery({
         metricItem: mockLegacyHistogramMetric,
-        aggregationSettings: {
+        gridSettings: {
           counterAggregation: 'sum',
           gaugeAggregation: 'avg',
           histogramPercentile: 'p90',
@@ -683,7 +683,7 @@ TS metrics-*
     it('applies a custom percentile for tdigest instruments', () => {
       const query = createESQLQuery({
         metricItem: mockTdigestMetric,
-        aggregationSettings: {
+        gridSettings: {
           counterAggregation: 'sum',
           gaugeAggregation: 'avg',
           histogramPercentile: 'p50',

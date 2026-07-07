@@ -991,12 +991,12 @@ describe('MetricsGrid', () => {
     });
   });
 
-  describe('aggregationSettings', () => {
-    it('forwards aggregationSettings from context into createESQLQuery for each metric', () => {
+  describe('gridSettings', () => {
+    it('forwards gridSettings from context into createESQLQuery for each metric', () => {
       render(
         <MetricsExperienceStateProvider
           profileId="test-profile"
-          aggregationSettings={{
+          gridSettings={{
             counterAggregation: 'max',
             gaugeAggregation: 'avg',
             histogramPercentile: 'p90',
@@ -1008,7 +1008,7 @@ describe('MetricsGrid', () => {
 
       expect(createESQLQuery).toHaveBeenCalledWith(
         expect.objectContaining({
-          aggregationSettings: {
+          gridSettings: {
             counterAggregation: 'max',
             gaugeAggregation: 'avg',
             histogramPercentile: 'p90',

@@ -19,35 +19,35 @@ import { SIMPLE_AGGREGATION_OPTIONS, HISTOGRAM_PERCENTILE_OPTIONS } from './cons
  * expression.
  */
 export const SIMPLE_AGGREGATION_LABELS: Record<SimpleAggregation, string> = {
-  avg: i18n.translate('metricsExperience.aggregationSettingsFlyout.avgOptionLabel', {
+  avg: i18n.translate('metricsExperience.gridSettingsFlyout.avgOptionLabel', {
     defaultMessage: 'Average',
   }),
-  sum: i18n.translate('metricsExperience.aggregationSettingsFlyout.sumOptionLabel', {
+  sum: i18n.translate('metricsExperience.gridSettingsFlyout.sumOptionLabel', {
     defaultMessage: 'Sum',
   }),
-  min: i18n.translate('metricsExperience.aggregationSettingsFlyout.minOptionLabel', {
+  min: i18n.translate('metricsExperience.gridSettingsFlyout.minOptionLabel', {
     defaultMessage: 'Minimum',
   }),
-  max: i18n.translate('metricsExperience.aggregationSettingsFlyout.maxOptionLabel', {
+  max: i18n.translate('metricsExperience.gridSettingsFlyout.maxOptionLabel', {
     defaultMessage: 'Maximum',
   }),
 };
 
 /** Display labels for `HistogramPercentile` values, e.g. "50th percentile". */
 export const HISTOGRAM_PERCENTILE_LABELS: Record<HistogramPercentile, string> = {
-  p50: i18n.translate('metricsExperience.aggregationSettingsFlyout.p50OptionLabel', {
+  p50: i18n.translate('metricsExperience.gridSettingsFlyout.p50OptionLabel', {
     defaultMessage: '50th percentile',
   }),
-  p75: i18n.translate('metricsExperience.aggregationSettingsFlyout.p75OptionLabel', {
+  p75: i18n.translate('metricsExperience.gridSettingsFlyout.p75OptionLabel', {
     defaultMessage: '75th percentile',
   }),
-  p90: i18n.translate('metricsExperience.aggregationSettingsFlyout.p90OptionLabel', {
+  p90: i18n.translate('metricsExperience.gridSettingsFlyout.p90OptionLabel', {
     defaultMessage: '90th percentile',
   }),
-  p95: i18n.translate('metricsExperience.aggregationSettingsFlyout.p95OptionLabel', {
+  p95: i18n.translate('metricsExperience.gridSettingsFlyout.p95OptionLabel', {
     defaultMessage: '95th percentile',
   }),
-  p99: i18n.translate('metricsExperience.aggregationSettingsFlyout.p99OptionLabel', {
+  p99: i18n.translate('metricsExperience.gridSettingsFlyout.p99OptionLabel', {
     defaultMessage: '99th percentile',
   }),
 };
@@ -69,15 +69,15 @@ export const buildHistogramPercentileOptions = (): Array<
     value: option,
     inputDisplay: HISTOGRAM_PERCENTILE_LABELS[option],
     dropdownDisplay: HISTOGRAM_PERCENTILE_LABELS[option],
-    'data-test-subj': `metricsExperienceAggregationSettingsHistogramOption-${option}`,
+    'data-test-subj': `metricsExperienceGridSettingsHistogramOption-${option}`,
   }));
 
 export const COUNTER_OPTIONS = buildSimpleAggregationOptions(
-  'metricsExperienceAggregationSettingsCounterOption'
+  'metricsExperienceGridSettingsCounterOption'
 );
 
 export const GAUGE_OPTIONS = buildSimpleAggregationOptions(
-  'metricsExperienceAggregationSettingsGaugeOption'
+  'metricsExperienceGridSettingsGaugeOption'
 );
 
 export const HISTOGRAM_OPTIONS = buildHistogramPercentileOptions();

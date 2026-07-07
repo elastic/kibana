@@ -11,31 +11,44 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiSuperSelectTestHarness } from '@kbn/test-eui-helpers';
-import { AggregationSettingsFlyout } from './aggregation_settings_flyout';
-import type { MetricsAggregationSettings } from '../../../types';
+import { GridSettingsFlyout } from './grid_settings_flyout';
+import type { MetricsGridSettings } from '../../../types';
 
-const defaultSettings: MetricsAggregationSettings = {
+const defaultSettings: MetricsGridSettings = {
   counterAggregation: 'sum',
   gaugeAggregation: 'avg',
   histogramPercentile: 'p95',
 };
 
-const counterSelect = new EuiSuperSelectTestHarness(
-  'metricsExperienceAggregationSettingsCounterSelect'
-);
-const gaugeSelect = new EuiSuperSelectTestHarness(
-  'metricsExperienceAggregationSettingsGaugeSelect'
-);
+const counterSelect = new EuiSuperSelectTestHarness('metricsExperienceGridSettingsCounterSelect');
+const gaugeSelect = new EuiSuperSelectTestHarness('metricsExperienceGridSettingsGaugeSelect');
 const histogramSelect = new EuiSuperSelectTestHarness(
-  'metricsExperienceAggregationSettingsHistogramSelect'
+  'metricsExperienceGridSettingsHistogramSelect'
 );
 
-describe('AggregationSettingsFlyout', () => {
+describe('GridSettingsFlyout', () => {
+  it('renders the aggregation settings inside an accordion that is open by default', () => {
+    render(
+      <GridSettingsFlyout
+        gridSettings={defaultSettings}
+        onGridSettingsChange={jest.fn()}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByTestId('metricsExperienceGridSettingsAggregationAccordion')
+    ).toBeInTheDocument();
+    expect(counterSelect.getSelected()).toContain('Sum');
+    expect(gaugeSelect.getSelected()).toContain('Average');
+    expect(histogramSelect.getSelected()).toContain('95th percentile');
+  });
+
   it('shows the currently applied option as the selected value in each dropdown', () => {
     render(
-      <AggregationSettingsFlyout
-        aggregationSettings={defaultSettings}
-        onAggregationSettingsChange={jest.fn()}
+      <GridSettingsFlyout
+        gridSettings={defaultSettings}
+        onGridSettingsChange={jest.fn()}
         onClose={jest.fn()}
       />
     );
@@ -47,98 +60,98 @@ describe('AggregationSettingsFlyout', () => {
 
   it('disables "Apply and close" until a selection actually changes', async () => {
     render(
-      <AggregationSettingsFlyout
-        aggregationSettings={defaultSettings}
-        onAggregationSettingsChange={jest.fn()}
+      <GridSettingsFlyout
+        gridSettings={defaultSettings}
+        onGridSettingsChange={jest.fn()}
         onClose={jest.fn()}
       />
     );
 
-    expect(screen.getByTestId('metricsExperienceAggregationSettingsApplyButton')).toBeDisabled();
+    expect(screen.getByTestId('metricsExperienceGridSettingsApplyButton')).toBeDisabled();
 
-    await counterSelect.select('metricsExperienceAggregationSettingsCounterOption-max');
+    await counterSelect.select('metricsExperienceGridSettingsCounterOption-max');
 
-    expect(screen.getByTestId('metricsExperienceAggregationSettingsApplyButton')).toBeEnabled();
+    expect(screen.getByTestId('metricsExperienceGridSettingsApplyButton')).toBeEnabled();
   });
 
-  it('does not call onAggregationSettingsChange until "Apply and close" is clicked, then closes', async () => {
-    const onAggregationSettingsChange = jest.fn();
+  it('does not call onGridSettingsChange until "Apply and close" is clicked, then closes', async () => {
+    const onGridSettingsChange = jest.fn();
     const onClose = jest.fn();
     render(
-      <AggregationSettingsFlyout
-        aggregationSettings={defaultSettings}
-        onAggregationSettingsChange={onAggregationSettingsChange}
+      <GridSettingsFlyout
+        gridSettings={defaultSettings}
+        onGridSettingsChange={onGridSettingsChange}
         onClose={onClose}
       />
     );
 
-    await counterSelect.select('metricsExperienceAggregationSettingsCounterOption-max');
+    await counterSelect.select('metricsExperienceGridSettingsCounterOption-max');
 
-    expect(onAggregationSettingsChange).not.toHaveBeenCalled();
+    expect(onGridSettingsChange).not.toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();
 
-    await userEvent.click(screen.getByTestId('metricsExperienceAggregationSettingsApplyButton'));
+    await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsApplyButton'));
 
-    expect(onAggregationSettingsChange).toHaveBeenCalledWith({ counterAggregation: 'max' });
+    expect(onGridSettingsChange).toHaveBeenCalledWith({ counterAggregation: 'max' });
     expect(onClose).toHaveBeenCalled();
   });
 
   it('applies only the fields that changed across all three dropdowns', async () => {
-    const onAggregationSettingsChange = jest.fn();
+    const onGridSettingsChange = jest.fn();
     render(
-      <AggregationSettingsFlyout
-        aggregationSettings={defaultSettings}
-        onAggregationSettingsChange={onAggregationSettingsChange}
+      <GridSettingsFlyout
+        gridSettings={defaultSettings}
+        onGridSettingsChange={onGridSettingsChange}
         onClose={jest.fn()}
       />
     );
 
-    await gaugeSelect.select('metricsExperienceAggregationSettingsGaugeOption-min');
-    await histogramSelect.select('metricsExperienceAggregationSettingsHistogramOption-p90');
+    await gaugeSelect.select('metricsExperienceGridSettingsGaugeOption-min');
+    await histogramSelect.select('metricsExperienceGridSettingsHistogramOption-p90');
 
-    await userEvent.click(screen.getByTestId('metricsExperienceAggregationSettingsApplyButton'));
+    await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsApplyButton'));
 
-    expect(onAggregationSettingsChange).toHaveBeenCalledWith({
+    expect(onGridSettingsChange).toHaveBeenCalledWith({
       gaugeAggregation: 'min',
       histogramPercentile: 'p90',
     });
   });
 
-  it('discards the draft and does not call onAggregationSettingsChange when Cancel is clicked', async () => {
-    const onAggregationSettingsChange = jest.fn();
+  it('discards the draft and does not call onGridSettingsChange when Cancel is clicked', async () => {
+    const onGridSettingsChange = jest.fn();
     const onClose = jest.fn();
     render(
-      <AggregationSettingsFlyout
-        aggregationSettings={defaultSettings}
-        onAggregationSettingsChange={onAggregationSettingsChange}
+      <GridSettingsFlyout
+        gridSettings={defaultSettings}
+        onGridSettingsChange={onGridSettingsChange}
         onClose={onClose}
       />
     );
 
-    await counterSelect.select('metricsExperienceAggregationSettingsCounterOption-max');
+    await counterSelect.select('metricsExperienceGridSettingsCounterOption-max');
 
-    await userEvent.click(screen.getByTestId('metricsExperienceAggregationSettingsCancelButton'));
+    await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsCancelButton'));
 
-    expect(onAggregationSettingsChange).not.toHaveBeenCalled();
+    expect(onGridSettingsChange).not.toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('discards the draft and does not call onAggregationSettingsChange when the flyout close button is clicked', async () => {
-    const onAggregationSettingsChange = jest.fn();
+  it('discards the draft and does not call onGridSettingsChange when the flyout close button is clicked', async () => {
+    const onGridSettingsChange = jest.fn();
     const onClose = jest.fn();
     render(
-      <AggregationSettingsFlyout
-        aggregationSettings={defaultSettings}
-        onAggregationSettingsChange={onAggregationSettingsChange}
+      <GridSettingsFlyout
+        gridSettings={defaultSettings}
+        onGridSettingsChange={onGridSettingsChange}
         onClose={onClose}
       />
     );
 
-    await counterSelect.select('metricsExperienceAggregationSettingsCounterOption-max');
+    await counterSelect.select('metricsExperienceGridSettingsCounterOption-max');
 
     await userEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
 
-    expect(onAggregationSettingsChange).not.toHaveBeenCalled();
+    expect(onGridSettingsChange).not.toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
   });
 });

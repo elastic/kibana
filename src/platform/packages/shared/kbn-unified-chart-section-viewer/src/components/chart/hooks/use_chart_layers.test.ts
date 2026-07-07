@@ -160,8 +160,8 @@ describe('useChartLayers', () => {
     });
   });
 
-  it('forwards aggregationSettings to createMetricAggregation', () => {
-    const aggregationSettings = {
+  it('forwards gridSettings to createMetricAggregation', () => {
+    const gridSettings = {
       counterAggregation: 'max' as const,
       gaugeAggregation: 'avg' as const,
       histogramPercentile: 'p95' as const,
@@ -171,12 +171,12 @@ describe('useChartLayers', () => {
       useChartLayers({
         metricItem: mockMetric,
         dimensions: [],
-        aggregationSettings,
+        gridSettings,
       })
     );
 
     expect(createMetricAggregation).toHaveBeenCalledWith(
-      expect.objectContaining({ aggregationSettings })
+      expect.objectContaining({ gridSettings })
     );
   });
 });

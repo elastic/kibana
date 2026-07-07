@@ -8,15 +8,15 @@
  */
 
 import {
-  METRICS_AGGREGATION_SETTINGS_DEFAULTS,
+  METRICS_GRID_SETTINGS_DEFAULTS,
   SIMPLE_AGGREGATION_OPTIONS,
   HISTOGRAM_PERCENTILE_OPTIONS,
   HISTOGRAM_PERCENTILE_VALUES,
 } from './constants';
 
-describe('aggregation_settings constants', () => {
+describe('grid_settings constants', () => {
   it('exposes defaults matching the pre-existing hardcoded aggregation behavior', () => {
-    expect(METRICS_AGGREGATION_SETTINGS_DEFAULTS).toEqual({
+    expect(METRICS_GRID_SETTINGS_DEFAULTS).toEqual({
       counterAggregation: 'sum',
       gaugeAggregation: 'avg',
       histogramPercentile: 'p95',

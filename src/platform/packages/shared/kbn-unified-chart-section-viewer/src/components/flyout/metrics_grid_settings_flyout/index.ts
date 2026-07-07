@@ -9,4 +9,4 @@
 
 export * from './constants';
 export * from './options';
-export { AggregationSettingsFlyout } from './aggregation_settings_flyout';
+export { GridSettingsFlyout } from './grid_settings_flyout';

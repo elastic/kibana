@@ -316,7 +316,7 @@ const ChartItem = React.memo(
     onViewDetails,
     userMessages,
   }: ChartItemProps) => {
-    const { profileId, aggregationSettings } = useMetricsExperienceState();
+    const { profileId, gridSettings } = useMetricsExperienceState();
     const { euiTheme } = useEuiTheme();
     const colorPalette = useMemo(
       () => Object.values(euiTheme.colors.vis).slice(0, 10),
@@ -337,17 +337,17 @@ const ChartItem = React.memo(
             splitAccessors: applicableDimensions.map((dim) => dim.name),
             whereStatements,
             originalSource: userSource,
-            aggregationSettings,
+            gridSettings,
           })
         : '';
-    }, [metricItem, applicableDimensions, whereStatements, userSource, aggregationSettings]);
+    }, [metricItem, applicableDimensions, whereStatements, userSource, gridSettings]);
 
     const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
     const chartLayers = useChartLayers({
       dimensions: applicableDimensions,
       metricItem,
       color,
-      aggregationSettings,
+      gridSettings,
     });
     const handleViewDetailsCallback = useCallback(
       () => onViewDetails(index, esqlQuery, metricItem),
