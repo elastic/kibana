@@ -26,7 +26,6 @@ import {
   AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID,
-  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
 } from '@kbn/management-settings-ids';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
@@ -40,15 +39,11 @@ export const AgentBuilderTracingSection: React.FC = () => {
   } = useKibana();
 
   const canEditAdvancedSettings = application.capabilities.advancedSettings?.save;
-  const isExperimentalFeaturesEnabled = settings.client.get(
-    AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-    false
-  );
 
   const { tracingEnabledField, tracingEnabled, handleTracingEnabledChange } =
     useTracingEnabledState();
 
-  if (!tracingEnabledField || !isExperimentalFeaturesEnabled) {
+  if (!tracingEnabledField) {
     return null;
   }
 
