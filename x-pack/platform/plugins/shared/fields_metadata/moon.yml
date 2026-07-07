@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/fields-metadata-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-onboarding-team'
+  defaultOwner: '@elastic/streams-ui'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/fields-metadata-plugin'
   description: Moon project for @kbn/fields-metadata-plugin
   channel: ''
-  owner: '@elastic/obs-onboarding-team'
+  owner: '@elastic/streams-ui'
   sourceRoot: x-pack/platform/plugins/shared/fields_metadata
 dependsOn:
   - '@kbn/core'

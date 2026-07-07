@@ -805,6 +805,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable Significant events discovery in Streams.',
     },
   },
+  'observability:streamsEnableSignificantEventsAlertingV2': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Back Streams Significant events queries with Alerting v2 (kind: signal) instead of the streams.rules.esql rule type.',
+    },
+  },
   'observability:streamsEnableContentPacks': {
     type: 'boolean',
     _meta: {
@@ -873,6 +880,38 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Switches the Entity Store Engine to v2',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowEnabled': {
+    type: 'boolean',
+    _meta: { description: 'Whether the managed alert analysis workflow is enabled' },
+  },
+  'securitySolution:alertAnalysisWorkflowAutoCloseEnabled': {
+    type: 'boolean',
+    _meta: {
+      description: 'Auto-close alerts validated as false positives by the alert analysis workflow',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMinThreshold': {
+    type: 'float',
+    _meta: {
+      description: 'Minimum false positive confidence score for auto-closing alerts',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMaxThreshold': {
+    type: 'float',
+    _meta: {
+      description: 'Maximum false positive confidence score for auto-closing alerts',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowConnectorId': {
+    type: 'keyword',
+    _meta: { description: 'AI connector used by the alert analysis workflow' },
+  },
+  'securitySolution:alertAnalysisWorkflowCreateConversation': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the AI agent creates a new conversation per alert analysis',
     },
   },
   'elasticRamen:enabled': {
