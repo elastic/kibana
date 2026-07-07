@@ -14,9 +14,9 @@ import React, { memo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, TRIGGER_STEP_TYPES } from '@kbn/workflows';
-import { getStepIconType, getTriggerTypeIconType } from '../step_icons';
 import { useWorkflowGraphActions } from './workflow_graph_actions_context';
 import type { RenderStepIcon } from './workflow_graph_actions_context';
+import { getStepIconType, getTriggerTypeIconType } from '../step_icons';
 
 export interface WorkflowGraphNodeData extends Record<string, unknown> {
   readonly label: string;
