@@ -17,6 +17,7 @@ export interface UseSloFormValuesResponse {
   isLoading: boolean;
   isEditMode: boolean;
   slo: GetSLOResponse | undefined;
+  templateId: string | undefined;
 }
 
 export function useSloFormValues(sloId?: string): UseSloFormValuesResponse {
@@ -26,8 +27,11 @@ export function useSloFormValues(sloId?: string): UseSloFormValuesResponse {
   const sloFormValuesFromSloResponse = transformSloResponseToFormState(slo);
 
   const sloFormValuesFromUrlState = useParseUrlState();
-  const { isInitialLoading: isTemplateLoading, data: sloFormValuesFromTemplateId } =
-    useParseTemplateId();
+  const {
+    isInitialLoading: isTemplateLoading,
+    data: sloFormValuesFromTemplateId,
+    templateId,
+  } = useParseTemplateId();
 
   const initialValues = isEditMode
     ? sloFormValuesFromSloResponse
@@ -38,5 +42,7 @@ export function useSloFormValues(sloId?: string): UseSloFormValuesResponse {
     isLoading: isSloLoading || isTemplateLoading,
     isEditMode,
     slo,
+    // an SLO created from a template can only happen when creating (not editing) via ?fromTemplateId
+    templateId: isEditMode ? undefined : templateId,
   };
 }

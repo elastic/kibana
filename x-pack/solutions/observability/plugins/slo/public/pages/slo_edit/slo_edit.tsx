@@ -26,7 +26,7 @@ export function SloEditPage() {
     serverless,
   } = useKibana().services;
   const { sloId } = useParams<{ sloId: string | undefined }>();
-  const { initialValues, isLoading, isEditMode, slo } = useSloFormValues(sloId);
+  const { initialValues, isLoading, isEditMode, slo, templateId } = useSloFormValues(sloId);
 
   const { data: permissions } = usePermissions();
   const { ObservabilityPageTemplate } = usePluginContext();
@@ -91,7 +91,12 @@ export function SloEditPage() {
       {isLoading ? (
         <EuiLoadingSpinner size="xl" data-test-subj="sloEditLoadingSpinner" />
       ) : (
-        <SloEditForm slo={slo} formSettings={{ isEditMode }} initialValues={initialValues} />
+        <SloEditForm
+          slo={slo}
+          formSettings={{ isEditMode }}
+          initialValues={initialValues}
+          templateId={templateId}
+        />
       )}
     </ObservabilityPageTemplate>
   );

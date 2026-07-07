@@ -26,5 +26,5 @@ export function useParseTemplateId() {
 
   const { data: template, isInitialLoading } = useFetchSloTemplate(templateId);
 
-  return { isInitialLoading, data: transformPartialSLODataToFormState(template) };
+  return { isInitialLoading, data: transformPartialSLODataToFormState(template), templateId };
 }

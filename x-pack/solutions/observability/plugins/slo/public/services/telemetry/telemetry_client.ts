@@ -10,6 +10,11 @@ import type {
   ISloTelemetryClient,
   SloDetailsFlyoutTabChangedParams,
   SloCreateFlyoutViewedParams,
+  SloCreatedParams,
+  SloEditedParams,
+  SloDeletedParams,
+  SloClonedParams,
+  SloResetParams,
 } from './types';
 import { SloTelemetryEventTypes } from './types';
 
@@ -26,5 +31,25 @@ export class SloTelemetryClient implements ISloTelemetryClient {
 
   public reportSloCreateFlyoutViewed = (params: SloCreateFlyoutViewedParams) => {
     this.analytics.reportEvent(SloTelemetryEventTypes.SLO_CREATE_FLYOUT_VIEWED, params);
+  };
+
+  public reportSloCreated = (params: SloCreatedParams) => {
+    this.analytics.reportEvent(SloTelemetryEventTypes.SLO_CREATED, params);
+  };
+
+  public reportSloEdited = (params: SloEditedParams) => {
+    this.analytics.reportEvent(SloTelemetryEventTypes.SLO_EDITED, params);
+  };
+
+  public reportSloDeleted = (params: SloDeletedParams) => {
+    this.analytics.reportEvent(SloTelemetryEventTypes.SLO_DELETED, params);
+  };
+
+  public reportSloCloned = (params: SloClonedParams) => {
+    this.analytics.reportEvent(SloTelemetryEventTypes.SLO_CLONED, params);
+  };
+
+  public reportSloReset = (params: SloResetParams) => {
+    this.analytics.reportEvent(SloTelemetryEventTypes.SLO_RESET, params);
   };
 }

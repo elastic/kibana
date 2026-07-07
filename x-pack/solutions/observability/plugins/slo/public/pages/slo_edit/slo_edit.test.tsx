@@ -31,7 +31,7 @@ import { usePermissions } from '../../hooks/use_permissions';
 import { useUpdateSlo } from '../../hooks/use_update_slo';
 import { PluginContext } from '../../context/plugin_context';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
-import { render, pluginContextDefaultValue } from '../../utils/test_helper';
+import { render, pluginContextDefaultValue, telemetryClientMock } from '../../utils/test_helper';
 import { SloEditPage } from './slo_edit';
 
 jest.mock('react-router-dom', () => ({
@@ -320,6 +320,10 @@ describe('SLO Edit Page', () => {
       });
 
       expect(mockCreate).toHaveBeenCalled();
+      expect(telemetryClientMock.reportSloCreated).toHaveBeenCalledWith({
+        slo_id: SLO_ID,
+        template_id: undefined,
+      });
     });
 
     it('renders the SLO Edit Form with prefilled values from a template', async () => {
@@ -364,6 +368,11 @@ describe('SLO Edit Page', () => {
       await waitFor(() => {
         fireEvent.click(getByTestId('sloFormSubmitButton'));
         expect(mockCreate).toHaveBeenCalled();
+      });
+
+      expect(telemetryClientMock.reportSloCreated).toHaveBeenCalledWith({
+        slo_id: SLO_ID,
+        template_id: 'template-1234',
       });
     });
   });

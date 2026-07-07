@@ -15,6 +15,7 @@ import { InPortal } from 'react-reverse-portal';
 import { useCreateRule } from '../../../hooks/use_create_burn_rate_rule';
 import { useCreateSlo } from '../../../hooks/use_create_slo';
 import { useKibana } from '../../../hooks/use_kibana';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useUpdateSlo } from '../../../hooks/use_update_slo';
 import type { BurnRateRuleParams } from '../../../typings';
 import { createBurnRateRuleRequestBody } from '../helpers/create_burn_rate_rule_request_body';
@@ -31,13 +32,15 @@ export interface Props {
   slo?: GetSLOResponse;
   onFlyoutClose?: () => void;
   isEditMode: boolean;
+  templateId?: string;
 }
 
-export function SloEditFormFooter({ slo, onFlyoutClose, isEditMode }: Props) {
+export function SloEditFormFooter({ slo, onFlyoutClose, isEditMode, templateId }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana().services;
+  const { telemetry } = usePluginContext();
 
   const isFlyout = Boolean(onFlyoutClose);
   const { getValues, trigger } = useFormContext<CreateSLOForm>();
@@ -62,6 +65,7 @@ export function SloEditFormFooter({ slo, onFlyoutClose, isEditMode }: Props) {
     } else {
       const processedValues = transformCreateSLOFormToCreateSLOInput(values);
       const resp = await createSlo({ slo: processedValues });
+      telemetry?.reportSloCreated({ slo_id: resp.id, template_id: templateId });
       createBurnRateRule({
         rule: createBurnRateRuleRequestBody({ ...processedValues, id: resp.id }),
       });

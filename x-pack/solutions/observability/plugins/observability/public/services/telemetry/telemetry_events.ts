@@ -69,6 +69,47 @@ const linkedDashboardView: TelemetryEvent = {
         optional: false,
       },
     },
+    rule_id: {
+      type: 'keyword' as const,
+      _meta: {
+        description: 'The ID of the rule backing the alert whose linked dashboard was viewed',
+        optional: false,
+      },
+    },
+    dashboard_id: {
+      type: 'keyword' as const,
+      _meta: {
+        description: 'The ID of the linked dashboard that was viewed',
+        optional: false,
+      },
+    },
+  },
+};
+
+const suggestedDashboardAdded: TelemetryEvent = {
+  eventType: TelemetryEventTypes.SUGGESTED_DASHBOARD_ADDED,
+  schema: {
+    rule_type_id: {
+      type: 'keyword' as const,
+      _meta: {
+        description: 'Rule type id',
+        optional: false,
+      },
+    },
+    rule_id: {
+      type: 'keyword' as const,
+      _meta: {
+        description: 'The ID of the rule backing the alert the suggested dashboard was added from',
+        optional: false,
+      },
+    },
+    dashboard_id: {
+      type: 'keyword' as const,
+      _meta: {
+        description: 'The ID of the suggested dashboard that was added to linked dashboards',
+        optional: false,
+      },
+    },
   },
 };
 
@@ -77,4 +118,5 @@ export const events: TelemetryEvent[] = [
   alertDetailsPageView,
   alertAddedToCase,
   linkedDashboardView,
+  suggestedDashboardAdded,
 ];

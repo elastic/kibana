@@ -13,8 +13,8 @@ export interface ITelemetryClient {
   reportRelatedAlertsLoaded(count: number): void;
   reportAlertDetailsPageView(ruleType: string): void;
   reportAlertAddedToCase(newCaseCreated: boolean, from: string, ruleTypeId: string): void;
-  reportLinkedDashboardViewed(ruleTypeId: string): void;
-  reportSuggestedDashboardAdded(ruleTypeId: string): void;
+  reportLinkedDashboardViewed(ruleTypeId: string, ruleId: string, dashboardId: string): void;
+  reportSuggestedDashboardAdded(ruleTypeId: string, ruleId: string, dashboardId: string): void;
 }
 
 export enum TelemetryEventTypes {
@@ -54,6 +54,8 @@ interface AlertAddedToCaseEvent {
 }
 interface LinkedDashboardViewParams {
   rule_type_id: string;
+  rule_id: string;
+  dashboard_id: string;
 }
 
 interface LinkedDashboardViewEvent {
@@ -62,6 +64,8 @@ interface LinkedDashboardViewEvent {
 }
 interface SuggestedDashboardAddedParams {
   rule_type_id: string;
+  rule_id: string;
+  dashboard_id: string;
 }
 
 interface SuggestedDashboardAddedEvent {

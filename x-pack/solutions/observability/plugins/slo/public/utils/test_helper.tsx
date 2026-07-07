@@ -45,11 +45,23 @@ const queryClient = new QueryClient({
 
 const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);
 
+export const telemetryClientMock = {
+  reportSloDetailsFlyoutViewed: jest.fn(),
+  reportSloDetailsFlyoutTabChanged: jest.fn(),
+  reportSloCreateFlyoutViewed: jest.fn(),
+  reportSloCreated: jest.fn(),
+  reportSloEdited: jest.fn(),
+  reportSloDeleted: jest.fn(),
+  reportSloCloned: jest.fn(),
+  reportSloReset: jest.fn(),
+};
+
 export const pluginContextDefaultValue = {
   appMountParameters,
   observabilityRuleTypeRegistry,
   ObservabilityPageTemplate: KibanaPageTemplate,
   sloClient,
+  telemetry: telemetryClientMock,
 };
 
 export const render = (component: React.ReactNode) => {
