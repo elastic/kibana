@@ -6,8 +6,8 @@
  */
 
 import { memoize } from 'lodash';
+import type { Maybe } from '@kbn/apm-types-shared';
 import { asDecimal } from './formatters';
-import type { Maybe } from '../../../typings/common';
 
 function asKilobytes(value: number) {
   return `${asDecimal(value / 1000)} KB`;
