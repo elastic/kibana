@@ -25,6 +25,7 @@ export {
 } from './registry';
 export type { InlineActionStepDefinition, PayloadVariable } from './registry';
 export { ActionForm, createInitialActionFormValue } from './action_form';
+export { InlineWorkflowEditor } from './components/inline_workflow_editor';
 export { isActionValid } from './types';
 export type {
   ActionDraft,
