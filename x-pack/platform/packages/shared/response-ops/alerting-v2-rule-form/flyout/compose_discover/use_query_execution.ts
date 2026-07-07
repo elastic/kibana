@@ -156,7 +156,10 @@ export const useQueryExecution = ({
     const rangeChanged = exec?.timeRange.from !== tr.from || exec?.timeRange.to !== tr.to;
     const fieldChanged = exec?.timeField !== tf;
     if (exec && trimmed === exec.query && !rangeChanged && !fieldChanged) {
-      queryClient.invalidateQueries({ queryKey: ['composeDiscoverQuery'] });
+      queryClient.invalidateQueries({
+        queryKey: ['composeDiscoverQuery', exec.query, exec.timeRange, exec.timeField],
+        exact: true,
+      });
     } else {
       setExecutionsByTab((prev) => ({
         ...prev,

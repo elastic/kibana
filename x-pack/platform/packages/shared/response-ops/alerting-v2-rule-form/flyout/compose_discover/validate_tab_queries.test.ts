@@ -75,7 +75,7 @@ describe('validateTabQueries', () => {
     );
   });
 
-  it('treats a validation exception for one tab as no error, without failing the batch', async () => {
+  it('reports a validation exception for one tab as an error, without failing the batch', async () => {
     mockValidateQuery.mockImplementation(async (query: string) => {
       if (query.includes('boom')) throw new Error('boom');
       return { errors: [{ text: 'bad query' }], warnings: [] };
@@ -86,6 +86,11 @@ describe('validateTabQueries', () => {
       callbacks
     );
 
-    expect(result).toEqual([{ tab: 'alert', messages: ['bad query'] }]);
+    expect(result).toEqual(
+      expect.arrayContaining([
+        { tab: 'base', messages: ['Could not validate this query. Try again.'] },
+        { tab: 'alert', messages: ['bad query'] },
+      ])
+    );
   });
 });

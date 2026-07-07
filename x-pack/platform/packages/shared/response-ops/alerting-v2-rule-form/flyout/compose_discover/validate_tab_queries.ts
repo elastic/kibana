@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { validateQuery } from '@kbn/esql-language';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { QueryTab } from './types';
@@ -19,14 +20,6 @@ export interface TabValidationError {
 const getErrorText = (error: EsqlValidationError): string =>
   'text' in error ? error.text : error.message;
 
-/**
- * Statically validates each tab's ES|QL query and returns one entry per tab
- * that has at least one error. Runs full validation (including the ES|QL
- * callbacks for column/source resolution), so it is meant to be invoked
- * on-demand — e.g. when the user clicks Apply — not on every keystroke, since
- * the callbacks issue real requests to Elasticsearch. Empty queries are
- * skipped, and a validation failure for one tab never rejects the whole batch.
- */
 export const validateTabQueries = async (
   queries: Partial<Record<QueryTab, string>>,
   callbacks: ESQLCallbacks
@@ -41,7 +34,15 @@ export const validateTabQueries = async (
         if (errors.length === 0) return null;
         return { tab, messages: errors.map(getErrorText) };
       } catch {
-        return null;
+        return {
+          tab,
+          messages: [
+            i18n.translate(
+              'xpack.alertingV2.composeDiscover.querySandbox.validationFailedMessage',
+              { defaultMessage: 'Could not validate this query. Try again.' }
+            ),
+          ],
+        };
       }
     })
   );

@@ -449,7 +449,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         </EuiFlexGroup>
       )}
 
-      {isError && (
+      {isError && !validationError?.length && (
         <EuiCallOut
           announceOnMount
           color="danger"

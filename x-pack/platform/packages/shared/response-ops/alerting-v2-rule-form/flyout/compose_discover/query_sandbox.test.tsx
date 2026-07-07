@@ -203,13 +203,29 @@ describe('QuerySandbox', () => {
       hasRun: true,
       isError: true,
       error: 'Something went wrong',
-      // The executed query differs from the current query prop, matching Discover's
-      // behavior of leaving the error up until the user re-runs the query.
+      /*
+       * The executed query differs from the current query prop, matching Discover's
+       * behavior of leaving the error up until the user re-runs the query.
+       */
       lastExecutedQuery: 'FROM logs-* | STATS count() BY host.name (edited)',
     };
     renderSandbox();
     expect(screen.getByText('Query error')).toBeInTheDocument();
     expect(screen.queryByText('Run your query to see results')).not.toBeInTheDocument();
+  });
+
+  it('hides the stale execution error callout when a validation error is also showing', () => {
+    mockExecutionResult = {
+      ...defaultExecutionResult,
+      hasRun: true,
+      isError: true,
+      error: 'Something went wrong',
+      lastExecutedQuery: defaultProps.query,
+    };
+    renderSandbox({ validationError: ['bad query'] });
+    expect(screen.getByTestId('querySandboxValidationError')).toBeInTheDocument();
+    expect(screen.queryByText('Query error')).not.toBeInTheDocument();
+    expect(screen.queryByText('Something went wrong')).not.toBeInTheDocument();
   });
 
   it('shows "No results" when query returns empty rows', () => {
