@@ -7,7 +7,7 @@
 
 import React, { lazy, Suspense } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { getEcsField } from '../../../flyout/document_details/right/components/table_field_name_cell';
+import { getEcsField } from '../components/table_field_name_cell';
 import {
   HOST_NAME_FIELD_NAME,
   IP_FIELD_TYPE,
