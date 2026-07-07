@@ -218,6 +218,9 @@ describe('AgentlessPackagePoliciesTable', () => {
 
     const nameLink = await result.findByTestId('agentlessIntegrationNameLink');
     expect(nameLink.getAttribute('href')).not.toContain('isAgentless');
+    // With the hint suppressed and no `from`, the query string is empty — the href must not
+    // end in a dangling `?`.
+    expect(nameLink.getAttribute('href')).not.toContain('?');
     jest.mocked(ExperimentalFeaturesService.get).mockRestore();
   });
 

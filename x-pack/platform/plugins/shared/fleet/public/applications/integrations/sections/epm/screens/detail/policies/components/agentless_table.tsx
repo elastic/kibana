@@ -248,11 +248,12 @@ export const AgentlessPackagePoliciesTable = ({
               if (isAgentlessPoliciesUIEnabled()) {
                 editParams.set(IS_AGENTLESS_QUERY_PARAM, 'true');
               }
+              const editQueryString = editParams.toString();
               return (
                 <EuiLink
                   className="eui-textTruncate"
                   data-test-subj="agentlessIntegrationNameLink"
-                  href={`${editHref}?${editParams.toString()}`}
+                  href={`${editHref}${editQueryString ? `?${editQueryString}` : ''}`}
                 >
                   {packagePolicy.name}
                 </EuiLink>
