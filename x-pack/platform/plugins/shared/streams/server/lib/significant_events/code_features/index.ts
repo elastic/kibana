@@ -26,6 +26,18 @@ export {
   type IdentifyCodeFeaturesResult,
   type IdentifyCodeFeaturesStatus,
 } from './identify_code_features';
+export { extractLogSignatures, staticPrefixOf } from './extract_log_signatures';
+export {
+  generatePredictiveQueries,
+  buildPredictiveEsql,
+  isValidEsqlSyntax,
+} from './generate_predictive_queries';
+export {
+  identifyCodeQueries,
+  type IdentifyCodeQueriesOptions,
+  type IdentifyCodeQueriesResult,
+  type IdentifyCodeQueriesStatus,
+} from './identify_code_queries';
 export type {
   CodeRepositoryReader,
   RepoClassification,
@@ -34,4 +46,6 @@ export type {
   ServiceNameResolution,
   LanguageCount,
   CodeHit,
+  LoggingChunk,
+  LogSignature,
 } from './types';

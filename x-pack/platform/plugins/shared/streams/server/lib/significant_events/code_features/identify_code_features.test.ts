@@ -53,6 +53,7 @@ const createReader = (overrides: Partial<CodeRepositoryReader> = {}): CodeReposi
         ? [{ file: 'main.tf', line: 4, snippet: 'OTEL_SERVICE_NAME=checkoutservice' }]
         : []
   ),
+  getLoggingChunks: jest.fn(async () => []),
   ...overrides,
 });
 

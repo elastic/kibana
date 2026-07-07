@@ -49,3 +49,27 @@ export const SERVICE_NAME_SIGNAL_WEIGHT = {
 } as const;
 
 export type ServiceNameSignal = keyof typeof SERVICE_NAME_SIGNAL_WEIGHT;
+
+/** The chunk tag SCS stamps on log-emitting code chunks (see elastic/semantic-code-search#168). */
+export const LOGGING_CHUNK_TAG = 'logging' as const;
+
+/**
+ * Severity level of a log call mapped to a KI query severity score (0-100).
+ * Derived from the logger method name in the code (deterministic), not from log
+ * frequency — predictive queries have no occurrences to score against.
+ */
+export const LOG_LEVEL_SEVERITY: Record<string, number> = {
+  fatal: 80,
+  critical: 80,
+  severe: 80,
+  error: 70,
+  warn: 50,
+  warning: 50,
+  info: 30,
+  debug: 20,
+  trace: 20,
+  fine: 20,
+};
+
+/** Default severity for a recognized log call whose level is not in the map. */
+export const DEFAULT_LOG_SEVERITY = 40;

@@ -14,6 +14,7 @@ import { STREAMS_API_PRIVILEGES } from '../../../../../../common/constants';
 import {
   createCodeRepositoryReader,
   identifyCodeFeatures,
+  identifyCodeQueries,
 } from '../../../../../lib/significant_events/code_features';
 
 // ---------------------------------------------------------------------------
@@ -87,6 +88,62 @@ const identifyCodeFeaturesRoute = createServerRoute({
   },
 });
 
+// ---------------------------------------------------------------------------
+// Generate predictive Query KIs for a stream from its logger call sites (Stage 2).
+//
+// Consumes the Stage 1 `service_name` Feature KI as the join key and the
+// `tags: logging` code chunks (elastic/semantic-code-search#168) to build
+// predictive match queries — including for log lines not yet seen in the data.
+// Persisted as durable, non-rule-backed (draft) Query KIs.
+// ---------------------------------------------------------------------------
+
+const generateCodeQueriesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{streamName}/code_features/_generate_queries',
+  options: {
+    access: 'internal',
+    summary: 'Generate predictive KI queries for a stream from its indexed logger call sites',
+    timeout: { idleSocket: 300_000 },
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ streamName: z.string() }),
+  }),
+  handler: async ({ params, request, getScopedClients, server, logger }) => {
+    const scopedClients = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient, licensing, uiSettingsClient } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const { streamName } = params.path;
+    const routeLogger = logger.get('code_queries', streamName);
+
+    const agentBuilderTools = server.agentBuilder?.tools;
+    if (!agentBuilderTools) {
+      routeLogger.debug('Agent Builder tools unavailable; skipping code query generation');
+      return { status: 'no_repo' as const };
+    }
+
+    const [kiClient, stream] = await Promise.all([
+      scopedClients.getKnowledgeIndicatorClient(),
+      streamsClient.getStream(streamName),
+    ]);
+
+    const reader = createCodeRepositoryReader({
+      esClient: scopedClusterClient.asCurrentUser,
+      agentBuilderTools,
+      request,
+      logger: routeLogger,
+    });
+
+    return identifyCodeQueries({ stream, kiClient, reader, logger: routeLogger });
+  },
+});
+
 export const internalSignificantEventsKICodeFeaturesRoutes = {
   ...identifyCodeFeaturesRoute,
+  ...generateCodeQueriesRoute,
 };

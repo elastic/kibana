@@ -56,6 +56,31 @@ export interface CodeHit {
 }
 
 /**
+ * A log-emitting code chunk, retrieved via the `tags: logging` filter that SCS
+ * stamps at ingest (elastic/semantic-code-search#168).
+ */
+export interface LoggingChunk {
+  content: string;
+  language?: string;
+  /** Best-effort file location (from the SCS `_locations` index), when available. */
+  location?: string;
+}
+
+/**
+ * A log statement extracted from a logging chunk: its severity level and the
+ * static (non-interpolated) portion of the message used to build a match query.
+ */
+export interface LogSignature {
+  level: string;
+  severity: number;
+  /** The full literal message as written in code (may contain placeholders). */
+  message: string;
+  /** The leading static text before any interpolation placeholder. */
+  staticPrefix: string;
+  location?: string;
+}
+
+/**
  * Narrow, injectable surface over the SCS + Elasticsearch reads that code
  * feature identification needs. Kept as an interface so the orchestrator is
  * unit-testable with a fake reader.
@@ -73,4 +98,9 @@ export interface CodeRepositoryReader {
   getObservedServiceNames(index: string): Promise<string[]>;
   /** Semantic code search over the repository. */
   searchCode(repository: string, query: string): Promise<CodeHit[]>;
+  /**
+   * Log-emitting chunks for the repository (via the `tags: logging` filter).
+   * Deterministic enumeration — no semantic ranking.
+   */
+  getLoggingChunks(repository: string, limit?: number): Promise<LoggingChunk[]>;
 }

@@ -67,11 +67,26 @@ steps:
         iteration-on-failure:
           continue: true
         steps:
+          # Stage 1: derive code Feature KIs (repo type, language, service name).
           - name: identify_code_features
             type: kibana.request
             with:
               method: POST
               path: '/internal/streams/{{ foreach.item.streamName }}/code_features/_identify'
+              headers:
+                x-elastic-internal-origin: 'kibana'
+            on-failure:
+              retry:
+                max-attempts: 2
+                delay: '5s'
+                strategy: exponential
+          # Stage 2: generate predictive Query KIs from logger call sites. Runs
+          # after Stage 1 so the resolved service_name feature is available.
+          - name: generate_code_queries
+            type: kibana.request
+            with:
+              method: POST
+              path: '/internal/streams/{{ foreach.item.streamName }}/code_features/_generate_queries'
               headers:
                 x-elastic-internal-origin: 'kibana'
             on-failure:

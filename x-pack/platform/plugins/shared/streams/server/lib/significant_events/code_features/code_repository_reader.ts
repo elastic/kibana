@@ -13,11 +13,13 @@ import {
 } from '../../agent_builder/inference_tool_bridge';
 import { SCS_SEMANTIC_SEARCH_TOOL_ID } from '../../semantic_code_search_grounding/semantic_code_search_tools';
 import { resolveIndexForRepository as resolveCodeIndex } from '../../semantic_code_search_grounding/resolve_code_index';
-import type { CodeHit, CodeRepositoryReader, LanguageCount } from './types';
+import { LOGGING_CHUNK_TAG } from './constants';
+import type { CodeHit, CodeRepositoryReader, LanguageCount, LoggingChunk } from './types';
 
 const MAX_LANGUAGES = 50;
 const MAX_SERVICE_NAMES = 50;
 const MAX_SNIPPET_LENGTH = 400;
+const MAX_LOGGING_CHUNKS = 500;
 
 const asRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
@@ -168,6 +170,38 @@ export function createCodeRepositoryReader({
       } catch (error) {
         logger.debug(
           `code_features: code search failed for "${repository}": ${errorMessage(error)}`
+        );
+        return [];
+      }
+    },
+
+    async getLoggingChunks(repository, limit = MAX_LOGGING_CHUNKS) {
+      const index = await resolveIndex(repository);
+      if (!index) {
+        return [];
+      }
+      try {
+        const response = await esClient.search<{ content?: string; language?: string }>({
+          index,
+          size: limit,
+          track_total_hits: false,
+          _source: ['content', 'language'],
+          query: {
+            bool: {
+              filter: [{ term: { tags: LOGGING_CHUNK_TAG } }, { term: { repository } }],
+            },
+          },
+        });
+        return response.hits.hits.flatMap<LoggingChunk>((hit) => {
+          const content = hit._source?.content;
+          if (typeof content !== 'string' || content.length === 0) {
+            return [];
+          }
+          return [{ content, language: hit._source?.language }];
+        });
+      } catch (error) {
+        logger.debug(
+          `code_features: logging chunk read failed for "${repository}": ${errorMessage(error)}`
         );
         return [];
       }
