@@ -121,8 +121,10 @@ interface AppMenuItemBase {
    * */
   hidden?: EuiHideForProps['sizes'];
   /**
-   * Renders the item in a "pressed" visual state (`aria-pressed`), for toggle-style
-   * buttons whose action opens/closes a paired UI (e.g. a side panel).
+   * Renders the item in a "pressed" visual state, for toggle-style buttons whose action
+   * opens/closes a paired UI (e.g. a side panel). When the item is displayed inline it uses
+   * `aria-pressed`; when it collapses into the overflow "More" popover the pressed state is
+   * shown with a highlighted background.
    * Ignored for items with sub-items — those already reflect popover-open state.
    */
   isSelected?: boolean;
