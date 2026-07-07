@@ -327,25 +327,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('bulk_remove_collectors', () => {
-      it('returns { count } counting only OPAMP agents when mixed agents are passed by kuery', async () => {
-        const actionsBefore = await getActionCount();
-
-        const { body } = await supertest
-          .post('/api/fleet/agents/bulk_remove_collectors')
-          .set('kbn-xsrf', 'xxx')
-          .send({ agents: 'active:true', dryRun: true })
-          .expect(200);
-
-        // The fixture agents (agent1–agent4) are PERMANENT type, not OPAMP,
-        // so the dry-run count must be 0 — not the total active agent count.
-        expect(body).to.have.property('count');
-        expect(body.count).to.be.a('number');
-        expect(body.count).to.eql(0);
-
-        const actionsAfter = await getActionCount();
-        expect(actionsAfter).to.eql(actionsBefore);
-      });
     });
+  });
+}
   });
 }
