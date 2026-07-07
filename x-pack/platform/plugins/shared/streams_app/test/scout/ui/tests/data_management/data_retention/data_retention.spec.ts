@@ -11,12 +11,12 @@ import { omit } from 'lodash';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 import {
-  ensureDslLifecycle,
   openLifecycleMethodFlyout,
   removeDeletePhase,
   RETENTION_TEST_IDS,
   saveRetentionChanges,
   setCustomRetention,
+  setStreamDslLifecycle,
   toggleInheritSwitch,
 } from '../../../fixtures/data_lifecycle_helpers';
 
@@ -124,7 +124,9 @@ test.describe(
       await apiServices.streams.clearStreamChildren('logs.otel');
     });
 
-    // Smoke test: Verifies the complete retention UI workflow
+    // Smoke test: Verifies the complete retention UI workflow. setCustomRetention/removeDeletePhase
+    // resolve the correct add-delete flow per deployment (stateful data phases flyout vs serverless
+    // delete-only flyout).
     // Detailed retention value tests (7d, 30d, 90d, hours, etc.) are covered by API tests
     // in test/scout/api/tests/lifecycle_retention.spec.ts
     test('should set and reset retention policy', async ({ page }) => {
@@ -137,9 +139,17 @@ test.describe(
       await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('∞');
     });
 
-    // Smoke test: Verifies persistence across page refresh (UI-specific behavior)
-    test('should persist retention value across page refresh', async ({ page, pageObjects }) => {
-      await setCustomRetention(page, '30', 'd');
+    // Smoke test: Verifies the retention value persists across a page refresh. Seeded via the API
+    // since this asserts the display, not the add-delete UI.
+    test('should persist retention value across page refresh', async ({
+      page,
+      apiServices,
+      pageObjects,
+    }) => {
+      await setStreamDslLifecycle(apiServices.streams, 'logs.otel.nginx', {
+        data_retention: '30d',
+      });
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
       await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('30 days');
 
       // Refresh the page
@@ -149,31 +159,35 @@ test.describe(
       await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('30 days');
     });
 
-    // Smoke test: Verifies classic stream retention UI workflow
-    test('should set retention on classic stream', async ({
+    // Smoke test: Verifies retention is displayed on a classic stream. Classic streams inherit their
+    // lifecycle from the backing index template (may resolve to ILM), so pin DSL + retention via the
+    // API before loading the UI.
+    test('should display retention on classic stream', async ({
       page,
       pageObjects,
       logsSynthtraceEsClient,
       apiServices,
-      config,
     }) => {
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
       await apiServices.streams.clearStreamProcessors('logs-generic-default');
+
+      await setStreamDslLifecycle(apiServices.streams, 'logs-generic-default', {
+        data_retention: '7d',
+      });
+
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
-      // Classic streams inherit their lifecycle from the backing index template,
-      // which may resolve to ILM. Switch to DSL so a custom delete phase can be set.
-      await ensureDslLifecycle(page);
-
-      await setCustomRetention(page, '7', 'd', {
-        expectOverrideConfirmation: config.serverless,
-      });
       await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('7 days');
     });
 
-    // Verifies the inherit lifecycle flyout flow
-    test('should switch lifecycle to inherit from parent', async ({ page }) => {
-      await setCustomRetention(page, '7', 'd');
+    // Verifies the inherit lifecycle flyout flow.
+    test('should switch lifecycle to inherit from parent', async ({
+      page,
+      apiServices,
+      pageObjects,
+    }) => {
+      await setStreamDslLifecycle(apiServices.streams, 'logs.otel.nginx', { data_retention: '7d' });
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
       await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('7 days');
 
       // Switch to inherit via the lifecycle method flyout
@@ -183,12 +197,18 @@ test.describe(
       await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('∞');
     });
 
+    // Verifies the DSL lifecycle phase popover displays phase details.
     test('should open DSL lifecycle phase popup and display phase details', async ({
       page,
       config,
+      apiServices,
+      pageObjects,
     }) => {
-      // Set a custom retention to have a DSL lifecycle with a delete phase
-      await setCustomRetention(page, '30', 'd');
+      // Seed a DSL lifecycle with a delete phase so the phase popover has content to show.
+      await setStreamDslLifecycle(apiServices.streams, 'logs.otel.nginx', {
+        data_retention: '30d',
+      });
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
       // DSL phase label differs: 'Hot' in stateful, 'Successful ingest' in serverless
       // Click on the phase button using test ID

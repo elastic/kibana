@@ -43,6 +43,7 @@ export function transformDashboardOut(
     timeTo,
     title,
     projectRouting,
+    esqlApproximation,
   } = attributes;
 
   // Extract tag references
@@ -139,6 +140,7 @@ export function transformDashboardOut(
       ...(validatedState as DashboardState), // defaults have been injected at this point, so casting is safe
       /** These keys were validated seperately, since they each have unique error handling */
       ...(filters && { filters }),
+      ...(esqlApproximation !== undefined && { esql_approximation: esqlApproximation }),
       panels,
       pinned_panels: pinnedPanels,
       ...(query && { query }),

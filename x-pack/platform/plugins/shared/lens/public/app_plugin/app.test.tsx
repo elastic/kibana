@@ -1495,7 +1495,7 @@ describe('Lens App', () => {
         ],
         type: 'lnsXY',
         savedObjectId: '',
-        vizEditorOriginatingAppUrl: '#/tsvb-link',
+        visEditorOriginatingAppUrl: '#/tsvb-link',
         isVisualizeAction: true,
       } as unknown as VisualizeEditorContext;
 
