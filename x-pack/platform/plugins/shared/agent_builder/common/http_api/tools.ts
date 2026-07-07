@@ -67,6 +67,12 @@ export interface BulkDeleteToolResponse {
 
 export interface ExecuteToolResponse {
   results: ToolResult[];
+  /**
+   * The trace id correlating this execution, when tracing is enabled. Callers such as the
+   * evals framework use it to grade the run against its exported trace. Mirrors the `trace_id`
+   * returned by the `converse` route.
+   */
+  trace_id?: string;
 }
 
 export interface ResolveSearchSourcesRequest {

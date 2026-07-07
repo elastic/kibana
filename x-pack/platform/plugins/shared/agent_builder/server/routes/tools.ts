@@ -20,11 +20,13 @@ import type {
   UpdateToolPayload,
   CreateToolResponse,
   UpdateToolResponse,
+  ExecuteToolResponse,
 } from '../../common/http_api/tools';
 import { publicApiPath } from '../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, TOOLS_WRITE_SECURITY } from './route_security';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 import { asError } from '../utils/as_error';
+import { getCurrentTraceId } from '../tracing';
 
 export function registerToolsRoutes({
   router,
@@ -453,9 +455,16 @@ export function registerToolsRoutes({
           defaultConnectorId,
         });
 
-        return response.ok({
+        return response.ok<ExecuteToolResponse>({
           body: {
-            results: toolResult.results,
+            results: toolResult.results ?? [],
+            // Surface the trace id (when tracing is enabled) so callers such as the evals
+            // framework can correlate this execution with its exported trace. Prefer the
+            // execution's own trace id: inference operations detach onto their own root
+            // trace, so `getCurrentTraceId()` here would return the ambient HTTP request
+            // trace, which does not contain the tool/gen_ai spans. Falls back to the
+            // request trace for tools that never opened an execute_tool span.
+            trace_id: toolResult.traceId ?? getCurrentTraceId(),
           },
         });
       })

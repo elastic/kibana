@@ -28,6 +28,16 @@ export interface RunToolReturn {
    * Interruption returned by the tool
    */
   prompt?: PromptRequest;
+  /**
+   * Trace id of the trace that actually contains this execution's spans (the
+   * `execute_tool` span and any nested inference/`gen_ai` spans).
+   *
+   * Inference operations start their own root trace (see `createInferenceContext`),
+   * so this can differ from the ambient HTTP request trace. Callers such as the
+   * evals framework must use this id — not the request trace — to correlate a tool
+   * run with its exported trace.
+   */
+  traceId?: string;
 }
 
 /**
