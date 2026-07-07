@@ -9,6 +9,8 @@ import { EuiFlyoutBody, EuiPortal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import type { Environment } from '../../../../common/environment_rt';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import type { ServiceNodeData } from '../../../../common/service_map';
 import { ResponsiveFlyout } from '../responsive_flyout';
 import { ServiceFlyoutFooter } from './footer';
@@ -72,6 +74,11 @@ export function ServiceFlyout({
     rangeFrom: initialRangeFrom,
     rangeTo: initialRangeTo,
   });
+  const { start = '', end = '' } = useTimeRange({
+    rangeFrom: flyoutRange.rangeFrom,
+    rangeTo: flyoutRange.rangeTo,
+    optional: true,
+  });
   const [transactionType, setTransactionType] = useState(initialTransactionType ?? '');
   const [refreshToken, setRefreshToken] = useState(Date.now());
 
@@ -109,38 +116,46 @@ export function ServiceFlyout({
   return (
     <EuiPortal>
       <ServiceFlyoutContextProvider core={core} share={share} lens={lens} dataViews={dataViews}>
-        <ResponsiveFlyout
-          data-test-subj="serviceFlyout"
-          flyoutMenuDisplayMode="always"
-          onClose={onClose}
-          ownFocus={false}
-          size="m"
-          paddingSize="m"
-          resizable
-          session="start"
-          flyoutMenuProps={{ title }}
-          aria-labelledby={titleId}
+        <TimeRangeMetadataContextProvider
+          uiSettings={core.uiSettings}
+          start={start}
+          end={end}
+          kuery={kuery}
+          useSpanName={false}
         >
-          <ServiceFlyoutHeader
-            service={service}
-            title={title}
-            titleId={titleId}
-            environment={flyoutEnvironment}
-            kuery={kuery}
-            rangeFrom={flyoutRange.rangeFrom}
-            rangeTo={flyoutRange.rangeTo}
-            selectedTabId={selectedTabId}
-            onSelectedTabIdChange={setSelectedTabId}
-          />
-          <EuiFlyoutBody>{renderTabContent()}</EuiFlyoutBody>
-          <ServiceFlyoutFooter
-            serviceName={service.id}
-            environment={flyoutEnvironment}
-            rangeFrom={flyoutRange.rangeFrom}
-            rangeTo={flyoutRange.rangeTo}
-            transactionType={transactionType}
-          />
-        </ResponsiveFlyout>
+          <ResponsiveFlyout
+            data-test-subj="serviceFlyout"
+            flyoutMenuDisplayMode="always"
+            onClose={onClose}
+            ownFocus={false}
+            size="m"
+            paddingSize="m"
+            resizable
+            session="start"
+            flyoutMenuProps={{ title }}
+            aria-labelledby={titleId}
+          >
+            <ServiceFlyoutHeader
+              service={service}
+              title={title}
+              titleId={titleId}
+              environment={flyoutEnvironment}
+              kuery={kuery}
+              rangeFrom={flyoutRange.rangeFrom}
+              rangeTo={flyoutRange.rangeTo}
+              selectedTabId={selectedTabId}
+              onSelectedTabIdChange={setSelectedTabId}
+            />
+            <EuiFlyoutBody>{renderTabContent()}</EuiFlyoutBody>
+            <ServiceFlyoutFooter
+              serviceName={service.id}
+              environment={flyoutEnvironment}
+              rangeFrom={flyoutRange.rangeFrom}
+              rangeTo={flyoutRange.rangeTo}
+              transactionType={transactionType}
+            />
+          </ResponsiveFlyout>
+        </TimeRangeMetadataContextProvider>
       </ServiceFlyoutContextProvider>
     </EuiPortal>
   );
