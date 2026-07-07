@@ -69,6 +69,7 @@ interface GetEntityAnomaliesParams {
   offset?: number;
   pageSize?: number;
   request: KibanaRequest;
+  securityJobIds?: string[];
   sort?: Array<{ field: AnomalySortField; order: AnomalySortOrder }>;
   soClient: SavedObjectsClientContract;
 }
@@ -93,10 +94,12 @@ export const getEntityAnomalies = async ({
   offset = 0,
   pageSize = 100,
   request,
+  securityJobIds,
   sort,
   soClient,
 }: GetEntityAnomaliesParams): Promise<GetEntityAnomaliesResult> => {
-  const allSecurityJobIds = await getSecurityMlJobIds({ ml, request, soClient });
+  const allSecurityJobIds =
+    securityJobIds ?? (await getSecurityMlJobIds({ ml, request, soClient }));
   const allConfigs = await getJobConfig({
     jobIds: allSecurityJobIds,
     logger,
@@ -133,6 +136,7 @@ export const getEntityAnomalies = async ({
     logger,
     ml,
     request,
+    securityJobIds: allSecurityJobIds,
     soClient,
   });
 

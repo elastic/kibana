@@ -89,7 +89,7 @@ const getAnomalyDataFromApi = async ({
     return entities.map(() => []);
   }
 
-  const { jobMetaById } = await getSecurityJobIds(ml, soClient, request);
+  const { securityJobIds, jobMetaById } = await getSecurityJobIds(ml, soClient, request);
 
   return Promise.all(
     entities.map(async ({ entity }) => {
@@ -108,6 +108,7 @@ const getAnomalyDataFromApi = async ({
         ml,
         toMs: toDate,
         request,
+        securityJobIds,
         soClient,
       });
 
