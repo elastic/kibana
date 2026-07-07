@@ -59,31 +59,12 @@ export function useRelayAppConnection(): UseRelayAppConnection {
     },
   });
 
-  const connectMutation = useMutation<SlackAppConnectResponse, Error, Window | null>({
+  const connectMutation = useMutation<SlackAppConnectResponse, Error>({
     mutationFn: () => http.post<SlackAppConnectResponse>(CONNECT_ROUTE),
-    onSuccess: (response, authWindow) => {
-      // Navigate the tab opened synchronously on click (see `connect` below).
-      // Opening it here instead — after the request resolves — gets blocked by
-      // most browsers' popup blockers, since it's no longer within the click's
-      // user-activation window (Safari in particular blocks window.open() after
-      // almost any async gap).
-      if (authWindow && !authWindow.closed) {
-        authWindow.location.href = response.authorizeUrl;
-      } else if (!window.open(response.authorizeUrl, '_blank')) {
-        // The synchronous open was itself blocked, or the user closed that tab
-        // before the request resolved. Nothing more script can do here; let the
-        // user know why no tab appeared.
-        notifications.toasts.addWarning({
-          title: i18n.translate(
-            'xpack.streams.significantEventsDiscovery.settings.apps.connectPopupBlocked',
-            { defaultMessage: 'Allow pop-ups for Kibana and try connecting again' }
-          ),
-        });
-      }
+    onSuccess: () => {
       pollDeadlineRef.current = Date.now() + POLL_TIMEOUT_MS;
     },
-    onError: (error, authWindow) => {
-      authWindow?.close();
+    onError: (error) => {
       notifications.toasts.addError(error, {
         title: i18n.translate(
           'xpack.streams.significantEventsDiscovery.settings.apps.connectError',
@@ -123,10 +104,27 @@ export function useRelayAppConnection(): UseRelayAppConnection {
     error: statusQuery.data?.error,
     isMutating: connectMutation.isLoading || disconnectMutation.isLoading,
     connect: async () => {
-      // Must happen synchronously, inside the click's user-activation window —
-      // see the comment in connectMutation.onSuccess above.
+      // Open the tab synchronously, inside the click gesture: `mutateAsync`
+      // below awaits a network round-trip, and by the time it resolves the
+      // click's user-activation has expired, so opening the tab from
+      // `onSuccess` gets treated as an unsolicited popup and blocked by most
+      // browsers. Navigate this pre-opened tab once we have the URL instead.
       const authWindow = window.open('', '_blank');
-      await connectMutation.mutateAsync(authWindow);
+      if (authWindow) {
+        // Detach the opener reference to protect against reverse tabnabbing,
+        // while keeping our own handle so we can navigate the tab below.
+        authWindow.opener = null;
+      }
+
+      try {
+        const response = await connectMutation.mutateAsync();
+        if (authWindow && !authWindow.closed) {
+          authWindow.location.replace(response.authorizeUrl);
+        }
+      } catch (error) {
+        authWindow?.close();
+        throw error;
+      }
     },
     disconnect: async () => {
       await disconnectMutation.mutateAsync();

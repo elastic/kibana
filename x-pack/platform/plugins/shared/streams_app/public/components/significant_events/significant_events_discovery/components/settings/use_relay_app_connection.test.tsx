@@ -30,17 +30,18 @@ const POLL_TIMEOUT_MS = 2 * 60 * 1_000;
 const httpGet = jest.fn();
 const httpPost = jest.fn();
 const addError = jest.fn();
-const addWarning = jest.fn();
-
-// A minimal stand-in for the tab window.open() returns: settable `location`,
-// `closed`, and a spy-able `close()`, matching what connect()/onSuccess use.
-const createFakeWindow = () =>
-  ({ location: { href: '' }, closed: false, close: jest.fn() } as unknown as Window);
 
 const statusResponse = (
   status: SlackAppStatusResponse['status'],
   overrides: Partial<SlackAppStatusResponse> = {}
 ): SlackAppStatusResponse => ({ available: true, status, ...overrides });
+
+const createFakeAuthWindow = () => ({
+  closed: false,
+  opener: window as unknown as Window | null,
+  location: { replace: jest.fn() },
+  close: jest.fn(),
+});
 
 const createSetup = () => {
   const queryClient = new QueryClient({
@@ -57,17 +58,17 @@ const createSetup = () => {
 const flush = (ms = 0) => act(() => jest.advanceTimersByTimeAsync(ms));
 
 describe('useRelayAppConnection', () => {
+  let authWindow: ReturnType<typeof createFakeAuthWindow>;
+
   beforeEach(() => {
     jest.useFakeTimers();
     jest.clearAllMocks();
-    // Default to the common case: window.open() succeeds (e.g. the
-    // synchronous placeholder tab opened on click). Individual tests override
-    // this to simulate a blocked popup.
-    jest.spyOn(window, 'open').mockImplementation(() => createFakeWindow());
+    authWindow = createFakeAuthWindow();
+    jest.spyOn(window, 'open').mockImplementation(() => authWindow as unknown as Window);
     mockUseKibana.mockReturnValue({
       core: {
         http: { get: httpGet, post: httpPost },
-        notifications: { toasts: { addError, addWarning } },
+        notifications: { toasts: { addError } },
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
@@ -126,12 +127,13 @@ describe('useRelayAppConnection', () => {
     expect(httpGet).toHaveBeenCalledTimes(callsAtTimeout);
   });
 
-  // Regression coverage: window.open() must be called synchronously (before
-  // the connect request resolves) so it stays inside the click's
-  // user-activation window — most browsers block it otherwise. The resolved
-  // authorize URL then navigates that already-open tab via `location.href`,
-  // which isn't subject to popup blocking.
-  it('connect() opens a blank tab synchronously and navigates it to the Slack OAuth URL', async () => {
+  // Regression coverage: the tab must be opened synchronously (before the
+  // `await` on the connect request) so it carries the click's user-activation
+  // and isn't treated as an unsolicited popup. Opening it from `onSuccess`
+  // (after the network round-trip) gets silently blocked by most browsers
+  // with default popup settings, leaving the card stuck "waiting" with no
+  // consent tab.
+  it('connect() opens a blank tab synchronously, detaches its opener, then navigates it once the authorize URL is known', async () => {
     httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.notConnected));
     httpPost.mockResolvedValue({ authorizeUrl: 'https://slack/oauth' });
     const { wrapper } = createSetup();
@@ -139,22 +141,43 @@ describe('useRelayAppConnection', () => {
     await flush();
 
     httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.oauthInProgress));
+
+    const connectPromise = result.current.connect();
+    // The tab is opened (and detached) before the connect request resolves.
+    expect(window.open).toHaveBeenCalledWith('', '_blank');
+    expect(authWindow.opener).toBeNull();
+    expect(authWindow.location.replace).not.toHaveBeenCalled();
+
     await act(async () => {
-      await result.current.connect();
+      await connectPromise;
     });
 
-    expect(window.open).toHaveBeenCalledTimes(1);
-    expect(window.open).toHaveBeenCalledWith('', '_blank');
-    const authWindow = (window.open as jest.Mock).mock.results[0].value;
-    expect(authWindow.location.href).toBe('https://slack/oauth');
+    expect(authWindow.location.replace).toHaveBeenCalledWith('https://slack/oauth');
 
     const callsAfterConnect = httpGet.mock.calls.length;
     await flush(POLL_INTERVAL_MS);
     expect(httpGet.mock.calls.length).toBeGreaterThan(callsAfterConnect);
   });
 
-  it('falls back to a direct window.open() and warns when the placeholder tab is blocked', async () => {
-    (window.open as jest.Mock).mockReturnValue(null);
+  it('closes the pre-opened tab when the connect request fails', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.notConnected));
+    httpPost.mockRejectedValue(new Error('relay down'));
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useRelayAppConnection(), { wrapper });
+    await flush();
+
+    await act(async () => {
+      await result.current.connect().catch(() => undefined);
+    });
+
+    expect(authWindow.close).toHaveBeenCalledTimes(1);
+    expect(authWindow.location.replace).not.toHaveBeenCalled();
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('does not throw when the browser blocks the pre-opened tab', async () => {
+    jest.spyOn(window, 'open').mockReturnValue(null);
     httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.notConnected));
     httpPost.mockResolvedValue({ authorizeUrl: 'https://slack/oauth' });
     const { wrapper } = createSetup();
@@ -162,12 +185,8 @@ describe('useRelayAppConnection', () => {
     await flush();
 
     await act(async () => {
-      await result.current.connect();
+      await expect(result.current.connect()).resolves.toBeUndefined();
     });
-
-    expect(window.open).toHaveBeenCalledWith('', '_blank');
-    expect(window.open).toHaveBeenCalledWith('https://slack/oauth', '_blank');
-    expect(addWarning).toHaveBeenCalledTimes(1);
   });
 
   // Regression coverage: disconnect() resets the deadline to 0. If a later
@@ -201,7 +220,7 @@ describe('useRelayAppConnection', () => {
     expect(httpGet.mock.calls.length).toBeGreaterThan(callsAfterReconnectObserved);
   });
 
-  it('surfaces a toast error and closes the placeholder tab when connect fails', async () => {
+  it('surfaces a toast error when connect fails', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.notConnected));
     httpPost.mockRejectedValue(new Error('relay down'));
@@ -214,8 +233,6 @@ describe('useRelayAppConnection', () => {
     });
 
     expect(addError).toHaveBeenCalledTimes(1);
-    const authWindow = (window.open as jest.Mock).mock.results[0].value;
-    expect(authWindow.close).toHaveBeenCalledTimes(1);
     consoleErrorSpy.mockRestore();
   });
 
