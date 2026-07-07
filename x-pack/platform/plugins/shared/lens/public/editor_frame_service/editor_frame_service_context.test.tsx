@@ -12,7 +12,7 @@ import type { DatasourceMap, VisualizationMap, Visualization, Datasource } from 
 
 describe('EditorFrameServiceContext', () => {
   const mockVisualizationMap: VisualizationMap = {
-    testViz: {} as Visualization,
+    testVis: {} as Visualization,
   };
 
   const mockDatasourceMap: DatasourceMap = {
@@ -23,7 +23,7 @@ describe('EditorFrameServiceContext', () => {
     const { visualizationMap, datasourceMap } = useEditorFrameService();
     return (
       <div>
-        <span data-test-subj="viz-count">{Object.keys(visualizationMap).length}</span>
+        <span data-test-subj="vis-count">{Object.keys(visualizationMap).length}</span>
         <span data-test-subj="ds-count">{Object.keys(datasourceMap).length}</span>
       </div>
     );
@@ -39,7 +39,7 @@ describe('EditorFrameServiceContext', () => {
       </EditorFrameServiceProvider>
     );
 
-    expect(screen.getByTestId('viz-count')).toHaveTextContent('1');
+    expect(screen.getByTestId('vis-count')).toHaveTextContent('1');
     expect(screen.getByTestId('ds-count')).toHaveTextContent('1');
   });
 

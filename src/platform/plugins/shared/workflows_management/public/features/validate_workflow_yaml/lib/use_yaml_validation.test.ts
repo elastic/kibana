@@ -299,19 +299,18 @@ steps:
     });
   });
 
-  it('should handle nested steps in parallel branches', async () => {
+  it('should handle nested steps in a parallel branch body', async () => {
     const yamlContent = `
 name: "Test Workflow"
 steps:
   - name: parallel_step
     type: parallel
-    branches:
-      - steps:
-          - name: branch_step
-            type: console
-      - steps:
-          - name: branch_step
-            type: http
+    foreach: "{{ steps.list.output }}"
+    steps:
+      - name: branch_step
+        type: console
+      - name: branch_step
+        type: http
 `;
 
     const mockEditor = createMockEditor(yamlContent);

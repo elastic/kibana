@@ -23,9 +23,9 @@ import { useDataTableFilters } from '../../../../common/hooks/use_data_table_fil
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useKibana, useUiSetting } from '../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../common/lib/telemetry';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { ENABLE_NEW_FLYOUT_SETTING } from '../../../../../common/constants';
 import { useDefaultDocumentFlyoutProperties } from '../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { flyoutProviders } from '../../../../flyout_v2/shared/components/flyout_provider';
 import { AttackFlyoutWrapper } from '../../../../flyout_v2/attack/main/attack_flyout_wrapper';
@@ -135,8 +135,7 @@ export const TableSection = React.memo(
 
     const { services } = useKibana();
     const { telemetry, overlays } = services;
-
-    const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+    const enableNewFlyout = useUiSetting<boolean>(ENABLE_NEW_FLYOUT_SETTING, false);
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const store = useStore();
     const history = useHistory();
@@ -177,7 +176,7 @@ export const TableSection = React.memo(
       (selectedGroup: string, bucket: RawBucket<AlertsGroupingAggregation>) => {
         const attack = getAttack(selectedGroup, bucket);
         if (attack) {
-          if (newFlyoutSystemEnabled) {
+          if (enableNewFlyout) {
             overlays.openSystemFlyout(
               flyoutProviders({
                 services,
@@ -217,9 +216,9 @@ export const TableSection = React.memo(
       [
         dataView,
         defaultFlyoutProperties,
+        enableNewFlyout,
         getAttack,
         history,
-        newFlyoutSystemEnabled,
         openFlyout,
         overlays,
         services,

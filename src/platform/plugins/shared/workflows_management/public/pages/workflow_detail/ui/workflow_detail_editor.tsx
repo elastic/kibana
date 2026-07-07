@@ -26,8 +26,8 @@ import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/monaco';
 import { isMac } from '@kbn/shared-ux-utility';
 import {
+  WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
   WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
-  WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
 } from '@kbn/workflows';
 import {
   ReactFlowProvider,
@@ -175,7 +175,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
   );
 
   const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
-    WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID
+    WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
   );
   const isExecutionGraphEnabled = useWorkflowsExperimentalUiSetting(
     WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID

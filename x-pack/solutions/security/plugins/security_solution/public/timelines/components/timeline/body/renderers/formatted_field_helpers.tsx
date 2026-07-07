@@ -21,14 +21,13 @@ import endPointSvg from '../../../../../common/utils/logo_endpoint/64_color.svg'
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
-import { useKibana } from '../../../../../common/lib/kibana';
-import { APP_UI_ID } from '../../../../../../common/constants';
+import { useKibana, useUiSetting } from '../../../../../common/lib/kibana';
+import { APP_UI_ID, ENABLE_NEW_FLYOUT_SETTING } from '../../../../../../common/constants';
 import { LinkAnchor } from '../../../../../common/components/links';
 import { GenericLinkButton } from '../../../../../common/components/links/helpers';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { RulePanelKey } from '../../../../../flyout/rule_details/right';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { RuleDetails } from '../../../../../flyout_v2/rule/main';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
@@ -64,7 +63,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   const store = useStore();
   const history = useHistory();
   const eventContext = useContext(StatefulEventContext);
-  const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+  const enableNewFlyout = useUiSetting<boolean>(ENABLE_NEW_FLYOUT_SETTING, false);
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const ruleName = `${value}`;
@@ -89,7 +88,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
         return;
       }
 
-      if (newFlyoutSystemEnabled && ruleId) {
+      if (enableNewFlyout && ruleId) {
         overlays.openSystemFlyout(
           flyoutProviders({
             services,
@@ -122,7 +121,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
       openFlyout,
       eventContext,
       isInTimelineContext,
-      newFlyoutSystemEnabled,
+      enableNewFlyout,
       overlays,
       services,
       store,

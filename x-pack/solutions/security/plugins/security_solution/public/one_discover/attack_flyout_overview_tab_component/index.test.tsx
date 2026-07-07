@@ -30,6 +30,14 @@ jest.mock('../../flyout_v2/attack/main/tabs/overview_tab', () => ({
   ),
 }));
 
+jest.mock('../../common/hooks/is_in_security_app', () => ({
+  useIsInSecurityApp: () => false,
+}));
+
+jest.mock('../alert_flyout_overview_tab_component/data_view_manager_bootstrap', () => ({
+  DataViewManagerBootstrap: () => null,
+}));
+
 describe('AttackFlyoutOverviewTab', () => {
   beforeEach(() => {
     mockFlyoutProviders.mockClear();

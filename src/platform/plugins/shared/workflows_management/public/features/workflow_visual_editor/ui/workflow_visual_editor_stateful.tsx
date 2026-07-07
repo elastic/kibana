@@ -145,8 +145,8 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   }, [selectedStepId, transformed.nodeRefs, workflowLookup, workflow]);
 
   const renderStepIcon = useCallback<RenderStepIcon>(
-    ({ stepType, isTrigger: _isTrigger }) => (
-      <StepIcon stepType={stepType} executionStatus={undefined} />
+    ({ stepType, isTrigger: _isTrigger, color }) => (
+      <StepIcon stepType={stepType} executionStatus={undefined} iconColor={color} />
     ),
     []
   );

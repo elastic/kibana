@@ -176,7 +176,6 @@ describe('WorkflowDetailEditor', () => {
     });
 
     mockUseUiSetting$.mockImplementation((key: string, defaultValue: boolean) => {
-      if (key === 'workflows:ui:visualEditor:enabled') return [false];
       if (key === 'workflows:ui:executionGraph:enabled') return [false];
       return [defaultValue];
     });
@@ -307,7 +306,7 @@ describe('WorkflowDetailEditor', () => {
 
       // Enable the visual editor so handleEditorViewChange runs the graph-focus logic.
       (useWorkflowsExperimentalUiSetting as jest.Mock).mockImplementation(
-        (settingId: string) => settingId === 'workflows:ui:visualEditor:enabled'
+        (settingId: string) => settingId === 'workflows:experimentalFeatures'
       );
 
       const wrapper = ({ children }: { children: React.ReactNode }) => {

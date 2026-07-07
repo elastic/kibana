@@ -26,7 +26,6 @@ spec:
         SCOUT_REPORTER_ENABLED: 'true'
         # [rspack-transition] Build the distribution and run all tests against the Rspack optimizer
         KBN_USE_RSPACK: 'true'
-        FTR_SMART_RETRY_ENABLED: 'true'
       allow_rebuilds: true
       branch_configuration: main
       default_branch: main
