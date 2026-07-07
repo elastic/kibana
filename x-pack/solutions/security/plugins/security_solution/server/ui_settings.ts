@@ -17,6 +17,7 @@ import {
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE,
@@ -845,6 +846,27 @@ export const getAlertAnalysisWorkflowSettings = (): SettingsConfig => ({
     category: [APP_ID],
     requiresPageReload: false,
     schema: schema.boolean(),
+    solutionViews: ['classic', 'security'],
+    technicalPreview: true,
+    readonly: true,
+  },
+  [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.alertAnalysisWorkflowTagPrefixLabel', {
+      defaultMessage: 'Alert analysis workflow tag prefix',
+    }),
+    value: 'alert-analysis',
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowTagPrefixDescription',
+      {
+        defaultMessage:
+          'Prefix for the tags the alert analysis workflow adds to alerts it analyzes (for example {example}). Changing it means alerts tagged under the old prefix are no longer recognized as analyzed.',
+        values: { example: 'alert-analysis.classification.false_positive' },
+      }
+    ),
+    type: 'string',
+    category: [APP_ID],
+    requiresPageReload: false,
+    schema: schema.string({ minLength: 1 }),
     solutionViews: ['classic', 'security'],
     technicalPreview: true,
     readonly: true,

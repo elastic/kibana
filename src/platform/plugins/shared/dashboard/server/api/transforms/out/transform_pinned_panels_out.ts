@@ -15,6 +15,7 @@ import {
   type LegacyStoredPinnedControlState,
 } from '@kbn/controls-schemas';
 import { transformType } from '@kbn/embeddable-plugin/server';
+import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT } from '@kbn/as-code-shared-schemas';
 import { pinnedControlSchema } from '@kbn/controls-schemas/src/controls_group_schema';
 
 import type { DashboardPinnedPanel, DashboardPinnedPanelsState } from '../../../../common';
@@ -28,7 +29,8 @@ export type StoredPinnedPanels =
 export function transformPinnedPanelsOut(
   controlGroupInput: DashboardSavedObjectAttributes['controlGroupInput'], // legacy
   pinnedPanels: DashboardSavedObjectAttributes['pinned_panels'],
-  containerReferences: Reference[] = []
+  containerReferences: Reference[] = [],
+  useGASchemas: boolean = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
 ): { panels: DashboardPinnedPanelsState; warnings: Warnings } {
   let warnings: Warnings = [];
   let transformedPanels: DashboardPinnedPanelsState = [];
@@ -38,7 +40,8 @@ export function transformPinnedPanelsOut(
      */
     ({ warnings, panels: transformedPanels } = transformPanels(
       flow(transformPinnedPanelsObjectToArray, transformPinnedPanelProperties)(pinnedPanels.panels),
-      containerReferences
+      containerReferences,
+      useGASchemas
     ));
   } else if (controlGroupInput) {
     /**
@@ -121,7 +124,8 @@ export function transformPinnedPanelProperties(
  */
 function transformPanels(
   panels: DashboardPinnedPanelsState,
-  containerReferences: Reference[]
+  containerReferences: Reference[],
+  useGASchemas: boolean = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
 ): { panels: DashboardPinnedPanelsState; warnings: Warnings } {
   const transformedPanels: DashboardPinnedPanelsState = [];
   const warnings: Warnings = [];
@@ -136,7 +140,8 @@ function transformPanels(
           config,
           [],
           containerReferences,
-          panel.id
+          panel.id,
+          useGASchemas
         ) as DashboardPinnedPanel['config'];
       }
       if (schema) {
