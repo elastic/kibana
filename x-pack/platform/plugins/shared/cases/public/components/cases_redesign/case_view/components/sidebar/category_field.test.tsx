@@ -11,6 +11,7 @@ import { screen, waitFor } from '@testing-library/react';
 import { readCasesPermissions, renderWithTestingProviders } from '../../../../../common/mock';
 import { useGetCategories } from '../../../../../containers/use_get_categories';
 import { categories } from '../../../../../containers/mock';
+import { MAX_CATEGORY_LENGTH } from '../../../../../../common/constants';
 import type { CategoryFieldProps } from './category_field';
 import { CategoryField } from './category_field';
 
@@ -119,5 +120,31 @@ describe('CategoryField', () => {
     await user.click(screen.getByTestId('template-field-confirm-category'));
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(null));
+  });
+
+  it('shows an error and does not submit when the category is too long', async () => {
+    const longCategory = 'a'.repeat(MAX_CATEGORY_LENGTH + 1);
+
+    renderWithTestingProviders(<CategoryField {...defaultProps} />);
+
+    await user.type(screen.getByRole('combobox'), `${longCategory}{enter}`);
+    await user.click(screen.getByTestId('template-field-confirm-category'));
+
+    expect(
+      await screen.findByText(
+        `The length of the category is too long. The maximum length is ${MAX_CATEGORY_LENGTH} characters.`
+      )
+    ).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('shows an error and does not submit when the category is only whitespace', async () => {
+    renderWithTestingProviders(<CategoryField {...defaultProps} />);
+
+    await user.type(screen.getByRole('combobox'), '   {enter}');
+    await user.click(screen.getByTestId('template-field-confirm-category'));
+
+    expect(await screen.findByText('Empty category is not allowed')).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 });

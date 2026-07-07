@@ -8,6 +8,7 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen, waitFor, within } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import {
   alertComment,
@@ -159,7 +160,7 @@ describe('CaseViewSidebar (redesign)', () => {
 
     expect(
       (await screen.findByTestId('case-severity-selection')).classList.contains(
-        'euiSelect-isLoading'
+        'euiSuperSelectControl-isLoading'
       )
     ).toBeTruthy();
   });
@@ -171,7 +172,7 @@ describe('CaseViewSidebar (redesign)', () => {
 
     expect(
       (await screen.findByTestId('case-severity-selection')).classList.contains(
-        'euiSelect-isLoading'
+        'euiSuperSelectControl-isLoading'
       )
     ).not.toBeTruthy();
   });
@@ -181,16 +182,22 @@ describe('CaseViewSidebar (redesign)', () => {
 
     renderWithTestingProviders(<CaseViewSidebar caseData={caseData} />);
 
-    expect(await screen.findByTestId('case-severity-selection')).toHaveValue(CaseSeverity.LOW);
+    expect(
+      await screen.findAllByTestId(`case-severity-selection-${CaseSeverity.LOW}`)
+    ).not.toHaveLength(0);
 
-    await user.selectOptions(screen.getByTestId('case-severity-selection'), CaseSeverity.CRITICAL);
+    await user.click(screen.getByTestId('case-severity-selection'));
+    await waitForEuiPopoverOpen();
+    await user.click(screen.getByTestId(`case-severity-selection-${CaseSeverity.CRITICAL}`));
 
     expect(screen.getByTestId('template-field-confirm-severity')).toBeInTheDocument();
 
     await user.click(screen.getByTestId('case-view-sidebar-attributes-toggle'));
     await user.click(screen.getByTestId('case-view-sidebar-attributes-toggle'));
 
-    expect(screen.getByTestId('case-severity-selection')).toHaveValue(CaseSeverity.CRITICAL);
+    expect(
+      screen.getAllByTestId(`case-severity-selection-${CaseSeverity.CRITICAL}`).length
+    ).not.toBe(0);
     expect(screen.getByTestId('template-field-confirm-severity')).toBeInTheDocument();
   });
 
@@ -346,7 +353,10 @@ describe('CaseViewSidebar (redesign)', () => {
       });
 
       expect(screen.queryByTestId('case-view-template-fields')).not.toBeInTheDocument();
-      expect(screen.getByTestId('case-view-sidebar-template-fields-settings')).toBeInTheDocument();
+      // The settings popover has nothing to configure when templates v2 itself is disabled.
+      expect(
+        screen.queryByTestId('case-view-sidebar-template-fields-settings')
+      ).not.toBeInTheDocument();
     });
 
     it('renders TemplateFields when templates v2 is enabled', async () => {

@@ -68,7 +68,11 @@ export const TagsField: React.FC<TagsFieldProps> = ({ isLoading, onSubmit, tags 
   const onConfirm = handleSubmit(({ tags: submittedTags }) => {
     const trimmedTags = submittedTags.map((tag) => tag.trim());
     onSubmit(trimmedTags);
-    reset({ tags: trimmedTags });
+    // Reset to the current `tags` prop rather than the just-submitted value: the mutation
+    // triggered by `onSubmit` is fire-and-forget from here, so until it actually resolves and
+    // the prop updates, we should keep showing the last-known-good value instead of assuming
+    // success. If the mutation fails, the prop never changes and this correctly reverts.
+    reset({ tags });
   });
 
   const onCancel = useCallback(() => {

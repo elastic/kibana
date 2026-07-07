@@ -451,6 +451,26 @@ describe('EditConnector ', () => {
     expect(screen.queryByTestId('connector-edit-button')).not.toBeInTheDocument();
   });
 
+  it('shows a header divider when there is no header but an edit action renders (icon variant)', async () => {
+    renderWithTestingProviders(<EditConnector {...defaultProps} showHeader={false} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('connector-edit-button')).toBeInTheDocument();
+    });
+    expect(screen.getByRole('separator')).toBeInTheDocument();
+  });
+
+  it('does not show a header divider when there is no header and no edit action renders (icon variant)', async () => {
+    const props = { ...defaultProps, isLoading: true };
+
+    renderWithTestingProviders(<EditConnector {...props} showHeader={false} />);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('connector-edit-button')).not.toBeInTheDocument();
+    });
+    expect(screen.queryByRole('separator')).not.toBeInTheDocument();
+  });
+
   it('should show the correct connector name on the push button', async () => {
     const props = {
       ...defaultProps,

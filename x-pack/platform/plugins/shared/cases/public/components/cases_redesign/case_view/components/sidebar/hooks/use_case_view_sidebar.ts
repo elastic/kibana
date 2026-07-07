@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { isEqual } from 'lodash';
 import type { CaseSeverity, CaseUI } from '../../../../../../../common';
 import type { CaseUICustomField } from '../../../../../../../common/ui/types';
@@ -44,10 +44,10 @@ export const useCaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
 
   const isTemplatesV2Enabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
 
-  const { userProfiles } = parseCaseUsers({
-    caseUsers,
-    createdBy: caseData.createdBy,
-  });
+  const { userProfiles } = useMemo(
+    () => parseCaseUsers({ caseUsers, createdBy: caseData.createdBy }),
+    [caseUsers, caseData.createdBy]
+  );
 
   const assigneeUids = caseData.assignees.map((assignee) => assignee.uid);
 

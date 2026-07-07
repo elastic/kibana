@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
-import type { EuiSelectOption } from '@elastic/eui';
-import { EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
+import React from 'react';
+import { EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import type { CaseSeverity } from '../../../../../../common';
-import { severities } from '../../../../severity/config';
+import { SeveritySelector } from '../../../../severity/selector';
 import { SEVERITY_TITLE } from '../../../../severity/translations';
 import { InlineFieldActions } from '../../../../templates_v2/field_types/controls/inline_field_actions';
+import { usePendingFieldValue } from './hooks/use_pending_field_value';
 
 interface Props {
   selectedSeverity: CaseSeverity;
@@ -20,54 +20,26 @@ interface Props {
   isDisabled: boolean;
 }
 
-const SEVERITY_OPTIONS: EuiSelectOption[] = (Object.keys(severities) as CaseSeverity[]).map(
-  (severity) => ({
-    value: severity,
-    text: severities[severity].label,
-  })
-);
-
 export const SeverityField: React.FC<Props> = ({
   selectedSeverity,
   onSeverityChange,
   isLoading,
   isDisabled,
 }) => {
-  const [pendingSeverity, setPendingSeverity] = useState<CaseSeverity | null>(null);
-
-  const currentValue = pendingSeverity ?? selectedSeverity;
-  const hasPendingChange = useMemo(
-    () => pendingSeverity != null && pendingSeverity !== selectedSeverity,
-    [pendingSeverity, selectedSeverity]
-  );
-
-  const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setPendingSeverity(e.target.value as CaseSeverity);
-  };
-
-  const onConfirm = () => {
-    if (pendingSeverity != null) {
-      onSeverityChange(pendingSeverity);
-    }
-    setPendingSeverity(null);
-  };
-
-  const onCancel = () => {
-    setPendingSeverity(null);
-  };
+  const { currentValue, hasPendingChange, setPendingValue, onConfirm, onCancel } =
+    usePendingFieldValue<CaseSeverity>({
+      committedValue: selectedSeverity,
+      onSubmit: onSeverityChange,
+    });
 
   return (
     <EuiFlexItem grow={false} data-test-subj="sidebar-severity">
       <EuiFormRow label={SEVERITY_TITLE} fullWidth>
-        <EuiSelect
-          options={SEVERITY_OPTIONS}
-          value={currentValue}
-          onChange={onChange}
-          disabled={isDisabled || isLoading}
+        <SeveritySelector
+          selectedSeverity={currentValue}
+          onSeverityChange={setPendingValue}
           isLoading={isLoading}
-          fullWidth
-          data-test-subj="case-severity-selection"
-          aria-label={SEVERITY_TITLE}
+          isDisabled={isDisabled}
         />
       </EuiFormRow>
       {hasPendingChange && !isLoading && (

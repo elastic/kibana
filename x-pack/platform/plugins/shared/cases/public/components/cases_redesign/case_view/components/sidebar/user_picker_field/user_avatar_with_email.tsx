@@ -37,8 +37,8 @@ export const UserAvatarWithEmail: React.FC<UserAvatarWithEmailProps> = ({
     }
 
     const caseUrl = getCaseViewUrl({ detailName: caseId });
-    const subject = caseViewI18n.EMAIL_SUBJECT(caseTitle);
-    const body = caseViewI18n.EMAIL_BODY(caseUrl);
+    const subject = encodeURIComponent(caseViewI18n.EMAIL_SUBJECT(caseTitle));
+    const body = encodeURIComponent(caseViewI18n.EMAIL_BODY(caseUrl));
 
     return `mailto:${email}?subject=${subject}&body=${body}`;
   }, [caseId, caseTitle, email, getCaseViewUrl]);

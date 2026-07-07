@@ -43,9 +43,9 @@ describe('UserAvatarWithEmail', () => {
 
     expect(screen.getByTestId('user-picker-field-email-avatar-link')).toHaveAttribute(
       'href',
-      `mailto:damaged_raccoon@elastic.co?subject=${caseViewI18n.EMAIL_SUBJECT(
-        basicCase.title
-      )}&body=${caseViewI18n.EMAIL_BODY(caseLink)}`
+      `mailto:damaged_raccoon@elastic.co?subject=${encodeURIComponent(
+        caseViewI18n.EMAIL_SUBJECT(basicCase.title)
+      )}&body=${encodeURIComponent(caseViewI18n.EMAIL_BODY(caseLink))}`
     );
   });
 

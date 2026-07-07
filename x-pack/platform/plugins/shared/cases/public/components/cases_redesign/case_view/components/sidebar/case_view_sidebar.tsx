@@ -128,7 +128,7 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
           id="templateFields"
           title={templateFieldsTitle}
           extraAction={
-            permissions.update ? (
+            permissions.update && isTemplatesV2Enabled ? (
               <TemplateSettingsPopover
                 caseData={caseData}
                 isTemplatesEnabled={isTemplatesV2Enabled}
@@ -163,7 +163,9 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
               id="connectors"
               title={redesignI18n.CONNECTORS_TITLE}
               extraAction={
-                <ConnectorSettingsPopover data-test-subj="case-view-sidebar-connectors-settings" />
+                permissions.settings ? (
+                  <ConnectorSettingsPopover data-test-subj="case-view-sidebar-connectors-settings" />
+                ) : undefined
               }
               isOpen={isOpen('connectors')}
               onToggle={onToggle}

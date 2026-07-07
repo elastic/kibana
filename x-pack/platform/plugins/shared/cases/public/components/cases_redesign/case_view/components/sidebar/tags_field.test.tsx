@@ -162,4 +162,22 @@ describe('TagsField', () => {
     expect(screen.getByTestId('comboBoxInput')).toHaveTextContent('new');
     expect(screen.getByTestId('template-field-confirm-tags')).toBeInTheDocument();
   });
+
+  it('reverts to the last confirmed tags rather than assuming success if the update never persists', async () => {
+    renderWithTestingProviders(<TagsField {...defaultProps} tags={['a']} />);
+
+    await user.click(await screen.findByRole('combobox'));
+    await user.paste('new');
+    await user.keyboard('{enter}');
+    await user.click(await screen.findByTestId('template-field-confirm-tags'));
+
+    expect(onSubmit).toHaveBeenCalledWith(['a', 'new']);
+
+    // onSubmit is fire-and-forget from the field's perspective; the `tags` prop here never
+    // updates (as if the mutation failed), so the field must fall back to the last-known-good
+    // value instead of continuing to display the unconfirmed, optimistic one.
+    expect(screen.getByTestId('comboBoxInput')).toHaveTextContent('a');
+    expect(screen.getByTestId('comboBoxInput')).not.toHaveTextContent('new');
+    expect(screen.queryByTestId('template-field-confirm-tags')).not.toBeInTheDocument();
+  });
 });

@@ -81,7 +81,16 @@ const CaseViewTabContentInner: FC<CaseViewTabContentProps> = ({
             <CaseViewSimilarCases caseData={caseData} />
           )}
         </EuiFlexItem>
-        {isSidebarOpen && <CaseViewSidebar caseData={caseData} />}
+        {/* Hidden rather than unmounted when collapsed, so pending unconfirmed field edits
+            survive a toggle the same way they already survive collapsing a single accordion. */}
+        <div
+          data-test-subj="case-view-sidebar-container"
+          css={css`
+            display: ${isSidebarOpen ? 'contents' : 'none'};
+          `}
+        >
+          <CaseViewSidebar caseData={caseData} />
+        </div>
       </EuiFlexGroup>
     </SavedObjectInAppUrlsProvider>
   );

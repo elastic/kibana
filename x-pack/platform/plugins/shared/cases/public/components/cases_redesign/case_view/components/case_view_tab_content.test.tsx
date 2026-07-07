@@ -134,12 +134,15 @@ describe('CaseViewTabContent', () => {
     expect(screen.getByTestId('case-view-page-sidebar')).toBeInTheDocument();
   });
 
-  it('hides the sidebar when localStorage has sidebarOpen set to false', async () => {
+  it('hides the sidebar visually, without unmounting it, when localStorage has sidebarOpen set to false', async () => {
     localStorage.setItem(`${basicCase.owner}.cases.caseView.sidebarOpen`, JSON.stringify(false));
 
     renderWithTestingProviders(<CaseViewTabContent {...defaultProps} />);
 
     await screen.findByTestId(`case-view-tab-content-${CASE_VIEW_PAGE_TABS.ACTIVITY}`);
-    expect(screen.queryByTestId('case-view-page-sidebar')).not.toBeInTheDocument();
+    // Stays mounted (not removed from the DOM) so that any pending, unconfirmed field edits
+    // inside it survive collapsing the whole sidebar, the same way they already survive
+    // collapsing a single accordion section.
+    expect(screen.getByTestId('case-view-page-sidebar')).not.toBeVisible();
   });
 });
