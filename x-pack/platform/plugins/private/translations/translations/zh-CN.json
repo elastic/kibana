@@ -3528,7 +3528,6 @@
     "expressions.execution.functionNotFound": "找不到函数 {fnName}。",
     "expressions.functions.createTable.args.idsHelpText": "要按位置顺序生成的列 ID。ID 表示行中的键。",
     "expressions.functions.createTable.args.nameHelpText": "要按位置顺序生成的列名称。名称不需要唯一，如果未提供，默认为 ID。",
-    "expressions.functions.createTable.args.rowCountText": "要添加到表中、之后将分配值的空行数目",
     "expressions.functions.createTableHelpText": "将创建包含列列表和 1 或多个空行的的数据表。要填充行，请使用 {mapColumnFn} 或 {mathColumnFn}。",
     "expressions.functions.cumulativeSum.args.byHelpText": "用作累计和计算拆分依据的列",
     "expressions.functions.cumulativeSum.args.inputColumnIdHelpText": "要计算累计和的列",
