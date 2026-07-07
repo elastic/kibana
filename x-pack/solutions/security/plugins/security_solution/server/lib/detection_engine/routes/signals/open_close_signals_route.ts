@@ -158,7 +158,6 @@ export const setSignalsStatusRoute = (
               alertsIndex,
               esClient,
               user,
-              logger,
               reason,
               runtimeMappings
             );
@@ -200,7 +199,6 @@ const updateSignalsStatusByQuery = async (
   index: string,
   esClient: ElasticsearchClient,
   user: AuthenticatedUser | null,
-  logger: Logger,
   reason?: string,
   runtimeMappings?: estypes.MappingRuntimeFields
 ) => {

@@ -92,9 +92,7 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
   );
 
   useEffect(() => {
-    onUpdateBulkCloseIndex(
-      shouldBulkCloseAlert && signalIndexNames != null ? signalIndexNames : undefined
-    );
+    onUpdateBulkCloseIndex(shouldBulkCloseAlert ? signalIndexNames : undefined);
   }, [signalIndexNames, onUpdateBulkCloseIndex, shouldBulkCloseAlert]);
 
   useEffect((): void => {
