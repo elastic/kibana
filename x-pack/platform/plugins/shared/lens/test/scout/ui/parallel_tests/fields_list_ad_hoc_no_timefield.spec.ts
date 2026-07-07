@@ -13,9 +13,25 @@ spaceTest.describe(
   'Lens fields list - ad-hoc datasource without time field',
   { tag: tags.stateful.classic },
   () => {
-    spaceTest.beforeAll(async ({ scoutSpace }) => {
+    spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
+      const { data: dataView } = await apiServices.dataViews.create({
+        title: testData.DATA_VIEW_ID.LOGSTASH,
+        name: testData.DATA_VIEW_ID.LOGSTASH,
+        timeFieldName: '@timestamp',
+        override: true,
+        spaceId: scoutSpace.id,
+        runtimeFieldMap: {
+          runtime_string: {
+            type: 'keyword',
+            script: {
+              source: "emit('abc')",
+            },
+          },
+        },
+      });
+
       await scoutSpace.uiSettings.set({
-        defaultIndex: testData.DATA_VIEW_ID.LOGSTASH,
+        defaultIndex: dataView.id,
         'dateFormat:tz': 'UTC',
       });
     });
