@@ -73,7 +73,12 @@ steps:
           #
           # NOTE: Use `eis/<modelId>` values (not connector ids) so we can filter purely on the discovered
           # EIS model ids in `target/eis_models.json`.
-          EVAL_MODEL_GROUPS: &weekly_eis_core_models 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/google-gemini-3.0-flash,eis/google-gemini-3.1-pro,eis/openai-gpt-5.4,eis/openai-gpt-oss-120b'
+          # C3 (Investigation) L1/L2 source suite — needs OSS coverage alongside
+          # `endpoint` and `entity-analytics-v2` so DeepSeek/Kimi are not stuck on
+          # `Insufficient Data` for the whole Investigation column. Anchor moved
+          # here (was defined further down in `security-ai-rules`) since this is
+          # now the earliest OSS-eligible suite in file order.
+          EVAL_MODEL_GROUPS: &security_oss_models 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/google-gemini-3.0-flash,eis/google-gemini-3.1-pro,eis/openai-gpt-5.4,eis/openai-gpt-oss-120b,llm-gateway/DeepSeek-V4-Flash,llm-gateway/Kimi-K2.6'
           EVAL_SERVER_CONFIG_SET: 'evals_security_ai_rules'
         timeout_in_minutes: 60
         agents:
@@ -96,7 +101,10 @@ steps:
           EVAL_SUITE_ID: 'agent-builder-dashboards'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          # Frontier-only anchor moved here (was on `agent-builder`, now OSS-wired
+          # above for C3 L1/L2 coverage). Definition point, not a behavior change
+          # for this suite.
+          EVAL_MODEL_GROUPS: &weekly_eis_core_models 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/google-gemini-3.0-flash,eis/google-gemini-3.1-pro,eis/openai-gpt-5.4,eis/openai-gpt-oss-120b'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -243,7 +251,7 @@ steps:
           #   node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_litellm_connectors.js \
           #     --base-url "$LITELLM_BASE_URL" --team-name "$LITELLM_TEAM_NAME" \
           #     --api-key "$LITELLM_VIRTUAL_KEY" --model-prefix "llm-gateway/" | base64 -d | jq 'keys'
-          EVAL_MODEL_GROUPS: &security_oss_models 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/google-gemini-3.0-flash,eis/google-gemini-3.1-pro,eis/openai-gpt-5.4,eis/openai-gpt-oss-120b,llm-gateway/DeepSeek-V4-Flash,llm-gateway/Kimi-K2.6'
+          EVAL_MODEL_GROUPS: *security_oss_models
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -265,7 +273,9 @@ steps:
           EVAL_SUITE_ID: 'endpoint'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          # C3 (Investigation) L1/L2 source suite — OSS-wired alongside
+          # `agent-builder` and `entity-analytics-v2`.
+          EVAL_MODEL_GROUPS: *security_oss_models
           EVAL_SERVER_CONFIG_SET: 'evals_endpoint'
         timeout_in_minutes: 60
         agents:
@@ -311,7 +321,9 @@ steps:
           EVAL_SUITE_ID: 'entity-analytics-v2'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          # C3 (Investigation) L1/L2 source suite — OSS-wired alongside
+          # `agent-builder` and `endpoint`.
+          EVAL_MODEL_GROUPS: *security_oss_models
           EVAL_SERVER_CONFIG_SET: 'evals_entity_analytics_v2'
         timeout_in_minutes: 60
         agents:
