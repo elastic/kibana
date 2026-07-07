@@ -42,12 +42,8 @@ const getMockPositionAt = (offset: number) => {
   return { lineNumber: 1, column: 1 };
 };
 
-const mockEditor = {
-  createDecorationsCollection: jest.fn(() => ({
-    clear: jest.fn(),
-    set: jest.fn(),
-  })),
-  getModel: jest.fn(() => ({
+const createMockModel = (): monaco.editor.ITextModel =>
+  ({
     getLineContent: (lineNumber: number) => getMockLines()[lineNumber - 1] ?? '',
     getLineCount: () => getMockLines().length,
     getLineMaxColumn: (lineNumber: number) => (getMockLines()[lineNumber - 1] ?? '').length + 1,
@@ -57,7 +53,14 @@ const mockEditor = {
       getMockLines()
         .slice(startLineNumber - 1, endLineNumber)
         .join('\n'),
+  } as unknown as monaco.editor.ITextModel);
+
+const mockEditor = {
+  createDecorationsCollection: jest.fn(() => ({
+    clear: jest.fn(),
+    set: jest.fn(),
   })),
+  getModel: jest.fn(createMockModel),
   getScrollTop: jest.fn(() => 0),
   getSelection: jest.fn(() => ({
     startLineNumber: mockSelectionStartLineNumber,
@@ -131,6 +134,7 @@ describe('WHEN rendering Console output', () => {
     mockEditorValue = '';
     mockSelectionStartLineNumber = 1;
     mockSelectionEndLineNumber = 1;
+    mockEditor.getModel.mockImplementation(createMockModel);
     Object.defineProperty(window.navigator, 'clipboard', {
       configurable: true,
       value: { writeText },
@@ -251,6 +255,54 @@ describe('WHEN rendering Console output', () => {
 
     await waitFor(() => expect(execCommand).toHaveBeenCalledWith('copy'));
     expect(writeText).not.toHaveBeenCalled();
+    expect(addSuccess).toHaveBeenCalled();
+    expect(addDanger).not.toHaveBeenCalled();
+  });
+
+  it('SHOULD show an error when reading the selected output fails', async () => {
+    mockEditor.getModel.mockReturnValue({
+      getValue: () => {
+        throw new Error('Output parsing failed');
+      },
+    } as unknown as monaco.editor.ITextModel);
+
+    render(
+      <I18nProvider>
+        <MonacoEditorOutput />
+      </I18nProvider>
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('consoleMonacoOutput')).toHaveTextContent('"acknowledged": true')
+    );
+
+    await userEvent.click(screen.getByTestId('copyOutputButton'));
+
+    await waitFor(() => expect(addDanger).toHaveBeenCalled());
+    expect(execCommand).not.toHaveBeenCalled();
+    expect(writeText).not.toHaveBeenCalled();
+    expect(addSuccess).not.toHaveBeenCalled();
+  });
+
+  it('SHOULD use the Clipboard API when the document copy throws', async () => {
+    jest.spyOn(document, 'createRange').mockImplementation(() => {
+      throw new Error('Document copy failed');
+    });
+
+    render(
+      <I18nProvider>
+        <MonacoEditorOutput />
+      </I18nProvider>
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('consoleMonacoOutput')).toHaveTextContent('"acknowledged": true')
+    );
+
+    await userEvent.click(screen.getByTestId('copyOutputButton'));
+
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith(`${responseValue}\n`));
+    expect(execCommand).not.toHaveBeenCalled();
     expect(addSuccess).toHaveBeenCalled();
     expect(addDanger).not.toHaveBeenCalled();
   });

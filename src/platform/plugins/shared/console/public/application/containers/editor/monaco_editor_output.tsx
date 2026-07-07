@@ -108,8 +108,12 @@ const useStatusCodeClassNames = (): StatusCodeClassNames => {
 };
 
 const copyTextToClipboard = async (text: string): Promise<boolean> => {
-  if (copyToClipboard(text)) {
-    return true;
+  try {
+    if (copyToClipboard(text)) {
+      return true;
+    }
+  } catch {
+    // Fall back to the async Clipboard API below.
   }
 
   try {
