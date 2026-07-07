@@ -30,6 +30,7 @@ export enum SecurityGroupName {
   entityAnalytics = 'securityGroup:entityAnalytics',
   machineLearning = 'securityGroup:machineLearning',
   launchpad = 'securityGroup:launchpad',
+  workflows = 'securityGroup:workflows',
 
   // TODO: https://github.com/elastic/kibana/issues/242434
   // Investigate possibility of using `detections` instead

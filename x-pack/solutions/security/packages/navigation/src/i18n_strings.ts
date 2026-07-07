@@ -36,6 +36,16 @@ export const i18nStrings = {
       defaultMessage: 'Investigations',
     }),
   },
+  workflows: {
+    title: i18n.translate('securitySolutionPackages.navLinks.workflows', {
+      defaultMessage: 'Workflows',
+    }),
+    automation: {
+      title: i18n.translate('securitySolutionPackages.navLinks.workflows.automation', {
+        defaultMessage: 'Automation',
+      }),
+    },
+  },
   explore: {
     title: i18n.translate('securitySolutionPackages.navLinks.explore', {
       defaultMessage: 'Explore',
