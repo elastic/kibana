@@ -64,6 +64,52 @@ export const APPLY_TEMPLATE_MODAL_APPLY = i18n.translate(
   }
 );
 
+export const CHANGE_CONNECTOR_MODAL_TITLE = i18n.translate(
+  'xpack.cases.caseView.changeConnectorModal.changeTitle',
+  {
+    defaultMessage: 'Change the connector for this case?',
+  }
+);
+
+export const REMOVE_CONNECTOR_MODAL_TITLE = i18n.translate(
+  'xpack.cases.caseView.changeConnectorModal.removeTitle',
+  {
+    defaultMessage: 'Remove the connector for this case?',
+  }
+);
+
+export const CHANGE_CONNECTOR_MODAL_BODY = (currentConnector: string, nextConnector: string) =>
+  i18n.translate('xpack.cases.caseView.changeConnectorModal.changeBody', {
+    values: { currentConnector, nextConnector },
+    defaultMessage:
+      'This case has already been pushed to {currentConnector}. If you switch the connector to {nextConnector}, future updates will not reach {currentConnector}, which can leave an orphaned ticket there.',
+  });
+
+export const REMOVE_CONNECTOR_MODAL_BODY = (currentConnector: string) =>
+  i18n.translate('xpack.cases.caseView.changeConnectorModal.removeBody', {
+    values: { currentConnector },
+    defaultMessage:
+      'This case has already been pushed to {currentConnector}. If you remove {currentConnector} as the connector, future updates will not reach it, which can leave an orphaned ticket there.',
+  });
+
+export const CHANGE_CONNECTOR_MODAL_CONFIRM = (nextConnector: string) =>
+  i18n.translate('xpack.cases.caseView.changeConnectorModal.changeConfirm', {
+    values: { nextConnector },
+    defaultMessage: 'Change to {nextConnector}',
+  });
+
+export const REMOVE_CONNECTOR_MODAL_CONFIRM = (currentConnector: string) =>
+  i18n.translate('xpack.cases.caseView.changeConnectorModal.removeConfirm', {
+    values: { currentConnector },
+    defaultMessage: 'Remove {currentConnector}',
+  });
+
+export const CHANGE_CONNECTOR_MODAL_KEEP = (currentConnector: string) =>
+  i18n.translate('xpack.cases.caseView.changeConnectorModal.keep', {
+    values: { currentConnector },
+    defaultMessage: 'Keep {currentConnector}',
+  });
+
 export const NAME = i18n.translate('xpack.cases.caseView.name', {
   defaultMessage: 'Name',
 });

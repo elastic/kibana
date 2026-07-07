@@ -17,6 +17,11 @@ jest.mock('../../severity/config', () => ({
   ),
 }));
 
+const mockUseCasesFeatures = jest.fn(() => ({ isSyncAlertsEnabled: true }));
+jest.mock('../../../common/use_cases_features', () => ({
+  useCasesFeatures: () => mockUseCasesFeatures(),
+}));
+
 const defaultProps: TemplateMetadataPreviewProps = {
   parsedTemplate: {
     name: 'Test Template',
@@ -28,6 +33,10 @@ const renderComponent = (props: Partial<TemplateMetadataPreviewProps> = {}) =>
   render(<TemplateMetadataPreview {...defaultProps} {...props} />);
 
 describe('TemplateMetadataPreview', () => {
+  beforeEach(() => {
+    mockUseCasesFeatures.mockReturnValue({ isSyncAlertsEnabled: true });
+  });
+
   it('renders the template name', () => {
     renderComponent();
 
@@ -135,6 +144,20 @@ describe('TemplateMetadataPreview', () => {
 
     expect(screen.getByText('Sync alerts')).toBeInTheDocument();
     expect(screen.getByText('On')).toBeInTheDocument();
+  });
+
+  it('does not render the sync alerts setting when alert syncing is disabled (e.g. Observability)', () => {
+    mockUseCasesFeatures.mockReturnValue({ isSyncAlertsEnabled: false });
+
+    renderComponent({
+      parsedTemplate: {
+        name: 'Test',
+        settings: { syncAlerts: true },
+        fields: [],
+      },
+    });
+
+    expect(screen.queryByText('Sync alerts')).not.toBeInTheDocument();
   });
 
   it('renders extract observables setting when provided', () => {

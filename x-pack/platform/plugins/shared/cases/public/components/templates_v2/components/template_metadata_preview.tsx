@@ -15,6 +15,7 @@ import type { ParsedTemplateDefinitionSchema } from '../../../../common/types/do
 import type { CaseSeverity } from '../../../../common/types/domain';
 import { ConnectorTypes } from '../../../../common/types/domain';
 import { SeverityHealth } from '../../severity/config';
+import { useCasesFeatures } from '../../../common/use_cases_features';
 import * as commonI18n from '../../../common/translations';
 import { SEVERITY_TITLE } from '../../severity/translations';
 import { componentStyles } from './template_metadata_preview.styles';
@@ -31,6 +32,8 @@ export const TemplateMetadataPreview: FC<TemplateMetadataPreviewProps> = ({ pars
   const styles = useMemoCss(componentStyles);
   const { name, description, tags, severity, category, settings, connector } = parsedTemplate;
   const { euiTheme } = useEuiTheme();
+  // Hidden where alert syncing is not a feature (e.g. Observability), matching the editor form.
+  const { isSyncAlertsEnabled } = useCasesFeatures();
   return (
     <dl css={styles.list}>
       <MetadataRow label={commonI18n.NAME}>
@@ -77,7 +80,7 @@ export const TemplateMetadataPreview: FC<TemplateMetadataPreviewProps> = ({ pars
         </MetadataRow>
       )}
 
-      {settings?.syncAlerts !== undefined && (
+      {isSyncAlertsEnabled && settings?.syncAlerts !== undefined && (
         <MetadataRow label={commonI18n.SYNC_ALERTS}>
           <EuiText size="s">
             {settings.syncAlerts

@@ -18,6 +18,7 @@ import {
 
 import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
 import type { TemplateSettings } from '../../../../common/types/domain/template/v1';
+import { useCasesFeatures } from '../../../common/use_cases_features';
 import { TemplateConnectorForm } from './template_connector_form';
 import * as commonI18n from '../../../common/translations';
 import * as i18n from '../translations';
@@ -35,6 +36,10 @@ export const TemplateSettingsForm: React.FC<TemplateSettingsFormProps> = ({
   onSettingsChange,
   onConnectorChange,
 }) => {
+  // Alert syncing is not a feature in every solution (e.g. Observability disables it), so the toggle
+  // is hidden there — mirroring the create-case form and case settings popover.
+  const { isSyncAlertsEnabled } = useCasesFeatures();
+
   const setSetting = useCallback(
     (key: keyof TemplateSettings, value: boolean) => {
       onSettingsChange({ ...(settings ?? {}), [key]: value });
@@ -54,16 +59,20 @@ export const TemplateSettingsForm: React.FC<TemplateSettingsFormProps> = ({
       </EuiTitle>
       <EuiSpacer size="s" />
 
-      <EuiFormRow fullWidth helpText={commonI18n.SYNC_ALERTS_HELP}>
-        <EuiSwitch
-          label={commonI18n.SYNC_ALERTS}
-          checked={settings?.syncAlerts ?? false}
-          onChange={(e) => setSetting('syncAlerts', e.target.checked)}
-          data-test-subj="templateSettingsSyncAlertsSwitch"
-        />
-      </EuiFormRow>
+      {isSyncAlertsEnabled && (
+        <>
+          <EuiFormRow fullWidth helpText={commonI18n.SYNC_ALERTS_HELP}>
+            <EuiSwitch
+              label={commonI18n.SYNC_ALERTS}
+              checked={settings?.syncAlerts ?? false}
+              onChange={(e) => setSetting('syncAlerts', e.target.checked)}
+              data-test-subj="templateSettingsSyncAlertsSwitch"
+            />
+          </EuiFormRow>
 
-      <EuiSpacer size="m" />
+          <EuiSpacer size="m" />
+        </>
+      )}
 
       <EuiFormRow fullWidth helpText={commonI18n.EXTRACT_OBSERVABLES_HELP}>
         <EuiSwitch

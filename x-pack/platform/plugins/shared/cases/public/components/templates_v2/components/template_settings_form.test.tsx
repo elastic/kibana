@@ -14,6 +14,11 @@ jest.mock('./template_connector_form', () => ({
   TemplateConnectorForm: () => <div data-test-subj="mock-connector-form" />,
 }));
 
+const mockUseCasesFeatures = jest.fn(() => ({ isSyncAlertsEnabled: true }));
+jest.mock('../../../common/use_cases_features', () => ({
+  useCasesFeatures: () => mockUseCasesFeatures(),
+}));
+
 describe('TemplateSettingsForm', () => {
   const base = {
     onSettingsChange: jest.fn(),
@@ -22,6 +27,7 @@ describe('TemplateSettingsForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseCasesFeatures.mockReturnValue({ isSyncAlertsEnabled: true });
   });
 
   it('reflects the current settings in the toggles and renders the connector form', () => {
@@ -71,5 +77,17 @@ describe('TemplateSettingsForm', () => {
     await user.click(screen.getByTestId('templateSettingsExtractObservablesSwitch'));
 
     expect(onSettingsChange).toHaveBeenCalledWith({ syncAlerts: true, extractObservables: true });
+  });
+
+  it('hides the sync alerts toggle when alert syncing is disabled (e.g. Observability)', () => {
+    mockUseCasesFeatures.mockReturnValue({ isSyncAlertsEnabled: false });
+
+    render(
+      <TemplateSettingsForm {...base} settings={{ syncAlerts: true, extractObservables: false }} />
+    );
+
+    expect(screen.queryByTestId('templateSettingsSyncAlertsSwitch')).not.toBeInTheDocument();
+    // Extract observables remains available regardless of the alert-sync feature.
+    expect(screen.getByTestId('templateSettingsExtractObservablesSwitch')).toBeInTheDocument();
   });
 });

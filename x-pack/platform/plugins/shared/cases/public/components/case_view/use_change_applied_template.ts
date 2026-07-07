@@ -8,7 +8,11 @@
 import { useMutation } from '@kbn/react-query';
 import type { z } from '@kbn/zod/v4';
 import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
-import type { CaseConnector, CaseSettings, ConnectorTypeFields } from '../../../common/types/domain';
+import type {
+  CaseConnector,
+  CaseSettings,
+  ConnectorTypeFields,
+} from '../../../common/types/domain';
 import { ConnectorTypes } from '../../../common/types/domain';
 import type { CaseConnectorWithoutName } from '../../../common/types/domain_zod/connector/v1';
 import type { TemplateSettings } from '../../../common/types/domain/template/v1';
@@ -31,19 +35,32 @@ import * as i18n from './translations';
 
 type Field = z.infer<typeof FieldSchema>;
 
+/**
+ * A template's raw definition values as passed to {@link useChangeAppliedTemplate}. `connector` /
+ * `settings` are unresolved (the hook resolves the connector and applies create-flow defaults).
+ * `null` removes the applied template.
+ */
+export type NewAppliedTemplate = {
+  id: string;
+  version: number;
+  fields: Field[];
+  connector?: CaseConnectorWithoutName;
+  settings?: TemplateSettings;
+} | null;
+
 interface ChangeAppliedTemplateArgs {
   caseData: CaseUI;
   /**
    * Pass null to remove the applied template. `connector` / `settings` are the template's raw
    * definition values; the hook resolves the connector and applies the same defaults as create.
    */
-  newTemplate: {
-    id: string;
-    version: number;
-    fields: Field[];
-    connector?: CaseConnectorWithoutName;
-    settings?: TemplateSettings;
-  } | null;
+  newTemplate: NewAppliedTemplate;
+  /**
+   * When provided, this fully-resolved connector is written to the case instead of the one resolved
+   * from `newTemplate.connector`. Callers use it to retain the case's existing connector after the
+   * user declines a connector change on an already-pushed case (see the connector-change guard).
+   */
+  connectorOverride?: CaseConnector;
 }
 
 /**
@@ -51,7 +68,7 @@ interface ChangeAppliedTemplateArgs {
  * Falls back to `.none` when the template declares no connector or its `id` no longer resolves to a
  * connector of the same type (deleted / unauthorized / other space), mirroring the create flow.
  */
-const resolveTemplateConnector = (
+export const resolveTemplateConnector = (
   connector: CaseConnectorWithoutName | undefined,
   connectors: CaseActionConnector[]
 ): CaseConnector => {
@@ -105,7 +122,7 @@ export const useChangeAppliedTemplate = () => {
   const { data: connectors = [] } = useGetSupportedActionConnectors();
 
   return useMutation(
-    ({ caseData, newTemplate }: ChangeAppliedTemplateArgs) => {
+    ({ caseData, newTemplate, connectorOverride }: ChangeAppliedTemplateArgs) => {
       const newExtendedFields = newTemplate
         ? computeNewExtendedFields(newTemplate.fields, caseData.extendedFields ?? {})
         : {};
@@ -116,7 +133,9 @@ export const useChangeAppliedTemplate = () => {
           [CASE_EXTENDED_FIELDS]: newExtendedFields,
           // The applied template owns the connector and settings; a template that declares neither
           // (or removing the template) resets them to `.none` / off so the case matches the template.
-          connector: resolveTemplateConnector(newTemplate?.connector, connectors),
+          // `connectorOverride` wins when the caller chose to retain the case's existing connector.
+          connector:
+            connectorOverride ?? resolveTemplateConnector(newTemplate?.connector, connectors),
           settings: buildTemplateSettings(newTemplate?.settings),
         },
         version: caseData.version,

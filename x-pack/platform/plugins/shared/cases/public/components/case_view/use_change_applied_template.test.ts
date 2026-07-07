@@ -194,6 +194,50 @@ describe('useChangeAppliedTemplate', () => {
     });
   });
 
+  it('writes connectorOverride verbatim instead of resolving the template connector', async () => {
+    const { result } = renderHook(() => useChangeAppliedTemplate(), {
+      wrapper: TestProviders,
+    });
+
+    const retainedConnector = {
+      id: 'servicenow-1',
+      name: 'My SN connector',
+      type: ConnectorTypes.serviceNowITSM,
+      fields: null,
+    };
+
+    act(() => {
+      result.current.mutate({
+        caseData: caseWithTemplate,
+        newTemplate: {
+          id: 'tmpl-2',
+          version: 5,
+          fields: templateFields,
+          // Template would switch to jira, but the override must win (user chose to retain).
+          connector: {
+            type: ConnectorTypes.jira,
+            id: 'jira-1',
+            fields: { issueType: '10006', priority: null, parent: null },
+          },
+          settings: { syncAlerts: true },
+        },
+        connectorOverride: retainedConnector,
+      });
+    });
+
+    await waitFor(() => {
+      expect(mockPatchCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          updatedCase: expect.objectContaining({
+            connector: retainedConnector,
+            // settings still override regardless of the connector decision
+            settings: { syncAlerts: true, extractObservables: false },
+          }),
+        })
+      );
+    });
+  });
+
   it('falls back to the none connector when the template connector no longer resolves', async () => {
     const { result } = renderHook(() => useChangeAppliedTemplate(), {
       wrapper: TestProviders,
