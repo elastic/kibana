@@ -841,7 +841,11 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
                       bool: {
                         must: [
                           { term: { status: 'failed' } },
-                          { match: { 'original_dashboard.title': { query: 'test', operator: 'and' } } },
+                          {
+                            match: {
+                              'original_dashboard.title': { query: 'test', operator: 'and' },
+                            },
+                          },
                         ],
                       },
                     },
@@ -1016,7 +1020,11 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
                       bool: {
                         must: [
                           { term: { status: 'failed' } },
-                          { match: { 'original_dashboard.title': { query: 'test', operator: 'and' } } },
+                          {
+                            match: {
+                              'original_dashboard.title': { query: 'test', operator: 'and' },
+                            },
+                          },
                         ],
                       },
                     },
