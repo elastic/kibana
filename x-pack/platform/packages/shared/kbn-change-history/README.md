@@ -142,14 +142,13 @@ The data stream uses `dynamic: false` and the following index mapping (defined b
 | `event.dataset`         | `keyword`   | Feature dataset (e.g. `alerting-rules`). Used to scope writes and queries.           |
 | `event.action`          | `keyword`   | Action that triggered the change (e.g. `rule_create`, `rule_update`, `rule_delete`). See additional [examples](https://www.elastic.co/docs/reference/kibana/kibana-audit-events#xpack-security-ecs-audit-logging).  |
 | `event.type`            | `keyword`   | ECS categorization: `creation`, `change`, `deletion`.                         |
-| `event.reason`          | `text`      | User-specified reason for the change. (Optional)                            |
 | `span`                  | `object`    | Logic span for bulk operations. (Optional)                                 |
 | `span.id`               | `keyword`   | ID shared between events that take place in a bulk operation. (Optional)                           |
 | `object`                | `object`    | The tracked object.                                                         |
 | `object.id`             | `keyword`   | Unique id of the target object in Kibana.                                   |
 | `object.type`           | `keyword`   | Type of the target object (e.g. `alert`). Allows tracking multiple types in the same change history stream. |
 | `object.sequence`       | `long`      | Optional monotonically increasing integer determining changes order for the tracked object (see [Ordering and versioning](#ordering-and-versioning)). |
-| `object.snapshot`       | (unmapped)  | Full snapshot after the change. Minus any sanitized fields.                                            |
+| `object.snapshot`       | (unmapped)  | Full snapshot after the change. Including sanitized fields.                                            |
 | `tags`                  | `keyword`   | Optional list of tags for the event.                                       |
 | `metadata`              | `flattened` | Optional structured metadata; does not form part of the ECS schema. |
 | `kibana.space_ids`      | `keyword`   | Injected by `@kbn/data-streams` (not part of this package’s index mappings). Space IDs the document belongs to (e.g. `['default']`). |
@@ -162,8 +161,9 @@ Variable-shape field `object.snapshot` is stored but unmapped; `metadata` uses t
 
 Several fields are still written to documents (preserved in `_source` for forensic inspection) but are intentionally not mapped, since no consumer queries, filters, sorts, or aggregates on them. With `dynamic: false`, these fields land in `_source` without consuming inverted-index or doc-values storage:
 
-- `ecs.version` — hardcoded ECS schema constant.
+- `ecs.version` — hardcoded ECS schema constant, pinned to ECS [`9.3.0`]. 
 - `event.created` — very similar to `@timestamp` (set to the package serialisation moment vs. the caller-supplied write-confirmed moment). 
+- `event.reason` — optional user-specified reason for the change;
 - `object.hash` — SHA-256 of the original snapshot; can be used to check if a version of the object already exists.
 - `object.fields.hashed` — list of paths in `object.snapshot` whose string values were redacted with a SHA-256 digest.
 - `object.fields.redacted` - List of paths in `object.snapshot` whose values were replaced with a `[redacted]` placeholder. 

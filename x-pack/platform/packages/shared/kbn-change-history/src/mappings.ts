@@ -34,7 +34,6 @@ export const changeHistoryMappings = {
           dataset: mappings.keyword(),
           action: mappings.keyword(),
           type: mappings.keyword(),
-          reason: mappings.text(),
         },
       }),
 
