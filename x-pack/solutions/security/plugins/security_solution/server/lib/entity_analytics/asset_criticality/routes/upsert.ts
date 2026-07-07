@@ -26,7 +26,6 @@ import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 export const assetCriticalityPublicUpsertRoute = ({
   router,
   logger,
-  config,
   docLinks,
 }: EntityAnalyticsRoutesDeps) => {
   router.versioned
@@ -47,17 +46,13 @@ export const assetCriticalityPublicUpsertRoute = ({
             body: buildRouteValidationWithZod(CreateAssetCriticalityRecordRequestBody),
           },
         },
-        ...(config.experimentalFeatures.entityAnalyticsEntityStoreV2
-          ? {
-              options: {
-                deprecated: {
-                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
-                  severity: 'warning',
-                  reason: { type: 'remove' },
-                },
-              },
-            }
-          : {}),
+        options: {
+          deprecated: {
+            documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+            severity: 'warning',
+            reason: { type: 'remove' },
+          },
+        },
       },
       async (
         context,

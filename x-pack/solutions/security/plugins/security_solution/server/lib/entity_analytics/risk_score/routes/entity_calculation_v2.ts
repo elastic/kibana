@@ -38,13 +38,6 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
   const securityConfig = securityContext.getConfig();
   const siemResponse = buildSiemResponse(response);
 
-  if (!securityConfig.experimentalFeatures.entityAnalyticsEntityStoreV2) {
-    return siemResponse.error({
-      statusCode: 400,
-      body: 'Entity Store V2 is not enabled',
-    });
-  }
-
   const { identifier_type: identifierType, entity_id: entityId } = request.body;
 
   if (!entityId) {

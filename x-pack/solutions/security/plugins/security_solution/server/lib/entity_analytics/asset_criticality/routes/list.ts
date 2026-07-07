@@ -21,7 +21,6 @@ import { AssetCriticalityAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 
 export const assetCriticalityPublicListRoute = ({
-  config,
   docLinks,
   router,
   logger,
@@ -44,17 +43,13 @@ export const assetCriticalityPublicListRoute = ({
             query: buildRouteValidationWithZod(FindAssetCriticalityRecordsRequestQuery),
           },
         },
-        ...(config.experimentalFeatures.entityAnalyticsEntityStoreV2
-          ? {
-              options: {
-                deprecated: {
-                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
-                  severity: 'warning',
-                  reason: { type: 'remove' },
-                },
-              },
-            }
-          : {}),
+        options: {
+          deprecated: {
+            documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+            severity: 'warning',
+            reason: { type: 'remove' },
+          },
+        },
       },
       async (
         context,

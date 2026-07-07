@@ -104,19 +104,6 @@ x-pack/solutions/security/plugins/entity_store/
 - **Entity Analytics** — Platinum+
 - **Advanced Entity Analytics** (includes Entity Resolution) — Enterprise (ESS) + Complete (Serverless)
 
-## Feature Gating
-
-**Two separate gates exist — don't confuse them:**
-
-1. **UI setting** `securitySolution:entityStoreEnableV2` — runtime toggle for v2 features in the frontend (entity store data source, id-based scoring, dual-write)
-   - Frontend: `useUiSetting$<boolean>('securitySolution:entityStoreEnableV2')`
-   - Constant: `FF_ENABLE_ENTITY_STORE_V2` from `@kbn/entity-store/public`
-
-2. **Experimental feature flag** `entityAnalyticsEntityStoreV2` — gates server-side plugin setup (risk score maintainer registration). Requires Kibana restart.
-   - Enable in `kibana.dev.yml`: `xpack.securitySolution.enableExperimental: ['entityAnalyticsEntityStoreV2']`
-   - Defaults to `false` in `common/experimental_features.ts`
-   - The **risk score maintainer** only registers when this flag is `true` (checked in `plugin.ts` at setup)
-
 ## Risk Score Architecture (v2)
 
 The risk score maintainer (`id: 'risk-score'`) is registered by `security_solution` plugin (not `entity_store`) via `registerRiskScoreMaintainer()`. It **dual-writes** to both the risk score index AND the entity store in the same run.

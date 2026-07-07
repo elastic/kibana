@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type { ExperimentalFeatures } from '@kbn/security-solution-plugin/common';
 import { createTestConfig } from '../../../../../config/serverless/config.base';
-
-const securitySolutionEnableExperimental: Array<keyof ExperimentalFeatures> = [
-  'entityAnalyticsEntityStoreV2',
-];
 
 export default createTestConfig({
   kbnTestServerArgs: [
@@ -19,9 +14,6 @@ export default createTestConfig({
       { product_line: 'endpoint', product_tier: 'complete' },
       { product_line: 'cloud', product_tier: 'complete' },
     ])}`,
-    `--xpack.securitySolution.enableExperimental=${JSON.stringify(
-      securitySolutionEnableExperimental
-    )}`,
   ],
   testFiles: [require.resolve('..')],
   junit: {

@@ -14,7 +14,6 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { GetEntityStoreStatusResponse } from '@kbn/entity-store/common';
 import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics';
 import { useKibana, useUiSetting } from '../../common/lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useEntityStoreStatus } from '../../entity_analytics/components/entity_store/hooks/use_entity_store';
 import { useEntityAnalyticsRoutes } from '../../entity_analytics/api/api';
 import { ASSET_INVENTORY_INDEX_PATTERN } from '../constants';
@@ -22,7 +21,6 @@ import { useAssetInventoryRoutes } from './use_asset_inventory_routes';
 
 export type AssetInventoryStatus =
   | 'inactive_feature'
-  | 'entity_store_v2_disabled'
   | 'disabled'
   | 'initializing'
   | 'empty'
@@ -83,11 +81,7 @@ export const useAssetInventoryStatus = () => {
   const isAssetInventoryEnabled = useUiSetting<boolean>(
     SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING
   );
-  const isEntityStoreV2ExperimentalEnabled = useIsExperimentalFeatureEnabled(
-    'entityAnalyticsEntityStoreV2'
-  );
-  const v2FlagsEnabled = isEntityStoreV2ExperimentalEnabled;
-  const featureGatesPassed = isAssetInventoryEnabled && v2FlagsEnabled;
+  const featureGatesPassed = isAssetInventoryEnabled;
 
   const hasDocsQuery = useQuery<boolean>({
     queryKey: ASSET_INVENTORY_HAS_DOCS_QUERY_KEY,
@@ -140,9 +134,6 @@ export const useAssetInventoryStatus = () => {
     if (!isAssetInventoryEnabled) {
       return { status: 'inactive_feature' };
     }
-    if (!v2FlagsEnabled) {
-      return { status: 'entity_store_v2_disabled' };
-    }
 
     if (entityStoreStatusQuery.isLoading || privilegesQuery.isLoading || hasDocsQuery.isLoading) {
       return undefined;
@@ -186,7 +177,6 @@ export const useAssetInventoryStatus = () => {
     return { status: 'initializing' };
   }, [
     isAssetInventoryEnabled,
-    v2FlagsEnabled,
     entityStoreStatusQuery.isLoading,
     entityStoreStatusQuery.data,
     privilegesQuery.isLoading,

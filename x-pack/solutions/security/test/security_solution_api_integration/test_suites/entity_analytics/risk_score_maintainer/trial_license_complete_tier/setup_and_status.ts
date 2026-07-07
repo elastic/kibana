@@ -163,71 +163,69 @@ export default ({ getService }: FtrProviderContext) => {
       await spaces.delete(customSpaceName);
     });
 
-    describe('when entityAnalyticsEntityStoreV2 is true', () => {
-      beforeEach(async () => {
-        await enableEntityStoreV2Setting();
-        await enableEntityStoreV2Setting(customSpaceName);
+    beforeEach(async () => {
+      await enableEntityStoreV2Setting();
+      await enableEntityStoreV2Setting(customSpaceName);
+    });
+
+    it('should return 400 for legacy risk engine init api', async () => {
+      await riskEngineRoutes.init(400);
+    });
+
+    it('should return 400 for legacy risk engine status api', async () => {
+      await riskEngineRoutes.getStatus(400);
+    });
+
+    it('adopts a legacy risk score config into the fixed saved object id', async () => {
+      const legacyId = 'legacy-risk-engine-configuration';
+      await createLegacyRiskEngineConfig({
+        id: legacyId,
+        attributes: {
+          pageSize: 1234,
+          enableResetToZero: false,
+          excludeAlertStatuses: ['open'],
+          filters: [{ entity_types: ['host'], filter: 'host.name:*' }],
+        },
       });
 
-      it('should return 400 for legacy risk engine init api', async () => {
-        await riskEngineRoutes.init(400);
+      await entityStoreUtils.installEntityStoreV2({
+        entityTypes: ['host'],
+        waitForEntities: false,
       });
+      await maintainerRoutes.runMaintainerSync('risk-score');
 
-      it('should return 400 for legacy risk engine status api', async () => {
-        await riskEngineRoutes.getStatus(400);
+      const savedObjects = await listRiskEngineConfigs();
+      expect(savedObjects.length).to.eql(1);
+      expect(savedObjects[0].id).to.eql(
+        getRiskEngineConfigurationSavedObjectId({ namespace: 'default' })
+      );
+      expect(savedObjects[0].attributes.pageSize).to.eql(10_000);
+      expect(savedObjects[0].attributes.enableResetToZero).to.eql(false);
+      expect(savedObjects[0].attributes.excludeAlertStatuses).to.eql(['open']);
+      expect(savedObjects[0].attributes.filters).to.eql([
+        { entity_types: ['host'], filter: 'host.name:*' },
+      ]);
+      expect(savedObjects.some(({ id }) => id === legacyId)).to.be(false);
+    });
+
+    it('should setup risk score assets and configuration when entity store is enabled', async () => {
+      await entityStoreUtils.installEntityStoreV2({
+        entityTypes: ['host'],
+        waitForEntities: false,
       });
+      await maintainerRoutes.runMaintainerSync('risk-score');
 
-      it('adopts a legacy risk score config into the fixed saved object id', async () => {
-        const legacyId = 'legacy-risk-engine-configuration';
-        await createLegacyRiskEngineConfig({
-          id: legacyId,
-          attributes: {
-            pageSize: 1234,
-            enableResetToZero: false,
-            excludeAlertStatuses: ['open'],
-            filters: [{ entity_types: ['host'], filter: 'host.name:*' }],
-          },
-        });
+      await checkAssets('default', maintainerRoutes);
+    });
 
-        await entityStoreUtils.installEntityStoreV2({
-          entityTypes: ['host'],
-          waitForEntities: false,
-        });
-        await maintainerRoutes.runMaintainerSync('risk-score');
-
-        const savedObjects = await listRiskEngineConfigs();
-        expect(savedObjects.length).to.eql(1);
-        expect(savedObjects[0].id).to.eql(
-          getRiskEngineConfigurationSavedObjectId({ namespace: 'default' })
-        );
-        expect(savedObjects[0].attributes.pageSize).to.eql(10_000);
-        expect(savedObjects[0].attributes.enableResetToZero).to.eql(false);
-        expect(savedObjects[0].attributes.excludeAlertStatuses).to.eql(['open']);
-        expect(savedObjects[0].attributes.filters).to.eql([
-          { entity_types: ['host'], filter: 'host.name:*' },
-        ]);
-        expect(savedObjects.some(({ id }) => id === legacyId)).to.be(false);
+    it('should setup risk score assets and configuration in custom namespace', async () => {
+      await entityStoreUtilsCustomSpace.installEntityStoreV2({
+        entityTypes: ['host'],
+        waitForEntities: false,
       });
+      await maintainerRoutesCustomSpace.runMaintainerSync('risk-score');
 
-      it('should setup risk score assets and configuration when entity store is enabled', async () => {
-        await entityStoreUtils.installEntityStoreV2({
-          entityTypes: ['host'],
-          waitForEntities: false,
-        });
-        await maintainerRoutes.runMaintainerSync('risk-score');
-
-        await checkAssets('default', maintainerRoutes);
-      });
-
-      it('should setup risk score assets and configuration in custom namespace', async () => {
-        await entityStoreUtilsCustomSpace.installEntityStoreV2({
-          entityTypes: ['host'],
-          waitForEntities: false,
-        });
-        await maintainerRoutesCustomSpace.runMaintainerSync('risk-score');
-
-        await checkAssets(customSpaceName, maintainerRoutesCustomSpace);
-      });
+      await checkAssets(customSpaceName, maintainerRoutesCustomSpace);
     });
   });
 };

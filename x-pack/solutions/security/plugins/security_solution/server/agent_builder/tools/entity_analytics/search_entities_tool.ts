@@ -695,14 +695,6 @@ export const searchEntitiesTool = (
         try {
           const availability = await getAgentBuilderResourceAvailability({ core, request, logger });
           if (availability.status === 'available') {
-            const isEntityStoreV2Enabled = experimentalFeatures.entityAnalyticsEntityStoreV2;
-            if (!isEntityStoreV2Enabled) {
-              return {
-                status: 'unavailable',
-                reason: 'Entity Store V2 is not enabled.',
-              };
-            }
-
             const [coreStart] = await core.getStartServices();
             const esClient = coreStart.elasticsearch.client.asInternalUser;
 

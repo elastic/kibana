@@ -112,16 +112,6 @@ describe('useAssetInventoryStatus', () => {
     });
   });
 
-  it('returns entity_store_v2_disabled when the entity-store v2 experimental flag is disabled', async () => {
-    mockIsExperimentalFeatureEnabled.mockReturnValue(false);
-
-    const { result } = renderStatusHook();
-
-    await waitFor(() => {
-      expect(result.current.data).toEqual({ status: 'entity_store_v2_disabled' });
-    });
-  });
-
   it('returns ready when the has-docs query resolves to true and triggers the data view install', async () => {
     setHasDocs(true);
     mockPostInstallAssetInventoryDataView.mockResolvedValue({});

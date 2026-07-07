@@ -10,8 +10,7 @@ import { createPlaywrightEvalsConfig } from '@kbn/evals';
 /**
  * Playwright config for Entity Analytics V2 evals.
  *
- * Requires the evals_entity_analytics_v2 Scout configSet, which enables the
- * entityAnalyticsEntityStoreV2 experimental flag and the Entity Store V2 UI setting.
+ * Requires the evals_entity_analytics_v2 Scout configSet
  *
  * Run with:
  *   node scripts/evals start --suite entity-analytics-v2

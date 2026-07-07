@@ -146,10 +146,6 @@ const getMaintainerRouteWithId = (route: string, id: string): string =>
 
 export const useEntityAnalyticsRoutes = () => {
   const { http } = useKibana().services;
-  const isEntityAnalyticsEntityStoreV2Enabled = useIsExperimentalFeatureEnabled(
-    'entityAnalyticsEntityStoreV2'
-  );
-  const isMaintainerRiskScoreV2Enabled = isEntityAnalyticsEntityStoreV2Enabled;
 
   return useMemo(() => {
     const fetchEntityMaintainers = (ids?: string[]) =>
@@ -265,141 +261,105 @@ export const useEntityAnalyticsRoutes = () => {
      * Fetches risks engine status
      */
     const fetchRiskEngineStatus = async ({ signal }: { signal?: AbortSignal }) => {
-      if (isMaintainerRiskScoreV2Enabled) {
-        const riskScoreMaintainer = await fetchRiskScoreMaintainer();
-        const riskEngineStatus = !riskScoreMaintainer
-          ? 'NOT_INSTALLED'
-          : riskScoreMaintainer.taskStatus === 'started'
-          ? 'ENABLED'
-          : riskScoreMaintainer.taskStatus === 'stopped'
-          ? 'DISABLED'
-          : 'NOT_INSTALLED';
-        const runAt = riskScoreMaintainer?.nextRunAt;
+      const riskScoreMaintainer = await fetchRiskScoreMaintainer();
+      const riskEngineStatus = !riskScoreMaintainer
+        ? 'NOT_INSTALLED'
+        : riskScoreMaintainer.taskStatus === 'started'
+        ? 'ENABLED'
+        : riskScoreMaintainer.taskStatus === 'stopped'
+        ? 'DISABLED'
+        : 'NOT_INSTALLED';
+      const runAt = riskScoreMaintainer?.nextRunAt;
 
-        // The maintainer API doesn't expose the underlying TaskManager status directly,
-        // so we infer 'running' vs 'idle' based on whether nextRunAt is in the past.
-        // This is a heuristic, but it avoids leaking TaskManager internals into the maintainer API.
-        const isRunning = runAt ? new Date(runAt).getTime() <= Date.now() : false;
-        const status = isRunning ? 'running' : 'idle';
+      // The maintainer API doesn't expose the underlying TaskManager status directly,
+      // so we infer 'running' vs 'idle' based on whether nextRunAt is in the past.
+      // This is a heuristic, but it avoids leaking TaskManager internals into the maintainer API.
+      const isRunning = runAt ? new Date(runAt).getTime() <= Date.now() : false;
+      const status = isRunning ? 'running' : 'idle';
 
-        return {
-          risk_engine_status: riskEngineStatus,
-          risk_engine_task_status: runAt
-            ? {
-                status,
-                runAt,
-              }
-            : undefined,
-        } as RiskEngineStatusResponse;
-      }
-
-      return http.fetch<RiskEngineStatusResponse>(RISK_ENGINE_STATUS_URL, {
-        version: '1',
-        method: 'GET',
-        signal,
-      });
+      return {
+        risk_engine_status: riskEngineStatus,
+        risk_engine_task_status: runAt
+          ? {
+              status,
+              runAt,
+            }
+          : undefined,
+      } as RiskEngineStatusResponse;
     };
 
     /**
      * Init risk score engine
      */
     const initRiskEngine = async () => {
-      if (isMaintainerRiskScoreV2Enabled) {
-        await http.fetch<{ ok: true }>(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, {
-          method: 'POST',
-          query: ENTITY_STORE_V2_QUERY,
-          body: JSON.stringify({}),
-        });
-
-        return {
-          result: {
-            risk_engine_enabled: true,
-            risk_engine_resources_installed: true,
-            risk_engine_configuration_created: true,
-            errors: [],
-          },
-        } as InitRiskEngineResponse;
-      }
-
-      return http.fetch<InitRiskEngineResponse>(RISK_ENGINE_INIT_URL, {
-        version: '1',
+      await http.fetch<{ ok: true }>(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, {
         method: 'POST',
+        query: ENTITY_STORE_V2_QUERY,
+        body: JSON.stringify({}),
       });
+
+      return {
+        result: {
+          risk_engine_enabled: true,
+          risk_engine_resources_installed: true,
+          risk_engine_configuration_created: true,
+          errors: [],
+        },
+      } as InitRiskEngineResponse;
     };
 
     /**
      * Enable risk score engine
      */
     const enableRiskEngine = async () => {
-      if (isMaintainerRiskScoreV2Enabled) {
-        await http.fetch<{ ok: true }>(
-          getMaintainerRouteWithId(
-            ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START,
-            RISK_SCORE_MAINTAINER_ID
-          ),
-          {
-            method: 'PUT',
-            query: ENTITY_STORE_V2_QUERY,
-            body: JSON.stringify({}),
-          }
-        );
-        return { success: true } as EnableRiskEngineResponse;
-      }
-
-      return http.fetch<EnableRiskEngineResponse>(RISK_ENGINE_ENABLE_URL, {
-        version: '1',
-        method: 'POST',
-      });
+      await http.fetch<{ ok: true }>(
+        getMaintainerRouteWithId(
+          ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START,
+          RISK_SCORE_MAINTAINER_ID
+        ),
+        {
+          method: 'PUT',
+          query: ENTITY_STORE_V2_QUERY,
+          body: JSON.stringify({}),
+        }
+      );
+      return { success: true } as EnableRiskEngineResponse;
     };
 
     /**
      * Disable risk score engine
      */
     const disableRiskEngine = async () => {
-      if (isMaintainerRiskScoreV2Enabled) {
-        await http.fetch<{ ok: true }>(
-          getMaintainerRouteWithId(
-            ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_STOP,
-            RISK_SCORE_MAINTAINER_ID
-          ),
-          {
-            method: 'PUT',
-            query: ENTITY_STORE_V2_QUERY,
-            body: JSON.stringify({}),
-          }
-        );
-        return { success: true } as DisableRiskEngineResponse;
-      }
-
-      return http.fetch<DisableRiskEngineResponse>(RISK_ENGINE_DISABLE_URL, {
-        version: '1',
-        method: 'POST',
-      });
+      await http.fetch<{ ok: true }>(
+        getMaintainerRouteWithId(
+          ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_STOP,
+          RISK_SCORE_MAINTAINER_ID
+        ),
+        {
+          method: 'PUT',
+          query: ENTITY_STORE_V2_QUERY,
+          body: JSON.stringify({}),
+        }
+      );
+      return { success: true } as DisableRiskEngineResponse;
     };
 
     /**
      * Enable risk score engine
      */
     const scheduleNowRiskEngine = async () => {
-      if (isMaintainerRiskScoreV2Enabled) {
-        await http.fetch<{ ok: true }>(
-          getMaintainerRouteWithId(
-            ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN,
-            RISK_SCORE_MAINTAINER_ID
-          ),
-          {
-            method: 'POST',
-            query: ENTITY_STORE_V2_QUERY,
-            body: JSON.stringify({}),
-          }
-        );
-        return { success: true } as RiskEngineScheduleNowResponse;
-      }
-
-      return http.fetch<RiskEngineScheduleNowResponse>(RISK_ENGINE_SCHEDULE_NOW_URL, {
-        version: API_VERSIONS.public.v1,
-        method: 'POST',
-      });
+      await http.fetch<{ ok: true }>(
+        getMaintainerRouteWithId(
+          ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN,
+          RISK_SCORE_MAINTAINER_ID
+        ),
+        {
+          method: 'POST',
+          query: ENTITY_STORE_V2_QUERY,
+          body: JSON.stringify({}),
+        }
+      );
+      return { success: true } as RiskEngineScheduleNowResponse;
     };
 
     /**
@@ -605,43 +565,10 @@ export const useEntityAnalyticsRoutes = () => {
       const body = new FormData();
       body.append('file', file);
 
-      if (isEntityAnalyticsEntityStoreV2Enabled) {
-        const response = await http.fetch<InternalUploadAssetCriticalityV2CsvResponse>(
-          ASSET_CRITICALITY_CSV_UPLOAD_V2_URL,
-          {
-            version: API_VERSIONS.internal.v1,
-            method: 'POST',
-            headers: {
-              'Content-Type': undefined, // Lets the browser set the appropriate content type
-            },
-            body,
-          }
-        );
-
-        return {
-          errors: compact(
-            response.items.map((item, ndx) => {
-              if (item.error) {
-                return {
-                  index: ndx,
-                  message: item.error,
-                };
-              }
-              return null;
-            })
-          ),
-          stats: {
-            successful: response.successful,
-            failed: response.failed,
-            total: response.total,
-          },
-        };
-      }
-
-      return http.fetch<UploadAssetCriticalityRecordsResponse>(
-        ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
+      const response = await http.fetch<InternalUploadAssetCriticalityV2CsvResponse>(
+        ASSET_CRITICALITY_CSV_UPLOAD_V2_URL,
         {
-          version: API_VERSIONS.public.v1,
+          version: API_VERSIONS.internal.v1,
           method: 'POST',
           headers: {
             'Content-Type': undefined, // Lets the browser set the appropriate content type
@@ -649,6 +576,25 @@ export const useEntityAnalyticsRoutes = () => {
           body,
         }
       );
+
+      return {
+        errors: compact(
+          response.items.map((item, ndx) => {
+            if (item.error) {
+              return {
+                index: ndx,
+                message: item.error,
+              };
+            }
+            return null;
+          })
+        ),
+        stats: {
+          successful: response.successful,
+          failed: response.failed,
+          total: response.total,
+        },
+      };
     };
 
     /**
@@ -1067,7 +1013,7 @@ export const useEntityAnalyticsRoutes = () => {
       fetchAnomalyOverview,
       fetchAnomalySummary,
     };
-  }, [http, isEntityAnalyticsEntityStoreV2Enabled, isMaintainerRiskScoreV2Enabled]);
+  }, [http]);
 };
 
 export type AssetCriticality = SnakeToCamelCase<AssetCriticalityRecord>;

@@ -28,7 +28,5 @@ export const registerAssetCriticalityRoutes = (deps: EntityAnalyticsRoutesDeps) 
   assetCriticalityPublicUpsertRoute(deps);
 
   // V2 CSV Upload Routes
-  if (deps.config.experimentalFeatures.entityAnalyticsEntityStoreV2) {
-    assetCriticalityCSVUploadV2Route(deps);
-  }
+  assetCriticalityCSVUploadV2Route(deps);
 };

@@ -9,9 +9,6 @@ import { createTestConfig } from '../../../../../config/serverless/config.base';
 
 export default createTestConfig({
   kbnTestServerArgs: [
-    `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-      'entityAnalyticsEntityStoreV2',
-    ])}`,
     `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
       { product_line: 'security', product_tier: 'essentials' },
       { product_line: 'endpoint', product_tier: 'essentials' },

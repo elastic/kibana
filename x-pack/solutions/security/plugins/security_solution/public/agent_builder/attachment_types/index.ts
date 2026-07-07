@@ -99,8 +99,8 @@ export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceSt
  * The lazy `security_entity_attachment_rich` chunk keeps bundle impact at zero until the first
  * `security.entity` attachment is rendered. The `security.entity` attachment itself is only
  * ever emitted by the Entity Store V2 tools (`security.get_entity` /
- * `security.search_entities`), which are gated on `entityAnalyticsEntityStoreV2`, so non-V2
- * environments never exercise this renderer even though it's registered unconditionally.
+ * `security.search_entities`), so non-V2 environments never exercise this renderer even though it's
+ * registered unconditionally.
  */
 export const registerEntityAttachment = ({
   attachments,

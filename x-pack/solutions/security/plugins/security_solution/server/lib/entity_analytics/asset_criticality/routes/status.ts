@@ -21,7 +21,6 @@ import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_c
 export const assetCriticalityInternalStatusRoute = ({
   router,
   logger,
-  config,
   docLinks,
 }: EntityAnalyticsRoutesDeps) => {
   router.versioned
@@ -38,17 +37,13 @@ export const assetCriticalityInternalStatusRoute = ({
       {
         version: API_VERSIONS.internal.v1,
         validate: {},
-        ...(config.experimentalFeatures.entityAnalyticsEntityStoreV2
-          ? {
-              options: {
-                deprecated: {
-                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
-                  severity: 'warning',
-                  reason: { type: 'remove' },
-                },
-              },
-            }
-          : {}),
+        options: {
+          deprecated: {
+            documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+            severity: 'warning',
+            reason: { type: 'remove' },
+          },
+        },
       },
       async (context, _, response): Promise<IKibanaResponse<GetAssetCriticalityStatusResponse>> => {
         const siemResponse = buildSiemResponse(response);

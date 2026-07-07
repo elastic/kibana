@@ -9,7 +9,6 @@ import type { coreMock } from '@kbn/core/server/mocks';
 import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
-import type { ExperimentalFeatures } from '../../../../common';
 import {
   createToolHandlerContext,
   createToolTestMocks,
@@ -28,10 +27,6 @@ jest.mock('../../../lib/entity_analytics/risk_score/recalculate_entity_risk_scor
 const ENTITY_ID = 'host:server1';
 const ENTITY_TYPE = 'host' as const;
 const CRITICALITY = 'high_impact' as const;
-
-const mockExperimentalFeatures = {
-  entityAnalyticsEntityStoreV2: true,
-} as unknown as ExperimentalFeatures;
 
 describe('setAssetCriticalityTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();

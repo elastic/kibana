@@ -264,11 +264,6 @@ export const allowedExperimentalValues = Object.freeze({
   newFlyoutSystemEnabled: false,
 
   /**
-   * Uses entity store v2 for entity analytics skill
-   */
-  entityAnalyticsEntityStoreV2: true,
-
-  /**
    * Enables entity ML anomaly details API
    */
   entityAnalyticsAnomalyDetails: false,
