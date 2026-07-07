@@ -7,6 +7,13 @@ description: Kibana Saved Objects registration and style review guidance. Use wh
 
 Use this skill when reviewing or changing Saved Object type registrations, especially code that calls `savedObjects.registerType`, edits `mappings`, or changes `modelVersions`.
 
+## Type Registration
+
+Register Saved Object types systematically during plugin setup. We want to encourage—and, where possible, enforce—unconditional `savedObjects.registerType` calls rather than gating registration behind a configuration parameter or feature flag.
+
+If registration is conditional, our CI Saved Object check is unlikely to detect the type. The check builds the current registry by starting Kibana; when the gate is off in CI, the type is never registered and the check cannot validate its definition or subsequent updates to mappings, `modelVersions`, or schemas. That bypasses safeguards that catch invalid migrations before they reach production, where bad changes can corrupt stored data or prevent Kibana from starting.
+
+For early iteration that genuinely requires conditional registration, follow the documented WIP-type workflows in `docs/extend/key-concepts/saved-objects/validate.md` rather than ad hoc feature-flag gating.
 ## Mapping Mindset
 
 Saved Object mappings are search indexes, not a complete schema. Once added and released, mappings cannot be removed. Add mappings only for fields that Kibana must search, filter, sort, or aggregate on. Stored attributes do not need mappings just because they exist in the Saved Object payload.
