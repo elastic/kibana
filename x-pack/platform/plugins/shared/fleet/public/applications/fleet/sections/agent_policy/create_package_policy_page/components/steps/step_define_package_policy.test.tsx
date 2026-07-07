@@ -16,7 +16,7 @@ import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
 import type { AgentPolicy, NewPackagePolicy, PackageInfo } from '../../../../../types';
 
-import { useGetPackagePoliciesQuery } from '../../../../../hooks';
+import { useGetPackagePoliciesQuery, useGetIlmPoliciesQuery } from '../../../../../hooks';
 
 import { StepDefinePackagePolicy } from './step_define_package_policy';
 
@@ -32,6 +32,10 @@ jest.mock('./components/hooks', () => ({
 jest.mock('../../../../../hooks', () => ({
   ...jest.requireActual('../../../../../hooks'),
   useGetPackagePoliciesQuery: jest.fn().mockReturnValue({ data: { items: [] } }),
+  useGetIlmPoliciesQuery: jest.fn().mockReturnValue({
+    data: { has_manage_ilm: true, items: ['policy-a', 'policy-b'] },
+    isLoading: false,
+  }),
 }));
 
 jest.mock('../../../../../../../hooks/use_space_settings_context', () => ({
@@ -745,6 +749,99 @@ describe('StepDefinePackagePolicy', () => {
             renderResult.queryByTestId('packagePolicyNamespaceCustomizationOptInImpactWarning')
           ).not.toBeInTheDocument();
         });
+      });
+    });
+
+    describe('ILM policy picker', () => {
+      const mockUseGetIlmPoliciesQuery = useGetIlmPoliciesQuery as jest.Mock;
+
+      afterEach(() => {
+        mockUseGetIlmPoliciesQuery.mockReturnValue({
+          data: { has_manage_ilm: true, items: ['policy-a', 'policy-b'] },
+          isLoading: false,
+        });
+      });
+
+      it('is disabled with a tooltip when namespace customization is not enabled', async () => {
+        renderResult = renderWithToggle({
+          packagePolicyOverride: { namespace: 'staging' },
+        });
+        await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+        await waitFor(() => {
+          expect(renderResult.getByTestId('packagePolicyIlmPolicySelect')).toBeDisabled();
+        });
+      });
+
+      it('becomes enabled as soon as the toggle is switched on, before the policy is saved', async () => {
+        // Regression test: the picker must not wait for the server-confirmed opt-in
+        // (installationInfo.namespace_customization_enabled_for), which is only updated after
+        // save — otherwise it's impossible to pick an ILM policy while creating a new policy.
+        renderResult = renderWithToggle({
+          packagePolicyOverride: { namespace: 'staging' },
+        });
+        await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+        const toggle = await renderResult.findByTestId('packagePolicyNamespaceCustomizationToggle');
+        await userEvent.click(toggle); // turn ON, not yet saved/opted in on the server
+        await waitFor(() => {
+          expect(renderResult.getByTestId('packagePolicyIlmPolicySelect')).not.toBeDisabled();
+        });
+      });
+
+      it('is disabled when the caller lacks the manage_ilm privilege, even if enabled', async () => {
+        mockUseGetIlmPoliciesQuery.mockReturnValue({
+          data: { has_manage_ilm: false, items: [] },
+          isLoading: false,
+        });
+        renderResult = renderWithToggle({
+          packagePolicyOverride: { namespace: 'staging' },
+          packageInfoOverride: {
+            installationInfo: {
+              namespace_customization_enabled_for: ['staging'],
+            } as any,
+          },
+        });
+        await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+        await waitFor(() => {
+          expect(renderResult.getByTestId('packagePolicyIlmPolicySelect')).toBeDisabled();
+        });
+      });
+
+      it('calls onIlmPolicyChange when a policy is selected', async () => {
+        const onIlmPolicyChange = jest.fn();
+        renderResult = testRenderer.render(
+          <StepDefinePackagePolicy
+            namespacePlaceholder={getInheritedNamespace(agentPolicies)}
+            packageInfo={packageInfo}
+            packagePolicy={{ ...packagePolicy, namespace: 'staging' }}
+            updatePackagePolicy={mockUpdatePackagePolicy}
+            validationResults={validationResults}
+            submitAttempted={true}
+            onNamespaceCustomizationEnabledChange={jest.fn()}
+            onIlmPolicyChange={onIlmPolicyChange}
+          />
+        );
+        await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+        const toggle = await renderResult.findByTestId('packagePolicyNamespaceCustomizationToggle');
+        await userEvent.click(toggle);
+        const select = await renderResult.findByTestId('packagePolicyIlmPolicySelect');
+        await waitFor(() => expect(select).not.toBeDisabled());
+        fireEvent.change(select, { target: { value: 'policy-a' } });
+        expect(onIlmPolicyChange).toHaveBeenLastCalledWith('policy-a');
+      });
+
+      it('keeps the currently assigned ilm_policy selectable even if excluded from the fetched list', async () => {
+        renderResult = renderWithToggle({
+          packagePolicyOverride: { namespace: 'staging' },
+          packageInfoOverride: {
+            installationInfo: {
+              namespace_customization_enabled_for: ['staging'],
+              namespace_customization_settings: { staging: { ilm_policy: 'deleted-policy' } },
+            } as any,
+          },
+        });
+        await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+        const select = await renderResult.findByTestId('packagePolicyIlmPolicySelect');
+        await waitFor(() => expect(select).toHaveValue('deleted-policy'));
       });
     });
   });
