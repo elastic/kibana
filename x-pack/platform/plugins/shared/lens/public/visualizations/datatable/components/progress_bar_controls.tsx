@@ -7,6 +7,7 @@
 
 import type { MutableRefObject } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonGroup,
@@ -131,6 +132,31 @@ const maxValueRangeLabel = i18n.translate('xpack.lens.table.progressBar.valueRan
 
 const MANUAL_INPUT_SYNC_DELAY_MS = 250;
 const PASSIVE_SLIDER_BOUND_RESET_THRESHOLD = 0.33;
+
+const valueRangeAppendCss = css`
+  && .euiFormControlLayout__append {
+    max-inline-size: 26%;
+    min-inline-size: 0;
+  }
+
+  && .euiFormControlLayout__append > *,
+  && .euiFormControlLayout__append .euiFormAppend,
+  && .euiFormControlLayout__append .lnsDatatableProgressBarAppendLabel {
+    max-inline-size: 100%;
+    min-inline-size: 0;
+  }
+
+  && .euiFormControlLayout__append .euiFormAppend {
+    overflow: hidden;
+  }
+
+  && .euiFormControlLayout__append .lnsDatatableProgressBarAppendLabel {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+`;
 
 function getDecimalPlaces(value: number): number {
   if (!Number.isFinite(value)) return 0;
@@ -890,9 +916,20 @@ export function ProgressBarControls({
         <EuiFormRow display="columnCompressed" fullWidth hasEmptyLabelSpace>
           <>
             <EuiFormControlLayoutDelimited
+              css={valueRangeAppendCss}
               compressed
               fullWidth
-              append={appendLabel}
+              append={
+                appendLabel ? (
+                  <span
+                    className="lnsDatatableProgressBarAppendLabel"
+                    title={appendLabel}
+                    data-test-subj="lnsDatatable_progressBar_valueRangeAppendLabel"
+                  >
+                    {appendLabel}
+                  </span>
+                ) : undefined
+              }
               data-test-subj="lnsDatatable_progressBar_valueRangeInputs"
               startControl={
                 <EuiFieldNumber

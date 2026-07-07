@@ -598,10 +598,12 @@ describe('data table dimension editor', () => {
       renderTableDimensionEditor();
 
       expect(
-        screen
-          .getByTestId('lnsDatatable_progressBar_valueRangeInputs')
-          .querySelector('.euiFormControlLayout__append')
+        screen.getByTestId('lnsDatatable_progressBar_valueRangeAppendLabel')
       ).toHaveTextContent('Percentage');
+      expect(screen.getByTestId('lnsDatatable_progressBar_valueRangeAppendLabel')).toHaveAttribute(
+        'title',
+        'Percentage'
+      );
     });
 
     it('does not show an append label when no explicit value format label is available', () => {
