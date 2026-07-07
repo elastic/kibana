@@ -383,6 +383,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
             disableScreenReaderOutput
           >
             <div
+              tabIndex={0}
               data-test-subj="workflowGraphNodeRetryBadge"
               aria-label={i18n.translate('workflowsUi.graphNode.retryBadgeAria', {
                 defaultMessage: '{count, plural, one {# retry} other {# retries}} on failure',
