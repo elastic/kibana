@@ -16,12 +16,26 @@ import {
 } from '@kbn/agent-builder-common';
 import type { ChatCallbackFailurePayload } from '../../../common/http_api/chat_callback';
 import { buildChatResponseFromEvents } from './utils/chat_response';
-import {
-  makeFailureCallbackRequestIfConfigured,
-  makeSuccessCallbackRequestIfConfigured,
-} from './callback_delivery';
+import { CallbackDeliveryService } from './callback_delivery_service';
 
 const callbackUrl = 'https://relay.example.com/events?token=abc';
+const createCallbackDeliveryService = (ensureUriAllowed = jest.fn()) =>
+  new CallbackDeliveryService({
+    actions: {
+      getActionsConfigurationUtilities: jest.fn().mockReturnValue({ ensureUriAllowed }),
+    },
+  } as never);
+
+describe('validateCallbackUrl', () => {
+  it('delegates callback URL validation to the Actions allowed-host validator', () => {
+    const ensureUriAllowed = jest.fn();
+    const callbackDeliveryService = createCallbackDeliveryService(ensureUriAllowed);
+
+    callbackDeliveryService.validateCallbackUrl(callbackUrl);
+
+    expect(ensureUriAllowed).toHaveBeenCalledWith(callbackUrl);
+  });
+});
 
 describe('callback request delivery', () => {
   const payload: ChatCallbackFailurePayload = {
@@ -40,20 +54,46 @@ describe('callback request delivery', () => {
 
   it('posts the exact serialized JSON body without a signature', async () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
+    const ensureUriAllowed = jest.fn();
+    const callbackDeliveryService = createCallbackDeliveryService(ensureUriAllowed);
 
-    await makeFailureCallbackRequestIfConfigured({
+    await callbackDeliveryService.makeFailureCallbackRequestIfConfigured({
       callbackUrl,
       payload,
     });
 
     const body = JSON.stringify(payload);
+    expect(ensureUriAllowed).toHaveBeenCalledWith(callbackUrl);
     expect(fetchMock).toHaveBeenCalledWith(callbackUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body,
+      redirect: 'error',
     });
+  });
+
+  it('does not post when the callback URL is not allowlisted', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch');
+    const ensureUriAllowed = jest.fn();
+    const callbackDeliveryService = createCallbackDeliveryService(ensureUriAllowed);
+    ensureUriAllowed.mockImplementation(() => {
+      throw new Error(
+        'target url "https://relay.example.com/events?token=abc" is not added to the Kibana config xpack.actions.allowedHosts'
+      );
+    });
+
+    await expect(
+      callbackDeliveryService.makeFailureCallbackRequestIfConfigured({
+        callbackUrl,
+        payload,
+      })
+    ).rejects.toThrow(
+      'target url "https://relay.example.com/events?token=abc" is not added to the Kibana config xpack.actions.allowedHosts'
+    );
+
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('retries network errors and 5xx responses', async () => {
@@ -64,7 +104,7 @@ describe('callback request delivery', () => {
       .mockResolvedValueOnce({ status: 503 } as Response)
       .mockResolvedValueOnce({ status: 204 } as Response);
 
-    const delivery = makeFailureCallbackRequestIfConfigured({
+    const delivery = createCallbackDeliveryService().makeFailureCallbackRequestIfConfigured({
       callbackUrl,
       payload,
     });
@@ -80,7 +120,7 @@ describe('callback request delivery', () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 400 } as Response);
 
     await expect(
-      makeFailureCallbackRequestIfConfigured({
+      createCallbackDeliveryService().makeFailureCallbackRequestIfConfigured({
         callbackUrl,
         payload,
       })
@@ -93,7 +133,7 @@ describe('callback request delivery', () => {
     jest.useFakeTimers();
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 503 } as Response);
 
-    const delivery = makeFailureCallbackRequestIfConfigured({
+    const delivery = createCallbackDeliveryService().makeFailureCallbackRequestIfConfigured({
       callbackUrl,
       payload,
     });
@@ -148,7 +188,7 @@ describe('makeSuccessCallbackRequestIfConfigured', () => {
   it('does not deliver when no callback is configured', async () => {
     const fetchMock = jest.spyOn(global, 'fetch');
 
-    await makeSuccessCallbackRequestIfConfigured({
+    await createCallbackDeliveryService().makeSuccessCallbackRequestIfConfigured({
       callbackUrl: undefined,
       executionId: 'execution-1',
       events,
@@ -160,7 +200,7 @@ describe('makeSuccessCallbackRequestIfConfigured', () => {
   it('delivers the completed response payload when configured', async () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
 
-    await makeSuccessCallbackRequestIfConfigured({
+    await createCallbackDeliveryService().makeSuccessCallbackRequestIfConfigured({
       callbackUrl,
       executionId: 'execution-1',
       events,
@@ -189,7 +229,7 @@ describe('makeFailureCallbackRequestIfConfigured', () => {
   it('does not deliver when no callback is configured', async () => {
     const fetchMock = jest.spyOn(global, 'fetch');
 
-    await makeFailureCallbackRequestIfConfigured({
+    await createCallbackDeliveryService().makeFailureCallbackRequestIfConfigured({
       callbackUrl: undefined,
       payload: {
         execution_id: 'execution-1',
@@ -209,7 +249,7 @@ describe('makeFailureCallbackRequestIfConfigured', () => {
       status: ExecutionStatus.aborted,
     };
 
-    await makeFailureCallbackRequestIfConfigured({
+    await createCallbackDeliveryService().makeFailureCallbackRequestIfConfigured({
       callbackUrl,
       payload,
     });

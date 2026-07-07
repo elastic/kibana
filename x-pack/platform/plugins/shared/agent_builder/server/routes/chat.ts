@@ -590,8 +590,14 @@ export function registerChatRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { execution: executionService } = getInternalServices();
+        const { execution: executionService, callbackDeliveryService } = getInternalServices();
         const payload = request.body as ChatCallbackRequestBodyPayload;
+
+        try {
+          callbackDeliveryService.validateCallbackUrl(payload.callback.url);
+        } catch (error) {
+          throw createBadRequestError(error instanceof Error ? error.message : String(error));
+        }
 
         await validateConfigurationOverrides({ payload, request });
         validateAction(payload);

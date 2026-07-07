@@ -19,13 +19,11 @@ import {
   type AgentExecutionDeps,
 } from '../execution_runner';
 import { AbortMonitor } from './abort_monitor';
-import {
-  makeSuccessCallbackRequestIfConfigured,
-  makeFailureCallbackRequestIfConfigured,
-} from '../callback_delivery';
+import type { CallbackDeliveryService } from '../callback_delivery_service';
 
 export interface TaskHandlerDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
+  callbackDeliveryService: CallbackDeliveryService;
 }
 
 /**
@@ -100,7 +98,7 @@ class TaskHandlerImpl implements TaskHandler {
       });
 
       // 6. Deliver success callback if configured
-      await makeSuccessCallbackRequestIfConfigured({
+      await this.deps.callbackDeliveryService.makeSuccessCallbackRequestIfConfigured({
         callbackUrl: execution.metadata?.callback_url,
         executionId,
         events,
@@ -175,7 +173,7 @@ class TaskHandlerImpl implements TaskHandler {
     initialFailureOutcome: FailureOutcome;
   }): Promise<FailureOutcome> {
     try {
-      await makeFailureCallbackRequestIfConfigured({
+      await this.deps.callbackDeliveryService.makeFailureCallbackRequestIfConfigured({
         callbackUrl: execution.metadata?.callback_url,
         payload: {
           execution_id: executionId,

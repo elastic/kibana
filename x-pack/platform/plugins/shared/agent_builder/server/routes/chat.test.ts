@@ -179,6 +179,7 @@ describe('registerChatRoutes', () => {
       router,
       getInternalServices: jest.fn(),
       coreSetup: {} as never,
+      pluginsSetup: {},
       logger: loggingSystemMock.createLogger(),
     } as never);
 
@@ -193,6 +194,7 @@ describe('registerChatRoutes', () => {
   it('schedules callback converse with source for conversation resolution', async () => {
     const callbackPath = `${internalApiPath}/converse/callback`;
     let callbackHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
+    const validateCallbackUrl = jest.fn();
     const executeAgent = jest.fn().mockResolvedValue({
       executionId: 'execution-1',
       events$: of(),
@@ -225,8 +227,10 @@ describe('registerChatRoutes', () => {
       router,
       getInternalServices: jest.fn().mockReturnValue({
         execution: { executeAgent },
+        callbackDeliveryService: { validateCallbackUrl },
       }),
       coreSetup: {} as never,
+      pluginsSetup: {},
       logger: loggingSystemMock.createLogger(),
     } as never);
 
@@ -263,6 +267,7 @@ describe('registerChatRoutes', () => {
       status: 202,
       payload: { execution_id: 'execution-1', status: ExecutionStatus.scheduled },
     });
+    expect(validateCallbackUrl).toHaveBeenCalledWith('https://relay.example.com/events?token=abc');
     expect(executeAgent).toHaveBeenCalledWith(
       expect.objectContaining({
         useTaskManager: true,
@@ -275,5 +280,85 @@ describe('registerChatRoutes', () => {
         }),
       })
     );
+  });
+
+  it('rejects callback converse when the callback URL is not allowlisted', async () => {
+    const callbackPath = `${internalApiPath}/converse/callback`;
+    let callbackHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
+    const validateCallbackUrl = jest.fn().mockImplementation(() => {
+      throw new Error(
+        'target url "https://disallowed.example.com/events" is not added to the Kibana config xpack.actions.allowedHosts'
+      );
+    });
+    const executeAgent = jest.fn();
+
+    const router = {
+      versioned: {
+        post: jest.fn().mockImplementation((config: { path: string }) => ({
+          addVersion: jest
+            .fn()
+            .mockImplementation(
+              (
+                _versionConfig: unknown,
+                handler: (ctx: any, req: any, res: any) => Promise<any>
+              ) => {
+                if (config.path === callbackPath) {
+                  callbackHandler = handler;
+                }
+              }
+            ),
+        })),
+      },
+    };
+
+    registerChatRoutes({
+      router,
+      getInternalServices: jest.fn().mockReturnValue({
+        execution: { executeAgent },
+        callbackDeliveryService: { validateCallbackUrl },
+      }),
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = {
+      accepted: jest.fn(),
+      forbidden: jest.fn(),
+      customError: jest.fn(({ body, statusCode }) => ({ status: statusCode, payload: body })),
+      notFound: jest.fn(),
+    };
+
+    const result = await callbackHandler!(
+      {
+        core: Promise.resolve({}),
+        licensing: Promise.resolve({
+          license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+        }),
+        agentBuilder: Promise.resolve({
+          spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+        }),
+      },
+      {
+        body: {
+          agent_id: 'agent-1',
+          input: 'Hello',
+          callback: {
+            url: 'https://disallowed.example.com/events',
+          },
+        },
+      },
+      response
+    );
+
+    expect(result).toEqual({
+      status: 400,
+      payload: {
+        attributes: {},
+        message:
+          'target url "https://disallowed.example.com/events" is not added to the Kibana config xpack.actions.allowedHosts',
+      },
+    });
+    expect(executeAgent).not.toHaveBeenCalled();
   });
 });

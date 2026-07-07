@@ -17,10 +17,7 @@ import {
 } from '@kbn/agent-builder-common';
 import { AgentExecutionMode } from '@kbn/agent-builder-common/agents';
 import { createTaskHandler } from './task_handler';
-import {
-  makeSuccessCallbackRequestIfConfigured,
-  makeFailureCallbackRequestIfConfigured,
-} from '../callback_delivery';
+import type { CallbackDeliveryService } from '../callback_delivery_service';
 import {
   collectAndWriteEvents,
   handleAgentExecution,
@@ -28,18 +25,9 @@ import {
 } from '../execution_runner';
 import { createAgentExecutionClient } from '../persistence';
 
-jest.mock('../callback_delivery');
 jest.mock('../execution_runner');
 jest.mock('../persistence');
 
-const makeSuccessCallbackRequestIfConfiguredMock =
-  makeSuccessCallbackRequestIfConfigured as jest.MockedFunction<
-    typeof makeSuccessCallbackRequestIfConfigured
-  >;
-const makeFailureCallbackRequestIfConfiguredMock =
-  makeFailureCallbackRequestIfConfigured as jest.MockedFunction<
-    typeof makeFailureCallbackRequestIfConfigured
-  >;
 const handleAgentExecutionMock = handleAgentExecution as jest.MockedFunction<
   typeof handleAgentExecution
 >;
@@ -109,10 +97,16 @@ describe('TaskHandler callback finalization', () => {
     updateStatus: jest.Mock;
   };
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  let callbackDeliveryService: jest.Mocked<CallbackDeliveryService>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     logger = loggingSystemMock.createLogger();
+    callbackDeliveryService = {
+      validateCallbackUrl: jest.fn(),
+      makeSuccessCallbackRequestIfConfigured: jest.fn().mockResolvedValue(undefined),
+      makeFailureCallbackRequestIfConfigured: jest.fn().mockResolvedValue(undefined),
+    } as unknown as jest.Mocked<CallbackDeliveryService>;
     executionClient = {
       get: jest.fn().mockResolvedValue(execution),
       updateStatus: jest.fn().mockResolvedValue(undefined),
@@ -120,8 +114,6 @@ describe('TaskHandler callback finalization', () => {
     createAgentExecutionClientMock.mockReturnValue(executionClient as never);
     handleAgentExecutionMock.mockResolvedValue(of(...events));
     collectAndWriteEventsMock.mockResolvedValue(events);
-    makeSuccessCallbackRequestIfConfiguredMock.mockResolvedValue(undefined);
-    makeFailureCallbackRequestIfConfiguredMock.mockResolvedValue(undefined);
     serializeExecutionErrorMock.mockImplementation((error: unknown) => ({
       code: 'internal_error' as never,
       message: error instanceof Error ? error.message : String(error),
@@ -132,6 +124,7 @@ describe('TaskHandler callback finalization', () => {
     createTaskHandler({
       logger,
       elasticsearch: { client: { asInternalUser: {} } },
+      callbackDeliveryService,
     } as never);
 
   it('delivers a success callback before marking the execution completed', async () => {
@@ -140,12 +133,12 @@ describe('TaskHandler callback finalization', () => {
       fakeRequest: httpServerMock.createKibanaRequest(),
     });
 
-    expect(makeSuccessCallbackRequestIfConfiguredMock).toHaveBeenCalledWith({
+    expect(callbackDeliveryService.makeSuccessCallbackRequestIfConfigured).toHaveBeenCalledWith({
       callbackUrl: 'https://relay.example.com/events?token=abc',
       executionId: 'execution-1',
       events,
     });
-    expect(makeFailureCallbackRequestIfConfiguredMock).not.toHaveBeenCalled();
+    expect(callbackDeliveryService.makeFailureCallbackRequestIfConfigured).not.toHaveBeenCalled();
     expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
       'execution-1',
       ExecutionStatus.completed
@@ -160,7 +153,7 @@ describe('TaskHandler callback finalization', () => {
       fakeRequest: httpServerMock.createKibanaRequest(),
     });
 
-    expect(makeFailureCallbackRequestIfConfiguredMock).toHaveBeenCalledWith({
+    expect(callbackDeliveryService.makeFailureCallbackRequestIfConfigured).toHaveBeenCalledWith({
       callbackUrl: 'https://relay.example.com/events?token=abc',
       payload: {
         execution_id: 'execution-1',
@@ -195,7 +188,7 @@ describe('TaskHandler callback finalization', () => {
       fakeRequest: httpServerMock.createKibanaRequest(),
     });
 
-    expect(makeFailureCallbackRequestIfConfiguredMock).toHaveBeenCalledWith({
+    expect(callbackDeliveryService.makeFailureCallbackRequestIfConfigured).toHaveBeenCalledWith({
       callbackUrl: 'https://relay.example.com/events?token=abc',
       payload: {
         execution_id: 'execution-1',
@@ -215,7 +208,7 @@ describe('TaskHandler callback finalization', () => {
       fakeRequest: httpServerMock.createKibanaRequest(),
     });
 
-    expect(makeFailureCallbackRequestIfConfiguredMock).toHaveBeenCalledWith({
+    expect(callbackDeliveryService.makeFailureCallbackRequestIfConfigured).toHaveBeenCalledWith({
       callbackUrl: 'https://relay.example.com/events?token=abc',
       payload: {
         execution_id: 'execution-1',
@@ -238,7 +231,7 @@ describe('TaskHandler callback finalization', () => {
       fakeRequest: httpServerMock.createKibanaRequest(),
     });
 
-    expect(makeFailureCallbackRequestIfConfiguredMock).toHaveBeenCalledWith({
+    expect(callbackDeliveryService.makeFailureCallbackRequestIfConfigured).toHaveBeenCalledWith({
       callbackUrl: 'https://relay.example.com/events?token=abc',
       payload: {
         execution_id: 'execution-1',
@@ -256,7 +249,9 @@ describe('TaskHandler callback finalization', () => {
     handleAgentExecutionMock.mockRejectedValue(
       createRequestAbortedError('Converse request was aborted')
     );
-    makeFailureCallbackRequestIfConfiguredMock.mockRejectedValue(new Error('callback failed'));
+    callbackDeliveryService.makeFailureCallbackRequestIfConfigured.mockRejectedValue(
+      new Error('callback failed')
+    );
     serializeExecutionErrorMock
       .mockReturnValueOnce({
         code: 'internal_error' as never,
@@ -272,7 +267,7 @@ describe('TaskHandler callback finalization', () => {
       fakeRequest: httpServerMock.createKibanaRequest(),
     });
 
-    expect(makeFailureCallbackRequestIfConfiguredMock).toHaveBeenCalledWith({
+    expect(callbackDeliveryService.makeFailureCallbackRequestIfConfigured).toHaveBeenCalledWith({
       callbackUrl: 'https://relay.example.com/events?token=abc',
       payload: {
         execution_id: 'execution-1',
@@ -303,7 +298,7 @@ describe('TaskHandler callback finalization', () => {
       fakeRequest: httpServerMock.createKibanaRequest(),
     });
 
-    expect(makeFailureCallbackRequestIfConfiguredMock).toHaveBeenCalledWith({
+    expect(callbackDeliveryService.makeFailureCallbackRequestIfConfigured).toHaveBeenCalledWith({
       callbackUrl: 'https://relay.example.com/events?token=abc',
       payload: {
         execution_id: 'execution-1',
@@ -330,7 +325,9 @@ describe('TaskHandler callback finalization', () => {
   });
 
   it('marks the execution failed when success callback delivery fails', async () => {
-    makeSuccessCallbackRequestIfConfiguredMock.mockRejectedValue(new Error('callback failed'));
+    callbackDeliveryService.makeSuccessCallbackRequestIfConfigured.mockRejectedValue(
+      new Error('callback failed')
+    );
 
     await createHandler().run({
       executionId: 'execution-1',
