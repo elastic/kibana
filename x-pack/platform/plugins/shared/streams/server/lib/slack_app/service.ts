@@ -13,13 +13,14 @@ import type {
   SlackAppStatusResponse,
 } from '../../../common/slack_app/types';
 import { RELAY_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
+import { STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG } from '../../../common/feature_flags';
 import type { StreamsServer } from '../../types';
 import {
   RELAY_APP_CONNECTION_SO_ID,
   RELAY_APP_CONNECTION_SO_TYPE,
   type RelayAppConnectionAttributes,
 } from './saved_object';
-import { RelayClient } from './relay_client';
+import type { RelayClient } from './relay_client';
 import { RelayRequestError } from './relay_error';
 import { SlackAppUnavailableError } from './errors';
 
@@ -30,13 +31,20 @@ export class SlackAppService {
     this.logger = server.logger.get('slack-app');
   }
 
-  /** feature flag on + relayUrl configured + agentBuilder available on this deployment. */
-  private getRelayUrl(): string | undefined {
-    const { enabled, relayUrl } = this.server.config.slackApp;
-    if (!enabled || !relayUrl || !this.server.agentBuilder) {
+  /**
+   * feature flag on + `relayService` configured (the injected singleton client exists) +
+   * agentBuilder available on this deployment.
+   */
+  private async getRelayClient(): Promise<RelayClient | undefined> {
+    const { relayClient, agentBuilder } = this.server;
+    if (!relayClient || !agentBuilder) {
       return undefined;
     }
-    return relayUrl;
+    const enabled = await this.server.core.featureFlags.getBooleanValue(
+      STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG,
+      false
+    );
+    return enabled ? relayClient : undefined;
   }
 
   private getSoClient(request: KibanaRequest): SavedObjectsClientContract {
@@ -73,8 +81,8 @@ export class SlackAppService {
   }
 
   async connect(request: KibanaRequest): Promise<SlackAppConnectResponse> {
-    const relayUrl = this.getRelayUrl();
-    if (!relayUrl) {
+    const relayClient = await this.getRelayClient();
+    if (!relayClient) {
       throw new SlackAppUnavailableError(
         'The Elastic Slack App is not available on this deployment'
       );
@@ -127,7 +135,6 @@ export class SlackAppService {
     // never returned by any Relay endpoint, so Kibana stores no secret at all.
     let installResponse;
     try {
-      const relayClient = new RelayClient(relayUrl);
       installResponse = await relayClient.startInstall({
         kibana_api_key: encodedApiKey,
         ...(username ? { created_by_user_key: username } : {}),
@@ -194,8 +201,8 @@ export class SlackAppService {
   }
 
   async getStatus(request: KibanaRequest): Promise<SlackAppStatusResponse> {
-    const relayUrl = this.getRelayUrl();
-    if (!relayUrl) {
+    const relayClient = await this.getRelayClient();
+    if (!relayClient) {
       return { available: false, status: RELAY_APP_CONNECTION_STATUS.notConnected };
     }
 
@@ -220,7 +227,6 @@ export class SlackAppService {
         );
       }
       try {
-        const relayClient = new RelayClient(relayUrl);
         const claim = await relayClient.fetchClaim(connection.claimId);
         if (claim.status === 'complete') {
           await this.writeConnection(soClient, {
@@ -253,7 +259,7 @@ export class SlackAppService {
   }
 
   async disconnect(request: KibanaRequest): Promise<SlackAppDisconnectResponse> {
-    const relayUrl = this.getRelayUrl();
+    const relayClient = await this.getRelayClient();
     const soClient = this.getSoClient(request);
     const connection = await this.readConnection(soClient);
 
@@ -271,9 +277,9 @@ export class SlackAppService {
         });
     }
 
-    if (relayUrl) {
+    if (relayClient) {
       try {
-        await new RelayClient(relayUrl).unbind();
+        await relayClient.unbind();
       } catch (error) {
         // The Relay's own contract requires the caller never see success while a
         // binding survives (a partial teardown returns 502 and must be retried).

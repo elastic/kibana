@@ -28,7 +28,7 @@ export interface SlackAppConnectResponse {
 
 /** Response from the status route driving the card state. */
 export interface SlackAppStatusResponse {
-  /** feature flag on + `xpack.streams.slackApp.relayUrl` set + agentBuilder available. */
+  /** `streams.significantEventsAppsEnabled` flag on + `xpack.streams.relayService.url` set + agentBuilder available. */
   available: boolean;
   status: RelayAppConnectionStatus;
   error?: string;

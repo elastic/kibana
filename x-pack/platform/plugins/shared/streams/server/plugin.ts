@@ -27,6 +27,7 @@ import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extens
 import { distinctUntilChanged, filter, skip } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import { isSignificantEventsMemoryEnabled } from './lib/memory/is_significant_events_memory_enabled';
+import { RelayClient } from './lib/slack_app/relay_client';
 import type { StreamsConfig } from '../common/config';
 import { installWorkflows } from './lib/workflows/setup/install_workflows';
 import {
@@ -585,6 +586,17 @@ export class StreamsPlugin
       this.server.spaces = plugins.spaces;
       this.server.workflowsExtensions = plugins.workflowsExtensions;
       this.server.agentBuilder = plugins.agentBuilder;
+
+      // Built once here rather than per-request: reads TLS cert/key/CA files from disk
+      // and keeps its own connection pool (see RelayClient's class doc).
+      const relayService = this.config.relayService;
+      if (relayService) {
+        this.server.relayClient = new RelayClient({
+          baseUrl: relayService.url,
+          tls: relayService.tls,
+          logger: this.logger.get('relay-client'),
+        });
+      }
     }
 
     initializeSignificantEventsTemplates({

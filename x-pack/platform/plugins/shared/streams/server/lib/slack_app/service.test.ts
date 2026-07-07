@@ -11,17 +11,24 @@ import { RELAY_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
 import type { StreamsServer } from '../../types';
 import { SlackAppService } from './service';
 import { SlackAppUnavailableError } from './errors';
-import { RelayClient } from './relay_client';
 import { RelayRequestError } from './relay_error';
 import { RELAY_APP_CONNECTION_SO_ID, RELAY_APP_CONNECTION_SO_TYPE } from './saved_object';
 
-jest.mock('./relay_client');
-
-const RelayClientMock = RelayClient as jest.MockedClass<typeof RelayClient>;
-
 const request = {} as unknown as KibanaRequest;
 
-function createHarness(configOverride?: Partial<StreamsServer['config']['slackApp']>) {
+// Shared across tests via `createHarness`'s injected `relayClient`, reset in `beforeEach`.
+const startInstall = jest.fn();
+const fetchClaim = jest.fn();
+const unbind = jest.fn();
+
+interface HarnessOptions {
+  /** `streams.significantEventsAppsEnabled` feature flag value. Defaults to enabled. */
+  featureFlagEnabled?: boolean;
+  /** Whether `server.relayClient` (built at plugin start from `relayService` config) exists. */
+  hasRelayClient?: boolean;
+}
+
+function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: HarnessOptions = {}) {
   const soClient = {
     // Defaults to "no connection exists yet"; individual tests override this
     // with mockResolvedValue to simulate an existing connection document.
@@ -35,6 +42,7 @@ function createHarness(configOverride?: Partial<StreamsServer['config']['slackAp
   };
   const grantAsInternalUser = jest.fn();
   const invalidateAsInternalUser = jest.fn().mockResolvedValue({});
+  const getBooleanValue = jest.fn().mockResolvedValue(featureFlagEnabled);
   const logger = {
     warn: jest.fn(),
     error: jest.fn(),
@@ -46,10 +54,12 @@ function createHarness(configOverride?: Partial<StreamsServer['config']['slackAp
 
   const server = {
     logger,
-    config: { slackApp: { enabled: true, relayUrl: 'https://relay.test', ...configOverride } },
+    config: { relayService: { url: 'https://relay.test' } },
     agentBuilder: {},
+    relayClient: hasRelayClient ? { startInstall, fetchClaim, unbind } : undefined,
     core: {
       savedObjects: { getScopedClient: jest.fn().mockReturnValue(soClient) },
+      featureFlags: { getBooleanValue },
     },
     security: {
       authc: {
@@ -59,24 +69,24 @@ function createHarness(configOverride?: Partial<StreamsServer['config']['slackAp
     },
   } as unknown as StreamsServer;
 
-  return { server, soClient, grantAsInternalUser, invalidateAsInternalUser };
+  return { server, soClient, grantAsInternalUser, invalidateAsInternalUser, getBooleanValue };
 }
 
 describe('SlackAppService', () => {
-  const startInstall = jest.fn();
-  const fetchClaim = jest.fn();
-  const unbind = jest.fn();
-
   beforeEach(() => {
     jest.clearAllMocks();
-    RelayClientMock.mockImplementation(
-      () => ({ startInstall, fetchClaim, unbind } as unknown as RelayClient)
-    );
   });
 
   describe('connect', () => {
-    it('throws when the feature is not available', async () => {
-      const { server } = createHarness({ enabled: false });
+    it('throws when the feature flag is disabled', async () => {
+      const { server } = createHarness({ featureFlagEnabled: false });
+      await expect(new SlackAppService(server).connect(request)).rejects.toBeInstanceOf(
+        SlackAppUnavailableError
+      );
+    });
+
+    it('throws when the relay client is not configured', async () => {
+      const { server } = createHarness({ hasRelayClient: false });
       await expect(new SlackAppService(server).connect(request)).rejects.toBeInstanceOf(
         SlackAppUnavailableError
       );
@@ -161,8 +171,16 @@ describe('SlackAppService', () => {
   });
 
   describe('getStatus', () => {
-    it('reports unavailable when relayUrl is not configured', async () => {
-      const { server } = createHarness({ relayUrl: undefined });
+    it('reports unavailable when the relay client is not configured', async () => {
+      const { server } = createHarness({ hasRelayClient: false });
+      await expect(new SlackAppService(server).getStatus(request)).resolves.toEqual({
+        available: false,
+        status: RELAY_APP_CONNECTION_STATUS.notConnected,
+      });
+    });
+
+    it('reports unavailable when the feature flag is disabled', async () => {
+      const { server } = createHarness({ featureFlagEnabled: false });
       await expect(new SlackAppService(server).getStatus(request)).resolves.toEqual({
         available: false,
         status: RELAY_APP_CONNECTION_STATUS.notConnected,

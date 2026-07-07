@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import {
   EuiBadge,
   EuiBottomBar,
@@ -37,6 +38,7 @@ import {
 import {
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MIN_EXTRACTION_INTERVAL_HOURS,
+  STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG,
 } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url';
@@ -62,6 +64,11 @@ export function SettingsTab() {
   const canManageStreams = streamsUiPrivileges.manage;
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
   const canEditSettings = canManageStreams && canSaveAdvancedSettings;
+
+  const isAppsEnabled = useObservable(
+    core.featureFlags.getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG, false),
+    false
+  );
 
   const [savedIndexPatterns, setSavedIndexPatterns] = useState<string>(() =>
     core.settings.client.get<string>(
@@ -502,7 +509,7 @@ export function SettingsTab() {
         </EuiPanel>
       </EuiPanel>
 
-      <AppsSection canEdit={canEditSettings} />
+      {isAppsEnabled && <AppsSection canEdit={canEditSettings} />}
 
       {hasChanges && (
         <EuiBottomBar data-test-subj="streams-significant-events-settings-bottom-bar">

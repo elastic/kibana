@@ -49,6 +49,7 @@ import type {
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
 import type { StreamsConfig } from '../common/config';
+import type { RelayClient } from './lib/slack_app/relay_client';
 
 export interface StreamsServer {
   core: CoreStart;
@@ -66,6 +67,8 @@ export interface StreamsServer {
   workflowsManagement?: WorkflowsServerPluginSetup;
   agentBuilder?: AgentBuilderPluginStart;
   spaces?: SpacesPluginStart;
+  /** Singleton client for the Relay service, built once at `start()` from `config.relayService`. */
+  relayClient?: RelayClient;
 }
 
 export interface ElasticsearchAccessorOptions {

@@ -8,6 +8,32 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
+const relayServiceTlsSchema = schema.object(
+  {
+    verificationMode: schema.oneOf(
+      [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+      { defaultValue: 'full' }
+    ),
+    certificateAuthorities: schema.maybe(
+      schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+    ),
+    certificate: schema.maybe(schema.string()),
+    key: schema.maybe(schema.string()),
+  },
+  {
+    validate: (rawConfig) => {
+      if (rawConfig.certificate && !rawConfig.key) {
+        return 'must specify [tls.key] when [tls.certificate] is specified';
+      }
+      if (rawConfig.key && !rawConfig.certificate) {
+        return 'must specify [tls.certificate] when [tls.key] is specified';
+      }
+    },
+  }
+);
+
+export type RelayServiceTlsConfig = TypeOf<typeof relayServiceTlsSchema>;
+
 export const configSchema = schema.object({
   preconfigured: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
@@ -24,14 +50,17 @@ export const configSchema = schema.object({
     }),
   }),
   /**
-   * Configures the "Elastic Slack App" entry point under Significant Events settings,
-   * which connects a deployment to the Nightshift Relay service. `relayUrl` is the
-   * base URL the Kibana server uses to reach Relay (never exposed to the browser).
+   * Configures the Kibana -> Relay connection used by the "Elastic Slack App" entry
+   * point under Significant Events settings. Whether the feature is surfaced at all is
+   * controlled by the `streams.significantEventsAppsEnabled` feature flag, not this
+   * config. Server-only: `url` and the TLS material are never exposed to the browser.
    */
-  slackApp: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
-    relayUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
-  }),
+  relayService: schema.maybe(
+    schema.object({
+      url: schema.uri({ scheme: ['http', 'https'] }),
+      tls: schema.maybe(relayServiceTlsSchema),
+    })
+  ),
 });
 
 export type StreamsConfig = TypeOf<typeof configSchema>;
@@ -46,16 +75,6 @@ export type PatternExtractionWorkerConfig = StreamsConfig['workers']['patternExt
  * NOTE: anything exposed here will be visible in the UI dev tools,
  * and therefore MUST NOT be anything that is sensitive information!
  */
-export const exposeToBrowserConfig = {
-  slackApp: {
-    // Only the coarse on/off flag is exposed so the UI can decide whether to render
-    // the Apps section. `relayUrl` stays server-side.
-    enabled: true,
-  },
-} as const;
+export const exposeToBrowserConfig = {} as const;
 
-export interface StreamsPublicConfig {
-  slackApp: {
-    enabled: boolean;
-  };
-}
+export type StreamsPublicConfig = Record<string, never>;

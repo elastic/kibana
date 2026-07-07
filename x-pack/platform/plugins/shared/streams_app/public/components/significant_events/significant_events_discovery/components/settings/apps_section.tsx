@@ -31,9 +31,10 @@ interface AppsSectionProps {
 /**
  * "Apps" section under Significant Events settings. Currently surfaces the Elastic
  * Slack App connect/disconnect flow; the section is structured to hold additional
- * external apps (GitHub, Teams) in the future. Renders nothing when the Slack App is
- * not available on this deployment (feature disabled, Relay URL unset, or Agent
- * Builder absent).
+ * external apps (GitHub, Teams) in the future. Only rendered by the caller (`tab.tsx`)
+ * when the `streams.significantEventsAppsEnabled` feature flag is on; additionally
+ * renders nothing here when the Slack App is not available on this deployment
+ * (`xpack.streams.relayService` unset, or Agent Builder absent).
  */
 export function AppsSection({ canEdit }: AppsSectionProps) {
   const { isLoading, available, status, error, isMutating, connect, disconnect } =
