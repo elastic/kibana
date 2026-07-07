@@ -143,13 +143,17 @@ Object {
 Preview an EQL (event query language) detection rule
 
 Options:
-  --interval         Rule run frequency, e.g. \\"5m\\", \\"1h\\"  [string] [default: \\"1h\\"]
-  --timeframe-start  Preview window start as datemath, e.g. \\"now-24h\\"  [string] [default: \\"now-1h\\"]
-  --timeframe-end    Preview window end as datemath  [string] [default: \\"now\\"]
-  --query            EQL query string  [string] [required]
-  --index            Index pattern (repeat for multiple)  [array]
-  --data-view-id     Kibana data view ID (alternative to --index)  [string]
-  -h, --help         Show help  [boolean]
+  --interval                 Rule run frequency, e.g. \\"5m\\", \\"1h\\"  [string] [default: \\"1h\\"]
+  --timeframe-start          Preview window start as datemath, e.g. \\"now-24h\\"  [string] [default: \\"now-1h\\"]
+  --timeframe-end            Preview window end as datemath  [string] [default: \\"now\\"]
+  --query                    EQL query string  [string] [required]
+  --index                    Index pattern (repeat for multiple)  [array]
+  --data-view-id             Kibana data view ID (alternative to --index)  [string]
+  --filters                  JSON array of Kibana query filters, e.g. '[{\\"query\\":{\\"match_phrase\\":{\\"event.category\\":\\"process\\"}}}]'  [string]
+  --event-category-override  Field to use instead of \\"event.category\\" for EQL category matching  [string]
+  --tiebreaker-field         Field used to sort hits with identical timestamps  [string]
+  --timestamp-field          Field to use instead of \\"@timestamp\\" for EQL evaluation  [string]
+  -h, --help                 Show help  [boolean]
 
 Examples:
    eql --query \\"process where process.name == \\\\\\"cmd.exe\\\\\\"\\"",
@@ -237,6 +241,7 @@ Options:
   --language              Query language: \\"kuery\\" (KQL, default) or \\"lucene\\"  [string] [choices: \\"kuery\\", \\"lucene\\"] [default: \\"kuery\\"]
   --index                 Index pattern (repeat for multiple)  [array]
   --data-view-id          Kibana data view ID (alternative to --index)  [string]
+  --filters               JSON array of Kibana query filters, e.g. '[{\\"query\\":{\\"match_phrase\\":{\\"event.category\\":\\"process\\"}}}]'  [string]
   -h, --help              Show help  [boolean]
 
 Examples:
@@ -259,6 +264,7 @@ Options:
   --language         Query language: \\"kuery\\" (KQL, default) or \\"lucene\\"  [string] [choices: \\"kuery\\", \\"lucene\\"] [default: \\"kuery\\"]
   --index            Index pattern (repeat for multiple)  [array]
   --data-view-id     Kibana data view ID (alternative to --index)  [string]
+  --filters          JSON array of Kibana query filters, e.g. '[{\\"query\\":{\\"match_phrase\\":{\\"event.category\\":\\"process\\"}}}]'  [string]
   -h, --help         Show help  [boolean]
 
 Examples:
@@ -282,6 +288,7 @@ Options:
   --language         Query language: \\"kuery\\" (KQL, default) or \\"lucene\\"  [string] [choices: \\"kuery\\", \\"lucene\\"] [default: \\"kuery\\"]
   --index            Index pattern (repeat for multiple)  [array]
   --data-view-id     Kibana data view ID (alternative to --index)  [string]
+  --filters          JSON array of Kibana query filters, e.g. '[{\\"query\\":{\\"match_phrase\\":{\\"event.category\\":\\"process\\"}}}]'  [string]
   -h, --help         Show help  [boolean]
 
 Examples:
@@ -309,6 +316,7 @@ Options:
   --language               Query language: \\"kuery\\" (KQL, default) or \\"lucene\\"  [string] [choices: \\"kuery\\", \\"lucene\\"] [default: \\"kuery\\"]
   --index                  Index pattern (repeat for multiple)  [array]
   --data-view-id           Kibana data view ID (alternative to --index)  [string]
+  --filters                JSON array of Kibana query filters, e.g. '[{\\"query\\":{\\"match_phrase\\":{\\"event.category\\":\\"process\\"}}}]'  [string]
   -h, --help               Show help  [boolean]
 
 Examples:
@@ -324,18 +332,22 @@ Object {
 Preview a threshold-based detection rule
 
 Options:
-  --interval         Rule run frequency, e.g. \\"5m\\", \\"1h\\"  [string] [default: \\"1h\\"]
-  --timeframe-start  Preview window start as datemath, e.g. \\"now-24h\\"  [string] [default: \\"now-1h\\"]
-  --timeframe-end    Preview window end as datemath  [string] [default: \\"now\\"]
-  --query            KQL / Lucene query  [string] [required]
-  --threshold-value  Minimum event count to alert (integer ≥ 1)  [number] [required]
-  --threshold-field  Group-by field(s) (repeat for multiple, omit for no grouping)  [array]
-  --language         Query language: \\"kuery\\" (KQL, default) or \\"lucene\\"  [string] [choices: \\"kuery\\", \\"lucene\\"] [default: \\"kuery\\"]
-  --index            Index pattern (repeat for multiple)  [array]
-  --data-view-id     Kibana data view ID (alternative to --index)  [string]
-  -h, --help         Show help  [boolean]
+  --interval           Rule run frequency, e.g. \\"5m\\", \\"1h\\"  [string] [default: \\"1h\\"]
+  --timeframe-start    Preview window start as datemath, e.g. \\"now-24h\\"  [string] [default: \\"now-1h\\"]
+  --timeframe-end      Preview window end as datemath  [string] [default: \\"now\\"]
+  --query              KQL / Lucene query  [string] [required]
+  --threshold-value    Minimum event count to alert (integer ≥ 1)  [number] [required]
+  --threshold-field    Group-by field(s) (repeat for multiple, omit for no grouping)  [array]
+  --cardinality-field  Field to calculate unique-value cardinality on (repeat alongside --cardinality-value, must not overlap --threshold-field)  [array]
+  --cardinality-value  Minimum unique-value count for the matching --cardinality-field  [number]
+  --language           Query language: \\"kuery\\" (KQL, default) or \\"lucene\\"  [string] [choices: \\"kuery\\", \\"lucene\\"] [default: \\"kuery\\"]
+  --index              Index pattern (repeat for multiple)  [array]
+  --data-view-id       Kibana data view ID (alternative to --index)  [string]
+  --filters            JSON array of Kibana query filters, e.g. '[{\\"query\\":{\\"match_phrase\\":{\\"event.category\\":\\"process\\"}}}]'  [string]
+  -h, --help           Show help  [boolean]
 
 Examples:
-   threshold --query \\"event.category:auth\\" --threshold-value 10 --threshold-field host.name",
+   threshold --query \\"event.category:auth\\" --threshold-value 10 --threshold-field host.name
+   threshold --query \\"event.category:auth\\" --threshold-value 10 --threshold-field host.name --cardinality-field user.name --cardinality-value 5",
 }
 `;

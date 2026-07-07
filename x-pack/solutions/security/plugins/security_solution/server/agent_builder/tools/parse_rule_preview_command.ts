@@ -110,10 +110,31 @@ const QUERY_LANGUAGE_OPTIONS = {
   },
 };
 
+const FILTERS_OPTION = {
+  filters: {
+    type: 'string' as const,
+    desc: 'JSON array of Kibana query filters, e.g. \'[{"query":{"match_phrase":{"event.category":"process"}}}]\'',
+  },
+};
+
 // ── Helper ─────────────────────────────────────────────────────────────────────
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type HandlerArgv = Record<string, any>;
+
+/** Builds a yargs `.coerce()` handler that parses a flag's string value as a JSON array. */
+const parseJsonArrayFlag =
+  (flagName: string) =>
+  (v: string): unknown => {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(v);
+    } catch {
+      throw new Error(`--${flagName}: invalid JSON — ${v}`);
+    }
+    if (!Array.isArray(parsed)) throw new Error(`--${flagName} must be a JSON array`);
+    return parsed;
+  };
 
 const toPreview = (rule: Record<string, unknown>, argv: HandlerArgv): ParsedPreviewCommand => ({
   kind: 'preview',
@@ -166,6 +187,20 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
         y
           .option('query', { type: 'string', demandOption: true, desc: 'EQL query string' })
           .options(INDEX_OPTIONS)
+          .options(FILTERS_OPTION)
+          .coerce('filters', parseJsonArrayFlag('filters'))
+          .option('event-category-override', {
+            type: 'string',
+            desc: 'Field to use instead of "event.category" for EQL category matching',
+          })
+          .option('tiebreaker-field', {
+            type: 'string',
+            desc: 'Field used to sort hits with identical timestamps',
+          })
+          .option('timestamp-field', {
+            type: 'string',
+            desc: 'Field to use instead of "@timestamp" for EQL evaluation',
+          })
           .example('$0 eql --query "process where process.name == \\"cmd.exe\\""', ''),
       (argv: HandlerArgv) => {
         if (result) return;
@@ -176,6 +211,12 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
             language: 'eql',
             ...(argv.index?.length && { index: argv.index }),
             ...(argv.dataViewId && { data_view_id: argv.dataViewId }),
+            ...(argv.filters !== undefined && { filters: argv.filters }),
+            ...(argv.eventCategoryOverride && {
+              event_category_override: argv.eventCategoryOverride,
+            }),
+            ...(argv.tiebreakerField && { tiebreaker_field: argv.tiebreakerField }),
+            ...(argv.timestampField && { timestamp_field: argv.timestampField }),
           },
           argv
         );
@@ -193,6 +234,8 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
           })
           .options(QUERY_LANGUAGE_OPTIONS)
           .options(INDEX_OPTIONS)
+          .options(FILTERS_OPTION)
+          .coerce('filters', parseJsonArrayFlag('filters'))
           .example(
             '$0 query --query "event.category:authentication AND event.outcome:failure"',
             ''
@@ -206,6 +249,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
             language: argv.language,
             ...(argv.index?.length && { index: argv.index }),
             ...(argv.dataViewId && { data_view_id: argv.dataViewId }),
+            ...(argv.filters !== undefined && { filters: argv.filters }),
           },
           argv
         );
@@ -225,6 +269,8 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
           .option('query', { type: 'string', desc: 'KQL / Lucene query override' })
           .options(QUERY_LANGUAGE_OPTIONS)
           .options(INDEX_OPTIONS)
+          .options(FILTERS_OPTION)
+          .coerce('filters', parseJsonArrayFlag('filters'))
           .example('$0 saved_query --saved-id my-saved-query-id', ''),
       (argv: HandlerArgv) => {
         if (result) return;
@@ -236,6 +282,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
             language: argv.language,
             ...(argv.index?.length && { index: argv.index }),
             ...(argv.dataViewId && { data_view_id: argv.dataViewId }),
+            ...(argv.filters !== undefined && { filters: argv.filters }),
           },
           argv
         );
@@ -263,22 +310,66 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
             array: true,
             desc: 'Group-by field(s) (repeat for multiple, omit for no grouping)',
           })
+          .option('cardinality-field', {
+            type: 'string',
+            array: true,
+            desc: 'Field to calculate unique-value cardinality on (repeat alongside --cardinality-value, must not overlap --threshold-field)',
+          })
+          .option('cardinality-value', {
+            type: 'number',
+            array: true,
+            desc: 'Minimum unique-value count for the matching --cardinality-field',
+          })
           .options(QUERY_LANGUAGE_OPTIONS)
           .options(INDEX_OPTIONS)
+          .options(FILTERS_OPTION)
+          .coerce('filters', parseJsonArrayFlag('filters'))
+          .check((argv: HandlerArgv) => {
+            const cardinalityFields: string[] = argv.cardinalityField ?? [];
+            const values = argv.cardinalityValue ?? [];
+            if (cardinalityFields.length !== values.length) {
+              throw new Error(
+                `--cardinality-field and --cardinality-value must be repeated the same number of times, got ${cardinalityFields.length} field(s) and ${values.length} value(s)`
+              );
+            }
+            const thresholdFields: string[] = argv.thresholdField ?? [];
+            const overlap = cardinalityFields.find((field) => thresholdFields.includes(field));
+            if (overlap) {
+              throw new Error(
+                `Cardinality of a field that is being aggregated on is always 1 — "${overlap}" cannot be used in both --threshold-field and --cardinality-field`
+              );
+            }
+            return true;
+          })
           .example(
             '$0 threshold --query "event.category:auth" --threshold-value 10 --threshold-field host.name',
+            ''
+          )
+          .example(
+            '$0 threshold --query "event.category:auth" --threshold-value 10 --threshold-field host.name --cardinality-field user.name --cardinality-value 5',
             ''
           ),
       (argv: HandlerArgv) => {
         if (result) return;
+        const cardinalityFields: string[] = argv.cardinalityField ?? [];
+        const cardinalityValues: number[] = argv.cardinalityValue ?? [];
+        const cardinality = cardinalityFields.map((field, i) => ({
+          field,
+          value: cardinalityValues[i],
+        }));
         result = toPreview(
           {
             type: 'threshold',
             query: argv.query,
-            threshold: { field: argv.thresholdField ?? [], value: argv.thresholdValue },
+            threshold: {
+              field: argv.thresholdField ?? [],
+              value: argv.thresholdValue,
+              ...(cardinality.length && { cardinality }),
+            },
             language: argv.language,
             ...(argv.index?.length && { index: argv.index }),
             ...(argv.dataViewId && { data_view_id: argv.dataViewId }),
+            ...(argv.filters !== undefined && { filters: argv.filters }),
           },
           argv
         );
@@ -336,6 +427,8 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
           })
           .options(QUERY_LANGUAGE_OPTIONS)
           .options(INDEX_OPTIONS)
+          .options(FILTERS_OPTION)
+          .coerce('filters', parseJsonArrayFlag('filters'))
           .example(
             '$0 threat_match --query "*:*" --threat-query "*:*" --threat-index logs-ti_* --threat-mapping \'[{"entries":[{"field":"source.ip","type":"mapping","value":"threat.indicator.ip"}]}]\'',
             ''
@@ -354,6 +447,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
             language: argv.language,
             ...(argv.index?.length && { index: argv.index }),
             ...(argv.dataViewId && { data_view_id: argv.dataViewId }),
+            ...(argv.filters !== undefined && { filters: argv.filters }),
           },
           argv
         );
@@ -419,6 +513,8 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
           })
           .options(QUERY_LANGUAGE_OPTIONS)
           .options(INDEX_OPTIONS)
+          .options(FILTERS_OPTION)
+          .coerce('filters', parseJsonArrayFlag('filters'))
           .example(
             '$0 new_terms --query "*:*" --new-terms-fields source.ip --history-window-start now-30d',
             ''
@@ -434,6 +530,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
             language: argv.language,
             ...(argv.index?.length && { index: argv.index }),
             ...(argv.dataViewId && { data_view_id: argv.dataViewId }),
+            ...(argv.filters !== undefined && { filters: argv.filters }),
           },
           argv
         );

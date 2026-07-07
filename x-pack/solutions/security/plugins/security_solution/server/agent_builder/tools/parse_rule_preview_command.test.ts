@@ -373,6 +373,158 @@ describe('parseRulePreviewCommand — numeric / JSON validation', () => {
 });
 
 // ---------------------------------------------------------------------------
+// --filters (query, eql, saved_query, threshold, threat_match, new_terms)
+// ---------------------------------------------------------------------------
+
+describe('parseRulePreviewCommand — --filters', () => {
+  it('parses --filters as a JSON array on a query rule', () => {
+    const result = parseRulePreviewCommand(
+      'query --query "user.name: admin" --filters \'[{"query":{"match_phrase":{"event.category":"process"}}}]\''
+    );
+    expect(result.kind).toBe('preview');
+    if (result.kind === 'preview') {
+      expect(result.rule.filters).toEqual([
+        { query: { match_phrase: { 'event.category': 'process' } } },
+      ]);
+    }
+  });
+
+  it('parses --filters on an eql rule', () => {
+    const result = parseRulePreviewCommand(
+      'eql --query "process where true" --filters \'[{"query":{"match_phrase":{"host.name":"h1"}}}]\''
+    );
+    expect(result.kind).toBe('preview');
+    if (result.kind === 'preview') {
+      expect(Array.isArray(result.rule.filters)).toBe(true);
+    }
+  });
+
+  it('omits filters from the rule when not provided', () => {
+    const result = parseRulePreviewCommand('query --query "user.name: admin"');
+    expect(result.kind).toBe('preview');
+    if (result.kind === 'preview') {
+      expect(result.rule.filters).toBeUndefined();
+    }
+  });
+
+  it('returns kind:error for invalid JSON in --filters', () => {
+    const result = parseRulePreviewCommand('query --filters not-json');
+    expect(result.kind).toBe('error');
+    if (result.kind === 'error') {
+      expect(result.message).toContain('filters');
+    }
+  });
+
+  it('returns kind:error when --filters is a JSON object (not an array)', () => {
+    const result = parseRulePreviewCommand('query --filters "{}"');
+    expect(result.kind).toBe('error');
+    if (result.kind === 'error') {
+      expect(result.message).toContain('filters');
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// EQL advanced fields
+// ---------------------------------------------------------------------------
+
+describe('parseRulePreviewCommand — eql advanced fields', () => {
+  it('parses --event-category-override, --tiebreaker-field, --timestamp-field', () => {
+    const result = parseRulePreviewCommand(
+      'eql --query "process where true" --event-category-override event.type ' +
+        '--tiebreaker-field event.sequence --timestamp-field event.ingested'
+    );
+    expect(result.kind).toBe('preview');
+    if (result.kind === 'preview') {
+      expect(result.rule.event_category_override).toBe('event.type');
+      expect(result.rule.tiebreaker_field).toBe('event.sequence');
+      expect(result.rule.timestamp_field).toBe('event.ingested');
+    }
+  });
+
+  it('omits eql advanced fields from the rule when not provided', () => {
+    const result = parseRulePreviewCommand('eql --query "process where true"');
+    expect(result.kind).toBe('preview');
+    if (result.kind === 'preview') {
+      expect(result.rule.event_category_override).toBeUndefined();
+      expect(result.rule.tiebreaker_field).toBeUndefined();
+      expect(result.rule.timestamp_field).toBeUndefined();
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// threshold.cardinality
+// ---------------------------------------------------------------------------
+
+describe('parseRulePreviewCommand — threshold cardinality', () => {
+  it('parses --cardinality-field / --cardinality-value pairs into threshold.cardinality', () => {
+    const result = parseRulePreviewCommand(
+      'threshold --query "process.name: *" --threshold-value 5 --threshold-field host.name ' +
+        '--cardinality-field user.name --cardinality-value 3'
+    );
+    expect(result.kind).toBe('preview');
+    if (result.kind === 'preview') {
+      const threshold = result.rule.threshold as {
+        cardinality?: Array<{ field: string; value: number }>;
+      };
+      expect(threshold.cardinality).toEqual([{ field: 'user.name', value: 3 }]);
+    }
+  });
+
+  it('supports repeated --cardinality-field / --cardinality-value for multiple entries', () => {
+    const result = parseRulePreviewCommand(
+      'threshold --query "process.name: *" --threshold-value 5 ' +
+        '--cardinality-field user.name --cardinality-field source.ip ' +
+        '--cardinality-value 3 --cardinality-value 10'
+    );
+    expect(result.kind).toBe('preview');
+    if (result.kind === 'preview') {
+      const threshold = result.rule.threshold as {
+        cardinality?: Array<{ field: string; value: number }>;
+      };
+      expect(threshold.cardinality).toEqual([
+        { field: 'user.name', value: 3 },
+        { field: 'source.ip', value: 10 },
+      ]);
+    }
+  });
+
+  it('omits threshold.cardinality when not provided', () => {
+    const result = parseRulePreviewCommand(
+      'threshold --query "process.name: *" --threshold-value 5'
+    );
+    expect(result.kind).toBe('preview');
+    if (result.kind === 'preview') {
+      const threshold = result.rule.threshold as { cardinality?: unknown };
+      expect(threshold.cardinality).toBeUndefined();
+    }
+  });
+
+  it('returns kind:error when --cardinality-field and --cardinality-value counts do not match', () => {
+    const result = parseRulePreviewCommand(
+      'threshold --query "process.name: *" --threshold-value 5 ' +
+        '--cardinality-field user.name --cardinality-field source.ip --cardinality-value 3'
+    );
+    expect(result.kind).toBe('error');
+    if (result.kind === 'error') {
+      expect(result.message).toContain('cardinality-field');
+    }
+  });
+
+  it('returns kind:error when a --cardinality-field overlaps --threshold-field', () => {
+    const result = parseRulePreviewCommand(
+      'threshold --query "process.name: *" --threshold-value 5 --threshold-field host.name ' +
+        '--cardinality-field host.name --cardinality-value 3'
+    );
+    expect(result.kind).toBe('error');
+    if (result.kind === 'error') {
+      expect(result.message).toContain('Cardinality of a field that is being aggregated on');
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Schedule defaults and overrides
 // ---------------------------------------------------------------------------
 
