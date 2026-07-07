@@ -15,7 +15,7 @@ import { unescape } from 'lodash';
  * the result reads clearly. Returns the transformed string, or undefined
  * when the value contains no JSON to format, so the caller can render it as-is.
  */
-export const prettyPrintJsonBlocks = (value: unknown): string | undefined => {
+export const tryPrettyPrintJsonBlocks = (value: unknown): string | undefined => {
   const unescapedValue = unescape(String(value));
   const segments = extractEmbeddedJsonSegments(unescapedValue);
   if (!segments.length) {
