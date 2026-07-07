@@ -57,6 +57,14 @@ export type {
   LoopContinueNodeSchema,
 } from './nodes/flow_control_nodes';
 export type {
+  EnterParallelNode,
+  EnterParallelNodeSchema,
+  ExitParallelNode,
+  ExitParallelNodeSchema,
+  EnterParallelNodeConfiguration,
+  EnterParallelNodeConfigurationSchema,
+} from './nodes/parallel_nodes';
+export type {
   EnterRetryNode,
   EnterRetryNodeSchema,
   ExitRetryNode,
@@ -117,6 +125,8 @@ export {
   isEnterNormalPath,
   isExitForeach,
   isExitWhile,
+  isEnterParallel,
+  isExitParallel,
   isExitIf,
   isExitRetry,
   isExitTryBlock,
