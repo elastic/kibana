@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React from 'react';
+import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { capitalize } from 'lodash/fp';
+import type { EntityType } from '../../../../../common/entity_analytics/types';
 import { AnomaliesOverview } from '../../../../entity_analytics/components/anomalies/anomalies_overview';
-import { buildEntityRightPanel } from '../../entity_explore_navigation';
-import { useEntityAnalyticsAgentNavigation } from '../../entity_analytics_agent_navigation_context';
 import type { EntityAttachmentIdentifier } from '../types';
 import { useAnomalyOverviewForAttachment } from '../use_anomaly_overview_for_attachment';
 
 interface AnomaliesMiniProps {
-  identifier: EntityAttachmentIdentifier;
-  entityStoreEntityId?: string;
+  entityType: EntityType;
+  entityId: string;
   anomalyDetailsEnabled: boolean;
 }
 
@@ -23,46 +25,48 @@ const toAnomalyEntityType = (
 ): 'host' | 'user' | undefined =>
   identifierType === 'host' || identifierType === 'user' ? identifierType : undefined;
 
+const TITLE = (entityType: EntityType) =>
+  i18n.translate('xpack.securitySolution.agentBuilder.entityAttachment.anomalies.title', {
+    defaultMessage: '{entity} anomalies',
+    values: { entity: capitalize(entityType) },
+  });
+
 /**
  * Chat-scale recreation of the flyout's `AnomaliesSection`. Reuses the
  * flyout-scale `AnomaliesOverview` directly (it only depends on EUI/kibana-
  * react, no Redux) since it already renders exactly the "anomaly overview"
- * shape we need: total count, MITRE tactic chain, and a recent-anomalies
- * table. "View all" opens the entity in the Entity Analytics app rather than
- * a left-panel tab, since the chat card has no details panel of its own.
+ * shape we need: the anomaly count + MITRE tactic chain. The "All Anomalies"
+ * header and recent-anomalies table are omitted (via `slim`) in favor of
+ * this card's own heading, matching `RiskSummaryMini`'s "{entity} risk
+ * summary" pattern.
  */
 export const AnomaliesMini: React.FC<AnomaliesMiniProps> = ({
-  identifier,
-  entityStoreEntityId,
+  entityType,
+  entityId,
   anomalyDetailsEnabled,
 }) => {
-  const { canNavigate, navigateWithFlyout } = useEntityAnalyticsAgentNavigation();
-  const entityType = toAnomalyEntityType(identifier.identifierType);
-  const enabled = anomalyDetailsEnabled && Boolean(entityStoreEntityId) && entityType != null;
-
   const { data, isLoading } = useAnomalyOverviewForAttachment({
-    entityId: entityStoreEntityId ?? '',
-    entityType: entityType ?? 'host',
-    enabled,
+    entityId,
+    entityType,
+    enabled: anomalyDetailsEnabled,
   });
 
-  const rightPanel = useMemo(() => buildEntityRightPanel(identifier), [identifier]);
-
-  const openDetailsPanel = useCallback(() => {
-    if (!canNavigate || !rightPanel) return;
-    navigateWithFlyout({ preview: [], right: rightPanel });
-  }, [canNavigate, rightPanel, navigateWithFlyout]);
-
-  if (!enabled || isLoading || !data || data.totalAnomaliesCount === 0) {
+  if (!anomalyDetailsEnabled || isLoading || !data || data.totalAnomaliesCount === 0) {
     return null;
   }
 
   return (
-    <AnomaliesOverview
-      data={data}
-      isPreviewMode={false}
-      hideHeaderIcons
-      openDetailsPanel={openDetailsPanel}
-    />
+    <EuiPanel
+      hasShadow={false}
+      hasBorder={false}
+      paddingSize="none"
+      data-test-subj="entityAttachmentAnomaliesMini"
+    >
+      <EuiTitle size="xs">
+        <h3>{TITLE(entityType)}</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <AnomaliesOverview data={data} isPreviewMode={false} hideHeaderIcons slim />
+    </EuiPanel>
   );
 };

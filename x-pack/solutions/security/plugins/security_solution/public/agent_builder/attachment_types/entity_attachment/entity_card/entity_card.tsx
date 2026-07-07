@@ -234,8 +234,8 @@ export const EntityCard: React.FC<EntityCardProps> = ({
             <>
               <EuiSpacer size="m" />
               <AnomaliesMini
-                identifier={identifier}
-                entityStoreEntityId={resolved.entityId}
+                entityType={resolved.entityType}
+                entityId={resolved.entityId}
                 anomalyDetailsEnabled={anomalyDetailsEnabled}
               />
             </>

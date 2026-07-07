@@ -51,8 +51,20 @@ const RECENT_TABLE_ANOMALY_COLUMN_WIDTH = '28.57%';
 interface AnomaliesOverviewProps {
   data: GetAnomalyOverviewResponse;
   isPreviewMode?: boolean;
-  openDetailsPanel: (path: EntityDetailsPath) => void;
+  /**
+   * Omit when the caller has no details panel to navigate to (e.g. the chat
+   * attachment card) — the "All Anomalies" header link is only rendered when
+   * this is provided.
+   */
+  openDetailsPanel?: (path: EntityDetailsPath) => void;
   hideHeaderIcons?: boolean;
+  /**
+   * Renders only the anomaly count + MITRE tactic chain row, omitting the
+   * "All Anomalies" header and the recent-anomalies table. For callers that
+   * render their own heading above this component (e.g. the chat attachment
+   * card).
+   */
+  slim?: boolean;
 }
 
 export const AnomaliesOverview: React.FC<AnomaliesOverviewProps> = ({
@@ -60,6 +72,7 @@ export const AnomaliesOverview: React.FC<AnomaliesOverviewProps> = ({
   isPreviewMode,
   openDetailsPanel,
   hideHeaderIcons,
+  slim,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -67,7 +80,7 @@ export const AnomaliesOverview: React.FC<AnomaliesOverviewProps> = ({
   const totalAnomaliesCount = data.totalAnomaliesCount;
 
   const goToAnomaliesTab = useCallback(
-    () => openDetailsPanel({ tab: EntityDetailsLeftPanelTab.ANOMALIES }),
+    () => openDetailsPanel?.({ tab: EntityDetailsLeftPanelTab.ANOMALIES }),
     [openDetailsPanel]
   );
 
@@ -111,16 +124,59 @@ export const AnomaliesOverview: React.FC<AnomaliesOverviewProps> = ({
   );
 
   const link = useMemo(
-    () => ({
-      callback: goToAnomaliesTab,
-      tooltip: ENTITY_ANOMALIES_ALL_LINK_TOOLTIP,
-    }),
-    [goToAnomaliesTab]
+    () =>
+      openDetailsPanel
+        ? {
+            callback: goToAnomaliesTab,
+            tooltip: ENTITY_ANOMALIES_ALL_LINK_TOOLTIP,
+          }
+        : undefined,
+    [goToAnomaliesTab, openDetailsPanel]
   );
 
   const statCellCss = css`
     min-width: 72px;
   `;
+
+  const statsAndMitreRow = (
+    <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false} css={statCellCss}>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem>
+            <EuiTitle size="s">
+              <h3>{getAbbreviatedNumber(totalAnomaliesCount)}</h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText
+              size="xs"
+              css={css`
+                font-weight: ${euiTheme.font.weight.semiBold};
+              `}
+            >
+              {getEntityAnomaliesCountLabel(totalAnomaliesCount)}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem
+        css={css`
+          flex: 1;
+          min-width: 0;
+        `}
+      >
+        <MitreAttackChain
+          triggeredTactics={uniqueTactics}
+          anomalyCountByTactic={data.tacticCounts}
+          showLabels={false}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  if (slim) {
+    return statsAndMitreRow;
+  }
 
   return (
     <ExpandablePanel
@@ -140,39 +196,7 @@ export const AnomaliesOverview: React.FC<AnomaliesOverviewProps> = ({
         link,
       }}
     >
-      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false} css={statCellCss}>
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h3>{getAbbreviatedNumber(totalAnomaliesCount)}</h3>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText
-                size="xs"
-                css={css`
-                  font-weight: ${euiTheme.font.weight.semiBold};
-                `}
-              >
-                {getEntityAnomaliesCountLabel(totalAnomaliesCount)}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem
-          css={css`
-            flex: 1;
-            min-width: 0;
-          `}
-        >
-          <MitreAttackChain
-            triggeredTactics={uniqueTactics}
-            anomalyCountByTactic={data.tacticCounts}
-            showLabels={false}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {statsAndMitreRow}
       <EuiHorizontalRule margin="m" />
       <EuiTitle size="xxs">
         <h4>{ENTITY_ANOMALIES_RECENT_TABLE_TITLE}</h4>
