@@ -109,7 +109,7 @@ To use the Amazon DynamoDB connector, you need AWS credentials for an IAM user w
    Follow the principle of least privilege — grant only the permissions required for your use case. Omit write permissions (`PutItem`, `DeleteItem`) if the connector will only read data.
    :::
 
-4. In the IAM user's **Security credentials** tab, click **Create access key** and choose the **Application running outside AWS** use case.
+4. In the IAM user's **Security credentials** tab, select **Create access key** and select the **Application running outside AWS** use case.
 5. Download the `.csv` file or copy the **Access Key ID** and **Secret Access Key** immediately. The secret key is only shown once.
 6. For the **AWS Region**, use the region where your DynamoDB tables are located (for example, `us-east-1` or `eu-west-1`).
 
