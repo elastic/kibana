@@ -95,10 +95,12 @@ export async function identifyCodeFeatures({
 
   const reconciled = reconcileCodeFeatures({ incoming, existing: existingFeatures, runId });
 
-  const expiresAt = kiClient.getDefaultExpiresAt();
+  // Code features are persisted as durable KIs (no `expires_at`): they reflect
+  // the source code, not a sampling window, so they should not expire and are
+  // kept alive by the persistent keep-alive path.
   await kiClient.bulk(
     streamName,
-    reconciled.map((feature) => ({ index: { feature: { ...feature, expires_at: expiresAt } } }))
+    reconciled.map((feature) => ({ index: { feature } }))
   );
 
   logger.debug(

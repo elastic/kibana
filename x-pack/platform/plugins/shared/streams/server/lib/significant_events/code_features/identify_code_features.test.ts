@@ -142,7 +142,8 @@ describe('identifyCodeFeatures', () => {
     expect(bulk).toHaveBeenCalledTimes(1);
     const operations = bulk.mock.calls[0][1];
     expect(operations).toHaveLength(3);
-    expect(operations[0].index.feature.expires_at).toBe('2099-01-01T00:00:00.000Z');
+    // Code features are persisted as durable KIs (no expiry).
+    expect(operations[0].index.feature.expires_at).toBeUndefined();
     expect(operations[0].index.feature.run_id).toBe('run-42');
   });
 });
