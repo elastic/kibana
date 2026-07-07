@@ -105,7 +105,7 @@ const extractEmbeddedJsonSegments = (value: string): EmbeddedJsonSegment[] => {
  * starts at `startIndex`, or undefined if the delimiters never balance. String
  * literals and their escapes are respected so braces/brackets inside strings do
  * not affect the result.
- * Note there is no check on simetry between "{" and "]", validity is checked when running JSON.parse.
+ * Note there is no check on symmetry between "{" and "]", validity is checked when running JSON.parse.
  */
 const findSegmentEnd = (value: string, startIndex: number): number | undefined => {
   let depth = 0;

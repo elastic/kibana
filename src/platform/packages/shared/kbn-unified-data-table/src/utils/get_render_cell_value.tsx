@@ -272,7 +272,8 @@ function renderPopoverContent({
   }
 
   const value = row.flattened[columnId];
-  const jsonContent = field?.type === 'string' ? tryPrettyPrintJsonBlocks(value) : value;
+  const formattedValue =
+    field?.type === 'string' ? tryPrettyPrintJsonBlocks(value) ?? value : value;
 
   return (
     <EuiFlexGroup
@@ -283,7 +284,7 @@ function renderPopoverContent({
     >
       <EuiFlexItem>
         <DataTablePopoverCellValue>
-          <div
+          <span
             data-test-subj="dataTableExpandCellActionPopoverValue"
             css={css`
               white-space: pre-wrap;
@@ -292,13 +293,13 @@ function renderPopoverContent({
             `}
           >
             {formatFieldValueReact({
-              value: jsonContent ?? value,
+              value: formattedValue,
               hit: row.raw,
               fieldFormats,
               dataView,
               field,
             })}
-          </div>
+          </span>
         </DataTablePopoverCellValue>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>

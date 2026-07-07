@@ -9,7 +9,7 @@
 
 import { tryPrettyPrintJsonBlocks } from './format_json_content';
 
-describe('prettyPrintJsonBlocks', () => {
+describe('tryPrettyPrintJsonBlocks', () => {
   it('returns undefined when the value is undefined or null', () => {
     expect(tryPrettyPrintJsonBlocks(undefined)).toBeUndefined();
     expect(tryPrettyPrintJsonBlocks(null)).toBeUndefined();
