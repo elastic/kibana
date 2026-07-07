@@ -11,7 +11,7 @@ import { SIGNIFICANT_EVENTS_DISCOVERY_TOOL_IDS } from './constants';
 import type { StreamsServer } from '../../../types';
 import { getSignificantEventsAvailability } from '../../../routes/utils/assert_significant_events_access';
 
-export const SIGNIFICANT_EVENTS_JUDGE_AGENT_ID = 'platform.sig_events.discovery.judge';
+export const SIGNIFICANT_EVENTS_JUDGE_AGENT_ID = 'platform.streams.sig-events.discovery-judge';
 
 export const createSignificantEventsJudgeAgent = ({
   server,
@@ -20,7 +20,7 @@ export const createSignificantEventsJudgeAgent = ({
 }): BuiltInAgentDefinition =>
   ({
     id: SIGNIFICANT_EVENTS_JUDGE_AGENT_ID,
-    name: 'Significant Events Discovery Judge',
+    name: 'Significant Events Judge',
     description:
       'Reviews proposed discoveries and decides whether to promote, acknowledge, or demote a significant event.',
     labels: ['observability', 'streams', 'significant-events', 'discovery', 'judge'],

@@ -28,10 +28,7 @@ import React from 'react';
 import { paths } from '../../../constants';
 import { RuleActionsMenu } from '../../../pages/rules_list_page/rule_actions_menu';
 import { RuleProvider } from '../../rule_details/rule_context';
-import {
-  RuleHeaderDescription,
-  RuleTitleWithBadges,
-} from '../../rule_details/rule_header_description';
+import { RuleHeaderDescription, RuleTitleWithBadges } from '../../rule_details/rule_summary_header';
 import { RuleConditions } from '../../rule_details/sidebar/rule_conditions';
 import { RuleMetadata } from '../../rule_details/sidebar/rule_metadata';
 import type { RuleApiResponse } from '../../../services/rules_api';
