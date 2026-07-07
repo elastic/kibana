@@ -22,6 +22,8 @@ export function startTrackingHistory<T extends object = {}>({
 }) {
   const history: jsondiffpatch.Delta[] = [];
   const pointer$: BehaviorSubject<number> = new BehaviorSubject<number>(-1);
+  let undoOrRedoAction = false;
+
   const currentState$: BehaviorSubject<T> = new BehaviorSubject<T>(state$.getValue());
   const disabledActions$: BehaviorSubject<{ undo: boolean; redo: boolean }> = new BehaviorSubject({
     undo: true as boolean,
@@ -29,17 +31,15 @@ export function startTrackingHistory<T extends object = {}>({
   });
 
   const stateSubscription = state$
-    .pipe(skip(1), map(mapState), distinctUntilChanged(deepEqual), pairwise())
+    .pipe(map(mapState), distinctUntilChanged(deepEqual), pairwise())
     .subscribe(([previous, current]) => {
-      const pointer = pointer$.getValue();
-      // console.log('before early return', { pointerBefore: pointer, history: [...history] });
-      if (history.length && pointer < history.length - 1) {
-        // do not update state when pointer is not at the end of the history queue
+      if (undoOrRedoAction) {
+        // do not add to history if state change is coming from undo or redo action
+        undoOrRedoAction = false;
         return;
       }
 
       const diff = jsondiffpatch.diff(previous, current);
-      // console.log({ previous, current, diff });
       history.push(diff);
       // console.log({ history: history.length, maxSize, pointer: pointer$.getValue() });
       // if (history.length > maxSize) {
@@ -57,12 +57,6 @@ export function startTrackingHistory<T extends object = {}>({
     });
 
   const disabledActionsSubscription = pointer$.subscribe((pointer) => {
-    // console.log('disabled actions subscription', {
-    //   pointer,
-    //   history: [...history],
-    //   undo: pointer - 1 < 0,
-    //   redo: pointer + 1 >= history.length,
-    // });
     disabledActions$.next({
       undo: pointer <= -1, // at the start of history
       redo: pointer + 1 >= history.length, // at the end of history
@@ -71,12 +65,13 @@ export function startTrackingHistory<T extends object = {}>({
 
   return {
     api: {
-      currentState$,
+      currentState$: currentState$.pipe(skip(1)),
       disabledActions$,
       undo: () => {
         const pointer = pointer$.getValue();
 
         const reversedPatch = jsondiffpatch.reverse(history[pointer]); // must undo the **current** patch
+        undoOrRedoAction = true;
         currentState$.next(jsondiffpatch.patch(state$.getValue(), reversedPatch) as T);
         pointer$.next(pointer - 1);
         console.log('UNDO - after', { pointer: pointer$.getValue(), history: [...history] });
@@ -84,6 +79,7 @@ export function startTrackingHistory<T extends object = {}>({
       redo: () => {
         const pointer = pointer$.getValue();
         const patch = history[pointer + 1]; // must apply the **next** patch
+        undoOrRedoAction = true;
         currentState$.next(jsondiffpatch.patch(state$.getValue(), patch) as T);
         pointer$.next(pointer + 1);
         console.log('REDO - after', { pointer: pointer$.getValue(), history: [...history] });
