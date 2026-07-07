@@ -10,7 +10,6 @@ import useObservable from 'react-use/lib/useObservable';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
@@ -50,12 +49,6 @@ const ruleDefaultMetadataFields = {
 
 const SYNC_DEBOUNCE_MS = 500;
 
-// Adapts a `VersionedAttachment` to the `{ data, origin }` view the rule helpers read.
-const versionedAttachmentView = (attachment: { versions?: unknown; origin?: string }) => ({
-  data: getLatestVersion(attachment as never)?.data,
-  origin: attachment.origin,
-});
-
 interface ConversationAttachment {
   id: string;
   type: string;
@@ -84,7 +77,7 @@ const resolveSyncRuleId = (
   if (!attachment) {
     return pageRuleId;
   }
-  return getRuleIdFromAttachment(versionedAttachmentView(attachment) as never);
+  return getRuleIdFromAttachment(attachment);
 };
 
 interface UseAgentBuilderRuleCreationParams {

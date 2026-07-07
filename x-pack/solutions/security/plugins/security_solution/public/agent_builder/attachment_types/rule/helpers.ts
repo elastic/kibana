@@ -32,8 +32,9 @@ export type RuleAttachment = Attachment<
 >;
 
 // `origin` (set after save, persisted server-side) is the source of truth for identity and intent.
-export const getRuleIdFromAttachment = (attachment: RuleAttachment): string | undefined =>
-  attachment.origin ?? undefined;
+export const getRuleIdFromAttachment = (
+  attachment: Pick<RuleAttachment, 'origin'>
+): string | undefined => attachment.origin ?? undefined;
 
 export const getRuleAttachmentIntent = (attachment: RuleAttachment): RuleAttachmentIntent =>
   attachment.origin ? 'update' : 'create';

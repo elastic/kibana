@@ -21,7 +21,7 @@ import type {
 } from '../../plugin_contract';
 import { securityTool } from './constants';
 import type { ExperimentalFeatures } from '../../../common';
-import type { EsqlRuleCreateProps } from '../../../common/api/detection_engine/model/rule_schema';
+import { EsqlRuleCreateProps } from '../../../common/api/detection_engine/model/rule_schema';
 import {
   SecurityAgentBuilderAttachments,
   SECURITY_RULE_ATTACHMENT_ID,
@@ -99,8 +99,7 @@ export const resolveAttachmentTarget = (
 
   const placeholderRecord = attachments.getAttachmentRecord(SECURITY_RULE_ATTACHMENT_ID);
   const placeholderVersion = placeholderRecord ? getLatestVersion(placeholderRecord) : undefined;
-  const placeholderText = (placeholderVersion?.data as Record<string, unknown> | undefined)
-    ?.text as string | undefined;
+  const placeholderText = (placeholderVersion?.data as { text?: string } | undefined)?.text;
 
   if (placeholderRecord && placeholderText && isPlaceholderRuleText(placeholderText)) {
     return {
@@ -247,9 +246,13 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
         let existingRuleForGraph: Partial<EsqlRuleCreateProps> | undefined;
         if (existingRuleText) {
           try {
-            const parsed = JSON.parse(existingRuleText);
-            if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-              existingRuleForGraph = parsed as Partial<EsqlRuleCreateProps>;
+            const parsed = EsqlRuleCreateProps.partial().safeParse(JSON.parse(existingRuleText));
+            if (parsed.success) {
+              existingRuleForGraph = parsed.data;
+            } else {
+              logger.warn(
+                `Existing rule text for attachment ${resolvedAttachmentId} failed validation`
+              );
             }
           } catch {
             logger.warn(
@@ -280,15 +283,10 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
 
         logger.debug(`Successfully created detection rule: ${result.rule.name}`);
 
-        // Strip server-assigned identity fields — `id`/`rule_id` must not appear in the stored draft.
-        const {
-          id: _id,
-          rule_id: _ruleId,
-          ...ruleWithoutIds
-        } = result.rule as typeof result.rule & {
-          id?: string;
-          rule_id?: string;
-        };
+        // Strip the server-assigned rule_id — it must not appear in the stored draft. `id` isn't
+        // part of EsqlRuleCreateProps and can't leak in: existingRuleForGraph is schema-validated,
+        // so no node in the graph ever sees or sets it.
+        const { rule_id: _ruleId, ...ruleWithoutIds } = result.rule;
 
         const attachmentDescription = `Rule: ${result.rule.name}`;
 
@@ -314,7 +312,8 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
                 description: attachmentDescription,
               });
 
-          // update() returns undefined if the id vanished mid-invoke.
+          // The LLM invoke above can take a while, so the attachment resolved earlier may have
+          // been deleted by the time we get here — update() then returns undefined.
           if (!persisted) {
             throw new Error(`Failed to persist rule attachment "${resolvedAttachmentId}"`);
           }
