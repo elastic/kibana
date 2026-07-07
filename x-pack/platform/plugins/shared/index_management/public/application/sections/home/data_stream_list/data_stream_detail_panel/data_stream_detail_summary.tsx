@@ -43,6 +43,7 @@ import {
   getDlmDownsamplingStepsLabel,
 } from '../../../../lib/data_streams';
 import { buildFailureStoreRetentionSummary } from '../../../../lib/failure_store_retention_summary';
+import { getInfiniteRetentionLabel } from '../../../../lib/infinite_retention_label';
 import { DataHealth } from '../../../../components';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
 import { formatByteSizeString } from '../../../../lib/format_bytes';
@@ -389,12 +390,7 @@ export const DataStreamDetailSummary: React.FunctionComponent<DataStreamDetailSu
             const hasRetention = typeof retentionRaw === 'string' && retentionRaw.length > 0;
             const retentionLabel = hasRetention
               ? getRetentionPeriod(retentionRaw)
-              : i18n.translate(
-                  'xpack.idxMgmt.dataStreamDetailPanel.successfulIngestLifecycleIlmInfinite',
-                  {
-                    defaultMessage: '∞',
-                  }
-                );
+              : getInfiniteRetentionLabel();
 
             const shouldShowPhaseCounts = !isServerless;
             const phasesLabel = shouldShowPhaseCounts
@@ -532,11 +528,7 @@ export const DataStreamDetailSummary: React.FunctionComponent<DataStreamDetailSu
           'data_stream',
           {
             disabledLabel,
-            infiniteLabel: i18n.translate(
-              'xpack.idxMgmt.dataStreamDetailPanel.failedIngestLifecycleRetentionInfinite',
-              { defaultMessage: '∞' }
-            ),
-            defaultLabel: '',
+            infiniteLabel: getInfiniteRetentionLabel(),
           },
           { showPhaseCounts: !isServerless }
         );

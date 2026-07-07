@@ -133,4 +133,83 @@ describe('Index template TabSummary', () => {
     expect(within(detail).getByText(/∞/)).toBeInTheDocument();
     expect(within(detail).queryByTestId('iconTip')).not.toBeInTheDocument();
   });
+
+  it('shows ∞ when an explicit infinite (-1) retention is configured', () => {
+    mockUseLoadFailureStoreSettings.mockReturnValue({ data: { defaultRetentionPeriod: '30d' } });
+
+    render(
+      <TabSummary
+        templateDetails={makeTemplateDetails({
+          template: {
+            data_stream_options: {
+              failure_store: { enabled: true, lifecycle: { enabled: true, data_retention: -1 } },
+            },
+          },
+        })}
+      />
+    );
+
+    const detail = screen.getByTestId('failedDataLifecycleTemplateDetail');
+    expect(within(detail).getByText(/∞/)).toBeInTheDocument();
+    expect(within(detail).queryByText(/30 days/)).not.toBeInTheDocument();
+    expect(within(detail).queryByTestId('iconTip')).not.toBeInTheDocument();
+  });
+
+  it('shows ∞ when no retention is configured anywhere (no explicit value, no cluster default)', () => {
+    mockUseLoadFailureStoreSettings.mockReturnValue({ data: {} });
+
+    render(
+      <TabSummary
+        templateDetails={makeTemplateDetails({
+          template: {
+            data_stream_options: { failure_store: { enabled: true } },
+          },
+        })}
+      />
+    );
+
+    const detail = screen.getByTestId('failedDataLifecycleTemplateDetail');
+    expect(within(detail).getByText(/∞/)).toBeInTheDocument();
+    expect(within(detail).queryByTestId('iconTip')).not.toBeInTheDocument();
+  });
+
+  it('shows an error indicator when the cluster default request fails and no explicit retention is set', () => {
+    mockUseLoadFailureStoreSettings.mockReturnValue({ error: { message: 'Request failed' } });
+
+    render(
+      <TabSummary
+        templateDetails={makeTemplateDetails({
+          template: {
+            data_stream_options: { failure_store: { enabled: true } },
+          },
+        })}
+      />
+    );
+
+    const detail = screen.getByTestId('failedDataLifecycleTemplateDetail');
+    expect(within(detail).queryByText(/∞/)).not.toBeInTheDocument();
+
+    const tooltip = within(detail).getByTestId('iconTip');
+    expect(tooltip.getAttribute('data-content')).toMatch(/unable to load/i);
+  });
+
+  it('ignores a failed cluster default request when an explicit retention is configured', () => {
+    mockUseLoadFailureStoreSettings.mockReturnValue({ error: { message: 'Request failed' } });
+
+    render(
+      <TabSummary
+        templateDetails={makeTemplateDetails({
+          template: {
+            data_stream_options: {
+              failure_store: { enabled: true, lifecycle: { enabled: true, data_retention: '15d' } },
+            },
+          },
+        })}
+      />
+    );
+
+    const detail = screen.getByTestId('failedDataLifecycleTemplateDetail');
+    expect(within(detail).getByText(/15 days/)).toBeInTheDocument();
+    expect(within(detail).queryByTestId('iconTip')).not.toBeInTheDocument();
+  });
 });

@@ -7,10 +7,11 @@
 
 import { getDlmDataPhasesLabel, getRetentionPeriod } from './data_streams';
 
+export type FailureStoreRetentionBehavior = 'data_stream' | 'index_template';
+
 interface BuildFailureStoreRetentionSummaryLabels {
   disabledLabel: string;
   infiniteLabel: string;
-  defaultLabel: string;
 }
 
 interface BuildFailureStoreRetentionSummaryOptions {
@@ -29,7 +30,7 @@ export const buildFailureStoreRetentionSummary = (
     retention?: string;
     retentionDisabled: boolean;
   },
-  behavior: 'data_stream' | 'index_template',
+  behavior: FailureStoreRetentionBehavior,
   labels: BuildFailureStoreRetentionSummaryLabels,
   {
     showPhaseCounts,
@@ -44,11 +45,10 @@ export const buildFailureStoreRetentionSummary = (
   const hasFiniteRetention = typeof retention === 'string' && retention.length > 0;
 
   if (behavior === 'index_template') {
-    const retentionLabel = retentionDisabled
-      ? labels.infiniteLabel
-      : hasFiniteRetention
-      ? getRetentionPeriod(retention)
-      : labels.defaultLabel;
+    const retentionLabel =
+      !retentionDisabled && hasFiniteRetention
+        ? getRetentionPeriod(retention)
+        : labels.infiniteLabel;
 
     const phaseCount = retentionDisabled ? infinitePhaseCount : finitePhaseCount;
     const phasesLabel = showPhaseCounts ? getDlmDataPhasesLabel(phaseCount) : undefined;

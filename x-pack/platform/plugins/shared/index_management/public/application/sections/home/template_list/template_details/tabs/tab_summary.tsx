@@ -60,7 +60,8 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
     config: { isServerless },
   } = useAppContext();
   const dlmTiersLayoutEnabled = !isServerless;
-  const { data: failureStoreSettings } = useLoadFailureStoreSettings();
+  const { data: failureStoreSettings, error: failureStoreSettingsError } =
+    useLoadFailureStoreSettings();
   const {
     version,
     priority,
@@ -94,6 +95,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
     templateType: 'template',
     failureStore: templateDetails.template?.data_stream_options?.failure_store,
     failureStoreSettings: failureStoreSettings ?? undefined,
+    hasSettingsError: Boolean(failureStoreSettingsError),
     showPhaseCounts: !isServerless,
   });
 
@@ -297,6 +299,16 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                           content={failureStoreSummary.defaultRetentionTooltip}
                           position="right"
                           type="info"
+                        />
+                      </EuiFlexItem>
+                    )}
+                    {failureStoreSummary.settingsErrorTooltip && (
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          content={failureStoreSummary.settingsErrorTooltip}
+                          position="right"
+                          type="warning"
+                          color="warning"
                         />
                       </EuiFlexItem>
                     )}
