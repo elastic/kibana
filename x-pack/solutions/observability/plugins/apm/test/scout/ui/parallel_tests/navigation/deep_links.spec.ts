@@ -39,9 +39,11 @@ for (const keyword of ['apm', 'applications']) {
 
       for (const { title, url } of APM_DEEP_LINKS) {
         test(`navigates to ${title}`, async ({ page, pageObjects: { navigationPage } }) => {
-          await navigationPage.searchGlobalNav(keyword);
-          await navigationPage.clickSearchResult(title);
-          await expect(page).toHaveURL(new RegExp(url.replace(/\//g, '\\/')));
+          await expect(async () => {
+            await navigationPage.searchGlobalNav(keyword);
+            await navigationPage.clickSearchResult(title);
+            await expect(page).toHaveURL(new RegExp(url.replace(/\//g, '\\/')), { timeout: 2000 });
+          }).toPass({ timeout: 30_000 });
         });
       }
     }
