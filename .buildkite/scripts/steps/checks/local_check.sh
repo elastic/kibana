@@ -29,7 +29,7 @@ if [[ "$FAILED" == "true" ]]; then
 fi
 
 if is_pr && ! is_auto_commit_disabled; then
-  check_for_changed_files "node scripts/check" true
+  check_for_changed_files "node scripts/check" false
 fi
 
 if [[ "$FAILED" == "true" ]]; then
