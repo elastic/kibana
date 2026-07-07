@@ -116,9 +116,7 @@ spaceTest.describe('tabs - multi-tab Discover sessions', { tag: '@local-stateful
       // Saving clears the unsaved-changes diff; full restoration of the saved
       // session is covered by the "loading" test, so we don't re-validate every
       // tab here.
-      await page.testSubj
-        .locator('split-button-notification-indicator')
-        .waitFor({ state: 'hidden' });
+      await discover.unsavedChangesIndicator().waitFor({ state: 'hidden' });
     });
   });
 
@@ -139,9 +137,7 @@ spaceTest.describe('tabs - multi-tab Discover sessions', { tag: '@local-stateful
         AD_HOC_TAB.label,
         ESQL_TAB.label,
       ]);
-      await page.testSubj
-        .locator('split-button-notification-indicator')
-        .waitFor({ state: 'hidden' });
+      await discover.unsavedChangesIndicator().waitFor({ state: 'hidden' });
 
       await spaceTest.step('validate persisted tab', async () => {
         expect(await discover.getHitCountInt()).toBe(PERSISTED_TAB.hitCount);
@@ -254,16 +250,14 @@ spaceTest.describe('tabs - multi-tab Discover sessions', { tag: '@local-stateful
           await discover.waitUntilTabIsLoaded();
           await datePicker.setAbsoluteRange(esqlUnsaved.time);
           await discover.codeEditor.setCodeEditorValue(esqlUnsaved.query);
-          await page.testSubj.click('querySubmitButton');
+          await discover.submitQuery();
           await discover.waitUntilTabIsLoaded();
           await discover.changeHistogramVisShape(esqlUnsaved.visShape);
           return discover.getHitCountInt();
         }
       );
 
-      await page.testSubj
-        .locator('split-button-notification-indicator')
-        .waitFor({ state: 'visible' });
+      await discover.unsavedChangesIndicator().waitFor({ state: 'visible' });
 
       await spaceTest.step('refresh and validate unsaved changes persist', async () => {
         await discover.waitForTabStateToPersist();
@@ -313,9 +307,7 @@ spaceTest.describe('tabs - multi-tab Discover sessions', { tag: '@local-stateful
         expect(await discover.getHitCountInt()).toBe(esqlUnsavedCount);
       });
 
-      await page.testSubj
-        .locator('split-button-notification-indicator')
-        .waitFor({ state: 'visible' });
+      await discover.unsavedChangesIndicator().waitFor({ state: 'visible' });
     }
   );
 });

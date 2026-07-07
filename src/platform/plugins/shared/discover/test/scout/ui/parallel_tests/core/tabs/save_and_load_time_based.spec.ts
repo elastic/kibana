@@ -114,11 +114,7 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
       // Tab 2: time-based ES|QL query (the only time-based tab).
       await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
-      await discover.selectTextBaseLang();
-      await discover.codeEditor.setCodeEditorValue(
-        'FROM logstash-* | SORT @timestamp DESC | LIMIT 10'
-      );
-      await page.testSubj.click('querySubmitButton');
+      await discover.writeAndSubmitEsqlQuery('FROM logstash-* | SORT @timestamp DESC | LIMIT 10');
       await discover.waitUntilTabIsLoaded();
 
       await spaceTest.step('switch is shown while the time-based tab is active', async () => {
@@ -198,8 +194,6 @@ const addNonTimeBasedEsqlTab = async (pageObjects: PageObjects) => {
   const { discover, unifiedTabs } = pageObjects;
   await unifiedTabs.createNewTab();
   await discover.waitUntilTabIsLoaded();
-  await discover.selectTextBaseLang();
-  await discover.codeEditor.setCodeEditorValue('FROM without-timefield');
-  await discover.submitQuery();
+  await discover.writeAndSubmitEsqlQuery('FROM without-timefield');
   await discover.waitUntilTabIsLoaded();
 };
