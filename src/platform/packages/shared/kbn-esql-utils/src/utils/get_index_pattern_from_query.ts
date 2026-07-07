@@ -105,23 +105,31 @@ export function getIndexPatternFromESQLQuery(esql?: string): string {
 
 /**
  * @param esql - The ES|QL query string to parse
- * @param supportedSourceCommands - Source command set to match, or '*' to match all registered source commands
+ * @param supportedSourceCommands - Source command set to match, defaults to FROM and TS
  * @returns The source command name, or an empty string if not found
  */
 export function getSourceCommandFromESQLQuery(
   esql: string | undefined,
-  supportedSourceCommands: Set<string> | '*' = INDEX_SOURCE_COMMANDS
+  supportedSourceCommands: Set<string> = INDEX_SOURCE_COMMANDS
 ): string {
   if (!esql?.trim()) {
     return '';
   }
 
   const { root } = Parser.parse(esql);
-  const sourceCommandNames =
-    supportedSourceCommands === '*' ? ALL_SOURCE_COMMANDS : supportedSourceCommands;
   const sourceCommand = root.commands.find(({ name }) =>
-    sourceCommandNames.has(name.toUpperCase())
+    supportedSourceCommands.has(name.toUpperCase())
   );
 
   return sourceCommand?.name.toUpperCase() ?? '';
+}
+
+/**
+ * Retrieves the source command name from an ES|QL query,
+ * matching any source command (FROM, TS, PROMQL, etc.)
+ * @param esql - The ES|QL query string to parse
+ * @returns The source command name, or an empty string if not found
+ */
+export function getAnySourceCommandFromESQLQuery(esql?: string): string {
+  return getSourceCommandFromESQLQuery(esql, ALL_SOURCE_COMMANDS);
 }

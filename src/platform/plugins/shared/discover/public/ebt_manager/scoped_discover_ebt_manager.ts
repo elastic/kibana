@@ -18,7 +18,7 @@ import {
 import {
   getQueryColumnsFromESQLQuery,
   getKqlSearchQueries,
-  getSourceCommandFromESQLQuery,
+  getAnySourceCommandFromESQLQuery,
 } from '@kbn/esql-utils';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { Request as InspectedRequest } from '@kbn/inspector-plugin/public';
@@ -439,7 +439,7 @@ export class ScopedDiscoverEBTManager {
           : 'fetchDocuments';
         const queryRangeSeconds = timeRange ? getTimeDifferenceInSeconds(timeRange) : 0;
         const querySourceCommand = isOfAggregateQueryType(query)
-          ? getSourceCommandFromESQLQuery(query.esql, '*') || undefined
+          ? getAnySourceCommandFromESQLQuery(query.esql) || undefined
           : undefined;
 
         this.reportPerformanceEvent?.({
