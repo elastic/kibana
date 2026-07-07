@@ -156,4 +156,7 @@ export const SIGNIFICANT_EVENT_STATUS_LABELS: Record<SignificantEventStatus, str
   demoted: i18n.translate('xpack.streams.significantEvent.status.demoted', {
     defaultMessage: 'Demoted',
   }),
+  closed: i18n.translate('xpack.streams.significantEvent.status.closed', {
+    defaultMessage: 'Closed',
+  }),
 };

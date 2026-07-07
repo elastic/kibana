@@ -24,4 +24,5 @@ export const SIGNIFICANT_EVENT_STATUS_COLORS: Record<SignificantEventStatus, str
   acknowledged: 'warning',
   resolved: 'success',
   demoted: 'default',
+  closed: 'default',
 };
