@@ -38,8 +38,6 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
         cachedTokens: number;
         totalTokens: number;
       } = { inputTokens: 0, outputTokens: 0, cachedTokens: 0, totalTokens: 0 };
-      // Populated once executeAgent resolves, so it's available even if a later error is thrown.
-      let executionId: string | undefined;
 
       try {
         const {
@@ -82,7 +80,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           agentId: effectiveAgentId,
         });
 
-        const executeAgentResult = await executionService.executeAgent({
+        const { events$ } = await executionService.executeAgent({
           mode: AgentExecutionMode.conversation,
           request,
           abortSignal: context.abortSignal,
@@ -104,10 +102,9 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           // workflows already run as scheduled tasks
           useTaskManager: false,
         });
-        executionId = executeAgentResult.executionId;
 
         const events = await firstValueFrom(
-          executeAgentResult.events$.pipe(
+          events$.pipe(
             tap((event) => {
               if (isRoundCompleteEvent(event)) {
                 const { model_usage: modelUsage } = event.data.round;
@@ -155,7 +152,6 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
             message: outputMessage,
             structured_output: round.response.structured_output,
             ...(outputConversationId && { conversation_id: outputConversationId }),
-            execution_id: executionId,
             metadata: { usage },
           },
         };
@@ -165,7 +161,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           error instanceof Error ? error : new Error(String(error))
         );
         return {
-          output: { message: '', execution_id: executionId, metadata: { usage } },
+          output: { message: '', metadata: { usage } },
           error: error instanceof Error ? error : new Error(String(error)),
         };
       }

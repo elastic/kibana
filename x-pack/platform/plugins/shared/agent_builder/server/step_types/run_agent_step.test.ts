@@ -466,7 +466,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     });
   });
 
-  describe('execution_id and metadata', () => {
+  describe('metadata', () => {
     it('forwards input.metadata to executeAgent', async () => {
       const events$ = of({
         type: ChatEventType.roundComplete,
@@ -485,33 +485,6 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       expect(execution.executeAgent).toHaveBeenCalledWith(
         expect.objectContaining({ metadata: { workflow_execution_id: 'wf-exec-1' } })
       );
-    });
-
-    it('returns the underlying agent execution id in the output', async () => {
-      const events$ = of({
-        type: ChatEventType.roundComplete,
-        data: { round: { id: 'r-1', response: { message: 'ok' } } },
-      });
-      const execution = createExecutionMock(events$);
-      const serviceManager = { internalStart: { execution } } as any;
-      const step = getRunAgentStepDefinition(serviceManager);
-
-      const res = await step.handler(createContext({ input: { message: 'hello' } }));
-
-      expect(res.output?.execution_id).toBe('exec-1');
-    });
-
-    it('returns the execution id even when the step fails after execution starts', async () => {
-      const execError = new Error('No LLM connector configured');
-      const events$ = throwError(() => execError);
-      const execution = createExecutionMock(events$);
-      const serviceManager = { internalStart: { execution } } as any;
-      const step = getRunAgentStepDefinition(serviceManager);
-
-      const res = await step.handler(createContext({ input: { message: 'hello' } }));
-
-      expect(res.error).toBe(execError);
-      expect(res.output?.execution_id).toBe('exec-1');
     });
   });
 

@@ -108,12 +108,6 @@ export const OutputSchema = z.object({
     .describe(
       'Conversation ID associated with this step execution. Present when create_conversation is enabled or conversation_id is provided.'
     ),
-  execution_id: z
-    .string()
-    .optional()
-    .describe(
-      'Id of the underlying agent execution, whether caller-provided (via input.execution_id) or auto-generated. Can be used to follow the agent execution live. Absent if the step failed before the agent execution started.'
-    ),
   metadata: z
     .object({
       usage: z.object({
