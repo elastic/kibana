@@ -12,6 +12,11 @@ import { ExperimentalFeaturesService } from './experimental_features';
  * agentless integration policies through the agentless policies API; when false, every migrated
  * surface falls back to the legacy package-policy/agent-policy APIs. Single source of truth —
  * all agentless-vs-legacy UI forks must consult this instead of reading the flag directly.
+ *
+ * Scope: only the surfaces migrated by this flag's rollout (edit, deployments table, copy, bulk
+ * upgrade) are gated. Agentless policy create and delete are NOT gated — they have been calling
+ * the agentless API in production for a while and predate this switch, so they stay on it even
+ * when the flag is off.
  */
 export const isAgentlessPoliciesUIEnabled = (): boolean => {
   return ExperimentalFeaturesService.get().enableAgentlessPoliciesUI;
