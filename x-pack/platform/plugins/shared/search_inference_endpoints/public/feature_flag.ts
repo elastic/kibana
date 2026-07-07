@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import type { IUiSettingsClient } from '@kbn/core/public';
+import { useKibana } from './hooks/use_kibana';
 import { INFERENCE_PREFERENCES_FEATURE_FLAG_ID } from '../common/constants';
 
-export const isInferencePreferencesEnabled = (uiSettings: IUiSettingsClient): boolean =>
-  uiSettings.get<boolean>(INFERENCE_PREFERENCES_FEATURE_FLAG_ID, false);
+export const useInferencePreferencesEnabled = (): boolean => {
+  const {
+    services: { uiSettings },
+  } = useKibana();
+  return uiSettings.get<boolean>(INFERENCE_PREFERENCES_FEATURE_FLAG_ID, false);
+};
