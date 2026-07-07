@@ -164,7 +164,6 @@ describe('TaskHandler callback finalization', () => {
       callbackUrl: 'https://relay.example.com/events?token=abc',
       payload: {
         execution_id: 'execution-1',
-        conversation_id: 'conversation-1',
         error: { code: 'internal_error', message: 'agent failed' },
         status: ExecutionStatus.failed,
       },
@@ -174,6 +173,36 @@ describe('TaskHandler callback finalization', () => {
       ExecutionStatus.failed,
       { code: 'internal_error', message: 'agent failed' }
     );
+  });
+
+  it('omits the conversation id from source-based failure callbacks', async () => {
+    const sourceBasedExecution = {
+      ...execution,
+      agentParams: {
+        nextInput: { message: 'hello' },
+        source: {
+          type: 'slack',
+          external_conversation_id: 'team:T123/channel:C123/thread:callback-continuation',
+        },
+      },
+    };
+    executionClient.get.mockResolvedValue(sourceBasedExecution);
+    handleAgentExecutionMock.mockResolvedValue(of());
+    collectAndWriteEventsMock.mockRejectedValue(new Error('agent failed'));
+
+    await createHandler().run({
+      executionId: 'execution-1',
+      fakeRequest: httpServerMock.createKibanaRequest(),
+    });
+
+    expect(makeFailureCallbackRequestIfConfiguredMock).toHaveBeenCalledWith({
+      callbackUrl: 'https://relay.example.com/events?token=abc',
+      payload: {
+        execution_id: 'execution-1',
+        error: { code: 'internal_error', message: 'agent failed' },
+        status: ExecutionStatus.failed,
+      },
+    });
   });
 
   it('delivers an aborted callback before marking the execution aborted', async () => {
@@ -190,7 +219,6 @@ describe('TaskHandler callback finalization', () => {
       callbackUrl: 'https://relay.example.com/events?token=abc',
       payload: {
         execution_id: 'execution-1',
-        conversation_id: 'conversation-1',
         error: { code: 'internal_error', message: 'Converse request was aborted' },
         status: ExecutionStatus.aborted,
       },
@@ -214,7 +242,6 @@ describe('TaskHandler callback finalization', () => {
       callbackUrl: 'https://relay.example.com/events?token=abc',
       payload: {
         execution_id: 'execution-1',
-        conversation_id: 'conversation-1',
         status: ExecutionStatus.failed,
       },
     });
@@ -249,7 +276,6 @@ describe('TaskHandler callback finalization', () => {
       callbackUrl: 'https://relay.example.com/events?token=abc',
       payload: {
         execution_id: 'execution-1',
-        conversation_id: 'conversation-1',
         error: { code: 'internal_error', message: 'Converse request was aborted' },
         status: ExecutionStatus.aborted,
       },

@@ -26,7 +26,6 @@ const callbackUrl = 'https://relay.example.com/events?token=abc';
 describe('callback request delivery', () => {
   const payload: ChatCallbackFailurePayload = {
     execution_id: 'execution-1',
-    conversation_id: 'conversation-1',
     status: ExecutionStatus.failed,
     error: {
       code: AgentBuilderErrorCode.internalError,
@@ -202,29 +201,7 @@ describe('makeFailureCallbackRequestIfConfigured', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('includes conversation_id when provided', async () => {
-    const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
-
-    await makeFailureCallbackRequestIfConfigured({
-      callbackUrl,
-      payload: {
-        execution_id: 'execution-1',
-        conversation_id: 'conversation-1',
-        error,
-        status: ExecutionStatus.failed,
-      },
-    });
-
-    const body = fetchMock.mock.calls[0][1]?.body as string;
-    expect(JSON.parse(body)).toEqual({
-      execution_id: 'execution-1',
-      conversation_id: 'conversation-1',
-      status: ExecutionStatus.failed,
-      error,
-    });
-  });
-
-  it('omits conversation_id when not provided', async () => {
+  it('delivers the failed response payload', async () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
     const payload: ChatCallbackFailurePayload = {
       execution_id: 'execution-1',

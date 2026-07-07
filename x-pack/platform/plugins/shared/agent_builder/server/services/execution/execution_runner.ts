@@ -194,9 +194,6 @@ const handleConversationExecution = async ({
       })
     : EMPTY;
 
-  // Merge all event streams
-  const effectiveConversationId = conversation.id;
-
   const chatModel = (await modelProvider.getDefaultModel()).chatModel;
   const connectorProvider = getConnectorProvider(chatModel.getConnector());
 
@@ -218,7 +215,7 @@ const handleConversationExecution = async ({
       agentId,
       agentName,
       providerName: connectorProvider,
-      conversationId: effectiveConversationId,
+      conversationId: conversation.id,
       spaceId,
       opikHeaders,
     },
@@ -236,7 +233,7 @@ const handleConversationExecution = async ({
               // metering
               meteringService
                 .reportExecution({
-                  conversationId: effectiveConversationId,
+                  conversationId: conversation.id,
                   executionId: execution.executionId,
                   roundCount: currentRoundCount,
                   agentId,
@@ -248,11 +245,11 @@ const handleConversationExecution = async ({
                 });
 
               // snapshot telemetry tracking
-              trackingService?.trackConversationRound(effectiveConversationId, currentRoundCount);
+              trackingService?.trackConversationRound(conversation.id, currentRoundCount);
 
               // EBT tracking
               analyticsService?.reportRoundComplete({
-                conversationId: effectiveConversationId,
+                conversationId: conversation.id,
                 executionId: execution.executionId,
                 roundCount: currentRoundCount,
                 agentId,
@@ -270,7 +267,7 @@ const handleConversationExecution = async ({
           analyticsService,
           trackingService,
           modelProvider: connectorProvider,
-          conversationId: effectiveConversationId,
+          conversationId: conversation.id,
           executionId: execution.executionId,
         })
       )

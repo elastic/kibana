@@ -175,17 +175,10 @@ class TaskHandlerImpl implements TaskHandler {
     initialFailureOutcome: FailureOutcome;
   }): Promise<FailureOutcome> {
     try {
-      const conversationId =
-        execution.executionMode === 'conversation'
-          ? execution.agentParams.conversationId
-          : undefined;
-
       await makeFailureCallbackRequestIfConfigured({
         callbackUrl: execution.metadata?.callback_url,
         payload: {
           execution_id: executionId,
-          // Only conversation executions have a conversation id to report back.
-          ...(conversationId ? { conversation_id: conversationId } : {}),
           ...initialFailureOutcome,
         },
       });

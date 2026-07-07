@@ -86,18 +86,20 @@ describe('handleAgentExecution', () => {
       get: jest.fn().mockResolvedValue({ name: 'Test agent' }),
     };
 
-    const events$ = await handleAgentExecution({
-      execution: {
-        executionId: 'execution-1',
-        executionMode: AgentExecutionMode.conversation,
-        agentParams: {
-          agentId: 'test-agent',
-          source,
-          nextInput: {
-            message: 'Continue this thread',
-          },
+    const execution = {
+      executionId: 'execution-1',
+      executionMode: AgentExecutionMode.conversation,
+      agentParams: {
+        agentId: 'test-agent',
+        source,
+        nextInput: {
+          message: 'Continue this thread',
         },
-      } as never,
+      },
+    } as never;
+
+    const events$ = await handleAgentExecution({
+      execution,
       deps: {
         logger: loggingSystemMock.createLogger(),
         runAgent: jest.fn(),
