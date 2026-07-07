@@ -9,10 +9,7 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import { render, waitFor } from '@testing-library/react';
 import { GraphInvestigation } from '@kbn/cloud-security-posture-graph';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { GraphVisualization } from './graph_visualization';
-import { mockFlyoutApi } from '../../document_details/shared/mocks/mock_flyout_context';
-import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
+import { GraphVisualization, GRAPH_VISUALIZATION_TEST_ID } from './graph_visualization';
 
 const mockToasts = {
   addDanger: jest.fn(),
@@ -29,29 +26,15 @@ const mockInvestigateInTimeline = {
 
 const GRAPH_INVESTIGATION_TEST_ID = 'cloudSecurityPostureGraphGraphInvestigation';
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-}));
-
 jest.mock('@kbn/cloud-security-posture-graph', () => {
-  const { isEntityNode, getNodeDocumentMode, hasNodeDocumentsData, getSingleDocumentData } =
-    jest.requireActual('@kbn/cloud-security-posture-graph/src/components/utils');
-  const { GraphGroupedNodePreviewPanelKey, GROUP_PREVIEW_BANNER } = jest.requireActual(
-    '@kbn/cloud-security-posture-graph/src/components/graph_grouped_node_preview_panel/constants'
-  );
-  const { isEntityItem } = jest.requireActual(
-    '@kbn/cloud-security-posture-graph/src/components/graph_grouped_node_preview_panel/components/grouped_item/types'
+  const { getNodeDocumentMode, getSingleDocumentData } = jest.requireActual(
+    '@kbn/cloud-security-posture-graph/src/components/utils'
   );
 
   return {
     GraphInvestigation: jest.fn(),
-    isEntityNode,
-    isEntityItem,
-    getNodeDocumentMode,
-    hasNodeDocumentsData,
-    getSingleDocumentData,
-    GraphGroupedNodePreviewPanelKey,
-    GROUP_PREVIEW_BANNER,
+    getNodeDocumentMode: jest.fn().mockImplementation(getNodeDocumentMode),
+    getSingleDocumentData: jest.fn().mockImplementation(getSingleDocumentData),
   };
 });
 
@@ -62,7 +45,7 @@ const mockCapabilities = {
   },
 };
 
-jest.mock('../../../common/lib/kibana', () => ({
+jest.mock('../../../../../common/lib/kibana', () => ({
   useToasts: () => mockToasts,
   useKibana: () => ({
     services: {
@@ -80,11 +63,11 @@ jest.mock('../../../common/lib/kibana', () => ({
   },
 }));
 
-jest.mock('../../../common/hooks/timeline/use_investigate_in_timeline', () => ({
+jest.mock('../../../../../common/hooks/timeline/use_investigate_in_timeline', () => ({
   useInvestigateInTimeline: () => mockInvestigateInTimeline,
 }));
 
-jest.mock('../../../data_view_manager/hooks/use_data_view', () => ({
+jest.mock('../../../../../data_view_manager/hooks/use_data_view', () => ({
   useDataView: () => ({
     dataView: {
       id: 'experimental-data-view',
@@ -94,9 +77,12 @@ jest.mock('../../../data_view_manager/hooks/use_data_view', () => ({
   }),
 }));
 
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: () => true,
-}));
+const callbacks = {
+  onShowDocument: jest.fn(),
+  onShowEntity: jest.fn(),
+  onShowGrouped: jest.fn(),
+  onShowNetwork: jest.fn(),
+};
 
 const EVENT_PROPS = {
   mode: 'event' as const,
@@ -104,18 +90,19 @@ const EVENT_PROPS = {
   eventIds: ['event-1', 'event-2'],
   timestamp: new Date().toISOString(),
   isAlert: false,
+  ...callbacks,
 };
 
 const ENTITY_PROPS = {
   mode: 'entity' as const,
   scopeId: 'test-scope',
   entityId: 'entity-1',
+  ...callbacks,
 };
 
 describe('GraphVisualization', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     (GraphInvestigation as unknown as jest.Mock).mockReturnValue(
       <div data-test-subj={GRAPH_INVESTIGATION_TEST_ID} />
     );
@@ -163,18 +150,6 @@ describe('GraphVisualization', () => {
         from: `${timestamp}||-30m`,
         to: `${timestamp}||+30m`,
       });
-    });
-
-    it('passes onOpenEventPreview callback', async () => {
-      render(<GraphVisualization {...EVENT_PROPS} />);
-
-      await waitFor(() => {
-        expect(GraphInvestigation).toHaveBeenCalledTimes(1);
-      });
-
-      expect(typeof jest.mocked(GraphInvestigation).mock.calls[0][0].onOpenEventPreview).toBe(
-        'function'
-      );
     });
   });
 
@@ -234,6 +209,39 @@ describe('GraphVisualization', () => {
 
       expect(jest.mocked(GraphInvestigation).mock.calls[0][0].showInvestigateInTimeline).toBe(
         false
+      );
+    });
+  });
+
+  describe('node dispatch', () => {
+    it('routes a single-event node to onShowDocument', async () => {
+      const { getNodeDocumentMode, getSingleDocumentData } = jest.requireMock(
+        '@kbn/cloud-security-posture-graph'
+      );
+      getNodeDocumentMode.mockReturnValueOnce('single-event');
+      getSingleDocumentData.mockReturnValueOnce({ id: 'doc-id', index: 'logs-*' });
+
+      render(<GraphVisualization {...EVENT_PROPS} />);
+
+      await waitFor(() => {
+        expect(GraphInvestigation).toHaveBeenCalledTimes(1);
+      });
+
+      const { onOpenEventPreview } = jest.mocked(GraphInvestigation).mock.calls[0][0];
+      onOpenEventPreview?.({} as never);
+
+      expect(callbacks.onShowDocument).toHaveBeenCalledWith('doc-id', 'logs-*', true);
+    });
+
+    it('forwards onOpenNetworkPreview straight to GraphInvestigation', async () => {
+      render(<GraphVisualization {...EVENT_PROPS} />);
+
+      await waitFor(() => {
+        expect(GraphInvestigation).toHaveBeenCalledTimes(1);
+      });
+
+      expect(jest.mocked(GraphInvestigation).mock.calls[0][0].onOpenNetworkPreview).toBe(
+        callbacks.onShowNetwork
       );
     });
   });
