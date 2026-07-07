@@ -394,7 +394,7 @@ export function EpisodeDetailsPage() {
         badges={headerBadges}
         menu={headerMenu}
         tabs={headerTabs}
-        padding={{ bleed: 'l' }}
+        padding={{ bleed: 'm' }}
       />
       <EuiSpacer size="m" />
       {isLoading ? (
