@@ -77,6 +77,17 @@ export const EditDslStepsFlyout = ({
     return { ms, esFormat: `${parsed.value}${parsed.unit}` };
   }, []);
 
+  // Downsampling rounds must finish before the data reaches the frozen phase (searchable snapshot);
+  // if none is configured, the delete phase (data retention) is the boundary. When present, this
+  // takes over as both the help-text reference and the validation boundary.
+  const frozenAfterInfo = useMemo(() => {
+    const parsed = parseInterval(initialStepsRef.current.dsl?.frozen_after);
+    if (!parsed) return;
+    const ms = toMilliseconds(parsed.value, parsed.unit);
+    if (!Number.isFinite(ms) || ms < 0) return;
+    return { ms, esFormat: `${parsed.value}${parsed.unit}` };
+  }, []);
+
   const serializer = useMemo(() => createDslStepsFlyoutSerializer(initialStepsRef.current), []);
   const deserializer = useMemo(() => createDslStepsFlyoutDeserializer(), []);
 
@@ -286,6 +297,8 @@ export const EditDslStepsFlyout = ({
                 reindexErrorsAfterRemoval={reindexErrorsAfterRemoval}
                 dataRetentionMs={dataRetentionInfo?.ms}
                 dataRetentionEsFormat={dataRetentionInfo?.esFormat}
+                frozenAfterMs={frozenAfterInfo?.ms}
+                frozenAfterEsFormat={frozenAfterInfo?.esFormat}
               />
             )}
           </UseArray>

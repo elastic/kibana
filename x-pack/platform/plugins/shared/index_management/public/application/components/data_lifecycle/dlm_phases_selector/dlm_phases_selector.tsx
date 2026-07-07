@@ -38,6 +38,7 @@ export const DlmPhasesSelector = ({
   manageRepositoriesUrl,
   createDefaultRepositoryUrl,
   canCreateDefaultSnapshotRepository = false,
+  hasExistingRepositories = false,
   enterprise,
   onRefreshDefaultSnapshotRepository,
   onChange,
@@ -119,6 +120,7 @@ export const DlmPhasesSelector = ({
             hasDefaultSnapshotRepository={hasDefaultSnapshotRepository}
             canCreateDefaultSnapshotRepository={canCreateDefaultSnapshotRepository}
             createDefaultRepositoryUrl={createDefaultRepositoryUrl}
+            hasExistingRepositories={hasExistingRepositories}
             enterprise={enterprise}
             onRefreshDefaultSnapshotRepository={onRefreshDefaultSnapshotRepository}
             onChange={updateFrozen}

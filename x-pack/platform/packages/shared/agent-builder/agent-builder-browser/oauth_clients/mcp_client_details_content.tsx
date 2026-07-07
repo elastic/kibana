@@ -8,7 +8,8 @@
 import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiCallOut, EuiCopy, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import type { OAuthClient } from '@kbn/agent-builder-common';
-import { OAuthClientType } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, OAuthClientType } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import fileSaver from 'file-saver';
 import { isEmpty } from 'lodash';
 import useToggle from 'react-use/lib/useToggle';
@@ -121,6 +122,11 @@ export const McpClientDetailsContent = ({
                     color="text"
                     aria-label={labels.details.modal.copySecret}
                     onClick={copy}
+                    {...getEbtProps({
+                      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                      action: AGENT_BUILDER_UI_EBT.action.globalManagement.MCP_CLIENT_COPY_SECRET,
+                      detail: AGENT_BUILDER_UI_EBT.entity.MCP_CLIENT,
+                    })}
                   />
                 </EuiToolTip>
               )}
