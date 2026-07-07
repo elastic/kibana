@@ -9,9 +9,9 @@
 
 import type { PageObjects, ScoutParallelTestFixtures } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
+import { DocViewer } from '@kbn/unified-doc-viewer/test/scout/ui/fixtures/page_objects';
 import type { DiscoverWorkerFixtures } from './common';
 import { spaceTest as spaceBaseTest } from './common';
-import { DocViewer } from './page_objects';
 
 export interface DiscoverPageObjects extends PageObjects {
   docViewer: DocViewer;
@@ -39,4 +39,4 @@ export const spaceTest = spaceBaseTest.extend<DiscoverTestFixtures, DiscoverWork
   },
 });
 
-export { DocViewer } from './page_objects';
+export { DocViewer } from '@kbn/unified-doc-viewer/test/scout/ui/fixtures/page_objects';
