@@ -102,88 +102,88 @@ export const bulkImportRules = async ({
 
   const responses: Array<BulkImportRuleSuccess | RuleImportErrorObject> = [];
 
-  const existingLists = await getReferencedExceptionLists({ rules, savedObjectsClient });
-  await ruleSourceImporter.setup(rules);
-
-  const { prepared, errors: prepErrors } = await prepareRules({
-    rules,
-    mlAuthz,
-    ruleSourceImporter,
-    existingLists,
-  });
-  responses.push(...prepErrors);
-
-  if (prepared.length === 0) {
-    return { responses };
-  }
-
-  // One query resolves every `rule_id` conflict up front so we can classify the
-  // whole set (overwrite vs create) without a per-rule existence check.
-  const ruleIds = prepared.map((p) => p.rule.rule_id);
-  const existingRuleIds = await findExistingRuleIds({ rulesClient, ruleIds });
-
-  // Classify: conflict | overwrite-fallback | bulk-create.
-  const conflicts: PreparedImport[] = [];
-  const toOverwrite: PreparedImport[] = [];
-  const toBulkCreate: PreparedImport[] = [];
-  for (const p of prepared) {
-    if (existingRuleIds.has(p.rule.rule_id)) {
-      if (overwriteRules) toOverwrite.push(p);
-      else conflicts.push(p);
-    } else {
-      toBulkCreate.push(p);
-    }
-  }
-
-  conflicts.forEach((p) => {
-    responses.push(
-      createRuleImportErrorObject({
-        ruleId: p.rule.rule_id,
-        type: 'conflict',
-        message: 'Rule with this rule_id already exists',
-      })
-    );
-  });
-
-  // Overwrite branch: stays per-rule via existing single-rule importRule. The full
-  // RuleResponse is collapsed to { rule_id } for a uniform success shape.
-  if (toOverwrite.length > 0) {
-    responses.push(
-      ...(await overwriteExisting({
-        rules: toOverwrite,
-        actionsClient,
-        rulesClient,
-        savedObjectsClient,
-        mlAuthz,
-        changeTracking,
-        allowMissingConnectorSecrets,
-      }))
-    );
-  }
-
-  if (toBulkCreate.length === 0) {
-    return { responses };
-  }
-
-  // Bulk-create new rules in a single alerting call. Pre-assign uuids so we
-  // can re-pair successes/failures back to the source `rule_id`.
-  const {
-    bulkInputs,
-    inputById,
-    errors: buildErrors,
-  } = buildBulkInputs({
-    rules: toBulkCreate,
-    actionsClient,
-    allowMissingConnectorSecrets,
-  });
-  responses.push(...buildErrors);
-
-  if (bulkInputs.length === 0) {
-    return { responses };
-  }
-
-  // Whole-batch pre-checks (authz, schedule-limit) throw; isolate so one batch can't 500 the import.
+  // Contain any throw so one batch can't reject and abort the multi-batch loop mid-import.
   try {
+    const existingLists = await getReferencedExceptionLists({ rules, savedObjectsClient });
+    await ruleSourceImporter.setup(rules);
+
+    const { prepared, errors: prepErrors } = await prepareRules({
+      rules,
+      mlAuthz,
+      ruleSourceImporter,
+      existingLists,
+    });
+    responses.push(...prepErrors);
+
+    if (prepared.length === 0) {
+      return { responses };
+    }
+
+    // One query resolves every `rule_id` conflict up front so we can classify the
+    // whole set (overwrite vs create) without a per-rule existence check.
+    const ruleIds = prepared.map((p) => p.rule.rule_id);
+    const existingRuleIds = await findExistingRuleIds({ rulesClient, ruleIds });
+
+    // Classify: conflict | overwrite-fallback | bulk-create.
+    const conflicts: PreparedImport[] = [];
+    const toOverwrite: PreparedImport[] = [];
+    const toBulkCreate: PreparedImport[] = [];
+    for (const p of prepared) {
+      if (existingRuleIds.has(p.rule.rule_id)) {
+        if (overwriteRules) toOverwrite.push(p);
+        else conflicts.push(p);
+      } else {
+        toBulkCreate.push(p);
+      }
+    }
+
+    conflicts.forEach((p) => {
+      responses.push(
+        createRuleImportErrorObject({
+          ruleId: p.rule.rule_id,
+          type: 'conflict',
+          message: 'Rule with this rule_id already exists',
+        })
+      );
+    });
+
+    // Overwrite branch: stays per-rule via existing single-rule importRule. The full
+    // RuleResponse is collapsed to { rule_id } for a uniform success shape.
+    if (toOverwrite.length > 0) {
+      responses.push(
+        ...(await overwriteExisting({
+          rules: toOverwrite,
+          actionsClient,
+          rulesClient,
+          savedObjectsClient,
+          mlAuthz,
+          changeTracking,
+          allowMissingConnectorSecrets,
+        }))
+      );
+    }
+
+    if (toBulkCreate.length === 0) {
+      return { responses };
+    }
+
+    // Bulk-create new rules in a single alerting call. Pre-assign uuids so we
+    // can re-pair successes/failures back to the source `rule_id`.
+    const {
+      bulkInputs,
+      inputById,
+      errors: buildErrors,
+    } = buildBulkInputs({
+      rules: toBulkCreate,
+      actionsClient,
+      allowMissingConnectorSecrets,
+    });
+    responses.push(...buildErrors);
+
+    if (bulkInputs.length === 0) {
+      return { responses };
+    }
+
     const { successfulIds, errors: bulkErrors } = await rulesClient.bulkCreateRules<RuleParams>({
       rules: bulkInputs,
       batchSize: RULE_MANAGEMENT_BULK_IMPORT_BATCH_SIZE,
@@ -209,8 +209,13 @@ export const bulkImportRules = async ({
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    for (const source of inputById.values()) {
-      responses.push(createRuleImportErrorObject({ ruleId: source.rule.rule_id, message }));
+    const responded = new Set(
+      responses.map((r) => (isRuleImportError(r) ? r.error.ruleId : r.rule_id))
+    );
+    for (const rule of rules) {
+      if (!responded.has(rule.rule_id)) {
+        responses.push(createRuleImportErrorObject({ ruleId: rule.rule_id, message }));
+      }
     }
   }
 

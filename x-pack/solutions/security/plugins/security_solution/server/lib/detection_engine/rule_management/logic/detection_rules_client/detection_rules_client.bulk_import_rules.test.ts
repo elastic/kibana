@@ -376,6 +376,27 @@ describe('detectionRulesClient.bulkImportRules', () => {
     expect(errors[0].error.message).toBe('kaboom');
   });
 
+  it('a thrown conflict lookup surfaces as per-rule errors, not a rejection', async () => {
+    const rules = [
+      { ...getImportRulesSchemaMock(), rule_id: 'rule-1' },
+      { ...getImportRulesSchemaMock(), rule_id: 'rule-2' },
+    ];
+    (findRules as jest.Mock).mockRejectedValueOnce(new Error('search exploded'));
+
+    const { responses } = await subject.bulkImportRules({
+      allowMissingConnectorSecrets: false,
+      overwriteRules: false,
+      ruleSourceImporter: mockRuleSourceImporter,
+      rules,
+    });
+
+    const errors = responses.filter(isRuleImportError);
+    expect(errors).toHaveLength(2);
+    expect(errors.map((e) => e.error.ruleId).sort()).toEqual(['rule-1', 'rule-2']);
+    expect(errors.every((e) => e.error.message === 'search exploded')).toBe(true);
+    expect(rulesClient.bulkCreateRules).not.toHaveBeenCalled();
+  });
+
   it('returns empty result for empty input without calling alerting/findRules', async () => {
     const result = await subject.bulkImportRules({
       allowMissingConnectorSecrets: false,
