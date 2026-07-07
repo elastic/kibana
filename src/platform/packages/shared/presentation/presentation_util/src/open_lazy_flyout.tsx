@@ -49,6 +49,29 @@ interface OpenLazyFlyoutParams {
  *
  * @returns A handle to the opened flyout (`OverlayRef`).
  */
+/**
+ * Stable DOM id for a panel's context menu ("...") toggle button. Shared with the
+ * embeddable panel hover actions (which render the button) so that focus can be
+ * returned to the persistent toggle when a flyout opened from the panel closes,
+ * even if the action that opened it ran asynchronously and the context menu (and the
+ * transient menu item that had focus) was already torn down (WCAG 2.4.3 Focus Order).
+ */
+export const getPanelContextMenuTriggerId = (panelId: string) =>
+  `presentationPanelContextMenu-${panelId}`;
+
+/**
+ * Re-queries `el` by its id (so focus survives a re-render that replaced the node),
+ * falling back to the node itself while it is still attached to the DOM.
+ */
+const resolveAttachedElement = (el: HTMLElement | null): HTMLElement | null => {
+  if (!el) return null;
+  if (el.id) {
+    const refreshed = document.getElementById(el.id);
+    if (refreshed) return refreshed;
+  }
+  return document.body.contains(el) ? el : null;
+};
+
 export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
   const { core, parentApi, loadContent, flyoutProps: allFlyoutProps } = params;
   const { focusedPanelId, triggerId, ...flyoutProps } = allFlyoutProps ?? {};
@@ -62,23 +85,28 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
   // Capture the element that had focus when the flyout was opened so focus can be
   // returned to it when the flyout closes. This keeps keyboard and screen reader
   // users on the triggering element (e.g. a panel action button) instead of
-  // sending them to the top of the DOM (WCAG 2.4.3 Focus Order).
+  // sending them to the top of the DOM (WCAG 2.4.3 Focus Order). Ignore `<body>`,
+  // which means focus was already lost (e.g. a context menu closed before an async
+  // action opened the flyout) — the panel fallback below handles that case.
   const previouslyFocusedElement =
-    document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    document.activeElement instanceof HTMLElement && document.activeElement !== document.body
+      ? document.activeElement
+      : null;
 
   const getTriggerElement = () => {
     // An explicit trigger id always wins.
     const byTriggerId = triggerId ? document.getElementById(triggerId) : null;
     if (byTriggerId) return byTriggerId;
-    // Otherwise re-query the captured element by its id, in case opening/closing the
-    // flyout re-rendered the panel and replaced the original node (e.g. Lens inline edit).
-    const byCapturedId = previouslyFocusedElement?.id
-      ? document.getElementById(previouslyFocusedElement.id)
-      : null;
-    if (byCapturedId) return byCapturedId;
-    // Fall back to the captured node, but only if it is still attached to the DOM.
-    return previouslyFocusedElement && document.body.contains(previouslyFocusedElement)
-      ? previouslyFocusedElement
+    // Then the element that had focus, re-queried by id so focus survives a re-render
+    // that replaced the node (e.g. Lens inline edit) and only used while still attached.
+    const byFocusedElement = resolveAttachedElement(previouslyFocusedElement);
+    if (byFocusedElement) return byFocusedElement;
+    // Finally, for a panel flyout, fall back to the panel's persistent "..." toggle.
+    // This covers actions launched from the context menu that open the flyout
+    // asynchronously, where the menu (and the menu item that had focus) is gone by
+    // the time the flyout opens.
+    return focusedPanelId
+      ? document.getElementById(getPanelContextMenuTriggerId(focusedPanelId))
       : null;
   };
 

@@ -29,6 +29,7 @@ import { buildContextMenuForActions, triggers } from '@kbn/ui-actions-plugin/pub
 import { css } from '@emotion/react';
 import type { EmbeddableApiContext, PublishesTitle, ViewMode } from '@kbn/presentation-publishing';
 import { apiCanLockHoverActions, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { getPanelContextMenuTriggerId } from '@kbn/presentation-util';
 import type { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
 import { BehaviorSubject, Subscription, switchMap } from 'rxjs';
 import {
@@ -63,14 +64,15 @@ const getContextMenuAriaLabel = (title?: string, index?: number) => {
 const ALLOWED_NOTIFICATIONS = ['ACTION_FILTERS_NOTIFICATION'] as const;
 
 /**
- * Stable DOM ids for the panel hover action buttons. These let overlays opened by
+ * Stable DOM id for the panel quick action buttons. This lets overlays opened by
  * an action (e.g. the panel settings/edit flyout) return focus to the triggering
  * button when they close, even if opening the flyout re-renders the panel and
- * replaces the original button node (WCAG 2.4.3 Focus Order).
+ * replaces the original button node (WCAG 2.4.3 Focus Order). The context menu
+ * toggle uses the shared `getPanelContextMenuTriggerId` so `openLazyFlyout` can
+ * restore focus to it for actions launched from the "..." menu.
  */
 const getQuickActionElementId = (actionId: string, uuid: string) =>
   `presentationPanelQuickAction-${actionId}-${uuid}`;
-const getContextMenuElementId = (uuid: string) => `presentationPanelContextMenu-${uuid}`;
 
 export const createClickHandler =
   (action: Action<EmbeddableApiContext>, context: ActionExecutionContext<EmbeddableApiContext>) =>
@@ -392,7 +394,7 @@ export const PresentationPanelHoverActions = ({
   const ContextMenuButton = (
     <EuiToolTip content={getContextMenuAriaLabel(title, index)} disableScreenReaderOutput>
       <EuiButtonIcon
-        id={api?.uuid ? getContextMenuElementId(api.uuid) : undefined}
+        id={api?.uuid ? getPanelContextMenuTriggerId(api.uuid) : undefined}
         color="text"
         data-test-subj="embeddablePanelToggleMenuIcon"
         aria-label={getContextMenuAriaLabel(title, index)}

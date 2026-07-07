@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { openLazyFlyout } from './src/open_lazy_flyout';
+export { openLazyFlyout, getPanelContextMenuTriggerId } from './src/open_lazy_flyout';
 export { tracksOverlays, type TracksOverlays } from './src/tracks_overlays';

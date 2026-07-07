@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { openLazyFlyout } from './open_lazy_flyout';
+import { openLazyFlyout, getPanelContextMenuTriggerId } from './open_lazy_flyout';
 import type { CoreStart } from '@kbn/core/public';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 
@@ -188,6 +188,45 @@ describe('openLazyFlyout', () => {
       jest.runAllTimers();
 
       expect(document.activeElement).toBe(trigger);
+    });
+
+    it("returns focus to the panel's context menu toggle when focus was lost after the menu closed", () => {
+      // Mirrors a flyout opened asynchronously from the panel "..." context menu: by
+      // the time the flyout opens the menu (and the menu item that had focus) is gone
+      // and focus has fallen to <body>. Focus must return to the persistent toggle
+      // identified by focusedPanelId.
+      const panelId = 'panel-1';
+      const toggle = document.createElement('button');
+      toggle.id = getPanelContextMenuTriggerId(panelId);
+      document.body.appendChild(toggle);
+
+      // No element is focused (focus was dropped to <body>).
+      openLazyFlyout({ core, loadContent, flyoutProps: { focusedPanelId: panelId } });
+
+      getOnClose()();
+      jest.runAllTimers();
+
+      expect(document.activeElement).toBe(toggle);
+    });
+
+    it('prefers the previously focused element over the panel context menu fallback', () => {
+      const panelId = 'panel-1';
+      const toggle = document.createElement('button');
+      toggle.id = getPanelContextMenuTriggerId(panelId);
+      document.body.appendChild(toggle);
+
+      // A quick-action button had focus when the flyout opened.
+      const quickAction = document.createElement('button');
+      quickAction.id = 'quickActionButton';
+      document.body.appendChild(quickAction);
+      quickAction.focus();
+
+      openLazyFlyout({ core, loadContent, flyoutProps: { focusedPanelId: panelId } });
+
+      getOnClose()();
+      jest.runAllTimers();
+
+      expect(document.activeElement).toBe(quickAction);
     });
   });
 });
