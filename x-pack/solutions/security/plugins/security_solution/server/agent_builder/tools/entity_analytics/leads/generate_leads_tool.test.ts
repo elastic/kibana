@@ -5,12 +5,18 @@
  * 2.0.
  */
 
+import type { coreMock } from '@kbn/core/server/mocks';
 import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import type { ExperimentalFeatures } from '../../../../../common';
-import { createToolHandlerContext, createToolTestMocks } from '../../../__mocks__/test_helpers';
-import { generateLeadsTool } from './generate_leads_tool';
+import {
+  createToolHandlerContext,
+  createToolTestMocks,
+  setupMockCoreStartServices,
+} from '../../../__mocks__/test_helpers';
+import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../../lib/telemetry/event_based/events';
+import { generateLeadsTool, SECURITY_GENERATE_LEADS_TOOL_ID } from './generate_leads_tool';
 import {
   getLeadGenerationConfig,
   upsertLeadGenerationConfig,
@@ -54,7 +60,7 @@ describe('generateLeadsTool', () => {
     inference: {},
     actions: { getActionsClientWithRequest: mockGetActionsClientWithRequest },
   };
-  const mockCoreStart = { analytics: {} };
+  const mockPipelineCoreStart = { analytics: {} };
 
   const tool = generateLeadsTool(
     mockCore,
@@ -65,9 +71,12 @@ describe('generateLeadsTool', () => {
 
   const handlerContext = () => createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
+  let mockCoreStart: ReturnType<typeof coreMock.createStart>;
+
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetStartServices.mockResolvedValue([mockCoreStart, mockStartPlugins, {}]);
+    mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
+    mockGetStartServices.mockResolvedValue([mockPipelineCoreStart, mockStartPlugins, {}]);
     mockActionsGetAll.mockResolvedValue([
       { id: CONNECTOR_ID, name: CONNECTOR_NAME, actionTypeId: '.gen-ai' },
     ]);
@@ -329,6 +338,130 @@ describe('generateLeadsTool', () => {
           'start services unavailable'
         );
       });
+    });
+  });
+
+  describe('handler — telemetry', () => {
+    it('does not report telemetry while only asking for confirmation', async () => {
+      const ctx = handlerContext();
+      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+        status: ConfirmationStatus.unprompted,
+      });
+      (ctx.prompts.askForConfirmation as jest.Mock).mockReturnValue({ type: 'confirmation' });
+
+      await tool.handler({}, ctx);
+
+      expect(mockCoreStart.analytics.reportEvent).not.toHaveBeenCalled();
+    });
+
+    it('reports userConfirmationOutcome=accepted and success=true after a successful start', async () => {
+      const ctx = handlerContext();
+      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+        status: ConfirmationStatus.accepted,
+      });
+
+      await tool.handler({ connectorName: CONNECTOR_NAME }, ctx);
+
+      expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+        {
+          toolId: SECURITY_GENERATE_LEADS_TOOL_ID,
+          actionType: 'mutation',
+          spaceId: 'default',
+          success: true,
+          errorMessage: undefined,
+          userConfirmationOutcome: ConfirmationStatus.accepted,
+        }
+      );
+    });
+
+    it('reports userConfirmationOutcome=rejected when the user declines the prompt', async () => {
+      const ctx = handlerContext();
+      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+        status: ConfirmationStatus.rejected,
+      });
+
+      await tool.handler({}, ctx);
+
+      expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+        {
+          toolId: SECURITY_GENERATE_LEADS_TOOL_ID,
+          actionType: 'mutation',
+          spaceId: 'default',
+          success: true,
+          errorMessage: undefined,
+          userConfirmationOutcome: ConfirmationStatus.rejected,
+        }
+      );
+    });
+
+    it('reports success=false when the caller lacks write privilege', async () => {
+      mockGetUserLeadPrivileges.mockResolvedValue({
+        adhoc: { has_read_permissions: true, has_write_permissions: false },
+        scheduled: { has_read_permissions: true, has_write_permissions: true },
+        has_all_required: false,
+        privileges: {},
+      });
+
+      await tool.handler({}, handlerContext());
+
+      expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+        {
+          toolId: SECURITY_GENERATE_LEADS_TOOL_ID,
+          actionType: 'mutation',
+          spaceId: 'default',
+          success: false,
+          errorMessage: 'You do not have permission to generate leads in this space.',
+          userConfirmationOutcome: undefined,
+        }
+      );
+    });
+
+    it('reports success=false when no connector is configured (validation error)', async () => {
+      mockGetLeadGenerationConfig.mockResolvedValue({ connectorId: undefined });
+      const ctx = handlerContext();
+      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+        status: ConfirmationStatus.accepted,
+      });
+
+      await tool.handler({}, ctx);
+
+      expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+        {
+          toolId: SECURITY_GENERATE_LEADS_TOOL_ID,
+          actionType: 'mutation',
+          spaceId: 'default',
+          success: false,
+          errorMessage:
+            'No AI connector is configured for lead generation. Provide a connectorName argument, or configure one via the Lead Generation settings.',
+          userConfirmationOutcome: ConfirmationStatus.accepted,
+        }
+      );
+    });
+
+    it('reports success=false and errorMessage when getStartServices throws', async () => {
+      mockGetStartServices.mockRejectedValue(new Error('boom'));
+      const ctx = handlerContext();
+      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+        status: ConfirmationStatus.accepted,
+      });
+
+      await tool.handler({ connectorName: CONNECTOR_NAME }, ctx);
+
+      expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+        {
+          toolId: SECURITY_GENERATE_LEADS_TOOL_ID,
+          actionType: 'mutation',
+          spaceId: 'default',
+          success: false,
+          errorMessage: 'boom',
+          userConfirmationOutcome: ConfirmationStatus.accepted,
+        }
+      );
     });
   });
 });

@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -36,13 +36,13 @@ export const triggerMemorySynthesisWorkflow = async ({
 
   const spaceId = spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
   const workflow = await workflowsManagement.management.getWorkflow(
-    STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID,
+    SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
     spaceId
   );
 
   if (!workflow || !workflow.definition) {
     logger.warn(
-      `Managed workflow "${STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID}" not found, skipping memory synthesis`
+      `Managed workflow "${SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID}" not found, skipping memory synthesis`
     );
     return undefined;
   }
