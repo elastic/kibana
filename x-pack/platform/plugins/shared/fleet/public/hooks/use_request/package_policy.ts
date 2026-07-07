@@ -172,7 +172,9 @@ export function useUpgradePackagePolicyDryRunQuery(
   }
 
   return useQuery<UpgradePackagePolicyDryRunResponse, RequestError>(
-    ['upgradePackagePolicyDryRun', packagePolicyIds, packageVersion],
+    // Sorted ids + no focus refetching, for the same reasons as
+    // `useUpgradeAgentlessPoliciesDryRunQuery`: each spurious refetch is another dry-run POST.
+    ['upgradePackagePolicyDryRun', [...packagePolicyIds].sort(), packageVersion],
     () =>
       sendRequestForRq<UpgradePackagePolicyDryRunResponse>({
         path: packagePolicyRouteService.getDryRunPath(),
@@ -180,7 +182,10 @@ export function useUpgradePackagePolicyDryRunQuery(
         version: API_VERSIONS.public.v1,
         body: JSON.stringify(body),
       }),
-    { enabled }
+    {
+      enabled,
+      refetchOnWindowFocus: false,
+    }
   );
 }
 
