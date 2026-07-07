@@ -171,6 +171,14 @@ describe('User actions APIs', () => {
         );
       });
 
+      it('throws an error when the search is an empty string', () => {
+        expect(
+          PathReporter.report(
+            UserActionInternalFindRequestRt.decode({ ...defaultRequest, search: '' })
+          )
+        ).toContain('The search field cannot be an empty string.');
+      });
+
       it(`throws an error when an author is more than ${MAX_USER_ACTION_AUTHOR_LENGTH} characters`, () => {
         const author = 'a'.repeat(MAX_USER_ACTION_AUTHOR_LENGTH + 1);
 
@@ -217,6 +225,14 @@ describe('User actions APIs', () => {
         const result = UserActionInternalFindRequestSchema.safeParse({
           ...defaultRequest,
           search: 'a'.repeat(MAX_USER_ACTION_SEARCH_LENGTH + 1),
+        });
+        expect(result.success).toBe(false);
+      });
+
+      it('zod: throws an error when the search is an empty string', () => {
+        const result = UserActionInternalFindRequestSchema.safeParse({
+          ...defaultRequest,
+          search: '',
         });
         expect(result.success).toBe(false);
       });
