@@ -194,30 +194,31 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
             />
           </EuiText>
         )}
-        {anonymizedResult.recommended_actions && anonymizedResult.recommended_actions.length > 0 && (
-          <>
-            <EuiHorizontalRule margin="m" />
-            <EuiFlexGroup alignItems="center" gutterSize="xs">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="documentation" size="m" aria-hidden={true} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xxs">
-                  <h4>
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.highlights.recommendedActions"
-                      defaultMessage="Recommended actions"
-                    />
-                  </h4>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-            <EuiMarkdownFormat textSize="xs" color="default">
-              {anonymizedResult.recommended_actions.map((action) => `- ${action}`).join('\n')}
-            </EuiMarkdownFormat>
-          </>
-        )}
+        {anonymizedResult.recommended_actions &&
+          anonymizedResult.recommended_actions.length > 0 && (
+            <>
+              <EuiHorizontalRule margin="m" />
+              <EuiFlexGroup alignItems="center" gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="documentation" size="m" aria-hidden={true} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xxs">
+                    <h4>
+                      <FormattedMessage
+                        id="xpack.securitySolution.flyout.entityDetails.highlights.recommendedActions"
+                        defaultMessage="Recommended actions"
+                      />
+                    </h4>
+                  </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="s" />
+              <EuiMarkdownFormat textSize="xs" color="default">
+                {anonymizedResult.recommended_actions.map((action) => `- ${action}`).join('\n')}
+              </EuiMarkdownFormat>
+            </>
+          )}
       </div>
 
       <>
