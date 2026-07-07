@@ -43,10 +43,18 @@ export interface FeatureFlagsSetupDeps {
  * The browser-side Feature Flags Service
  * @internal
  */
+type FeatureFlagValue = boolean | string | number;
+
+interface ReportedFlagValue {
+  type: 'boolean' | 'string' | 'number';
+  value: FeatureFlagValue;
+}
+
 export class FeatureFlagsService {
   private readonly featureFlagsClient: Client;
   private readonly logger: Logger;
   private readonly contextChanged$ = new Subject<void>();
+  private readonly lastReportedValues = new Map<string, ReportedFlagValue>();
   private isProviderReadyPromise?: Promise<void>;
   private context: MultiContextEvaluationContext = { kind: 'multi' };
   private overrides: Record<string, unknown> = {};
@@ -202,7 +210,7 @@ export class FeatureFlagsService {
    * @param fallbackValue The fallback value
    * @internal
    */
-  private evaluateFlag<T extends string | boolean | number>(
+  private evaluateFlag<T extends FeatureFlagValue>(
     evaluationFn: (flagName: string, fallbackValue: T) => T,
     flagName: string,
     fallbackValue: T
@@ -215,6 +223,16 @@ export class FeatureFlagsService {
           evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
     apm.addLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
 
+    this.reportValueIfChanged(flagName, value);
+
+    return value;
+  }
+
+  private reportValueIfChanged(flagName: string, value: FeatureFlagValue): void {
+    if (!this.shouldReportValue(flagName, value)) {
+      return;
+    }
+
     // Increment usage counter
     // TODO: When UI has OTel instrumented, we can increment the counter in the browser directly.
     this.http
@@ -222,8 +240,17 @@ export class FeatureFlagsService {
         body: JSON.stringify({ value }),
       })
       .catch();
+  }
 
-    return value;
+  private shouldReportValue(flagName: string, value: FeatureFlagValue): boolean {
+    const type = typeof value;
+    const lastReportedValue = this.lastReportedValues.get(flagName);
+    if (lastReportedValue?.type === type && lastReportedValue.value === value) {
+      return false;
+    }
+
+    this.lastReportedValues.set(flagName, { type, value });
+    return true;
   }
 
   /**
