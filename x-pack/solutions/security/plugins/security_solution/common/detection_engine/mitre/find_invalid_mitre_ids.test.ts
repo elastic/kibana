@@ -7,8 +7,9 @@
 
 import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import { findInvalidMitreIds } from './find_invalid_mitre_ids';
+import { MITRE_ATTACK_FRAMEWORK } from './iterate_mitre_threat_entities';
 
-const MITRE_FRAMEWORK = 'MITRE ATT&CK';
+const MITRE_FRAMEWORK = MITRE_ATTACK_FRAMEWORK;
 
 // Valid IDs sampled from the bundled mitre_tactics_techniques.ts
 const VALID_TACTIC_ID = 'TA0005'; // Defense Evasion

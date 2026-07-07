@@ -7,6 +7,8 @@
 
 import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 
+export const MITRE_ATTACK_FRAMEWORK = 'MITRE ATT&CK';
+
 export type MitreThreatEntityType = 'tactic' | 'technique' | 'subtechnique';
 
 export interface MitreThreatEntity {
@@ -33,7 +35,7 @@ export function* iterateMitreThreatEntities(
   }
 
   for (const threatItem of threats) {
-    if (threatItem.framework === 'MITRE ATT&CK') {
+    if (threatItem.framework === MITRE_ATTACK_FRAMEWORK) {
       yield { type: 'tactic', id: threatItem.tactic.id };
 
       for (const technique of threatItem.technique ?? []) {
