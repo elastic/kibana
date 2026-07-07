@@ -14,13 +14,9 @@ import { EsqlRuleCreateProps } from '../../../common/api/detection_engine/model/
 import {
   SecurityAgentBuilderAttachments,
   SECURITY_RULE_ATTACHMENT_ID,
-  DETECTION_ENGINE_RULES_URL,
 } from '../../../common/constants';
-import { RULE_MANAGEMENT_RULES_URL_SEARCH } from '../../../common/api/detection_engine/rule_management/urls';
 import { createRule, updateRule } from '../rule_management/api/api';
-import { transformInput, transformOutput } from './transforms';
-import { securitySolutionQueryClient } from '../../common/containers/query_client/query_client_provider';
-import { RULE_MANAGEMENT_FILTERS_QUERY_KEY } from '../rule_management/api/hooks/use_fetch_rule_management_filters_query';
+import { transformOutput } from './transforms';
 import type { AiRuleCreationService } from './ai_rule_creation_store';
 import {
   SAVE_RULE_FAILED_TITLE,
@@ -84,7 +80,7 @@ export const createAiRuleCreationHandler = ({
           const ruleProps = parseResult.data;
           const isUpdate = Boolean(rule.id);
           let saved: RuleResponse;
-          if (rule.id) {
+          if (isUpdate) {
             // The server rejects PUT requests carrying both `id` and `rule_id`, so drop
             // `rule_id` and address the rule by `id` instead.
             const { rule_id: _ruleId, ...updateProps } = ruleProps;
@@ -102,27 +98,6 @@ export const createAiRuleCreationHandler = ({
           aiRuleCreation.deactivateFormSync();
 
           const targetAttachmentId = attachmentId ?? SECURITY_RULE_ATTACHMENT_ID;
-
-          securitySolutionQueryClient.invalidateQueries(
-            ['POST', RULE_MANAGEMENT_RULES_URL_SEARCH],
-            {
-              exact: false,
-            }
-          );
-          securitySolutionQueryClient.invalidateQueries(RULE_MANAGEMENT_FILTERS_QUERY_KEY, {
-            exact: false,
-          });
-          if (isUpdate) {
-            securitySolutionQueryClient.setQueryData(
-              ['GET', DETECTION_ENGINE_RULES_URL, saved.id],
-              transformInput(saved)
-            );
-            // 'none': a background refetch would race the setQueryData above.
-            securitySolutionQueryClient.invalidateQueries(['GET', DETECTION_ENGINE_RULES_URL], {
-              exact: false,
-              refetchType: 'none',
-            });
-          }
 
           agentBuilder?.addAttachment({
             id: targetAttachmentId,

@@ -9,21 +9,13 @@ import { Subject } from 'rxjs';
 import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
 import { createAiRuleCreationHandler } from './ai_rule_creation_handler';
 import type { AiRuleCreationService } from './ai_rule_creation_store';
-import { securitySolutionQueryClient } from '../../common/containers/query_client/query_client_provider';
 
 jest.mock('../rule_management/api/api', () => ({
   createRule: jest.fn(),
   updateRule: jest.fn(),
 }));
 jest.mock('./transforms', () => ({
-  transformInput: jest.fn((r) => r),
   transformOutput: jest.fn((r) => r),
-}));
-jest.mock('../../common/containers/query_client/query_client_provider', () => ({
-  securitySolutionQueryClient: {
-    invalidateQueries: jest.fn(),
-    setQueryData: jest.fn(),
-  },
 }));
 
 import { createRule, updateRule } from '../rule_management/api/api';
@@ -287,21 +279,6 @@ describe('createAiRuleCreationHandler', () => {
       expect(mockUpdateRule).toHaveBeenCalled();
       expect(mockCreateRule).not.toHaveBeenCalled();
       expect(updateOrigin).not.toHaveBeenCalled();
-    });
-
-    it('writes to query cache immediately', async () => {
-      mockUpdateRule.mockResolvedValue(savedRule);
-      const service = makeService();
-
-      createAiRuleCreationHandler({
-        aiRuleCreation: service,
-        notifications: makeNotifications() as never,
-      });
-
-      emit(service as never, { rule: makeRule({ id: 'saved-id-1' }) });
-      await flush();
-
-      expect(securitySolutionQueryClient.setQueryData).toHaveBeenCalled();
     });
   });
 
