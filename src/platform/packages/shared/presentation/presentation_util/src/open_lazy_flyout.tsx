@@ -65,18 +65,17 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
   // sending them to the top of the DOM (WCAG 2.4.3 Focus Order).
   const previouslyFocusedElement =
     document.activeElement instanceof HTMLElement ? document.activeElement : null;
-  // The captured node may be removed from the DOM while the flyout is open (e.g.
-  // opening the flyout re-renders the triggering panel). If the trigger has an id,
-  // remember it so focus can be restored to the freshly rendered element on close.
-  const previouslyFocusedElementId = previouslyFocusedElement?.id || undefined;
 
   const getTriggerElement = () => {
-    if (triggerId) return document.getElementById(triggerId);
-    // Prefer re-querying by id in case the original node was replaced by a re-render.
-    if (previouslyFocusedElementId) {
-      const refreshed = document.getElementById(previouslyFocusedElementId);
-      if (refreshed) return refreshed;
-    }
+    // An explicit trigger id always wins.
+    const byTriggerId = triggerId ? document.getElementById(triggerId) : null;
+    if (byTriggerId) return byTriggerId;
+    // Otherwise re-query the captured element by its id, in case opening/closing the
+    // flyout re-rendered the panel and replaced the original node (e.g. Lens inline edit).
+    const byCapturedId = previouslyFocusedElement?.id
+      ? document.getElementById(previouslyFocusedElement.id)
+      : null;
+    if (byCapturedId) return byCapturedId;
     // Fall back to the captured node, but only if it is still attached to the DOM.
     return previouslyFocusedElement && document.body.contains(previouslyFocusedElement)
       ? previouslyFocusedElement

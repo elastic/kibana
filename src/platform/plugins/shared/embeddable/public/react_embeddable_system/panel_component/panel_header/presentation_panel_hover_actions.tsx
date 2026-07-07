@@ -72,7 +72,7 @@ const getQuickActionElementId = (actionId: string, uuid: string) =>
   `presentationPanelQuickAction-${actionId}-${uuid}`;
 const getContextMenuElementId = (uuid: string) => `presentationPanelContextMenu-${uuid}`;
 
-const createClickHandler =
+export const createClickHandler =
   (action: Action<EmbeddableApiContext>, context: ActionExecutionContext<EmbeddableApiContext>) =>
   (event: React.MouseEvent) => {
     if (event.currentTarget instanceof HTMLAnchorElement) {
