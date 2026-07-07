@@ -9,7 +9,6 @@ import { useMemo } from 'react';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
 import { useKibana } from '../common/lib/kibana';
 import { useLicense } from '../common/use_license';
 
@@ -33,7 +32,7 @@ export const useAgentBuilderAvailability = (): UseAgentBuilderAvailability => {
   const license = useLicense();
 
   return useMemo(() => {
-    const agentBuilderCapabilities = capabilities[AGENTBUILDER_FEATURE_ID];
+    const agentBuilderCapabilities = capabilities.agentBuilder;
     const hasAgentBuilderPrivilege = agentBuilderCapabilities?.show === true;
     const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
     const hasValidAgentBuilderLicense = license.isAtLeastEnterprise();

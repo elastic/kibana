@@ -8,7 +8,6 @@
 import { renderHook } from '@testing-library/react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
 import { useKibana } from '../common/lib/kibana';
 import { useLicense } from '../common/use_license';
 import { useAgentBuilderAvailability } from './use_agent_builder_availability';
@@ -28,7 +27,7 @@ describe('useAgentBuilderAvailability', () => {
       services: {
         application: {
           capabilities: {
-            [AGENTBUILDER_FEATURE_ID]: { show: true },
+            agentBuilder: { show: true },
           },
         },
       },
