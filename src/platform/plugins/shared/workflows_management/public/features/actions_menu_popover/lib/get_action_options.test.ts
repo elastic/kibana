@@ -197,6 +197,7 @@ describe('getActionOptions', () => {
         'parallel',
         'wait',
         'waitForInput',
+        'waitForApproval',
         'workflow.execute',
         'workflow.executeAsync',
       ]);

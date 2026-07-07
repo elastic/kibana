@@ -62553,6 +62553,193 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/workflows/executions/{executionId}/resume/external:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/executions/{executionId}/resume/external</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Resume a paused `waitForApproval` step (pauses the workflow and waits for a human to approve/decline before execution continues) or `waitForInput` step (passes the expected input values as query parameters in the URL). Returns an HTML confirmation page.
+      operationId: get-workflows-executions-executionid-resume-external
+      parameters:
+        - description: Workflow execution ID
+          in: path
+          name: executionId
+          required: true
+          schema:
+            type: string
+        - description: The API key created when the workflow execution was paused. Authenticates the request to resume execution.
+          in: query
+          name: apiKey
+          required: true
+          schema:
+            maxLength: 1024
+            type: string
+        - description: Indicates whether a human reviewer approved the paused step. Required for `waitForApproval` when resuming an approval step.
+          in: query
+          name: approved
+          required: false
+          schema:
+            anyOf:
+              - type: boolean
+              - enum:
+                  - 'true'
+                type: string
+              - enum:
+                  - 'false'
+                type: string
+      responses:
+        '200':
+          content:
+            text/html:
+              examples:
+                externalResumeSuccessExample:
+                  description: Success page confirming the response was received
+                  value: <!DOCTYPE html><html><body><h1>Thank you</h1><p>Your response was received. You can close this window.</p></body></html>
+              schema:
+                type: string
+          description: An HTML confirmation page confirming that the response was received and the workflow execution was resumed.
+      summary: Resume a workflow execution from an external link
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/resume/external?apiKey=${ENCODED_API_KEY}&approved=true"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/executions/{executionId}/resume/external?apiKey={encodedApiKey}&approved=true
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/executions/{executionId}/resume/external</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Resume a workflow execution that is paused and waiting for external input. Submit input values as a JSON request body, authenticated with either an Authorization: ApiKey header or an apiKey query parameter. Returns an HTML confirmation page.
+      operationId: post-workflows-executions-executionid-resume-external
+      parameters:
+        - description: Workflow execution ID
+          in: path
+          name: executionId
+          required: true
+          schema:
+            type: string
+        - description: External resume API key credential. Used when Authorization header is not provided.
+          in: query
+          name: apiKey
+          required: false
+          schema:
+            maxLength: 1024
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              externalResumeInputRequestExample:
+                description: Example external input payload for a waitForInput step
+                value:
+                  description: Escalated from Slack triage
+                  severity: high
+            schema: {}
+      responses:
+        '200':
+          content:
+            text/html:
+              examples:
+                externalResumeInputSuccessExample:
+                  description: Success page confirming the input was received
+                  value: <!DOCTYPE html><html><body><h1>Thank you</h1><p>Your response was received. You can close this window.</p></body></html>
+              schema:
+                type: string
+          description: An HTML confirmation page confirming that the input was received and the workflow execution was resumed.
+      summary: Submit external input for a paused workflow execution
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/workflows/executions/{executionId}/resume/external?apiKey=${ENCODED_API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"severity":"high"}'
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/workflows/executions/{executionId}/resume/external" \
+              -H "Authorization: ApiKey ${ENCODED_API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"severity":"high"}'
+        - lang: Console
+          source: |
+            POST kbn://api/workflows/executions/{executionId}/resume/external?apiKey={encodedApiKey}
+            Content-Type: application/json
+
+            {"severity":"high"}
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/executions/{executionId}/resume/external/form:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/executions/{executionId}/resume/external/form</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns an HTML form for submitting external input to a paused waitForInput step. Does not resume the execution.
+      operationId: get-workflows-executions-executionid-resume-external-form
+      parameters:
+        - description: Workflow execution ID
+          in: path
+          name: executionId
+          required: true
+          schema:
+            type: string
+        - description: External resume API key credential.
+          in: query
+          name: apiKey
+          required: true
+          schema:
+            maxLength: 1024
+            type: string
+      responses:
+        '200':
+          content:
+            text/html:
+              examples:
+                externalResumeFormExample:
+                  description: Form page for external input submission
+                  value: <!DOCTYPE html><html><body><h1>Submit your response</h1><form method="POST"><button type="submit">Submit</button></form></body></html>
+              schema:
+                type: string
+          description: HTML form page for submitting external input to a paused waitForInput step
+      summary: Get the external input form for a paused workflow execution
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/resume/external/form?apiKey=${ENCODED_API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/executions/{executionId}/resume/external/form?apiKey={encodedApiKey}
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/workflows/executions/{executionId}/step/{stepExecutionId}:
     get:
       description: |-
@@ -62621,8 +62808,10 @@ paths:
                       message: Approve change to production?
                     isTestRun: false
                     output:
-                      approved: true
-                      reason: looks good
+                      respondedBy: alice
+                      response:
+                        approved: true
+                        reason: looks good
                     scopeStack: []
                     spaceId: default
                     startedAt: '2025-11-20T12:00:01.000Z'
@@ -64203,7 +64392,9 @@ paths:
                           message: Approve change to production?
                         isTestRun: false
                         output:
-                          approved: true
+                          respondedBy: alice
+                          response:
+                            approved: true
                         scopeStack: []
                         spaceId: default
                         startedAt: '2025-11-20T12:00:02.000Z'
