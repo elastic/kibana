@@ -61,7 +61,7 @@ Use tools only to verify what detection change points suggest. Do not search for
 | Tool | Use when | Constraints |
 |------|----------|-------------|
 | `search_knowledge_indicators` | **Mandatory first call — always** (your service knowledge base) | One call for the entire batch; `kind: ["feature", "query"]`, `stream_names` required. No other filters required. Query KIs appear at the end — read to the end. Follow-up rules: see KI search. |
-| `execute_esql` | Confirm or refute a KI hypothesis | KI queries only — no new queries. Run all query KIs whose `rule.id` matches a rule in the batch and whose description semantically matches the failure. Modifications: see result processing. |
+| `execute_esql` | Confirm or refute a KI hypothesis | KI queries only — no new queries. Run all query KIs whose `rule.id` matches a rule in the batch and whose description semantically matches the failure. Modifications: see result processing. If the KI's `esql.query` starts with `FROM $.<name>`, the `$.` is a required, literal part of the Streams-backed view reference — copy it verbatim, never strip or "correct" it. |
 
 </tool_usage>
 
@@ -268,7 +268,7 @@ For each rule that has an exact-match KI (`rule.id` = `rule_uuid`): add one call
    Before: FROM logs.* | WHERE body.text : "ECONNREFUSED" | LIMIT 1
    After:  FROM logs.* | WHERE @timestamp >= "2026-06-11T15:03:00Z" AND @timestamp <= NOW() | WHERE body.text : "ECONNREFUSED" | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1
    ```
-4. Never modify `WHERE`, field names, or `FROM`. Skip query on failure.
+4. Never modify `WHERE`, field names, or `FROM` — this includes the `$.` prefix on a `FROM` target (e.g. `FROM $.logs-orders-default`). The `$.` marks a Streams-backed ES|QL view and is a required, literal part of the name, not a typo to strip or a placeholder to replace with a guessed index/data-stream name. Copy the KI's `FROM` target exactly as written. Skip query on failure — do not retry with a modified index name.
 
 **Record each call in `evidences`:** `rule_name`, `result` (found/empty/error), `row_count`, `esql_query` (exact post-modification string), `description`, `collected_at`.
 
