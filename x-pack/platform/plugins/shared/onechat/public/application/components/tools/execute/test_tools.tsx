@@ -129,6 +129,8 @@ const getParameters = (tool?: ToolDefinitionWithSchema): Array<ToolParameter> =>
       }
     }
 
+    const title = schema && 'title' in schema ? schema.title : undefined;
+    const description = schema && 'description' in schema ? schema.description : undefined;
     return {
       name: paramName,
       label: paramSchema?.title || paramName,
