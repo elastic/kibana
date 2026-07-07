@@ -18,8 +18,10 @@ import { generateVisualizationEsql } from '../shared/generate_visualization_esql
 import { normalizeVegaSpec } from './normalize_spec';
 import { validateVegaSpec } from './vega_validator';
 import { createAuthorVegaSpecPrompt, vegaEsqlAdditionalInstructions } from './prompts';
+import { buildReferenceExamplesBlock } from './reference_examples';
 import {
   GENERATE_ESQL_NODE,
+  SELECT_EXAMPLES_NODE,
   AUTHOR_SPEC_NODE,
   VALIDATE_SPEC_NODE,
   FINALIZE_NODE,
@@ -80,6 +82,7 @@ const VegaStateAnnotation = Annotation.Root({
   esqlQuery: Annotation<string>(),
   columns: Annotation<EsqlEsqlColumnInfo[] | undefined>(),
   currentAttempt: Annotation<number>({ reducer: (_, newValue) => newValue, default: () => 0 }),
+  referenceExamples: Annotation<string>({ reducer: (_, newValue) => newValue, default: () => '' }),
   actions: Annotation<VegaAction[]>({
     reducer: (a, b) => [...a, ...b],
     default: () => [],
@@ -201,6 +204,17 @@ export const createVegaGraph = async (
     };
   };
 
+  // Runs once before the authoring retry loop; the model picks which examples fit.
+  const selectExamplesNode = async (state: VegaState) => {
+    const referenceExamples = await buildReferenceExamplesBlock({
+      nlQuery: state.nlQuery,
+      chartType: state.chartType,
+      model: defaultModel,
+      logger,
+    });
+    return { referenceExamples };
+  };
+
   const authorSpecNode = async (state: VegaState) => {
     const attempt = state.currentAttempt + 1;
     logger.debug(`Authoring Vega-Lite spec (attempt ${attempt}/${MAX_RETRY_ATTEMPTS})`);
@@ -228,6 +242,7 @@ export const createVegaGraph = async (
       columns: state.columns,
       existingSpec: state.existingSpec,
       chartType: state.chartType,
+      referenceExamples: state.referenceExamples,
       additionalContext: previousContext
         ? `Previous attempts:\n${previousContext}\n\nReturn a single valid JSON object that fixes the issues above.`
         : undefined,
@@ -345,7 +360,7 @@ export const createVegaGraph = async (
       logger.warn('ES|QL resolution failed; finalizing without authoring a Vega spec');
       return FINALIZE_NODE;
     }
-    return AUTHOR_SPEC_NODE;
+    return SELECT_EXAMPLES_NODE;
   };
 
   const shouldRetryRouter = (state: VegaState): string => {
@@ -369,14 +384,16 @@ export const createVegaGraph = async (
 
   return new StateGraph(VegaStateAnnotation)
     .addNode(GENERATE_ESQL_NODE, generateESQLNode)
+    .addNode(SELECT_EXAMPLES_NODE, selectExamplesNode)
     .addNode(AUTHOR_SPEC_NODE, authorSpecNode)
     .addNode(VALIDATE_SPEC_NODE, validateSpecNode)
     .addNode(FINALIZE_NODE, finalizeNode)
     .addEdge('__start__', GENERATE_ESQL_NODE)
     .addConditionalEdges(GENERATE_ESQL_NODE, afterGenerateEsqlRouter, {
-      [AUTHOR_SPEC_NODE]: AUTHOR_SPEC_NODE,
+      [SELECT_EXAMPLES_NODE]: SELECT_EXAMPLES_NODE,
       [FINALIZE_NODE]: FINALIZE_NODE,
     })
+    .addEdge(SELECT_EXAMPLES_NODE, AUTHOR_SPEC_NODE)
     .addEdge(AUTHOR_SPEC_NODE, VALIDATE_SPEC_NODE)
     .addConditionalEdges(VALIDATE_SPEC_NODE, shouldRetryRouter, {
       [AUTHOR_SPEC_NODE]: AUTHOR_SPEC_NODE,
