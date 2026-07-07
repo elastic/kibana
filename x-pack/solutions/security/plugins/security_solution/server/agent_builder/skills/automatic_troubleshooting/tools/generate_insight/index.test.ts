@@ -218,6 +218,7 @@ describe('automaticTroubleshootingGenerateInsightTool', () => {
 
     const createHandlerContext = () =>
       ({
+        request: {},
         modelProvider: mockModelProvider,
         spaceId: 'space-1',
         logger: {
@@ -231,6 +232,9 @@ describe('automaticTroubleshootingGenerateInsightTool', () => {
       mockEnsureInCurrentSpace = fleetServices.ensureInCurrentSpace as jest.Mock;
       mockEnsureInCurrentSpace.mockResolvedValue(undefined);
       mockEndpointAppContextService.getInternalFleetServices.mockClear();
+      // createMockEndpointAppContextService() defaults getEndpointAuthz to all-true
+      // (see security_solution/common/endpoint/service/authz/mocks.ts), so
+      // canWriteWorkflowInsights is authorized by default in these tests.
 
       tool = generateInsightTool(mockEndpointAppContextService);
 
@@ -296,6 +300,38 @@ describe('automaticTroubleshootingGenerateInsightTool', () => {
       });
       expect(mockGraph.invoke).toHaveBeenCalledWith({});
       expect(result).toEqual({ results: mockResults });
+    });
+
+    it('returns an error and skips graph execution when the user lacks canWriteWorkflowInsights privileges', async () => {
+      (mockEndpointAppContextService.getEndpointAuthz as jest.Mock).mockResolvedValueOnce({
+        canWriteWorkflowInsights: false,
+      });
+
+      const result = await tool.handler(
+        {
+          problemDescription: 'configuration issue detected',
+          remediation: 'fix the thing',
+          endpointIds: ['endpoint-1', 'endpoint-2'],
+          data: [{ event: { type: 'process' } }],
+        },
+        createHandlerContext()
+      );
+
+      expect(mockEndpointAppContextService.getEndpointAuthz).toHaveBeenCalled();
+      expect(mockEnsureInCurrentSpace).not.toHaveBeenCalled();
+      expect(mockModelProvider.getDefaultModel).not.toHaveBeenCalled();
+      expect(mockCreateGenerateInsightGraph).not.toHaveBeenCalled();
+      expect(mockGraph.invoke).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message: 'Not authorized to write workflow insights',
+            },
+          },
+        ],
+      });
     });
 
     it('returns an error and skips graph execution when endpoint space validation fails', async () => {

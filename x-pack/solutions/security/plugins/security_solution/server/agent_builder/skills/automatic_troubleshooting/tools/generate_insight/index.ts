@@ -58,9 +58,20 @@ This tool creates structured insights for persisting the results of the troubles
     schema: generateInsightSchema,
     handler: async (
       { problemDescription, remediation, endpointIds, data },
-      { spaceId, modelProvider, logger }
+      { request, spaceId, modelProvider, logger }
     ) => {
       try {
+        // securityWorkflowInsightsService.createFromDefendInsights (invoked further down via
+        // createGenerateInsightGraph) runs with an internal-user ES client and bypasses
+        // route-level authz. Re-assert the same `canWriteWorkflowInsights` gate the HTTP
+        // create_insights route enforces, since this tool is dispatched without that route.
+        const { canWriteWorkflowInsights } = await endpointAppContextService.getEndpointAuthz(
+          request
+        );
+        if (!canWriteWorkflowInsights) {
+          return errorResult('Not authorized to write workflow insights');
+        }
+
         await endpointAppContextService
           .getInternalFleetServices(spaceId)
           .ensureInCurrentSpace({ agentIds: endpointIds });
