@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
-import { DashboardArtifactsSection } from './dashboard_artifacts_section';
+import { DashboardArtifactsSubsection } from './dashboard_artifacts_subsection';
 import { RuleProvider } from '../../rule_context';
 import type { RuleApiResponse } from '../../../../services/rules_api';
 
@@ -91,16 +91,16 @@ const baseRule: RuleApiResponse = {
   updatedAt: '2026-03-04T12:00:00.000Z',
 };
 
-const renderSection = (rule: RuleApiResponse) =>
+const renderSubsection = (rule: RuleApiResponse) =>
   render(
     <I18nProvider>
       <RuleProvider rule={rule}>
-        <DashboardArtifactsSection />
+        <DashboardArtifactsSubsection />
       </RuleProvider>
     </I18nProvider>
   );
 
-describe('DashboardArtifactsSection', () => {
+describe('DashboardArtifactsSubsection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockDashboardServiceOverride = mockDashboardService;
@@ -112,7 +112,7 @@ describe('DashboardArtifactsSection', () => {
   });
 
   it('renders empty state when the rule has no dashboard artifacts', async () => {
-    renderSection(baseRule);
+    renderSubsection(baseRule);
 
     await waitFor(() => {
       expect(screen.getByTestId('ruleDashboardArtifactsEmpty')).toBeInTheDocument();
@@ -123,7 +123,7 @@ describe('DashboardArtifactsSection', () => {
   it('renders loading state while dashboards are being resolved', () => {
     mockResolveDashboardsByIds.mockReturnValue(new Promise(() => {}));
 
-    renderSection({
+    renderSubsection({
       ...baseRule,
       artifacts: [{ id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, value: 'dash-1' }],
     });
@@ -134,7 +134,7 @@ describe('DashboardArtifactsSection', () => {
   it('renders error state when dashboard resolution fails', async () => {
     mockResolveDashboardsByIds.mockRejectedValue(new Error('network error'));
 
-    renderSection({
+    renderSubsection({
       ...baseRule,
       artifacts: [{ id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, value: 'dash-1' }],
     });
@@ -150,7 +150,7 @@ describe('DashboardArtifactsSection', () => {
       missing: [],
     });
 
-    renderSection({
+    renderSubsection({
       ...baseRule,
       artifacts: [{ id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, value: 'dash-1' }],
     });
@@ -169,7 +169,7 @@ describe('DashboardArtifactsSection', () => {
   });
 
   it('opens the edit flyout when the add action is clicked', async () => {
-    renderSection(baseRule);
+    renderSubsection(baseRule);
 
     fireEvent.click(screen.getByTestId('ruleDashboardArtifactsAddButton'));
     expect(mockOpenEditFlyout).toHaveBeenCalledWith(baseRule);
@@ -189,7 +189,7 @@ describe('DashboardArtifactsSection', () => {
       ],
     };
 
-    renderSection(rule);
+    renderSubsection(rule);
 
     await waitFor(() => {
       expect(screen.getByTestId('ruleDashboardArtifactDeleteButton-dash-1')).toBeInTheDocument();
@@ -220,7 +220,7 @@ describe('DashboardArtifactsSection', () => {
       artifacts: [{ id: 'artifact-missing', type: DASHBOARD_ARTIFACT_TYPE, value: 'dash-missing' }],
     };
 
-    renderSection(rule);
+    renderSubsection(rule);
 
     await waitFor(() => {
       expect(
@@ -250,7 +250,7 @@ describe('DashboardArtifactsSection', () => {
 
   it('renders a subdued note when the dashboard plugin is unavailable', () => {
     mockDashboardServiceOverride = undefined;
-    renderSection(baseRule);
+    renderSubsection(baseRule);
 
     expect(screen.getByTestId('ruleDashboardArtifactsUnavailable')).toBeInTheDocument();
     expect(screen.getByText('Dashboards are unavailable in this environment.')).toBeInTheDocument();

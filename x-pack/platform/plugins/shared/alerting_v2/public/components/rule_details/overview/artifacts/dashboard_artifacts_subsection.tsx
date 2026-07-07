@@ -7,7 +7,6 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiAccordion,
   EuiBadge,
   EuiButtonIcon,
   EuiCode,
@@ -246,7 +245,7 @@ const DashboardsSubsectionHeader = ({
   </EuiFlexGroup>
 );
 
-export const DashboardArtifactsSection: React.FC = () => {
+export const DashboardArtifactsSubsection: React.FC = () => {
   const rule = useRule();
   const http = useService(CoreStart('http'));
   const share = useService(PluginStart('share')) as SharePluginStart;
@@ -260,7 +259,6 @@ export const DashboardArtifactsSection: React.FC = () => {
 
   const [artifactIdPendingDelete, setArtifactIdPendingDelete] = useState<string | null>(null);
   const confirmModalTitleId = useGeneratedHtmlId();
-  const artifactsAccordionId = useGeneratedHtmlId({ prefix: 'ruleArtifactsSection' });
 
   const handleEdit = useCallback(() => {
     openEditFlyout(rule);
@@ -313,113 +311,97 @@ export const DashboardArtifactsSection: React.FC = () => {
 
   return (
     <>
-      <EuiAccordion
-        id={artifactsAccordionId}
-        data-test-subj="ruleArtifactsSection"
-        buttonContent={
-          <EuiText size="s">
-            <strong>
-              {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.title', {
-                defaultMessage: 'Artifacts',
-              })}
-            </strong>
+      <EuiPanel hasBorder paddingSize="m" data-test-subj="ruleDashboardArtifactsSection">
+        <DashboardsSubsectionHeader onAdd={handleEdit} isAddDisabled={!dashboard} />
+        <EuiSpacer size="m" />
+
+        {!dashboard ? (
+          <EuiText size="s" color="subdued" data-test-subj="ruleDashboardArtifactsUnavailable">
+            {i18n.translate(
+              'xpack.alertingV2.ruleDetails.artifacts.dashboards.unavailableService',
+              {
+                defaultMessage: 'Dashboards are unavailable in this environment.',
+              }
+            )}
           </EuiText>
-        }
-        paddingSize="m"
-        initialIsOpen
-      >
-        <EuiPanel hasBorder paddingSize="m" data-test-subj="ruleDashboardArtifactsSection">
-          <DashboardsSubsectionHeader onAdd={handleEdit} isAddDisabled={!dashboard} />
-          <EuiSpacer size="m" />
+        ) : null}
 
-          {!dashboard ? (
-            <EuiText size="s" color="subdued" data-test-subj="ruleDashboardArtifactsUnavailable">
-              {i18n.translate(
-                'xpack.alertingV2.ruleDetails.artifacts.dashboards.unavailableService',
-                {
-                  defaultMessage: 'Dashboards are unavailable in this environment.',
-                }
-              )}
-            </EuiText>
-          ) : null}
+        {dashboard && isLoading ? (
+          <EuiLoadingSpinner size="m" data-test-subj="ruleDashboardArtifactsLoading" />
+        ) : null}
 
-          {dashboard && isLoading ? (
-            <EuiLoadingSpinner size="m" data-test-subj="ruleDashboardArtifactsLoading" />
-          ) : null}
+        {dashboard && !isLoading && isError ? (
+          <EuiEmptyPrompt
+            color="danger"
+            iconType="warning"
+            data-test-subj="ruleDashboardArtifactsError"
+            title={
+              <h4>
+                {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.dashboards.errorTitle', {
+                  defaultMessage: 'Could not load dashboards',
+                })}
+              </h4>
+            }
+            body={
+              <EuiText size="s">
+                {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.dashboards.errorBody', {
+                  defaultMessage: 'Try refreshing the page.',
+                })}
+              </EuiText>
+            }
+          />
+        ) : null}
 
-          {dashboard && !isLoading && isError ? (
-            <EuiEmptyPrompt
-              color="danger"
-              iconType="warning"
-              data-test-subj="ruleDashboardArtifactsError"
-              title={
-                <h4>
-                  {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.dashboards.errorTitle', {
-                    defaultMessage: 'Could not load dashboards',
-                  })}
-                </h4>
-              }
-              body={
-                <EuiText size="s">
-                  {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.dashboards.errorBody', {
-                    defaultMessage: 'Try refreshing the page.',
-                  })}
-                </EuiText>
-              }
-            />
-          ) : null}
+        {dashboard && !isLoading && !isError && !hasDashboardArtifacts ? (
+          <EuiEmptyPrompt
+            iconType="dashboardApp"
+            data-test-subj="ruleDashboardArtifactsEmpty"
+            title={
+              <h4>
+                {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.dashboards.emptyTitle', {
+                  defaultMessage: 'No dashboards linked',
+                })}
+              </h4>
+            }
+            body={
+              <EuiText size="s">
+                {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.dashboards.emptyBody', {
+                  defaultMessage: 'Edit the rule to attach investigation dashboards.',
+                })}
+              </EuiText>
+            }
+          />
+        ) : null}
 
-          {dashboard && !isLoading && !isError && !hasDashboardArtifacts ? (
-            <EuiEmptyPrompt
-              iconType="dashboardApp"
-              data-test-subj="ruleDashboardArtifactsEmpty"
-              title={
-                <h4>
-                  {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.dashboards.emptyTitle', {
-                    defaultMessage: 'No dashboards linked',
-                  })}
-                </h4>
-              }
-              body={
-                <EuiText size="s">
-                  {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.dashboards.emptyBody', {
-                    defaultMessage: 'Edit the rule to attach investigation dashboards.',
-                  })}
-                </EuiText>
-              }
-            />
-          ) : null}
-
-          {dashboard && !isLoading && !isError && hasDashboardArtifacts ? (
-            <>
-              {dashboardLinks.map((entry) => (
-                <React.Fragment key={entry.id}>
-                  <ResolvedDashboardRow
-                    dashboardId={entry.id}
-                    title={entry.title}
-                    href={entry.href}
-                    artifactId={artifactIdByDashboardId.get(entry.id)}
-                    isDeleting={isDeleting}
-                    onDelete={handleDeleteRequest}
-                  />
-                  <EuiSpacer size="s" />
-                </React.Fragment>
-              ))}
-              {missing.map((missingDashboard) => (
-                <React.Fragment key={missingDashboard.id}>
-                  <MissingDashboardRow
-                    missingDashboard={missingDashboard}
-                    artifactId={artifactIdByDashboardId.get(missingDashboard.id)}
-                    isDeleting={isDeleting}
-                    onDelete={handleDeleteRequest}
-                  />
-                  <EuiSpacer size="s" />
-                </React.Fragment>
-              ))}
-            </>
-          ) : null}
-        </EuiPanel>
-      </EuiAccordion>
+        {dashboard && !isLoading && !isError && hasDashboardArtifacts ? (
+          <>
+            {dashboardLinks.map((entry) => (
+              <React.Fragment key={entry.id}>
+                <ResolvedDashboardRow
+                  dashboardId={entry.id}
+                  title={entry.title}
+                  href={entry.href}
+                  artifactId={artifactIdByDashboardId.get(entry.id)}
+                  isDeleting={isDeleting}
+                  onDelete={handleDeleteRequest}
+                />
+                <EuiSpacer size="s" />
+              </React.Fragment>
+            ))}
+            {missing.map((missingDashboard) => (
+              <React.Fragment key={missingDashboard.id}>
+                <MissingDashboardRow
+                  missingDashboard={missingDashboard}
+                  artifactId={artifactIdByDashboardId.get(missingDashboard.id)}
+                  isDeleting={isDeleting}
+                  onDelete={handleDeleteRequest}
+                />
+                <EuiSpacer size="s" />
+              </React.Fragment>
+            ))}
+          </>
+        ) : null}
+      </EuiPanel>
 
       {artifactIdPendingDelete ? (
         <EuiConfirmModal
