@@ -12,15 +12,8 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import pLimit from 'p-limit';
-import {
-  buildDocsArchive,
-  buildDocsAssets,
-  buildDocsRegistry,
-} from '@kbn/storybook/src/lib/docs_assets';
-import type {
-  BuildDocsArchiveResult,
-  BuildDocsRegistryResult,
-} from '@kbn/storybook/src/lib/docs_assets';
+import { buildDocsArchive, buildDocsAssets, buildDocsRegistry } from '@kbn/storybook';
+import type { BuildDocsArchiveResult, BuildDocsRegistryResult } from '@kbn/storybook';
 import { storybookAliases } from '@kbn/dev/storybook/aliases';
 import { getKibanaDir } from '#pipeline-utils';
 
