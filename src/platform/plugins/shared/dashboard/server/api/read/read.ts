@@ -19,6 +19,7 @@ export async function read(
   savedObjectsClient: SavedObjectsClientContract,
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   id: string,
+  useGASchemas: boolean,
   serverTiming?: RequestTiming,
   isDashboardAppRequest: boolean = false
 ): Promise<{ body: DashboardReadResponseBody; resolveHeaders: Record<string, string> }> {
@@ -48,7 +49,8 @@ export async function read(
       'read',
       strictValidationSchema,
       isDashboardAppRequest,
-      serverTiming
+      serverTiming,
+      useGASchemas
     ),
     resolveHeaders,
   };

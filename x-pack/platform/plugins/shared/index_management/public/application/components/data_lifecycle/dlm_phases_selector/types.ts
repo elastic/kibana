@@ -66,6 +66,12 @@ export interface DlmPhasesSelectorProps {
    */
   canCreateDefaultSnapshotRepository?: boolean;
   /**
+   * Whether the cluster already has at least one snapshot repository configured.
+   * When true, the "default repository required" modal directs the user to the repositories
+   * list to select a default instead of creating a new one.
+   */
+  hasExistingRepositories?: boolean;
+  /**
    * Enterprise gating configuration — needed to render the upgrade modal
    * when the user tries to enable the Frozen phase without an Enterprise license.
    */

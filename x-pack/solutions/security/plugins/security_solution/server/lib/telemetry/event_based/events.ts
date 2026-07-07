@@ -5,7 +5,9 @@
  * 2.0.
  */
 import type { EventTypeOpts } from '@kbn/core/server';
+import type { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
+import type { CsvErrorCategory } from '../../entity_analytics/entity_resolution/csv_upload';
 import type {
   ResponseActionAgentType,
   ResponseActionStatus,
@@ -745,9 +747,17 @@ export const ENTITY_HIGHLIGHTS_USAGE_EVENT: EventTypeOpts<{
 };
 
 export const ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT: EventTypeOpts<{
-  entitiesReturned: number;
-  entityTypes: string[];
+  actionType?: 'read' | 'mutation';
+  /**
+   * @deprecated Use `resultCount` instead. Retained in the schema so historical
+   * rows (written before the rename) can still be queried in BigQuery; no tool
+   * populates this field anymore — dashboards should `COALESCE(resultCount, entitiesReturned)`.
+   */
+  entitiesReturned?: number;
+  entityTypes?: string[];
   errorMessage?: string;
+  userConfirmationOutcome?: ConfirmationStatus;
+  resultCount?: number;
   spaceId: string;
   success: boolean;
   toolId: string;
@@ -760,6 +770,14 @@ export const ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT: EventTypeOpts<{
         description: 'ID of the agent tool being used (e.g. "security.get_entity")',
       },
     },
+    actionType: {
+      type: 'keyword',
+      _meta: {
+        optional: true,
+        description:
+          'Whether the tool call reads data or mutates state ("read" | "mutation"). Omitted for legacy events emitted before this field was introduced.',
+      },
+    },
     entityTypes: {
       type: 'array',
       items: {
@@ -769,13 +787,15 @@ export const ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT: EventTypeOpts<{
         },
       },
       _meta: {
-        description: 'Entity types the tool was called for (e.g. ["host", "user"])',
+        optional: true,
+        description:
+          'Entity types the tool was called for (e.g. ["host", "user"]). Not populated for tools that do not operate on a specific entity type (e.g. watchlist and lead tools).',
       },
     },
     spaceId: {
       type: 'keyword',
       _meta: {
-        description: 'Space where the highlight request originated (e.g. "default")',
+        description: 'Space where the tool invocation originated (e.g. "default")',
       },
     },
     success: {
@@ -787,7 +807,25 @@ export const ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT: EventTypeOpts<{
     entitiesReturned: {
       type: 'long',
       _meta: {
-        description: 'Number of entities returned by the tool',
+        optional: true,
+        description:
+          'Deprecated — use `resultCount` instead. Historical field populated by `get_entity` / `search_entities` before the rename; no tool populates it anymore. Kept in the schema so historical rows remain queryable.',
+      },
+    },
+    resultCount: {
+      type: 'long',
+      _meta: {
+        optional: true,
+        description:
+          'Number of items returned or affected by the tool (entities, watchlists, leads, entities added to a watchlist, …). Replaces `entitiesReturned` for tools whose result set is not "entities". Not populated for tools that do not return a countable result set (e.g. single-record mutations).',
+      },
+    },
+    userConfirmationOutcome: {
+      type: 'keyword',
+      _meta: {
+        optional: true,
+        description:
+          'For HITL-gated mutation tools: "accepted" or "rejected" once the user has responded to the confirmation prompt, or "unprompted" if the tool resolved to a final answer without asking. Omitted entirely for tools that do not require a HITL prompt.',
       },
     },
     errorMessage: {
@@ -2074,6 +2112,112 @@ export const LEAD_GENERATION_EXECUTION_EVENT: EventTypeOpts<{
   },
 };
 
+interface ResolutionCsvUploadEvent {
+  total: number;
+  successful: number;
+  failed: number;
+  unmatched: number;
+  durationMs: number;
+  errors?: Array<{
+    errorCategory: CsvErrorCategory;
+    count: number;
+  }>;
+  namespace: string;
+}
+
+export const ENTITY_STORE_RESOLUTION_CSV_UPLOAD_EVENT: EventTypeOpts<ResolutionCsvUploadEvent> = {
+  eventType: 'entity_store_resolution_csv_upload',
+  schema: {
+    total: {
+      type: 'long',
+      _meta: { description: 'Total number of CSV rows processed' },
+    },
+    successful: {
+      type: 'long',
+      _meta: { description: 'Number of rows successfully linked' },
+    },
+    failed: {
+      type: 'long',
+      _meta: { description: 'Number of rows that failed processing' },
+    },
+    unmatched: {
+      type: 'long',
+      _meta: { description: 'Number of rows with no matching entities found' },
+    },
+    durationMs: {
+      type: 'long',
+      _meta: { description: 'Duration of the CSV upload processing in milliseconds' },
+    },
+    errors: {
+      type: 'array',
+      _meta: {
+        optional: true,
+        description: 'Per-category error counts for failed rows',
+      },
+      items: {
+        properties: {
+          errorCategory: {
+            type: 'keyword',
+            _meta: { description: 'Error category for failed rows' },
+          },
+          count: {
+            type: 'long',
+            _meta: { description: 'Number of rows with this error category' },
+          },
+        },
+      },
+    },
+    namespace: {
+      type: 'keyword',
+      _meta: { description: 'Kibana space ID where the upload was performed' },
+    },
+  },
+};
+
+// Telemetry event sent when the alert analysis workflow settings are saved through the
+// dedicated settings page, whether the save succeeds or fails.
+export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT: EventTypeOpts<{
+  status: 'success' | 'error';
+  workflowEnabled: boolean;
+  autoCloseEnabled: boolean;
+  createConversation: boolean;
+  connectorConfigured: boolean;
+  autoCloseConfidenceScoreMinThreshold: number;
+  autoCloseConfidenceScoreMaxThreshold: number;
+}> = {
+  eventType: 'alert_analysis_workflow_settings_updated',
+  schema: {
+    status: {
+      type: 'keyword',
+      _meta: { description: 'Whether the settings update succeeded or failed' },
+    },
+    workflowEnabled: {
+      type: 'boolean',
+      _meta: { description: 'Whether the alert analysis workflow is enabled' },
+    },
+    autoCloseEnabled: {
+      type: 'boolean',
+      _meta: { description: 'Whether auto-closing false positive alerts is enabled' },
+    },
+    createConversation: {
+      type: 'boolean',
+      _meta: { description: 'Whether a new AI conversation is created per alert analysis' },
+    },
+    connectorConfigured: {
+      type: 'boolean',
+      _meta: { description: 'Whether an AI connector is configured for the workflow' },
+    },
+    autoCloseConfidenceScoreMinThreshold: {
+      type: 'float',
+      _meta: { description: 'Minimum confidence score threshold for auto-close (0-1)' },
+    },
+    autoCloseConfidenceScoreMaxThreshold: {
+      type: 'float',
+      _meta: { description: 'Maximum confidence score threshold for auto-close (0-1)' },
+    },
+  },
+};
+
 export const events = [
   DETECTION_RULE_UPGRADE_EVENT,
   DETECTION_RULE_BULK_UPGRADE_EVENT,
@@ -2116,4 +2260,6 @@ export const events = [
   GAP_DETECTED_EVENT,
   ...TRIAL_COMPANION_EVENTS,
   LEAD_GENERATION_EXECUTION_EVENT,
+  ENTITY_STORE_RESOLUTION_CSV_UPLOAD_EVENT,
+  ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT,
 ];

@@ -225,6 +225,9 @@ describe('CreateRuleOptionsFlyout', () => {
         expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
       });
 
+      expect(capturedSelectorProps.createWithAgentDisabled).toBe(false);
+      expect(capturedSelectorProps.createWithAgentTooltipText).toBeUndefined();
+
       fireEvent.click(screen.getByTestId('agentBtn'));
 
       expect(mockServices.application.navigateToApp).toHaveBeenCalledWith(AGENT_BUILDER_APP_ID, {
@@ -234,7 +237,7 @@ describe('CreateRuleOptionsFlyout', () => {
       expect(onClose).toHaveBeenCalledTimes(1);
     });
 
-    it('does not pass onCreateWithAgent when agentBuilder capability is missing', async () => {
+    it('disables (does not hide) the agent option when agentBuilder capability is missing', async () => {
       mockServices.application.capabilities = {
         ...mockServices.application.capabilities,
         agentBuilder: {
@@ -253,10 +256,12 @@ describe('CreateRuleOptionsFlyout', () => {
         expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
       });
 
-      expect(capturedSelectorProps.onCreateWithAgent).toBeUndefined();
+      expect(capturedSelectorProps.onCreateWithAgent).toEqual(expect.any(Function));
+      expect(capturedSelectorProps.createWithAgentDisabled).toBe(true);
+      expect(capturedSelectorProps.createWithAgentTooltipText).toEqual(expect.any(String));
     });
 
-    it('does not pass onCreateWithAgent when experimental features are disabled', async () => {
+    it('disables (does not hide) the agent option when experimental features are disabled', async () => {
       (mockServices.uiSettings.get as jest.Mock).mockReturnValue(false);
       renderFlyout();
       resolveServices(mockServices);
@@ -265,7 +270,9 @@ describe('CreateRuleOptionsFlyout', () => {
         expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
       });
 
-      expect(capturedSelectorProps.onCreateWithAgent).toBeUndefined();
+      expect(capturedSelectorProps.onCreateWithAgent).toEqual(expect.any(Function));
+      expect(capturedSelectorProps.createWithAgentDisabled).toBe(true);
+      expect(capturedSelectorProps.createWithAgentTooltipText).toEqual(expect.any(String));
     });
   });
 
