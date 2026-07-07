@@ -32082,13 +32082,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -32916,6 +32924,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 enrollment_token:
                   type: string
                 settings:
@@ -32970,13 +32980,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -33055,6 +33073,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 user_info:
                   additionalProperties: false
                   type: object
@@ -33076,13 +33096,21 @@ paths:
                   value:
                     actionId: actionId
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: 'OK: A successful request.'
         '400':
           content:
@@ -33159,6 +33187,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 includeInactive:
                   default: false
                   type: boolean
@@ -33177,13 +33207,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -33270,6 +33308,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
               required:
                 - agents
       responses:
@@ -33282,13 +33322,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -33367,6 +33415,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 includeInactive:
                   default: false
                   type: boolean
@@ -33383,16 +33433,25 @@ paths:
                       - actionId1
                       - actionId2
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionIds:
-                    items:
-                      type: string
-                    maxItems: 10000
-                    type: array
-                required:
-                  - actionIds
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionIds:
+                        items:
+                          maxLength: 36
+                          type: string
+                        maxItems: 10000
+                        type: array
+                    required:
+                      - actionIds
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: 'OK: A successful request.'
         '400':
           content:
@@ -33471,6 +33530,8 @@ paths:
                       type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 force:
                   description: Unenrolls hosted agents too
                   type: boolean
@@ -33492,13 +33553,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -33580,6 +33649,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 includeInactive:
                   default: false
                   type: boolean
@@ -33605,13 +33676,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -33691,6 +33770,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 force:
                   type: boolean
                 includeInactive:
@@ -33720,13 +33801,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
