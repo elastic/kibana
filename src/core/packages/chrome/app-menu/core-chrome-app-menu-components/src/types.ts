@@ -120,6 +120,12 @@ interface AppMenuItemBase {
    * Hides the item at the specified responsive breakpoints.
    * */
   hidden?: EuiHideForProps['sizes'];
+  /**
+   * Renders the item in a "pressed" visual state (`aria-pressed`), for toggle-style
+   * buttons whose action opens/closes a paired UI (e.g. a side panel).
+   * Ignored for items with sub-items — those already reflect popover-open state.
+   */
+  isSelected?: boolean;
 }
 
 type AppMenuLinkItem = AppMenuItemBase & {
