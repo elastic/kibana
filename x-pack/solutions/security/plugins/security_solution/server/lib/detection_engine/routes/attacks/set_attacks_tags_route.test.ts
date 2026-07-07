@@ -18,6 +18,9 @@ import { DETECTION_ENGINE_ATTACKS_TAGS_URL } from '../../../../../common/constan
 import { getSuccessfulSignalUpdateResponse } from '../__mocks__/request_responses';
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
+import { ATTACKS_API_CALL_EVENT } from '../../../telemetry/event_based/events';
+import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { setAttacksTagsRoute } from './set_attacks_tags_route';
 
 const SCHEDULED_INDEX = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-default`;
@@ -56,6 +59,8 @@ describe('set attacks tags', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: SecuritySolutionRequestHandlerContextMock;
   let ruleDataClient: RuleDataClientMock;
+  let telemetrySenderMock: ITelemetryEventsSender;
+  let reportEBT: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -66,7 +71,13 @@ describe('set attacks tags', () => {
     );
     ruleDataClient = ruleRegistryMocks.createRuleDataClient('.alerts-security.alerts');
 
-    setAttacksTagsRoute(server.router, ruleDataClient);
+    reportEBT = jest.fn();
+    telemetrySenderMock = {
+      ...createMockTelemetryEventsSender(),
+      reportEBT,
+    } as unknown as ITelemetryEventsSender;
+
+    setAttacksTagsRoute(server.router, ruleDataClient, telemetrySenderMock);
   });
 
   afterEach(() => {
@@ -255,6 +266,59 @@ describe('set attacks tags', () => {
       const result = server.validate(getRequest({ ids: ['attack1'] }));
 
       expect(result.badRequest).toHaveBeenCalled();
+    });
+  });
+
+  describe('telemetry', () => {
+    test('reports success telemetry on tag update', async () => {
+      await server.inject(getRequest(defaultBody), requestContextMock.convertContext(context));
+
+      expect(reportEBT).toHaveBeenCalledTimes(1);
+      expect(reportEBT).toHaveBeenCalledWith(
+        ATTACKS_API_CALL_EVENT,
+        expect.objectContaining({
+          endpoint: DETECTION_ENGINE_ATTACKS_TAGS_URL,
+          operation: 'tags',
+          ids_count: 2,
+          update_related_alerts: false,
+          tags_to_add_count: 1,
+          tags_to_remove_count: 0,
+        })
+      );
+    });
+
+    test('reports error telemetry on validation failure', async () => {
+      await server.inject(
+        getRequest({
+          ids: ['attack1'],
+          tags: { tags_to_add: ['duplicate'], tags_to_remove: ['duplicate'] },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(reportEBT).toHaveBeenCalledWith(
+        ATTACKS_API_CALL_EVENT,
+        expect.objectContaining({
+          operation: 'tags',
+          error: expect.any(String),
+        })
+      );
+    });
+
+    test('reports error telemetry on ES failure', async () => {
+      context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockRejectedValue(
+        new Error('Test error')
+      );
+
+      await server.inject(getRequest(defaultBody), requestContextMock.convertContext(context));
+
+      expect(reportEBT).toHaveBeenCalledWith(
+        ATTACKS_API_CALL_EVENT,
+        expect.objectContaining({
+          operation: 'tags',
+          error: 'Test error',
+        })
+      );
     });
   });
 });
