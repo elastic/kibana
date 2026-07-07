@@ -31951,13 +31951,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -32796,6 +32804,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 enrollment_token:
                   type: string
                 settings:
@@ -32850,13 +32860,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -32936,6 +32954,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 user_info:
                   additionalProperties: false
                   type: object
@@ -32957,13 +32977,21 @@ paths:
                   value:
                     actionId: actionId
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: 'OK: A successful request.'
         '400':
           content:
@@ -33041,6 +33069,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 includeInactive:
                   default: false
                   type: boolean
@@ -33059,13 +33089,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -33144,6 +33182,8 @@ paths:
                       type: array
                     - description: KQL query string. Leave empty to target all collectors
                       type: string
+                dryRun:
+                  type: boolean
                 includeInactive:
                   description: When passing collectors by KQL query, also removes inactive collectors
                   type: boolean
@@ -33159,13 +33199,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -33254,6 +33302,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
               required:
                 - agents
       responses:
@@ -33266,13 +33316,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -33352,6 +33410,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 includeInactive:
                   default: false
                   type: boolean
@@ -33368,16 +33428,25 @@ paths:
                       - actionId1
                       - actionId2
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionIds:
-                    items:
-                      type: string
-                    maxItems: 10000
-                    type: array
-                required:
-                  - actionIds
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionIds:
+                        items:
+                          maxLength: 36
+                          type: string
+                        maxItems: 10000
+                        type: array
+                    required:
+                      - actionIds
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: 'OK: A successful request.'
         '400':
           content:
@@ -33457,6 +33526,8 @@ paths:
                       type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 force:
                   description: Unenrolls hosted agents too
                   type: boolean
@@ -33478,13 +33549,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -33567,6 +33646,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 includeInactive:
                   default: false
                   type: boolean
@@ -33592,13 +33673,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -33679,6 +33768,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 force:
                   type: boolean
                 includeInactive:
@@ -33708,13 +33799,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -54375,7 +54474,8 @@ paths:
                     records: []
                     total: 0
                 pageModeExample:
-                  description: A paginated list of host entities sorted by timestamp in descending order, including query inspection data.
+                  description: |
+                    A paginated list of host entities sorted by timestamp in descending order, including query inspection data.
                   summary: Page mode response with host entities
                   value:
                     inspect:
@@ -54417,7 +54517,8 @@ paths:
                             type: linux
                     total: 1
                 searchAfterModeExample:
-                  description: A cursor-based response with entities and a search_after token for the next page.
+                  description: |
+                    A cursor-based response with entities and a search_after token for the next page.
                   summary: Search-after mode response
                   value:
                     entities:
@@ -87813,13 +87914,36 @@ components:
       description: Duration format between time units.
       properties:
         from:
-          description: Source time unit for conversion, for example `milliseconds`, `seconds`, `minutes`, `hours`, or `days`.
+          description: Source time unit of the raw field value, including fine-grained units (`ps`, `ns`, `us`) in addition to standard units. This describes how the stored data is encoded, not a query duration literal.
+          enum:
+            - ps
+            - ns
+            - us
+            - ms
+            - s
+            - min
+            - h
+            - d
+            - w
+            - mo
+            - 'y'
           type: string
         suffix:
           description: Suffix appended to the formatted value.
           type: string
         to:
-          description: Display time unit after conversion, for example `seconds`, `minutes`, `hours`, or `days`.
+          description: 'Display time unit: `auto` (precise), `auto-approximate`, or a fixed conversion unit.'
+          enum:
+            - auto
+            - auto-approximate
+            - ms
+            - s
+            - min
+            - h
+            - d
+            - w
+            - mo
+            - 'y'
           type: string
         type:
           enum:
@@ -88541,6 +88665,7 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_numericFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_byteFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_durationFormat'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyDurationFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_customFormat'
       description: Number display format for the dimension value.
       title: Format Type
@@ -95904,6 +96029,29 @@ components:
         - palette
         - shift
       title: Legacy color by value (absolute)
+      type: object
+    Kibana_HTTP_APIs_legacyDurationFormat:
+      additionalProperties: false
+      description: Legacy duration format used when the `asCode.useGASchemas` feature flag is disabled. Accepts free-form unit strings (no enum validation) to preserve pre-GA behavior.
+      properties:
+        from:
+          description: Source time unit for conversion, for example `milliseconds`, `seconds`, `minutes`, `hours`, or `days`.
+          type: string
+        suffix:
+          description: Suffix appended to the formatted value.
+          type: string
+        to:
+          description: Display time unit after conversion, for example `seconds`, `minutes`, `hours`, or `days`.
+          type: string
+        type:
+          enum:
+            - duration
+          type: string
+      required:
+        - type
+        - from
+        - to
+      title: Duration Format (Legacy)
       type: object
     Kibana_HTTP_APIs_legacyMetricCountMetric:
       additionalProperties: false
@@ -123575,6 +123723,12 @@ components:
           type: object
         reason:
           $ref: '#/components/schemas/Security_Detections_API_Reason'
+        runtime_fields:
+          additionalProperties:
+            $ref: '#/components/schemas/Security_Detections_API_RuntimeFieldType'
+          description: Optional map of field name to runtime field type. For each entry, the server defines a runtime field of the given type that reads its value from `_source[fieldName]` and attaches it to the underlying `_update_by_query` as `runtime_mappings`. Allows the `query` to reference non-ECS fields stored on the alert `_source` but not in the alerts index mapping — for example, runtime fields the rule's source index defined at the time the alerts were created. Limited to 100 entries per request; larger maps are rejected.
+          maxProperties: 100
+          type: object
         status:
           enum:
             - closed
@@ -127212,6 +127366,17 @@ components:
               $ref: '#/components/schemas/Security_Detections_API_RunScriptOsConfigValues'
       required:
         - command
+    Security_Detections_API_RuntimeFieldType:
+      description: The data type for the runtime field type. Determines how the field value is indexed and queried.
+      enum:
+        - keyword
+        - long
+        - double
+        - date
+        - ip
+        - boolean
+        - geo_point
+      type: string
     Security_Detections_API_SavedObjectResolveAliasPurpose:
       enum:
         - savedObjectConversion
@@ -127769,6 +127934,12 @@ components:
           type: string
         query:
           additionalProperties: true
+          type: object
+        runtime_fields:
+          additionalProperties:
+            $ref: '#/components/schemas/Security_Detections_API_RuntimeFieldType'
+          description: Optional map of field name to runtime field type. For each entry, a runtime field of the specified type is created reading its value from `_source[fieldName]` and included in the query as `runtime_mappings`. Use this to reference fields stored on the alert `_source` that are not part of the Elastic Common Schema (ECS) of the alerts index mapping, for example, custom fields that the rule's source index defined when the alerts were created.
+          maxProperties: 100
           type: object
         status:
           $ref: '#/components/schemas/Security_Detections_API_AlertStatusExceptClosed'
@@ -139252,6 +139423,11 @@ components:
         - from
       type: object
       properties:
+        allowHtml:
+          description: |
+            When `true`, the connector can send emails with HTML-formatted content in the body. Defaults to `false`. This option is unavailable when `service` is `elastic_cloud`.
+          default: false
+          type: boolean
         clientId:
           description: |
             The client identifier, which is a part of OAuth 2.0 client credentials authentication, in GUID format. If `service` is `exchange_server`, this property is required.

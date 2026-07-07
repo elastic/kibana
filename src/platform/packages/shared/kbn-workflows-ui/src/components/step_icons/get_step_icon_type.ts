@@ -98,10 +98,8 @@ export const getStepIconType = (nodeType: string): IconType => {
     case 'parallel':
     case 'enter-parallel':
     case 'exit-parallel':
-      iconType = 'branch';
-      break;
     case 'parallel-branch':
-      iconType = 'branch';
+      iconType = HardcodedIcons.parallel;
       break;
     case 'loop.break':
     case 'loop.continue':

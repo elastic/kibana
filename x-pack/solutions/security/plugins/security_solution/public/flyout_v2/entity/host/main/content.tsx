@@ -54,6 +54,8 @@ export interface ContentProps {
   isPreviewMode: boolean;
   /** When using Entity Store v2: entity record for asset criticality upsert. */
   entityRecord?: Entity;
+  /** Refetch entity store record after AI summary persist (v2). */
+  refetchEntityRecord?: () => void;
   /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
   skipRiskAndCriticality?: boolean;
   /** Entity store entity ID for the host. */
@@ -86,6 +88,7 @@ export const Content = ({
   onAssetCriticalityChange,
   isPreviewMode,
   entityRecord,
+  refetchEntityRecord,
   skipRiskAndCriticality = false,
   entityStoreEntityId,
   prefetchedResolutionRisk,
@@ -114,6 +117,8 @@ export const Content = ({
         <EntityHighlightsAccordion
           entityIdentifier={entityRecord ? entityRecord.entity?.id ?? hostName : hostName}
           entityType={EntityType.host}
+          entityRecord={entityRecord}
+          refetchEntityRecord={refetchEntityRecord}
         />
       )}
       {!skipRiskAndCriticality &&
@@ -142,6 +147,7 @@ export const Content = ({
             entityId={entityStoreEntityId}
             isPreviewMode={isPreviewMode}
             openDetailsPanel={openDetailsPanel}
+            hideHeaderIcons={hideHeaderIcons}
           />
         </>
       )}
