@@ -30,6 +30,8 @@ export async function sanitize(
    */
   const { attributes: storedDashboardState, references } = transformDashboardIn(
     dashboardState,
+    undefined,
+    undefined,
     useGASchemas
   );
   const { dashboardState: transformedApiDashboardState, warnings: dashboardStateWarnings } =
