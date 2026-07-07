@@ -8,7 +8,12 @@
 import { parse as parseYaml } from 'yaml';
 import { ConnectorTypes } from '../../../../common/types/domain';
 import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
-import { splitTemplateDefinition, mergeTemplateDefinition } from './template_settings_yaml';
+import {
+  splitTemplateDefinition,
+  mergeTemplateDefinition,
+  normalizeTemplateSettings,
+  normalizeTemplateConnector,
+} from './template_settings_yaml';
 
 const jiraConnector = {
   type: ConnectorTypes.jira,
@@ -137,6 +142,40 @@ describe('template_settings_yaml', () => {
       });
 
       expect(parseYaml(merged)).toEqual(parseYaml(original));
+    });
+  });
+
+  describe('normalizeTemplateSettings', () => {
+    it('collapses unset / empty settings to undefined', () => {
+      expect(normalizeTemplateSettings(undefined)).toBeUndefined();
+      expect(normalizeTemplateSettings({})).toBeUndefined();
+      expect(normalizeTemplateSettings({ syncAlerts: undefined })).toBeUndefined();
+    });
+
+    it('keeps only defined settings so transient shapes compare equal', () => {
+      expect(normalizeTemplateSettings({ syncAlerts: false })).toEqual({ syncAlerts: false });
+      expect(
+        normalizeTemplateSettings({ syncAlerts: true, extractObservables: undefined })
+      ).toEqual({
+        syncAlerts: true,
+      });
+    });
+  });
+
+  describe('normalizeTemplateConnector', () => {
+    it('collapses the none / absent connector to undefined', () => {
+      expect(normalizeTemplateConnector(undefined)).toBeUndefined();
+      expect(
+        normalizeTemplateConnector({
+          type: ConnectorTypes.none,
+          id: 'none',
+          fields: null,
+        } as CaseConnectorWithoutName)
+      ).toBeUndefined();
+    });
+
+    it('preserves a real connector', () => {
+      expect(normalizeTemplateConnector(jiraConnector)).toEqual(jiraConnector);
     });
   });
 });

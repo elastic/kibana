@@ -28,6 +28,32 @@ const isPlainRecord = (value: unknown): value is Record<string, unknown> =>
   value != null && typeof value === 'object' && !Array.isArray(value);
 
 /**
+ * Canonical "no meaningful settings" form. Drops undefined keys and collapses an empty object to
+ * `undefined`, so the form's transient shapes (`{}`, `{ syncAlerts: undefined }`) compare equal to
+ * an unset value. Used for both persistence and unsaved-change detection.
+ */
+export const normalizeTemplateSettings = (
+  settings?: TemplateSettings
+): TemplateSettings | undefined => {
+  if (settings == null) return undefined;
+  const normalized: TemplateSettings = {};
+  if (settings.syncAlerts !== undefined) normalized.syncAlerts = settings.syncAlerts;
+  if (settings.extractObservables !== undefined)
+    normalized.extractObservables = settings.extractObservables;
+  return Object.keys(normalized).length === 0 ? undefined : normalized;
+};
+
+/**
+ * Canonical "no connector" form: the `.none` (or absent) connector collapses to `undefined`, so the
+ * connector form's "no connector" shape (`{ type: 'none', id: 'none', fields: null }`) compares
+ * equal to an unset value. Used for both persistence and unsaved-change detection.
+ */
+export const normalizeTemplateConnector = (
+  connector?: CaseConnectorWithoutName
+): CaseConnectorWithoutName | undefined =>
+  connector == null || connector.type === ConnectorTypes.none ? undefined : connector;
+
+/**
  * Splits a template definition into the fields-only YAML that stays in the editor buffer and the
  * `connector` / `settings` blocks that are managed by the Settings form.
  *
@@ -87,19 +113,16 @@ export const mergeTemplateDefinition = (
 
     const rootMap = root as YAMLMap<unknown, unknown>;
 
-    const hasSettings =
-      settings != null &&
-      (settings.syncAlerts !== undefined || settings.extractObservables !== undefined);
-    if (hasSettings) {
-      rootMap.set(SETTINGS_KEY, doc.createNode(settings));
+    const normalizedSettings = normalizeTemplateSettings(settings);
+    if (normalizedSettings) {
+      rootMap.set(SETTINGS_KEY, doc.createNode(normalizedSettings));
     } else {
       rootMap.delete(SETTINGS_KEY);
     }
 
-    const hasConnector =
-      connector != null && connector.type != null && connector.type !== ConnectorTypes.none;
-    if (hasConnector) {
-      rootMap.set(CONNECTOR_KEY, doc.createNode(connector));
+    const normalizedConnector = normalizeTemplateConnector(connector);
+    if (normalizedConnector) {
+      rootMap.set(CONNECTOR_KEY, doc.createNode(normalizedConnector));
     } else {
       rootMap.delete(CONNECTOR_KEY);
     }

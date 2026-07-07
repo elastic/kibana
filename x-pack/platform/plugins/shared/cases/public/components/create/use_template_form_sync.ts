@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useRef } from 'react';
+import type { MutableRefObject } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { parse as parseYaml } from 'yaml';
 import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -78,6 +79,117 @@ const applyTemplateConnector = (
   }
 };
 
+type TemplateDefinition = ParsedTemplate['definition'];
+
+/**
+ * Standard case field values (title, description, tags, severity, category) reset when no template
+ * is selected, while global extended-field values are preserved. Returned object is the reset
+ * payload for the inner form's extended-fields tree.
+ */
+const preserveGlobalFields = (
+  innerForm: UseFormReturn,
+  globalFieldKeys: ReadonlySet<string>
+): Record<string, unknown> => {
+  const current =
+    (innerForm.getValues() as Record<string, Record<string, unknown>>)?.[CASE_EXTENDED_FIELDS] ??
+    {};
+  return Object.fromEntries(Object.entries(current).filter(([k]) => globalFieldKeys.has(k)));
+};
+
+/**
+ * Resets the create-case form to its no-template state, keeping global extended-field values.
+ */
+const clearTemplateFromForm = (
+  setFieldValue: SetFieldValue,
+  innerForm: UseFormReturn,
+  globalFieldKeys: ReadonlySet<string>
+): void => {
+  setFieldValue('description', '');
+  setFieldValue('tags', []);
+  setFieldValue('severity', 'low');
+  setFieldValue('category', null);
+  innerForm.reset({ [CASE_EXTENDED_FIELDS]: preserveGlobalFields(innerForm, globalFieldKeys) });
+};
+
+/**
+ * Applies a template's settings block. A declared block is authoritative: keys it declares are
+ * applied, keys it omits reset to their defaults, and no block at all reverts a previously-applied
+ * template's settings.
+ */
+const applyTemplateSettings = (
+  settings: TemplateDefinition['settings'],
+  setFieldValue: SetFieldValue,
+  didApplySettingsRef: MutableRefObject<boolean>
+): void => {
+  if (settings) {
+    setFieldValue('syncAlerts', settings.syncAlerts ?? DEFAULT_SYNC_ALERTS);
+    setFieldValue('extractObservables', settings.extractObservables ?? DEFAULT_EXTRACT_OBSERVABLES);
+    didApplySettingsRef.current = true;
+  } else if (didApplySettingsRef.current) {
+    revertSettingsToDefault(setFieldValue);
+    didApplySettingsRef.current = false;
+  }
+};
+
+/**
+ * Applies a template's default connector, or reverts a previously-applied template's connector to
+ * `.none` when the new template declares none. Mirrors {@link applyTemplateSettings}.
+ */
+const syncTemplateConnector = (
+  connector: TemplateDefinition['connector'],
+  connectors: Array<{ id: string; actionTypeId: string }>,
+  setFieldValue: SetFieldValue,
+  updateFieldValues: (
+    values: Record<string, unknown>,
+    options?: { runDeserializer?: boolean }
+  ) => void,
+  didApplyConnectorRef: MutableRefObject<boolean>
+): void => {
+  if (connector) {
+    applyTemplateConnector(connector, connectors, setFieldValue, updateFieldValues);
+    didApplyConnectorRef.current = true;
+  } else if (didApplyConnectorRef.current) {
+    revertConnectorToDefault(setFieldValue);
+    didApplyConnectorRef.current = false;
+  }
+};
+
+/**
+ * Resolves a template's fields (inline fields pass through, `$ref` fields are looked up in the
+ * library) into a `{ snakeKey: yamlDefault }` map for the inner form.
+ */
+const resolveExtendedFieldDefaults = (
+  fields: TemplateDefinition['fields'],
+  libraryDefs: Array<{ name: string; definition: string }>
+): Record<string, string> => {
+  const resolvedFields = (fields ?? []).flatMap((field): InlineField[] => {
+    if (isInlineField(field)) return [field];
+    const fd = libraryDefs.find((d) => d.name === field.$ref);
+    if (!fd) return [];
+    try {
+      const parsed = parseYaml(fd.definition);
+      const result = FieldSchema.safeParse(parsed);
+      if (!result.success || isRefField(result.data)) return [];
+      const inlineField = result.data as InlineField;
+      return [
+        field.name && field.name !== inlineField.name
+          ? { ...inlineField, name: field.name }
+          : inlineField,
+      ];
+    } catch {
+      return [];
+    }
+  });
+
+  const nextExtended: Record<string, string> = {};
+  for (const field of resolvedFields) {
+    nextExtended[getFieldSnakeKey(field.name, field.type)] = getYamlDefaultAsString(
+      field.metadata?.default
+    );
+  }
+  return nextExtended;
+};
+
 interface UseTemplateFormSyncReturn {
   template: ParsedTemplate | undefined;
   isLoading: boolean;
@@ -121,20 +233,7 @@ export const useTemplateFormSync = (
     if (!templateId) {
       if (appliedRef.current) {
         appliedRef.current = undefined;
-        setFieldValue('description', '');
-        setFieldValue('tags', []);
-        setFieldValue('severity', 'low');
-        setFieldValue('category', null);
-
-        // Clear template-specific extended-field values but preserve global field values.
-        const current =
-          (innerForm.getValues() as Record<string, Record<string, unknown>>)?.[
-            CASE_EXTENDED_FIELDS
-          ] ?? {};
-        const preserved = Object.fromEntries(
-          Object.entries(current).filter(([k]) => globalFieldKeys.has(k))
-        );
-        innerForm.reset({ [CASE_EXTENDED_FIELDS]: preserved });
+        clearTemplateFromForm(setFieldValue, innerForm, globalFieldKeys);
       }
 
       // Only revert connector / settings if a template actually set them, so we don't clobber the
@@ -174,72 +273,32 @@ export const useTemplateFormSync = (
       }
     }
 
-    // Apply the settings the template declares (each is independent). When switching to a template
-    // that declares none, revert to defaults so a previous template's settings don't outlive it.
-    if (definition.settings) {
-      if (definition.settings.syncAlerts !== undefined) {
-        setFieldValue('syncAlerts', definition.settings.syncAlerts);
-      }
-      if (definition.settings.extractObservables !== undefined) {
-        setFieldValue('extractObservables', definition.settings.extractObservables);
-      }
-      didApplySettingsRef.current = true;
-    } else if (didApplySettingsRef.current) {
-      revertSettingsToDefault(setFieldValue);
-      didApplySettingsRef.current = false;
-    }
+    applyTemplateSettings(definition.settings, setFieldValue, didApplySettingsRef);
 
     // Wait for field definitions AND supported connectors to load before finishing. Connectors are
     // needed to resolve the template's default connector; field defs to resolve $ref field defaults.
     // Do NOT set appliedRef.current yet — the effect must re-run once both are available.
     if (isLoadingFieldDefs || isLoadingConnectors) return;
 
-    // Apply the template's default connector (falling back to `.none` if it no longer resolves).
-    // When switching to a template that declares none, revert to `.none` so a previous template's
-    // connector doesn't outlive it.
-    if (definition.connector) {
-      applyTemplateConnector(definition.connector, connectors, setFieldValue, updateFieldValues);
-      didApplyConnectorRef.current = true;
-    } else if (didApplyConnectorRef.current) {
-      revertConnectorToDefault(setFieldValue);
-      didApplyConnectorRef.current = false;
-    }
-
-    // Resolve all fields — inline fields pass through, ref fields are looked up in the library
-    const libraryDefs = fieldDefsData?.fieldDefinitions ?? [];
-    const resolvedFields = (definition.fields ?? []).flatMap((field): InlineField[] => {
-      if (isInlineField(field)) return [field];
-      const fd = libraryDefs.find((d) => d.name === field.$ref);
-      if (!fd) return [];
-      try {
-        const parsed = parseYaml(fd.definition);
-        const result = FieldSchema.safeParse(parsed);
-        if (!result.success || isRefField(result.data)) return [];
-        const inlineField = result.data as InlineField;
-        return [
-          field.name && field.name !== inlineField.name
-            ? { ...inlineField, name: field.name }
-            : inlineField,
-        ];
-      } catch {
-        return [];
-      }
-    });
-
-    const nextExtended: Record<string, string> = {};
-    for (const field of resolvedFields) {
-      nextExtended[getFieldSnakeKey(field.name, field.type)] = getYamlDefaultAsString(
-        field.metadata?.default
-      );
-    }
-    // Preserve current values for global fields when template changes.
-    const current =
-      (innerForm.getValues() as Record<string, Record<string, unknown>>)?.[CASE_EXTENDED_FIELDS] ??
-      {};
-    const preserved = Object.fromEntries(
-      Object.entries(current).filter(([k]) => globalFieldKeys.has(k))
+    syncTemplateConnector(
+      definition.connector,
+      connectors,
+      setFieldValue,
+      updateFieldValues,
+      didApplyConnectorRef
     );
-    innerForm.reset({ [CASE_EXTENDED_FIELDS]: { ...nextExtended, ...preserved } });
+
+    const nextExtended = resolveExtendedFieldDefaults(
+      definition.fields,
+      fieldDefsData?.fieldDefinitions ?? []
+    );
+    // Preserve current values for global fields when template changes.
+    innerForm.reset({
+      [CASE_EXTENDED_FIELDS]: {
+        ...nextExtended,
+        ...preserveGlobalFields(innerForm, globalFieldKeys),
+      },
+    });
     appliedRef.current = key;
   }, [
     templateId,

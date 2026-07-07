@@ -36,7 +36,12 @@ import {
   UserPickerDefaultSchema,
 } from '../../../../common/types/domain/template/fields';
 import { normalizeYamlString } from '../utils/normalize_yaml_string';
-import { splitTemplateDefinition, mergeTemplateDefinition } from '../utils/template_settings_yaml';
+import {
+  splitTemplateDefinition,
+  mergeTemplateDefinition,
+  normalizeTemplateSettings,
+  normalizeTemplateConnector,
+} from '../utils/template_settings_yaml';
 import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
 import type { TemplateSettings } from '../../../../common/types/domain/template/v1';
 
@@ -140,10 +145,17 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     const yamlChanged =
       computeChangedLines(normalizeYamlString(initialFieldsYaml), normalizeYamlString(yamlValue))
         .length > 0;
-    // Settings-tab edits (connector + case settings) count as unsaved changes too, so the reset
-    // button and "unsaved changes" badge show up when only that tab is edited.
-    const settingsChanged = !isEqual(settings, initialSettings);
-    const connectorChanged = !isEqual(connector, initialConnector);
+    // Settings-tab edits (connector + case settings) count as unsaved changes too. Compare the
+    // normalized forms so the connector form's "no connector" shape (`.none`) and empty settings
+    // don't read as changes against the unset initial state.
+    const settingsChanged = !isEqual(
+      normalizeTemplateSettings(settings),
+      normalizeTemplateSettings(initialSettings)
+    );
+    const connectorChanged = !isEqual(
+      normalizeTemplateConnector(connector),
+      normalizeTemplateConnector(initialConnector)
+    );
     return yamlChanged || settingsChanged || connectorChanged;
   }, [initialFieldsYaml, yamlValue, settings, initialSettings, connector, initialConnector]);
 

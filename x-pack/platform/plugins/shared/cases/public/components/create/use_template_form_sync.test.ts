@@ -796,7 +796,7 @@ describe('useTemplateFormSync', () => {
       expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', true);
     });
 
-    it('applies only the settings the template declares', () => {
+    it('resets settings keys the template omits to their defaults (a declared block is authoritative)', () => {
       mockUseFormData.mockReturnValue([{ templateId: 'template-settings' }]);
       mockUseGetTemplate.mockReturnValue({
         data: {
@@ -810,7 +810,8 @@ describe('useTemplateFormSync', () => {
       renderHook(() => useTemplateFormSync(innerForm, new Set()));
 
       expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
-      expect(mockSetFieldValue).not.toHaveBeenCalledWith('extractObservables', expect.anything());
+      // extractObservables is omitted by the template, so it resets to its default (not inherited).
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
     });
 
     it('reverts settings to off (the template default) when a settings-bearing template is cleared', () => {
@@ -843,6 +844,42 @@ describe('useTemplateFormSync', () => {
           templateId: 'template-plain',
           templateVersion: 1,
           definition: { name: 'B', fields: [] },
+        },
+        isLoading: false,
+      });
+
+      rerender();
+
+      expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
+    });
+
+    it('resets undeclared settings keys when switching to a template with a partial settings block', () => {
+      // A declares both `true`; B declares only `syncAlerts`. B's omitted `extractObservables` must
+      // reset to its default rather than inheriting A's `true`.
+      mockUseFormData.mockReturnValue([{ templateId: 'template-a' }]);
+      mockUseGetTemplate.mockReturnValue({
+        data: {
+          templateId: 'template-a',
+          templateVersion: 1,
+          definition: {
+            name: 'A',
+            fields: [],
+            settings: { syncAlerts: true, extractObservables: true },
+          },
+        },
+        isLoading: false,
+      });
+
+      const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+      mockSetFieldValue.mockClear();
+      mockUseFormData.mockReturnValue([{ templateId: 'template-b' }]);
+      mockUseGetTemplate.mockReturnValue({
+        data: {
+          templateId: 'template-b',
+          templateVersion: 1,
+          definition: { name: 'B', fields: [], settings: { syncAlerts: false } },
         },
         isLoading: false,
       });
