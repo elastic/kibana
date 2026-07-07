@@ -8,7 +8,7 @@
 /* eslint-disable complexity */
 
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { AppHeader } from '@kbn/app-header';
+import { AppHeader, type AppHeaderTab } from '@kbn/app-header';
 import { useLocation } from 'react-router-dom';
 import { css } from '@emotion/react';
 
@@ -50,8 +50,13 @@ import { HeaderPage } from '../header_page';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { CasesDeepLinkId, getCasesConfigureTemplatesPath } from '../../common/navigation';
-import { useAllCasesNavigation, useCasesTemplatesNavigation } from '../../common/navigation/hooks';
-import { getSettingsMenu } from './header_menu';
+import {
+  useAllCasesNavigation,
+  useCasesTemplatesNavigation,
+  useConfigureCasesNavigation,
+  useCasesCreateTemplateNavigation,
+  useCasesFieldLibraryNavigation,
+} from '../../common/navigation/hooks';
 import { CustomFields } from '../custom_fields';
 import { CommonFlyout } from './flyout';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
@@ -68,8 +73,16 @@ import { ObservableTypesForm } from '../observable_types/form';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { SettingsTabs } from './settings_tabs';
 import { NoPrivilegesPage } from '../no_privileges';
+import { getTemplatesListMenu } from '../templates_v2/components/header_menu';
+import type { TemplateFlyoutProps } from '../templates_v2/components/template_flyout';
 
 const AllCasesTemplatesLazy = lazy(() => import('../templates_v2/pages/all_templates_page'));
+
+const TemplateImportFlyoutLazy: React.FC<TemplateFlyoutProps> = lazy(() =>
+  import('../templates_v2/components/template_flyout').then((templateFlyoutModule) => ({
+    default: templateFlyoutModule.TemplateFlyout,
+  }))
+);
 
 // Wrapper component to conditionally apply breadcrumbs without violating Rules of Hooks.
 // TODO: Remove along with the templates FF cleanup — breadcrumbs will always be handled by the templates tab.
@@ -94,7 +107,13 @@ const getFormWrapperCss = (euiTheme: EuiThemeComputed<{}>) => css`
 `;
 
 interface Flyout {
-  type: 'addConnector' | 'editConnector' | 'customField' | 'template' | 'observableTypes';
+  type:
+    | 'addConnector'
+    | 'editConnector'
+    | 'customField'
+    | 'template'
+    | 'observableTypes'
+    | 'importTemplate';
   visible: boolean;
 }
 
@@ -136,6 +155,10 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const { permissions, basePath } = useCasesContext();
   const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
   const { getCasesTemplatesUrl, navigateToCasesTemplates } = useCasesTemplatesNavigation();
+  const { getConfigureCasesUrl, navigateToConfigureCases } = useConfigureCasesNavigation();
+  const { getCasesCreateTemplateUrl, navigateToCasesCreateTemplate } =
+    useCasesCreateTemplateNavigation();
+  const { getCasesFieldLibraryUrl, navigateToCasesFieldLibrary } = useCasesFieldLibraryNavigation();
   const { triggersActionsUi, docLinks } = useKibana().services;
   const isTemplatesEnabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
   const isSettingsRedesignEnabled = KibanaServices.getConfig()?.casesRedesign?.settings ?? false;
@@ -647,59 +670,117 @@ export const ConfigureCases: React.FC = React.memo(() => {
       </CommonFlyout>
     ) : null;
 
-  const settingsMenu = useMemo(
+  const onOpenImportTemplateFlyout = useCallback(() => {
+    setFlyOutVisibility({ type: 'importTemplate', visible: true });
+  }, []);
+
+  const onCloseImportTemplateFlyout = useCallback(() => {
+    setFlyOutVisibility({ type: 'importTemplate', visible: false });
+  }, []);
+
+  const settingsTabs: AppHeaderTab[] = useMemo(() => {
+    const tabs: AppHeaderTab[] = [
+      {
+        id: 'general',
+        label: i18n.SETTINGS_TAB_GENERAL,
+        isSelected: !isTemplatesTab,
+        href: getConfigureCasesUrl(),
+        onClick: navigateToConfigureCases,
+        'data-test-subj': 'settings-tab-general',
+      },
+    ];
+
+    if (isTemplatesEnabled && permissions.manageTemplates) {
+      tabs.push({
+        id: 'templates',
+        label: i18n.SETTINGS_TAB_TEMPLATES,
+        isSelected: isTemplatesTab,
+        href: getCasesTemplatesUrl(),
+        onClick: navigateToCasesTemplates,
+        'data-test-subj': 'settings-tab-templates',
+      });
+    }
+
+    return tabs;
+  }, [
+    getCasesTemplatesUrl,
+    getConfigureCasesUrl,
+    isTemplatesEnabled,
+    isTemplatesTab,
+    navigateToCasesTemplates,
+    navigateToConfigureCases,
+    permissions.manageTemplates,
+  ]);
+
+  const templatesListMenu = useMemo(
     () =>
-      getSettingsMenu({
-        isTemplatesEnabled,
-        permissions,
-        navigateToCasesTemplates,
-        getCasesTemplatesUrl,
+      getTemplatesListMenu({
+        onImportClick: onOpenImportTemplateFlyout,
+        navigateToCasesCreateTemplate,
+        getCasesCreateTemplateUrl,
+        navigateToCasesFieldLibrary,
+        getCasesFieldLibraryUrl,
       }),
-    [getCasesTemplatesUrl, isTemplatesEnabled, navigateToCasesTemplates, permissions]
+    [
+      getCasesCreateTemplateUrl,
+      getCasesFieldLibraryUrl,
+      navigateToCasesCreateTemplate,
+      navigateToCasesFieldLibrary,
+      onOpenImportTemplateFlyout,
+    ]
   );
+
+  const AddOrImportTemplateFlyout =
+    flyOutVisibility?.type === 'importTemplate' && flyOutVisibility?.visible ? (
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <TemplateImportFlyoutLazy
+          onClose={onCloseImportTemplateFlyout}
+          onImport={onCloseImportTemplateFlyout}
+        />
+      </Suspense>
+    ) : null;
 
   return (
     <EuiPageSection paddingSize="none">
-      {!isTemplatesTab && (
-        <>
-          {isSettingsRedesignEnabled ? (
-            <AppHeader
+      {isSettingsRedesignEnabled ? (
+        <AppHeader
+          title={i18n.CONFIGURE_CASES_PAGE_TITLE}
+          back={{
+            href: getAllCasesUrl(),
+            label: i18n.PAGE_TITLE,
+            onClick: navigateToAllCases,
+          }}
+          tabs={settingsTabs}
+          menu={isTemplatesTab ? templatesListMenu : undefined}
+          sticky={false}
+        />
+      ) : (
+        !isTemplatesTab && (
+          <>
+            <ConfigureGeneralBreadcrumbs />
+            {isTemplatesEnabled && (
+              <EuiButtonEmpty
+                iconType="sortLeft"
+                size="xs"
+                flush="left"
+                onClick={navigateToAllCases}
+                data-test-subj="configure-cases-back-to-cases"
+              >
+                {i18n.BACK_TO_ALL}
+              </EuiButtonEmpty>
+            )}
+            <HeaderPage
+              data-test-subj="case-configure-title"
               title={i18n.CONFIGURE_CASES_PAGE_TITLE}
-              back={{
-                href: getAllCasesUrl(),
-                label: i18n.PAGE_TITLE,
-                onClick: navigateToAllCases,
-              }}
-              menu={settingsMenu}
-              sticky={false}
             />
-          ) : (
-            <>
-              <ConfigureGeneralBreadcrumbs />
-              {isTemplatesEnabled && (
-                <EuiButtonEmpty
-                  iconType="sortLeft"
-                  size="xs"
-                  flush="left"
-                  onClick={navigateToAllCases}
-                  data-test-subj="configure-cases-back-to-cases"
-                >
-                  {i18n.BACK_TO_ALL}
-                </EuiButtonEmpty>
-              )}
-              <HeaderPage
-                data-test-subj="case-configure-title"
-                title={i18n.CONFIGURE_CASES_PAGE_TITLE}
-              />
-              {isTemplatesEnabled && (
-                <>
-                  <SettingsTabs activeTab="general" />
-                  <EuiSpacer size="l" />
-                </>
-              )}
-            </>
-          )}
-        </>
+            {isTemplatesEnabled && (
+              <>
+                <SettingsTabs activeTab="general" />
+                <EuiSpacer size="l" />
+              </>
+            )}
+          </>
+        )
       )}
       <EuiPageBody restrictWidth={false}>
         {isTemplatesTab ? (
@@ -711,6 +792,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
             ) : (
               <NoPrivilegesPage pageName={i18n.SETTINGS_TAB_TEMPLATES} />
             )}
+            {AddOrImportTemplateFlyout}
           </>
         ) : (
           <div css={getFormWrapperCss(euiTheme)}>

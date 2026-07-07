@@ -1587,4 +1587,123 @@ describe('ConfigureCases', () => {
       expect(screen.queryByTestId('all-cases-templates')).not.toBeInTheDocument();
     });
   });
+
+  describe('settings redesign header', () => {
+    beforeEach(() => {
+      useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
+      usePersistConfigurationMock.mockImplementation(() => usePersistConfigurationMockResponse);
+      useGetConnectorsMock.mockImplementation(() => ({
+        ...useConnectorsResponse,
+        data: [],
+        isLoading: false,
+      }));
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+      useLocationMock.mockReturnValue({
+        pathname: '/',
+        search: '',
+        hash: '',
+        state: undefined,
+        key: 'default',
+      });
+    });
+
+    it('renders the general and templates tabs', () => {
+      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: true },
+        casesRedesign: { settings: true },
+      } as ReturnType<typeof KibanaServices.getConfig>);
+
+      renderWithTestingProviders(<ConfigureCases />);
+
+      expect(screen.getByTestId('settings-tab-general')).toBeInTheDocument();
+      expect(screen.getByTestId('settings-tab-templates')).toBeInTheDocument();
+    });
+
+    it('does not render the templates tab when the templates feature is disabled', () => {
+      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: false },
+        casesRedesign: { settings: true },
+      } as ReturnType<typeof KibanaServices.getConfig>);
+
+      renderWithTestingProviders(<ConfigureCases />);
+
+      expect(screen.getByTestId('settings-tab-general')).toBeInTheDocument();
+      expect(screen.queryByTestId('settings-tab-templates')).not.toBeInTheDocument();
+    });
+
+    it('does not render the templates tab when the user lacks the manageTemplates permission', () => {
+      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: true },
+        casesRedesign: { settings: true },
+      } as ReturnType<typeof KibanaServices.getConfig>);
+
+      renderWithTestingProviders(<ConfigureCases />, {
+        wrapperProps: { permissions: buildCasesPermissions({ manageTemplates: false }) },
+      });
+
+      expect(screen.queryByTestId('settings-tab-templates')).not.toBeInTheDocument();
+    });
+
+    it('marks the general tab as selected on the general route', () => {
+      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: true },
+        casesRedesign: { settings: true },
+      } as ReturnType<typeof KibanaServices.getConfig>);
+
+      renderWithTestingProviders(<ConfigureCases />);
+
+      expect(screen.getByTestId('settings-tab-general')).toHaveAttribute('aria-selected', 'true');
+      expect(screen.getByTestId('settings-tab-templates')).toHaveAttribute(
+        'aria-selected',
+        'false'
+      );
+    });
+
+    it('marks the templates tab as selected and renders the templates content on the templates route', async () => {
+      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: true },
+        casesRedesign: { settings: true },
+      } as ReturnType<typeof KibanaServices.getConfig>);
+
+      useLocationMock.mockReturnValue({
+        pathname: '/cases/configure/templates',
+        search: '',
+        hash: '',
+        state: undefined,
+        key: 'default',
+      });
+
+      renderWithTestingProviders(<ConfigureCases />);
+
+      expect(await screen.findByTestId('all-cases-templates')).toBeInTheDocument();
+      expect(screen.getByTestId('settings-tab-templates')).toHaveAttribute('aria-selected', 'true');
+      expect(screen.getByTestId('settings-tab-general')).toHaveAttribute('aria-selected', 'false');
+    });
+
+    it('shows the templates header actions only when on the templates tab', async () => {
+      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: true },
+        casesRedesign: { settings: true },
+      } as ReturnType<typeof KibanaServices.getConfig>);
+
+      renderWithTestingProviders(<ConfigureCases />);
+
+      expect(screen.queryByTestId('create-template-button')).not.toBeInTheDocument();
+
+      useLocationMock.mockReturnValue({
+        pathname: '/cases/configure/templates',
+        search: '',
+        hash: '',
+        state: undefined,
+        key: 'default',
+      });
+
+      renderWithTestingProviders(<ConfigureCases />);
+
+      expect(await screen.findByTestId('create-template-button')).toBeInTheDocument();
+    });
+  });
 });

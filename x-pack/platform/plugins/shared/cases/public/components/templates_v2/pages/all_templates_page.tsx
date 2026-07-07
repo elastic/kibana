@@ -16,6 +16,7 @@ import {
 } from '../../../common/navigation/hooks';
 import { useCasesTemplatesBreadcrumbs } from '../../use_breadcrumbs';
 import { useCasesContext } from '../../cases_context/use_cases_context';
+import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from '../translations';
 import * as configureCasesI18n from '../../configure_cases/translations';
 import { useTemplatesColumns } from '../hooks/use_templates_columns';
@@ -36,6 +37,10 @@ import { DeleteConfirmationModal } from '../../configure_cases/delete_confirmati
 export const AllTemplatesPage: React.FC = () => {
   useCasesTemplatesBreadcrumbs();
   const { owner } = useCasesContext();
+  // The Settings redesign renders a single AppHeader (with General/Templates tabs) that
+  // covers this page, so the page-local header below is only needed as a legacy fallback.
+  // TODO: Remove along with the Settings redesign FF cleanup.
+  const isSettingsRedesignEnabled = KibanaServices.getConfig()?.casesRedesign?.settings ?? false;
   const { getConfigureCasesUrl, navigateToConfigureCases } = useConfigureCasesNavigation();
   const { getCasesCreateTemplateUrl, navigateToCasesCreateTemplate } =
     useCasesCreateTemplateNavigation();
@@ -134,16 +139,18 @@ export const AllTemplatesPage: React.FC = () => {
 
   return (
     <>
-      <AppHeader
-        title={i18n.TEMPLATE_TITLE}
-        back={{
-          href: getConfigureCasesUrl(),
-          label: configureCasesI18n.CONFIGURE_CASES_PAGE_TITLE,
-          onClick: navigateToConfigureCases,
-        }}
-        menu={templatesListMenu}
-        sticky={false}
-      />
+      {!isSettingsRedesignEnabled && (
+        <AppHeader
+          title={i18n.TEMPLATE_TITLE}
+          back={{
+            href: getConfigureCasesUrl(),
+            label: configureCasesI18n.CONFIGURE_CASES_PAGE_TITLE,
+            onClick: navigateToConfigureCases,
+          }}
+          menu={templatesListMenu}
+          sticky={false}
+        />
+      )}
       <TemplatesInfoPanel />
       <TemplatesTableFilters
         queryParams={queryParams}
