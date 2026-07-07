@@ -251,6 +251,11 @@ export function getOverridePaletteColors<T extends PaletteOutput<CustomPalettePa
     .getCategoricalColors(numberOfBands, otherParams);
 }
 
-export const isValueBasedPalette = (
-  palette?: PaletteOutput<{ stops?: ColorStop[] | number[]; steps?: number }>
-): boolean => Boolean(palette?.params);
+/**
+ * Type guard distinguishing the two kinds of palette a chart/column can carry:
+ * - color-by-value palette: carries `params` (custom stops or a named band spec) -> value-based
+ * - legacy colorMapping (categorical) palette: name-only, no `params` -> not value-based
+ */
+export const isValueBasedPalette = <T = CustomPaletteParams>(
+  palette?: PaletteOutput<T>
+): palette is PaletteOutput<T> => Boolean(palette?.params);

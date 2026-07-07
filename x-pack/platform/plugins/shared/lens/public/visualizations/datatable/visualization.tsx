@@ -131,7 +131,7 @@ function reconcileNumericColumn(
   const paletteEntry = paletteMap.get(palette.name);
   if (!paletteEntry) return column;
 
-  const hasStops = isValueBasedPalette(palette);
+  const hasStops = isValueBasedPalette(palette) && Boolean(palette.params?.stops?.length);
   const needsStopsComputed = !paletteEntry.canDynamicColoring || !hasStops;
   if (!needsStopsComputed) return column;
 
