@@ -72,11 +72,10 @@ export const ServiceNodeWithCollapseAffordance = memo((props: NodeProps<ServiceN
                 <EuiToolTip
                   content={i18n.translate('xpack.apm.serviceMap.contextual.expandHidden', {
                     defaultMessage:
-                      'Show {count, plural, one {# hidden dependency} other {# hidden dependencies}}{attention}',
+                      'Show {count, plural, one {# hidden dependency} other {# hidden dependencies}}{attentionCount, plural, =0 {} one { (# needs attention)} other { (# need attention)}}',
                     values: {
                       count: hiddenDependencyCount,
-                      attention:
-                        hiddenAttentionCount > 0 ? ` (${hiddenAttentionCount} need attention)` : '',
+                      attentionCount: hiddenAttentionCount,
                     },
                   })}
                 >
