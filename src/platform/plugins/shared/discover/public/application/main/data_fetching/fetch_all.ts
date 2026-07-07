@@ -124,7 +124,7 @@ export function fetchAll(
         })
       : fetchDocuments(searchSource, params);
 
-    const fetchAllRequestOnlyTracker = scopedEbtManager.trackQueryPerformanceEvent({
+    const fetchAllRequestsOnlyTracker = scopedEbtManager.trackQueryPerformanceEvent({
       eventName: 'discoverFetchAllRequestsOnly',
       query,
       timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
@@ -133,7 +133,7 @@ export function fetchAll(
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
       .then(({ records, esqlQueryColumns, interceptedWarnings = [], esqlHeaderWarning }) => {
-        fetchAllRequestOnlyTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
+        fetchAllRequestsOnlyTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
 
         if (isEsqlQuery) {
           const fetchStatus =
