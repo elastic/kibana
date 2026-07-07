@@ -66,10 +66,7 @@ export const setAttacksStatusRoute = (
         const core = await context.core;
         const { status, ids, update_related_alerts: updateRelatedAlerts } = request.body;
         const reason = 'reason' in request.body ? request.body.reason : undefined;
-        const telemetryFields = buildAttacksStatusApiCallFields(
-          request.route.path,
-          request.body
-        );
+        const telemetryFields = buildAttacksStatusApiCallFields(request.route.path, request.body);
 
         const closingReason = await validateClosingReason({ core, status, reason });
         if (!closingReason.valid) {

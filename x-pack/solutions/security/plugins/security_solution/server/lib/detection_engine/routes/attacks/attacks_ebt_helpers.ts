@@ -21,7 +21,7 @@ import { buildSiemResponse } from '../utils';
  * follow the legacy signals status route pattern in open_close_signals_route.ts.
  */
 
-export type AttacksApiCallEventFields = {
+export interface AttacksApiCallEventFields {
   endpoint: string;
   operation: AttacksApiCallOperation;
   ids_count?: number;
@@ -33,7 +33,7 @@ export type AttacksApiCallEventFields = {
   status?: string;
   has_aggregations?: boolean;
   has_ids_filter?: boolean;
-};
+}
 
 interface AttacksSearchRequestBodyForTelemetry {
   ids?: string[];

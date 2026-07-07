@@ -47,10 +47,7 @@ export const searchAttacksRoute = (
         },
       },
       async (context, request, response) => {
-        const telemetryFields = buildAttacksSearchApiCallFields(
-          request.route.path,
-          request.body
-        );
+        const telemetryFields = buildAttacksSearchApiCallFields(request.route.path, request.body);
         const params = buildSearchAttacksParams(request.body);
         const validationError = validateSearchAlertsParams(params);
         if (validationError) {
