@@ -668,8 +668,12 @@ describe('useTemplateFormSync', () => {
 
       renderHook(() => useTemplateFormSync(innerForm, new Set()));
 
-      expect(mockSetFieldValue).toHaveBeenCalledWith('connectorId', 'none');
-      expect(mockSetFieldValue).toHaveBeenCalledWith('fields', null);
+      // Reset via updateFieldValues so both the live fields and the form default-value object are
+      // cleared (a plain setFieldValue would leave a previously-applied connector in the default).
+      expect(mockUpdateFieldValues).toHaveBeenCalledWith(
+        { connectorId: 'none', fields: null },
+        { runDeserializer: false }
+      );
     });
 
     it('falls back to the .none connector when the id resolves but the type differs', () => {
@@ -683,8 +687,10 @@ describe('useTemplateFormSync', () => {
 
       renderHook(() => useTemplateFormSync(innerForm, new Set()));
 
-      expect(mockSetFieldValue).toHaveBeenCalledWith('connectorId', 'none');
-      expect(mockSetFieldValue).toHaveBeenCalledWith('fields', null);
+      expect(mockUpdateFieldValues).toHaveBeenCalledWith(
+        { connectorId: 'none', fields: null },
+        { runDeserializer: false }
+      );
     });
 
     it('does not apply the connector until supported connectors finish loading', () => {
@@ -720,13 +726,16 @@ describe('useTemplateFormSync', () => {
       const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set()));
 
       mockSetFieldValue.mockClear();
+      mockUpdateFieldValues.mockClear();
       mockUseFormData.mockReturnValue([{ templateId: '' }]);
       mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
 
       rerender();
 
-      expect(mockSetFieldValue).toHaveBeenCalledWith('connectorId', 'none');
-      expect(mockSetFieldValue).toHaveBeenCalledWith('fields', null);
+      expect(mockUpdateFieldValues).toHaveBeenCalledWith(
+        { connectorId: 'none', fields: null },
+        { runDeserializer: false }
+      );
     });
 
     it('reverts the connector to .none when switching to a template that declares no connector', () => {
@@ -741,6 +750,7 @@ describe('useTemplateFormSync', () => {
       const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set()));
 
       mockSetFieldValue.mockClear();
+      mockUpdateFieldValues.mockClear();
       mockUseFormData.mockReturnValue([{ templateId: 'template-plain' }]);
       mockUseGetTemplate.mockReturnValue({
         data: {
@@ -753,8 +763,10 @@ describe('useTemplateFormSync', () => {
 
       rerender();
 
-      expect(mockSetFieldValue).toHaveBeenCalledWith('connectorId', 'none');
-      expect(mockSetFieldValue).toHaveBeenCalledWith('fields', null);
+      expect(mockUpdateFieldValues).toHaveBeenCalledWith(
+        { connectorId: 'none', fields: null },
+        { runDeserializer: false }
+      );
     });
 
     it('does not touch the connector when a cleared template never set one', () => {

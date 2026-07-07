@@ -50,6 +50,8 @@ const mockParsedTemplate = {
     fields: [
       { name: 'priority', type: 'keyword', control: 'INPUT_TEXT', metadata: { default: 'low' } },
     ],
+    connector: { type: '.jira', id: 'jira-1', fields: { issueType: '10006', priority: null, parent: null } },
+    settings: { syncAlerts: true },
   },
 };
 
@@ -157,6 +159,8 @@ describe('ApplyTemplateModal', () => {
           id: 'tmpl-1',
           version: 3,
           fields: mockParsedTemplate.definition.fields,
+          connector: mockParsedTemplate.definition.connector,
+          settings: mockParsedTemplate.definition.settings,
         },
       },
       expect.objectContaining({ onSuccess: mockOnClose })

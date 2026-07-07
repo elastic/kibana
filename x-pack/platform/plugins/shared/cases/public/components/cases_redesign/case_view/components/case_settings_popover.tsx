@@ -96,6 +96,8 @@ export const CaseSettingsPopover: FC<CaseSettingsPopoverProps> = ({
           id: selectedTemplateData.templateId,
           version: selectedTemplateData.templateVersion,
           fields: selectedTemplateData.definition.fields,
+          connector: selectedTemplateData.definition.connector,
+          settings: selectedTemplateData.definition.settings,
         },
       });
     }

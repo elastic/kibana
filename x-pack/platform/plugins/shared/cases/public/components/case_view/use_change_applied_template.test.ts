@@ -6,6 +6,7 @@
  */
 
 import { renderHook, waitFor, act } from '@testing-library/react';
+import { ConnectorTypes } from '../../../common/types/domain';
 import { TestProviders } from '../../common/mock';
 import { basicCase } from '../../containers/mock';
 import { computeNewExtendedFields, useChangeAppliedTemplate } from './use_change_applied_template';
@@ -14,6 +15,21 @@ const mockPatchCase = jest.fn();
 jest.mock('../../containers/api', () => ({
   ...jest.requireActual('../../containers/api'),
   patchCase: (...args: unknown[]) => mockPatchCase(...args),
+}));
+
+const mockConnectors = [
+  {
+    id: 'jira-1',
+    actionTypeId: '.jira',
+    name: 'My Jira',
+    config: {},
+    isPreconfigured: false,
+    isDeprecated: false,
+    isSystemAction: false,
+  },
+];
+jest.mock('../../containers/configure/use_get_supported_action_connectors', () => ({
+  useGetSupportedActionConnectors: () => ({ data: mockConnectors, isLoading: false }),
 }));
 
 const mockRefresh = jest.fn();
@@ -138,7 +154,103 @@ describe('useChangeAppliedTemplate', () => {
     });
   });
 
-  it('calls patchCase with template: null and empty extended_fields when removing a template', async () => {
+  it('resolves the template connector and applies its settings', async () => {
+    const { result } = renderHook(() => useChangeAppliedTemplate(), {
+      wrapper: TestProviders,
+    });
+
+    act(() => {
+      result.current.mutate({
+        caseData: caseWithTemplate,
+        newTemplate: {
+          id: 'tmpl-2',
+          version: 5,
+          fields: templateFields,
+          connector: {
+            type: ConnectorTypes.jira,
+            id: 'jira-1',
+            fields: { issueType: '10006', priority: null, parent: null },
+          },
+          settings: { syncAlerts: true },
+        },
+      });
+    });
+
+    await waitFor(() => {
+      expect(mockPatchCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          updatedCase: expect.objectContaining({
+            connector: {
+              id: 'jira-1',
+              name: 'My Jira',
+              type: '.jira',
+              fields: { issueType: '10006', priority: null, parent: null },
+            },
+            // declared syncAlerts kept, omitted extractObservables defaults to off
+            settings: { syncAlerts: true, extractObservables: false },
+          }),
+        })
+      );
+    });
+  });
+
+  it('falls back to the none connector when the template connector no longer resolves', async () => {
+    const { result } = renderHook(() => useChangeAppliedTemplate(), {
+      wrapper: TestProviders,
+    });
+
+    act(() => {
+      result.current.mutate({
+        caseData: caseWithTemplate,
+        newTemplate: {
+          id: 'tmpl-2',
+          version: 5,
+          fields: templateFields,
+          connector: {
+            type: ConnectorTypes.jira,
+            id: 'deleted-connector',
+            fields: { issueType: '10006', priority: null, parent: null },
+          },
+        },
+      });
+    });
+
+    await waitFor(() => {
+      expect(mockPatchCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          updatedCase: expect.objectContaining({
+            connector: { id: 'none', name: 'none', type: '.none', fields: null },
+          }),
+        })
+      );
+    });
+  });
+
+  it('clears the connector to none and turns settings off when the template defines neither', async () => {
+    const { result } = renderHook(() => useChangeAppliedTemplate(), {
+      wrapper: TestProviders,
+    });
+
+    act(() => {
+      result.current.mutate({
+        caseData: caseWithTemplate,
+        newTemplate: { id: 'tmpl-2', version: 5, fields: templateFields },
+      });
+    });
+
+    await waitFor(() => {
+      expect(mockPatchCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          updatedCase: expect.objectContaining({
+            connector: { id: 'none', name: 'none', type: '.none', fields: null },
+            settings: { syncAlerts: false, extractObservables: false },
+          }),
+        })
+      );
+    });
+  });
+
+  it('calls patchCase with template: null, empty extended_fields, and reset connector/settings when removing a template', async () => {
     const { result } = renderHook(() => useChangeAppliedTemplate(), {
       wrapper: TestProviders,
     });
@@ -153,6 +265,8 @@ describe('useChangeAppliedTemplate', () => {
           updatedCase: expect.objectContaining({
             template: null,
             extended_fields: {},
+            connector: { id: 'none', name: 'none', type: '.none', fields: null },
+            settings: { syncAlerts: false, extractObservables: false },
           }),
         })
       );

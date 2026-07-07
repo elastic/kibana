@@ -80,6 +80,8 @@ export const ApplyTemplateModal: FC<ApplyTemplateModalProps> = ({ caseData, onCl
           id: selectedTemplateData.templateId,
           version: selectedTemplateData.templateVersion,
           fields: selectedTemplateData.definition.fields,
+          connector: selectedTemplateData.definition.connector,
+          settings: selectedTemplateData.definition.settings,
         },
       },
       { onSuccess: onClose }

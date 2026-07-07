@@ -35,15 +35,22 @@ const DEFAULT_SYNC_ALERTS = false;
 const DEFAULT_EXTRACT_OBSERVABLES = false;
 
 type SetFieldValue = (path: string, value: unknown) => void;
+type UpdateFieldValues = (
+  values: Record<string, unknown>,
+  options?: { runDeserializer?: boolean }
+) => void;
 
 const revertSettingsToDefault = (setFieldValue: SetFieldValue): void => {
   setFieldValue('syncAlerts', DEFAULT_SYNC_ALERTS);
   setFieldValue('extractObservables', DEFAULT_EXTRACT_OBSERVABLES);
 };
 
-const revertConnectorToDefault = (setFieldValue: SetFieldValue): void => {
-  setFieldValue('connectorId', NONE_CONNECTOR_ID);
-  setFieldValue('fields', null);
+const revertConnectorToDefault = (updateFieldValues: UpdateFieldValues): void => {
+  // Mirror `applyTemplateConnector`. The per-type connector inputs remount on connector change and
+  // re-read the form's default-value object, so a plain `setFieldValue` leaves the previous
+  // template's connector in that default and it reappears in the UI. `updateFieldValues` resets
+  // both the default-value object and the live fields, fully reversing the applied connector.
+  updateFieldValues({ connectorId: NONE_CONNECTOR_ID, fields: null }, { runDeserializer: false });
 };
 
 /**
@@ -53,11 +60,7 @@ const revertConnectorToDefault = (setFieldValue: SetFieldValue): void => {
 const applyTemplateConnector = (
   connector: CaseConnectorWithoutName,
   connectors: Array<{ id: string; actionTypeId: string }>,
-  setFieldValue: (path: string, value: unknown) => void,
-  updateFieldValues: (
-    values: Record<string, unknown>,
-    options?: { runDeserializer?: boolean }
-  ) => void
+  updateFieldValues: UpdateFieldValues
 ): void => {
   const resolved =
     connector.type !== ConnectorTypes.none &&
@@ -74,8 +77,9 @@ const applyTemplateConnector = (
       { runDeserializer: false }
     );
   } else {
-    setFieldValue('connectorId', NONE_CONNECTOR_ID);
-    setFieldValue('fields', null);
+    // Fall back to `.none`, resetting the default-value object too so a previously-applied
+    // connector doesn't linger in the form default (see revertConnectorToDefault).
+    revertConnectorToDefault(updateFieldValues);
   }
 };
 
@@ -138,18 +142,14 @@ const applyTemplateSettings = (
 const syncTemplateConnector = (
   connector: TemplateDefinition['connector'],
   connectors: Array<{ id: string; actionTypeId: string }>,
-  setFieldValue: SetFieldValue,
-  updateFieldValues: (
-    values: Record<string, unknown>,
-    options?: { runDeserializer?: boolean }
-  ) => void,
+  updateFieldValues: UpdateFieldValues,
   didApplyConnectorRef: MutableRefObject<boolean>
 ): void => {
   if (connector) {
-    applyTemplateConnector(connector, connectors, setFieldValue, updateFieldValues);
+    applyTemplateConnector(connector, connectors, updateFieldValues);
     didApplyConnectorRef.current = true;
   } else if (didApplyConnectorRef.current) {
-    revertConnectorToDefault(setFieldValue);
+    revertConnectorToDefault(updateFieldValues);
     didApplyConnectorRef.current = false;
   }
 };
@@ -240,7 +240,7 @@ export const useTemplateFormSync = (
       // configuration's default connector when no connector-bearing template was ever applied.
       if (didApplyConnectorRef.current) {
         didApplyConnectorRef.current = false;
-        revertConnectorToDefault(setFieldValue);
+        revertConnectorToDefault(updateFieldValues);
       }
       if (didApplySettingsRef.current) {
         didApplySettingsRef.current = false;
@@ -283,7 +283,6 @@ export const useTemplateFormSync = (
     syncTemplateConnector(
       definition.connector,
       connectors,
-      setFieldValue,
       updateFieldValues,
       didApplyConnectorRef
     );
