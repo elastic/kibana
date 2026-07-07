@@ -143,6 +143,36 @@ describe('scanHostTool', () => {
     expect(data.path).toBe('/home/user/suspicious');
   });
 
+  it('resolves agentType from the agent packages for a non-Elastic-Defend host (multi-vendor)', async () => {
+    const mockAgentService = {
+      listAgents: jest.fn().mockResolvedValue({
+        agents: [{ id: 'agent-mde-1', packages: ['microsoft_defender_endpoint'] }],
+      }),
+    };
+    const mockResponseActionsClient = {
+      scan: jest.fn().mockResolvedValue({
+        id: 'action-scan-mde',
+        status: 'pending',
+        wasSuccessful: undefined,
+        hosts: { 'agent-mde-1': { name: 'mde-host' } },
+      }),
+    };
+    service.getInternalFleetServices = jest.fn(() => ({
+      agent: mockAgentService,
+      ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+    })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+    service.getInternalResponseActionsClient = jest.fn(
+      () => mockResponseActionsClient
+    ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+    const tool = scanHostTool(service);
+    await tool.handler({ hostName: 'mde-host', path: '/tmp' }, mockContext);
+
+    expect(service.getInternalResponseActionsClient).toHaveBeenCalledWith(
+      expect.objectContaining({ agentType: 'microsoft_defender_endpoint', isAutomated: false })
+    );
+  });
+
   it('returns an error result when the response actions client throws', async () => {
     const mockAgentService = {
       listAgents: jest.fn().mockResolvedValue({ agents: [{ id: 'agent-123' }] }),

@@ -129,6 +129,37 @@ describe('getRunningProcessesTool', () => {
     expect(data.actionId).toBe('action-999');
   });
 
+  it('resolves agentType from the agent packages for a non-Elastic-Defend host (multi-vendor)', async () => {
+    const mockAgentService = {
+      listAgents: jest.fn().mockResolvedValue({
+        agents: [{ id: 'agent-s1-1', packages: ['sentinel_one'] }],
+      }),
+    };
+    const mockResponseActionsClient = {
+      runningProcesses: jest.fn().mockResolvedValue({
+        id: 'action-999',
+        status: 'pending',
+        wasSuccessful: undefined,
+        hosts: { 'agent-s1-1': { name: 's1-host' } },
+        outputs: {},
+      }),
+    };
+    service.getInternalFleetServices = jest.fn(() => ({
+      agent: mockAgentService,
+      ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+    })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+    service.getInternalResponseActionsClient = jest.fn(
+      () => mockResponseActionsClient
+    ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+    const tool = getRunningProcessesTool(service);
+    await tool.handler({ hostName: 's1-host' }, mockContext);
+
+    expect(service.getInternalResponseActionsClient).toHaveBeenCalledWith(
+      expect.objectContaining({ agentType: 'sentinel_one', isAutomated: false })
+    );
+  });
+
   it('returns an error result when the agent service throws', async () => {
     const mockAgentService = {
       listAgents: jest.fn().mockRejectedValue(new Error('fleet unavailable')),
