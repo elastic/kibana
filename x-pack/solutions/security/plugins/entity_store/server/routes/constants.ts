@@ -19,26 +19,35 @@ export const RESOLUTION_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
 
 export type LogExtractionUpdateParams = z.infer<typeof LogExtractionUpdateParams>;
 
+// Index pattern strings are bounded to Elasticsearch's own index name length limit.
+const MAX_INDEX_PATTERN_LENGTH = 255;
+// Duration strings (e.g. "10m", "1h") are always short; bounded defensively.
+const MAX_DURATION_STRING_LENGTH = 32;
+
 export const LogExtractionUpdateParams = z.object({
   fieldHistoryLength: z.number().int().optional(),
-  additionalIndexPatterns: z.array(z.string()).optional(),
-  excludedIndexPatterns: z.array(z.string()).optional(),
+  additionalIndexPatterns: z.array(z.string().max(MAX_INDEX_PATTERN_LENGTH)).optional(),
+  excludedIndexPatterns: z.array(z.string().max(MAX_INDEX_PATTERN_LENGTH)).optional(),
   lookbackPeriod: z
     .string()
+    .max(MAX_DURATION_STRING_LENGTH)
     .regex(/[smdh]$/)
     .optional(),
   frequency: z
     .string()
+    .max(MAX_DURATION_STRING_LENGTH)
     .regex(/[smdh]$/)
     .optional(),
   delay: z
     .string()
+    .max(MAX_DURATION_STRING_LENGTH)
     .regex(/[smdh]$/)
     .optional(),
   docsLimit: z.number().int().min(1).optional(),
   maxLogsPerPage: z.number().int().min(1).optional(),
   maxTimeWindowSize: z
     .string()
+    .max(MAX_DURATION_STRING_LENGTH)
     .regex(/[smdh]$/)
     .optional(),
   maxLogsPerWindow: z.number().int().min(0).optional(),
