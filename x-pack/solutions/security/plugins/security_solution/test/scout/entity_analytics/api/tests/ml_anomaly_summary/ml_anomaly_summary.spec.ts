@@ -10,12 +10,12 @@ import { expect } from '@kbn/scout-security/api';
 import type {
   AnomalyOverviewResponse,
   AnomalySummaryResponse,
-} from '../../../../../../../common/api/entity_analytics/anomaly_summary';
+} from '../../../../../../common/api/entity_analytics/anomaly_summary';
 import {
   ENTITY_ANOMALY_OVERVIEW_INTERNAL_URL,
   ENTITY_ANOMALY_PRIVILEGES_INTERNAL_URL,
   ENTITY_ANOMALY_SUMMARY_INTERNAL_URL,
-} from '../../../../../../../common/entity_analytics/anomalies/constants';
+} from '../../../../../../common/entity_analytics/anomalies/constants';
 import {
   CAROL_EUID,
   DAVID_EUID,
@@ -25,7 +25,7 @@ import {
   anomalyTestData,
   ANOMALY_RECORD_IDS,
   SOURCE_EVENT_IDS,
-} from '../../../fixtures/ml_anomaly_summary_test_data';
+} from '../../fixtures/ml_anomaly_summary_test_data';
 
 const ML_ANOMALIES_SHARED_INDEX = '.ml-anomalies-shared';
 const SOURCE_EVENTS_INDEX = 'logs-windows.forwarded-default';
