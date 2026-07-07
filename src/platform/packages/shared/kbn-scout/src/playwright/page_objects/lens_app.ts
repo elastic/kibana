@@ -56,8 +56,11 @@ export class LensApp {
     await expect(this.lensApp).toBeVisible();
   }
 
-  async switchToVisualization(visType: string) {
+  async switchToVisualization(visType: string, options?: { search?: string }) {
     await this.openChartSwitchPopover();
+    if (options?.search) {
+      await this.page.testSubj.locator('lnsChartSwitchSearch').fill(options.search);
+    }
     await this.page.testSubj.locator(`lnsChartSwitchPopover_${visType}`).click();
   }
 

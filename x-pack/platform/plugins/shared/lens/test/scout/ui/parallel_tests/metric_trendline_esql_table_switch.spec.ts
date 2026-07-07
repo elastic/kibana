@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0.
- */
-
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
@@ -103,9 +97,7 @@ spaceTest.describe(
           await dashboard.switchToEditMode();
           await openInlineEditorAndWaitVisible(pageObjects, panelId);
 
-          await page.getByTestId('lnsChartSwitchPopover').click();
-          await page.getByTestId('lnsChartSwitchSearch').fill('Metric');
-          await page.getByTestId('lnsChartSwitchPopover_lnsMetric').click();
+          await lens.switchToVisualization('lnsMetric', { search: 'Metric' });
 
           await expect(page.getByTestId('mtrVis')).toBeVisible({ timeout: 30_000 });
           await waitForMoreThanOneMetricTile(page);
