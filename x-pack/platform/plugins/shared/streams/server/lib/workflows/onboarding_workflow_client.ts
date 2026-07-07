@@ -342,15 +342,17 @@ export class StreamsKIsOnboardingClient {
   /**
    * Cancels every non-terminal onboarding execution across all streams.
    * Used during teardown of the continuous KI onboarding workflow.
+   *
+   * @returns The number of executions that were canceled.
    */
-  async cancelAllRunning({ request }: { request: KibanaRequest }): Promise<void> {
+  async cancelAllRunning({ request }: { request: KibanaRequest }): Promise<number> {
     const { results } = await this.workflowExecutionService.getExecutions(
       { statuses: [...NonTerminalExecutionStatuses], size: MAX_STREAMS_PER_QUERY },
       ONBOARDING_EXECUTIONS_SPACE_ID
     );
 
     if (results.length === 0) {
-      return;
+      return 0;
     }
 
     await Promise.all(
@@ -362,6 +364,8 @@ export class StreamsKIsOnboardingClient {
         })
       )
     );
+
+    return results.length;
   }
 
   /**
