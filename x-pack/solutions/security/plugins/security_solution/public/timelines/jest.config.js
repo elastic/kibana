@@ -9,11 +9,15 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../../..',
   roots: ['<rootDir>/x-pack/solutions/security/plugins/security_solution/public/timelines'],
+  testPathIgnorePatterns: [
+    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/timelines/components/',
+  ],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/security/plugins/security_solution/public/timelines',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/timelines/**/*.{ts,tsx}',
+    '!<rootDir>/x-pack/solutions/security/plugins/security_solution/public/timelines/components/**/*.{ts,tsx}',
   ],
   moduleNameMapper: require('../../server/__mocks__/module_name_map'),
 };
