@@ -1459,7 +1459,7 @@ describe('UiamService', () => {
     });
 
     it('splits large lists into batches and merges the results', async () => {
-      const userIds = Array.from({ length: 120 }, (_, i) => `user-${i}`);
+      const userIds = Array.from({ length: 250 }, (_, i) => `user-${i}`);
 
       fetchSpy
         .mockResolvedValueOnce({
@@ -1468,18 +1468,18 @@ describe('UiamService', () => {
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => ({ users: { 'user-50': { first_name: 'Second' } } }),
+          json: async () => ({ users: { 'user-100': { first_name: 'Second' } } }),
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => ({ users: { 'user-100': { first_name: 'Third' } } }),
+          json: async () => ({ users: { 'user-200': { first_name: 'Third' } } }),
         });
 
       await expect(uiamService.resolveUsers('access-token', userIds)).resolves.toEqual({
         users: {
           'user-0': { first_name: 'First' },
-          'user-50': { first_name: 'Second' },
-          'user-100': { first_name: 'Third' },
+          'user-100': { first_name: 'Second' },
+          'user-200': { first_name: 'Third' },
         },
       });
 
@@ -1487,7 +1487,7 @@ describe('UiamService', () => {
     });
 
     it('returns partial results when some batches fail', async () => {
-      const userIds = Array.from({ length: 120 }, (_, i) => `user-${i}`);
+      const userIds = Array.from({ length: 250 }, (_, i) => `user-${i}`);
 
       fetchSpy
         .mockResolvedValueOnce({
@@ -1502,13 +1502,13 @@ describe('UiamService', () => {
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => ({ users: { 'user-100': { first_name: 'Third' } } }),
+          json: async () => ({ users: { 'user-200': { first_name: 'Third' } } }),
         });
 
       await expect(uiamService.resolveUsers('access-token', userIds)).resolves.toEqual({
         users: {
           'user-0': { first_name: 'First' },
-          'user-100': { first_name: 'Third' },
+          'user-200': { first_name: 'Third' },
         },
       });
 

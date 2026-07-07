@@ -120,7 +120,7 @@ describe('List OAuth Connections route', () => {
     });
   });
 
-  it('deduplicates user ids before resolving and skips resolution when there are none', async () => {
+  it('forwards the user ids from connections for resolution', async () => {
     oauthMock.listConnections.mockResolvedValue({
       connections: [
         {
@@ -145,7 +145,7 @@ describe('List OAuth Connections route', () => {
       kibanaResponseFactory
     );
 
-    expect(oauthMock.resolveUsers).toHaveBeenCalledWith(expect.anything(), ['user-1']);
+    expect(oauthMock.resolveUsers).toHaveBeenCalledWith(expect.anything(), ['user-1', 'user-1']);
   });
 
   it('does not call resolveUsers when no connection has a user id', async () => {

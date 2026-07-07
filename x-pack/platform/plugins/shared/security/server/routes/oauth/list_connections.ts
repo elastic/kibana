@@ -66,13 +66,9 @@ export function defineListOAuthConnectionsRoute({
             });
           }
 
-          const userIds = [
-            ...new Set(
-              result.connections
-                .map((connection) => connection.user_id)
-                .filter((userId): userId is string => Boolean(userId))
-            ),
-          ];
+          const userIds = result.connections
+            .map((connection) => connection.user_id)
+            .filter((userId): userId is string => Boolean(userId));
 
           let users: Record<string, UiamUserInfo> = {};
           if (userIds.length > 0) {

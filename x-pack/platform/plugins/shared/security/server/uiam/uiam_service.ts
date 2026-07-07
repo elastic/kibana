@@ -111,9 +111,9 @@ export type PatchOAuthConnectionRequestBody = UpdateUiamOAuthConnectionParams;
 export type ResolvedUsersResponse = UiamResolvedUsersResponse;
 
 /**
- * The maximum number of user IDs to resolve in a single UIAM request (avoids overly long URLs).
+ * Maximum number of user IDs in a single request (aligned with UIAM limit).
  */
-const RESOLVE_USERS_BATCH_SIZE = 50;
+const RESOLVE_USERS_BATCH_SIZE = 100;
 
 /**
  * Shape of the `error` object inside a UIAM non-2xx response payload, mirroring
