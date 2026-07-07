@@ -16,7 +16,11 @@ export {
   successResult,
   errorResult,
 } from './create_resource_installation_helper';
-export { AlertsService, type PublicFrameworkAlertsService } from './alerts_service';
+export {
+  AlertsService,
+  type PublicFrameworkAlertsService,
+  type CreateAdHocAlertsClientParams,
+} from './alerts_service';
 export {
   createOrUpdateIlmPolicy,
   createOrUpdateComponentTemplate,

@@ -39,6 +39,7 @@ import type { GetAlertIndicesAlias } from '../lib';
 import type { AlertsService } from '../alerts_service';
 import type { BackfillClient } from '../backfill_client/backfill_client';
 import type { IScopedChangeTrackingService } from './lib/change_tracking';
+import type { AdHocExecutionClient } from '../ad_hoc_execution_client/ad_hoc_execution_client';
 
 export type {
   BulkEditOperation,
@@ -75,7 +76,7 @@ export interface RulesClientContext {
   readonly minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   readonly maxScheduledPerMinute: AlertingRulesConfig['maxScheduledPerMinute'];
   readonly minimumScheduleIntervalInMs: number;
-  readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
+  readonly createAPIKey: (name: string, expiration?: string) => Promise<CreateAPIKeyResult>;
   readonly getActionsClient: () => Promise<ActionsClient>;
   readonly actionsAuthorization: ActionsAuthorization;
   readonly getEventLogClient: () => Promise<IEventLogClient>;
@@ -111,6 +112,7 @@ export interface RulesClientContext {
   readonly getAlertIndicesAlias: GetAlertIndicesAlias;
   readonly alertsService: AlertsService | null;
   readonly backfillClient: BackfillClient;
+  readonly adHocExecutionClient: AdHocExecutionClient;
   readonly isSystemAction: (actionId: string) => boolean;
   readonly uiSettings: UiSettingsServiceStart;
   readonly shouldGrantUiam?: boolean;

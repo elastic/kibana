@@ -104,6 +104,7 @@ import {
   AlertsService,
   type PublicFrameworkAlertsService,
   type InitializationPromise,
+  type CreateAdHocAlertsClientParams,
   errorResult,
 } from './alerts_service';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
@@ -113,6 +114,7 @@ import { getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 import type { GetAlertIndicesAlias } from './lib';
 import { createGetAlertIndicesAliasFn, spaceIdToNamespace } from './lib';
 import { BackfillClient } from './backfill_client/backfill_client';
+import { AdHocExecutionClient } from './ad_hoc_execution_client/ad_hoc_execution_client';
 import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
 import { AlertDeletionClient } from './alert_deletion';
 import { registerGapAutoFillSchedulerTask } from './lib/rule_gaps/task/gap_auto_fill_scheduler_task';
@@ -250,6 +252,7 @@ export class AlertingPlugin {
   private pluginStop$: Subject<void>;
   private dataStreamAdapter?: DataStreamAdapter;
   private backfillClient?: BackfillClient;
+  private adHocExecutionClient?: AdHocExecutionClient;
   private alertDeletionClient?: AlertDeletionClient;
   private readonly isServerless: boolean;
   private nodeRoles: PluginInitializerContext['node']['roles'];
@@ -334,6 +337,13 @@ export class AlertingPlugin {
       .then(([_, alertingStart]) => alertingStart.taskManager);
 
     this.backfillClient = new BackfillClient({
+      logger: this.logger,
+      taskManagerSetup: plugins.taskManager,
+      taskManagerStartPromise,
+      taskRunnerFactory: this.taskRunnerFactory,
+    });
+
+    this.adHocExecutionClient = new AdHocExecutionClient({
       logger: this.logger,
       taskManagerSetup: plugins.taskManager,
       taskManagerStartPromise,
@@ -630,6 +640,12 @@ export class AlertingPlugin {
 
           return Promise.resolve(errorResult(`Framework alerts service not available`));
         },
+        createAdHocAlertsClient: (opts: CreateAdHocAlertsClientParams) => {
+          if (this.alertsService) {
+            return this.alertsService.createAdHocAlertsClient(opts);
+          }
+          return Promise.resolve(null);
+        },
       },
       getDataStreamAdapter: () => this.dataStreamAdapter!,
     };
@@ -708,6 +724,7 @@ export class AlertingPlugin {
       getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
       alertsService: this.alertsService,
       backfillClient: this.backfillClient!,
+      adHocExecutionClient: this.adHocExecutionClient!,
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: core.uiSettings,
       securityService: core.security,
