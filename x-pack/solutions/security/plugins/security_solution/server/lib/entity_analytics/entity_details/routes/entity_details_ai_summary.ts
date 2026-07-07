@@ -11,6 +11,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { AiSummaryMetadataDoc } from '@kbn/entity-store/common';
+import { AI_SUMMARY_EVENT_ACTION } from '@kbn/entity-store/common';
 import {
   capEntitySummaryContent,
   MAX_ENTITY_ID_LENGTH,
@@ -136,20 +137,20 @@ export const entityDetailsAiSummaryRoute = ({
           const doc: AiSummaryMetadataDoc = {
             '@timestamp': new Date().toISOString(),
             'event.kind': 'event',
-            'event.action': 'ai_summary_generated',
+            'event.action': AI_SUMMARY_EVENT_ACTION,
             'entity.id': entityId,
             'entity.type': entityType,
-            'ai_summary.generated_by': generatedBy,
-            'ai_summary.generated_at': summary.generated_at,
-            'ai_summary.highlights': highlights,
+            'Ai_summary.generated_by': generatedBy,
+            'Ai_summary.generated_at': summary.generated_at,
+            'Ai_summary.highlights': highlights,
             ...(recommendedActions != null && {
-              'ai_summary.recommendedActions': recommendedActions,
+              'Ai_summary.recommendedActions': recommendedActions,
             }),
             ...(summary.anomaly_job_ids != null && {
-              'ai_summary.anomaly_job_ids': summary.anomaly_job_ids,
+              'Ai_summary.anomaly_job_ids': summary.anomaly_job_ids,
             }),
-            ...(summary.variant_id != null && { 'ai_summary.variant_id': summary.variant_id }),
-            'ai_summary.staleness': summary.staleness,
+            ...(summary.variant_id != null && { 'Ai_summary.variant_id': summary.variant_id }),
+            'Ai_summary.staleness': summary.staleness,
           };
 
           // A dropped doc resolves (not throws) as `failed > 0`; treat it as a hard failure so

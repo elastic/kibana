@@ -42,9 +42,9 @@ describe('ensureMetadataDataStreamMappings', () => {
     expect(esClient.indices.putMapping).toHaveBeenCalledTimes(1);
     const params = esClient.indices.putMapping.mock.calls[0][0];
     expect(params.index).toBe(DATA_STREAM);
-    // Additive ai_summary.* fields (and existing ones) come from the shared mapping source.
+    // Additive Ai_summary.* fields (and existing ones) come from the shared mapping source.
     expect(params.properties).toMatchObject({
-      'ai_summary.generated_by': { type: 'keyword' },
+      'Ai_summary.generated_by': { type: 'keyword' },
     });
   });
 

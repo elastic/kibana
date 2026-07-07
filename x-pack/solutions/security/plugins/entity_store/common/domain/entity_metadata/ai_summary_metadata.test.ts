@@ -15,10 +15,10 @@ describe('AiSummaryMetadataDoc', () => {
     'event.action': 'ai_summary_generated',
     'entity.id': 'user:alice@local',
     'entity.type': 'user',
-    'ai_summary.generated_by': 'alice',
-    'ai_summary.generated_at': 1748771200000,
-    'ai_summary.highlights': [{ title: 'Risk overview', text: 'Entity has elevated risk score.' }],
-    'ai_summary.staleness': {
+    'Ai_summary.generated_by': 'alice',
+    'Ai_summary.generated_at': 1748771200000,
+    'Ai_summary.highlights': [{ title: 'Risk overview', text: 'Entity has elevated risk score.' }],
+    'Ai_summary.staleness': {
       enabled_signals: ['risk_score'] as Array<'risk_score'>,
       snapshot: { risk_score: 72.5 },
     },
@@ -30,9 +30,9 @@ describe('AiSummaryMetadataDoc', () => {
     expect(minimalRequired['event.action']).toBe('ai_summary_generated');
     expect(minimalRequired['entity.id']).toBe('user:alice@local');
     expect(minimalRequired['entity.type']).toBe('user');
-    expect(minimalRequired['ai_summary.generated_by']).toBe('alice');
-    expect(minimalRequired['ai_summary.generated_at']).toBe(1748771200000);
-    expect(minimalRequired['ai_summary.highlights']).toHaveLength(1);
+    expect(minimalRequired['Ai_summary.generated_by']).toBe('alice');
+    expect(minimalRequired['Ai_summary.generated_at']).toBe(1748771200000);
+    expect(minimalRequired['Ai_summary.highlights']).toHaveLength(1);
   });
 
   it('accepts a document with all optional fields populated', () => {
@@ -43,23 +43,23 @@ describe('AiSummaryMetadataDoc', () => {
       'event.ingested': '2026-06-01T10:00:05.000Z',
       'entity.id': 'user:alice@local',
       'entity.type': 'user',
-      'ai_summary.generated_by': 'alice',
-      'ai_summary.generated_at': 1748771200000,
-      'ai_summary.highlights': [
+      'Ai_summary.generated_by': 'alice',
+      'Ai_summary.generated_at': 1748771200000,
+      'Ai_summary.highlights': [
         { title: 'Risk overview', text: 'Entity has elevated risk score.' },
       ],
-      'ai_summary.recommendedActions': ['Investigate login activity'],
-      'ai_summary.anomaly_job_ids': ['security-job-1'],
-      'ai_summary.variant_id': 'default',
-      'ai_summary.staleness': {
+      'Ai_summary.recommendedActions': ['Investigate login activity'],
+      'Ai_summary.anomaly_job_ids': ['security-job-1'],
+      'Ai_summary.variant_id': 'default',
+      'Ai_summary.staleness': {
         enabled_signals: ['risk_score'] as Array<'risk_score'>,
         snapshot: { risk_score: 72.5 },
       },
     };
     expect(fullDoc['event.ingested']).toBe('2026-06-01T10:00:05.000Z');
-    expect(fullDoc['ai_summary.recommendedActions']).toEqual(['Investigate login activity']);
-    expect(fullDoc['ai_summary.anomaly_job_ids']).toEqual(['security-job-1']);
-    expect(fullDoc['ai_summary.variant_id']).toBe('default');
+    expect(fullDoc['Ai_summary.recommendedActions']).toEqual(['Investigate login activity']);
+    expect(fullDoc['Ai_summary.anomaly_job_ids']).toEqual(['security-job-1']);
+    expect(fullDoc['Ai_summary.variant_id']).toBe('default');
   });
 
   it('pins event.kind to the literal "event"', () => {
@@ -84,28 +84,28 @@ describe('AiSummaryMetadataDoc', () => {
       'event.kind': 'event' as const,
       'event.action': 'ai_summary_generated' as const,
       'entity.type': 'user',
-      'ai_summary.generated_by': 'alice',
-      'ai_summary.generated_at': 1748771200000,
-      'ai_summary.highlights': [],
-      'ai_summary.staleness': { enabled_signals: [] as Array<'risk_score'>, snapshot: {} },
+      'Ai_summary.generated_by': 'alice',
+      'Ai_summary.generated_at': 1748771200000,
+      'Ai_summary.highlights': [],
+      'Ai_summary.staleness': { enabled_signals: [] as Array<'risk_score'>, snapshot: {} },
     };
     // @ts-expect-error entity.id is required
     const _bad: AiSummaryMetadataDoc = missingEntityId;
     expect(_bad).toBeDefined();
   });
 
-  it('rejects a document missing ai_summary.staleness at compile time', () => {
+  it('rejects a document missing Ai_summary.staleness at compile time', () => {
     const missingStaleness = {
       '@timestamp': '2026-06-01T10:00:00.000Z',
       'event.kind': 'event' as const,
       'event.action': 'ai_summary_generated' as const,
       'entity.id': 'user:alice@local',
       'entity.type': 'user',
-      'ai_summary.generated_by': 'alice',
-      'ai_summary.generated_at': 1748771200000,
-      'ai_summary.highlights': [],
+      'Ai_summary.generated_by': 'alice',
+      'Ai_summary.generated_at': 1748771200000,
+      'Ai_summary.highlights': [],
     };
-    // @ts-expect-error ai_summary.staleness is required
+    // @ts-expect-error Ai_summary.staleness is required
     const _bad: AiSummaryMetadataDoc = missingStaleness;
     expect(_bad).toBeDefined();
   });
@@ -114,13 +114,13 @@ describe('AiSummaryMetadataDoc', () => {
 // Flat keyword/date paths the component template declares for AI summary docs.
 const AI_SUMMARY_FLAT_TEMPLATE_PATHS = [
   'entity.type',
-  'ai_summary.generated_by',
-  'ai_summary.generated_at',
-  'ai_summary.recommendedActions',
-  'ai_summary.anomaly_job_ids',
-  'ai_summary.variant_id',
-  'ai_summary.staleness.enabled_signals',
-  'ai_summary.staleness.snapshot.risk_score',
+  'Ai_summary.generated_by',
+  'Ai_summary.generated_at',
+  'Ai_summary.recommendedActions',
+  'Ai_summary.anomaly_job_ids',
+  'Ai_summary.variant_id',
+  'Ai_summary.staleness.enabled_signals',
+  'Ai_summary.staleness.snapshot.risk_score',
 ] as const;
 
 // True iff A and B are mutually assignable — used for exhaustiveness enforcement.
@@ -137,13 +137,13 @@ const AI_SUMMARY_METADATA_FIELD_PATHS = [
   'event.ingested',
   'entity.id',
   'entity.type',
-  'ai_summary.generated_by',
-  'ai_summary.generated_at',
-  'ai_summary.highlights',
-  'ai_summary.recommendedActions',
-  'ai_summary.anomaly_job_ids',
-  'ai_summary.variant_id',
-  'ai_summary.staleness',
+  'Ai_summary.generated_by',
+  'Ai_summary.generated_at',
+  'Ai_summary.highlights',
+  'Ai_summary.recommendedActions',
+  'Ai_summary.anomaly_job_ids',
+  'Ai_summary.variant_id',
+  'Ai_summary.staleness',
 ] as const satisfies ReadonlyArray<keyof AiSummaryMetadataDoc>;
 
 type EnumeratedKeys = (typeof AI_SUMMARY_METADATA_FIELD_PATHS)[number];
@@ -162,13 +162,13 @@ describe('drift guard: AiSummaryMetadataDoc stays in sync with component templat
     expect(properties[path]).toBeDefined();
   });
 
-  it('declares ai_summary.highlights as an object mapping', () => {
-    expect(properties['ai_summary.highlights']).toBeDefined();
-    expect(properties['ai_summary.highlights']?.type).toBe('object');
+  it('declares Ai_summary.highlights as an object mapping', () => {
+    expect(properties['Ai_summary.highlights']).toBeDefined();
+    expect(properties['Ai_summary.highlights']?.type).toBe('object');
   });
 
-  it('declares ai_summary.generated_at as a date mapping', () => {
-    expect(properties['ai_summary.generated_at']).toBeDefined();
-    expect(properties['ai_summary.generated_at']?.type).toBe('date');
+  it('declares Ai_summary.generated_at as a date mapping', () => {
+    expect(properties['Ai_summary.generated_at']).toBeDefined();
+    expect(properties['Ai_summary.generated_at']?.type).toBe('date');
   });
 });

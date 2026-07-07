@@ -15,6 +15,7 @@ import type {
   GetPersistedAiSummaryResponse,
   PersistedEntityAiSummary,
 } from '@kbn/entity-store/common';
+import { AI_SUMMARY_EVENT_ACTION } from '@kbn/entity-store/common';
 import {
   MAX_ENTITY_ID_LENGTH,
   MAX_ENTITY_TYPE_LENGTH,
@@ -30,26 +31,23 @@ const GetAiSummaryRequestQuery = z.object({
   entityType: z.string().max(MAX_ENTITY_TYPE_LENGTH).optional(),
 });
 
-/** The discriminator that identifies AI-summary docs in the shared metadata datastream. */
-const AI_SUMMARY_EVENT_ACTION = 'ai_summary_generated';
-
 /**
- * Maps a raw metadata datastream doc (ai_summary.* prefixed fields) to the flat
+ * Maps a raw metadata datastream doc (Ai_summary.* prefixed fields) to the flat
  * shape the flyout renders. Kept here so the datastream envelope stays server-side.
  */
 const toPersistedSummary = (doc: AiSummaryMetadataDoc): PersistedEntityAiSummary => ({
-  highlights: doc['ai_summary.highlights'],
-  recommendedActions: doc['ai_summary.recommendedActions'] ?? null,
-  generated_at: doc['ai_summary.generated_at'],
-  generated_by: doc['ai_summary.generated_by'],
+  highlights: doc['Ai_summary.highlights'],
+  recommendedActions: doc['Ai_summary.recommendedActions'] ?? null,
+  generated_at: doc['Ai_summary.generated_at'],
+  generated_by: doc['Ai_summary.generated_by'],
   staleness: {
-    enabled_signals: doc['ai_summary.staleness'].enabled_signals,
-    snapshot: doc['ai_summary.staleness'].snapshot,
+    enabled_signals: doc['Ai_summary.staleness'].enabled_signals,
+    snapshot: doc['Ai_summary.staleness'].snapshot,
   },
-  ...(doc['ai_summary.anomaly_job_ids'] != null && {
-    anomaly_job_ids: doc['ai_summary.anomaly_job_ids'],
+  ...(doc['Ai_summary.anomaly_job_ids'] != null && {
+    anomaly_job_ids: doc['Ai_summary.anomaly_job_ids'],
   }),
-  ...(doc['ai_summary.variant_id'] != null && { variant_id: doc['ai_summary.variant_id'] }),
+  ...(doc['Ai_summary.variant_id'] != null && { variant_id: doc['Ai_summary.variant_id'] }),
 });
 
 export const entityDetailsGetAiSummaryRoute = ({

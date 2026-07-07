@@ -32,11 +32,11 @@ const STORED_DOC: AiSummaryMetadataDoc = {
   'event.action': 'ai_summary_generated',
   'entity.id': 'user:alice@local',
   'entity.type': 'user',
-  'ai_summary.generated_by': 'alice',
-  'ai_summary.generated_at': 1748771200000,
-  'ai_summary.highlights': [{ title: 'Risk overview', text: 'Elevated risk.' }],
-  'ai_summary.recommendedActions': ['Investigate login activity'],
-  'ai_summary.staleness': {
+  'Ai_summary.generated_by': 'alice',
+  'Ai_summary.generated_at': 1748771200000,
+  'Ai_summary.highlights': [{ title: 'Risk overview', text: 'Elevated risk.' }],
+  'Ai_summary.recommendedActions': ['Investigate login activity'],
+  'Ai_summary.staleness': {
     enabled_signals: ['risk_score'],
     snapshot: { risk_score: 72.5 },
   },

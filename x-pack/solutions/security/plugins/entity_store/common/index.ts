@@ -174,6 +174,7 @@ export type {
   RelationshipMetadataDoc,
   RelationshipMetadataMaintainer,
 } from './domain/entity_metadata/relationship_metadata';
+export { AI_SUMMARY_EVENT_ACTION } from './domain/entity_metadata/ai_summary_metadata';
 export type {
   AiSummaryMetadataDoc,
   AiSummaryHighlightItem,

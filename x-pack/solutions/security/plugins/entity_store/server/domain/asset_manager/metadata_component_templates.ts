@@ -40,16 +40,17 @@ export const getMetadataIndexMappings = (): MappingTypeMapping => ({
     'Maintainer.kind': { type: 'keyword' },
     'Maintainer.scan_id': { type: 'keyword' },
     'Maintainer.lookback_window': { type: 'keyword' },
-    // AI summary fields — scoped under ai_summary.* to avoid collisions with other doc types
+    // AI summary fields — scoped under the capitalized Ai_summary.* prefix so they can
+    // never collide with ECS fields (always lowercase) or other doc types in the stream.
     'entity.type': { type: 'keyword' },
-    'ai_summary.generated_by': { type: 'keyword' },
-    'ai_summary.generated_at': { type: 'date', format: 'epoch_millis' },
-    'ai_summary.highlights': { type: 'object', enabled: false },
-    'ai_summary.recommendedActions': { type: 'keyword', index: false, doc_values: false },
-    'ai_summary.anomaly_job_ids': { type: 'keyword' },
-    'ai_summary.variant_id': { type: 'keyword' },
-    'ai_summary.staleness.enabled_signals': { type: 'keyword' },
-    'ai_summary.staleness.snapshot.risk_score': { type: 'float' },
+    'Ai_summary.generated_by': { type: 'keyword' },
+    'Ai_summary.generated_at': { type: 'date', format: 'epoch_millis' },
+    'Ai_summary.highlights': { type: 'object', enabled: false },
+    'Ai_summary.recommendedActions': { type: 'keyword', index: false, doc_values: false },
+    'Ai_summary.anomaly_job_ids': { type: 'keyword' },
+    'Ai_summary.variant_id': { type: 'keyword' },
+    'Ai_summary.staleness.enabled_signals': { type: 'keyword' },
+    'Ai_summary.staleness.snapshot.risk_score': { type: 'float' },
   },
 });
 

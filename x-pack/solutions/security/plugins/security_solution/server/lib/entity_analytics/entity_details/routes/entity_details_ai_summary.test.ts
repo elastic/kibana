@@ -132,12 +132,12 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
     expect(docs[0]['event.kind']).toBe('event');
   });
 
-  it('derives ai_summary.generated_by from the authenticated user, not the request body', async () => {
+  it('derives Ai_summary.generated_by from the authenticated user, not the request body', async () => {
     const request = buildRequest();
     await server.inject(request, context);
 
     const [docs] = mockBulkAppendMetadata.mock.calls[0];
-    expect(docs[0]['ai_summary.generated_by']).toBe('test-user');
+    expect(docs[0]['Ai_summary.generated_by']).toBe('test-user');
   });
 
   it('sets entity.id and entity.type from the request body', async () => {
@@ -149,13 +149,13 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
     expect(docs[0]['entity.type']).toBe('user');
   });
 
-  it('includes ai_summary.highlights and ai_summary.staleness from the request body', async () => {
+  it('includes Ai_summary.highlights and Ai_summary.staleness from the request body', async () => {
     const request = buildRequest();
     await server.inject(request, context);
 
     const [docs] = mockBulkAppendMetadata.mock.calls[0];
-    expect(docs[0]['ai_summary.highlights']).toEqual(BASE_REQUEST_BODY.summary.highlights);
-    expect(docs[0]['ai_summary.staleness']).toEqual(BASE_REQUEST_BODY.summary.staleness);
+    expect(docs[0]['Ai_summary.highlights']).toEqual(BASE_REQUEST_BODY.summary.highlights);
+    expect(docs[0]['Ai_summary.staleness']).toEqual(BASE_REQUEST_BODY.summary.staleness);
   });
 
   it('uses asInternalUser — createEntityMetadataClient is called with the internal ES client', async () => {
@@ -171,7 +171,7 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
     expect(mockCreateEntityMetadataClient).toHaveBeenCalledWith(internalEsClient, 'default');
   });
 
-  it('falls back to "unknown" for ai_summary.generated_by when no authenticated user', async () => {
+  it('falls back to "unknown" for Ai_summary.generated_by when no authenticated user', async () => {
     // Same jest.Mock reference the converted context wraps, so this applies at request time.
     (ctx.core.security.authc.getCurrentUser as jest.Mock).mockReturnValue(null);
 
@@ -179,7 +179,7 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
     await server.inject(request, context);
 
     const [docs] = mockBulkAppendMetadata.mock.calls[0];
-    expect(docs[0]['ai_summary.generated_by']).toBe('unknown');
+    expect(docs[0]['Ai_summary.generated_by']).toBe('unknown');
   });
 
   it('caps highlights and recommendedActions in the persisted document', async () => {
@@ -203,14 +203,14 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
     await server.inject(request, context);
 
     const [docs] = mockBulkAppendMetadata.mock.calls[0];
-    expect(docs[0]['ai_summary.highlights']).toHaveLength(MAX_ENTITY_SUMMARY_HIGHLIGHTS);
-    expect(docs[0]['ai_summary.highlights']).toEqual(
+    expect(docs[0]['Ai_summary.highlights']).toHaveLength(MAX_ENTITY_SUMMARY_HIGHLIGHTS);
+    expect(docs[0]['Ai_summary.highlights']).toEqual(
       overshootHighlights.slice(0, MAX_ENTITY_SUMMARY_HIGHLIGHTS)
     );
-    expect(docs[0]['ai_summary.recommendedActions']).toHaveLength(
+    expect(docs[0]['Ai_summary.recommendedActions']).toHaveLength(
       MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS
     );
-    expect(docs[0]['ai_summary.recommendedActions']).toEqual(
+    expect(docs[0]['Ai_summary.recommendedActions']).toEqual(
       overshootActions.slice(0, MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS)
     );
   });

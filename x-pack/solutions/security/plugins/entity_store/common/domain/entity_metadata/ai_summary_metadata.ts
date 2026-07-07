@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+/**
+ * The `event.action` discriminator that identifies AI-summary docs in the shared
+ * metadata datastream. Reused by the write route, the read query, and the doc type
+ * so the literal is defined once.
+ */
+export const AI_SUMMARY_EVENT_ACTION = 'ai_summary_generated' as const;
+
 export interface AiSummaryHighlightItem {
   title: string;
   text: string;
@@ -23,26 +30,28 @@ export interface AiSummaryMetadataStaleness {
  * Document shape written to the entity metadata data stream
  * (`.entities.v2.metadata.security_{namespace}`) when an AI summary is generated.
  *
- * AI-summary-specific fields are scoped under the `ai_summary.*` prefix, following
+ * AI-summary-specific fields are scoped under the `Ai_summary.*` prefix, following
  * the `Maintainer.*` convention used by relationship metadata docs in the same stream.
- * This prevents naming conflicts as the stream gains new doc types over time.
+ * The prefix is capitalized so it can never collide with a future ECS field (ECS
+ * field names are always lowercase). This also prevents naming conflicts as the
+ * stream gains new doc types over time.
  *
  * Written via `EntityMetadataClient.bulkAppendMetadata` using `asInternalUser` —
- * no per-user index write privilege is required. `ai_summary.generated_by` records
+ * no per-user index write privilege is required. `Ai_summary.generated_by` records
  * the authenticated user who triggered generation and is set server-side.
  */
 export interface AiSummaryMetadataDoc {
   '@timestamp': string;
   'event.kind': 'event';
-  'event.action': 'ai_summary_generated';
+  'event.action': typeof AI_SUMMARY_EVENT_ACTION;
   'event.ingested'?: string;
   'entity.id': string;
   'entity.type': string;
-  'ai_summary.generated_by': string;
-  'ai_summary.generated_at': number;
-  'ai_summary.highlights': AiSummaryHighlightItem[];
-  'ai_summary.recommendedActions'?: string[] | null;
-  'ai_summary.anomaly_job_ids'?: string[];
-  'ai_summary.variant_id'?: string;
-  'ai_summary.staleness': AiSummaryMetadataStaleness;
+  'Ai_summary.generated_by': string;
+  'Ai_summary.generated_at': number;
+  'Ai_summary.highlights': AiSummaryHighlightItem[];
+  'Ai_summary.recommendedActions'?: string[] | null;
+  'Ai_summary.anomaly_job_ids'?: string[];
+  'Ai_summary.variant_id'?: string;
+  'Ai_summary.staleness': AiSummaryMetadataStaleness;
 }
