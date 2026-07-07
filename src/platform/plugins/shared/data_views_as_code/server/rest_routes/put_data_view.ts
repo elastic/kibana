@@ -41,6 +41,9 @@ export const registerPutDataViewAsCodeRoute = (
                 id: schema.string({
                   minLength: 1,
                   maxLength: 1_000,
+                  meta: {
+                    description: 'The data view id that will be created or updated.',
+                  },
                 }),
               },
               { unknowns: 'allow' }
