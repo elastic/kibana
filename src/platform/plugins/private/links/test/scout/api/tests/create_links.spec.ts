@@ -20,7 +20,7 @@ import {
 
 /** Minimal valid dashboard link object — uses a placeholder destination ID */
 const DASHBOARD_LINK = {
-  type: 'dashboard_link' as const,
+  type: 'dashboardLink' as const,
   destination: 'test-dashboard-id',
   options: {
     use_filters: false,
@@ -57,7 +57,7 @@ apiTest.describe('links - create', { tag: tags.deploymentAgnostic }, () => {
     expect(response.body.id).toBeDefined();
     expect(response.body.data.title).toBe(MINIMAL_LINKS_BODY.title);
     expect(response.body.data.links).toHaveLength(1);
-    expect(response.body.data.links[0].type).toBe('external_link');
+    expect(response.body.data.links[0].type).toBe('externalLink');
     expect(response.body.meta.created_at).toBeDefined();
     expect(response.body.meta.updated_at).toBeDefined();
   });
@@ -77,7 +77,7 @@ apiTest.describe('links - create', { tag: tags.deploymentAgnostic }, () => {
 
     expect(response).toHaveStatusCode(201);
     expect(response.body.id).toBeDefined();
-    expect(response.body.data.links[0].type).toBe('dashboard_link');
+    expect(response.body.data.links[0].type).toBe('dashboardLink');
   });
 
   apiTest(
@@ -137,7 +137,7 @@ apiTest.describe('links - create', { tag: tags.deploymentAgnostic }, () => {
 
     expect(response).toHaveStatusCode(400);
     expect(response.body.message).toBe(
-      '[request body.links.0]: expected "type" to be one of ["dashboard_link", "external_link"] but got ["invalidLinkType"]'
+      '[request body.links.0]: expected "type" to be one of ["dashboardLink", "externalLink"] but got ["invalidLinkType"]'
     );
   });
 

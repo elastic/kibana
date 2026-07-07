@@ -137,7 +137,7 @@ export const DashboardLinkDestinationPicker = ({
           onDestinationPicked(undefined);
         }
       }}
-      data-test-subj="links--linkEditor--dashboard_link--comboBox"
+      data-test-subj="links--linkEditor--dashboardLink--comboBox"
       inputPopoverProps={{ panelProps: { css: styles } }}
     />
   );

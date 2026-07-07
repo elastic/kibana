@@ -21,7 +21,7 @@ export const COMMON_HEADERS = {
 
 /** Minimal valid external link object */
 export const EXTERNAL_LINK = {
-  type: 'external_link' as const,
+  type: 'externalLink' as const,
   destination: 'https://example.com',
   options: {
     encode_url: true,

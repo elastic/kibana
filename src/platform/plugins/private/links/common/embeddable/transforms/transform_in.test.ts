@@ -66,7 +66,7 @@ describe('transformIn', () => {
                 "use_filters": true,
                 "use_time_range": true,
               },
-              "type": "dashboard_link",
+              "type": "dashboardLink",
             },
           ],
           "title": "Custom title",

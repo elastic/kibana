@@ -103,11 +103,11 @@ export class DashboardPageLinks extends FtrService {
       await this.testSubjects.click('links--panelEditor--addLinkBtn');
       await this.expectLinkEditorFlyoutIsOpen();
     });
-    const radioOption = await this.testSubjects.find('links--linkEditor--dashboard_link--radioBtn');
-    const label = await radioOption.findByCssSelector('label[for="dashboard_link"]');
+    const radioOption = await this.testSubjects.find('links--linkEditor--dashboardLink--radioBtn');
+    const label = await radioOption.findByCssSelector('label[for="dashboardLink"]');
     await label.click();
 
-    await this.comboBox.set('links--linkEditor--dashboard_link--comboBox', destination);
+    await this.comboBox.set('links--linkEditor--dashboardLink--comboBox', destination);
     if (linkLabel) {
       await this.testSubjects.setValue('links--linkEditor--linkLabel--input', linkLabel);
     }
@@ -208,14 +208,14 @@ export class DashboardPageLinks extends FtrService {
       await this.expectLinkEditorFlyoutIsOpen();
     });
     await this.retry.try(async () => {
-      const option = await this.testSubjects.find('links--linkEditor--external_link--radioBtn');
-      const label = await option.findByCssSelector('label[for="external_link"]');
+      const option = await this.testSubjects.find('links--linkEditor--externalLink--radioBtn');
+      const label = await option.findByCssSelector('label[for="externalLink"]');
       await label.click();
-      if (!(await this.testSubjects.exists('links--linkEditor--external_link--input'))) {
+      if (!(await this.testSubjects.exists('links--linkEditor--externalLink--input'))) {
         throw new Error('External link input did not render');
       }
     });
-    await this.testSubjects.setValue('links--linkEditor--external_link--input', destination);
+    await this.testSubjects.setValue('links--linkEditor--externalLink--input', destination);
   }
 
   public async toggleSaveByReference(checked: boolean) {

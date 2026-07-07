@@ -13,7 +13,7 @@ import type { StoredLinksByValueState910 } from './bwc';
 import { transformOut } from './transform_out';
 
 describe('transformOut', () => {
-  test('should convert camelCase dashboard link by-value state to snake_case', () => {
+  test('should convert camelCase dashboard link options by-value state to snake_case', () => {
     const byValueState = {
       title: 'Custom title',
       layout: 'vertical',
@@ -28,10 +28,9 @@ describe('transformOut', () => {
           } as unknown,
         },
       ],
-    } as unknown as LinksEmbeddableState;
-    const transformed = transformOut(byValueState, []) as LinksByValueState;
-    expect(transformed.links[0].type).toEqual('dashboard_link');
-    expect(transformed.links[0].options).toMatchInlineSnapshot(`
+    } as LinksEmbeddableState;
+    expect((transformOut(byValueState, []) as LinksByValueState).links[0].options)
+      .toMatchInlineSnapshot(`
       Object {
         "open_in_new_tab": false,
         "use_filters": false,
@@ -40,7 +39,7 @@ describe('transformOut', () => {
     `);
   });
 
-  test('should convert camelCase external link by-value state to snake_case', () => {
+  test('should convert camelCase external link options by-value state to snake_case', () => {
     const byValueState = {
       title: 'Custom title',
       layout: 'vertical',
@@ -54,10 +53,9 @@ describe('transformOut', () => {
           } as unknown,
         },
       ],
-    } as unknown as LinksEmbeddableState;
-    const transformed = transformOut(byValueState, []) as LinksByValueState;
-    expect(transformed.links[0].type).toEqual('external_link');
-    expect(transformed.links[0].options).toMatchInlineSnapshot(`
+    } as LinksEmbeddableState;
+    expect((transformOut(byValueState, []) as LinksByValueState).links[0].options)
+      .toMatchInlineSnapshot(`
       Object {
         "encode_url": true,
         "open_in_new_tab": false,
@@ -71,7 +69,7 @@ describe('transformOut', () => {
       layout: 'vertical',
       links: [
         {
-          type: 'external_link',
+          type: 'externalLink',
           destination: 'https://github.com/',
           options: {
             open_in_new_tab: true,
@@ -103,13 +101,12 @@ describe('transformOut', () => {
           order: 0,
         },
       ],
-    } as unknown as StoredLinksEmbeddableState;
-    const transformed = transformOut(byValueState, []) as LinksByValueState;
-    expect(transformed.links).toMatchInlineSnapshot(`
+    } as StoredLinksEmbeddableState;
+    expect((transformOut(byValueState, []) as LinksByValueState).links).toMatchInlineSnapshot(`
       Array [
         Object {
           "destination": "https://github.com/",
-          "type": "external_link",
+          "type": "externalLink",
         },
       ]
     `);
@@ -134,7 +131,7 @@ describe('transformOut', () => {
         "links": Array [
           Object {
             "destination": "https://example.com/",
-            "type": "external_link",
+            "type": "externalLink",
           },
         ],
         "title": "Custom title",
@@ -152,7 +149,7 @@ describe('transformOut', () => {
           destinationRefName: 'link_e2ab286f-0945-4e17-b256-f497b6c3102e_dashboard',
         },
       ],
-    } as unknown as StoredLinksEmbeddableState;
+    } as StoredLinksEmbeddableState;
     const references = [
       {
         name: 'link_e2ab286f-0945-4e17-b256-f497b6c3102e_dashboard',
@@ -166,7 +163,7 @@ describe('transformOut', () => {
         "links": Array [
           Object {
             "destination": "7adfa750-4c81-11e8-b3d7-01146121b73d",
-            "type": "dashboard_link",
+            "type": "dashboardLink",
           },
         ],
         "title": "Custom title",
@@ -187,7 +184,7 @@ describe('transformOut', () => {
             destinationRefName: 'link_e2ab286f-0945-4e17-b256-f497b6c3102e_dashboard',
           },
         ],
-      } as unknown as StoredLinksByValueState910['attributes'],
+      } as StoredLinksByValueState910['attributes'],
     };
     const references = [
       {
@@ -202,7 +199,7 @@ describe('transformOut', () => {
         "links": Array [
           Object {
             "destination": "7adfa750-4c81-11e8-b3d7-01146121b73d",
-            "type": "dashboard_link",
+            "type": "dashboardLink",
           },
         ],
         "title": "Custom title",

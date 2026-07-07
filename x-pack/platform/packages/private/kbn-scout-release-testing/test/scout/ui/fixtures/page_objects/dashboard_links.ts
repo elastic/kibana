@@ -57,16 +57,16 @@ export class DashboardLinks {
 
     // Link types
     this.dashboardLinkRadioBtn = this.page.testSubj.locator(
-      'links--linkEditor--dashboard_link--radioBtn'
+      'links--linkEditor--dashboardLink--radioBtn'
     );
     this.externalLinkRadioBtn = this.page.testSubj.locator(
-      'links--linkEditor--external_link--radioBtn'
+      'links--linkEditor--externalLink--radioBtn'
     );
     this.dashboardLinkComboBox = new EuiComboBoxWrapper(
       this.page,
-      'links--linkEditor--dashboard_link--comboBox'
+      'links--linkEditor--dashboardLink--comboBox'
     );
-    this.externalLinkInput = this.page.testSubj.locator('links--linkEditor--external_link--input');
+    this.externalLinkInput = this.page.testSubj.locator('links--linkEditor--externalLink--input');
 
     // Links panel
     this.linksListGroup = this.page.testSubj.locator('links--component--listGroup');
@@ -194,7 +194,7 @@ export class DashboardLinks {
     await this.expectLinkEditorFlyoutIsOpen();
 
     // Select dashboard link type
-    await this.dashboardLinkRadioBtn.locator('label[for="dashboard_link"]').click();
+    await this.dashboardLinkRadioBtn.locator('label[for="dashboardLink"]').click();
 
     // Set destination via combo box
     await this.dashboardLinkComboBox.selectSingleOption(destination);
@@ -251,7 +251,7 @@ export class DashboardLinks {
     await this.expectLinkEditorFlyoutIsOpen();
 
     // Select external link type
-    await this.externalLinkRadioBtn.locator('label[for="external_link"]').click();
+    await this.externalLinkRadioBtn.locator('label[for="externalLink"]').click();
 
     await this.externalLinkInput.fill(destination);
   }

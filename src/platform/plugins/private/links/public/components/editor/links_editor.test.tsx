@@ -24,14 +24,14 @@ describe('LinksEditor', () => {
   const someLinks: ResolvedLink[] = [
     {
       id: 'foo',
-      type: 'dashboard_link' as const,
+      type: 'dashboardLink' as const,
       destination: '123',
       title: 'dashboard 01',
       options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
     },
     {
       id: 'bar',
-      type: 'dashboard_link' as const,
+      type: 'dashboardLink' as const,
       destination: '456',
       title: 'dashboard 02',
       description: 'awesome dashboard if you ask me',
@@ -39,14 +39,14 @@ describe('LinksEditor', () => {
     },
     {
       id: 'bizz',
-      type: 'external_link' as const,
+      type: 'externalLink' as const,
       destination: 'http://example.com',
       title: 'http://example.com',
       options: DEFAULT_EXTERNAL_LINK_OPTIONS,
     },
     {
       id: 'buzz',
-      type: 'external_link' as const,
+      type: 'externalLink' as const,
       destination: 'http://elastic.co',
       title: 'Elastic website',
       options: DEFAULT_EXTERNAL_LINK_OPTIONS,
