@@ -11,10 +11,10 @@ import type { ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/s
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { notFound, serverUnavailable } from '@hapi/boom';
 import {
-  STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
-  STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
-  STREAMS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
-  STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -502,13 +502,13 @@ const createWorkflowTriggerRoute = (
 
 const scrapeConversationsRoute = createWorkflowTriggerRoute(
   'POST /internal/streams/memory/_scrape_conversations',
-  STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
   'Trigger conversation scraping for memory'
 );
 
 const consolidateMemoryRoute = createWorkflowTriggerRoute(
   'POST /internal/streams/memory/_consolidate',
-  STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
   'Trigger memory consolidation'
 );
 
@@ -546,15 +546,15 @@ const synthesizeMemoryRoute = createServerRoute({
 
 const detectGapsRoute = createWorkflowTriggerRoute(
   'POST /internal/streams/memory/_detect_gaps',
-  STREAMS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
   'Trigger gap detection for memory'
 );
 
 const MEMORY_WORKFLOW_IDS = [
-  STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
-  STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
-  STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID,
-  STREAMS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
 ] as const;
 
 const getMemoryWorkflowsEnabledRoute = createServerRoute({
