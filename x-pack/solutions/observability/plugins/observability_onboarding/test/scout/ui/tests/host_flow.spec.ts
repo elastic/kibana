@@ -68,7 +68,10 @@ test.describe.serial(
       page,
     }) => {
       await pageObjects.host.gotoPath('/host/linux');
-      await pageObjects.host.ingestionSelector().waitFor({ state: 'visible' });
+      // The ingestion selector's visibility depends on wiredStreamsStatus.isLoading, an async
+      // status check that can exceed the default 10s under serverless parallel load. Wait
+      // explicitly (matching the 30s wait later in this test).
+      await pageObjects.host.ingestionSelector().waitFor({ state: 'visible', timeout: 30_000 });
 
       await test.step('select Wired Streams ingestion', async () => {
         await pageObjects.onboarding.selectWiredStreams();
