@@ -30,6 +30,7 @@ import { ColorMappingByValues } from '../../../shared_components/coloring/color_
 import { ColorMappingByTerms } from '../../../shared_components/coloring/color_mapping_by_terms';
 import {
   getColumnAlignment,
+  getSupportedColumnAlignment,
   getDataBoundsForAccessor,
   getColorByValuePalette,
   getDefaultProgressPalette,
@@ -171,13 +172,8 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
 
   // A terms-colored bucket is treated as bucketed; everything else offered here is numeric.
   const columnKind: ColumnKind = showColorByTerms ? 'bucketed' : 'numeric';
-  const decoration = getCellDecorationCapabilities(currentColorMode);
   const currentAlignment = getColumnAlignment(column, isNumeric);
-  // Fall back to the decoration's preferred alignment when the current one is unsupported.
-  const effectiveAlignment =
-    isAlignmentSupported(currentColorMode, currentAlignment as CellAlignment) || !decoration
-      ? currentAlignment
-      : decoration.defaultAlignment ?? currentAlignment;
+  const effectiveAlignment = getSupportedColumnAlignment(column, isNumeric);
   const visibleColumnsCount = localState.columns.filter((c) => !c.hidden).length;
 
   const colorModeOptions = getColorModeOptions(showDynamicColoringFeature ? columnKind : undefined);
@@ -307,7 +303,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 // Coerce to the decoration's preferred alignment when the current
                 // one is unsupported (e.g. center under a progress bar).
                 if (
-                  !isAlignmentSupported(newMode, currentAlignment as CellAlignment) &&
+                  !isAlignmentSupported(newMode, currentAlignment) &&
                   nextDecoration.defaultAlignment
                 ) {
                   params.alignment = nextDecoration.defaultAlignment;

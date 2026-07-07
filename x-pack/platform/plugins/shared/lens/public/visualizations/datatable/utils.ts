@@ -29,7 +29,7 @@ import type {
   CellDecorationValueRange,
 } from '@kbn/lens-common';
 import { defaultPaletteParams, findMinMaxByColumnId } from '../../shared_components';
-import { getCellDecorationCapabilities } from './cell_decoration';
+import { getCellDecorationCapabilities, isAlignmentSupported } from './cell_decoration';
 
 type ProgressBarPaletteParams =
   | Pick<CustomPaletteParams, 'rangeType' | 'steps' | 'stops'>
@@ -47,6 +47,21 @@ export function getColumnAlignment<C extends { alignment?: 'left' | 'right' | 'c
 ): 'left' | 'right' | 'center' {
   if (alignment) return alignment;
   return isNumeric ? 'right' : 'left';
+}
+
+export function getSupportedColumnAlignment<
+  C extends {
+    alignment?: 'left' | 'right' | 'center';
+    colorMode?: ColumnCellDecorationMode;
+  }
+>(column: C, isNumeric = false): 'left' | 'right' | 'center' {
+  const currentAlignment = getColumnAlignment(column, isNumeric);
+  const colorMode = column.colorMode ?? 'none';
+  const decoration = getCellDecorationCapabilities(colorMode);
+
+  return isAlignmentSupported(colorMode, currentAlignment)
+    ? currentAlignment
+    : decoration.defaultAlignment ?? currentAlignment;
 }
 
 export function hasIncompatibleColorConfig({

@@ -485,6 +485,16 @@ describe('data table dimension editor', () => {
       expect(centerButton).toBeDisabled();
     });
 
+    it('shows the supported alignment when a progress column is stored with center alignment', () => {
+      mockFirstColumn({ dataType: 'number' });
+      state.columns[0].colorMode = 'progress';
+      state.columns[0].alignment = 'center';
+      state.columns[0].fillStyle = { fillMode: 'single' };
+      renderTableDimensionEditor();
+
+      expect(btnGroups.alignment.getSelected()).toHaveTextContent('Right');
+    });
+
     it('renders progress bar controls (Bar color + Value range) in progress mode', () => {
       mockFirstColumn({ dataType: 'number' });
       state.columns[0].colorMode = 'progress';
