@@ -266,7 +266,13 @@ export class CasePlugin
       isCasesAttachmentsEnabled: this.caseConfig.attachments?.enabled === true,
     });
 
-    registerCaseWorkflowSteps(plugins.workflowsExtensions, getCasesClient);
+    registerCaseWorkflowSteps(
+      plugins.workflowsExtensions,
+      getCasesClient,
+      this.unifiedAttachmentTypeRegistry,
+      this.caseConfig.attachments?.enabled === true,
+      () => core.getStartServices()
+    );
     registerCaseWorkflowTriggers(plugins.workflowsExtensions);
 
     if (plugins.agentBuilder) {
