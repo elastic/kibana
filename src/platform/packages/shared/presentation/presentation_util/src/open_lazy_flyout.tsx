@@ -49,13 +49,6 @@ interface OpenLazyFlyoutParams {
  *
  * @returns A handle to the opened flyout (`OverlayRef`).
  */
-/**
- * Stable DOM id for a panel's context menu ("...") toggle button. Shared with the
- * embeddable panel hover actions (which render the button) so that focus can be
- * returned to the persistent toggle when a flyout opened from the panel closes,
- * even if the action that opened it ran asynchronously and the context menu (and the
- * transient menu item that had focus) was already torn down (WCAG 2.4.3 Focus Order).
- */
 export const getPanelContextMenuTriggerId = (panelId: string) =>
   `presentationPanelContextMenu-${panelId}`;
 
@@ -82,12 +75,6 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
   const type = flyoutProps?.type ?? panelFlyoutTypeFromParent ?? 'push';
   const ownFocus = flyoutProps?.ownFocus ?? panelFlyoutTypeFromParent !== 'overlay';
 
-  // Capture the element that had focus when the flyout was opened so focus can be
-  // returned to it when the flyout closes. This keeps keyboard and screen reader
-  // users on the triggering element (e.g. a panel action button) instead of
-  // sending them to the top of the DOM (WCAG 2.4.3 Focus Order). Ignore `<body>`,
-  // which means focus was already lost (e.g. a context menu closed before an async
-  // action opened the flyout) — the panel fallback below handles that case.
   const previouslyFocusedElement =
     document.activeElement instanceof HTMLElement && document.activeElement !== document.body
       ? document.activeElement

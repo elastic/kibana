@@ -63,14 +63,6 @@ const getContextMenuAriaLabel = (title?: string, index?: number) => {
 
 const ALLOWED_NOTIFICATIONS = ['ACTION_FILTERS_NOTIFICATION'] as const;
 
-/**
- * Stable DOM id for the panel quick action buttons. This lets overlays opened by
- * an action (e.g. the panel settings/edit flyout) return focus to the triggering
- * button when they close, even if opening the flyout re-renders the panel and
- * replaces the original button node (WCAG 2.4.3 Focus Order). The context menu
- * toggle uses the shared `getPanelContextMenuTriggerId` so `openLazyFlyout` can
- * restore focus to it for actions launched from the "..." menu.
- */
 const getQuickActionElementId = (actionId: string, uuid: string) =>
   `presentationPanelQuickAction-${actionId}-${uuid}`;
 
