@@ -39,7 +39,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { BackgroundSearchRestoredCallout } from '@kbn/background-search';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { QuerySource, type ESQLQueryStats } from '@kbn/esql-types';
+import { type ESQLQueryStats } from '@kbn/esql-types';
 import { ESQLEditorTelemetryService } from '@kbn/esql/public';
 import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
 import type { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
@@ -54,7 +54,7 @@ import type { QueryBarTopRowProps } from '../query_string_input/query_bar_top_ro
 import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
 import { searchBarStyles } from './search_bar.styles';
-import { QuerySubmitTrigger, type QuerySubmitMetadata } from './query_submit_metadata';
+import { getESQLQuerySubmittedTelemetry, type QuerySubmitMetadata } from './query_submit_metadata';
 
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IUnifiedSearchPluginServices>;
@@ -502,39 +502,14 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     );
   };
 
-  private getESQLSubmitSource(
-    metadata?: QuerySubmitMetadata
-  ): QuerySource.SEARCH_BUTTON | QuerySource.TIME_FILTER | undefined {
-    switch (metadata?.trigger) {
-      case QuerySubmitTrigger.QUERY_BAR_SUBMIT:
-        return QuerySource.SEARCH_BUTTON;
-      case QuerySubmitTrigger.TIME_FILTER:
-        return QuerySource.TIME_FILTER;
-      // Editor-internal submits (QuerySubmitTrigger.TEXT_BASED_EDITOR) are intentionally not tracked here:
-      // the ESQL editor (@kbn/esql-editor) already emits its own `esql.query_submitted` event for those
-      // (with sources like MANUAL, QUICK_SEARCH, HISTORY, etc.). Adding a case for it would double-count.
-      default:
-        return;
-    }
-  }
-
   private trackESQLQuerySubmitted(
     query: Query | AggregateQuery | undefined,
     metadata?: QuerySubmitMetadata
   ) {
-    if (!query || !isOfAggregateQueryType(query)) {
-      return;
+    const telemetry = getESQLQuerySubmittedTelemetry(query, metadata);
+    if (telemetry) {
+      this.esqlTelemetryService.trackQuerySubmitted(telemetry);
     }
-
-    const source = this.getESQLSubmitSource(metadata);
-    if (!source) {
-      return;
-    }
-
-    this.esqlTelemetryService.trackQuerySubmitted({
-      source,
-      query: query.esql,
-    });
   }
 
   public onQueryBarSubmit = (

@@ -30,9 +30,6 @@ import { createMockStorage, createMockTimeHistory } from './mocks';
 import { SearchSessionState } from '@kbn/data-plugin/public';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
-import { QuerySource } from '@kbn/esql-types';
-import type { AggregateQuery } from '@kbn/es-query';
-import { QuerySubmitTrigger } from './query_submit_metadata';
 
 const startMock = coreMock.createStart();
 startMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
@@ -93,7 +90,6 @@ function wrapSearchBarInContext(
     settings: startMock.settings,
     notifications: startMock.notifications,
     http: startMock.http,
-    analytics: startMock.analytics,
     theme: startMock.theme,
     docLinks: startMock.docLinks,
     storage: createMockStorage(),
@@ -417,116 +413,6 @@ describe('SearchBar', () => {
       // is not equal with props for dateRange which is undefined
       true
     );
-  });
-
-  describe('ES|QL query submitted telemetry', () => {
-    const createSearchBarUI = (query: SearchBarProps<AggregateQuery>['query'] = esqlQuery) => {
-      const component = new SearchBarUI<AggregateQuery>({
-        kibana: {
-          services: {
-            analytics: startMock.analytics,
-            appName: 'test',
-            data: {
-              query: {
-                savedQueries: {},
-              },
-            },
-          },
-        },
-        intl: null,
-        query,
-      } as any);
-
-      jest.spyOn(component, 'setState').mockImplementation((stateUpdate: any, callback?: any) => {
-        const statePatch =
-          typeof stateUpdate === 'function'
-            ? stateUpdate(component.state, component.props)
-            : stateUpdate;
-        if (statePatch) {
-          component.state = { ...component.state, ...statePatch };
-        }
-        callback?.call(component);
-      });
-
-      return component;
-    };
-
-    beforeEach(() => {
-      startMock.analytics.reportEvent.mockClear();
-    });
-
-    it('tracks ES|QL submissions from the top row search button', () => {
-      const component = createSearchBarUI();
-
-      component.onQueryBarSubmit(
-        {
-          query: esqlQuery,
-          dateRange: { from: 'now-15m', to: 'now' },
-        },
-        { trigger: QuerySubmitTrigger.QUERY_BAR_SUBMIT }
-      );
-
-      expect(startMock.analytics.reportEvent).toHaveBeenCalledWith(
-        'esql.query_submitted',
-        expect.objectContaining({
-          query_source: QuerySource.SEARCH_BUTTON,
-          query_lines: '1',
-        })
-      );
-      expect((startMock.analytics.reportEvent as jest.Mock).mock.calls[0][1]).not.toHaveProperty(
-        'source_command'
-      );
-      expect((startMock.analytics.reportEvent as jest.Mock).mock.calls[0][1]).not.toHaveProperty(
-        'data_source_category'
-      );
-    });
-
-    it('tracks ES|QL submissions from the time filter trigger', () => {
-      const component = createSearchBarUI();
-
-      component.onQueryBarSubmit(
-        {
-          query: esqlQuery,
-          dateRange: { from: 'now-30m', to: 'now' },
-        },
-        { trigger: QuerySubmitTrigger.TIME_FILTER }
-      );
-
-      expect(startMock.analytics.reportEvent).toHaveBeenCalledWith(
-        'esql.query_submitted',
-        expect.objectContaining({
-          query_source: QuerySource.TIME_FILTER,
-        })
-      );
-    });
-
-    it('does not double count ES|QL editor submissions', () => {
-      const component = createSearchBarUI();
-
-      component.onQueryBarSubmit(
-        {
-          query: esqlQuery,
-          dateRange: { from: 'now-15m', to: 'now' },
-        },
-        { trigger: QuerySubmitTrigger.TEXT_BASED_EDITOR }
-      );
-
-      expect(startMock.analytics.reportEvent).not.toHaveBeenCalled();
-    });
-
-    it('does not track non-ES|QL submissions', () => {
-      const component = createSearchBarUI(kqlQuery);
-
-      component.onQueryBarSubmit(
-        {
-          query: kqlQuery,
-          dateRange: { from: 'now-15m', to: 'now' },
-        },
-        { trigger: QuerySubmitTrigger.QUERY_BAR_SUBMIT }
-      );
-
-      expect(startMock.analytics.reportEvent).not.toHaveBeenCalled();
-    });
   });
 
   describe('SearchBarUI.getDerivedStateFromProps', () => {
