@@ -6,14 +6,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  transparentize,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { Change } from 'diff';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -120,6 +113,7 @@ const MonacoDiffViewer: React.FC<{
   const contentHeight = measuredHeight ?? estimatedHeight;
   const collapsedHeight = Math.min(contentHeight, COLLAPSED_HEIGHT);
   const needsExpansion = contentHeight > COLLAPSED_HEIGHT;
+  const hiddenLines = Math.max(0, Math.ceil((contentHeight - collapsedHeight) / LINE_HEIGHT));
 
   const handleFocus = useCallback(() => {
     setIsActive(true);
@@ -231,40 +225,36 @@ const MonacoDiffViewer: React.FC<{
   }, []);
 
   return (
-    <div
-      css={styles.wrapper}
-      style={isExpanded ? undefined : { height: collapsedHeight, overflow: 'hidden' }}
-    >
-      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
-      <div
-        ref={containerRef}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        onKeyDown={handleKeyDown}
-        tabIndex={0}
-        role="region"
-        aria-label="Workflow diff"
-        style={{ height: contentHeight, width: '100%' }}
-      />
-      {needsExpansion && !isExpanded && (
-        <div css={styles.expandBar}>
-          <EuiButtonEmpty size="xs" color="primary" onClick={handleExpand}>
-            <EuiBadge iconType="arrowDown" color="primary">
-              {i18n.translate('workflowsManagement.attachmentRenderers.diff.showAll', {
-                defaultMessage: 'Show all',
-              })}
-            </EuiBadge>
-          </EuiButtonEmpty>
-        </div>
-      )}
-      {needsExpansion && isExpanded && (
-        <div css={styles.collapseBar}>
-          <EuiButtonEmpty size="xs" color="primary" onClick={handleCollapse}>
-            <EuiBadge iconType="arrowUp" color="primary">
-              {i18n.translate('workflowsManagement.attachmentRenderers.diff.collapse', {
-                defaultMessage: 'Collapse',
-              })}
-            </EuiBadge>
+    <div css={styles.wrapper}>
+      <div style={isExpanded ? undefined : { height: collapsedHeight, overflow: 'hidden' }}>
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+        <div
+          ref={containerRef}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          tabIndex={0}
+          role="region"
+          aria-label="Workflow diff"
+          style={{ height: contentHeight, width: '100%' }}
+        />
+      </div>
+      {needsExpansion && (
+        <div css={styles.toggleBar}>
+          <EuiButtonEmpty
+            size="xs"
+            color="primary"
+            onClick={isExpanded ? handleCollapse : handleExpand}
+          >
+            {isExpanded
+              ? i18n.translate('workflowsManagement.attachmentRenderers.diff.showLess', {
+                  defaultMessage: 'Show less',
+                })
+              : i18n.translate('workflowsManagement.attachmentRenderers.diff.showMore', {
+                  defaultMessage:
+                    'Show {hiddenLines, plural, one {# more line} other {# more lines}}',
+                  values: { hiddenLines },
+                })}
           </EuiButtonEmpty>
         </div>
       )}
@@ -331,68 +321,29 @@ const componentStyles = {
   wrapper: ({ euiTheme }: UseEuiTheme) =>
     css({
       position: 'relative',
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       '.diff-hidden-lines .center': {
         gap: euiTheme.size.s,
       },
     }),
-  expandBar: ({ euiTheme }: UseEuiTheme) =>
+  toggleBar: ({ euiTheme }: UseEuiTheme) =>
     css({
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      height: 48,
-
-      '.euiButtonEmpty': {
-        width: '100%',
-        height: '100%',
-        borderTopLeftRadius: 0,
-        borderTopRightRadius: 0,
-      },
-
-      '&:before': {
-        content: '""',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        transition: 'opacity 0.15s ease-out',
-        opacity: 0.7,
-        '&:hover': {
-          opacity: 1,
-        },
-
-        background: `linear-gradient(
-          to bottom,
-          ${transparentize(euiTheme.colors.backgroundBasePlain, 0)} 0%,
-          ${transparentize(euiTheme.colors.backgroundBasePlain, 0.6)} 40%,
-          ${euiTheme.colors.backgroundBasePlain} 100%
-        )`,
-      },
-    }),
-  collapseBar: () =>
-    css({
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      height: 48,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'transparent',
+      borderTop: euiTheme.border.thin,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       '.euiButtonEmpty': {
         width: '100%',
-        height: '100%',
-        borderTopLeftRadius: 0,
-        borderTopRightRadius: 0,
+        height: 40,
+        borderRadius: 0,
       },
     }),
   header: ({ euiTheme }: UseEuiTheme) =>
     css({
       padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
       borderBottom: euiTheme.border.thin,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
     }),
   headerName: css({
     overflow: 'hidden',
