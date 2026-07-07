@@ -6,8 +6,14 @@
  */
 
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import type { InferenceConnector, EisInferenceEndpointMetadata } from '@kbn/inference-common';
+import type {
+  InferenceConnector,
+  EisInferenceEndpointMetadata,
+  CspRegion,
+} from '@kbn/inference-common';
 import { INFERENCE_CONNECTORS_INTERNAL_API_PATH } from '@kbn/inference-common';
+
+export type { CspRegion };
 
 /** Route path constants (const object so imported paths stay type-narrowed as `string`). */
 export const APIRoutes = {
@@ -83,9 +89,7 @@ export type EisInferenceEndpoint = InferenceAPIConfigResponse & {
 };
 
 export type InferenceEndpointWithMetadata = EisInferenceEndpoint & {
-  metadata: EisInferenceEndpointMetadata & {
-    regions?: EisRegion[];
-  };
+  metadata: EisInferenceEndpointMetadata;
 };
 
 export type InferenceEndpointWithDisplayNameMetadata = InferenceEndpointWithMetadata & {
@@ -103,20 +107,6 @@ export type InferenceEndpointWithDisplayCreatorMetadata = InferenceEndpointWithM
     };
   };
 };
-
-export interface CspRegion {
-  csp: string;
-  region: string;
-  geo?: string;
-}
-
-/** A region entry that carries only a geographic zone with no CSP/region detail. */
-export interface GeoOnlyRegion {
-  geo: string;
-}
-
-/** Union of all region entry shapes returned by the EIS metadata.regions field. */
-export type EisRegion = CspRegion | GeoOnlyRegion;
 
 export interface RegionPolicyBody {
   allowed_regions?: CspRegion[];
