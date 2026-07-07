@@ -278,6 +278,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
                 height: 100%;
                 overflow-y: auto;
                 padding: ${euiTheme.size.l};
+                ${logicalCSS('padding-right', '0')}
                 border-left: ${euiTheme.border.thin};
               }
             `}

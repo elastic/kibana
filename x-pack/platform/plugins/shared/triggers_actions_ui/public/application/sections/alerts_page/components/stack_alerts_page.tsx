@@ -15,6 +15,8 @@ import {
   ALERT_STATUS_UNTRACKED,
   AlertConsumers,
   isSiemRuleType,
+  STACK_ALERTS_ONLY_FEATURE_ID,
+  OBSERVABILITY_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { BoolQuery, Filter } from '@kbn/es-query';
@@ -48,6 +50,7 @@ import type { RuleTypeIdsByFeatureId } from '../hooks/use_rule_type_ids_by_featu
 import { useRuleTypeIdsByFeatureId } from '../hooks/use_rule_type_ids_by_feature_id';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
 import { NON_SIEM_CONSUMERS } from '../../alerts_search_bar/constants';
+import { ALL_NON_SIEM_RULE_TYPE_IDS } from '../constants';
 import { RuleAlertActionsCell } from '../../rule_details/components/rule_alert_actions_cell';
 
 /**
@@ -77,12 +80,21 @@ const PageContentWrapperComponent: React.FC = () => {
     setBreadcrumbs,
     http,
     notifications: { toasts },
+    application: { capabilities },
   } = useKibana().services;
 
   const {
     ruleTypesState: { data: ruleTypesIndex, isInitialLoad: isInitialLoadingRuleTypes },
     authorizedToReadAnyRules,
   } = useGetRuleTypesPermissions({ http, toasts, filteredRuleTypes: [] });
+
+  // The Stack Alerts and Observability Alerts features grant read access to alerts
+  // without requiring rule read privileges, so their `show` capability also unlocks
+  // this page.
+  const authorizedToReadAnyAlerts =
+    authorizedToReadAnyRules ||
+    Boolean(capabilities?.[STACK_ALERTS_ONLY_FEATURE_ID]?.show) ||
+    Boolean(capabilities?.[OBSERVABILITY_ALERTS_FEATURE_ID]?.show);
 
   const ruleTypeIdsByFeatureId = useRuleTypeIdsByFeatureId(ruleTypesIndex);
 
@@ -94,6 +106,7 @@ const PageContentWrapperComponent: React.FC = () => {
   return !isInitialLoadingRuleTypes ? (
     <PageContent
       isLoading={isInitialLoadingRuleTypes}
+      authorizedToReadAnyAlerts={authorizedToReadAnyAlerts}
       authorizedToReadAnyRules={authorizedToReadAnyRules}
       ruleTypeIdsByFeatureId={ruleTypeIdsByFeatureId}
     />
@@ -104,12 +117,17 @@ const PageContentWrapper = React.memo(PageContentWrapperComponent);
 
 interface PageContentProps {
   isLoading: boolean;
+  // Controls page access: true when the user can read alerts (via rule read or
+  // the Stack Alerts `show` capability).
+  authorizedToReadAnyAlerts: boolean;
+  // True only when the user can read rules; gates the rule stats in the header.
   authorizedToReadAnyRules: boolean;
   ruleTypeIdsByFeatureId: RuleTypeIdsByFeatureId;
 }
 
 const PageContentComponent: React.FC<PageContentProps> = ({
   isLoading,
+  authorizedToReadAnyAlerts,
   authorizedToReadAnyRules,
   ruleTypeIdsByFeatureId,
 }) => {
@@ -137,9 +155,15 @@ const PageContentComponent: React.FC<PageContentProps> = ({
   const ruleTypeIdsByFeatureIdEntries = Object.entries(ruleTypeIdsByFeatureId);
 
   const [esQuery, setEsQuery] = useState({ bool: {} } as { bool: BoolQuery });
-  const [ruleTypeIds, setRuleTypeIds] = useState<string[]>(() =>
-    getInitialRuleTypeIds(ruleTypeIdsByFeatureId)
-  );
+  const [ruleTypeIds, setRuleTypeIds] = useState<string[]>(() => {
+    const fromApi = getInitialRuleTypeIds(ruleTypeIdsByFeatureId);
+    // When the user has alert-read but not rule-read (e.g. stackAlertsOnly),
+    // the rule types API returns nothing and fromApi is empty. Without a fallback,
+    // useSearchAlertsQuery is disabled (ruleTypeIds.length === 0) and the table
+    // stays permanently empty. Fall back to ALL_NON_SIEM_RULE_TYPE_IDS so the
+    // query runs; server-side RBAC enforces what the user can actually see.
+    return fromApi.length > 0 ? fromApi : ALL_NON_SIEM_RULE_TYPE_IDS;
+  });
 
   const [consumers, setConsumers] = useState<string[]>(NON_SIEM_CONSUMERS);
   const [filterControls, setFilterControls] = useState<Filter[]>();
@@ -150,7 +174,7 @@ const PageContentComponent: React.FC<PageContentProps> = ({
   );
 
   const [selectedFilters, setSelectedFilters] = useState<AlertsFeatureIdsFilter[]>([]);
-  const ruleStats = useRuleStats({ ruleTypeIds });
+  const ruleStats = useRuleStats({ ruleTypeIds, enabled: authorizedToReadAnyRules });
   const isFilteringSecurityRules = ruleTypeIds.every(isSiemRuleType);
 
   const onFilterSelected = useCallback(
@@ -179,7 +203,8 @@ const PageContentComponent: React.FC<PageContentProps> = ({
         return;
       }
 
-      setRuleTypeIds(getInitialRuleTypeIds(ruleTypeIdsByFeatureId));
+      const fromApi = getInitialRuleTypeIds(ruleTypeIdsByFeatureId);
+      setRuleTypeIds(fromApi.length > 0 ? fromApi : ALL_NON_SIEM_RULE_TYPE_IDS);
       setConsumers(NON_SIEM_CONSUMERS);
     },
     [ruleTypeIdsByFeatureId]
@@ -280,7 +305,7 @@ const PageContentComponent: React.FC<PageContentProps> = ({
         rightSideItems={ruleStats}
       />
       <EuiSpacer size="l" />
-      {!isLoading && !authorizedToReadAnyRules ? (
+      {!isLoading && !authorizedToReadAnyAlerts ? (
         <NoPermissionPrompt />
       ) : (
         <EuiFlexGroup gutterSize="m" direction="column" data-test-subj="stackAlertsPageContent">
