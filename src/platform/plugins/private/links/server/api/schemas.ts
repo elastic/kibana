@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getAsCodeTagsSchema } from '@kbn/as-code-shared-schemas';
 import { schema } from '@kbn/config-schema';
 import { dashboardNavigationOptionsSchema } from '@kbn/dashboard-navigation-options-schema';
 import {
@@ -21,7 +22,6 @@ import {
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
 } from '../../common/constants';
-import { getAsCodeTagsSchema } from '`@kbn/as-code-shared-schemas`';
 
 const baseLinkSchema = {
   label: schema.maybe(
