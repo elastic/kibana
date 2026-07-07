@@ -33,23 +33,31 @@ export function getSignificantEventsTestApiService({
 }): SignificantEventsTestApiService {
   return {
     async enableSignificantEvents() {
-      await measurePerformanceAsync(log, 'streamsTestApi.enableSignificantEvents', async () => {
-        await kbnClient.uiSettings.update({
-          [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
-        });
-      });
+      await measurePerformanceAsync(
+        log,
+        'significantEventsTestApi.enableSignificantEvents',
+        async () => {
+          await kbnClient.uiSettings.update({
+            [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
+          });
+        }
+      );
     },
 
     async disableSignificantEvents() {
-      await measurePerformanceAsync(log, 'streamsTestApi.disableSignificantEvents', async () => {
-        await kbnClient.uiSettings.update({
-          [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
-        });
-      });
+      await measurePerformanceAsync(
+        log,
+        'significantEventsTestApi.disableSignificantEvents',
+        async () => {
+          await kbnClient.uiSettings.update({
+            [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
+          });
+        }
+      );
     },
 
     async enableMemory() {
-      await measurePerformanceAsync(log, 'streamsTestApi.enableMemory', async () => {
+      await measurePerformanceAsync(log, 'significantEventsTestApi.enableMemory', async () => {
         await kbnClient.request({
           path: '/internal/core/_settings',
           method: 'PUT',
@@ -64,7 +72,7 @@ export function getSignificantEventsTestApiService({
     },
 
     async disableMemory() {
-      await measurePerformanceAsync(log, 'streamsTestApi.disableMemory', async () => {
+      await measurePerformanceAsync(log, 'significantEventsTestApi.disableMemory', async () => {
         await kbnClient.request({
           path: '/internal/core/_settings',
           method: 'PUT',
@@ -81,7 +89,7 @@ export function getSignificantEventsTestApiService({
     async runSignificantEventsDiscovery() {
       return measurePerformanceAsync(
         log,
-        'streamsTestApi.runSignificantEventsDiscovery',
+        'significantEventsTestApi.runSignificantEventsDiscovery',
         async () => {
           const response = await kbnClient.request({
             method: 'POST',
@@ -96,7 +104,7 @@ export function getSignificantEventsTestApiService({
     async cancelSignificantEventsDiscovery() {
       return measurePerformanceAsync(
         log,
-        'streamsTestApi.cancelSignificantEventsDiscovery',
+        'significantEventsTestApi.cancelSignificantEventsDiscovery',
         async () => {
           const response = await kbnClient.request({
             method: 'POST',
@@ -111,7 +119,7 @@ export function getSignificantEventsTestApiService({
     async getSignificantEventsDiscoveryStatus() {
       return measurePerformanceAsync(
         log,
-        'streamsTestApi.getSignificantEventsDiscoveryStatus',
+        'significantEventsTestApi.getSignificantEventsDiscoveryStatus',
         async () => {
           const response = await kbnClient.request({
             method: 'GET',
