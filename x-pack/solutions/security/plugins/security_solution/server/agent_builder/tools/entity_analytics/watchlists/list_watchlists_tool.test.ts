@@ -216,6 +216,7 @@ describe('listWatchlistsTool', () => {
             success: true,
             resultCount: 2,
             errorMessage: undefined,
+            userConfirmationOutcome: undefined,
           }
         );
       });
@@ -239,6 +240,7 @@ describe('listWatchlistsTool', () => {
             success: false,
             resultCount: 0,
             errorMessage: 'You do not have permission to read watchlists in this space.',
+            userConfirmationOutcome: undefined,
           }
         );
       });

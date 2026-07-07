@@ -18,7 +18,7 @@ import {
 } from '../../../../../common/entity_analytics/watchlists/constants';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlists/management/watchlist_config';
-import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../../lib/telemetry/event_based/events';
+import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
 import { securityTool } from '../../constants';
 import { checkWatchlistAccess } from './check_watchlist_access';
 import { formatRiskModifier, riskModifierSchema } from './risk_modifier';
@@ -78,10 +78,12 @@ Do NOT use this tool to add entities to an existing watchlist — that is a sepa
         `${SECURITY_CREATE_WATCHLIST_TOOL_ID} tool called with parameters ${JSON.stringify(params)}`
       );
 
-      let success = true;
-      let errorMessage: string | undefined;
-      let hitlOutcome: ConfirmationStatus | undefined;
-      let awaitingPrompt = false;
+      const telemetryTracker = createToolTelemetryTracker({
+        core,
+        toolId: SECURITY_CREATE_WATCHLIST_TOOL_ID,
+        spaceId,
+        actionType: 'mutation',
+      });
 
       try {
         const [, startPlugins] = await core.getStartServices();
@@ -95,8 +97,7 @@ Do NOT use this tool to add entities to an existing watchlist — that is a sepa
           action: 'create watchlists',
         });
         if (!accessResult.allowed) {
-          success = false;
-          errorMessage = accessResult.result.data.message;
+          telemetryTracker.recordFailure(accessResult.result.data.message);
           return { results: [accessResult.result] };
         }
 
@@ -104,7 +105,7 @@ Do NOT use this tool to add entities to an existing watchlist — that is a sepa
 
         const promptId = `watchlists.create_watchlist.${callContext.toolCallId}`;
         const { status } = prompts.checkConfirmationStatus(promptId);
-        hitlOutcome = status;
+        telemetryTracker.recordConfirmationStatus(status);
 
         if (status === ConfirmationStatus.unprompted) {
           const detailLines = [
@@ -112,7 +113,7 @@ Do NOT use this tool to add entities to an existing watchlist — that is a sepa
             ...(params.description ? [`**Description:** ${params.description}`] : []),
             `**Risk modifier:** ${formatRiskModifier(riskModifier)}`,
           ];
-          awaitingPrompt = true;
+          telemetryTracker.recordAwaitingConfirmation();
           return prompts.askForConfirmation({
             id: promptId,
             title: 'Create watchlist',
@@ -160,8 +161,8 @@ Do NOT use this tool to add entities to an existing watchlist — that is a sepa
           ],
         };
       } catch (error) {
-        success = false;
-        errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        telemetryTracker.recordFailure(errorMessage);
         return {
           results: [
             {
@@ -172,17 +173,7 @@ Do NOT use this tool to add entities to an existing watchlist — that is a sepa
           ],
         };
       } finally {
-        if (!awaitingPrompt) {
-          const [coreStart] = await core.getStartServices();
-          coreStart.analytics.reportEvent(ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType, {
-            toolId: SECURITY_CREATE_WATCHLIST_TOOL_ID,
-            actionType: 'mutation',
-            spaceId,
-            success,
-            errorMessage,
-            hitlOutcome,
-          });
-        }
+        await telemetryTracker.report();
       }
     },
   };

@@ -331,12 +331,12 @@ describe('removeEntitiesFromWatchlistTool', () => {
             success: true,
             resultCount: 1,
             errorMessage: undefined,
-            hitlOutcome: ConfirmationStatus.accepted,
+            userConfirmationOutcome: ConfirmationStatus.accepted,
           }
         );
       });
 
-      it('reports hitlOutcome=rejected when the user declines the prompt', async () => {
+      it('reports userConfirmationOutcome=rejected when the user declines the prompt', async () => {
         mockGetWatchlistFn.mockResolvedValueOnce(buildWatchlist());
         const ctx = buildHandlerContextWithPrompts(mocks, {
           checkStatus: ConfirmationStatus.rejected,
@@ -353,7 +353,7 @@ describe('removeEntitiesFromWatchlistTool', () => {
             success: true,
             resultCount: 0,
             errorMessage: undefined,
-            hitlOutcome: ConfirmationStatus.rejected,
+            userConfirmationOutcome: ConfirmationStatus.rejected,
           }
         );
       });
@@ -379,7 +379,7 @@ describe('removeEntitiesFromWatchlistTool', () => {
             resultCount: 0,
             errorMessage:
               'You do not have permission to modify watchlist membership in this space.',
-            hitlOutcome: undefined,
+            userConfirmationOutcome: undefined,
           }
         );
       });
@@ -402,7 +402,7 @@ describe('removeEntitiesFromWatchlistTool', () => {
             success: false,
             resultCount: 0,
             errorMessage: 'boom',
-            hitlOutcome: ConfirmationStatus.accepted,
+            userConfirmationOutcome: ConfirmationStatus.accepted,
           }
         );
       });

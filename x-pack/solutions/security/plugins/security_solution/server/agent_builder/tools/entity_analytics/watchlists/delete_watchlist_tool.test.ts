@@ -377,12 +377,12 @@ describe('deleteWatchlistTool', () => {
             success: false,
             errorMessage:
               'Cannot delete watchlist "System" — it is system-managed and protected from deletion.',
-            hitlOutcome: ConfirmationStatus.unprompted,
+            userConfirmationOutcome: ConfirmationStatus.unprompted,
           }
         );
       });
 
-      it('reports hitlOutcome=accepted and success=true after a successful delete', async () => {
+      it('reports userConfirmationOutcome=accepted and success=true after a successful delete', async () => {
         mockDeleteWatchlistEntitiesFn.mockResolvedValueOnce(undefined);
         mockDeleteFn.mockResolvedValueOnce(undefined);
         const ctx = buildHandlerContextWithPrompts(mocks, {
@@ -399,12 +399,12 @@ describe('deleteWatchlistTool', () => {
             spaceId: 'default',
             success: true,
             errorMessage: undefined,
-            hitlOutcome: ConfirmationStatus.accepted,
+            userConfirmationOutcome: ConfirmationStatus.accepted,
           }
         );
       });
 
-      it('reports hitlOutcome=rejected when the user declines the prompt', async () => {
+      it('reports userConfirmationOutcome=rejected when the user declines the prompt', async () => {
         const ctx = buildHandlerContextWithPrompts(mocks, {
           checkStatus: ConfirmationStatus.rejected,
         });
@@ -419,7 +419,7 @@ describe('deleteWatchlistTool', () => {
             spaceId: 'default',
             success: true,
             errorMessage: undefined,
-            hitlOutcome: ConfirmationStatus.rejected,
+            userConfirmationOutcome: ConfirmationStatus.rejected,
           }
         );
       });
@@ -443,7 +443,7 @@ describe('deleteWatchlistTool', () => {
             spaceId: 'default',
             success: false,
             errorMessage: 'You do not have permission to delete watchlists in this space.',
-            hitlOutcome: undefined,
+            userConfirmationOutcome: undefined,
           }
         );
       });
@@ -465,7 +465,7 @@ describe('deleteWatchlistTool', () => {
             spaceId: 'default',
             success: false,
             errorMessage: 'boom',
-            hitlOutcome: ConfirmationStatus.accepted,
+            userConfirmationOutcome: ConfirmationStatus.accepted,
           }
         );
       });

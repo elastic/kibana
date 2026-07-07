@@ -24,7 +24,7 @@ import { IdentifierType } from '../../../../common/api/entity_analytics/common/c
 import { recalculateEntityRiskScore } from '../../../lib/entity_analytics/risk_score/recalculate_entity_risk_score';
 import { RiskScoreDataClient } from '../../../lib/entity_analytics/risk_score/risk_score_data_client';
 import { ASSET_CRITICALITY_UPDATED_TOOL_EVENT } from '../../../../common/entity_analytics/tool_events';
-import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
+import { createToolTelemetryTracker } from './tool_telemetry_tracker';
 
 export const SECURITY_SET_ASSET_CRITICALITY_TOOL_ID = securityTool('set_asset_criticality');
 
@@ -135,23 +135,24 @@ export const setAssetCriticalityTool = (
 
       const { entityId, entityType, criticality } = params;
 
-      let success = true;
-      let errorMessage: string | undefined;
-      let hitlOutcome: ConfirmationStatus | undefined;
-      let awaitingPrompt = false;
+      const telemetryTracker = createToolTelemetryTracker({
+        core,
+        toolId: SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
+        spaceId,
+        actionType: 'mutation',
+      });
 
       try {
         const [, { security }] = await core.getStartServices();
         const accessResult = await checkAssetCriticalityAccess({ request, security, spaceId });
         if (!accessResult.allowed) {
-          success = false;
-          errorMessage = accessResult.result.data.message;
+          telemetryTracker.recordFailure(accessResult.result.data.message);
           return { results: [accessResult.result] };
         }
 
         const promptId = `set_asset_criticality.confirm.${callContext.toolCallId}`;
         const { status } = prompts.checkConfirmationStatus(promptId);
-        hitlOutcome = status;
+        telemetryTracker.recordConfirmationStatus(status);
 
         if (status === ConfirmationStatus.unprompted) {
           const criticalityLabel =
@@ -159,7 +160,7 @@ export const setAssetCriticalityTool = (
               ? 'remove the existing criticality'
               : `set criticality to **${criticality}**`;
 
-          awaitingPrompt = true;
+          telemetryTracker.recordAwaitingConfirmation();
           return prompts.askForConfirmation({
             id: promptId,
             title: 'Set asset criticality',
@@ -259,8 +260,8 @@ export const setAssetCriticalityTool = (
           ],
         };
       } catch (error) {
-        success = false;
-        errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        telemetryTracker.recordFailure(errorMessage);
         logger.error(
           `[SetAssetCriticality] Error setting criticality for ${entityId}: ${errorMessage}`
         );
@@ -275,17 +276,7 @@ export const setAssetCriticalityTool = (
           ],
         };
       } finally {
-        if (!awaitingPrompt) {
-          const [coreStart] = await core.getStartServices();
-          coreStart.analytics.reportEvent(ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType, {
-            toolId: SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
-            actionType: 'mutation',
-            spaceId,
-            success,
-            errorMessage,
-            hitlOutcome,
-          });
-        }
+        await telemetryTracker.report();
       }
     },
   };

@@ -354,7 +354,7 @@ describe('generateLeadsTool', () => {
       expect(mockCoreStart.analytics.reportEvent).not.toHaveBeenCalled();
     });
 
-    it('reports hitlOutcome=accepted and success=true after a successful start', async () => {
+    it('reports userConfirmationOutcome=accepted and success=true after a successful start', async () => {
       const ctx = handlerContext();
       (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
         status: ConfirmationStatus.accepted,
@@ -370,12 +370,12 @@ describe('generateLeadsTool', () => {
           spaceId: 'default',
           success: true,
           errorMessage: undefined,
-          hitlOutcome: ConfirmationStatus.accepted,
+          userConfirmationOutcome: ConfirmationStatus.accepted,
         }
       );
     });
 
-    it('reports hitlOutcome=rejected when the user declines the prompt', async () => {
+    it('reports userConfirmationOutcome=rejected when the user declines the prompt', async () => {
       const ctx = handlerContext();
       (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
         status: ConfirmationStatus.rejected,
@@ -391,7 +391,7 @@ describe('generateLeadsTool', () => {
           spaceId: 'default',
           success: true,
           errorMessage: undefined,
-          hitlOutcome: ConfirmationStatus.rejected,
+          userConfirmationOutcome: ConfirmationStatus.rejected,
         }
       );
     });
@@ -414,7 +414,7 @@ describe('generateLeadsTool', () => {
           spaceId: 'default',
           success: false,
           errorMessage: 'You do not have permission to generate leads in this space.',
-          hitlOutcome: undefined,
+          userConfirmationOutcome: undefined,
         }
       );
     });
@@ -437,7 +437,7 @@ describe('generateLeadsTool', () => {
           success: false,
           errorMessage:
             'No AI connector is configured for lead generation. Provide a connectorName argument, or configure one via the Lead Generation settings.',
-          hitlOutcome: ConfirmationStatus.accepted,
+          userConfirmationOutcome: ConfirmationStatus.accepted,
         }
       );
     });
@@ -459,7 +459,7 @@ describe('generateLeadsTool', () => {
           spaceId: 'default',
           success: false,
           errorMessage: 'boom',
-          hitlOutcome: ConfirmationStatus.accepted,
+          userConfirmationOutcome: ConfirmationStatus.accepted,
         }
       );
     });

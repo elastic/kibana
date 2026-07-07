@@ -209,7 +209,7 @@ describe('dismissLeadTool', () => {
       expect(mockCoreStart.analytics.reportEvent).not.toHaveBeenCalled();
     });
 
-    it('reports hitlOutcome=accepted and success=true after a successful dismiss', async () => {
+    it('reports userConfirmationOutcome=accepted and success=true after a successful dismiss', async () => {
       const ctx = handlerContext();
       (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
         status: ConfirmationStatus.accepted,
@@ -225,12 +225,12 @@ describe('dismissLeadTool', () => {
           spaceId: 'default',
           success: true,
           errorMessage: undefined,
-          hitlOutcome: ConfirmationStatus.accepted,
+          userConfirmationOutcome: ConfirmationStatus.accepted,
         }
       );
     });
 
-    it('reports hitlOutcome=rejected when the user declines the prompt', async () => {
+    it('reports userConfirmationOutcome=rejected when the user declines the prompt', async () => {
       const ctx = handlerContext();
       (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
         status: ConfirmationStatus.rejected,
@@ -246,7 +246,7 @@ describe('dismissLeadTool', () => {
           spaceId: 'default',
           success: true,
           errorMessage: undefined,
-          hitlOutcome: ConfirmationStatus.rejected,
+          userConfirmationOutcome: ConfirmationStatus.rejected,
         }
       );
     });
@@ -269,7 +269,7 @@ describe('dismissLeadTool', () => {
           spaceId: 'default',
           success: false,
           errorMessage: 'You do not have permission to dismiss leads in this space.',
-          hitlOutcome: undefined,
+          userConfirmationOutcome: undefined,
         }
       );
     });
@@ -291,7 +291,7 @@ describe('dismissLeadTool', () => {
           spaceId: 'default',
           success: false,
           errorMessage: `Lead not found: ${LEAD_ID}`,
-          hitlOutcome: ConfirmationStatus.accepted,
+          userConfirmationOutcome: ConfirmationStatus.accepted,
         }
       );
     });
@@ -313,7 +313,7 @@ describe('dismissLeadTool', () => {
           spaceId: 'default',
           success: false,
           errorMessage: 'boom',
-          hitlOutcome: ConfirmationStatus.accepted,
+          userConfirmationOutcome: ConfirmationStatus.accepted,
         }
       );
     });

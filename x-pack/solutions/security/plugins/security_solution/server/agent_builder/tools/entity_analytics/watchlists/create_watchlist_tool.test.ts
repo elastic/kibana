@@ -306,7 +306,7 @@ describe('createWatchlistTool', () => {
         expect(mockCoreStart.analytics.reportEvent).not.toHaveBeenCalled();
       });
 
-      it('reports hitlOutcome=accepted and success=true after a successful create', async () => {
+      it('reports userConfirmationOutcome=accepted and success=true after a successful create', async () => {
         mockCreateFn.mockResolvedValueOnce(buildCreatedWatchlist());
         const ctx = buildHandlerContextWithPrompts(mocks, {
           checkStatus: ConfirmationStatus.accepted,
@@ -322,12 +322,12 @@ describe('createWatchlistTool', () => {
             spaceId: 'default',
             success: true,
             errorMessage: undefined,
-            hitlOutcome: ConfirmationStatus.accepted,
+            userConfirmationOutcome: ConfirmationStatus.accepted,
           }
         );
       });
 
-      it('reports hitlOutcome=rejected when the user declines the prompt', async () => {
+      it('reports userConfirmationOutcome=rejected when the user declines the prompt', async () => {
         const ctx = buildHandlerContextWithPrompts(mocks, {
           checkStatus: ConfirmationStatus.rejected,
         });
@@ -342,7 +342,7 @@ describe('createWatchlistTool', () => {
             spaceId: 'default',
             success: true,
             errorMessage: undefined,
-            hitlOutcome: ConfirmationStatus.rejected,
+            userConfirmationOutcome: ConfirmationStatus.rejected,
           }
         );
       });
@@ -363,7 +363,7 @@ describe('createWatchlistTool', () => {
             spaceId: 'default',
             success: false,
             errorMessage: 'boom',
-            hitlOutcome: ConfirmationStatus.accepted,
+            userConfirmationOutcome: ConfirmationStatus.accepted,
           }
         );
       });

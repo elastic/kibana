@@ -402,7 +402,7 @@ describe('setAssetCriticalityTool', () => {
       expect(mockCoreStart.analytics.reportEvent).not.toHaveBeenCalled();
     });
 
-    it('reports hitlOutcome=rejected and success=true when the user declines the prompt', async () => {
+    it('reports userConfirmationOutcome=rejected and success=true when the user declines the prompt', async () => {
       const ctx = handlerContext();
       (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
         status: ConfirmationStatus.rejected,
@@ -421,12 +421,12 @@ describe('setAssetCriticalityTool', () => {
           spaceId: 'default',
           success: true,
           errorMessage: undefined,
-          hitlOutcome: ConfirmationStatus.rejected,
+          userConfirmationOutcome: ConfirmationStatus.rejected,
         }
       );
     });
 
-    it('reports hitlOutcome=accepted and success=true after a successful update', async () => {
+    it('reports userConfirmationOutcome=accepted and success=true after a successful update', async () => {
       const ctx = handlerContext();
       (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
         status: ConfirmationStatus.accepted,
@@ -445,7 +445,7 @@ describe('setAssetCriticalityTool', () => {
           spaceId: 'default',
           success: true,
           errorMessage: undefined,
-          hitlOutcome: ConfirmationStatus.accepted,
+          userConfirmationOutcome: ConfirmationStatus.accepted,
         }
       );
     });
@@ -473,7 +473,7 @@ describe('setAssetCriticalityTool', () => {
           spaceId: 'default',
           success: false,
           errorMessage: 'You do not have permission to update asset criticality in this space.',
-          hitlOutcome: undefined,
+          userConfirmationOutcome: undefined,
         }
       );
     });
@@ -505,7 +505,7 @@ describe('setAssetCriticalityTool', () => {
           spaceId: 'default',
           success: false,
           errorMessage: 'Engine not running',
-          hitlOutcome: ConfirmationStatus.accepted,
+          userConfirmationOutcome: ConfirmationStatus.accepted,
         }
       );
     });
@@ -530,7 +530,7 @@ describe('setAssetCriticalityTool', () => {
           spaceId: 'default',
           success: false,
           errorMessage: 'ES unavailable',
-          hitlOutcome: ConfirmationStatus.accepted,
+          userConfirmationOutcome: ConfirmationStatus.accepted,
         }
       );
     });

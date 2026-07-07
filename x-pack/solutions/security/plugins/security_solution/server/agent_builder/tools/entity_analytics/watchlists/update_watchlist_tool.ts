@@ -18,7 +18,7 @@ import {
 } from '../../../../../common/entity_analytics/watchlists/constants';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlists/management/watchlist_config';
-import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../../lib/telemetry/event_based/events';
+import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
 import { securityTool } from '../../constants';
 import { checkWatchlistAccess } from './check_watchlist_access';
 import { formatRiskModifier, riskModifierSchema } from './risk_modifier';
@@ -81,10 +81,12 @@ Do NOT use this tool to add or remove entities — that is a separate action.`,
         `${SECURITY_UPDATE_WATCHLIST_TOOL_ID} tool called with parameters ${JSON.stringify(params)}`
       );
 
-      let success = true;
-      let errorMessage: string | undefined;
-      let hitlOutcome: ConfirmationStatus | undefined;
-      let awaitingPrompt = false;
+      const telemetryTracker = createToolTelemetryTracker({
+        core,
+        toolId: SECURITY_UPDATE_WATCHLIST_TOOL_ID,
+        spaceId,
+        actionType: 'mutation',
+      });
 
       try {
         const updates: { name?: string; description?: string; riskModifier?: number } = {};
@@ -93,9 +95,9 @@ Do NOT use this tool to add or remove entities — that is a separate action.`,
         if (params.riskModifier !== undefined) updates.riskModifier = params.riskModifier;
 
         if (Object.keys(updates).length === 0) {
-          success = false;
-          errorMessage =
+          const errorMessage =
             'No update fields supplied. Pass at least one of name, description, or riskModifier.';
+          telemetryTracker.recordFailure(errorMessage);
           return {
             results: [
               {
@@ -120,8 +122,7 @@ Do NOT use this tool to add or remove entities — that is a separate action.`,
           action: 'update watchlists',
         });
         if (!accessResult.allowed) {
-          success = false;
-          errorMessage = accessResult.result.data.message;
+          telemetryTracker.recordFailure(accessResult.result.data.message);
           return { results: [accessResult.result] };
         }
 
@@ -135,7 +136,7 @@ Do NOT use this tool to add or remove entities — that is a separate action.`,
 
         const promptId = `watchlists.update_watchlist.${callContext.toolCallId}`;
         const { status } = prompts.checkConfirmationStatus(promptId);
-        hitlOutcome = status;
+        telemetryTracker.recordConfirmationStatus(status);
 
         if (status === ConfirmationStatus.unprompted) {
           const existing = await client.get(params.watchlistId);
@@ -174,7 +175,7 @@ Do NOT use this tool to add or remove entities — that is a separate action.`,
             };
           }
 
-          awaitingPrompt = true;
+          telemetryTracker.recordAwaitingConfirmation();
           return prompts.askForConfirmation({
             id: promptId,
             title: 'Update watchlist',
@@ -210,8 +211,8 @@ Do NOT use this tool to add or remove entities — that is a separate action.`,
           ],
         };
       } catch (error) {
-        success = false;
-        errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        telemetryTracker.recordFailure(errorMessage);
         return {
           results: [
             {
@@ -222,17 +223,7 @@ Do NOT use this tool to add or remove entities — that is a separate action.`,
           ],
         };
       } finally {
-        if (!awaitingPrompt) {
-          const [coreStart] = await core.getStartServices();
-          coreStart.analytics.reportEvent(ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType, {
-            toolId: SECURITY_UPDATE_WATCHLIST_TOOL_ID,
-            actionType: 'mutation',
-            spaceId,
-            success,
-            errorMessage,
-            hitlOutcome,
-          });
-        }
+        await telemetryTracker.report();
       }
     },
   };

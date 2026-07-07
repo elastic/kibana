@@ -349,12 +349,12 @@ describe('updateWatchlistTool', () => {
             spaceId: 'default',
             success: true,
             errorMessage: undefined,
-            hitlOutcome: ConfirmationStatus.unprompted,
+            userConfirmationOutcome: ConfirmationStatus.unprompted,
           }
         );
       });
 
-      it('reports hitlOutcome=accepted and success=true after a successful update', async () => {
+      it('reports userConfirmationOutcome=accepted and success=true after a successful update', async () => {
         mockUpdateFn.mockResolvedValueOnce(buildExistingWatchlist());
         const ctx = buildHandlerContextWithPrompts(mocks, {
           checkStatus: ConfirmationStatus.accepted,
@@ -370,12 +370,12 @@ describe('updateWatchlistTool', () => {
             spaceId: 'default',
             success: true,
             errorMessage: undefined,
-            hitlOutcome: ConfirmationStatus.accepted,
+            userConfirmationOutcome: ConfirmationStatus.accepted,
           }
         );
       });
 
-      it('reports hitlOutcome=rejected when the user declines the prompt', async () => {
+      it('reports userConfirmationOutcome=rejected when the user declines the prompt', async () => {
         const ctx = buildHandlerContextWithPrompts(mocks, {
           checkStatus: ConfirmationStatus.rejected,
         });
@@ -390,7 +390,7 @@ describe('updateWatchlistTool', () => {
             spaceId: 'default',
             success: true,
             errorMessage: undefined,
-            hitlOutcome: ConfirmationStatus.rejected,
+            userConfirmationOutcome: ConfirmationStatus.rejected,
           }
         );
       });
@@ -409,7 +409,7 @@ describe('updateWatchlistTool', () => {
             success: false,
             errorMessage:
               'No update fields supplied. Pass at least one of name, description, or riskModifier.',
-            hitlOutcome: undefined,
+            userConfirmationOutcome: undefined,
           }
         );
       });
@@ -433,7 +433,7 @@ describe('updateWatchlistTool', () => {
             spaceId: 'default',
             success: false,
             errorMessage: 'You do not have permission to update watchlists in this space.',
-            hitlOutcome: undefined,
+            userConfirmationOutcome: undefined,
           }
         );
       });
@@ -454,7 +454,7 @@ describe('updateWatchlistTool', () => {
             spaceId: 'default',
             success: false,
             errorMessage: 'boom',
-            hitlOutcome: ConfirmationStatus.accepted,
+            userConfirmationOutcome: ConfirmationStatus.accepted,
           }
         );
       });

@@ -891,6 +891,7 @@ describe('getEntityTool', () => {
             success: true,
             resultCount: 1,
             errorMessage: undefined,
+            userConfirmationOutcome: undefined,
           }
         );
       });
@@ -917,6 +918,7 @@ describe('getEntityTool', () => {
             success: true,
             resultCount: 0,
             errorMessage: undefined,
+            userConfirmationOutcome: undefined,
           }
         );
       });
@@ -939,6 +941,7 @@ describe('getEntityTool', () => {
             success: false,
             resultCount: 0,
             errorMessage: 'ES|QL failure',
+            userConfirmationOutcome: undefined,
           }
         );
       });

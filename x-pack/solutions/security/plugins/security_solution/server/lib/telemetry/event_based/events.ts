@@ -756,7 +756,7 @@ export const ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT: EventTypeOpts<{
   entitiesReturned?: number;
   entityTypes?: string[];
   errorMessage?: string;
-  hitlOutcome?: ConfirmationStatus;
+  userConfirmationOutcome?: ConfirmationStatus;
   resultCount?: number;
   spaceId: string;
   success: boolean;
@@ -820,7 +820,7 @@ export const ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT: EventTypeOpts<{
           'Number of items returned or affected by the tool (entities, watchlists, leads, entities added to a watchlist, …). Replaces `entitiesReturned` for tools whose result set is not "entities". Not populated for tools that do not return a countable result set (e.g. single-record mutations).',
       },
     },
-    hitlOutcome: {
+    userConfirmationOutcome: {
       type: 'keyword',
       _meta: {
         optional: true,

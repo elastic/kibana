@@ -17,7 +17,7 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../pl
 import { getIndexForWatchlist } from '../../../../lib/entity_analytics/watchlists/entities/utils';
 import { createManualEntityService } from '../../../../lib/entity_analytics/watchlists/entity_sources/manual/service';
 import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlists/management/watchlist_config';
-import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../../lib/telemetry/event_based/events';
+import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
 import { securityTool } from '../../constants';
 import { checkWatchlistAccess } from './check_watchlist_access';
 import { formatEntityIdsForPrompt } from './entity_ids_preview';
@@ -81,11 +81,13 @@ This tool only removes entities that were **manually assigned** to the watchlist
         )}`
       );
 
-      let success = true;
-      let resultCount = 0;
-      let errorMessage: string | undefined;
-      let hitlOutcome: ConfirmationStatus | undefined;
-      let awaitingPrompt = false;
+      const telemetryTracker = createToolTelemetryTracker({
+        core,
+        toolId: SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
+        spaceId,
+        actionType: 'mutation',
+      });
+      telemetryTracker.recordResultCount(0);
 
       try {
         const [, startPlugins] = await core.getStartServices();
@@ -99,8 +101,7 @@ This tool only removes entities that were **manually assigned** to the watchlist
           action: 'modify watchlist membership',
         });
         if (!accessResult.allowed) {
-          success = false;
-          errorMessage = accessResult.result.data.message;
+          telemetryTracker.recordFailure(accessResult.result.data.message);
           return { results: [accessResult.result] };
         }
 
@@ -114,10 +115,10 @@ This tool only removes entities that were **manually assigned** to the watchlist
 
         const promptId = `watchlists.remove_entities_from_watchlist.${callContext.toolCallId}`;
         const { status } = prompts.checkConfirmationStatus(promptId);
-        hitlOutcome = status;
+        telemetryTracker.recordConfirmationStatus(status);
 
         if (status === ConfirmationStatus.unprompted) {
-          awaitingPrompt = true;
+          telemetryTracker.recordAwaitingConfirmation();
           return prompts.askForConfirmation({
             id: promptId,
             title: 'Remove entities from watchlist',
@@ -165,7 +166,7 @@ This tool only removes entities that were **manually assigned** to the watchlist
 
         const result = await service.unassign(params.entityIds);
 
-        resultCount = result.successful;
+        telemetryTracker.recordResultCount(result.successful);
         return {
           results: [
             {
@@ -180,8 +181,8 @@ This tool only removes entities that were **manually assigned** to the watchlist
           ],
         };
       } catch (error) {
-        success = false;
-        errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        telemetryTracker.recordFailure(errorMessage);
         return {
           results: [
             {
@@ -192,18 +193,7 @@ This tool only removes entities that were **manually assigned** to the watchlist
           ],
         };
       } finally {
-        if (!awaitingPrompt) {
-          const [coreStart] = await core.getStartServices();
-          coreStart.analytics.reportEvent(ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType, {
-            toolId: SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
-            actionType: 'mutation',
-            spaceId,
-            success,
-            resultCount,
-            errorMessage,
-            hitlOutcome,
-          });
-        }
+        await telemetryTracker.report();
       }
     },
   };

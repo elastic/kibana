@@ -1115,6 +1115,7 @@ describe('searchEntitiesTool', () => {
             success: true,
             resultCount: 3,
             errorMessage: undefined,
+            userConfirmationOutcome: undefined,
           }
         );
       });
@@ -1140,6 +1141,7 @@ describe('searchEntitiesTool', () => {
             success: true,
             resultCount: 0,
             errorMessage: undefined,
+            userConfirmationOutcome: undefined,
           }
         );
       });
@@ -1162,6 +1164,7 @@ describe('searchEntitiesTool', () => {
             success: false,
             resultCount: 0,
             errorMessage: 'ES|QL failure',
+            userConfirmationOutcome: undefined,
           }
         );
       });
