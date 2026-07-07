@@ -16,14 +16,15 @@ import { ReactFlowProvider, WorkflowGraphCanvasWithoutProvider } from '@kbn/work
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import type { GraphConfig } from './page_template';
 
-// Globals injected by the dev server's HTML template (see page_template.ts).
-declare const __WORKFLOW_YAML__: string;
-declare const __GRAPH_CONFIG__: GraphConfig;
+// Data injected by the server's HTML template via custom-element `data` attributes
+// (see page_template.ts). Reading from attributes (rather than inline script globals)
+// is safe even when YAML content contains `</script>` literals.
+const yamlString: string =
+  document.querySelector('kbn-workflow-yaml')?.getAttribute('data') ?? '';
 
-const yamlString: string = (window as unknown as { __WORKFLOW_YAML__: string }).__WORKFLOW_YAML__;
-
-const graphConfig: GraphConfig = (window as unknown as { __GRAPH_CONFIG__: GraphConfig })
-  .__GRAPH_CONFIG__;
+const graphConfig: GraphConfig = JSON.parse(
+  document.querySelector('kbn-graph-config')?.getAttribute('data') ?? '{"transparent":false}'
+);
 
 const parsed = parseYamlToJSONWithoutValidation(yamlString);
 const workflow = parsed.success ? (parsed.json as unknown as WorkflowYaml) : undefined;

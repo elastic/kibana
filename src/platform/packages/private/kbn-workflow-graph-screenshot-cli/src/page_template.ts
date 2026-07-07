@@ -13,8 +13,10 @@ export interface GraphConfig {
 
 /**
  * Builds the HTML page served to puppeteer for each workflow. Injects the YAML
- * and config as JSON-encoded globals so the browser entry can read them without
- * any XSS risk from special characters in the YAML content.
+ * and config as HTML-attribute-escaped `data` attributes on custom elements so
+ * the browser entry can read them safely with `getAttribute('data')` + JSON.parse.
+ * Using an attribute (rather than an inline `<script>` body) means a `</script>`
+ * literal in the YAML content cannot break out of any script block.
  */
 export const buildPageHtml = (
   yamlString: string,
@@ -22,8 +24,8 @@ export const buildPageHtml = (
   width: number,
   height: number
 ): string => {
-  const escapedYaml = JSON.stringify(yamlString);
-  const escapedConfig = JSON.stringify(config);
+  const yamlAttr = escapeHtml(yamlString);
+  const configAttr = escapeHtml(JSON.stringify(config));
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -39,14 +41,13 @@ export const buildPageHtml = (
     }
     html, body { margin: 0; padding: 0; width: ${width}px; height: ${height}px; overflow: hidden; }
     #root { width: ${width}px; height: ${height}px; }
+    kbn-workflow-yaml, kbn-graph-config { display: none; }
   </style>
-  <script>
-    window.__WORKFLOW_YAML__ = ${escapedYaml};
-    window.__GRAPH_CONFIG__ = ${escapedConfig};
-  </script>
 </head>
 <body>
   <div id="root"></div>
+  <kbn-workflow-yaml data="${yamlAttr}"></kbn-workflow-yaml>
+  <kbn-graph-config data="${configAttr}"></kbn-graph-config>
   <script src="/bundle.js"></script>
 </body>
 </html>`;
