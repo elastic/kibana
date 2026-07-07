@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, render } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { WorkflowGraphCanvasWithoutProvider } from './workflow_graph_canvas';
 
@@ -162,5 +162,50 @@ describe('WorkflowGraphCanvas initial centering', () => {
 
     expect(instance.setCenter).not.toHaveBeenCalled();
     expect(onReady).toHaveBeenCalledTimes(1);
+  });
+});
+
+// mockNodes: minX=0 minY=0 maxX=200 maxY=214 → centerX=100, centerY=107.
+// jsdom never performs layout so wrapperRef.current.clientWidth/clientHeight are
+// always 0, making both wrapperWidth/wrapperHeight terms contribute 0.
+// TOP_PADDING=80, INITIAL_ZOOM=1.
+//
+// TB formula (vertical, unchanged): setCenter(centerX, minY + 0/2 - 80, …)
+//                                 = setCenter(100, -80, …)
+// LR formula (horizontal, the fix): setCenter(minX + 0/2 - 80, centerY, …)
+//                                  = setCenter(-80, 107, …)
+describe('WorkflowGraphCanvas Reset zoom button', () => {
+  beforeEach(() => {
+    mockStoreWidth = 0;
+    mockStoreHeight = 0;
+    mockNodesInitialized = false;
+    mockCapturedOnInit = undefined;
+  });
+
+  // Dimension fixtures are kept at 0 so the initial-centering effect (gated on
+  // measuredWidth > 0) stays dormant — the only setCenter call is from the click.
+
+  it('resets to trigger-near-top for TB (vertical) layout', () => {
+    const instance = makeInstance();
+    render(<WorkflowGraphCanvasWithoutProvider {...baseProps} showZoomControls />);
+    act(() => mockCapturedOnInit!(instance));
+
+    fireEvent.click(screen.getByTestId('workflowCanvas-reset-zoom'));
+
+    expect(instance.setCenter).toHaveBeenCalledTimes(1);
+    expect(instance.setCenter).toHaveBeenCalledWith(100, -80, { zoom: 1, duration: 200 });
+  });
+
+  it('resets to trigger-near-left for LR (horizontal) layout', () => {
+    const instance = makeInstance();
+    render(<WorkflowGraphCanvasWithoutProvider {...baseProps} showZoomControls direction="LR" />);
+    act(() => mockCapturedOnInit!(instance));
+
+    fireEvent.click(screen.getByTestId('workflowCanvas-reset-zoom'));
+
+    expect(instance.setCenter).toHaveBeenCalledTimes(1);
+    // x: minX + wrapperWidth/2 − TOP_PADDING = 0 + 0 − 80 = −80 (trigger anchored left)
+    // y: centerY = (minY + maxY) / 2 = (0 + 214) / 2 = 107 (graph centred vertically)
+    expect(instance.setCenter).toHaveBeenCalledWith(-80, 107, { zoom: 1, duration: 200 });
   });
 });

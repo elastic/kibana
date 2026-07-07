@@ -105,6 +105,26 @@ const TOP_PADDING = 80;
 const CANVAS_CONTROLS_SHADOW =
   '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 1px 4px 0 rgba(43, 57, 79, 0.06), 0 2px 8px 0 rgba(43, 57, 79, 0.05)';
 
+/**
+ * Returns the `setCenter` target (x, y) for the initial / reset view.
+ *
+ * The framing is axis-aware: for `TB` (vertical) the trigger row is the topmost
+ * rank so we anchor it near the top edge — `minY` is placed `TOP_PADDING` pixels
+ * from the top, and the graph is centred horizontally (`centerX`). For `LR`
+ * (horizontal) the trigger column is the leftmost rank, so we mirror the framing:
+ * `minX` is anchored `TOP_PADDING` pixels from the left edge, and the graph is
+ * centred vertically (`centerY`). Both axes use the same `TOP_PADDING` constant.
+ */
+const getResetViewTarget = (
+  direction: LayoutDirection,
+  bounds: { minX: number; minY: number; centerX: number; centerY: number },
+  wrapperWidth: number,
+  wrapperHeight: number
+): { x: number; y: number } =>
+  direction === 'LR'
+    ? { x: bounds.minX + wrapperWidth / 2 - TOP_PADDING, y: bounds.centerY }
+    : { x: bounds.centerX, y: bounds.minY + wrapperHeight / 2 - TOP_PADDING };
+
 function CanvasZoomControls({ onResetView }: { onResetView: () => void }) {
   const { euiTheme } = useEuiTheme();
   const { zoomIn, zoomOut } = useReactFlow();
@@ -351,7 +371,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
   // spreading large arrays as call args can raise RangeError on very big graphs.
   const graphBounds = useMemo(() => {
     if (nodes.length === 0) {
-      return { minX: -1000, minY: -1000, maxX: 1000, maxY: 1000, centerX: 0 };
+      return { minX: -1000, minY: -1000, maxX: 1000, maxY: 1000, centerX: 0, centerY: 0 };
     }
     let minX = Infinity;
     let minY = Infinity;
@@ -365,7 +385,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
       if (n.position.x + w > maxX) maxX = n.position.x + w;
       if (n.position.y + h > maxY) maxY = n.position.y + h;
     }
-    return { minX, minY, maxX, maxY, centerX: (minX + maxX) / 2 };
+    return { minX, minY, maxX, maxY, centerX: (minX + maxX) / 2, centerY: (minY + maxY) / 2 };
   }, [nodes]);
 
   // Restrict panning to the graph's bounding box plus a comfortable margin
@@ -424,27 +444,27 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
         }
       }
 
-      const wrapperHeight = wrapperRef.current?.clientHeight ?? 600;
-      instance.setCenter(graphBounds.centerX, graphBounds.minY + wrapperHeight / 2 - TOP_PADDING, {
-        zoom: INITIAL_ZOOM,
-        duration,
-      });
+      const wrapperWidth = wrapperRef.current?.clientWidth ?? 0;
+      const wrapperHeight = wrapperRef.current?.clientHeight ?? 0;
+      const target = getResetViewTarget(direction, graphBounds, wrapperWidth, wrapperHeight);
+      instance.setCenter(target.x, target.y, { zoom: INITIAL_ZOOM, duration });
     },
-    [nodes, graphBounds, fitViewProp, fitViewOptionsProp, focusStepId]
+    [nodes, graphBounds, fitViewProp, fitViewOptionsProp, focusStepId, direction]
   );
 
-  // Centers on the graph's top row at the initial zoom — always ignores
-  // focusStepId so the button reliably returns to the trigger-row view.
+  // Returns the camera to the trigger-row / trigger-column view at the initial
+  // zoom. Always ignores focusStepId so the button reliably gives a consistent
+  // "home" regardless of which step the user last focused. The leading-edge
+  // anchor is direction-aware: top for TB, left for LR (see getResetViewTarget).
   const handleResetView = useCallback(() => {
     const instance = flowInstanceRef.current;
     if (!instance || nodes.length === 0) return;
 
-    const wrapperHeight = wrapperRef.current?.clientHeight ?? 600;
-    instance.setCenter(graphBounds.centerX, graphBounds.minY + wrapperHeight / 2 - TOP_PADDING, {
-      zoom: INITIAL_ZOOM,
-      duration: 200,
-    });
-  }, [nodes.length, graphBounds]);
+    const wrapperWidth = wrapperRef.current?.clientWidth ?? 0;
+    const wrapperHeight = wrapperRef.current?.clientHeight ?? 0;
+    const target = getResetViewTarget(direction, graphBounds, wrapperWidth, wrapperHeight);
+    instance.setCenter(target.x, target.y, { zoom: INITIAL_ZOOM, duration: 200 });
+  }, [nodes.length, graphBounds, direction]);
 
   // Record the instance and decide who owns the initial viewport. The default
   // centering is deferred to the measurement-gated effect below, because
