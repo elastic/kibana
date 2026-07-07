@@ -833,96 +833,101 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                   )}
                 </EuiPanel>
               )}
-              <EuiSpacer size="l" />
-              <EuiTitle size="xs">
-                <h3>
-                  <FormattedMessage
-                    id="xpack.security.accountManagement.apiKeyFlyout.optionalSettings.title"
-                    defaultMessage="Optional settings"
-                  />
-                </h3>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <EuiPanel hasBorder>
-                <div style={{ paddingRight: euiTheme.size.s }}>
-                  <EuiSwitch
-                    data-test-subj="apiKeyCustomExpirationSwitch"
-                    label={
-                      <EuiTitle size="xs">
-                        <h4>
-                          <FormattedMessage
-                            id="xpack.security.accountManagement.apiKeyFlyout.applyExpirationDateLabel"
-                            defaultMessage="Add expiration date"
-                          />
-                        </h4>
-                      </EuiTitle>
-                    }
-                    checked={Boolean(formik.values.customExpiration)}
-                    disabled={readOnly || (apiKey && !canEdit) || (!!apiKey && !!apiKey.expiration)}
-                    onChange={(e) => formik.setFieldValue('customExpiration', e.target.checked)}
-                  />
-                  <EuiSpacer size="xs" />
-                  <EuiText color="subdued" size="xs">
-                    <p>
+              {!apiKey && (
+                <>
+                  <EuiSpacer size="l" />
+                  <EuiTitle size="xs">
+                    <h3>
                       <FormattedMessage
-                        id="xpack.security.accountManagement.apiKeyFlyout.expiresFieldHelpText"
-                        defaultMessage="Setting an expiration date is a security best practice. Defaults to no expiration."
+                        id="xpack.security.accountManagement.apiKeyFlyout.optionalSettings.title"
+                        defaultMessage="Optional settings"
                       />
-                    </p>
-                  </EuiText>
-                </div>
-                {formik.values.customExpiration && (
-                  <>
-                    <EuiSpacer />
-                    <EuiFormRow
-                      fullWidth
-                      helpText={
-                        <FormattedMessage
-                          id="xpack.security.accountManagement.apiKeyFlyout.expirationHelpText"
-                          defaultMessage="This API Key will expire on {expirationDate}"
-                          values={{
-                            expirationDate: (
-                              <strong>
-                                <FormattedDate
-                                  year="numeric"
-                                  month="long"
-                                  day="numeric"
-                                  value={expirationDate!}
-                                />
-                              </strong>
-                            ),
-                          }}
-                        />
-                      }
-                    >
-                      <FormField
-                        as={EuiFieldNumber}
-                        name="expiration"
-                        min={0}
-                        append={i18n.translate(
-                          'xpack.security.accountManagement.apiKeyFlyout.expirationUnit',
-                          {
-                            defaultMessage: 'days',
+                    </h3>
+                  </EuiTitle>
+                  <EuiSpacer size="s" />
+                  <EuiPanel hasBorder>
+                    <div style={{ paddingRight: euiTheme.size.s }}>
+                      <EuiSwitch
+                        data-test-subj="apiKeyCustomExpirationSwitch"
+                        label={
+                          <EuiTitle size="xs">
+                            <h4>
+                              <FormattedMessage
+                                id="xpack.security.accountManagement.apiKeyFlyout.applyExpirationDateLabel"
+                                defaultMessage="Add expiration date"
+                              />
+                            </h4>
+                          </EuiTitle>
+                        }
+                        checked={Boolean(formik.values.customExpiration)}
+                        disabled={readOnly || !!apiKey}
+                        onChange={(e) => formik.setFieldValue('customExpiration', e.target.checked)}
+                      />
+                      <EuiSpacer size="xs" />
+                      <EuiText color="subdued" size="xs">
+                        <p>
+                          <FormattedMessage
+                            id="xpack.security.accountManagement.apiKeyFlyout.expiresFieldHelpText"
+                            defaultMessage="Setting an expiration date is a security best practice. Defaults to no expiration."
+                          />
+                        </p>
+                      </EuiText>
+                    </div>
+                    {formik.values.customExpiration && (
+                      <>
+                        <EuiSpacer />
+                        <EuiFormRow
+                          fullWidth
+                          helpText={
+                            <FormattedMessage
+                              id="xpack.security.accountManagement.apiKeyFlyout.expirationHelpText"
+                              defaultMessage="This API Key will expire on {expirationDate}"
+                              values={{
+                                expirationDate: (
+                                  <strong>
+                                    <FormattedDate
+                                      year="numeric"
+                                      month="long"
+                                      day="numeric"
+                                      value={expirationDate!}
+                                    />
+                                  </strong>
+                                ),
+                              }}
+                            />
                           }
-                        )}
-                        validate={{
-                          min: {
-                            value: 1,
-                            message: i18n.translate(
-                              'xpack.security.management.apiKeys.apiKeyFlyout.expirationRequired',
+                        >
+                          <FormField
+                            as={EuiFieldNumber}
+                            name="expiration"
+                            min={0}
+                            append={i18n.translate(
+                              'xpack.security.accountManagement.apiKeyFlyout.expirationUnit',
                               {
-                                defaultMessage: 'Enter a valid duration or disable this option.',
+                                defaultMessage: 'days',
                               }
-                            ),
-                          },
-                        }}
-                        disabled={readOnly || (apiKey && !canEdit)}
-                        data-test-subj="apiKeyCustomExpirationInput"
-                      />
-                    </EuiFormRow>
-                  </>
-                )}
-              </EuiPanel>
+                            )}
+                            validate={{
+                              min: {
+                                value: 1,
+                                message: i18n.translate(
+                                  'xpack.security.management.apiKeys.apiKeyFlyout.expirationRequired',
+                                  {
+                                    defaultMessage:
+                                      'Enter a valid duration or disable this option.',
+                                  }
+                                ),
+                              },
+                            }}
+                            disabled={readOnly || !!apiKey}
+                            data-test-subj="apiKeyCustomExpirationInput"
+                          />
+                        </EuiFormRow>
+                      </>
+                    )}
+                  </EuiPanel>
+                </>
+              )}
               <EuiSpacer size="l" />
               <EuiPanel hasBorder>
                 <div style={{ paddingRight: euiTheme.size.s }}>
@@ -1164,14 +1169,12 @@ export function mapUpdateApiKeyValues(
   values: ApiKeyFormValues,
   initialValues: ApiKeyFormValues
 ): UpdateAPIKeyParams {
-  const expiration = getUpdatedExpiration(values, initialValues);
   const metadata = values.includeMetadata ? JSON.parse(values.metadata) : '{}';
 
   if (type === 'cross_cluster') {
     return {
       type,
       id,
-      expiration,
       metadata,
       access: JSON.parse(values.access),
       certificate_identity: getUpdatedCertificateIdentity(values, initialValues),
@@ -1180,28 +1183,9 @@ export function mapUpdateApiKeyValues(
 
   return {
     id,
-    expiration,
     metadata,
     role_descriptors: values.customPrivileges ? JSON.parse(values.role_descriptors) : '{}',
   };
-}
-
-/**
- * Determines the `expiration` value to send when updating an API key. Elasticsearch only accepts a
- * relative duration (e.g. `30d`) and interprets an omitted value as "leave unchanged"; it has no way
- * to clear an existing expiration on update. To avoid silently pushing the deadline forward (or
- * reactivating an already-expired key) every time the form is saved, we only send a value when the
- * user actually changed the expiration settings.
- */
-function getUpdatedExpiration(
-  values: ApiKeyFormValues,
-  initialValues: ApiKeyFormValues
-): string | undefined {
-  const hasChanged =
-    values.customExpiration !== initialValues.customExpiration ||
-    values.expiration !== initialValues.expiration;
-
-  return hasChanged && values.customExpiration ? `${values.expiration}d` : undefined;
 }
 
 /**
@@ -1235,7 +1219,7 @@ function mapApiKeyFormValues(apiKey: CategorizedApiKey): ApiKeyFormValues {
     name: apiKey.name,
     type: apiKey.type,
     customExpiration: !!apiKey.expiration,
-    expiration: getRemainingExpirationDays(apiKey.expiration),
+    expiration: !!apiKey.expiration ? apiKey.expiration.toString() : '',
     includeMetadata,
     metadata: includeMetadata ? JSON.stringify(apiKey.metadata, null, 2) : '{}',
     customPrivileges,
@@ -1248,16 +1232,3 @@ function mapApiKeyFormValues(apiKey: CategorizedApiKey): ApiKeyFormValues {
   };
 }
 
-/**
- * Converts an absolute API key expiration timestamp (epoch ms) into the number of remaining whole
- * days from now, so it can be edited in the expiration field (which is expressed in days). Returns an
- * empty string when the key has no expiration.
- */
-function getRemainingExpirationDays(expiration?: number): string {
-  if (!expiration) {
-    return '';
-  }
-  const millisecondsPerDay = 1000 * 60 * 60 * 24;
-  const remainingDays = Math.ceil((Number(expiration) - Date.now()) / millisecondsPerDay);
-  return String(Math.max(1, remainingDays));
-}

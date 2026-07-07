@@ -59,14 +59,12 @@ describe('mapCreateApiKeyValues', () => {
 });
 
 describe('mapUpdateApiKeyValues', () => {
-  it('includes `certificate_identity` and `expiration` for cross-cluster keys when changed', () => {
+  it('includes `certificate_identity` for cross-cluster keys when the toggle is enabled', () => {
     const result = mapUpdateApiKeyValues(
       'cross_cluster',
       '123',
       {
         ...baseValues,
-        customExpiration: true,
-        expiration: '30',
         includeCertificateIdentity: true,
         certificateIdentity: 'CN=host,OU=engineering,DC=example,DC=com',
       },
@@ -76,36 +74,9 @@ describe('mapUpdateApiKeyValues', () => {
     expect(result).toMatchObject({
       type: 'cross_cluster',
       id: '123',
-      expiration: '30d',
       certificate_identity: 'CN=host,OU=engineering,DC=example,DC=com',
     });
-  });
-
-  it('omits `expiration` when the value is unchanged from the initial values', () => {
-    const initialValues: ApiKeyFormValues = {
-      ...baseValues,
-      customExpiration: true,
-      expiration: '25',
-    };
-
-    const result = mapUpdateApiKeyValues('cross_cluster', '123', initialValues, initialValues);
-
-    expect(result.expiration).toBeUndefined();
-  });
-
-  it('does not reactivate an unchanged (already-seeded) expiration', () => {
-    // Simulates re-saving a key whose expiration was seeded as a remaining day count: because the
-    // value is unchanged, no `expiration` is sent and the original deadline is preserved.
-    const initialValues: ApiKeyFormValues = {
-      ...baseValues,
-      type: 'rest',
-      customExpiration: true,
-      expiration: '1',
-    };
-
-    const result = mapUpdateApiKeyValues('rest', '123', initialValues, initialValues);
-
-    expect(result.expiration).toBeUndefined();
+    expect(result).not.toHaveProperty('expiration');
   });
 
   it('sends `certificate_identity: null` to clear a previously set value when disabled', () => {
@@ -137,20 +108,4 @@ describe('mapUpdateApiKeyValues', () => {
     expect(result.certificate_identity).toBeUndefined();
   });
 
-  it('forwards `expiration` for REST keys when changed', () => {
-    const result = mapUpdateApiKeyValues(
-      'rest',
-      '123',
-      {
-        ...baseValues,
-        type: 'rest',
-        customExpiration: true,
-        expiration: '7',
-      },
-      { ...baseValues, type: 'rest' }
-    );
-
-    expect(result).toMatchObject({ id: '123', expiration: '7d' });
-    expect(result).not.toHaveProperty('certificate_identity');
-  });
 });
