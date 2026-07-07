@@ -109,12 +109,11 @@ export class SlackAppService {
     const now = new Date().toISOString();
 
     // A prior connection (connected, or a still-in-progress install) may already
-    // hold a live managed key. Invalidate it before minting a new one so
-    // reconnecting — or any repeat call to this route — never orphans a key in ES.
+    // hold a live managed key. It's invalidated only once the new install
+    // succeeds (below), not here — invalidating it up front would brick a
+    // working connection if startInstall then failed, since the SO write also
+    // only happens on success.
     const existingConnection = await this.readConnection(soClient);
-    if (existingConnection?.apiKeyId) {
-      await this.invalidateApiKey(existingConnection.apiKeyId, 'before reconnecting');
-    }
 
     // Mint a managed, least-privilege ES API key scoped to Agent Builder read. The key
     // is granted on behalf of the connecting user but survives their deletion (ES keys
@@ -152,9 +151,16 @@ export class SlackAppService {
       });
     } catch (error) {
       this.logger.error(`Slack app install failed: ${this.toErrorMessage(error)}`);
-      // Do not leak an orphaned key if the Relay never took ownership of it.
+      // Do not leak an orphaned key if the Relay never took ownership of it. The
+      // existing connection (if any) is left untouched so a failed reconnect
+      // attempt never breaks an already-working one.
       await this.invalidateApiKey(apiKeyResult.id, 'after Relay install error');
       throw error;
+    }
+
+    // The new key has taken over — safe to invalidate whatever it's replacing now.
+    if (existingConnection?.apiKeyId) {
+      await this.invalidateApiKey(existingConnection.apiKeyId, 'after successful reconnect');
     }
 
     await this.writeConnection(soClient, {

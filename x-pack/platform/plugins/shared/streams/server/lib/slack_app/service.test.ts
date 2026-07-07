@@ -141,7 +141,7 @@ describe('SlackAppService', () => {
       expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
     });
 
-    it('invalidates a pre-existing key before minting a new one when a connection already exists', async () => {
+    it('invalidates the pre-existing key once the new install succeeds, when a connection already exists', async () => {
       const { server, soClient, invalidateAsInternalUser, grantAsInternalUser } = createHarness();
       soClient.get.mockResolvedValue({
         attributes: {
@@ -167,6 +167,32 @@ describe('SlackAppService', () => {
         { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
       );
       expect(result).toEqual({ authorizeUrl: 'https://slack/oauth' });
+    });
+
+    // Regression coverage: invalidating the old key up front (before startInstall
+    // is attempted) would brick an already-working connection if the reconnect
+    // then failed, since the SO is never rewritten on failure. The old key must
+    // only be invalidated once the new install has actually succeeded.
+    it('leaves an existing connection untouched when a reconnect attempt fails', async () => {
+      const { server, soClient, invalidateAsInternalUser, grantAsInternalUser } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          apiKeyId: 'old-key',
+          surface: 'slack',
+        },
+      });
+      grantAsInternalUser.mockResolvedValue({ id: 'new-key', name: 'k', api_key: 'secret' });
+      startInstall.mockRejectedValue(new Error('relay down'));
+
+      await expect(new SlackAppService(server).connect(request)).rejects.toThrow('relay down');
+
+      // Only the newly-minted (unused) key is invalidated; the existing
+      // connection's key and record are left alone.
+      expect(invalidateAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['new-key'] });
+      expect(invalidateAsInternalUser).not.toHaveBeenCalledWith({ ids: ['old-key'] });
+      expect(soClient.create).not.toHaveBeenCalled();
     });
   });
 
