@@ -11,6 +11,7 @@ import type { KbnPaletteId } from '@kbn/palettes';
 import { act, screen } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EuiButtonGroupTestHarness, EuiComboBoxTestHarness } from '@kbn/test-eui-helpers';
@@ -31,6 +32,15 @@ import { getKbnPalettes } from '@kbn/palettes';
 import { renderWithProviders } from '../../../test_utils/test_utils';
 
 const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
+
+function createTestFormat(options: { id: string; title: string }) {
+  return new (class TestFormat extends FieldFormat {
+    static id = options.id;
+    static title = options.title;
+
+    textConvert: FieldFormat['textConvert'] = (value) => String(value);
+  })(undefined, jest.fn());
+}
 
 describe('data table dimension editor', () => {
   let user: UserEvent;
@@ -576,13 +586,32 @@ describe('data table dimension editor', () => {
       });
     });
 
-    it('does not show an append label on the consolidated custom range inputs', () => {
+    it('shows an append label when an explicit value format label is available', () => {
       mockFirstColumn({ dataType: 'number' });
       state.columns[0].colorMode = 'progress';
       state.columns[0].fillStyle = {
         fillMode: 'single',
         valueRange: { mode: 'custom', min: 10, max: 100 },
       };
+      frame.activeData!.first.columns[0].meta.params = { id: 'percent' };
+      props.formatFactory = () => createTestFormat({ id: 'percent', title: 'Percentage' });
+      renderTableDimensionEditor();
+
+      expect(
+        screen
+          .getByTestId('lnsDatatable_progressBar_valueRangeInputs')
+          .querySelector('.euiFormControlLayout__append')
+      ).toHaveTextContent('Percentage');
+    });
+
+    it('does not show an append label when no explicit value format label is available', () => {
+      mockFirstColumn({ dataType: 'number' });
+      state.columns[0].colorMode = 'progress';
+      state.columns[0].fillStyle = {
+        fillMode: 'single',
+        valueRange: { mode: 'custom', min: 10, max: 100 },
+      };
+      frame.activeData!.first.columns[0].meta.params = undefined;
       renderTableDimensionEditor();
 
       expect(

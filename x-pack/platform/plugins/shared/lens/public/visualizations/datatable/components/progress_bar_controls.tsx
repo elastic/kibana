@@ -301,6 +301,7 @@ export interface ProgressBarControlsProps {
   palette: PaletteOutput<CustomPaletteParams>;
   paletteService: PaletteRegistry;
   panelRef: MutableRefObject<HTMLDivElement | null>;
+  appendLabel?: string;
   isInlineEditing?: boolean;
   onUpdate: (newColumn: Partial<ColumnState>) => void;
 }
@@ -316,6 +317,7 @@ export function ProgressBarControls({
   palette,
   paletteService,
   panelRef,
+  appendLabel,
   isInlineEditing,
   onUpdate,
 }: ProgressBarControlsProps) {
@@ -890,6 +892,7 @@ export function ProgressBarControls({
             <EuiFormControlLayoutDelimited
               compressed
               fullWidth
+              append={appendLabel}
               data-test-subj="lnsDatatable_progressBar_valueRangeInputs"
               startControl={
                 <EuiFieldNumber

@@ -183,6 +183,10 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
 
   const currentMinMax =
     getDataBoundsForAccessor(accessor, currentData, localState.columns) ?? getFallbackDataBounds();
+  const progressBarAppendLabel =
+    columnMeta?.params?.id && typeof formatter.type.title === 'string'
+      ? formatter.type.title
+      : undefined;
 
   let activePalette: PaletteOutput<CustomPaletteParams>;
   const shouldUseDefaultProgressPalette =
@@ -328,6 +332,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 palette={activePalette}
                 paletteService={props.paletteService}
                 panelRef={props.panelRef}
+                appendLabel={progressBarAppendLabel}
                 isInlineEditing={isInlineEditing}
                 onUpdate={(newColumn) => updateColumnState(accessor, newColumn, { flush: true })}
               />
