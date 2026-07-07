@@ -22,7 +22,8 @@
     "@kbn/search-types",
     "@kbn/data-plugin",
     "@kbn/code-editor",
-    "@kbn/monaco"
+    "@kbn/monaco",
+    "@kbn/ui-theme"
   ],
   "exclude": ["target/**/*"]
 }

@@ -25,7 +25,7 @@ import type { TimeRange } from '@kbn/es-query';
 import type { AiPanelEmbeddableState } from '../server';
 import { AI_PANEL_EMBEDDABLE_TYPE } from '../common/constants';
 
-type AiPanelApi = DefaultEmbeddableApi<AiPanelEmbeddableState> & HasEditCapabilities;
+export type AiPanelApi = DefaultEmbeddableApi<AiPanelEmbeddableState> & HasEditCapabilities;
 import { AiPanelComponent } from './components/ai_panel_component';
 import { EditAiPanelFlyout } from './components/edit_ai_panel_flyout';
 

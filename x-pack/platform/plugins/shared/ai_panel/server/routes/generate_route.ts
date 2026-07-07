@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter, CoreSetup } from '@kbn/core/server';
 import { ChatCompletionEventType, MessageRole } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import { runEsqlQuery, sanitizeCellValue } from '../utils/esql_query';
 import type { EsqlColumn } from '../utils/esql_query';
 import { columnNamesToKeys } from '../../common/utils';
@@ -22,19 +23,22 @@ const CSP_META = `<meta http-equiv="Content-Security-Policy" content="default-sr
 type ColorMode = 'LIGHT' | 'DARK';
 
 function colorSection(colorMode: ColorMode): string {
+  const theme = colorMode === 'DARK' ? euiDarkVars : euiLightVars;
+  const accents = `${theme.euiColorPrimary} (blue), ${theme.euiColorAccentSecondary} (teal), ${theme.euiColorAccent} (pink), ${theme.euiColorWarning} (yellow)`;
+
   if (colorMode === 'DARK') {
     return `VISUAL DESIGN — DARK MODE (apply these colors exactly, do not substitute):
-- IMPORTANT: body background MUST be #1D1E24. Text color: #D4DAE5.
-- Required body reset: body { margin: 0; padding: 16px; box-sizing: border-box; font-family: Inter, system-ui, sans-serif; color: #D4DAE5; background: #1D1E24; }
-- Card/surface backgrounds: #25262E. Borders: #3C3D4A.
-- Accent colors: #36A2EF (blue), #2EC4B6 (teal), #FF6B9D (pink), #FFD166 (yellow), #5BC0F8, #E87DA8.
+- IMPORTANT: body background MUST be ${theme.euiColorEmptyShade}. Text color: ${theme.euiColorTextParagraph}.
+- Required body reset: body { margin: 0; padding: 16px; box-sizing: border-box; font-family: Inter, system-ui, sans-serif; color: ${theme.euiColorTextParagraph}; background: ${theme.euiColorEmptyShade}; }
+- Card/surface backgrounds: ${theme.euiColorLightestShade}. Borders: ${theme.euiColorBorderBasePlain}.
+- Accent colors: ${accents}.
 - Clean, modern design. Comfortable padding. No harsh borders.`;
   }
   return `VISUAL DESIGN — LIGHT MODE (apply these colors exactly, do not substitute):
-- IMPORTANT: body background MUST be transparent — do NOT set background on <html> or <body>. Text color: #343741.
-- Required body reset: body { margin: 0; padding: 16px; box-sizing: border-box; font-family: Inter, system-ui, sans-serif; color: #343741; }
-- Accent colors: #0077CC (blue), #00BFB3 (teal), #F04E98 (pink), #FEC514 (yellow), #1BA9F5, #D36086.
-- Card/surface backgrounds: #FFFFFF. Borders: #D3DAE6.
+- IMPORTANT: body background MUST be transparent — do NOT set background on <html> or <body>. Text color: ${theme.euiColorTextParagraph}.
+- Required body reset: body { margin: 0; padding: 16px; box-sizing: border-box; font-family: Inter, system-ui, sans-serif; color: ${theme.euiColorTextParagraph}; }
+- Accent colors: ${accents}.
+- Card/surface backgrounds: ${theme.euiColorEmptyShade}. Borders: ${theme.euiColorBorderBasePlain}.
 - Clean, modern design. Comfortable padding. No harsh borders.`;
 }
 
@@ -101,7 +105,7 @@ CONTENT RULES:
 }
 
 function formatSampleTable(columns: EsqlColumn[], rows: unknown[][]): string {
-  const header = columns.map((c) => c.name.replace(/[<>]/g, '')).join(' | ');
+  const header = columns.map((c) => sanitizeCellValue(c.name)).join(' | ');
   const separator = columns.map(() => '---').join(' | ');
   const dataRows = rows
     .slice(0, 3)
@@ -179,9 +183,7 @@ export function registerGenerateRoute(
           const schemaLines = columns
             .map(
               (c, i) =>
-                `  - ${sanitizeCellValue(c.name)} (${sanitizeCellValue(c.type)}) → placeholder: {{${
-                  columnKeys[i]
-                }}}`
+                `  - ${sanitizeCellValue(c.name)} (${c.type}) → placeholder: {{${columnKeys[i]}}}`
             )
             .join('\n');
           const sampleSection =

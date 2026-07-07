@@ -9,16 +9,28 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import dateMath from '@kbn/datemath';
 import { getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 
-// Sanitizes a cell value before it is included in an LLM prompt.
-// Strips HTML angle brackets, newlines, and Liquid template delimiters ({{ and {%)
-// to prevent prompt injection via crafted field names or values.
+const MAX_SANITIZED_CELL_LENGTH = 500;
+
+// Strips characters that could let a crafted field name/value break out of the sample
+// table and inject instructions or Liquid syntax into the LLM prompt.
+const HTML_ANGLE_BRACKETS = /[<>]/g;
+const LINE_BREAKS = /[\r\n]+/g;
+const LIQUID_OUTPUT_DELIMITER = /\{\{/g; // e.g. {{ row.field }}
+const LIQUID_TAG_DELIMITER = /\{%/g; // e.g. {% for row in rows %}
+
+/**
+ * Sanitizes a single ES|QL cell value (or column name) before it is embedded in an LLM prompt.
+ */
 export function sanitizeCellValue(v: unknown): string {
-  return String(v ?? '')
-    .replace(/[<>]/g, '')
-    .replace(/[\r\n]+/g, ' ')
-    .replace(/\{\{/g, '{ {')
-    .replace(/\{%/g, '{ %')
-    .slice(0, 500);
+  const withoutHtmlAndLineBreaks = String(v ?? '')
+    .replace(HTML_ANGLE_BRACKETS, '')
+    .replace(LINE_BREAKS, ' ');
+
+  const withoutLiquidSyntax = withoutHtmlAndLineBreaks
+    .replace(LIQUID_OUTPUT_DELIMITER, '{ {')
+    .replace(LIQUID_TAG_DELIMITER, '{ %');
+
+  return withoutLiquidSyntax.slice(0, MAX_SANITIZED_CELL_LENGTH);
 }
 
 export interface EsqlColumn {
