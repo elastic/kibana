@@ -113,8 +113,9 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     const cloudSetup = appContextService.getCloud();
     const isCloud = cloudSetup?.isCloudEnabled;
     const isServerless = cloudSetup?.isServerlessEnabled;
-    // TODO(cursor-state): #8636 — the managed bulk output has no usable direct-ES URL for the
-    // agentless state store; cursor state routing is unresolved and not wired up here.
+    // TODO(cursor-state): https://github.com/elastic/ingest-dev/issues/8636 — the managed bulk
+    // output has no usable direct-ES URL for the agentless state store; cursor state routing is
+    // unresolved and not wired up here.
     const useManagedBulk = isManagedBulkEnabled() && canUseManagedBulk(agentPolicy);
     return isServerless
       ? useManagedBulk

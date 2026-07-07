@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ECH_AGENTLESS_OUTPUT_ID, ECH_AGENTLESS_FLEET_SERVER_HOST_ID } from '../constants';
+
 import { ensureCorrectAgentlessSettingsIds } from './agentless_settings_ids';
 import { agentPolicyService } from './agent_policy';
 import { agentlessAgentService } from './agents/agentless_agent';
@@ -16,6 +18,7 @@ jest.mock('.', () => ({
   appContextService: {
     getLogger: () => ({
       debug: jest.fn(),
+      error: jest.fn(),
     }),
     getInternalUserSOClientWithoutSpaceExtension: () => ({}),
   },
@@ -73,7 +76,9 @@ async function* pages(...items: any[][]) {
 describe('ensureCorrectAgentlessSettingsIds', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedAgentlessAgentService.getDefaultFleetServerId.mockReturnValue('default-fleet-server');
+    mockedAgentlessAgentService.getDefaultFleetServerId.mockReturnValue(
+      ECH_AGENTLESS_FLEET_SERVER_HOST_ID
+    );
     mockedOutputService.get.mockResolvedValue({ id: 'es-default-output' } as any);
     mockedFleetServerHostService.get.mockResolvedValue({ id: 'default-fleet-server' } as any);
     mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([]);
@@ -99,7 +104,7 @@ describe('ensureCorrectAgentlessSettingsIds', () => {
         },
       ])
     );
-    mockedAgentlessAgentService.getDefaultOutputId.mockReturnValue('es-default-output');
+    mockedAgentlessAgentService.getDefaultOutputId.mockReturnValue(ECH_AGENTLESS_OUTPUT_ID);
 
     await ensureCorrectAgentlessSettingsIds(undefined as any);
 
@@ -108,9 +113,9 @@ describe('ensureCorrectAgentlessSettingsIds', () => {
       undefined,
       'agent_policy_1',
       {
-        data_output_id: 'es-default-output',
-        monitoring_output_id: 'es-default-output',
-        fleet_server_host_id: 'default-fleet-server',
+        data_output_id: ECH_AGENTLESS_OUTPUT_ID,
+        monitoring_output_id: ECH_AGENTLESS_OUTPUT_ID,
+        fleet_server_host_id: ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
       },
       { force: true }
     );
@@ -121,13 +126,13 @@ describe('ensureCorrectAgentlessSettingsIds', () => {
       pages([
         {
           id: 'agent_policy_1',
-          data_output_id: 'es-default-output',
-          monitoring_output_id: 'es-default-output',
-          fleet_server_host_id: 'default-fleet-server',
+          data_output_id: ECH_AGENTLESS_OUTPUT_ID,
+          monitoring_output_id: ECH_AGENTLESS_OUTPUT_ID,
+          fleet_server_host_id: ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
         },
       ])
     );
-    mockedAgentlessAgentService.getDefaultOutputId.mockReturnValue('es-default-output');
+    mockedAgentlessAgentService.getDefaultOutputId.mockReturnValue(ECH_AGENTLESS_OUTPUT_ID);
 
     await ensureCorrectAgentlessSettingsIds(undefined as any);
 
@@ -139,13 +144,13 @@ describe('ensureCorrectAgentlessSettingsIds', () => {
       pages([
         {
           id: 'agent_policy_1',
-          data_output_id: 'es-default-output',
-          monitoring_output_id: 'es-default-output',
+          data_output_id: ECH_AGENTLESS_OUTPUT_ID,
+          monitoring_output_id: ECH_AGENTLESS_OUTPUT_ID,
           fleet_server_host_id: 'wrong-fleet-server',
         },
       ])
     );
-    mockedAgentlessAgentService.getDefaultOutputId.mockReturnValue('es-default-output');
+    mockedAgentlessAgentService.getDefaultOutputId.mockReturnValue(ECH_AGENTLESS_OUTPUT_ID);
 
     await ensureCorrectAgentlessSettingsIds(undefined as any);
 
@@ -153,7 +158,7 @@ describe('ensureCorrectAgentlessSettingsIds', () => {
       expect.anything(),
       undefined,
       'agent_policy_1',
-      { fleet_server_host_id: 'default-fleet-server' },
+      { fleet_server_host_id: ECH_AGENTLESS_FLEET_SERVER_HOST_ID },
       { force: true }
     );
   });
@@ -165,13 +170,13 @@ describe('ensureCorrectAgentlessSettingsIds', () => {
           id: 'bulk_eligible_policy',
           data_output_id: 'wrong-output',
           monitoring_output_id: 'wrong-output',
-          fleet_server_host_id: 'default-fleet-server',
+          fleet_server_host_id: ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
         },
         {
           id: 'connector_policy',
           data_output_id: 'wrong-output',
           monitoring_output_id: 'wrong-output',
-          fleet_server_host_id: 'default-fleet-server',
+          fleet_server_host_id: ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
         },
       ])
     );
@@ -218,11 +223,11 @@ describe('ensureCorrectAgentlessSettingsIds', () => {
           id: 'agent_policy_1',
           data_output_id: 'wrong-output',
           monitoring_output_id: 'wrong-output',
-          fleet_server_host_id: 'default-fleet-server',
+          fleet_server_host_id: ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
         },
       ])
     );
-    mockedAgentlessAgentService.getDefaultOutputId.mockReturnValue('nonexistent-output');
+    mockedAgentlessAgentService.getDefaultOutputId.mockReturnValue(ECH_AGENTLESS_OUTPUT_ID);
     mockedOutputService.get.mockResolvedValue(null as any);
 
     await ensureCorrectAgentlessSettingsIds(undefined as any);
@@ -235,13 +240,13 @@ describe('ensureCorrectAgentlessSettingsIds', () => {
       pages([
         {
           id: 'agent_policy_1',
-          data_output_id: 'es-default-output',
-          monitoring_output_id: 'es-default-output',
+          data_output_id: ECH_AGENTLESS_OUTPUT_ID,
+          monitoring_output_id: ECH_AGENTLESS_OUTPUT_ID,
           fleet_server_host_id: 'wrong-fleet-server',
         },
       ])
     );
-    mockedAgentlessAgentService.getDefaultOutputId.mockReturnValue('es-default-output');
+    mockedAgentlessAgentService.getDefaultOutputId.mockReturnValue(ECH_AGENTLESS_OUTPUT_ID);
     mockedFleetServerHostService.get.mockResolvedValue(null as any);
 
     await ensureCorrectAgentlessSettingsIds(undefined as any);
@@ -257,7 +262,7 @@ describe('ensureCorrectAgentlessSettingsIds', () => {
             id: 'agent_policy_1',
             data_output_id: 'wrong-output',
             monitoring_output_id: 'wrong-output',
-            fleet_server_host_id: 'default-fleet-server',
+            fleet_server_host_id: ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
           },
         ],
         [
@@ -265,15 +270,71 @@ describe('ensureCorrectAgentlessSettingsIds', () => {
             id: 'agent_policy_2',
             data_output_id: 'wrong-output',
             monitoring_output_id: 'wrong-output',
-            fleet_server_host_id: 'default-fleet-server',
+            fleet_server_host_id: ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
           },
         ]
       )
     );
-    mockedAgentlessAgentService.getDefaultOutputId.mockReturnValue('es-default-output');
+    mockedAgentlessAgentService.getDefaultOutputId.mockReturnValue(ECH_AGENTLESS_OUTPUT_ID);
 
     await ensureCorrectAgentlessSettingsIds(undefined as any);
 
     expect(mockedAgentPolicyService.update).toHaveBeenCalledTimes(2);
+  });
+
+  it('should skip a policy whose package-policy lookup fails, without aborting the rest of the page', async () => {
+    mockedAgentPolicyService.fetchAllAgentPolicies.mockResolvedValue(
+      pages([
+        {
+          id: 'failing_policy',
+          data_output_id: 'wrong-output',
+          monitoring_output_id: 'wrong-output',
+          fleet_server_host_id: ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
+        },
+        {
+          id: 'ok_policy',
+          data_output_id: 'wrong-output',
+          monitoring_output_id: 'wrong-output',
+          fleet_server_host_id: ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
+        },
+      ])
+    );
+    mockedAgentlessAgentService.getDefaultOutputId.mockReturnValue(ECH_AGENTLESS_OUTPUT_ID);
+    mockedPackagePolicyService.findAllForAgentPolicy.mockImplementation(async (_soClient, id) => {
+      if (id === 'failing_policy') {
+        throw new Error('boom');
+      }
+      return [];
+    });
+
+    await ensureCorrectAgentlessSettingsIds(undefined as any);
+
+    expect(mockedAgentPolicyService.update).toHaveBeenCalledTimes(1);
+    expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
+      expect.anything(),
+      undefined,
+      'ok_policy',
+      expect.objectContaining({ data_output_id: ECH_AGENTLESS_OUTPUT_ID }),
+      { force: true }
+    );
+  });
+
+  it('should treat the output as missing when outputService.get rejects', async () => {
+    mockedAgentPolicyService.fetchAllAgentPolicies.mockResolvedValue(
+      pages([
+        {
+          id: 'agent_policy_1',
+          data_output_id: 'wrong-output',
+          monitoring_output_id: 'wrong-output',
+          fleet_server_host_id: ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
+        },
+      ])
+    );
+    mockedAgentlessAgentService.getDefaultOutputId.mockReturnValue(ECH_AGENTLESS_OUTPUT_ID);
+    mockedOutputService.get.mockRejectedValue(new Error('boom'));
+
+    await ensureCorrectAgentlessSettingsIds(undefined as any);
+
+    expect(mockedAgentPolicyService.update).not.toHaveBeenCalled();
   });
 });
