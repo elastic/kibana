@@ -83,7 +83,7 @@ describe('RulesAdapterV2', () => {
         grouping: { fields: ['_id'] },
         query: {
           format: 'standalone',
-          breach: { query: 'FROM logs-* METADATA _id | WHERE level == "error"' },
+          breach: { query: 'FROM logs-* METADATA _id | WHERE level == "error" | LIMIT 1000' },
         },
       });
       expect(lastCreateCall(mock).options).toEqual({ id: 'rule-1' });
@@ -143,7 +143,7 @@ describe('RulesAdapterV2', () => {
           grouping: { fields: ['_id'] },
           query: {
             format: 'standalone',
-            breach: { query: 'FROM logs-* METADATA _id | WHERE level == "error"' },
+            breach: { query: 'FROM logs-* METADATA _id | WHERE level == "error" | LIMIT 1000' },
           },
         },
       });
@@ -211,7 +211,7 @@ describe('RulesAdapterV2', () => {
         query: { format: 'standalone'; breach: { query: string } };
       };
       expect(data.query.breach.query).toBe(
-        'FROM logs.child, logs.child.* METADATA _id | WHERE KQL("message: error")'
+        'FROM logs.child, logs.child.* METADATA _id | WHERE KQL("message: error") | LIMIT 1000'
       );
     });
 
@@ -230,7 +230,31 @@ describe('RulesAdapterV2', () => {
       const data = lastUpdateCall(mock).data as {
         query: { format: 'standalone'; breach: { query: string } };
       };
-      expect(data.query.breach.query).toBe('FROM logs-* METADATA _id | WHERE level == "error"');
+      expect(data.query.breach.query).toBe(
+        'FROM logs-* METADATA _id | WHERE level == "error" | LIMIT 1000'
+      );
+    });
+
+    it('appends MAX_ALERTS_PER_EXECUTION unconditionally — ES|QL min-semantics clamp larger author limits', async () => {
+      // | LIMIT 500 | LIMIT 1000 → 500 (author wins, smaller limit)
+      // | LIMIT 50000 | LIMIT 1000 → 1000 (capped)
+      const mock = makeRulesClientMock();
+      mock.createRule.mockResolvedValue({} as never);
+      const adapter = makeAdapter(mock);
+      await adapter.createRule('rule-1', {
+        ...createBody,
+        params: {
+          timestampField: '@timestamp',
+          query: 'FROM logs-* METADATA _id, _source | WHERE level == "error" | LIMIT 500',
+        },
+      });
+
+      const data = lastCreateCall(mock).data as {
+        query: { format: 'standalone'; breach: { query: string } };
+      };
+      expect(data.query.breach.query).toBe(
+        'FROM logs-* METADATA _id | WHERE level == "error" | LIMIT 500 | LIMIT 1000'
+      );
     });
 
     it('leaves queries without METADATA unchanged', async () => {
@@ -248,7 +272,7 @@ describe('RulesAdapterV2', () => {
       const data = lastCreateCall(mock).data as {
         query: { format: 'standalone'; breach: { query: string } };
       };
-      expect(data.query.breach.query).toBe('FROM logs-* | WHERE level == "error"');
+      expect(data.query.breach.query).toBe('FROM logs-* | WHERE level == "error" | LIMIT 1000');
     });
   });
 
