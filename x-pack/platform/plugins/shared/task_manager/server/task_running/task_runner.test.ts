@@ -34,7 +34,6 @@ import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/us
 import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
 import { TASK_MANAGER_RUN_TRANSACTION_TYPE } from './task_runner';
 import { schema } from '@kbn/config-schema';
-import { CLAIM_STRATEGY_MGET } from '../config';
 import * as nextRunAtUtils from '../lib/get_next_run_at';
 import { configMock } from '../config.mock';
 import { EsApiKeyStrategy } from '../api_key_strategy';
@@ -167,7 +166,6 @@ describe('TaskManagerRunner', () => {
             }),
           },
         },
-        strategy: CLAIM_STRATEGY_MGET,
       });
       const result = await runner.markTaskAsRunning();
 
@@ -205,7 +203,6 @@ describe('TaskManagerRunner', () => {
             }),
           },
         },
-        strategy: CLAIM_STRATEGY_MGET,
       });
 
       const result = await runner.markTaskAsRunning();
@@ -239,7 +236,6 @@ describe('TaskManagerRunner', () => {
             }),
           },
         },
-        strategy: CLAIM_STRATEGY_MGET,
       });
 
       const result = await runner.markTaskAsRunning();
@@ -3294,7 +3290,6 @@ describe('TaskManagerRunner', () => {
     definitions?: TaskDefinitionRegistry;
     onTaskEvent?: jest.Mock<(event: TaskEvent<unknown, unknown>) => void>;
     allowReadingInvalidState?: boolean;
-    strategy?: string;
     enrichFakeRequest?: jest.Mock;
   }
 
@@ -3372,7 +3367,6 @@ describe('TaskManagerRunner', () => {
         },
       }),
       allowReadingInvalidState: opts.allowReadingInvalidState || false,
-      strategy: opts.strategy ?? CLAIM_STRATEGY_MGET,
       getPollInterval: () => 500,
       apiKeyStrategy: new EsApiKeyStrategy(),
       eventLogger: eventLoggerMock,

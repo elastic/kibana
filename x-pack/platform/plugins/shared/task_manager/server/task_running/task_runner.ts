@@ -118,7 +118,6 @@ type Opts = {
   usageCounter?: UsageCounter;
   config: TaskManagerConfig;
   allowReadingInvalidState: boolean;
-  strategy: string;
   getPollInterval: () => number;
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
@@ -174,8 +173,6 @@ export class TaskManagerRunner implements TaskRunner {
   private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
   private readonly taskValidator: TaskValidator;
-  // @ts-expect-error
-  private readonly claimStrategy: string;
   private getPollInterval: () => number;
   private apiKeyStrategy: ApiKeyStrategy;
   private eventLogger: TaskEventLogger;
@@ -204,7 +201,6 @@ export class TaskManagerRunner implements TaskRunner {
     usageCounter,
     config,
     allowReadingInvalidState,
-    strategy,
     getPollInterval,
     apiKeyStrategy,
     eventLogger,
@@ -226,7 +222,6 @@ export class TaskManagerRunner implements TaskRunner {
       definitions: this.definitions,
       allowReadingInvalidState,
     });
-    this.claimStrategy = strategy;
     this.getPollInterval = getPollInterval;
     this.apiKeyStrategy = apiKeyStrategy;
     this.eventLogger = eventLogger;

@@ -268,7 +268,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       usageCounter: this.usageCounter,
       config: this.config,
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
-      strategy: this.config.claim_strategy,
       getPollInterval: () => this.currentPollInterval,
       apiKeyStrategy: this.apiKeyStrategy,
       eventLogger: this.eventLogger,
