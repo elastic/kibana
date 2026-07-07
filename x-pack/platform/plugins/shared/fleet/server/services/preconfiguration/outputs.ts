@@ -79,6 +79,7 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
             is_default: false,
             is_default_monitoring: false,
             is_preconfigured: true,
+            allow_edit: ['hosts', 'ca_sha256'],
           } as PreconfiguredOutput,
         ]
       : []),

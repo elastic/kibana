@@ -366,6 +366,7 @@ describe('Outputs preconfiguration', () => {
         is_default_monitoring: false,
         is_preconfigured: true,
       });
+      expect(result[1].allow_edit).toEqual(['hosts', 'ca_sha256']);
 
       // Restore original mocks
       jest.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
