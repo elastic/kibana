@@ -26,6 +26,7 @@ export { EngineDescriptorTypeName } from './domain/saved_objects/engine_descript
 export { EntityStoreGlobalStateTypeName } from './domain/saved_objects/global_state/types';
 export { enterpriseLicenseMiddleware } from './routes/middleware/enterprise_license';
 export { checkEntityStoreIndexPrivileges } from './routes/apis/utils/check_and_format_privileges';
+export { ENTITY_ANALYTICS_KIBANA_FEATURE_PRIVILEGES } from './routes/constants';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { EntityStorePlugin } = await import('./plugin');

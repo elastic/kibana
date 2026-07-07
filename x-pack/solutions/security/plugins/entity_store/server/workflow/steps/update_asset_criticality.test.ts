@@ -38,7 +38,10 @@ const buildCheckPrivilegesResponse = (authorized: boolean, spaceId = 'default') 
           ],
         },
       },
-      kibana: [],
+      kibana: [
+        { privilege: 'api:securitySolution', authorized },
+        { privilege: 'api:securitySolution-entity-analytics', authorized },
+      ],
     },
   };
 };
@@ -94,7 +97,10 @@ describe('updateAssetCriticalityStepDefinition', () => {
   const getSecurityStart = jest.fn(
     async () =>
       ({
-        authz: { checkPrivilegesDynamicallyWithRequest },
+        authz: {
+          checkPrivilegesDynamicallyWithRequest,
+          actions: { api: { get: (privilege: string) => `api:${privilege}` } },
+        },
       } as unknown as SecurityPluginStart)
   );
 
@@ -235,12 +241,38 @@ describe('updateAssetCriticalityStepDefinition', () => {
             [getLatestEntityIndexPattern('default')]: ['read', 'write'],
           },
         },
+        kibana: ['api:securitySolution', 'api:securitySolution-entity-analytics'],
       });
       expect(updateEntity).toHaveBeenCalled();
     });
 
     it('throws a PermissionError ExecutionError and does not update the entity when the caller lacks write access', async () => {
       checkPrivileges.mockResolvedValueOnce(buildCheckPrivilegesResponse(false));
+      const mockContext = createMockContext({
+        entity_type: 'host',
+        entity_id: 'host:my-host',
+        criticality_level: 'high_impact',
+      });
+
+      await expect(updateAssetCriticalityStepDefinition.handler(mockContext)).rejects.toMatchObject(
+        {
+          type: 'PermissionError',
+        }
+      );
+      expect(updateEntity).not.toHaveBeenCalled();
+    });
+
+    it('throws a PermissionError ExecutionError and does not update the entity when the caller has write access but lacks the Kibana feature privilege', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        ...buildCheckPrivilegesResponse(true),
+        privileges: {
+          ...buildCheckPrivilegesResponse(true).privileges,
+          kibana: [
+            { privilege: 'api:securitySolution', authorized: false },
+            { privilege: 'api:securitySolution-entity-analytics', authorized: false },
+          ],
+        },
+      });
       const mockContext = createMockContext({
         entity_type: 'host',
         entity_id: 'host:my-host',

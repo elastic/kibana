@@ -24,6 +24,7 @@ export const Privileges = z.object({
   has_all_required: z.boolean(),
   has_read_permissions: z.boolean().optional(),
   has_write_permissions: z.boolean().optional(),
+  has_kibana_feature_access: z.boolean().optional(),
   privileges: z.object({
     elasticsearch: z.object({
       cluster: z.object({}).catchall(z.boolean()).optional(),
@@ -97,6 +98,9 @@ export async function checkAndFormatPrivileges({
     privileges: formatPrivileges(privileges),
     has_all_required: hasAllRequested,
     ...hasReadWritePermissions(privileges.elasticsearch, indexPatterns),
+    ...(privilegesToCheck.kibana?.length
+      ? { has_kibana_feature_access: privileges.kibana.every(({ authorized }) => authorized) }
+      : {}),
   };
 }
 
@@ -109,6 +113,12 @@ export interface CheckEntityStoreIndexPrivilegesOpts {
    * `check_privileges` route, which needs to know whether the metadata indices are readable.
    */
   includeMetadataPrivileges?: boolean;
+  /**
+   * Also checks these Kibana feature privileges if specified (e.g. `['securitySolution',
+   * 'securitySolution-entity-analytics']`. Needed by callers that run with a synthetic request
+   * and so never pass through Kibana's route-level authorization
+   */
+  kibanaFeaturePrivileges?: string[];
 }
 
 /**
@@ -121,6 +131,7 @@ export async function checkEntityStoreIndexPrivileges({
   security,
   spaceId,
   includeMetadataPrivileges = false,
+  kibanaFeaturePrivileges,
 }: CheckEntityStoreIndexPrivilegesOpts): Promise<Privileges> {
   const entitiesAliasPattern = getEntitiesAlias(ENTITY_LATEST, spaceId);
   const latestEntityIndexPattern = getLatestEntityIndexPattern(spaceId);
@@ -144,6 +155,13 @@ export async function checkEntityStoreIndexPrivileges({
         cluster: [],
         index,
       },
+      ...(kibanaFeaturePrivileges?.length
+        ? {
+            kibana: kibanaFeaturePrivileges.map((privilege) =>
+              security.authz.actions.api.get(privilege)
+            ),
+          }
+        : {}),
     },
   });
 }

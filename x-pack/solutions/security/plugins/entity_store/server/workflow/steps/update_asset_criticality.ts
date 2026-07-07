@@ -14,6 +14,7 @@ import { ExecutionError } from '@kbn/workflows/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { checkEntityStoreIndexPrivileges } from '../../routes/apis/utils/check_and_format_privileges';
+import { ENTITY_ANALYTICS_KIBANA_FEATURE_PRIVILEGES } from '../../routes/constants';
 import {
   MAX_WORKFLOW_MESSAGE_LENGTH,
   updateAssetCriticalityStepCommonDefinition,
@@ -48,14 +49,17 @@ export const getUpdateAssetCriticalityStepDefinition = (
         const security = await getSecurityStart();
         const fakeRequest = context.contextManager.getFakeRequest();
 
-        const { has_write_permissions: hasWritePermissions } =
-          await checkEntityStoreIndexPrivileges({
-            request: fakeRequest,
-            security,
-            spaceId: workflow.spaceId,
-          });
+        const {
+          has_write_permissions: hasWritePermissions,
+          has_kibana_feature_access: hasKibanaFeatureAccess,
+        } = await checkEntityStoreIndexPrivileges({
+          request: fakeRequest,
+          security,
+          spaceId: workflow.spaceId,
+          kibanaFeaturePrivileges: ENTITY_ANALYTICS_KIBANA_FEATURE_PRIVILEGES,
+        });
 
-        if (!hasWritePermissions) {
+        if (!hasWritePermissions || !hasKibanaFeatureAccess) {
           throw new ExecutionError({
             type: 'PermissionError',
             message: 'You do not have permission to update asset criticality in this space.',
