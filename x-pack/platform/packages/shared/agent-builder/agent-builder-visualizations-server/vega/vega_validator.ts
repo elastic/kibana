@@ -17,7 +17,10 @@ export interface VegaValidationResult {
 
 interface WorkerResponse {
   ok: boolean;
+  /** Vega rejected the spec (compile- or render-time). */
   error?: string;
+  /** In-worker infra fault (e.g. the ESM vega libs failed to load); fail open. */
+  infraError?: string;
   warnings?: string[];
 }
 
@@ -67,6 +70,13 @@ export const validateVegaSpec = async ({
 
       worker.on('message', (response: WorkerResponse) => {
         clearTimeout(timer);
+        // An in-worker infra fault (not a spec rejection) fails open, like
+        // every other infra failure: it must not be fed back to the model.
+        if (response.infraError) {
+          logger.warn(`Vega validator could not load the vega libs: ${response.infraError}`);
+          resolve({ warnings: [] });
+          return;
+        }
         resolve({
           error: response.ok ? undefined : response.error,
           warnings: response.warnings ?? [],

@@ -102,6 +102,14 @@ describe('validateVegaSpec', () => {
     }
   });
 
+  it('fails open when the worker reports an infra fault (lib load failure)', async () => {
+    const promise = validateVegaSpec({ spec: { mark: 'bar' }, logger });
+    lastWorker().emit('message', { ok: false, infraError: "Cannot find module 'vega'" });
+
+    await expect(promise).resolves.toEqual({ warnings: [] });
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("Cannot find module 'vega'"));
+  });
+
   it('fails open when the worker errors', async () => {
     const promise = validateVegaSpec({ spec: { mark: 'bar' }, logger });
     lastWorker().emit('error', new Error('worker crashed'));

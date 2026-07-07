@@ -38,7 +38,13 @@ interface ValidationRequest {
   spec: Record<string, unknown>;
 }
 
-let libs: Promise<{ compile: CompileFn; parse: ParseFn; View: ViewCtor }> | undefined;
+interface VegaLibs {
+  compile: CompileFn;
+  parse: ParseFn;
+  View: ViewCtor;
+}
+
+let libs: Promise<VegaLibs> | undefined;
 
 const loadLibs = () => {
   if (!libs) {
@@ -89,8 +95,10 @@ const createCollectingLogger = (warnings: string[]) => ({
   },
 });
 
-const validate = async (spec: Record<string, unknown>): Promise<string[]> => {
-  const { compile, parse, View } = await loadLibs();
+const validate = async (
+  { compile, parse, View }: VegaLibs,
+  spec: Record<string, unknown>
+): Promise<string[]> => {
   const warnings: string[] = [];
   const logger = createCollectingLogger(warnings);
 
@@ -108,8 +116,23 @@ const validate = async (spec: Record<string, unknown>): Promise<string[]> => {
 };
 
 parentPort?.on('message', async ({ spec }: ValidationRequest) => {
+  // A lib-load failure (e.g. a packaging/resolution problem in a distributable)
+  // is an infra fault, not a spec rejection: report it distinctly so the host
+  // fails open instead of feeding a meaningless error back to the model.
+  let vegaLibs: VegaLibs;
   try {
-    const warnings = await validate(spec);
+    vegaLibs = await loadLibs();
+  } catch (error) {
+    parentPort?.postMessage({
+      ok: false,
+      infraError: error instanceof Error ? error.message : String(error),
+    });
+    return;
+  }
+
+  // From here a thrown error is Vega rejecting the spec (compile/render).
+  try {
+    const warnings = await validate(vegaLibs, spec);
     parentPort?.postMessage({ ok: true, warnings });
   } catch (error) {
     parentPort?.postMessage({
