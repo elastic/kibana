@@ -71,6 +71,12 @@ export interface UserSummaryProps {
   lastSeenFromEntityStore?: string;
   /** When true, inspect button is always visible (e.g. in document details flyout). Default false = show on hover. */
   showInspectButtonAlways?: boolean;
+  /**
+   * Optional renderer for the host.ip value. Defaults to the expandable-flyout `FlyoutLink`.
+   * Callers rendering this overview outside the expandable-flyout system (e.g. the attack
+   * Entities tool) can supply a link that opens the network flyout via the new flyout system.
+   */
+  renderIpLink?: (ip: string) => React.ReactNode;
 }
 
 const UserRiskOverviewWrapper = styled(EuiFlexGroup, {
@@ -107,6 +113,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
     firstSeenFromEntityStore,
     lastSeenFromEntityStore,
     showInspectButtonAlways = false,
+    renderIpLink,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
@@ -305,18 +312,21 @@ export const UserOverview = React.memo<UserSummaryProps>(
                 attrName={'host.ip'}
                 idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
                 scopeId={scopeId}
-                render={(ip) =>
-                  ip != null ? (
+                render={(ip) => {
+                  if (ip == null) {
+                    return getEmptyTagValue();
+                  }
+                  return renderIpLink ? (
+                    renderIpLink(ip)
+                  ) : (
                     <FlyoutLink
                       field="host.ip"
                       value={ip}
                       scopeId={scopeId}
                       isFlyoutOpen={isFlyoutOpen}
                     />
-                  ) : (
-                    getEmptyTagValue()
-                  )
-                }
+                  );
+                }}
               />
             ),
           },
@@ -333,6 +343,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
         lastSeenFromEntityStore,
         firstColumn,
         isFlyoutOpen,
+        renderIpLink,
       ]
     );
     return (
