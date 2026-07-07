@@ -4,16 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('apis', () => {
-    // load new platform deployment-agnostic test here
-    loadTestFile(require.resolve('../../apis/management'));
-    loadTestFile(require.resolve('../../apis/painless_lab'));
-    loadTestFile(require.resolve('../../apis/intercepts'));
-    loadTestFile(require.resolve('../../apis/streams'));
+  describe('Serverless Observability - Deployment-agnostic Significant Events API integration tests', function () {
+    this.tags(['esGate']);
+
     loadTestFile(require.resolve('../../apis/significant_events'));
   });
 }
