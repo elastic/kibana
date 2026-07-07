@@ -9,12 +9,13 @@ import type { Logger } from '@kbn/logging';
 import moment from 'moment';
 import { parseDurationToMs } from '../../infra/time';
 import type {
-  CcsLogExtractionState,
   EngineLogExtractionState,
   LogExtractionConfig,
+  RemoteLogExtractionState,
 } from '../saved_objects';
 
 export const WINDOW_CAP_GRACE_PERIOD_MS = 30_000;
+const MAX_LAG_LOOKBACK_FACTOR = 1.5;
 
 /** `now - delay`. Upper bound of all data eligible to be processed in this cycle. */
 export const computeEffectiveWindowEnd = (delay: string): string =>
@@ -37,7 +38,7 @@ export interface MainExtractionWindow {
 }
 
 /**
- * Window for the main (non-CCS) extraction path.
+ * Window for the main (origin-local) extraction path.
  *
  * Resume order: `checkpointTimestamp` (last slice end or mid-slice entity cursor) →
  * `lastExecutionTimestamp` (last completed cycle) → lookback fallback.
@@ -57,7 +58,7 @@ export const resolveMainExtractionWindow = ({
   return { fromDateISO, effectiveWindowEnd };
 };
 
-export interface CcsExtractionWindow {
+export interface RemoteExtractionWindow {
   effectiveFromDateISO: string;
   effectiveWindowEnd: string;
   recoveryId: string | undefined;
@@ -65,23 +66,23 @@ export interface CcsExtractionWindow {
 }
 
 /**
- * Window for the CCS extraction path.
+ * Window for the remote extraction path.
  *
  * Resume order: explicit `windowOverride` → mid entity-page recovery (`paginationRecoveryId` +
  * `checkpointTimestamp`) → slice-boundary recovery (`checkpointTimestamp` only) → lookback fallback.
- * Logs context for each branch so lagging / recovering CCS state is observable.
+ * Logs context for each branch so lagging / recovering state is observable.
  */
-export const resolveCcsExtractionWindow = ({
+export const resolveRemoteExtractionWindow = ({
   config,
-  ccsState,
+  state,
   windowOverride,
   logger,
 }: {
   config: Pick<LogExtractionConfig, 'lookbackPeriod' | 'delay'>;
-  ccsState: Pick<CcsLogExtractionState, 'checkpointTimestamp' | 'paginationRecoveryId'>;
+  state: Pick<RemoteLogExtractionState, 'checkpointTimestamp' | 'paginationRecoveryId'>;
   windowOverride?: { fromDateISO: string; toDateISO: string };
   logger: Logger;
-}): CcsExtractionWindow => {
+}): RemoteExtractionWindow => {
   if (windowOverride != null) {
     return {
       effectiveFromDateISO: windowOverride.fromDateISO,
@@ -93,41 +94,86 @@ export const resolveCcsExtractionWindow = ({
 
   const effectiveWindowEnd = computeEffectiveWindowEnd(config.delay);
 
-  if (ccsState.paginationRecoveryId && ccsState.checkpointTimestamp) {
-    const effectiveFromDateISO = ccsState.checkpointTimestamp;
-    const recoveryId = ccsState.paginationRecoveryId;
+  if (state.paginationRecoveryId && state.checkpointTimestamp) {
+    const effectiveFromDateISO = state.checkpointTimestamp;
+    const recoveryId = state.paginationRecoveryId;
     logger.warn(
-      `CCS extraction resuming from broken state: checkpointTimestamp=${effectiveFromDateISO}, paginationRecoveryId=${recoveryId}`
+      `extraction resuming from broken state: checkpointTimestamp=${effectiveFromDateISO}, paginationRecoveryId=${recoveryId}`
     );
     return { effectiveFromDateISO, effectiveWindowEnd, recoveryId, isWindowOverride: false };
   }
 
-  if (ccsState.checkpointTimestamp) {
+  if (state.checkpointTimestamp) {
     logger.debug(
-      `CCS extraction resuming after slice boundary: checkpointTimestamp=${ccsState.checkpointTimestamp}`
+      `extraction resuming after slice boundary: checkpointTimestamp=${state.checkpointTimestamp}`
     );
     return {
-      effectiveFromDateISO: ccsState.checkpointTimestamp,
+      effectiveFromDateISO: state.checkpointTimestamp,
       effectiveWindowEnd,
       recoveryId: undefined,
       isWindowOverride: false,
     };
   }
 
-  if (ccsState.paginationRecoveryId && !ccsState.checkpointTimestamp) {
+  if (state.paginationRecoveryId && !state.checkpointTimestamp) {
     logger.error(
-      `CCS extraction can't be resumed from broken state because checkpointTimestamp is null (recovery id is present), defaulting to lookback period`
+      `extraction can't be resumed from broken state because checkpointTimestamp is null (recovery id is present), defaulting to lookback period`
     );
   }
 
   const effectiveFromDateISO = computeLookbackStart(config.lookbackPeriod);
-  logger.debug(`CCS extraction starting fresh: fromDateISO=${effectiveFromDateISO}`);
+  logger.debug(`extraction starting fresh: fromDateISO=${effectiveFromDateISO}`);
   return {
     effectiveFromDateISO,
     effectiveWindowEnd,
     recoveryId: undefined,
     isWindowOverride: false,
   };
+};
+
+/**
+ * Skip-ahead circuit breaker for stalled extractions.
+ *
+ * When the gap between `fromDateISO` and `effectiveWindowEnd` exceeds MAX_LAG_LOOKBACK_FACTOR × `lookbackPeriod`,
+ * continuing to chip away at the backlog won't let the engine catch up. Reset the window start
+ * to `effectiveWindowEnd - frequency` so this cycle still processes a real, frequency-sized
+ * slice of recent data, re-anchoring the persisted checkpoint near real-time. The skipped range
+ * is intentionally dropped.
+ */
+export const applyMaxLagCutoff = ({
+  fromDateISO,
+  effectiveWindowEnd,
+  lookbackPeriod,
+  frequency,
+  logger,
+}: {
+  fromDateISO: string;
+  effectiveWindowEnd: string;
+  lookbackPeriod: string;
+  frequency: string;
+  logger: Logger;
+}): string => {
+  const fromMs = moment(fromDateISO).valueOf();
+  const effectiveEndMs = moment(effectiveWindowEnd).valueOf();
+  const lagMs = effectiveEndMs - fromMs;
+  const lookbackMs = parseDurationToMs(lookbackPeriod);
+  const thresholdMs = MAX_LAG_LOOKBACK_FACTOR * lookbackMs;
+
+  if (lagMs <= thresholdMs) {
+    return fromDateISO;
+  }
+
+  const frequencyMs = parseDurationToMs(frequency);
+  const newFromDateISO = moment(effectiveEndMs - frequencyMs)
+    .utc()
+    .toISOString();
+
+  const droppedMs = lagMs - frequencyMs;
+  logger.warn(
+    `Extraction lag exceeded ${thresholdMs} — skipping backlog: from=${fromDateISO}, newFrom=${newFromDateISO}, effectiveEnd=${effectiveWindowEnd}, lagMs=${lagMs}, droppedMs=${droppedMs}`
+  );
+
+  return newFromDateISO;
 };
 
 export interface CappedExtractionWindow {

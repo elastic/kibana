@@ -14,6 +14,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { StaticToolRegistration, ToolRegistry } from './tools';
 import type { AttachmentTypeDefinition } from './attachments';
+import type { RendererTypeDefinition } from './renderers';
 import type { SkillDefinition } from './skills';
 import type { SkillRegistry } from './skills/registry';
 import type { BuiltInAgentDefinition, AgentRegistry } from './agents';
@@ -57,6 +58,18 @@ export interface AttachmentsSetup {
    * Register an attachment type to be available in agentBuilder.
    */
   registerType(attachmentType: AttachmentTypeDefinition): void;
+}
+
+export interface RenderersSetup {
+  /**
+   * Register a renderer type to be available in agentBuilder.
+   *
+   * A matching browser-side UI definition must be registered with the same
+   * `type` (via the browser plugin's `renderers.register`). Otherwise the
+   * agent will be told it can render this type, but `<render>` directives for
+   * it will fail to resolve in the UI.
+   */
+  register(rendererType: RendererTypeDefinition): void;
 }
 
 export interface SkillsSetup {
@@ -205,6 +218,10 @@ export interface AgentBuilderPluginSetup {
    * Attachments setup contract, which can be used to register attachment types.
    */
   attachments: AttachmentsSetup;
+  /**
+   * Renderers setup contract, which can be used to register renderer types.
+   */
+  renderers: RenderersSetup;
   /**
    * Hooks setup contract, which can be used to register lifecycle event hooks.
    */

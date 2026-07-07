@@ -22,6 +22,7 @@ import {
   EuiToolTip,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
@@ -34,6 +35,7 @@ import { useQueries, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
 import type { DocumentationItem, DocumentationStatus } from './types';
 import { DOCUMENTATION_ITEMS_CONFIG, type NormalizedDocStatus } from './documentation_items';
+import { enableProductDocumentationToolOnDefaultAgent } from './enable_product_documentation_tool_on_agent';
 import * as i18n from './translations';
 
 interface DocumentationSectionProps {
@@ -90,32 +92,66 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
         name: doc.name,
         status,
         resourceType: doc.resourceType,
+        inferenceId: defaultInferenceEndpoints.ELSER,
         ...(updateAvailable ? { updateAvailable } : {}),
         isTechPreview: doc.isTechPreview,
         isStubbed: doc.isStubbed,
         icon: doc.icon,
+        ...(data?.failureReason ? { failureReason: data.failureReason } : {}),
       };
     });
   }, [docsConfig, statusQueries]);
 
-  const getStatusBadge = useCallback((itemStatus: DocumentationStatus) => {
-    // Status badge only shows binary state: Installed or Not installed
-    // Action states (installing/uninstalling) are shown in the action button
-    switch (itemStatus) {
-      case 'installed':
-        return <EuiBadge color="success">{i18n.STATUS_INSTALLED}</EuiBadge>;
-      case 'uninstalling':
-        return <EuiBadge color="success">{i18n.STATUS_INSTALLED}</EuiBadge>;
-      case 'error':
-        return <EuiBadge color="danger">{i18n.STATUS_ERROR}</EuiBadge>;
-      case 'not_available':
-        return <EuiBadge color="warning">{i18n.STATUS_NOT_AVAILABLE}</EuiBadge>;
-      case 'installing':
-      case 'uninstalled':
-      default:
-        return <EuiBadge color="hollow">{i18n.STATUS_NOT_INSTALLED}</EuiBadge>;
-    }
-  }, []);
+  const getErrorSuggestion = useCallback(
+    (failureReason: string, inferenceId: string): string | null => {
+      if (failureReason.includes('model_deployment_timeout_exception')) {
+        return i18n.getModelDeploymentTimeoutSuggestion(inferenceId);
+      }
+      return null;
+    },
+    []
+  );
+
+  const getStatusBadge = useCallback(
+    (item: DocumentationItem) => {
+      switch (item.status) {
+        case 'installed':
+          return <EuiBadge color="success">{i18n.STATUS_INSTALLED}</EuiBadge>;
+        case 'uninstalling':
+          return <EuiBadge color="success">{i18n.STATUS_INSTALLED}</EuiBadge>;
+        case 'error': {
+          if (!item.failureReason) {
+            return <EuiBadge color="danger">{i18n.STATUS_ERROR}</EuiBadge>;
+          }
+          const suggestion = getErrorSuggestion(item.failureReason, item.inferenceId ?? '');
+          return (
+            <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="danger">{i18n.STATUS_ERROR}</EuiBadge>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {item.failureReason}
+                </EuiText>
+              </EuiFlexItem>
+              {suggestion && (
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs">{suggestion}</EuiText>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          );
+        }
+        case 'not_available':
+          return <EuiBadge color="warning">{i18n.STATUS_NOT_AVAILABLE}</EuiBadge>;
+        case 'installing':
+        case 'uninstalled':
+        default:
+          return <EuiBadge color="hollow">{i18n.STATUS_NOT_INSTALLED}</EuiBadge>;
+      }
+    },
+    [getErrorSuggestion]
+  );
 
   const getActionButton = useCallback(
     (item: DocumentationItem) => {
@@ -140,7 +176,7 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
         render: (name: string, item: DocumentationItem) => (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiIcon type={item.icon ?? 'documents'} />
+              <EuiIcon type={item.icon ?? 'documents'} aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s">{name}</EuiText>
@@ -163,7 +199,7 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
         name: i18n.COLUMN_STATUS,
         sortable: false,
         width: '300px',
-        render: (itemStatus: DocumentationStatus) => getStatusBadge(itemStatus),
+        render: (_: DocumentationStatus, item: DocumentationItem) => getStatusBadge(item),
       },
       {
         field: 'actions',
@@ -216,11 +252,29 @@ const DocumentationRowActions: React.FC<{
   onRefetch: () => void;
 }> = ({ item, productDocBase, hasManagePrivilege, onRefetch }) => {
   const { services } = useKibana();
-  const { notifications, rendering, docLinks } = services;
+  const { application, http, notifications, rendering, docLinks } = services;
 
   const installMutation = useInstallProductDoc(productDocBase, {
     onSuccess: () => {
       notifications.toasts.addSuccess({ title: i18n.getInstallSuccessTitle(item.name) });
+
+      enableProductDocumentationToolOnDefaultAgent({ http }).catch(() => {
+        const toolsUrl = application.getUrlForApp('agent_builder', {
+          path: `/agents/${encodeURIComponent(agentBuilderDefaultAgentId)}/tools`,
+        });
+        notifications.toasts.addWarning({
+          title: i18n.getInstallSuccessTitle(item.name),
+          text: toMountPoint(
+            <EuiText size="s">
+              <p>{i18n.TOOL_AUTO_ENABLE_FAILED_DESCRIPTION}</p>
+              <p>
+                <EuiLink href={toolsUrl}>{i18n.TOOL_AUTO_ENABLE_FAILED_LINK}</EuiLink>
+              </p>
+            </EuiText>,
+            rendering
+          ),
+        });
+      });
     },
     onError: (error) => {
       const message = error.body?.message ?? error.message;

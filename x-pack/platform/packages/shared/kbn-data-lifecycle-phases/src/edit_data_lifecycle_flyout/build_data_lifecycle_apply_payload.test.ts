@@ -31,7 +31,23 @@ describe('buildDataLifecycleApplyPayload', () => {
         inheritLifecycle: false,
         method: 'dlm',
       })
-    ).toEqual({ inheritLifecycle: false, method: 'dlm' });
+    ).toEqual({
+      inheritLifecycle: false,
+      method: 'dlm',
+      frozenAfter: undefined,
+      dataRetention: undefined,
+    });
+  });
+
+  it('returns DLM payload with phase durations when provided', () => {
+    expect(
+      buildDataLifecycleApplyPayload({
+        inheritLifecycle: false,
+        method: 'dlm',
+        frozenAfter: '30d',
+        dataRetention: '60d',
+      })
+    ).toEqual({ inheritLifecycle: false, method: 'dlm', frozenAfter: '30d', dataRetention: '60d' });
   });
 
   it('returns undefined when not inheriting and method is ilm without a policy name', () => {

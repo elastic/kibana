@@ -13,7 +13,7 @@ import type {
   SavedObjectsBulkUpdateObject,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
-import type { ChangeTrackingAction } from '@kbn/alerting-types';
+import type { RuleChangeTracking } from '@kbn/alerting-types';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { logRuleChanges } from '../../../application/rule/methods/common_utils/log_rule_changes';
 import type { RuleParams } from '../../../application/rule/types';
@@ -45,8 +45,7 @@ export interface BulkEditOccOptions<Params extends RuleParams> {
   shouldInvalidateApiKeys: boolean;
   paramsModifier?: ParamsModifier<Params>;
   shouldIncrementRevision?: ShouldIncrementRevision<Params>;
-  changeTrackingAction?: ChangeTrackingAction;
-  totalNumOfRules?: number;
+  changeTracking?: RuleChangeTracking;
 }
 
 const isValidInterval = (interval: string | undefined): interval is string => {
@@ -164,8 +163,7 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
     rules,
     apiKeysMap,
     shouldInvalidateApiKeys: options.shouldInvalidateApiKeys,
-    changeTrackingAction: options.changeTrackingAction,
-    totalNumOfRules: options.totalNumOfRules,
+    changeTracking: options.changeTracking,
   });
 
   return {
@@ -182,15 +180,13 @@ async function saveBulkUpdatedRules({
   rules,
   apiKeysMap,
   shouldInvalidateApiKeys,
-  changeTrackingAction,
-  totalNumOfRules,
+  changeTracking,
 }: {
   context: RulesClientContext;
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   shouldInvalidateApiKeys: boolean;
   apiKeysMap: ApiKeysMap;
-  changeTrackingAction?: ChangeTrackingAction;
-  totalNumOfRules?: number;
+  changeTracking?: RuleChangeTracking;
 }) {
   const apiKeysToInvalidate: string[] = [];
   let result: SavedObjectsBulkResponse<RawRule>;
@@ -198,8 +194,6 @@ async function saveBulkUpdatedRules({
     // TODO (http-versioning): for whatever reasoning we are using SavedObjectsBulkUpdateObject
     // everywhere when it should be SavedObjectsBulkCreateObject. We need to fix it in
     // bulk_disable, bulk_enable, etc. to fix this cast
-    const bulkEditRulesTimestamp = Date.now();
-
     result = await bulkCreateRulesSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       bulkCreateRuleAttributes: rules as Array<SavedObjectsBulkCreateObject<RawRule>>,
@@ -208,11 +202,16 @@ async function saveBulkUpdatedRules({
 
     await logRuleChanges({
       ruleSOs: result.saved_objects,
+      encryptedFieldsMap: new Map(
+        [...apiKeysMap.entries()].map(([ruleId, { newApiKey, newUiamApiKey }]) => [
+          ruleId,
+          { apiKey: newApiKey ?? null, uiamApiKey: newUiamApiKey ?? null },
+        ])
+      ),
       rulesClientContext: context,
       changesContext: {
-        action: changeTrackingAction ?? RuleChangeTrackingAction.ruleUpdate,
-        timestamp: bulkEditRulesTimestamp,
-        metadata: totalNumOfRules ? { bulkCount: totalNumOfRules } : undefined,
+        action: changeTracking?.action ?? RuleChangeTrackingAction.ruleUpdate,
+        metadata: changeTracking?.metadata,
       },
     });
   } catch (e) {

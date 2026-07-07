@@ -262,6 +262,26 @@ describe('TemplateFormLayout', () => {
     expect(screen.getByTestId('resetTemplateButton')).toBeDisabled();
   });
 
+  it('disables save button when template definition is invalid', () => {
+    mockUseDebouncedYamlEdit.mockReturnValue({
+      value: `name: Test
+fields:
+  - name: effort
+    control: INPUT_NUMBER
+    label: Effort
+    type: keyword
+`,
+      onChange: jest.fn(),
+      handleReset: mockHandleReset,
+      isSaving: false,
+      isSaved: false,
+    });
+
+    render(<TestWrapper onCreate={mockOnCreate} />);
+
+    expect(screen.getByTestId('saveTemplateHeaderButton')).toBeDisabled();
+  });
+
   it('renders back to templates button', () => {
     render(<TestWrapper onCreate={mockOnCreate} />);
 

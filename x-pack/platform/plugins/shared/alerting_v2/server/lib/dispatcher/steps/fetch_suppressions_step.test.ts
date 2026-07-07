@@ -61,4 +61,59 @@ describe('FetchSuppressionsStep', () => {
     if (result.type !== 'continue') return;
     expect(result.data?.suppressions).toHaveLength(0);
   });
+
+  it('issues multiple ES|QL requests and concatenates results when input exceeds the size budget', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const step = new FetchSuppressionsStep(queryService);
+
+    // pair_key = rule_id::group_hash → ~10 KB per literal forces multiple chunks
+    // for 200 episodes against the 600 KB budget.
+    const longSegment = 'x'.repeat(5_000);
+    const episodes = Array.from({ length: 200 }, (_, i) =>
+      createAlertEpisode({
+        rule_id: `${longSegment}-r${i}`,
+        group_hash: `${longSegment}-g${i}`,
+        episode_id: `e${i}`,
+      })
+    );
+
+    mockEsClient.esql.query.mockImplementation((args: { query: string }) => {
+      const rows: Array<{
+        rule_id: string;
+        group_hash: string;
+        episode_id: string;
+        should_suppress: boolean;
+      }> = [];
+      if (args.query.includes(`${longSegment}-r0::`)) {
+        rows.push({
+          rule_id: `${longSegment}-r0`,
+          group_hash: `${longSegment}-g0`,
+          episode_id: 'e0',
+          should_suppress: true,
+        });
+      }
+      if (args.query.includes(`${longSegment}-r199::`)) {
+        rows.push({
+          rule_id: `${longSegment}-r199`,
+          group_hash: `${longSegment}-g199`,
+          episode_id: 'e199',
+          should_suppress: false,
+        });
+      }
+      return Promise.resolve(createAlertEpisodeSuppressionsResponse(rows));
+    });
+
+    const state = createDispatcherPipelineState({ episodes });
+    const result = await step.execute(state);
+
+    expect(mockEsClient.esql.query.mock.calls.length).toBeGreaterThanOrEqual(2);
+    for (const [args] of mockEsClient.esql.query.mock.calls) {
+      expect((args.query as string).length).toBeLessThan(1_000_000);
+    }
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(result.data?.suppressions).toHaveLength(2);
+    expect(result.data?.suppressions?.map((s) => s.episode_id)).toEqual(['e0', 'e199']);
+  });
 });

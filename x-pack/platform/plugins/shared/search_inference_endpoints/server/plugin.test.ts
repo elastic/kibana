@@ -82,14 +82,16 @@ describe('SearchInferenceEndpointsPlugin', () => {
       });
     });
 
-    it('registers feature with read privilege disabled', () => {
+    it('registers feature with read privilege enabled', () => {
       plugin.setup(coreSetup, { features });
 
       const feature = features.registerKibanaFeature.mock.calls[0][0];
 
       expect(feature.privileges?.read).toMatchObject({
-        disabled: true,
+        savedObject: { all: [], read: ['inference-settings'] },
+        ui: ['show'],
       });
+      expect(feature.privileges?.read).not.toHaveProperty('disabled');
     });
   });
 

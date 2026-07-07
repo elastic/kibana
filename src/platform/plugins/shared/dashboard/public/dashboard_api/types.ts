@@ -15,6 +15,7 @@ import type { GridLayoutData } from '@kbn/grid-layout';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type {
   CanExpandPanels,
+  CanIndicateRelatedChildren,
   CanPinPanels,
   HasLastSavedChildState,
   HasSections,
@@ -36,6 +37,7 @@ import type {
   PublishesTitle,
   PublishesUnifiedSearch,
   PublishesProjectRouting,
+  PublishesApproximation,
   PublishesViewMode,
   PublishesWritableViewMode,
   PublishingSubject,
@@ -146,6 +148,7 @@ export interface DashboardCreationOptions {
  * This type combines multiple capability interfaces to provide full dashboard functionality.
  */
 export type DashboardApi = CanExpandPanels &
+  CanIndicateRelatedChildren &
   CanPinPanels &
   HasSections &
   HasAppContext &
@@ -167,6 +170,7 @@ export type DashboardApi = CanExpandPanels &
   PublishesSettings &
   PublishesUnifiedSearch &
   PublishesProjectRouting &
+  PublishesApproximation &
   PublishesViewMode &
   PublishesWritableViewMode &
   PublishesEditablePauseFetch &
@@ -197,6 +201,7 @@ export type DashboardApi = CanExpandPanels &
     hasUnsavedChanges$: PublishingSubject<boolean>;
     highlightPanel: (panelRef: HTMLDivElement) => void;
     highlightPanelId$: PublishingSubject<string | undefined>;
+    blurredPanelIds$: PublishingSubject<string[]>;
     isEmbeddedExternally: boolean;
     isEditableByUser: boolean;
     isManaged: boolean;
@@ -213,6 +218,7 @@ export type DashboardApi = CanExpandPanels &
     setHighlightPanelId: (id: string | undefined) => void;
     setQuery: (query?: Query | undefined) => void;
     setProjectRouting: (projectRouting?: ProjectRouting) => void;
+    setEsqlApproximation: (esqlApproximation: boolean) => void;
     setScrollToPanelId: (id: string | undefined) => void;
     setSettings: (settings: DashboardSettings) => void;
     setTags: (tags: string[]) => void;
@@ -235,10 +241,16 @@ export type DashboardApi = CanExpandPanels &
     changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
     createdBy?: string;
     user?: DashboardUser;
+    userActivity$: Subject<UserActivity>;
     isAccessControlEnabled?: boolean;
 
     addIncomingEmbeddables: (embeddables?: EmbeddablePackageState[]) => void;
   };
+
+type ActivityType = 'view' | 'refresh';
+export type UserActivity =
+  | { type: ActivityType; start: number; end?: undefined }
+  | { type: ActivityType; start?: undefined; end: number };
 
 export interface DashboardInternalApi {
   gridLayout$: BehaviorSubject<GridLayoutData>;
@@ -249,7 +261,6 @@ export interface DashboardInternalApi {
   publishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
   unpublishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
   publishVariables: () => void;
-  arePanelsRelated$: BehaviorSubject<(a: string, b: string) => boolean>;
 }
 
 export interface DashboardUser {

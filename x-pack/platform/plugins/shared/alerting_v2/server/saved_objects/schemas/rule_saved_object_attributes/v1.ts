@@ -24,27 +24,38 @@ export const ruleSavedObjectAttributesSchema = schema.object({
     description: schema.maybe(schema.string()),
     owner: schema.maybe(schema.string()),
     tags: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })),
+    builder_type: schema.maybe(schema.string()),
   }),
   time_field: schema.string(),
   schedule: schema.object({
     every: schema.string(),
     lookback: schema.maybe(schema.string()),
   }),
-  evaluation: schema.object({
-    query: schema.object({
-      base: schema.string(),
-    }),
-  }),
-  recovery_policy: schema.maybe(
-    schema.object({
-      type: schema.oneOf([schema.literal('query'), schema.literal('no_breach')]),
-      query: schema.maybe(
-        schema.object({
-          base: schema.maybe(schema.string()),
-        })
-      ),
-    })
+  recovery_strategy: schema.maybe(
+    schema.oneOf([schema.literal('no_breach'), schema.literal('query'), schema.literal('none')])
   ),
+  no_data_strategy: schema.maybe(
+    schema.oneOf([
+      schema.literal('last_known_status'),
+      schema.literal('emit'),
+      schema.literal('recover'),
+      schema.literal('none'),
+    ])
+  ),
+  query: schema.oneOf([
+    schema.object({
+      format: schema.literal('composed'),
+      base: schema.string(),
+      breach: schema.object({ segment: schema.string() }),
+      recovery: schema.maybe(schema.object({ segment: schema.string() })),
+    }),
+    schema.object({
+      format: schema.literal('standalone'),
+      breach: schema.object({ query: schema.string() }),
+      recovery: schema.maybe(schema.object({ query: schema.string() })),
+      no_data: schema.maybe(schema.object({ query: schema.string() })),
+    }),
+  ]),
   state_transition: schema.maybe(
     schema.nullable(
       schema.object({
@@ -64,18 +75,6 @@ export const ruleSavedObjectAttributesSchema = schema.object({
       fields: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 10 }),
     })
   ),
-  no_data: schema.maybe(
-    schema.object({
-      behavior: schema.maybe(
-        schema.oneOf([
-          schema.literal('no_data'),
-          schema.literal('last_status'),
-          schema.literal('recover'),
-        ])
-      ),
-      timeframe: schema.maybe(schema.string()),
-    })
-  ),
 
   artifacts: schema.maybe(
     schema.arrayOf(
@@ -87,6 +86,7 @@ export const ruleSavedObjectAttributesSchema = schema.object({
       { maxSize: 100 }
     )
   ),
+
   // Server-managed fields
   enabled: schema.boolean(),
   createdBy: schema.nullable(schema.string()),

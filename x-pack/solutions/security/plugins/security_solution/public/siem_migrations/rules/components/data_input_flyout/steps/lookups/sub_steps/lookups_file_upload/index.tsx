@@ -13,7 +13,7 @@ import type { SiemMigrationResourceData } from '../../../../../../../../../commo
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
 import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
-import type { MigrationSource } from '../../../../../../../common/types';
+import { MigrationSource } from '../../../../../../../common/types';
 
 export interface RulesFileUploadStepProps {
   status: EuiStepStatus;
@@ -53,7 +53,10 @@ export const useLookupsFileUploadStep = ({
   }, [isLoading, error, status]);
 
   return {
-    title: i18n.LOOKUPS_DATA_INPUT_FILE_UPLOAD_TITLE,
+    title:
+      migrationStats.vendor === MigrationSource.SPLUNK
+        ? i18n.LOOKUPS_DATA_INPUT_FILE_UPLOAD_TITLE
+        : i18n.WATCHLIST_DATA_INPUT_FILE_UPLOAD_TITLE,
     status: uploadStepStatus,
     children: (
       <LookupsFileUpload

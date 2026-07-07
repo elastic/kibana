@@ -21,7 +21,6 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { alertingAuthorizationMock } from '../authorization/alerting_authorization.mock';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
-import { fieldsToExcludeFromPublicApi } from './rules_client';
 import type { RulesClientContext } from './types';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
@@ -60,6 +59,7 @@ const create = () => {
     getAuthenticationAPIKey: jest.fn(),
     cloneAPIKey: jest.fn(),
     cloneApiKeysOnCreate: false,
+    invalidateApiKeyNow: jest.fn(),
     getAlertIndicesAlias: jest.fn(),
     alertsService: null,
     backfillClient,
@@ -67,7 +67,6 @@ const create = () => {
     connectorAdapterRegistry: new ConnectorAdapterRegistry(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     minimumScheduleIntervalInMs: 0,
-    fieldsToExcludeFromPublicApi,
     featureFlags: coreFeatureFlagsMock.createStart(),
     isServerless: false,
   };

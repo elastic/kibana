@@ -8,6 +8,7 @@
  */
 
 import type { WorkflowDetailDto } from '@kbn/workflows';
+import { pickWorkflowDocumentVersion } from '@kbn/workflows';
 import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 
 import type { WorkflowProperties } from '../../storage/workflow_storage';
@@ -32,6 +33,7 @@ export const transformStorageDocumentToWorkflowDto = (
     managedBy: source.managedBy,
     definitionHash: source.definitionHash,
     originManagedWorkflowId: source.originManagedWorkflowId,
+    managedVersion: source.managedVersion,
     lifecycle: source.lifecycle,
     yaml: source.yaml,
     definition: source.definition,
@@ -40,6 +42,7 @@ export const transformStorageDocumentToWorkflowDto = (
     valid: source.valid,
     createdAt: source.created_at,
     lastUpdatedAt: source.updated_at,
+    ...pickWorkflowDocumentVersion(source),
   };
 };
 
@@ -72,6 +75,7 @@ export const transformStoragePartialToWorkflowDto = (
   if ('definitionHash' in source) dto.definitionHash = source.definitionHash;
   if ('originManagedWorkflowId' in source)
     dto.originManagedWorkflowId = source.originManagedWorkflowId;
+  if ('managedVersion' in source) dto.managedVersion = source.managedVersion;
   if ('lifecycle' in source) dto.lifecycle = source.lifecycle;
   if ('yaml' in source) dto.yaml = source.yaml;
   if ('definition' in source) dto.definition = source.definition;
@@ -80,5 +84,8 @@ export const transformStoragePartialToWorkflowDto = (
   if ('valid' in source) dto.valid = source.valid;
   if ('created_at' in source) dto.createdAt = source.created_at;
   if ('updated_at' in source) dto.lastUpdatedAt = source.updated_at;
+  if ('version' in source) {
+    Object.assign(dto, pickWorkflowDocumentVersion(source));
+  }
   return dto;
 };

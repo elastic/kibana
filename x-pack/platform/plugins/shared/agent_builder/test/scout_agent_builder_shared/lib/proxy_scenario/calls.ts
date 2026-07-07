@@ -95,22 +95,7 @@ export const mockAgentParallelToolCalls = ({
   });
 };
 
-export const mockHandoverToAnswer = (llmProxy: LlmProxy, answer: string | LLmError) => {
-  void llmProxy
-    .intercept({
-      name: 'handover-to-answer',
-      when: ({ messages }) => {
-        const systemMessage = messages.find((message) => message.role === 'system');
-        return (systemMessage?.content as string).includes(
-          'This response will serve as a handover note for the answering agent'
-        );
-      },
-      responseMock: answer,
-    })
-    .completeAfterIntercept();
-};
-
-export const mockFinalAnswer = (llmProxy: LlmProxy, answer: string) => {
+export const mockFinalAnswer = (llmProxy: LlmProxy, answer: string | LLmError) => {
   void llmProxy
     .intercept({
       name: 'final-assistant-response',

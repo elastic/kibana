@@ -162,6 +162,7 @@ export class WorkflowsBaseTelemetry {
     if (enabledChanged) {
       const enabledValue = workflowUpdate.enabled ?? workflowDefinition?.enabled;
       if (enabledValue !== undefined) {
+        const { hasCustomEventTrigger } = extractWorkflowMetadata(workflowDefinition);
         this.reportWorkflowEnabledStateChanged({
           workflowId,
           enabled: enabledValue,
@@ -172,6 +173,7 @@ export class WorkflowsBaseTelemetry {
             }),
           ...(finalEditorType && { editorType: finalEditorType }),
           ...(origin && { origin }),
+          hasCustomEventTrigger,
           error,
         });
         return;
@@ -241,12 +243,21 @@ export class WorkflowsBaseTelemetry {
     enabled: boolean;
     isBulkAction: boolean;
     bulkActionCount?: number;
+    hasCustomEventTrigger?: boolean;
     error?: Error;
     editorType?: WorkflowEditorType;
     origin?: WorkflowTelemetryOrigin;
   }) => {
-    const { workflowId, enabled, isBulkAction, bulkActionCount, error, editorType, origin } =
-      params;
+    const {
+      workflowId,
+      enabled,
+      isBulkAction,
+      bulkActionCount,
+      hasCustomEventTrigger,
+      error,
+      editorType,
+      origin,
+    } = params;
     this.telemetryService.reportEvent(WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged, {
       eventName: workflowEventNames[WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged],
       workflowId,
@@ -255,6 +266,7 @@ export class WorkflowsBaseTelemetry {
       ...(bulkActionCount !== undefined && {
         bulkActionCount,
       }),
+      ...(hasCustomEventTrigger !== undefined && { hasCustomEventTrigger }),
       ...(editorType && { editorType }),
       ...(origin && { origin }),
       ...this.getBaseResultParams(error),
@@ -348,8 +360,18 @@ export class WorkflowsBaseTelemetry {
     editorType?: WorkflowEditorType;
     origin?: WorkflowTelemetryOrigin;
     triggerTab?: WorkflowTriggerTab;
+    hasCustomEventTrigger?: boolean;
   }) => {
-    const { workflowId, hasInputs, inputCount, error, editorType, origin, triggerTab } = params;
+    const {
+      workflowId,
+      hasInputs,
+      inputCount,
+      error,
+      editorType,
+      origin,
+      triggerTab,
+      hasCustomEventTrigger,
+    } = params;
     this.telemetryService.reportEvent(WorkflowExecutionEventTypes.WorkflowTestRunInitiated, {
       eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowTestRunInitiated],
       ...(workflowId && { workflowId }),
@@ -358,6 +380,7 @@ export class WorkflowsBaseTelemetry {
       ...(editorType && { editorType }),
       ...(origin && { origin }),
       ...(triggerTab && { triggerTab }),
+      ...(hasCustomEventTrigger !== undefined && { hasCustomEventTrigger }),
       ...this.getBaseResultParams(error),
     });
   };
@@ -409,8 +432,18 @@ export class WorkflowsBaseTelemetry {
     editorType?: WorkflowEditorType;
     origin?: WorkflowTelemetryOrigin;
     triggerTab?: WorkflowTriggerTab;
+    hasCustomEventTrigger?: boolean;
   }) => {
-    const { workflowId, hasInputs, inputCount, error, editorType, origin, triggerTab } = params;
+    const {
+      workflowId,
+      hasInputs,
+      inputCount,
+      error,
+      editorType,
+      origin,
+      triggerTab,
+      hasCustomEventTrigger,
+    } = params;
     this.telemetryService.reportEvent(WorkflowExecutionEventTypes.WorkflowRunInitiated, {
       eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowRunInitiated],
       workflowId,
@@ -419,6 +452,7 @@ export class WorkflowsBaseTelemetry {
       ...(editorType && { editorType }),
       ...(origin && { origin }),
       ...(triggerTab && { triggerTab }),
+      ...(hasCustomEventTrigger !== undefined && { hasCustomEventTrigger }),
       ...this.getBaseResultParams(error),
     });
   };

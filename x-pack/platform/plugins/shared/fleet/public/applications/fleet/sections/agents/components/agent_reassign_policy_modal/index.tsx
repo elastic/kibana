@@ -31,11 +31,13 @@ import { SO_SEARCH_LIMIT } from '../../../../constants';
 interface Props {
   onClose: () => void;
   agents: Agent[] | string;
+  agentCount: number;
 }
 
 export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
   onClose,
   agents,
+  agentCount,
 }) => {
   const modalTitleId = useGeneratedHtmlId();
 
@@ -70,6 +72,7 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
   }, [agentPolicies, selectedAgentPolicyId]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasInvalidPolicySearch, setHasInvalidPolicySearch] = useState(false);
   async function onSubmit() {
     try {
       setIsSubmitting(true);
@@ -89,12 +92,13 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
         throw res.error;
       }
       setIsSubmitting(false);
-      const successMessage = i18n.translate(
-        'xpack.fleet.agentReassignPolicy.successSingleNotificationTitle',
-        {
-          defaultMessage: 'Reassigning agent policy',
-        }
-      );
+      const successMessage = isSingleAgent
+        ? i18n.translate('xpack.fleet.agentReassignPolicy.successSingleNotificationTitle', {
+            defaultMessage: 'Reassigning agent policy',
+          })
+        : i18n.translate('xpack.fleet.agentReassignPolicy.successBulkNotificationTitle', {
+            defaultMessage: 'Agent policy reassignment in progress',
+          });
       notifications.toasts.addSuccess(successMessage);
       onClose();
     } catch (error) {
@@ -125,6 +129,7 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
       confirmButtonDisabled={
         isSubmitting ||
         !selectedAgentPolicyId ||
+        hasInvalidPolicySearch ||
         (isSingleAgent && selectedAgentPolicyId === (agents[0] as Agent).policy_id)
       }
       confirmButtonText={
@@ -140,9 +145,9 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
       <p>
         <FormattedMessage
           id="xpack.fleet.agentReassignPolicy.flyoutDescription"
-          defaultMessage="Choose a new agent policy to assign the selected {count, plural, one {agent} other {agents}} to."
+          defaultMessage="Choose a new agent policy to assign the selected {count, plural, one {agent} other {# agents}} to."
           values={{
-            count: isSingleAgent ? 1 : 0,
+            count: agentCount,
           }}
         />
       </p>
@@ -162,12 +167,16 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
                 label: agentPolicy.name,
               }))}
               singleSelection
+              isInvalid={hasInvalidPolicySearch}
               onChange={(newOptions) => {
                 if (newOptions.length) {
                   setSelectedAgentPolicyId(newOptions[0].key);
                 } else {
                   setSelectedAgentPolicyId(undefined);
                 }
+              }}
+              onSearchChange={(value, hasMatchingOptions) => {
+                setHasInvalidPolicySearch(!!value && !hasMatchingOptions);
               }}
               selectedOptions={
                 selectedAgentPolicyId

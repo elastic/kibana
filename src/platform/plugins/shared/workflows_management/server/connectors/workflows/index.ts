@@ -16,6 +16,7 @@ import type {
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { TriggerType, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import { validateWorkflowForExecution } from '@kbn/workflows/server';
 import { z } from '@kbn/zod/v4';
 import { api } from './api';
@@ -99,18 +100,7 @@ function getWorkflowsConnectorTypeArgs(
       const workflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId);
       validateWorkflowForExecution(workflow, workflowId);
 
-      const workflowToRun: WorkflowExecutionEngineModel = {
-        id: workflow.id,
-        name: workflow.name,
-        enabled: workflow.enabled,
-        definition: workflow.definition,
-        yaml: workflow.yaml,
-        ...(workflow.managed === true ? { managed: true } : {}),
-        ...(typeof workflow.managedBy === 'string' ? { managedBy: workflow.managedBy } : {}),
-        ...(typeof workflow.originManagedWorkflowId === 'string'
-          ? { originManagedWorkflowId: workflow.originManagedWorkflowId }
-          : {}),
-      };
+      const workflowToRun: WorkflowExecutionEngineModel = toWorkflowExecutionEngineModel(workflow);
 
       // Run the workflow, @tb: maybe switch to scheduler?
       return workflowsManagementApi.runWorkflow(workflowToRun, spaceId, inputs, request);
@@ -133,18 +123,8 @@ function getWorkflowsConnectorTypeArgs(
       const workflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId);
       validateWorkflowForExecution(workflow, workflowId);
 
-      const workflowToSchedule: WorkflowExecutionEngineModel = {
-        id: workflow.id,
-        name: workflow.name,
-        enabled: workflow.enabled,
-        definition: workflow.definition,
-        yaml: workflow.yaml,
-        ...(workflow.managed === true ? { managed: true } : {}),
-        ...(typeof workflow.managedBy === 'string' ? { managedBy: workflow.managedBy } : {}),
-        ...(typeof workflow.originManagedWorkflowId === 'string'
-          ? { originManagedWorkflowId: workflow.originManagedWorkflowId }
-          : {}),
-      };
+      const workflowToSchedule: WorkflowExecutionEngineModel =
+        toWorkflowExecutionEngineModel(workflow);
 
       return workflowsManagementApi.scheduleWorkflow(
         workflowToSchedule,

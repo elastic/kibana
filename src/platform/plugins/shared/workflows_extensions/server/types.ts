@@ -10,10 +10,6 @@
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type {
-  SearchInferenceEndpointsPluginSetup,
-  SearchInferenceEndpointsPluginStart,
-} from '@kbn/search-inference-endpoints/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   ManagedWorkflowsSystemApiProvider,
@@ -115,17 +111,16 @@ export type WorkflowsExtensionsServerPluginStart =
 /**
  * Dependencies for the server plugin setup phase.
  */
-export interface WorkflowsExtensionsServerPluginSetupDeps {
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
-}
+export type WorkflowsExtensionsServerPluginSetupDeps = Record<string, never>;
 
 export type ServerStepDefinitionOrLoader<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
+  Config extends z.ZodObject = z.ZodObject,
+  State extends z.ZodObject = z.ZodObject
 > =
-  | ServerStepDefinition<Input, Output, Config>
-  | (() => Promise<ServerStepDefinition<Input, Output, Config> | undefined>);
+  | ServerStepDefinition<Input, Output, Config, State>
+  | (() => Promise<ServerStepDefinition<Input, Output, Config, State> | undefined>);
 
 /**
  * Dependencies for the server plugin start phase.
@@ -133,7 +128,6 @@ export type ServerStepDefinitionOrLoader<
 export interface WorkflowsExtensionsServerPluginStartDeps {
   actions: ActionsPluginStartContract;
   inference: InferenceServerStart;
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   spaces?: SpacesPluginStart;
 }
 

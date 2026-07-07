@@ -48,7 +48,8 @@ export type AgentActionType =
   | 'POLICY_CHANGE'
   | 'INPUT_ACTION'
   | 'MIGRATE'
-  | 'PRIVILEGE_LEVEL_CHANGE';
+  | 'PRIVILEGE_LEVEL_CHANGE'
+  | 'REMOVE_COLLECTOR';
 
 export type AgentUpgradeStateType =
   | 'UPG_REQUESTED'
@@ -178,6 +179,7 @@ export interface Agent extends AgentBase {
   default_api_key_history?: FleetServerAgent['default_api_key_history'];
   outputs?: OutputMap;
   status?: AgentStatus;
+  pipeline_config?: string;
   packages: string[];
   sort?: any[];
   metrics?: AgentMetrics;

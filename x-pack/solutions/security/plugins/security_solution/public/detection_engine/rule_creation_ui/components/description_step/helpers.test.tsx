@@ -141,7 +141,7 @@ describe('helpers', () => {
       const indexPattern = {
         fields: [{ name: 'event.category', type: 'test type' }],
         title: 'test title',
-        getFormatterForField: () => ({ convert: (val: unknown) => val }),
+        getFormatterForField: () => ({ convertToText: (val: unknown) => val }),
       } as unknown as DataViewBase;
 
       const result: ListItems[] = buildQueryBarDescription({

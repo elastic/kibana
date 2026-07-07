@@ -26,8 +26,8 @@ export interface EmptyListContent {
 interface IndexDetailsTab {
   // a unique key to identify the tab
   id: IndexDetailsTabId;
-  // a text that is displayed on the tab label, usually a Formatted message component
-  name: ReactNode;
+  // a string displayed on the tab label
+  name: string;
   // a function that renders the content of the tab
   renderTabContent: (args: {
     index: Index;

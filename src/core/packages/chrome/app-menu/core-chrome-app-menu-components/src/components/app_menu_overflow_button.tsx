@@ -8,12 +8,13 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { getIsSelectedColor } from '../utils';
 import { AppMenuPopover } from './app_menu_popover';
 import type { AppMenuItemType, AppMenuPrimaryActionItem, AppMenuSwitch } from '../types';
+import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
 
 interface AppMenuShowMoreButtonProps {
   items: AppMenuItemType[];
@@ -55,19 +56,26 @@ export const AppMenuOverflowButton = ({
   `;
 
   const button = (
-    <EuiButtonIcon
-      iconType="ellipsis"
-      size="s"
-      aria-label={i18n.translate('core.chrome.appMenu.showMoreButtonLabel', {
+    <EuiToolTip
+      content={i18n.translate('core.chrome.appMenu.showMoreButtonLabel', {
         defaultMessage: 'More',
       })}
-      color="text"
-      aria-haspopup="menu"
-      onClick={handleClick}
-      isSelected={isPopoverOpen}
-      css={buttonCss}
-      data-test-subj="app-menu-overflow-button"
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        iconType="ellipsis"
+        size="s"
+        aria-label={i18n.translate('core.chrome.appMenu.showMoreButtonLabel', {
+          defaultMessage: 'More',
+        })}
+        color="text"
+        aria-haspopup="menu"
+        onClick={handleClick}
+        isSelected={isPopoverOpen}
+        css={buttonCss}
+        data-test-subj={APP_MENU_TEST_SUBJECTS.overflowButton}
+      />
+    </EuiToolTip>
   );
 
   return (

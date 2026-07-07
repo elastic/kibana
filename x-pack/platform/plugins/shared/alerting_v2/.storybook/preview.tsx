@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiTitle,
+} from '@elastic/eui';
 import { Context, CoreStart } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -48,8 +56,44 @@ const buildContainer = () => {
     basePath: { prepend: (p: string) => p, get: () => '' },
   } as any);
 
+  container.bind(CoreStart('docLinks')).toConstantValue({ links: {} } as any);
+
   container.bind(ActionPoliciesApi).toSelf();
   container.bind(RulesApi).toSelf();
+
+  container.bind(PluginStart('triggersActionsUi')).toConstantValue({
+    getAddConnectorFlyout: ({
+      onClose,
+      onConnectorCreated,
+      initialConnector,
+    }: {
+      onClose: () => void;
+      onConnectorCreated?: (connector: { id: string; name: string }) => void;
+      initialConnector?: { actionTypeId?: string };
+    }) => (
+      <EuiFlyout onClose={onClose} size="s" aria-label="Create connector (stub)">
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2>Create connector (stub)</h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <EuiCallOut title="Storybook stub" color="primary" iconType="iInCircle">
+            <p>Action type: {initialConnector?.actionTypeId ?? 'any'}</p>
+          </EuiCallOut>
+          <EuiButton
+            color="primary"
+            onClick={() => {
+              action('onConnectorCreated')({ id: 'new-stub-connector', name: 'New connector' });
+              onConnectorCreated?.({ id: 'new-stub-connector', name: 'New connector' });
+            }}
+          >
+            Save connector
+          </EuiButton>
+        </EuiFlyoutBody>
+      </EuiFlyout>
+    ),
+  });
 
   container.bind(PluginStart('kql')).toConstantValue({
     QueryStringInput: ({

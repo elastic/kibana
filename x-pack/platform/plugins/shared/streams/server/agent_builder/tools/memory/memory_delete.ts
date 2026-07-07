@@ -31,7 +31,7 @@ export const createMemoryDeleteTool = ({
   tags: ['memory'],
   confirmation: { askUser: 'never' },
   handler: async ({ id, name }, context) => {
-    const memoryService = getMemoryService();
+    const memoryService = getMemoryService(context.esClient.asCurrentUser);
 
     if (!name && !id) {
       return {

@@ -17,6 +17,7 @@ import {
   ExecutionStatus,
   isEventDrivenWorkflowTriggerSource,
   isWellKnownWorkflowTriggerSource,
+  toManagedWorkflowTelemetryFields,
 } from '@kbn/workflows';
 import {
   workflowExecutionEventNames,
@@ -167,6 +168,7 @@ function buildBaseExecutionTelemetryFields(
   const { triggerType, eventTriggerId } = resolveExecutionTriggerTelemetry(
     workflowExecution.triggeredBy
   );
+  const managedWorkflowFields = toManagedWorkflowTelemetryFields(workflowExecution);
   return {
     workflowExecutionId: workflowExecution.id,
     workflowId: workflowExecution.workflowId,
@@ -174,6 +176,7 @@ function buildBaseExecutionTelemetryFields(
     triggerType,
     ...(eventTriggerId !== undefined ? { eventTriggerId } : {}),
     isTestRun: workflowExecution.isTestRun || false,
+    ...managedWorkflowFields,
     ...(executionMetadata.ruleId && { ruleId: executionMetadata.ruleId }),
     ...(executionMetadata.compositionDepth !== undefined && {
       compositionDepth: executionMetadata.compositionDepth,
@@ -186,6 +189,22 @@ function buildBaseExecutionTelemetryFields(
     }),
     ...(executionMetadata.eventChainDepth !== undefined && {
       eventChainDepth: executionMetadata.eventChainDepth,
+    }),
+    ...(workflowExecution.usage && {
+      inputTokensUsed: workflowExecution.usage.inputTokens,
+      outputTokensUsed: workflowExecution.usage.outputTokens,
+      cachedTokensUsed: workflowExecution.usage.cachedTokens ?? 0,
+      totalTokensUsed: workflowExecution.usage.totalTokens,
+    }),
+    ...(workflowExecution.stepUsage?.length && {
+      aiStepsUsage: workflowExecution.stepUsage.map((step) => ({
+        stepId: step.stepId,
+        ...(step.connectorId ? { connectorId: step.connectorId } : {}),
+        inputTokens: step.inputTokens,
+        outputTokens: step.outputTokens,
+        cachedTokens: step.cachedTokens ?? 0,
+        totalTokens: step.totalTokens,
+      })),
     }),
   };
 }
@@ -394,6 +413,7 @@ export class WorkflowExecutionTelemetryClient {
     const { triggerType, eventTriggerId } = resolveExecutionTriggerTelemetry(
       workflowExecution.triggeredBy
     );
+    const managedWorkflowFields = toManagedWorkflowTelemetryFields(workflowExecution);
 
     const eventData: EventDrivenExecutionSuppressedParams = {
       eventName:
@@ -406,6 +426,7 @@ export class WorkflowExecutionTelemetryClient {
       triggerType,
       ...(eventTriggerId !== undefined ? { eventTriggerId } : {}),
       isTestRun: workflowExecution.isTestRun || false,
+      ...managedWorkflowFields,
       ...(executionMetadata.ruleId && { ruleId: executionMetadata.ruleId }),
       ...(executionMetadata.eventChainDepth !== undefined && {
         eventChainDepth: executionMetadata.eventChainDepth,

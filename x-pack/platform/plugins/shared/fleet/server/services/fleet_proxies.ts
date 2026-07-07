@@ -10,6 +10,7 @@ import type {
   SavedObject,
   ElasticsearchClient,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { omit } from 'lodash';
 import pMap from 'p-map';
 
@@ -19,6 +20,7 @@ import {
   MAX_CONCURRENT_FLEET_PROXIES_OPERATIONS,
 } from '../constants';
 import { FleetProxyUnauthorizedError } from '../errors';
+import { validateFleetSavedObjectId } from '../../common/services';
 import type {
   DownloadSource,
   FleetProxy,
@@ -79,6 +81,8 @@ export async function createFleetProxy(
   const logger = appContextService.getLogger();
   logger.debug(`Creating fleet proxy ${data}`);
 
+  validateFleetSavedObjectId(options?.id);
+
   const res = await soClient.create<FleetProxySOAttributes>(
     FLEET_PROXY_SAVED_OBJECT_TYPE,
     fleetProxyDataToSOAttribute(data),
@@ -111,7 +115,7 @@ export async function bulkCreateFleetProxies(
     { overwrite: options?.overwrite }
   );
 
-  const itemErrors = res.saved_objects.filter((so) => so.error);
+  const itemErrors = res.saved_objects.filter(isSavedObjectErrorResult);
   if (itemErrors.length > 0) {
     throw itemErrors[0].error;
   }
@@ -207,7 +211,7 @@ export async function bulkGetFleetProxies(
 
   return res.saved_objects
     .map((so) => {
-      if (so.error) {
+      if (isSavedObjectErrorResult(so)) {
         if (!ignoreNotFound || so.error.statusCode !== 404) {
           throw so.error;
         }

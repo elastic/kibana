@@ -21,6 +21,7 @@ import type { StepExecutionRuntime } from '../workflow_context_manager/step_exec
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
 import { createMockWorkflowEventLogger } from '../workflow_event_logger/mocks';
+import { WorkflowTaskManagerAbortError } from '../workflow_task_shutdown';
 
 jest.mock('./run_stack_monitor/run_stack_monitor');
 jest.mock('./catch_error');
@@ -115,6 +116,7 @@ describe('runNode', () => {
       stepIoService: {
         releaseTransientlyRehydratedOutputs: jest.fn(),
       },
+      taskAbortController: new AbortController(),
     } as unknown as jest.Mocked<WorkflowExecutionLoopParams>;
   });
 
@@ -159,6 +161,20 @@ describe('runNode', () => {
 
       expect(mockParams.workflowRuntime.saveState).toHaveBeenCalled();
       expect(mockStepExecutionRuntime.flushEventLogs).toHaveBeenCalledTimes(1);
+    });
+
+    it('should pass the task abort signal when Task Manager aborts during step execution', async () => {
+      mockNodeImplementation.run.mockImplementation(async () => {
+        mockParams.taskAbortController.abort(new WorkflowTaskManagerAbortError());
+      });
+
+      await runNode(mockParams);
+
+      expect(mockHandleExecutionDelay).toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.flushEventLogs).toHaveBeenCalledWith({
+        signal: mockParams.taskAbortController.signal,
+      });
+      expect(mockParams.workflowRuntime.enterScope).toHaveBeenCalled();
     });
   });
 
@@ -432,6 +448,29 @@ describe('runNode', () => {
         'Failed to execute onCancel hook - continuing execution',
         onCancelError
       );
+    });
+
+    it('should call onCancel when a monitor (e.g. timeout zone) aborts and throws', async () => {
+      // Regression: a step-level timeout zone aborts the step's runtime and then
+      // throws a TimeoutError from the monitor. That rejection bubbles out of the
+      // run/monitor race into runNode's catch, which previously skipped the
+      // onCancel call. Cleanup now lives in `finally`, so a cancellable node
+      // (e.g. parallel) still gets to release/timeout its parked children.
+      const mockOnCancel = jest.fn().mockResolvedValue(undefined);
+      const cancellableNode = setupCancellableNode(mockOnCancel);
+      cancellableNode.run = jest.fn(async () => {
+        await new Promise<void>((resolve) => process.nextTick(resolve));
+      });
+      mockRunStackMonitor.mockImplementation(async () => {
+        await new Promise<void>((resolve) => process.nextTick(resolve));
+        mockStepExecutionRuntime.abortController.abort();
+        throw new Error('Step execution exceeded the configured timeout of 4s.');
+      });
+
+      await runNode(mockParams);
+
+      expect(mockOnCancel).toHaveBeenCalledTimes(1);
+      expect(mockParams.workflowRuntime.saveState).toHaveBeenCalled();
     });
 
     it('should handle synchronous onCancel that throws', async () => {

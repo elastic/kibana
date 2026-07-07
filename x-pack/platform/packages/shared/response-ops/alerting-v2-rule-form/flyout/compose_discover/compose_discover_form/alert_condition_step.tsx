@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Parser, isColumn } from '@elastic/esql';
 import { useQuery } from '@kbn/react-query';
@@ -14,71 +14,59 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getEsqlColumns } from '@kbn/esql-utils';
 import {
   EuiButton,
-  EuiCallOut,
   EuiComboBox,
   EuiFormRow,
   EuiPanel,
   EuiSelect,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import type { ComposeDiscoverAction, ComposeDiscoverState } from '../types';
-import type { ComposeFormValues } from '../compose_form_types';
+import type { FormValues } from '../../../form/types';
 import { QuerySummary } from '../query_summary';
+import { EsqlQuerySummarySection } from './esql_query_summary_section';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
-import { useDataFields } from '../../../form/hooks/use_data_fields';
-import { ScheduleField } from '../../../form/fields/schedule_field';
-import { LookbackWindowField } from '../../../form/fields/lookback_window_field';
+import { useComposeDiscoverTimeField } from '../compose_discover_time_field_context';
+import { getTimeFieldResolutionQuery } from '../get_time_field_resolution_query';
 
 interface AlertConditionStepProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
-  onKindChange: (kind: 'signal' | 'alert') => void;
+  isEditing: boolean;
+  onManualSplit?: () => void;
 }
 
 export function AlertConditionStep({
   state,
   dispatch,
   services,
-  onKindChange,
+  isEditing,
+  onManualSplit,
 }: AlertConditionStepProps) {
-  const { setValue, watch } = useFormContext<ComposeFormValues>();
+  const { setValue, watch } = useFormContext<FormValues>();
   const isAlert = watch('kind') === 'alert';
   const timeField = watch('timeField') ?? '@timestamp';
   const grouping = watch('grouping');
   const groupFields = grouping?.fields ?? [];
   const query = watch('query');
 
-  const baseQuery = query.format === 'composed' ? query.base : '';
-  const alertBlock = query.format === 'composed' ? query.blocks.breach : '';
-  const fullQuery = query.format === 'standalone' ? query.breach : '';
+  const fullQuery = query.format === 'standalone' ? query.breach.query : '';
 
-  // Use the base query for field lookup when tracking is on; fall back to full breach query.
-  const committedQuery = useMemo(() => {
-    const q = isAlert ? baseQuery : fullQuery;
-    return /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(q) && state.queryCommitted ? q : '';
-  }, [isAlert, baseQuery, fullQuery, state.queryCommitted]);
+  // Committed pipeline query for output-column lookup and STATS BY auto-populate.
+  const committedQuery = useMemo(
+    () => getTimeFieldResolutionQuery(query, isAlert, state.queryCommitted),
+    [query, isAlert, state.queryCommitted]
+  );
 
-  const { data: fieldMap } = useDataFields({
-    query: committedQuery,
-    http: services.http,
-    dataViews: services.dataViews,
-  });
-  const timeFieldOptions = useMemo(() => {
-    const dateFields = Object.values(fieldMap ?? {})
-      .filter((f) => f.type === 'date')
-      .map((f) => f.name)
-      .sort();
-    if (!dateFields.includes('@timestamp')) dateFields.unshift('@timestamp');
-    return dateFields.map((name) => ({ value: name, text: name }));
-  }, [fieldMap]);
+  const { timeFieldOptions } = useComposeDiscoverTimeField();
 
-  // Output columns of the full pipeline -> options for the group fields selector.
-  // Uses | LIMIT 0 so no data is transferred -- only the output schema is returned.
-  // Works in edit mode (query seeded on mount) without requiring the sandbox to be opened.
+  /*
+   * Output columns of the full pipeline -> options for the group fields selector.
+   * Uses | LIMIT 0 so no data is transferred -- only the output schema is returned.
+   * Works in edit mode (query seeded on mount) without requiring the sandbox to be opened.
+   */
   const { data: outputColumns = [] } = useQuery({
     queryKey: ['composeDiscoverOutputColumns', committedQuery],
     queryFn: async () => {
@@ -93,18 +81,20 @@ export function AlertConditionStep({
     keepPreviousData: true,
   });
 
-  // Auto-populate group fields from the STATS BY clause when a query is first committed
-  // and the user hasn't already set any group fields.
-  const autoPopulatedForRef = useRef<string | null>(null);
+  /*
+   * Auto-populate group fields from the STATS BY clause whenever the committed
+   * query changes. Re-derives on every new Apply so switching indices updates
+   * the group fields instead of leaving stale values from the previous query.
+   * Skips the first run when editing to preserve API-seeded grouping defaults.
+   */
+  const autoPopulatedForRef = useRef<string | null>(isEditing ? committedQuery : null);
   useEffect(() => {
-    if (!state.queryCommitted || groupFields.length > 0 || !committedQuery) return;
+    if (!state.queryCommitted || !committedQuery) return;
     if (autoPopulatedForRef.current === committedQuery) return;
     autoPopulatedForRef.current = committedQuery;
     try {
       const { root } = Parser.parse(committedQuery);
       const statsCmd = [...root.commands].reverse().find((c) => c.name === 'stats');
-      // ESQLAstItem is a wide union -- use a local type alias to access the 'by' option
-      // safely rather than an inline interface (which triggers lint in function scope).
       interface CmdOption {
         type: string;
         name: string;
@@ -114,20 +104,11 @@ export function AlertConditionStep({
         (a) => a.type === 'option' && a.name === 'by'
       );
       const byFields = (byOption?.args ?? []).filter(isColumn).map((a) => a.name);
-      if (byFields.length > 0) setValue('grouping', { fields: byFields });
+      setValue('grouping', byFields.length > 0 ? { fields: byFields } : undefined);
     } catch {
       // Non-parseable query -- skip auto-populate
     }
-  }, [state.queryCommitted, committedQuery, groupFields.length, setValue]);
-
-  const handleTrackingToggle = useCallback(() => {
-    onKindChange(isAlert ? 'signal' : 'alert');
-  }, [isAlert, onKindChange]);
-
-  // Callout when the heuristic split couldn't find a clear split point.
-  // Only relevant after Apply (when the committed query is in composed format).
-  const splitFailed =
-    isAlert && state.queryCommitted && query.format === 'composed' && !query.base.trim();
+  }, [state.queryCommitted, committedQuery, setValue]);
 
   return (
     <>
@@ -141,7 +122,15 @@ export function AlertConditionStep({
       </EuiTitle>
       <EuiSpacer size="s" />
 
-      {!state.queryCommitted ? (
+      {isAlert ? (
+        <EsqlQuerySummarySection
+          query={query}
+          queryCommitted={state.queryCommitted}
+          isEditorOpen={state.childOpen}
+          onOpenEditor={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
+          onManualSplit={onManualSplit}
+        />
+      ) : !state.queryCommitted ? (
         <>
           <EuiPanel color="subdued" paddingSize="m">
             <EuiText size="s" color="subdued">
@@ -164,7 +153,7 @@ export function AlertConditionStep({
             />
           </EuiButton>
         </>
-      ) : !isAlert ? (
+      ) : (
         <>
           <QuerySummary
             query={fullQuery}
@@ -176,7 +165,8 @@ export function AlertConditionStep({
           <EuiSpacer size="s" />
           <EuiButton
             size="s"
-            iconType="editorCodeBlock"
+            color="text"
+            iconType="chevronLimitLeft"
             isDisabled={state.childOpen}
             onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
             data-test-subj="composeDiscoverEditQuery"
@@ -184,73 +174,6 @@ export function AlertConditionStep({
             <FormattedMessage
               id="xpack.alertingV2.composeDiscover.alertCondition.editQueryButtonLabel"
               defaultMessage="Edit query"
-            />
-          </EuiButton>
-        </>
-      ) : (
-        <>
-          {splitFailed && (
-            <>
-              <EuiCallOut
-                announceOnMount={false}
-                size="s"
-                color="primary"
-                iconType="iInCircle"
-                title={i18n.translate(
-                  'xpack.alertingV2.composeDiscover.alertCondition.splitFailedTitle',
-                  {
-                    defaultMessage:
-                      "Couldn't automatically separate base query from alert condition. Adjust the split in the query editor.",
-                  }
-                )}
-              />
-              <EuiSpacer size="s" />
-            </>
-          )}
-          <EuiText size="xs" color="subdued">
-            <strong>
-              <FormattedMessage
-                id="xpack.alertingV2.composeDiscover.alertCondition.baseQueryLabel"
-                defaultMessage="Base query"
-              />
-            </strong>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <QuerySummary
-            query={baseQuery}
-            emptyMessage={i18n.translate(
-              'xpack.alertingV2.composeDiscover.alertCondition.noBaseQueryDefined',
-              { defaultMessage: 'No base query defined' }
-            )}
-          />
-          <EuiSpacer size="m" />
-          <EuiText size="xs" color="subdued">
-            <strong>
-              <FormattedMessage
-                id="xpack.alertingV2.composeDiscover.alertCondition.alertConditionLabel"
-                defaultMessage="Alert condition"
-              />
-            </strong>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <QuerySummary
-            query={alertBlock}
-            emptyMessage={i18n.translate(
-              'xpack.alertingV2.composeDiscover.alertCondition.noAlertConditionDefined',
-              { defaultMessage: 'No alert condition defined' }
-            )}
-          />
-          <EuiSpacer size="s" />
-          <EuiButton
-            size="s"
-            iconType="editorCodeBlock"
-            isDisabled={state.childOpen}
-            onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
-            data-test-subj="composeDiscoverEditQueries"
-          >
-            <FormattedMessage
-              id="xpack.alertingV2.composeDiscover.alertCondition.editQueriesButtonLabel"
-              defaultMessage="Edit queries"
             />
           </EuiButton>
         </>
@@ -264,10 +187,11 @@ export function AlertConditionStep({
         fullWidth
       >
         <EuiSelect
+          compressed
           fullWidth
           options={timeFieldOptions}
           value={timeField}
-          onChange={(e) => setValue('timeField', e.target.value)}
+          onChange={(e) => setValue('timeField', e.target.value, { shouldDirty: true })}
           disabled={state.childOpen}
           data-test-subj="composeDiscoverTimeField"
         />
@@ -280,13 +204,18 @@ export function AlertConditionStep({
         fullWidth
       >
         <EuiComboBox
+          compressed
           fullWidth
           options={outputColumns.map((name) => ({ label: name }))}
           selectedOptions={groupFields.map((f) => ({ label: f }))}
           onChange={(opts) =>
-            setValue('grouping', opts.length ? { fields: opts.map((o) => o.label) } : undefined)
+            setValue('grouping', opts.length ? { fields: opts.map((o) => o.label) } : undefined, {
+              shouldDirty: true,
+            })
           }
-          onCreateOption={(val) => setValue('grouping', { fields: [...groupFields, val] })}
+          onCreateOption={(val) =>
+            setValue('grouping', { fields: [...groupFields, val] }, { shouldDirty: true })
+          }
           placeholder={i18n.translate(
             'xpack.alertingV2.composeDiscover.alertCondition.groupFieldsPlaceholder',
             { defaultMessage: 'Add group fields' }
@@ -294,24 +223,6 @@ export function AlertConditionStep({
           data-test-subj="composeDiscoverGroupFields"
         />
       </EuiFormRow>
-
-      <EuiSpacer size="m" />
-      <EuiSwitch
-        label={i18n.translate(
-          'xpack.alertingV2.composeDiscover.alertCondition.trackingToggleLabel',
-          { defaultMessage: 'Track active and recovered state over time' }
-        )}
-        checked={isAlert}
-        onChange={handleTrackingToggle}
-        disabled={!state.queryCommitted}
-        data-test-subj="composeDiscoverTrackingToggle"
-      />
-
-      {/* Schedule and lookback -- connected to RHF via useFormContext() internally */}
-      <EuiSpacer size="m" />
-      <ScheduleField />
-      <EuiSpacer size="m" />
-      <LookbackWindowField />
     </>
   );
 }

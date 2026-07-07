@@ -13,6 +13,7 @@ import {
   EuiFlyoutFooter,
   EuiFlexGroup,
   EuiFlexItem,
+  euiFullHeight,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -35,6 +36,17 @@ const TABS: NonEmptyFlyoutTabs<TabId> = [
   },
 ];
 
+const jsonTabFlyoutBodyStyles = css`
+  .euiFlyoutBody__overflow {
+    overflow: hidden;
+  }
+
+  .euiFlyoutBody__overflowContent {
+    ${euiFullHeight()}
+    min-height: 0;
+  }
+`;
+
 export const InspectIlmPolicyFlyout = ({
   policyName,
   policy,
@@ -42,6 +54,8 @@ export const InspectIlmPolicyFlyout = ({
   onEditPolicy,
   primaryAction,
   type,
+  container,
+  ownFocus,
 }: InspectIlmPolicyFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const footerStyles = css`
@@ -61,10 +75,15 @@ export const InspectIlmPolicyFlyout = ({
       onClose={onBack}
       onBack={onBack}
       type={type}
+      container={container}
+      ownFocus={ownFocus}
     >
       {(selectedTab) => (
         <>
-          <EuiFlyoutBody>
+          <EuiFlyoutBody
+            css={selectedTab === 'json' ? jsonTabFlyoutBodyStyles : undefined}
+            scrollableTabIndex={selectedTab === 'json' ? -1 : undefined}
+          >
             {selectedTab === 'summary' && <IlmPolicySummaryTab phases={policy.phases} />}
             {selectedTab === 'json' && <IlmPolicyJsonTab policyName={policyName} policy={policy} />}
           </EuiFlyoutBody>

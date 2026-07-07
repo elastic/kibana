@@ -72,7 +72,6 @@ jest.mock('../../components/action_policy/details_flyout/action_policy_definitio
 
 const defaultData = {
   name: 'My Policy',
-  type: 'global' as const,
   description: 'A test policy',
   destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
   matcher: 'rule.id: "abc"',
@@ -342,6 +341,15 @@ describe('ActionPolicyCanvasContent', () => {
       await renderCanvas({ data: { matcher: 'rule.tags: "production"' } });
 
       expect(mockGetRule).not.toHaveBeenCalled();
+    });
+
+    it('extracts the rule id from the matcher rule.id clause', async () => {
+      await renderCanvas({
+        data: { matcher: 'rule.id: "from-matcher"' },
+      });
+
+      expect(mockGetRule).toHaveBeenCalledWith('from-matcher', expect.any(AbortSignal));
+      expect(mockGetRule).toHaveBeenCalledTimes(1);
     });
   });
 

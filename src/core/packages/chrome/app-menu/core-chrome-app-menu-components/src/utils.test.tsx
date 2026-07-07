@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiThemeComputed } from '@elastic/eui';
+import { isValidElement } from 'react';
+import { render } from '@testing-library/react';
+import type { ReactElement } from 'react';
+import { EuiSwitch, EuiToolTip, type EuiThemeComputed } from '@elastic/eui';
 import {
   createReturnFocus,
   getDisplayedItemsAllowedAmount,
@@ -21,6 +24,7 @@ import {
   processStaticItems,
 } from './utils';
 import { APP_MENU_ITEM_LIMIT } from './constants';
+import { APP_MENU_TEST_SUBJECTS } from './test_subjects';
 import type { AppMenuItemType, AppMenuPopoverItem, AppMenuSwitch } from './types';
 
 describe('utils', () => {
@@ -31,7 +35,7 @@ describe('utils', () => {
     beforeEach(() => {
       triggerElement = document.createElement('button');
       overflowButton = document.createElement('button');
-      overflowButton.setAttribute('data-test-subj', 'app-menu-overflow-button');
+      overflowButton.setAttribute('data-test-subj', APP_MENU_TEST_SUBJECTS.overflowButton);
     });
 
     afterEach(() => {
@@ -439,6 +443,45 @@ describe('utils', () => {
       expect(result.toolTipContent).toBe('Content');
       expect(result.toolTipProps?.title).toBe('Title');
     });
+
+    it('should disable the item when isLoading is true', () => {
+      const item = { ...baseItem, isLoading: true };
+      const result = mapAppMenuItemToPanelItem(item);
+
+      expect(result.disabled).toBe(true);
+    });
+
+    it('should disable the item when isLoading is true even if disableButton is false', () => {
+      const item = { ...baseItem, isLoading: true, disableButton: false };
+      const result = mapAppMenuItemToPanelItem(item);
+
+      expect(result.disabled).toBe(true);
+    });
+
+    it('should render a spinner icon instead of the iconType when isLoading is true', () => {
+      const item = { ...baseItem, iconType: 'gear' as const, isLoading: true, testId: 'my-item' };
+      const { icon } = mapAppMenuItemToPanelItem(item);
+
+      expect(icon).not.toBe('gear');
+      expect(isValidElement(icon)).toBe(true);
+
+      if (!isValidElement(icon)) {
+        throw new Error('Expected icon to be a React element');
+      }
+
+      const { getByTestId } = render(icon);
+      expect(getByTestId('my-item-loading')).toBeInTheDocument();
+    });
+
+    it('should set danger color when isDestructive is true', () => {
+      const result = mapAppMenuItemToPanelItem({ ...baseItem, isDestructive: true });
+      expect(result.color).toBe('danger');
+    });
+
+    it('should not set color when isDestructive is falsy', () => {
+      const result = mapAppMenuItemToPanelItem(baseItem);
+      expect(result.color).toBeUndefined();
+    });
   });
 
   describe('getPopoverActionItems', () => {
@@ -509,6 +552,22 @@ describe('utils', () => {
       const result = getPopoverSwitchItems({ switchConfig: defaultSwitch });
 
       expect(result[1].renderItem).toBeDefined();
+    });
+
+    it('should not wrap the switch in a tooltip when no tooltip is provided', () => {
+      const result = getPopoverSwitchItems({ switchConfig: defaultSwitch });
+      const element = result[1].renderItem?.() as ReactElement;
+
+      expect(element.type).toBe(EuiSwitch);
+    });
+
+    it('should wrap the switch in a tooltip when tooltipContent is provided', () => {
+      const result = getPopoverSwitchItems({
+        switchConfig: { ...defaultSwitch, tooltipContent: 'Save changes to enable' },
+      });
+      const element = result[1].renderItem?.() as ReactElement;
+
+      expect(element.type).toBe(EuiToolTip);
     });
   });
 
@@ -669,7 +728,22 @@ describe('utils', () => {
       expect(mainPanel?.['data-test-subj']).toBeUndefined(); // Main panel has no test ID by default
     });
 
-    it('should append staticItems after regular items in the main panel', () => {
+    it('should not show a separator when only static items are present', () => {
+      const items: AppMenuPopoverItem[] = [];
+      const staticItems: AppMenuPopoverItem[] = [
+        { id: 'static1', label: 'Static 1', run: jest.fn(), order: 1 },
+        { id: 'static2', label: 'Static 2', run: jest.fn(), order: 2 },
+      ];
+
+      const panels = getPopoverPanels({ items, staticItems });
+
+      expect(panels).toHaveLength(1);
+      const panelItems = panels[0].items as Array<{ key?: string; isSeparator?: boolean }>;
+      expect(panelItems[0].isSeparator).not.toBe(true);
+      expect(panelItems.map((i) => i.key)).toEqual(['static1', 'static2']);
+    });
+
+    it('should add a separator between regular and static items', () => {
       const items: AppMenuPopoverItem[] = [
         { id: '1', label: 'Item 1', run: jest.fn(), order: 2 },
         { id: '2', label: 'Item 2', run: jest.fn(), order: 1 },
@@ -681,9 +755,9 @@ describe('utils', () => {
       const panels = getPopoverPanels({ items, staticItems });
 
       expect(panels).toHaveLength(1);
-      const panelItems = panels[0].items as Array<{ key?: string }>;
-      // Regular items sorted by order: Item 2 (order 1), Item 1 (order 2), then static
-      expect(panelItems.map((i) => i.key)).toEqual(['2', '1', 'static1']);
+      const panelItems = panels[0].items as Array<{ key?: string; isSeparator?: boolean }>;
+      expect(panelItems.map((i) => i.key)).toEqual(['2', '1', 'static-items-separator', 'static1']);
+      expect(panelItems[2].isSeparator).toBe(true);
     });
 
     it('should not re-sort staticItems together with regular items', () => {
@@ -854,7 +928,7 @@ describe('utils', () => {
       expect(result.every((item) => item.overflow === true)).toBe(true);
     });
 
-    it('should add separator "above" only to the first item', () => {
+    it('should not add separator to items', () => {
       const items = [
         createStaticItem({ id: 'a', order: 1 }),
         createStaticItem({ id: 'b', order: 2 }),
@@ -862,19 +936,19 @@ describe('utils', () => {
       ];
       const result = processStaticItems(items);
 
-      expect(result[0].separator).toBe('above');
+      expect(result[0].separator).toBeUndefined();
       expect(result[1].separator).toBeUndefined();
       expect(result[2].separator).toBeUndefined();
     });
 
-    it('should strip existing separator values from non-first items', () => {
+    it('should strip existing separator values from items', () => {
       const items = [
         createStaticItem({ id: 'a', order: 1, separator: 'below' }),
         createStaticItem({ id: 'b', order: 2, separator: 'above' }),
       ];
       const result = processStaticItems(items);
 
-      expect(result[0].separator).toBe('above');
+      expect(result[0].separator).toBeUndefined();
       expect(result[1].separator).toBeUndefined();
     });
 
@@ -889,7 +963,7 @@ describe('utils', () => {
       expect(result.map((item) => item.id)).toEqual(['a', 'b', 'c']);
     });
 
-    it('should add separator "above" to the first item after sorting', () => {
+    it('should not add separator to the first item after sorting', () => {
       const items = [
         createStaticItem({ id: 'c', order: 3 }),
         createStaticItem({ id: 'a', order: 1 }),
@@ -897,7 +971,7 @@ describe('utils', () => {
       const result = processStaticItems(items);
 
       expect(result[0].id).toBe('a');
-      expect(result[0].separator).toBe('above');
+      expect(result[0].separator).toBeUndefined();
     });
   });
 });

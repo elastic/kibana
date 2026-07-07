@@ -96,10 +96,11 @@ describe('ResolutionClient', () => {
         linked: ['entity-1', 'entity-2'],
         skipped: [],
         target_id: 'target-1',
+        entity_type: 'user',
       });
       expect(mockEsClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
-          refresh: 'wait_for',
+          refresh: false,
           operations: expect.arrayContaining([
             expect.objectContaining({
               update: expect.objectContaining({
@@ -111,7 +112,7 @@ describe('ResolutionClient', () => {
       );
     });
 
-    it('should forward refresh: false to the bulk call when caller passes it', async () => {
+    it('should pass refresh: wait_for to bulk when awaitVisibility: true', async () => {
       const targetDoc = createEntityDoc('target-1');
       const entity1Doc = createEntityDoc('entity-1');
 
@@ -121,7 +122,24 @@ describe('ResolutionClient', () => {
       mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
       mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
 
-      await client.linkEntities('target-1', ['entity-1'], { refresh: false });
+      await client.linkEntities('target-1', ['entity-1'], { awaitVisibility: true });
+
+      expect(mockEsClient.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({ refresh: 'wait_for' })
+      );
+    });
+
+    it('should pass refresh: false to bulk when awaitVisibility: false', async () => {
+      const targetDoc = createEntityDoc('target-1');
+      const entity1Doc = createEntityDoc('entity-1');
+
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([targetDoc, entity1Doc]) as never
+      );
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
+
+      await client.linkEntities('target-1', ['entity-1'], { awaitVisibility: false });
 
       expect(mockEsClient.bulk).toHaveBeenCalledWith(expect.objectContaining({ refresh: false }));
     });
@@ -181,6 +199,7 @@ describe('ResolutionClient', () => {
         linked: ['entity-2'],
         skipped: ['entity-1'],
         target_id: 'target-1',
+        entity_type: 'user',
       });
     });
 
@@ -199,6 +218,7 @@ describe('ResolutionClient', () => {
         linked: [],
         skipped: ['entity-1'],
         target_id: 'target-1',
+        entity_type: 'user',
       });
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
     });
@@ -301,6 +321,7 @@ describe('ResolutionClient', () => {
         linked: ['entity-1'],
         skipped: [],
         target_id: 'target-1',
+        entity_type: 'user',
       });
     });
 
@@ -349,6 +370,20 @@ describe('ResolutionClient', () => {
         ResolutionSearchTruncatedError
       );
     });
+    it('should populate entity_type from EngineMetadata.Type on link', async () => {
+      const targetDoc = createEntityDoc('target-1', 'host');
+      const entity1Doc = createEntityDoc('entity-1', 'host');
+
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([targetDoc, entity1Doc]) as never
+      );
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
+
+      const result = await client.linkEntities('target-1', ['entity-1']);
+
+      expect(result.entity_type).toBe('host');
+    });
   });
 
   describe('unlinkEntities', () => {
@@ -360,10 +395,10 @@ describe('ResolutionClient', () => {
 
       const result = await client.unlinkEntities(['alias-1']);
 
-      expect(result).toEqual({ unlinked: ['alias-1'], skipped: [] });
+      expect(result).toEqual({ unlinked: ['alias-1'], skipped: [], entity_type: 'user' });
       expect(mockEsClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
-          refresh: 'wait_for',
+          refresh: false,
           operations: expect.arrayContaining([
             expect.objectContaining({
               doc: {
@@ -381,13 +416,26 @@ describe('ResolutionClient', () => {
       );
     });
 
-    it('should forward refresh: false to the bulk call when caller passes it', async () => {
+    it('should pass refresh: wait_for to bulk when awaitVisibility: true', async () => {
       const aliasDoc = createEntityDoc('alias-1', 'user', 'target-1');
 
       mockEsClient.search.mockResolvedValueOnce(createSearchResponse([aliasDoc]) as never);
       mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
 
-      await client.unlinkEntities(['alias-1'], { refresh: false });
+      await client.unlinkEntities(['alias-1'], { awaitVisibility: true });
+
+      expect(mockEsClient.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({ refresh: 'wait_for' })
+      );
+    });
+
+    it('should pass refresh: false to bulk when awaitVisibility: false', async () => {
+      const aliasDoc = createEntityDoc('alias-1', 'user', 'target-1');
+
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([aliasDoc]) as never);
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
+
+      await client.unlinkEntities(['alias-1'], { awaitVisibility: false });
 
       expect(mockEsClient.bulk).toHaveBeenCalledWith(expect.objectContaining({ refresh: false }));
     });
@@ -405,7 +453,59 @@ describe('ResolutionClient', () => {
 
       const result = await client.unlinkEntities(['entity-1']);
 
-      expect(result).toEqual({ unlinked: [], skipped: ['entity-1'] });
+      expect(result).toEqual({ unlinked: [], skipped: ['entity-1'], entity_type: 'user' });
+      expect(mockEsClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('should populate entity_type from EngineMetadata.Type on all-skipped unlink', async () => {
+      const standaloneDoc = createEntityDoc('entity-1', 'host');
+
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([standaloneDoc]) as never);
+
+      const result = await client.unlinkEntities(['entity-1']);
+
+      expect(result.entity_type).toBe('host');
+    });
+
+    it('should throw MixedEntityTypesError when unlinked entities have different types', async () => {
+      const userAlias = createEntityDoc('alias-user', 'user', 'target-1');
+      const hostAlias = createEntityDoc('alias-host', 'host', 'target-2');
+
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([userAlias, hostAlias]) as never
+      );
+
+      await expect(client.unlinkEntities(['alias-user', 'alias-host'])).rejects.toThrow(
+        MixedEntityTypesError
+      );
+      expect(mockEsClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('should throw MixedEntityTypesError when all-skipped entities have different types', async () => {
+      const userStandalone = createEntityDoc('entity-user', 'user');
+      const hostStandalone = createEntityDoc('entity-host', 'host');
+
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([userStandalone, hostStandalone]) as never
+      );
+
+      await expect(client.unlinkEntities(['entity-user', 'entity-host'])).rejects.toThrow(
+        MixedEntityTypesError
+      );
+      expect(mockEsClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('should reject unlinked aliases and skipped standalones of different types', async () => {
+      const userAlias = createEntityDoc('alias-user', 'user', 'target-1');
+      const hostStandalone = createEntityDoc('entity-host', 'host');
+
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([userAlias, hostStandalone]) as never
+      );
+
+      await expect(client.unlinkEntities(['alias-user', 'entity-host'])).rejects.toThrow(
+        MixedEntityTypesError
+      );
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
     });
 
@@ -420,7 +520,7 @@ describe('ResolutionClient', () => {
 
       const result = await client.unlinkEntities(['alias-1', 'entity-1']);
 
-      expect(result).toEqual({ unlinked: ['alias-1'], skipped: ['entity-1'] });
+      expect(result).toEqual({ unlinked: ['alias-1'], skipped: ['entity-1'], entity_type: 'user' });
     });
 
     it('should deduplicate entity_ids', async () => {
@@ -431,7 +531,7 @@ describe('ResolutionClient', () => {
 
       const result = await client.unlinkEntities(['alias-1', 'alias-1', 'alias-1']);
 
-      expect(result).toEqual({ unlinked: ['alias-1'], skipped: [] });
+      expect(result).toEqual({ unlinked: ['alias-1'], skipped: [], entity_type: 'user' });
     });
 
     it('should throw ResolutionUpdateError when bulk update has errors', async () => {
@@ -473,6 +573,7 @@ describe('ResolutionClient', () => {
         target: targetDoc,
         aliases: [aliasDoc],
         group_size: 2,
+        entity_type: 'user',
       });
     });
 
@@ -493,6 +594,7 @@ describe('ResolutionClient', () => {
         target: targetDoc,
         aliases: [aliasDoc],
         group_size: 2,
+        entity_type: 'user',
       });
     });
 
@@ -510,6 +612,7 @@ describe('ResolutionClient', () => {
         target: standaloneDoc,
         aliases: [],
         group_size: 1,
+        entity_type: 'user',
       });
     });
 
