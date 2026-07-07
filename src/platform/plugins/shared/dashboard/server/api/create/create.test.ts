@@ -12,7 +12,7 @@ import supertest from 'supertest';
 import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { type savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { coreFeatureFlagsMock, type savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { coreServices, taggingService, logger } from '../../kibana_services';
@@ -51,6 +51,9 @@ describe(`create`, () => {
     const { versioned } = createRouter<RequestHandlerContext>('/');
     registerCreateRoute(versioned, undefined, false, logger);
 
+    Object.assign(handlerContext, {
+      featureFlags: coreFeatureFlagsMock.createRequestHandlerContext(),
+    });
     savedObjectsClient.create.mockResolvedValue({
       id: 'test-dashboard',
       type: 'dashboard',
