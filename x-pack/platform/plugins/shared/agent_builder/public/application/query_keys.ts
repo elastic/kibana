@@ -75,6 +75,10 @@ export const queryKeys = {
   connectors: {
     all: ['connectors'] as const,
   },
+  workspaceFiles: {
+    byPath: (conversationId: string, path: string) =>
+      ['workspaceFiles', conversationId, path] as const,
+  },
   oauthClients: {
     all: ['oauthClients', 'list'] as const,
     byId: (clientId: string) => ['oauthClients', clientId] as const,
