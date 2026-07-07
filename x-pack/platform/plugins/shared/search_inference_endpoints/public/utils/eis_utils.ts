@@ -363,7 +363,8 @@ const collectGeoOnlyZones = (endpoints: EisInferenceEndpoint[]): Set<string> => 
     const regions = ep.metadata.regions;
     if (!regions) continue;
     for (const region of regions) {
-      if (!isCspRegion(region)) {
+      if (isCspRegion(region)) continue;
+      if (region && typeof region === 'object' && typeof region.geo === 'string') {
         geoOnly.add(region.geo);
       }
     }
