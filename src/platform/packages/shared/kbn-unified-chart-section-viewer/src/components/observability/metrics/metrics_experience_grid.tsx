@@ -21,10 +21,12 @@ import { SearchButton } from '../../toolbar/right_side_actions/search_button';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import { ChartSectionSearchError } from '../../chart_section_search_error/chart_section_search_error';
 import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
+import { METRICS_SORT_BY, METRICS_SORT_DIRECTION } from '../../../common/constants';
 import {
   useDimensionsWipe,
   useDiscoverFieldForBreakdown,
   useMetricFieldsFilter,
+  useMetricsSort,
   useResetPageOnDimensionsChange,
 } from './hooks';
 import { isSuppressedFetchError } from '../../chart/utils/is_suppressed_fetch_error';
@@ -72,6 +74,12 @@ export const MetricsExperienceGrid = ({
   const { filteredMetricItems } = useMetricFieldsFilter({
     metricItems,
     searchTerm,
+  });
+
+  const { sortedMetricItems } = useMetricsSort({
+    metricItems: filteredMetricItems,
+    sortBy: METRICS_SORT_BY.alphabetically,
+    direction: METRICS_SORT_DIRECTION.asc,
   });
 
   useDiscoverFieldForBreakdown(
@@ -185,7 +193,7 @@ export const MetricsExperienceGrid = ({
       onKeyDown={onKeyDown}
     >
       <MetricsExperienceGridContent
-        metricItems={filteredMetricItems}
+        metricItems={sortedMetricItems}
         activeDimensions={activeDimensions}
         services={services}
         discoverFetch$={discoverFetch$}

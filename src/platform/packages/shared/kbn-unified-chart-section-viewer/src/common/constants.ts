@@ -64,3 +64,14 @@ export const DIMENSION_TYPES = [
 
 // Metric instrument types allowed in the Metrics experience.
 export const ALLOWED_METRIC_TYPES = ['gauge', 'counter', 'histogram'];
+
+// Metrics grid sort options
+export const METRICS_SORT_BY = {
+  alphabetically: 'alphabetically',
+} as const;
+
+// Metrics grid sort directions
+export const METRICS_SORT_DIRECTION = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;
