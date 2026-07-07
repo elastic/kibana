@@ -1982,6 +1982,54 @@ describe('Package policy secrets', () => {
         expect(result.secretsToDelete).toHaveLength(0);
       });
     });
+
+    describe('when a secret var is removed entirely from a newer package version', () => {
+      // Mirrors the `secrets` test fixture package used by the policy_secrets FTR suite:
+      // `package_var_multi_secret` exists in 1.0.0 but is dropped from 1.1.0's manifest.
+      const newPackageInfoWithoutMultiSecret = {
+        name: 'mock-package',
+        title: 'Mock package',
+        version: '1.1.0',
+        description: 'description',
+        type: 'integration',
+        status: 'not_installed',
+        vars: [{ name: 'pkg-secret-1', type: 'text', secret: true, required: true }],
+        data_streams: [],
+        policy_templates: [],
+      } as unknown as PackageInfo;
+
+      it('still marks the orphaned secret for deletion even though the new package no longer declares it', async () => {
+        const oldPackagePolicy = {
+          vars: {
+            'pkg-secret-1': {
+              value: { id: 'pkg-secret-1-id', isSecretRef: true },
+            },
+            'pkg-multi-secret': {
+              value: { ids: ['orphan-id-1', 'orphan-id-2'], isSecretRef: true },
+            },
+          },
+          inputs: [],
+        } as unknown as PackagePolicy;
+
+        const packagePolicyUpdate = {
+          vars: {
+            'pkg-secret-1': {
+              value: { id: 'pkg-secret-1-id', isSecretRef: true },
+            },
+          },
+          inputs: [],
+        } as unknown as UpdatePackagePolicy;
+
+        const result = await extractAndUpdateSecrets({
+          oldPackagePolicy,
+          packagePolicyUpdate,
+          packageInfo: newPackageInfoWithoutMultiSecret,
+          esClient: esClientMock,
+        });
+
+        expect(result.secretsToDelete).toEqual([{ id: 'orphan-id-1' }, { id: 'orphan-id-2' }]);
+      });
+    });
   });
 
   describe('findPackagePoliciesUsingSecrets', () => {
