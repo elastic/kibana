@@ -61,9 +61,7 @@ export function useRelayAppConnection(): UseRelayAppConnection {
 
   const connectMutation = useMutation<SlackAppConnectResponse, Error>({
     mutationFn: () => http.post<SlackAppConnectResponse>(CONNECT_ROUTE),
-    onSuccess: (response) => {
-      // The Slack OAuth consent happens in the user's browser; open it in a new tab.
-      window.open(response.authorizeUrl, '_blank', 'noopener,noreferrer');
+    onSuccess: () => {
       pollDeadlineRef.current = Date.now() + POLL_TIMEOUT_MS;
     },
     onError: (error) => {
@@ -106,7 +104,27 @@ export function useRelayAppConnection(): UseRelayAppConnection {
     error: statusQuery.data?.error,
     isMutating: connectMutation.isLoading || disconnectMutation.isLoading,
     connect: async () => {
-      await connectMutation.mutateAsync();
+      // Open the tab synchronously, inside the click gesture: `mutateAsync`
+      // below awaits a network round-trip, and by the time it resolves the
+      // click's user-activation has expired, so opening the tab from
+      // `onSuccess` gets treated as an unsolicited popup and blocked by most
+      // browsers. Navigate this pre-opened tab once we have the URL instead.
+      const authWindow = window.open('', '_blank');
+      if (authWindow) {
+        // Detach the opener reference to protect against reverse tabnabbing,
+        // while keeping our own handle so we can navigate the tab below.
+        authWindow.opener = null;
+      }
+
+      try {
+        const response = await connectMutation.mutateAsync();
+        if (authWindow && !authWindow.closed) {
+          authWindow.location.replace(response.authorizeUrl);
+        }
+      } catch (error) {
+        authWindow?.close();
+        throw error;
+      }
     },
     disconnect: async () => {
       await disconnectMutation.mutateAsync();
