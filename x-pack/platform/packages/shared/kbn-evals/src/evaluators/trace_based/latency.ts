@@ -58,7 +58,7 @@ export function createSpanLatencyEvaluator({
       name: 'Latency',
       buildQuery: (traceId) => `FROM traces-*
 | WHERE trace.id == "${traceId}" AND ${spanFilter}
-| STATS total_duration_ns = MAX(duration)
+| STATS total_duration_ns = SUM(duration)
 | EVAL latency_seconds = TO_DOUBLE(total_duration_ns) / 1000000000
 | KEEP latency_seconds`,
       extractResult: (response) => {
