@@ -913,10 +913,30 @@ export const labels = {
         }),
     },
     referencedFileSection: {
-      description: i18n.translate('xpack.agentBuilder.skills.referencedFileSection.description', {
+      description: i18n.translate('xpack.agentBuilder.skills.referencedFileSection.descriptionV2', {
         defaultMessage:
-          'Attach extra markdown files that belong to this skill. Paths are relative to the skill folder.',
+          'Optional reference material the agent can pull into context when it uses this skill, such as query templates, examples, or naming conventions that are too long for the instructions above.',
       }),
+      emptyStateTitle: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileSection.emptyStateTitle',
+        {
+          defaultMessage: 'No reference files yet',
+        }
+      ),
+      emptyStateDescription: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileSection.emptyStateDescription',
+        {
+          defaultMessage:
+            'Reference files are markdown snippets saved with the skill. When an agent uses this skill, their content can be added to its context. You enter the content here manually.',
+        }
+      ),
+      uploadingNotAvailable: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileSection.uploadingNotAvailable',
+        {
+          defaultMessage:
+            "Uploading files or pointing to a folder isn't available yet, so content is added manually for now.",
+        }
+      ),
       addFileButton: i18n.translate(
         'xpack.agentBuilder.skills.referencedFileSection.addFileButton',
         {

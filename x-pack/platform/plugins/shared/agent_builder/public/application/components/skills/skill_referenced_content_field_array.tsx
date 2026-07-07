@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiSpacer,
   EuiText,
+  EuiTitle,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useController, useFieldArray, useWatch, type Control } from 'react-hook-form';
 import { maxReferencedContentItems, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -21,6 +26,54 @@ import { labels } from '../../utils/i18n';
 import type { ReferencedContentItem, SkillFormData } from './skill_form_validation';
 import { ReferencedContentFileCard } from './referenced_content_file_card';
 import { SkillReferencedContentReadOnly } from './skill_referenced_content_read_only';
+
+const addFileEbtProps = getEbtProps({
+  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+  action: AGENT_BUILDER_UI_EBT.action.globalManagement.ADD_REFERENCED_FILE,
+  detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+});
+
+const removeFileEbtProps = getEbtProps({
+  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+  action: AGENT_BUILDER_UI_EBT.action.globalManagement.REMOVE_REFERENCED_FILE,
+  detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+});
+
+const ReferencedContentEmptyState: React.FC<{ onAdd: () => void }> = ({ onAdd }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const containerStyle = css`
+    border: 2px dashed ${euiTheme.colors.borderBaseSubdued};
+    border-radius: ${euiTheme.border.radius.medium};
+    padding: ${euiTheme.size.l};
+  `;
+
+  return (
+    <div css={containerStyle} data-test-subj="agentBuilderSkillReferencedContentEmptyState">
+      <EuiTitle size="xxs">
+        <h3>{labels.skills.referencedFileSection.emptyStateTitle}</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText size="s" color="subdued">
+        {labels.skills.referencedFileSection.emptyStateDescription}
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiButton
+        iconType="plusInCircle"
+        onClick={onAdd}
+        data-test-subj="agentBuilderSkillReferencedContentAddFile"
+        {...addFileEbtProps}
+      >
+        {labels.skills.referencedFileSection.addFileButton}
+      </EuiButton>
+      <EuiSpacer size="m" />
+      <EuiText size="xs" color="subdued">
+        <EuiIcon type="info" color="subdued" size="s" aria-hidden={true} />{' '}
+        {labels.skills.referencedFileSection.uploadingNotAvailable}
+      </EuiText>
+    </div>
+  );
+};
 
 const DEFAULT_REFERENCED_FILE: ReferencedContentItem = {
   name: '',
@@ -65,19 +118,19 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="trash"
-          color="danger"
-          onClick={onRemove}
-          aria-label={labels.skills.referencedFileSection.removeFileAriaLabel}
-          title={labels.skills.referencedFileSection.removeFileAriaLabel}
-          data-test-subj={`agentBuilderSkillReferencedContentRemove-${index}`}
-          {...getEbtProps({
-            element: AGENT_BUILDER_UI_EBT.element.pageContent,
-            action: AGENT_BUILDER_UI_EBT.action.globalManagement.REMOVE_REFERENCED_FILE,
-            detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
-          })}
-        />
+        <EuiToolTip
+          content={labels.skills.referencedFileSection.removeFileAriaLabel}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="trash"
+            color="danger"
+            onClick={onRemove}
+            aria-label={labels.skills.referencedFileSection.removeFileAriaLabel}
+            data-test-subj={`agentBuilderSkillReferencedContentRemove-${index}`}
+            {...removeFileEbtProps}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -108,61 +161,59 @@ const SkillReferencedContentFieldArrayEdit: React.FC<{ control: Control<SkillFor
 
   const atLimit = fields.length >= maxReferencedContentItems;
 
-  const filesAddedLabel = useMemo(
-    () =>
-      labels.skills.referencedFileSection.filesAddedCount(fields.length, maxReferencedContentItems),
-    [fields.length]
-  );
-
   return (
     <div data-test-subj="agentBuilderSkillReferencedContentSection">
-      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            iconType="plusInCircle"
-            onClick={() => append(DEFAULT_REFERENCED_FILE)}
-            disabled={atLimit}
-            title={
-              atLimit
-                ? labels.skills.referencedFileSection.addFileButtonDisabledTooltip(
-                    maxReferencedContentItems
-                  )
-                : undefined
-            }
-            data-test-subj="agentBuilderSkillReferencedContentAddFile"
-            {...getEbtProps({
-              element: AGENT_BUILDER_UI_EBT.element.pageContent,
-              action: AGENT_BUILDER_UI_EBT.action.globalManagement.ADD_REFERENCED_FILE,
-              detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
-            })}
-          >
-            {labels.skills.referencedFileSection.addFileButton}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText
-            size="s"
-            color="subdued"
-            data-test-subj="agentBuilderSkillReferencedContentCount"
-          >
-            {filesAddedLabel}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="l" />
-
-      <EuiFlexGroup direction="column" gutterSize="xl">
-        {fields.map((field, index) => (
-          <EuiFlexItem key={field.id} grow={false}>
-            <ReferencedContentFileRow
-              index={index}
-              control={control}
-              skillName={skillName}
-              onRemove={() => remove(index)}
-            />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
+      {fields.length === 0 ? (
+        <ReferencedContentEmptyState onAdd={() => append(DEFAULT_REFERENCED_FILE)} />
+      ) : (
+        <>
+          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="plusInCircle"
+                onClick={() => append(DEFAULT_REFERENCED_FILE)}
+                disabled={atLimit}
+                title={
+                  atLimit
+                    ? labels.skills.referencedFileSection.addFileButtonDisabledTooltip(
+                        maxReferencedContentItems
+                      )
+                    : undefined
+                }
+                data-test-subj="agentBuilderSkillReferencedContentAddFile"
+                {...addFileEbtProps}
+              >
+                {labels.skills.referencedFileSection.addFileButton}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText
+                size="s"
+                color="subdued"
+                data-test-subj="agentBuilderSkillReferencedContentCount"
+              >
+                {labels.skills.referencedFileSection.filesAddedCount(
+                  fields.length,
+                  maxReferencedContentItems
+                )}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup direction="column" gutterSize="xl">
+            {fields.map((field, index) => (
+              <EuiFlexItem key={field.id} grow={false}>
+                <ReferencedContentFileRow
+                  index={index}
+                  control={control}
+                  skillName={skillName}
+                  onRemove={() => remove(index)}
+                />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </>
+      )}
     </div>
   );
 };
