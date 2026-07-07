@@ -76,6 +76,8 @@ export interface DownsamplingBarProps {
   editedDownsampleStepIndex?: number;
   canManageLifecycle: boolean;
   isEditLifecycleFlyoutOpen?: boolean;
+  /** While true, all click interactions are disabled: no popover opens and no navigation occurs. */
+  disableInteractions?: boolean;
 }
 
 export const DownsamplingBar = ({
@@ -87,6 +89,7 @@ export const DownsamplingBar = ({
   editedDownsampleStepIndex,
   canManageLifecycle,
   isEditLifecycleFlyoutOpen,
+  disableInteractions,
 }: DownsamplingBarProps) => {
   const phaseColors = usePhaseColors();
   const { getDownsamplingColor } = useDownsamplingColors();
@@ -169,6 +172,7 @@ export const DownsamplingBar = ({
                       )}
                       canManageLifecycle={canManageLifecycle}
                       isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
+                      disableInteractions={disableInteractions}
                     />
                   ) : segment.isDelete ? (
                     <EuiPanel
