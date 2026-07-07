@@ -19,7 +19,6 @@ import type { WorkflowExecutionsTracking } from '@kbn/elastic-assistant-common';
 import type { HttpSetup } from '@kbn/core/public';
 import { ExecutionStatus } from '@kbn/workflows';
 
-import { MissingPrivilegesCallOut } from '../../../../common/components/missing_privileges';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AttackDiscoveryEventTypes } from '../../../../common/lib/telemetry';
 import type { AttackDiscoveryPipelineStepType } from '../../../../common/lib/telemetry';
@@ -27,6 +26,7 @@ import { useHasWorkflowsPrivileges } from '../../hooks/use_has_workflows_privile
 import { useGetAttackDiscoveryGeneration } from '../../hooks/use_get_attack_discovery_generation';
 import { usePipelineData } from '../../hooks/use_pipeline_data';
 import { useWorkflowExecutionDetails } from '../../hooks/use_workflow_execution_details';
+import { WorkflowsMissingPrivilegesCallOut } from '../../workflows_missing_privileges_callout';
 import { LoadingCallout } from '..';
 import { StepDataModal } from '../step_data_modal';
 import type { AggregatedWorkflowExecution, WorkflowInspectMetadata } from '../types';
@@ -430,11 +430,7 @@ const WorkflowExecutionDetailsFlyoutComponent: React.FC<WorkflowExecutionDetails
             pipelineData={pipelineData}
           />
         ) : (
-          <MissingPrivilegesCallOut
-            dismissible={false}
-            missingPrivileges={missingPrivileges}
-            namespace="attackDiscoveryWorkflowExecution"
-          />
+          <WorkflowsMissingPrivilegesCallOut missingPrivileges={missingPrivileges} />
         )}
 
         {liveGeneration?.conversation_id != null && (

@@ -161,7 +161,7 @@ export const getRunAttackDiscoveryTool = ({
   logger,
   workflowsManagementApi,
 }: RunAttackDiscoveryToolDeps): BuiltinSkillBoundedTool<typeof inputSchema> => ({
-  description: `Run the canonical Attack Discovery generation pipeline (alert retrieval → generation → validation → persistence) inside the audited Anonymization Boundary. Prefer "provided" mode (pass curated \`alerts\`) when you have already gathered evidence; otherwise use "esql" with \`esql_query\`, "custom_only" with \`alert_retrieval_workflow_ids\`, or "custom_query" with explicit \`size\`/\`start\`/\`end\`. Returns inline discoveries when sync-mode finishes within the soft deadline; otherwise returns \`execution_uuid\` for slow-path resume via \`security.attack-discovery.get_status\`. The LLM connector is resolved from the agent execution; pass \`connector_id\` only to override.`,
+  description: `Run the canonical Attack Discovery generation pipeline (alert retrieval → generation → validation → persistence) inside the audited Anonymization Boundary. Prefer "provided" mode (pass curated \`alerts\`) when you have already gathered evidence; otherwise use "esql" with \`esql_query\`, "custom_only" with \`alert_retrieval_workflow_ids\`, or "custom_query" with explicit \`size\`/\`start\`/\`end\`. Every result includes a \`status\` field: \`status: 'completed'\` means the run finished and \`attack_discoveries\`/\`discovery_count\` are final (\`discovery_count: 0\` genuinely means zero discoveries); \`status: 'pending'\` means the run is still executing in the background and only \`execution_uuid\` is returned (async mode, or sync-mode exceeding the soft deadline) — poll \`security.attack-discovery.get_status\` with the \`execution_uuid\` and NEVER report "0 discoveries" for a pending run. The LLM connector is resolved from the agent execution; pass \`connector_id\` only to override.`,
   handler: async (args, context) => {
     const effectiveConnectorId = await resolveEffectiveConnectorId({ args, context, logger });
 
@@ -179,7 +179,7 @@ export const getRunAttackDiscoveryTool = ({
     const {
       additional_context: additionalContext,
       alert_retrieval_mode: alertRetrievalMode,
-      alert_retrieval_workflow_ids: alertRetrievalWorkflowIds,
+      alert_retrieval_workflow_ids: alertRetrievalWorkflowIds = [],
       alerts,
       end,
       esql_query: esqlQuery,
@@ -216,14 +216,21 @@ export const getRunAttackDiscoveryTool = ({
         connector_id: effectiveConnectorId,
       };
 
-      const effectiveRetrievalMode =
-        alerts != null && alerts.length > 0 ? 'provided' : alertRetrievalMode;
+      // Pre-supplied alerts are passed directly via `executeParams.alerts`, so
+      // the retrieval phase is skipped; otherwise the legacy tool input enum is
+      // bridged to the composite toggles (legacy `custom_only` => default
+      // retrieval off).
+      const hasProvidedAlerts = alerts != null && alerts.length > 0;
+      const queryMode = alertRetrievalMode === 'esql' ? 'esql' : 'custom_query';
 
       const workflowConfig: WorkflowConfig = {
         ...(additionalContext != null ? { additional_context: additionalContext } : {}),
-        alert_retrieval_mode: effectiveRetrievalMode,
+        alert_retrieval_mode: queryMode,
         alert_retrieval_workflow_ids: alertRetrievalWorkflowIds,
-        esql_query: esqlQuery,
+        alert_retrieval_workflows_enabled: alertRetrievalWorkflowIds.length > 0,
+        default_retrieval_enabled: !hasProvidedAlerts && alertRetrievalMode !== 'custom_only',
+        ...(esqlQuery != null ? { esql_query: esqlQuery } : {}),
+        skill_enabled: true,
         validation_workflow_id: validationWorkflowId,
       };
 
@@ -232,6 +239,7 @@ export const getRunAttackDiscoveryTool = ({
         alertsIndexPattern: getAlertsIndexForSpace(spaceId),
         analytics,
         apiConfig,
+        authz: pluginsStart.security.authz,
         checkIntegrity:
           workflowsManagementApi != null
             ? async ({
@@ -282,7 +290,7 @@ export const getRunAttackDiscoveryTool = ({
         });
 
         return {
-          results: [buildSuccessResult({ execution_uuid: executionUuid })],
+          results: [buildSuccessResult({ execution_uuid: executionUuid, status: 'pending' })],
         };
       }
 
@@ -308,7 +316,7 @@ export const getRunAttackDiscoveryTool = ({
         });
 
         return {
-          results: [buildSuccessResult({ execution_uuid: executionUuid })],
+          results: [buildSuccessResult({ execution_uuid: executionUuid, status: 'pending' })],
         };
       }
 
@@ -322,6 +330,7 @@ export const getRunAttackDiscoveryTool = ({
               attack_discoveries: generationResult.attackDiscoveries,
               discovery_count: validationResult.generatedCount,
               execution_uuid: generationResult.executionUuid,
+              status: 'completed',
             }),
           ],
         };
@@ -336,6 +345,7 @@ export const getRunAttackDiscoveryTool = ({
             attack_discoveries: null,
             discovery_count: 0,
             execution_uuid: executionUuid,
+            status: 'completed',
           }),
         ],
       };

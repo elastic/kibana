@@ -88,7 +88,7 @@ Use the REST API when building Kibana UI features. Use the workflow step when bu
 
 ## Example workflow
 
-The `Attack discovery - Run example` workflow (`ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW`, id `system-attack-discovery-run-example`, declared inline in [`kbn-workflows/managed/definitions/discoveries.ts`](../../../../../../../../../src/platform/packages/shared/kbn-workflows/managed/definitions/discoveries.ts)) demonstrates the step with all inputs documented and the `alerts` composability pattern highlighted:
+The `Attack discovery - Run example` workflow (`ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW`, id `system-attack-discovery-run-example`, declared inline in [`kbn-workflows/managed/definitions/discoveries/index.ts`](../../../../../../../../../src/platform/packages/shared/kbn-workflows/managed/definitions/discoveries/index.ts)) demonstrates the step with all inputs documented and the `alerts` composability pattern highlighted:
 
 ```yaml
 steps:
