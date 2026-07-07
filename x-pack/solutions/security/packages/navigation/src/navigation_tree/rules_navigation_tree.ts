@@ -47,6 +47,10 @@ export const createRulesNavigationTree = (): NodeDefinition => ({
           id: SecurityPageName.exceptions,
           link: securityLink(SecurityPageName.exceptions),
         },
+        {
+          id: SecurityPageName.alertAnalysisWorkflow,
+          link: securityLink(SecurityPageName.alertAnalysisWorkflow),
+        },
       ],
     },
     {
