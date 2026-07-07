@@ -35,10 +35,11 @@ export function parseAutocompleteQuery(fullText: string, offset: number): Parsed
   const tokens = getEsqlLexerTokens(innerText);
   const correctedQuery = correctQuerySyntax(innerText);
   const { root } = Parser.parse(correctedQuery, { withFormatting: true });
+  const cleanRoot = removeAutocompleteMarkers(root);
 
   return {
     innerText,
-    root: removeAutocompleteMarkers(root),
+    root: cleanRoot,
     tokens,
   };
 }

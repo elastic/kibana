@@ -20,6 +20,8 @@ export {
   getInitialESQLQuery,
   getESQLWithSafeLimit,
   appendToESQLQuery,
+  escapeStringValue,
+  buildJoinedFilter,
   appendWhereClauseToESQLQuery,
   appendStatsByToQuery,
   appendLimitToQuery,
