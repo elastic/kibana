@@ -91,9 +91,6 @@ safe-outputs:
     labels: [flaky-test-fixer]
     base-branch: main
     allowed-base-branches: ['main', '9.*', '8.*', '7.*']
-    # Enforce the `fix/flaky-*` branch prefix so the Flaky Fix Verifier can
-    # cheaply pre-fetch exactly this branch pattern (see its `checkout.fetch`).
-    allowed-branches: ['fix/flaky-*']
     if-no-changes: 'ignore'
     # Open the PR as `kibanamachine` (a user), not the default GITHUB_TOKEN bot, so
     # the PR's `opened` event can trigger the Flaky Fix Verifier (GITHUB_TOKEN events don't).
@@ -175,7 +172,6 @@ Kibana is already bootstrapped for you.
 
 ## PR format
 
-- **Branch**: name the PR's source branch `fix/flaky-<issue-number>-<short-kebab-slug>` (e.g. `fix/flaky-275144-host-flow-ingestion-wait`). The `fix/flaky-` prefix is required — the Flaky Fix Verifier relies on it.
 - **Title**: `[<Plugin name>] <concise summary of the fix>`. Derive the plugin name from the test file path (e.g. `x-pack/solutions/security/plugins/security_solution/...` → `Security Solution`).
 - **Body**:
   ```

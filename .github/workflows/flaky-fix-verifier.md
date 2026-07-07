@@ -102,13 +102,12 @@ network:
 sandbox:
   agent: awf
 
-# Shallow-fetch the fixer PR branches into the safe_outputs job so the
+# Check out the PR head by number (available for every trigger) so the
 # `push_to_pull_request_branch` handler's own branch fetch is a fast no-op
-# instead of an unbounded fetch that hangs on a repo Kibana's size. The fixer
-# enforces the `fix/flaky-*` branch prefix (see flaky-test-fixer.md).
+# instead of an unbounded fetch that hangs on a repo Kibana's size.
 checkout:
-  fetch:
-    - fix/flaky-*
+  ref: refs/pull/${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}/head
+  fetch-depth: 2
 
 jobs:
   prefetch_pr_context:
