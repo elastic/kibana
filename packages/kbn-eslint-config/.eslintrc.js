@@ -40,7 +40,6 @@ const JS_YAML_LEGACY_CONSUMERS = [
   /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-connector-cli[\/\\]/,
   /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-edot-collector[\/\\]/,
   /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-es[\/\\]/,
-  /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-openapi-bundler[\/\\]/,
   /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-otel-demo[\/\\]/,
   /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-otel-semantic-conventions[\/\\]/,
   /^src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-scout[\/\\]/,
@@ -49,7 +48,6 @@ const JS_YAML_LEGACY_CONSUMERS = [
   /^src[\/\\]platform[\/\\]plugins[\/\\]private[\/\\]interactive_setup[\/\\]server[\/\\]/,
   /^x-pack[\/\\]packages[\/\\]kbn-synthetics-private-location[\/\\]/,
   /^x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-data-forge[\/\\]/,
-  /^x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-evals[\/\\]/,
   /^x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-inference-cli[\/\\]/,
   /^x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]response-ops[\/\\]alerting-v2-rule-form[\/\\]/,
   /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]agent_builder[\/\\]server[\/\\]services[\/\\]/,
@@ -58,7 +56,6 @@ const JS_YAML_LEGACY_CONSUMERS = [
   /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]cases[\/\\]/,
   /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]/,
   /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]inference[\/\\]scripts[\/\\]/,
-  /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]osquery[\/\\]cypress[\/\\]/,
   /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]rule_registry[\/\\]scripts[\/\\]/,
   /^x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]streams[\/\\]scripts[\/\\]/,
   /^x-pack[\/\\]platform[\/\\]test[\/\\]cases_api_integration[\/\\]/,
@@ -68,12 +65,7 @@ const JS_YAML_LEGACY_CONSUMERS = [
   /^x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]observability_ai_assistant_app[\/\\]scripts[\/\\]/,
   /^x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]observability_onboarding[\/\\]server[\/\\]routes[\/\\]flow[\/\\]/,
   /^x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]synthetics[\/\\]public[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]security[\/\\]packages[\/\\]test-api-clients[\/\\]/,
   /^x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]cloud_defend[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]elastic_assistant[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]scripts[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]server[\/\\]assistant[\/\\]/,
-  /^x-pack[\/\\]solutions[\/\\]security[\/\\]test[\/\\]security_solution_cypress[\/\\]cypress[\/\\]support[\/\\]/,
 ];
 
 const USES_ELASTIC_APM_AGENT = [
