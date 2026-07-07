@@ -18,6 +18,7 @@ import { useConversationContext } from '../../../../../context/conversation/conv
 import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { AttachmentHeader } from './attachment_header';
+import { AttachmentRenderErrorBoundary } from './attachment_render_error_boundary';
 import { getAttachmentPreviewKey, useCanvasContext } from './canvas_context';
 
 interface InlineAttachmentWithActionsProps {
@@ -170,17 +171,21 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
         onClosePreview={closeCanvas}
       />
       <EuiSplitPanel.Inner grow={false} paddingSize="none">
-        {uiDefinition?.renderInlineContent?.(
-          {
-            attachment,
-            isSidebar,
-            screenContext,
-            openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
-          },
-          {
-            registerActionButtons,
+        <AttachmentRenderErrorBoundary key={attachmentPreviewKey}>
+          {() =>
+            uiDefinition?.renderInlineContent?.(
+              {
+                attachment,
+                isSidebar,
+                screenContext,
+                openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+              },
+              {
+                registerActionButtons,
+              }
+            )
           }
-        )}
+        </AttachmentRenderErrorBoundary>
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
   );
