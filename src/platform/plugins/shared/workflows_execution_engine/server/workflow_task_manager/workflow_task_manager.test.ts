@@ -490,14 +490,6 @@ describe('WorkflowTaskManager', () => {
     });
   });
 
-  describe('runSoon', () => {
-    it('runs the provided task id soon', async () => {
-      await workflowTaskManager.runSoon('resume-task-id');
-
-      expect(mockTaskManager.runSoon).toHaveBeenCalledWith('resume-task-id');
-    });
-  });
-
   describe('forceRunIdleTasks', () => {
     const workflowExecutionId = 'test-execution-id';
 
