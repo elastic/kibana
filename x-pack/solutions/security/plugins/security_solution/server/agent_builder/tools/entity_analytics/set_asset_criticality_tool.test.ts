@@ -507,10 +507,24 @@ describe('setAssetCriticalityTool', () => {
 
     it('reports success=false when the caller lacks write privilege', async () => {
       mockCheckPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
         privileges: {
           elasticsearch: {
-            index: new Proxy({}, { get: () => [{ privilege: 'write', authorized: false }] }),
+            cluster: [],
+            index: new Proxy(
+              {},
+              {
+                get: () => [
+                  { privilege: 'read', authorized: true },
+                  { privilege: 'write', authorized: false },
+                ],
+              }
+            ),
           },
+          kibana: [
+            { privilege: 'api:securitySolution', authorized: true },
+            { privilege: 'api:securitySolution-entity-analytics', authorized: true },
+          ],
         },
       });
       const ctx = handlerContext();

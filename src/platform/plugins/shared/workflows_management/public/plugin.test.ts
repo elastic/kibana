@@ -12,6 +12,7 @@ import type { App, AppUpdatableFields, AppUpdater } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import {
+  WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
   WORKFLOWS_MANAGEMENT_FEATURE_ID,
   WORKFLOWS_UI_SETTING_ID,
 } from '@kbn/workflows/common/constants';
@@ -42,13 +43,12 @@ jest.mock('./connectors/workflows', () => ({
   getWorkflowsConnectorType: jest.fn(() => ({ id: 'workflows', actionTypeId: 'workflows' })),
 }));
 
-const createPlugin = (globalExecutionsViewEnabled = false) =>
+const createPlugin = () =>
   new WorkflowsPlugin(
     coreMock.createPluginInitializerContext({
       enabled: true,
       logging: { console: false },
       available: true,
-      globalExecutionsView: { enabled: globalExecutionsViewEnabled },
     })
   );
 
@@ -89,8 +89,8 @@ describe('WorkflowsPlugin', () => {
       expect(coreSetup.application.register).not.toHaveBeenCalled();
     });
 
-    it('should register the workflows list and library deep links but not executions when the executions view flag is off in bootstrap', () => {
-      plugin = createPlugin(false);
+    it('should register the workflows list and library deep links but not executions at bootstrap', () => {
+      plugin = createPlugin();
       coreSetup.uiSettings.get.mockImplementation((key: string, fallback?: unknown) => {
         if (key === WORKFLOWS_UI_SETTING_ID) return true;
         return fallback;
@@ -104,8 +104,8 @@ describe('WorkflowsPlugin', () => {
           id: PLUGIN_ID,
           title: 'Workflows',
           appRoute: '/app/workflows',
-          // Library is registered by default at bootstrap; the executions link is
-          // gated by the flag (off here). Both are refined at start().
+          // Library is registered by default at bootstrap; the executions link is gated by the
+          // global uiSetting (off by default). Both are refined reactively at start().
           deepLinks: [
             expect.objectContaining({ id: 'workflowsList', path: '/' }),
             expect.objectContaining({ id: 'library', path: '/library' }),
@@ -113,25 +113,6 @@ describe('WorkflowsPlugin', () => {
         })
       );
       expect(result).toEqual({});
-    });
-
-    it('should register the executions deep link when executions view flag is on in bootstrap', () => {
-      plugin = createPlugin(true);
-      coreSetup.uiSettings.get.mockImplementation((key: string, fallback?: unknown) => {
-        if (key === WORKFLOWS_UI_SETTING_ID) return true;
-        return fallback;
-      });
-
-      plugin.setup(coreSetup, setupDeps as any);
-
-      expect(coreSetup.application.register).toHaveBeenCalledWith(
-        expect.objectContaining({
-          deepLinks: expect.arrayContaining([
-            expect.objectContaining({ id: 'workflowsList', path: '/' }),
-            expect.objectContaining({ id: 'executions', path: '/executions' }),
-          ]),
-        })
-      );
     });
   });
 
@@ -299,6 +280,28 @@ describe('WorkflowsPlugin', () => {
 
         expect(updates.length).toBeGreaterThan(emissionsBefore);
         expect(updates[updates.length - 1].deepLinks).toBeDefined();
+      });
+
+      it('should add the executions deep link when the executions view uiSetting is enabled', () => {
+        setReadCapability(true);
+        setLicenseValid(true);
+        const updates = captureAppUpdates();
+
+        plugin.start(coreStart, startDeps as any);
+
+        // Off by default → no executions deep link.
+        expect(updates[updates.length - 1].deepLinks).not.toEqual(
+          expect.arrayContaining([expect.objectContaining({ id: 'executions' })])
+        );
+
+        // Enabling the global uiSetting adds the executions deep link reactively.
+        deepLinkSettings$.get(WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID)?.next(true);
+
+        expect(updates[updates.length - 1].deepLinks).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ id: 'executions', path: '/executions' }),
+          ])
+        );
       });
     });
   });
