@@ -25,7 +25,6 @@ import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
 import { useQueryStringManager } from './lib/use_query_string_manager';
 import { canShowSavedQuery } from './lib/can_show_saved_query';
-import type { QuerySubmitMetadata } from './query_submit_metadata';
 
 export interface StatefulSearchBarDeps {
   core: CoreStart;
@@ -99,11 +98,7 @@ const defaultOnQuerySubmit = <QT extends AggregateQuery | Query = Query>(
 
   const { timefilter } = queryService.timefilter;
 
-  return (
-    payload: { dateRange: TimeRange; query?: QT | Query },
-    _isUpdate?: boolean,
-    metadata?: QuerySubmitMetadata
-  ) => {
+  return (payload: { dateRange: TimeRange; query?: QT | Query }, _isUpdate?: boolean) => {
     const currentTime = timefilter.getTime();
     const isUpdate =
       !isEqual(currentTime, payload.dateRange) || !isEqual(payload.query, currentQuery);
@@ -129,8 +124,7 @@ const defaultOnQuerySubmit = <QT extends AggregateQuery | Query = Query>(
           dateRange: submittedTime,
           query: submittedQuery,
         },
-        isUpdate,
-        metadata
+        isUpdate
       );
     }
   };

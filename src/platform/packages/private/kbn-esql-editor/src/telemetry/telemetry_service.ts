@@ -16,7 +16,6 @@ import type {
   TelemetryLatencyProps,
 } from '@kbn/esql-types';
 import { BasicPrettyPrinter, Parser } from '@elastic/esql';
-import { getDataSourceCategoryFromESQLQuery, getSourceCommandFromESQLQuery } from '@kbn/esql-utils';
 import {
   hasLimitBeforeAggregate,
   missingSortBeforeLimit,
@@ -195,14 +194,10 @@ export class ESQLEditorTelemetryService {
       // Keep submission telemetry best-effort for invalid or partially typed queries.
     }
 
-    const sourceCommand = getSourceCommandFromESQLQuery(query, '*') || 'unknown';
-
     this._reportEvent(ESQL_QUERY_SUBMITTED, {
       query_source: source,
       query_length: queryLength,
       query_lines: query.split('\n').length.toString(),
-      source_command: sourceCommand,
-      data_source_category: getDataSourceCategoryFromESQLQuery(query),
       anti_limit_before_aggregate: hasLimitBeforeStats,
       anti_missing_sort_before_limit: hasMissingSortBeforeLimit,
     });

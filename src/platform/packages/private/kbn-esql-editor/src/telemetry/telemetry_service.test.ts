@@ -50,7 +50,7 @@ describe('ESQLEditorTelemetryService', () => {
   });
 
   describe('trackQuerySubmitted', () => {
-    it('tracks query submission with source command and data source category', () => {
+    it('tracks query submission metadata', () => {
       telemetryService.trackQuerySubmitted({
         source: QuerySource.MANUAL,
         query: 'FROM logs-* | LIMIT 10',
@@ -62,30 +62,13 @@ describe('ESQLEditorTelemetryService', () => {
           query_source: QuerySource.MANUAL,
           query_length: expect.any(String),
           query_lines: '1',
-          source_command: 'FROM',
-          data_source_category: 'logs',
           anti_limit_before_aggregate: false,
           anti_missing_sort_before_limit: false,
         })
       );
     });
 
-    it('tracks registered non-index source commands', () => {
-      telemetryService.trackQuerySubmitted({
-        source: QuerySource.MANUAL,
-        query: 'PROMQL index=metrics-* step=1m start=?_tstart end=?_tend (avg(cpu_usage))',
-      });
-
-      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
-        ESQL_QUERY_SUBMITTED,
-        expect.objectContaining({
-          source_command: 'PROMQL',
-          data_source_category: 'metrics',
-        })
-      );
-    });
-
-    it('tracks invalid query submissions with unknown source metadata', () => {
+    it('tracks invalid query submissions with safe fallback metadata', () => {
       const invalidQuery = 'FROM logs-* | ???';
 
       telemetryService.trackQuerySubmitted({
@@ -99,8 +82,6 @@ describe('ESQLEditorTelemetryService', () => {
           query_source: QuerySource.MANUAL,
           query_length: expect.any(String),
           query_lines: '1',
-          source_command: 'unknown',
-          data_source_category: 'unknown',
           anti_limit_before_aggregate: false,
           anti_missing_sort_before_limit: false,
         })
