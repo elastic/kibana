@@ -76,14 +76,13 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
               CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW
             );
           }
-          const { inference, searchInferenceEndpoints } = serviceManager.internalStart ?? {};
-          if (!inference || !searchInferenceEndpoints) {
-            throw new Error('inference services are not available');
+          const { searchInferenceEndpoints } = serviceManager.internalStart ?? {};
+          if (!searchInferenceEndpoints) {
+            throw new Error('searchInferenceEndpoints service is not available');
           }
           effectiveConnectorId = await resolveConnectorIdByFeature({
             featureId: connectorIdByFeature,
             request,
-            inference,
             searchInferenceEndpoints,
           });
         }

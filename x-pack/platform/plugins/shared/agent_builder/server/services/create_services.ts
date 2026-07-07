@@ -265,7 +265,6 @@ export class ServiceManager {
       savedObjects,
       plugins,
       consumption,
-      inference,
       searchInferenceEndpoints,
     };
 

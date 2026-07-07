@@ -66,7 +66,6 @@ export interface InternalStartServices {
   taskHandler: TaskHandler;
   plugins: PluginsServiceStart;
   consumption: ConsumptionServiceStart;
-  inference: InferenceServerStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }
 

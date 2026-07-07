@@ -400,9 +400,6 @@ describe('ai.agent workflow step (Agent Builder)', () => {
 
   describe('connector-id-by-feature', () => {
     const createFeatureServicesMock = (endpoints: Array<{ connectorId: string }> = []) => ({
-      inference: {
-        getDefaultConnector: jest.fn().mockResolvedValue(undefined),
-      },
       searchInferenceEndpoints: {
         endpoints: {
           getForFeature: jest
@@ -499,7 +496,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       );
 
       expect(execution.executeAgent).not.toHaveBeenCalled();
-      expect(res.error?.message).toContain('No connector configured for feature');
+      expect(res.error?.message).toBe('No connector available for feature "unknown_feature".');
     });
   });
 
