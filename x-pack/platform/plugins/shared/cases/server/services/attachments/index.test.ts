@@ -1916,6 +1916,7 @@ describe('AttachmentService', () => {
         log: mockLogger,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
+        analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
       });
       unsecuredSavedObjectsClient.find.mockResolvedValue(
         createSOFindResponse([
