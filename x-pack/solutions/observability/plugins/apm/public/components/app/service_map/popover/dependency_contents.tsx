@@ -34,6 +34,7 @@ export function DependencyContents({ selection, environment, start, end }: Conte
     '/services/{serviceName}/service-map',
     '/mobile-services/{serviceName}/service-map',
     '/services/{serviceName}/overview',
+    '/mobile-services/{serviceName}/overview',
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view'
   );

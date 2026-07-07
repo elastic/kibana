@@ -9,6 +9,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
+import { UI_SETTINGS as DATA_UI_SETTINGS } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/observability-shared-plugin/public/hooks/use_kibana_ui_settings';
 import { UrlService } from '@kbn/share-plugin/common/url_service';
 import type { Router } from '@kbn/typed-react-router-config';
@@ -31,6 +32,7 @@ import { ApmTimeRangeMetadataContextProvider } from '../time_range_metadata/time
 import { ChartPointerEventContextProvider } from '../chart_pointer_event/chart_pointer_event_context';
 import type { ApmPluginContextValue } from './apm_plugin_context';
 import { ApmPluginContext } from './apm_plugin_context';
+import { mockApmPluginContextValue } from './mock_apm_plugin_context';
 import { setApmInternalServices } from '../../plugin';
 
 const mockPerformanceApi = {
@@ -60,7 +62,14 @@ const uiSettings: Record<string, unknown> = {
     value: 100000,
   },
   [enableInspectEsQueries]: false,
+  [DATA_UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS]: true,
+  [DATA_UI_SETTINGS.QUERY_STRING_OPTIONS]: {},
+  [DATA_UI_SETTINGS.DATEFORMAT_TZ]: 'Browser',
+  [DATA_UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: false,
 };
+
+const getUiSetting = (key: string, defaultValue?: unknown) =>
+  key in uiSettings ? uiSettings[key] : defaultValue;
 
 const urlService = new UrlService({
   navigate: async () => {},
@@ -132,8 +141,15 @@ export const mockCore = {
     },
   },
   uiSettings: {
-    get: (key: string) => uiSettings[key],
-    get$: (key: string) => of(mockCore.uiSettings.get(key)),
+    get: getUiSetting,
+    get$: (key: string, defaultValue?: unknown) => of(getUiSetting(key, defaultValue)),
+  },
+  settings: {
+    client: {
+      get: getUiSetting,
+      get$: (key: string, defaultValue?: unknown) => of(getUiSetting(key, defaultValue)),
+      set: async () => true,
+    },
   },
   unifiedSearch: {
     autocomplete: {
@@ -186,6 +202,7 @@ const mockUnifiedSearchBar = {
 export const mockApmPluginContext = {
   core: mockCore,
   plugins: mockPlugin,
+  config: mockApmPluginContextValue.config,
   unifiedSearch: mockUnifiedSearchBar,
   observabilityAIAssistant: {
     service: { setScreenContext: () => noop },

@@ -9,9 +9,7 @@ import React from 'react';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { ContextualServiceMapSection } from '../../service_map/contextual_map/contextual_service_map_section';
-
-/** Graph area height on service overview (default contextual map is 400px). */
-const SERVICE_OVERVIEW_CONTEXTUAL_MAP_PANEL_HEIGHT = 320;
+import { SERVICE_OVERVIEW_CONTEXTUAL_MAP_PANEL_HEIGHT } from '../../service_map/contextual_map/constants';
 
 export function ServiceOverviewServiceMapSection() {
   const { serviceName } = useApmServiceContext();

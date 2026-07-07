@@ -459,31 +459,9 @@ export function ServiceMapEmbeddable({
             onMapOrientationChange={onMapOrientationChange}
             viewFilters={viewFiltersForGraph}
             onViewFiltersChange={onViewFiltersChange}
+            flyoutOptions={flyoutOptionsForGraph}
           />
         )}
-        <ServiceMapGraph
-          height="100%"
-          nodes={isLoading ? [] : nodesForGraph}
-          edges={isLoading ? [] : data.edges}
-          serviceName={serviceName}
-          highlightedServiceName={serviceName}
-          environment={environment}
-          kuery={kuery}
-          start={start}
-          end={end}
-          isFullscreen={false}
-          fullMapHref={fullMapHref}
-          isEmbedded
-          showEmbeddedControls={showEmbeddedControls}
-          showFocusMap={showFocusMapInPopover}
-          alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
-          clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
-          mapOrientation={mapOrientation}
-          onMapOrientationChange={onMapOrientationChange}
-          viewFilters={viewFiltersForGraph}
-          onViewFiltersChange={onViewFiltersChange}
-          flyoutOptions={flyoutOptionsForGraph}
-        />
       </div>
       {sloOverviewFlyout && (
         <SloOverviewFlyout

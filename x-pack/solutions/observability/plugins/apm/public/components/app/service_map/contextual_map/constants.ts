@@ -9,3 +9,6 @@
 export const CONTEXTUAL_MAP_DEFAULT_MAX_VISIBLE_NODES = 8;
 
 export const CONTEXTUAL_MAP_DEFAULT_BASE_MAX_HOPS = 1;
+
+/** Graph area height for contextual map on ECS and mobile service overview. */
+export const SERVICE_OVERVIEW_CONTEXTUAL_MAP_PANEL_HEIGHT = 320;
