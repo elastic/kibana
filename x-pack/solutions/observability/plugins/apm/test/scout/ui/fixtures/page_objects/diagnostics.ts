@@ -36,6 +36,9 @@ export class DiagnosticsPage {
       .locator('#file-picker')
       .waitFor({ state: 'attached', timeout: EXTENDED_TIMEOUT });
     await this.page.locator('#file-picker').setInputFiles(filePath);
+    // Reading and parsing the file happens asynchronously (FileReader), so wait for the
+    // UI to confirm the bundle was imported before interacting with the page any further.
+    await this.removeReportButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   public get removeReportButton() {
@@ -43,7 +46,15 @@ export class DiagnosticsPage {
   }
 
   async clearBundle() {
-    await this.page.getByTestId('apmTemplateDescriptionClearBundleButton').click();
+    // The EuiCallOut wrapping this button uses `announceOnMount`, which renders a second copy
+    // of its children (including this button) into a `role="status"` live region for screen
+    // readers. That copy is clipped off-screen rather than hidden, so Playwright's `visible`
+    // check still matches it. Exclude anything nested under the live region instead.
+    await this.page
+      .locator(
+        '[data-test-subj="apmTemplateDescriptionClearBundleButton"]:not([role="status"] *)'
+      )
+      .click();
   }
 
   getTableRows(containerTestSubj?: string) {
