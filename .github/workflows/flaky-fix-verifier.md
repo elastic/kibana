@@ -174,16 +174,14 @@ safe-outputs:
   # Used only on iterations that revise the fix. The fixer always creates in-repo
   # (non-fork) branches, so pushing back to the PR branch is allowed. `am` patch
   # transport avoids the `git fetch --unshallow` that times out on a repo this size.
-  # Push as `kibanamachine` (not the default github-actions[bot]): the signed-commit
-  # push attributes authorship to the token owner, so follow-up fixes carry the same
-  # identity that opens the fixer PRs and posts these comments.
+  # Pushes with the default GITHUB_TOKEN (as github-actions[bot]); the follow-up
+  # `/flaky` comment that re-runs verification is what carries the kibanamachine identity.
   push-to-pull-request-branch:
     target: '*'
     required-labels: [flaky-test-fixer]
     protected-files: fallback-to-issue
     patch-format: am
     max: 1
-    github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
 
 strict: false
 timeout-minutes: 30
