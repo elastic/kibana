@@ -11,6 +11,7 @@
     "server": true,
     "configPath": ["xpack", "cases"],
     "requiredPlugins": [
+      "agentBuilder",
       "alerting",
       "actions",
       "data",
@@ -30,7 +31,6 @@
       "workflowsExtensions"
     ],
     "optionalPlugins": [
-      "agentBuilder",
       "cloud",
       "dataViews",
       "dashboard",
