@@ -25,6 +25,8 @@ import { createErrorSO, createSOFindResponse } from '../test_utils';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
+  LENS_ATTACHMENT_TYPE,
+  LENS_SO_TYPE,
   SECURITY_ENTITY_ATTACHMENT_TYPE,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
@@ -579,6 +581,34 @@ describe('AttachmentService', () => {
           isBoom: true,
           output: { statusCode: 400 },
           message: expect.stringContaining(SECURITY_ENTITY_ATTACHMENT_TYPE),
+        });
+
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+
+      // A Lens-by-reference attachment is a unified-only *instance* of a hybrid
+      // type (by-value lens still downgrades). The legacy write path must reject
+      // it with a 400 rather than 500/silently corrupt it into a persistableState.
+      it('create throws Boom 400 for a Lens-by-reference attachment when attachments flag is off', async () => {
+        const lensByRefAttrs = {
+          type: LENS_ATTACHMENT_TYPE,
+          attachmentId: 'lens-1',
+          metadata: { title: 'My lens', soType: LENS_SO_TYPE },
+          owner: SECURITY_SOLUTION_OWNER,
+          created_at: '2024-01-01T00:00:00.000Z',
+          created_by: { username: 'u', full_name: null, email: null },
+          pushed_at: null,
+          pushed_by: null,
+          updated_at: null,
+          updated_by: null,
+        };
+
+        await expect(
+          service.create({ attributes: lensByRefAttrs, references: [], id: '1' })
+        ).rejects.toMatchObject({
+          isBoom: true,
+          output: { statusCode: 400 },
+          message: expect.stringContaining(LENS_ATTACHMENT_TYPE),
         });
 
         expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
@@ -1422,6 +1452,46 @@ describe('AttachmentService', () => {
         type: 'user',
         comment: 'from unified',
         owner: SECURITY_SOLUTION_OWNER,
+      });
+    });
+
+    // A Lens-by-reference attachment has no legacy form, so a legacy-mode read
+    // must return it in the unified shape instead of throwing or corrupting it.
+    it('returns a Lens-by-reference attachment in unified shape for legacy mode reads', async () => {
+      const serviceWithFlagOn = new AttachmentService({
+        log: mockLogger,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(true),
+      });
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createSOFindResponse([
+          {
+            id: 'lens-ref-1',
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+            score: 0,
+            attributes: {
+              type: LENS_ATTACHMENT_TYPE,
+              attachmentId: 'lens-1',
+              metadata: { title: 'My lens', soType: LENS_SO_TYPE },
+              owner: SECURITY_SOLUTION_OWNER,
+              created_at: '2024-01-01T00:00:00.000Z',
+              created_by: { username: 'u', full_name: null, email: null },
+              pushed_at: null,
+              pushed_by: null,
+              updated_at: null,
+              updated_by: null,
+            },
+            references: [],
+          },
+        ])
+      );
+
+      const res = await serviceWithFlagOn.find({ mode: 'legacy' });
+
+      expect(res.saved_objects[0].attributes).toMatchObject({
+        type: LENS_ATTACHMENT_TYPE,
+        attachmentId: 'lens-1',
+        metadata: { soType: LENS_SO_TYPE },
       });
     });
 
