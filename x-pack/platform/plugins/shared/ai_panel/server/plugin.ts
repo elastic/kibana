@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { AI_PANEL_EMBEDDABLE_TYPE, AI_PANEL_APP_NAME } from '../common/constants';
@@ -21,6 +21,8 @@ interface StartDeps {
 }
 
 export class AiPanelPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
+
   setup(core: CoreSetup<StartDeps>, { embeddable }: SetupDeps) {
     embeddable.registerEmbeddableServerDefinition(AI_PANEL_EMBEDDABLE_TYPE, {
       title: AI_PANEL_APP_NAME,
@@ -28,7 +30,7 @@ export class AiPanelPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
     });
 
     const router = core.http.createRouter();
-    registerGenerateRoute(router, core.getStartServices);
+    registerGenerateRoute(router, core.getStartServices, this.initializerContext.logger.get());
   }
 
   start(_core: CoreStart, _plugins: StartDeps) {}

@@ -69,10 +69,14 @@ function buildMocks() {
     badRequest: jest.fn((r) => ({ status: 400, ...r })),
   };
 
+  const logger = { error: jest.fn() };
+
   return {
     router: router as unknown as Parameters<typeof registerGenerateRoute>[0],
     handler,
     getStartServices: getStartServices as unknown as Parameters<typeof registerGenerateRoute>[1],
+    logger: logger as unknown as Parameters<typeof registerGenerateRoute>[2],
+    loggerError: logger.error,
     context,
     request,
     response,
@@ -88,8 +92,8 @@ describe('registerGenerateRoute', () => {
   });
 
   it('registers a POST handler at the internal generate path', () => {
-    const { router, getStartServices } = buildMocks();
-    registerGenerateRoute(router, getStartServices);
+    const { router, getStartServices, logger } = buildMocks();
+    registerGenerateRoute(router, getStartServices, logger);
 
     expect(router.post).toHaveBeenCalledWith(
       expect.objectContaining({ path: '/internal/ai_panel/generate' }),
@@ -102,13 +106,14 @@ describe('registerGenerateRoute', () => {
       router,
       handler,
       getStartServices,
+      logger,
       context,
       request,
       response,
       getDefaultConnector,
       chatComplete,
     } = buildMocks();
-    registerGenerateRoute(router, getStartServices);
+    registerGenerateRoute(router, getStartServices, logger);
     getDefaultConnector.mockRejectedValue(new Error('no connector'));
 
     await handler(context, request, response);
@@ -124,6 +129,7 @@ describe('registerGenerateRoute', () => {
       router,
       handler,
       getStartServices,
+      logger,
       context,
       request,
       response,
@@ -131,7 +137,7 @@ describe('registerGenerateRoute', () => {
       chatComplete,
       abortedUnsubscribe,
     } = buildMocks();
-    registerGenerateRoute(router, getStartServices);
+    registerGenerateRoute(router, getStartServices, logger);
     getDefaultConnector.mockResolvedValue({ connectorId: 'connector-1' });
     chatComplete.mockReturnValue(of(chunkEvent('<div>'), chunkEvent('hello</div>')));
 
@@ -155,13 +161,14 @@ describe('registerGenerateRoute', () => {
       router,
       handler,
       getStartServices,
+      logger,
       context,
       request,
       response,
       getDefaultConnector,
       chatComplete,
     } = buildMocks();
-    registerGenerateRoute(router, getStartServices);
+    registerGenerateRoute(router, getStartServices, logger);
     getDefaultConnector.mockResolvedValue({ connectorId: 'connector-1' });
     runEsqlQuery.mockResolvedValue({
       columns: [{ name: 'category', type: 'keyword' }],
@@ -178,7 +185,8 @@ describe('registerGenerateRoute', () => {
 
     const [{ system, messages }] = chatComplete.mock.calls[0];
     expect(system).toContain('Liquid template syntax');
-    expect(messages[0].content).toContain('category (keyword) → placeholder: {{category}}');
+    expect(messages[0].content).toContain('category (keyword)');
+    expect(messages[0].content).toContain('row["category"].value');
     expect(messages[0].content).toContain('electronics');
   });
 
@@ -187,13 +195,14 @@ describe('registerGenerateRoute', () => {
       router,
       handler,
       getStartServices,
+      logger,
       context,
       request,
       response,
       getDefaultConnector,
       chatComplete,
     } = buildMocks();
-    registerGenerateRoute(router, getStartServices);
+    registerGenerateRoute(router, getStartServices, logger);
     getDefaultConnector.mockResolvedValue({ connectorId: 'connector-1' });
     runEsqlQuery.mockRejectedValue(new Error('ES|QL failed'));
     chatComplete.mockReturnValue(of(chunkEvent('<div></div>')));
@@ -211,13 +220,14 @@ describe('registerGenerateRoute', () => {
       router,
       handler,
       getStartServices,
+      logger,
       context,
       request,
       response,
       getDefaultConnector,
       chatComplete,
     } = buildMocks();
-    registerGenerateRoute(router, getStartServices);
+    registerGenerateRoute(router, getStartServices, logger);
     getDefaultConnector.mockResolvedValue({ connectorId: 'connector-1' });
 
     const oversizedChunk = 'a'.repeat(500_001);
@@ -232,27 +242,63 @@ describe('registerGenerateRoute', () => {
     ]);
   });
 
-  it('emits an error line and ends the stream when the inference call errors', async () => {
+  it('measures the size limit in actual UTF-8 bytes, not JS string length', async () => {
     const {
       router,
       handler,
       getStartServices,
+      logger,
       context,
       request,
       response,
       getDefaultConnector,
       chatComplete,
     } = buildMocks();
-    registerGenerateRoute(router, getStartServices);
+    registerGenerateRoute(router, getStartServices, logger);
     getDefaultConnector.mockResolvedValue({ connectorId: 'connector-1' });
-    chatComplete.mockReturnValue(throwError(() => new Error('inference failed')));
+
+    // Each CJK character is 1 UTF-16 code unit but 3 UTF-8 bytes, so 200,001 of them
+    // are under the old (length-based) 500,000 threshold but well over the real byte budget.
+    const multiByteChunk = '字'.repeat(200_001);
+    expect(multiByteChunk.length).toBeLessThan(500_000);
+    expect(Buffer.byteLength(multiByteChunk, 'utf8')).toBeGreaterThan(500_000);
+    chatComplete.mockReturnValue(of(chunkEvent(multiByteChunk)));
 
     await handler(context, request, response);
 
     const events = await readNdjson(response.ok.mock.results[0].value.body);
     expect(events).toEqual([
       { token: expect.stringContaining('Content-Security-Policy') },
-      { error: 'inference failed' },
+      { error: 'Generated content exceeded size limit' },
     ]);
+  });
+
+  it('logs the real error and emits a generic error line when the inference call errors', async () => {
+    const {
+      router,
+      handler,
+      getStartServices,
+      logger,
+      loggerError,
+      context,
+      request,
+      response,
+      getDefaultConnector,
+      chatComplete,
+    } = buildMocks();
+    registerGenerateRoute(router, getStartServices, logger);
+    getDefaultConnector.mockResolvedValue({ connectorId: 'connector-1' });
+    chatComplete.mockReturnValue(throwError(() => new Error('upstream provider secret leak')));
+
+    await handler(context, request, response);
+
+    const events = await readNdjson(response.ok.mock.results[0].value.body);
+    expect(events).toEqual([
+      { token: expect.stringContaining('Content-Security-Policy') },
+      { error: 'AI panel generation failed' },
+    ]);
+    expect(loggerError).toHaveBeenCalledWith(
+      expect.stringContaining('upstream provider secret leak')
+    );
   });
 });

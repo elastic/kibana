@@ -8,17 +8,21 @@
 import { PassThrough } from 'stream';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, CoreSetup } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
+import { i18n } from '@kbn/i18n';
 import { ChatCompletionEventType, MessageRole } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
+import {
+  AI_PANEL_CSP_META,
+  AI_PANEL_MAX_PROMPT_LENGTH,
+  AI_PANEL_MAX_ESQL_QUERY_LENGTH,
+} from '../../common/constants';
 import { runEsqlQuery, sanitizeCellValue } from '../utils/esql_query';
 import type { EsqlColumn } from '../utils/esql_query';
-import { columnNamesToKeys } from '../../common/utils';
 
 const SOCKET_TIMEOUT_MS = 5 * 60 * 1000;
 const MAX_HTML_BYTES = 500_000;
-
-const CSP_META = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';">`;
 
 type ColorMode = 'LIGHT' | 'DARK';
 
@@ -71,19 +75,17 @@ function buildSystemPromptTemplate(colorMode: ColorMode): string {
 Generate a reusable HTML template using Liquid template syntax. The template is filled with real ES|QL query results at render time — do NOT embed literal data values.
 
 DATA MODEL available in the template:
-- rows: array of row objects. Column names are normalized: dots/special chars → underscores, @ → at_.
-  e.g. category.keyword → row.category_keyword, @timestamp → row.at_timestamp
-- _pct variants: pre-computed percentage of each numeric column's max value (0–100).
-  e.g. row.total_revenue_pct
-- max: object of column max values. e.g. max.total_revenue
+- rows: array of row objects. Access a column with its EXACT name (as given in the schema below) using bracket notation: row["exact column name"].
+  Each column access resolves to an object: .value is the raw cell value, .pct is that column's value as a percentage (0–100) of its max across all rows (numeric columns only).
+- max: object of column max values, also keyed by exact column name. e.g. max["total_revenue"]
 
 LIQUID SYNTAX:
 - Loop rows:     {% for row in rows %}...{% endfor %}
 - Empty state:   {% if rows.size == 0 %}...{% endif %}
-- Conditionals:  {% if row.revenue >= 10000 %}...{% elsif row.revenue >= 5000 %}...{% else %}...{% endif %}
-- Output value:  {{ row.column_name }}
-- Bar width:     <div style="width: {{ row.column_name_pct }}%; ..."></div>
-- Filters:       {{ row.value | round: 2 }}
+- Conditionals:  {% if row["revenue"].value >= 10000 %}...{% elsif row["revenue"].value >= 5000 %}...{% else %}...{% endif %}
+- Output value:  {{ row["column name"].value }}
+- Bar width:     <div style="width: {{ row["column name"].pct }}%; ..."></div>
+- Filters:       {{ row["column name"].value | round: 2 }}
 
 OUTPUT RULES:
 - Output ONLY the HTML template. No markdown fences, no explanation.
@@ -98,8 +100,8 @@ CONTENT RULES:
 - Pick the best visualization for the schema and prompt. Full panel width; height fits content naturally. No title.
 - Status board example:
   {% for row in rows %}
-  <div class="card {% if row.revenue >= 10000 %}card-green{% elsif row.revenue >= 5000 %}card-yellow{% else %}card-red{% endif %}">
-    <span>{{ row.category }}</span><span>{{ row.revenue }}</span>
+  <div class="card {% if row["revenue"].value >= 10000 %}card-green{% elsif row["revenue"].value >= 5000 %}card-yellow{% else %}card-red{% endif %}">
+    <span>{{ row["category"].value }}</span><span>{{ row["revenue"].value }}</span>
   </div>
   {% endfor %}`;
 }
@@ -120,7 +122,8 @@ interface StartDeps {
 
 export function registerGenerateRoute(
   router: IRouter,
-  getStartServices: CoreSetup<StartDeps>['getStartServices']
+  getStartServices: CoreSetup<StartDeps>['getStartServices'],
+  logger: Logger
 ) {
   router.post(
     {
@@ -134,8 +137,8 @@ export function registerGenerateRoute(
       },
       validate: {
         body: schema.object({
-          prompt: schema.string({ minLength: 1, maxLength: 10_000 }),
-          esqlQuery: schema.maybe(schema.string({ maxLength: 1_000_000 })),
+          prompt: schema.string({ minLength: 1, maxLength: AI_PANEL_MAX_PROMPT_LENGTH }),
+          esqlQuery: schema.maybe(schema.string({ maxLength: AI_PANEL_MAX_ESQL_QUERY_LENGTH })),
           timeRange: schema.maybe(schema.object({ from: schema.string(), to: schema.string() })),
           colorMode: schema.oneOf([schema.literal('LIGHT'), schema.literal('DARK')], {
             defaultValue: 'LIGHT',
@@ -150,7 +153,11 @@ export function registerGenerateRoute(
 
       const connector = await inference.getDefaultConnector(request).catch(() => undefined);
       if (!connector) {
-        return response.badRequest({ body: 'No inference connector configured' });
+        return response.badRequest({
+          body: i18n.translate('xpack.aiPanel.generateRoute.noConnectorError', {
+            defaultMessage: 'No inference connector configured',
+          }),
+        });
       }
       const { connectorId } = connector;
 
@@ -179,18 +186,13 @@ export function registerGenerateRoute(
         }
 
         if (columns.length > 0) {
-          const columnKeys = columnNamesToKeys(columns.map((c) => c.name));
-          const schemaLines = columns
-            .map(
-              (c, i) =>
-                `  - ${sanitizeCellValue(c.name)} (${c.type}) → placeholder: {{${columnKeys[i]}}}`
-            )
-            .join('\n');
+          // Not sanitizeCellValue'd — must match the real key used in fillTemplate exactly.
+          const schemaLines = columns.map((c) => `  - ${c.name} (${c.type})`).join('\n');
           const sampleSection =
             sampleRows.length > 0
               ? `\n\nSample rows:\n${formatSampleTable(columns, sampleRows)}`
               : '\n\nNote: no rows available for the current time range.';
-          userMessage = `${prompt}\n\nData schema:\n${schemaLines}${sampleSection}\n\nGenerate an HTML template using the placeholder names shown above.`;
+          userMessage = `${prompt}\n\nData schema:\n${schemaLines}${sampleSection}\n\nGenerate an HTML template that accesses each column via bracket notation using its exact name, e.g. row["${columns[0].name}"].value.`;
         } else {
           userMessage = `${prompt}\n\nNote: schema unavailable. Generate a suitable template based on the prompt.`;
         }
@@ -202,7 +204,7 @@ export function registerGenerateRoute(
       // For static panels, prepend CSP as the first token so the iframe gets it immediately.
       // Template panels skip this — CSP is injected client-side after placeholder fill.
       if (!esqlQuery) {
-        passThrough.write(JSON.stringify({ token: CSP_META }) + '\n');
+        passThrough.write(JSON.stringify({ token: AI_PANEL_CSP_META }) + '\n');
       }
 
       const client = inference.getClient({ request });
@@ -214,20 +216,24 @@ export function registerGenerateRoute(
         abortSignal: abortController.signal,
       });
 
-      let accHtml = '';
+      let accHtmlBytes = 0;
       let sizeLimitExceeded = false;
       events$.subscribe({
         next: (event) => {
           if (sizeLimitExceeded) return;
           if (event.type === ChatCompletionEventType.ChatCompletionChunk && event.content) {
-            accHtml += event.content;
-            if (accHtml.length > MAX_HTML_BYTES) {
+            accHtmlBytes += Buffer.byteLength(event.content, 'utf8');
+            if (accHtmlBytes > MAX_HTML_BYTES) {
               sizeLimitExceeded = true;
               abortController.abort();
               abortSub.unsubscribe();
               if (!passThrough.writableEnded) {
                 passThrough.write(
-                  JSON.stringify({ error: 'Generated content exceeded size limit' }) + '\n'
+                  JSON.stringify({
+                    error: i18n.translate('xpack.aiPanel.generateRoute.sizeLimitError', {
+                      defaultMessage: 'Generated content exceeded size limit',
+                    }),
+                  }) + '\n'
                 );
                 passThrough.end();
               }
@@ -239,8 +245,15 @@ export function registerGenerateRoute(
         },
         error: (err) => {
           abortSub.unsubscribe();
+          logger.error(`AI panel generation failed: ${err.message}`);
           if (!passThrough.writableEnded) {
-            passThrough.write(JSON.stringify({ error: err.message }) + '\n');
+            passThrough.write(
+              JSON.stringify({
+                error: i18n.translate('xpack.aiPanel.generateRoute.generationFailedError', {
+                  defaultMessage: 'AI panel generation failed',
+                }),
+              }) + '\n'
+            );
             passThrough.end();
           }
         },

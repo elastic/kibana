@@ -48,6 +48,12 @@ jest.mock('./components/edit_ai_panel_flyout', () => ({
       >
         save-changed-prompt
       </button>
+      <button
+        data-test-subj="saveChangedQuery"
+        onClick={() => props.onSave(props.prompt, 'FROM a-different-index', 'edited-template')}
+      >
+        save-changed-query
+      </button>
     </div>
   ),
 }));
@@ -136,7 +142,7 @@ describe('aiPanelEmbeddableFactory', () => {
       });
     });
 
-    it('keeps the edited template when only the query/template change (prompt unchanged)', async () => {
+    it('keeps the edited template when only the template itself changes (prompt and query unchanged)', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
       await act(async () => render(<embeddable.Component />));
 
@@ -150,6 +156,24 @@ describe('aiPanelEmbeddableFactory', () => {
       expect(embeddable.api.serializeState()).toEqual({
         ...baseState,
         template: 'edited-template',
+      });
+    });
+
+    it('clears the saved template when the query changes, even though the prompt is unchanged', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => {
+        await embeddable.api.onEdit();
+      });
+      await waitFor(() => expect(screen.getByTestId('mockEditFlyout')).toBeInTheDocument());
+
+      await userEvent.click(screen.getByTestId('saveChangedQuery'));
+
+      expect(embeddable.api.serializeState()).toEqual({
+        ...baseState,
+        esqlQuery: 'FROM a-different-index',
+        template: undefined,
       });
     });
 

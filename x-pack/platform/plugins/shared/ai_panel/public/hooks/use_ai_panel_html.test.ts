@@ -75,7 +75,7 @@ describe('useAiPanelHtml', () => {
         columns: [{ name: 'count', type: 'long' }],
         values: [[42]],
       });
-      const template = `<html><body>{{ rows[0].count }}</body></html>`;
+      const template = `<html><body>{{ rows[0]["count"].value }}</body></html>`;
 
       const { result } = renderHook(() =>
         useAiPanelHtml({
@@ -110,7 +110,7 @@ describe('useAiPanelHtml', () => {
   describe('slow path — no stored template', () => {
     it('calls both fetchEsqlData and streamGenerate in parallel for esqlQuery panels', async () => {
       const onTemplateChange = jest.fn();
-      const template = `<html><body>{{ rows[0].total }}</body></html>`;
+      const template = `<html><body>{{ rows[0]["total"].value }}</body></html>`;
 
       (streamGenerate as jest.Mock).mockImplementation(
         (_http: unknown, _params: unknown, onToken: (t: string) => void) => {
@@ -134,7 +134,7 @@ describe('useAiPanelHtml', () => {
       await waitFor(() => expect(result.current.isLoading).toBe(false));
       expect(fetchEsqlData).toHaveBeenCalledTimes(1);
       expect(streamGenerate).toHaveBeenCalledTimes(1);
-      expect(onTemplateChange).toHaveBeenCalledWith(expect.stringContaining('rows[0].total'));
+      expect(onTemplateChange).toHaveBeenCalledWith(expect.stringContaining('rows[0]["total"]'));
       expect(result.current.html).toContain('99');
     });
 

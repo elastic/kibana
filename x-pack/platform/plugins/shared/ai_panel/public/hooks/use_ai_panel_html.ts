@@ -56,6 +56,8 @@ export function useAiPanelHtml({
   const htmlRef = useRef('');
   htmlRef.current = html;
 
+  // onTemplateChange() below writes back into savedTemplate, a dependency of this effect, which
+  // would otherwise re-fire itself; a count (not a boolean) survives overlapping self-writes.
   const selfWriteCountRef = useRef(0);
   const acknowledgedWriteCountRef = useRef(0);
 

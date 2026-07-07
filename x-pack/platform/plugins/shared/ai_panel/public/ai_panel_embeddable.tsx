@@ -147,17 +147,13 @@ export const aiPanelEmbeddableFactory: EmbeddablePublicDefinition<
                 timeRange={timeRange}
                 onSave={(newPrompt, newEsqlQuery, newTemplate) => {
                   const promptChanged = newPrompt !== prompt$.getValue();
+                  const queryChanged = newEsqlQuery !== esqlQuery$.getValue();
                   prompt$.next(newPrompt);
                   esqlQuery$.next(newEsqlQuery);
-                  if (promptChanged) {
-                    // Prompt changed — clear template so LLM regenerates a fresh one.
-                    // Takes priority even if the template was also edited.
-                    template$.next(undefined);
-                  } else {
-                    // Only query or template edited — save template directly and re-render.
-                    // Changing just the query keeps the existing template (same column schema).
-                    template$.next(newTemplate);
-                  }
+                  // Prompt or query changed — the existing template may no longer match the
+                  // new column schema, so clear it and let the LLM regenerate. Takes priority
+                  // even if the template box was also hand-edited.
+                  template$.next(promptChanged || queryChanged ? undefined : newTemplate);
                   setGenerationVersion((v) => v + 1);
                 }}
                 onClose={() => isEditFlyoutOpen$.next(false)}

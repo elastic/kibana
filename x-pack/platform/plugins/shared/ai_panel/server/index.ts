@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { PluginInitializerContext } from '@kbn/core/server';
+
 export type { AiPanelEmbeddableState } from './embeddable/schemas';
 export { AI_PANEL_EMBEDDABLE_TYPE } from '../common/constants';
 
-export const plugin = async () => {
+export const plugin = async (initializerContext: PluginInitializerContext) => {
   const { AiPanelPlugin } = await import('./plugin');
-  return new AiPanelPlugin();
+  return new AiPanelPlugin(initializerContext);
 };

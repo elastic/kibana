@@ -63,12 +63,15 @@ export async function runEsqlQuery(
         ]
       : undefined;
 
+  // Shorter than the Kibana default (30s) — this is a best-effort schema/sample-row lookup for
+  // the LLM prompt, not the real data path, so a slow query should fail fast into the caller's
+  // non-fatal fallback rather than delay panel generation.
   const result = await esClient.esql.query(
     {
       query: esqlQuery,
       ...(esqlParams ? { params: esqlParams } : {}),
     },
-    { requestTimeout: 30_000 }
+    { requestTimeout: '10s' }
   );
 
   return {

@@ -26,27 +26,40 @@ const rows = [
 const wrap = (body: string) => `<html><body>${body}</body></html>`;
 
 describe('fillTemplate', () => {
-  describe('column name normalization', () => {
-    it('maps dot-notation column names to underscored placeholders', () => {
-      expect(fillTemplate(wrap('{{ rows[0].category_keyword }}'), cols, rows)).toContain(
+  describe('bracket-notation column access', () => {
+    it('accesses dot-notation column names via bracket notation', () => {
+      expect(fillTemplate(wrap('{{ rows[0]["category.keyword"].value }}'), cols, rows)).toContain(
         'Clothing'
       );
     });
 
-    it('converts @-prefixed column names to at_ so they remain distinct', () => {
+    it('accesses @-prefixed column names via bracket notation', () => {
       const result = fillTemplate(
-        wrap('{{ rows[0].at_ts }}'),
+        wrap('{{ rows[0]["@ts"].value }}'),
         [{ name: '@ts', type: 'date' }],
         [['2024-01-01']]
       );
       expect(result).toContain('2024-01-01');
+    });
+
+    it('keeps both columns readable when their names would collide under a normalized key', () => {
+      const collidingCols = [
+        { name: 'category.keyword', type: 'keyword' },
+        { name: 'category_keyword', type: 'keyword' },
+      ];
+      const result = fillTemplate(
+        wrap('{{ rows[0]["category.keyword"].value }}-{{ rows[0]["category_keyword"].value }}'),
+        collidingCols,
+        [['Clothing', 'RAW_FIELD']]
+      );
+      expect(result).toContain('Clothing-RAW_FIELD');
     });
   });
 
   describe('Liquid loops', () => {
     it('renders one element per row inside {% for %}', () => {
       const result = fillTemplate(
-        wrap('{% for row in rows %}<span>{{ row.category_keyword }}</span>{% endfor %}'),
+        wrap('{% for row in rows %}<span>{{ row["category.keyword"].value }}</span>{% endfor %}'),
         cols,
         rows
       );
@@ -57,7 +70,7 @@ describe('fillTemplate', () => {
 
     it('renders nothing for the loop when rows is empty', () => {
       const result = fillTemplate(
-        wrap('{% for row in rows %}<span>{{ row.category_keyword }}</span>{% endfor %}'),
+        wrap('{% for row in rows %}<span>{{ row["category.keyword"].value }}</span>{% endfor %}'),
         cols,
         []
       );
@@ -79,10 +92,10 @@ describe('fillTemplate', () => {
     });
   });
 
-  describe('_pct variants', () => {
-    it('computes _pct as percentage of max value', () => {
+  describe('pct variants', () => {
+    it('computes pct as percentage of max value', () => {
       const result = fillTemplate(
-        wrap('{% for row in rows %}{{ row.total_revenue_pct }}{% endfor %}'),
+        wrap('{% for row in rows %}{{ row["total_revenue"].pct }}{% endfor %}'),
         cols,
         rows
       );
@@ -92,9 +105,9 @@ describe('fillTemplate', () => {
       expect(result).toContain('13');
     });
 
-    it('clamps _pct to 100 maximum', () => {
+    it('clamps pct to 100 maximum', () => {
       const result = fillTemplate(
-        wrap('{{ rows[0].val_pct }}'),
+        wrap('{{ rows[0]["val"].pct }}'),
         [{ name: 'val', type: 'double' }],
         [[999999]]
       );
@@ -106,7 +119,7 @@ describe('fillTemplate', () => {
     it('applies green/yellow/red status logic', () => {
       const tpl = wrap(
         '{% for row in rows %}' +
-          '{% if row.total_revenue >= 5000 %}green{% elsif row.total_revenue >= 2000 %}yellow{% else %}red{% endif %}' +
+          '{% if row["total_revenue"].value >= 5000 %}green{% elsif row["total_revenue"].value >= 2000 %}yellow{% else %}red{% endif %}' +
           '{% endfor %}'
       );
       const result = fillTemplate(tpl, cols, rows);
@@ -119,7 +132,7 @@ describe('fillTemplate', () => {
   describe('HTML escaping', () => {
     it('escapes < and > in column values', () => {
       const result = fillTemplate(
-        wrap('{% for row in rows %}{{ row.label }}{% endfor %}'),
+        wrap('{% for row in rows %}{{ row["label"].value }}{% endfor %}'),
         [{ name: 'label', type: 'keyword' }],
         [['<script>alert(1)</script>']]
       );
@@ -128,19 +141,19 @@ describe('fillTemplate', () => {
     });
   });
 
-  describe('_pct edge cases', () => {
-    it('returns 0 for _pct when all values are zero', () => {
+  describe('pct edge cases', () => {
+    it('returns 0 for pct when all values are zero', () => {
       const result = fillTemplate(
-        wrap('{{ rows[0].val_pct }}'),
+        wrap('{{ rows[0]["val"].pct }}'),
         [{ name: 'val', type: 'double' }],
         [[0], [0]]
       );
       expect(result).toContain('0');
     });
 
-    it('ignores non-numeric values when computing _pct', () => {
+    it('ignores non-numeric values when computing pct', () => {
       const result = fillTemplate(
-        wrap('{{ rows[0].val_pct }}'),
+        wrap('{{ rows[0]["val"].pct }}'),
         [{ name: 'val', type: 'keyword' }],
         [['text']]
       );
@@ -150,8 +163,8 @@ describe('fillTemplate', () => {
   });
 
   describe('max object', () => {
-    it('exposes max values via {{ max.col_name }}', () => {
-      const result = fillTemplate(wrap('{{ max.total_revenue }}'), cols, rows);
+    it('exposes max values via max["column name"]', () => {
+      const result = fillTemplate(wrap('{{ max["total_revenue"] }}'), cols, rows);
       expect(result).toContain('8000');
     });
   });
@@ -193,6 +206,14 @@ describe('stripMarkdownFences', () => {
 
   it('leaves plain HTML unchanged', () => {
     expect(stripMarkdownFences('<p>hello</p>')).toBe('<p>hello</p>');
+  });
+
+  it('leaves a fenced code example deep in the body untouched', () => {
+    const filler = '<p>content</p>'.repeat(30);
+    const raw = `<html><body>${filler}<pre>Use \`\`\`bash\necho hi\n\`\`\` in your terminal</pre>${filler}</body></html>`;
+    const result = stripMarkdownFences(raw);
+    expect(result).toContain('```bash');
+    expect(result).toContain('echo hi');
   });
 });
 

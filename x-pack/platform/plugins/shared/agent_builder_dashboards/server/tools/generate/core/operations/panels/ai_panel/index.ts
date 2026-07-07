@@ -12,6 +12,10 @@ import { definePanelType } from '../panel_type';
 /**
  * AI panel — renders anything (KPI cards, status boards, custom charts)
  * from a natural-language prompt and an optional ES|QL query.
+ *
+ * prompt/esqlQuery length limits are intentionally duplicated from ai_panel's server-side
+ * validation (generate_route.ts) rather than imported, to avoid a cross-plugin dependency for
+ * two numbers — keep them in sync by hand if either changes.
  */
 
 export const aiPanelConfigSchema = z.object({
