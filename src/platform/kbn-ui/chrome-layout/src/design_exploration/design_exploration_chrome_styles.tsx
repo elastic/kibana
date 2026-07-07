@@ -68,7 +68,6 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
     ? `color-mix(in srgb, ${colors.borderBaseSubdued} 55%, transparent)`
     : `color-mix(in srgb, ${colors.borderBaseSubdued} 75%, transparent)`;
   const scrolledBarBorderRadius = `0 0 ${DESIGN_EXPLORATION_RADIUS_CONTROL}px ${DESIGN_EXPLORATION_RADIUS_CONTROL}px`;
-  const scrolledAppHeaderBorderRadius = `${DESIGN_EXPLORATION_RADIUS_CONTROL}px ${DESIGN_EXPLORATION_RADIUS_CONTROL}px 0 0`;
 
   return css`
     ${scope} [data-test-subj='kbnGridLayout'] {
@@ -112,6 +111,10 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
       padding-bottom: ${DESIGN_EXPLORATION_PADDING}px !important;
     }
 
+    ${scope}:has(.dshDashboardViewportWrapper--isFullscreen) [data-test-subj='controls-group-wrapper'] {
+      padding-top: ${DESIGN_EXPLORATION_PADDING}px !important;
+    }
+
     ${scope}:has([data-test-subj='dashboardContainer'], #dashboardListingHeading)
       [data-test-subj='appHeader'] {
       padding-inline: 12px !important;
@@ -119,15 +122,8 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
       margin-inline: 0 !important;
       margin-top: 0 !important;
       border-radius: ${DESIGN_EXPLORATION_RADIUS_CONTROL}px !important;
-      border: 1px solid ${colors.borderBaseSubdued} !important;
-    }
-
-    ${scope}[${DESIGN_EXPLORATION_SCROLLED_BODY_ATTR}='true']:has(
-        [data-test-subj='dashboardContainer'],
-        #dashboardListingHeading
-      )
-      [data-test-subj='appHeader'] {
-      border-radius: ${scrolledAppHeaderBorderRadius} !important;
+      border: none !important;
+      box-shadow: ${embeddablePanelShadow} !important;
     }
 
     ${scope} .kbnChromeLayoutApplication:has([data-test-subj='appHeader']) {
@@ -167,20 +163,18 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
       background-color: transparent !important;
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
-      border-block-start: none !important;
-      border-block-end: 1px solid transparent !important;
-      border-inline: 1px solid transparent !important;
+      border: none !important;
+      box-shadow: none !important;
       transition: width 200ms ease, margin 200ms ease, background-color 200ms ease,
-        backdrop-filter 200ms ease, border-color 200ms ease !important;
+        backdrop-filter 200ms ease, box-shadow 200ms ease !important;
     }
 
     ${scope}[${DESIGN_EXPLORATION_SCROLLED_BODY_ATTR}='true']
       .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
-      width: calc(100% - ${DESIGN_EXPLORATION_PADDING * 2}px) !important;
-      margin: ${DESIGN_EXPLORATION_PADDING}px !important;
+      width: calc(100% - ${DESIGN_EXPLORATION_PADDING * 2}px - 24px) !important;
+      margin: calc(${DESIGN_EXPLORATION_PADDING}px + 12px) !important;
       border-radius: ${scrolledBarBorderRadius} !important;
-      border-block-end-color: ${colors.borderBaseSubdued} !important;
-      border-inline-color: ${colors.borderBaseSubdued} !important;
+      box-shadow: ${embeddablePanelShadow} !important;
       background-color: color-mix(
         in srgb,
         ${colors.backgroundBasePlain} 75%,
@@ -188,6 +182,11 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
       ) !important;
       backdrop-filter: blur(10px) !important;
       -webkit-backdrop-filter: blur(10px) !important;
+    }
+
+    ${scope}:has(.dshDashboardViewportWrapper--isFullscreen)[${DESIGN_EXPLORATION_SCROLLED_BODY_ATTR}='true']
+      .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
+      border-radius: ${DESIGN_EXPLORATION_RADIUS_CONTROL}px !important;
     }
 
     ${scope} .dshDashboardViewportWrapper,
