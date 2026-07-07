@@ -11,6 +11,7 @@ import {
   getIndexPatternFromESQLQuery,
   getIndexPatternsFromESQLQuery,
   getSourceCommandFromESQLQuery,
+  getAnySourceCommandFromESQLQuery,
 } from './get_index_pattern_from_query';
 
 describe('getIndexPatternFromESQLQuery', () => {
@@ -166,15 +167,6 @@ describe('getSourceCommandFromESQLQuery', () => {
     expect(getSourceCommandFromESQLQuery('STATS count()')).toBe('');
   });
 
-  it('should support all registered source commands', () => {
-    expect(
-      getSourceCommandFromESQLQuery(
-        'PROMQL index=metrics step=1m start=?_tstart end=?_tend (avg(cpu_usage))',
-        '*'
-      )
-    ).toBe('PROMQL');
-  });
-
   it('should only match the provided source commands', () => {
     expect(getSourceCommandFromESQLQuery('FROM metrics-*', new Set(['PROMQL']))).toBe('');
     expect(
@@ -199,5 +191,15 @@ describe('getSourceCommandFromESQLQuery', () => {
         '// a comment before the query\nFROM kibana_sample_data_logstsdb'
       )
     ).toBe('FROM');
+  });
+});
+
+describe('getAnySourceCommandFromESQLQuery', () => {
+  it('should support all registered source commands', () => {
+    expect(
+      getAnySourceCommandFromESQLQuery(
+        'PROMQL index=metrics step=1m start=?_tstart end=?_tend (avg(cpu_usage))'
+      )
+    ).toBe('PROMQL');
   });
 });
