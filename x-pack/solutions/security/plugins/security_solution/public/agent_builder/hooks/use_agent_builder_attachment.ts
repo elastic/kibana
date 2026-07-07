@@ -9,7 +9,7 @@ import { useCallback, useRef } from 'react';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { useKibana } from '../../common/lib/kibana/use_kibana';
 
-export interface UseAgentBuilderAttachmentParams {
+interface UseAgentBuilderAttachmentBaseParams {
   /**
    * Optional stable ID for the attachment. When provided, the platform will
    * replace any existing attachment with the same ID instead of creating a new one.
@@ -21,15 +21,6 @@ export interface UseAgentBuilderAttachmentParams {
    */
   attachmentType: string;
   /**
-   * Data for the attachment. Optional when `origin` is provided.
-   */
-  attachmentData?: Record<string, unknown>;
-  /**
-   * Saved-object ID linking the attachment to its source. When set, the platform can call the
-   * server-side `resolve` to refresh stale data, and card intent derives from this field.
-   */
-  origin?: string;
-  /**
    * Prompt/input text for the agent builder conversation
    */
   attachmentPrompt?: string;
@@ -38,6 +29,18 @@ export interface UseAgentBuilderAttachmentParams {
    */
   attachmentDescription?: string;
 }
+
+/**
+ * At least one of `attachmentData` and `origin` must be provided:
+ * - `attachmentData`: data for the attachment.
+ * - `origin`: saved-object ID linking the attachment to its source. When set, the platform can
+ *   call the server-side `resolve` to refresh stale data, and card intent derives from this field.
+ */
+export type UseAgentBuilderAttachmentParams = UseAgentBuilderAttachmentBaseParams &
+  (
+    | { attachmentData: Record<string, unknown>; origin?: string }
+    | { attachmentData?: Record<string, unknown>; origin: string }
+  );
 
 export interface UseAgentBuilderAttachmentResult {
   /**
