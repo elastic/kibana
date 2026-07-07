@@ -14,9 +14,16 @@ import type { RuleApiResponse } from '../../../../services/rules_api';
 
 const mockUseLinkedActionPolicies = jest.fn();
 
-jest.mock('./use_linked_action_policies', () => ({
-  useLinkedActionPolicies: (...args: unknown[]) => mockUseLinkedActionPolicies(...args),
-}));
+jest.mock('./use_linked_action_policies', () => {
+  const actual = jest.requireActual<typeof import('./use_linked_action_policies')>(
+    './use_linked_action_policies'
+  );
+
+  return {
+    ...actual,
+    useLinkedActionPolicies: (...args: unknown[]) => mockUseLinkedActionPolicies(...args),
+  };
+});
 
 const mockHttpService = {
   basePath: {
@@ -66,6 +73,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       matchingCriteriaCount: 0,
       isLoading: false,
       isError: false,
+      isCountTruncated: false,
       error: null,
     });
   });
@@ -82,6 +90,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       matchingCriteriaCount: 0,
       isLoading: true,
       isError: false,
+      isCountTruncated: false,
       error: null,
     });
 
@@ -96,6 +105,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       matchingCriteriaCount: 0,
       isLoading: false,
       isError: true,
+      isCountTruncated: false,
       error: new Error('boom'),
     });
 
@@ -118,6 +128,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       matchingCriteriaCount: 1,
       isLoading: false,
       isError: false,
+      isCountTruncated: false,
       error: null,
     });
 
@@ -141,5 +152,24 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     );
     expect(screen.getByText('Open notification policies')).toBeInTheDocument();
     expect(screen.queryByTestId('ruleActionPolicyArtifactRow-policy-1')).not.toBeInTheDocument();
+  });
+
+  it('shows a truncated count indicator when linked policy counts may be incomplete', () => {
+    mockUseLinkedActionPolicies.mockReturnValue({
+      totalCount: 5,
+      catchAllCount: 2,
+      matchingCriteriaCount: 3,
+      isLoading: false,
+      isError: false,
+      isCountTruncated: true,
+      error: null,
+    });
+
+    renderSubsection();
+
+    expect(screen.getByTestId('ruleActionPoliciesArtifactsStat')).toHaveTextContent('5+');
+    expect(screen.getByTestId('ruleActionPoliciesArtifactsTruncatedHint')).toHaveTextContent(
+      'This space has more than 100 action policies, so this count may be low.'
+    );
   });
 });

@@ -10,7 +10,10 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { buildRuleScopedMatcher } from '@kbn/alerting-v2-rule-form';
-import { useLinkedActionPolicies } from './use_linked_action_policies';
+import {
+  useLinkedActionPolicies,
+  LINKED_ACTION_POLICIES_FETCH_LIMIT,
+} from './use_linked_action_policies';
 import { actionPolicyKeys } from '../../../../hooks/query_key_factory';
 
 const mockListActionPolicies = jest.fn();
@@ -60,7 +63,12 @@ const createWrapper =
 describe('useLinkedActionPolicies', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockListActionPolicies.mockResolvedValue({ items: [], total: 0, page: 1, perPage: 100 });
+    mockListActionPolicies.mockResolvedValue({
+      items: [],
+      total: 0,
+      page: 1,
+      perPage: LINKED_ACTION_POLICIES_FETCH_LIMIT,
+    });
   });
 
   it('does not fetch when ruleId is empty', () => {
@@ -78,7 +86,7 @@ describe('useLinkedActionPolicies', () => {
       items: [buildPolicy()],
       total: 1,
       page: 1,
-      perPage: 100,
+      perPage: LINKED_ACTION_POLICIES_FETCH_LIMIT,
     });
 
     const queryClient = new QueryClient({
@@ -119,7 +127,7 @@ describe('useLinkedActionPolicies', () => {
       ],
       total: 3,
       page: 1,
-      perPage: 100,
+      perPage: LINKED_ACTION_POLICIES_FETCH_LIMIT,
     });
 
     const Wrapper = createWrapper(
@@ -133,13 +141,35 @@ describe('useLinkedActionPolicies', () => {
 
     expect(mockListActionPolicies).toHaveBeenCalledWith({
       page: 1,
-      perPage: 100,
+      perPage: LINKED_ACTION_POLICIES_FETCH_LIMIT,
     });
     expect(result.current.totalCount).toBe(2);
     expect(result.current.catchAllCount).toBe(1);
     expect(result.current.matchingCriteriaCount).toBe(1);
+    expect(result.current.isCountTruncated).toBe(false);
     expect(result.current.isError).toBe(false);
     expect(result.current.error).toBeNull();
+  });
+
+  it('flags truncated counts when the space has more policies than the fetch limit', async () => {
+    mockListActionPolicies.mockResolvedValue({
+      items: [buildPolicy({ id: 'linked-1' })],
+      total: LINKED_ACTION_POLICIES_FETCH_LIMIT + 1,
+      page: 1,
+      perPage: LINKED_ACTION_POLICIES_FETCH_LIMIT,
+    });
+
+    const Wrapper = createWrapper(
+      new QueryClient({
+        defaultOptions: { queries: { retry: false } },
+      })
+    );
+    const { result } = renderHook(() => useLinkedActionPolicies(RULE_ID), { wrapper: Wrapper });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.totalCount).toBe(1);
+    expect(result.current.isCountTruncated).toBe(true);
   });
 
   it('surfaces API errors', async () => {

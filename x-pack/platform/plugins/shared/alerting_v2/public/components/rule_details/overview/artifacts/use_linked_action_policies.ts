@@ -11,13 +11,15 @@ import { summarizeExplicitlyLinkedActionPolicies } from '@kbn/alerting-v2-rule-f
 import { ActionPoliciesApi } from '../../../../services/action_policies_api';
 import { actionPolicyKeys } from '../../../../hooks/query_key_factory';
 
-/** List API max page size; client-side filter may miss policies beyond the first page. */
-const LINKED_ACTION_POLICIES_LIST_PER_PAGE = 100;
+/** Max policies fetched from the list API; linked counts may undercount when the space has more. */
+export const LINKED_ACTION_POLICIES_FETCH_LIMIT = 100;
 
 export interface UseLinkedActionPoliciesResult {
   totalCount: number;
   catchAllCount: number;
   matchingCriteriaCount: number;
+  /** True when the space has more policies than {@link LINKED_ACTION_POLICIES_FETCH_LIMIT} and the list response was truncated. */
+  isCountTruncated: boolean;
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
@@ -32,17 +34,30 @@ export const useLinkedActionPolicies = (ruleId: string): UseLinkedActionPolicies
     queryFn: () =>
       actionPoliciesApi.listActionPolicies({
         page: 1,
-        perPage: LINKED_ACTION_POLICIES_LIST_PER_PAGE,
+        perPage: LINKED_ACTION_POLICIES_FETCH_LIMIT,
       }),
     enabled,
     refetchOnWindowFocus: false,
-    select: (response) => summarizeExplicitlyLinkedActionPolicies(response.items, ruleId),
+    /*
+     * Client-side filter for policies whose matcher explicitly includes rule.id.
+     * We do not use _match_for_rule here — that endpoint returns broader matches
+     * (global and global-filtered policies), not only explicit rule.id linkage.
+     */
+    select: (response) => {
+      const summary = summarizeExplicitlyLinkedActionPolicies(response.items, ruleId);
+
+      return {
+        ...summary,
+        isCountTruncated: response.total > LINKED_ACTION_POLICIES_FETCH_LIMIT,
+      };
+    },
   });
 
   return {
     totalCount: data?.totalCount ?? 0,
     catchAllCount: data?.catchAllCount ?? 0,
     matchingCriteriaCount: data?.matchingCriteriaCount ?? 0,
+    isCountTruncated: data?.isCountTruncated ?? false,
     isLoading: enabled && isLoading,
     isError: error != null,
     error: error instanceof Error ? error : error != null ? new Error(String(error)) : null,

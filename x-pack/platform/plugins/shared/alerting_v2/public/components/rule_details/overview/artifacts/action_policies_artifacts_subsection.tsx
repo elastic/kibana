@@ -21,7 +21,10 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { paths } from '../../../../constants';
 import { useRule } from '../../rule_context';
-import { useLinkedActionPolicies } from './use_linked_action_policies';
+import {
+  useLinkedActionPolicies,
+  LINKED_ACTION_POLICIES_FETCH_LIMIT,
+} from './use_linked_action_policies';
 
 const openLinkLabel = i18n.translate(
   'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.openLink',
@@ -67,10 +70,12 @@ const ActionPoliciesSubsectionHeader = ({ openHref }: { openHref: string }) => (
 export const ActionPoliciesArtifactsSubsection: React.FC = () => {
   const rule = useRule();
   const http = useService(CoreStart('http'));
-  const { totalCount, catchAllCount, matchingCriteriaCount, isLoading, isError } =
+  const { totalCount, catchAllCount, matchingCriteriaCount, isCountTruncated, isLoading, isError } =
     useLinkedActionPolicies(rule.id);
 
   const openNotificationPoliciesHref = http.basePath.prepend(paths.actionPolicyList);
+
+  const statTitle = isCountTruncated ? `${totalCount}+` : totalCount;
 
   const summaryText =
     totalCount > 0
@@ -81,17 +86,28 @@ export const ActionPoliciesArtifactsSubsection: React.FC = () => {
         })
       : null;
 
-  const showStat = isLoading || !isError;
+  const truncatedCountHint = isCountTruncated
+    ? i18n.translate(
+        'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.truncatedCountHint',
+        {
+          defaultMessage:
+            'This space has more than {fetchLimit} action policies, so this count may be low.',
+          values: { fetchLimit: LINKED_ACTION_POLICIES_FETCH_LIMIT },
+        }
+      )
+    : null;
+
+  const shouldShowCounts = isLoading || !isError;
 
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="ruleActionPoliciesArtifactsSection">
       <ActionPoliciesSubsectionHeader openHref={openNotificationPoliciesHref} />
       <EuiSpacer size="m" />
 
-      {showStat ? (
+      {shouldShowCounts ? (
         <>
           <EuiStat
-            title={totalCount}
+            title={statTitle}
             description={i18n.translate(
               'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.statDescription',
               { defaultMessage: 'Notification policies' }
@@ -108,6 +124,19 @@ export const ActionPoliciesArtifactsSubsection: React.FC = () => {
               <EuiSpacer size="s" />
               <EuiText size="s" color="subdued" data-test-subj="ruleActionPoliciesArtifactsSummary">
                 {summaryText}
+              </EuiText>
+            </>
+          ) : null}
+
+          {truncatedCountHint ? (
+            <>
+              <EuiSpacer size="s" />
+              <EuiText
+                size="s"
+                color="subdued"
+                data-test-subj="ruleActionPoliciesArtifactsTruncatedHint"
+              >
+                {truncatedCountHint}
               </EuiText>
             </>
           ) : null}
