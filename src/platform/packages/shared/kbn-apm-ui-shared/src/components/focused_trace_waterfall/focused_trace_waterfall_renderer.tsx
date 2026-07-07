@@ -1,40 +1,52 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import type { FocusedTraceWaterfallProps } from '@kbn/apm-types';
+
 import { EuiCallOut } from '@elastic/eui';
+import type { APMClientV2 } from '@kbn/apm-api-shared';
+import type { FocusedTraceWaterfallProps } from '@kbn/apm-types';
 import type { CoreStart } from '@kbn/core/public';
-import { Loading, useGetServiceBadgeHrefFromCore } from '@kbn/apm-ui-shared';
-import { isPending, useFetcher } from '../../../hooks/use_fetcher';
-import { FETCHER_OPERATION_IDS } from '../../../hooks/fetcher_operation_ids';
+import { i18n } from '@kbn/i18n';
+import { useAbortableAsync } from '@kbn/react-hooks';
+import React from 'react';
 import { FocusedTraceWaterfall } from '.';
+import { Loading } from '../trace_waterfall/loading';
+import { useGetServiceBadgeHrefFromCore } from '../trace_waterfall/use_get_service_badge_href_from_core';
 
 interface Props extends FocusedTraceWaterfallProps {
   core: CoreStart;
+  callApmApi: APMClientV2;
 }
 
-export function FocusedTraceWaterfallRenderer({ traceId, rangeFrom, rangeTo, docId, core }: Props) {
+export function FocusedTraceWaterfallRenderer({
+  traceId,
+  rangeFrom,
+  rangeTo,
+  docId,
+  core,
+  callApmApi,
+}: Props) {
   const getServiceBadgeHref = useGetServiceBadgeHrefFromCore(core, rangeFrom, rangeTo);
 
-  const { data, status } = useFetcher(
-    (callApmApi) => {
+  const { value: data, loading } = useAbortableAsync(
+    ({ signal }) => {
       return callApmApi('GET /internal/apm/unified_traces/{traceId}/summary', {
+        signal,
         params: {
           path: { traceId },
           query: { start: rangeFrom, end: rangeTo, docId },
         },
       });
     },
-    [docId, rangeFrom, rangeTo, traceId],
-    { operationId: FETCHER_OPERATION_IDS.FETCH_FOCUSED_TRACE_WATERFALL }
+    [docId, rangeFrom, rangeTo, traceId]
   );
 
-  if (isPending(status)) {
+  if (loading) {
     return <Loading />;
   }
 

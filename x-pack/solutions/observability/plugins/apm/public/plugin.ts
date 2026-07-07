@@ -102,7 +102,6 @@ import { APMServiceDetailLocator } from './locator/service_detail_locator';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import type { ITelemetryClient } from './services/telemetry';
 import { TelemetryService } from './services/telemetry';
-import { createLazyFocusedTraceWaterfallRenderer } from './components/shared/focused_trace_waterfall/lazy_create_focused_trace_waterfall_renderer';
 import type { ApmCoreSetup } from './components/alerting/utils/create_lazy_component_with_context';
 import { registerEmbeddables } from './embeddable/register_embeddables';
 import { registerServiceMapAttachment } from './agent_builder/attachment_types';
@@ -527,7 +526,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   }
 
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
-    const { fleet, discoverShared } = plugins;
+    const { fleet } = plugins;
     const isCpsEnabled = core.featureFlags.getBooleanValue(
       OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
       OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
@@ -567,11 +566,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       mod.registerAssistantFunctions({
         registerRenderFunction,
       });
-    });
-
-    discoverShared.features.registry.register({
-      id: 'observability-focused-trace-waterfall',
-      render: createLazyFocusedTraceWaterfallRenderer({ core }),
     });
 
     if (fleet) {
