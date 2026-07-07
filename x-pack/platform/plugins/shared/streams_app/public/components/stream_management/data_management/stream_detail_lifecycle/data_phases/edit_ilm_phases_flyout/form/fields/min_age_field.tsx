@@ -86,10 +86,10 @@ const MinAgeFieldControl = ({
 
   const minAgePhases = ['warm', 'cold', 'frozen', 'delete'] as const;
   type MinAgePhase = (typeof minAgePhases)[number];
-  // Only the previous phase acts as a boundary here. The hot phase is not configurable (min age 0),
-  // so a phase with no earlier configured phase (e.g. the first enabled phase after hot) shows no
-  // help text.
-  const { lowerBoundPhase } = getRelativeBoundsInMs(
+  // The nearest configured phase in each direction acts as a boundary. The hot phase is not
+  // configurable (min age 0), so a phase with no earlier configured phase shows only the upper
+  // bound (or nothing when it is also the last enabled phase).
+  const { lowerBoundPhase, upperBoundPhase } = getRelativeBoundsInMs(
     minAgePhases,
     phaseName as MinAgePhase,
     getPhaseMinAgeMs
@@ -108,6 +108,7 @@ const MinAgeFieldControl = ({
 
   const helpText = getTimingBoundHelpText({
     lower: toPhaseBound(lowerBoundPhase),
+    upper: toPhaseBound(upperBoundPhase),
   });
 
   return (
