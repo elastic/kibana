@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AppDeepLinkId, NodeDefinition } from '@kbn/core-chrome-browser';
+import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityGroupName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { i18nStrings } from '../i18n_strings';
@@ -27,7 +27,7 @@ export const createWorkflowsNavigationTree = (templatesEnabled = false): NodeDef
           ? [
               {
                 title: i18nStrings.workflows.templates.title,
-                link: 'workflows-library' as AppDeepLinkId,
+                link: 'workflows:library' as const,
               },
             ]
           : []),
