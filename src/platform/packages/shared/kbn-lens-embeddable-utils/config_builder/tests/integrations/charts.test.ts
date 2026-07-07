@@ -22,7 +22,13 @@ const panels = JSON.parse(files || '[]') as Record<string, LensAttributes>[];
 
 const builder = new LensConfigBuilder(undefined, true);
 
-const stableChartTypes = new Set(['lnsHeatmap', 'lnsDatatable', 'lnsPie']);
+const stableChartTypes = new Set([
+  'lnsHeatmap',
+  'lnsDatatable',
+  'lnsPie',
+  'lnsTagcloud',
+  'lnsMetric',
+]);
 
 // These need special attention to be sure they are correctly handled in the transformations
 const skipList: Record<string, string[]> = {
@@ -68,20 +74,16 @@ describe('Integration panels', () => {
             );
           }
 
-          if (skipped.length > 0) {
-            it.skip.each(skipped.map(({ panel_title: title, attributes }) => [title, attributes]))(
-              'should convert the panel - %s',
-              () => {}
-            );
-          }
+          skipped.forEach(({ panel_title: title }) => {
+            it.todo(`should convert the panel - ${title}`);
+          });
         });
       });
     } else {
       describe(`Type ${chartType}`, () => {
-        it.skip.each(panelsOfType.map(({ panel_title: title, attributes }) => [title, attributes]))(
-          'should convert the panel - %s',
-          () => {}
-        );
+        panelsOfType.forEach(({ panel_title: title }) => {
+          it.todo(`should convert the panel - ${title}`);
+        });
       });
     }
   }

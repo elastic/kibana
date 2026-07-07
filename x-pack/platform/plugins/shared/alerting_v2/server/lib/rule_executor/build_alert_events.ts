@@ -11,7 +11,10 @@ import { stableStringify } from '@kbn/std';
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { AlertEvent, AlertEventSeverity } from '../../resources/datastreams/alert_events';
-import { alertEventSeverity } from '../../resources/datastreams/alert_events';
+import {
+  alertEventSeverity,
+  buildRuleEventDocument,
+} from '../../resources/datastreams/alert_events';
 import type { ActiveAlertGroupHash } from './queries';
 
 const SEVERITY_COLUMN = 'severity';
@@ -110,25 +113,18 @@ export function createAlertEventsBatchBuilder({
         },
       });
 
-      const doc: AlertEvent = {
+      const doc = buildRuleEventDocument({
         '@timestamp': wroteAt,
         scheduled_timestamp: scheduledTimestamp,
-        rule: {
-          id: ruleId,
-          version: ruleVersion,
-        },
+        rule: { id: ruleId, version: ruleVersion },
         group_hash: groupHash,
         data: rowDoc,
         status: 'breached',
         source,
         type: 'signal',
         space_id: spaceId,
-      };
-
-      const severity = extractSeverity(rowDoc);
-      if (severity !== undefined) {
-        doc.severity = severity;
-      }
+        severity: extractSeverity(rowDoc),
+      });
 
       index++;
       alertEventsBatch.push(doc);
@@ -151,7 +147,7 @@ export interface BuildRecoveryAlertEventsOpts {
  * Creates `recovered` alert events for groups that were previously in a non-inactive
  * episode state but are no longer present in the current breached set.
  *
- * Used when `recovery_policy.type` is `no_breach` or unset.
+ * Used when no recover query is configured on the rule.
  */
 export function buildRecoveryAlertEvents({
   ruleId,
@@ -165,17 +161,19 @@ export function buildRecoveryAlertEvents({
 
   return activeGroupHashes
     .filter(({ group_hash }) => !breachedGroupHashes.has(group_hash))
-    .map(({ group_hash }) => ({
-      '@timestamp': wroteAt,
-      scheduled_timestamp: scheduledTimestamp,
-      rule: { id: ruleId, version: ruleVersion },
-      group_hash,
-      data: {},
-      status: 'recovered' as const,
-      source: 'internal',
-      type: 'signal' as const,
-      space_id: spaceId,
-    }));
+    .map(({ group_hash }) =>
+      buildRuleEventDocument({
+        '@timestamp': wroteAt,
+        scheduled_timestamp: scheduledTimestamp,
+        rule: { id: ruleId, version: ruleVersion },
+        group_hash,
+        data: {},
+        status: 'recovered',
+        source: 'internal',
+        type: 'signal',
+        space_id: spaceId,
+      })
+    );
 }
 
 function rowToDocument(
@@ -198,12 +196,11 @@ export interface BuildQueryRecoveryAlertEventsOpts {
   esqlResponse: EsqlQueryResponse;
   scheduledTimestamp: string;
 }
-
 /**
  * Creates `recovered` alert events by running a custom recovery query.
  *
  * Active groups whose group hash matches a row in the recovery query results
- * are considered recovered. Used when `recovery_policy.type` is `query`.
+ * are considered recovered. Used when the rule has a recover query configured.
  */
 export function buildQueryRecoveryAlertEvents({
   ruleId,
@@ -249,15 +246,17 @@ export function buildQueryRecoveryAlertEvents({
 
   const wroteAt = new Date().toISOString();
 
-  return Array.from(recoveredByGroupHash).map(([groupHash, data]) => ({
-    '@timestamp': wroteAt,
-    scheduled_timestamp: scheduledTimestamp,
-    rule: { id: ruleId, version: ruleVersion },
-    group_hash: groupHash,
-    data,
-    status: 'recovered' as const,
-    source: 'internal',
-    type: 'signal' as const,
-    space_id: spaceId,
-  }));
+  return Array.from(recoveredByGroupHash).map(([groupHash, data]) =>
+    buildRuleEventDocument({
+      '@timestamp': wroteAt,
+      scheduled_timestamp: scheduledTimestamp,
+      rule: { id: ruleId, version: ruleVersion },
+      group_hash: groupHash,
+      data,
+      status: 'recovered',
+      source: 'internal',
+      type: 'signal',
+      space_id: spaceId,
+    })
+  );
 }

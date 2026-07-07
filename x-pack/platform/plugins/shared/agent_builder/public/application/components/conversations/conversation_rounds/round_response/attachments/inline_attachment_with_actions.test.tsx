@@ -88,6 +88,32 @@ describe('InlineAttachmentWithActions', () => {
     jest.clearAllMocks();
   });
 
+  it('shows a fallback instead of crashing when renderInlineContent throws', () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    const attachment: UnknownAttachment = { id: 'attachment-1', type: 'test', data: {} };
+    const attachmentsService = {
+      getAttachmentUiDefinition: jest.fn().mockReturnValue({
+        getLabel: () => 'Test attachment',
+        renderInlineContent: () => {
+          throw new Error('boom');
+        },
+      }),
+      updateOrigin: jest.fn(),
+    };
+
+    render(
+      <InlineAttachmentWithActions
+        attachment={attachment}
+        attachmentsService={attachmentsService as unknown as AttachmentsService}
+        conversationId="conversation-1"
+        isSidebar={false}
+      />
+    );
+
+    expect(screen.getByText("Couldn't render this attachment")).not.toBeNull();
+  });
+
   it('renders action buttons registered by inline content', async () => {
     const attachment: UnknownAttachment = { id: 'attachment-1', type: 'test', data: {} };
     const attachmentsService = {

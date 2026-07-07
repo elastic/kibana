@@ -194,8 +194,6 @@ async function saveBulkUpdatedRules({
     // TODO (http-versioning): for whatever reasoning we are using SavedObjectsBulkUpdateObject
     // everywhere when it should be SavedObjectsBulkCreateObject. We need to fix it in
     // bulk_disable, bulk_enable, etc. to fix this cast
-    const bulkEditRulesTimestamp = Date.now();
-
     result = await bulkCreateRulesSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       bulkCreateRuleAttributes: rules as Array<SavedObjectsBulkCreateObject<RawRule>>,
@@ -204,10 +202,15 @@ async function saveBulkUpdatedRules({
 
     await logRuleChanges({
       ruleSOs: result.saved_objects,
+      encryptedFieldsMap: new Map(
+        [...apiKeysMap.entries()].map(([ruleId, { newApiKey, newUiamApiKey }]) => [
+          ruleId,
+          { apiKey: newApiKey ?? null, uiamApiKey: newUiamApiKey ?? null },
+        ])
+      ),
       rulesClientContext: context,
       changesContext: {
         action: changeTracking?.action ?? RuleChangeTrackingAction.ruleUpdate,
-        timestamp: bulkEditRulesTimestamp,
         metadata: changeTracking?.metadata,
       },
     });

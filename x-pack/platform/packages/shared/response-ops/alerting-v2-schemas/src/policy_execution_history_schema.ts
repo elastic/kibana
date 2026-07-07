@@ -6,11 +6,42 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { ID_MAX_LENGTH } from './constants';
 
 export const POLICY_EXECUTION_HISTORY_MAX_PER_PAGE = 100;
+export const POLICY_EXECUTION_HISTORY_SEARCH_MAX_LENGTH = 200;
 
 export const policyExecutionOutcomeSchema = z.enum(['dispatched', 'throttled']);
 export type PolicyExecutionOutcome = z.infer<typeof policyExecutionOutcomeSchema>;
+
+export const policyExecutionOutcomeFilterSchema = z.enum(['dispatched', 'throttled', 'all']);
+export type PolicyExecutionOutcomeFilter = z.infer<typeof policyExecutionOutcomeFilterSchema>;
+
+const sharedFilterFields = {
+  search: z
+    .string()
+    .trim()
+    .min(1)
+    .max(POLICY_EXECUTION_HISTORY_SEARCH_MAX_LENGTH)
+    .optional()
+    .describe(
+      'Free-text search. Matches policy name, rule name, policy/rule ID (case-insensitive).'
+    ),
+  ruleIds: z
+    .preprocess(
+      (v) => (v === undefined || Array.isArray(v) ? v : [v]),
+      z.array(z.string().trim().min(1).max(ID_MAX_LENGTH)).max(50)
+    )
+    .optional()
+    .describe(
+      'Explicit rule filter. Narrows events to those referencing at least one of the provided rule ids. Also unions with the search filter if both are provided. Max 50 ids.'
+    ),
+  outcome: policyExecutionOutcomeFilterSchema
+    .optional()
+    .describe(
+      'Outcome filter. When omitted defaults to "all" (both dispatched and throttled). Pass "dispatched" or "throttled" to narrow.'
+    ),
+};
 
 export const listPolicyExecutionHistoryQuerySchema = z.object({
   page: z.coerce.number().min(1).optional().describe('Page number (1-indexed). Defaults to 1.'),
@@ -20,6 +51,7 @@ export const listPolicyExecutionHistoryQuerySchema = z.object({
     .max(POLICY_EXECUTION_HISTORY_MAX_PER_PAGE)
     .optional()
     .describe('Number of events per page. Defaults to 100.'),
+  ...sharedFilterFields,
 });
 export type ListPolicyExecutionHistoryParams = z.infer<
   typeof listPolicyExecutionHistoryQuerySchema
@@ -27,6 +59,7 @@ export type ListPolicyExecutionHistoryParams = z.infer<
 
 export const countPolicyExecutionEventsQuerySchema = z.object({
   since: z.string().describe('ISO timestamp; count events with @timestamp greater than this.'),
+  ...sharedFilterFields,
 });
 export type CountPolicyExecutionEventsParams = z.infer<
   typeof countPolicyExecutionEventsQuerySchema
@@ -37,25 +70,51 @@ const namedRefSchema = z.object({
   name: z.string().nullable().optional(),
 });
 
-// Defensive upper bound to keep response payloads sane.
+// Defensive upper bounds to keep response payloads sane.
 const MAX_WORKFLOWS_PER_ITEM = 100;
+// Cap for the embedded `rules` array in each item. A broad Action Policy can
+// emit one event referencing thousands of rules; the response only carries a
+// bounded sample and clients rely on `totalRuleCount` for the true count.
+export const MAX_EMBEDDED_RULES_PER_ITEM = 20;
 
 export const policyExecutionHistoryItemSchema = z.object({
   '@timestamp': z.string(),
   policy: namedRefSchema,
-  rule: namedRefSchema,
   outcome: policyExecutionOutcomeSchema,
   episode_count: z.number(),
   action_group_count: z.number(),
+  rules: z
+    .array(namedRefSchema)
+    .max(MAX_EMBEDDED_RULES_PER_ITEM)
+    .describe(
+      'Rules referenced by this event, bounded to MAX_EMBEDDED_RULES_PER_ITEM. When a search or rule filter narrows the match, this array is intersected with the matched subset server-side. Use `totalRuleCount` for the full count.'
+    ),
+  totalRuleCount: z
+    .number()
+    .describe(
+      'Total number of rules referenced by this event after search / rule-filter narrowing. May exceed `rules.length` when the embedded array is truncated to the cap.'
+    ),
   workflows: z.array(namedRefSchema).max(MAX_WORKFLOWS_PER_ITEM),
 });
 export type PolicyExecutionHistoryItem = z.infer<typeof policyExecutionHistoryItemSchema>;
+
+export const searchMatchCountsSchema = z.object({
+  policies: z.number().describe('Total policies matching the search.'),
+  rules: z.number().describe('Total rules matching the search.'),
+  cap: z.number().describe('Maximum number of policy/rule ids the server uses as a filter.'),
+});
+export type SearchMatchCounts = z.infer<typeof searchMatchCountsSchema>;
 
 export const listPolicyExecutionHistoryResponseSchema = z.object({
   items: z.array(policyExecutionHistoryItemSchema),
   page: z.number(),
   perPage: z.number(),
   totalEvents: z.number(),
+  searchMatches: searchMatchCountsSchema
+    .nullable()
+    .describe(
+      'Per-type match counts for the active search, plus the cap used as filter. Null when no search was provided. When policies > cap or rules > cap the result is truncated.'
+    ),
 });
 export type ListPolicyExecutionHistoryResponse = z.infer<
   typeof listPolicyExecutionHistoryResponseSchema

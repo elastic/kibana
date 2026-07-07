@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormProvider, useForm, useFormState, useWatch } from 'react-hook-form';
 
+import { FrozenEnterpriseRequiredCallout } from '@kbn/data-lifecycle-phases';
 import type { EditDlmPhasesFlyoutProps } from './types';
 import type { EditDataPhasesFlyoutChangeMeta } from '../shared';
 import { DlmSearchableSnapshotInfoSection } from './sections/dlm_searchable_snapshot_info_section';
@@ -29,7 +30,6 @@ import { AfterField, getDlmPhasesFlyoutFormSchema, type DlmPhasesFlyoutFormInter
 import { DEFAULT_NEW_PHASE_MIN_AGE, TIME_UNIT_OPTIONS } from '../edit_ilm_phases_flyout/constants';
 import { PhaseTabsRow } from '../shared';
 import { useDataPhasesFlyoutStyles } from '../shared';
-import { FrozenEnterpriseRequiredCallout } from '../../common/data_lifecycle/frozen_enterprise_required_callout';
 import { useIlmPhasesColorAndDescription } from '../../hooks/use_ilm_phases_color_and_description';
 import {
   formatDuration,
@@ -70,13 +70,19 @@ const buildInitialValues = (
   };
 };
 
-const formatDslOutput = (values: DlmPhasesFlyoutFormInternal): IngestStreamLifecycleDSL['dsl'] => {
+const formatDslOutput = (
+  values: DlmPhasesFlyoutFormInternal,
+  // The live preview keeps an invalid (e.g. negative) frozen_after so the timeline can still show
+  // the frozen phase (marked red) instead of it vanishing while the user edits. Saving stays strict
+  // — and is blocked by validation anyway — so an invalid value is never persisted.
+  { lenientFrozen = false }: { lenientFrozen?: boolean } = {}
+): IngestStreamLifecycleDSL['dsl'] => {
   const dsl: IngestStreamLifecycleDSL['dsl'] = {};
 
   if (values.frozen.enabled) {
     const frozenAfter = formatDuration(values.frozen.afterValue, values.frozen.afterUnit, {
       integerOnly: true,
-      minInclusive: 0,
+      ...(lenientFrozen ? {} : { minInclusive: 0 }),
     });
     if (frozenAfter) dsl.frozen_after = frozenAfter;
   }
@@ -108,6 +114,7 @@ export const EditDlmPhasesFlyout = ({
   isRefreshingDefaultRepository,
   manageRepositoriesHref,
   defaultRepositoryName,
+  canCreateRepository = true,
   'data-test-subj': dataTestSubjProp,
 }: EditDlmPhasesFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
@@ -183,7 +190,7 @@ export const EditDlmPhasesFlyout = ({
   );
 
   useDebouncedOnChangeEmit<IngestStreamLifecycleDSL['dsl'], EditDataPhasesFlyoutChangeMeta>({
-    getOutput: () => formatDslOutput(methods.getValues()),
+    getOutput: () => formatDslOutput(methods.getValues(), { lenientFrozen: true }),
     initialOutput: formatDslOutput(buildInitialValues(initialDsl)),
     onChange,
     buildMeta,
@@ -349,7 +356,7 @@ export const EditDlmPhasesFlyout = ({
     <PhaseTabsRow
       enabledPhases={enabledPhases}
       searchableSnapshotRepositories={[]}
-      canCreateRepository={true}
+      canCreateRepository={canCreateRepository}
       excludedPhases={['hot', 'warm', 'cold']}
       disabledPhaseTooltips={{ hot: HOT_DISABLED_TOOLTIP }}
       selectedPhase={selectedPhase}
