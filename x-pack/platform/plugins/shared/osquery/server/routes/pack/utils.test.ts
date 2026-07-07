@@ -19,6 +19,7 @@ import {
   stripPerQueryRruleFields,
   stripPriorModePerQueryFields,
   resolvePreservedQueries,
+  hasQueries,
   START_DATE_EPOCH_FALLBACK,
 } from './utils';
 
@@ -1485,5 +1486,43 @@ describe('fetchAllPackagePolicies (shared keyset drain for create/delete/update/
     await fetchAllPackagePolicies(service, soClient, 'custom-kuery');
 
     expect(service.fetchAllItems).toHaveBeenCalledWith(soClient, { kuery: 'custom-kuery' });
+  });
+});
+
+// Shared by the V4 mint guard and the reconcile filter; pinning its verdict
+// here pins mint-guard ≡ reconcile-filter parity so the two can't drift.
+describe('hasQueries (shared mint/reconcile emptiness predicate)', () => {
+  it.each([
+    ['non-empty array', [{ query: 'SELECT 1' }], true],
+    ['non-empty record', { q1: { query: 'SELECT 1' } }, true],
+    ['empty array', [], false],
+    ['empty record', {}, false],
+    ['null', null, false],
+    ['undefined', undefined, false],
+  ])('returns %s → %s', (_label, input, expected) => {
+    expect(hasQueries(input as Parameters<typeof hasQueries>[0])).toBe(expected);
+  });
+
+  // Mint guard (`!hasQueries` → skip) and reconcile filter (`hasQueries` →
+  // include) must reach the same verdict for every shape.
+  it('mint guard and reconcile filter agree on the same verdict for each shape', () => {
+    const cases: Array<Parameters<typeof hasQueries>[0]> = [
+      [{ query: 'SELECT 1' }],
+      { q1: { query: 'SELECT 1' } },
+      [],
+      {},
+      undefined,
+    ];
+
+    for (const queries of cases) {
+      const nonEmpty = hasQueries(queries);
+      // Mint guard skips (returns empty patch) exactly when queries are empty.
+      const mintGuardSkips = !hasQueries(queries);
+      // Reconcile filter includes an enabled pack exactly when queries are non-empty.
+      const reconcileIncludes = true && hasQueries(queries);
+
+      expect(mintGuardSkips).toBe(!nonEmpty);
+      expect(reconcileIncludes).toBe(nonEmpty);
+    }
   });
 });

@@ -141,10 +141,20 @@ export const convertPackQueriesToSO = (queries: Record<string, PackQueryInput>):
 // Single source of truth for the stored-query key: id when present, else array index.
 // The `query.id` truthiness check intentionally treats an empty-string id as
 // ABSENT (a malformed '' id must fall back to the index/key, not be honored).
+// FROZEN once V4 has shipped: feeds the deterministic schedule_id UUIDv5, so a
+// change here silently changes migration output (as SCHEDULE_ID_NAME_PREFIX).
 export const deriveEffectiveQueryKey = (
   query: { id?: string },
   indexOrKey: string | number
 ): string => (query.id ? query.id : String(indexOrKey));
+
+// Shape-agnostic emptiness check for a pack's `queries` (array or record).
+// Shared by the V4 mint guard and the reconcile filter so they can't drift.
+// Typed as a guard so a truthy result narrows away null/undefined.
+export const hasQueries = <T extends unknown[] | Record<string, unknown>>(
+  queries: T | null | undefined
+): queries is T =>
+  Array.isArray(queries) ? queries.length > 0 : Object.keys(queries ?? {}).length > 0;
 
 export const convertSOQueriesToPack = (queries: SOPackQuery[] | Record<string, PackQueryInput>) =>
   reduce(

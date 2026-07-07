@@ -22,6 +22,7 @@ import {
 import {
   convertSOQueriesToPackConfig,
   fetchAllPackagePolicies,
+  hasQueries,
   policyHasPack,
   makePackKey,
   removePackFromPolicy,
@@ -66,7 +67,7 @@ export const reconcileScheduleIdsToWire = async ({
     await packFinder.close();
 
     const packsToReconcile = allPackSavedObjects.filter(
-      (pack) => pack.attributes.enabled && pack.attributes.queries?.length
+      (pack) => pack.attributes.enabled && hasQueries(pack.attributes.queries)
     );
 
     if (!packsToReconcile.length) {

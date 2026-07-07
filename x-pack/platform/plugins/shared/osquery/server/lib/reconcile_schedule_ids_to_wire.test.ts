@@ -186,6 +186,73 @@ describe('reconcileScheduleIdsToWire', () => {
     expect(packBlock.pack_id).toBe('pack-1');
   });
 
+  // Regression: the old array-only guard (`queries?.length` → undefined for a
+  // record) dropped record-shaped packs, so their schedule_id never reached the
+  // wire. Assert the write path is REACHED, not just survival.
+  test('reconciles an enabled pack whose queries are a record (map) onto the Fleet wire', async () => {
+    const scopedClient = createMockScopedClient();
+    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyList = mockFetchAllItems([buildPackagePolicy()]);
+
+    const recordShapedPack = buildEnabledPackFindResult({
+      queries: {
+        q1: { id: 'q1', query: 'SELECT 1', interval: 60, name: 'q1', schedule_id: 'sched-q1' },
+        q2: { id: 'q2', query: 'SELECT 2', interval: 120, name: 'q2', schedule_id: 'sched-q2' },
+      },
+    });
+
+    const { core } = createMockCoreStart(recordShapedPack, scopedClient);
+    const osqueryContext = createMockOsqueryContext({
+      fetchAllItems: packagePolicyList,
+      update: packagePolicyUpdate,
+    });
+    const logger = createMockLogger();
+
+    const result = await reconcileScheduleIdsToWire({
+      coreStart: core,
+      osqueryContext,
+      logger: logger as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['logger'],
+    });
+
+    expect(result).toEqual({ hadFailures: false });
+    // The write path is reached — the record shape is no longer dropped by the guard.
+    expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
+    const packBlock =
+      packagePolicyUpdate.mock.calls[0][3].inputs[0].config.osquery.value.packs[
+        'default--reconcile-pack'
+      ];
+    expect(packBlock).toBeDefined();
+    expect(packBlock.queries.q1.schedule_id).toBe('sched-q1');
+    expect(packBlock.queries.q2.schedule_id).toBe('sched-q2');
+    expect(packBlock.pack_id).toBe('pack-1');
+  });
+
+  // Empty record `{}` must be skipped exactly like an empty array `[]`.
+  test('skips an enabled pack whose queries are an empty record (no Fleet write)', async () => {
+    const scopedClient = createMockScopedClient();
+    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const packagePolicyList = mockFetchAllItems([buildPackagePolicy()]);
+
+    const { core } = createMockCoreStart(buildEnabledPackFindResult({ queries: {} }), scopedClient);
+    const osqueryContext = createMockOsqueryContext({
+      fetchAllItems: packagePolicyList,
+      update: packagePolicyUpdate,
+    });
+    const logger = createMockLogger();
+
+    const result = await reconcileScheduleIdsToWire({
+      coreStart: core,
+      osqueryContext,
+      logger: logger as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['logger'],
+    });
+
+    expect(result).toEqual({ hadFailures: false });
+    expect(packagePolicyUpdate).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      'reconcileScheduleIdsToWire: no enabled packs to reconcile'
+    );
+  });
+
   // Route-shaped wire: reconciler output plus the `shard` field routes always set.
   const buildInSyncPolicyFromFirstReconcile = async () => {
     const firstUpdate = jest.fn().mockResolvedValue({});

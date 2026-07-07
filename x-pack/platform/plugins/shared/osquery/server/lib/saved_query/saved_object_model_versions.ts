@@ -11,7 +11,11 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import { v5 as uuidv5 } from 'uuid';
 import { savedQuerySchemaV2, packSchemaV2, packSchemaV3, packSchemaV4 } from './schemas';
-import { deriveEffectiveQueryKey, START_DATE_EPOCH_FALLBACK } from '../../routes/pack/utils';
+import {
+  deriveEffectiveQueryKey,
+  hasQueries,
+  START_DATE_EPOCH_FALLBACK,
+} from '../../routes/pack/utils';
 
 interface BackfillableQuery {
   id?: string;
@@ -116,10 +120,7 @@ const backfillScheduleIdFn: SavedObjectModelDataBackfillFn<
   { queries?: BackfillableQueries }
 > = ({ id: soId, attributes, created_at: envelopeCreatedAt }) => {
   const queries = attributes.queries;
-  if (
-    queries == null ||
-    (Array.isArray(queries) ? !queries.length : !Object.keys(queries).length)
-  ) {
+  if (!hasQueries(queries)) {
     return { attributes: {} };
   }
 
