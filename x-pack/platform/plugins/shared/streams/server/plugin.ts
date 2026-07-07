@@ -86,8 +86,8 @@ import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 import { installMemoryWorkflows } from './lib/memory/install_managed_workflows';
 import { isInvestigationEnabled } from './lib/investigations/is_investigation_enabled';
 import { installInvestigationWorkflow } from './lib/investigations/install_investigation_workflow';
-import { isCodeKiExtractionEnabled } from './lib/significant_events/code_features/is_code_ki_extraction_enabled';
-import { installCodeExtractionWorkflow } from './lib/significant_events/code_features/install_code_extraction_workflow';
+import { isCodeKiExtractionEnabled } from './lib/significant_events/code_intelligence/is_code_ki_extraction_enabled';
+import { installCodeExtractionWorkflow } from './lib/significant_events/code_intelligence/install_code_extraction_workflow';
 import {
   SIGNIFICANT_EVENTS_CODE_KI_EXTRACTION_ENABLED_FLAG,
   SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG,

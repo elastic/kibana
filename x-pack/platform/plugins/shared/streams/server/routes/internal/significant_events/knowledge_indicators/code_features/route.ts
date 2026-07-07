@@ -15,7 +15,7 @@ import {
   createCodeRepositoryReader,
   identifyCodeFeatures,
   identifyCodeQueries,
-} from '../../../../../lib/significant_events/code_features';
+} from '../../../../../lib/significant_events/code_intelligence';
 
 // ---------------------------------------------------------------------------
 // Identify code-driven Feature KIs for a single stream (Stage 1).
