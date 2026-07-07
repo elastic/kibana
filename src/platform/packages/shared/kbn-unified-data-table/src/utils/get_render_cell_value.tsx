@@ -272,8 +272,11 @@ function renderPopoverContent({
   }
 
   const value = row.flattened[columnId];
+
   const formattedValue =
-    field?.type === 'string' ? tryPrettyPrintJsonBlocks(value) ?? value : value;
+    field?.type === 'string' && typeof value === 'string'
+      ? tryPrettyPrintJsonBlocks(value) ?? value
+      : value;
 
   return (
     <EuiFlexGroup

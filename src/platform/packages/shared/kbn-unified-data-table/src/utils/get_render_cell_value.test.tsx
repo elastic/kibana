@@ -929,6 +929,44 @@ describe('Unified data table cell rendering', () => {
     expect(value.textContent).toBe('a short message');
   });
 
+  it('does not pretty-print JSON for multivalued fields', () => {
+    const rows: EsHitRecord[] = [
+      {
+        _id: '1',
+        _index: 'test',
+        _score: 1,
+        _source: undefined,
+        fields: { message: [JSON.stringify({ a: 1 }), JSON.stringify({ b: 2 })] },
+      },
+    ];
+
+    const DataTableCellValue = getRenderCellValueFn({
+      closePopover: jest.fn(),
+      columnsMeta: undefined,
+      dataView: dataViewMock,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+      rows: rows.map(build),
+      shouldShowFieldHandler: () => true,
+    });
+
+    renderWithI18n(
+      <DataTableCellValue
+        colIndex={0}
+        columnId="message"
+        isDetails={true}
+        isExpandable={true}
+        isExpanded={false}
+        rowIndex={0}
+        setCellProps={jest.fn()}
+      />
+    );
+
+    const value = screen.getByTestId('dataTableExpandCellActionPopoverValue');
+    expect(value).toBeVisible();
+    expect(value.textContent).not.toContain('\n');
+  });
+
   it('renders regular ES|QL fields correctly', () => {
     const DataTableCellValue = getCustomEsqlDataTableCellValue();
 
