@@ -45,6 +45,11 @@ export const i18nStrings = {
         defaultMessage: 'Automation',
       }),
     },
+    templates: {
+      title: i18n.translate('securitySolutionPackages.navLinks.workflows.templates', {
+        defaultMessage: 'Templates',
+      }),
+    },
   },
   explore: {
     title: i18n.translate('securitySolutionPackages.navLinks.explore', {

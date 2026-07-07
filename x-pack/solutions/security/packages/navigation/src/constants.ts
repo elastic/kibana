@@ -40,3 +40,6 @@ export enum SecurityGroupName {
 /** This Kibana Advanced Setting allows users to enable/disable the Alerts and Attacks Alignment feature */
 export const ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING =
   'securitySolution:enableAlertsAndAttacksAlignment' as const;
+
+/** Feature flag gating the "Templates" entry in the Workflows side-nav panel. */
+export const WORKFLOWS_TEMPLATES_NAV_FLAG = 'securitySolution.workflowsTemplatesInNav' as const;

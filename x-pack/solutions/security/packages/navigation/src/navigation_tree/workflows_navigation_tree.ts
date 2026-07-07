@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { NodeDefinition } from '@kbn/core-chrome-browser';
+import type { AppDeepLinkId, NodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityGroupName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { i18nStrings } from '../i18n_strings';
 
-export const createWorkflowsNavigationTree = (): NodeDefinition => ({
+export const createWorkflowsNavigationTree = (templatesEnabled = false): NodeDefinition => ({
   id: SecurityGroupName.workflows,
   title: SecurityLinkGroup[SecurityGroupName.workflows].title,
   icon: 'branch',
@@ -23,6 +23,14 @@ export const createWorkflowsNavigationTree = (): NodeDefinition => ({
         {
           link: 'workflows',
         },
+        ...(templatesEnabled
+          ? [
+              {
+                title: i18nStrings.workflows.templates.title,
+                link: 'workflows-library' as AppDeepLinkId,
+              },
+            ]
+          : []),
       ],
     },
   ],

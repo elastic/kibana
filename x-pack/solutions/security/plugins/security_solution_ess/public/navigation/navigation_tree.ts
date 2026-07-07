@@ -10,6 +10,7 @@ import { AIChatExperience } from '@kbn/ai-assistant-common';
 import {
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   SecurityPageName,
+  WORKFLOWS_TEMPLATES_NAV_FLAG,
 } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
@@ -26,6 +27,10 @@ export const createNavigationTree = (
   const showAgentBuilder = chatExperience === AIChatExperience.Agent;
   const agentBuilderNavAtTop = services.featureFlags.getBooleanValue(
     AGENT_BUILDER_NAV_AT_TOP_FLAG,
+    false
+  );
+  const workflowsTemplatesEnabled = services.featureFlags.getBooleanValue(
+    WORKFLOWS_TEMPLATES_NAV_FLAG,
     false
   );
 
@@ -61,7 +66,7 @@ export const createNavigationTree = (
             icon: 'warning',
             link: securityLink(SecurityPageName.alerts),
           },
-      defaultNavigationTree.workflows(),
+      defaultNavigationTree.workflows(workflowsTemplatesEnabled),
       // TODO: remove this item when agentBuilderNavAtTop is enabled by default and the Agent Builder link is always at the top of the nav
       ...(showAgentBuilder && !agentBuilderNavAtTop ? [agentBuilderLink] : []),
       {

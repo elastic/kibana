@@ -14,5 +14,6 @@ export {
   LinkCategoryType,
   SECURITY_UI_APP_ID,
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+  WORKFLOWS_TEMPLATES_NAV_FLAG,
 } from './src/constants';
 export * from './src/types';
