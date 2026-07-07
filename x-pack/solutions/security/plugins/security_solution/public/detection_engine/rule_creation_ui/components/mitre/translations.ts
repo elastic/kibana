@@ -105,7 +105,8 @@ export const UNSUPPORTED_MITRE_ID_ERROR = (id: string) =>
 
 export const RENAMED_FROM_HINT = (previousName: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.mitreAttack.renamedFromHint', {
-    defaultMessage: 'Renamed from "{previousName}" in the currently supported MITRE ATT&CK\u00AE version.',
+    defaultMessage:
+      'Renamed from "{previousName}" in the currently supported MITRE ATT&CK\u00AE version.',
     values: { previousName },
   });
 
