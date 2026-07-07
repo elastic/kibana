@@ -2074,6 +2074,50 @@ export const LEAD_GENERATION_EXECUTION_EVENT: EventTypeOpts<{
   },
 };
 
+// Telemetry event sent when the alert analysis workflow settings are saved through the
+// dedicated settings page, whether the save succeeds or fails.
+export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT: EventTypeOpts<{
+  status: 'success' | 'error';
+  workflowEnabled: boolean;
+  autoCloseEnabled: boolean;
+  createConversation: boolean;
+  connectorConfigured: boolean;
+  autoCloseConfidenceScoreMinThreshold: number;
+  autoCloseConfidenceScoreMaxThreshold: number;
+}> = {
+  eventType: 'alert_analysis_workflow_settings_updated',
+  schema: {
+    status: {
+      type: 'keyword',
+      _meta: { description: 'Whether the settings update succeeded or failed' },
+    },
+    workflowEnabled: {
+      type: 'boolean',
+      _meta: { description: 'Whether the alert analysis workflow is enabled' },
+    },
+    autoCloseEnabled: {
+      type: 'boolean',
+      _meta: { description: 'Whether auto-closing false positive alerts is enabled' },
+    },
+    createConversation: {
+      type: 'boolean',
+      _meta: { description: 'Whether a new AI conversation is created per alert analysis' },
+    },
+    connectorConfigured: {
+      type: 'boolean',
+      _meta: { description: 'Whether an AI connector is configured for the workflow' },
+    },
+    autoCloseConfidenceScoreMinThreshold: {
+      type: 'float',
+      _meta: { description: 'Minimum confidence score threshold for auto-close (0-1)' },
+    },
+    autoCloseConfidenceScoreMaxThreshold: {
+      type: 'float',
+      _meta: { description: 'Maximum confidence score threshold for auto-close (0-1)' },
+    },
+  },
+};
+
 export const events = [
   DETECTION_RULE_UPGRADE_EVENT,
   DETECTION_RULE_BULK_UPGRADE_EVENT,
@@ -2116,4 +2160,5 @@ export const events = [
   GAP_DETECTED_EVENT,
   ...TRIAL_COMPANION_EVENTS,
   LEAD_GENERATION_EXECUTION_EVENT,
+  ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT,
 ];

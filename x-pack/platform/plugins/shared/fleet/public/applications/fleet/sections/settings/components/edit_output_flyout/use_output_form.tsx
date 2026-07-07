@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -284,12 +284,18 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   // ES output's host URL is restricted to default in serverless
   const isServerless = cloud?.isServerlessEnabled;
   const isEditingRemoteEsOutput = output?.type === outputType.RemoteElasticsearch;
+
   // When editing a remote ES output, the saved hosts belong to the remote ES input,
   // not the regular ES input. Use the default output hosts instead.
-  const elasticsearchUrlDefaultValue =
-    isEditingRemoteEsOutput || (isServerless && !output?.hosts)
-      ? defaultOutput?.hosts || []
-      : output?.hosts || [];
+  // For an existing ES output (incl. the PrivateLink output) always show that output's own
+  // hosts; only fall back to the default when creating a new output in serverless.
+  const elasticsearchUrlDefaultValue = isEditingRemoteEsOutput
+    ? defaultOutput?.hosts || []
+    : output?.hosts?.length
+    ? output.hosts
+    : isServerless
+    ? defaultOutput?.hosts || []
+    : [];
   const elasticsearchUrlDisabled = isServerless || isDisabled('hosts');
   const elasticsearchUrlInput = useComboInput(
     'esHostsComboxBox',
@@ -429,28 +435,55 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     validateSslPathsCombo,
     isSSLEditable
   );
+  // Live mirror of sibling SSL field values so cross-field validators can read them
+  // without forward references (respects no-use-before-define).
+  const sslValuesRef = useRef({
+    certificate: output?.ssl?.certificate ?? '',
+    key: output?.ssl?.key ?? '',
+    keySecret: (output as NewLogstashOutput)?.secrets?.ssl?.key,
+  });
+
+  // Client cert + key must be supplied as a pair (mTLS). The rule is active for ES and
+  // remote-ES always, and for logstash only when its SSL toggle is on.
+  // Kafka uses its own auth_type-gated inputs and is excluded here.
+  const isSharedSslActive =
+    typeInput.value === outputType.Elasticsearch ||
+    typeInput.value === outputType.RemoteElasticsearch ||
+    (typeInput.value === outputType.Logstash && logstashEnableSSLInput.value);
+
   const sslCertificateInput = useInput(
     output?.ssl?.certificate ?? '',
-    typeInput.value === 'logstash' && logstashEnableSSLInput.value
-      ? validateSSLCertificate
-      : validateSslPathInput,
+    (value: string) => {
+      const { key, keySecret } = sslValuesRef.current;
+      return isSharedSslActive && (key || keySecret)
+        ? validateSSLCertificate(value)
+        : validateSslPathInput(value);
+    },
     isSSLEditable
   );
+  sslValuesRef.current.certificate = sslCertificateInput.value;
+
   const sslKeyInput = useInput(
     output?.ssl?.key ?? '',
-    typeInput.value === 'logstash' && logstashEnableSSLInput.value
-      ? validateSSLKey
-      : validateSslPathInput,
+    (value: string) => {
+      const { certificate, keySecret } = sslValuesRef.current;
+      return isSharedSslActive && certificate && !keySecret
+        ? validateSSLKey(value)
+        : validateSslPathInput(value);
+    },
     isSSLEditable
   );
+  sslValuesRef.current.key = sslKeyInput.value;
 
   const sslKeySecretInput = useSecretInput(
     (output as NewLogstashOutput)?.secrets?.ssl?.key,
-    typeInput.value === 'logstash' && logstashEnableSSLInput.value
-      ? validateSSLKeySecret
-      : undefined,
+    (value) => {
+      const { certificate, key } = sslValuesRef.current;
+      return isSharedSslActive && certificate && !key ? validateSSLKeySecret(value) : undefined;
+    },
     isSSLEditable
   );
+  sslValuesRef.current.keySecret = sslKeySecretInput.value;
 
   const proxyIdInput = useInput(output?.proxy_id ?? '', () => undefined, isDisabled('proxy_id'));
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { platformStreamsSigEventsTools, ToolType } from '@kbn/agent-builder-common';
+import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
   BuiltinToolDefinition,
@@ -14,11 +14,8 @@ import type {
 } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
-import {
-  baseFeatureSchema,
-  getStreamTypeFromDefinition,
-  type StreamType,
-} from '@kbn/streams-schema';
+import { getStreamTypeFromDefinition, type StreamType } from '@kbn/streams-schema';
+import { baseFeatureSchema } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { StreamsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -27,7 +24,7 @@ import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { createFeatureKnowledgeIndicatorToolHandler } from './handler';
 
 export const STREAMS_CREATE_FEATURE_KNOWLEDGE_INDICATOR_TOOL_ID =
-  platformStreamsSigEventsTools.createFeatureKnowledgeIndicator;
+  platformSignificantEventsTools.createFeatureKnowledgeIndicator;
 
 const createFeatureKISchema = baseFeatureSchema.extend({
   expires_at: z.iso
@@ -112,16 +109,19 @@ export function createFeatureKnowledgeIndicatorTool({
       let streamType: StreamType | 'unknown' = 'unknown';
 
       try {
-        const { streamsClient, getKnowledgeIndicatorClient, licensing, uiSettingsClient } =
-          await getScopedClients({
-            request,
-          });
+        const scopedClients = await getScopedClients({
+          request,
+        });
 
-        await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-        const definition = await streamsClient.getStream(streamName);
+        await assertSignificantEventsAccess({
+          server,
+          licensing: scopedClients.licensing,
+          uiSettingsClient: scopedClients.uiSettingsClient,
+        });
+        const definition = await scopedClients.streamsClient.getStream(streamName);
         streamType = getStreamTypeFromDefinition(definition);
 
-        const kiClient = await getKnowledgeIndicatorClient();
+        const kiClient = await scopedClients.getKnowledgeIndicatorClient();
         const { id } = await createFeatureKnowledgeIndicatorToolHandler({
           kiClient,
           streamName,

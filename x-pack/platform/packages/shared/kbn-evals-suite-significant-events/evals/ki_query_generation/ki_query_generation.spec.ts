@@ -10,14 +10,14 @@ import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/
 import { tags } from '@kbn/scout';
 
 import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
-import type { Feature, Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
+import type { Feature } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   canonicalKIFeaturesFromExpectedGroundTruth,
   cleanSignificantEventsDataStreams,
   deleteTemporaryReplayIndices,
   ensureStreamsEnabled,
-  listAvailableSnapshots,
   loadKIFeaturesFromSnapshot,
   replayIntoManagedStream,
   SIGEVENTS_SNAPSHOT_RUN,
@@ -34,6 +34,7 @@ import {
   snapshotCatalogKey,
   type KIQueryGenerationScenario,
 } from '../../src/datasets';
+import { buildAvailableSnapshotsBySource } from '../shared';
 import { KI_FEATURE_SOURCES_TO_RUN } from './resolve_ki_sources';
 import { extractLogTextFromSourceDoc } from './extract_log_text';
 import { getComputedKIFeaturesFromDocs } from './get_computed_ki_features_from_docs';
@@ -60,22 +61,13 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
   const availableSnapshotsBySource = new Map<string, Set<string>>();
 
   evaluate.beforeAll(async ({ esClient, log }) => {
-    const uniqueCatalogSources = new Map<string, GcsConfig>();
-    for (const dataset of activeDatasets) {
-      for (const scenario of dataset.kiQueryGeneration) {
-        const source = resolveScenarioSnapshotSource({
-          scenarioId: scenario.input.scenario_id,
-          datasetGcs: dataset.gcs,
-          snapshotSource: scenario.snapshot_source,
-        });
-        uniqueCatalogSources.set(snapshotCatalogKey(source.gcs), source.gcs);
-      }
-    }
-
-    for (const [catalogSourceKey, gcs] of uniqueCatalogSources.entries()) {
-      const availableSnapshots = await listAvailableSnapshots(esClient, log, gcs);
-      availableSnapshotsBySource.set(catalogSourceKey, new Set(availableSnapshots));
-    }
+    const snapshots = await buildAvailableSnapshotsBySource(
+      activeDatasets,
+      (dataset) => dataset.kiQueryGeneration,
+      esClient,
+      log
+    );
+    snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
   });
 
   for (const dataset of activeDatasets) {
