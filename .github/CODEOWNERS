@@ -1435,6 +1435,8 @@ packages/kbn-optimizer/limits.yml
 
 packages/kbn-generate/src/commands/user_activity_actions_docs_command.ts @elastic/kibana-core
 
+src/platform/packages/private/kbn-code-owners/teams.jsonc @elastic/kibana-operations @elastic/kibana-security
+
 src/platform/plugins/private/ftr_apis/server/routes/task_manager @elastic/response-ops
 
 /x-pack/solutions/observability/test/api_integration/apis/metrics_ui @elastic/obs-presentation-team
@@ -1874,6 +1876,8 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_policies.test.ts @elastic/kibana-management
 /x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_phases.ts @elastic/kibana-management
 /x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_phases.test.ts @elastic/kibana-management
+/x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/global_retention.ts @elastic/kibana-management
+/x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/global_retention.test.ts @elastic/kibana-management
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/failure_store.ts @elastic/kibana-management
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/lifecycle_retention.ts @elastic/kibana-management
 
@@ -2632,6 +2636,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/hubspot/** @elastic/w
 src/platform/packages/shared/kbn-connector-specs/src/specs/jina/** @elastic/jinastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_teams/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/notion/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/one_drive/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/one_password/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/outlook/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/pagerduty/** @elastic/workchat-eng
@@ -2650,6 +2655,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/zoom/** @elastic/work
 
 # Connector Agent Skills
 src/platform/packages/shared/kbn-connector-specs/.claude/skills @elastic/workchat-eng
+
 
 # Connector Workflow Tests
 src/platform/plugins/shared/workflows_management/test/connector_workflows @elastic/workchat-eng
@@ -3065,6 +3071,8 @@ x-pack/solutions/security/plugins/entity_store @elastic/security-entity-analytic
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/pages/threat_intelligence_paywall.tsx @elastic/security-threat-hunting
 
 /x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/alert_analysis @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/alert_triage @elastic/security-threat-hunting
+/x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/evals/security/alert_triage_skill @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/threat_hunting @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/server/lib/timeline @elastic/security-threat-hunting
@@ -3118,6 +3126,12 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/set_alert_tags_step @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/set_attack_tags_step @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/set_attack_status_step @elastic/security-threat-hunting
+
+# Alert analysis workflow
+src/platform/packages/shared/kbn-workflows/managed/definitions/alert_analysis @elastic/security-threat-hunting
+x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analysis_workflow.ts @elastic/security-threat-hunting
+x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/pages/alert_analysis_workflow @elastic/security-threat-hunting
+x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analysis_workflow @elastic/security-threat-hunting
 
 ## Security Threat Hunting owner connectors
 # OpenAI
@@ -3663,7 +3677,9 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 
 # Appex QA to own auto-generated scout metadata
 /**/scout/.meta/**
+/**/scout/*/.meta/**
 /**/scout_*/.meta/**
+/**/scout_*/*/.meta/**
 
 # Macroscope Check Run Agents
 /.macroscope/backport-review.md @elastic/appex-qa

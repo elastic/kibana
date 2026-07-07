@@ -7,7 +7,11 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 
-import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
+import {
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT,
+  asCodeIdSchema,
+} from '@kbn/as-code-shared-schemas';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
@@ -27,6 +31,7 @@ import {
   lensUpdateRequestParamsSchema,
   lensUpdateResponseBodySchema,
 } from './schema';
+import { findInvalidDurationFormat } from '../../../../common/transforms/ga_schema_validator';
 import { getLensRequestConfig, getLensResponseItem } from './utils';
 
 export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
@@ -103,6 +108,18 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
           throw new Error('visualizationType is required');
         }
 
+        const { core } = await ctx.resolve(['core']);
+        const useGASchemas = await core.featureFlags.getBooleanValue(
+          AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+          AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
+        );
+
+        // Enforce the active duration unit names for the current flag state (GA or legacy).
+        const durationError = findInvalidDurationFormat(req.body, useGASchemas);
+        if (durationError) {
+          return res.badRequest({ body: { message: durationError } });
+        }
+
         // TODO fix IContentClient to type this client based on the actual
         const client = contentManagement.contentClient
           .getForRequest({ request: req, requestHandlerContext: ctx })
@@ -131,7 +148,7 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
 
         try {
           const { result } = await client.update(req.params.id, data, options);
-          const responseItem = getLensResponseItem(builder, result.item);
+          const responseItem = getLensResponseItem(builder, result.item, useGASchemas);
 
           if (createdNew) {
             return res.created<LensUpdateResponseBody>({
