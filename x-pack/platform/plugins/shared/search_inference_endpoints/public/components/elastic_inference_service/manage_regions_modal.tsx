@@ -63,6 +63,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
 
   const showRegionList = !isLoading && totalRegions > 0;
   const showNoRegions = !isLoading && !isError && totalRegions === 0;
+  const isSaveDisabled = isSaving || isLoading || totalSelected === 0 || !isDirty;
 
   return (
     <EuiModal
@@ -203,7 +204,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
         <EuiButton
           fill
           onClick={handleSave}
-          isDisabled={isSaving || isLoading || totalSelected === 0 || !isDirty}
+          isDisabled={isSaveDisabled}
           isLoading={isSaving}
           data-test-subj="manageRegionsSaveButton"
         >
