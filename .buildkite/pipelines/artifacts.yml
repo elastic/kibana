@@ -118,6 +118,10 @@ steps:
         - exit_status: '-1'
           limit: 0
 
+        # Self-timeout
+        - exit_status: 124
+          limit: 0
+
         # Test failures
         - exit_status: '*'
           limit: 1
@@ -142,6 +146,10 @@ steps:
 
         # Timeout and forced shutdown
         - exit_status: '-1'
+          limit: 0
+
+        # Self-timeout
+        - exit_status: 124
           limit: 0
 
         # Test failures
