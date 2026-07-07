@@ -1,0 +1,166 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { act, render } from '@testing-library/react';
+import React from 'react';
+import { WorkflowGraphCanvasWithoutProvider } from './workflow_graph_canvas';
+
+// Mutable state driving the mocked React Flow store. `let mock*` names are the
+// only identifiers a jest factory may close over; they're read at render time
+// (long after module init), so no TDZ issue.
+let mockStoreWidth = 0;
+let mockStoreHeight = 0;
+let mockNodesInitialized = false;
+let mockCapturedOnInit: ((instance: unknown) => void) | undefined;
+
+// A minimal two-node layout (trigger + one step). graphBounds derived from this:
+// minX=0, minY=0, maxX=200, maxY=214 => centerX=100.
+const mockNodes = [
+  { id: 'trigger', type: 'trigger', position: { x: 0, y: 0 }, width: 200, height: 64, data: {} },
+  { id: 'step1', type: 'step', position: { x: 0, y: 150 }, width: 200, height: 64, data: {} },
+];
+const EXPECTED_CENTER_X = 100;
+
+jest.mock('./use_workflow_layout', () => ({
+  useWorkflowLayout: () => ({ nodes: mockNodes, edges: [] }),
+}));
+
+// Replace React Flow with light stand-ins: `ReactFlow` captures the `onInit`
+// callback and renders its children; the store hooks return our controllable
+// measured dimensions. jsdom never lays the canvas out, so injecting the
+// dimensions through `useStore`/`useNodesInitialized` is the only way to
+// exercise the "measured vs. not-yet-measured" branch.
+jest.mock('@xyflow/react', () => ({
+  ...jest.requireActual('@xyflow/react'),
+  ReactFlow: ({
+    onInit,
+    children,
+  }: {
+    onInit?: (i: unknown) => void;
+    children?: React.ReactNode;
+  }) => {
+    mockCapturedOnInit = onInit;
+    return <div data-test-subj="reactflow-mock">{children}</div>;
+  },
+  Background: () => null,
+  MiniMap: () => null,
+  Panel: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+  Handle: () => null,
+  useReactFlow: () => ({ zoomIn: jest.fn(), zoomOut: jest.fn() }),
+  useStore: (selector: (s: { width: number; height: number }) => unknown) =>
+    selector({ width: mockStoreWidth, height: mockStoreHeight }),
+  useNodesInitialized: () => mockNodesInitialized,
+}));
+
+const makeInstance = () => ({ setCenter: jest.fn(), fitView: jest.fn() });
+
+const baseProps = {
+  workflow: undefined,
+  isYamlValid: true,
+  onStepSelect: jest.fn(),
+} as const;
+
+const measureCanvas = () => {
+  mockStoreWidth = 1200;
+  mockStoreHeight = 900;
+  mockNodesInitialized = true;
+};
+
+describe('WorkflowGraphCanvas initial centering', () => {
+  beforeEach(() => {
+    mockStoreWidth = 0;
+    mockStoreHeight = 0;
+    mockNodesInitialized = false;
+    mockCapturedOnInit = undefined;
+  });
+
+  it('does not center the viewport until the canvas has been measured', () => {
+    const instance = makeInstance();
+    const { rerender } = render(<WorkflowGraphCanvasWithoutProvider {...baseProps} />);
+
+    // React Flow fires onInit before its ResizeObserver measures the container.
+    act(() => mockCapturedOnInit!(instance));
+    expect(instance.setCenter).not.toHaveBeenCalled();
+
+    // Once the store reports real dimensions, centering runs.
+    measureCanvas();
+    rerender(<WorkflowGraphCanvasWithoutProvider {...baseProps} />);
+
+    expect(instance.setCenter).toHaveBeenCalledTimes(1);
+    expect(instance.setCenter).toHaveBeenCalledWith(
+      EXPECTED_CENTER_X,
+      expect.any(Number),
+      expect.objectContaining({ zoom: 1 })
+    );
+  });
+
+  it('centers exactly once even as dimensions keep updating', () => {
+    const instance = makeInstance();
+    const { rerender } = render(<WorkflowGraphCanvasWithoutProvider {...baseProps} />);
+    act(() => mockCapturedOnInit!(instance));
+
+    measureCanvas();
+    rerender(<WorkflowGraphCanvasWithoutProvider {...baseProps} />);
+    expect(instance.setCenter).toHaveBeenCalledTimes(1);
+
+    // A later resize (e.g. window resize) must not re-center over the user.
+    mockStoreWidth = 1600;
+    mockStoreHeight = 1000;
+    rerender(<WorkflowGraphCanvasWithoutProvider {...baseProps} />);
+    expect(instance.setCenter).toHaveBeenCalledTimes(1);
+  });
+
+  it('centers once under React StrictMode', () => {
+    const instance = makeInstance();
+    measureCanvas();
+    const { rerender } = render(
+      <React.StrictMode>
+        <WorkflowGraphCanvasWithoutProvider {...baseProps} />
+      </React.StrictMode>
+    );
+    act(() => mockCapturedOnInit!(instance));
+    rerender(
+      <React.StrictMode>
+        <WorkflowGraphCanvasWithoutProvider {...baseProps} />
+      </React.StrictMode>
+    );
+
+    expect(instance.setCenter).toHaveBeenCalledTimes(1);
+  });
+
+  it('signals ready without manual centering when fitView is set', () => {
+    const onReady = jest.fn();
+    const instance = makeInstance();
+    measureCanvas();
+    render(<WorkflowGraphCanvasWithoutProvider {...baseProps} fitView onReady={onReady} />);
+
+    act(() => mockCapturedOnInit!(instance));
+
+    expect(instance.setCenter).not.toHaveBeenCalled();
+    expect(onReady).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not re-center over a restored defaultViewport', () => {
+    const onReady = jest.fn();
+    const instance = makeInstance();
+    measureCanvas();
+    render(
+      <WorkflowGraphCanvasWithoutProvider
+        {...baseProps}
+        defaultViewport={{ x: 10, y: 20, zoom: 1.5 }}
+        onReady={onReady}
+      />
+    );
+
+    act(() => mockCapturedOnInit!(instance));
+
+    expect(instance.setCenter).not.toHaveBeenCalled();
+    expect(onReady).toHaveBeenCalledTimes(1);
+  });
+});

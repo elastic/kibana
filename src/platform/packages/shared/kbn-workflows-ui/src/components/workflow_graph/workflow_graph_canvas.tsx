@@ -17,10 +17,20 @@ import {
   Panel,
   ReactFlow,
   type ReactFlowInstance,
+  useNodesInitialized,
   useReactFlow,
+  useStore,
   type Viewport,
 } from '@xyflow/react';
-import React, { Component, type ReactNode, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, {
+  Component,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { i18n } from '@kbn/i18n';
 import type {
   LayoutDirection,
@@ -371,6 +381,16 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const flowInstanceRef = useRef<ReactFlowInstance | null>(null);
 
+  // React Flow's `setCenter` derives the viewport from the store's container
+  // `width`/`height`, which are 0 until its ResizeObserver measures the canvas
+  // (usually *after* `onInit` fires). Subscribe to those measured dimensions so
+  // the initial centering can wait until they are known.
+  const measuredWidth = useStore((s) => s.width);
+  const measuredHeight = useStore((s) => s.height);
+  const nodesInitialized = useNodesInitialized();
+  const hasCenteredInitialViewRef = useRef(false);
+  const [instanceReady, setInstanceReady] = useState(false);
+
   // Position the viewport on the focused step or the graph's top row (same as onInit).
   const resetViewportToInitialView = useCallback(
     (instance: ReactFlowInstance, duration = 0) => {
@@ -426,8 +446,10 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     });
   }, [nodes.length, graphBounds]);
 
-  // Position the initial view: if focusStepId matches a node, centre on
-  // that node; otherwise centre on the graph's top row.
+  // Record the instance and decide who owns the initial viewport. The default
+  // centering is deferred to the measurement-gated effect below, because
+  // `setCenter` needs the container dimensions React Flow has not measured yet
+  // when `onInit` fires.
   const handleInit = useCallback(
     (instance: ReactFlowInstance) => {
       flowInstanceRef.current = instance;
@@ -435,11 +457,8 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
       // When fitView is declarative (fitViewProp=true), ReactFlow handles the
       // viewport positioning internally before firing onInit. Just signal ready.
       if (fitViewProp) {
+        hasCenteredInitialViewRef.current = true;
         onReady?.();
-        return;
-      }
-
-      if (nodes.length === 0) {
         return;
       }
 
@@ -449,15 +468,46 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
       // detect this from `instance.getViewport()`; the explicit prop is the
       // only reliable signal.)
       if (defaultViewport) {
+        hasCenteredInitialViewRef.current = true;
         onReady?.();
         return;
       }
 
-      resetViewportToInitialView(instance, 0);
-      onReady?.();
+      setInstanceReady(true);
     },
-    [nodes.length, defaultViewport, fitViewProp, onReady, resetViewportToInitialView]
+    [defaultViewport, fitViewProp, onReady]
   );
+
+  // Perform the one-time initial centering, but only once React Flow has
+  // measured the canvas. Centering during the 0-dimension window computes a
+  // wrong transform that pins a small graph to the top of the view until the
+  // first pan re-clamps it against `translateExtent`. Waiting for measured
+  // dimensions (and node measurement) also handles nodes that arrive after the
+  // canvas mounts. The ref keeps this to a single centering for the component's
+  // lifetime, so later resizes never yank the viewport away from the user.
+  useEffect(() => {
+    if (hasCenteredInitialViewRef.current || !instanceReady) {
+      return;
+    }
+    const instance = flowInstanceRef.current;
+    if (!instance || nodes.length === 0) {
+      return;
+    }
+    if (measuredWidth <= 0 || measuredHeight <= 0 || !nodesInitialized) {
+      return;
+    }
+    hasCenteredInitialViewRef.current = true;
+    resetViewportToInitialView(instance, 0);
+    onReady?.();
+  }, [
+    instanceReady,
+    measuredWidth,
+    measuredHeight,
+    nodesInitialized,
+    nodes.length,
+    resetViewportToInitialView,
+    onReady,
+  ]);
 
   const previousDirectionRef = useRef(direction);
   useEffect(() => {
