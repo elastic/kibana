@@ -15,6 +15,7 @@ import {
   CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
   normalizeOptionalConnectorOrInferenceParam,
 } from '../resolve_connector_or_inference_id';
+import { normalizeOptionalStringParam } from '../normalize_optional_string_param';
 
 /**
  * Step type ID for the agentBuilder run agent step.
@@ -199,9 +200,7 @@ export const ConfigSchema = z
   .superRefine((cfg, ctx) => {
     const connector = normalizeOptionalConnectorOrInferenceParam(cfg['connector-id']);
     const inference = normalizeOptionalConnectorOrInferenceParam(cfg['inference-id']);
-    const connectorByFeature = normalizeOptionalConnectorOrInferenceParam(
-      cfg['connector-id-by-feature']
-    );
+    const connectorByFeature = normalizeOptionalStringParam(cfg['connector-id-by-feature']);
     if (connector !== undefined && inference !== undefined) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

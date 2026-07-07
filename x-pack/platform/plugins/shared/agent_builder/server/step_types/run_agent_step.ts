@@ -19,9 +19,9 @@ import {
   CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
   CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
   ConnectorOrInferenceIdConflictError,
-  normalizeOptionalConnectorOrInferenceParam,
   resolveConnectorOrInferenceId,
 } from '../../common/resolve_connector_or_inference_id';
+import { normalizeOptionalStringParam } from '../../common/normalize_optional_string_param';
 import { runAgentStepCommonDefinition } from '../../common/step_types/run_agent_step';
 import { resolveConnectorIdByFeature } from '../utils/resolve_connector_id_by_feature';
 
@@ -68,8 +68,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW
         );
 
-        const connectorIdByFeature =
-          normalizeOptionalConnectorOrInferenceParam(connectorIdByFeatureRaw);
+        const connectorIdByFeature = normalizeOptionalStringParam(connectorIdByFeatureRaw);
         if (connectorIdByFeature !== undefined) {
           if (effectiveConnectorId !== undefined) {
             throw new ConnectorOrInferenceIdConflictError(
