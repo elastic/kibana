@@ -24,8 +24,6 @@ import {
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { useGetFieldDefinitions } from '../field_library/hooks/use_get_field_definitions';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
-import { useCasesToast } from '../../common/use_cases_toast';
-import * as i18n from './translations';
 
 /**
  * Values a template applies by default and reverts to when it stops applying them. Sync alerts and
@@ -101,7 +99,6 @@ export const useTemplateFormSync = (
   globalFieldKeys: ReadonlySet<string>
 ): UseTemplateFormSyncReturn => {
   const { setFieldValue, updateFieldValues } = useFormContext();
-  const { showInfoToast } = useCasesToast();
   const [{ templateId }] = useFormData<{ templateId?: string }>({ watch: ['templateId'] });
   const { data: template, isLoading: isTemplateLoading } = useGetTemplate(templateId || undefined);
   // A disabled query (no templateId) can sit in "loading" state indefinitely in react-query v4;
@@ -177,11 +174,6 @@ export const useTemplateFormSync = (
       }
     }
 
-    // A previous template's connector/settings that this template doesn't re-declare get reverted
-    // below; track that so we can let the user know (the `!templateId` clear branch is the user's
-    // own explicit action, so it stays silent).
-    let clearedPreviousTemplateConfig = false;
-
     // Apply the settings the template declares (each is independent). When switching to a template
     // that declares none, revert to defaults so a previous template's settings don't outlive it.
     if (definition.settings) {
@@ -195,7 +187,6 @@ export const useTemplateFormSync = (
     } else if (didApplySettingsRef.current) {
       revertSettingsToDefault(setFieldValue);
       didApplySettingsRef.current = false;
-      clearedPreviousTemplateConfig = true;
     }
 
     // Wait for field definitions AND supported connectors to load before finishing. Connectors are
@@ -212,13 +203,6 @@ export const useTemplateFormSync = (
     } else if (didApplyConnectorRef.current) {
       revertConnectorToDefault(setFieldValue);
       didApplyConnectorRef.current = false;
-      clearedPreviousTemplateConfig = true;
-    }
-
-    // Switching templates silently dropped the previous template's connector/settings — let the
-    // user know so a case isn't created against a stale connector or sync setting unnoticed.
-    if (clearedPreviousTemplateConfig) {
-      showInfoToast(i18n.TEMPLATE_SWITCH_CLEARED_CONFIG);
     }
 
     // Resolve all fields — inline fields pass through, ref fields are looked up in the library
@@ -268,7 +252,6 @@ export const useTemplateFormSync = (
     globalFieldKeys,
     connectors,
     isLoadingConnectors,
-    showInfoToast,
   ]);
 
   return { template, isLoading };
