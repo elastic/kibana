@@ -144,7 +144,7 @@ TRUE, _euid_branch_1_formula, NULL))
 exports[`COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots system_auth: targets-per-actor ES|QL is locked 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-system.auth-__namespace__
-| WHERE event.category IN (\\"authentication\\", \\"session\\")
+| WHERE (MV_CONTAINS(TO_STRING(event.category), \\"authentication\\") OR MV_CONTAINS(TO_STRING(event.category), \\"session\\"))
     AND event.action == \\"ssh_login\\"
     AND event.outcome == \\"success\\"
     AND ((TO_STRING(event.outcome) IS NULL OR TO_STRING(event.outcome) != \\"failure\\") AND (TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\" OR TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\" OR TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\"))

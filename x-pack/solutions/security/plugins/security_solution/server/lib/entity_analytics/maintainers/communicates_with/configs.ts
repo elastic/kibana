@@ -44,7 +44,12 @@ export const COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipInt
     relationshipKey: 'communicates_with',
     targetEntityType: 'host',
     requireTargetEntityIdExists: true,
-    esqlWhereClause: `event.category IN ("authentication", "session")
+    // `event.category` is multivalued in ECS (Elastic Agent's syslog SSH events
+    // emit `["authentication", "session"]`). ES|QL `IN` returns NULL for a
+    // multivalued left-hand side, so `event.category IN (...)` silently drops
+    // those events. Use MV_CONTAINS (same idiom as the EUID builder's
+    // `event.category` checks) so multivalued categories match.
+    esqlWhereClause: `(MV_CONTAINS(TO_STRING(event.category), "authentication") OR MV_CONTAINS(TO_STRING(event.category), "session"))
     AND event.action == "ssh_login"
     AND event.outcome == "success"`,
     compositeAggAdditionalFilters: [
