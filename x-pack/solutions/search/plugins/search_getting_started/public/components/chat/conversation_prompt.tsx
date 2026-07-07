@@ -39,11 +39,11 @@ export const ConversationPrompt = () => {
         name="searchGettingStartedChatPromptInput"
         data-test-subj="searchGettingStartedChatPromptInput"
         placeholder={i18n.translate(
-          'xpack.search.gettingStarted.chat.conversationPrompt.placeholder',
+          'xpack.searchGettingStarted.chat.conversationPrompt.placeholder',
           { defaultMessage: 'How can I help you get started today?' }
         )}
         aria-label={i18n.translate(
-          'xpack.search.gettingStarted.chat.conversationPrompt.input.aria',
+          'xpack.searchGettingStarted.chat.conversationPrompt.input.aria',
           {
             defaultMessage: 'Ask the AI assistant a question to get started',
           }
@@ -56,7 +56,7 @@ export const ConversationPrompt = () => {
       <div css={NewConversationSendButton}>
         <EuiToolTip
           content={i18n.translate(
-            'xpack.search.gettingStarted.chat.conversationPrompt.send.tooltip',
+            'xpack.searchGettingStarted.chat.conversationPrompt.send.tooltip',
             {
               defaultMessage: 'Open the AI assistant chat',
             }
@@ -69,7 +69,7 @@ export const ConversationPrompt = () => {
             size="m"
             disabled={initialMessage.trim().length === 0}
             onClick={openConversation}
-            aria-label={i18n.translate('xpack.search.gettingStarted.chat.conversationPrompt.send', {
+            aria-label={i18n.translate('xpack.searchGettingStarted.chat.conversationPrompt.send', {
               defaultMessage: 'Open the AI assistant chat',
             })}
             data-test-subj="searchGettingStartedChatPromptSend"

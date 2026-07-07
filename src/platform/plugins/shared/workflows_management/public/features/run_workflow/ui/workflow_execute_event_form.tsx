@@ -9,7 +9,7 @@
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import type { WorkflowYaml } from '@kbn/workflows';
@@ -18,6 +18,7 @@ import { useTriggerEventSearch } from './use_trigger_event_search';
 import { useTriggerEventTableConfig } from './use_trigger_event_table_config';
 import { useWorkflowsEventsDataView } from './use_workflows_events_data_view';
 import { WorkflowExecuteEventFormSearchResults } from './workflow_execute_event_form_search_results';
+import { WORKFLOW_EXECUTE_TABLE_TAB_ROOT_CLASS } from './workflow_execute_modal_global_styles';
 import {
   getWorkflowCustomTriggerTypeIds,
   isDefaultTriggerEventSearchScope,
@@ -37,8 +38,10 @@ export interface WorkflowExecuteEventFormProps {
   setErrors?: (errors: string | null) => void;
   /** Number of rows currently selected in the trigger-events table (checkbox selection). */
   onTriggerEventTableSelectionCountChange?: (selectedCount: number) => void;
-  /** Notifies the modal when UnifiedDataTable / EuiDataGrid fullscreen toggles. */
-  onEventGridFullScreenChange?: (isFullScreen: boolean) => void;
+  /** Mirrors modal layout when the table expands to full screen. */
+  isTableGridFullScreen?: boolean;
+  /** Notifies the modal when the table toolbar fullscreen control is toggled. */
+  onTableGridFullScreenChange?: (isFullScreen: boolean) => void;
   /** Switches the execute modal to the Manual tab from the empty-state action. */
   onOpenManualTab?: () => void;
 }
@@ -50,7 +53,8 @@ export const WorkflowExecuteEventForm = ({
   errors,
   setErrors,
   onTriggerEventTableSelectionCountChange,
-  onEventGridFullScreenChange,
+  isTableGridFullScreen = false,
+  onTableGridFullScreenChange,
   onOpenManualTab,
 }: WorkflowExecuteEventFormProps): React.JSX.Element => {
   const { euiTheme } = useEuiTheme();
@@ -74,15 +78,6 @@ export const WorkflowExecuteEventForm = ({
   );
 
   const triggerEventsSurfaceRef = useRef<HTMLDivElement | null>(null);
-  const [isDataGridFullScreen, setIsDataGridFullScreen] = useState(false);
-
-  const handleDataGridFullScreenChange = useCallback(
-    (nextIsFullScreen: boolean) => {
-      setIsDataGridFullScreen(nextIsFullScreen);
-      onEventGridFullScreenChange?.(nextIsFullScreen);
-    },
-    [onEventGridFullScreenChange]
-  );
 
   const dataView = useWorkflowsEventsDataView({
     dataViews: services.dataViews,
@@ -122,10 +117,10 @@ export const WorkflowExecuteEventForm = ({
   });
 
   useEffect(() => {
-    if (rows.length === 0 && isDataGridFullScreen) {
-      setIsDataGridFullScreen(false);
+    if (rows.length === 0 && isTableGridFullScreen) {
+      onTableGridFullScreenChange?.(false);
     }
-  }, [rows.length, isDataGridFullScreen]);
+  }, [rows.length, isTableGridFullScreen, onTableGridFullScreenChange]);
 
   const documentCount = searchResult?.total ?? 0;
 
@@ -178,7 +173,7 @@ export const WorkflowExecuteEventForm = ({
 
   return (
     <EuiFlexGroup
-      className="workflowTriggerEventsRoot"
+      className={`workflowTriggerEventsRoot ${WORKFLOW_EXECUTE_TABLE_TAB_ROOT_CLASS}`}
       direction="column"
       gutterSize="s"
       css={css({
@@ -187,7 +182,7 @@ export const WorkflowExecuteEventForm = ({
         height: '100%',
       })}
     >
-      {!isDataGridFullScreen ? (
+      {!isTableGridFullScreen ? (
         <EuiFlexItem grow={false}>
           <SearchBar
             appName="workflow_management"
@@ -241,7 +236,8 @@ export const WorkflowExecuteEventForm = ({
         externalCustomRenderers={tableConfig.externalCustomRenderers}
         totalHits={totalHits}
         onFetchMoreRecords={onFetchMoreRecords}
-        onDataGridFullScreenChange={handleDataGridFullScreenChange}
+        isTableGridFullScreen={isTableGridFullScreen}
+        onDataGridFullScreenChange={onTableGridFullScreenChange}
         showNoEventsEmptyState={showNoEventsEmptyState}
         isDefaultTriggerScope={isDefaultTriggerScope}
         onOpenManualTab={onOpenManualTab}

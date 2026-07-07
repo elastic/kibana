@@ -99,6 +99,14 @@ describe('RuleFilter', () => {
     expect(mockUseFetchRules).toHaveBeenLastCalledWith(expect.objectContaining({ enabled: true }));
   });
 
+  it('restricts fetched rules to kind:alert', () => {
+    renderWithI18n(<RuleFilter matcher="" onChange={jest.fn()} />);
+
+    expect(mockUseFetchRules).toHaveBeenCalledWith(
+      expect.objectContaining({ filter: 'kind:alert' })
+    );
+  });
+
   it('displays rules from API', async () => {
     renderWithI18n(<RuleFilter matcher="" onChange={jest.fn()} />);
 
@@ -301,6 +309,14 @@ describe('TagsFilter', () => {
 
     expect(mockUseFetchRuleTags).toHaveBeenLastCalledWith(
       expect.objectContaining({ enabled: true })
+    );
+  });
+
+  it('restricts fetched tags to kind:alert', () => {
+    renderWithI18n(<TagsFilter matcher="" onChange={jest.fn()} />);
+
+    expect(mockUseFetchRuleTags).toHaveBeenCalledWith(
+      expect.objectContaining({ filter: 'kind:alert' })
     );
   });
 

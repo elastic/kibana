@@ -13,6 +13,7 @@ import {
   EuiIcon,
   EuiPopover,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -94,20 +95,27 @@ export const PlaygroundMoreOptionsMenu = ({
       panelPaddingSize="none"
       anchorPosition="downLeft"
       button={
-        <EuiButtonIcon
-          iconType="boxesVertical"
-          onClick={togglePopover}
-          size="m"
-          data-test-subj="moreOptionsActionButton"
-          aria-label={i18n.translate(
-            'xpack.searchPlayground.savedPlayground.moreOptions.ariaLabel',
-            {
-              defaultMessage: 'More options',
-            }
-          )}
-          aria-expanded={showMoreOptions}
-          aria-haspopup="true"
-        />
+        <EuiToolTip
+          content={i18n.translate('xpack.searchPlayground.savedPlayground.moreOptions.ariaLabel', {
+            defaultMessage: 'More options',
+          })}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="boxesVertical"
+            onClick={togglePopover}
+            size="m"
+            data-test-subj="moreOptionsActionButton"
+            aria-label={i18n.translate(
+              'xpack.searchPlayground.savedPlayground.moreOptions.ariaLabel',
+              {
+                defaultMessage: 'More options',
+              }
+            )}
+            aria-expanded={showMoreOptions}
+            aria-haspopup="true"
+          />
+        </EuiToolTip>
       }
     >
       <EuiContextMenuPanel data-test-subj="moreOptionsContextMenu" items={menuItems} />

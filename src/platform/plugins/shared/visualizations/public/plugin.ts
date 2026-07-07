@@ -115,7 +115,6 @@ import {
   setSavedSearch,
   setDataViews,
   setInspector,
-  getTypes,
   setNotifications,
 } from './services';
 import type { ListingViewRegistry } from './types';
@@ -123,6 +122,7 @@ import type { VisualizationSavedObjectAttributes } from '../common/content_manag
 import { LATEST_VERSION, CONTENT_ID } from '../common/content_management';
 import { registerActions } from './actions/register_actions';
 import type { VisualizeByReferenceState } from '../common/embeddable/types';
+import { VegaIcon } from './components/vega_icon';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -503,7 +503,7 @@ export class VisualizationsPlugin
       }),
       getIconForSavedObject: (savedObject) => {
         const visState = JSON.parse(savedObject.attributes.visState ?? '{}');
-        return getTypes().get(visState.type)?.icon ?? '';
+        return visState.type === 'vega' ? VegaIcon : 'visualizeApp';
       },
     });
     embeddable.registerLegacyURLTransform(

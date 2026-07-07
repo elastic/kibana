@@ -54,7 +54,6 @@ const helpersMock: jest.Mocked<CasesPublicStart['helpers']> = {
   }),
   getRuleIdFromEvent: jest.fn(),
   groupAlertsByRule: jest.fn(),
-  getObservablesFromEcs: jest.fn(),
 };
 
 export interface CaseUiClientMock {
@@ -72,6 +71,7 @@ export const mockCasesContract = (): CaseUiClientMock => ({
   helpers: helpersMock,
   config: {
     templatesEnabled: false,
+    attachmentsEnabled: false,
     casesRedesign: { list: false, details: false, settings: false },
   },
 });

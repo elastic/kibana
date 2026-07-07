@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComponentType } from 'react';
+import type { ComponentType, RefAttributes } from 'react';
 import type {
   AttachmentInput,
   ConversationAttachment,
@@ -15,6 +15,7 @@ import type { BrowserApiToolDefinition } from './tools/browser_api_tool';
 import type {
   AgentsServiceStartContract,
   AttachmentServiceStartContract,
+  RendererServiceStartContract,
   EventsServiceStartContract,
   ToolServiceStartContract,
 } from '.';
@@ -111,6 +112,21 @@ export interface PublicEmbeddableConversationProps extends EmbeddableConversatio
   ariaLabelledBy?: string;
 }
 
+export interface EmbeddableConversationInputRef {
+  /**
+   * Add an attachment pill to the input. The pill appears immediately and the
+   * user can remove it before sending. Duplicates (matched by `id`) are merged.
+   */
+  addAttachment: (attachment: ConversationAttachment) => void;
+}
+
+export interface PublicEmbeddableConversationInputProps {
+  /**
+   * Agent the input is bound to. Defaults to `agentBuilderDefaultAgentId` when omitted.
+   */
+  agentId?: string;
+}
+
 /**
  * Options passed when opening or toggling the conversation sidebar.
  */
@@ -147,6 +163,10 @@ export interface AgentBuilderPluginStart {
    * Attachment service contract, can be used to register and retrieve attachment UI definitions.
    */
   attachments: AttachmentServiceStartContract;
+  /**
+   * Renderer service contract, can be used to register and retrieve renderer UI definitions.
+   */
+  renderers: RendererServiceStartContract;
   /**
    * Tool service contract, can be used to list or execute tools.
    */
@@ -218,4 +238,25 @@ export interface AgentBuilderPluginStart {
    * functional agent_builder chat without the sidebar chrome.
    */
   EmbeddableConversation: ComponentType<PublicEmbeddableConversationProps>;
+  /**
+   * Inline-embeddable chat **input** component, pre-bound to the plugin's
+   * internal services.
+   *
+   * Use this when you want to give users an Agent Builder–style entry point
+   * inside your own UI without hosting the full conversation.
+   *
+   * @example
+   * ```tsx
+   * const inputRef = useRef<EmbeddableConversationInputRef>(null);
+   *
+   * <plugins.agentBuilder.EmbeddableConversationInput
+   *   ref={inputRef}
+   *   agentId="my-agent-id"
+   * />
+   * <button onClick={() => inputRef.current?.addAttachment(att)}>Attach</button>
+   * ```
+   */
+  EmbeddableConversationInput: ComponentType<
+    PublicEmbeddableConversationInputProps & RefAttributes<EmbeddableConversationInputRef>
+  >;
 }

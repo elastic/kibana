@@ -68,12 +68,6 @@ export const renderAttachmentTagParser = createTagParser({
     attachmentId: extractAttr(value, renderAttachmentElement.attributes.attachmentId),
     version: extractAttr(value, renderAttachmentElement.attributes.version),
   }),
-  assignAttributes: (node, attributes) => {
-    node.type = renderAttachmentElement.tagName;
-    node.attachmentId = attributes.attachmentId;
-    node.attachmentVersion = attributes.version;
-    delete node.value;
-  },
   createNode: (attributes, position) => ({
     type: renderAttachmentElement.tagName,
     attachmentId: attributes.attachmentId,

@@ -8,8 +8,8 @@
 import type React from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
-import type { ComposeFormValues } from './compose_form_types';
-import type { BuilderState, RuleBuilderRecoveryProps } from './rule_builder/types';
+import type { FormValues } from '../../form/types';
+import type { BuilderState } from './rule_builder/types';
 
 export type ComposeDiscoverMode = 'create' | 'edit' | 'clone';
 
@@ -24,14 +24,26 @@ export type StepId =
   | 'details'
   | 'notifications';
 
+export const isAlertConditionStepId = (id: StepId): boolean =>
+  id === 'alertCondition' || id === 'builderCondition';
+
+export const isBuilderConditionStepId = (id: StepId): boolean => id === 'builderCondition';
+
+export interface CustomRecoveryRenderProps {
+  state: ComposeDiscoverState;
+  dispatch: React.Dispatch<ComposeDiscoverAction>;
+}
+
 export interface StepRenderProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
   onRecoveryTypeChange: (type: RecoveryType) => void;
-  onKindChange: (kind: 'signal' | 'alert') => void;
+  isEditing: boolean;
   ruleId?: string;
-  renderBuilderRecovery?: (props: RuleBuilderRecoveryProps) => React.ReactNode;
+  renderCustomRecovery?: (props: CustomRecoveryRenderProps) => React.ReactNode;
+  /** Opts the user into manual split mode from the form (e.g. split-failed CTA). */
+  onManualSplit?: () => void;
 }
 
 export interface StepDefinition {
@@ -39,7 +51,7 @@ export interface StepDefinition {
   title: string;
   render: (props: StepRenderProps) => React.ReactNode;
   validate?: (
-    methods: UseFormReturn<ComposeFormValues>,
+    methods: UseFormReturn<FormValues>,
     state: ComposeDiscoverState,
     services?: RuleFormServices,
     builderState?: BuilderState
@@ -66,6 +78,11 @@ export interface ComposeDiscoverState {
   queryCommitted: boolean;
   /** When true the stepped form is replaced by a full YAML editor. */
   yamlMode: boolean;
+  /**
+   * When true the sandbox shows separate base/alert tabs and the heuristic
+   * auto-split on Apply is disabled. The user opted in from the unified editor.
+   */
+  manualSplitEnabled: boolean;
 }
 
 export type ComposeDiscoverAction =
@@ -73,11 +90,13 @@ export type ComposeDiscoverAction =
   | { type: 'KIND_CHANGE'; kind: 'signal' | 'alert' }
   | { type: 'SET_TAB'; tab: QueryTab }
   | { type: 'SET_STEP'; step: number }
-  | { type: 'GO_NEXT'; isAlert: boolean }
-  | { type: 'GO_BACK' }
+  | { type: 'GO_NEXT'; isAlert: boolean; isBuilderMode?: boolean }
+  | { type: 'GO_BACK'; isBuilderMode?: boolean }
   | { type: 'OPEN_CHILD'; isAlert: boolean }
   | { type: 'OPEN_CHILD_FOR_STEP'; step: number; isAlert: boolean }
   | { type: 'CLOSE_CHILD' }
   | { type: 'COMMIT_QUERY' }
   | { type: 'INVALIDATE_QUERY' }
-  | { type: 'SET_YAML_MODE'; enabled: boolean };
+  | { type: 'SET_YAML_MODE'; enabled: boolean }
+  | { type: 'ENABLE_MANUAL_SPLIT' }
+  | { type: 'DISABLE_MANUAL_SPLIT' };

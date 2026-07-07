@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import type { IconType } from '@elastic/eui';
+import type { EuiButtonColor, IconType } from '@elastic/eui';
 import type {
   UnknownAttachment,
   AttachmentVersion,
@@ -70,6 +70,8 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
   isSidebar: boolean;
   /** Whether the attachment is being rendered in canvas mode (expanded flyout view) */
   isCanvas: boolean;
+  /** Id of the agent the current conversation is using, when known. */
+  agentId?: string;
   /** Function to update the attachment's origin reference */
   updateOrigin: (origin: string) => Promise<UpdateOriginResponse | undefined>;
   /** Callback to open the attachment in canvas mode (expanded flyout view). Undefined when already in canvas mode. */
@@ -93,6 +95,8 @@ export interface ActionButton {
   icon?: IconType;
   /** Whether this is the primary action button */
   type: ActionButtonType;
+  /** Optional EUI button color override (defaults to 'text') */
+  color?: EuiButtonColor;
   /** Whether the action is currently unavailable */
   disabled?: boolean;
   /** Optional explanation shown when a disabled action remains visible */

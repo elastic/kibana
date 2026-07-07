@@ -39,7 +39,7 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
 
     initSubscribers(container);
 
-    scheduleDispatcherTask({ taskManager, resourceManager }).catch((error) => {
+    scheduleDispatcherTask({ taskManager }).catch((error) => {
       logger.error(error as Error, {
         error: {
           code: 'DISPATCHER_TASK_SCHEDULE_FAILURE',

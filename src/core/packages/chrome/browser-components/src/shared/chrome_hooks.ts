@@ -29,6 +29,8 @@ import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useChromeComponentsDeps } from '../context';
 
+export { useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
+
 /**
  * Returns the current classic breadcrumbs set via `chrome.setBreadcrumbs()`.
  * Used by `ClassicHeader`.
@@ -303,4 +305,14 @@ export function useHasInlineAppHeader(): boolean {
 export function useInternalLegacyActionMenu(): MountPoint | undefined {
   const { legacyActionMenu$ } = useChromeService().componentDeps;
   return useObservable(legacyActionMenu$, undefined);
+}
+
+/**
+ * Returns the current user menu content set via
+ * `chrome.next.userMenu.set()`, or null if not set.
+ */
+export function useUserMenu(): ReactNode {
+  const chrome = useChromeService();
+  const content$ = useMemo(() => chrome.next.userMenu.get$(), [chrome]);
+  return useObservable(content$, null);
 }
