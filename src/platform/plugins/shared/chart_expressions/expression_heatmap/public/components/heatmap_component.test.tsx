@@ -24,7 +24,10 @@ import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
 import type { HeatmapRenderProps, HeatmapArguments } from '../../common';
-import HeatmapComponent, { getDateFormatPattern } from './heatmap_component';
+import HeatmapComponent, {
+  computeMinIntervalFromData,
+  getDateFormatPattern,
+} from './heatmap_component';
 import { LegendSize } from '@kbn/chart-expressions-common';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
@@ -676,72 +679,120 @@ describe('HeatmapComponent', function () {
   });
 
   describe('time-based heatmap with ES|QL data', () => {
-    it('renders time-based heatmap with ES|QL data and scaled date formatting', async () => {
-      const timeData: Datatable = {
-        type: 'datatable',
-        meta: { type: 'esql' },
-        columns: [
-          {
-            id: 'timestamp',
-            name: 'timestamp',
-            meta: { type: 'date', esMeta: { bucket: { interval: 1, unit: 'minute' } } },
-          },
-          { id: 'category', name: 'category', meta: { type: 'string' } },
-          { id: 'value', name: 'value', meta: { type: 'number' } },
-        ] satisfies Datatable['columns'],
-        rows: [
-          { timestamp: '2024-01-01T00:00:00.000Z', category: 'A', value: 10 },
-          { timestamp: '2024-01-01T00:01:00.000Z', category: 'A', value: 20 },
-          { timestamp: '2024-01-01T00:02:00.000Z', category: 'B', value: 15 },
-        ],
-      };
+    const timeArgs: HeatmapArguments = {
+      ...args,
+      xAccessor: 'timestamp',
+      yAccessor: 'category',
+      valueAccessor: 'value',
+      gridConfig: {
+        ...args.gridConfig,
+        xScaleType: 'time',
+      },
+    };
 
-      const timeArgs: HeatmapArguments = {
-        ...args,
-        xAccessor: 'timestamp',
-        yAccessor: 'category',
-        valueAccessor: 'value',
-        gridConfig: {
-          ...args.gridConfig,
-          xScaleType: 'time',
-        },
-      };
+    const buildTimeData = (
+      rows: Array<Record<string, string | number>>,
+      timestampMeta: Datatable['columns'][number]['meta'] = { type: 'date' }
+    ): Datatable => ({
+      type: 'datatable',
+      meta: { type: 'esql' },
+      columns: [
+        { id: 'timestamp', name: 'timestamp', meta: timestampMeta },
+        { id: 'category', name: 'category', meta: { type: 'string' } },
+        { id: 'value', name: 'value', meta: { type: 'number' } },
+      ] satisfies Datatable['columns'],
+      rows,
+    });
 
-      const mockUISettings = {
-        get: jest.fn((key: string) => {
-          if (key === 'dateFormat:scaled') {
-            return [
-              ['', 'HH:mm:ss.SSS'],
-              ['PT1S', 'HH:mm:ss'],
-              ['PT1M', 'HH:mm'],
-              ['PT1H', 'YYYY-MM-DD HH:mm'],
-            ];
-          }
-          return 'YYYY-MM-DD';
-        }),
-      } as any;
-
-      const newProps = {
-        ...wrapperProps,
-        data: timeData,
-        args: timeArgs,
-        uiSettings: mockUISettings,
-      };
-
-      const component = mountWithIntl(<HeatmapComponent {...newProps} />);
+    const renderXScale = async (timeData: Datatable) => {
+      const component = mountWithIntl(
+        <HeatmapComponent {...wrapperProps} data={timeData} args={timeArgs} />
+      );
       await act(async () => {
         await component.update();
       });
+      return component.find(Heatmap).prop('xScale');
+    };
 
-      // Verify that Heatmap component is rendered with time scale
-      const heatmapComponent = component.find(Heatmap);
-      expect(heatmapComponent.exists()).toBe(true);
-      expect(heatmapComponent.prop('xScale')).toEqual(
-        expect.objectContaining({
-          type: 'time',
-          interval: { type: 'calendar', unit: 'm', value: 1 },
+    it('renders time-based heatmap with ES|QL data using the bucket interval', async () => {
+      const xScale = await renderXScale(
+        buildTimeData(
+          [
+            { timestamp: '2024-01-01T00:00:00.000Z', category: 'A', value: 10 },
+            { timestamp: '2024-01-01T00:01:00.000Z', category: 'A', value: 20 },
+            { timestamp: '2024-01-01T00:02:00.000Z', category: 'B', value: 15 },
+          ],
+          { type: 'date', esMeta: { bucket: { interval: 1, unit: 'minute' } } }
+        )
+      );
+
+      expect(xScale).toEqual({
+        type: 'time',
+        interval: { type: 'calendar', unit: 'm', value: 1 },
+      });
+    });
+
+    it('falls back to a fixed ms interval when parseEsInterval rejects the bucket interval', async () => {
+      // "2w" is a valid moment duration but parseEsInterval throws because calendar weeks
+      // only allow value = 1. The scale should still be time-based, using the parsed ms value.
+      const xScale = await renderXScale(
+        buildTimeData(
+          [
+            { timestamp: '2024-01-01T00:00:00.000Z', category: 'A', value: 10 },
+            { timestamp: '2024-01-15T00:00:00.000Z', category: 'A', value: 20 },
+          ],
+          { type: 'date', esMeta: { bucket: { interval: 2, unit: 'week' } } }
+        )
+      );
+
+      const twoWeeksMs = 2 * 7 * 24 * 60 * 60 * 1000;
+      expect(xScale).toEqual({
+        type: 'time',
+        interval: { type: 'fixed', unit: 'ms', value: twoWeeksMs },
+      });
+    });
+
+    it('computes the interval from row spacing when no bucket metadata is available', async () => {
+      // Without esMeta.bucket there is no dateHistogramMeta.interval, so both parseEsInterval and
+      // parseInterval short-circuit and the scale must be inferred from computeMinIntervalFromData.
+      const fiveMinutesMs = 5 * 60 * 1000;
+      const xScale = await renderXScale(
+        buildTimeData([
+          { timestamp: '2024-01-01T00:00:00.000Z', category: 'A', value: 10 },
+          { timestamp: '2024-01-01T00:05:00.000Z', category: 'A', value: 20 },
+          { timestamp: '2024-01-01T00:10:00.000Z', category: 'B', value: 15 },
+        ])
+      );
+
+      expect(xScale).toEqual({
+        type: 'time',
+        interval: { type: 'fixed', unit: 'ms', value: fiveMinutesMs },
+      });
+    });
+
+    it('falls back to a linear scale when no interval can be computed', async () => {
+      // >1 row (to bypass the ordinal early return) but all identical timestamps means the Set of
+      // unique values has size 1, so computeMinIntervalFromData returns undefined too.
+      const xScale = await renderXScale(
+        buildTimeData([
+          { timestamp: '2024-01-01T00:00:00.000Z', category: 'A', value: 10 },
+          { timestamp: '2024-01-01T00:00:00.000Z', category: 'B', value: 20 },
+        ])
+      );
+
+      expect(xScale).toEqual({ type: 'linear' });
+    });
+
+    it('falls back to an ordinal scale for a single row even when a time scale is requested', async () => {
+      // computeXScale short-circuits to Ordinal for chartData.length <= 1 before any time logic.
+      const xScale = await renderXScale(
+        buildTimeData([{ timestamp: '2024-01-01T00:00:00.000Z', category: 'A', value: 10 }], {
+          type: 'date',
+          esMeta: { bucket: { interval: 1, unit: 'minute' } },
         })
       );
+
+      expect(xScale).toEqual({ type: 'ordinal' });
     });
   });
 
@@ -790,6 +841,34 @@ describe('HeatmapComponent', function () {
       } as any;
 
       expect(getDateFormatPattern(1000, mockUISettings)).toBe('YYYY-MM-DD');
+    });
+  });
+
+  describe('computeMinIntervalFromData', () => {
+    it('computes minimum interval from timestamp data', () => {
+      const timestampData = [
+        { x: 1000, y: 'a', value: 1 },
+        { x: 2000, y: 'a', value: 2 },
+        { x: 3500, y: 'b', value: 3 },
+      ];
+      expect(computeMinIntervalFromData(timestampData, 'x')).toBe(1000);
+    });
+
+    it('returns undefined for insufficient data', () => {
+      const singleRow = [{ x: 1000, y: 'a', value: 1 }];
+      expect(computeMinIntervalFromData(singleRow, 'x')).toBeUndefined();
+    });
+
+    it('returns undefined for empty data', () => {
+      expect(computeMinIntervalFromData([], 'x')).toBeUndefined();
+    });
+
+    it('returns undefined when xAccessor is not provided', () => {
+      const timestampData = [
+        { x: 1000, y: 'a', value: 1 },
+        { x: 2000, y: 'a', value: 2 },
+      ];
+      expect(computeMinIntervalFromData(timestampData, undefined)).toBeUndefined();
     });
   });
 });
