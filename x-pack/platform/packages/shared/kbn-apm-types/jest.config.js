@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export const FLYOUT_STORAGE_KEYS = {
-  RIGHT_PANEL_SELECTED_TABS: 'securitySolution.documentDetailsFlyout.rightPanel.selectedTabs.v8.14',
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-apm-types'],
 };
