@@ -510,6 +510,9 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
         return QuerySource.SEARCH_BUTTON;
       case QuerySubmitTrigger.TIME_FILTER:
         return QuerySource.TIME_FILTER;
+      // Editor-internal submits (QuerySubmitTrigger.TEXT_BASED_EDITOR) are intentionally not tracked here:
+      // the ESQL editor (@kbn/esql-editor) already emits its own `esql.query_submitted` event for those
+      // (with sources like MANUAL, QUICK_SEARCH, HISTORY, etc.). Adding a case for it would double-count.
       default:
         return;
     }
