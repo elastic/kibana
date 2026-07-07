@@ -145,7 +145,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'returns incomplete logs-ingest for malformed complete ea-status payload',
+      'returns with incomplete status for malformed payloads',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
         const adminHeaders = {
