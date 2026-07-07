@@ -14,7 +14,11 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { type EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
 import { WORKFLOW_RESUME_TASK_TYPE } from './types';
 import type { ResumeWorkflowExecutionParams } from './types';
-import { getWorkflowGlobalTimeoutResumeTaskId, WorkflowTaskManager } from './workflow_task_manager';
+import {
+  getWorkflowGlobalTimeoutResumeTaskId,
+  getWorkflowImmediateResumeTaskId,
+  WorkflowTaskManager,
+} from './workflow_task_manager';
 import { generateExecutionTaskScope } from '../utils';
 
 // Mock uuid
@@ -283,26 +287,30 @@ describe('WorkflowTaskManager', () => {
   });
 
   describe('scheduleImmediateResume', () => {
-    it('should schedule a resume task with WORKFLOW_RESUME_TASK_TYPE and no runAt', async () => {
-      mockTaskManager.schedule.mockResolvedValue({ id: 'immediate-task-id' } as any);
+    it('uses the stable immediate-resume task id and calls removeIfExists before scheduling', async () => {
+      const executionId = 'exec-789';
+      const stableId = getWorkflowImmediateResumeTaskId(executionId);
+      mockTaskManager.schedule.mockResolvedValue({ id: stableId } as any);
 
       const result = await workflowTaskManager.scheduleImmediateResume({
-        executionId: 'exec-789',
+        executionId,
         spaceId: 'default',
         fakeRequest,
       });
 
-      expect(result).toEqual({ taskId: 'immediate-task-id' });
+      expect(result).toEqual({ taskId: stableId });
+      expect(mockTaskManager.removeIfExists).toHaveBeenCalledWith(stableId);
       expect(mockTaskManager.schedule).toHaveBeenCalledWith(
-        expect.objectContaining({
+        {
+          id: stableId,
           taskType: WORKFLOW_RESUME_TASK_TYPE,
           params: {
-            workflowRunId: 'exec-789',
+            workflowRunId: executionId,
             spaceId: 'default',
           } as ResumeWorkflowExecutionParams,
           state: {},
-          scope: ['workflow:execution:exec-789'],
-        }),
+          scope: [`workflow:execution:${executionId}`],
+        },
         { request: fakeRequest }
       );
       // runAt must not be set — task runs at the next available slot
@@ -310,21 +318,45 @@ describe('WorkflowTaskManager', () => {
       expect(scheduledTask.runAt).toBeUndefined();
     });
 
-    it('should use executionId-scoped scope string', async () => {
-      mockTaskManager.schedule.mockResolvedValue({ id: 'task-id' } as any);
+    it('removeIfExists is called before schedule to prevent double-resume', async () => {
+      const executionId = 'exec-order-check';
+      const stableId = getWorkflowImmediateResumeTaskId(executionId);
+      const callOrder: string[] = [];
+
+      mockTaskManager.removeIfExists.mockImplementation(async () => {
+        callOrder.push('removeIfExists');
+      });
+      mockTaskManager.schedule.mockImplementation(async () => {
+        callOrder.push('schedule');
+        return { id: stableId } as any;
+      });
 
       await workflowTaskManager.scheduleImmediateResume({
-        executionId: 'exec-abc',
+        executionId,
+        spaceId: 'default',
+        fakeRequest,
+      });
+
+      expect(callOrder).toEqual(['removeIfExists', 'schedule']);
+    });
+
+    it('uses executionId-scoped scope string and correct spaceId', async () => {
+      const executionId = 'exec-abc';
+      const stableId = getWorkflowImmediateResumeTaskId(executionId);
+      mockTaskManager.schedule.mockResolvedValue({ id: stableId } as any);
+
+      await workflowTaskManager.scheduleImmediateResume({
+        executionId,
         spaceId: 'space-x',
         fakeRequest,
       });
 
       const scheduledTask = (mockTaskManager.schedule as jest.Mock).mock.calls[0][0];
-      expect(scheduledTask.scope).toEqual(['workflow:execution:exec-abc']);
+      expect(scheduledTask.scope).toEqual([`workflow:execution:${executionId}`]);
       expect(scheduledTask.params.spaceId).toBe('space-x');
     });
 
-    it('should propagate scheduling errors', async () => {
+    it('propagates scheduling errors', async () => {
       mockTaskManager.schedule.mockRejectedValue(new Error('Task manager unavailable'));
 
       await expect(
@@ -336,20 +368,98 @@ describe('WorkflowTaskManager', () => {
       ).rejects.toThrow('Task manager unavailable');
     });
 
-    it('should schedule without request when fakeRequest is omitted', async () => {
-      mockTaskManager.schedule.mockResolvedValue({ id: 'no-req-task' } as any);
+    it('schedules without request when fakeRequest is omitted', async () => {
+      const executionId = 'exec-no-req';
+      const stableId = getWorkflowImmediateResumeTaskId(executionId);
+      mockTaskManager.schedule.mockResolvedValue({ id: stableId } as any);
 
       await workflowTaskManager.scheduleImmediateResume({
-        executionId: 'exec-no-req',
+        executionId,
         spaceId: 'default',
       });
 
       expect(mockTaskManager.schedule).toHaveBeenCalledWith(
         expect.objectContaining({
-          params: { workflowRunId: 'exec-no-req', spaceId: 'default' },
+          params: { workflowRunId: executionId, spaceId: 'default' },
         }),
         undefined
       );
+    });
+
+    it('regression: concurrent calls both target the same stable id (last writer wins via removeIfExists)', async () => {
+      // Verify that two concurrent scheduleImmediateResume calls for the same execution
+      // both target the same stable task id — the idempotent removeIfExists + schedule
+      // pattern means the second call replaces the first, never creating two tasks.
+      const executionId = 'exec-concurrent';
+      const stableId = getWorkflowImmediateResumeTaskId(executionId);
+
+      mockTaskManager.schedule.mockResolvedValue({ id: stableId } as any);
+
+      await Promise.all([
+        workflowTaskManager.scheduleImmediateResume({
+          executionId,
+          spaceId: 'default',
+          fakeRequest,
+        }),
+        workflowTaskManager.scheduleImmediateResume({
+          executionId,
+          spaceId: 'default',
+          fakeRequest,
+        }),
+      ]);
+
+      const scheduledIds = (mockTaskManager.schedule as jest.Mock).mock.calls.map(
+        ([taskDef]) => taskDef.id
+      );
+      // Both calls must target the same stable id — never a random uuid
+      expect(scheduledIds).toEqual([stableId, stableId]);
+    });
+  });
+
+  describe('scheduleAndRunImmediateResume', () => {
+    it('should call scheduleImmediateResume and then runSoon on the returned taskId', async () => {
+      const executionId = 'exec-and-run';
+      const stableId = getWorkflowImmediateResumeTaskId(executionId);
+      mockTaskManager.schedule.mockResolvedValue({ id: stableId } as any);
+
+      await workflowTaskManager.scheduleAndRunImmediateResume({
+        executionId,
+        spaceId: 'default',
+        fakeRequest,
+      });
+
+      expect(mockTaskManager.removeIfExists).toHaveBeenCalledWith(stableId);
+      expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.runSoon).toHaveBeenCalledWith(stableId);
+    });
+
+    it('should propagate errors from scheduleImmediateResume', async () => {
+      mockTaskManager.schedule.mockRejectedValue(new Error('TM unavailable'));
+
+      await expect(
+        workflowTaskManager.scheduleAndRunImmediateResume({
+          executionId: 'exec-fail',
+          spaceId: 'default',
+          fakeRequest,
+        })
+      ).rejects.toThrow('TM unavailable');
+
+      expect(mockTaskManager.runSoon).not.toHaveBeenCalled();
+    });
+
+    it('should propagate errors from runSoon', async () => {
+      const executionId = 'exec-runsoon-fail';
+      const stableId = getWorkflowImmediateResumeTaskId(executionId);
+      mockTaskManager.schedule.mockResolvedValue({ id: stableId } as any);
+      mockTaskManager.runSoon.mockRejectedValue(new Error('runSoon failed'));
+
+      await expect(
+        workflowTaskManager.scheduleAndRunImmediateResume({
+          executionId,
+          spaceId: 'default',
+          fakeRequest,
+        })
+      ).rejects.toThrow('runSoon failed');
     });
   });
 
