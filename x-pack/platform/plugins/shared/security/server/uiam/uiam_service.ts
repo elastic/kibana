@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { readFileSync } from 'fs';
+import { chunk } from 'lodash';
 import { Agent } from 'undici';
 
 import type { Logger } from '@kbn/core/server';
@@ -17,6 +18,7 @@ import type {
   UiamOAuthClientResponse,
   UiamOAuthClientType,
   UiamOAuthConnectionResponse,
+  UiamResolvedUsersResponse,
   UpdateUiamOAuthClientParams,
   UpdateUiamOAuthConnectionParams,
 } from '@kbn/core-security-server';
@@ -106,6 +108,12 @@ export type OAuthConnectionResponse = UiamOAuthConnectionResponse;
 export type CreateOAuthClientRequestBody = CreateUiamOAuthClientParams;
 export type PatchOAuthClientRequestBody = UpdateUiamOAuthClientParams;
 export type PatchOAuthConnectionRequestBody = UpdateUiamOAuthConnectionParams;
+export type ResolvedUsersResponse = UiamResolvedUsersResponse;
+
+/**
+ * The maximum number of user IDs to resolve in a single UIAM request (avoids overly long URLs).
+ */
+const RESOLVE_USERS_BATCH_SIZE = 50;
 
 /**
  * Shape of the `error` object inside a UIAM non-2xx response payload, mirroring
@@ -278,6 +286,13 @@ export interface UiamServicePublic {
     connectionId: string,
     reason?: string
   ): Promise<OAuthConnectionResponse>;
+
+  /**
+   * Resolves one or more user IDs into basic user information via the UIAM service.
+   * @param accessToken UIAM session access token.
+   * @param userIds The user IDs to resolve.
+   */
+  resolveUsers(accessToken: string, userIds: string[]): Promise<ResolvedUsersResponse>;
 }
 
 interface UiamServiceOptions {
@@ -829,6 +844,53 @@ export class UiamService implements UiamServicePublic {
       this.#logger.error(
         () => `Failed to revoke OAuth connection ${connectionId}: ${getDetailedErrorMessage(err)}`
       );
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.resolveUsers}.
+   */
+  async resolveUsers(accessToken: string, userIds: string[]): Promise<ResolvedUsersResponse> {
+    const uniqueUserIds = [...new Set(userIds)];
+    if (uniqueUserIds.length === 0) {
+      return { users: {} };
+    }
+
+    try {
+      this.#logger.debug(`Attempting to resolve ${uniqueUserIds.length} user(s).`);
+
+      const responses = await Promise.all(
+        chunk(uniqueUserIds, RESOLVE_USERS_BATCH_SIZE).map(
+          async (batch): Promise<ResolvedUsersResponse> => {
+            const url = new URL(`${this.#config.url}/uiam/api/v1/users`);
+            url.searchParams.set('user_id', batch.join(','));
+
+            return UiamService.#parseUiamResponse(
+              await fetch(url.toString(), {
+                method: 'GET',
+                headers: {
+                  'User-Agent': this.#userAgentHeader,
+                  [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+                  Authorization: `Bearer ${accessToken}`,
+                },
+                // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+                dispatcher: this.#dispatcher,
+              })
+            );
+          }
+        )
+      );
+
+      const users: ResolvedUsersResponse['users'] = Object.assign(
+        {},
+        ...responses.map((response) => response.users)
+      );
+
+      this.#logger.debug('Successfully resolved users.');
+      return { users };
+    } catch (err) {
+      this.#logger.error(() => `Failed to resolve users: ${getDetailedErrorMessage(err)}`);
       throw err;
     }
   }

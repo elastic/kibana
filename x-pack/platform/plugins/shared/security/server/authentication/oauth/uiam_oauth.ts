@@ -14,6 +14,7 @@ import type {
   UiamOAuthClientResponse,
   UiamOAuthConnectionResponse,
   UiamOAuthType,
+  UiamResolvedUsersResponse,
   UpdateUiamOAuthClientParams,
   UpdateUiamOAuthConnectionParams,
 } from '@kbn/core-security-server';
@@ -203,6 +204,27 @@ export class UiamOAuth implements UiamOAuthType {
       this.logger.error(
         `Failed to revoke OAuth connection ${connectionId}: ${getDetailedErrorMessage(e)}`
       );
+      throw e;
+    }
+  }
+
+  async resolveUsers(
+    request: KibanaRequest,
+    userIds: string[]
+  ): Promise<UiamResolvedUsersResponse | null> {
+    if (!this.license.isEnabled()) {
+      return null;
+    }
+
+    const accessToken = UiamOAuth.getAccessToken(request);
+    this.logger.debug(`Attempting to resolve ${userIds.length} user(s)`);
+
+    try {
+      const result = await this.uiam.resolveUsers(accessToken, userIds);
+      this.logger.debug('Users resolved successfully');
+      return result;
+    } catch (e) {
+      this.logger.error(`Failed to resolve users: ${getDetailedErrorMessage(e)}`);
       throw e;
     }
   }
