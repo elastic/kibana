@@ -28,7 +28,7 @@ export const DESIGN_EXPLORATION_BORDER_WIDTH = 0.5;
 export const DESIGN_EXPLORATION_PADDING = 16;
 
 /** Application top bar slot height when Chrome app header is shown. */
-export const DESIGN_EXPLORATION_TOP_BAR_HEIGHT = 80;
+export const DESIGN_EXPLORATION_TOP_BAR_HEIGHT = 72;
 
 export const DESIGN_EXPLORATION_BODY_ATTR = 'data-design-exploration';
 
@@ -67,6 +67,8 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
   const formControlBorderHover = isDarkMode
     ? `color-mix(in srgb, ${colors.borderBaseSubdued} 55%, transparent)`
     : `color-mix(in srgb, ${colors.borderBaseSubdued} 75%, transparent)`;
+  const scrolledBarBorderRadius = `0 0 ${DESIGN_EXPLORATION_RADIUS_CONTROL}px ${DESIGN_EXPLORATION_RADIUS_CONTROL}px`;
+  const scrolledAppHeaderBorderRadius = `${DESIGN_EXPLORATION_RADIUS_CONTROL}px ${DESIGN_EXPLORATION_RADIUS_CONTROL}px 0 0`;
 
   return css`
     ${scope} [data-test-subj='kbnGridLayout'] {
@@ -101,28 +103,31 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} [data-test-subj='globalQueryBar'] {
-      padding: 0 ${DESIGN_EXPLORATION_PADDING}px 12px !important;
+      padding: ${DESIGN_EXPLORATION_PADDING}px !important;
+      padding-bottom: ${DESIGN_EXPLORATION_GAP}px !important;
     }
 
     ${scope} [data-test-subj='controls-group-wrapper'] {
       padding-inline: ${DESIGN_EXPLORATION_PADDING}px !important;
       padding-bottom: ${DESIGN_EXPLORATION_PADDING}px !important;
-      border-bottom: 1px solid transparent !important;
-      transition: border-bottom-color 200ms ease !important;
-    }
-
-    ${scope}[${DESIGN_EXPLORATION_SCROLLED_BODY_ATTR}='true']
-      [data-test-subj='controls-group-wrapper'] {
-      border-bottom-color: ${colors.borderBaseSubdued} !important;
     }
 
     ${scope}:has([data-test-subj='dashboardContainer'], #dashboardListingHeading)
       [data-test-subj='appHeader'] {
       padding-inline: 12px !important;
+      padding-block: 4px !important;
       margin-inline: 0 !important;
       margin-top: 0 !important;
       border-radius: ${DESIGN_EXPLORATION_RADIUS_CONTROL}px !important;
       border: 1px solid ${colors.borderBaseSubdued} !important;
+    }
+
+    ${scope}[${DESIGN_EXPLORATION_SCROLLED_BODY_ATTR}='true']:has(
+        [data-test-subj='dashboardContainer'],
+        #dashboardListingHeading
+      )
+      [data-test-subj='appHeader'] {
+      border-radius: ${scrolledAppHeaderBorderRadius} !important;
     }
 
     ${scope} .kbnChromeLayoutApplication:has([data-test-subj='appHeader']) {
@@ -145,6 +150,7 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} .kbnChromeLayoutApplication div:has(> [data-test-subj='appHeader']) {
+      width: calc(100% - ${DESIGN_EXPLORATION_PADDING * 2}px) !important;
       margin: ${DESIGN_EXPLORATION_PADDING}px !important;
       min-height: 48px !important;
     }
@@ -156,10 +162,25 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
-      background: transparent !important;
       top: ${DESIGN_EXPLORATION_TOP_BAR_HEIGHT}px !important;
+      background: transparent !important;
+      background-color: transparent !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      border-block-start: none !important;
+      border-block-end: 1px solid transparent !important;
+      border-inline: 1px solid transparent !important;
+      transition: width 200ms ease, margin 200ms ease, background-color 200ms ease,
+        backdrop-filter 200ms ease, border-color 200ms ease !important;
+    }
+
+    ${scope}[${DESIGN_EXPLORATION_SCROLLED_BODY_ATTR}='true']
+      .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
+      width: calc(100% - ${DESIGN_EXPLORATION_PADDING * 2}px) !important;
       margin: ${DESIGN_EXPLORATION_PADDING}px !important;
-      border-radius: ${DESIGN_EXPLORATION_RADIUS_CONTROL}px !important;
+      border-radius: ${scrolledBarBorderRadius} !important;
+      border-block-end-color: ${colors.borderBaseSubdued} !important;
+      border-inline-color: ${colors.borderBaseSubdued} !important;
       background-color: color-mix(
         in srgb,
         ${colors.backgroundBasePlain} 75%,
