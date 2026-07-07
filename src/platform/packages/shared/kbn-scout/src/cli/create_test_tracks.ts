@@ -460,7 +460,6 @@ export const createTestTracks: Command<void> = {
     ],
     boolean: ['showIndividualTrackSummaries', 'showMultiTrackSummary'],
     default: {
-      testChannel: testChannels.current(),
       outputPath: `${SCOUT_OUTPUT_ROOT}/test_tracks/${Date.now()}.json`,
     },
     help: `
@@ -526,8 +525,10 @@ export const createTestTracks: Command<void> = {
         selectedTestTargets.map((target) => target.tag).join(', ')
     );
 
+    const rawChannels: string[] = flagsReader.arrayOfStrings('testChannel') || [];
+
     const selectedTestChannels: Set<ScoutTestChannel> = new Set(
-      flagsReader.requiredArrayOfStrings('testChannel')?.map((channel) => {
+      (rawChannels.length > 0 ? rawChannels : testChannels.current()).map((channel) => {
         try {
           return testChannel.fromString(channel);
         } catch (e) {
