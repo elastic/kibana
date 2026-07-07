@@ -56,13 +56,6 @@ const configSchema = schema.object({
    */
   available: schema.boolean({ defaultValue: true }),
   /**
-   * Global workflow executions list (`/app/workflows/executions`). Not exposed in Advanced Settings;
-   * enable via `workflowsManagement.globalExecutionsView.enabled` in `kibana.yml`.
-   */
-  globalExecutionsView: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
-  }),
-  /**
    * Workflow Template Library — fetches the curated catalog and exposes it at
    * `/internal/workflows/library/*`. Server-only infrastructure settings; the
    * tech-preview enable/disable toggle is the `workflowsManagement:library:enabled`
@@ -76,7 +69,4 @@ export type WorkflowsManagementConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<WorkflowsManagementConfig> = {
   schema: configSchema,
-  exposeToBrowser: {
-    globalExecutionsView: true,
-  },
 };
