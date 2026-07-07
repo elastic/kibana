@@ -31,8 +31,9 @@ export function startTrackingHistory<T extends object = {}>({
   });
 
   const stateSubscription = state$
-    .pipe(map(mapState), distinctUntilChanged(deepEqual), pairwise())
+    .pipe(map(mapState), pairwise())
     .subscribe(([previous, current]) => {
+      console.log({ undoOrRedoAction });
       if (undoOrRedoAction) {
         // do not add to history if state change is coming from undo or redo action
         undoOrRedoAction = false;
@@ -40,17 +41,16 @@ export function startTrackingHistory<T extends object = {}>({
       }
 
       const diff = jsondiffpatch.diff(previous, current);
+
+      const pointer = pointer$.getValue();
+      if (pointer !== history.length - 1) {
+        // if not at the top of the history stack, then drop all history that came after the current pointer
+        history.length = pointer + 1;
+      } else if (history.length > maxSize) {
+        // drop the bottom of the history stack when max size is reached
+        history.shift();
+      }
       history.push(diff);
-      // console.log({ history: history.length, maxSize, pointer: pointer$.getValue() });
-      // if (history.length > maxSize) {
-      //   console.log('SHIFT');
-      //   history.shift(); // drop the bottom of the patch queue
-      // }
-      // if (history.length > maxSize) {
-      //   history.shift(); // drop the bottom of the patch queue
-      // } else if (history.length > 1) {
-      //   pointer$.next(Math.max(pointer + 1, history.length));
-      // }
       pointer$.next(history.length - 1);
 
       console.log('STATE CHANGED', { pointerAfter: pointer$.getValue(), history: [...history] });
