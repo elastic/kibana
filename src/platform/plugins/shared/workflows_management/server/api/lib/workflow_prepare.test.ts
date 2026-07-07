@@ -8,6 +8,7 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows';
+import type { z } from '@kbn/zod/v4';
 
 import {
   applyFieldUpdates,
@@ -15,6 +16,7 @@ import {
   getTriggerTypesFromDefinition,
   workflowYamlDeclaresTopLevelEnabled,
 } from './workflow_prepare';
+import { getWorkflowZodSchema } from '../../../common/schema';
 import type { WorkflowProperties } from '../../storage/workflow_storage';
 
 describe('getTriggerTypesFromDefinition', () => {
@@ -161,5 +163,48 @@ describe('applyYamlUpdate', () => {
     expect(result.updatedDataPatch.enabled).toBe(false);
     expect(result.updatedDataPatch.valid).toBe(false);
     expect(result.updatedDataPatch.triggerTypes).toEqual([]);
+  });
+
+  describe('renaming a schema-invalid workflow', () => {
+    const realSchema: z.ZodType = getWorkflowZodSchema({}, [], { lightweight: true });
+    // Syntactically valid YAML that carries a name but fails schema validation
+    // (missing required triggers/steps), i.e. the state produced by renaming an invalid workflow.
+    const invalidYamlWithName = 'name: Renamed Invalid Workflow\ndescription: still broken';
+
+    it('extracts name from raw YAML so the rename persists', () => {
+      const result = applyYamlUpdate({
+        workflowYaml: invalidYamlWithName,
+        zodSchema: realSchema,
+        triggerDefinitions: [],
+      });
+      expect(result.updatedDataPatch.name).toBe('Renamed Invalid Workflow');
+    });
+
+    it('still reports the workflow as invalid', () => {
+      const result = applyYamlUpdate({
+        workflowYaml: invalidYamlWithName,
+        zodSchema: realSchema,
+        triggerDefinitions: [],
+      });
+      expect(result.updatedDataPatch.valid).toBe(false);
+    });
+
+    it('still surfaces validation errors', () => {
+      const result = applyYamlUpdate({
+        workflowYaml: invalidYamlWithName,
+        zodSchema: realSchema,
+        triggerDefinitions: [],
+      });
+      expect(result.validationErrors.length).toBeGreaterThan(0);
+    });
+
+    it('omits name from the patch when the raw YAML has no string name', () => {
+      const result = applyYamlUpdate({
+        workflowYaml: 'description: no name here',
+        zodSchema: realSchema,
+        triggerDefinitions: [],
+      });
+      expect(result.updatedDataPatch).not.toHaveProperty('name');
+    });
   });
 });

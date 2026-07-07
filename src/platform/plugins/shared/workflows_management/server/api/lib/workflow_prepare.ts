@@ -123,8 +123,23 @@ export const applyYamlUpdate = (params: {
   const validation = validateWorkflowYaml(workflowYaml, zodSchema, { triggerDefinitions });
 
   if (!validation.valid || !validation.parsedWorkflow) {
+    // Schema-invalid YAML never populates `parsedWorkflow`, so extract the name from the raw
+    // YAML to keep the stored `name` in sync with the saved YAML (e.g. renaming an invalid
+    // workflow). Validation errors are still surfaced below.
+    const parsed = parseYamlToJSONWithoutValidation(workflowYaml);
+    const rawName =
+      parsed.success && parsed.json && typeof parsed.json === 'object'
+        ? (parsed.json as { name?: unknown }).name
+        : undefined;
+
     return {
-      updatedDataPatch: { definition: null, enabled: false, valid: false, triggerTypes: [] },
+      updatedDataPatch: {
+        definition: null,
+        enabled: false,
+        valid: false,
+        triggerTypes: [],
+        ...(typeof rawName === 'string' ? { name: rawName } : {}),
+      },
       validationErrors: validation.diagnostics
         .filter((d) => d.severity === 'error')
         .map((d) => d.message),

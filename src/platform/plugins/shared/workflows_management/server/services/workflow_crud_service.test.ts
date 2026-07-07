@@ -2262,6 +2262,50 @@ describe('WorkflowCrudService', () => {
       jest.restoreAllMocks();
     });
 
+    it('persists a renamed name from invalid YAML into the stored document', async () => {
+      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
+        updatedDataPatch: {
+          definition: null,
+          enabled: false,
+          valid: false,
+          triggerTypes: [],
+          name: 'Renamed Invalid Workflow',
+        },
+        validationErrors: ['YAML schema error'],
+        shouldUpdateScheduler: true,
+      });
+
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: makeSource({ name: 'Old Name', valid: false }),
+              _seq_no: 2,
+              _primary_term: 1,
+            },
+          ],
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      await service.updateWorkflow(
+        'wf-1',
+        { yaml: 'name: Renamed Invalid Workflow' } as any,
+        'default',
+        request
+      );
+
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ name: 'Renamed Invalid Workflow' }),
+        })
+      );
+
+      jest.restoreAllMocks();
+    });
+
     it('skips YAML merge when the zod schema is unavailable', async () => {
       const applyYamlUpdateSpy = jest.spyOn(workflowPrepare, 'applyYamlUpdate');
       const { deps, client } = makeDeps();
