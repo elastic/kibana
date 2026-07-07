@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SIGEVENTS_INVESTIGATOR_AGENT_ID } from '@kbn/streams-plugin/server';
+import { SIGNIFICANT_EVENTS_INVESTIGATOR_AGENT_ID } from '@kbn/streams-plugin/server';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId } from '@kbn/evals';
 import type { Detection, Discovery } from '@kbn/significant-events-schema';
@@ -258,7 +258,7 @@ evaluate.describe(
                     });
 
                     const converseResult = await agentBuilderClient.converse({
-                      agentId: SIGEVENTS_INVESTIGATOR_AGENT_ID,
+                      agentId: SIGNIFICANT_EVENTS_INVESTIGATOR_AGENT_ID,
                       input: agentInput,
                     });
 
@@ -430,7 +430,7 @@ evaluate.describe(
                       });
 
                       const converseResult = await agentBuilderClient.converse({
-                        agentId: SIGEVENTS_INVESTIGATOR_AGENT_ID,
+                        agentId: SIGNIFICANT_EVENTS_INVESTIGATOR_AGENT_ID,
                         input: agentInput,
                       });
 

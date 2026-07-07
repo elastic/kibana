@@ -112,6 +112,7 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
             'ruleChangesHistoryEnabled',
           ])}`,
           '--xpack.alerting.ruleChangeTracking.enabled=true',
+          '--uiSettings.overrides.securitySolution:enableRuleChangesHistory=true',
           `--plugin-path=${path.resolve(
             __dirname,
             '../../../../../../../src/platform/test/analytics/plugins/analytics_ftr_helpers'

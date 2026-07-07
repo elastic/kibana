@@ -19,7 +19,7 @@ export {
   type ToolDefinitionWithSchema,
   platformCoreTools,
   platformCoreCasesTools,
-  platformStreamsSigEventsTools,
+  platformSignificantEventsTools,
   attachmentTools,
   internalTools,
   defaultAgentToolIds,
