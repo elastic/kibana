@@ -11,6 +11,7 @@ import React, { useEffect } from 'react';
 import { Global, css } from '@emotion/react';
 import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import { getScrollContainer } from '@kbn/ui-chrome-layout-utils';
+import { layoutVarName } from '@kbn/ui-chrome-layout-constants';
 
 /** Gutter between chrome panels. */
 export const DESIGN_EXPLORATION_GAP = 8;
@@ -31,12 +32,18 @@ export const DESIGN_EXPLORATION_PADDING = 16;
 export const DESIGN_EXPLORATION_PADDING_COMPACT = 12;
 
 /** Application top bar slot height when Chrome app header is shown. */
-export const DESIGN_EXPLORATION_TOP_BAR_HEIGHT = 64;
+export const DESIGN_EXPLORATION_TOP_BAR_HEIGHT = 72;
 
 export const DESIGN_EXPLORATION_BODY_ATTR = 'data-design-exploration';
 
 /** Set on body when the app scroll container (ancestor of `.kbnAppWrapper`) has scrolled. */
 export const DESIGN_EXPLORATION_SCROLLED_BODY_ATTR = 'data-design-exploration-scrolled';
+
+/** Set on body when the dashboard AppHeader should collapse while scrolled. */
+export const DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR =
+  'data-design-exploration-app-header-hidden';
+
+const DASHBOARD_CONTAINER_SELECTOR = '[data-test-subj="dashboardContainer"]';
 
 const panelSelectorList = [
   '.kbnChromeLayoutNavigation',
@@ -59,7 +66,8 @@ export const designExplorationScopedInPanels = (selectors: string) => {
 
 const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
   const scope = designExplorationScope();
-  const { colors } = euiTheme.euiTheme;
+  const { colors, levels } = euiTheme.euiTheme;
+  const appHeaderStackZIndex = Number(levels.mask) + 1;
   const isDarkMode = euiTheme.colorMode === 'DARK';
   const embeddablePanelShadow = isDarkMode
     ? `0 0 0 1px color-mix(in srgb, ${colors.borderBaseSubdued} 45%, transparent), 0 2px 4px rgba(0, 0, 0, 0.28)`
@@ -70,9 +78,27 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
   const formControlBorderHover = isDarkMode
     ? `color-mix(in srgb, ${colors.borderBaseSubdued} 55%, transparent)`
     : `color-mix(in srgb, ${colors.borderBaseSubdued} 75%, transparent)`;
-  const scrolledBarBorderRadius = `0 0 ${DESIGN_EXPLORATION_RADIUS_CONTROL}px ${DESIGN_EXPLORATION_RADIUS_CONTROL}px`;
+  const scrolledBarBorderRadius = `${DESIGN_EXPLORATION_RADIUS_CONTROL}px`;
 
   return css`
+    ${scope} {
+      ${layoutVarName('application.marginRight')}: 0px !important;
+    }
+
+    ${scope} [class*='css-'][class*='-euiPageSection-grow-l-top-plain'],
+    ${scope} [class*='css-'][class*='-euiPageInner-panelled'] {
+      background-color: transparent !important;
+      box-shadow: none !important;
+    }
+
+    ${scope} [class*='css-'][class*='-global_header_shell--rightGroup'] {
+      gap: 2px !important;
+    }
+
+    ${scope} [data-test-subj='chromeNextGlobalHeaderActions'] {
+      display: none !important;
+    }
+
     ${scope} [data-test-subj='kbnGridLayout'] {
       --kbnGridGutterSize: 12 !important;
       padding: ${DESIGN_EXPLORATION_PADDING}px !important;
@@ -84,8 +110,12 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
       box-shadow: ${embeddablePanelShadow} !important;
     }
 
-    ${scope} [data-test-subj='dashboardPanelTitle'] {
-      padding-top: ${DESIGN_EXPLORATION_GAP}px !important;
+    ${scope} [data-test-subj='embeddablePanel'] [data-test-subj='dashboardPanelTitle'] {
+      height: 48px !important;
+      overflow: visible !important;
+      line-height: normal !important;
+      align-items: center !important;
+      padding-inline: ${DESIGN_EXPLORATION_GAP}px !important;
     }
 
     ${scope} [data-test-subj='embeddablePanelTitle'] {
@@ -188,15 +218,27 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
       --kbn-application--top-bar-height: ${DESIGN_EXPLORATION_TOP_BAR_HEIGHT}px !important;
     }
 
-    ${scope} .kbnChromeLayoutApplication > div:has([data-test-subj='appHeader']) {
+    ${scope}:has(${DASHBOARD_CONTAINER_SELECTOR}) .kbnChromeLayoutApplication > div:has([data-test-subj='appHeader']) {
       height: ${DESIGN_EXPLORATION_TOP_BAR_HEIGHT}px !important;
-      min-height: ${DESIGN_EXPLORATION_TOP_BAR_HEIGHT}px !important;
+      opacity: 1;
+      overflow: visible !important;
+      z-index: ${appHeaderStackZIndex} !important;
+      transition: opacity 250ms ease !important;
+    }
+
+    ${scope}:has(${DASHBOARD_CONTAINER_SELECTOR})
+      .kbnChromeLayoutApplication div:has(> [data-test-subj='appHeader']) {
+      position: relative;
+      z-index: ${appHeaderStackZIndex} !important;
     }
 
     ${scope} .kbnChromeLayoutApplication div:has(> [data-test-subj='appHeader']) [data-test-subj='appHeader'] {
+      border-radius: ${DESIGN_EXPLORATION_RADIUS_CONTROL}px !important;
+      border: none !important;
+      box-shadow: ${embeddablePanelShadow} !important;
       background-color: color-mix(
         in srgb,
-        ${colors.backgroundBasePlain} 75%,
+        ${colors.backgroundBaseSubdued} 80%,
         transparent
       ) !important;
       backdrop-filter: blur(10px) !important;
@@ -204,8 +246,8 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} .kbnChromeLayoutApplication div:has(> [data-test-subj='appHeader']) {
-      width: calc(100% - ${DESIGN_EXPLORATION_PADDING * 1}px) !important;
-      margin: calc(${DESIGN_EXPLORATION_PADDING}px - 8px) !important;
+      width: calc(100% - ${DESIGN_EXPLORATION_PADDING * 1.5}px) !important;
+      margin: ${DESIGN_EXPLORATION_PADDING_COMPACT}px !important;
       min-height: 48px !important;
     }
 
@@ -225,14 +267,34 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
       -webkit-backdrop-filter: none !important;
       border: none !important;
       box-shadow: none !important;
-      transition: width 200ms ease, margin 200ms ease, background-color 200ms ease,
+      transition: top 250ms ease, width 200ms ease, margin 200ms ease, background-color 200ms ease,
         backdrop-filter 200ms ease, box-shadow 200ms ease !important;
+    }
+
+    ${scope}[${DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR}='true']:has(${DASHBOARD_CONTAINER_SELECTOR})
+      .kbnChromeLayoutApplication:has([data-test-subj='appHeader']) {
+      --kbn-application--top-bar-height: 0px !important;
+      --kbn-application--sticky-headers-offset: 0px !important;
+      --kbnAppHeadersOffset: 0px !important;
+    }
+
+    ${scope}[${DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR}='true']:has(${DASHBOARD_CONTAINER_SELECTOR})
+      .kbnChromeLayoutApplication > div:has([data-test-subj='appHeader']) {
+      height: 0 !important;
+      opacity: 0 !important;
+      overflow: hidden !important;
+      pointer-events: none !important;
+    }
+
+    ${scope}[${DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR}='true']:has(${DASHBOARD_CONTAINER_SELECTOR})
+      .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
+      top: ${DESIGN_EXPLORATION_GAP}px !important;
     }
 
     ${scope}[${DESIGN_EXPLORATION_SCROLLED_BODY_ATTR}='true']
       .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
-      width: calc(100% - ${DESIGN_EXPLORATION_PADDING * 2}px) !important;
-      margin: ${DESIGN_EXPLORATION_PADDING}px !important;
+      width: calc(100% - ${DESIGN_EXPLORATION_PADDING}px) !important;
+      margin: ${DESIGN_EXPLORATION_PADDING}px 8px !important;
       border-radius: ${scrolledBarBorderRadius} !important;
       box-shadow: ${embeddablePanelShadow} !important;
       background-color: color-mix(
@@ -264,6 +326,38 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
   `;
 };
 
+interface DesignExplorationScrollState {
+  lastScrollTop: number;
+}
+
+const setBodyAttr = (attr: string, enabled: boolean) => {
+  if (enabled) {
+    document.body.setAttribute(attr, 'true');
+  } else {
+    document.body.removeAttribute(attr);
+  }
+};
+
+const updateDesignExplorationScrollState = (
+  scrollContainer: HTMLElement,
+  state: DesignExplorationScrollState
+) => {
+  const scrollTop = scrollContainer.scrollTop;
+  const isDashboard = Boolean(document.querySelector(DASHBOARD_CONTAINER_SELECTOR));
+
+  setBodyAttr(DESIGN_EXPLORATION_SCROLLED_BODY_ATTR, scrollTop > 0);
+
+  if (!isDashboard || scrollTop <= 0) {
+    setBodyAttr(DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR, false);
+  } else if (scrollTop > state.lastScrollTop) {
+    setBodyAttr(DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR, true);
+  } else if (scrollTop < state.lastScrollTop) {
+    setBodyAttr(DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR, false);
+  }
+
+  state.lastScrollTop = scrollTop;
+};
+
 /**
  * Design exploration chrome POC — sets body scope for global style overrides when mounted.
  */
@@ -274,21 +368,33 @@ export const DesignExplorationChromeGlobalStyles = () => {
     document.body.setAttribute(DESIGN_EXPLORATION_BODY_ATTR, 'true');
 
     const scrollContainer = getScrollContainer();
-    const updateScrolledState = () => {
-      if (scrollContainer.scrollTop > 0) {
-        document.body.setAttribute(DESIGN_EXPLORATION_SCROLLED_BODY_ATTR, 'true');
-      } else {
-        document.body.removeAttribute(DESIGN_EXPLORATION_SCROLLED_BODY_ATTR);
+    const scrollState: DesignExplorationScrollState = {
+      lastScrollTop: scrollContainer.scrollTop,
+    };
+    let frameId: number | undefined;
+
+    const handleScroll = () => {
+      if (frameId !== undefined) {
+        return;
       }
+
+      frameId = window.requestAnimationFrame(() => {
+        frameId = undefined;
+        updateDesignExplorationScrollState(scrollContainer, scrollState);
+      });
     };
 
-    updateScrolledState();
-    scrollContainer.addEventListener('scroll', updateScrolledState, { passive: true });
+    updateDesignExplorationScrollState(scrollContainer, scrollState);
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
-      scrollContainer.removeEventListener('scroll', updateScrolledState);
+      if (frameId !== undefined) {
+        window.cancelAnimationFrame(frameId);
+      }
+      scrollContainer.removeEventListener('scroll', handleScroll);
       document.body.removeAttribute(DESIGN_EXPLORATION_BODY_ATTR);
       document.body.removeAttribute(DESIGN_EXPLORATION_SCROLLED_BODY_ATTR);
+      document.body.removeAttribute(DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR);
     };
   }, []);
 

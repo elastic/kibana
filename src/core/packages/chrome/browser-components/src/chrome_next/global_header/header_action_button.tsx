@@ -30,11 +30,11 @@ export const headerButtonBaseStyles = css({
 });
 
 export const headerButtonBorderedStyles = css({
-  border: '1px solid var(--header-btn-border)',
+  border: 'none !important',
 });
 
 const plainStyles = css({
-  border: 'none',
+  border: 'none !important',
 });
 
 const squareStyles = css({

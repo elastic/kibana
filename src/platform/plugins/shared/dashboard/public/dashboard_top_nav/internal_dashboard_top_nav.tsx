@@ -514,6 +514,7 @@ export function InternalDashboardTopNav({
           query={query as Query | undefined}
           screenTitle={title}
           useDefaultBehaviors={true}
+          fillSubmitButton={true}
           savedQueryId={savedQueryId}
           indexPatterns={allDataViews ?? []}
           allowSavingQueries
