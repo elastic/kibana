@@ -22,14 +22,14 @@ export enum WorkflowsDeepLinks {
 }
 
 export interface DeepLinksParams {
-  executionsViewEnabled: boolean;
+  executionsViewEnabled?: boolean;
   libraryEnabled?: boolean;
 }
 
 export function getDeepLinks({
-  executionsViewEnabled,
+  executionsViewEnabled = false,
   libraryEnabled = true,
-}: DeepLinksParams): AppDeepLink[] {
+}: DeepLinksParams = {}): AppDeepLink[] {
   const links: AppDeepLink[] = [
     {
       id: WorkflowsDeepLinks.workflowsList,

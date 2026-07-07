@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IconType } from '@elastic/eui';
 import { EuiButtonIcon, EuiIcon, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { Handle, Position } from '@xyflow/react';
 import type { Node, NodeProps } from '@xyflow/react';
@@ -15,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, TRIGGER_STEP_TYPES } from '@kbn/workflows';
 import { useWorkflowGraphActions } from './workflow_graph_actions_context';
+import { ParallelIcon } from '../step_icons/parallel_icon';
 
 export interface WorkflowGraphNodeData extends Record<string, unknown> {
   readonly label: string;
@@ -47,10 +49,10 @@ function getStepMaxAttempts(step: WorkflowGraphNodeData['step']): number | undef
   return typeof value === 'number' && value > 0 ? value : undefined;
 }
 
-const STEP_TYPE_ICON: Record<string, string> = {
+const STEP_TYPE_ICON: Record<string, IconType> = {
   if: 'branch',
   foreach: 'refresh',
-  parallel: 'visGoal',
+  parallel: ParallelIcon,
   merge: 'merge',
   atomic: 'package',
   manual: 'bolt',
@@ -62,14 +64,14 @@ const STEP_TYPE_ICON: Record<string, string> = {
   kibana: 'logoKibana',
 };
 
-function getNodeIcon(stepType: string): string {
+function getNodeIcon(stepType: string): IconType {
   const base = stepType.split('.')[0];
   return STEP_TYPE_ICON[base] ?? 'package';
 }
 
 // Branded multi-color icons keep their natural palette; everything else is
 // tinted with the trigger/step accent color.
-const LOGO_ICONS = new Set(['logoElasticsearch', 'logoKibana']);
+const LOGO_ICONS = new Set<IconType>(['logoElasticsearch', 'logoKibana']);
 
 function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
   const { stepType, label, isTrigger, stepExecution, preview, step } = node.data;

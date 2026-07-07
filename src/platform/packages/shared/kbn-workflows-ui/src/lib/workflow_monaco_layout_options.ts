@@ -8,9 +8,9 @@
  */
 
 import type { monaco } from '@kbn/code-editor';
-import { WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
+import { WORKFLOWS_MONACO_EDITOR_THEME } from '../hooks/use_workflows_monaco_theme';
 
-/** Shared Monaco layout defaults for workflow YAML surfaces (editor + history preview). */
+/** Shared Monaco layout defaults for workflow YAML surfaces (editor + read-only previews). */
 export const WORKFLOW_MONACO_LAYOUT_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
   theme: WORKFLOWS_MONACO_EDITOR_THEME,
   minimap: { enabled: false },
@@ -41,8 +41,9 @@ export const WORKFLOW_READ_ONLY_MONACO_OPTIONS: monaco.editor.IStandaloneEditorC
   {
     ...WORKFLOW_MONACO_LAYOUT_OPTIONS,
     readOnly: true,
-    contextmenu: false,
     domReadOnly: true,
+    contextmenu: false,
+    glyphMargin: false, // read-only surfaces have no glyph decorations
     lightbulb: { enabled: false },
     quickSuggestions: false,
     suggestOnTriggerCharacters: false,

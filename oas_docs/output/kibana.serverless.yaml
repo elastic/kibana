@@ -49245,7 +49245,8 @@ paths:
                     records: []
                     total: 0
                 pageModeExample:
-                  description: A paginated list of host entities sorted by timestamp in descending order, including query inspection data.
+                  description: |
+                    A paginated list of host entities sorted by timestamp in descending order, including query inspection data.
                   summary: Page mode response with host entities
                   value:
                     inspect:
@@ -49287,7 +49288,8 @@ paths:
                             type: linux
                     total: 1
                 searchAfterModeExample:
-                  description: A cursor-based response with entities and a search_after token for the next page.
+                  description: |
+                    A cursor-based response with entities and a search_after token for the next page.
                   summary: Search-after mode response
                   value:
                     entities:
