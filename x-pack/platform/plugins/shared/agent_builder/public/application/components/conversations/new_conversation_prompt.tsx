@@ -33,7 +33,9 @@ export const NewConversationPrompt: React.FC<{}> = () => {
   const centerFlexItemStyles = css`
     justify-content: center;
     align-items: center;
+    text-align: center;
     gap: ${euiTheme.size.base};
+    padding: 0 ${euiTheme.size.base};
   `;
 
   const inputPaddingStyles = css`
