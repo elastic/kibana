@@ -78,8 +78,8 @@ export const useToolbarActions = ({
       return [];
     }
 
-    const editAggregationsLabel = i18n.translate('metricsExperience.editAggregationsButton', {
-      defaultMessage: 'Edit metric aggregations',
+    const editGridLabel = i18n.translate('metricsExperience.editAggregationsButton', {
+      defaultMessage: 'Edit grid of metrics',
     });
 
     const fullscreenButtonLabel = isFullscreen
@@ -93,10 +93,10 @@ export const useToolbarActions = ({
     return [
       {
         iconType: 'pencil',
-        label: editAggregationsLabel,
-        toolTipContent: editAggregationsLabel,
+        label: editGridLabel,
+        toolTipContent: editGridLabel,
         onClick: onOpenAggregationSettings,
-        'data-test-subj': 'metricsExperienceEditAggregationsButton',
+        'data-test-subj': 'metricsExperienceEditGridButton',
       },
       {
         iconType: isFullscreen ? 'fullScreenExit' : 'fullScreen',

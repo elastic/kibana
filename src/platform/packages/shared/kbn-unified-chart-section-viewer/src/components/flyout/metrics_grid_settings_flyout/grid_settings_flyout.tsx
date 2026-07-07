@@ -102,13 +102,6 @@ export const AggregationSettingsFlyout = ({
           label={i18n.translate('metricsExperience.aggregationSettingsFlyout.counterLabel', {
             defaultMessage: 'Counter',
           })}
-          labelAppend={
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('metricsExperience.aggregationSettingsFlyout.optionalText', {
-                defaultMessage: 'Optional',
-              })}
-            </EuiText>
-          }
         >
           <EuiSuperSelect
             data-test-subj="metricsExperienceAggregationSettingsCounterSelect"
@@ -122,13 +115,6 @@ export const AggregationSettingsFlyout = ({
           label={i18n.translate('metricsExperience.aggregationSettingsFlyout.gaugeLabel', {
             defaultMessage: 'Gauge',
           })}
-          labelAppend={
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('metricsExperience.aggregationSettingsFlyout.optionalText', {
-                defaultMessage: 'Optional',
-              })}
-            </EuiText>
-          }
         >
           <EuiSuperSelect
             data-test-subj="metricsExperienceAggregationSettingsGaugeSelect"
@@ -140,15 +126,8 @@ export const AggregationSettingsFlyout = ({
         <EuiSpacer size="m" />
         <EuiFormRow
           label={i18n.translate('metricsExperience.aggregationSettingsFlyout.histogramLabel', {
-            defaultMessage: 'Histogram percentile',
+            defaultMessage: 'Histogram',
           })}
-          labelAppend={
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('metricsExperience.aggregationSettingsFlyout.optionalText', {
-                defaultMessage: 'Optional',
-              })}
-            </EuiText>
-          }
         >
           <EuiSuperSelect
             data-test-subj="metricsExperienceAggregationSettingsHistogramSelect"
