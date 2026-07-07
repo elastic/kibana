@@ -216,7 +216,6 @@ export const createGridCell = (
             alignment={alignment}
             labelWidthCh={progressBarProps.labelWidthCh}
             baseline={progressBarProps.baseline}
-            fitRowToContent={fitRowToContent}
             ariaLabel={formatter?.convertToText(rawValue) ?? fallbackText}
             onLabelClick={isClickable ? onFilter : undefined}
           />

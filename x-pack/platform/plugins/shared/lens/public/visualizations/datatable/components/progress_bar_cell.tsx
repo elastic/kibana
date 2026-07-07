@@ -118,7 +118,6 @@ export interface ProgressBarCellProps {
    * baseline sits inside the domain.
    */
   baseline?: number;
-  fitRowToContent?: boolean;
   ariaLabel?: string;
   /** When set, the value label becomes a one-click filter trigger. */
   onLabelClick?: () => void;
