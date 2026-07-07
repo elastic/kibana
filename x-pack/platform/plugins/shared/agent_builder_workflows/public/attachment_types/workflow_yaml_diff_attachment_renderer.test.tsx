@@ -68,7 +68,12 @@ describe('workflowYamlDiffAttachmentUiDefinition', () => {
     });
 
     const { getByText } = render(
-      <>{workflowYamlDiffAttachmentUiDefinition.renderInlineContent!({ attachment })}</>
+      <>
+        {workflowYamlDiffAttachmentUiDefinition.renderInlineContent!({
+          attachment,
+          isSidebar: false,
+        })}
+      </>
     );
 
     expect(getByText('My workflow')).toBeInTheDocument();
@@ -80,7 +85,12 @@ describe('workflowYamlDiffAttachmentUiDefinition', () => {
     const attachment = makeAttachment();
 
     const { getByText } = render(
-      <>{workflowYamlDiffAttachmentUiDefinition.renderInlineContent!({ attachment })}</>
+      <>
+        {workflowYamlDiffAttachmentUiDefinition.renderInlineContent!({
+          attachment,
+          isSidebar: false,
+        })}
+      </>
     );
 
     expect(getByText('Workflow')).toBeInTheDocument();
@@ -89,7 +99,14 @@ describe('workflowYamlDiffAttachmentUiDefinition', () => {
   it('computes diff stats exactly once per (beforeYaml, afterYaml) render — no wasted diff work', () => {
     const attachment = makeAttachment({ beforeYaml: 'a\nb\n', afterYaml: 'a\nc\n' });
 
-    render(<>{workflowYamlDiffAttachmentUiDefinition.renderInlineContent!({ attachment })}</>);
+    render(
+      <>
+        {workflowYamlDiffAttachmentUiDefinition.renderInlineContent!({
+          attachment,
+          isSidebar: false,
+        })}
+      </>
+    );
 
     // Header stats + MonacoDiffViewer height estimation must share a single
     // computation — a second call would mean the memoization broke.
@@ -101,10 +118,22 @@ describe('workflowYamlDiffAttachmentUiDefinition', () => {
     const attachment = makeAttachment({ beforeYaml: 'a\nb\n', afterYaml: 'a\nc\n' });
 
     const { rerender } = render(
-      <>{workflowYamlDiffAttachmentUiDefinition.renderInlineContent!({ attachment })}</>
+      <>
+        {workflowYamlDiffAttachmentUiDefinition.renderInlineContent!({
+          attachment,
+          isSidebar: false,
+        })}
+      </>
     );
 
-    rerender(<>{workflowYamlDiffAttachmentUiDefinition.renderInlineContent!({ attachment })}</>);
+    rerender(
+      <>
+        {workflowYamlDiffAttachmentUiDefinition.renderInlineContent!({
+          attachment,
+          isSidebar: false,
+        })}
+      </>
+    );
 
     expect(mockedComputeStats).toHaveBeenCalledTimes(1);
   });
@@ -113,7 +142,12 @@ describe('workflowYamlDiffAttachmentUiDefinition', () => {
     const attachment = makeAttachment({ beforeYaml: 'same\n', afterYaml: 'same\n' });
 
     const { getByText } = render(
-      <>{workflowYamlDiffAttachmentUiDefinition.renderInlineContent!({ attachment })}</>
+      <>
+        {workflowYamlDiffAttachmentUiDefinition.renderInlineContent!({
+          attachment,
+          isSidebar: false,
+        })}
+      </>
     );
 
     expect(getByText('No changes detected')).toBeInTheDocument();
