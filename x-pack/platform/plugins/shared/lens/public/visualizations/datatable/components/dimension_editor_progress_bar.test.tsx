@@ -208,7 +208,7 @@ describe('data table progress bar regressions', () => {
 
     expect(
       await screen.findByText(
-        'Custom lets you change the range. You can also reverse color order or tweak color stops by editing Color mappings.'
+        'Custom lets you change the range. You can also reverse color order or tweak color stops by editing Color mapping.'
       )
     ).toBeInTheDocument();
   });
