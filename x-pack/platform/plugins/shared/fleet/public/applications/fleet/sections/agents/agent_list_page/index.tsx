@@ -370,6 +370,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         <EuiPortal>
           <AgentReassignAgentPolicyModal
             agents={[agentToReassign]}
+            agentCount={1}
             onClose={() => {
               setAgentToReassign(undefined);
               refreshAgents();

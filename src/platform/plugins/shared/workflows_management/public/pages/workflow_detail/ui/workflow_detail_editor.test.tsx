@@ -289,7 +289,7 @@ describe('WorkflowDetailEditor', () => {
       const store = mockStore();
 
       (useWorkflowsExperimentalUiSetting as jest.Mock).mockImplementation(
-        (settingId: string) => settingId === 'workflows:ui:visualEditor:enabled'
+        (settingId: string) => settingId === 'workflows:experimentalFeatures'
       );
 
       mockUseSelector.mockImplementation((selector: any) => {
