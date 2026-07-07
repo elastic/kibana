@@ -215,6 +215,7 @@ export interface UsageStats {
   'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMaxThreshold': number;
   'securitySolution:alertAnalysisWorkflowConnectorId': string;
   'securitySolution:alertAnalysisWorkflowCreateConversation': boolean;
+  'securitySolution:alertAnalysisWorkflowTagPrefix': string;
   'elasticRamen:enabled': boolean;
   'query_activity:minRunningTime': number;
   'genAiSettings:tokenUsageTracking': boolean;
