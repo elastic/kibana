@@ -20,7 +20,7 @@ export class EsqlServerPlugin
     Plugin<
       EsqlServerPluginSetup,
       void,
-      { contentManagement: ContentManagementServerSetup },
+      { contentManagement: ContentManagementServerSetup; dataFederation?: unknown },
       EsqlServerPluginStart
     >
 {
@@ -33,7 +33,7 @@ export class EsqlServerPlugin
 
   public setup(
     core: CoreSetup<EsqlServerPluginStart, void>,
-    plugins: { contentManagement: ContentManagementServerSetup }
+    plugins: { contentManagement: ContentManagementServerSetup; dataFederation?: unknown }
   ) {
     const { initContext } = this;
 
@@ -47,7 +47,7 @@ export class EsqlServerPlugin
       }),
     });
 
-    registerRoutes(core, this.extensionsRegistry, initContext);
+    registerRoutes(core, this.extensionsRegistry, initContext, Boolean(plugins.dataFederation));
 
     return {
       getExtensionsRegistry: () => this.extensionsRegistry,

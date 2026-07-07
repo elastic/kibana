@@ -41,6 +41,7 @@ interface EsqlPluginStartDependencies {
   licensing?: LicensingPluginStart;
   usageCollection?: UsageCollectionStart;
   cps?: CPSPluginStart;
+  dataFederation?: unknown;
   // LOOKUP JOIN deps
   share: SharePluginStart;
   data: DataPublicPluginStart;
@@ -65,6 +66,7 @@ export interface EsqlPluginStart {
   isServerless: boolean;
   enrichSources: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
   enrichViews: (views: EsqlView[]) => Promise<EsqlView[]>;
+  datasetsEnabled: boolean;
 }
 
 export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
@@ -109,6 +111,7 @@ export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
       fieldFormats,
       share,
       kql,
+      dataFederation,
     }: EsqlPluginStartDependencies
   ): EsqlPluginStart {
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
@@ -159,6 +162,7 @@ export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
       getLicense: async () => await licensing?.getLicense(),
       enrichSources: (sources: ESQLSourceResult[]) => this.sourceEnricherService.enrich(sources),
       enrichViews: (views: EsqlView[]) => this.viewEnricherService.enrich(views),
+      datasetsEnabled: Boolean(dataFederation),
     };
 
     setKibanaServices(

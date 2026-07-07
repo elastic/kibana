@@ -39,6 +39,8 @@ export class DataFederationServerPlugin
     });
 
     registerDataSetsRoutes(http.createRouter(), this.config);
+
+    return {};
   }
 
   public start(_core: CoreStart) {}

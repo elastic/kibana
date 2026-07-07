@@ -109,6 +109,7 @@ export interface EsqlPluginStartBase {
   isServerless: boolean;
   enrichSources: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
   enrichViews: (views: EsqlView[]) => Promise<EsqlView[]>;
+  datasetsEnabled: boolean;
 }
 
 export interface ESQLEditorDeps {

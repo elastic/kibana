@@ -26,14 +26,15 @@ import { registerSuggestFixRoute } from './suggest_fix_route';
 export const registerRoutes = (
   setup: CoreSetup<EsqlServerPluginStart>,
   extensionsRegistry: ESQLExtensionsRegistry,
-  initContext: PluginInitializerContext
+  initContext: PluginInitializerContext,
+  isDataFederationEnabled: boolean
 ) => {
   const router = setup.http.createRouter();
 
   registerGetJoinIndicesRoute(router, initContext);
   registerGetTimeseriesIndicesRoute(router, initContext);
   registerGetViewsRoute(router, initContext);
-  registerGetDatasetsRoute(router, initContext);
+  registerGetDatasetsRoute(router, initContext, isDataFederationEnabled);
   registerESQLExtensionsRoute(router, extensionsRegistry, initContext);
   registerGetInferenceEndpointsRoute(router, initContext);
   registerLookupIndexRoutes(router, initContext);

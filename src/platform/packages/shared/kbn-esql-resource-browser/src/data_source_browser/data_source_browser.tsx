@@ -41,6 +41,7 @@ interface DataSourceBrowserKibanaServices {
   esql?: {
     getLicense?: () => Promise<ILicense | undefined>;
     enrichSources?: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
+    datasetsEnabled?: boolean;
   };
 }
 
@@ -74,6 +75,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   const { http, application } = core;
   const getLicense = kibana.services?.esql?.getLicense;
   const enrichSources = kibana.services?.esql?.enrichSources;
+  const datasetsEnabled = kibana.services?.esql?.datasetsEnabled ?? false;
 
   const getTimeseriesIndicesCallback = useCallback(async () => {
     return await getTimeseriesIndices(http);
@@ -90,7 +92,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
     preloadedSources,
     getSources: getSourcesCallback,
     getTimeseriesIndices: getTimeseriesIndicesCallback,
-    getDatasets: getDatasetsCallback,
+    getDatasets: datasetsEnabled ? getDatasetsCallback : undefined,
     isTimeseries,
   });
   const { euiTheme } = useEuiTheme();

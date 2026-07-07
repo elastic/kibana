@@ -13,7 +13,11 @@ import { EsqlService } from '@kbn/esql-server-utils';
 // TODO: Re-enable when datasets are available in Tech preview
 // import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 
-export const registerGetDatasetsRoute = (router: IRouter, { logger }: PluginInitializerContext) => {
+export const registerGetDatasetsRoute = (
+  router: IRouter,
+  { logger }: PluginInitializerContext,
+  isDataFederationEnabled: boolean
+) => {
   router.get(
     {
       path: DATASETS_ROUTE,
@@ -26,6 +30,10 @@ export const registerGetDatasetsRoute = (router: IRouter, { logger }: PluginInit
       },
     },
     async (requestHandlerContext, request, response) => {
+      if (!isDataFederationEnabled) {
+        return response.ok({ body: { datasets: [] } });
+      }
+
       try {
         const core = await requestHandlerContext.core;
         const service = new EsqlService({ client: core.elasticsearch.client.asCurrentUser });
