@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// eslint-disable-next-line import/no-nodejs-modules -- This helper is exported from @kbn/workflows/server and used only by server-side Workflows code; HMAC signing relies on Node crypto.
 import { createHmac } from 'node:crypto';
 
 /**
