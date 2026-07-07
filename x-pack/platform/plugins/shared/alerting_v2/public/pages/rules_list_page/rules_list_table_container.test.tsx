@@ -212,15 +212,23 @@ describe('RulesListTableContainer', () => {
     it('calls toggleEnabled mutation with inverted enabled state', async () => {
       renderContainer();
 
-      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
-
-      await waitFor(() => {
-        expect(screen.getByTestId('toggleEnabledRule-rule-1')).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByTestId('toggleEnabledRule-rule-1'));
+      fireEvent.click(screen.getByTestId('ruleEnabledSwitch-rule-1'));
 
       expect(mockToggleEnabledMutate).toHaveBeenCalledWith({ id: 'rule-1', enabled: false });
+    });
+
+    it('shows a spinner in place of the switch for the rule being toggled', () => {
+      mockUseToggleRuleEnabled.mockReturnValue({
+        mutate: mockToggleEnabledMutate,
+        isLoading: true,
+        variables: { id: 'rule-1', enabled: false },
+      });
+
+      renderContainer();
+
+      expect(screen.getByTestId('ruleEnabledSpinner-rule-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleEnabledSwitch-rule-1')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeInTheDocument();
     });
   });
 

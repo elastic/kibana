@@ -152,6 +152,9 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onClone={(r) => onCloneInFlyout(r)}
         onDelete={(r) => setRuleToDelete(r)}
         onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
+        togglingRuleId={
+          toggleEnabledMutation.isLoading ? toggleEnabledMutation.variables?.id : undefined
+        }
         onTableChange={onTableChange}
       />
       {expandedRule ? (

@@ -20,8 +20,10 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPopover,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiToolTip,
   useEuiTheme,
@@ -99,6 +101,8 @@ export interface RulesListTableProps {
   onClone: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
   onToggleEnabled: (rule: RuleApiResponse) => void;
+  /** Id of the rule whose enabled state is currently being toggled, if any. */
+  togglingRuleId?: string;
 
   /** Pagination callback */
   onTableChange: (criteria: Criteria<RuleApiResponse>) => void;
@@ -132,6 +136,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onClone,
   onDelete,
   onToggleEnabled,
+  togglingRuleId,
   onTableChange,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -319,23 +324,27 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
       {
         field: 'enabled',
         name: (
-          <FormattedMessage id="xpack.alertingV2.rulesList.column.status" defaultMessage="Status" />
+          <FormattedMessage
+            id="xpack.alertingV2.rulesList.column.enabled"
+            defaultMessage="Enabled"
+          />
         ),
         width: '8%',
         sortable: true,
-        render: (enabled: boolean) =>
-          enabled ? (
-            <EuiBadge color="success" data-test-subj="ruleStatusEnabled">
-              {i18n.translate('xpack.alertingV2.rulesList.statusEnabled', {
+        render: (enabled: boolean, rule: RuleApiResponse) =>
+          togglingRuleId === rule.id ? (
+            <EuiLoadingSpinner data-test-subj={`ruleEnabledSpinner-${rule.id}`} size="m" />
+          ) : (
+            <EuiSwitch
+              compressed
+              showLabel={false}
+              label={i18n.translate('xpack.alertingV2.rulesList.column.enabled.switchLabel', {
                 defaultMessage: 'Enabled',
               })}
-            </EuiBadge>
-          ) : (
-            <EuiBadge color="default" data-test-subj="ruleStatusDisabled">
-              {i18n.translate('xpack.alertingV2.rulesList.statusDisabled', {
-                defaultMessage: 'Disabled',
-              })}
-            </EuiBadge>
+              checked={enabled}
+              onChange={() => onToggleEnabled(rule)}
+              data-test-subj={`ruleEnabledSwitch-${rule.id}`}
+            />
           ),
       },
       {
@@ -373,13 +382,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <RuleActionsMenu
-                rule={rule}
-                onEdit={onEdit}
-                onClone={onClone}
-                onDelete={onDelete}
-                onToggleEnabled={onToggleEnabled}
-              />
+              <RuleActionsMenu rule={rule} onEdit={onEdit} onClone={onClone} onDelete={onDelete} />
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
@@ -397,6 +400,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
       onClone,
       onDelete,
       onToggleEnabled,
+      togglingRuleId,
     ]
   );
 
