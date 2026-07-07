@@ -14,18 +14,28 @@ import {
 /**
  * Selector for a set of rules targeted by a bulk action.
  *
- * Re-uses the `ids` / `query` shapes from the API's `BulkActionBase`. The
- * "exactly one of" rule is documented but NOT enforced by the generated zod
- * schema (the route validates it at runtime); the `.refine()` below promotes
- * that check to workflow YAML edit time.
+ * Re-uses the `ids` / `query` shapes from the API's `BulkActionBase`.
+ *
+ * Trade-off: the "exactly one of" rule is a `.refine()`, which is stripped
+ * before Monaco JSON Schema generation — so it surfaces at workflow
+ * validation time, not in the YAML editor. Expressing it as a union of two
+ * strict objects would reach the editor as `anyOf`, but unions in step input
+ * schemas currently break workflow validation for template-string inputs
+ * (see the workflows-eng bug linked in PR #275187 review).
  */
 export const bulkRuleSelectorSchema = BulkActionBase.pick({
   ids: true,
   query: true,
-}).refine((value) => (value.ids === undefined) !== (value.query === undefined), {
-  message: 'Provide exactly one of `ids` or `query`',
-  path: ['ids'],
-});
+})
+  .extend({
+    // An empty `query` would select every rule; `.min(1)` (unlike a refine)
+    // also reaches the JSON Schema as `minLength`, so the editor flags it.
+    query: z.string().min(1, 'query cannot be an empty string').optional(),
+  })
+  .refine((value) => (value.ids === undefined) !== (value.query === undefined), {
+    message: 'Provide exactly one of `ids` or `query`',
+    path: ['ids'],
+  });
 
 /**
  * Summary of a `_bulk_action` result: per-rule counters plus the `errors` for
