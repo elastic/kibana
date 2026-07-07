@@ -131,10 +131,10 @@ export const useToastNotificationText = () => {
         typeof text.message === 'string' &&
         text.message.length <= MAX_SIMPLE_MESSAGE_LENGTH
       ) {
-        return { text: text.message as string };
+        return { text: text.message };
       }
 
-      // Long text: truncated preview + "View details" secondary action opening a modal
+      // Long text: truncated preview + "View details" primary action opening a modal
       const unformattedText =
         typeof text === 'object' && text !== null && text.message ? text.message : text;
       const formattedText =
