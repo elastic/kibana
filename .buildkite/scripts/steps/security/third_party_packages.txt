@@ -50,3 +50,5 @@ jszip
 @opentelemetry/exporter-logs-otlp-proto
 @opentelemetry/otlp-transformer
 just-bash
+@types/mdast
+@types/unist
