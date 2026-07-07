@@ -32,18 +32,11 @@ export async function assertFlowOwnership({
   notFoundMessage = ONBOARDING_SESSION_NOT_FOUND_MESSAGE,
 }: {
   context: ObservabilityOnboardingRequestHandlerContext;
-  flow: Pick<SavedObservabilityOnboardingFlow, 'createdBy' | 'apiKeyId'>;
+  flow: Pick<SavedObservabilityOnboardingFlow, 'createdBy'>;
   notFoundMessage?: string;
 }): Promise<void> {
-  const coreContext = await context.core;
-  const currentUser = coreContext.security.authc.getCurrentUser();
-  const username = currentUser?.username;
-  const apiKeyId = currentUser?.api_key?.id;
-
-  const isOwnerByUsername = Boolean(username) && flow.createdBy === username;
-  const isOwnerByApiKey = Boolean(apiKeyId) && flow.apiKeyId === apiKeyId;
-
-  if (!isOwnerByUsername && !isOwnerByApiKey) {
+  const username = await getCurrentUsername(context);
+  if (!username || flow.createdBy !== username) {
     throw Boom.notFound(notFoundMessage);
   }
 }

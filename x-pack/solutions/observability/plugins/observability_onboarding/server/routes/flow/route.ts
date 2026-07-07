@@ -225,28 +225,27 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
 
     const fleetPluginStart = await plugins.fleet.start();
 
-    const [ingestApiKey, installApiKey, elasticAgentVersionInfo] = await Promise.all([
-      createShipperApiKey(client.asCurrentUser, 'standalone-elastic-agent'),
-      (
-        await context.resolve(['core'])
-      ).core.security.authc.apiKeys.create(createInstallApiKey('onboarding-install')),
-      getAgentVersionInfo(fleetPluginStart, kibanaVersion),
-    ]);
+    const [onboardingFlow, ingestApiKey, installApiKey, elasticAgentVersionInfo] =
+      await Promise.all([
+        saveObservabilityOnboardingFlow({
+          savedObjectsClient,
+          observabilityOnboardingState: {
+            type: 'autoDetect',
+            createdBy,
+            state: undefined,
+            progress: {},
+          },
+        }),
+        createShipperApiKey(client.asCurrentUser, 'standalone-elastic-agent'),
+        (
+          await context.resolve(['core'])
+        ).core.security.authc.apiKeys.create(createInstallApiKey('onboarding-install')),
+        getAgentVersionInfo(fleetPluginStart, kibanaVersion),
+      ]);
 
     if (!installApiKey) {
       throw Boom.notFound('License does not allow API key creation.');
     }
-
-    const onboardingFlow = await saveObservabilityOnboardingFlow({
-      savedObjectsClient,
-      observabilityOnboardingState: {
-        type: 'autoDetect',
-        createdBy,
-        apiKeyId: installApiKey.id,
-        state: undefined,
-        progress: {},
-      },
-    });
 
     const kibanaUrl = getKibanaUrl(core.setup, plugins.cloud?.setup);
     const scriptDownloadUrl = new URL(

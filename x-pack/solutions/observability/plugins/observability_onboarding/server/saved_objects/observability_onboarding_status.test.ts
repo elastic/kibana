@@ -12,14 +12,13 @@ describe('observability onboarding flow saved object', () => {
     expect(observabilityOnboardingFlow.hidden).toBe(true);
   });
 
-  it('maps createdBy and apiKeyId as keywords with a bounded ignore_above', () => {
+  it('maps createdBy as a keyword', () => {
     expect(observabilityOnboardingFlow.mappings.properties).toMatchObject({
-      createdBy: { type: 'keyword', ignore_above: expect.any(Number) },
-      apiKeyId: { type: 'keyword', ignore_above: expect.any(Number) },
+      createdBy: { type: 'keyword' },
     });
   });
 
-  it('adds createdBy and apiKeyId in model version 3', () => {
+  it('adds createdBy in model version 3', () => {
     const { modelVersions } = observabilityOnboardingFlow;
     if (!modelVersions || typeof modelVersions === 'function') {
       throw new Error('Expected modelVersions to be an object map');
@@ -31,7 +30,6 @@ describe('observability onboarding flow saved object', () => {
           type: 'mappings_addition',
           addedMappings: {
             createdBy: { type: 'keyword' },
-            apiKeyId: { type: 'keyword' },
           },
         },
       ],
