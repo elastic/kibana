@@ -53,13 +53,12 @@ if [[ "${FORCE_ALL:-}" == "1" ]]; then
     ! -name '_*' -exec basename {} \;)"
 else
   # tsconfig.base.json compiles for bundlers (module: preserve), which leaves
-  # import/export syntax untouched. ts-node hands that straight to Node, which
-  # can't parse it as CommonJS and falls back to strict ESM resolution —
-  # breaking @kbn/moon's extensionless relative imports. tsx resolves imports
-  # itself (esbuild, bundler-style) so it isn't affected. Declared as a
-  # devDependency in .buildkite/package.json, installed by
-  # setup_buildkite_deps.sh's `npm ci` before this script runs.
-  affected="$(.buildkite/node_modules/.bin/tsx src/platform/kbn-ui/_tooling/affected_packages.ts "$base_ref" HEAD)"
+  # import/export syntax untouched. ts-node then hands that straight to Node,
+  # which can't parse it as CommonJS and falls back to strict ESM resolution —
+  # breaking @kbn/moon's extensionless relative imports. Force ts-node back to
+  # plain CommonJS for this script's own execution.
+  affected="$(TS_NODE_COMPILER_OPTIONS='{"module":"commonjs","moduleResolution":"node"}' \
+    ts-node src/platform/kbn-ui/_tooling/affected_packages.ts "$base_ref" HEAD)"
 fi
 
 if [[ -z "$affected" ]]; then
