@@ -6,13 +6,8 @@
  */
 
 import type { CoreStart } from '@kbn/core/server';
+import { type AgentKeysPrivilegesResponse } from '@kbn/apm-api-shared';
 import type { ApmPluginRequestHandlerContext } from '../typings';
-
-export interface AgentKeysPrivilegesResponse {
-  areApiKeysEnabled: boolean;
-  isAdmin: boolean;
-  canManage: boolean;
-}
 
 export async function getAgentKeysPrivileges({
   context,

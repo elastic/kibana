@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { platformStreamsSigEventsTools, ToolType } from '@kbn/agent-builder-common';
+import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
   BuiltinToolDefinition,
@@ -21,7 +21,7 @@ import { assertSignificantEventsAccess } from '../../../routes/utils/assert_sign
 import { searchKnowledgeIndicatorsToolHandler } from './handler';
 
 export const STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID =
-  platformStreamsSigEventsTools.searchKnowledgeIndicators;
+  platformSignificantEventsTools.searchKnowledgeIndicators;
 
 const searchKnowledgeIndicatorsSchema = z.object({
   stream_names: z
@@ -110,15 +110,18 @@ export function createSearchKnowledgeIndicatorsTool({
       const { request } = context;
 
       try {
-        const { streamsClient, getKnowledgeIndicatorClient, licensing, uiSettingsClient } =
-          await getScopedClients({ request });
+        const scopedClients = await getScopedClients({ request });
 
-        await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+        await assertSignificantEventsAccess({
+          server,
+          licensing: scopedClients.licensing,
+          uiSettingsClient: scopedClients.uiSettingsClient,
+        });
 
-        const kiClient = await getKnowledgeIndicatorClient();
+        const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 
         const output = await searchKnowledgeIndicatorsToolHandler({
-          streamsClient,
+          streamsClient: scopedClients.streamsClient,
           kiClient,
           logger,
           params: toolParams,

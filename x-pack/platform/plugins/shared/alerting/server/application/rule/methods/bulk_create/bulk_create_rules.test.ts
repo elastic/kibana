@@ -1097,6 +1097,12 @@ describe('bulkCreateRules', () => {
       getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
     });
 
+    beforeEach(() => {
+      (rulesClientParams.uiSettings.asScopedToClient as jest.Mock).mockReturnValue({
+        get: jest.fn().mockResolvedValue(true),
+      });
+    });
+
     const setRuleType = (overrides: { trackChanges?: boolean } = {}) => {
       ruleTypeRegistry.get.mockReturnValue({
         id: '123',

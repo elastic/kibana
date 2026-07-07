@@ -302,7 +302,7 @@ export const useColumns = (
         }),
         render: (_, { fieldValue, type }) => (
           <EuiToolTip content={String(fieldValue)} disableScreenReaderOutput>
-            <span>
+            <span tabIndex={0}>
               {type === 'keyword' ? (
                 String(fieldValue)
               ) : (
