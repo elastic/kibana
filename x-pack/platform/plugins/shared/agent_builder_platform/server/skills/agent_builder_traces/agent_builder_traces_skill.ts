@@ -14,7 +14,6 @@ export const agentBuilderTracesSkill = defineSkillType({
   id: 'agent-builder-traces',
   name: 'agent-builder-traces',
   basePath: 'skills/platform/agent-builder',
-  experimental: true,
   uiSettingRequired: AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
   description:
     'Answer questions about Agent Builder OTel (OpenTelemetry) traces and activity: token usage, ' +
