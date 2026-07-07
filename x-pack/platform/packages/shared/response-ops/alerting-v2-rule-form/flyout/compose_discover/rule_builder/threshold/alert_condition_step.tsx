@@ -57,12 +57,12 @@ import {
   getAvailableMetricLabels,
 } from './form_types';
 import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
+import { EvaluationExpressionField } from './evaluation_expression_field';
 import { splitQuery } from '../../use_heuristic_split';
 import {
   AGGREGATION_OPTIONS,
   COMPARATOR_OPTIONS,
   CONDITION_OPERATOR_OPTIONS,
-  EXPRESSION_UNKNOWN_REFERENCE_WARNING,
   STAT_FIELD_REQUIRED_ERROR,
   STAT_LABEL_REQUIRED_ERROR,
 } from './translations';
@@ -369,7 +369,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
   }, [thresholdValues.stats, thresholdValues.evaluations]);
 
   // Debounced so warnings don't flash on every keystroke while the user is still typing.
-  const debouncedEvaluations = useDebouncedValue(thresholdValues.evaluations);
+  const debouncedEvaluations = useDebouncedValue(thresholdValues.evaluations, 500);
 
   const evaluationInvalidRefs = useMemo(() => {
     const map = new Map<string, string[]>();
@@ -753,30 +753,14 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={4}>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.alertingV2.ruleBuilder.evaluations.expressionLabel',
-                    { defaultMessage: 'Expression' }
-                  )}
-                  fullWidth
-                  helpText={
-                    evaluationInvalidRefs.has(ev.id)
-                      ? EXPRESSION_UNKNOWN_REFERENCE_WARNING(evaluationInvalidRefs.get(ev.id)!)
-                      : undefined
-                  }
-                >
-                  <EuiFieldText
-                    fullWidth
-                    compressed
-                    value={ev.expression}
-                    onChange={(e) => updateEvaluation(idx, { expression: e.target.value })}
-                    placeholder={i18n.translate(
-                      'xpack.alertingV2.ruleBuilder.evaluations.expressionPlaceholder',
-                      { defaultMessage: 'e.g. errors / total * 100' }
-                    )}
-                    data-test-subj={`ruleBuilderEvalExpression-${idx}`}
-                  />
-                </EuiFormRow>
+                <EvaluationExpressionField
+                  index={idx}
+                  currentEvaluation={ev}
+                  onChange={(expression) => updateEvaluation(idx, { expression })}
+                  stats={thresholdValues.stats}
+                  evaluations={thresholdValues.evaluations}
+                  evaluationInvalidRefs={evaluationInvalidRefs}
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
                 <EuiToolTip
