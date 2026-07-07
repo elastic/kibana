@@ -409,6 +409,28 @@ describe('FeatureFlagsService Browser', () => {
         });
       });
 
+      test('does not retry the same value after a failed best-effort report', () => {
+        http.post.mockRejectedValueOnce(new Error('Counter request failed'));
+
+        startContract.getBooleanValue('my-flag', false);
+        startContract.getBooleanValue('my-flag', false);
+
+        expect(http.post).toHaveBeenCalledTimes(1);
+        expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/my-flag/counter', {
+          body: JSON.stringify({ value: false }),
+        });
+      });
+
+      test('does not report repeated NaN evaluations', () => {
+        startContract.getNumberValue('my-flag', NaN);
+        startContract.getNumberValue('my-flag', NaN);
+
+        expect(http.post).toHaveBeenCalledTimes(1);
+        expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/my-flag/counter', {
+          body: JSON.stringify({ value: NaN }),
+        });
+      });
+
       test('reports again when the evaluated value changes', () => {
         const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
         getBooleanValueSpy.mockReturnValueOnce(true).mockReturnValueOnce(false);

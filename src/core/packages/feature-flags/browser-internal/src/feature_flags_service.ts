@@ -239,16 +239,17 @@ export class FeatureFlagsService {
       ?.post(buildPath('/internal/feature-flags/{flagName}/counter', { flagName }), {
         body: JSON.stringify({ value }),
       })
-      .catch();
+      .catch(() => {});
   }
 
   private shouldReportValue(flagName: string, value: FeatureFlagValue): boolean {
     const type = typeof value;
     const lastReportedValue = this.lastReportedValues.get(flagName);
-    if (lastReportedValue?.type === type && lastReportedValue.value === value) {
+    if (lastReportedValue?.type === type && Object.is(lastReportedValue.value, value)) {
       return false;
     }
 
+    // Counter reporting is best effort; record before posting to cap attempts at one per unique value.
     this.lastReportedValues.set(flagName, { type, value });
     return true;
   }
