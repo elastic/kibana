@@ -22,30 +22,20 @@ import {
   EuiHighlight,
   EuiLink,
   EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
-import {
-  AnalyticsServiceStart,
-  AppMountParameters,
-  I18nStart,
-  ThemeServiceStart,
-} from '@kbn/core/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { ExampleDefinition } from './types';
-
-interface StartServices {
-  analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
-  i18n: I18nStart;
-  theme: Pick<ThemeServiceStart, 'theme$'>;
-}
+import type { AppMountParameters } from '@kbn/core/public';
+import type { RenderingService } from '@kbn/core-rendering-browser';
+import type { ExampleDefinition } from './types';
 
 interface Props {
-  startServices: StartServices;
+  rendering: RenderingService;
   examples: ExampleDefinition[];
   navigateToApp: (appId: string) => void;
   getUrlForApp: (appId: string) => string;
 }
 
-function DeveloperExamples({ startServices, examples, navigateToApp, getUrlForApp }: Props) {
+function DeveloperExamples({ examples, navigateToApp, getUrlForApp, rendering }: Props) {
   const [search, setSearch] = useState<string>('');
 
   const lcSearch = search.toLowerCase();
@@ -57,8 +47,8 @@ function DeveloperExamples({ startServices, examples, navigateToApp, getUrlForAp
         return false;
       });
 
-  return (
-    <KibanaRenderContextProvider {...startServices}>
+  return rendering.addContext(
+    <EuiPageTemplate offset={0}>
       <EuiPageTemplate.Header>
         <EuiFlexGroup justifyContent={'spaceBetween'}>
           <EuiFlexItem>
@@ -100,24 +90,25 @@ function DeveloperExamples({ startServices, examples, navigateToApp, getUrlForAp
                         {def.title}
                       </EuiHighlight>
                     </EuiLink>
-                    <EuiButtonIcon
-                      iconType="popout"
-                      onClick={() =>
-                        window.open(getUrlForApp(def.appId), '_blank', 'noopener, noreferrer')
-                      }
-                    >
-                      Open in new tab
-                    </EuiButtonIcon>
+                    <EuiToolTip content="Open in new tab" disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        iconType="popout"
+                        aria-label="Open in new tab"
+                        onClick={() =>
+                          window.open(getUrlForApp(def.appId), '_blank', 'noopener, noreferrer')
+                        }
+                      />
+                    </EuiToolTip>
                   </React.Fragment>
                 }
                 image={def.image}
-                footer={def.links ? <EuiListGroup size={'s'} listItems={def.links} /> : undefined}
+                footer={def.links ? <EuiListGroup listItems={def.links} /> : undefined}
               />
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
       </EuiPageTemplate.Section>
-    </KibanaRenderContextProvider>
+    </EuiPageTemplate>
   );
 }
 

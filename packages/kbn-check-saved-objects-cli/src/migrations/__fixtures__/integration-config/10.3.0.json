@@ -1,0 +1,58 @@
+{
+  "10.2.0": [
+    {
+      "integration_id": "apache",
+      "created_by": "elastic",
+      "created_by_profile_uid": "u_abc123",
+      "last_updated_by": "elastic",
+      "last_updated_at": "2025-03-01T00:00:00.000Z",
+      "metadata": {
+        "title": "Apache Integration",
+        "version": "1.0.0",
+        "logo": "apache-logo",
+        "description": "Integration for Apache HTTP Server",
+        "created_at": "2025-01-01T00:00:00.000Z"
+      }
+    },
+    {
+      "integration_id": "nginx",
+      "created_by": "admin",
+      "last_updated_by": "admin",
+      "last_updated_at": "2025-02-15T00:00:00.000Z",
+      "metadata": {
+        "title": "Nginx Integration",
+        "description": "Integration for Nginx web server",
+        "created_at": "2025-02-01T00:00:00.000Z",
+        "categories": ["web", "observability"]
+      }
+    }
+  ],
+  "10.3.0": [
+    {
+      "integration_id": "apache",
+      "created_by": "elastic",
+      "created_by_profile_uid": "u_abc123",
+      "last_updated_by": "elastic",
+      "last_updated_at": "2025-03-01T00:00:00.000Z",
+      "metadata": {
+        "title": "Apache Integration",
+        "version": "1.0.0",
+        "logo": "apache-logo",
+        "description": "Integration for Apache HTTP Server",
+        "created_at": "2025-01-01T00:00:00.000Z"
+      }
+    },
+    {
+      "integration_id": "nginx",
+      "created_by": "admin",
+      "last_updated_by": "admin",
+      "last_updated_at": "2025-02-15T00:00:00.000Z",
+      "metadata": {
+        "title": "Nginx Integration",
+        "description": "Integration for Nginx web server",
+        "created_at": "2025-02-01T00:00:00.000Z",
+        "categories": ["web", "observability"]
+      }
+    }
+  ]
+}

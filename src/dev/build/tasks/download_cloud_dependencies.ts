@@ -11,7 +11,8 @@ import Path from 'path';
 import del from 'del';
 import Axios from 'axios';
 import Fsp from 'fs/promises';
-import { Task, downloadToDisk, downloadToString } from '../lib';
+import type { Task } from '../lib';
+import { downloadToDisk, downloadToString } from '../lib';
 
 export const DownloadCloudDependencies: Task = {
   description: 'Downloading cloud dependencies',
@@ -19,8 +20,8 @@ export const DownloadCloudDependencies: Task = {
   async run(config, log, build) {
     const subdomain = config.isRelease ? 'artifacts-staging' : 'artifacts-snapshot';
 
-    const downloadBeat = async (beat: string, id: string) => {
-      const version = config.getBuildVersion();
+    const downloadBeat = async (beat: string, id: string, variant?: string) => {
+      const version = variant ? `${variant}-${config.getBuildVersion()}` : config.getBuildVersion();
       const localArchitecture = [process.arch === 'arm64' ? 'arm64' : 'x86_64'];
       const allArchitectures = ['arm64', 'x86_64'];
       const architectures = config.getDockerCrossCompile() ? allArchitectures : localArchitecture;
@@ -79,8 +80,15 @@ export const DownloadCloudDependencies: Task = {
 
     await del([config.resolveFromRepo('.beats')]);
 
-    await downloadBeat('metricbeat', buildId);
-    await downloadBeat('filebeat', buildId);
+    if (config.buildOptions.createDockerCloud) {
+      await downloadBeat('metricbeat', buildId);
+      await downloadBeat('filebeat', buildId);
+    }
+
+    if (config.buildOptions.createDockerCloudFIPS) {
+      await downloadBeat('metricbeat', buildId, 'fips');
+      await downloadBeat('filebeat', buildId, 'fips');
+    }
 
     await writeManifest(manifestUrl, manifestJSON);
   },

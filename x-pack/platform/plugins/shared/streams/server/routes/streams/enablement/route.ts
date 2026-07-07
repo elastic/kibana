@@ -1,0 +1,114 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z } from '@kbn/zod/v4';
+import { conflict } from '@hapi/boom';
+import { STREAMS_API_PRIVILEGES, STREAMS_SETTINGS_DOCUMENT_ID } from '../../../../common/constants';
+import { NameTakenError } from '../../../lib/streams/errors/name_taken_error';
+import type { DisableStreamsResponse, EnableStreamsResponse } from '../../../lib/streams/client';
+import { createServerRoute } from '../../create_server_route';
+
+export const enableStreamsRoute = createServerRoute({
+  endpoint: 'POST /api/streams/_enable 2023-10-31',
+  params: z.object({}),
+  options: {
+    access: 'public',
+    summary: 'Enable streams',
+    description: 'Enables wired streams',
+    availability: {
+      since: '9.1.0',
+      stability: 'experimental',
+    },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Streams were enabled successfully.',
+        },
+      },
+    }),
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  handler: async ({ request, getScopedClients }): Promise<EnableStreamsResponse> => {
+    const { streamsClient, streamsSettingsStorageClient } = await getScopedClients({
+      request,
+    });
+
+    try {
+      const result = await streamsClient.enableStreams();
+      await streamsSettingsStorageClient.clean();
+      return result;
+    } catch (error) {
+      if (error instanceof NameTakenError) {
+        throw conflict(`Cannot enable Streams, failed to create root stream: ${error.message}`);
+      }
+
+      throw error;
+    }
+  },
+});
+
+export const disableStreamsRoute = createServerRoute({
+  endpoint: 'POST /api/streams/_disable 2023-10-31',
+  params: z.object({}),
+  options: {
+    access: 'public',
+    summary: 'Disable streams',
+    description:
+      'Disables wired streams and deletes all existing stream definitions. The data of wired streams is deleted, but the data of classic streams is preserved.',
+    availability: {
+      since: '9.1.0',
+      stability: 'experimental',
+    },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Streams were disabled successfully.',
+        },
+      },
+    }),
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  handler: async ({ request, getScopedClients }): Promise<DisableStreamsResponse> => {
+    const { streamsClient, streamsSettingsStorageClient } = await getScopedClients({ request });
+
+    const result = await streamsClient.disableStreams();
+    await streamsSettingsStorageClient.index({
+      id: STREAMS_SETTINGS_DOCUMENT_ID,
+      document: {
+        wired_streams_disabled_by_user: true,
+      },
+    });
+    return result;
+  },
+});
+
+export const enablementRoutes = {
+  ...enableStreamsRoute,
+  ...disableStreamsRoute,
+};

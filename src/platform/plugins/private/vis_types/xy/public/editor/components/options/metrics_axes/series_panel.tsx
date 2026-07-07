@@ -1,0 +1,72 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React from 'react';
+
+import { EuiPanel, EuiTitle, EuiSpacer, EuiAccordion } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import type { Vis } from '@kbn/visualizations-plugin/public';
+
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { visEditorSidebarStyles } from '@kbn/vis-default-editor-plugin/public';
+import type { ValueAxis, SeriesParam } from '../../../../types';
+import { ChartOptions } from './chart_options';
+import type { SetParamByIndex, ChangeValueAxis } from '.';
+
+export interface SeriesPanelProps {
+  changeValueAxis: ChangeValueAxis;
+  setParamByIndex: SetParamByIndex;
+  seriesParams: SeriesParam[];
+  valueAxes: ValueAxis[];
+  vis: Vis;
+}
+
+function SeriesPanel({ seriesParams, ...chartProps }: SeriesPanelProps) {
+  const styles = useMemoCss(visEditorSidebarStyles);
+
+  return (
+    <EuiPanel paddingSize="s">
+      <EuiTitle size="xs">
+        <h3>
+          <FormattedMessage
+            id="visTypeXy.controls.pointSeries.series.metricsTitle"
+            defaultMessage="Metrics"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+
+      {seriesParams.map((chart, index) => (
+        <EuiAccordion
+          id={`visEditorSeriesAccordion${chart.data.id}`}
+          key={index}
+          className="visEditorSidebar__section visEditorSidebar__collapsible"
+          initialIsOpen={index === 0}
+          buttonContent={chart.data.label}
+          buttonContentClassName="visEditorSidebar__aggGroupAccordionButtonContent eui-textTruncate"
+          aria-label={i18n.translate('visTypeXy.controls.pointSeries.seriesAccordionAriaLabel', {
+            defaultMessage: 'Toggle {agg} options',
+            values: { agg: chart.data.label },
+          })}
+          css={[styles.section, styles.collapsible, styles.aggGroupAccordionButtonContent]}
+        >
+          <>
+            <EuiSpacer size="m" />
+
+            <ChartOptions index={index} chart={chart} {...chartProps} />
+          </>
+        </EuiAccordion>
+      ))}
+    </EuiPanel>
+  );
+}
+
+export { SeriesPanel };

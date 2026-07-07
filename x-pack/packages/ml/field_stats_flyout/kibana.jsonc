@@ -1,5 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/ml-field-stats-flyout",
-  "owner": "@elastic/ml-ui"
-}

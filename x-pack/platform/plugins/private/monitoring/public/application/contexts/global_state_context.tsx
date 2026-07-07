@@ -1,0 +1,77 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import type { FC, PropsWithChildren } from 'react';
+import React, { createContext, useState } from 'react';
+import type { TimeRange } from '@kbn/es-query';
+import type { RefreshInterval } from '@kbn/data-plugin/public';
+import useUnmount from 'react-use/lib/useUnmount';
+import { GlobalState } from '../../url_state';
+import type { MonitoringStartPluginDependencies, MonitoringStartServices } from '../../types';
+import { Legacy } from '../../legacy_shims';
+import { shouldOverrideRefreshInterval } from './should_override_refresh_interval';
+
+interface GlobalStateProviderProps {
+  query: MonitoringStartPluginDependencies['data']['query'];
+  toasts: MonitoringStartServices['notifications']['toasts'];
+  uiSettings: MonitoringStartServices['uiSettings'];
+}
+
+export interface State {
+  [key: string]: unknown;
+  cluster_uuid?: string;
+  ccs?: any;
+  inSetupMode?: boolean;
+  save?: () => void;
+  time?: TimeRange;
+  refreshInterval?: RefreshInterval;
+}
+
+export const GlobalStateContext = createContext({} as State);
+
+const REFRESH_INTERVAL_OVERRIDE = {
+  pause: false,
+  value: 10000,
+};
+
+export const GlobalStateProvider: FC<PropsWithChildren<GlobalStateProviderProps>> = ({
+  uiSettings,
+  query,
+  toasts,
+  children,
+}) => {
+  const localState: State = {};
+  const [globalState] = useState(
+    () => new GlobalState(query, toasts, localState as { [key: string]: unknown })
+  );
+
+  const initialState: any = globalState.getState();
+  for (const key in initialState) {
+    if (!Object.hasOwn(initialState, key)) {
+      continue;
+    }
+    localState[key] = initialState[key];
+  }
+
+  localState.save = () => {
+    const newState = { ...localState };
+    delete newState.save;
+    globalState.setState(newState);
+  };
+
+  // default to an active refresh interval if it's not conflicting with user-defined values
+  if (shouldOverrideRefreshInterval(uiSettings, Legacy.shims.timefilter)) {
+    localState.refreshInterval = REFRESH_INTERVAL_OVERRIDE;
+    Legacy.shims.timefilter.setRefreshInterval(localState.refreshInterval);
+    localState.save();
+  }
+
+  useUnmount(() => {
+    globalState.destroy();
+  });
+
+  return <GlobalStateContext.Provider value={localState}>{children}</GlobalStateContext.Provider>;
+};

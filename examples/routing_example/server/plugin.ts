@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
-import { registerRoutes } from './routes';
+import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import { registerRoutes, registerDeprecatedRoutes } from './routes';
 
 export class RoutingExamplePlugin implements Plugin<{}, {}> {
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
 
     registerRoutes(router);
+    registerDeprecatedRoutes(router);
 
     return {};
   }

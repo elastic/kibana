@@ -10,9 +10,9 @@
 import Path from 'path';
 
 import { Bundle } from '../common';
-import { Limits } from './optimizer_config';
+import type { Limits } from './optimizer_config';
 
-import { KibanaPlatformPlugin } from './kibana_platform_plugins';
+import type { KibanaPlatformPlugin } from './kibana_platform_plugins';
 
 export function getPluginBundles(
   plugins: KibanaPlatformPlugin[],

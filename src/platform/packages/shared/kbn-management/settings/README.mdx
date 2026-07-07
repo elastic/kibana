@@ -1,0 +1,11 @@
+# Management Settings
+
+These packages comprise the Management Advanced Settings application.  The source of these components and related types and utilities origingated in the `advancedSettings` plugin.  We've abstracted it away into packages first, for Serverless, and later, as a drop-in replacement in the plugin.
+
+## Notes
+
+**Be aware**: the functional flow logic we've adopted for these components is not one I would encourage, specifically, using "drilled" onFieldChange handlers and utilizing a composing-component-based store. Ideally, we'd use a Redux store, or, at the very least, a React reducer.
+
+In the interest of time and compatibility, we've opted to use the pattern from the original components in `advancedSettings`. We plan to revisit the state management and prop-drilling when `advancedSettings` is refactored with these components.
+
+This is being tracked with https://github.com/elastic/kibana/issues/166579

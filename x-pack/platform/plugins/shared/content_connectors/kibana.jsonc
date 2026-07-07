@@ -1,0 +1,32 @@
+{
+  "type": "plugin",
+  "id": "@kbn/content-connectors-plugin",
+  "owner": "@elastic/search-kibana",
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Plugin hosting shared features for connectors",
+  "plugin": {
+    "id": "contentConnectors",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "contentConnectors"
+    ],
+    "requiredPlugins": [
+      "home",
+      "management",
+      "features",
+      "share",
+      "licensing",
+      "taskManager",
+      "fleet",
+      "indexManagement",
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "discover",
+    ],
+    "requiredBundles": ["kibanaReact"]
+  }
+}

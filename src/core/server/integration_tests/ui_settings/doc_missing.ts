@@ -19,9 +19,7 @@ export const docMissingSuite = (savedObjectsIndex: string) => () => {
     // delete all docs from kibana index to ensure savedConfig is not found
     await esClient.deleteByQuery({
       index: savedObjectsIndex,
-      body: {
-        query: { match_all: {} },
-      },
+      query: { match_all: {} },
     });
   });
 

@@ -1,0 +1,107 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { heatmapFunction } from './heatmap_function';
+import type { HeatmapArguments } from '..';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
+import type { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
+import {
+  EXPRESSION_HEATMAP_GRID_NAME,
+  EXPRESSION_HEATMAP_LEGEND_NAME,
+  EXPRESSION_HEATMAP_NAME,
+} from '../constants';
+import type { ExecutionContext } from '@kbn/expressions-plugin/common';
+
+describe('interpreter/functions#heatmap', () => {
+  const fn = functionWrapper(heatmapFunction());
+  const context: Datatable = {
+    type: 'datatable',
+    rows: [{ 'col-0-1': 0 }],
+    columns: [
+      { id: 'col-0-1', name: 'Count', meta: { type: 'number' } },
+      { id: 'col-1-2', name: 'Dest', meta: { type: 'string' } },
+    ],
+  };
+  const args: HeatmapArguments = {
+    percentageMode: false,
+    legend: {
+      isVisible: true,
+      position: 'top',
+      type: EXPRESSION_HEATMAP_LEGEND_NAME,
+    },
+    gridConfig: {
+      isCellLabelVisible: true,
+      isYAxisLabelVisible: true,
+      isXAxisLabelVisible: true,
+      isYAxisTitleVisible: true,
+      isXAxisTitleVisible: true,
+      type: EXPRESSION_HEATMAP_GRID_NAME,
+    },
+    palette: {
+      type: 'palette',
+      name: '',
+      params: {
+        colors: ['rgba(0, 0, 0, 0)', 'rgb(112, 38, 231)'],
+        stops: [0, 10000],
+        gradient: false,
+        rangeMin: 0,
+        rangeMax: 150,
+        range: 'number',
+      },
+    },
+    showTooltip: true,
+    highlightInHover: false,
+    xAccessor: 'col-1-2',
+    valueAccessor: 'col-0-1',
+  };
+
+  it('returns an object with the correct structure', () => {
+    const actual = fn(context, args);
+
+    expect(actual).toMatchSnapshot();
+  });
+
+  it('logs correct datatable to inspector', async () => {
+    let loggedTable: Datatable;
+    const handlers = {
+      inspectorAdapters: {
+        tables: {
+          logDatatable: (name: string, datatable: Datatable) => {
+            loggedTable = datatable;
+          },
+          reset: () => {},
+        },
+      },
+      getExecutionContext: jest.fn(),
+    } as unknown as ExecutionContext;
+
+    await fn(context, args, handlers);
+
+    expect(loggedTable!).toMatchSnapshot();
+  });
+
+  it('should pass over overrides from variables', async () => {
+    const overrides = {
+      settings: {
+        onBrushEnd: 'ignore',
+      },
+    };
+    const handlers = {
+      variables: { overrides },
+      getExecutionContext: jest.fn(),
+    } as unknown as ExecutionContext;
+    const result = await fn(context, args, handlers);
+
+    expect(result).toEqual({
+      type: 'render',
+      as: EXPRESSION_HEATMAP_NAME,
+      value: expect.objectContaining({ overrides }),
+    });
+  });
+});

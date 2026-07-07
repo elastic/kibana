@@ -1,9 +1,0 @@
-# @kbn-doc-linker partial
-
-properties:
-  search:
-    type: string
-  certExpirationThreshold:
-    type: number
-  certAgeThreshold:
-    type: number

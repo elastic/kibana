@@ -1,0 +1,19 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node", "react"]
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/es-query",
+    "@kbn/data-views-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/core-execution-context-common",
+    "@kbn/utility-types",
+    "@kbn/presentation-publishing-schemas",
+    "@kbn/esql-types",
+    "@kbn/safer-lodash-set"
+  ]
+}

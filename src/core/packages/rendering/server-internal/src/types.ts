@@ -1,0 +1,128 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
+import type { InjectedMetadata } from '@kbn/core-injected-metadata-common-internal';
+import type { KibanaRequest, ICspConfig } from '@kbn/core-http-server';
+import type {
+  InternalHttpServicePreboot,
+  InternalHttpServiceSetup,
+} from '@kbn/core-http-server-internal';
+import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
+import type { InternalStatusServiceSetup } from '@kbn/core-status-server-internal';
+import type { DarkModeValue } from '@kbn/core-ui-settings-common';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
+import type { InternalCustomBrandingSetup } from '@kbn/core-custom-branding-server-internal';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
+import type { I18nServiceSetup } from '@kbn/core-i18n-server';
+import type { InternalI18nServicePreboot } from '@kbn/core-i18n-server-internal';
+import type { InternalFeatureFlagsSetup } from '@kbn/core-feature-flags-server-internal';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
+import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
+
+/** @internal */
+export interface RenderingMetadata {
+  hardenPrototypes: ICspConfig['strict'];
+  strictCsp: ICspConfig['strict'];
+  uiPublicUrl: string;
+  bootstrapScriptUrl: string;
+  locale: string;
+  themeVersion: ThemeVersion;
+  darkMode: DarkModeValue;
+  stylesheetPaths: string[];
+  scriptPaths: string[];
+  /** Font URLs to preload via <link rel="preload" as="font"> (rspack mode only) */
+  preloadFonts?: string[];
+  /** When true, adds font-display: swap to @font-face declarations (rspack mode only) */
+  optimizeFontLoading?: boolean;
+  injectedMetadata: InjectedMetadata;
+  customBranding: CustomBranding;
+}
+
+/** @internal */
+export interface RenderingPrebootDeps {
+  http: InternalHttpServicePreboot;
+  uiPlugins: UiPlugins;
+  i18n: InternalI18nServicePreboot;
+}
+
+/** @internal */
+export interface RenderingSetupDeps {
+  elasticsearch: InternalElasticsearchServiceSetup;
+  featureFlags: InternalFeatureFlagsSetup;
+  http: InternalHttpServiceSetup;
+  status: InternalStatusServiceSetup;
+  uiPlugins: UiPlugins;
+  customBranding: InternalCustomBrandingSetup;
+  userSettings: InternalUserSettingsServiceSetup;
+  i18n: I18nServiceSetup;
+}
+
+/** @internal */
+export interface RenderingStartDeps {
+  featureFlags: FeatureFlagsStart;
+  /** Optional so `render()` is safe to call before `start()` runs. */
+  userStorage?: UserStorageServiceStart;
+}
+
+/** @internal */
+export interface IRenderOptions {
+  /**
+   * Set whether the page is anonymous, which determines what plugins are enabled and whether to output user settings in the page metadata.
+   * `false` by default.
+   */
+  isAnonymousPage?: boolean;
+
+  /**
+   * @internal
+   * This is only used for integration tests that allow us to verify which config keys are exposed to the browser.
+   */
+  includeExposedConfigKeys?: boolean;
+}
+
+/** @internal */
+export interface RenderingResponse {
+  /** The rendered HTML body. */
+  body: string;
+  /**
+   * Response headers the renderer wants attached to the HTTP response (e.g.,
+   * the `Set-Cookie` carrying the resolved locale). Callers should merge
+   * these with any caller-provided headers when building the response.
+   */
+  headers: Record<string, string>;
+}
+
+/** @internal */
+export interface InternalRenderingServiceSetup {
+  /**
+   * Renders an HTML page bootstrapped with the `core` bundle (or another
+   * specified legacy bundle), and returns the body alongside response
+   * headers the caller should set (e.g., `Set-Cookie` for the resolved
+   * locale).
+   *
+   * @example
+   * ```ts
+   * const { body, headers } = await rendering.render(request, uiSettings);
+   * return response.ok({ body, headers });
+   * ```
+   */
+  render(
+    request: KibanaRequest,
+    uiSettings: {
+      client: IUiSettingsClient;
+      globalClient: IUiSettingsClient;
+    },
+    options?: IRenderOptions
+  ): Promise<RenderingResponse>;
+}
+
+/** @internal */
+export type InternalRenderingServicePreboot = InternalRenderingServiceSetup;

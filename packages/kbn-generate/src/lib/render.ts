@@ -12,7 +12,7 @@ import Fsp from 'fs/promises';
 
 import Ejs from 'ejs';
 import normalizePath from 'normalize-path';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { sortPackageJson } from '@kbn/sort-package-json';
 import { REPO_ROOT } from '@kbn/repo-info';
 

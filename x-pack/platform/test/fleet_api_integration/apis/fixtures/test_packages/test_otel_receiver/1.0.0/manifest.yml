@@ -1,0 +1,21 @@
+format_version: 3.0.0
+name: test_otel_receiver
+title: Test OTel Receiver-Specific Package
+description: >-
+  Test package for verifying OTel routing when dynamic_signal_types is NOT set.
+  Simulates receiver-specific packages like mysql_input_otel where the source
+  system is known and Fleet should still set data_stream.dataset in routing.
+type: input
+version: 1.0.0
+license: basic
+categories: []
+policy_templates:
+  - name: mysqld_exporter
+    title: MySQL Exporter
+    description: Collect MySQL metrics via the mysqld_exporter receiver.
+    input: otelcol
+    type: metrics
+    template_path: input.yml.hbs
+    vars: []
+owner:
+  github: elastic/fleet

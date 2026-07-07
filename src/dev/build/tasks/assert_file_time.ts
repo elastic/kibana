@@ -12,7 +12,8 @@ import { statSync } from 'fs';
 
 import { tap, filter, map, toArray } from 'rxjs';
 
-import { scan$, Task } from '../lib';
+import type { Task } from '../lib';
+import { scan$ } from '../lib';
 
 export const AssertFileTime: Task = {
   description: 'Checking for files dated before 1980',

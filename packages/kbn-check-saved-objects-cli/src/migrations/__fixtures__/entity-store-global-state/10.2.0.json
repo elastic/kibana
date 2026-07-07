@@ -1,0 +1,38 @@
+{
+  "10.1.0": [
+    {
+      "historySnapshot": {
+        "status": "stopped",
+        "frequency": "1h"
+      },
+      "logsExtraction": {
+        "additionalIndexPatterns": [],
+        "fieldHistoryLength": 10,
+        "lookbackPeriod": "24h",
+        "delay": "2m",
+        "docsLimit": 10000,
+        "timeout": "30s",
+        "frequency": "1h"
+      }
+    }
+  ],
+  "10.2.0": [
+    {
+      "historySnapshot": {
+        "status": "stopped",
+        "frequency": "1h"
+      },
+      "logsExtraction": {
+        "additionalIndexPatterns": [],
+        "fieldHistoryLength": 10,
+        "lookbackPeriod": "24h",
+        "delay": "2m",
+        "docsLimit": 10000,
+        "timeout": "30s",
+        "frequency": "1h",
+        "excludedIndexPatterns": [],
+        "maxTimeWindowSize": "15m"
+      }
+    }
+  ]
+}

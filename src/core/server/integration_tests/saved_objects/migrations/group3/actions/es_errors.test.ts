@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
-import { Root } from '@kbn/core-root-server-internal';
+import type { estypes } from '@elastic/elasticsearch';
+import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
+import type { Root } from '@kbn/core-root-server-internal';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { ElasticsearchClient } from '../../../../..';
 import {
@@ -21,7 +21,6 @@ import {
   isWriteBlockException,
   isClusterShardLimitExceeded,
   createIndex,
-  setWriteBlock,
 } from '@kbn/core-saved-objects-migration-server-internal';
 
 const { startES } = createTestServers({
@@ -53,12 +52,12 @@ describe('Elasticsearch Errors', () => {
       mappings: { properties: {} },
       esCapabilities: elasticsearchServiceMock.createCapabilities(),
     })();
-    await setWriteBlock({ client, index: 'existing_index_with_write_block' })();
+    await client.indices.addBlock({ index: 'existing_index_with_write_block', block: 'write' });
   });
 
   afterAll(async () => {
-    await esServer.stop();
-    await root.shutdown();
+    await root?.shutdown();
+    await esServer?.stop();
   });
 
   describe('isWriteBlockException', () => {
@@ -68,7 +67,7 @@ describe('Elasticsearch Errors', () => {
           index: 'existing_index_with_write_block',
           id: 'some-id',
           op_type: 'index',
-          body: {
+          document: {
             hello: 'dolly',
           },
         },
@@ -98,7 +97,7 @@ describe('Elasticsearch Errors', () => {
     it('correctly identify errors from bulk index operations', async () => {
       const res = await client.bulk({
         refresh: 'wait_for',
-        body: [
+        operations: [
           {
             index: {
               _index: 'existing_index_with_write_block',
@@ -119,7 +118,7 @@ describe('Elasticsearch Errors', () => {
     it('correctly identify errors from bulk create operations', async () => {
       const res = await client.bulk({
         refresh: 'wait_for',
-        body: [
+        operations: [
           {
             create: {
               _index: 'existing_index_with_write_block',
@@ -150,18 +149,6 @@ describe('Elasticsearch Errors', () => {
       const res = await client.indices.create(
         {
           index: 'new_test_index',
-        },
-        { ignore: [400] }
-      );
-
-      // @ts-expect-error @elastic/elasticsearch doesn't declare error on response
-      expect(isClusterShardLimitExceeded(res.error)).toEqual(true);
-    });
-    it('correctly identify errors from clone index operation', async () => {
-      const res = await client.indices.clone(
-        {
-          index: 'existing_index_with_write_block',
-          target: 'new_test_index_2',
         },
         { ignore: [400] }
       );

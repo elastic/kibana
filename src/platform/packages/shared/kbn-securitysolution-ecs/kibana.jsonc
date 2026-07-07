@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/securitysolution-ecs",
+  "owner": [
+    "@elastic/security-threat-hunting"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

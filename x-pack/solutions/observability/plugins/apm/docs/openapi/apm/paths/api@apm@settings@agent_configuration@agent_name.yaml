@@ -1,0 +1,52 @@
+get:
+  summary: Get agent name for service
+  description: Retrieve `agentName` for a service.
+  operationId: getAgentNameForService
+  tags:
+    - APM agent configuration
+  parameters:
+    - $ref: '../components/headers/elastic_api_version.yaml'
+    - name: serviceName
+      in: query
+      description: The name of the service
+      required: true
+      schema:
+        type: string
+      example: node
+  responses:
+    '200':
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/service_agent_name_response.yaml'
+          examples:
+            getAgentNameForServiceResponse1:
+              $ref: '../components/examples/service_agent_name_get_200_response1.yaml'
+    '400':
+      description: Bad Request response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
+          examples:
+            badRequestResponse:
+              $ref: '../components/examples/error_400_response.yaml'
+    '401':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+          examples:
+            unauthorizedResponse:
+              $ref: '../components/examples/error_401_response.yaml'
+    '404':
+      description: Not found response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'
+          examples:
+            notFoundResponse:
+              $ref: '../components/examples/error_404_response.yaml'

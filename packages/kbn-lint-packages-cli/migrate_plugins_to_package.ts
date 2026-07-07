@@ -13,7 +13,7 @@ import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { asyncMapWithLimit } from '@kbn/std';
-import { RepoPath } from '@kbn/repo-path';
+import type { RepoPath } from '@kbn/repo-path';
 import { type PluginPackageManifest } from '@kbn/repo-packages';
 
 function isObj(v: unknown): v is Record<string, unknown> {
@@ -78,7 +78,8 @@ export async function migratePluginsToPackages(legacyManifests: RepoPath[]) {
       .split('\n')
       .flatMap((line) => {
         const trim = line.trim();
-        if (!trim || trim.startsWith('#')) {
+        // kibanamachine is an assignment override on backport branches to avoid review requests
+        if (!trim || trim.startsWith('#') || trim.includes('@kibanamachine')) {
           return [];
         }
 

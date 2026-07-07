@@ -7,14 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactElement, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
-import { ADD_PANEL_TRIGGER, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { PageApi } from '../types';
+import { i18n } from '@kbn/i18n';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { PublishingSubject, ViewMode } from '@kbn/presentation-publishing';
+import { apiPublishesViewMode, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { of } from 'rxjs';
 
-export function AddButton({ pageApi, uiActions }: { pageApi: PageApi; uiActions: UiActionsStart }) {
+export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions: UiActionsStart }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [items, setItems] = useState<ReactElement[]>([]);
+
+  const viewMode = useStateFromPublishingSubject(
+    apiPublishesViewMode(pageApi) ? pageApi?.viewMode$ : (of('edit') as PublishingSubject<ViewMode>)
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -25,36 +34,24 @@ export function AddButton({ pageApi, uiActions }: { pageApi: PageApi; uiActions:
         id: ADD_PANEL_TRIGGER,
       },
     };
-    const actionsPromises = uiActions.getTriggerActions(ADD_PANEL_TRIGGER).map(async (action) => {
-      return {
-        isCompatible: await action.isCompatible(actionContext),
-        action,
-      };
-    });
 
-    Promise.all(actionsPromises).then((actions) => {
-      if (cancelled) {
-        return;
-      }
+    uiActions.getTriggerCompatibleActions(ADD_PANEL_TRIGGER, actionContext).then((actions) => {
+      if (cancelled) return;
 
-      const nextItems = actions
-        .filter(
-          ({ action, isCompatible }) => isCompatible && action.id !== 'ACTION_CREATE_ESQL_CHART'
-        )
-        .map(({ action }) => {
-          return (
-            <EuiContextMenuItem
-              key={action.id}
-              icon="share"
-              onClick={() => {
-                action.execute(actionContext);
-                setIsPopoverOpen(false);
-              }}
-            >
-              {action.getDisplayName(actionContext)}
-            </EuiContextMenuItem>
-          );
-        });
+      const nextItems = actions.map((action) => {
+        return (
+          <EuiContextMenuItem
+            key={action.id}
+            icon={action?.getIconType(actionContext) ?? ''}
+            onClick={() => {
+              action.execute(actionContext);
+              setIsPopoverOpen(false);
+            }}
+          >
+            {action.getDisplayName(actionContext)}
+          </EuiContextMenuItem>
+        );
+      });
       setItems(nextItems);
     });
 
@@ -72,8 +69,9 @@ export function AddButton({ pageApi, uiActions }: { pageApi: PageApi; uiActions:
           onClick={() => {
             setIsPopoverOpen(!isPopoverOpen);
           }}
+          disabled={viewMode !== 'edit'}
         >
-          Add
+          Add panel
         </EuiButton>
       }
       isOpen={isPopoverOpen}
@@ -82,6 +80,9 @@ export function AddButton({ pageApi, uiActions }: { pageApi: PageApi; uiActions:
       }}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      aria-label={i18n.translate('embeddableExamples.addPanelPopover.ariaLabel', {
+        defaultMessage: 'Add panel',
+      })}
     >
       <EuiContextMenuPanel items={items} />
     </EuiPopover>

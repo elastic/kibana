@@ -17,7 +17,7 @@ import { OptimizerConfig } from '@kbn/optimizer';
 import { Bundle, BundleRemotes } from '@kbn/optimizer/src/common';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 
-import { TaskContext } from '../task_context';
+import type { TaskContext } from '../task_context';
 
 type WorkerMsg = { success: true; warnings: string } | { success: false; error: string };
 
@@ -64,7 +64,7 @@ export async function optimize({
 
     const proc = fork(require.resolve('./optimize_worker'), {
       cwd: REPO_ROOT,
-      execArgv: ['--require=@kbn/babel-register/install', '--openssl-legacy-provider'],
+      execArgv: ['--require=@kbn/babel-register/install'],
       stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
     });
 

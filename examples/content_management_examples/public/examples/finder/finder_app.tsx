@@ -11,7 +11,7 @@ import React from 'react';
 import { ContentClientProvider, type ContentClient } from '@kbn/content-management-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 
 export const FinderApp = (props: {
@@ -23,6 +23,7 @@ export const FinderApp = (props: {
     <ContentClientProvider contentClient={props.contentClient}>
       <I18nProvider>
         <SavedObjectFinder
+          id="cmFinderApp"
           showFilter={true}
           services={{
             savedObjectsTagging: props.savedObjectsTagging.getTaggingApi(),
@@ -36,7 +37,7 @@ export const FinderApp = (props: {
             {
               type: `search`,
               getIconForSavedObject: () => 'discoverApp',
-              name: 'Saved search',
+              name: 'Discover session',
             },
             {
               type: 'index-pattern',

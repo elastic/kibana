@@ -10,22 +10,25 @@
 import supertest from 'supertest';
 import { ContextService } from '@kbn/core-http-context-server-internal';
 import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
-import { createHttpService, createCoreContext } from '@kbn/core-http-server-mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { createCoreContext } from '@kbn/core-http-server-mocks';
+import type { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
 import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
-import { contextServiceMock, coreMock } from '../../../mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import {
   registerResolveRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { createHiddenTypeVariants } from '@kbn/core-test-helpers-test-utils';
 import { loggerMock } from '@kbn/logging-mocks';
-import { setupConfig } from './routes_test_utils';
+import { deprecationMock, setupConfig } from './routes_test_utils';
+import { contextServiceMock, coreMock } from '../../../mocks';
+import { createInternalHttpService } from '../../utilities';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 
 const coreId = Symbol('core');
 
@@ -42,16 +45,21 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
   let loggerWarnSpy: jest.SpyInstance;
+  let registrationSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     const coreContext = createCoreContext({ coreId });
-    server = createHttpService(coreContext);
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    server = createInternalHttpService(coreContext);
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
 
     const contextService = new ContextService(coreContext);
     httpSetup = await server.setup({
       context: contextService.setup({ pluginDependencies: new Map() }),
       executionContext: executionContextServiceMock.createInternalSetupContract(),
+      userActivity: userActivityServiceMock.createInternalSetupContract(),
     });
 
     handlerContext = coreMock.createRequestHandlerContext();
@@ -79,10 +87,18 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     const logger = loggerMock.create();
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
+    registrationSpy = jest.spyOn(router, 'get');
+
     const config = setupConfig();
     const access = 'public';
 
-    registerResolveRoute(router, { config, coreUsageData, logger, access });
+    registerResolveRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     await server.start();
   });
@@ -141,5 +157,15 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
       .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
     expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('passes deprecation configuration to the router arguments', async () => {
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/resolve/index-pattern/logstash-*')
+      .set('x-elastic-internal-origin', 'kibana')
+      .expect(200);
+    expect(registrationSpy.mock.calls[0][0]).toMatchObject({
+      options: { deprecated: deprecationMock },
+    });
   });
 });

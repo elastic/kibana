@@ -1,0 +1,113 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
+import {
+  getEmptyFindResult,
+  resolveRuleMock,
+  getDeleteRequest,
+  getFindResultWithSingleHit,
+  getDeleteRequestById,
+  getEmptySavedObjectsResponse,
+} from '../../../../routes/__mocks__/request_responses';
+import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
+import { deleteRuleRoute } from './route';
+import { getQueryRuleParams } from '../../../../rule_schema/mocks';
+import type {
+  MockClients,
+  SecuritySolutionRequestHandlerContextMock,
+} from '../../../../routes/__mocks__/request_context';
+
+describe('Delete rule route', () => {
+  let server: ReturnType<typeof serverMock.create>;
+  let clients: MockClients;
+  let context: SecuritySolutionRequestHandlerContextMock;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    server = serverMock.create();
+    ({ clients, context } = requestContextMock.createTools());
+
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.detectionRulesClient.deleteRule.mockResolvedValue();
+    clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
+
+    deleteRuleRoute(server.router);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  describe('status codes with actionClient and alertClient', () => {
+    test('returns 200 when deleting a single rule with a valid actionClient and alertClient by alertId', async () => {
+      const response = await server.inject(
+        getDeleteRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+    });
+
+    test('returns 200 when deleting a single rule with a valid actionClient and alertClient by id', async () => {
+      clients.rulesClient.resolve.mockResolvedValue(resolveRuleMock(getQueryRuleParams()));
+      const response = await server.inject(
+        getDeleteRequestById(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+    });
+
+    test('returns 404 when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {
+      clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
+
+      const response = await server.inject(
+        getDeleteRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({
+        message: 'rule_id: "rule-1" not found',
+        status_code: 404,
+      });
+    });
+
+    test('catches error if deletion throws error', async () => {
+      clients.detectionRulesClient.deleteRule.mockImplementation(async () => {
+        throw new Error('Test error');
+      });
+      const response = await server.inject(
+        getDeleteRequest(),
+        requestContextMock.convertContext(context)
+      );
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: 'Test error',
+        status_code: 500,
+      });
+    });
+  });
+
+  describe('request validation', () => {
+    test('rejects a request with no id', async () => {
+      const request = requestMock.create({
+        method: 'delete',
+        path: DETECTION_ENGINE_RULES_URL,
+        query: {},
+      });
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(400);
+      expect(response.body).toEqual({
+        message: ['either "id" or "rule_id" must be set'],
+        status_code: 400,
+      });
+    });
+  });
+});

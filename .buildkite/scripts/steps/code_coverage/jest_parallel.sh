@@ -19,7 +19,7 @@ fi
 
 export TEST_TYPE
 echo "--- downloading jest test run order"
-download_artifact jest_run_order.json .
+download_tmp_artifact jest_run_order.json . "$BUILDKITE_BUILD_ID"
 configs=$(jq -r 'getpath([env.TEST_TYPE]) | .groups[env.JOB | tonumber].names | .[]' jest_run_order.json)
 
 echo "--- KIBANA_DIR: $KIBANA_DIR"
@@ -85,6 +85,9 @@ mv target/kibana-coverage/jest-combined/coverage-final.json \
 
 echo "--- Jest [$TEST_TYPE] configs complete"
 printf "%s\n" "${results[@]}"
+
+# Scout reporter
+source .buildkite/scripts/steps/test/scout/upload_report_events.sh
 
 # Force exit 0 to ensure the next build step starts.
 exit 0

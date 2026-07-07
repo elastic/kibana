@@ -11,7 +11,8 @@ import { relative } from 'path';
 
 import * as Rx from 'rxjs';
 
-import { scan$, Task } from '../lib';
+import type { Task } from '../lib';
+import { scan$ } from '../lib';
 
 export const AssertPathLength: Task = {
   description: 'Checking Windows for paths > 200 characters',

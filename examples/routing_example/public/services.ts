@@ -12,8 +12,9 @@ import type {
   CoreStart,
   I18nStart,
   ThemeServiceStart,
+  UserProfileService,
 } from '@kbn/core/public';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { buildPath, type IHttpFetchError } from '@kbn/core-http-browser';
 import {
   RANDOM_NUMBER_ROUTE_PATH,
   RANDOM_NUMBER_BETWEEN_ROUTE_PATH,
@@ -25,6 +26,7 @@ interface StartServices {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
   i18n: I18nStart;
   theme: Pick<ThemeServiceStart, 'theme$'>;
+  userProfile: UserProfileService;
 }
 
 export interface Services {
@@ -37,8 +39,8 @@ export interface Services {
 }
 
 export function getServices(core: CoreStart): Services {
-  const { analytics, i18n, theme } = core;
-  const startServices = { analytics, i18n, theme };
+  const { analytics, i18n, theme, userProfile } = core;
+  const startServices = { analytics, i18n, theme, userProfile };
 
   return {
     startServices,
@@ -64,7 +66,7 @@ export function getServices(core: CoreStart): Services {
     },
     postMessage: async (message: string, id: string) => {
       try {
-        await core.http.post(`${POST_MESSAGE_ROUTE_PATH}/${id}`, {
+        await core.http.post(buildPath(`${POST_MESSAGE_ROUTE_PATH}/{id}`, { id }), {
           body: JSON.stringify({ message }),
         });
       } catch (e) {

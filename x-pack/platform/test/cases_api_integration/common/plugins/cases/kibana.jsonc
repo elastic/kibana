@@ -1,0 +1,23 @@
+{
+  "type": "plugin",
+  "id": "@kbn/cases-api-integration-test-plugin",
+  "owner": "@elastic/kibana-cases",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "casesApiIntegrationTestPlugin",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "actions",
+      "features",
+      "cases",
+      "files",
+      "taskManager"
+    ],
+    "optionalPlugins": [
+      "security",
+      "spaces"
+    ]
+  }
+}

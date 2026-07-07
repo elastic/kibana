@@ -1,0 +1,28 @@
+import { Canvas, Meta, ArgTypes } from '@storybook/blocks';
+import * as ESQLEditorStories from './esql_editor.stories';
+
+<Meta of={ESQLEditorStories} />
+
+# ES|QL Editor
+
+The ES|QL Editor is the primary interface for writing and running [ES|QL](https://www.elastic.co/guide/en/elasticsearch/reference/current/esql.html) queries in Kibana.
+It wraps the Monaco editor with the full ES|QL language server: syntax highlighting, auto-complete, hover documentation, inline validation, and query history.
+
+## Default
+
+The standard editor as it appears in Discover and most search contexts.
+
+<Canvas of={ESQLEditorStories.Default} />
+
+## Usage
+
+Several other stories are accessible from the sidebar in Canvas mode:
+
+- **Inline mode** — editor embedded in a flyout or dashboard panel with an inline run button (`editorIsInline: true`)
+- **With errors** — server-side validation errors passed via the `errors` prop
+- **With warning** — a non-fatal Elasticsearch warning passed via the `warning` prop
+- **With history open** — inline editor with the history/starred-queries panel expanded on mount via `initialState`
+
+## Props
+
+<ArgTypes of={ESQLEditorStories.Default} sort="alpha" />

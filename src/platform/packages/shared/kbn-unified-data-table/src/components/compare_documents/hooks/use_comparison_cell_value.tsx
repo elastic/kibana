@@ -1,0 +1,267 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { formatFieldValueReact } from '@kbn/discover-utils';
+import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { getFieldIconProps } from '@kbn/field-utils';
+import { FieldIcon } from '@kbn/react-field';
+import classNames from 'classnames';
+import { isEqual, memoize } from 'lodash';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
+import { CELL_CLASS } from '../../../utils/get_render_cell_value';
+import type { DocumentDiffMode } from '../types';
+import type { DocMap } from '../../../types';
+import type { CalculateDiffProps } from './calculate_diff';
+import { calculateDiff, formatDiffValue } from './calculate_diff';
+import {
+  ADDED_SEGMENT_CLASS,
+  BASE_CELL_CLASS,
+  DIFF_CELL_CLASS,
+  FIELD_NAME_CLASS,
+  MATCH_CELL_CLASS,
+  REMOVED_SEGMENT_CLASS,
+  SEGMENT_CLASS,
+} from './use_comparison_css';
+
+export interface UseComparisonCellValueProps {
+  dataView: DataView;
+  columnsMeta: DataTableColumnsMeta | undefined;
+  comparisonFields: string[];
+  fieldColumnId: string;
+  selectedDocIds: string[];
+  diffMode: DocumentDiffMode | undefined;
+  fieldFormats: FieldFormatsStart;
+  docMap: DocMap;
+}
+
+export const useComparisonCellValue = ({
+  dataView,
+  columnsMeta,
+  comparisonFields,
+  fieldColumnId,
+  selectedDocIds,
+  diffMode,
+  fieldFormats,
+  docMap,
+}: UseComparisonCellValueProps) => {
+  const baseDocId = selectedDocIds[0];
+  const baseDoc = useMemo(() => docMap.get(baseDocId)?.doc.flattened, [baseDocId, docMap]);
+  const [calculateDiffMemoized] = useState(() => createCalculateDiffMemoized());
+
+  return useCallback(
+    (props: EuiDataGridCellValueElementProps) => (
+      <DiffProvider value={calculateDiffMemoized}>
+        <CellValue
+          dataView={dataView}
+          columnsMeta={columnsMeta}
+          comparisonFields={comparisonFields}
+          fieldColumnId={fieldColumnId}
+          baseDocId={baseDocId}
+          baseDoc={baseDoc}
+          diffMode={diffMode}
+          fieldFormats={fieldFormats}
+          docMap={docMap}
+          {...props}
+        />
+      </DiffProvider>
+    ),
+    [
+      baseDoc,
+      baseDocId,
+      calculateDiffMemoized,
+      comparisonFields,
+      dataView,
+      columnsMeta,
+      diffMode,
+      fieldColumnId,
+      fieldFormats,
+      docMap,
+    ]
+  );
+};
+
+type CellValueProps = Omit<UseComparisonCellValueProps, 'selectedDocIds'> &
+  EuiDataGridCellValueElementProps & {
+    baseDocId: string;
+    baseDoc: DataTableRecord['flattened'] | undefined;
+  };
+
+const EMPTY_VALUE = '-';
+
+const CellValue = (props: CellValueProps) => {
+  const { dataView, comparisonFields, fieldColumnId, rowIndex, columnId, docMap, columnsMeta } =
+    props;
+  const fieldName = comparisonFields[rowIndex];
+  const field = useMemo(
+    () =>
+      getDataViewFieldOrCreateFromColumnMeta({
+        dataView,
+        fieldName,
+        columnMeta: columnsMeta?.[fieldName],
+      }),
+    [dataView, fieldName, columnsMeta]
+  );
+  const comparisonDoc = useMemo(() => docMap.get(columnId)?.doc, [columnId, docMap]);
+
+  if (columnId === fieldColumnId) {
+    return <FieldCellValue field={field} fieldName={fieldName} />;
+  }
+
+  if (!comparisonDoc) {
+    return <span className={CELL_CLASS}>{EMPTY_VALUE}</span>;
+  }
+
+  return (
+    <DiffCellValue {...props} field={field} fieldName={fieldName} comparisonDoc={comparisonDoc} />
+  );
+};
+
+interface FieldCellValueProps {
+  field: DataViewField | undefined;
+  fieldName: string;
+}
+
+const FieldCellValue = ({ field, fieldName }: FieldCellValueProps) => {
+  return (
+    <EuiFlexGroup responsive={false} gutterSize="s">
+      {field && (
+        <EuiFlexItem grow={false}>
+          <FieldIcon
+            {...getFieldIconProps(field)}
+            data-test-subj="unifiedDataTableComparisonFieldIcon"
+          />
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem>
+        <EuiText
+          size="relative"
+          className={FIELD_NAME_CLASS}
+          data-test-subj="unifiedDataTableComparisonFieldName"
+        >
+          {field?.displayName ?? fieldName}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+type DiffCellValueProps = CellValueProps &
+  FieldCellValueProps & {
+    comparisonDoc: DataTableRecord;
+  };
+
+const DiffCellValue = ({
+  dataView,
+  field,
+  fieldName,
+  baseDocId,
+  baseDoc,
+  comparisonDoc,
+  diffMode,
+  columnId,
+  fieldFormats,
+  setCellProps,
+}: DiffCellValueProps) => {
+  const baseValue = baseDoc?.[fieldName];
+  const comparisonValue = comparisonDoc?.flattened[fieldName];
+  const isBaseDoc = columnId === baseDocId;
+  const formattedBaseValue = useMemo(
+    () => (isBaseDoc ? formatDiffValue(baseValue, false).value : undefined),
+    [baseValue, isBaseDoc]
+  );
+
+  useEffect(() => {
+    if (isBaseDoc) {
+      setCellProps({ className: BASE_CELL_CLASS });
+    } else if (diffMode !== 'basic') {
+      setCellProps({ className: undefined });
+    } else if (isEqual(baseValue, comparisonValue)) {
+      setCellProps({ className: MATCH_CELL_CLASS });
+    } else {
+      setCellProps({ className: DIFF_CELL_CLASS });
+    }
+  }, [baseValue, columnId, comparisonValue, baseDocId, diffMode, setCellProps, isBaseDoc]);
+
+  if (!diffMode || diffMode === 'basic') {
+    return (
+      <span className={CELL_CLASS}>
+        {formatFieldValueReact({
+          value: comparisonValue,
+          hit: comparisonDoc.raw,
+          fieldFormats,
+          dataView,
+          field,
+        })}
+      </span>
+    );
+  }
+
+  if (formattedBaseValue) {
+    return <span className={CELL_CLASS}>{formattedBaseValue || EMPTY_VALUE}</span>;
+  }
+
+  return (
+    <DiffCellValueAdvanced
+      baseValue={baseValue}
+      comparisonValue={comparisonValue}
+      diffMode={diffMode}
+    />
+  );
+};
+
+const DiffCellValueAdvanced = ({ diffMode, ...props }: CalculateDiffProps) => {
+  const diff = useDiff({ diffMode, ...props });
+  const SegmentTag = diffMode === 'lines' ? 'div' : 'span';
+
+  return (
+    <span className={CELL_CLASS}>
+      {diff.map((change, i) => (
+        <SegmentTag
+          key={`segment-${i}`}
+          className={classNames(SEGMENT_CLASS, {
+            [ADDED_SEGMENT_CLASS]: change.added,
+            [REMOVED_SEGMENT_CLASS]: change.removed,
+          })}
+        >
+          {change.value || EMPTY_VALUE}
+        </SegmentTag>
+      ))}
+    </span>
+  );
+};
+
+// EuiDataGrid remounts cells often due to virtualization, e.g. on init to calculate cell sizes
+// and while scrolling, so React memoization is not effective here. Instead we memoize the diff
+// results in the comparison to avoid recalculating them frequently.
+const createCalculateDiffMemoized = (): typeof calculateDiff => {
+  const calculateDiffMemoized = memoize((diffMode: CalculateDiffProps['diffMode']) => {
+    return memoize((baseValue: CalculateDiffProps['baseValue']) => {
+      return memoize((comparisonValue: CalculateDiffProps['comparisonValue']) => {
+        return calculateDiff({ diffMode, baseValue, comparisonValue });
+      });
+    });
+  });
+
+  return ({ diffMode, baseValue, comparisonValue }: CalculateDiffProps) => {
+    return calculateDiffMemoized(diffMode)(baseValue)(comparisonValue);
+  };
+};
+
+const DiffContext = createContext(calculateDiff);
+const DiffProvider = DiffContext.Provider;
+
+const useDiff = (props: CalculateDiffProps) => {
+  const calculateDiffMemoized = useContext(DiffContext);
+  return calculateDiffMemoized(props);
+};

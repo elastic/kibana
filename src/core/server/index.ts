@@ -29,7 +29,8 @@
  * @packageDocumentation
  */
 
-import { Type } from '@kbn/config-schema';
+import 'reflect-metadata';
+import type { Type } from '@kbn/config-schema';
 import type { AppenderConfigType } from '@kbn/core-logging-server';
 import { appendersSchema } from '@kbn/core-logging-server-internal';
 import type {
@@ -110,6 +111,7 @@ export type {
   FakeRequest,
   ScopeableRequest,
   ElasticsearchClient,
+  ElasticsearchRequestLoggingOptions,
   IClusterClient,
   ICustomClusterClient,
   ElasticsearchClientConfig,
@@ -157,7 +159,7 @@ export type {
 } from '@kbn/core-user-profile-server';
 
 export { CspConfig } from '@kbn/core-http-server-internal';
-export { CoreKibanaRequest, kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
+export { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 
 export type {
   AuthenticationHandler,
@@ -200,7 +202,6 @@ export type {
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
   IKibanaResponse,
-  LifecycleResponseFactory,
   KnownHeaders,
   ErrorHttpResponseOptions,
   IKibanaSocket,
@@ -225,6 +226,7 @@ export type {
   IStaticAssets,
   SessionStorage,
   SessionStorageCookieOptions,
+  SessionStorageSetOptions,
   SessionCookieValidationResult,
   SessionStorageFactory,
   GetAuthState,
@@ -242,7 +244,11 @@ export type {
 } from '@kbn/core-http-server';
 export type { IExternalUrlPolicy } from '@kbn/core-http-common';
 
-export { validBodyOutput, OnPostAuthResultType } from '@kbn/core-http-server';
+export {
+  validBodyOutput,
+  OnPostAuthResultType,
+  ReservedPrivilegesSet,
+} from '@kbn/core-http-server';
 
 export type {
   HttpResourcesRenderOptions,
@@ -289,7 +295,6 @@ export type {
 
 export type { PluginName, DiscoveredPlugin } from '@kbn/core-base-common';
 
-export type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 export type {
   SavedObjectsMigrationVersion,
   SavedObjectsImportConflictError,
@@ -361,6 +366,9 @@ export type {
 } from '@kbn/core-saved-objects-api-server';
 export type {
   SavedObject,
+  SavedObjectErrorResult,
+  SavedObjectBulkResult,
+  SavedObjectAccessControl,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
@@ -425,6 +433,7 @@ export {
   SPACES_EXTENSION_ID,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
+export { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 export {
   SavedObjectsUtils,
   mergeSavedObjectMigrationMaps,
@@ -612,4 +621,6 @@ export type {
   RouteSecurityGetter,
   Privilege,
   PrivilegeSet,
+  AllRequiredCondition,
+  AnyRequiredCondition,
 } from '@kbn/core-http-server';

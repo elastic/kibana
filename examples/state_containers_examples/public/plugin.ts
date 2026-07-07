@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { AppPluginDependencies } from './with_data_services/types';
+import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { AppPluginDependencies } from './with_data_services/types';
 import image from './state_sync.png';
 
 interface SetupDeps {
@@ -91,23 +91,20 @@ export class StateContainersExamplesPlugin implements Plugin {
       links: [
         {
           label: 'State containers README',
-          href: 'https://github.com/elastic/kibana/tree/main/src/plugins/kibana_utils/docs/state_containers',
+          href: 'https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/kibana_utils/docs/state_containers',
           iconType: 'logoGithub',
-          size: 's',
           target: '_blank',
         },
         {
           label: 'State sync utils README',
-          href: 'https://github.com/elastic/kibana/tree/main/src/plugins/kibana_utils/docs/state_sync',
+          href: 'https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/kibana_utils/docs/state_sync',
           iconType: 'logoGithub',
-          size: 's',
           target: '_blank',
         },
         {
           label: 'Kibana navigation best practices',
           href: 'https://www.elastic.co/guide/en/kibana/master/kibana-navigation.html',
           iconType: 'logoKibana',
-          size: 's',
           target: '_blank',
         },
       ],

@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type {
   RuleType as BaseRuleType,
   RuleTypeState,
   RuleExecutorOptions as BaseRuleExecutorOptions,
-  DEFAULT_AAD_CONFIG,
-  AlertsClientError,
 } from '@kbn/alerting-plugin/server';
+import { DEFAULT_AAD_CONFIG, AlertsClientError } from '@kbn/alerting-plugin/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import { RecoveredActionGroupId } from '@kbn/alerting-plugin/common';
+import type { RecoveredActionGroupId } from '@kbn/alerting-plugin/common';
+import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 type Params = TypeOf<typeof Params>;
 const Params = schema.object(
@@ -62,10 +63,11 @@ export const ruleType: RuleType = getPatternRuleType();
 function getPatternRuleType(): RuleType {
   return {
     id: 'example.pattern',
-    name: 'Example: Creates alerts on a pattern, for testing',
+    name: 'Pattern firing',
     actionGroups: [{ id: 'default', name: 'Default' }],
     category: 'kibana',
-    producer: 'alertsFixture',
+    producer: ALERTING_EXAMPLE_APP_ID,
+    solution: 'stack',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,

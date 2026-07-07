@@ -1,0 +1,91 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    gutterSize="none"
+    justifyContent="center"
+    wrap={true}
+  >
+    <ZeekElement
+      field="zeek.session_id"
+      scopeId="test"
+      value="C8DRTq362Fios6hw16"
+    />
+    <ZeekElement
+      field="event.dataset"
+      scopeId="test"
+      stringRenderer={[Function]}
+      value="zeek.connection"
+    />
+    <ZeekElement
+      field="zeek.files.sha1"
+      scopeId="test"
+      stringRenderer={[Function]}
+    />
+    <ZeekElement
+      field="zeek.files.md5"
+      scopeId="test"
+      stringRenderer={[Function]}
+    />
+    <ZeekElement
+      field="zeek.notice.dropped"
+      scopeId="test"
+      stringRenderer={[Function]}
+      value={null}
+    />
+    <ZeekElement
+      field="zeek.ssl.version"
+      scopeId="test"
+    />
+    <ZeekElement
+      field="zeek.ssl.cipher"
+      scopeId="test"
+    />
+    <ZeekElement
+      field="zeek.connection.state"
+      scopeId="test"
+      value="REJ"
+    />
+    <ZeekElement
+      field="http.request.method"
+      scopeId="test"
+    />
+    <ZeekElement
+      field="zeek.connection.history"
+      scopeId="test"
+      value="Sr"
+    />
+    <ZeekElement
+      field="zeek.notice.note"
+      scopeId="test"
+    />
+    <ZeekElement
+      field="zeek.dns.query"
+      scopeId="test"
+    />
+    <ZeekElement
+      field="zeek.dns.qclass_name"
+      scopeId="test"
+    />
+    <ZeekElement
+      field="http.response.status_code"
+      scopeId="test"
+    />
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="none"
+    justifyContent="center"
+  >
+    <Link
+      link="REJ Connection attempt rejected"
+      value="Connection attempt rejected"
+    />
+    <Link />
+    <Link />
+    <Link />
+    <Link />
+    <TotalVirusLinkSha />
+  </EuiFlexGroup>
+</Fragment>
+`;

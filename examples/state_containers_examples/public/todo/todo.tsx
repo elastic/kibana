@@ -10,7 +10,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { History } from 'history';
+import type { History } from 'history';
 import {
   EuiButton,
   EuiCheckbox,
@@ -24,22 +24,26 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import {
+import type {
   BaseState,
   BaseStateContainer,
+  INullableBaseStateContainer,
+  StateContainer,
+} from '@kbn/kibana-utils-plugin/public';
+import {
   createKbnUrlStateStorage,
   createStateContainer,
   getStateFromKbnUrl,
-  INullableBaseStateContainer,
-  StateContainer,
   syncState,
   useContainerSelector,
 } from '@kbn/kibana-utils-plugin/public';
+import type {
+  TodoActions,
+  TodoState,
+} from '@kbn/kibana-utils-plugin/demos/state_containers/todomvc';
 import {
   defaultState,
   pureTransitions,
-  TodoActions,
-  TodoState,
 } from '@kbn/kibana-utils-plugin/demos/state_containers/todomvc';
 
 interface TodoAppProps {

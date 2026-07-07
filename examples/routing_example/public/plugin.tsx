@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart, Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { CoreStart, Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { getServices } from './services';
 
 interface SetupDeps {
@@ -36,17 +36,15 @@ export class RoutingExamplePlugin implements Plugin<{}, {}, SetupDeps, {}> {
       links: [
         {
           label: 'IRouter',
-          href: 'https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.irouter.md',
+          href: 'https://github.com/elastic/kibana/blob/8.3/docs/development/core/server/kibana-plugin-core-server.irouter.md',
           iconType: 'logoGithub',
           target: '_blank',
-          size: 's',
         },
         {
           label: 'HttpHandler (core.http.fetch)',
-          href: 'https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.httphandler.md',
+          href: 'https://github.com/elastic/kibana/blob/8.3/docs/development/core/public/kibana-plugin-core-public.httphandler.md',
           iconType: 'logoGithub',
           target: '_blank',
-          size: 's',
         },
       ],
     });

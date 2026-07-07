@@ -11,6 +11,7 @@ import type {
   InlineEditLensEmbeddableContext,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
@@ -19,8 +20,9 @@ import {
   EuiPanel,
   EuiButtonIcon,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder/config_builder';
+import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { StartDependencies } from './plugin';
 import { getConfigOptions } from './utils';
 
@@ -64,13 +66,13 @@ export const LensChart = (props: {
     (
       isLoading: boolean,
       adapters: InlineEditLensEmbeddableContext['lensEvent']['adapters'] | undefined,
-      lensEmbeddableOutput$?: InlineEditLensEmbeddableContext['lensEvent']['embeddableOutput$']
+      dataLoading$?: InlineEditLensEmbeddableContext['lensEvent']['dataLoading$']
     ) => {
       const adapterTables = adapters?.tables?.tables;
       if (adapterTables && !isLoading) {
         setLensLoadEvent({
           adapters,
-          embeddableOutput$: lensEmbeddableOutput$,
+          dataLoading$,
         });
       }
     },
@@ -107,6 +109,10 @@ export const LensChart = (props: {
   }, [embeddableInput, lensLoadEvent, props]);
   const LensComponent = props.plugins.lens.EmbeddableComponent;
 
+  const editChartLabel = i18n.translate('lensChart.editButton.ariaLabel', {
+    defaultMessage: 'Edit chart',
+  });
+
   return (
     <EuiPanel
       hasBorder={!props.container}
@@ -136,19 +142,23 @@ export const LensChart = (props: {
             align-self: flex-end;
           `}
         >
-          <EuiButtonIcon
-            size="xs"
-            iconType="pencil"
-            onClick={() => {
-              props?.setPanelActive?.(props.isESQL ? 1 : 2);
-              if (triggerOptions) {
-                props.plugins.uiActions
-                  .getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER')
-                  .exec(triggerOptions);
-                props?.setIsinlineEditingVisible?.(true);
-              }
-            }}
-          />
+          <EuiToolTip content={editChartLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              size="xs"
+              iconType="pencil"
+              aria-label={editChartLabel}
+              onClick={() => {
+                props?.setPanelActive?.(props.isESQL ? 1 : 2);
+                if (triggerOptions) {
+                  props.plugins.uiActions.executeTriggerActions(
+                    'IN_APP_EMBEDDABLE_EDIT_TRIGGER',
+                    triggerOptions
+                  );
+                  props?.setIsinlineEditingVisible?.(true);
+                }
+              }}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem>
           {embeddableInput && (

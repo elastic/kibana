@@ -9,7 +9,8 @@
 
 import stripAnsi from 'strip-ansi';
 
-import { FailedTestCase, TestReport, makeFailedTestCaseIter } from './test_report';
+import type { FailedTestCase, TestReport } from './test_report';
+import { makeFailedTestCaseIter } from './test_report';
 
 export type TestFailure = FailedTestCase['$'] & {
   failure: string;
@@ -18,6 +19,7 @@ export type TestFailure = FailedTestCase['$'] & {
   githubIssue?: string;
   failureCount?: number;
   commandLine?: string;
+  owners?: any;
 };
 
 const getText = (node?: Array<string | { _: string }>) => {
@@ -67,6 +69,10 @@ const isLikelyIrrelevant = (name: string, failure: string) => {
     return true;
   }
 
+  if (failure.includes('Unable to read snapshot manifest: Internal Server Error')) {
+    return true;
+  }
+
   return false;
 };
 
@@ -78,6 +84,7 @@ export function getFailures(report: TestReport) {
   for (const testCase of makeFailedTestCaseIter(report)) {
     const failure = getText(testCase.failure);
     const likelyIrrelevant = isLikelyIrrelevant(testCase.$.name, failure);
+    const owners = testCase.$.owners;
 
     const failureObj = {
       // unwrap xml weirdness
@@ -87,6 +94,7 @@ export function getFailures(report: TestReport) {
       likelyIrrelevant,
       'system-out': getText(testCase['system-out']),
       commandLine,
+      owners,
     };
 
     // cleaning up duplicates

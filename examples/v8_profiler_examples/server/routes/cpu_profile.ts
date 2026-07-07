@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Logger, IRouter } from '@kbn/core/server';
+import type { Logger, IRouter } from '@kbn/core/server';
 import { startProfiling } from '../lib/cpu_profile';
 import { handleRoute } from './common';
 
@@ -24,6 +24,7 @@ const routeValidation = {
 const routeConfig = {
   path: '/_dev/cpu_profile',
   validate: routeValidation,
+  security: { authz: { requiredPrivileges: ['foo'] } },
 };
 
 export function registerRoute(logger: Logger, router: IRouter): void {

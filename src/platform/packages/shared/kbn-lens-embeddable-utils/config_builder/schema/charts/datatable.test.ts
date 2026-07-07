@@ -1,0 +1,897 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
+import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
+import type { DatatableConfig } from './datatable';
+import { datatableConfigSchema } from './datatable';
+
+type DefaultDatatableConfig = Pick<DatatableConfig, 'sampling' | 'ignore_global_filters'>;
+type DatatableWithoutDefaultsConfig = Omit<DatatableConfig, 'sampling' | 'ignore_global_filters'>;
+
+describe('Datatable Schema', () => {
+  const baseDatatableConfig: Omit<DatatableWithoutDefaultsConfig, 'metrics'> = {
+    type: 'data_table',
+    data_source: {
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+      ref_id: 'test-data-view',
+    },
+  };
+
+  const defaultValues: DefaultDatatableConfig = {
+    sampling: 1,
+    ignore_global_filters: false,
+  };
+
+  describe('basic configuration', () => {
+    it('validates metrics with count metric operation', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'count',
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          },
+        ],
+      };
+
+      const validated = datatableConfigSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
+    });
+
+    it('validates metrics, rows and split_metrics_by operations', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'median',
+            field: 'bytes',
+          },
+          {
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        rows: [
+          {
+            operation: 'date_histogram',
+            field: '@timestamp',
+            suggested_interval: '1d',
+            use_original_time_range: true,
+            include_empty_rows: true,
+          },
+          {
+            operation: 'terms',
+            fields: ['geo.dest'],
+            limit: 10,
+          },
+        ],
+        split_metrics_by: [
+          {
+            operation: 'terms',
+            fields: ['api'],
+            limit: 5,
+          },
+        ],
+      };
+
+      const validated = datatableConfigSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
+    });
+
+    it('validates metric sorting configuration', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'median',
+            field: 'bytes',
+          },
+          {
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        rows: [
+          {
+            operation: 'date_histogram',
+            field: '@timestamp',
+            suggested_interval: '1d',
+            use_original_time_range: true,
+            include_empty_rows: true,
+          },
+          {
+            operation: 'terms',
+            fields: ['geo.dest'],
+            limit: 10,
+          },
+        ],
+        split_metrics_by: [
+          {
+            operation: 'terms',
+            fields: ['api'],
+            limit: 5,
+          },
+        ],
+        styling: {
+          sort_by: {
+            column_type: 'metric',
+            index: 1,
+            direction: 'desc',
+          },
+        },
+      };
+
+      const validated = datatableConfigSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
+    });
+
+    it('validates row sorting configuration', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'median',
+            field: 'bytes',
+          },
+          {
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        rows: [
+          {
+            operation: 'date_histogram',
+            field: '@timestamp',
+            suggested_interval: '1d',
+            use_original_time_range: true,
+            include_empty_rows: true,
+          },
+          {
+            operation: 'terms',
+            fields: ['geo.dest'],
+            limit: 10,
+          },
+        ],
+        split_metrics_by: [
+          {
+            operation: 'terms',
+            fields: ['api'],
+            limit: 5,
+          },
+        ],
+        styling: {
+          sort_by: {
+            column_type: 'row',
+            index: 1,
+            direction: 'desc',
+          },
+        },
+      };
+
+      const validated = datatableConfigSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
+    });
+
+    it('validates pivoted metric sorting configuration', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'median',
+            field: 'bytes',
+          },
+          {
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        rows: [
+          {
+            operation: 'date_histogram',
+            field: '@timestamp',
+            suggested_interval: '1d',
+            use_original_time_range: true,
+            include_empty_rows: true,
+          },
+          {
+            operation: 'terms',
+            fields: ['geo.dest'],
+            limit: 10,
+          },
+        ],
+        split_metrics_by: [
+          {
+            operation: 'terms',
+            fields: ['status'],
+            limit: 5,
+          },
+        ],
+        styling: {
+          sort_by: {
+            column_type: 'pivoted_metric',
+            index: 1,
+            values: ['success'],
+            direction: 'desc',
+          },
+        },
+      };
+
+      const validated = datatableConfigSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
+    });
+
+    it('validates pivoted metric sorting configuration with multiple split dimensions', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'median',
+            field: 'bytes',
+          },
+          {
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        rows: [
+          {
+            operation: 'date_histogram',
+            field: '@timestamp',
+            suggested_interval: '1d',
+            use_original_time_range: true,
+            include_empty_rows: true,
+          },
+          {
+            operation: 'terms',
+            fields: ['geo.dest'],
+            limit: 10,
+          },
+        ],
+        split_metrics_by: [
+          {
+            operation: 'terms',
+            fields: ['status'],
+            limit: 5,
+          },
+          {
+            operation: 'terms',
+            fields: ['product'],
+            limit: 3,
+          },
+        ],
+        styling: {
+          sort_by: {
+            column_type: 'pivoted_metric',
+            index: 0,
+            values: ['success1', 'success2'],
+            direction: 'desc',
+          },
+        },
+      };
+
+      const validated = datatableConfigSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
+    });
+  });
+
+  describe('validation errors', () => {
+    it('throws on missing metrics', () => {
+      const input: Omit<DatatableWithoutDefaultsConfig, 'metrics'> = {
+        ...baseDatatableConfig,
+        rows: [
+          {
+            operation: 'date_histogram',
+            field: '@timestamp',
+            suggested_interval: '1d',
+            use_original_time_range: true,
+            include_empty_rows: true,
+          },
+          {
+            operation: 'terms',
+            fields: ['geo.dest'],
+            limit: 10,
+          },
+        ],
+      };
+
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
+    });
+
+    it('throws on empty metrics for non-esql', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        ...baseDatatableConfig,
+        metrics: [],
+        rows: [
+          {
+            operation: 'date_histogram',
+            field: '@timestamp',
+            suggested_interval: '1d',
+            use_original_time_range: true,
+            include_empty_rows: true,
+          },
+        ],
+      };
+
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
+    });
+
+    it('throws on empty rows', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'median',
+            field: 'bytes',
+          },
+          {
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        rows: [],
+        split_metrics_by: [
+          {
+            operation: 'terms',
+            fields: ['api'],
+            limit: 5,
+          },
+        ],
+      };
+
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
+    });
+
+    it('throws on empty split_metrics_by', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'median',
+            field: 'bytes',
+          },
+          {
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        split_metrics_by: [],
+      };
+
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
+    });
+
+    it('throws when using invalid density height type', () => {
+      const input: Omit<DatatableWithoutDefaultsConfig, 'styling'> & {
+        styling: { density: { height: { header: { type: 'invalid' } } } };
+      } = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'median',
+            field: 'bytes',
+          },
+          {
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        styling: {
+          density: {
+            height: {
+              header: { type: 'invalid' },
+            },
+          },
+        },
+      };
+
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
+    });
+
+    it('throws when using invalid density mode', () => {
+      const input: Omit<DatatableWithoutDefaultsConfig, 'styling'> & {
+        styling: { density: { mode: 'invalid' } };
+      } = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'median',
+            field: 'bytes',
+          },
+          {
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        styling: {
+          density: {
+            mode: 'invalid',
+          },
+        },
+      };
+
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
+    });
+
+    it('throws when using invalid height type', () => {
+      const input: Omit<DatatableWithoutDefaultsConfig, 'styling'> & {
+        styling: { density: { height: { header: { type: 'invalid' } } } };
+      } = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'median',
+            field: 'bytes',
+          },
+          {
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        styling: { density: { height: { header: { type: 'invalid' } } } },
+      };
+
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
+    });
+
+    it('throws when missing summary type', () => {
+      const input: Omit<DatatableWithoutDefaultsConfig, 'metrics'> & {
+        metrics: {
+          operation: 'median';
+          field: 'bytes';
+          summary: { label: 'Average bytes' };
+        }[];
+      } = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'median',
+            field: 'bytes',
+            summary: { label: 'Average bytes' },
+          },
+        ],
+      };
+
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
+    });
+
+    it('throws when using term buckets operation in an esql configuration', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        type: 'data_table',
+        data_source: {
+          type: 'esql',
+          query: 'FROM my-index | LIMIT 100',
+        },
+        metrics: [
+          {
+            operation: 'median',
+            field: 'bytes',
+          },
+          {
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        rows: [{ operation: 'terms', fields: ['geo.dest'], limit: 10 }],
+      };
+
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
+    });
+
+    it('throws when esql datatable has no metrics and no rows', () => {
+      const input: Omit<DatatableWithoutDefaultsConfig, 'metrics' | 'rows'> = {
+        type: 'data_table',
+        data_source: {
+          type: 'esql',
+          query: 'FROM my-index | LIMIT 100',
+        },
+      };
+
+      expect(() => datatableConfigSchema.validate(input)).toThrow(
+        'Datatable must have at least one column'
+      );
+    });
+
+    it('throws on empty metrics array for esql', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        type: 'data_table',
+        data_source: {
+          type: 'esql',
+          query: 'FROM my-index | LIMIT 100',
+        },
+        metrics: [],
+        rows: [
+          {
+            column: 'location',
+          },
+        ],
+      };
+
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
+    });
+
+    it('throws on empty rows array for esql', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        type: 'data_table',
+        data_source: {
+          type: 'esql',
+          query: 'FROM my-index | LIMIT 100',
+        },
+        metrics: [
+          {
+            column: 'bytes',
+          },
+        ],
+        rows: [],
+      };
+
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
+    });
+
+    it('throws when using invalid sorting index', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'median',
+            field: 'bytes',
+          },
+          {
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        rows: [
+          {
+            operation: 'date_histogram',
+            field: '@timestamp',
+            suggested_interval: '1d',
+            use_original_time_range: true,
+            include_empty_rows: true,
+          },
+          {
+            operation: 'terms',
+            fields: ['geo.dest'],
+            limit: 10,
+          },
+        ],
+        split_metrics_by: [
+          {
+            operation: 'terms',
+            fields: ['status'],
+            limit: 5,
+          },
+        ],
+        styling: {
+          sort_by: {
+            column_type: 'metric',
+            index: 2,
+            direction: 'desc',
+          },
+        },
+      };
+
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
+    });
+
+    it('throws when using invalid sorting index for pivoted_metric', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'median',
+            field: 'bytes',
+          },
+          {
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        rows: [
+          {
+            operation: 'date_histogram',
+            field: '@timestamp',
+            suggested_interval: '1d',
+            use_original_time_range: true,
+            include_empty_rows: true,
+          },
+          {
+            operation: 'terms',
+            fields: ['geo.dest'],
+            limit: 10,
+          },
+        ],
+        split_metrics_by: [
+          {
+            operation: 'terms',
+            fields: ['status'],
+            limit: 5,
+          },
+        ],
+        styling: {
+          sort_by: {
+            column_type: 'pivoted_metric',
+            index: 2,
+            values: ['success'],
+            direction: 'desc',
+          },
+        },
+      };
+
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
+    });
+
+    it('throws when using invalid values length for pivoted_metric', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'median',
+            field: 'bytes',
+          },
+          {
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        rows: [
+          {
+            operation: 'date_histogram',
+            field: '@timestamp',
+            suggested_interval: '1d',
+            use_original_time_range: true,
+            include_empty_rows: true,
+          },
+          {
+            operation: 'terms',
+            fields: ['geo.dest'],
+            limit: 10,
+          },
+        ],
+        split_metrics_by: [
+          {
+            operation: 'terms',
+            fields: ['status'],
+            limit: 5,
+          },
+          {
+            operation: 'terms',
+            fields: ['api'],
+            limit: 5,
+          },
+        ],
+        styling: {
+          sort_by: {
+            column_type: 'pivoted_metric',
+            index: 2,
+            values: ['success'],
+            direction: 'desc',
+          },
+        },
+      };
+
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
+    });
+  });
+
+  describe('complex configurations', () => {
+    it('validates full datatable configuration', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        ...baseDatatableConfig,
+        styling: {
+          density: {
+            mode: 'compact',
+            height: {
+              header: { type: 'auto' },
+              value: { type: 'custom', lines: 2 },
+            },
+          },
+          sort_by: {
+            column_type: 'metric',
+            index: 0,
+            direction: 'asc',
+          },
+        },
+        metrics: [
+          {
+            operation: 'median',
+            field: 'bytes',
+            alignment: 'left',
+            apply_color_to: 'background',
+            visible: true,
+            width: 200,
+            summary: { type: 'avg', label: 'Average bytes' },
+            color: {
+              type: 'dynamic',
+              range: 'absolute',
+              steps: [
+                {
+                  lt: 0,
+                  color: '#000000',
+                },
+              ],
+            },
+          },
+          {
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        rows: [
+          {
+            operation: 'date_histogram',
+            field: '@timestamp',
+            suggested_interval: '1d',
+            use_original_time_range: true,
+            include_empty_rows: true,
+          },
+          {
+            operation: 'terms',
+            fields: ['geo.dest'],
+            limit: 10,
+            alignment: 'right',
+            width: 100,
+            apply_color_to: 'value',
+            visible: true,
+            click_filter: true,
+            collapse_by: 'avg',
+            color: {
+              mode: 'categorical',
+              palette: 'palette_name',
+              mapping: [
+                {
+                  values: ['value1', 'value2', 'value3'],
+                  color: {
+                    type: 'color_code',
+                    value: '#000000',
+                  },
+                },
+              ],
+            },
+          },
+        ],
+        split_metrics_by: [
+          {
+            operation: 'terms',
+            fields: ['api'],
+            limit: 5,
+          },
+        ],
+      };
+
+      const validated = datatableConfigSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
+    });
+
+    it('validates esql configuration', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        type: 'data_table',
+        title: 'Datatable',
+        description: 'ESQL table full configuration',
+        data_source: {
+          type: 'esql',
+          query: 'FROM my-index | LIMIT 100',
+        },
+        styling: {
+          density: {
+            mode: 'compact',
+            height: {
+              header: { type: 'auto' },
+              value: { type: 'custom', lines: 2 },
+            },
+          },
+        },
+        metrics: [
+          {
+            column: 'avg_bytes',
+            alignment: 'left',
+            apply_color_to: 'badge',
+            visible: true,
+            summary: { type: 'avg' },
+            color: {
+              type: 'dynamic',
+              range: 'absolute',
+              steps: [
+                {
+                  lt: 0,
+                  color: '#000000',
+                },
+              ],
+            },
+          },
+          {
+            column: 'median_bytes',
+            alignment: 'center',
+            apply_color_to: 'value',
+            visible: true,
+            summary: { type: 'sum' },
+            color: {
+              type: 'dynamic',
+              range: 'absolute',
+              steps: [
+                {
+                  lt: 0,
+                  color: '#000000',
+                },
+              ],
+            },
+          },
+        ],
+        rows: [
+          {
+            column: 'location',
+            alignment: 'right',
+            apply_color_to: 'value',
+            visible: true,
+            click_filter: true,
+            collapse_by: 'avg',
+            color: {
+              mode: 'categorical',
+              palette: 'palette_name',
+              mapping: [
+                {
+                  values: ['value1', 'value2', 'value3'],
+                  color: {
+                    type: 'color_code',
+                    value: '#000000',
+                  },
+                },
+              ],
+            },
+          },
+        ],
+        split_metrics_by: [
+          {
+            column: 'api',
+          },
+        ],
+      };
+
+      const validated = datatableConfigSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
+    });
+
+    it('allows no metrics when using esql', () => {
+      const input: Omit<DatatableWithoutDefaultsConfig, 'metrics'> = {
+        type: 'data_table',
+        title: 'Datatable',
+        description: 'ESQL table without metrics',
+        data_source: {
+          type: 'esql',
+          query: 'FROM my-index | LIMIT 100',
+        },
+        rows: [
+          {
+            column: 'location',
+            alignment: 'right',
+            apply_color_to: 'value',
+            visible: true,
+            click_filter: true,
+            collapse_by: 'avg',
+            color: {
+              mode: 'categorical',
+              palette: 'palette_name',
+              mapping: [
+                {
+                  values: ['value1', 'value2', 'value3'],
+                  color: {
+                    type: 'color_code',
+                    value: '#000000',
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      const validated = datatableConfigSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
+    });
+  });
+});

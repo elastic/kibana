@@ -1,6 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/core-lifecycle-browser-mocks",
-  "devOnly": true,
-  "owner": "@elastic/kibana-core"
-}

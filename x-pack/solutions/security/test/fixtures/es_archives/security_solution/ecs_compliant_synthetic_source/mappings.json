@@ -1,0 +1,127 @@
+{
+  "type": "index",
+  "value": {
+    "index": "ecs_compliant_synthetic_source",
+    "mappings": {
+      "properties": {
+        "id": {
+          "type": "keyword"
+        },
+        "@timestamp": {
+          "type": "date"
+        },
+        "agent": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            }
+          }
+        },
+        "observer": {
+          "properties": {
+            "os": {
+              "properties": {
+                "full": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "text": {
+                      "type": "match_only_text"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "process": {
+          "properties": {
+            "entry_leader": {
+              "properties": {
+                "name": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "text": {
+                      "type": "match_only_text"
+                    },
+                    "caseless": {
+                      "type": "keyword",
+                      "ignore_above": 1024,
+                      "normalizer": "lowercase"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "host": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "ip": {
+              "type": "ip"
+            },
+            "uptime": {
+              "type": "long"
+            }
+          }
+        },
+        "container": {
+          "properties": {
+            "image": {
+              "type": "keyword"
+            }
+          }
+        },
+        "client": {
+          "properties": {
+            "ip": {
+              "type": "keyword"
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "ingested": {
+              "type": "date"
+            },
+            "created": {
+              "type": "keyword"
+            }
+          }
+        },
+        "dll": {
+          "properties": {
+            "code_signature": {
+              "properties": {
+                "valid": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1",
+        "mapping": {
+          "source": {
+            "mode": "synthetic"
+          }
+        }
+      }
+    }
+  }
+}

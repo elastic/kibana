@@ -1,0 +1,21 @@
+{
+  "type": "plugin",
+  "id": "@kbn/global-search-providers-plugin",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "globalSearchProviders",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "global_search_providers"
+    ],
+    "requiredPlugins": [
+      "globalSearch"
+    ]
+  }
+}

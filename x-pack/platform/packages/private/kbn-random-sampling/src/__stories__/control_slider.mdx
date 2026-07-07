@@ -1,0 +1,24 @@
+import { Canvas, Meta, Story, Controls } from '@storybook/blocks';
+import * as ControlSliderStories from './control_slider.stories';
+
+<Meta of={ControlSliderStories} />
+
+# Overview
+
+The following control slider component has been designed to work as a shared component in Kibana:
+
+<Canvas>
+  <Story of={ControlSliderStories.Basic} />
+</Canvas>
+
+When the control slider is disabled an explanation tooltip is shown to the user:
+
+<Canvas>
+  <Story of={ControlSliderStories.Disabled} />
+</Canvas>
+
+## Component props
+
+The component exposes the following properties:
+
+<Controls />

@@ -1,0 +1,162 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { flow, mapValues } from 'lodash';
+import type { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
+import { mergeMigrationFunctionMaps } from '@kbn/kibana-utils-plugin/common';
+import {
+  commonAddSupportOfDualIndexSelectionModeInTSVB,
+  commonHideTSVBLastValueIndicator,
+  commonRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel,
+  commonMigrateVislibPie,
+  commonAddEmptyValueColorRule,
+  commonMigrateTagCloud,
+  commonAddDropLastBucketIntoTSVBModel,
+  commonAddDropLastBucketIntoTSVBModel714Above,
+  commonRemoveMarkdownLessFromTSVB,
+  commonUpdatePieVisApi,
+  commonPreserveOldLegendSizeDefault,
+  commonRemoveExclamationCircleIcon,
+} from '../migrations/visualization_common_migrations';
+import type { SerializedVis } from '../../common';
+
+const byValueAddSupportOfDualIndexSelectionModeInTSVB = (state: SerializableRecord) => {
+  return {
+    ...state,
+    savedVis: commonAddSupportOfDualIndexSelectionModeInTSVB(state.savedVis),
+  };
+};
+
+const byValueHideTSVBLastValueIndicator = (state: SerializableRecord) => {
+  return {
+    ...state,
+    savedVis: commonHideTSVBLastValueIndicator(state.savedVis),
+  };
+};
+
+const byValueAddDropLastBucketIntoTSVBModel = (state: SerializableRecord) => {
+  return {
+    ...state,
+    savedVis: commonAddDropLastBucketIntoTSVBModel(state.savedVis),
+  };
+};
+
+const byValueAddDropLastBucketIntoTSVBModel714Above = (state: SerializableRecord) => {
+  return {
+    ...state,
+    savedVis: commonAddDropLastBucketIntoTSVBModel714Above(state.savedVis),
+  };
+};
+
+const byValueRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel = (state: SerializableRecord) => {
+  return {
+    ...state,
+    savedVis: commonRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel(state.savedVis),
+  };
+};
+
+const byValueAddEmptyValueColorRule = (state: SerializableRecord) => {
+  return {
+    ...state,
+    savedVis: commonAddEmptyValueColorRule(state.savedVis),
+  };
+};
+
+const byValueMigrateVislibPie = (state: SerializableRecord) => {
+  return {
+    ...state,
+    savedVis: commonMigrateVislibPie(state.savedVis),
+  };
+};
+
+const byValueMigrateTagcloud = (state: SerializableRecord) => {
+  return {
+    ...state,
+    savedVis: commonMigrateTagCloud(state.savedVis),
+  };
+};
+
+const byValueRemoveMarkdownLessFromTSVB = (state: SerializableRecord) => {
+  return {
+    ...state,
+    savedVis: commonRemoveMarkdownLessFromTSVB(state.savedVis),
+  };
+};
+
+const byValueUpdatePieVisApi = (state: SerializableRecord) => ({
+  ...state,
+  savedVis: commonUpdatePieVisApi(state.savedVis),
+});
+
+const byValuePreserveOldLegendSizeDefault = (state: SerializableRecord) => ({
+  ...state,
+  savedVis: commonPreserveOldLegendSizeDefault(state.savedVis),
+});
+
+const byValueRemoveExclamationCircleIcon = (state: SerializableRecord) => ({
+  ...state,
+  savedVis: commonRemoveExclamationCircleIcon(state.savedVis),
+});
+
+const getEmbeddedVisualizationSearchSourceMigrations = (
+  searchSourceMigrations: MigrateFunctionsObject
+) =>
+  mapValues<MigrateFunctionsObject, MigrateFunction>(
+    searchSourceMigrations,
+    (migrate: MigrateFunction<SerializedSearchSourceFields>): MigrateFunction =>
+      (state) => {
+        const _state = state as unknown as { savedVis: SerializedVis };
+        return {
+          ..._state,
+          savedVis: {
+            ..._state.savedVis,
+            data: {
+              ..._state.savedVis.data,
+              searchSource: migrate(_state.savedVis.data.searchSource),
+            },
+          },
+        } as SerializableRecord;
+      }
+  );
+
+export const makeVisualizeEmbeddableFactory =
+  (getSearchSourceMigrations: () => MigrateFunctionsObject) => (): EmbeddableRegistryDefinition => {
+    return {
+      id: 'visualization',
+      // migrations set up as a callable so that getSearchSourceMigrations doesn't get invoked till after plugin setup steps
+      migrations: () =>
+        mergeMigrationFunctionMaps(
+          getEmbeddedVisualizationSearchSourceMigrations(getSearchSourceMigrations()),
+          {
+            // These migrations are run in 7.13.1 for `by value` panels because the 7.13 release window was missed.
+            '7.13.1': (state) =>
+              flow(
+                byValueAddSupportOfDualIndexSelectionModeInTSVB,
+                byValueHideTSVBLastValueIndicator,
+                byValueRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel
+              )(state),
+            '7.14.0': (state) =>
+              flow(
+                byValueAddEmptyValueColorRule,
+                byValueMigrateVislibPie,
+                byValueMigrateTagcloud,
+                byValueAddDropLastBucketIntoTSVBModel
+              )(state),
+            '7.17.0': (state) => flow(byValueAddDropLastBucketIntoTSVBModel714Above)(state),
+            '8.0.0': (state) => flow(byValueRemoveMarkdownLessFromTSVB)(state),
+            '8.1.0': (state) => flow(byValueUpdatePieVisApi)(state),
+            '8.3.0': (state) => flow(byValuePreserveOldLegendSizeDefault)(state),
+            '8.5.0': (state) => flow(byValueRemoveExclamationCircleIcon)(state),
+          }
+        ),
+    };
+  };

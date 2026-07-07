@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`objectUnion extends should invalidate extended union for {"type":"A","str":"test","bool":"string"} 1`] = `
+"types that failed validation:
+- [0.bool]: expected value of type [boolean] but got [string]
+- [1.type]: expected value to equal [B]"
+`;
+
+exports[`objectUnion extends should invalidate extended union for {"type":"A","str":"test","bool":true,"extra":{}} 1`] = `
+"types that failed validation:
+- [0.extra]: Additional properties are not allowed ('extra' was unexpected)
+- [1.type]: expected value to equal [B]"
+`;
+
+exports[`objectUnion extends should invalidate extended union for {"type":"B","num":123,"bool":"string"} 1`] = `
+"types that failed validation:
+- [0.type]: expected value to equal [A]
+- [1.bool]: expected value of type [boolean] but got [string]"
+`;
+
+exports[`objectUnion extends should invalidate extended union for {"type":"B","num":123,"bool":false,"extra":{}} 1`] = `
+"types that failed validation:
+- [0.type]: expected value to equal [A]
+- [1.extra]: Additional properties are not allowed ('extra' was unexpected)"
+`;
+
+exports[`objectUnion should invalidate union for {"type":"A","str":"test","extra":{}} 1`] = `
+"types that failed validation:
+- [0.extra]: Additional properties are not allowed ('extra' was unexpected)
+- [1.type]: expected value to equal [B]"
+`;
+
+exports[`objectUnion should invalidate union for {"type":"A","str":123} 1`] = `
+"types that failed validation:
+- [0.str]: expected value of type [string] but got [number]
+- [1.type]: expected value to equal [B]"
+`;
+
+exports[`objectUnion should invalidate union for {"type":"B","num":"string"} 1`] = `
+"types that failed validation:
+- [0.type]: expected value to equal [A]
+- [1.num]: expected value of type [number] but got [string]"
+`;
+
+exports[`objectUnion should invalidate union for {"type":"B","num":123,"extra":{}} 1`] = `
+"types that failed validation:
+- [0.type]: expected value to equal [A]
+- [1.extra]: Additional properties are not allowed ('extra' was unexpected)"
+`;

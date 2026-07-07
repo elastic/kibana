@@ -1,0 +1,30 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../../../typings/**/*"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/management-plugin",
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/features-plugin",
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/core-analytics-browser",
+    "@kbn/licensing-plugin",
+    "@kbn/licensing-types",
+    "@kbn/home-plugin"
+  ]
+}

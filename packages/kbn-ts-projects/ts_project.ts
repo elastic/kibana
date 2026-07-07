@@ -14,8 +14,10 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { makeMatcher } from '@kbn/picomatcher';
 import { type Package, findPackageForPath, getRepoRelsSync } from '@kbn/repo-packages';
 import { createFailError } from '@kbn/dev-cli-errors';
+import { readPackageJson } from '@kbn/repo-packages';
 
-import { readTsConfig, parseTsConfig, TsConfig } from './ts_configfile';
+import type { TsConfig } from './ts_configfile';
+import { readTsConfig, parseTsConfig } from './ts_configfile';
 
 export type RefableTsProject = TsProject & { rootImportReq: string; pkg: Package };
 
@@ -68,10 +70,37 @@ export class TsProject {
       throw new Error('missing config-paths.json file, make sure you run `yarn kbn bootstrap`');
     }
 
+    const refreshTsConfigPaths = () => {
+      const tsConfigPaths = [...getRepoRelsSync(REPO_ROOT, ['tsconfig.json', '**/tsconfig.json'])];
+      Fs.writeFileSync(mapPath, JSON.stringify(tsConfigPaths, null, 2));
+    };
+
     const tsConfigRepoRels: string[] = JSON.parse(Fs.readFileSync(mapPath, 'utf8'));
 
-    const ignores = expand('ignore', options.ignore, tsConfigRepoRels);
-    const disableTypeCheck = expand('disableTypeCheck', options.disableTypeCheck, tsConfigRepoRels);
+    if (!tsConfigRepoRels || !tsConfigRepoRels.length) {
+      throw new Error('TS Project map missing, make sure you run `yarn kbn bootstrap`');
+    }
+
+    let ignores: Set<string>;
+    let disableTypeCheck: Set<string>;
+    try {
+      ignores = expand('ignore', options.ignore, tsConfigRepoRels);
+      disableTypeCheck = expand('disableTypeCheck', options.disableTypeCheck, tsConfigRepoRels);
+    } catch (error) {
+      const shouldRefresh =
+        error instanceof Error &&
+        error.message.includes('patterns do not match any tsconfig.json files');
+
+      if (shouldRefresh && !options.noTsconfigPathsRefresh) {
+        refreshTsConfigPaths();
+        return TsProject.loadAll({
+          ...options,
+          noTsconfigPathsRefresh: true,
+        });
+      }
+
+      throw error;
+    }
 
     const cache = new Map();
     const projects: TsProject[] = [];
@@ -96,8 +125,7 @@ export class TsProject {
       }
 
       // rebuild the tsconfig.json path cache
-      const tsConfigPaths = getRepoRelsSync(REPO_ROOT, ['tsconfig.json', '**/tsconfig.json']);
-      Fs.writeFileSync(mapPath, JSON.stringify(tsConfigPaths, null, 2));
+      refreshTsConfigPaths();
       return TsProject.loadAll({
         ...options,
         noTsconfigPathsRefresh: true,
@@ -151,6 +179,8 @@ export class TsProject {
   public readonly directory: string;
   /** the package this tsconfig file is within, if any */
   public readonly pkg?: Package;
+  /** the package is esm or not */
+  public readonly isEsm?: boolean;
   /**
    * if this project is within a package then this will
    * be set to the import request that maps to the root of this project
@@ -187,6 +217,7 @@ export class TsProject {
       : undefined;
 
     this._disableTypeCheck = !!opts?.disableTypeCheck;
+    this.isEsm = readPackageJson(`${this.dir}/package.json`)?.type === 'module';
   }
 
   private _name: string | undefined;
@@ -248,12 +279,19 @@ export class TsProject {
       return undefined;
     }
 
-    return TsProject.createFromCache(
+    const absolutePath =
+      this.config.extends === '@kbn/tsconfig-base/tsconfig.json'
+        ? Path.join(REPO_ROOT, 'tsconfig.base.json')
+        : Path.resolve(this.directory, this.config.extends);
+
+    const tsProject = TsProject.createFromCache(
       this.cache,
-      Path.resolve(this.directory, this.config.extends),
+      absolutePath,
       {},
       `extends: ${JSON.stringify(this.config.extends)}`
     );
+
+    return tsProject;
   }
 
   isRefable(): this is RefableTsProject {

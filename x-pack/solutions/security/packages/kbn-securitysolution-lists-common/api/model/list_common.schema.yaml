@@ -1,0 +1,101 @@
+openapi: 3.0.0
+info:
+  title: Common Value List Attributes
+  version: 'not applicable'
+paths: {}
+components:
+  schemas:
+    ListId:
+      type: string
+      minLength: 1
+      format: nonempty
+      description: Value list's identifier.
+      example: 21b01cfb-058d-44b9-838c-282be16c91cd
+
+    ListType:
+      type: string
+      enum:
+        - binary
+        - boolean
+        - byte
+        - date
+        - date_nanos
+        - date_range
+        - double
+        - double_range
+        - float
+        - float_range
+        - geo_point
+        - geo_shape
+        - half_float
+        - integer
+        - integer_range
+        - ip
+        - ip_range
+        - keyword
+        - long
+        - long_range
+        - shape
+        - short
+        - text
+      description: |
+        Specifies the Elasticsearch data type of excludes the list container holds. Some common examples:
+
+        - `keyword`: Many ECS fields are Elasticsearch keywords
+        - `ip`: IP addresses
+        - `ip_range`: Range of IP addresses (supports IPv4, IPv6, and CIDR notation)
+
+    ListName:
+      type: string
+      minLength: 1
+      format: nonempty
+      description: Value list's name.
+      example: 'List of bad IPs'
+
+    ListDescription:
+      type: string
+      minLength: 1
+      format: nonempty
+      description: Describes the value list.
+
+    ListMetadata:
+      type: object
+      additionalProperties: true
+      description: Placeholder for metadata about the value list.
+
+    ListVersion:
+      type: integer
+      minimum: 1
+      description: The document version number.
+      example: 1
+
+    ListVersionId:
+      type: string
+      description: |
+        The version id, normally returned by the API when the document is retrieved. Use it ensure updates are done against the latest version.
+      example: WzIsMV0=
+
+    ListItemId:
+      type: string
+      minLength: 1
+      format: nonempty
+      description: Value list item's identifier.
+      example: 54b01cfb-058d-44b9-838c-282be16c91cd
+
+    ListItemValue:
+      type: string
+      minLength: 1
+      format: nonempty
+      description: The value used to evaluate exceptions.
+
+    ListItemDescription:
+      type: string
+      minLength: 1
+      format: nonempty
+      description: Describes the value list item.
+      example: Value list description.
+
+    ListItemMetadata:
+      type: object
+      additionalProperties: true
+      description: Placeholder for metadata about the value list item.

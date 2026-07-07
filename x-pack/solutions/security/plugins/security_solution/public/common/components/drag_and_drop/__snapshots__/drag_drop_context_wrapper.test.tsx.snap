@@ -1,0 +1,485 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = `
+<DragDropContextWrapper
+  browserFields={
+    Object {
+      "agent": Object {
+        "fields": Object {
+          "agent.ephemeral_id": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "agent.ephemeral_id",
+            "searchable": true,
+            "type": "string",
+          },
+          "agent.hostname": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "agent.hostname",
+            "searchable": true,
+            "type": "string",
+          },
+          "agent.id": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "agent.id",
+            "searchable": true,
+            "type": "string",
+          },
+          "agent.name": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "agent.name",
+            "searchable": true,
+            "type": "string",
+          },
+        },
+      },
+      "auditd": Object {
+        "fields": Object {
+          "auditd.data.a0": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "auditd.data.a0",
+            "searchable": true,
+            "type": "string",
+          },
+          "auditd.data.a1": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "auditd.data.a1",
+            "searchable": true,
+            "type": "string",
+          },
+          "auditd.data.a2": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "auditd.data.a2",
+            "searchable": true,
+            "type": "string",
+          },
+        },
+      },
+      "base": Object {
+        "fields": Object {
+          "@timestamp": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "date",
+            ],
+            "name": "@timestamp",
+            "readFromDocValues": true,
+            "searchable": true,
+            "type": "date",
+          },
+          "_id": Object {
+            "aggregatable": false,
+            "esTypes": Array [],
+            "name": "_id",
+            "searchable": true,
+            "type": "string",
+          },
+          "message": Object {
+            "aggregatable": false,
+            "esTypes": Array [
+              "text",
+            ],
+            "format": Object {
+              "id": "string",
+            },
+            "name": "message",
+            "searchable": true,
+            "type": "string",
+          },
+        },
+      },
+      "client": Object {
+        "fields": Object {
+          "client.address": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "client.address",
+            "searchable": true,
+            "type": "string",
+          },
+          "client.bytes": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "long",
+            ],
+            "name": "client.bytes",
+            "searchable": true,
+            "type": "number",
+          },
+          "client.domain": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "client.domain",
+            "searchable": true,
+            "type": "string",
+          },
+          "client.geo.country_iso_code": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "client.geo.country_iso_code",
+            "searchable": true,
+            "type": "string",
+          },
+        },
+      },
+      "cloud": Object {
+        "fields": Object {
+          "cloud.account.id": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "cloud.account.id",
+            "searchable": true,
+            "type": "string",
+          },
+          "cloud.availability_zone": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "cloud.availability_zone",
+            "searchable": true,
+            "type": "string",
+          },
+        },
+      },
+      "container": Object {
+        "fields": Object {
+          "container.id": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "container.id",
+            "searchable": true,
+            "type": "string",
+          },
+          "container.image.name": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "container.image.name",
+            "searchable": true,
+            "type": "string",
+          },
+          "container.image.tag": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "container.image.tag",
+            "searchable": true,
+            "type": "string",
+          },
+        },
+      },
+      "destination": Object {
+        "fields": Object {
+          "destination.address": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "destination.address",
+            "searchable": true,
+            "type": "string",
+          },
+          "destination.bytes": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "long",
+            ],
+            "name": "destination.bytes",
+            "searchable": true,
+            "type": "number",
+          },
+          "destination.domain": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "destination.domain",
+            "searchable": true,
+            "type": "string",
+          },
+          "destination.ip": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "ip",
+            ],
+            "name": "destination.ip",
+            "searchable": true,
+            "type": "ip",
+          },
+          "destination.port": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "long",
+            ],
+            "name": "destination.port",
+            "searchable": true,
+            "type": "number",
+          },
+        },
+      },
+      "event": Object {
+        "fields": Object {
+          "event.action": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "format": Object {
+              "id": "string",
+            },
+            "name": "event.action",
+            "searchable": true,
+            "type": "string",
+          },
+          "event.category": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "format": Object {
+              "id": "string",
+            },
+            "name": "event.category",
+            "searchable": true,
+            "type": "string",
+          },
+          "event.end": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "date",
+            ],
+            "name": "event.end",
+            "searchable": true,
+            "type": "date",
+          },
+          "event.kind": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "format": Object {
+              "id": "string",
+            },
+            "name": "event.kind",
+            "searchable": true,
+            "type": "string",
+          },
+          "event.severity": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "long",
+            ],
+            "format": Object {
+              "id": "number",
+            },
+            "name": "event.severity",
+            "searchable": true,
+            "type": "number",
+          },
+        },
+      },
+      "host": Object {
+        "fields": Object {
+          "host.id": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "format": Object {
+              "id": "string",
+            },
+            "name": "host.id",
+            "searchable": true,
+            "type": "string",
+          },
+          "host.name": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "format": Object {
+              "id": "string",
+            },
+            "name": "host.name",
+            "searchable": true,
+            "type": "string",
+          },
+        },
+      },
+      "mock": Object {
+        "fields": Object {
+          "mock.attr": Object {
+            "aggregatable": false,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "mock.attr",
+            "searchable": true,
+            "type": "string",
+          },
+        },
+      },
+      "nestedField": Object {
+        "fields": Object {
+          "nestedField.firstAttributes": Object {
+            "aggregatable": false,
+            "name": "nestedField.firstAttributes",
+            "searchable": true,
+            "subType": Object {
+              "nested": Object {
+                "path": "nestedField",
+              },
+            },
+            "type": "string",
+          },
+          "nestedField.secondAttributes": Object {
+            "aggregatable": false,
+            "name": "nestedField.secondAttributes",
+            "searchable": true,
+            "subType": Object {
+              "nested": Object {
+                "path": "nestedField",
+              },
+            },
+            "type": "string",
+          },
+          "nestedField.thirdAttributes": Object {
+            "aggregatable": false,
+            "name": "nestedField.thirdAttributes",
+            "searchable": true,
+            "subType": Object {
+              "nested": Object {
+                "path": "nestedField",
+              },
+            },
+            "type": "date",
+          },
+        },
+      },
+      "process": Object {
+        "fields": Object {
+          "process.args": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "process.args",
+            "readFromDocValues": true,
+            "searchable": true,
+            "type": "string",
+          },
+        },
+      },
+      "source": Object {
+        "fields": Object {
+          "source.as.number": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "long",
+            ],
+            "name": "source.as.number",
+            "searchable": true,
+            "type": "number",
+          },
+          "source.as.organization.name": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "source.as.organization.name",
+            "searchable": true,
+            "type": "string",
+          },
+          "source.geo.city_name": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "source.geo.city_name",
+            "searchable": true,
+            "type": "string",
+          },
+          "source.geo.region_name": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "source.geo.region_name",
+            "searchable": true,
+            "type": "string",
+          },
+          "source.ip": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "ip",
+            ],
+            "name": "source.ip",
+            "searchable": true,
+            "type": "ip",
+          },
+          "source.port": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "long",
+            ],
+            "name": "source.port",
+            "searchable": true,
+            "type": "number",
+          },
+        },
+      },
+      "user": Object {
+        "fields": Object {
+          "user.name": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "format": Object {
+              "id": "string",
+            },
+            "name": "user.name",
+            "searchable": true,
+            "type": "string",
+          },
+        },
+      },
+    }
+  }
+>
+  Drag drop context wrapper children
+</DragDropContextWrapper>
+`;

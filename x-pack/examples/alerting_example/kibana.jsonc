@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/alerting-example-plugin",
   "owner": "@elastic/response-ops",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "alertingExample",
     "server": true,
@@ -14,7 +16,10 @@
       "actions",
       "kibanaReact",
       "features",
-      "developerExamples"
+      "developerExamples",
+      "unifiedSearch",
+      "dataViews",
+      "fieldsMetadata"
     ],
     "requiredBundles": [
       "kibanaReact"

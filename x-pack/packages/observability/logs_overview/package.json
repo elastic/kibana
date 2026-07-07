@@ -1,7 +1,0 @@
-{
-  "name": "@kbn/observability-logs-overview",
-  "private": true,
-  "version": "1.0.0",
-  "license": "Elastic License 2.0",
-  "sideEffects": false
-}

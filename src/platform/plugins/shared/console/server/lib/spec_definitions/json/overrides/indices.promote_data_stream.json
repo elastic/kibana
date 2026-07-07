@@ -1,0 +1,7 @@
+{
+  "indices.promote_data_stream": {
+    "patterns": [
+      "_data_stream/_promote/{data_stream}"
+    ]
+  }
+}

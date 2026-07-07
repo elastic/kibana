@@ -1,0 +1,26 @@
+openapi: 3.0.0
+
+info:
+  title: Disable Privilege Monitoring Engine
+  version: "2023-10-31"
+paths:
+  /api/entity_analytics/monitoring/engine/disable:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: DisableMonitoringEngine
+      summary: Disable the Privilege Monitoring Engine
+      description: Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
+
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "../common.schema.yaml#/components/schemas/MonitoringEngineDescriptor"
+              examples:
+                DisableMonitoringEngineResponse:
+                  summary: Engine disabled successfully
+                  value:
+                    status: disabled

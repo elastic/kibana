@@ -10,14 +10,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import {
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type {
   IndexPatternFieldEditorStart,
   IndexPatternFieldEditorSetup,
 } from '@kbn/data-view-field-editor-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { registerExampleFormat } from './examples/2_creating_custom_formatter';
 import { App } from './app';
 import { registerExampleFormatEditor } from './examples/3_creating_custom_format_editor';

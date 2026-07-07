@@ -1,0 +1,163 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
+import styled from 'styled-components';
+
+import type { GetInfoResponse } from '../../../../../../../common/types';
+import {
+  useGetPackageInfoByKeyQuery,
+  useLink,
+  useDashboardLocator,
+  useFleetStatus,
+} from '../../../../hooks';
+import type { Agent, AgentPolicy } from '../../../../types';
+import {
+  FLEET_ELASTIC_AGENT_PACKAGE,
+  FLEET_OTEL_COLLECTOR_INTERNAL_TELEMETRY_PACKAGE,
+  DASHBOARD_LOCATORS_IDS,
+} from '../../../../../../../common/constants';
+import { getDashboardIdForSpace } from '../../services/dashboard_helpers';
+
+function isKibanaAssetsInstalledInSpace(spaceId: string | undefined, res?: GetInfoResponse) {
+  if (res?.item?.status !== 'installed') {
+    return false;
+  }
+
+  const installationInfo = res.item.installationInfo;
+
+  if (!installationInfo || installationInfo.install_status !== 'installed') {
+    return false;
+  }
+  return (
+    installationInfo.installed_kibana_space_id === spaceId ||
+    (spaceId && installationInfo.additional_spaces_installed_kibana?.[spaceId])
+  );
+}
+function useAgentDashboardLink(agent: Agent, packageName: string) {
+  const { isLoading, data } = useGetPackageInfoByKeyQuery(packageName);
+  const { spaceId } = useFleetStatus();
+
+  const isInstalled = isKibanaAssetsInstalledInSpace(spaceId, data);
+  const dashboardLocator = useDashboardLocator();
+
+  let link: string | undefined;
+  if (agent.type === 'OPAMP') {
+    // 'elastic.display.name' is set by the Add Collector form (PR #262196) as the hostname/display
+    // name for the collector, and maps to service.instance.id in its self-telemetry. Fall back to
+    // agent.id for collectors enrolled before that field was introduced (9.4 compatibility).
+    const instanceId = agent.non_identifying_attributes?.['elastic.display.name'] ?? agent.id;
+    link = dashboardLocator?.getRedirectUrl({
+      dashboardId: DASHBOARD_LOCATORS_IDS.OTEL_COLLECTOR_INTERNAL_TELEMETRY,
+      query: {
+        language: 'kuery',
+        query: `service.instance.id:"${instanceId}"`,
+      },
+    });
+  } else {
+    link = dashboardLocator?.getRedirectUrl({
+      dashboardId: getDashboardIdForSpace(
+        spaceId,
+        data,
+        DASHBOARD_LOCATORS_IDS.ELASTIC_AGENT_AGENT_METRICS
+      ),
+      query: {
+        language: 'kuery',
+        query: `elastic_agent.id:${agent.id}`,
+      },
+    });
+  }
+
+  return {
+    isLoading,
+    isInstalled,
+    link,
+  };
+}
+
+const EuiButtonCompressed = styled(EuiButton)`
+  height: 32px;
+`;
+
+export const AgentDashboardLink: React.FunctionComponent<{
+  agent: Agent;
+  agentPolicy?: AgentPolicy;
+}> = ({ agent, agentPolicy }) => {
+  const packageName =
+    agent.type === 'OPAMP'
+      ? FLEET_OTEL_COLLECTOR_INTERNAL_TELEMETRY_PACKAGE
+      : FLEET_ELASTIC_AGENT_PACKAGE;
+  const { isInstalled, link, isLoading } = useAgentDashboardLink(agent, packageName);
+  const { getHref } = useLink();
+
+  const isMetricsEnabled =
+    agentPolicy?.monitoring_enabled?.includes('metrics') || agent.type === 'OPAMP';
+
+  const buttonArgs =
+    !isInstalled || isLoading || !isMetricsEnabled ? { disabled: true } : { href: link };
+
+  const button = (
+    <EuiButtonCompressed
+      {...buttonArgs}
+      isLoading={isLoading}
+      color="primary"
+      iconType="dashboardApp"
+    >
+      <FormattedMessage
+        data-test-subj="agentDetails.viewMoreMetricsButton"
+        id="xpack.fleet.agentDetails.viewDashboardButtonLabel"
+        defaultMessage="View more agent metrics"
+      />
+    </EuiButtonCompressed>
+  );
+
+  if (!isLoading && !isMetricsEnabled && agentPolicy) {
+    return (
+      <EuiToolTip
+        content={
+          <FormattedMessage
+            id="xpack.fleet.agentDetails.viewDashboardButton.disabledNoMetricsTooltip"
+            defaultMessage="Metrics for agent are not enabled in the agent policy."
+          />
+        }
+      >
+        <EuiButtonCompressed
+          data-test-subj="agentDetails.enableMetricsButton"
+          isLoading={isLoading}
+          color="primary"
+          href={getHref('policy_details', { policyId: agentPolicy.id, tabId: 'settings' })}
+          disabled={agentPolicy?.is_managed}
+        >
+          <FormattedMessage
+            id="xpack.fleet.agentDetails.enableMetricsLabel"
+            defaultMessage="Enable agent metrics"
+          />
+        </EuiButtonCompressed>
+      </EuiToolTip>
+    );
+  }
+
+  if (!isInstalled) {
+    return (
+      <EuiToolTip
+        content={
+          <FormattedMessage
+            id="xpack.fleet.agentDetails.viewDashboardButton.disabledNoIntegrationTooltip"
+            defaultMessage="Agent dashboard not found, you need to install the {integration} integration."
+            values={{ integration: packageName }}
+          />
+        }
+      >
+        {button}
+      </EuiToolTip>
+    );
+  }
+
+  return button;
+};

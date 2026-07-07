@@ -8,17 +8,17 @@
  */
 
 import Path from 'path';
+import { setTimeout as timer } from 'timers/promises';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { clearLog, defaultKibanaIndex, startElasticsearch } from '../kibana_migrator_test_kit';
+import { clearLog, defaultKibanaIndex, startElasticsearch } from '@kbn/migrator-test-kit';
 
 import {
   createBaseline,
   getCompatibleMigratorTestKit,
   getUpToDateMigratorTestKit,
-  getReindexingMigratorTestKit,
-} from '../kibana_migrator_test_kit.fixtures';
+} from '@kbn/migrator-test-kit/fixtures';
 import '../jest_matchers';
-import { delay, parseLogFile } from '../test_utils';
+import { parseLogFile } from '../test_utils';
 
 export const logFilePath = Path.join(__dirname, 'pickup_updated_types_only.test.log');
 
@@ -32,23 +32,6 @@ describe('pickupUpdatedMappings', () => {
   beforeEach(async () => {
     await createBaseline();
     await clearLog(logFilePath);
-  });
-
-  describe('when performing a reindexing migration', () => {
-    it('should pickup all documents from the index', async () => {
-      const { runMigrations } = await getReindexingMigratorTestKit({ logFilePath });
-
-      await runMigrations();
-
-      const logs = await parseLogFile(logFilePath);
-
-      expect(logs).not.toContainLogEntry(
-        `[${defaultKibanaIndex}] Documents of the following SO types will be updated`
-      );
-      expect(logs).not.toContainLogEntry(
-        `[${defaultKibanaIndex}] There are no changes in the mappings of any of the SO types, skipping UPDATE_TARGET_MAPPINGS steps.`
-      );
-    });
   });
 
   describe('when performing a compatible migration', () => {
@@ -88,6 +71,6 @@ describe('pickupUpdatedMappings', () => {
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(2);
+    await timer(2_000);
   });
 });

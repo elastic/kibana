@@ -11,9 +11,9 @@ import Path from 'path';
 import fs from 'fs/promises';
 import { range } from 'lodash';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import '../jest_matchers';
-import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
+import { getKibanaMigratorTestKit, startElasticsearch } from '@kbn/migrator-test-kit';
 import { parseLogFile } from '../test_utils';
 import {
   getBaseMigratorParams,
@@ -107,9 +107,10 @@ describe('ZDT upgrades - encountering conversion failures', () => {
         changes: [
           {
             type: 'unsafe_transform',
-            transformFn: (doc) => {
-              throw new Error(`error from ${doc.id}`);
-            },
+            transformFn: (typeSafeGuard) =>
+              typeSafeGuard((doc) => {
+                throw new Error(`error from ${doc.id}`);
+              }),
           },
         ],
       },
@@ -122,12 +123,13 @@ describe('ZDT upgrades - encountering conversion failures', () => {
         changes: [
           {
             type: 'unsafe_transform',
-            transformFn: (doc) => {
-              if (doc.id === 'b-0') {
-                throw new Error(`error from ${doc.id}`);
-              }
-              return { document: doc };
-            },
+            transformFn: (typeSafeGuard) =>
+              typeSafeGuard((doc) => {
+                if (doc.id === 'b-0') {
+                  throw new Error(`error from ${doc.id}`);
+                }
+                return { document: doc };
+              }),
           },
         ],
       },

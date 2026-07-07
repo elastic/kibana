@@ -1,0 +1,227 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { EuiCommentProps, EuiThemeComputed } from '@elastic/eui';
+import { EuiCommentList, useEuiTheme } from '@elastic/eui';
+
+import React, { useMemo, useEffect, useState } from 'react';
+import { css } from '@emotion/react';
+
+import type { AttachmentUIV2, UserActionUI } from '../../containers/types';
+import type { UserActionTreeProps } from './types';
+import type { AddCommentRefObject } from '../add_comment';
+import type { UserActionMarkdownRefObject } from './markdown_form';
+import { isUserActionTypeSupported } from './helpers';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { builderMap } from './builder';
+import { useCaseViewParams } from '../../common/navigation';
+import { useUserActionsHandler } from './use_user_actions_handler';
+import { scaledMarkdownImages } from '../utils';
+import { CommentRenderingProvider } from './comment/comment_rendering_context';
+
+const getCommentListCss = (euiTheme: EuiThemeComputed<{}>) => css`
+  & .userAction__comment.outlined .euiCommentEvent {
+    outline: solid 5px ${euiTheme.colors.lightShade};
+    margin: 0.5em;
+    transition: 0.8s;
+  }
+
+  ${scaledMarkdownImages}
+
+  & .draftFooter {
+    & .euiCommentEvent__body {
+      padding: 0;
+    }
+  }
+
+  & .euiComment.isEdit {
+    & .euiCommentEvent {
+      border: none;
+      box-shadow: none;
+    }
+
+    & .euiCommentEvent__body {
+      padding: 0;
+    }
+
+    & .euiCommentEvent__header {
+      display: none;
+    }
+  }
+
+  & .comment-action.empty-comment [class*='euiCommentEvent-regular'] {
+    box-shadow: none;
+    .euiCommentEvent__header {
+      padding: ${euiTheme.size.m} ${euiTheme.size.s};
+      border-bottom: 0;
+    }
+  }
+`;
+
+export type UserActionListProps = Omit<
+  UserActionTreeProps,
+  'userActivityQueryParams' | 'userActionsStats' | 'onUpdateField' | 'statusActionButton'
+> & {
+  commentRefs: React.MutableRefObject<
+    Record<string, AddCommentRefObject | UserActionMarkdownRefObject | null | undefined>
+  >;
+  handleManageQuote: (quote: string) => void;
+  caseUserActions: UserActionUI[];
+  attachments: AttachmentUIV2[];
+  bottomActions?: EuiCommentProps[];
+  isExpandable?: boolean;
+};
+
+export const UserActionsList = React.memo(
+  ({
+    caseUserActions,
+    attachments,
+    caseConnectors,
+    userProfiles,
+    currentUserProfile,
+    data: caseData,
+    casesConfiguration,
+    commentRefs,
+    handleManageQuote,
+    bottomActions = [],
+    isExpandable = false,
+  }: UserActionListProps) => {
+    const {
+      externalReferenceAttachmentTypeRegistry,
+      persistableStateAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry,
+    } = useCasesContext();
+    const { owner } = useCasesContext();
+    const { commentId } = useCaseViewParams();
+    const [initLoading, setInitLoading] = useState(true);
+    const { euiTheme } = useEuiTheme();
+
+    const {
+      loadingCommentIds,
+      selectedOutlineCommentId,
+      manageMarkdownEditIds,
+      handleManageMarkdownEditId,
+      handleOutlineComment,
+      handleSaveComment,
+      handleDeleteComment,
+    } = useUserActionsHandler();
+
+    const builtUserActions: EuiCommentProps[] = useMemo(() => {
+      if (!caseUserActions) {
+        return [];
+      }
+
+      return caseUserActions.reduce<EuiCommentProps[]>((userActions, userAction, index) => {
+        if (!isUserActionTypeSupported(userAction.type)) {
+          return userActions;
+        }
+
+        const builder = builderMap[userAction.type];
+
+        if (builder == null) {
+          return userActions;
+        }
+
+        const userActionBuilder = builder({
+          appId: owner[0],
+          caseData,
+          casesConfiguration,
+          caseConnectors,
+          externalReferenceAttachmentTypeRegistry,
+          persistableStateAttachmentTypeRegistry,
+          unifiedAttachmentTypeRegistry,
+          userAction,
+          userProfiles,
+          currentUserProfile,
+          attachments,
+          index,
+          manageMarkdownEditIds,
+          selectedOutlineCommentId,
+          loadingCommentIds,
+          euiTheme,
+          handleOutlineComment,
+          handleDeleteComment,
+        });
+        return [...userActions, ...userActionBuilder.build()];
+      }, []);
+    }, [
+      caseUserActions,
+      owner,
+      caseData,
+      casesConfiguration,
+      caseConnectors,
+      externalReferenceAttachmentTypeRegistry,
+      persistableStateAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry,
+      userProfiles,
+      currentUserProfile,
+      attachments,
+      manageMarkdownEditIds,
+      selectedOutlineCommentId,
+      loadingCommentIds,
+      euiTheme,
+      handleOutlineComment,
+      handleDeleteComment,
+    ]);
+
+    const comments = bottomActions?.length
+      ? [...builtUserActions, ...bottomActions]
+      : [...builtUserActions];
+
+    useEffect(() => {
+      if (commentId != null && initLoading) {
+        setInitLoading(false);
+        handleOutlineComment(commentId);
+      }
+    }, [commentId, initLoading, handleOutlineComment]);
+
+    // Provide rendering context for comment attachments
+    const commentRenderingContext = useMemo(
+      () => ({
+        appId: owner[0] ?? '',
+        caseData,
+        userProfiles,
+        commentRefs,
+        manageMarkdownEditIds,
+        selectedOutlineCommentId,
+        loadingCommentIds,
+        euiTheme,
+        handleManageMarkdownEditId,
+        handleSaveComment,
+        handleManageQuote,
+        handleDeleteComment,
+      }),
+      [
+        owner,
+        caseData,
+        userProfiles,
+        commentRefs,
+        manageMarkdownEditIds,
+        selectedOutlineCommentId,
+        loadingCommentIds,
+        euiTheme,
+        handleManageMarkdownEditId,
+        handleSaveComment,
+        handleManageQuote,
+        handleDeleteComment,
+      ]
+    );
+
+    return (
+      <CommentRenderingProvider value={commentRenderingContext}>
+        <EuiCommentList
+          className={isExpandable ? 'commentList--hasShowMore' : ''}
+          css={getCommentListCss(euiTheme)}
+          comments={comments}
+          data-test-subj="user-actions-list"
+        />
+      </CommentRenderingProvider>
+    );
+  }
+);
+
+UserActionsList.displayName = 'UserActionsList';

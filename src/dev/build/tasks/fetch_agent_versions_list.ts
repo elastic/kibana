@@ -10,8 +10,9 @@
 import fetch from 'node-fetch';
 import pRetry from 'p-retry';
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { write, Task } from '../lib';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Task } from '../lib';
+import { write } from '../lib';
 
 // Endpoint maintained by the web-team and hosted on the elastic website
 const PRODUCT_VERSIONS_URL = 'https://www.elastic.co/api/product_versions';
@@ -71,7 +72,8 @@ export const FetchAgentVersionsList: Task = {
     }
 
     const versionsList = await getAvailableVersions(log);
-    const AGENT_VERSION_BUILD_FILE = 'x-pack/plugins/fleet/target/agent_versions_list.json';
+    const AGENT_VERSION_BUILD_FILE =
+      'x-pack/platform/plugins/shared/fleet/target/agent_versions_list.json';
 
     if (versionsList.length !== 0) {
       log.info(`Writing versions list to ${AGENT_VERSION_BUILD_FILE}`);

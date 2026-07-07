@@ -1,0 +1,22 @@
+{
+  "ingest.get_geoip_database": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ingest/geoip/database",
+      "_ingest/geoip/database/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-get-geoip-database",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

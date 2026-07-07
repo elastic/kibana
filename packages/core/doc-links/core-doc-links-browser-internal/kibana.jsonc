@@ -1,5 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/core-doc-links-browser-internal",
-  "owner": "@elastic/kibana-core"
-}

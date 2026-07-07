@@ -1,0 +1,176 @@
+openapi: 3.0.0
+info:
+  title: Find endpoint list items API endpoint
+  version: '2023-10-31'
+paths:
+  /api/endpoint_list/items/_find:
+    get:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: FindEndpointListItems
+      summary: Get Elastic Endpoint exception list items
+      description: Get a list of all Elastic Endpoint exception list items.
+      parameters:
+        - name: filter
+          in: query
+          required: false
+          description: |
+            Filters the returned results according to the value of the specified field,
+            using the `<field name>:<field value>` syntax.
+          schema:
+            $ref: '#/components/schemas/FindEndpointListItemsFilter'
+        - name: page
+          in: query
+          required: false
+          description: The page number to return
+          schema:
+            type: integer
+            minimum: 0
+        - name: per_page
+          in: query
+          required: false
+          description: The number of exception list items to return per page
+          schema:
+            type: integer
+            minimum: 0
+        - name: sort_field
+          in: query
+          required: false
+          description: Determines which field is used to sort the results
+          schema:
+            $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - name: sort_order
+          in: query
+          required: false
+          description: Determines the sort order, which can be `desc` or `asc`
+          schema:
+            type: string
+            enum: [desc, asc]
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: The list of endpoint exception list items.
+                    items:
+                      $ref: '../model/endpoint_list_common.schema.yaml#/components/schemas/EndpointListItem'
+                  page:
+                    type: integer
+                    minimum: 0
+                    description: The current page number.
+                  per_page:
+                    type: integer
+                    minimum: 0
+                    description: The number of items per page.
+                  total:
+                    type: integer
+                    minimum: 0
+                    description: The total number of endpoint exception list items.
+                  pit:
+                    type: string
+                    description: The point-in-time ID for pagination.
+                required:
+                  - data
+                  - page
+                  - per_page
+                  - total
+              examples:
+                foundItems:
+                  summary: Found endpoint exception list items
+                  value:
+                    data:
+                      - id: "d4b0c1e2-3f4a-5b6c-7d8e-9f0a1b2c3d4e"
+                        item_id: "block-malicious-file"
+                        list_id: "endpoint_list"
+                        type: "simple"
+                        name: "Block malicious file"
+                        description: "Blocks a known malicious file by its hash"
+                        entries:
+                          - type: "match"
+                            field: "file.hash.sha256"
+                            value: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                            operator: "included"
+                        namespace_type: "agnostic"
+                        os_types:
+                          - "windows"
+                        tags:
+                          - "policy:all"
+                        comments: []
+                        tie_breaker_id: "f1e2d3c4-b5a6-7890-abcd-ef1234567890"
+                        created_at: "2025-01-01T12:00:00.000Z"
+                        created_by: "elastic"
+                        updated_at: "2025-01-01T12:00:00.000Z"
+                        updated_by: "elastic"
+                    page: 1
+                    per_page: 20
+                    total: 1
+        400:
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: '[request query]: page: Expected number, received string'
+        401:
+          description: Unsuccessful authentication
+          content:
+            application/json:
+              schema:
+                $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+        403:
+          description: Insufficient privileges
+          content:
+            application/json:
+              schema:
+                $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [GET /api/endpoint_list/items/_find] is unauthorized for user, this action is granted by the Kibana privileges [lists-read]'
+        404:
+          description: Endpoint list not found
+          content:
+            application/json:
+              schema:
+                $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                notFound:
+                  value:
+                    status_code: 404
+                    message: 'list id: "endpoint_list" does not exist'
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    status_code: 500
+                    message: Internal Server Error
+
+components:
+  schemas:
+    FindEndpointListItemsFilter:
+      $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'

@@ -8,9 +8,9 @@
  */
 
 import type { Plugin, CoreSetup } from '@kbn/core/server';
-import { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { schema } from '@kbn/config-schema';
 
 export interface SetupDeps {
@@ -40,7 +40,11 @@ export class UserProfilesPlugin implements Plugin<void, void, SetupDeps, StartDe
         /**
          * Important: You must restrict access to this endpoint using access `tags`.
          */
-        options: { tags: ['access:suggestUserProfiles'] },
+        security: {
+          authz: {
+            requiredPrivileges: ['suggestUserProfiles'],
+          },
+        },
       },
       async (context, request, response) => {
         const [, pluginDeps] = await core.getStartServices();

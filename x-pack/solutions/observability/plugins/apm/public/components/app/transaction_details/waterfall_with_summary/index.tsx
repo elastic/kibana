@@ -1,0 +1,261 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPagination,
+  EuiSpacer,
+  EuiTitle,
+  EuiSkeletonText,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useEffect, useMemo, useState } from 'react';
+import type { SavedSearchTableConfig } from '@kbn/saved-search-component';
+
+import { TransactionSummary } from '../../../shared/summary/transaction_summary';
+import { TransactionActionMenu } from '../../../shared/transaction_action_menu/transaction_action_menu';
+import { MaybeViewTraceLink } from './maybe_view_trace_link';
+import type { TransactionTab } from './transaction_tabs';
+import { TransactionTabs } from './transaction_tabs';
+import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { TraceWaterfallFlyout } from './trace_waterfall_flyout';
+import { isNotInitiated, isPending, isSuccess } from '../../../../hooks/use_fetcher';
+import type { UnifiedWaterfallFetcherResult } from '../use_unified_waterfall_fetcher';
+import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
+import {
+  getTraceParentChildrenMap,
+  getRootItemOrFallback,
+  getSubtreeIds,
+} from '../../../shared/trace_waterfall/use_trace_waterfall';
+import { TRACE_WATERFALL_EBT_ELEMENTS } from '../../../shared/trace_waterfall/ebt_constants';
+
+interface Props<TSample extends {}> {
+  traceSamples?: TSample[];
+  traceSamplesFetchStatus: FETCH_STATUS;
+  onSampleClick: (sample: TSample) => void;
+  onTabClick: (tab: TransactionTab) => void;
+  serviceName?: string;
+  waterfallItemId?: string;
+  detailTab?: TransactionTab;
+  showCriticalPath: boolean;
+  onShowCriticalPathChange: (showCriticalPath: boolean) => void;
+  selectedSample?: TSample | null;
+  logsTableConfig?: SavedSearchTableConfig;
+  onLogsTableConfigChange?: (config: SavedSearchTableConfig) => void;
+  unifiedWaterfallFetchResult: UnifiedWaterfallFetcherResult;
+  entryTransactionId?: string;
+  rangeFrom: string;
+  rangeTo: string;
+  traceId?: string;
+}
+
+export function WaterfallWithSummary<TSample extends {}>({
+  traceSamples,
+  traceSamplesFetchStatus,
+  onSampleClick,
+  onTabClick,
+  serviceName,
+  waterfallItemId,
+  detailTab,
+  showCriticalPath,
+  onShowCriticalPathChange,
+  selectedSample,
+  logsTableConfig,
+  onLogsTableConfigChange,
+  unifiedWaterfallFetchResult,
+  entryTransactionId,
+  rangeFrom,
+  rangeTo,
+  traceId,
+}: Props<TSample>) {
+  const [sampleActivePage, setSampleActivePage] = useState(0);
+  const [isFullTraceFlyoutOpen, setIsFullTraceFlyoutOpen] = useState(false);
+
+  const isControlled = selectedSample !== undefined;
+
+  const activeWaterfallStatus = unifiedWaterfallFetchResult.status;
+
+  const isLoading = isPending(activeWaterfallStatus) || isPending(traceSamplesFetchStatus);
+
+  // When traceId is not present, call to waterfallFetchResult will not be initiated
+  const isSucceeded =
+    (isSuccess(activeWaterfallStatus) || isNotInitiated(activeWaterfallStatus)) &&
+    isSuccess(traceSamplesFetchStatus);
+
+  useEffect(() => {
+    if (!isControlled) {
+      setSampleActivePage(0);
+    }
+  }, [traceSamples, isControlled]);
+
+  const goToSample = (index: number) => {
+    const sample = traceSamples![index];
+    if (!isControlled) {
+      setSampleActivePage(index);
+    }
+    onSampleClick(sample);
+  };
+
+  const samplePageIndex = isControlled
+    ? selectedSample
+      ? traceSamples?.indexOf(selectedSample)
+      : 0
+    : sampleActivePage;
+
+  const entryTransaction = unifiedWaterfallFetchResult.entryTransaction;
+
+  const contextSpanIds = useMemo(() => {
+    if (!entryTransaction || unifiedWaterfallFetchResult.traceItems.length === 0) {
+      return undefined;
+    }
+    const parentChildMap = getTraceParentChildrenMap(unifiedWaterfallFetchResult.traceItems, false);
+    return getSubtreeIds(parentChildMap, entryTransaction.transaction.id);
+  }, [entryTransaction, unifiedWaterfallFetchResult.traceItems]);
+
+  const unifiedRootTransactionDuration = useMemo(() => {
+    if (unifiedWaterfallFetchResult.traceItems.length === 0) {
+      return undefined;
+    }
+    const parentChildMap = getTraceParentChildrenMap(unifiedWaterfallFetchResult.traceItems, false);
+    const { rootItem } = getRootItemOrFallback(
+      parentChildMap,
+      unifiedWaterfallFetchResult.traceItems,
+      entryTransaction?.transaction.id
+    );
+    return rootItem?.duration;
+  }, [unifiedWaterfallFetchResult.traceItems, entryTransaction?.transaction.id]);
+
+  if (!entryTransaction && traceSamples?.length === 0 && isSucceeded) {
+    return (
+      <EuiEmptyPrompt
+        title={
+          <div>
+            {i18n.translate('xpack.apm.transactionDetails.traceNotFound', {
+              defaultMessage: 'The selected trace cannot be found',
+            })}
+          </div>
+        }
+        data-test-subj="apmNoTraceFound"
+        titleSize="s"
+      />
+    );
+  }
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center">
+          {/* Prevent wrapping on narrow screens */}
+          <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
+            <EuiTitle size="xs">
+              <h5>
+                {i18n.translate('xpack.apm.transactionDetails.traceSampleTitle', {
+                  defaultMessage: 'Trace sample',
+                })}
+              </h5>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow>
+            {!!traceSamples?.length && (
+              <EuiPagination
+                pageCount={traceSamples.length}
+                activePage={samplePageIndex}
+                onPageClick={goToSample}
+                compressed
+                aria-label={i18n.translate(
+                  'xpack.apm.transactionDetails.traceSamplePaginationLabel',
+                  {
+                    defaultMessage: 'Trace sample pages',
+                  }
+                )}
+              />
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="m">
+              <EuiFlexItem grow={false}>
+                <MaybeViewTraceLink
+                  isLoading={isLoading}
+                  transaction={entryTransaction}
+                  traceItems={unifiedWaterfallFetchResult.traceItems}
+                  onViewFullTrace={() => setIsFullTraceFlyoutOpen(true)}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <OpenInDiscover
+                  variant="emptyButton"
+                  dataTestSubj="apmWaterfallOpenInDiscoverButton"
+                  indexType="traces"
+                  rangeFrom={rangeFrom}
+                  rangeTo={rangeTo}
+                  label={i18n.translate(
+                    'xpack.apm.transactionDetails.openFullTraceInDiscover.label',
+                    { defaultMessage: 'Open full trace in Discover' }
+                  )}
+                  queryParams={{
+                    traceId,
+                    sortDirection: 'ASC',
+                  }}
+                  ebt={{
+                    element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_HEADER,
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <TransactionActionMenu isLoading={isLoading} transaction={entryTransaction} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+
+      {isLoading || !entryTransaction ? (
+        <EuiFlexItem grow={false}>
+          <EuiSpacer size="s" />
+          <EuiSkeletonText lines={1} data-test-sub="loading-content" />
+        </EuiFlexItem>
+      ) : (
+        <EuiFlexItem grow={false}>
+          <TransactionSummary
+            errorCount={unifiedWaterfallFetchResult.errors.length}
+            totalDuration={unifiedRootTransactionDuration}
+            transaction={entryTransaction}
+          />
+        </EuiFlexItem>
+      )}
+
+      <EuiFlexItem grow={false}>
+        <TransactionTabs
+          transaction={entryTransaction}
+          detailTab={detailTab}
+          serviceName={serviceName}
+          waterfallItemId={waterfallItemId}
+          onTabClick={onTabClick}
+          isLoading={isLoading}
+          showCriticalPath={showCriticalPath}
+          onShowCriticalPathChange={onShowCriticalPathChange}
+          logsTableConfig={logsTableConfig}
+          onLogsTableConfigChange={onLogsTableConfigChange}
+          unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
+          entryTransactionId={entryTransactionId}
+        />
+      </EuiFlexItem>
+      {traceId && (
+        <TraceWaterfallFlyout
+          traceId={traceId}
+          rangeFrom={rangeFrom}
+          rangeTo={rangeTo}
+          isOpen={isFullTraceFlyoutOpen}
+          onClose={() => setIsFullTraceFlyoutOpen(false)}
+          contextSpanIds={contextSpanIds}
+        />
+      )}
+    </EuiFlexGroup>
+  );
+}

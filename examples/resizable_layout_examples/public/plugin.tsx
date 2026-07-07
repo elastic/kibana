@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
+import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import image from './resizable_layout_examples.png';
 
@@ -25,10 +25,11 @@ export class ResizableLayoutExamplesPlugin implements Plugin {
       title: PLUGIN_NAME,
       visibleIn: [],
       mount: async (params: AppMountParameters) => {
+        const [coreStart] = await core.getStartServices();
         // Load application bundle
         const { renderApp } = await import('./application');
         // Render the application
-        return renderApp(params);
+        return renderApp(coreStart, params);
       },
     });
 

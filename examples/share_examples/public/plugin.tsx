@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
-import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
+import type { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
+import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 
 interface SetupDeps {
   share: SharePluginSetup;

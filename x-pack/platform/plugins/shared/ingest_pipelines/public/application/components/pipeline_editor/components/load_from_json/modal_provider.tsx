@@ -1,0 +1,164 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { FunctionComponent } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { EuiConfirmModal, EuiSpacer, EuiText, EuiCallOut, useGeneratedHtmlId } from '@elastic/eui';
+
+import type { OnJsonEditorUpdateHandler } from '../../../../../shared_imports';
+import { JsonEditor, XJson } from '../../../../../shared_imports';
+
+import type { Processor } from '../../../../../../common/types';
+
+import { deserialize } from '../../deserialize';
+
+export type OnDoneLoadJsonHandler = (json: {
+  processors: Processor[];
+  on_failure?: Processor[];
+}) => void;
+
+export interface Props {
+  onDone: OnDoneLoadJsonHandler;
+  children: (openModal: () => void) => React.ReactNode;
+}
+
+const i18nTexts = {
+  modalTitle: i18n.translate('xpack.ingestPipelines.pipelineEditor.loadFromJson.modalTitle', {
+    defaultMessage: 'Load JSON',
+  }),
+  buttons: {
+    cancel: i18n.translate('xpack.ingestPipelines.pipelineEditor.loadFromJson.buttons.cancel', {
+      defaultMessage: 'Cancel',
+    }),
+    confirm: i18n.translate('xpack.ingestPipelines.pipelineEditor.loadFromJson.buttons.confirm', {
+      defaultMessage: 'Load and overwrite',
+    }),
+  },
+  editor: {
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.loadFromJson.editor', {
+      defaultMessage: 'Pipeline object',
+    }),
+  },
+  error: {
+    title: i18n.translate('xpack.ingestPipelines.pipelineEditor.loadFromJson.error.title', {
+      defaultMessage: 'Invalid pipeline',
+    }),
+    body: i18n.translate('xpack.ingestPipelines.pipelineEditor.loadFromJson.error.body', {
+      defaultMessage: 'Please ensure the JSON is a valid pipeline object.',
+    }),
+  },
+};
+
+const { collapseLiteralStrings } = XJson;
+
+const defaultValue = {};
+const defaultValueRaw = JSON.stringify(defaultValue, null, 2);
+
+const isValidXJson = (content: string): boolean => {
+  if (content.trim() === '') return false;
+  try {
+    JSON.parse(collapseLiteralStrings(content));
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) => {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isValidJson, setIsValidJson] = useState(true);
+  const [error, setError] = useState<Error | undefined>();
+  const [editorContent, setEditorContent] = useState(defaultValueRaw);
+
+  useEffect(() => {
+    if (!isModalVisible) return;
+
+    setEditorContent(defaultValueRaw);
+    setIsValidJson(isValidXJson(defaultValueRaw));
+    setError(undefined);
+  }, [isModalVisible]);
+
+  const onJsonUpdate: OnJsonEditorUpdateHandler = useCallback((jsonUpdateData) => {
+    setEditorContent(jsonUpdateData.data.raw);
+    setIsValidJson(isValidXJson(jsonUpdateData.data.raw));
+    setError(undefined);
+  }, []);
+
+  const modalTitleId = useGeneratedHtmlId();
+
+  return (
+    <>
+      {children(() => setIsModalVisible(true))}
+      {isModalVisible ? (
+        <EuiConfirmModal
+          aria-labelledby={modalTitleId}
+          data-test-subj="loadJsonConfirmationModal"
+          title={i18nTexts.modalTitle}
+          onCancel={() => {
+            setIsModalVisible(false);
+          }}
+          titleProps={{ id: modalTitleId }}
+          onConfirm={async () => {
+            try {
+              const json = JSON.parse(collapseLiteralStrings(editorContent));
+              const { processors, on_failure: onFailure } = json;
+              // This function will throw if it cannot parse the pipeline object
+              deserialize({ processors, onFailure });
+              onDone(json as any);
+              setIsModalVisible(false);
+            } catch (e) {
+              setError(e);
+            }
+          }}
+          cancelButtonText={i18nTexts.buttons.cancel}
+          confirmButtonDisabled={!isValidJson || Boolean(error)}
+          confirmButtonText={i18nTexts.buttons.confirm}
+          maxWidth={600}
+        >
+          <div className="application">
+            <EuiText color="subdued">
+              <FormattedMessage
+                id="xpack.ingestPipelines.pipelineEditor.loadJsonModal.jsonEditorHelpText"
+                defaultMessage="Provide a pipeline object. This will override the existing pipeline processors and on-failure processors."
+              />
+            </EuiText>
+
+            <EuiSpacer size="m" />
+
+            {error && (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  data-test-subj="errorCallOut"
+                  title={i18nTexts.error.title}
+                  color="danger"
+                  iconType="warning"
+                >
+                  {i18nTexts.error.body}
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            )}
+
+            <JsonEditor
+              label={i18nTexts.editor.label}
+              value={editorContent}
+              onUpdate={onJsonUpdate}
+              error={!isValidJson || error ? i18nTexts.error.body : null}
+              codeEditorProps={{
+                height: '300px',
+                languageId: 'xjson',
+              }}
+            />
+          </div>
+        </EuiConfirmModal>
+      ) : undefined}
+    </>
+  );
+};

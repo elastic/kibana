@@ -1,0 +1,253 @@
+{
+  "attributes": {
+    "title": "This is used to test that when an object is unshared from all space, inbound aliases for all spaces are removed"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "alias_delete_exclusive",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzE0NjEsMV0="
+}
+
+{
+  "attributes": {
+    "title": "This is used to test that when an object is unshared from a space, inbound aliases for just those spaces are removed"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "alias_delete_inclusive",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzE0NjAsMV0="
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in all spaces"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "all_spaces",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzE0NTksMV0="
+}
+
+{
+  "attributes": {
+    "title": "This is used to test an inexact match conflict for an originId -> originId match"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "conflict_1a_default",
+  "managed": false,
+  "originId": "conflict_1a",
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzE0NjIsMV0="
+}
+
+{
+  "attributes": {
+    "title": "This is used to test an inexact match conflict for an originId -> id match"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "conflict_1b_default",
+  "managed": false,
+  "originId": "conflict_1b_space_2",
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzE0NjUsMV0="
+}
+
+{
+  "attributes": {
+    "title": "This is used to test an inexact match conflict for an id -> originId match"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "conflict_1c_default_and_space_1",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzE0NjgsMV0="
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in all spaces"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "conflict_2_all",
+  "managed": false,
+  "originId": "conflict_2",
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzE0NzMsMV0="
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in one space"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "conflict_2_default",
+  "managed": false,
+  "originId": "conflict_2",
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzE0NzAsMV0="
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in the default and space_1 spaces"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "default_and_space_1",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzE0NTUsMV0="
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in the default and space_2 spaces"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "default_and_space_2",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzE0NTYsMV0="
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in one space"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "default_only",
+  "managed": false,
+  "references": [
+    {
+      "id": "each_space",
+      "name": "refname",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzE0NTAsMV0="
+}
+
+{
+  "attributes": {
+    "title": "This object only exists to test the third assertion for spacesWithMatchingOrigins in get_shareable_references"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "space_2_only_matching_origin",
+  "managed": false,
+  "originId": "space_2_only",
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzE0NTQsMV0="
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in one space"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "space_1_only",
+  "managed": false,
+  "references": [
+    {
+      "id": "each_space",
+      "name": "refname",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzE0NTEsMV0="
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in second space"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "space_2_only",
+  "managed": false,
+  "references": [
+    {
+      "id": "each_space",
+      "name": "refname",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzE0NTEsMV0="
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in the default, space_1, and space_2 spaces"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "each_space",
+  "managed": false,
+  "references": [
+    {
+      "id": "default_only",
+      "name": "refname",
+      "type": "index-pattern"
+    },
+    {
+      "id": "space_1_only",
+      "name": "refname",
+      "type": "index-pattern"
+    },
+    {
+      "id": "space_2_only",
+      "name": "refname",
+      "type": "index-pattern"
+    },
+    {
+      "id": "all_spaces",
+      "name": "refname",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzE0NTgsMV0="
+}

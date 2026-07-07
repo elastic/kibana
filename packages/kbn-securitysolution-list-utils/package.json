@@ -1,8 +1,0 @@
-{
-  "name": "@kbn/securitysolution-list-utils",
-  "version": "1.0.0",
-  "description": "security solution list utilities",
-  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
-  "private": true,
-  "sideEffects": false
-}

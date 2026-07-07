@@ -1,0 +1,10 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/stdio-dev-helpers",
+  "owner": [
+    "@elastic/kibana-operations"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
+}

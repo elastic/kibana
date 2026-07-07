@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/interactive-setup-plugin",
+  "owner": [
+    "@elastic/kibana-security"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "description": "This plugin provides UI and APIs for the interactive setup mode.",
+  "plugin": {
+    "id": "interactiveSetup",
+    "browser": true,
+    "server": true,
+    "type": "preboot",
+    "configPath": [
+      "interactiveSetup"
+    ]
+  }
+}

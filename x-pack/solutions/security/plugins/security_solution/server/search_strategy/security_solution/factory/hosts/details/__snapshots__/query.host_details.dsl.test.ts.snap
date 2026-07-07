@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildHostDetailsQuery includes host.name filter when filterQuery is undefined 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "term": Object {
+          "host.name": "bastion00.siem.estc.dev",
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "format": "strict_date_optional_time",
+            "gte": "2020-09-02T15:17:13.678Z",
+            "lte": "2020-09-03T15:17:13.678Z",
+          },
+        },
+      },
+    ],
+  },
+}
+`;

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StateDemoPublicPluginSetup {}

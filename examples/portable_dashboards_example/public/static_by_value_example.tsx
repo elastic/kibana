@@ -9,12 +9,11 @@
 
 import React from 'react';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import type { DashboardPanelMap } from '@kbn/dashboard-plugin/common';
+import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 
-import panelsJson from './static_by_value_example_panels.json';
+import panels from './static_by_value_example_panels.json';
 
 export const StaticByValueExample = () => {
   return (
@@ -32,8 +31,8 @@ export const StaticByValueExample = () => {
             return {
               getInitialInput: () => ({
                 timeRange: { from: 'now-30d', to: 'now' },
-                viewMode: ViewMode.VIEW,
-                panels: panelsJson as DashboardPanelMap,
+                viewMode: 'view',
+                panels: panels as DashboardState['panels'],
               }),
             };
           }}

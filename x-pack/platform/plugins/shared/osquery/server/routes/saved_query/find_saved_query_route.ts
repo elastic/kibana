@@ -1,0 +1,180 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { IRouter } from '@kbn/core/server';
+
+import { escapeQuotes, escapeKuery } from '@kbn/es-query';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
+import { API_VERSIONS } from '../../../common/constants';
+import type { SavedQueryResponse } from './types';
+import type { SavedQuerySavedObject } from '../../common/types';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { PLUGIN_ID } from '../../../common';
+import { savedQuerySavedObjectType } from '../../../common/types';
+import { convertECSMappingToObject } from '../utils';
+import { getInstalledSavedQueriesMap } from './utils';
+import type { FindSavedQueryRequestQuerySchema } from '../../../common/api/saved_query/find_saved_query_route';
+import { findSavedQueryRequestQuerySchema } from '../../../common/api/saved_query/find_saved_query_route';
+import { findSavedQueryResponseSchema } from './response_schemas';
+
+export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
+  router.versioned
+    .get({
+      access: 'public',
+      path: '/api/osquery/saved_queries',
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-readSavedQueries`],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: {
+            query: buildRouteValidation<
+              typeof findSavedQueryRequestQuerySchema,
+              FindSavedQueryRequestQuerySchema
+            >(findSavedQueryRequestQuerySchema),
+          },
+          response: {
+            200: {
+              body: () => findSavedQueryResponseSchema,
+            },
+          },
+        },
+      },
+      async (context, request, response) => {
+        const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+          osqueryContext,
+          request
+        );
+
+        const space = await osqueryContext.service.getActiveSpace(request);
+        const spaceId = space?.id ?? DEFAULT_SPACE_ID;
+
+        try {
+          const filters: string[] = [];
+          if (request.query.createdBy) {
+            const users = request.query.createdBy.split(',');
+            const userFilters = users.map(
+              (u) =>
+                `${savedQuerySavedObjectType}.attributes.created_by: "${escapeQuotes(u.trim())}"`
+            );
+            filters.push(`(${userFilters.join(' OR ')})`);
+          }
+
+          if (request.query.id) {
+            const idTerm = request.query.id.trim();
+            filters.push(`${savedQuerySavedObjectType}.attributes.id: "${escapeQuotes(idTerm)}"`);
+          } else if (request.query.search) {
+            const searchTerm = escapeKuery(request.query.search.trim());
+            if (searchTerm) {
+              const searchFilter = [
+                `${savedQuerySavedObjectType}.attributes.id: *${searchTerm}*`,
+                `${savedQuerySavedObjectType}.attributes.description: *${searchTerm}*`,
+                `${savedQuerySavedObjectType}.attributes.query: *${searchTerm}*`,
+              ].join(' OR ');
+              filters.push(`(${searchFilter})`);
+            }
+          }
+
+          const savedQueries = await spaceScopedClient.find<SavedQuerySavedObject>({
+            type: savedQuerySavedObjectType,
+            page: request.query.page || 1,
+            perPage: request.query.pageSize,
+            sortField: request.query.sort || 'id',
+            sortOrder: request.query.sortOrder || 'desc',
+            ...(filters.length && { filter: filters.join(' AND ') }),
+          });
+
+          const prebuiltSavedQueriesMap = await getInstalledSavedQueriesMap(
+            osqueryContext.service.getPackageService()?.asInternalUser,
+            spaceScopedClient,
+            spaceId
+          );
+          const savedObjects: SavedQueryResponse[] = savedQueries.saved_objects.map(
+            (savedObject) => {
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              const ecs_mapping = savedObject.attributes.ecs_mapping;
+
+              const prebuiltById = savedObject.id && prebuiltSavedQueriesMap[savedObject.id];
+              const prebuiltByOriginId =
+                !prebuiltById && savedObject.originId
+                  ? prebuiltSavedQueriesMap[savedObject.originId]
+                  : false;
+
+              savedObject.attributes.prebuilt = !!(prebuiltById || prebuiltByOriginId);
+
+              if (ecs_mapping) {
+                // @ts-expect-error update types
+                savedObject.attributes.ecs_mapping = convertECSMappingToObject(ecs_mapping);
+              }
+
+              const {
+                created_at: createdAt,
+                created_by: createdBy,
+                created_by_profile_uid: createdByProfileUid,
+                description,
+                id,
+                interval,
+                timeout,
+                platform,
+                query,
+                removed,
+                snapshot,
+                version,
+                ecs_mapping: ecsMapping,
+                updated_at: updatedAt,
+                updated_by: updatedBy,
+                updated_by_profile_uid: updatedByProfileUid,
+                prebuilt,
+              } = savedObject.attributes;
+
+              return {
+                created_at: createdAt,
+                created_by: createdBy,
+                created_by_profile_uid: createdByProfileUid,
+                description,
+                id,
+                removed,
+                snapshot,
+                version,
+                ecs_mapping: ecsMapping,
+                interval,
+                timeout,
+                platform,
+                query,
+                updated_at: updatedAt,
+                updated_by: updatedBy,
+                updated_by_profile_uid: updatedByProfileUid,
+                prebuilt,
+                saved_object_id: savedObject.id,
+              };
+            }
+          );
+
+          return response.ok({
+            body: {
+              page: savedQueries.page,
+              per_page: savedQueries.per_page,
+              total: savedQueries.total,
+              data: savedObjects,
+            },
+          });
+        } catch (e) {
+          return response.customError({
+            statusCode: e.statusCode || e.output?.statusCode || 500,
+            body: e,
+          });
+        }
+      }
+    );
+};

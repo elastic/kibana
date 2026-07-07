@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddToFilterListLink renders the add to filter list link for a value 1`] = `
+<button
+  class="euiLink emotion-euiLink-primary"
+  data-test-subj="mlAddToFilterListLink"
+  type="button"
+>
+  Add elastic.co to safe_domains
+</button>
+`;

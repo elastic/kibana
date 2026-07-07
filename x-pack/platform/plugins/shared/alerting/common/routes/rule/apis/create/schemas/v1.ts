@@ -1,0 +1,227 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { type ObjectType, schema } from '@kbn/config-schema';
+import {
+  ruleParamsSchemasForCreateV1,
+  createRuleParamsExamplesV1,
+} from '@kbn/response-ops-rule-params';
+import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../../validation';
+import { notifyWhenSchemaV1, alertDelaySchemaV1 } from '../../../response';
+import { artifactsSchemaV1 } from '../../../request';
+import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
+import { flappingSchemaV2 } from '../../../common';
+
+export const actionFrequencySchema = schema.object(
+  {
+    summary: schema.boolean({
+      meta: { description: 'Indicates whether the action is a summary.' },
+    }),
+    notify_when: notifyWhenSchemaV1,
+    throttle: schema.nullable(
+      schema.string({
+        validate: validateDurationV1,
+        meta: {
+          description:
+            'The throttle interval defines how frequently rule actions are triggered. It is specified in seconds, minutes, hours, or days and only applies when `notify_when` is set to `onThrottleInterval`. You cannot set the throttle interval at both the rule and action level. The recommended approach is to set it for each action individually. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.',
+        },
+      })
+    ),
+  },
+  { meta: { id: 'new_rule_action_frequency' } }
+);
+
+export const actionAlertsFilterSchema = schema.object(
+  {
+    query: schema.maybe(alertsFilterQuerySchemaV1),
+    timeframe: schema.maybe(
+      schema.object(
+        {
+          days: schema.arrayOf(
+            schema.oneOf([
+              schema.literal(1),
+              schema.literal(2),
+              schema.literal(3),
+              schema.literal(4),
+              schema.literal(5),
+              schema.literal(6),
+              schema.literal(7),
+            ]),
+            {
+              meta: {
+                description:
+                  'Defines the days of the week that the action can run, represented as an array of numbers. For example, `1` represents Monday. An empty array is equivalent to specifying all the days of the week.',
+              },
+            }
+          ),
+          hours: schema.object(
+            {
+              start: schema.string({
+                validate: validateHoursV1,
+                meta: {
+                  description: 'The start of the time frame, in 24-hour notation (`hh:mm`).',
+                },
+              }),
+              end: schema.string({
+                validate: validateHoursV1,
+                meta: { description: 'The end of the time frame, in 24-hour notation (`hh:mm`).' },
+              }),
+            },
+            {
+              meta: {
+                description:
+                  'Defines the range of time in a day that the action can run. If the `start` value is `00:00` and the `end` value is `24:00`, actions be generated all day.',
+              },
+            }
+          ),
+          timezone: schema.string({
+            validate: validateTimezoneV1,
+            meta: {
+              description:
+                'The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in support for daylight savings time and are not recommended.',
+            },
+          }),
+        },
+        { meta: { description: 'Defines a period that limits whether the action runs.' } }
+      )
+    ),
+  },
+  {
+    meta: {
+      id: 'new_rule_action_alerts_filter',
+      description:
+        'Conditions that affect whether the action runs. If you specify multiple conditions, all conditions must be met for the action to run. For example, if an alert occurs within the specified time frame and matches the query, the action runs.',
+    },
+  }
+);
+
+export const actionSchema = schema.object(
+  {
+    group: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            "The group name, which affects when the action runs (for example, when the threshold is met or when the alert is recovered). Each rule type has a list of valid action group names. If you don't need to group actions, set to `default`.",
+        },
+      })
+    ),
+    id: schema.string({
+      meta: { description: 'The identifier for the connector saved object.' },
+    }),
+    params: schema.recordOf(schema.string(), schema.maybe(schema.any()), {
+      defaultValue: {},
+      meta: {
+        description:
+          'The parameters for the action, which are sent to the connector. The `params` are handled as Mustache templates and passed a default set of context.',
+      },
+    }),
+    frequency: schema.maybe(actionFrequencySchema),
+    uuid: schema.maybe(
+      schema.string({
+        meta: { description: 'A universally unique identifier (UUID) for the action.' },
+      })
+    ),
+    alerts_filter: schema.maybe(actionAlertsFilterSchema),
+    use_alert_data_for_template: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: 'Indicates whether to use alert data as a template.',
+        },
+      })
+    ),
+  },
+  {
+    meta: { id: 'new_rule_action', description: 'An action that runs under defined conditions.' },
+  }
+);
+
+const baseCreateBodyFields = {
+  name: schema.string({
+    meta: {
+      description:
+        'The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.',
+    },
+  }),
+  enabled: schema.boolean({
+    defaultValue: true,
+    meta: {
+      description:
+        'Indicates whether you want the rule to run on an interval basis after it is created.',
+    },
+  }),
+  consumer: schema.string({
+    meta: {
+      description:
+        'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.',
+    },
+  }),
+  tags: schema.arrayOf(schema.string(), {
+    defaultValue: [],
+    meta: { description: 'The tags for the rule.' },
+  }),
+  throttle: schema.maybe(
+    schema.nullable(
+      schema.string({
+        validate: validateDurationV1,
+        meta: {
+          description:
+            'Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.',
+        },
+      })
+    )
+  ),
+  schedule: schema.object(
+    {
+      interval: schema.string({
+        validate: validateDurationV1,
+        meta: { description: 'The interval is specified in seconds, minutes, hours, or days.' },
+      }),
+    },
+    {
+      meta: {
+        description:
+          'The check interval, which specifies how frequently the rule conditions are checked.',
+      },
+    }
+  ),
+  actions: schema.arrayOf(actionSchema, { defaultValue: [] }),
+  notify_when: schema.maybe(schema.nullable(notifyWhenSchemaV1)),
+  alert_delay: schema.maybe(alertDelaySchemaV1),
+  flapping: schema.maybe(schema.nullable(flappingSchemaV2)),
+  artifacts: schema.maybe(artifactsSchemaV1),
+};
+
+export { createRuleParamsExamplesV1 };
+
+export const knownCreateBodySchema = schema.discriminatedUnion(
+  'rule_type_id',
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ruleParamsSchemasForCreateV1(baseCreateBodyFields) as [ObjectType<any>]
+);
+
+export const fallbackCreateBodySchema = schema.object(
+  {
+    ...baseCreateBodyFields,
+    rule_type_id: schema.string({ meta: { description: 'The rule type identifier.' } }),
+    params: schema.recordOf(schema.string(), schema.maybe(schema.any()), {
+      defaultValue: {},
+      meta: { description: 'The parameters for the rule.' },
+    }),
+  },
+  { meta: { id: 'new_rule' } }
+);
+
+export const createBodySchema = schema.oneOf([knownCreateBodySchema, fallbackCreateBodySchema]);
+export const createParamsSchema = schema.object({
+  id: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'The identifier for the rule. If it is omitted, an ID is randomly generated.',
+      },
+    })
+  ),
+});

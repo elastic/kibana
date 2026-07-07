@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Logger, IRouter } from '@kbn/core/server';
+import type { Logger, IRouter } from '@kbn/core/server';
 
 import { registerRoute as registerRouteCpuProfile } from './cpu_profile';
 import { registerRoute as registerRouteHeapProfile } from './heap_profile';

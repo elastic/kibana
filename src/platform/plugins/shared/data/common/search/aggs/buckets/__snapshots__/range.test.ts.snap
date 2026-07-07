@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Range Agg RangeKey fully closed range should correctly stringify field 1`] = `"from:0,to:100"`;
+
+exports[`Range Agg RangeKey fully closed range w/ label should correctly stringify field 1`] = `"from:0,to:100"`;
+
+exports[`Range Agg RangeKey open lower range should correctly stringify field 1`] = `"from:-Infinity,to:100"`;
+
+exports[`Range Agg RangeKey open lower range w/ label should correctly stringify field 1`] = `"from:-Infinity,to:100"`;
+
+exports[`Range Agg RangeKey open range should correctly stringify field 1`] = `"from:-Infinity,to:Infinity"`;
+
+exports[`Range Agg RangeKey open range should correctly stringify field 2`] = `"from:-Infinity,to:Infinity"`;
+
+exports[`Range Agg RangeKey open upper range should correctly stringify field 1`] = `"from:0,to:Infinity"`;
+
+exports[`Range Agg RangeKey open upper range w/ label should correctly stringify field 1`] = `"from:0,to:Infinity"`;

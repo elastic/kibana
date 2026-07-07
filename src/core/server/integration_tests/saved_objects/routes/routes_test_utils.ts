@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 
 export function setupConfig(allowAccess: boolean = false) {
   const config = {
@@ -15,3 +15,19 @@ export function setupConfig(allowAccess: boolean = false) {
   } as SavedObjectConfig;
   return config;
 }
+
+export const deprecationMock = {
+  documentationUrl: 'http://elastic.co',
+  severity: 'warning' as const,
+  reason: {
+    type: 'deprecate' as const,
+  },
+};
+
+export const legacyDeprecationMock = {
+  documentationUrl: 'http://elastic.co',
+  severity: 'warning' as const,
+  reason: {
+    type: 'remove' as const,
+  },
+};

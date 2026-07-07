@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DisabledLoginForm renders as expected 1`] = `
+<div
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
+>
+  <div
+    class="euiText emotion-euiText-m-euiTextColor-danger"
+    style="text-align: center;"
+  >
+    <p>
+      disabled message title
+    </p>
+  </div>
+  <div
+    class="euiText emotion-euiText-m"
+    style="text-align: center;"
+  >
+    <p>
+      disabled message
+    </p>
+  </div>
+</div>
+`;

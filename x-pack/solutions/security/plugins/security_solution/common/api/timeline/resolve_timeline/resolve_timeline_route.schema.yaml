@@ -1,0 +1,66 @@
+openapi: 3.0.0
+info:
+  title: Elastic Security - Timeline - Resolve Timeline API
+  version: '2023-10-31'
+paths:
+  /api/timeline/resolve:
+    get:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: ResolveTimeline
+      summary: Resolve a Timeline or Timeline template
+      description:
+        Resolve a Timeline or Timeline template, surfacing outcomes such as `exactMatch`, `aliasMatch`, or `conflict` when object IDs have been remapped during upgrades or imports. Provide **either** `id` for default Timelines or `template_timeline_id` for templates.
+      tags:
+        - access:securitySolution
+      parameters:
+        - in: query
+          name: template_timeline_id
+          schema:
+            type: string
+          description: The ID of the template timeline to resolve
+        - in: query
+          name: id
+          schema:
+            type: string
+          description: The ID of the timeline to resolve
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '../model/components.schema.yaml#/components/schemas/ResolvedTimeline'
+              examples:
+                exactMatch:
+                  summary: Exact match outcome
+                  description: Timeline resolved without alias or conflict
+                  value:
+                    outcome: exactMatch
+                    timeline:
+                      savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                      title: Investigation
+                      timelineType: default
+
+        '400':
+          description: Bad Request response.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+              examples:
+                badRequest:
+                  summary: Bad request
+                  value: {}
+        '404':
+          description: The (template) Timeline was not found
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+              examples:
+                notFound:
+                  summary: Not found
+                  value: {}

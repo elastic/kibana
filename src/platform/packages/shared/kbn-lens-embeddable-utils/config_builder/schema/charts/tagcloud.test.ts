@@ -1,0 +1,463 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
+import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
+import { tagcloudConfigSchema } from './tagcloud';
+
+describe('Tagcloud Schema', () => {
+  const baseTagcloudConfig = {
+    type: 'tag_cloud',
+    data_source: {
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+      ref_id: 'test-data-view',
+    },
+  };
+
+  const defaultValues = {
+    sampling: 1,
+    ignore_global_filters: false,
+  };
+
+  describe('metric configuration', () => {
+    it('validates count metric operation', () => {
+      const input = {
+        ...baseTagcloudConfig,
+        metric: {
+          operation: 'count',
+          field: 'test_field',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+        },
+        tag_by: {
+          operation: 'terms',
+          fields: ['category'],
+        },
+      };
+
+      const validated = tagcloudConfigSchema.validate(input);
+      expect(validated).toEqual({
+        ...defaultValues,
+        ...input,
+        tag_by: { ...input.tag_by, limit: 5 },
+      });
+    });
+
+    it('validates metric with show metric label', () => {
+      const input = {
+        ...baseTagcloudConfig,
+        metric: {
+          operation: 'sum',
+          field: 'price',
+          label: 'Sum of price',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+        },
+        styling: {
+          caption: { visible: true },
+        },
+        tag_by: {
+          operation: 'terms',
+          fields: ['category'],
+        },
+      };
+
+      const validated = tagcloudConfigSchema.validate(input);
+      expect(validated).toEqual({
+        ...defaultValues,
+        ...input,
+        tag_by: { ...input.tag_by, limit: 5 },
+      });
+    });
+
+    it('validates with categorical color mapping', () => {
+      const input = {
+        ...baseTagcloudConfig,
+        metric: {
+          operation: 'sum',
+          field: 'revenue',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+        },
+        tag_by: {
+          operation: 'terms',
+          fields: ['category'],
+          color: {
+            mode: 'categorical',
+            palette: 'kibana_palette',
+            mapping: [
+              {
+                values: ['value1', 'value2', 'value3'],
+                color: { type: 'from_palette', palette: 'default', index: 0 },
+              },
+            ],
+            unassigned: { type: 'color_code', value: '#cccccc' },
+          },
+        },
+      };
+
+      const validated = tagcloudConfigSchema.validate(input);
+      expect(validated).toEqual({
+        ...defaultValues,
+        ...input,
+        tag_by: { ...input.tag_by, limit: 5 },
+      });
+    });
+
+    describe('orientation configuration', () => {
+      it('validates horizontal orientation', () => {
+        const input = {
+          ...baseTagcloudConfig,
+          metric: {
+            operation: 'count',
+            field: 'test_field',
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          },
+          styling: {
+            caption: { visible: false },
+            orientation: 'horizontal',
+          },
+          tag_by: {
+            operation: 'terms',
+            fields: ['category'],
+          },
+        };
+
+        const validated = tagcloudConfigSchema.validate(input);
+        expect(validated).toEqual({
+          ...defaultValues,
+          ...input,
+          tag_by: { ...input.tag_by, limit: 5 },
+        });
+      });
+
+      it('validates vertical orientation', () => {
+        const input = {
+          ...baseTagcloudConfig,
+          metric: {
+            operation: 'sum',
+            field: 'sales',
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          },
+          styling: {
+            caption: { visible: false },
+            orientation: 'vertical',
+          },
+          tag_by: {
+            operation: 'terms',
+            fields: ['category'],
+          },
+        };
+
+        const validated = tagcloudConfigSchema.validate(input);
+        expect(validated).toEqual({
+          ...defaultValues,
+          ...input,
+          tag_by: { ...input.tag_by, limit: 5 },
+        });
+      });
+
+      it('validates angled orientation', () => {
+        const input = {
+          ...baseTagcloudConfig,
+          metric: {
+            operation: 'sum',
+            field: 'sales',
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          },
+          styling: {
+            caption: { visible: false },
+            orientation: 'angled',
+          },
+          tag_by: {
+            operation: 'terms',
+            fields: ['category'],
+          },
+        };
+
+        const validated = tagcloudConfigSchema.validate(input);
+        expect(validated).toEqual({
+          ...defaultValues,
+          ...input,
+          tag_by: { ...input.tag_by, limit: 5 },
+        });
+      });
+    });
+
+    describe('font size configuration', () => {
+      it('validates font size configuration', () => {
+        const input = {
+          ...baseTagcloudConfig,
+          metric: {
+            operation: 'count',
+            field: 'test_field',
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          },
+          styling: {
+            caption: { visible: false },
+            font_size: {
+              min: 10,
+              max: 80,
+            },
+          },
+          tag_by: {
+            operation: 'terms',
+            fields: ['category'],
+          },
+        };
+
+        const validated = tagcloudConfigSchema.validate(input);
+        expect(validated).toEqual({
+          ...defaultValues,
+          ...input,
+          tag_by: { ...input.tag_by, limit: 5 },
+        });
+      });
+
+      it('validates default font size values', () => {
+        const input = {
+          ...baseTagcloudConfig,
+          metric: {
+            operation: 'count',
+            field: 'test_field',
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          },
+          styling: {
+            caption: { visible: false },
+            font_size: {},
+          },
+          tag_by: {
+            operation: 'terms',
+            fields: ['category'],
+          },
+        };
+
+        const validated = tagcloudConfigSchema.validate(input);
+        expect(validated).toEqual({
+          ...defaultValues,
+          ...input,
+          styling: {
+            ...input.styling,
+            font_size: { min: 18, max: 72 },
+          },
+          tag_by: { ...input.tag_by, limit: 5 },
+        });
+      });
+    });
+
+    describe('validation errors', () => {
+      it('throws on missing metric operation', () => {
+        const input = {
+          ...baseTagcloudConfig,
+          metric: {
+            field: 'test_field',
+          },
+          tag_by: {
+            operation: 'terms',
+            fields: ['category'],
+          },
+        };
+
+        expect(() => tagcloudConfigSchema.validate(input)).toThrow();
+      });
+
+      it('throws on missing tag_by operation', () => {
+        const input = {
+          ...baseTagcloudConfig,
+          metric: {
+            operation: 'count',
+            field: 'test_field',
+          },
+        };
+
+        expect(() => tagcloudConfigSchema.validate(input)).toThrow();
+      });
+
+      it('throws on invalid orientation value', () => {
+        const input = {
+          ...baseTagcloudConfig,
+          metric: {
+            operation: 'count',
+            field: 'test_field',
+          },
+          styling: {
+            caption: { visible: false },
+            orientation: 'invalid',
+          },
+          tag_by: {
+            operation: 'terms',
+            fields: ['category'],
+          },
+        };
+
+        expect(() => tagcloudConfigSchema.validate(input)).toThrow();
+      });
+
+      it('throws on invalid font size minimum', () => {
+        const input = {
+          ...baseTagcloudConfig,
+          metric: {
+            operation: 'count',
+            field: 'test_field',
+          },
+          styling: {
+            caption: { visible: false },
+            font_size: {
+              min: 0,
+              max: 72,
+            },
+          },
+          tag_by: {
+            operation: 'terms',
+            fields: ['category'],
+          },
+        };
+
+        expect(() => tagcloudConfigSchema.validate(input)).toThrow();
+      });
+
+      it('throws on invalid font size maximum', () => {
+        const input = {
+          ...baseTagcloudConfig,
+          metric: {
+            operation: 'count',
+            field: 'test_field',
+          },
+          styling: {
+            font_size: {
+              min: 14,
+              max: 150,
+            },
+          },
+          tag_by: {
+            operation: 'terms',
+            fields: ['category'],
+          },
+        };
+
+        expect(() => tagcloudConfigSchema.validate(input)).toThrow();
+      });
+
+      it('throw when missing DSL and esql operation in a configuration', () => {
+        const input = {
+          type: 'tag_cloud',
+          data_source: {
+            type: 'esql',
+            query: 'FROM my-index | LIMIT 100',
+          },
+          metric: {
+            column: 'count',
+          },
+          tag_by: {
+            operation: 'terms',
+            fields: ['category'],
+            limit: 5,
+          },
+        };
+        expect(() => tagcloudConfigSchema.validate(input)).toThrow();
+      });
+
+      it('throws when tag_by color is not a palette mapping', () => {
+        const input = {
+          ...baseTagcloudConfig,
+          metric: {
+            operation: 'sum',
+            field: 'revenue',
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          },
+          styling: {
+            caption: { visible: false },
+          },
+          tag_by: {
+            operation: 'terms',
+            fields: ['category'],
+            color: {
+              type: 'static',
+              color: '#00ff00',
+            },
+          },
+        };
+
+        expect(() => tagcloudConfigSchema.validate(input)).toThrow();
+      });
+    });
+
+    describe('complex configurations', () => {
+      it('validates full tagcloud configuration', () => {
+        const input = {
+          ...baseTagcloudConfig,
+          title: 'Sales Tagcloud',
+          description: 'Sales metrics visualization by category',
+          styling: {
+            orientation: 'horizontal',
+            font_size: {
+              min: 12,
+              max: 60,
+            },
+            caption: { visible: true },
+          },
+          metric: {
+            operation: 'sum',
+            field: 'sales',
+            label: 'Sum of sales',
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          },
+          tag_by: {
+            operation: 'terms',
+            fields: ['category'],
+            color: {
+              mode: 'gradient',
+              palette: 'kibana_palette',
+              gradient: [
+                { type: 'color_code', value: '#ff0000' },
+                { type: 'color_code', value: '#00ff00' },
+              ],
+            },
+          },
+        };
+
+        const validated = tagcloudConfigSchema.validate(input);
+        expect(validated).toEqual({
+          ...defaultValues,
+          ...input,
+          tag_by: { ...input.tag_by, limit: 5 },
+        });
+      });
+
+      it('validates esql configuration', () => {
+        const input = {
+          type: 'tag_cloud',
+          data_source: {
+            type: 'esql',
+            query: 'FROM my-index | STATS count() BY category | LIMIT 100',
+          },
+          metric: {
+            column: 'count',
+            label: 'Count',
+          },
+          styling: {
+            caption: { visible: false },
+            orientation: 'vertical',
+            font_size: {
+              min: 16,
+              max: 48,
+            },
+          },
+          tag_by: {
+            column: 'category',
+            color: {
+              mode: 'gradient',
+              palette: 'kibana_palette',
+            },
+          },
+        };
+
+        const validated = tagcloudConfigSchema.validate(input);
+        expect(validated).toEqual({ ...defaultValues, ...input });
+      });
+    });
+  });
+});

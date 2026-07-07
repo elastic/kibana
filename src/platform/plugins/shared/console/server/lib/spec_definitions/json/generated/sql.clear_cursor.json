@@ -1,0 +1,22 @@
+{
+  "sql.clear_cursor": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_sql/close"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-sql-clear-cursor",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-sql-clear-cursor",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

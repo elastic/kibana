@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/core-pricing-browser",
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

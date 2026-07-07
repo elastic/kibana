@@ -14,8 +14,8 @@ import type {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/public';
-import { FormatFactory } from '@kbn/field-formats-plugin/common';
-import { RotatingNumberState } from '../common/types';
+import type { FormatFactory } from '@kbn/field-formats-plugin/common';
+import type { RotatingNumberState } from '../common/types';
 
 export const getRotatingNumberRenderer = (
   formatFactory: Promise<FormatFactory>
@@ -61,7 +61,7 @@ function RotatingNumberChart({
 
   const value =
     column && column.meta?.params
-      ? formatFactory(column.meta?.params).convert(rawValue)
+      ? formatFactory(column.meta?.params).convertToText(rawValue)
       : Number(Number(rawValue).toFixed(3)).toString();
 
   return (

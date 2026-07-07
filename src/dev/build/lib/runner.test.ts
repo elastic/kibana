@@ -47,6 +47,7 @@ const setup = async () => {
     isRelease: true,
     targetAllPlatforms: true,
     targetServerlessPlatforms: false,
+    skipServerless: false,
     versionQualifier: '-SNAPSHOT',
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,
@@ -80,7 +81,7 @@ describe('default dist', () => {
     });
 
     expect(mock).toHaveBeenCalledTimes(1);
-    expect(mock).toHaveBeenLastCalledWith(config, log, [expect.any(Build)]);
+    expect(mock).toHaveBeenLastCalledWith(config, log);
   });
 
   it('calls local tasks once, passing the default build', async () => {

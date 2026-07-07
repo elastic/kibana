@@ -1,0 +1,33 @@
+{
+  "min_version": "7.12.0",
+  "uuid": "Z32sceNySTyUXskXH4H93g",
+  "cluster_id": "pN2COvnNRlioIBagZPodZA",
+  "snapshots": [
+    {
+      "name": "my_snapshot",
+      "uuid": "9Wej6Q4gRZWSblPzNrtLOQ",
+      "state": 1,
+      "index_metadata_lookup": {
+        "oYscBShISaWpDm7n1KXkCA": "X0NlkruTSgCxTsBO_mA37g-_na_-3-1-1"
+      },
+      "version": 8100599,
+      "start_time_millis": 1739275733654,
+      "end_time_millis": 1739275734671,
+      "slm_policy": ""
+    }
+  ],
+  "indices": {
+    ".kibana-observability-ai-assistant-kb-000001": {
+      "id": "oYscBShISaWpDm7n1KXkCA",
+      "snapshots": [
+        "9Wej6Q4gRZWSblPzNrtLOQ"
+      ],
+      "shard_generations": [
+        "KxGoXW9rQlmlCfPaW8lMYA"
+      ]
+    }
+  },
+  "index_metadata_identifiers": {
+    "X0NlkruTSgCxTsBO_mA37g-_na_-3-1-1": "3cLp9JQBDFLNeO2pjufJ"
+  }
+}

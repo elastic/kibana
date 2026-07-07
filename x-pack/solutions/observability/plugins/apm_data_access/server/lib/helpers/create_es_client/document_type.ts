@@ -1,0 +1,131 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { ProcessorEvent } from '@kbn/apm-types-shared';
+import { termQuery } from '@kbn/observability-utils-common/es/queries/term_query';
+import { METRICSET_INTERVAL, METRICSET_NAME } from '@kbn/apm-types/es_fields';
+import { DATASTREAM_DATASET, type DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import type { estypes } from '@elastic/elasticsearch';
+import { ApmDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
+import { getDocumentTypeFilterForServiceDestinationStatistics } from '../spans/get_is_using_service_destination_metrics';
+import { getBackwardCompatibleDocumentTypeFilter } from '../transactions';
+
+const defaultRollupIntervals = [
+  RollupInterval.OneMinute,
+  RollupInterval.TenMinutes,
+  RollupInterval.SixtyMinutes,
+];
+
+function getDefaultFilter(metricsetName: string, rollupInterval: RollupInterval) {
+  return [
+    ...termQuery(METRICSET_NAME, metricsetName),
+    ...termQuery(METRICSET_INTERVAL, rollupInterval),
+  ];
+}
+
+const documentTypeConfigMap = {
+  [ApmDocumentType.ServiceTransactionMetric]: {
+    processorEvent: ProcessorEvent.metric,
+    metricsetName: 'service_transaction',
+    getQuery: (rollupInterval: RollupInterval) => ({
+      bool: {
+        filter: getDefaultFilter('service_transaction', rollupInterval),
+      },
+    }),
+    rollupIntervals: defaultRollupIntervals,
+  },
+  [ApmDocumentType.ServiceSummaryMetric]: {
+    processorEvent: ProcessorEvent.metric,
+    metricsetName: 'service_summary',
+    getQuery: (rollupInterval: RollupInterval) => ({
+      bool: {
+        filter: getDefaultFilter('service_summary', rollupInterval),
+      },
+    }),
+    rollupIntervals: defaultRollupIntervals,
+  },
+  [ApmDocumentType.TransactionMetric]: {
+    processorEvent: ProcessorEvent.metric,
+    metricsetName: 'transaction',
+    getQuery: (rollupInterval: RollupInterval) => ({
+      bool: {
+        filter:
+          rollupInterval === RollupInterval.OneMinute
+            ? getBackwardCompatibleDocumentTypeFilter(true)
+            : getDefaultFilter('transaction', rollupInterval),
+      },
+    }),
+    rollupIntervals: defaultRollupIntervals,
+  },
+  [ApmDocumentType.TransactionEvent]: {
+    processorEvent: ProcessorEvent.transaction,
+    rollupIntervals: [RollupInterval.None],
+  },
+  [ApmDocumentType.ServiceDestinationMetric]: {
+    processorEvent: ProcessorEvent.metric,
+    metricsetName: 'service_destination',
+    rollupIntervals: defaultRollupIntervals,
+    getQuery: (rollupInterval: RollupInterval) => ({
+      bool: {
+        filter:
+          rollupInterval === RollupInterval.OneMinute
+            ? getDocumentTypeFilterForServiceDestinationStatistics(true)
+            : getDefaultFilter('service_destination', rollupInterval),
+      },
+    }),
+  },
+  [ApmDocumentType.ErrorEvent]: {
+    processorEvent: ProcessorEvent.error,
+    rollupIntervals: [RollupInterval.None],
+  },
+  [ApmDocumentType.SpanEvent]: {
+    processorEvent: ProcessorEvent.span,
+    rollupIntervals: [RollupInterval.None],
+  },
+} as const;
+
+type DocumentTypeConfigOf<TApmDocumentType extends ApmDocumentType> =
+  (typeof documentTypeConfigMap)[TApmDocumentType];
+
+export function getConfigForDocumentType<TApmDocumentType extends ApmDocumentType>(
+  docType: TApmDocumentType
+): DocumentTypeConfigOf<TApmDocumentType> {
+  return documentTypeConfigMap[docType];
+}
+
+export type ProcessorEventOfDocumentType<TApmDocumentType extends ApmDocumentType> =
+  DocumentTypeConfigOf<TApmDocumentType>['processorEvent'];
+
+export function getProcessorEventForDocumentType<TApmDocumentType extends ApmDocumentType>(
+  documentType: TApmDocumentType
+): ProcessorEventOfDocumentType<TApmDocumentType> {
+  return getConfigForDocumentType(documentType).processorEvent;
+}
+
+export function getMetricsetNameForDocumentType(documentType: ApmDocumentType): string | undefined {
+  const config = getConfigForDocumentType(documentType);
+
+  return 'metricsetName' in config ? config.metricsetName : undefined;
+}
+
+export function getDatasetFilterForSchema(
+  documentType: ApmDocumentType,
+  rollupInterval: RollupInterval,
+  schema: DataSchemaFormat
+): estypes.QueryDslQueryContainer[] {
+  const metricsetName = getMetricsetNameForDocumentType(documentType);
+  if (!metricsetName) {
+    return [];
+  }
+
+  const datasetValue = `${schema === 'ecs' ? 'apm.' : ''}${metricsetName}.${rollupInterval}${
+    schema === 'semconv' ? '.otel' : ''
+  }`;
+
+  return termQuery(DATASTREAM_DATASET, datasetValue);
+}

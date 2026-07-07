@@ -1,0 +1,35 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import moment from 'moment';
+import { getColumnByAccessor } from '@kbn/chart-expressions-common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
+
+export function normalizeTable(data: Datatable, xAccessor?: string | ExpressionValueVisDimension) {
+  const xColumn = xAccessor && getColumnByAccessor(xAccessor, data.columns);
+  if (xColumn && xColumn?.meta.type === 'date') {
+    const xColumnId = xColumn.id;
+    if (
+      !data.rows.some((row) => typeof row[xColumnId] === 'string' && row[xColumnId] !== '__other__')
+    )
+      return data;
+    const rows = data.rows.map((row) => {
+      return typeof row[xColumnId] !== 'string'
+        ? row
+        : {
+            ...row,
+            [xColumnId]: moment(row[xColumnId]).valueOf(),
+          };
+    });
+    return { ...data, rows };
+  }
+
+  return data;
+}

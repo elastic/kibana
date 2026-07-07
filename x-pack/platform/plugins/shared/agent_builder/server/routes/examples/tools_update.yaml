@@ -1,0 +1,151 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        updateEsqlToolRequest:
+          description: "Example request to update the custom ESQL tool"
+          value:
+            description: Updated ES|QL query tool for comprehensive financial analysis with enhanced filtering
+            tags:
+              - analytics
+              - finance
+              - reporting
+            configuration:
+              query: "FROM financial_trades | WHERE execution_timestamp >= ?startTime AND symbol LIKE ?symbolPattern | STATS trade_count=COUNT(*), avg_price=AVG(execution_price), total_volume=SUM(quantity) BY symbol | SORT trade_count DESC | LIMIT ?limit"
+              params:
+                startTime:
+                  type: date
+                  description: Start time for the analysis in ISO format
+                symbolPattern:
+                  type: keyword
+                  description: Pattern to filter symbols (e.g., 'US_*' for US instruments)
+                limit:
+                  type: integer
+                  description: Maximum number of results to return
+        updateIndexSearchToolRequest:
+          description: "Example request to update the custom Search tool"
+          value:
+            description: Updated search tool for comprehensive financial data analysis, reporting, and compliance monitoring
+            tags:
+              - search
+              - finance
+              - compliance
+              - reporting
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          updateEsqlToolExample:
+            description: "Example response showing the updated ESQL tool"
+            value:
+              id: example-esql-tool
+              type: esql
+              description: Updated ES|QL query tool for comprehensive financial analysis with enhanced filtering
+              tags:
+                - analytics
+                - finance
+                - reporting
+              configuration:
+                query: "FROM financial_trades | WHERE execution_timestamp >= ?startTime AND symbol LIKE ?symbolPattern | STATS trade_count=COUNT(*), avg_price=AVG(execution_price), total_volume=SUM(quantity) BY symbol | SORT trade_count DESC | LIMIT ?limit"
+                params:
+                  startTime:
+                    type: date
+                    description: Start time for the analysis in ISO format
+                  symbolPattern:
+                    type: keyword
+                    description: Pattern to filter symbols (e.g., 'US_*' for US instruments)
+                  limit:
+                    type: integer
+                    description: Maximum number of results to return
+              readonly: false
+              schema:
+                type: object
+                properties:
+                  startTime:
+                    type: string
+                    format: date-time
+                    description: Start time for the analysis in ISO format
+                  symbolPattern:
+                    type: string
+                    description: Pattern to filter symbols (e.g., 'US_*' for US instruments)
+                  limit:
+                    type: integer
+                    description: Maximum number of results to return
+                required:
+                  - startTime
+                  - symbolPattern
+                  - limit
+                additionalProperties: false
+                description: Parameters needed to execute the enhanced query
+                "$schema": http://json-schema.org/draft-07/schema#
+          updateIndexSearchToolExample:
+            description: "Example response showing the updated Search tool"
+            value:
+              id: example-index-search-tool
+              type: index_search
+              description: Updated search tool for comprehensive financial data analysis, reporting, and compliance monitoring
+              tags:
+                - search
+                - finance
+                - compliance
+                - reporting
+              configuration:
+                pattern: financial_*
+              readonly: false
+              schema:
+                type: object
+                properties:
+                  nlQuery:
+                    type: string
+                    description: A natural language query expressing the search request
+                required:
+                  - nlQuery
+                additionalProperties: false
+                "$schema": http://json-schema.org/draft-07/schema#
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+     -X PUT "https://${KIBANA_URL}/api/agent_builder/tools/{toolId}" \
+     -H "Authorization: ApiKey ${API_KEY}" \
+     -H "kbn-xsrf: true" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "description": "Updated ES|QL query tool for analyzing financial trades with time filtering",
+       "tags": ["analytics", "finance", "updated"],
+       "configuration": {
+         "query": "FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit",
+         "params": {
+           "startTime": {
+             "type": "date",
+             "description": "Start time for the analysis in ISO format"
+           },
+           "limit": {
+             "type": "integer",
+             "description": "Maximum number of results to return"
+           }
+         }
+       }
+     }'
+- lang: Console
+  source: |
+    PUT kbn:/api/agent_builder/tools/{toolId}
+    {
+      "description": "Updated ES|QL query tool for analyzing financial trades with time filtering",
+      "tags": ["analytics", "finance", "updated"],
+      "configuration": {
+        "query": "FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit",
+        "params": {
+          "startTime": {
+            "type": "date",
+            "description": "Start time for the analysis in ISO format"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of results to return"
+          }
+        }
+      }
+    }

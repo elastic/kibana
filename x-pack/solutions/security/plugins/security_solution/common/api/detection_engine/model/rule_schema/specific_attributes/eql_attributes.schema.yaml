@@ -1,0 +1,16 @@
+openapi: 3.0.0
+info:
+  title: EQL Rule Attributes
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    EventCategoryOverride:
+      type: string
+    TimestampField:
+      type: string
+      description: Specifies the name of the event timestamp field used for sorting a sequence of events. Not to be confused with `timestamp_override`, which specifies the more general field used for querying events within a range. Defaults to the @timestamp ECS field.
+    TiebreakerField:
+      type: string
+      description: Sets a secondary field for sorting events

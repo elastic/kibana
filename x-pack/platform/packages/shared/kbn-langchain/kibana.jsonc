@@ -1,0 +1,9 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/langchain",
+  "owner": [
+    "@elastic/security-threat-hunting"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Job } from './job';
-import { Pipeline } from './pipeline';
+import type { Job } from './job';
+import type { Pipeline } from './pipeline';
 
 export type BuildState =
   | 'running'

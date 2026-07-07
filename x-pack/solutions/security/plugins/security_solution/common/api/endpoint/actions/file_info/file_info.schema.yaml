@@ -1,0 +1,89 @@
+openapi: 3.0.0
+info:
+  title: File Info Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/action/{action_id}/file/{file_id}:
+    get:
+      summary: Get file information
+      operationId: EndpointFileInfo
+      description: |
+        Get information for the specified response action file download.
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      parameters:
+        - name: action_id
+          in: path
+          required: true
+          description: The ID of the response action that generated the file.
+          schema:
+            type: string
+        - name: file_id
+          in: path
+          required: true
+          description: |
+            The file identifier is constructed in one of two ways:
+            - For Elastic Defend agents (`agentType` of `endpoint`): combine the `action_id` and `agent_id` values using a dot (`.`) separator:
+            `{file_id}` = `{action_id}.{agent_id}`
+            - For all other agent types: the `file_id` is the `agent_id` for which the response action was sent to.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                        description: The response action ID.
+                      agentId:
+                        type: string
+                        description: The agent ID that generated the file.
+                      id:
+                        type: string
+                        description: The unique file identifier.
+                      agentType:
+                        type: string
+                        description: The type of agent that generated the file.
+                      status:
+                        type: string
+                        description: The file upload status.
+                        enum:
+                          - AWAITING_UPLOAD
+                          - UPLOADING
+                          - READY
+                          - UPLOAD_ERROR
+                          - DELETED
+                      created:
+                        type: string
+                        format: date-time
+                        description: The date and time the file was created.
+                      name:
+                        type: string
+                        description: The file name.
+                      size:
+                        type: number
+                        description: The file size in bytes.
+                      mimeType:
+                        type: string
+                        description: The MIME type of the file.
+              examples:
+                fileInfo:
+                  summary: File information for a response action upload
+                  value:
+                    data:
+                      actionId: '233db9ea-6733-4849-9226-5a7039c7161d'
+                      agentId: 'ed518850-681a-4d60-bb98-e22640cae2a8'
+                      id: '233db9ea-6733-4849-9226-5a7039c7161d.ed518850-681a-4d60-bb98-e22640cae2a8'
+                      agentType: 'endpoint'
+                      status: 'READY'
+                      created: '2025-02-26T13:37:30.452Z'
+                      name: 'memory_dump.zip'
+                      size: 1048576
+                      mimeType: 'application/zip'
+

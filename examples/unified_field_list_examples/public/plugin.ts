@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import {
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
   UnifiedFieldListExamplesPluginSetup,
@@ -53,10 +53,9 @@ export class UnifiedFieldListExamplesPlugin
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/tree/main/packages/kbn-unified-field-list/README.md',
+          href: 'https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-unified-field-list/README.md',
           iconType: 'logoGithub',
           target: '_blank',
-          size: 's',
         },
       ],
     });

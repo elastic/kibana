@@ -1,0 +1,30 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { FC } from 'react';
+import React from 'react';
+import { matrixToCSS } from '../../lib/dom';
+import type { TransformMatrix3d } from '../../lib/aeroelastic';
+
+interface Props {
+  height: number;
+  transformMatrix: TransformMatrix3d;
+  width: number;
+}
+
+export const DragBoxAnnotation: FC<Props> = ({ transformMatrix, width, height }) => (
+  <div
+    className="canvasDragBoxAnnotation canvasLayoutAnnotation"
+    style={{
+      height,
+      marginLeft: -width / 2,
+      marginTop: -height / 2,
+      transform: matrixToCSS(transformMatrix),
+      width,
+    }}
+  />
+);

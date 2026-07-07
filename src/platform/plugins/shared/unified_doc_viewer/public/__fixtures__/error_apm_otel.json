@@ -1,0 +1,142 @@
+{
+  "_index": ".ds-logs-generic.otel-default-2025.07.16-000001",
+  "_id": "AZgoIYNvH1inPBf52bL8",
+  "_version": 1,
+  "_source": {
+    "@timestamp": "2025-07-20T13:59:05.484Z",
+    "attributes": {
+      "error.exception.handled": true,
+      "error.grouping_key": "ecf3bee0458f05d676289b5d35737c1a",
+      "error.grouping_name": "<_MultiThreadedRendezvous of RPC that terminated with:\n\tstatus = StatusCode.DEADLINE_EXCEEDED\n\tdetails = \"Deadline Exceeded\"\n\tdebug_error_string = \"UNKNOWN:Error received from peer  {created_time:\"2025-07-20T13:59:05.482993505+00:00\", grpc_status:4, grpc_message:\"Deadline Exceeded\"}\"\n>",
+      "error.id": "7c381c58dd43979f95ba2b114133acec",
+      "event.name": "exception",
+      "exception.escaped": "False",
+      "exception.message": "<_MultiThreadedRendezvous of RPC that terminated with:\n\tstatus = StatusCode.DEADLINE_EXCEEDED\n\tdetails = \"Deadline Exceeded\"\n\tdebug_error_string = \"UNKNOWN:Error received from peer  {created_time:\"2025-07-20T13:59:05.482993505+00:00\", grpc_status:4, grpc_message:\"Deadline Exceeded\"}\"\n>",
+      "exception.stacktrace": "Traceback (most recent call last):\n  File \"/venv/lib/python3.12/site-packages/opentelemetry/trace/__init__.py\", line 589, in use_span\n    yield span\n  File \"/venv/lib/python3.12/site-packages/opentelemetry/sdk/trace/__init__.py\", line 1105, in start_as_current_span\n    yield span\n  File \"/venv/lib/python3.12/site-packages/opentelemetry/instrumentation/grpc/_client.py\", line 217, in _intercept_server_stream\n    raise err\n  File \"/venv/lib/python3.12/site-packages/opentelemetry/instrumentation/grpc/_client.py\", line 211, in _intercept_server_stream\n    yield from invoker(request_or_iterator, metadata)\n  File \"/venv/lib/python3.12/site-packages/grpc/_channel.py\", line 543, in __next__\n    return self._next()\n           ^^^^^^^^^^^^\n  File \"/venv/lib/python3.12/site-packages/grpc/_channel.py\", line 969, in _next\n    raise self\ngrpc._channel._MultiThreadedRendezvous: <_MultiThreadedRendezvous of RPC that terminated with:\n\tstatus = StatusCode.DEADLINE_EXCEEDED\n\tdetails = \"Deadline Exceeded\"\n\tdebug_error_string = \"UNKNOWN:Error received from peer  {created_time:\"2025-07-20T13:59:05.482993505+00:00\", grpc_status:4, grpc_message:\"Deadline Exceeded\"}\"\n>\n",
+      "exception.type": "grpc._channel._MultiThreadedRendezvous",
+      "processor.event": "error",
+      "timestamp.us": 1753019945484552,
+      "transaction.sampled": true,
+      "transaction.type": "request"
+    },
+    "data_stream": {
+      "dataset": "generic.otel",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event_name": "exception",
+    "resource": {
+      "attributes": {
+        "agent.name": "opentelemetry/python",
+        "agent.version": "1.30.0",
+        "service.name": "recommendation",
+        "service.namespace": "opentelemetry-demo",
+        "service.version": "2.0.2",
+        "telemetry.auto.version": "0.51b0",
+        "telemetry.sdk.language": "python",
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.version": "1.30.0"
+      }
+    },
+    "scope": {
+      "attributes": {
+        "service.framework.name": "opentelemetry.instrumentation.grpc",
+        "service.framework.version": "0.51b0"
+      },
+      "name": "opentelemetry.instrumentation.grpc",
+      "version": "0.51b0"
+    },
+    "span_id": "8a66b534c9e90ba0",
+    "trace_id": "1762ae333fb1d59bf8045b32b4905bfd"
+  },
+  "fields": {
+    "resource.attributes.telemetry.sdk.name.text": ["opentelemetry"],
+    "attributes.exception.message": [
+      "<_MultiThreadedRendezvous of RPC that terminated with:\n\tstatus = StatusCode.DEADLINE_EXCEEDED\n\tdetails = \"Deadline Exceeded\"\n\tdebug_error_string = \"UNKNOWN:Error received from peer  {created_time:\"2025-07-20T13:59:05.482993505+00:00\", grpc_status:4, grpc_message:\"Deadline Exceeded\"}\"\n>"
+    ],
+    "scope.name": ["opentelemetry.instrumentation.grpc"],
+    "resource.attributes.telemetry.sdk.name": ["opentelemetry"],
+    "resource.attributes.agent.name.text": ["opentelemetry/python"],
+    "service.language.name": ["python"],
+    "attributes.timestamp.us": [1753019945484552],
+    "telemetry.sdk.language": ["python"],
+    "exception.message": [
+      "<_MultiThreadedRendezvous of RPC that terminated with:\n\tstatus = StatusCode.DEADLINE_EXCEEDED\n\tdetails = \"Deadline Exceeded\"\n\tdebug_error_string = \"UNKNOWN:Error received from peer  {created_time:\"2025-07-20T13:59:05.482993505+00:00\", grpc_status:4, grpc_message:\"Deadline Exceeded\"}\"\n>"
+    ],
+    "processor.event": ["error"],
+    "agent.name": ["opentelemetry/python"],
+    "attributes.event.name": ["exception"],
+    "telemetry.sdk.version": ["1.30.0"],
+    "exception.stacktrace": [
+      "Traceback (most recent call last):\n  File \"/venv/lib/python3.12/site-packages/opentelemetry/trace/__init__.py\", line 589, in use_span\n    yield span\n  File \"/venv/lib/python3.12/site-packages/opentelemetry/sdk/trace/__init__.py\", line 1105, in start_as_current_span\n    yield span\n  File \"/venv/lib/python3.12/site-packages/opentelemetry/instrumentation/grpc/_client.py\", line 217, in _intercept_server_stream\n    raise err\n  File \"/venv/lib/python3.12/site-packages/opentelemetry/instrumentation/grpc/_client.py\", line 211, in _intercept_server_stream\n    yield from invoker(request_or_iterator, metadata)\n  File \"/venv/lib/python3.12/site-packages/grpc/_channel.py\", line 543, in __next__\n    return self._next()\n           ^^^^^^^^^^^^\n  File \"/venv/lib/python3.12/site-packages/grpc/_channel.py\", line 969, in _next\n    raise self\ngrpc._channel._MultiThreadedRendezvous: <_MultiThreadedRendezvous of RPC that terminated with:\n\tstatus = StatusCode.DEADLINE_EXCEEDED\n\tdetails = \"Deadline Exceeded\"\n\tdebug_error_string = \"UNKNOWN:Error received from peer  {created_time:\"2025-07-20T13:59:05.482993505+00:00\", grpc_status:4, grpc_message:\"Deadline Exceeded\"}\"\n>\n"
+    ],
+    "attributes.error.grouping_key": ["ecf3bee0458f05d676289b5d35737c1a"],
+    "scope.attributes.service.framework.name": ["opentelemetry.instrumentation.grpc"],
+    "attributes.error.grouping_name": [
+      "<_MultiThreadedRendezvous of RPC that terminated with:\n\tstatus = StatusCode.DEADLINE_EXCEEDED\n\tdetails = \"Deadline Exceeded\"\n\tdebug_error_string = \"UNKNOWN:Error received from peer  {created_time:\"2025-07-20T13:59:05.482993505+00:00\", grpc_status:4, grpc_message:\"Deadline Exceeded\"}\"\n>"
+    ],
+    "attributes.transaction.sampled": [true],
+    "exception.escaped": ["False"],
+    "span_id": ["8a66b534c9e90ba0"],
+    "event.name": ["exception"],
+    "span.id": ["8a66b534c9e90ba0"],
+    "data_stream.type": ["logs"],
+    "resource.attributes.service.namespace": ["opentelemetry-demo"],
+    "service.namespace": ["opentelemetry-demo"],
+    "attributes.error.exception.handled": [true],
+    "timestamp.us": [1753019945484552],
+    "resource.attributes.telemetry.sdk.version": ["1.30.0"],
+    "event_name": ["exception"],
+    "agent.version": ["1.30.0"],
+    "attributes.exception.type": ["grpc._channel._MultiThreadedRendezvous"],
+    "resource.attributes.service.name.text": ["recommendation"],
+    "scope.attributes.service.framework.version": ["0.51b0"],
+    "resource.attributes.service.name": ["recommendation"],
+    "error.grouping_key": ["ecf3bee0458f05d676289b5d35737c1a"],
+    "resource.attributes.agent.version": ["1.30.0"],
+    "attributes.exception.stacktrace": [
+      "Traceback (most recent call last):\n  File \"/venv/lib/python3.12/site-packages/opentelemetry/trace/__init__.py\", line 589, in use_span\n    yield span\n  File \"/venv/lib/python3.12/site-packages/opentelemetry/sdk/trace/__init__.py\", line 1105, in start_as_current_span\n    yield span\n  File \"/venv/lib/python3.12/site-packages/opentelemetry/instrumentation/grpc/_client.py\", line 217, in _intercept_server_stream\n    raise err\n  File \"/venv/lib/python3.12/site-packages/opentelemetry/instrumentation/grpc/_client.py\", line 211, in _intercept_server_stream\n    yield from invoker(request_or_iterator, metadata)\n  File \"/venv/lib/python3.12/site-packages/grpc/_channel.py\", line 543, in __next__\n    return self._next()\n           ^^^^^^^^^^^^\n  File \"/venv/lib/python3.12/site-packages/grpc/_channel.py\", line 969, in _next\n    raise self\ngrpc._channel._MultiThreadedRendezvous: <_MultiThreadedRendezvous of RPC that terminated with:\n\tstatus = StatusCode.DEADLINE_EXCEEDED\n\tdetails = \"Deadline Exceeded\"\n\tdebug_error_string = \"UNKNOWN:Error received from peer  {created_time:\"2025-07-20T13:59:05.482993505+00:00\", grpc_status:4, grpc_message:\"Deadline Exceeded\"}\"\n>\n"
+    ],
+    "service.framework.version": ["0.51b0"],
+    "error.exception.type": ["grpc._channel._MultiThreadedRendezvous"],
+    "resource.attributes.agent.name": ["opentelemetry/python"],
+    "resource.attributes.telemetry.sdk.language": ["python"],
+    "transaction.sampled": [true],
+    "telemetry.sdk.name": ["opentelemetry"],
+    "attributes.exception.stacktrace.text": [
+      "Traceback (most recent call last):\n  File \"/venv/lib/python3.12/site-packages/opentelemetry/trace/__init__.py\", line 589, in use_span\n    yield span\n  File \"/venv/lib/python3.12/site-packages/opentelemetry/sdk/trace/__init__.py\", line 1105, in start_as_current_span\n    yield span\n  File \"/venv/lib/python3.12/site-packages/opentelemetry/instrumentation/grpc/_client.py\", line 217, in _intercept_server_stream\n    raise err\n  File \"/venv/lib/python3.12/site-packages/opentelemetry/instrumentation/grpc/_client.py\", line 211, in _intercept_server_stream\n    yield from invoker(request_or_iterator, metadata)\n  File \"/venv/lib/python3.12/site-packages/grpc/_channel.py\", line 543, in __next__\n    return self._next()\n           ^^^^^^^^^^^^\n  File \"/venv/lib/python3.12/site-packages/grpc/_channel.py\", line 969, in _next\n    raise self\ngrpc._channel._MultiThreadedRendezvous: <_MultiThreadedRendezvous of RPC that terminated with:\n\tstatus = StatusCode.DEADLINE_EXCEEDED\n\tdetails = \"Deadline Exceeded\"\n\tdebug_error_string = \"UNKNOWN:Error received from peer  {created_time:\"2025-07-20T13:59:05.482993505+00:00\", grpc_status:4, grpc_message:\"Deadline Exceeded\"}\"\n>\n"
+    ],
+    "trace.id": ["1762ae333fb1d59bf8045b32b4905bfd"],
+    "attributes.exception.escaped": ["False"],
+    "resource.attributes.service.version": ["2.0.2"],
+    "scope.attributes.service.framework.name.text": ["opentelemetry.instrumentation.grpc"],
+    "telemetry.auto.version": ["0.51b0"],
+    "attributes.error.id": ["7c381c58dd43979f95ba2b114133acec"],
+    "trace_id": ["1762ae333fb1d59bf8045b32b4905bfd"],
+    "service.name": ["recommendation"],
+    "service.framework.name": ["opentelemetry.instrumentation.grpc"],
+    "data_stream.namespace": ["default"],
+    "exception.type": ["grpc._channel._MultiThreadedRendezvous"],
+    "error.exception.handled": [true],
+    "attributes.event.name.text": ["exception"],
+    "transaction.type": ["request"],
+    "attributes.processor.event": ["error"],
+    "@timestamp": ["2025-07-20T13:59:05.484Z"],
+    "service.version": ["2.0.2"],
+    "resource.attributes.telemetry.auto.version": ["0.51b0"],
+    "data_stream.dataset": ["generic.otel"],
+    "error.id": ["7c381c58dd43979f95ba2b114133acec"],
+    "attributes.transaction.type": ["request"],
+    "error.grouping_name": [
+      "<_MultiThreadedRendezvous of RPC that terminated with:\n\tstatus = StatusCode.DEADLINE_EXCEEDED\n\tdetails = \"Deadline Exceeded\"\n\tdebug_error_string = \"UNKNOWN:Error received from peer  {created_time:\"2025-07-20T13:59:05.482993505+00:00\", grpc_status:4, grpc_message:\"Deadline Exceeded\"}\"\n>"
+    ],
+    "error.stack_trace": [
+      "Traceback (most recent call last):\n  File \"/venv/lib/python3.12/site-packages/opentelemetry/trace/__init__.py\", line 589, in use_span\n    yield span\n  File \"/venv/lib/python3.12/site-packages/opentelemetry/sdk/trace/__init__.py\", line 1105, in start_as_current_span\n    yield span\n  File \"/venv/lib/python3.12/site-packages/opentelemetry/instrumentation/grpc/_client.py\", line 217, in _intercept_server_stream\n    raise err\n  File \"/venv/lib/python3.12/site-packages/opentelemetry/instrumentation/grpc/_client.py\", line 211, in _intercept_server_stream\n    yield from invoker(request_or_iterator, metadata)\n  File \"/venv/lib/python3.12/site-packages/grpc/_channel.py\", line 543, in __next__\n    return self._next()\n           ^^^^^^^^^^^^\n  File \"/venv/lib/python3.12/site-packages/grpc/_channel.py\", line 969, in _next\n    raise self\ngrpc._channel._MultiThreadedRendezvous: <_MultiThreadedRendezvous of RPC that terminated with:\n\tstatus = StatusCode.DEADLINE_EXCEEDED\n\tdetails = \"Deadline Exceeded\"\n\tdebug_error_string = \"UNKNOWN:Error received from peer  {created_time:\"2025-07-20T13:59:05.482993505+00:00\", grpc_status:4, grpc_message:\"Deadline Exceeded\"}\"\n>\n"
+    ],
+    "scope.version": ["0.51b0"],
+    "event.dataset": ["generic.otel"],
+    "error.exception.message": [
+      "<_MultiThreadedRendezvous of RPC that terminated with:\n\tstatus = StatusCode.DEADLINE_EXCEEDED\n\tdetails = \"Deadline Exceeded\"\n\tdebug_error_string = \"UNKNOWN:Error received from peer  {created_time:\"2025-07-20T13:59:05.482993505+00:00\", grpc_status:4, grpc_message:\"Deadline Exceeded\"}\"\n>"
+    ]
+  }
+}

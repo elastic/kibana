@@ -8,13 +8,42 @@
  */
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { resolve } from 'path';
-import { scanCopy, Task, deleteAll, copyAll } from '../lib';
+import { removePackagesFromPackageMap } from '@kbn/repo-packages';
+import type { KibanaSolution } from '@kbn/projects-solutions-groups';
+import { resolve, join } from 'path';
+import { scanCopy, deleteAll, copyAll } from '../lib';
+import type { Task, Platform } from '../lib';
 import { getNodeDownloadInfo } from './nodejs';
 
 export const CreateArchivesSources: Task = {
   description: 'Creating platform-specific archive source directories',
   async run(config, log, build) {
+    async function removeSolutions(solutionsToRemove: KibanaSolution[], platform: Platform) {
+      const solutionPluginNames: string[] = [];
+
+      for (const solution of solutionsToRemove) {
+        if (!solution) continue;
+        const solutionPlugins = config.getPrivateSolutionPackagesFromRepo(solution);
+        solutionPluginNames.push(...solutionPlugins.map((p) => p.name));
+      }
+      if (!solutionPluginNames.length) return;
+
+      log.debug(
+        `Removing ${solutionPluginNames.length} unused plugins from [${platform.toString()}]`
+      );
+      await deleteAll(
+        solutionPluginNames.map((name) =>
+          build.resolvePathForPlatform(platform, join('node_modules', name))
+        ),
+        log
+      );
+
+      removePackagesFromPackageMap(
+        solutionPluginNames,
+        build.resolvePathForPlatform(platform, 'node_modules/@kbn/repo-packages/package-map.json')
+      );
+    }
+
     await Promise.all(
       config.getTargetPlatforms().map(async (platform) => {
         // copy all files from generic build source directory into platform-specific build directory
@@ -42,23 +71,26 @@ export const CreateArchivesSources: Task = {
         log.debug('Node.js copied into', platform.getNodeArch(), 'specific build directory');
 
         if (platform.isServerless()) {
+          // Remove chromium assets
           await deleteAll(
-            [
-              'x-pack/plugins/canvas/shareable_runtime/build',
-              'node_modules/@kbn/screenshotting-plugin/server/assets',
-            ].map((path) => build.resolvePathForPlatform(platform, path)),
+            ['node_modules/@kbn/screenshotting-plugin/server/assets'].map((path) =>
+              build.resolvePathForPlatform(platform, path)
+            ),
             log
           );
+
+          // Copy all serverless config files into the generic serverless build.
           await copyAll(
             resolve(REPO_ROOT, 'config'),
             build.resolvePathForPlatform(platform, 'config'),
             {
-              select: ['serverless.yml', 'serverless.{es,oblt,security}.yml'],
+              select: ['serverless*.yml'],
             }
           );
-          log.debug(
-            `Serverless adjustments made in serverless-${platform.getNodeArch()} specific build directory`
-          );
+        } else if (config.isRelease) {
+          // For stateful release builds, remove the workplaceai solution.
+          // Snapshot builds support all solutions to faciliate functional testing
+          await removeSolutions(['workplaceai'], platform);
         }
       })
     );

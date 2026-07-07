@@ -1,0 +1,7 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/response-ops-alerts-fields-browser",
+  "owner": "@elastic/response-ops",
+  "group": "platform",
+  "visibility": "shared"
+}

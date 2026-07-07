@@ -27,6 +27,12 @@ export const defineReduxStreamRoute = (router: IRouter, logger: Logger) => {
     .post({
       path: RESPONSE_STREAM_API_ENDPOINT.REDUX_STREAM,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out of authorization as it is a developer example endpoint.',
+        },
+      },
     })
     .addVersion(
       {

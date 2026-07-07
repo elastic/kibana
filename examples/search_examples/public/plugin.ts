@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import {
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
   SearchExamplesPluginSetup,
@@ -54,10 +54,9 @@ export class SearchExamplesPlugin
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/tree/main/src/plugins/data/README.mdx',
+          href: 'https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/data/README.mdx',
           iconType: 'logoGithub',
           target: '_blank',
-          size: 's',
         },
       ],
     });

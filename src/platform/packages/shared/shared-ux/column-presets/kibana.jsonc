@@ -1,0 +1,10 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/shared-ux-column-presets",
+  "owner": [
+    "@elastic/eui",
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}
