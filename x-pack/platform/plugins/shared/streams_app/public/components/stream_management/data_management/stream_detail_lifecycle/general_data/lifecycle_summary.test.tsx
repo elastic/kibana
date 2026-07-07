@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { I18nProvider } from '@kbn/i18n-react';
 import { LifecycleSummary } from './lifecycle_summary';
 import { Streams, type IngestStreamLifecycle } from '@kbn/streams-schema';
 import { LifecycleAfterSaveProvider } from '../common/hooks/lifecycle_after_save';
@@ -35,6 +36,16 @@ const mockKibana = {
     start: {
       streams: {
         streamsRepositoryClient: mockStreamsRepositoryClient,
+      },
+      share: {
+        url: {
+          locators: {
+            get: () => ({
+              getRedirectUrl: ({ policyName }: { policyName: string }) =>
+                `/app/management/data/index_lifecycle_management/policies/edit/${policyName}`,
+            }),
+          },
+        },
       },
     },
   },
@@ -72,9 +83,11 @@ jest.mock('../hooks/use_ilm_phases_color_and_description', () => ({
 describe('LifecycleSummary', () => {
   const renderWithSync = (ui: React.ReactElement) => {
     return render(
-      <LifecycleAfterSaveProvider>
-        <LifecyclePreviewProvider>{ui}</LifecyclePreviewProvider>
-      </LifecycleAfterSaveProvider>
+      <I18nProvider>
+        <LifecycleAfterSaveProvider>
+          <LifecyclePreviewProvider>{ui}</LifecyclePreviewProvider>
+        </LifecycleAfterSaveProvider>
+      </I18nProvider>
     );
   };
 
@@ -99,6 +112,23 @@ describe('LifecycleSummary', () => {
           data_retention: dataRetention,
           downsample,
         },
+      },
+    } as unknown as Streams.ingest.all.GetResponse);
+
+  const createFrozenDslDefinition = (frozenAfter: string, dataRetention?: string) =>
+    ({
+      stream: {
+        name: 'test-stream',
+        ingest: {
+          lifecycle: { dsl: {} },
+          processing: { steps: [], updated_at: '2023-10-31' },
+        },
+      },
+      privileges: {
+        lifecycle: true,
+      },
+      effective_lifecycle: {
+        dsl: { frozen_after: frozenAfter, data_retention: dataRetention },
       },
     } as unknown as Streams.ingest.all.GetResponse);
 
@@ -217,15 +247,16 @@ describe('LifecycleSummary', () => {
       );
     });
 
-    it('should disable "Add delete phase" when the DSL downsample flyout is open', async () => {
+    it('should disable "Add data phase" when the DSL downsample flyout is open', async () => {
       const definition = createDslDefinition(undefined, [{ after: '1d', fixed_interval: '1d' }]);
 
       renderWithSync(
-        <LifecycleSummary definition={definition} isMetricsStream onAddDeletePhase={jest.fn()} />
+        <LifecycleSummary definition={definition} isMetricsStream onAddDataPhase={jest.fn()} />
       );
 
-      const addDeletePhaseButton = screen.getByTestId('dataLifecycleSummaryAddDeletePhase');
-      expect(addDeletePhaseButton).toBeEnabled();
+      // On stateful DLM the "Add data phase" popover replaces the dedicated "Add delete phase" button.
+      const addDataPhaseButton = screen.getByTestId('dataLifecycleSummaryAddDataPhaseButton');
+      expect(addDataPhaseButton).toBeEnabled();
 
       fireEvent.click(screen.getByTestId('downsamplingPhase-1d-label'));
       await waitFor(() =>
@@ -237,10 +268,64 @@ describe('LifecycleSummary', () => {
         expect(screen.getByTestId('streamsEditDslStepsFlyoutFromSummary')).toBeInTheDocument()
       );
 
-      await waitFor(() => expect(addDeletePhaseButton).toBeDisabled());
+      // Re-query: a disabled IlmPhaseSelect button is re-wrapped in a tooltip, replacing the node.
+      await waitFor(() =>
+        expect(screen.getByTestId('dataLifecycleSummaryAddDataPhaseButton')).toBeDisabled()
+      );
     });
 
-    it('should disable "Add delete phase" and show tooltip when delete phase already exists', async () => {
+    it('keeps "Add data phase" enabled when only a frozen phase is configured', () => {
+      const definition = createFrozenDslDefinition('10d');
+
+      renderWithSync(
+        <LifecycleSummary
+          definition={definition}
+          isMetricsStream={false}
+          onAddDataPhase={jest.fn()}
+        />
+      );
+
+      // Delete is still addable, so the popover stays enabled.
+      expect(screen.getByTestId('dataLifecycleSummaryAddDataPhaseButton')).toBeEnabled();
+    });
+
+    it('disables "Add data phase" when both frozen and delete phases are configured', () => {
+      const definition = createFrozenDslDefinition('10d', '30d');
+
+      renderWithSync(
+        <LifecycleSummary
+          definition={definition}
+          isMetricsStream={false}
+          onAddDataPhase={jest.fn()}
+        />
+      );
+
+      expect(screen.getByTestId('dataLifecycleSummaryAddDataPhaseButton')).toBeDisabled();
+    });
+
+    it('shows edit and remove actions in the frozen phase popover', async () => {
+      const definition = createFrozenDslDefinition('10d');
+
+      renderWithSync(
+        <LifecycleSummary
+          definition={definition}
+          isMetricsStream={false}
+          onAddDataPhase={jest.fn()}
+          refreshDefinition={jest.fn()}
+        />
+      );
+
+      // The frozen phase's timeline label is the localized, capitalized "Frozen".
+      fireEvent.click(screen.getByTestId('lifecyclePhase-Frozen-button'));
+
+      expect(await screen.findByTestId('lifecyclePhase-Frozen-editButton')).toBeInTheDocument();
+      expect(screen.getByTestId('lifecyclePhase-Frozen-removeButton')).toBeInTheDocument();
+    });
+
+    it('should disable "Add delete phase" and show tooltip when delete phase already exists (serverless)', async () => {
+      // The dedicated "Add delete phase" button only exists in serverless (stateful uses the
+      // "Add data phase" popover instead).
+      mockKibana.isServerless = true;
       const definition = createDslDefinition('30d');
 
       renderWithSync(
@@ -263,6 +348,16 @@ describe('LifecycleSummary', () => {
       const definition = createDslDefinition('60d', manySteps);
 
       renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
+
+      expect(screen.getByTestId('dataLifecycleSummaryAddDownsampleStep')).toBeDisabled();
+    });
+
+    it('should disable "Add downsample step" button while the data phases flyout is open', () => {
+      const definition = createDslDefinition('60d', [{ after: '10d', fixed_interval: '1h' }]);
+
+      renderWithSync(
+        <LifecycleSummary definition={definition} isMetricsStream isDataPhaseFlyoutOpen />
+      );
 
       expect(screen.getByTestId('dataLifecycleSummaryAddDownsampleStep')).toBeDisabled();
     });

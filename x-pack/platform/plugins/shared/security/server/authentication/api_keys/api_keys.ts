@@ -361,8 +361,11 @@ export class APIKeys implements NativeAPIKeysType {
         body: {
           api_key: authorizationHeader.credentials,
           name: cloneParams.name,
-          expiration: null,
+          // `metadata` MUST come before `expiration`. ES's RestCloneApiKeyAction
+          // over-advances the parser on `expiration: null`, silently dropping the next field.
+          // Remove this ordering constraint once the ES fix ships: https://github.com/elastic/elasticsearch/pull/152874
           ...(cloneParams.metadata ? { metadata: cloneParams.metadata } : {}),
+          expiration: null,
         },
       });
 
