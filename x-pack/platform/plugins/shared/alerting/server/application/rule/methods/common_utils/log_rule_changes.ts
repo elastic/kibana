@@ -19,6 +19,13 @@ import type { RuleDomain } from '../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { transformRuleAttributesToRuleDomain } from '../../transforms';
 
+// Owned by the Security Solution plugin (`ENABLE_RULE_CHANGES_HISTORY_SETTING` in
+// `x-pack/solutions/security/plugins/security_solution/common/constants.ts`). Duplicated here
+// as a raw string because "alerting" is a platform/shared plugin and cannot depend on a
+// solution-private plugin. Only applies to rules whose `ruleType.solution === 'security'`.
+const SECURITY_SOLUTION_ENABLE_RULE_CHANGES_HISTORY_SETTING =
+  'securitySolution:enableRuleChangesHistory';
+
 interface EncryptedRuleFields {
   apiKey?: string | null;
   uiamApiKey?: string | null;
@@ -64,7 +71,15 @@ interface LogRuleChanges {
 export async function logRuleChanges({
   ruleSOs,
   encryptedFieldsMap,
-  rulesClientContext: { changeTrackingService, ruleTypeRegistry, logger, spaceId, isSystemAction },
+  rulesClientContext: {
+    changeTrackingService,
+    ruleTypeRegistry,
+    logger,
+    spaceId,
+    isSystemAction,
+    uiSettings,
+    unsecuredSavedObjectsClient,
+  },
   changesContext: { action, timestamp, metadata, refresh },
 }: LogRuleChanges): Promise<void> {
   if (!changeTrackingService) {
@@ -78,6 +93,9 @@ export async function logRuleChanges({
   // Fallback timestamp is used when both timestamp and ruleSO.updated_at are missing.
   // In practice it'll be almost never used.
   const fallbackChangeTimestamp = new Date().toISOString();
+  // Lazily fetched and memoized: at most one ui settings read per logRuleChanges call,
+  // regardless of how many security solution rules are in effectiveRuleSOs.
+  let securityRuleChangesHistoryEnabled: boolean | undefined;
 
   for (const ruleSO of effectiveRuleSOs) {
     if (ruleSO.error) {
@@ -94,6 +112,28 @@ export async function logRuleChanges({
     //
     if (!ruleType?.trackChanges) {
       continue;
+    }
+
+    // Security Solution additionally gates rule changes history per-space via its
+    // "Enable rule changes history" advanced setting, on top of the static config flag above.
+    if (ruleType.solution === 'security') {
+      if (securityRuleChangesHistoryEnabled === undefined) {
+        try {
+          const uiSettingsClient = uiSettings.asScopedToClient(unsecuredSavedObjectsClient);
+          securityRuleChangesHistoryEnabled = await uiSettingsClient.get<boolean>(
+            SECURITY_SOLUTION_ENABLE_RULE_CHANGES_HISTORY_SETTING
+          );
+        } catch (e) {
+          logger.warn(
+            `Unable to read "${SECURITY_SOLUTION_ENABLE_RULE_CHANGES_HISTORY_SETTING}" advanced setting: ${e}`
+          );
+          securityRuleChangesHistoryEnabled = false;
+        }
+      }
+
+      if (!securityRuleChangesHistoryEnabled) {
+        continue;
+      }
     }
 
     try {

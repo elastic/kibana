@@ -35,6 +35,24 @@ jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions'
 );
 jest.mock('../../../../common/hooks/is_in_security_app');
+// The button forwards field-browser data (derived from the hit) to the action hooks. Stub the
+// derivation with the flattened-based conversion so these fixtures/expectations stay stable; the
+// real `getTimelineEventsDetailsFromRecord` is covered by its own test.
+jest.mock('../utils/get_timeline_events_details_from_record', () => ({
+  getTimelineEventsDetailsFromRecord: jest.fn((hit: { flattened?: Record<string, unknown> }) =>
+    Object.entries(hit.flattened ?? {}).map(([field, value]) => ({
+      field,
+      values: Array.isArray(value)
+        ? value.map(String)
+        : value != null
+        ? [String(value)]
+        : undefined,
+      originalValue: value,
+      isObjectArray: Array.isArray(value) && value.length > 0 && typeof value[0] === 'object',
+      category: field.split('.')[0],
+    }))
+  ),
+}));
 jest.mock(
   '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action',
   () => ({
