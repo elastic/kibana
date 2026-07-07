@@ -157,7 +157,7 @@ And you should **not**:
           proposalId,
           workflowId: sourceData?.workflowId ?? workflowId,
           name: workflow.name,
-          description: query,
+          description: `Diff for workflow '${workflow.name}'`,
           toolId: platformCoreTools.generateWorkflow,
         });
 
