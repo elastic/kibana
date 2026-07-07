@@ -100,6 +100,7 @@ export class KnowledgeIndicatorClient {
       minConfidence?: number;
       limit?: number;
       includeExcluded?: boolean;
+      includeExpired?: boolean;
       sort?: ComposerSortShorthand[];
     }
   ): Promise<{ hits: Feature[] }> {
@@ -150,6 +151,10 @@ export class KnowledgeIndicatorClient {
 
   findFeaturesByIds(ids: string[]): Promise<Array<{ id: string; stream_name: string }>> {
     return this.reader.findFeaturesByIds(ids);
+  }
+
+  getStreamNamesWithKnowledgeIndicators(): Promise<string[]> {
+    return this.reader.getStreamNamesWithKnowledgeIndicators();
   }
 
   findIndicators(

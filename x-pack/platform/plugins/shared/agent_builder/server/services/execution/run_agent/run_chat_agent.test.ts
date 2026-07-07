@@ -144,4 +144,51 @@ describe('runDefaultAgentMode', () => {
       { dynamic: true }
     );
   });
+
+  it('configures the tool-result length guardrail budget on the toolManager', async () => {
+    const context = createAgentHandlerContextMock();
+
+    jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+      connector: { name: 'test-connector' },
+      chatModel: {} as any,
+    } as any);
+
+    context.toolManager.getToolIdMapping.mockReturnValue(new Map());
+    context.toolManager.getDynamicToolIds.mockReturnValue([]);
+
+    getPendingRoundMock.mockReturnValue(undefined);
+
+    selectToolsMock.mockResolvedValue({
+      staticTools: [],
+      dynamicTools: [],
+    } as any);
+
+    prepareConversationMock.mockResolvedValue({
+      previousRounds: [],
+      nextInput: { message: 'hello', attachments: [] },
+      attachments: [],
+      attachmentTypes: [],
+      attachmentStateManager: context.attachmentStateManager,
+    } as any);
+
+    extractRoundMock.mockResolvedValue(
+      createRound({
+        id: 'round-1',
+      })
+    );
+
+    createAgentGraphMock.mockReturnValue({
+      streamEvents: jest.fn(() => []),
+    } as any);
+
+    await runDefaultAgentMode(
+      {
+        nextInput: { message: 'hello' },
+        agentConfiguration: { tools: [] } as any,
+      },
+      context
+    );
+
+    expect(context.toolManager.setMaxToolResultTokens).toHaveBeenCalledWith(20_000);
+  });
 });

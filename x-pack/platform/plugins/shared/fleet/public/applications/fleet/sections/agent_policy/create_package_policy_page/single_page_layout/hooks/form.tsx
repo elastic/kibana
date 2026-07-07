@@ -150,13 +150,20 @@ export const createAgentPolicyIfNeeded = async ({
 
 async function savePackagePolicy(
   pkgPolicy: CreatePackagePolicyRequest['body'],
-  varGroups?: RegistryVarGroup[]
+  varGroups?: RegistryVarGroup[],
+  packageInfo?: PackageInfo
 ): Promise<SavedPolicyResult> {
   const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(pkgPolicy);
 
   // If agentless use agentless policies API
   if (policy.supports_agentless) {
-    const agentlessRequestBody = toNewAgentlessPolicy(pkgPolicy as NewPackagePolicy, varGroups);
+    // Pass `packageInfo` so the create write applies the same template-aware input allow-check as the
+    // edit read path (`agentlessPolicyToPackagePolicy`), keeping create → GET → form → PUT idempotent.
+    const agentlessRequestBody = toNewAgentlessPolicy(
+      pkgPolicy as NewPackagePolicy,
+      varGroups,
+      packageInfo
+    );
     const { item } = await sendCreateAgentlessPolicy(agentlessRequestBody);
     return { type: 'agentless', policy: item };
   }
@@ -411,7 +418,9 @@ export function useOnSubmit({
               'overrides',
               'supports_agentless',
               'supports_cloud_connector',
-              'additional_datastreams_permissions'
+              'additional_datastreams_permissions',
+              'global_data_tags',
+              'var_group_selections'
             )
           );
         }
@@ -706,7 +715,8 @@ export function useOnSubmit({
             force: forceInstall,
             create_dataset_templates: createDatasetTemplates,
           },
-          varGroups
+          varGroups,
+          packageInfo
         );
 
         if (savedPolicyResult.policy.package) {
