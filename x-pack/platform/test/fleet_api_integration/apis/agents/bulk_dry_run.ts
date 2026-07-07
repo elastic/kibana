@@ -327,8 +327,5 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    });
-  });
-}
   });
 }
