@@ -59,6 +59,7 @@ jest.mock('react-router-dom', () => ({
 
 const mockUseGetRuleTypesPermissions = jest.fn(() => ({
   authorizedToReadRuleType: (): boolean => true,
+  authorizedToReadRuleForAlert: (): boolean => true,
 }));
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
   ...jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks'),
@@ -134,7 +135,10 @@ describe('AlertsTableExpandedAlertView', () => {
   const onExpandedAlertIndexChangeMock = jest.fn();
 
   beforeEach(() => {
-    mockUseGetRuleTypesPermissions.mockReturnValue({ authorizedToReadRuleType: () => true });
+    mockUseGetRuleTypesPermissions.mockReturnValue({
+      authorizedToReadRuleType: () => true,
+      authorizedToReadRuleForAlert: () => true,
+    });
   });
   const propsMock = {
     pageIndex: 0,
@@ -179,7 +183,10 @@ describe('AlertsTableExpandedAlertView', () => {
   });
 
   it('should NOT render View rule detail link when not authorized to read the rule type', async () => {
-    mockUseGetRuleTypesPermissions.mockReturnValue({ authorizedToReadRuleType: () => false });
+    mockUseGetRuleTypesPermissions.mockReturnValue({
+      authorizedToReadRuleType: () => false,
+      authorizedToReadRuleForAlert: () => false,
+    });
     render(
       <AlertsTableContextProvider value={alertsTableContextMock}>
         <AlertsTableExpandedAlertView {...propsMock} expandedAlertIndex={2} />

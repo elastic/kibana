@@ -586,6 +586,7 @@ describe('Data Streams tab', () => {
             delete_index: true,
             manage_data_stream_lifecycle: true,
             read_failure_store: true,
+            manage: true,
           },
         });
         const ds2 = createDataStreamPayload({
@@ -594,6 +595,7 @@ describe('Data Streams tab', () => {
             delete_index: true,
             manage_data_stream_lifecycle: true,
             read_failure_store: true,
+            manage: true,
           },
         });
 
@@ -1761,6 +1763,7 @@ describe('Data Streams tab', () => {
         delete_index: true,
         manage_data_stream_lifecycle: true,
         read_failure_store: true,
+        manage: true,
       },
     });
     const dataStreamNoDelete = createDataStreamPayload({
@@ -1769,6 +1772,7 @@ describe('Data Streams tab', () => {
         delete_index: false,
         manage_data_stream_lifecycle: true,
         read_failure_store: true,
+        manage: true,
       },
     });
     const dataStreamNoEditRetention = createDataStreamPayload({
@@ -1777,6 +1781,7 @@ describe('Data Streams tab', () => {
         delete_index: true,
         manage_data_stream_lifecycle: false,
         read_failure_store: true,
+        manage: false,
       },
     });
     const dataStreamNoPermissions = createDataStreamPayload({
@@ -1785,6 +1790,7 @@ describe('Data Streams tab', () => {
         delete_index: false,
         manage_data_stream_lifecycle: false,
         read_failure_store: false,
+        manage: false,
       },
     });
 
