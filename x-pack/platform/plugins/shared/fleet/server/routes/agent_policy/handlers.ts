@@ -433,9 +433,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       appContextService.getExperimentalFeatures().disableAgentlessLegacyAPI &&
       request.body.supports_agentless
     ) {
-      throw new FleetError(
-        'To create agentless agent policies, use the Fleet agentless policies API.'
-      );
+      throw new FleetError('To create agentless agent policies, use the agentless policies API.');
     }
 
     const agentPolicy = await createAgentPolicyWithPackages({
@@ -643,9 +641,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       false
     );
     if (existingAgentPolicy?.supports_agentless || data.supports_agentless) {
-      throw new FleetError(
-        'To update agentless agent policies, use the Fleet agentless policies API.'
-      );
+      throw new FleetError('To update agentless agent policies, use the agentless policies API.');
     }
 
     const agentPolicy = await agentPolicyService.update(
@@ -701,6 +697,20 @@ export const copyAgentPolicyHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   try {
+    if (appContextService.getExperimentalFeatures().disableAgentlessLegacyAPI) {
+      const sourceAgentPolicy = await agentPolicyService.get(
+        soClient,
+        request.params.agentPolicyId,
+        false
+      );
+      // A missing source falls through to `copy`, which reports the not-found error.
+      if (sourceAgentPolicy?.supports_agentless) {
+        throw new FleetError(
+          'Agentless agent policies cannot be copied. To create agentless deployments, use the agentless policies API.'
+        );
+      }
+    }
+
     const agentPolicy = await agentPolicyService.copy(
       soClient,
       esClient,
