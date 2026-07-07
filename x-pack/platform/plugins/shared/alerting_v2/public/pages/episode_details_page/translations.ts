@@ -29,6 +29,13 @@ export const METADATA_TAB_TITLE = i18n.translate(
   }
 );
 
+export const TIMELINE_TAB_TITLE = i18n.translate(
+  'xpack.alertingV2.episodeDetails.mainTabTimeline',
+  {
+    defaultMessage: 'Timeline',
+  }
+);
+
 /** --- Duration (sidebar) --- */
 export const FORMAT_EPISODE_DURATION_MS = (ms: number): string => {
   if (ms < 1000) {
@@ -64,18 +71,6 @@ export const FORMAT_EPISODE_DURATION_MS = (ms: number): string => {
     values: { seconds },
   });
 };
-
-/** --- Rule kind --- */
-export const RULE_KIND_SIGNAL = i18n.translate('xpack.alertingV2.episodeDetails.ruleKindSignal', {
-  defaultMessage: 'Signal',
-});
-
-export const RULE_KIND_ALERTING = i18n.translate(
-  'xpack.alertingV2.episodeDetails.ruleKindAlerting',
-  {
-    defaultMessage: 'Alert',
-  }
-);
 
 /** --- Error state --- */
 export const EPISODE_NOT_FOUND_TITLE = i18n.translate(

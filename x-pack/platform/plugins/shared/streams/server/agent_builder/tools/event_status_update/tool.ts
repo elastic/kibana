@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { platformStreamsSigEventsTools, ToolType } from '@kbn/agent-builder-common';
+import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { significantEventStatusSchema } from '@kbn/streams-schema';
+import { significantEventStatusSchema } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
@@ -20,7 +20,7 @@ import type { StreamsServer } from '../../../types';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { updateEventStatusToolHandler } from './handler';
 
-export const STREAMS_EVENT_STATUS_UPDATE_TOOL_ID = platformStreamsSigEventsTools.updateEventStatus;
+export const STREAMS_EVENT_STATUS_UPDATE_TOOL_ID = platformSignificantEventsTools.updateEventStatus;
 
 const eventStatusUpdateSchema = z.object({
   event_id: z.string().describe(

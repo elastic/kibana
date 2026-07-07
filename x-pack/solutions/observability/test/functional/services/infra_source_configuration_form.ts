@@ -14,6 +14,7 @@ export function InfraSourceConfigurationFormProvider({
 }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const saveButtonSelector = 'infraBottomBarActionsButton';
 
   return {
     /**
@@ -33,15 +34,20 @@ export function InfraSourceConfigurationFormProvider({
      * Infra Metrics bottom actions bar
      */
     async getSaveButton(): Promise<WebElementWrapper> {
-      return await testSubjects.find('infraBottomBarActionsButton');
+      return await testSubjects.find(saveButtonSelector);
     },
 
     async saveInfraSettings() {
       await (await this.getSaveButton()).click();
 
       await retry.try(async () => {
-        const element = await this.getSaveButton();
-        return !(await element.isDisplayed());
+        // The bottom bar (and its save button) unmounts once the form is no
+        // longer dirty, which only happens after the source is persisted.
+        // Throw while it is still present so `retry.try` actually waits for the
+        // save to round-trip instead of resolving on the first check.
+        if (await testSubjects.exists(saveButtonSelector)) {
+          throw new Error('Save button still present — settings not yet persisted');
+        }
       });
     },
 

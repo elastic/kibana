@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { platformStreamsSigEventsTools, ToolType } from '@kbn/agent-builder-common';
+import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { significantEventStatusSchema } from '@kbn/streams-schema';
+import { significantEventStatusSchema } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { GetScopedClients } from '../../../routes/types';
@@ -19,7 +19,7 @@ import type { StreamsServer } from '../../../types';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { searchEventsToolHandler } from './handler';
 
-export const STREAMS_SEARCH_EVENTS_TOOL_ID = platformStreamsSigEventsTools.searchEvent;
+export const STREAMS_SEARCH_EVENTS_TOOL_ID = platformSignificantEventsTools.searchEvent;
 
 const searchEventsSchema = z.object({
   query: z
