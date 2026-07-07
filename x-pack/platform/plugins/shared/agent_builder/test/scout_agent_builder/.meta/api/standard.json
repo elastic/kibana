@@ -1,5 +1,5 @@
 {
-  "sha1": "32c50285e1c777a93b96d8a9c5bedac75f68c7fd",
+  "sha1": "b799de0140d86561d2caf13781bff24869f5913e",
   "tests": [
     {
       "id": "d18f81a84aa5c84-01def2558f31c21",
@@ -452,6 +452,34 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/attachments_api.spec.ts",
         "line": 146,
+        "column": 12
+      }
+    },
+    {
+      "id": "5e1819ccd21625a-15831800091ed82",
+      "title": "Agent Builder — conversations access-control API public conversations require conversation access and agent use access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
+        "line": 407,
+        "column": 12
+      }
+    },
+    {
+      "id": "5e1819ccd21625a-38ea603d84caa81",
+      "title": "Agent Builder — conversations access-control API route-level privilege remains distinct from resource access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
+        "line": 712,
         "column": 12
       }
     },
@@ -1173,6 +1201,22 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_tool_calling_api.spec.ts",
         "line": 144,
         "column": 14
+      }
+    },
+    {
+      "id": "e4d863c37e81c3f-1121048c07532a3",
+      "title": "Agent Builder — tracing snapshot trace documents match snapshot after conversation with tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_tracing_snapshot_api.spec.ts",
+        "line": 190,
+        "column": 12
       }
     },
     {
