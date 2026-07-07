@@ -15,6 +15,7 @@ import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 import {
   EXCLUDED_FROM_PACKAGE_POLICY_COPY_PACKAGES,
   FLEET_CONNECTORS_PACKAGE,
+  IS_AGENTLESS_QUERY_PARAM,
 } from '../../common/constants';
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 import {
@@ -25,7 +26,7 @@ import {
   useStartServices,
   useUpgradeReviewActions,
 } from '../hooks';
-import { policyHasFleetServer } from '../services';
+import { isAgentlessPoliciesUIEnabled, policyHasFleetServer } from '../services';
 
 import { scheduleAutoOpenModal } from '../applications/integrations/sections/epm/screens/installed_integrations/components/pending_upgrade_review_status';
 
@@ -71,11 +72,15 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const isAgentlessPolicy = packagePolicy.supports_agentless;
 
   // For agentless policies the agentPolicies prop may be empty (the parent hook doesn't always
-  // fetch them). Fetch the agent policy directly so we can include cluster_id in the support bundle.
+  // fetch them) or a minimal synthesized policy without `agentless` details (the agentless
+  // deployments table). Fetch the agent policy directly so we can include cluster_id in the
+  // support bundle.
   const agentlessPolicyId =
-    isAgentlessPolicy && !agentPolicy ? packagePolicy.policy_ids[0] : undefined;
+    isAgentlessPolicy && !agentPolicy?.agentless ? packagePolicy.policy_ids[0] : undefined;
   const { data: agentlessPolicyData } = useGetOneAgentPolicy(agentlessPolicyId);
-  const effectiveAgentPolicy = agentPolicy ?? agentlessPolicyData?.item;
+  const effectiveAgentPolicy = agentPolicy?.agentless
+    ? agentPolicy
+    : agentlessPolicyData?.item ?? agentPolicy;
 
   const supportBundleText = useMemo(() => {
     if (!isAgentlessPolicy) return '';
@@ -122,6 +127,54 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     .map((input) => input?.vars?.connector_id?.value)
     .find(Boolean);
 
+  // Build the edit link query string once. For agentless policies we append an
+  // isAgentless hint so the edit page reads/writes through the agentless API
+  // instead of the package-policy API (detect-before-read). Orphaned (non-agentless)
+  // policies keep editing a package policy, so the hint is only added when agentless.
+  // The hint is suppressed when the agentless policies UI kill switch is off, so links
+  // route through the legacy APIs (the pages also ignore the hint when the switch is off).
+  const emitAgentlessHint = isAgentlessPolicy && isAgentlessPoliciesUIEnabled();
+  const editQueryParams = new URLSearchParams();
+  if (from) {
+    editQueryParams.set('from', from);
+  }
+  if (emitAgentlessHint) {
+    editQueryParams.set(IS_AGENTLESS_QUERY_PARAM, 'true');
+  }
+  const editQueryString = editQueryParams.toString();
+  const editHref = `${
+    isOrphanedPolicy || isAgentlessPolicy
+      ? getHref('integration_policy_edit', {
+          packagePolicyId: packagePolicy.id,
+        })
+      : getHref('edit_integration', {
+          policyId: agentPolicy?.id ?? '',
+          packagePolicyId: packagePolicy.id,
+        })
+  }${editQueryString ? `?${editQueryString}` : ''}`;
+
+  // The copy flow reuses the create page. Agentless copies must read/hydrate through the
+  // agentless API (detect-before-read), so carry the same isAgentless hint on the copy link.
+  const copyQueryParams = new URLSearchParams();
+  if (from) {
+    copyQueryParams.set('from', from);
+  }
+  if (emitAgentlessHint) {
+    copyQueryParams.set(IS_AGENTLESS_QUERY_PARAM, 'true');
+  }
+  const copyQueryString = copyQueryParams.toString();
+  const copyHref = `${
+    isOrphanedPolicy || isAgentlessPolicy
+      ? getHref('integration_policy_copy', {
+          policyId: agentPolicy?.id || '',
+          packagePolicyId: packagePolicy.id,
+        })
+      : getHref('copy_integration', {
+          policyId: agentPolicy?.id || '',
+          packagePolicyId: packagePolicy.id,
+        })
+  }${copyQueryString ? `?${copyQueryString}` : ''}`;
+
   const menuItems = [
     // FIXME: implement View package policy action
     // <EuiContextMenuItem
@@ -158,16 +211,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       data-test-subj="PackagePolicyActionsEditItem"
       disabled={!canWriteIntegrationPolicies || (!agentPolicy && !isOrphanedPolicy)}
       icon="pencil"
-      href={`${
-        isOrphanedPolicy || isAgentlessPolicy
-          ? getHref('integration_policy_edit', {
-              packagePolicyId: packagePolicy.id,
-            })
-          : getHref('edit_integration', {
-              policyId: agentPolicy?.id ?? '',
-              packagePolicyId: packagePolicy.id,
-            })
-      }${from ? `?from=${from}` : ''}`}
+      href={editHref}
       key="packagePolicyEdit"
     >
       <FormattedMessage
@@ -229,17 +273,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
           />
         ) : undefined
       }
-      href={
-        isOrphanedPolicy || isAgentlessPolicy
-          ? getHref('integration_policy_copy', {
-              policyId: agentPolicy?.id || '',
-              packagePolicyId: packagePolicy.id,
-            }) + (from ? `?from=${from}` : '')
-          : getHref('copy_integration', {
-              policyId: agentPolicy?.id || '',
-              packagePolicyId: packagePolicy.id,
-            }) + (from ? `?from=${from}` : '')
-      }
+      href={copyHref}
       data-test-subj="PackagePolicyActionsCopyItem"
       icon="copy"
       key="packagePolicyCopy"

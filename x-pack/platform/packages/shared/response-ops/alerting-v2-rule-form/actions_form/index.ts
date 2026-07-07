@@ -18,6 +18,12 @@ export {
 } from './helpers/rule_scoped_action_policies';
 export type { RuleScopedSimpleActionPolicy } from './helpers/rule_scoped_action_policies';
 export {
+  isExplicitlyLinkedToRule,
+  isRuleScopedCatchAllMatcher,
+  summarizeExplicitlyLinkedActionPolicies,
+} from './helpers/explicitly_linked_action_policies';
+export type { LinkedActionPolicySummary } from './helpers/explicitly_linked_action_policies';
+export {
   DISPATCH_PAYLOAD_VARIABLES,
   INLINE_ACTION_STEP_DEFINITIONS,
   getDefaultInlineActionStepDefinition,
@@ -25,6 +31,7 @@ export {
 } from './registry';
 export type { InlineActionStepDefinition, PayloadVariable } from './registry';
 export { ActionForm, createInitialActionFormValue } from './action_form';
+export { InlineWorkflowEditor } from './components/inline_workflow_editor';
 export { isActionValid } from './types';
 export type {
   ActionDraft,
