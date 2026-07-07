@@ -65,10 +65,14 @@ export function SettingsTab() {
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
   const canEditSettings = canManageStreams && canSaveAdvancedSettings;
 
-  const isAppsEnabled = useObservable(
-    core.featureFlags.getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG, false),
-    false
+  // getBooleanValue$ builds a new observable on every call, so memoize it —
+  // otherwise useObservable re-subscribes (and re-evaluates the flag) on every
+  // render of this settings tab, not just when the flag actually changes.
+  const isAppsEnabledObservable = useMemo(
+    () => core.featureFlags.getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG, false),
+    [core.featureFlags]
   );
+  const isAppsEnabled = useObservable(isAppsEnabledObservable, false);
 
   const [savedIndexPatterns, setSavedIndexPatterns] = useState<string>(() =>
     core.settings.client.get<string>(

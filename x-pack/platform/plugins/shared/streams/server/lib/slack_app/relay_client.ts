@@ -8,18 +8,17 @@
 import { readFileSync } from 'fs';
 import { Agent } from 'undici';
 import type { Logger } from '@kbn/core/server';
+import { getNodeSSLOptions } from '@kbn/actions-utils';
 import type { RelayServiceTlsConfig } from '../../../common/config';
 import { RelayRequestError } from './relay_error';
 
 const REQUEST_TIMEOUT_MS = 30_000;
 
-export type RelayClientTlsOptions = RelayServiceTlsConfig;
-
 export interface RelayClientOptions {
   /** Base URL of the Relay service, e.g. `https://relay.elastic.co`. */
   baseUrl: string;
   /** Outbound TLS settings for the `fetch` connection, e.g. an mTLS client certificate. */
-  tls?: RelayClientTlsOptions;
+  tls?: RelayServiceTlsConfig;
   logger: Logger;
 }
 
@@ -73,7 +72,7 @@ export class RelayClient {
    * settings. Mirrors `UiamService#createFetchDispatcher`
    * (`x-pack/platform/plugins/shared/security/server/uiam/uiam_service.ts`).
    */
-  private createDispatcher(tls: RelayClientTlsOptions | undefined, logger: Logger) {
+  private createDispatcher(tls: RelayServiceTlsConfig | undefined, logger: Logger) {
     const verificationMode = tls?.verificationMode ?? 'full';
 
     const readFile = (file: string) => readFileSync(file, 'utf8');
@@ -94,22 +93,21 @@ export class RelayClient {
 
     logger.debug(`Using a custom TLS dispatcher for the Relay client (mode: ${verificationMode})`);
 
+    const { rejectUnauthorized, checkServerIdentity } = getNodeSSLOptions(logger, verificationMode);
     return new Agent({
       connect: {
         ca,
         cert,
         key,
         allowPartialTrustChain: true,
-        rejectUnauthorized: verificationMode !== 'none',
-        // By default, Node.js checks the server identity against the SAN/CN
-        // in the certificate.
-        ...(verificationMode === 'certificate' ? { checkServerIdentity: () => undefined } : {}),
+        rejectUnauthorized,
+        checkServerIdentity,
       },
     });
   }
 
   async startInstall(body: RelayInstallRequest): Promise<RelayInstallResponse> {
-    const { response } = await this.post('/v1/slack/install', body);
+    const response = await this.post('/v1/slack/install', body);
     return (await response.json()) as RelayInstallResponse;
   }
 
@@ -120,7 +118,7 @@ export class RelayClient {
    * 200 once fulfilled. No secret is ever returned.
    */
   async fetchClaim(claimId: string): Promise<RelayClaimResponse> {
-    const { response } = await this.post('/v1/slack/install/claim', { claim_id: claimId });
+    const response = await this.post('/v1/slack/install/claim', { claim_id: claimId });
 
     if (response.status === 202) {
       return { status: 'pending' };
@@ -135,7 +133,7 @@ export class RelayClient {
     await this.post('/v1/slack/uninstall', {});
   }
 
-  private async post(path: string, body: unknown): Promise<{ response: Response }> {
+  private async post(path: string, body: unknown): Promise<Response> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     try {
@@ -161,7 +159,7 @@ export class RelayClient {
         }
         throw new RelayRequestError(path, response.status, relayMessage);
       }
-      return { response };
+      return response;
     } catch (error) {
       // Logging is owned by callers: they know whether a failure is expected
       // (uninstall 404), transient (keep polling), or terminal (surface to user).

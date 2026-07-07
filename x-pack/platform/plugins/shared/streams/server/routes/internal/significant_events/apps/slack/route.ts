@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { badGateway, badRequest } from '@hapi/boom';
+import { badGateway } from '@hapi/boom';
 import { createServerRoute } from '../../../../create_server_route';
 import { STREAMS_API_PRIVILEGES } from '../../../../../../common/constants';
 import type {
@@ -15,7 +15,6 @@ import type {
   SlackAppStatusResponse,
 } from '../../../../../../common/slack_app/types';
 import { SlackAppService } from '../../../../../lib/slack_app/service';
-import { SlackAppUnavailableError } from '../../../../../lib/slack_app/errors';
 import { RelayRequestError } from '../../../../../lib/slack_app/relay_error';
 
 const connectSlackAppRoute = createServerRoute({
@@ -36,11 +35,9 @@ const connectSlackAppRoute = createServerRoute({
     try {
       return await new SlackAppService(server).connect(request);
     } catch (error) {
-      if (error instanceof SlackAppUnavailableError) {
-        throw badRequest(error.message);
-      }
       // Surface the Relay's own reason (e.g. "workspace already bound") instead
-      // of a generic 500.
+      // of a generic 500. SlackAppUnavailableError is a StatusError, so it's
+      // already mapped to a 400 by the shared createServerRoute error handler.
       if (error instanceof RelayRequestError) {
         throw badGateway(error.relayMessage ?? error.message);
       }

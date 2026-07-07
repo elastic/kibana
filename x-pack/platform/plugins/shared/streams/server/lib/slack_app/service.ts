@@ -72,12 +72,29 @@ export class SlackAppService {
 
   private async writeConnection(
     soClient: SavedObjectsClientContract,
-    attributes: RelayAppConnectionAttributes
+    attributes: Omit<RelayAppConnectionAttributes, 'updatedAt'>
   ): Promise<void> {
-    await soClient.create<RelayAppConnectionAttributes>(RELAY_APP_CONNECTION_SO_TYPE, attributes, {
-      id: RELAY_APP_CONNECTION_SO_ID,
-      overwrite: true,
-    });
+    await soClient.create<RelayAppConnectionAttributes>(
+      RELAY_APP_CONNECTION_SO_TYPE,
+      { ...attributes, updatedAt: new Date().toISOString() },
+      { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
+    );
+  }
+
+  /** Best-effort key invalidation: never blocks the caller, only logs on failure. */
+  private async invalidateApiKey(apiKeyId: string, context: string): Promise<void> {
+    await this.server.security.authc.apiKeys
+      .invalidateAsInternalUser({ ids: [apiKeyId] })
+      .catch((error) => {
+        this.logger.warn(`Failed to invalidate API key ${apiKeyId} ${context}: ${error.message}`);
+      });
+  }
+
+  private toErrorMessage(error: unknown): string {
+    if (error instanceof RelayRequestError) {
+      return error.relayMessage ?? error.message;
+    }
+    return error instanceof Error ? error.message : String(error);
   }
 
   async connect(request: KibanaRequest): Promise<SlackAppConnectResponse> {
@@ -96,13 +113,7 @@ export class SlackAppService {
     // reconnecting — or any repeat call to this route — never orphans a key in ES.
     const existingConnection = await this.readConnection(soClient);
     if (existingConnection?.apiKeyId) {
-      await this.server.security.authc.apiKeys
-        .invalidateAsInternalUser({ ids: [existingConnection.apiKeyId] })
-        .catch((error) => {
-          this.logger.warn(
-            `Failed to invalidate existing API key ${existingConnection.apiKeyId} before reconnecting: ${error.message}`
-          );
-        });
+      await this.invalidateApiKey(existingConnection.apiKeyId, 'before reconnecting');
     }
 
     // Mint a managed, least-privilege ES API key scoped to Agent Builder read. The key
@@ -140,17 +151,9 @@ export class SlackAppService {
         ...(username ? { created_by_user_key: username } : {}),
       });
     } catch (error) {
-      this.logger.error(
-        `Slack app install failed: ${error instanceof Error ? error.message : String(error)}`
-      );
+      this.logger.error(`Slack app install failed: ${this.toErrorMessage(error)}`);
       // Do not leak an orphaned key if the Relay never took ownership of it.
-      await this.server.security.authc.apiKeys
-        .invalidateAsInternalUser({ ids: [apiKeyResult.id] })
-        .catch((invalidateError) => {
-          this.logger.warn(
-            `Failed to clean up API key ${apiKeyResult.id} after Relay install error: ${invalidateError.message}`
-          );
-        });
+      await this.invalidateApiKey(apiKeyResult.id, 'after Relay install error');
       throw error;
     }
 
@@ -162,7 +165,6 @@ export class SlackAppService {
       surface: 'slack',
       createdBy: username,
       createdAt: now,
-      updatedAt: now,
     });
 
     return { authorizeUrl: installResponse.authorize_url };
@@ -179,36 +181,31 @@ export class SlackAppService {
     error: RelayRequestError
   ): Promise<SlackAppStatusResponse> {
     if (connection.apiKeyId) {
-      await this.server.security.authc.apiKeys
-        .invalidateAsInternalUser({ ids: [connection.apiKeyId] })
-        .catch((invalidateError) => {
-          this.logger.warn(
-            `Failed to invalidate API key ${connection.apiKeyId} after install failure: ${invalidateError.message}`
-          );
-        });
+      await this.invalidateApiKey(connection.apiKeyId, 'after install failure');
     }
 
-    const message = error.relayMessage ?? error.message;
+    const message = this.toErrorMessage(error);
     this.logger.warn(`Slack app install failed terminally: ${message}`);
     await this.writeConnection(soClient, {
       ...connection,
       status: RELAY_APP_CONNECTION_STATUS.error,
       apiKeyId: null,
       error: message,
-      updatedAt: new Date().toISOString(),
     });
 
     return { available: true, status: RELAY_APP_CONNECTION_STATUS.error, error: message };
   }
 
   async getStatus(request: KibanaRequest): Promise<SlackAppStatusResponse> {
-    const relayClient = await this.getRelayClient();
+    const soClient = this.getSoClient(request);
+    const [relayClient, connection] = await Promise.all([
+      this.getRelayClient(),
+      this.readConnection(soClient),
+    ]);
+
     if (!relayClient) {
       return { available: false, status: RELAY_APP_CONNECTION_STATUS.notConnected };
     }
-
-    const soClient = this.getSoClient(request);
-    const connection = await this.readConnection(soClient);
 
     if (!connection) {
       return { available: true, status: RELAY_APP_CONNECTION_STATUS.notConnected };
@@ -234,7 +231,6 @@ export class SlackAppService {
             ...connection,
             tenantKey: claim.tenant_key,
             status: RELAY_APP_CONNECTION_STATUS.connected,
-            updatedAt: new Date().toISOString(),
           });
           return { available: true, status: RELAY_APP_CONNECTION_STATUS.connected };
         }
@@ -245,11 +241,7 @@ export class SlackAppService {
         if (error instanceof RelayRequestError && error.isTerminal) {
           return this.failInProgressInstall(soClient, connection, error);
         }
-        this.logger.warn(
-          `Failed to poll Relay install claim: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
+        this.logger.warn(`Failed to poll Relay install claim: ${this.toErrorMessage(error)}`);
       }
     }
 
@@ -261,22 +253,18 @@ export class SlackAppService {
   }
 
   async disconnect(request: KibanaRequest): Promise<SlackAppDisconnectResponse> {
-    const relayClient = await this.getRelayClient();
     const soClient = this.getSoClient(request);
-    const connection = await this.readConnection(soClient);
+    const [relayClient, connection] = await Promise.all([
+      this.getRelayClient(),
+      this.readConnection(soClient),
+    ]);
 
     if (!connection) {
       return { success: true };
     }
 
     if (connection.apiKeyId) {
-      await this.server.security.authc.apiKeys
-        .invalidateAsInternalUser({ ids: [connection.apiKeyId] })
-        .catch((error) => {
-          this.logger.warn(
-            `Failed to invalidate API key ${connection.apiKeyId} on disconnect: ${error.message}`
-          );
-        });
+      await this.invalidateApiKey(connection.apiKeyId, 'on disconnect');
     }
 
     if (relayClient) {
@@ -288,19 +276,13 @@ export class SlackAppService {
         // Keep the connection record in an `error` state instead of deleting it,
         // so the settings UI surfaces the failure and the user can retry rather
         // than believing they're disconnected while the workspace stays bound.
-        const message =
-          error instanceof RelayRequestError
-            ? error.relayMessage ?? error.message
-            : error instanceof Error
-            ? error.message
-            : String(error);
+        const message = this.toErrorMessage(error);
         this.logger.warn(`Failed to unbind from Relay on disconnect: ${message}`);
         await this.writeConnection(soClient, {
           ...connection,
           status: RELAY_APP_CONNECTION_STATUS.error,
           apiKeyId: null,
           error: message,
-          updatedAt: new Date().toISOString(),
         });
         return { success: false };
       }

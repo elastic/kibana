@@ -34,8 +34,9 @@ const relayAppConnectionAttributesV1 = schema.object({
   // Claim id issued at install start; required by the Relay's claim poll
   // (`parseClaimInstallInput` on relay main mandates `claim_id` in the body).
   claimId: schema.maybe(schema.string()),
-  // Which external app this connection is for (e.g. 'slack'); lets this SO type
-  // host future non-Slack app connections (GitHub, Teams, ...).
+  // Which external app this connection is for (e.g. 'slack'). The document id is
+  // still a fixed singleton, so this only labels today's one connection — it does
+  // not yet support multiple concurrent app connections per deployment.
   surface: schema.maybe(schema.string()),
   // Relay-side tenant identifier for this binding.
   tenantKey: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
