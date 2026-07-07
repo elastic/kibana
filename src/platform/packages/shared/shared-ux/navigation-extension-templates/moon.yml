@@ -19,6 +19,8 @@ project:
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/utility-types'
+  - '@kbn/ui-side-navigation'
+  - '@kbn/core-chrome-browser'
   - '@kbn/test-jest-helpers'
 tags:
   - shared-common

@@ -15,7 +15,6 @@ import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 import type { SerializableRecord } from '@kbn/utility-types';
 
 import type { NavExtensionPointContext } from '../types';
-import type { ListTemplateConfig } from './list_template';
 import { ListTemplate } from './list_template';
 
 interface TestRow extends SerializableRecord {
@@ -38,10 +37,9 @@ const EXTENSION_ID = 'recentlyAccessedDashboards';
 const defaultContext: NavExtensionPointContext = {
   slotId: SLOT_ID,
   extensionId: EXTENSION_ID,
-};
-
-const defaultConfig: ListTemplateConfig<TestRow> = {
-  emptyMessage: 'No dashboards yet',
+  primaryItemId: 'dashboards',
+  sectionId: 'dashboards-section',
+  surface: 'sidePanel',
 };
 
 const testRows: TestRow[] = [
@@ -52,8 +50,8 @@ const testRows: TestRow[] = [
 
 const renderListTemplate = ({
   data = testRows,
-  config = defaultConfig,
   context = defaultContext,
+  config = {},
 }: Partial<ComponentProps<typeof ListTemplate<TestRow>>> = {}) => {
   const view = renderWithEuiTheme(<ListTemplate data={data} config={config} context={context} />);
 
@@ -71,10 +69,25 @@ describe('ListTemplate', () => {
     expect(betaLink).toHaveAttribute('href', '/app/dashboards#/view/2');
   });
 
+  it('calls onLinkClick when a row link is clicked', async () => {
+    const user = userEvent.setup();
+    const onLinkClick = jest.fn();
+    renderListTemplate({
+      context: {
+        ...defaultContext,
+        surface: 'popover',
+        onLinkClick,
+      },
+    });
+
+    await user.click(screen.getByRole('link', { name: 'Alpha dashboard' }));
+
+    expect(onLinkClick).toHaveBeenCalledTimes(1);
+  });
+
   it('caps rendered rows when max is configured', () => {
     renderListTemplate({
       config: {
-        ...defaultConfig,
         max: 2,
       },
     });
@@ -100,18 +113,19 @@ describe('ListTemplate', () => {
     expect(screen.queryByRole('link', { name: 'Missing href' })).not.toBeInTheDocument();
   });
 
-  it('does not render the template when there are no rows', () => {
+  it('renders the empty message when there are no rows', () => {
     renderListTemplate({
       data: [],
     });
 
-    expect(screen.queryByTestId(`nav-extension-${SLOT_ID}-list-template`)).not.toBeInTheDocument();
+    expect(screen.getByTestId(`nav-extension-${SLOT_ID}-empty`)).toHaveTextContent(
+      'No items found'
+    );
   });
 
   it('renders the heading when configured', () => {
     renderListTemplate({
       config: {
-        ...defaultConfig,
         heading: 'Recently viewed',
       },
     });
@@ -123,7 +137,6 @@ describe('ListTemplate', () => {
     const user = userEvent.setup();
     renderListTemplate({
       config: {
-        ...defaultConfig,
         heading: 'Recently viewed',
         search: { enabled: true, placeholder: 'Search dashboards' },
       },
@@ -141,15 +154,17 @@ describe('ListTemplate', () => {
     });
   });
 
-  it('renders the empty message when searching yields no results', async () => {
+  it('renders the configured no search results message when searching yields no results', async () => {
     const user = userEvent.setup();
 
     renderListTemplate({
       config: {
-        ...defaultConfig,
         heading: 'Recently viewed',
-        search: { enabled: true, placeholder: 'Search dashboards' },
-        emptyMessage: 'No matching dashboards for query',
+        search: {
+          enabled: true,
+          placeholder: 'Search dashboards',
+          noSearchResultsMessage: 'No matching dashboards for query',
+        },
       },
     });
 
@@ -159,7 +174,7 @@ describe('ListTemplate', () => {
 
     await user.type(searchInput, 'kibanana');
 
-    expect(screen.getByTestId(`nav-extension-${SLOT_ID}-empty`)).toHaveTextContent(
+    expect(screen.getByTestId(`nav-extension-${SLOT_ID}-no-results`)).toHaveTextContent(
       'No matching dashboards for query'
     );
   });
@@ -170,7 +185,6 @@ describe('ListTemplate', () => {
 
     renderListTemplate({
       config: {
-        ...defaultConfig,
         heading: 'Recently viewed',
         supportAddItem: { enabled: true, onClick: onAddItemHandler },
         search: { enabled: true },
@@ -188,7 +202,6 @@ describe('ListTemplate', () => {
 
     renderListTemplate({
       config: {
-        ...defaultConfig,
         heading: 'Recently viewed',
         actions: [
           { id: 'delete', label: 'Delete', icon: 'trash', onClick: onAction },
@@ -293,9 +306,6 @@ describe('ListTemplate', () => {
           iconType: 'dashboardApp',
         },
       ],
-      config: {
-        emptyMessage: 'No dashboards yet',
-      },
     });
 
     const dashboardLink = screen.getByRole('link', { name: 'Dashboard with icon' });

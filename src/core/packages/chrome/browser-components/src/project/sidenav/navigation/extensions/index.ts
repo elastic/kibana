@@ -7,16 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Navigation, type NavigationProps } from './src/components/navigation';
-export { SecondaryMenu } from './src/components/secondary_menu';
-export { useNavigation } from './src/hooks/use_navigation';
-export { COLLAPSED_WIDTH, EXPANDED_WIDTH } from './src/hooks/use_layout_width';
-export type {
-  BadgeType,
-  MenuItem,
-  NavigationStructure,
-  SecondaryMenuItem,
-  SecondaryMenuSection,
-  SideNavLogo,
-  NavExtensionRenderContext,
-} from './types';
+export { useRenderNavExtensionPoint } from './template_host';
+export { useExtensionVisibilityStore } from './visibility_layer/context';
+export { ExtensionVisibilityProvider } from './visibility_layer/provider';
+export { ExtensionVisibilityController } from './visibility_layer/controller';
+export { applyExtensionVisibility, collectExtensionIds, extensionSlotHasData } from './utils';

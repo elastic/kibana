@@ -9,11 +9,12 @@
 
 import { createLocation } from 'history';
 import type {
+  ChromeExtensionPointNavigationNode,
   ChromeNavLink,
   ChromeProjectNavigationNode,
   NavigationTreeDefinition,
 } from '@kbn/core-chrome-browser/src';
-import { flattenNav, findActiveNodes, parseNavigationTree } from './utils';
+import { flattenNav, findActiveNodes, getRenderableNodes, parseNavigationTree } from './utils';
 
 const getDeepLink = (id: string, path: string, title = ''): ChromeNavLink => ({
   id,
@@ -141,6 +142,73 @@ describe('parseNavigationTree', () => {
     // Verify the result contains body section but not footer
     expect(result.navigationTreeUI.body).toHaveLength(1);
     expect(result.navigationTreeUI.footer).toBeUndefined();
+  });
+
+  it('should parse extension point nodes under panel openers', () => {
+    const navigationTreeDef = {
+      body: [
+        {
+          id: 'dashboards',
+          title: 'Dashboards',
+          renderAs: 'panelOpener',
+          children: [
+            {
+              id: 'recent-dashboards',
+              title: 'Recently viewed',
+              renderAs: 'extension',
+              extensionId: 'recentlyAccessedDashboards',
+              popoverOnly: true,
+              hideWhenEmpty: true,
+            },
+          ],
+        },
+      ],
+    } as const satisfies NavigationTreeDefinition;
+
+    const result = parseNavigationTree('security', navigationTreeDef, mockDeps);
+    const panelOpener = result.navigationTreeUI.body[0];
+
+    expect(panelOpener.renderAs).toBe('panelOpener');
+    expect(panelOpener.children).toHaveLength(1);
+
+    const extensionNode = panelOpener.children![0] as ChromeExtensionPointNavigationNode;
+    expect(extensionNode.renderAs).toBe('extension');
+    expect(extensionNode.id).toBe('recent-dashboards');
+    expect(extensionNode.extensionId).toBe('recentlyAccessedDashboards');
+    expect(extensionNode.popoverOnly).toBe(true);
+    expect(extensionNode.hideWhenEmpty).toBe(true);
+    expect(extensionNode.href).toBeUndefined();
+    expect(extensionNode.path).toBe('dashboards.recent-dashboards');
+  });
+});
+
+describe('getRenderableNodes', () => {
+  it('should retain panel openers whose only children are extension nodes', () => {
+    const navigationTreeDef: NavigationTreeDefinition = {
+      body: [
+        {
+          id: 'dashboards',
+          title: 'Dashboards',
+          renderAs: 'panelOpener',
+          children: [
+            {
+              id: 'recent-dashboards',
+              title: 'Recently viewed',
+              renderAs: 'extension',
+              extensionId: 'recentlyAccessedDashboards',
+            },
+          ],
+        },
+      ],
+    };
+
+    const { navigationTreeUI } = parseNavigationTree('security', navigationTreeDef, {
+      deepLinks: {},
+      cloudLinks: {},
+    });
+
+    expect(getRenderableNodes(navigationTreeUI.body)).toHaveLength(1);
+    expect(getRenderableNodes(navigationTreeUI.body)[0].id).toBe('dashboards');
   });
 });
 

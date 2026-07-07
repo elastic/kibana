@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { NavExtensionId, NavExtensionData } from '@kbn/core-chrome-browser';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { ListTemplateConfig } from './templates/list_template';
 import type { TEMPLATES } from './templates';
@@ -23,13 +24,15 @@ interface NavTemplateConfigByRow<Row = SerializableRecord> {
 export type NavTemplateConfig<Row = SerializableRecord> =
   NavTemplateConfigByRow<Row>[NavTemplateId];
 
+type ElementOf<T> = T extends ReadonlyArray<infer E> ? E : T;
+
 /**
  * Typed definition a publisher registers for an extension. `templateId` is constrained to the
  * catalog and `config` is typed to the chosen template and the extension's registered data row.
  * Structurally assignable to the runtime-erased `NavExtensionRuntimeDefinition` carried by chrome.
  */
-export interface NavExtensionDefinition<Id extends string = string> {
+export interface NavExtensionDefinition<Id extends NavExtensionId = NavExtensionId> {
   id: Id;
   templateId: NavTemplateId;
-  config: NavTemplateConfig;
+  config: NavTemplateConfig<ElementOf<NavExtensionData<Id>>>;
 }

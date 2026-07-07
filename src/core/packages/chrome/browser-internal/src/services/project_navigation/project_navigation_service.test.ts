@@ -8,15 +8,7 @@
  */
 
 import { createMemoryHistory } from 'history';
-import {
-  firstValueFrom,
-  lastValueFrom,
-  take,
-  map,
-  BehaviorSubject,
-  of,
-  type Observable,
-} from 'rxjs';
+import { firstValueFrom, lastValueFrom, take, map, BehaviorSubject, of, Observable } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import type {
   ChromeNavLinks,
@@ -174,7 +166,13 @@ describe('initNavigation()', () => {
     test('should add metadata to node (title, path, href, sideNavStatus...)', async () => {
       const treeDefinition = await getNavigationTree();
       const [node] = treeDefinition.body as [ChromeProjectNavigationNode];
-      expect(node.children![0]).toEqual({
+      const child = node.children![0];
+
+      if (child.renderAs === 'extension') {
+        throw new Error('Expected a standard navigation node');
+      }
+
+      expect(child).toEqual({
         id: 'foo',
         title: 'FOO',
         path: 'group1.foo',
@@ -183,7 +181,7 @@ describe('initNavigation()', () => {
         isExternalLink: false,
         sideNavStatus: 'visible',
       });
-      expect(node.children![0].href).toBe(node.children![0]!.deepLink!.href);
+      expect(child.href).toBe(child.deepLink!.href);
     });
 
     test('should allow href for absolute links', async () => {
@@ -984,6 +982,106 @@ describe('getNavigation$() active nodes', () => {
         },
       ],
     ]);
+  });
+});
+
+describe('getExtensionRegistry$()', () => {
+  it('should expose template definitions without data factories', async () => {
+    const { projectNavigation } = setup();
+    const createData$ = jest.fn(() => of([]));
+
+    projectNavigation.setExtensionRegistry({
+      recentlyAccessedDashboards: {
+        id: 'recentlyAccessedDashboards',
+        templateId: 'list',
+        config: { emptyMessage: 'None' },
+        createData$,
+      },
+    });
+
+    const registry = await lastValueFrom(projectNavigation.getExtensionRegistry$().pipe(take(1)));
+
+    expect(registry).toEqual({
+      recentlyAccessedDashboards: {
+        id: 'recentlyAccessedDashboards',
+        templateId: 'list',
+        config: { emptyMessage: 'None' },
+      },
+    });
+    expect(registry.recentlyAccessedDashboards).not.toHaveProperty('createData$');
+  });
+});
+
+describe('getExtensionData$()', () => {
+  it('should materialize extension data lazily and share one stream per extensionId', () => {
+    const { projectNavigation } = setup();
+
+    let upstreamSubscribeCount = 0;
+    const createData$ = jest.fn(() => {
+      return new Observable<Array<{ id: string }>>((subscriber) => {
+        upstreamSubscribeCount++;
+        subscriber.next([{ id: 'dashboard-1' }]);
+        return () => {};
+      });
+    });
+
+    projectNavigation.setExtensionRegistry({
+      recentlyAccessedDashboards: {
+        id: 'recentlyAccessedDashboards',
+        templateId: 'list',
+        config: {},
+        createData$,
+      },
+    });
+
+    const data$1 = projectNavigation.getExtensionData$('recentlyAccessedDashboards');
+    const data$2 = projectNavigation.getExtensionData$('recentlyAccessedDashboards');
+
+    expect(data$1).toBeDefined();
+    expect(data$2).toBe(data$1);
+    expect(createData$).toHaveBeenCalledTimes(1);
+
+    const sub1 = data$1!.subscribe();
+    const sub2 = data$2!.subscribe();
+
+    expect(upstreamSubscribeCount).toBe(1);
+
+    sub1.unsubscribe();
+    sub2.unsubscribe();
+  });
+
+  it('should return undefined when extension is not registered', () => {
+    const { projectNavigation } = setup();
+    expect(projectNavigation.getExtensionData$('unknown')).toBeUndefined();
+  });
+
+  it('should clear materialized data when registry is updated', () => {
+    const { projectNavigation } = setup();
+    const createData$ = jest.fn(() => of([{ id: '1' }]));
+
+    projectNavigation.setExtensionRegistry({
+      ext: {
+        id: 'ext',
+        templateId: 'list',
+        config: {},
+        createData$,
+      },
+    });
+
+    projectNavigation.getExtensionData$('ext');
+    expect(createData$).toHaveBeenCalledTimes(1);
+
+    projectNavigation.setExtensionRegistry({
+      ext: {
+        id: 'ext',
+        templateId: 'list',
+        config: {},
+        createData$,
+      },
+    });
+
+    projectNavigation.getExtensionData$('ext');
+    expect(createData$).toHaveBeenCalledTimes(2);
   });
 });
 

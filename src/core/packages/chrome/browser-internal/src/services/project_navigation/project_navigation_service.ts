@@ -18,6 +18,9 @@ import type {
   NavigationTreeDefinition,
   CloudLinks,
   SolutionId,
+  NavExtensionRegistryEntryMap,
+  NavExtensionRuntimeDefinitionMap,
+  NavExtensionSlotData,
 } from '@kbn/core-chrome-browser';
 import {
   BehaviorSubject,
@@ -43,6 +46,19 @@ import { findActiveNodes, stripQueryParams } from './utils';
 import { buildBreadcrumbs } from './breadcrumbs';
 import { getCloudLinks } from './cloud_links';
 import { applyCustomization, type ParsedNavigation } from './apply_customization';
+
+/**
+ * Converts a registry entry map to a runtime definition map.
+ */
+const toRuntimeDefinitionMap = (
+  registry: NavExtensionRegistryEntryMap
+): NavExtensionRuntimeDefinitionMap =>
+  Object.fromEntries(
+    Object.entries(registry).map(([id, entry]) => [
+      id,
+      { id: entry.id, templateId: entry.templateId, config: entry.config },
+    ])
+  );
 
 interface StartDeps {
   history: History;
@@ -78,6 +94,8 @@ export class ProjectNavigationService {
       id: SolutionId;
       navTreeDefinition$: Observable<NavigationTreeDefinition>;
     } | null>(null);
+    const extensionRegistry$ = new BehaviorSubject<NavExtensionRegistryEntryMap>({});
+    const materializedExtensionData$ = new Map<string, Observable<NavExtensionSlotData>>();
     const kibanaName$ = new BehaviorSubject<string | undefined>(undefined);
     const cloudLinks$ = new BehaviorSubject<CloudLinks>({});
     const projectBreadcrumbs$ = new BehaviorSubject<{
@@ -196,6 +214,25 @@ export class ProjectNavigationService {
           id,
           navTreeDefinition$: navTreeDefinition$ as Observable<NavigationTreeDefinition>,
         });
+      },
+      setExtensionRegistry: (registry: NavExtensionRegistryEntryMap) => {
+        materializedExtensionData$.clear();
+        extensionRegistry$.next(registry);
+      },
+      getExtensionRegistry$: () => extensionRegistry$.pipe(map(toRuntimeDefinitionMap)),
+      getExtensionData$: (extensionId: string): Observable<NavExtensionSlotData> | undefined => {
+        const entry = extensionRegistry$.getValue()[extensionId];
+        if (!entry?.createData$) {
+          return undefined;
+        }
+
+        let shared$ = materializedExtensionData$.get(extensionId);
+        if (!shared$) {
+          shared$ = entry.createData$().pipe(shareReplay({ bufferSize: 1, refCount: true }));
+          materializedExtensionData$.set(extensionId, shared$);
+        }
+
+        return shared$;
       },
       getNavigation$: () => navigation$,
       setProjectBreadcrumbs: (

@@ -8,6 +8,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { NavExtensionRenderContext } from '@kbn/ui-side-navigation';
 
 /** A declarative action descriptor rendered by the `list` template. */
 export interface NavTemplateActionConfig<Data = SerializableRecord> {
@@ -17,7 +18,7 @@ export interface NavTemplateActionConfig<Data = SerializableRecord> {
   onClick: (slotId: string, itemData: Data) => void;
 }
 
-export interface NavExtensionPointContext {
+export interface NavExtensionPointContext extends NavExtensionRenderContext {
   /** Per-placement slot id designated in the navigation tree. */
   slotId: string;
   /** Id of the published extension definition filling the slot. */
