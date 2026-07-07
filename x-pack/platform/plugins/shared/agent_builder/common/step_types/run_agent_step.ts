@@ -82,7 +82,7 @@ export const InputSchema = z.object({
    * events) while this step is still running, instead of waiting for the step to complete.
    */
   metadata: z
-    .record(z.string(), z.string())
+    .record(z.string().max(512), z.string().max(1024))
     .optional()
     .describe(
       'Optional key-value tags stored with the underlying agent execution and searchable via findExecutions. Callers that need to discover the execution id before this step completes (e.g. to follow it live) can tag it with a value they already know and look it up by that tag.'

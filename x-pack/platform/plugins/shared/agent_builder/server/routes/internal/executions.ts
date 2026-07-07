@@ -33,8 +33,8 @@ export function registerInternalExecutionRoutes({
       options: { access: 'internal' },
       validate: {
         query: schema.object({
-          metadataKey: schema.string(),
-          metadataValue: schema.string(),
+          metadataKey: schema.string({ minLength: 1, maxLength: 512 }),
+          metadataValue: schema.string({ minLength: 1, maxLength: 1024 }),
         }),
       },
     },
