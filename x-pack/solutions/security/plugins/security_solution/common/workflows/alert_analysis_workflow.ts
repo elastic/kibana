@@ -30,25 +30,36 @@ export const AlertAnalysisWorkflowSettings = z.object({
   autoCloseEnabled: z.boolean(),
   autoCloseConfidenceScoreMinThreshold: z.number().min(0).max(1),
   autoCloseConfidenceScoreMaxThreshold: z.number().min(0).max(1),
-  // Prefix for the workflow tags written to (and matched on) each analyzed alert. Non-empty so the
-  // dedup gate and tag replacement always have a real namespace to match against.
-  tagPrefix: z.string().min(1).max(256),
+  // Prefix for the workflow tags written to (and matched on) each analyzed alert. The value is
+  // interpolated verbatim into Liquid expression strings in the workflow YAML (the dedup gate and
+  // tag replacement), so it is constrained to a safe tag-namespace charset: characters like `"`,
+  // `{{`, or `|` would produce a malformed expression that silently breaks matching at run time.
+  tagPrefix: z
+    .string()
+    .min(1)
+    .max(256)
+    .regex(
+      /^[a-zA-Z0-9._-]+$/,
+      'Tag prefix may only contain letters, numbers, dots, dashes, and underscores'
+    ),
 });
 
 export type AlertAnalysisWorkflowSettings = z.infer<typeof AlertAnalysisWorkflowSettings>;
 
-export const AlertAnalysisWorkflowSettingsRequestBody = AlertAnalysisWorkflowSettings.refine(
-  ({ autoCloseConfidenceScoreMinThreshold, autoCloseConfidenceScoreMaxThreshold }) =>
-    autoCloseConfidenceScoreMinThreshold < autoCloseConfidenceScoreMaxThreshold,
-  {
-    message: 'Minimum confidence score must be lower than maximum confidence score',
-    path: ['autoCloseConfidenceScoreMaxThreshold'],
-  }
-);
+// Shared min<max threshold check, applied via `.refine()` by every settings schema (a refined
+// schema can't be `.extend()`-ed, so the server route reuses this predicate rather than the schema).
+export const isThresholdRangeValid = ({
+  autoCloseConfidenceScoreMinThreshold,
+  autoCloseConfidenceScoreMaxThreshold,
+}: Pick<
+  AlertAnalysisWorkflowSettings,
+  'autoCloseConfidenceScoreMinThreshold' | 'autoCloseConfidenceScoreMaxThreshold'
+>): boolean => autoCloseConfidenceScoreMinThreshold < autoCloseConfidenceScoreMaxThreshold;
 
-export type AlertAnalysisWorkflowSettingsRequestBody = z.infer<
-  typeof AlertAnalysisWorkflowSettingsRequestBody
->;
+export const THRESHOLD_RANGE_REFINEMENT: { message: string; path: string[] } = {
+  message: 'Minimum confidence score must be lower than maximum confidence score',
+  path: ['autoCloseConfidenceScoreMaxThreshold'],
+};
 
 export const AlertAnalysisWorkflowRuleAttachmentListRequestQuery = z.object({
   search: z.string().max(1000).optional().default(''),

@@ -866,7 +866,17 @@ export const getAlertAnalysisWorkflowSettings = (): SettingsConfig => ({
     type: 'string',
     category: [APP_ID],
     requiresPageReload: false,
-    schema: schema.string({ minLength: 1 }),
+    // The prefix is interpolated verbatim into the workflow's Liquid tag expressions, so it is
+    // constrained to a safe tag-namespace charset here too (this path is writable through the
+    // settings API, not just the workflow settings page).
+    schema: schema.string({
+      minLength: 1,
+      maxLength: 256,
+      validate: (value) =>
+        /^[a-zA-Z0-9._-]+$/.test(value)
+          ? undefined
+          : 'Tag prefix may only contain letters, numbers, dots, dashes, and underscores',
+    }),
     solutionViews: ['classic', 'security'],
     technicalPreview: true,
     readonly: true,

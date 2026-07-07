@@ -11,6 +11,7 @@ import {
   BulkActionEditTypeEnum,
   type BulkActionEditPayload,
 } from '../../../common/api/detection_engine/rule_management';
+import { convertRuleSearchTermToKQL } from '../../../common/detection_engine/rule_management/rule_filtering';
 import type { DetectionRulesAuthz } from '../../../common/detection_engine/rule_management/authz';
 import type { PrebuiltRulesCustomizationStatus } from '../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import type { MlAuthz } from '../../lib/machine_learning/authz';
@@ -378,5 +379,99 @@ describe('alert analysis workflow rule attachments', () => {
     await expect(
       service.updateRuleAttachments({ attachRuleIds: ['rule-1'], detachRuleIds: ['rule-1'] })
     ).rejects.toThrow('Rules cannot be both attached and detached in the same request');
+  });
+
+  it('searches rule names by substring, matching the Rules page behavior', async () => {
+    const rulesClient = createRulesClient([createRule({ id: 'rule-1' })]);
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
+      rulesClient,
+      workflowId: WORKFLOW_ID,
+    });
+
+    await service.getRuleAttachments({ search: 'Def', page: 1, perPage: 20 });
+
+    // A single search term must become a `name.keyword: *term*` substring filter (the same KQL
+    // the Rules page uses), not a whole-word/prefix `search`. Otherwise `Def` would not match
+    // `Endpoint Security (Elastic Defend)`.
+    const { options } = rulesClient.find.mock.calls[0][0] as {
+      options: { filter?: string; search?: string; searchFields?: string[] };
+    };
+    expect(options.filter).toEqual(expect.stringContaining('alert.attributes.name.keyword: *Def*'));
+    expect(options.filter).toEqual(expect.stringContaining(convertRuleSearchTermToKQL('Def')));
+    expect(options.search).toBeUndefined();
+    expect(options.searchFields).toBeUndefined();
+  });
+
+  it('does not add a name search filter when the search term is empty', async () => {
+    const rulesClient = createRulesClient([createRule({ id: 'rule-1' })]);
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
+      rulesClient,
+      workflowId: WORKFLOW_ID,
+    });
+
+    await service.getRuleAttachments({ search: '   ', page: 1, perPage: 20 });
+
+    // `findRules` always enriches the filter with the rule-type mapping, so the filter is never
+    // empty. What matters is that a blank search adds no `name` condition.
+    const { options } = rulesClient.find.mock.calls[0][0] as { options: { filter?: string } };
+    expect(options.filter ?? '').not.toContain('alert.attributes.name');
+  });
+
+  it('throws when more than the max number of rules match the search', async () => {
+    const rulesClient = {
+      find: jest.fn().mockResolvedValue({ data: [], total: 2001, page: 1, perPage: 2000 }),
+    } as Partial<jest.Mocked<RulesClient>> as jest.Mocked<RulesClient>;
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
+      rulesClient,
+      workflowId: WORKFLOW_ID,
+    });
+
+    await expect(service.getRuleAttachmentStats({ search: '' })).rejects.toThrow(
+      'More than 2000 rules matched the filter query'
+    );
+  });
+
+  it('throws when more than the max number of rules are selected for update', async () => {
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
+      rulesClient: createRulesClient([]),
+      workflowId: WORKFLOW_ID,
+      bulkEditDependencies: createBulkEditDependencies(),
+    });
+
+    await expect(
+      service.updateRuleAttachments({
+        attachRuleIds: Array.from({ length: 2001 }, (_, index) => `rule-${index}`),
+        detachRuleIds: [],
+      })
+    ).rejects.toThrow('More than 2000 rules were selected');
+  });
+
+  it('throws when a selected rule id cannot be resolved', async () => {
+    // find resolves only rule-1 (total 1) but two ids were requested.
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
+      rulesClient: createRulesClient([createRule({ id: 'rule-1' })]),
+      workflowId: WORKFLOW_ID,
+      bulkEditDependencies: createBulkEditDependencies(),
+    });
+
+    await expect(
+      service.updateRuleAttachments({
+        attachRuleIds: ['rule-1', 'missing-rule'],
+        detachRuleIds: [],
+      })
+    ).rejects.toThrow('Failed to resolve 1 selected rule(s)');
+  });
+
+  it('throws when bulk edit dependencies are missing but changes are required', async () => {
+    // rule-1 lacks the workflow action, so attaching it is a real change that needs bulk-edit
+    // dependencies; omitting them must fail loudly rather than silently no-op.
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
+      rulesClient: createRulesClient([createRule({ id: 'rule-1' })]),
+      workflowId: WORKFLOW_ID,
+    });
+
+    await expect(
+      service.updateRuleAttachments({ attachRuleIds: ['rule-1'], detachRuleIds: [] })
+    ).rejects.toThrow('Bulk edit dependencies are required');
   });
 });

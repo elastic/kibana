@@ -26,6 +26,8 @@ import {
   ALERT_ANALYSIS_WORKFLOW_RUNTIME_CONFIG_ROUTE,
   ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE,
   AlertAnalysisWorkflowSettings,
+  isThresholdRangeValid,
+  THRESHOLD_RANGE_REFINEMENT,
 } from '../../../common/workflows/alert_analysis_workflow';
 import { ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT } from '../../lib/telemetry/event_based/events';
 import type { SecuritySolutionPluginRouter } from '../../types';
@@ -58,14 +60,7 @@ const AlertAnalysisWorkflowSettingsWithConnectorRequestBody = AlertAnalysisWorkf
   connectorId: z.string().optional(),
   workflowEnabled: z.boolean(),
   createConversation: z.boolean(),
-}).refine(
-  ({ autoCloseConfidenceScoreMinThreshold, autoCloseConfidenceScoreMaxThreshold }) =>
-    autoCloseConfidenceScoreMinThreshold < autoCloseConfidenceScoreMaxThreshold,
-  {
-    message: 'Minimum confidence score must be lower than maximum confidence score',
-    path: ['autoCloseConfidenceScoreMaxThreshold'],
-  }
-);
+}).refine(isThresholdRangeValid, THRESHOLD_RANGE_REFINEMENT);
 
 type AlertAnalysisWorkflowSettingsWithConnectorRequestBodyType = z.infer<
   typeof AlertAnalysisWorkflowSettingsWithConnectorRequestBody

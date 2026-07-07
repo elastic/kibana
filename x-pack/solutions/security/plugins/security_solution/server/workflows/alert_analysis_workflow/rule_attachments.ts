@@ -19,6 +19,7 @@ import {
   type BulkActionEditPayload,
   type NormalizedRuleAction,
 } from '../../../common/api/detection_engine/rule_management';
+import { convertRuleSearchTermToKQL } from '../../../common/detection_engine/rule_management/rule_filtering';
 import type { DetectionRulesAuthz } from '../../../common/detection_engine/rule_management/authz';
 import type { PrebuiltRulesCustomizationStatus } from '../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import type { MlAuthz } from '../../lib/machine_learning/authz';
@@ -169,14 +170,17 @@ const getMatchingRules = async ({
   const normalizedSearch = normalizeSearch(search);
   const result = await findRules({
     rulesClient,
-    filter: undefined,
+    // Match the Rules page: a single search term becomes a `name.keyword: *term*` substring
+    // filter (plus the MITRE/index attributes), so `Endpoin`/`Sec`/`Def` match like they do
+    // there. The plain `search`/`searchFields` used before only matched whole words/prefixes.
+    filter: normalizedSearch ? convertRuleSearchTermToKQL(normalizedSearch) : undefined,
     fields: undefined,
     page: 1,
     perPage: MAX_RULES_TO_ATTACH,
     sortField: undefined,
     sortOrder: undefined,
-    search: normalizedSearch,
-    searchFields: normalizedSearch ? ['name'] : undefined,
+    search: undefined,
+    searchFields: undefined,
   });
 
   if (result.total > MAX_RULES_TO_ATTACH) {

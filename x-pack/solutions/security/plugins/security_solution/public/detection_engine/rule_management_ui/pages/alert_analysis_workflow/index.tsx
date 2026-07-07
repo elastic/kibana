@@ -81,8 +81,12 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
   >();
   const isDirty = !isEqual(pageSettings, savedSettings);
   const isWorkflowEnabled = pageSettings?.workflowEnabled ?? true;
+  // The confidence thresholds only apply to auto-close, so their range is only validated (and only
+  // blocks saving) when auto-close is enabled. When it is off the inputs are disabled and their
+  // values are irrelevant.
   const isThresholdRangeInvalid =
     pageSettings !== undefined &&
+    pageSettings.autoCloseEnabled &&
     !(
       pageSettings.autoCloseConfidenceScoreMinThreshold <
       pageSettings.autoCloseConfidenceScoreMaxThreshold
@@ -330,7 +334,9 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                   max={1}
                   step={0.01}
                   value={pageSettings.autoCloseConfidenceScoreMinThreshold}
-                  disabled={!canEditAdvancedSettings || !isWorkflowEnabled}
+                  disabled={
+                    !canEditAdvancedSettings || !isWorkflowEnabled || !pageSettings.autoCloseEnabled
+                  }
                   isInvalid={isThresholdRangeInvalid}
                   aria-label={translations.MIN_THRESHOLD_ARIA_LABEL}
                   onChange={(event) =>
@@ -372,7 +378,9 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                   max={1}
                   step={0.01}
                   value={pageSettings.autoCloseConfidenceScoreMaxThreshold}
-                  disabled={!canEditAdvancedSettings || !isWorkflowEnabled}
+                  disabled={
+                    !canEditAdvancedSettings || !isWorkflowEnabled || !pageSettings.autoCloseEnabled
+                  }
                   isInvalid={isThresholdRangeInvalid}
                   aria-label={translations.MAX_THRESHOLD_ARIA_LABEL}
                   onChange={(event) =>
