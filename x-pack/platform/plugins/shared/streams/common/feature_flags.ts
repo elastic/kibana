@@ -23,3 +23,12 @@ export const SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG =
  * Enables the Streams root cause investigation workflow and agent.
  */
 export const SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG = 'streams.investigationEnabled';
+
+/**
+ * Enables the scheduled, code-driven Stage 1 KI extraction workflow. When on,
+ * the continuous code KI extraction managed workflow is installed and runs on a
+ * schedule, deriving code Feature KIs (repo type, language, service name) from
+ * streams linked to a Semantic Code Search indexed repository.
+ */
+export const SIGNIFICANT_EVENTS_CODE_KI_EXTRACTION_ENABLED_FLAG =
+  'streams.significantEventsCodeKiExtractionEnabled';

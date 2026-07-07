@@ -86,7 +86,10 @@ import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 import { installMemoryWorkflows } from './lib/memory/install_managed_workflows';
 import { isInvestigationEnabled } from './lib/investigations/is_investigation_enabled';
 import { installInvestigationWorkflow } from './lib/investigations/install_investigation_workflow';
+import { isCodeKiExtractionEnabled } from './lib/significant_events/code_features/is_code_ki_extraction_enabled';
+import { installCodeExtractionWorkflow } from './lib/significant_events/code_features/install_code_extraction_workflow';
 import {
+  SIGNIFICANT_EVENTS_CODE_KI_EXTRACTION_ENABLED_FLAG,
   SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG,
   SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG,
 } from '../common/feature_flags';
@@ -617,6 +620,14 @@ export class StreamsPlugin
         filter((enabled) => enabled)
       );
 
+    const codeKiExtractionEnabled$ = core.featureFlags
+      .getBooleanValue$(SIGNIFICANT_EVENTS_CODE_KI_EXTRACTION_ENABLED_FLAG, false)
+      .pipe(
+        distinctUntilChanged(),
+        skip(1),
+        filter((enabled) => enabled)
+      );
+
     initializeKnowledgeIndicatorsTemplate({
       esClient: core.elasticsearch.client.asInternalUser,
       logger: this.logger,
@@ -663,6 +674,21 @@ export class StreamsPlugin
           ).catch((error: unknown) => {
             this.logger.error(
               `streams: Failed to install investigation managed workflow after feature flag change: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
+          });
+        })
+      );
+
+      this.subscriptions.push(
+        codeKiExtractionEnabled$.subscribe(() => {
+          void this.installCodeExtractionWorkflowIfEnabled(
+            workflowsExtensions,
+            core.featureFlags
+          ).catch((error: unknown) => {
+            this.logger.error(
+              `streams: Failed to install code KI extraction managed workflow after feature flag change: ${
                 error instanceof Error ? error.message : String(error)
               }`
             );
@@ -735,6 +761,24 @@ export class StreamsPlugin
     await client.ready();
   }
 
+  private async installCodeExtractionWorkflowIfEnabled(
+    workflowsExtensions: WorkflowsExtensionsServerPluginStart,
+    featureFlags: FeatureFlagsStart
+  ): Promise<void> {
+    if (!(await isCodeKiExtractionEnabled(featureFlags))) {
+      this.logger.debug(
+        'streams: code KI extraction is disabled, skipping code extraction workflow installation'
+      );
+      return;
+    }
+
+    const client = await workflowsExtensions.initManagedWorkflowsClient(
+      STREAMS_MANAGED_WORKFLOW_OWNER
+    );
+    await installCodeExtractionWorkflow({ client });
+    await client.ready();
+  }
+
   private async installManagedWorkflows(
     workflowsExtensions: WorkflowsExtensionsServerPluginStart,
     featureFlags: FeatureFlagsStart
@@ -754,6 +798,14 @@ export class StreamsPlugin
       } else {
         this.logger.debug(
           'streams: investigation is disabled, skipping investigation workflow installation'
+        );
+      }
+
+      if (await isCodeKiExtractionEnabled(featureFlags)) {
+        await installCodeExtractionWorkflow({ client });
+      } else {
+        this.logger.debug(
+          'streams: code KI extraction is disabled, skipping code extraction workflow installation'
         );
       }
 

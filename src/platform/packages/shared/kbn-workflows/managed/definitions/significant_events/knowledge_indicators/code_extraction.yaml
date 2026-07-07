@@ -1,0 +1,81 @@
+# Continuous code-driven KI (Knowledge Indicator) extraction workflow.
+#
+# Runs on a schedule and, for each candidate stream linked to a Semantic Code
+# Search (SCS) indexed repository, derives Stage 1 code Feature KIs (repo type,
+# language, service name) from the source code. The per-stream endpoint no-ops
+# when the repository is unchanged since the last run (fingerprint check), so
+# re-running on every tick is cheap.
+#
+# This is a managed workflow installed by the streams plugin. It is created
+# disabled; installation is gated by the code KI extraction feature flag.
+
+version: '1'
+name: 'Continuous Code KI Extraction'
+enabled: false
+description: 'This workflow is used by the system and should not be modified.'
+tags:
+  - observability
+  - streams
+  - significant-events
+  - knowledge-indicators
+  - code-extraction
+consts:
+  maxScheduledStreams: 25
+settings:
+  # Timeout is 1 minute shorter than the schedule to avoid overlapping runs.
+  timeout: '59m'
+  # Only one instance of this workflow runs at a time; overlapping triggers are dropped.
+  concurrency:
+    key: significant-events-continuous-code-ki-extraction
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: '60m'
+  - type: manual
+    inputs:
+      - name: maxScheduledStreams
+        type: number
+        default: 25
+        description: 'Max streams to process per run; remaining eligible streams are skipped.'
+steps:
+  # Step 1: Fetch eligible streams from the classification endpoint.
+  - name: get_eligible
+    type: kibana.request
+    with:
+      method: GET
+      path: '/internal/streams/_extraction/_eligible?maxScheduledStreams={{ inputs.maxScheduledStreams | default: consts.maxScheduledStreams }}'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: '5s'
+        strategy: exponential
+
+  # Step 2: Only proceed if there are candidates to process.
+  - name: has_candidates
+    type: if
+    condition: 'steps.get_eligible.output.candidates[0].streamName:*'
+    steps:
+      # Identify code features per stream. The endpoint no-ops internally when
+      # the repository is unchanged, so iterating all candidates is safe.
+      - name: identify_all
+        type: foreach
+        foreach: '${{ steps.get_eligible.output.candidates }}'
+        iteration-on-failure:
+          continue: true
+        steps:
+          - name: identify_code_features
+            type: kibana.request
+            with:
+              method: POST
+              path: '/internal/streams/{{ foreach.item.streamName }}/code_features/_identify'
+              headers:
+                x-elastic-internal-origin: 'kibana'
+            on-failure:
+              retry:
+                max-attempts: 2
+                delay: '5s'
+                strategy: exponential
