@@ -12,36 +12,42 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react';
 import { monaco } from '@kbn/code-editor';
 import { I18nProvider } from '@kbn/i18n-react';
-import { applyWorkflowYamlValidationToEditor } from './apply_workflow_yaml_validation_to_editor';
 import { WorkflowChangeHistoryMonacoPreview } from './workflow_change_history_monaco_preview';
-import { navigateToErrorPosition } from '../../widgets/workflow_yaml_editor/lib/utils';
 import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
 
 jest.mock('@kbn/workflows-ui', () => ({
-  useWorkflowsMonacoTheme: jest.fn(),
+  useDefineWorkflowsMonacoTheme: jest.fn(),
   WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
 }));
 
-jest.mock('../../widgets/workflow_yaml_editor/lib/utils', () => ({
-  navigateToErrorPosition: jest.fn(),
-}));
+let mockValidationResults: YamlValidationResult[] = [];
+let mockIsValidationLoading = false;
+const mockHandleValidationErrorClick = jest.fn();
 
-jest.mock('./apply_workflow_yaml_validation_to_editor', () => ({
-  applyWorkflowYamlValidationToEditor: jest.fn(() => Promise.resolve({ validationResults: [] })),
+jest.mock('./use_workflow_change_history_preview_validation', () => ({
+  useWorkflowChangeHistoryPreviewValidation: jest.fn(() => ({
+    validationResults: mockValidationResults,
+    isValidationLoading: mockIsValidationLoading,
+    handleValidationErrorClick: mockHandleValidationErrorClick,
+  })),
 }));
 
 jest.mock('../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accordion', () => ({
   WorkflowYamlValidationAccordion: ({
     extraAction,
     validationErrors,
+    isLoading,
     onErrorClick,
   }: {
     extraAction?: React.ReactNode;
     validationErrors?: YamlValidationResult[] | null;
+    isLoading?: boolean;
     onErrorClick?: (error: YamlValidationResult) => void;
   }) => (
     <div data-test-subj="workflowYamlEditorValidationErrorsList">
-      {(validationErrors ?? []).length === 0
+      {isLoading
+        ? 'Initializing validation...'
+        : (validationErrors ?? []).length === 0
         ? 'No validation errors'
         : (validationErrors ?? []).map((error) => (
             <button
@@ -61,6 +67,8 @@ jest.mock('../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accord
 const mockYamlModel = {
   getLineLength: jest.fn(() => 10),
   getLineCount: jest.fn(() => 1),
+  getValue: jest.fn(() => 'name: current\n'),
+  uri: { toString: () => 'inmemory://model/current.yaml' },
 };
 
 const mockRevealLineInCenter = jest.fn();
@@ -91,11 +99,15 @@ jest.mock('@kbn/code-editor', () => ({
       createModel: jest.fn((value: string) => ({ value, dispose: jest.fn() })),
       create: jest.fn(() => ({
         dispose: jest.fn(),
+        layout: jest.fn(),
         getModel: jest.fn(() => mockYamlModel),
+        updateOptions: jest.fn(),
+        createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
       })),
       createDiffEditor: jest.fn(() => ({
         setModel: jest.fn(),
         dispose: jest.fn(),
+        layout: jest.fn(),
         updateOptions: mockDiffUpdateOptions,
         getLineChanges: jest.fn(() => mockLineChanges),
         onDidUpdateDiff: jest.fn((listener: () => void) => {
@@ -110,17 +122,17 @@ jest.mock('@kbn/code-editor', () => ({
           updateOptions: mockModifiedUpdateOptions,
           revealLineInCenter: jest.fn(),
           getModel: jest.fn(() => mockYamlModel),
+          createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
         })),
       })),
       setModelMarkers: jest.fn(),
+      onDidChangeMarkers: jest.fn(() => ({ dispose: jest.fn() })),
     },
   },
 }));
 
 const mockCreateEditor = monaco.editor.create as jest.Mock;
 const mockCreateDiffEditor = monaco.editor.createDiffEditor as jest.Mock;
-const mockApplyValidation = applyWorkflowYamlValidationToEditor as jest.Mock;
-const mockNavigateToErrorPosition = navigateToErrorPosition as jest.Mock;
 
 const sampleValidationError: YamlValidationResult = {
   id: 'preview-validation-error',
@@ -144,6 +156,8 @@ const renderPreview = (props: React.ComponentProps<typeof WorkflowChangeHistoryM
 describe('WorkflowChangeHistoryMonacoPreview', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockValidationResults = [];
+    mockIsValidationLoading = false;
     onDidUpdateDiffCallbacks.length = 0;
     mockLineChanges = [
       {
@@ -169,7 +183,7 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
     expect(screen.getByTestId('workflowChangeHistoryMonacoPreview')).toBeInTheDocument();
     expect(mockCreateEditor).toHaveBeenCalled();
     expect(mockCreateDiffEditor).not.toHaveBeenCalled();
-    expect(screen.getByText('No validation errors')).toBeInTheDocument();
+    expect(screen.queryByText('No validation errors')).not.toBeInTheDocument();
     expect(screen.getByTestId('workflowChangeHistoryPreviewSettingsButton')).toBeInTheDocument();
   });
 
@@ -277,6 +291,16 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
     });
 
     expect(mockCreateDiffEditor).toHaveBeenCalled();
+    expect(mockCreateDiffEditor).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ lineNumbers: 'on', renderSideBySide: false })
+    );
+    expect(mockOriginalUpdateOptions).toHaveBeenCalledWith(
+      expect.objectContaining({ lineNumbers: 'off' })
+    );
+    expect(mockModifiedUpdateOptions).toHaveBeenCalledWith(
+      expect.objectContaining({ lineNumbers: 'on' })
+    );
     expect(mockCreateEditor).not.toHaveBeenCalled();
     expect(screen.getByTestId('workflowChangeHistoryDiffNavigator')).toHaveTextContent(
       '1 of 1 changes'
@@ -358,50 +382,52 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
     fireEvent.click(screen.getByTestId('workflowChangeHistoryPreviewSettingsButton'));
     fireEvent.click(screen.getByTestId('workflowChangeHistoryCompareSplit'));
 
-    expect(mockDiffUpdateOptions).toHaveBeenCalledWith({ renderSideBySide: true });
+    expect(mockDiffUpdateOptions).toHaveBeenCalledWith(
+      expect.objectContaining({ renderSideBySide: true, renderIndicators: true })
+    );
     expect(mockCreateDiffEditor.mock.calls.length).toBe(createCallsBeforeToggle);
   });
 
-  it('re-validates with highlight enabled when the setting is toggled on', async () => {
-    jest.useFakeTimers();
+  it('keeps settings popover open when toggling highlight validation', () => {
+    renderPreview({
+      targetYaml: 'name: current\n',
+      baselineYaml: 'name: original\n',
+    });
+
+    fireEvent.click(screen.getByTestId('workflowChangeHistoryPreviewSettingsButton'));
+    expect(screen.getByTestId('workflowChangeHistoryCompareUnified')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('workflowChangeHistoryHighlightValidationErrors'));
+
+    expect(screen.getByTestId('workflowChangeHistoryCompareUnified')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('workflowChangeHistoryHighlightValidationErrors')
+    ).toBeInTheDocument();
+  });
+
+  it('keeps settings popover open when switching compare mode', () => {
+    renderPreview({
+      targetYaml: 'name: current\n',
+      baselineYaml: 'name: original\n',
+    });
+
+    fireEvent.click(screen.getByTestId('workflowChangeHistoryPreviewSettingsButton'));
+    fireEvent.click(screen.getByTestId('workflowChangeHistoryCompareSplit'));
+
+    expect(screen.getByTestId('workflowChangeHistoryCompareUnified')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('workflowChangeHistoryHighlightValidationErrors')
+    ).toBeInTheDocument();
+  });
+
+  it('shows validation settings when highlight validation is enabled', () => {
     renderPreview({ targetYaml: 'name: current\n' });
-
-    await act(async () => {
-      jest.advanceTimersByTime(150);
-      jest.runOnlyPendingTimers();
-      await Promise.resolve();
-    });
-
-    await waitFor(() => {
-      expect(mockApplyValidation).toHaveBeenCalledWith(
-        expect.anything(),
-        'name: current\n',
-        false,
-        expect.anything(),
-        expect.anything()
-      );
-    });
-
-    mockApplyValidation.mockClear();
 
     fireEvent.click(screen.getByTestId('workflowChangeHistoryPreviewSettingsButton'));
     fireEvent.click(screen.getByTestId('workflowChangeHistoryHighlightValidationErrors'));
 
-    await act(async () => {
-      jest.advanceTimersByTime(150);
-      jest.runOnlyPendingTimers();
-      await Promise.resolve();
-    });
-
-    await waitFor(() => {
-      expect(mockApplyValidation).toHaveBeenCalledWith(
-        expect.anything(),
-        'name: current\n',
-        true,
-        expect.anything(),
-        expect.anything()
-      );
-    });
+    expect(screen.getByTestId('workflowYamlEditorValidationErrorsList')).toBeInTheDocument();
+    expect(screen.getByText('No validation errors')).toBeInTheDocument();
   });
 
   it('does not show compare mode settings when yaml has no diff baseline', () => {
@@ -414,19 +440,31 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
     expect(screen.queryByTestId('workflowChangeHistoryCompareSplit')).not.toBeInTheDocument();
   });
 
-  it('navigates to a validation error when an error row is clicked', async () => {
+  it('shows the validation accordion when highlight validation is enabled', async () => {
     jest.useFakeTimers();
-    mockApplyValidation.mockResolvedValue({
-      validationResults: [sampleValidationError],
-    });
+    renderPreview({ targetYaml: 'name: current\n' });
 
-    renderPreview({ targetYaml: 'name: current\nsteps:\n  - bad\n' });
+    fireEvent.click(screen.getByTestId('workflowChangeHistoryPreviewSettingsButton'));
+    fireEvent.click(screen.getByTestId('workflowChangeHistoryHighlightValidationErrors'));
 
     await act(async () => {
       jest.advanceTimersByTime(150);
       jest.runOnlyPendingTimers();
       await Promise.resolve();
     });
+
+    await waitFor(() => {
+      expect(screen.getByText('No validation errors')).toBeInTheDocument();
+    });
+  });
+
+  it('delegates validation error clicks to the preview validation hook', async () => {
+    mockValidationResults = [sampleValidationError];
+
+    renderPreview({ targetYaml: 'name: current\nsteps:\n  - bad\n' });
+
+    fireEvent.click(screen.getByTestId('workflowChangeHistoryPreviewSettingsButton'));
+    fireEvent.click(screen.getByTestId('workflowChangeHistoryHighlightValidationErrors'));
 
     await waitFor(() => {
       expect(
@@ -436,11 +474,7 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
 
     fireEvent.click(screen.getByTestId(`workflowYamlValidationError-${sampleValidationError.id}`));
 
-    expect(mockNavigateToErrorPosition).toHaveBeenCalledWith(
-      expect.anything(),
-      sampleValidationError.startLineNumber,
-      sampleValidationError.startColumn
-    );
+    expect(mockHandleValidationErrorClick).toHaveBeenCalledWith(sampleValidationError);
   });
 
   it('moves compare mode selection and focus with arrow keys', () => {
@@ -461,6 +495,8 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
     fireEvent.keyDown(unifiedTile, { key: 'ArrowRight' });
 
     expect(splitTile).toHaveFocus();
-    expect(mockDiffUpdateOptions).toHaveBeenCalledWith({ renderSideBySide: true });
+    expect(mockDiffUpdateOptions).toHaveBeenCalledWith(
+      expect.objectContaining({ renderSideBySide: true, renderIndicators: true })
+    );
   });
 });
