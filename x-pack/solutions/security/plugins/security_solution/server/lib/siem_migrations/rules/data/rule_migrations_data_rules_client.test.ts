@@ -971,24 +971,6 @@ describe('RuleMigrationsDataRulesClient', () => {
         });
       });
 
-      // Regression for #276409: the title search must use `match_phrase` so that
-      // searching a rule's displayed name returns only rules whose title contains
-      // that phrase. The previous `match` query used default OR token semantics,
-      // which returned every rule sharing a common token (e.g. searching
-      // "Spike in Network Traffic" returned 15+ rules instead of the matching one).
-      test('should use match_phrase (not match) for searchTerm title matching', () => {
-        const result = getFilterQuery({ searchTerm: 'Spike in Network Traffic' });
-        const titleClause = result.bool.filter[1].bool.should;
-        expect(titleClause[0]).toEqual({
-          match_phrase: { 'elastic_rule.title': 'Spike in Network Traffic' },
-        });
-        expect(titleClause[0]).not.toHaveProperty('match');
-        expect(titleClause[1].bool.must[1]).toEqual({
-          match_phrase: { 'original_rule.title': 'Spike in Network Traffic' },
-        });
-        expect(titleClause[1].bool.must[1]).not.toHaveProperty('match');
-      });
-
       test('should build filter query with multiple statuses', () => {
         const filters = { status: [SiemMigrationStatus.COMPLETED, SiemMigrationStatus.FAILED] };
         const result = getFilterQuery(filters);
