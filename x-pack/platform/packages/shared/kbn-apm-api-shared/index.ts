@@ -44,7 +44,6 @@ export type * from './src/routes/mobile';
 export type * from './src/routes/mobile_errors';
 export type * from './src/routes/mobile_crashes';
 export type * from './src/routes/fleet';
-export type * from './src/routes/debug_telemetry';
 export type * from './src/routes/storage_explorer';
 export type * from './src/routes/source_maps';
 export type * from './src/routes/agent_configuration';
@@ -59,7 +58,3 @@ export {
   transactionDataSourceRt,
   filtersRt,
 } from './src/default_api_types';
-export {
-  OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
-  OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
-} from './src/cps_feature_flag';
