@@ -10,6 +10,7 @@
 import type { IncomingHttpHeaders } from 'http';
 import {
   Transport,
+  errors,
   type TransportOptions,
   type TransportRequestParams,
   type TransportRequestOptions,
@@ -56,6 +57,49 @@ export type OnRequestHandler = (
 ) => void;
 
 const noop = () => undefined;
+
+const isStreamBody = (body: unknown): body is NodeJS.ReadableStream => {
+  return typeof body === 'object' && body !== null && typeof (body as { pipe?: unknown }).pipe === 'function';
+};
+
+const isUnauthorizedStreamResponse = (
+  response: TransportResult<any, any>
+): response is TransportResult<NodeJS.ReadableStream, any> & { statusCode: 401 } => {
+  return response.statusCode === 401 && isStreamBody(response.body);
+};
+
+const readStreamBody = async (body: NodeJS.ReadableStream): Promise<string> => {
+  const chunks: Buffer[] = [];
+
+  for await (const chunk of body as AsyncIterable<Buffer | string>) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+
+  return Buffer.concat(chunks).toString('utf8');
+};
+
+const createUnauthorizedStreamError = async (
+  response: TransportResult<NodeJS.ReadableStream, any> & { statusCode: 401 }
+) => {
+  const responseBodyText = await readStreamBody(response.body);
+
+  let responseBody: unknown;
+  if (responseBodyText) {
+    try {
+      responseBody = JSON.parse(responseBodyText);
+    } catch {
+      responseBody = responseBodyText;
+    }
+  }
+
+  return new errors.ResponseError({
+    statusCode: response.statusCode,
+    body: responseBody,
+    headers: response.headers,
+    warnings: response.warnings ?? [],
+    meta: response.meta ?? ({} as any),
+  });
+};
 
 export const createTransport = ({
   scoped = false,
@@ -109,31 +153,51 @@ export const createTransport = ({
 
       onRequest({ scoped }, params, opts, logger);
 
-      try {
-        return (await super.request(params, opts)) as TransportResult<any, any>;
-      } catch (e) {
-        if (isUnauthorizedError(e)) {
-          const unauthorizedErrorHandler = getUnauthorizedErrorHandler
-            ? getUnauthorizedErrorHandler()
-            : undefined;
-          if (unauthorizedErrorHandler) {
-            const result = await unauthorizedErrorHandler(e);
-            if (isRetryResult(result)) {
-              this.headers = {
-                ...this.headers,
-                ...result.authHeaders,
-              };
-              const retryOpts = { ...opts };
-              retryOpts.headers = {
-                ...this.headers,
-                ...options?.headers,
-              };
-              return (await super.request(params, retryOpts)) as TransportResult<any, any>;
+      const retryUnauthorizedRequest = async (error: errors.ResponseError) => {
+        const unauthorizedErrorHandler = getUnauthorizedErrorHandler
+          ? getUnauthorizedErrorHandler()
+          : undefined;
+        if (unauthorizedErrorHandler) {
+          const result = await unauthorizedErrorHandler(error);
+          if (isRetryResult(result)) {
+            this.headers = {
+              ...this.headers,
+              ...result.authHeaders,
+            };
+            const retryOpts = { ...opts };
+            retryOpts.headers = {
+              ...this.headers,
+              ...options?.headers,
+            };
+
+            const retryResponse = (await super.request(params, retryOpts)) as TransportResult<any, any>;
+            if (isUnauthorizedStreamResponse(retryResponse)) {
+              throw await createUnauthorizedStreamError(retryResponse);
             }
+
+            return retryResponse;
           }
         }
+
+        throw error;
+      };
+
+      let response: TransportResult<any, any>;
+      try {
+        response = (await super.request(params, opts)) as TransportResult<any, any>;
+      } catch (e) {
+        if (isUnauthorizedError(e)) {
+          return await retryUnauthorizedRequest(e);
+        }
+
         throw e;
       }
+
+      if (isUnauthorizedStreamResponse(response)) {
+        return await retryUnauthorizedRequest(await createUnauthorizedStreamError(response));
+      }
+
+      return response;
     }
   }
 
