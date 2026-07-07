@@ -291,7 +291,7 @@ function renderPopoverContent({
             data-test-subj="dataTableExpandCellActionPopoverValue"
             css={css`
               white-space: pre-wrap;
-              max-height: 500px;
+              max-height: 350px;
               overflow: auto;
             `}
             tabIndex={0}
