@@ -6,11 +6,10 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import type { EpisodesSortState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
-import type { UnifiedDataTableSettingsColumn } from '@kbn/unified-data-table';
+import { z } from '@kbn/zod';
 import { ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import type { IKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
-import { isArray, isNumber, isPlainObject, isString } from 'lodash';
+import { isPlainObject } from 'lodash';
 import { ALERTING_V2_EPISODES_APP_ID, ALERTING_V2_SECTION_ID } from '../../../constants';
 
 /** Namespace for episodes table config inside the `_a` app-state blob */
@@ -20,14 +19,32 @@ export const EPISODES_TABLE_APP_STATE_KEY = 'episodesTable' as const;
 export const EPISODES_TABLE_CONFIG_STORAGE_KEY =
   `${ALERTING_V2_SECTION_ID}.${ALERTING_V2_EPISODES_APP_ID}.tableConfiguration` as const;
 
-export type EpisodesTableColumnSettings = Record<string, UnifiedDataTableSettingsColumn>;
+const episodesTableColumnSettingSchema = z.object({
+  width: z.number().optional(),
+  display: z.string().optional(),
+});
 
-export interface EpisodesTableConfig {
-  visibleColumns: string[];
-  sort: EpisodesSortState;
-  rowHeight: number;
-  columnSettings: EpisodesTableColumnSettings;
-}
+// Bounds the row height to a valid line count (`auto` is -1). Values come from the URL and
+// localStorage, so an unbounded check would let a bad value render absurdly tall rows. Mirrors
+// @kbn/unified-data-table's `isValidRowHeight`, which isn't exported for reuse.
+const rowHeightSchema = z.number().int().min(-1).max(20);
+
+/**
+ * One field per persisted display option. Add more fields here as more options are persisted —
+ * decode/encode below validate and serialize per-field automatically.
+ */
+const episodesTableConfigSchema = z.object({
+  visibleColumns: z.array(z.string()).min(1),
+  sort: z.object({
+    sortField: z.string().min(1),
+    sortDirection: z.enum(['asc', 'desc']),
+  }),
+  rowHeight: rowHeightSchema,
+  columnSettings: z.record(z.string(), episodesTableColumnSettingSchema),
+});
+
+export type EpisodesTableConfig = z.infer<typeof episodesTableConfigSchema>;
+export type EpisodesTableColumnSettings = EpisodesTableConfig['columnSettings'];
 
 export const DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS: string[] = [
   'episode.status',
@@ -39,7 +56,7 @@ export const DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS: string[] = [
   'assignees',
 ];
 
-export const DEFAULT_EPISODES_TABLE_SORT: EpisodesSortState = {
+export const DEFAULT_EPISODES_TABLE_SORT: EpisodesTableConfig['sort'] = {
   sortField: '@timestamp',
   sortDirection: 'desc',
 };
@@ -62,80 +79,45 @@ type AppStateRecord = Record<string, unknown> & {
   [EPISODES_TABLE_APP_STATE_KEY]?: unknown;
 };
 
-// Bounds the row height to a valid line count (`auto` is -1). Values come from the URL and
-// localStorage, so an unbounded check would let a bad value render absurdly tall rows. Mirrors
-// @kbn/unified-data-table's `isValidRowHeight`, which isn't exported for reuse.
-const MIN_ROW_HEIGHT = -1;
-const MAX_ROW_HEIGHT = 20;
+type EpisodesTableConfigKey = keyof EpisodesTableConfig;
 
-const isValidRowHeight = (v: unknown): v is number =>
-  isNumber(v) && Number.isInteger(v) && v >= MIN_ROW_HEIGHT && v <= MAX_ROW_HEIGHT;
+const configFields = Object.keys(episodesTableConfigSchema.shape) as EpisodesTableConfigKey[];
 
-const isNonEmptyString = (v: unknown): v is string => isString(v) && v.trim().length > 0;
+type EpisodesTableConfigRecord = Partial<Record<EpisodesTableConfigKey, unknown>>;
 
-const isNonEmptyStringArray = (v: unknown): v is string[] =>
-  isArray(v) && v.length > 0 && v.every(isString);
+const isPlainRecord = (value: unknown): value is Record<string, unknown> => isPlainObject(value);
 
-const isSortDirection = (v: unknown): v is 'asc' | 'desc' => v === 'asc' || v === 'desc';
-
-function decodeSort(v: unknown): EpisodesSortState | undefined {
-  if (!isPlainObject(v)) return undefined;
-  const { sortField, sortDirection } = v as Record<string, unknown>;
-  if (!isNonEmptyString(sortField) || !isSortDirection(sortDirection)) return undefined;
-  return { sortField, sortDirection };
-}
-
-function decodeColumnSettings(v: unknown): EpisodesTableColumnSettings | undefined {
-  if (!isPlainObject(v)) return undefined;
-  const decoded: EpisodesTableColumnSettings = {};
-  for (const [colId, colSettings] of Object.entries(v as Record<string, unknown>)) {
-    if (!isPlainObject(colSettings)) continue;
-    const cs = colSettings as Record<string, unknown>;
-    const entry: UnifiedDataTableSettingsColumn = {};
-    if (isNumber(cs.width) && Number.isFinite(cs.width)) {
-      entry.width = cs.width;
+/**
+ * Validates each field independently against its own schema, so one corrupted or missing
+ * field falls back to the default without discarding the other, still-valid fields.
+ */
+const decodeEpisodesTableConfig = (raw: unknown): Partial<EpisodesTableConfig> | undefined => {
+  if (!isPlainRecord(raw)) return undefined;
+  const result: EpisodesTableConfigRecord = {};
+  for (const field of configFields) {
+    const parsed = episodesTableConfigSchema.shape[field].safeParse(raw[field]);
+    if (!parsed.success) {
+      continue;
     }
-    if (isString(cs.display)) {
-      entry.display = cs.display;
+    result[field] = parsed.data;
+  }
+  // `result` was built generically per schema field above, so it matches EpisodesTableConfig's
+  // shape by construction — TS just can't verify that field-by-field.
+  return Object.keys(result).length > 0 ? (result as Partial<EpisodesTableConfig>) : undefined;
+};
+
+const encodeEpisodesTableConfig = (
+  config: EpisodesTableConfig
+): EpisodesTableConfigRecord | null => {
+  const out: EpisodesTableConfigRecord = {};
+  for (const field of configFields) {
+    if (deepEqual(config[field], DEFAULT_EPISODES_TABLE_CONFIG[field])) {
+      continue;
     }
-    decoded[colId] = entry;
-  }
-  return decoded;
-}
-
-function decodeEpisodesTableConfig(raw: unknown): Partial<EpisodesTableConfig> | undefined {
-  if (!isPlainObject(raw)) return undefined;
-  const o = raw as Record<string, unknown>;
-  const result: Partial<EpisodesTableConfig> = {};
-  if (isNonEmptyStringArray(o.visibleColumns)) {
-    result.visibleColumns = [...o.visibleColumns];
-  }
-  const sort = decodeSort(o.sort);
-  if (sort) result.sort = sort;
-  if (isValidRowHeight(o.rowHeight)) {
-    result.rowHeight = o.rowHeight;
-  }
-  const columnSettings = decodeColumnSettings(o.columnSettings);
-  if (columnSettings) result.columnSettings = columnSettings;
-  return Object.keys(result).length > 0 ? result : undefined;
-}
-
-function encodeEpisodesTableConfig(config: EpisodesTableConfig): Record<string, unknown> | null {
-  const out: Record<string, unknown> = {};
-  if (!deepEqual(config.visibleColumns, DEFAULT_EPISODES_TABLE_CONFIG.visibleColumns)) {
-    out.visibleColumns = config.visibleColumns;
-  }
-  if (!deepEqual(config.sort, DEFAULT_EPISODES_TABLE_CONFIG.sort)) {
-    out.sort = config.sort;
-  }
-  if (config.rowHeight !== DEFAULT_EPISODES_TABLE_CONFIG.rowHeight) {
-    out.rowHeight = config.rowHeight;
-  }
-  if (!deepEqual(config.columnSettings, DEFAULT_EPISODES_TABLE_CONFIG.columnSettings)) {
-    out.columnSettings = config.columnSettings;
+    out[field] = config[field];
   }
   return Object.keys(out).length > 0 ? out : null;
-}
+};
 
 /**
  * Merges table config from localStorage and URL, with URL winning per-field over localStorage,
