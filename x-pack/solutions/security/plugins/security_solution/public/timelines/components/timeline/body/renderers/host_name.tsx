@@ -49,7 +49,7 @@ const HostNameComponent: React.FC<Props> = ({
   const { overlays } = services;
   const store = useStore();
   const history = useHistory();
-  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const newFlyoutSystemEnabled = useIsNewFlyoutEnabled();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const isInSecurityApp = useIsInSecurityApp();
@@ -72,7 +72,7 @@ const HostNameComponent: React.FC<Props> = ({
         return;
       }
 
-      if (enableNewFlyout) {
+      if (newFlyoutSystemEnabled) {
         overlays.openSystemFlyout(
           flyoutProviders({
             services,
@@ -109,7 +109,7 @@ const HostNameComponent: React.FC<Props> = ({
       entityId,
       openFlyout,
       contextId,
-      enableNewFlyout,
+      newFlyoutSystemEnabled,
       overlays,
       services,
       store,

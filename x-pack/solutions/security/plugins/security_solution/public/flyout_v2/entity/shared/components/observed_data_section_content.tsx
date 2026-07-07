@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { useEntityStoreEuidApi, type EntityStoreEuid } from '@kbn/entity-store/public';
+import { type EntityStoreEuid, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { getCriteriaFromUsersType } from '../../../../common/components/ml/criteria/get_criteria_from_users_type';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -91,7 +91,7 @@ const resolveEntityAnomalyConfig = ({
 export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps) => {
   const { entityType, observedData, identityFields, entityRecord, contextID, scopeId } = props;
 
-  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const newFlyoutSystemEnabled = useIsNewFlyoutEnabled();
 
   const { to, from, isInitializing } = useGlobalTime();
 
@@ -162,7 +162,7 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
       contextID={contextID}
       scopeId={scopeId}
       observedFields={typedFields}
-      entityLink={enableNewFlyout ? renderFlyoutLink : undefined}
+      entityLink={newFlyoutSystemEnabled ? renderFlyoutLink : undefined}
     />
   );
 });

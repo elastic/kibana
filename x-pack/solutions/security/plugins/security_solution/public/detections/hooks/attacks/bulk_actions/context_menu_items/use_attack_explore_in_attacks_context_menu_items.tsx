@@ -42,7 +42,7 @@ export const useAttackExploreInAttacksContextMenuItems = ({
   const {
     services: { application },
   } = useKibana();
-  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const newFlyoutSystemEnabled = useIsNewFlyoutEnabled();
 
   const url = useMemo(() => {
     const attacksBaseURL = application.getUrlForApp('securitySolutionUI', { path: 'attacks' });
@@ -51,9 +51,9 @@ export const useAttackExploreInAttacksContextMenuItems = ({
       indexName: attack.index ?? '',
       timestamp: attack.timestamp,
       attacksBaseURL,
-      useFlyoutV2: enableNewFlyout,
+      useFlyoutV2: newFlyoutSystemEnabled,
     });
-  }, [application, attack.id, attack.index, attack.timestamp, enableNewFlyout]);
+  }, [application, attack.id, attack.index, attack.timestamp, newFlyoutSystemEnabled]);
 
   const onClick = useCallback(() => {
     closePopover?.();
