@@ -58,6 +58,13 @@ export class UnifiedTabs {
     );
   }
 
+  async isTabsBarVisible(): Promise<boolean> {
+    return this.getTabsBar()
+      .waitFor({ state: 'visible', timeout: 1_000 })
+      .then(() => true)
+      .catch(() => false);
+  }
+
   private async getTabWrapper(index: number): Promise<Locator> {
     const tabWrappers = await this.page.locator('[data-test-subj^="unifiedTabs_tab_"]').all();
 
