@@ -8,6 +8,8 @@
  */
 
 import { castEsToKbnFieldTypeName, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { isMap, isStringLiteral } from '@elastic/esql';
+import type { ESQLMapEntry, ESQLSingleAstItem } from '@elastic/esql/types';
 import { DOUBLE_QUOTED_STRING_REGEX } from './autocomplete/map_expression';
 import { type MapValueType } from '../../registry/complete_items';
 
@@ -45,6 +47,22 @@ export function getMapNestingLevel(text: string): number {
  */
 export function isInsideMapExpression(text: string): boolean {
   return getMapNestingLevel(text) > 0;
+}
+
+/**
+ * Finds a string-keyed entry in an ES|QL map AST.
+ */
+export function getMapEntryByStringKey(
+  map: ESQLSingleAstItem | undefined,
+  name: string
+): ESQLMapEntry | undefined {
+  if (!isMap(map)) {
+    return undefined;
+  }
+
+  return map.entries.find(
+    (entry) => isStringLiteral(entry.key) && entry.key.valueUnquoted === name
+  );
 }
 
 const TypeMap: Partial<Record<KBN_FIELD_TYPES, MapValueType>> = {

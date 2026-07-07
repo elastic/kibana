@@ -70,6 +70,12 @@ export function escapeRegExp(text: string): string {
   return text.replace(REGEX_SPECIAL_CHARS, '\\$&');
 }
 
+export function matchesWildcardPattern(pattern: string, value: string): boolean {
+  const regex = new RegExp(`^${escapeRegExp(pattern).replace(/\\\*/g, '.*')}$`);
+
+  return regex.test(value);
+}
+
 /** Extracts the trailing identifier from text (e.g., "start" from "end=value start"). */
 export function getTrailingIdentifier(text: string): string | undefined {
   const match = text.match(TRAILING_IDENTIFIER_REGEX);

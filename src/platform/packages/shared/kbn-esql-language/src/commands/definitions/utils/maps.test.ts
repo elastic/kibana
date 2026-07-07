@@ -7,7 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MAP_PARAMS_REGEX, parseMapParams } from './maps';
+import { Parser } from '@elastic/esql';
+import type { ESQLMap } from '@elastic/esql/types';
+import { getMapEntryByStringKey, MAP_PARAMS_REGEX, parseMapParams } from './maps';
+
+const mapExpression = (query: string): ESQLMap => {
+  const { root } = Parser.parse(query);
+  const command = root.commands[1] as { namedParameters?: ESQLMap };
+  return command.namedParameters as ESQLMap;
+};
+
+describe('getMapEntryByStringKey', () => {
+  it('finds an entry by string key', () => {
+    const map = mapExpression(
+      'FROM a | IP_LOCATION geo = ipField WITH { "properties": ["city_name"] }'
+    );
+
+    expect(getMapEntryByStringKey(map, 'properties')?.key.text).toBe('"properties"');
+  });
+
+  it('returns undefined when the key is missing', () => {
+    const map = mapExpression('FROM a | IP_LOCATION geo = ipField WITH { "first_only": true }');
+
+    expect(getMapEntryByStringKey(map, 'properties')).toBeUndefined();
+  });
+});
 
 describe('MAP_PARAMS_REGEX', () => {
   const regex = MAP_PARAMS_REGEX;
