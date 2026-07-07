@@ -239,9 +239,9 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
       return;
     }
 
-    const upgradeAgentBasedPolicies = async (): Promise<boolean> => {
+    const upgradeAgentBasedPolicies = async (): Promise<void> => {
       if (!packagePolicyIdsToUpdate.length) {
-        return true;
+        return;
       }
       try {
         await upgradePackagePoliciesMutation.mutateAsync({
@@ -265,7 +265,6 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
             startServices
           ),
         });
-        return true;
       } catch (error) {
         notifications.toasts.addError(error, {
           title: i18n.translate(
@@ -285,13 +284,12 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
             }
           ),
         });
-        return false;
       }
     };
 
-    const upgradeAgentlessPolicies = async (): Promise<boolean> => {
+    const upgradeAgentlessPolicies = async (): Promise<void> => {
       if (!agentlessIdsToUpgrade.length) {
-        return true;
+        return;
       }
       try {
         const results = await sendBulkUpgradeAgentlessPolicies(agentlessIdsToUpgrade);
@@ -320,7 +318,8 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
               }
             ),
           });
-          return false;
+          // Partial failure: skip the success toast below.
+          return;
         }
         notifications.toasts.addSuccess({
           title: toMountPoint(
@@ -340,7 +339,6 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
             startServices
           ),
         });
-        return true;
       } catch (error) {
         notifications.toasts.addError(error, {
           title: i18n.translate(
@@ -360,7 +358,6 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
             }
           ),
         });
-        return false;
       }
     };
 
