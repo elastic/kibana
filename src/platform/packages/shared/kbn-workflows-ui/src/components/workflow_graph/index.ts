@@ -20,7 +20,6 @@ export {
   type ToolMenuItemDef,
   useWorkflowBottomBarState,
 } from './workflow_graph_bottom_bar';
-export { getStepIconType, getTriggerTypeIconType } from './step_icon_types';
 export {
   WorkflowVisualEditorFlyout,
   type WorkflowVisualEditorFlyoutProps,
