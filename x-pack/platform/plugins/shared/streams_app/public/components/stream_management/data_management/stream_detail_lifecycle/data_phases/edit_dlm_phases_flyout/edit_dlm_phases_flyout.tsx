@@ -33,7 +33,6 @@ import { useDataPhasesFlyoutStyles } from '../shared';
 import { useIlmPhasesColorAndDescription } from '../../hooks/use_ilm_phases_color_and_description';
 import {
   formatDuration,
-  getPhaseBoundName,
   getTimingBoundHelpText,
   getDoubledDurationFromPrevious,
   parseIntervalWithDefaultUnit,
@@ -390,7 +389,7 @@ export const EditDlmPhasesFlyout = ({
       : undefined;
     const frozenAfterHelpText = nextPhaseAfter
       ? getTimingBoundHelpText({
-          upper: { name: getPhaseBoundName('delete'), value: nextPhaseAfter },
+          upper: { neighbor: { type: 'phase', phase: 'delete' }, value: nextPhaseAfter },
         })
       : undefined;
     return (
@@ -476,7 +475,7 @@ export const EditDlmPhasesFlyout = ({
     const deleteAfterHelpText =
       frozenEnabled && previousPhaseAfter
         ? getTimingBoundHelpText({
-            lower: { name: getPhaseBoundName('frozen'), value: previousPhaseAfter },
+            lower: { neighbor: { type: 'phase', phase: 'frozen' }, value: previousPhaseAfter },
           })
         : undefined;
 

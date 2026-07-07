@@ -7,45 +7,24 @@
 
 import { i18n } from '@kbn/i18n';
 import type { PhaseName } from '@kbn/streams-schema';
+import { PHASE_NAMES_LOWERCASE } from '@kbn/data-lifecycle-phases';
 
-/**
- * Describes a single constraint (lower or upper bound) on a timing/interval field.
- * `name` is a ready-to-render noun phrase for the constraining neighbor
- * (e.g. "the frozen phase", "the previous step", "data retention") and `value` is a
- * formatted duration (e.g. "40d").
- */
+/** The neighbor that constrains a timing/interval field. */
+export type BoundNeighbor =
+  | { type: 'phase'; phase: PhaseName }
+  | { type: 'previousStep' }
+  | { type: 'stepInterval'; stepNumber: number };
+
+/** A single constraint on a field: the neighbor and its formatted duration (e.g. "40d"). */
 export interface HelpTextBound {
-  name: string;
+  neighbor: BoundNeighbor;
   value: string;
 }
 
 /**
- * Noun phrase for an ILM phase, e.g. "the frozen phase". Used to reference the
- * neighboring phase that constrains a timing/interval field.
- */
-export const getPhaseBoundName = (phase: PhaseName): string =>
-  i18n.translate('xpack.streams.dataPhases.boundHelpText.phaseName', {
-    defaultMessage: 'the {phase} phase',
-    values: { phase },
-  });
-
-/** Noun phrase for the previous downsample step. */
-export const getPreviousStepBoundName = (): string =>
-  i18n.translate('xpack.streams.dataPhases.boundHelpText.previousStep', {
-    defaultMessage: 'the previous step',
-  });
-
-/** Noun phrase for a specific downsample step's interval, e.g. "the step 1 interval". */
-export const getStepIntervalBoundName = (stepNumber: number): string =>
-  i18n.translate('xpack.streams.dataPhases.boundHelpText.stepInterval', {
-    defaultMessage: 'the step {stepNumber} interval',
-    values: { stepNumber },
-  });
-
-/**
- * Build the help text for a timing field (min-age / "after"), naming the
- * neighboring constraint(s) and their value(s). Returns `undefined` when the field
- * is unconstrained by any neighbor.
+ * Build the help text for a timing field (min-age / "after"). Returns `undefined` when the field is
+ * unconstrained. The lower bound may be a phase or the previous downsample step; the upper bound is
+ * always a phase (frozen/delete).
  */
 export const getTimingBoundHelpText = ({
   lower,
@@ -54,38 +33,57 @@ export const getTimingBoundHelpText = ({
   lower?: HelpTextBound;
   upper?: HelpTextBound;
 }): string | undefined => {
-  if (lower && upper) {
-    return i18n.translate('xpack.streams.dataPhases.boundHelpText.timingRange', {
+  if (lower?.neighbor.type === 'phase' && upper?.neighbor.type === 'phase') {
+    return i18n.translate('xpack.streams.dataPhases.boundHelpText.timingAfterPhaseBeforePhase', {
       defaultMessage:
-        'Must occur after {lowerName} ({lowerValue}) and before {upperName} ({upperValue}).',
+        'Must occur after the {lowerPhase} phase ({lowerValue}) and before the {upperPhase} phase ({upperValue}).',
       values: {
-        lowerName: lower.name,
+        lowerPhase: PHASE_NAMES_LOWERCASE[lower.neighbor.phase],
         lowerValue: lower.value,
-        upperName: upper.name,
+        upperPhase: PHASE_NAMES_LOWERCASE[upper.neighbor.phase],
         upperValue: upper.value,
       },
     });
   }
-  if (lower) {
-    return i18n.translate('xpack.streams.dataPhases.boundHelpText.timingLowerBound', {
-      defaultMessage: 'Must occur after {name} ({value}).',
-      values: { name: lower.name, value: lower.value },
+  if (lower?.neighbor.type === 'previousStep' && upper?.neighbor.type === 'phase') {
+    return i18n.translate(
+      'xpack.streams.dataPhases.boundHelpText.timingAfterPreviousStepBeforePhase',
+      {
+        defaultMessage:
+          'Must occur after the previous step ({lowerValue}) and before the {upperPhase} phase ({upperValue}).',
+        values: {
+          lowerValue: lower.value,
+          upperPhase: PHASE_NAMES_LOWERCASE[upper.neighbor.phase],
+          upperValue: upper.value,
+        },
+      }
+    );
+  }
+  if (lower?.neighbor.type === 'phase') {
+    return i18n.translate('xpack.streams.dataPhases.boundHelpText.timingAfterPhase', {
+      defaultMessage: 'Must occur after the {phase} phase ({value}).',
+      values: { phase: PHASE_NAMES_LOWERCASE[lower.neighbor.phase], value: lower.value },
     });
   }
-  if (upper) {
-    return i18n.translate('xpack.streams.dataPhases.boundHelpText.timingUpperBound', {
-      defaultMessage: 'Must occur before {name} ({value}).',
-      values: { name: upper.name, value: upper.value },
+  if (lower?.neighbor.type === 'previousStep') {
+    return i18n.translate('xpack.streams.dataPhases.boundHelpText.timingAfterPreviousStep', {
+      defaultMessage: 'Must occur after the previous step ({value}).',
+      values: { value: lower.value },
+    });
+  }
+  if (upper?.neighbor.type === 'phase') {
+    return i18n.translate('xpack.streams.dataPhases.boundHelpText.timingBeforePhase', {
+      defaultMessage: 'Must occur before the {phase} phase ({value}).',
+      values: { phase: PHASE_NAMES_LOWERCASE[upper.neighbor.phase], value: upper.value },
     });
   }
   return undefined;
 };
 
 /**
- * Build the help text for an interval field (downsample interval). `multipleOf` is the interval
- * the value must be a multiple of (the previous step/phase interval); `upper` is the constraint the
- * value must stay under (the frozen or delete phase). Returns `undefined` when the field is
- * unconstrained.
+ * Build the help text for an interval field (downsample interval). `multipleOf` is the interval the
+ * value must be a multiple of (a previous phase's interval, or a previous step's interval); `upper`
+ * is the phase the value must stay under. Returns `undefined` when the field is unconstrained.
  */
 export const getIntervalBoundHelpText = ({
   multipleOf,
@@ -94,28 +92,52 @@ export const getIntervalBoundHelpText = ({
   multipleOf?: HelpTextBound;
   upper?: HelpTextBound;
 }): string | undefined => {
-  if (multipleOf && upper) {
-    return i18n.translate('xpack.streams.dataPhases.boundHelpText.intervalMultipleAndUpper', {
-      defaultMessage:
-        'Must be a multiple of {multipleName} ({multipleValue}) and smaller than {upperName} ({upperValue}).',
-      values: {
-        multipleName: multipleOf.name,
-        multipleValue: multipleOf.value,
-        upperName: upper.name,
-        upperValue: upper.value,
-      },
+  if (multipleOf?.neighbor.type === 'phase' && upper?.neighbor.type === 'phase') {
+    return i18n.translate(
+      'xpack.streams.dataPhases.boundHelpText.intervalMultiplePhaseSmallerThanPhase',
+      {
+        defaultMessage:
+          'Must be a multiple of the {multiplePhase} phase ({multipleValue}) and smaller than the {upperPhase} phase ({upperValue}).',
+        values: {
+          multiplePhase: PHASE_NAMES_LOWERCASE[multipleOf.neighbor.phase],
+          multipleValue: multipleOf.value,
+          upperPhase: PHASE_NAMES_LOWERCASE[upper.neighbor.phase],
+          upperValue: upper.value,
+        },
+      }
+    );
+  }
+  if (multipleOf?.neighbor.type === 'stepInterval' && upper?.neighbor.type === 'phase') {
+    return i18n.translate(
+      'xpack.streams.dataPhases.boundHelpText.intervalMultipleStepSmallerThanPhase',
+      {
+        defaultMessage:
+          'Must be a multiple of the step {stepNumber} interval ({multipleValue}) and smaller than the {upperPhase} phase ({upperValue}).',
+        values: {
+          stepNumber: multipleOf.neighbor.stepNumber,
+          multipleValue: multipleOf.value,
+          upperPhase: PHASE_NAMES_LOWERCASE[upper.neighbor.phase],
+          upperValue: upper.value,
+        },
+      }
+    );
+  }
+  if (multipleOf?.neighbor.type === 'phase') {
+    return i18n.translate('xpack.streams.dataPhases.boundHelpText.intervalMultiplePhase', {
+      defaultMessage: 'Must be a multiple of the {phase} phase ({value}).',
+      values: { phase: PHASE_NAMES_LOWERCASE[multipleOf.neighbor.phase], value: multipleOf.value },
     });
   }
-  if (multipleOf) {
-    return i18n.translate('xpack.streams.dataPhases.boundHelpText.intervalMultiple', {
-      defaultMessage: 'Must be a multiple of {name} ({value}).',
-      values: { name: multipleOf.name, value: multipleOf.value },
+  if (multipleOf?.neighbor.type === 'stepInterval') {
+    return i18n.translate('xpack.streams.dataPhases.boundHelpText.intervalMultipleStep', {
+      defaultMessage: 'Must be a multiple of the step {stepNumber} interval ({value}).',
+      values: { stepNumber: multipleOf.neighbor.stepNumber, value: multipleOf.value },
     });
   }
-  if (upper) {
-    return i18n.translate('xpack.streams.dataPhases.boundHelpText.intervalUpperBound', {
-      defaultMessage: 'Must be smaller than {name} ({value}).',
-      values: { name: upper.name, value: upper.value },
+  if (upper?.neighbor.type === 'phase') {
+    return i18n.translate('xpack.streams.dataPhases.boundHelpText.intervalSmallerThanPhase', {
+      defaultMessage: 'Must be smaller than the {phase} phase ({value}).',
+      values: { phase: PHASE_NAMES_LOWERCASE[upper.neighbor.phase], value: upper.value },
     });
   }
   return undefined;

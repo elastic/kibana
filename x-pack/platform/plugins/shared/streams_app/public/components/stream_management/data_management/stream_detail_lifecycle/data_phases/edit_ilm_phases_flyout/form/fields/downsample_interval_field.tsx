@@ -16,7 +16,6 @@ import {
   formatDuration,
   getIntervalBoundHelpText,
   getMultipleStepAttributes,
-  getPhaseBoundName,
   getUnitSelectOptions,
   type HelpTextBound,
 } from '../../../shared';
@@ -100,7 +99,7 @@ const DownsampleIntervalFieldControl = ({
       { integerOnly: true, minExclusive: 0 }
     );
     if (!value) return undefined;
-    return { name: getPhaseBoundName(phase), value };
+    return { neighbor: { type: 'phase', phase }, value };
   };
 
   const helpText = getIntervalBoundHelpText({

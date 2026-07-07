@@ -20,8 +20,6 @@ import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from
 import type { PreservedTimeUnit, TimeUnit } from '../types';
 import {
   formatDuration,
-  getPhaseBoundName,
-  getPreviousStepBoundName,
   getTimingBoundHelpText,
   getUnitSelectOptions,
   type HelpTextBound,
@@ -111,13 +109,13 @@ const AfterFieldControl = ({
   // before the delete phase (data retention).
   let upper: HelpTextBound | undefined;
   if (frozenAfterEsFormat) {
-    upper = { name: getPhaseBoundName('frozen'), value: frozenAfterEsFormat };
+    upper = { neighbor: { type: 'phase', phase: 'frozen' }, value: frozenAfterEsFormat };
   } else if (dataRetentionEsFormat) {
-    upper = { name: getPhaseBoundName('delete'), value: dataRetentionEsFormat };
+    upper = { neighbor: { type: 'phase', phase: 'delete' }, value: dataRetentionEsFormat };
   }
 
   const helpText = getTimingBoundHelpText({
-    lower: lowerValue ? { name: getPreviousStepBoundName(), value: lowerValue } : undefined,
+    lower: lowerValue ? { neighbor: { type: 'previousStep' }, value: lowerValue } : undefined,
     upper,
   });
 

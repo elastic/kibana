@@ -22,8 +22,6 @@ import {
   formatDuration,
   getIntervalBoundHelpText,
   getMultipleStepAttributes,
-  getPhaseBoundName,
-  getStepIntervalBoundName,
   getUnitSelectOptions,
 } from '../../../shared';
 import { getStepIndexFromArrayItemPath, toMilliseconds } from '../utils';
@@ -117,12 +115,18 @@ const FixedIntervalFieldControl = ({
   // stay smaller than the frozen phase if one is configured, otherwise the delete phase.
   const multipleOf =
     previousIntervalValue !== undefined
-      ? { name: getStepIntervalBoundName(stepIndex), value: previousIntervalValue }
+      ? {
+          neighbor: { type: 'stepInterval' as const, stepNumber: stepIndex },
+          value: previousIntervalValue,
+        }
       : undefined;
   const upper = frozenAfterEsFormat
-    ? { name: getPhaseBoundName('frozen'), value: frozenAfterEsFormat }
+    ? { neighbor: { type: 'phase' as const, phase: 'frozen' as const }, value: frozenAfterEsFormat }
     : dataRetentionEsFormat
-    ? { name: getPhaseBoundName('delete'), value: dataRetentionEsFormat }
+    ? {
+        neighbor: { type: 'phase' as const, phase: 'delete' as const },
+        value: dataRetentionEsFormat,
+      }
     : undefined;
 
   const helpText = getIntervalBoundHelpText({ multipleOf, upper });

@@ -13,7 +13,6 @@ import { useController, useFormContext, useWatch } from 'react-hook-form';
 
 import {
   formatDuration,
-  getPhaseBoundName,
   getTimingBoundHelpText,
   getUnitSelectOptions,
   useBlurCommitDraft,
@@ -103,7 +102,7 @@ const MinAgeFieldControl = ({
       { integerOnly: true, minExclusive: 0 }
     );
     if (!value) return undefined;
-    return { name: getPhaseBoundName(phase), value };
+    return { neighbor: { type: 'phase', phase }, value };
   };
 
   const helpText = getTimingBoundHelpText({
