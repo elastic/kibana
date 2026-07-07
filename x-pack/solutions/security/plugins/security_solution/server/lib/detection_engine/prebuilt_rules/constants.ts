@@ -42,6 +42,8 @@ export const PREBUILT_RULES_BULK_CREATE_BATCH_SIZE = 500;
  * controlling how many rules it writes to ES per underlying bulk-create call.
  *
  * This is independent of PREBUILT_RULES_BULK_CREATE_BATCH_SIZE, which chunks
- * the install queue before assets are fetched and handed off here.
+ * the install queue before assets are fetched and handed off here. Keeping both
+ * at 500 means each bulkCreateRules call performs a single ES bulk write.
+ * Related discussion: https://github.com/elastic/kibana/pull/275523#issuecomment-4876496484
  */
-export const PREBUILT_RULES_ALERTING_BULK_CREATE_BATCH_SIZE = 100;
+export const PREBUILT_RULES_ALERTING_BULK_CREATE_BATCH_SIZE = 500;
