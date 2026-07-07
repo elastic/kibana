@@ -72,7 +72,7 @@ export const ServicePanelContent = ({
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={isPreviewMode}
             entityType={EntityType.service}
-            entityId={entityRecord?.entity.id}
+            entityId={entityRecord?.entity?.id}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
           />
           <EuiHorizontalRule />
@@ -107,7 +107,7 @@ export const ServicePanelContent = ({
         />
       )}
       <ObservedEntity
-        observedData={{ ...observedService, entityId: entityRecord?.entity.id }}
+        observedData={{ ...observedService, entityId: entityRecord?.entity?.id }}
         contextID={contextID}
         scopeId={scopeId}
         observedFields={observedFields}
