@@ -72,7 +72,7 @@ const getThemeStyles = (theme: ThemeName): { light: SplashColors; dark: SplashCo
 
 const splashRules = (colors: SplashColors) => `
           html {
-            background-color: ${colors.pageBackground}
+            background-color: ${colors.pageBackground};
           }
 
           .kbnWelcomeText {

@@ -78,21 +78,28 @@ describe('Template (boot splash)', () => {
   });
 
   describe('splash color mode', () => {
+    // Select only the inline splash <style> (the block that defines the loader
+    // colors, identified by `.kbnProgress`) rather than every <style> in the
+    // head, so the assertions validate the splash rules specifically.
+    const getSplashCss = ($: ReturnType<typeof render>) =>
+      $('head style')
+        .filter((_i, el) => $(el).text().includes('.kbnProgress'))
+        .text();
+
     it('inlines a single set of splash colors for an explicit dark mode', () => {
-      const $ = render({ ...baseMetadata, darkMode: true });
-      const css = $('head style').text();
-      expect(css).toContain('#07101F'); // borealis dark page background
+      const css = getSplashCss(render({ ...baseMetadata, darkMode: true }));
+      expect(css).toContain('background-color: #07101F;'); // borealis dark page background
       expect(css).not.toContain('#F6F9FC'); // no light background
       expect(css).not.toContain('@media (prefers-color-scheme');
     });
 
     it('inlines both variants behind a media query for system mode so the splash has no flash', () => {
       const $ = render({ ...baseMetadata, darkMode: 'system' });
-      const css = $('head style').text();
+      const css = getSplashCss($);
       // light defaults applied at first paint, dark applied via the CSS engine (no JS, no flash)
-      expect(css).toContain('#F6F9FC'); // light default page background
+      expect(css).toContain('background-color: #F6F9FC;'); // light default page background
       expect(css).toContain('@media (prefers-color-scheme: dark)');
-      expect(css).toContain('#07101F'); // dark override page background
+      expect(css).toContain('background-color: #07101F;'); // dark override page background
       // the old JS-based system theme bootstrap must no longer be injected
       expect($('head script[src*="bootstrap_system_theme"]')).toHaveLength(0);
     });
