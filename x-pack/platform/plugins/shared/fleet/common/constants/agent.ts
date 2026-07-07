@@ -66,12 +66,12 @@ export const ActiveAgentStatuses = [
 // leaking its live metrics to a stale/offline agent entry (same service.instance.id).
 // Must stay in sync across the server (agent_metrics.ts) and client (CollectorContext).
 // See https://github.com/elastic/kibana/issues/274843
-export const OPAMP_NON_REPORTING_STATUSES = [
+export const OPAMP_NON_REPORTING_STATUSES: ReadonlyArray<(typeof AgentStatuses)[number]> = [
   'offline',
   'inactive',
   'unenrolled',
   'uninstalled',
-] as const satisfies ReadonlyArray<(typeof AgentStatuses)[number]>;
+];
 
 // Kueries for finding unprivileged and privileged agents
 // Privileged is `not` because the metadata field can be undefined
