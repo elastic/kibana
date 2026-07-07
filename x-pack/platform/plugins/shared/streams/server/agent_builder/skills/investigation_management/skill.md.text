@@ -17,7 +17,7 @@ Load this skill when the user wants to:
 Use `platform.core.execute_workflow` with the following parameters:
 
 ```
-workflowId: "system-streams-investigation"
+workflowId: "system-significant-events-investigation"
 inputs:
   message: "<required – describe the issue or event to investigate>"
   stream_names: ["<optional – data stream names to scope the investigation>"]
@@ -41,7 +41,7 @@ waitForCompletion: true
 **Example call (free-form issue):**
 ```
 execute_workflow({
-  workflowId: "system-streams-investigation",
+  workflowId: "system-significant-events-investigation",
   inputs: {
     message: "Error rate on the checkout service spiked by 400% starting at 14:30 UTC. HTTP 503 errors are dominating.",
     stream_names: ["logs-checkout-service.default", "metrics-checkout-service.default"]
@@ -67,7 +67,7 @@ When the user wants to investigate a Significant Event, gather the event's metad
 **Example call (sig event context):**
 ```
 execute_workflow({
-  workflowId: "system-streams-investigation",
+  workflowId: "system-significant-events-investigation",
   inputs: {
     message: "Checkout latency p99 breached SLO\n\nP99 latency on checkout climbed above 2s for 20 minutes during peak traffic.\n\nProbable cause: connection pool exhaustion against the orders database.",
     stream_names: ["logs-checkout-service.default", "metrics-checkout-service.default"],
@@ -107,7 +107,7 @@ When the user wants to investigate an alert, load the alert's data first, then t
 **Example call (alert context):**
 ```
 execute_workflow({
-  workflowId: "system-streams-investigation",
+  workflowId: "system-significant-events-investigation",
   inputs: {
     message: "Alert \"High error rate - checkout\" fired at 2024-05-21T14:30:00Z. Reason: error rate is 38% (above the 5% threshold) for service checkout in environment production.",
     stream_names: ["logs-checkout-service.default"],

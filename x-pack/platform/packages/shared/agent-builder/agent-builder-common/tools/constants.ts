@@ -66,7 +66,7 @@ export const platformCoreCasesTools = {
  * - {entity} is a more granular entity withing the {feature} scope, for example Feature KI or Query KI.
  * - {action} the action to perform on the entity
  */
-export const platformStreamsSigEventsTools = {
+export const platformSignificantEventsTools = {
   searchKnowledgeIndicators: `${internalNamespaces.platformSignificantEvents}.ki_search`,
   createFeatureKnowledgeIndicator: `${internalNamespaces.platformSignificantEvents}.ki_feature_create`,
   createQueryKnowledgeIndicator: `${internalNamespaces.platformSignificantEvents}.ki_query_create`,
