@@ -326,7 +326,7 @@ const preserveTrendlineLayer = (
     }
   }
 
-  const updatedVisualization = { ...attrs.state.visualization } as PartialMetricVis;
+  const updatedVisualization = { ...newVis };
   let updatedColumns = prevTrendlineLayer.columns;
   if (newMainLayer) {
     for (const { from, to } of accessorPairs) {

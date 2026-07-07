@@ -405,12 +405,12 @@ export function getTextBasedDatasource({
         // Collect metric field names from all links targeting the same
         // trendline layer so the auto-generated STATS uses AVG(<field>)
         // instead of COUNT(*) when the source query has no STATS.
+        const metricGroupIds: string[] = [
+          LENS_METRIC_GROUP_ID.METRIC,
+          LENS_METRIC_GROUP_ID.SECONDARY_METRIC,
+        ];
         const metricFields = trendlineLayerLinks
-          .filter((l) =>
-            [LENS_METRIC_GROUP_ID.METRIC, LENS_METRIC_GROUP_ID.SECONDARY_METRIC].includes(
-              l.from.groupId
-            )
-          )
+          .filter((l) => metricGroupIds.includes(l.from.groupId))
           .map((l) => fromLayer.columns.find((c) => c.columnId === l.from.columnId))
           .filter((c): c is TextBasedLayerColumn => Boolean(c))
           .map((c) => c.fieldName);

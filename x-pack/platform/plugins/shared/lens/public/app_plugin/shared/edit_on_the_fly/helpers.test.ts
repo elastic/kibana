@@ -20,6 +20,7 @@ import type {
   TypedLensSerializedState,
   TextBasedPrivateState,
   TextBasedLayer,
+  MetricVisualizationState,
 } from '@kbn/lens-common';
 
 const getTextBasedLayers = (
@@ -381,24 +382,35 @@ describe('Lens inline editing helpers', () => {
         const trendlineMetricAccessor = 'trend-metric-1';
         const trendlineBreakdownAccessor = 'trend-breakdown-1';
         const newQuery = { esql: 'FROM index1 | KEEP bytes' };
+        const prevTextBasedState = prevAttributes.state.datasourceStates.textBased;
+        if (!prevTextBasedState) {
+          throw new Error('Expected textBased datasource state');
+        }
+        const prevMainLayer = prevTextBasedState.layers[mainLayerId];
+        const prevTrendlineLayer = prevTextBasedState.layers[trendlineLayerId];
+        if (!prevMainLayer || !prevTrendlineLayer) {
+          throw new Error('Expected previous main and trendline layers');
+        }
+
+        const prevVisualization = prevAttributes.state
+          .visualization as Partial<MetricVisualizationState>;
         const prevAttributesWithBreakdown: TypedLensSerializedState['attributes'] = {
           ...prevAttributes,
           state: {
             ...prevAttributes.state,
             visualization: {
-              ...prevAttributes.state.visualization,
+              ...prevVisualization,
               breakdownByAccessor: 'breakdown-accessor',
               trendlineBreakdownByAccessor: trendlineBreakdownAccessor,
             },
             datasourceStates: {
               textBased: {
                 layers: {
-                  ...prevAttributes.state.datasourceStates.textBased!.layers,
+                  ...prevTextBasedState.layers,
                   [mainLayerId]: {
-                    ...prevAttributes.state.datasourceStates.textBased!.layers[mainLayerId],
+                    ...prevMainLayer,
                     columns: [
-                      ...prevAttributes.state.datasourceStates.textBased!.layers[mainLayerId]
-                        .columns,
+                      ...prevMainLayer.columns,
                       {
                         columnId: 'breakdown-accessor',
                         fieldName: '@timestamp',
@@ -407,10 +419,9 @@ describe('Lens inline editing helpers', () => {
                     ],
                   },
                   [trendlineLayerId]: {
-                    ...prevAttributes.state.datasourceStates.textBased!.layers[trendlineLayerId],
+                    ...prevTrendlineLayer,
                     columns: [
-                      ...prevAttributes.state.datasourceStates.textBased!.layers[trendlineLayerId]
-                        .columns,
+                      ...prevTrendlineLayer.columns,
                       {
                         columnId: trendlineBreakdownAccessor,
                         fieldName: '@timestamp',
