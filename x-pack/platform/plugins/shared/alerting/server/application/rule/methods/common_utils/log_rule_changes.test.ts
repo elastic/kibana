@@ -134,6 +134,61 @@ describe('logBulkRuleChanges', () => {
     ]);
   });
 
+  it('skips security solution rule changes when the securitySolution:enableRuleChangesHistory advanced setting is disabled', async () => {
+    const context = buildContext(
+      {
+        changeTrackingService,
+        uiSettings: createMockUiSettings(false) as unknown as RulesClientContext['uiSettings'],
+      },
+      {
+        '123': { solution: 'stack', trackChanges: true },
+        '456': { solution: 'security', trackChanges: true },
+      }
+    );
+    const ruleSOs = [buildRuleSO('rule-stack', '123'), buildRuleSO('rule-sec', '456')];
+
+    await logRuleChanges({
+      rulesClientContext: context,
+      ruleSOs,
+      changesContext: {
+        action: RuleChangeTrackingAction.ruleUpdate,
+        timestamp: REFERENCE_TIMESTAMP_MS,
+      },
+    });
+
+    expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+    const [changes] = changeTrackingService.logBulk.mock.calls[0];
+    expect(changes.map((c) => c.objectId)).toEqual(['rule-stack']);
+  });
+
+  it('reads the ENABLE_RULE_CHANGES_HISTORY_SETTING advanced setting at most once per call, scoped to the space', async () => {
+    const uiSettings = createMockUiSettings(true);
+    const context = buildContext(
+      {
+        changeTrackingService,
+        uiSettings: uiSettings as unknown as RulesClientContext['uiSettings'],
+      },
+      {
+        '456': { solution: 'security', trackChanges: true },
+        '789': { solution: 'security', trackChanges: true },
+      }
+    );
+    const ruleSOs = [buildRuleSO('rule-sec-1', '456'), buildRuleSO('rule-sec-2', '789')];
+
+    await logRuleChanges({
+      rulesClientContext: context,
+      ruleSOs,
+      changesContext: {
+        action: RuleChangeTrackingAction.ruleUpdate,
+        timestamp: REFERENCE_TIMESTAMP_MS,
+      },
+    });
+
+    expect(uiSettings.asScopedToClient).toHaveBeenCalledTimes(1);
+    const uiSettingsClient = uiSettings.asScopedToClient.mock.results[0].value;
+    expect(uiSettingsClient.get).toHaveBeenCalledTimes(1);
+  });
+
   it('does not call logBulk when every rule change failed', async () => {
     const context = buildContext({ changeTrackingService });
     const ruleSOs = [buildErroredRuleSO('rule-1'), buildErroredRuleSO('rule-2')];
@@ -484,6 +539,11 @@ interface RuleTypeStub {
   trackChanges: boolean;
 }
 
+const createMockUiSettings = (securityRuleChangesHistoryEnabled = true) => {
+  const uiSettingsClient = { get: jest.fn().mockResolvedValue(securityRuleChangesHistoryEnabled) };
+  return { asScopedToClient: jest.fn().mockReturnValue(uiSettingsClient) };
+};
+
 const buildContext = (
   overrides: Partial<RulesClientContext> = {},
   ruleTypesByAlertTypeId: Record<string, RuleTypeStub> = {
@@ -509,6 +569,8 @@ const buildContext = (
     spaceId: 'default',
     ruleTypeRegistry,
     isSystemAction: jest.fn().mockReturnValue(false),
+    uiSettings: createMockUiSettings(),
+    unsecuredSavedObjectsClient: {},
     ...overrides,
   } as unknown as RulesClientContext;
 };
