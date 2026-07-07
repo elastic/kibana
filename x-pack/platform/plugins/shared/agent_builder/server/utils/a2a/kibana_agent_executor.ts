@@ -50,6 +50,8 @@ export class KibanaAgentExecutor implements AgentExecutor {
       const { events$ } = await execution.executeAgent({
         mode: AgentExecutionMode.conversation,
         request: this.kibanaRequest,
+        // A2A is a synchronous request/response protocol; don't use task manager
+        useTaskManager: false,
         params: {
           agentId: this.agentId,
           nextInput: { message: userText },
