@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
-import { STREAMS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import {
   SignificantEventsWorkflowStatus,
@@ -204,7 +204,7 @@ export class StreamsKIsOnboardingClient {
   }) {
     this.workflowExecutionService = new WorkflowExecutionService({
       managementApi,
-      workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
+      workflowId: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
       workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
     this.telemetry = telemetry;
@@ -233,7 +233,7 @@ export class StreamsKIsOnboardingClient {
     this.telemetry.trackOnboardingScheduled({
       stream_name: inputs.streamName,
       execution_id: executionId,
-      workflow_id: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
+      workflow_id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
       space_id: ONBOARDING_EXECUTIONS_SPACE_ID,
       skip_features: inputs.features.skip,
       skip_queries: inputs.queries.skip,
@@ -311,7 +311,7 @@ export class StreamsKIsOnboardingClient {
       }
       statuses[streamName] = WorkflowExecutionService.toStatusResult({
         execution,
-        workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
+        workflowId: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
       });
     }
 
@@ -342,15 +342,17 @@ export class StreamsKIsOnboardingClient {
   /**
    * Cancels every non-terminal onboarding execution across all streams.
    * Used during teardown of the continuous KI onboarding workflow.
+   *
+   * @returns The number of executions that were canceled.
    */
-  async cancelAllRunning({ request }: { request: KibanaRequest }): Promise<void> {
+  async cancelAllRunning({ request }: { request: KibanaRequest }): Promise<number> {
     const { results } = await this.workflowExecutionService.getExecutions(
       { statuses: [...NonTerminalExecutionStatuses], size: MAX_STREAMS_PER_QUERY },
       ONBOARDING_EXECUTIONS_SPACE_ID
     );
 
     if (results.length === 0) {
-      return;
+      return 0;
     }
 
     await Promise.all(
@@ -362,6 +364,8 @@ export class StreamsKIsOnboardingClient {
         })
       )
     );
+
+    return results.length;
   }
 
   /**
