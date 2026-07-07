@@ -7,7 +7,13 @@
 
 import { random } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import type { Plugin, CoreSetup, CoreStart, KibanaRequest } from '@kbn/core/server';
+import type {
+  Plugin,
+  CoreSetup,
+  CoreStart,
+  KibanaRequest,
+  IScopedClusterClient,
+} from '@kbn/core/server';
 import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import { EventEmitter } from 'events';
 import { firstValueFrom, Subject } from 'rxjs';
@@ -559,6 +565,70 @@ export class SampleTaskManagerFixturePlugin
           },
         }),
       },
+      sampleTaskUsingLimitedEsClient: {
+        title: 'Sample Task Using Limited ES Client',
+        description:
+          'Fires concurrent Elasticsearch requests through RunContext.esClient to exercise the es_request_limits category budgets.',
+        timeout: '1m',
+        maxAttempts: 1,
+        createTaskRunner: ({ taskInstance, esClient }: RunContext) => ({
+          async run() {
+            const category = taskInstance.params.category === 'write' ? 'write' : 'search';
+            const totalRequests = taskInstance.params.totalRequests ?? 5;
+            const outcome = await runLimitedEsRequests({ esClient, category, totalRequests });
+
+            const [{ elasticsearch }] = await core.getStartServices();
+            await elasticsearch.client.asInternalUser.index({
+              index: '.kibana_task_manager_test_result',
+              document: {
+                type: 'es-limit-result',
+                taskId: taskInstance.id,
+                taskType: 'sampleTaskUsingLimitedEsClient',
+                category,
+                ...outcome,
+                ranAt: new Date(),
+              },
+              refresh: true,
+            });
+
+            return { state: {} };
+          },
+        }),
+      },
+      sampleTaskWithScopedEsRequestLimit: {
+        title: 'Sample Task With Scoped ES Request Limit',
+        description:
+          'Uses a per-scope es_request_limits sub-limit to cap concurrent search requests below the category budget.',
+        timeout: '1m',
+        maxAttempts: 1,
+        esRequestLimits: { scope: 'sampleScopedEsLimit', search: 1 },
+        createTaskRunner: ({ taskInstance, esClient }: RunContext) => ({
+          async run() {
+            const totalRequests = taskInstance.params.totalRequests ?? 3;
+            const outcome = await runLimitedEsRequests({
+              esClient,
+              category: 'search',
+              totalRequests,
+            });
+
+            const [{ elasticsearch }] = await core.getStartServices();
+            await elasticsearch.client.asInternalUser.index({
+              index: '.kibana_task_manager_test_result',
+              document: {
+                type: 'es-limit-result',
+                taskId: taskInstance.id,
+                taskType: 'sampleTaskWithScopedEsRequestLimit',
+                category: 'search',
+                ...outcome,
+                ranAt: new Date(),
+              },
+              refresh: true,
+            });
+
+            return { state: {} };
+          },
+        }),
+      },
     });
 
     const taskWithTiming = {
@@ -655,6 +725,64 @@ export class SampleTaskManagerFixturePlugin
     this.taskManagerStart$.complete();
   }
   public stop() {}
+}
+
+interface LimitedEsRequestsOutcome {
+  totalRequests: number;
+  succeeded: number;
+  rejected: number;
+  limitRejected: number;
+}
+
+/**
+ * Fires `totalRequests` concurrent Elasticsearch requests of the given category
+ * through the Task Manager provided (rate-limited) `RunContext.esClient` and
+ * tallies how many succeeded versus were rejected by the request limiter (which
+ * throws a 429-shaped error). Requests are issued synchronously before any
+ * awaits resolve, so the limiter's in-flight counter is deterministic.
+ */
+async function runLimitedEsRequests({
+  esClient,
+  category,
+  totalRequests,
+}: {
+  esClient?: IScopedClusterClient;
+  category: 'search' | 'write';
+  totalRequests: number;
+}): Promise<LimitedEsRequestsOutcome> {
+  if (!esClient) {
+    throw new Error(
+      'RunContext.esClient was not provided; xpack.task_manager.es_request_limits must be enabled'
+    );
+  }
+
+  const client = esClient.asInternalUser;
+  const issueOne = () =>
+    category === 'search'
+      ? client.search({ index: '.kibana_task_manager', size: 0 })
+      : client.index({
+          index: '.kibana_task_manager_test_result',
+          document: { type: 'es-limit-write-probe', ranAt: new Date() },
+          refresh: false,
+        });
+
+  const results = await Promise.allSettled(Array.from({ length: totalRequests }, () => issueOne()));
+
+  return results.reduce<LimitedEsRequestsOutcome>(
+    (outcome, result) => {
+      if (result.status === 'fulfilled') {
+        outcome.succeeded += 1;
+      } else {
+        outcome.rejected += 1;
+        const reason = result.reason as { statusCode?: number } | undefined;
+        if (reason?.statusCode === 429) {
+          outcome.limitRejected += 1;
+        }
+      }
+      return outcome;
+    },
+    { totalRequests, succeeded: 0, rejected: 0, limitRejected: 0 }
+  );
 }
 
 function millisecondsFromNow(ms: number) {

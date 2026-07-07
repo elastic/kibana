@@ -38,6 +38,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.eventLog.indexEntries=true',
         '--xpack.task_manager.monitored_aggregated_stats_refresh_rate=5000',
         '--xpack.task_manager.invalidate_api_key_task.removalDelay="1s"',
+        // Enable Elasticsearch request limits with small budgets so the
+        // es_request_limits integration test can exercise rejections. Only tasks
+        // that opt into RunContext.esClient are affected by these budgets.
+        '--xpack.task_manager.es_request_limits.enabled=true',
+        '--xpack.task_manager.es_request_limits.search.cluster_wide=2',
+        '--xpack.task_manager.es_request_limits.write.cluster_wide=2',
         `--xpack.stack_connectors.enableExperimental=${JSON.stringify([
           'crowdstrikeConnectorOn',
           'microsoftDefenderEndpointOn',

@@ -389,5 +389,44 @@ describe('taskTypeDictionary', () => {
         `"Task type \\"sampleTaskSharedConcurrencyType2\\" shares concurrency limits with sampleTaskSharedConcurrencyType1 but has a different cost."`
       );
     });
+
+    it('allows task types to share an Elasticsearch request limits scope with identical limits', () => {
+      expect(() => {
+        definitions.registerTaskDefinitions({
+          esLimitA: {
+            title: 'A',
+            esRequestLimits: { scope: 'shared', search: 5 },
+            createTaskRunner: jest.fn(),
+          },
+          esLimitB: {
+            title: 'B',
+            esRequestLimits: { scope: 'shared', search: 5 },
+            createTaskRunner: jest.fn(),
+          },
+        });
+      }).not.toThrow();
+    });
+
+    it('throws when task types share an Elasticsearch request limits scope with different limits', () => {
+      definitions.registerTaskDefinitions({
+        esLimitA: {
+          title: 'A',
+          esRequestLimits: { scope: 'shared', search: 5 },
+          createTaskRunner: jest.fn(),
+        },
+      });
+
+      expect(() => {
+        definitions.registerTaskDefinitions({
+          esLimitB: {
+            title: 'B',
+            esRequestLimits: { scope: 'shared', search: 3 },
+            createTaskRunner: jest.fn(),
+          },
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Task type \\"esLimitB\\" shares Elasticsearch request limits scope \\"shared\\" with \\"esLimitA\\" but declares different limits."`
+      );
+    });
   });
 });

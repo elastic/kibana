@@ -33,6 +33,8 @@ export {
 export type { RruleSchedule } from './task';
 export { TaskStatus, TaskPriority, TaskCost, InstanceTaskCost } from './task';
 
+export { EsRequestCategory, EsRequestLimitReachedError } from './es_request_limiter';
+
 export type { TaskRegisterDefinition, TaskDefinitionRegistry } from './task_type_dictionary';
 
 export { asInterval } from './lib/intervals';

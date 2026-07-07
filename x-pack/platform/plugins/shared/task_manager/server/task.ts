@@ -10,7 +10,7 @@
 import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
 import type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
 import { isErr, tryAsResult } from './lib/result_type';
 import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
@@ -93,6 +93,16 @@ export interface RunContext {
    */
   fakeRequest?: KibanaRequest;
   abortController: AbortController;
+
+  /**
+   * A scoped Elasticsearch client provided by Task Manager. Requests made through
+   * it are subject to the configured Elasticsearch request concurrency limits
+   * (`xpack.task_manager.es_request_limits`). `asInternalUser` is always
+   * available; `asCurrentUser` / `asSecondaryAuthUser` are scoped to the task's
+   * API key and throw on use when the task was scheduled without one. Undefined
+   * when Task Manager could not construct a client for this run.
+   */
+  esClient?: IScopedClusterClient;
 
   /**
    * If the task has a known `profile_uid`, binds it to a child fake request
@@ -230,6 +240,22 @@ export const taskDefinitionSchema = schema.object(
     maxConcurrency: schema.maybe(
       schema.number({
         min: 0,
+      })
+    ),
+    /**
+     * Optional caps on the number of concurrent Elasticsearch requests issued
+     * through `RunContext.esClient`, per request category. The limits are
+     * cluster-wide and partitioned across active nodes, and are keyed by `scope`
+     * so multiple task types can share one budget (scope defaults to the task
+     * type when omitted). Task types that share a scope must declare identical
+     * limits. These layer on top of the cluster-wide category budgets configured
+     * via `xpack.task_manager.es_request_limits`.
+     */
+    esRequestLimits: schema.maybe(
+      schema.object({
+        scope: schema.maybe(schema.string()),
+        search: schema.maybe(schema.number({ min: 1 })),
+        write: schema.maybe(schema.number({ min: 1 })),
       })
     ),
     stateSchemaByVersion: schema.maybe(

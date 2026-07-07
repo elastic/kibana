@@ -12,8 +12,9 @@ import { pipe } from 'fp-ts/pipeable';
 import { map as mapOptional, none } from 'fp-ts/Option';
 import { tap } from 'rxjs';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { Logger, ExecutionContextStart } from '@kbn/core/server';
+import type { Logger, ExecutionContextStart, IClusterClient } from '@kbn/core/server';
 import type { FakeRequestEnricher } from '@kbn/core-security-server';
+import type { EsRequestLimiter } from './es_request_limiter';
 
 import type { Result } from './lib/result_type';
 import { asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
@@ -84,6 +85,8 @@ export interface TaskPollingLifecycleOpts {
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
   enrichFakeRequest?: FakeRequestEnricher;
+  clusterClient?: IClusterClient;
+  esRequestLimiter?: EsRequestLimiter;
 }
 
 export type TaskLifecycleEvent =
@@ -126,6 +129,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private apiKeyStrategy: ApiKeyStrategy;
   private currentTmUtilization$ = new BehaviorSubject<number>(0);
   private enrichFakeRequest?: FakeRequestEnricher;
+  private clusterClient?: IClusterClient;
+  private esRequestLimiter?: EsRequestLimiter;
 
   private eventLogger: TaskEventLogger;
 
@@ -149,6 +154,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     apiKeyStrategy,
     eventLogger,
     enrichFakeRequest,
+    clusterClient,
+    esRequestLimiter,
   }: TaskPollingLifecycleOpts) {
     this.logger = logger;
     this.middleware = middleware;
@@ -159,6 +166,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.config = config;
     this.apiKeyStrategy = apiKeyStrategy;
     this.enrichFakeRequest = enrichFakeRequest;
+    this.clusterClient = clusterClient;
+    this.esRequestLimiter = esRequestLimiter;
     const { poll_interval: pollInterval, claim_strategy: claimStrategy } = config;
     this.currentPollInterval = pollInterval;
     this.eventLogger = eventLogger;
@@ -287,6 +296,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       apiKeyStrategy: this.apiKeyStrategy,
       eventLogger: this.eventLogger,
       enrichFakeRequest: this.enrichFakeRequest,
+      clusterClient: this.clusterClient,
+      esRequestLimiter: this.esRequestLimiter,
     });
   };
 

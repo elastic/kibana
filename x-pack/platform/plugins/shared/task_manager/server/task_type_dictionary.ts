@@ -104,6 +104,20 @@ export interface TaskRegisterDefinition {
    * The default value, if not given, is 0.
    */
   maxConcurrency?: number;
+  /**
+   * Optional caps on the number of concurrent Elasticsearch requests issued
+   * through `RunContext.esClient`, per request category. The limits are
+   * cluster-wide and partitioned across active nodes, and are keyed by `scope`
+   * so multiple task types can share one budget (scope defaults to the task type
+   * when omitted). Task types that share a scope must declare identical limits.
+   * These layer on top of the cluster-wide category budgets configured via
+   * `xpack.task_manager.es_request_limits`.
+   */
+  esRequestLimits?: {
+    scope?: string;
+    search?: number;
+    write?: number;
+  };
   stateSchemaByVersion?: Record<
     number,
     {
@@ -199,6 +213,13 @@ export class TaskTypeDictionary {
           taskDefinitions[taskType].cost
         );
       }
+
+      // Task types that share an Elasticsearch request limits scope must declare
+      // identical limits, since they draw from a single shared budget.
+      const esRequestLimits = taskDefinitions[taskType].esRequestLimits;
+      if (esRequestLimits?.scope) {
+        this.verifySharedEsRequestLimits(taskType, esRequestLimits, taskDefinitions);
+      }
     }
 
     try {
@@ -207,6 +228,33 @@ export class TaskTypeDictionary {
       }
     } catch (e) {
       this.logger.error(`Could not sanitize task definitions: ${e.message}`);
+    }
+  }
+
+  private verifySharedEsRequestLimits(
+    taskType: string,
+    limits: NonNullable<TaskRegisterDefinition['esRequestLimits']>,
+    batch: TaskDefinitionRegistry
+  ) {
+    const differs = (other?: TaskRegisterDefinition['esRequestLimits']) =>
+      other?.scope === limits.scope &&
+      (other?.search !== limits.search || other?.write !== limits.write);
+
+    const conflictMessage = (otherTaskType: string) =>
+      `Task type "${taskType}" shares Elasticsearch request limits scope "${limits.scope}" with "${otherTaskType}" but declares different limits.`;
+
+    // Check against already-registered task types.
+    for (const [otherTaskType, otherDef] of this.definitions) {
+      if (otherTaskType !== taskType && differs(otherDef.esRequestLimits)) {
+        throw new Error(conflictMessage(otherTaskType));
+      }
+    }
+
+    // Check against other task types being registered in the same batch.
+    for (const otherTaskType of Object.keys(batch)) {
+      if (otherTaskType !== taskType && differs(batch[otherTaskType].esRequestLimits)) {
+        throw new Error(conflictMessage(otherTaskType));
+      }
     }
   }
 

@@ -83,6 +83,27 @@ const requestTimeoutsConfig = schema.object({
   update_by_query: schema.number({ defaultValue: 1000 * 30, min: 1000 * 10, max: 1000 * 60 * 10 }),
 });
 
+/*
+ * Per-category budget for Elasticsearch requests issued by running tasks.
+ * `cluster_wide` is the total number of concurrent requests allowed across all
+ * background-task Kibana nodes; each node enforces its partitioned share of it.
+ */
+const esRequestCategoryLimitSchema = schema.object({
+  cluster_wide: schema.number({ min: 1 }),
+});
+
+/*
+ * Limits on the number of concurrent Elasticsearch requests that tasks may issue
+ * through the Task Manager provided client (`RunContext.esClient`). Disabled by
+ * default; when enabled, requests over the per-category budget are rejected with
+ * a 429-shaped error so the task fails fast instead of overloading Elasticsearch.
+ */
+const esRequestLimitsSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
+  search: schema.maybe(esRequestCategoryLimitSchema),
+  write: schema.maybe(esRequestCategoryLimitSchema),
+});
+
 const validateDuration = (duration: string) => {
   try {
     parseIntervalAsMillisecond(duration);
@@ -223,6 +244,7 @@ export const configSchema = schema.object(
     claim_strategy: schema.string({ defaultValue: CLAIM_STRATEGY_MGET }),
     request_timeouts: requestTimeoutsConfig,
     auto_calculate_default_ech_capacity: schema.boolean({ defaultValue: false }),
+    es_request_limits: esRequestLimitsSchema,
   },
   {
     validate: (config) => {
@@ -241,3 +263,4 @@ export type TaskManagerConfig = TypeOf<typeof configSchema>;
 export type TaskExecutionFailureThreshold = TypeOf<typeof taskExecutionFailureThresholdSchema>;
 export type EventLoopDelayConfig = TypeOf<typeof eventLoopDelaySchema>;
 export type RequestTimeoutsConfig = TypeOf<typeof requestTimeoutsConfig>;
+export type EsRequestLimitsConfig = TypeOf<typeof esRequestLimitsSchema>;

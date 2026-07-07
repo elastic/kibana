@@ -20,6 +20,9 @@ describe('config validation', () => {
           "active_nodes_lookback": "30s",
           "interval": 10000,
         },
+        "es_request_limits": Object {
+          "enabled": false,
+        },
         "event_loop_delay": Object {
           "monitor": true,
           "warn_threshold": 5000,
@@ -84,6 +87,9 @@ describe('config validation', () => {
           "active_nodes_lookback": "30s",
           "interval": 10000,
         },
+        "es_request_limits": Object {
+          "enabled": false,
+        },
         "event_loop_delay": Object {
           "monitor": true,
           "warn_threshold": 5000,
@@ -145,6 +151,9 @@ describe('config validation', () => {
         "discovery": Object {
           "active_nodes_lookback": "30s",
           "interval": 10000,
+        },
+        "es_request_limits": Object {
+          "enabled": false,
         },
         "event_loop_delay": Object {
           "monitor": true,
