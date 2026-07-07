@@ -120,10 +120,11 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      // Regression for #276409: a multi-word `search_term` must match the
-      // displayed title as a phrase, not as a bag of OR tokens. Previously the
-      // `match` query returned every dashboard sharing any common token.
-      it('should filter by multi-word search term using phrase matching', async () => {
+      // Regression for #276409: a multi-word `search_term` must require ALL
+      // tokens to match (`match` with `operator: and`), not any token (OR).
+      // Previously the default OR semantics returned every dashboard sharing
+      // any common token.
+      it('should filter by multi-word search term requiring all words to match', async () => {
         const phraseMigrationResponse = await dashboardMigrationRoutes.create({});
         const phraseMigrationId = phraseMigrationResponse.body.migration_id;
 

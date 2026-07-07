@@ -99,12 +99,13 @@ export default ({ getService }: FtrProviderContext) => {
         expect(response.body.data).toEqual(expectedRuleDocuments);
       });
 
-      // Regression for #276409: a multi-word `searchTerm` must match the
-      // displayed title as a phrase, not as a bag of OR tokens. Previously the
-      // `match` query returned every rule sharing any common token (e.g. a
-      // search for "Spike in Network Traffic" returned all rules whose title
-      // contained "Network"), producing incorrect results.
-      it('should fetch rules filtered by multi-word `searchTerm` using phrase matching', async () => {
+      // Regression for #276409: a multi-word `searchTerm` must require ALL
+      // tokens to match (`match` with `operator: and`), not any token (OR).
+      // Previously the default OR semantics returned every rule sharing any
+      // common token (e.g. a search for "Spike in Network Traffic" returned
+      // all rules whose title contained "Network"), producing incorrect
+      // results.
+      it('should fetch rules filtered by multi-word `searchTerm` requiring all words to match', async () => {
         const migrationId = uuidv4();
         const titles = [
           'Spike in Network Traffic',

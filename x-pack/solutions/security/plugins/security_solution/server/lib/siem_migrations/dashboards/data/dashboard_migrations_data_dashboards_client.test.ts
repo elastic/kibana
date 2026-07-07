@@ -836,12 +836,12 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
               {
                 bool: {
                   should: [
-                    { match_phrase: { 'elastic_dashboard.title': 'test' } },
+                    { match: { 'elastic_dashboard.title': { query: 'test', operator: 'and' } } },
                     {
                       bool: {
                         must: [
                           { term: { status: 'failed' } },
-                          { match_phrase: { 'original_dashboard.title': 'test' } },
+                          { match: { 'original_dashboard.title': { query: 'test', operator: 'and' } } },
                         ],
                       },
                     },
@@ -1011,12 +1011,12 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
               {
                 bool: {
                   should: [
-                    { match_phrase: { 'elastic_dashboard.title': 'test' } },
+                    { match: { 'elastic_dashboard.title': { query: 'test', operator: 'and' } } },
                     {
                       bool: {
                         must: [
                           { term: { status: 'failed' } },
-                          { match_phrase: { 'original_dashboard.title': 'test' } },
+                          { match: { 'original_dashboard.title': { query: 'test', operator: 'and' } } },
                         ],
                       },
                     },
