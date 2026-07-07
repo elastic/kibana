@@ -326,6 +326,5 @@ export default function (providerContext: FtrProviderContext) {
         expect(actionsAfter).to.eql(actionsBefore);
       });
     });
-
   });
 }
