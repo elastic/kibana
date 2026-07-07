@@ -90,6 +90,8 @@ export interface RulesListTableProps {
   onBulkEnable: () => void;
   onBulkDisable: () => void;
   onBulkDelete: () => void;
+  /** Only offered when exactly 2 rules are selected (not in select-all mode). */
+  onBuildFlow?: () => void;
 
   /** Row action callbacks */
   onNavigateToDetails: (rule: RuleApiResponse) => void;
@@ -125,6 +127,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onBulkEnable,
   onBulkDisable,
   onBulkDelete,
+  onBuildFlow,
   onNavigateToDetails,
   onExpand,
   onQuickEdit,
@@ -162,6 +165,11 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   const handleBulkDelete = () => {
     setIsBulkActionsOpen(false);
     onBulkDelete();
+  };
+
+  const handleBuildFlow = () => {
+    setIsBulkActionsOpen(false);
+    onBuildFlow?.();
   };
 
   const pagination = {
@@ -466,6 +474,20 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
               >
                 <EuiContextMenuPanel
                   items={[
+                    ...(onBuildFlow && selectedCount === 2
+                      ? [
+                          <EuiContextMenuItem
+                            key="buildFlow"
+                            icon={<EuiIcon type="branch" size="m" aria-hidden={true} />}
+                            onClick={handleBuildFlow}
+                            data-test-subj="bulkBuildFlow"
+                          >
+                            {i18n.translate('xpack.alertingV2.rulesList.bulkAction.buildFlow', {
+                              defaultMessage: 'Build a Flow',
+                            })}
+                          </EuiContextMenuItem>,
+                        ]
+                      : []),
                     <EuiContextMenuItem
                       key="enable"
                       icon={<EuiIcon type="checkCircle" size="m" aria-hidden={true} />}

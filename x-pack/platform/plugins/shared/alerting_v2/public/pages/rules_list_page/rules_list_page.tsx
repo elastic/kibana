@@ -39,6 +39,8 @@ import { TagsFilterPopover } from '../../components/rule/popovers/tag_filter_pop
 import { buildRulesListFilter } from './utils';
 import { RuleCreateOptionsPanel } from '../../components/rule_create_options/rule_create_options_panel';
 import { RuleCreateOptionsFlyout } from '../../components/rule_create_options/rule_create_options_flyout';
+import { SequenceBuilderFlyout } from '../../components/build_flow/sequence_builder_flyout';
+import { useCreateRule } from '../../hooks/use_create_rule';
 
 const DEFAULT_PER_PAGE = 20;
 export const SEARCH_DEBOUNCE_MS = 300;
@@ -51,10 +53,12 @@ const getRulesListMenu = ({
   onCreateRule,
   onCreateEsqlRule,
   onCreateWithAgent,
+  onBuildSequence,
 }: {
   onCreateRule: () => void;
   onCreateEsqlRule: () => void;
   onCreateWithAgent?: () => void;
+  onBuildSequence: () => void;
 }): AppHeaderMenu => ({
   primaryActionItem: {
     id: 'createRule',
@@ -95,6 +99,16 @@ const getRulesListMenu = ({
               },
             ]
           : []),
+        {
+          id: 'buildSequence',
+          label: i18n.translate('xpack.alertingV2.rulesList.buildSequenceButton', {
+            defaultMessage: 'Build a Sequence',
+          }),
+          iconType: 'branch',
+          order: 2,
+          run: onBuildSequence,
+          testId: 'buildSequenceButton',
+        },
       ],
     },
   },
@@ -117,10 +131,13 @@ export const RulesListPage = () => {
     isCreateOptionsFlyoutOpen,
     { on: openCreateOptionsFlyout, off: closeCreateOptionsFlyout },
   ] = useBoolean(false);
+  const [isSequenceBuilderOpen, { on: openSequenceBuilder, off: closeSequenceBuilder }] =
+    useBoolean(false);
   const { flyout, openCreateFlyout, openCreateBuilderFlyout, openEditFlyout, openCloneFlyout } =
     useComposeDiscoverFlyout();
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
   const isRuleManagementABSkillAvailable = useIsRuleManagementABSkillAvailable();
+  const createSequenceRuleMutation = useCreateRule();
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
@@ -213,9 +230,10 @@ export const RulesListPage = () => {
             onCreateRule: openCreateOptionsFlyout,
             onCreateEsqlRule: openCreateFlyout,
             onCreateWithAgent,
+            onBuildSequence: openSequenceBuilder,
           })
         : undefined,
-    [showHeaderMenu, openCreateOptionsFlyout, openCreateFlyout, onCreateWithAgent]
+    [showHeaderMenu, openCreateOptionsFlyout, openCreateFlyout, onCreateWithAgent, openSequenceBuilder]
   );
 
   return (
@@ -311,6 +329,15 @@ export const RulesListPage = () => {
           onCreateEsqlRule={onCreateEsqlRuleFromOptionsFlyout}
           onCreateWithAgent={onCreateWithAgentFromFlyout}
           onCreateThresholdAlert={onCreateThresholdAlertFromOptionsFlyout}
+        />
+      ) : null}
+      {isSequenceBuilderOpen ? (
+        <SequenceBuilderFlyout
+          isSaving={createSequenceRuleMutation.isLoading}
+          onClose={closeSequenceBuilder}
+          onCreate={(payload) =>
+            createSequenceRuleMutation.mutate(payload, { onSuccess: closeSequenceBuilder })
+          }
         />
       ) : null}
       {flyout}

@@ -8,14 +8,17 @@
 import React, { useState } from 'react';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { Criteria } from '@elastic/eui';
+import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { useBulkSelect } from '../../hooks/use_bulk_select';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { useBulkDeleteRules } from '../../hooks/use_bulk_delete_rules';
 import { useBulkEnableRules, useBulkDisableRules } from '../../hooks/use_bulk_enable_disable_rules';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
+import { useCreateRule } from '../../hooks/use_create_rule';
 import { DeleteConfirmationModal } from '../../components/rule/modals/delete_confirmation_modal';
 import { RuleSummaryFlyout } from '../../components/rule/flyouts';
+import { BuildFlowFlyout } from '../../components/build_flow/build_flow_flyout';
 import { paths } from '../../constants';
 import { RulesListTable, type RulesListTableSortField } from './rules_list_table';
 
@@ -57,6 +60,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   const [ruleToDelete, setRuleToDelete] = useState<RuleApiResponse | null>(null);
   const [expandedRuleId, setExpandedRuleId] = useState<string | null>(null);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
+  const [isBuildFlowOpen, setIsBuildFlowOpen] = useState(false);
 
   const expandedRule = expandedRuleId ? items.find((r) => r.id === expandedRuleId) ?? null : null;
 
@@ -65,6 +69,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   const bulkEnableMutation = useBulkEnableRules();
   const bulkDisableMutation = useBulkDisableRules();
   const toggleEnabledMutation = useToggleRuleEnabled();
+  const createRuleMutation = useCreateRule();
 
   const {
     isAllSelected,
@@ -83,8 +88,26 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
     search: search || undefined,
   });
 
+  // Deliberately not gated on !isAllSelected: with only 2 total rules, clicking
+  // the "Select all 2 rules" link after already checking both individually is a
+  // natural next click, and selectedCount/isRowSelected already resolve correctly
+  // in that mode (see useBulkSelect's inverse-exclusion logic).
+  const selectedForFlow =
+    selectedCount === 2
+      ? (items.filter((r) => isRowSelected(r.id)) as [RuleApiResponse, RuleApiResponse])
+      : null;
+
   const handleBulkDelete = () => {
     setShowBulkDeleteConfirm(true);
+  };
+
+  const handleBuildFlowCreate = (payload: CreateRuleData) => {
+    createRuleMutation.mutate(payload, {
+      onSuccess: () => {
+        setIsBuildFlowOpen(false);
+        onClearSelection();
+      },
+    });
   };
 
   const onBulkDeleteConfirm = () => {
@@ -145,6 +168,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onBulkEnable={handleBulkEnable}
         onBulkDisable={handleBulkDisable}
         onBulkDelete={handleBulkDelete}
+        onBuildFlow={selectedForFlow ? () => setIsBuildFlowOpen(true) : undefined}
         onNavigateToDetails={(r) => navigateToUrl(basePath.prepend(paths.ruleDetails(r.id)))}
         onExpand={(r) => setExpandedRuleId(r.id)}
         onQuickEdit={(r) => onEditInFlyout(r)}
@@ -188,6 +212,14 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
           onCancel={() => setShowBulkDeleteConfirm(false)}
           onConfirm={onBulkDeleteConfirm}
           isLoading={bulkDeleteMutation.isLoading}
+        />
+      ) : null}
+      {isBuildFlowOpen && selectedForFlow ? (
+        <BuildFlowFlyout
+          rules={selectedForFlow}
+          isSaving={createRuleMutation.isLoading}
+          onClose={() => setIsBuildFlowOpen(false)}
+          onCreate={handleBuildFlowCreate}
         />
       ) : null}
     </>
