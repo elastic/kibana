@@ -56788,7 +56788,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get the resolution group for a given entity, returning all linked entities. Requires an enterprise license.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+        Get the resolution group for a given entity, returning all linked entities.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
       operationId: get-security-entity-store-resolution-group
       parameters:
         - description: The entity identifier to look up the resolution group for.
@@ -56865,6 +56865,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/security/entity_store/resolution/group?entity_id=user:jane.doe@example.com
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -56877,7 +56878,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Link one or more entities to a target entity, creating a resolution group. Changes become visible on subsequent reads after the next index refresh (typically <1s). Requires an enterprise license.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+        Link one or more entities to a target entity, creating a resolution group. Changes become visible on subsequent reads after the next index refresh (typically <1s).<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
       operationId: post-security-entity-store-resolution-link
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -56975,6 +56976,163 @@ paths:
               "target_id": "user:jane.doe@example.com",
               "entity_ids": ["user:jdoe@example.com"]
             }
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/security/entity_store/resolution/rules:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/resolution/rules</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        List managed entity resolution rules and their effective enabled state for this space.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+      operationId: get-security-entity-store-resolution-rules
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                rulesListExample:
+                  description: Lists the managed resolution rules and their enabled state in the current space.
+                  summary: Managed resolution rules
+                  value:
+                    rules:
+                      - enabled: false
+                        id: related_user_alias_resolution
+                        kind: related_user_alias_resolution
+                        managed: true
+                      - enabled: true
+                        id: email_exact_match
+                        kind: email_exact_match
+                        managed: true
+          description: Entity resolution rules.
+      summary: List entity resolution rules
+      tags:
+        - Security entity store
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/security/entity_store/resolution/rules/{id}/disable:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/resolution/rules/{id}/disable</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Disable a managed entity resolution rule in this space.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+      operationId: put-security-entity-store-resolution-rules-id-disable
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The stable identifier of the entity resolution rule.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 100
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                ruleDisabledExample:
+                  description: The related user alias resolution rule was disabled in the current space.
+                  summary: Rule disabled
+                  value:
+                    enabled: false
+                    id: related_user_alias_resolution
+                    kind: related_user_alias_resolution
+                    managed: true
+          description: Updated entity resolution rule.
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: The requested entity resolution rule does not exist.
+                  summary: Unknown rule
+                  value:
+                    error: Not Found
+                    message: Saved object [entity-resolution-rule/unknown] not found
+                    statusCode: 404
+          description: Unknown entity resolution rule.
+      summary: Disable an entity resolution rule
+      tags:
+        - Security entity store
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/security/entity_store/resolution/rules/{id}/enable:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/resolution/rules/{id}/enable</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Enable a managed entity resolution rule in this space.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+      operationId: put-security-entity-store-resolution-rules-id-enable
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The stable identifier of the entity resolution rule.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 100
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                ruleEnabledExample:
+                  description: The related user alias resolution rule was enabled in the current space.
+                  summary: Rule enabled
+                  value:
+                    enabled: true
+                    id: related_user_alias_resolution
+                    kind: related_user_alias_resolution
+                    managed: true
+          description: Updated entity resolution rule.
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: The requested entity resolution rule does not exist.
+                  summary: Unknown rule
+                  value:
+                    error: Not Found
+                    message: Saved object [entity-resolution-rule/unknown] not found
+                    statusCode: 404
+          description: Unknown entity resolution rule.
+      summary: Enable an entity resolution rule
+      tags:
+        - Security entity store
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -56987,7 +57145,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Remove one or more entities from their resolution group. Changes become visible on subsequent reads after the next index refresh (typically <1s). Requires an enterprise license.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+        Remove one or more entities from their resolution group. Changes become visible on subsequent reads after the next index refresh (typically <1s).<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
       operationId: post-security-entity-store-resolution-unlink
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -57071,6 +57229,7 @@ paths:
             {
               "entity_ids": ["user:jdoe@example.com"]
             }
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
