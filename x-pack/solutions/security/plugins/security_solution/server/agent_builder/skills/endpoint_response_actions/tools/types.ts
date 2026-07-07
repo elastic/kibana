@@ -9,6 +9,8 @@ import type { RunContext } from '@kbn/agent-builder-server';
 import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common';
+import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../../../../common/endpoint/service/response_actions/constants';
 
 /**
  * Builds the comment recorded on a dispatched response action so its entry in
@@ -83,4 +85,31 @@ export interface EndpointNotFoundResult {
   lastSeen: null;
   /** Human-readable explanation for the agent's response text. */
   message: string;
+}
+
+/**
+ * Resolves the response-actions `agentType` for a Fleet agent from its
+ * installed integration packages, mirroring
+ * `RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES` — the same map the REST API
+ * consults, except the REST API gets `agent_type` as an explicit request
+ * field while these chat-driven tools only resolve a hostname to a Fleet
+ * agent. The installed package list is the only signal available to tell
+ * Elastic Defend apart from a 3rd-party EDR (SentinelOne, CrowdStrike,
+ * Microsoft Defender for Endpoint), so this keeps multi-vendor parity with
+ * the REST API instead of hardcoding `'endpoint'`.
+ *
+ * Defaults to `endpoint` when no known integration package is found, since
+ * that keeps prior single-vendor behavior for hosts without a resolvable
+ * package list.
+ */
+export function resolveAgentTypeFromPackages(packages: string[] = []): ResponseActionAgentType {
+  for (const [agentType, packageNames] of Object.entries(
+    RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES
+  )) {
+    if (packageNames.some((packageName) => packages.includes(packageName))) {
+      return agentType as ResponseActionAgentType;
+    }
+  }
+
+  return 'endpoint';
 }

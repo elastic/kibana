@@ -13,7 +13,11 @@ import { escapeKuery } from '@kbn/es-query';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { ISOLATE_TOOL_ID } from '../..';
-import { buildResponseActionComment, insufficientPrivilegesResult } from '../types';
+import {
+  buildResponseActionComment,
+  insufficientPrivilegesResult,
+  resolveAgentTypeFromPackages,
+} from '../types';
 
 const isolateHostSchema = z.object({
   hostName: z.string().min(1).describe('The hostname of the endpoint to isolate.'),
@@ -61,24 +65,13 @@ export const isolateHostTool = (
           return insufficientPrivilegesResult('canIsolateHost');
         }
 
-        // Attribute the action to the initiating analyst (falls back to the
-        // default system user when the current user cannot be resolved) so the
-        // Response Actions audit trail records who requested it, not `elastic`.
-        const username = endpointAppContextService.getCurrentUsername(request);
-        const responseActionsClient = endpointAppContextService.getInternalResponseActionsClient({
-          spaceId,
-          username,
-          agentType: 'endpoint',
-          // Analyst-initiated via chat (gated behind HITL confirmation), not a
-          // system/rule-triggered action — RESPONSE_ACTIONS_SUPPORT_MAP only
-          // allows `isolate` for `manual` action type on the `endpoint` agent.
-          isAutomated: false,
-        });
-
         // The response actions API needs endpoint_ids, not host names.
         // We resolve hostName -> endpoint_ids via the fleet agent service.
         // `hostName` is user/LLM-controlled, so escape it before interpolating
-        // into the KQL expression.
+        // into the KQL expression. This lookup also drives multi-vendor
+        // support: the agent's installed packages tell us which EDR
+        // (`agentType`) to dispatch through, the same way the REST API's
+        // `agent_type` request field does.
         const fleetServices = endpointAppContextService.getInternalFleetServices(spaceId);
         const agent = fleetServices.agent;
         const agents = await agent.listAgents({
@@ -106,11 +99,28 @@ export const isolateHostTool = (
         }
 
         const endpointIds = agents.agents.map((a) => a.id);
+        const agentType = resolveAgentTypeFromPackages(agents.agents[0].packages);
 
         // Reject hosts that live in a different space than the caller's active
         // space — resolving/dispatching against the default space's agents would
         // otherwise let a caller act on hosts outside their space.
         await fleetServices.ensureInCurrentSpace({ agentIds: endpointIds });
+
+        // Attribute the action to the initiating analyst (falls back to the
+        // default system user when the current user cannot be resolved) so the
+        // Response Actions audit trail records who requested it, not `elastic`.
+        const username = endpointAppContextService.getCurrentUsername(request);
+        const responseActionsClient = endpointAppContextService.getInternalResponseActionsClient({
+          spaceId,
+          username,
+          agentType,
+          // Analyst-initiated via chat (gated behind HITL confirmation), not a
+          // system/rule-triggered action — RESPONSE_ACTIONS_SUPPORT_MAP gates
+          // `isolate` per agent type/action-type combination (see
+          // is_response_action_supported.ts); `manual` is what a human
+          // confirming in chat maps to.
+          isAutomated: false,
+        });
 
         const actionDetails = await responseActionsClient.isolate(
           {

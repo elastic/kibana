@@ -283,6 +283,124 @@ describe('isolateHostTool', () => {
       }
     });
 
+    it('resolves agentType from the agent packages for a non-Elastic-Defend host (multi-vendor)', async () => {
+      const mockAgentService = {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'agent-s1-1', packages: ['sentinel_one'] }],
+        }),
+      };
+
+      const mockResponseActionsClient = {
+        isolate: jest.fn().mockResolvedValue({
+          id: 'action-s1-1',
+          status: 'accepted',
+          wasSuccessful: true,
+          hosts: { 'agent-s1-1': { name: 's1-host' } },
+        }),
+        release: jest.fn().mockReturnValue(Promise.resolve()),
+        suspendProcess: jest.fn().mockReturnValue(Promise.resolve()),
+        upload: jest.fn().mockReturnValue(Promise.resolve()),
+        getFile: jest.fn().mockReturnValue(Promise.resolve()),
+        execute: jest.fn().mockReturnValue(Promise.resolve()),
+        killProcess: jest.fn().mockReturnValue(Promise.resolve()),
+        runningProcesses: jest.fn().mockReturnValue(Promise.resolve()),
+        processPendingActions: jest.fn().mockReturnValue(Promise.resolve()),
+        getFileInfo: jest.fn().mockReturnValue(Promise.resolve()),
+        getFileDownload: jest.fn().mockReturnValue(Promise.resolve()),
+        scan: jest.fn().mockReturnValue(Promise.resolve()),
+        runscript: jest.fn().mockReturnValue(Promise.resolve()),
+        getCustomScripts: jest.fn().mockReturnValue(Promise.resolve()),
+        cancel: jest.fn().mockReturnValue(Promise.resolve()),
+        memoryDump: jest.fn().mockReturnValue(Promise.resolve()),
+      };
+
+      const originalGetInternalFleetServices =
+        mockEndpointAppContextService.getInternalFleetServices;
+      const originalGetInternalResponseActionsClient =
+        mockEndpointAppContextService.getInternalResponseActionsClient;
+
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => mockResponseActionsClient
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+      try {
+        await tool.handler({ hostName: 's1-host' }, mockContext);
+
+        expect(mockEndpointAppContextService.getInternalResponseActionsClient).toHaveBeenCalledWith(
+          expect.objectContaining({ agentType: 'sentinel_one', isAutomated: false })
+        );
+        expect(mockResponseActionsClient.isolate).toHaveBeenCalledWith(
+          expect.objectContaining({ endpoint_ids: ['agent-s1-1'] }),
+          expect.anything()
+        );
+      } finally {
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
+        mockEndpointAppContextService.getInternalResponseActionsClient =
+          originalGetInternalResponseActionsClient;
+      }
+    });
+
+    it('defaults agentType to endpoint when the agent has no recognized package', async () => {
+      const mockAgentService = {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'agent-123' }],
+        }),
+      };
+
+      const mockResponseActionsClient = {
+        isolate: jest.fn().mockResolvedValue({
+          id: 'action-456',
+          status: 'accepted',
+          wasSuccessful: true,
+          hosts: { 'agent-123': { name: 'my-host' } },
+        }),
+        release: jest.fn().mockReturnValue(Promise.resolve()),
+        suspendProcess: jest.fn().mockReturnValue(Promise.resolve()),
+        upload: jest.fn().mockReturnValue(Promise.resolve()),
+        getFile: jest.fn().mockReturnValue(Promise.resolve()),
+        execute: jest.fn().mockReturnValue(Promise.resolve()),
+        killProcess: jest.fn().mockReturnValue(Promise.resolve()),
+        runningProcesses: jest.fn().mockReturnValue(Promise.resolve()),
+        processPendingActions: jest.fn().mockReturnValue(Promise.resolve()),
+        getFileInfo: jest.fn().mockReturnValue(Promise.resolve()),
+        getFileDownload: jest.fn().mockReturnValue(Promise.resolve()),
+        scan: jest.fn().mockReturnValue(Promise.resolve()),
+        runscript: jest.fn().mockReturnValue(Promise.resolve()),
+        getCustomScripts: jest.fn().mockReturnValue(Promise.resolve()),
+        cancel: jest.fn().mockReturnValue(Promise.resolve()),
+        memoryDump: jest.fn().mockReturnValue(Promise.resolve()),
+      };
+
+      const originalGetInternalFleetServices =
+        mockEndpointAppContextService.getInternalFleetServices;
+      const originalGetInternalResponseActionsClient =
+        mockEndpointAppContextService.getInternalResponseActionsClient;
+
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => mockResponseActionsClient
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+      try {
+        await tool.handler({ hostName: 'my-host' }, mockContext);
+
+        expect(mockEndpointAppContextService.getInternalResponseActionsClient).toHaveBeenCalledWith(
+          expect.objectContaining({ agentType: 'endpoint', isAutomated: false })
+        );
+      } finally {
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
+        mockEndpointAppContextService.getInternalResponseActionsClient =
+          originalGetInternalResponseActionsClient;
+      }
+    });
+
     it('returns an error result when the agent service throws', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockRejectedValue(new Error('fleet service unavailable')),
