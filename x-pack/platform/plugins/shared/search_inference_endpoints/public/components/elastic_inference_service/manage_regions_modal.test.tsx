@@ -315,15 +315,9 @@ describe('ManageRegionsModal', () => {
   });
 
   describe('Save preferences button', () => {
-    it('calls savePolicy with the full region list when all regions are selected', async () => {
+    it('is disabled when no changes have been made', async () => {
       mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false });
       mockUseEisModels.mockReturnValue({ data: [endpointWithRegions], isLoading: false });
-
-      mockSaveMutate.mockImplementation(
-        (_body: unknown, { onSuccess }: { onSuccess: () => void }) => {
-          onSuccess();
-        }
-      );
 
       render(
         <Wrapper>
@@ -331,23 +325,12 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      // All selected by default
+      // All regions selected by default — nothing changed yet
       await waitFor(() => {
         expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByTestId('manageRegionsSaveButton'));
-
-      expect(mockSaveMutate).toHaveBeenCalledWith(
-        {
-          allowed_regions: [
-            { csp: 'aws', region: 'us-east-1' },
-            { csp: 'gcp', region: 'europe-west1' },
-          ],
-        },
-        expect.objectContaining({ onSuccess: expect.any(Function) })
-      );
-      expect(onClose).toHaveBeenCalled();
+      expect(screen.getByTestId('manageRegionsSaveButton')).toBeDisabled();
     });
 
     it('calls savePolicy with only the checked regions when a subset is selected', async () => {
