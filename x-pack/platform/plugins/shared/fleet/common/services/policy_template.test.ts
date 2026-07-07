@@ -19,6 +19,7 @@ import {
   isIntegrationPolicyTemplate,
   getNormalizedInputs,
   getNormalizedDataStreams,
+  getPolicyTemplateDataStreamPaths,
   filterPolicyTemplatesTiles,
 } from './policy_template';
 
@@ -508,5 +509,47 @@ describe('filterPolicyTemplatesTiles', () => {
         path: 'nginx-template-2',
       },
     ]);
+  });
+});
+
+describe('getPolicyTemplateDataStreamPaths', () => {
+  it('returns the declared data_streams for integration templates', () => {
+    expect(
+      getPolicyTemplateDataStreamPaths({ name: 'nginx' }, {
+        name: 'nginx',
+        data_streams: ['access', 'error'],
+        inputs: [{ type: 'logfile' }],
+      } as any)
+    ).toEqual(['access', 'error']);
+  });
+
+  it('returns an empty array for integration templates without data_streams', () => {
+    expect(
+      getPolicyTemplateDataStreamPaths({ name: 'nginx' }, {
+        name: 'nginx',
+        inputs: [{ type: 'logfile' }],
+      } as any)
+    ).toEqual([]);
+  });
+
+  it('returns the synthesized data stream path for input-only templates', () => {
+    expect(
+      getPolicyTemplateDataStreamPaths({ name: 'aws_cloudwatch' }, {
+        name: 'ec2',
+        input: 'otelcol',
+        title: 'EC2',
+        description: 'EC2',
+      } as any)
+    ).toEqual(['aws_cloudwatch.ec2']);
+  });
+
+  it('scopes each input-only template to its own data stream path', () => {
+    const packageInfo = { name: 'aws_cloudwatch' };
+    expect(
+      getPolicyTemplateDataStreamPaths(packageInfo, { name: 'rds', input: 'otelcol' } as any)
+    ).toEqual(['aws_cloudwatch.rds']);
+    expect(
+      getPolicyTemplateDataStreamPaths(packageInfo, { name: 'sqs', input: 'otelcol' } as any)
+    ).toEqual(['aws_cloudwatch.sqs']);
   });
 });

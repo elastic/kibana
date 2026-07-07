@@ -6,6 +6,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
+import { escapeQuotes } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
@@ -124,7 +125,9 @@ export async function updateAgentPolicySpaces({
   const uninstallTokensRes = await soClient.find<UninstallTokenSOAttributes>({
     perPage: SO_SEARCH_LIMIT,
     type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-    filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.policy_id:"${agentPolicyId}"`,
+    filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.policy_id:"${escapeQuotes(
+      agentPolicyId
+    )}"`,
   });
 
   if (uninstallTokensRes.total > 0) {
@@ -169,7 +172,7 @@ export async function updateAgentPolicySpaces({
       let searchAfter: SortResults | undefined;
       while (hasMore) {
         const { agents } = await getAgentsByKuery(esClient, newSpaceSoClient, {
-          kuery: `policy_id:"${agentPolicyId}"`,
+          kuery: `policy_id:"${escapeQuotes(agentPolicyId)}"`,
           showInactive: true,
           perPage: UPDATE_AGENT_BATCH_SIZE,
           pitId,

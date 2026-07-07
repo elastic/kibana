@@ -24,7 +24,7 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -46,6 +46,7 @@ import {
   getNormalizedInputs,
   isRootPrivilegesRequired,
   varsReducer,
+  validateFleetSavedObjectId,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -95,12 +96,14 @@ import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema 
 import type {
   NewPackagePolicy,
   UpdatePackagePolicy,
+  UpdatePackagePolicyWithId,
   PackagePolicy,
   PackagePolicySOAttributes,
   DryRunPackagePolicy,
   PostPackagePolicyCreateCallback,
   PostPackagePolicyPostCreateCallback,
   PutPackagePolicyPostUpdateCallback,
+  PutPackagePolicyUpdateCallback,
 } from '../types';
 import type { ExternalCallback } from '..';
 
@@ -236,6 +239,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<PackagePolicy> {
+    validateFleetSavedObjectId(options?.id);
+
     const useSpaceAwareness = await isSpaceAwarenessEnabled();
     const packagePolicyId = options?.id || uuidv4();
 
@@ -953,9 +958,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     try {
       logger.debug(`Starting update of package policy ${id}`);
+      const packagePolicyUpdateWithId = { ...packagePolicyUpdate, id };
       enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
         'packagePolicyUpdate',
-        packagePolicyUpdate,
+        packagePolicyUpdateWithId,
         soClient,
         esClient
       );
@@ -996,7 +1002,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     // eslint-disable-next-line prefer-const
-    let { version, ...restOfPackagePolicy } = packagePolicy;
+    let { version, id: _id, ...restOfPackagePolicy } = packagePolicy;
     let inputs = getInputsWithStreamIds(restOfPackagePolicy, oldPackagePolicy.id);
 
     inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
@@ -1171,7 +1177,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   public async bulkUpdate(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    packagePolicyUpdates: Array<NewPackagePolicy & { version?: string; id: string }>,
+    packagePolicyUpdates: UpdatePackagePolicyWithId[],
     options?: { user?: AuthenticatedUser; force?: boolean; asyncDeploy?: boolean }
   ): Promise<{
     updatedPolicies: PackagePolicy[] | null;
@@ -2056,6 +2062,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
             for (const callback of externalCallbacks) {
               let thisCallbackResponse;
+              let packagePolicyId: string | undefined;
 
               if (externalCallbackType === 'packagePolicyPostCreate') {
                 thisCallbackResponse = await (callback as PostPackagePolicyPostCreateCallback)(
@@ -2075,6 +2082,17 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                   request
                 );
                 updatedNewData = PackagePolicySchema.validate(thisCallbackResponse);
+              } else if (externalCallbackType === 'packagePolicyUpdate') {
+                // id is stripped by the schema validation below; re-inject it so every
+                // callback in the chain receives it regardless of registration order.
+                packagePolicyId = (updatedNewData as UpdatePackagePolicyWithId).id;
+                thisCallbackResponse = await (callback as PutPackagePolicyUpdateCallback)(
+                  updatedNewData as UpdatePackagePolicyWithId,
+                  soClient,
+                  esClient,
+                  context,
+                  request
+                );
               } else {
                 thisCallbackResponse = await (callback as PostPackagePolicyCreateCallback)(
                   updatedNewData as NewPackagePolicy,
@@ -2105,7 +2123,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                   ),
                 };
 
-                updatedNewData = UpdatePackagePolicySchema.validate(omitted);
+                updatedNewData = {
+                  ...UpdatePackagePolicySchema.validate(omitted),
+                  id: packagePolicyId,
+                };
               }
             }
 
@@ -2448,7 +2469,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
 }
 
 function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: PackageInfo) {
-  const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, load);
+  const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, parse);
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
       .map(([key, value]) => ({
@@ -2948,7 +2969,7 @@ export function updatePackageInputs(
     vars,
   };
 
-  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, load);
+  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, parse);
 
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))

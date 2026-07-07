@@ -30,7 +30,12 @@ import type {
   DeletePackagePoliciesResponse,
   ExperimentalDataStreamFeature,
 } from '../../common/types';
-import type { NewPackagePolicy, UpdatePackagePolicy, PackagePolicy } from '../types';
+import type {
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+  UpdatePackagePolicyWithId,
+  PackagePolicy,
+} from '../types';
 import type { ExternalCallback } from '..';
 
 import type { NewPackagePolicyWithId } from './package_policy';
@@ -50,7 +55,7 @@ export type RunExternalCallbacksPackagePolicyArgument<A extends ExternalCallback
     : A extends 'packagePolicyPostCreate'
     ? PackagePolicy
     : A extends 'packagePolicyUpdate'
-    ? UpdatePackagePolicy
+    ? UpdatePackagePolicyWithId
     : A extends 'packagePolicyPostUpdate'
     ? PackagePolicy
     : never;
@@ -115,7 +120,7 @@ export interface PackagePolicyClient {
   bulkUpdate(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    packagePolicyUpdates: UpdatePackagePolicy[],
+    packagePolicyUpdates: UpdatePackagePolicyWithId[],
     options?: { user?: AuthenticatedUser; force?: boolean; asyncDeploy?: boolean },
     currentVersion?: string
   ): Promise<{

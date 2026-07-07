@@ -67,6 +67,7 @@ export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = Rea
 
     const { data: connectors } = useLoadConnectors({
       http,
+      inferenceEnabled: true,
       settings,
     });
     const defaultConnector = useMemo(

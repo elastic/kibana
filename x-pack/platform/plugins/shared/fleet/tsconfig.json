@@ -121,6 +121,7 @@
     "@kbn/embeddable-plugin",
     "@kbn/setup-node-env",
     "@kbn/react-query",
-    "@kbn/fs"
+    "@kbn/fs",
+    "@kbn/yaml-loader"
   ]
 }

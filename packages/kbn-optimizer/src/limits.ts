@@ -11,7 +11,7 @@ import Fs from 'fs';
 import Path from 'path';
 
 import dedent from 'dedent';
-import Yaml from 'js-yaml';
+import { parse, stringify } from 'yaml';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { ToolingLog } from '@kbn/tooling-log';
 import { CiStatsMetric } from '@kbn/ci-stats-reporter';
@@ -32,7 +32,7 @@ export function readLimits(path: string): Limits {
     }
   }
 
-  return yaml ? Yaml.load(yaml) : {};
+  return yaml ? parse(yaml) ?? {} : {};
 }
 
 export function validateLimitsForAllBundles(
@@ -136,6 +136,6 @@ export function updateBundleLimits({
     pageLoadAssetSize,
   };
 
-  Fs.writeFileSync(limitsPath, Yaml.dump(newLimits));
+  Fs.writeFileSync(limitsPath, stringify(newLimits));
   log.success(`wrote updated limits to ${limitsPath}`);
 }

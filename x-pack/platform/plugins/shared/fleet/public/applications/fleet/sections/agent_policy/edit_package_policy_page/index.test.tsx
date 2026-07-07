@@ -31,6 +31,10 @@ import { EditPackagePolicyPage } from '.';
 
 type MockFn = jest.MockedFunction<any>;
 
+jest.mock('../../../../../services/use_yaml', () => ({
+  useYaml: () => require('yaml'),
+}));
+
 jest.mock('../create_package_policy_page/components/steps/components/use_policies', () => {
   return {
     ...jest.requireActual('../create_package_policy_page/components/steps/components/use_policies'),
@@ -290,9 +294,8 @@ describe('edit package policy page', () => {
       expect(renderResult.getByText('Collect logs from Nginx instances')).toBeInTheDocument();
       expect(renderResult.getByDisplayValue('nginx-1')).toBeInTheDocument();
       expect(renderResult.getByDisplayValue('Nginx description')).toBeInTheDocument();
+      expect(renderResult.getByDisplayValue('/var/log/nginx/access.log*')).toBeInTheDocument();
     });
-
-    fireEvent.click(renderResult.getByText('Change defaults'));
 
     fireEvent.change(renderResult.getByDisplayValue('/var/log/nginx/access.log*'), {
       target: { value: '' },
@@ -317,7 +320,7 @@ describe('edit package policy page', () => {
       expect(renderResult.getByText('Collect logs from Nginx instances')).toBeInTheDocument();
     });
 
-    fireEvent.click(renderResult.getByRole('switch'));
+    fireEvent.click(renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch'));
 
     fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
 
@@ -351,7 +354,7 @@ describe('edit package policy page', () => {
     await waitFor(() => {
       expect(renderResult.getByText('Collect logs from Nginx instances')).toBeInTheDocument();
     });
-    fireEvent.click(renderResult.getByRole('switch'));
+    fireEvent.click(renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch'));
 
     fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
 
@@ -377,7 +380,7 @@ describe('edit package policy page', () => {
       expect(renderResult.getByText('Collect logs from Nginx instances')).toBeInTheDocument();
     });
 
-    fireEvent.click(renderResult.getByRole('switch'));
+    fireEvent.click(renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch'));
 
     fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
 
@@ -506,7 +509,7 @@ describe('edit package policy page', () => {
       expect(renderResult.getByText('Collect logs from Nginx instances')).toBeInTheDocument();
     });
 
-    fireEvent.click(renderResult.getByRole('switch'));
+    fireEvent.click(renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch'));
 
     fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
 

@@ -7,7 +7,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import globby from 'globby';
 import {
   decryptSecurityLabsContent,
@@ -45,7 +45,7 @@ describe('Security labs content', () => {
         const split = content.split('---');
         const yamlString = split[1];
         const article = split[2];
-        const parsed = yaml.load(yamlString) as {
+        const parsed = parse(yamlString) as {
           slug: string;
           title: string;
           date: string;

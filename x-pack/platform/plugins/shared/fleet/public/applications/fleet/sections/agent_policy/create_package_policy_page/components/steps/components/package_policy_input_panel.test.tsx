@@ -28,9 +28,12 @@ jest.mock('../../../single_page_layout/hooks/setup_technology', () => {
 });
 const useAgentlessMock = useAgentless as jest.MockedFunction<typeof useAgentless>;
 
+const mockParse = () => ({});
+
 describe('shouldShowStreamsByDefault', () => {
   it('should return true if a datastreamId is provided and contained in the input', () => {
     const res = shouldShowStreamsByDefault(
+      mockParse,
       {} as any,
       [],
       {
@@ -48,6 +51,7 @@ describe('shouldShowStreamsByDefault', () => {
 
   it('should return false if a datastreamId is provided but not contained in the input', () => {
     const res = shouldShowStreamsByDefault(
+      mockParse,
       {} as any,
       [],
       {
@@ -65,6 +69,7 @@ describe('shouldShowStreamsByDefault', () => {
 
   it('should return false if a datastreamId is provided but the input is disabled', () => {
     const res = shouldShowStreamsByDefault(
+      mockParse,
       {} as any,
       [],
       {

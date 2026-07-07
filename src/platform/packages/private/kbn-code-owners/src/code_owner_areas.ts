@@ -46,7 +46,7 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
   ],
   search: ['elastic/search-design', 'elastic/search-kibana'],
   observability: [
-    'elastic/obs-ai-assistant',
+    'elastic/nightshift-context-and-research-team',
     'elastic/obs-cloudnative-monitoring',
     'elastic/obs-docs',
     'elastic/obs-entities',

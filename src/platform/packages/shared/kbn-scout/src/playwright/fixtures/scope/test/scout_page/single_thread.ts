@@ -8,9 +8,10 @@
  */
 
 import { subj } from '@kbn/test-subj-selector';
-import type { Page } from '@playwright/test';
+import type { Page, TestInfo } from '@playwright/test';
 import { test as base } from '@playwright/test';
 import type { ScoutPage } from '.';
+import { attachBrowserConsoleErrors, collectBrowserConsoleErrors } from './browser_console_errors';
 import type { PathOptions } from '../../../../../common/services/kibana_url';
 import { checkA11y } from '../../../../utils';
 import type { KibanaUrl, ScoutLogger } from '../../worker';
@@ -142,11 +143,15 @@ export const scoutPageFixture = base.extend<
 >({
   page: async (
     { page, kbnUrl, log }: { page: Page; kbnUrl: KibanaUrl; log: ScoutLogger },
-    use: (extendedPage: ScoutPage) => Promise<void>
+    use: (extendedPage: ScoutPage) => Promise<void>,
+    testInfo: TestInfo
   ) => {
+    const consoleErrors = collectBrowserConsoleErrors(page);
     const extendedPage = extendPlaywrightPage({ page, kbnUrl });
 
     log.serviceLoaded('scoutPage');
     await use(extendedPage);
+
+    await attachBrowserConsoleErrors(testInfo, consoleErrors);
   },
 });

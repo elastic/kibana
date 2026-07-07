@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import { ConfigType } from '@kbn/screenshotting-server';
-import * as puppeteer from 'puppeteer';
+import type * as puppeteer from 'puppeteer';
 import { Size } from '../../../common/layout';
 import { PreserveLayout } from '../../layouts/preserve_layout';
 import { HeadlessChromiumDriver } from './driver';

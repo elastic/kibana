@@ -8,10 +8,14 @@
  */
 
 import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { EuiProvider } from '@elastic/eui';
 import { ManageData } from './manage_data';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { ApplicationStart } from '@kbn/core/public';
-import { FeatureCatalogueEntry } from '../../../services';
+import { AppStatus, type ApplicationStart, type PublicAppInfo } from '@kbn/core/public';
+import { BehaviorSubject } from 'rxjs';
+import type { FeatureCatalogueEntry } from '../../../services';
 
 jest.mock('../app_navigation_handler', () => {
   return {
@@ -30,13 +34,41 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-const applicationStartMock = {
-  capabilities: { navLinks: { management: true, dev_tools: true } },
-} as unknown as ApplicationStart;
+const createApplicationStartMock = ({
+  isManagementEnabled,
+  isDevToolsEnabled,
+  managementAppStatus = AppStatus.accessible,
+}: {
+  isManagementEnabled: boolean;
+  isDevToolsEnabled: boolean;
+  managementAppStatus?: AppStatus;
+}) =>
+  ({
+    capabilities: { navLinks: { management: isManagementEnabled, dev_tools: isDevToolsEnabled } },
+    currentAppId$: new BehaviorSubject('home'),
+    navigateToUrl: jest.fn(),
+    applications$: new BehaviorSubject(
+      new Map<string, PublicAppInfo>([
+        ['management', { status: managementAppStatus } as PublicAppInfo],
+      ])
+    ),
+  } as unknown as ApplicationStart);
 
-const applicationStartMockRestricted = {
-  capabilities: { navLinks: { management: false, dev_tools: false } },
-} as unknown as ApplicationStart;
+const applicationStartMock = createApplicationStartMock({
+  isManagementEnabled: true,
+  isDevToolsEnabled: true,
+});
+
+const applicationStartMockRestricted = createApplicationStartMock({
+  isManagementEnabled: false,
+  isDevToolsEnabled: false,
+});
+
+const applicationStartMockWithInaccessibleManagement = createApplicationStartMock({
+  isManagementEnabled: true,
+  isDevToolsEnabled: true,
+  managementAppStatus: AppStatus.inaccessible,
+});
 
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 
@@ -112,5 +144,68 @@ describe('ManageData', () => {
       />
     );
     expect(component).toMatchSnapshot();
+  });
+
+  test('renders dev tools link when capability is enabled', () => {
+    render(
+      <EuiProvider>
+        <I18nProvider>
+          <ManageData
+            addBasePath={addBasePathMock}
+            application={applicationStartMock}
+            features={mockFeatures}
+          />
+        </I18nProvider>
+      </EuiProvider>
+    );
+    expect(screen.getByTestId('homeDevTools')).toBeInTheDocument();
+  });
+
+  test('renders stack management link when management app is accessible', async () => {
+    render(
+      <EuiProvider>
+        <I18nProvider>
+          <ManageData
+            addBasePath={addBasePathMock}
+            application={applicationStartMock}
+            features={mockFeatures}
+          />
+        </I18nProvider>
+      </EuiProvider>
+    );
+
+    expect(await screen.findByTestId('homeManage')).toBeInTheDocument();
+  });
+
+  test('does not render dev tools link when capability is disabled', () => {
+    render(
+      <EuiProvider>
+        <I18nProvider>
+          <ManageData
+            addBasePath={addBasePathMock}
+            application={applicationStartMockRestricted}
+            features={mockFeatures}
+          />
+        </I18nProvider>
+      </EuiProvider>
+    );
+    expect(screen.queryByTestId('homeDevTools')).not.toBeInTheDocument();
+  });
+
+  test('does not render stack management link when management app is inaccessible', async () => {
+    render(
+      <EuiProvider>
+        <I18nProvider>
+          <ManageData
+            addBasePath={addBasePathMock}
+            application={applicationStartMockWithInaccessibleManagement}
+            features={mockFeatures}
+          />
+        </I18nProvider>
+      </EuiProvider>
+    );
+
+    expect(screen.getByTestId('homeDevTools')).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByTestId('homeManage')).not.toBeInTheDocument());
   });
 });

@@ -18,6 +18,7 @@ import {
 import type { DownloadSource, DownloadSourceSOAttributes, DownloadSourceBase } from '../types';
 import { DownloadSourceError, FleetError } from '../errors';
 import { SO_SEARCH_LIMIT } from '../../common';
+import { validateFleetSavedObjectId } from '../../common/services';
 
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
@@ -71,6 +72,8 @@ class DownloadSourceService {
   ): Promise<DownloadSource> {
     const logger = appContextService.getLogger();
     logger.debug(`Creating new download source`);
+
+    validateFleetSavedObjectId(options?.id);
 
     const data: DownloadSourceSOAttributes = downloadSource;
 
