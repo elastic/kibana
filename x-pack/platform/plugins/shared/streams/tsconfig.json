@@ -102,6 +102,7 @@
     "@kbn/sample-log-parser",
     "@kbn/workflows-extensions",
     "@kbn/agent-context-layer-plugin",
-    "@kbn/traced-es-client"
+    "@kbn/traced-es-client",
+    "@kbn/core-http-server-mocks"
   ]
 }

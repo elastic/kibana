@@ -14,7 +14,8 @@
     "@kbn/repo-info",
     "@kbn/human-readable-id",
     "@kbn/connector-specs",
-    "@kbn/connector-schemas"
+    "@kbn/connector-schemas",
+    "@kbn/std"
   ],
   "exclude": ["target/**/*"]
 }

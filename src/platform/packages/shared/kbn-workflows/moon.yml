@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/human-readable-id'
   - '@kbn/connector-specs'
   - '@kbn/connector-schemas'
+  - '@kbn/std'
 tags:
   - shared-common
   - package
