@@ -19,7 +19,6 @@ import {
 import {
   formatFieldStringValueWithHighlights,
   getMessageFieldWithFallbacks,
-  tryFormatAsStructuredValue,
   type DataTableRecord,
   type LogDocumentOverview,
 } from '@kbn/discover-utils';
@@ -49,31 +48,24 @@ export const ContentBreakdown = ({
 
   const rawFieldValue = hit && field ? hit.flattened[field] : undefined;
 
-  const messageCodeBlockProps = useMemo(() => {
-    // Pass field name for highlight lookup in hit.highlight.
-    // The field may not exist in the data view (e.g., OTel body.text) but highlights should still apply.
-    const getFormattedValue = () =>
-      formatFieldStringValueWithHighlights({
-        value: value ?? '',
-        hit: hit.raw,
-        fieldFormats,
-        dataView,
-        fieldName: field,
-      });
-
-    const structuredValue = tryFormatAsStructuredValue({
-      value,
-      getFormattedValue,
-      hit: hit.raw,
-      fieldFormats,
-      dataView,
-      fieldName: field,
-    });
-
-    return structuredValue
-      ? { language: structuredValue.language, children: structuredValue.content }
-      : { language: 'txt' as const, children: getFormattedValue() };
-  }, [dataView, field, fieldFormats, hit.raw, value]);
+  const messageCodeBlockProps = useMemo(
+    () =>
+      formattedValue
+        ? { language: 'json', children: formattedValue }
+        : {
+            language: 'txt',
+            // Pass field name for highlight lookup in hit.highlight.
+            // The field may not exist in the data view (e.g., OTel body.text) but highlights should still apply.
+            children: formatFieldStringValueWithHighlights({
+              value: value ?? '',
+              hit: hit.raw,
+              fieldFormats,
+              dataView,
+              fieldName: field,
+            }),
+          },
+    [dataView, field, fieldFormats, formattedValue, hit.raw, value]
+  );
   const hasMessageField = field && value;
 
   return (

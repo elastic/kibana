@@ -116,7 +116,7 @@ describe('ContentBreakdown', () => {
       expect(container.querySelector('john')).toBeNull();
     });
 
-    it('renders pretty-printed JSON when message is valid JSON', () => {
+    it('renders pretty-printed JSON when message is valid JSON and skips convertToReact', () => {
       const json = { foo: { bar: true } };
       const message = JSON.stringify(json);
       const hit = buildHit({ message });
@@ -126,40 +126,8 @@ describe('ContentBreakdown', () => {
 
       const codeBlock = screen.getByTestId('codeBlock');
       expect(codeBlock.textContent).toBe(JSON.stringify(json, null, 2));
-    });
-
-    it('preserves search-term highlighting when message is valid JSON', () => {
-      const json = { message: 'contains a search term' };
-      const message = JSON.stringify(json);
-      const highlights = [
-        'contains a @kibana-highlighted-field@search@/kibana-highlighted-field@ term',
-      ];
-      const hit = buildHit({ message }, { message: highlights });
-      const formattedDoc = { message } as any;
-
-      mockConvertToReact.mockImplementationOnce((value: unknown) => (
-        <>
-          {'{\n  "message": "contains a '}
-          <mark className="ffSearch__highlight">search</mark>
-          {' term"\n}'}
-        </>
-      ));
-
-      const { container } = render(
-        <ContentBreakdown dataView={mockDataView} formattedDoc={formattedDoc} hit={hit} />
-      );
-
-      // The pretty-printed JSON string is what gets passed through the highlighter
-      expect(mockConvertToReact).toHaveBeenCalledWith(
-        JSON.stringify(json, null, 2),
-        expect.objectContaining({
-          hit: expect.objectContaining({ highlight: { message: highlights } }),
-        })
-      );
-
-      const markElement = container.querySelector('mark.ffSearch__highlight');
-      expect(markElement).toBeInTheDocument();
-      expect(markElement).toHaveTextContent('search');
+      // The JSON path uses formattedValue directly — convertToReact should not be called
+      expect(mockConvertToReact).not.toHaveBeenCalled();
     });
 
     it('applies highlights even when field is not in data view (e.g., OTel body.text)', () => {

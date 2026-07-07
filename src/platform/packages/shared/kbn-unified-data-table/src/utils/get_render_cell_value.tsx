@@ -12,7 +12,7 @@ import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '@elastic/eui';
-import { EuiButtonIcon, EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import type {
@@ -20,9 +20,8 @@ import type {
   DataTableRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
-import { formatFieldValueReact, tryFormatAsStructuredValue } from '@kbn/discover-utils';
+import { formatFieldValueReact, tryFormatJsonContent } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { UnifiedDataTableContext } from '../table_context';
 import type { CustomCellRenderer } from '../types';
 import { SourceDocument } from '../components/source_document';
@@ -273,22 +272,7 @@ function renderPopoverContent({
   }
 
   const value = row.flattened[columnId];
-  const getFormattedValue = () =>
-    formatFieldValueReact({
-      value,
-      hit: row.raw,
-      fieldFormats,
-      dataView,
-      field,
-    });
-  const structuredValue = tryFormatAsStructuredValue({
-    value,
-    getFormattedValue,
-    hit: row.raw,
-    fieldFormats,
-    dataView,
-    field,
-  });
+  const jsonContent = tryFormatJsonContent(value);
 
   return (
     <EuiFlexGroup
@@ -299,21 +283,22 @@ function renderPopoverContent({
     >
       <EuiFlexItem>
         <DataTablePopoverCellValue>
-          {structuredValue ? (
-            <EuiCodeBlock
-              language={structuredValue.language}
-              overflowHeight={100}
-              paddingSize="s"
-              fontSize="s"
-              css={css`
-                margin-right: ${euiThemeVars.euiSizeXS};
-              `}
-            >
-              {structuredValue.content}
-            </EuiCodeBlock>
-          ) : (
-            <span>{getFormattedValue()}</span>
-          )}
+          <div
+            data-test-subj="dataTableExpandCellActionPopoverValue"
+            css={css`
+              white-space: pre-wrap;
+              max-height: 300px;
+              overflow: auto;
+            `}
+          >
+            {formatFieldValueReact({
+              value: jsonContent ?? value,
+              hit: row.raw,
+              fieldFormats,
+              dataView,
+              field,
+            })}
+          </div>
         </DataTablePopoverCellValue>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>

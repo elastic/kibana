@@ -43,7 +43,7 @@ export {
   formatFieldValueText,
   formatFieldStringValueWithHighlights,
   formatHitReact,
-  tryFormatAsStructuredValue,
+  tryFormatJsonContent,
   getDocId,
   getLogDocumentOverview,
   getFlattenedTraceDocumentOverview,

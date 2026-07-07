@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { unescape } from 'lodash';
 import type { LogDocumentOverview } from '../types';
 import { getFirstAvailableFieldValue } from './get_field_value_with_fallback';
-import { tryPrettyPrintJson } from './try_format_as_structured_value';
 
 export const getLogFieldWithFallback = <T extends keyof LogDocumentOverview>(
   doc: Record<string, unknown> | LogDocumentOverview,
@@ -23,7 +23,15 @@ export const getLogFieldWithFallback = <T extends keyof LogDocumentOverview>(
   );
   const valueAsString = value !== undefined && value !== null ? String(value) : undefined;
   if (field && valueAsString !== undefined && valueAsString !== null) {
-    const formattedValue = includeFormattedValue ? tryPrettyPrintJson(valueAsString) : undefined;
+    let formattedValue: string | undefined;
+
+    if (includeFormattedValue) {
+      try {
+        formattedValue = JSON.stringify(JSON.parse(unescape(valueAsString)), null, 2);
+      } catch {
+        // If the value is not a valid JSON, leave it unformatted
+      }
+    }
 
     return {
       field,
