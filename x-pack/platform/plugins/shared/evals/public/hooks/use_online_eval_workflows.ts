@@ -8,7 +8,11 @@
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { parseYamlToJSONWithoutValidation, stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
-import { parseOnlineEvalWorkflowYaml } from '../../common/online_evals/workflow_yaml';
+import {
+  buildOnlineEvalWorkflowYaml,
+  type OnlineEvalWorkflowConfig,
+  parseOnlineEvalWorkflowYaml,
+} from '../../common/online_evals/workflow_yaml';
 import { queryKeys } from '../query_keys';
 
 const WORKFLOWS_API_BASE_URL = '/api/workflows';
@@ -155,18 +159,33 @@ export const useUpdateOnlineEvalWorkflow = () => {
   return useMutation({
     mutationFn: async ({
       workflowId,
-      body,
+      config,
     }: {
       workflowId: string;
-      body: Partial<UpdateWorkflowPayload>;
+      config: OnlineEvalWorkflowConfig;
     }) => {
+      const workflow = await services.http!.get<WorkflowDetail>(getWorkflowUrl(workflowId), {
+        version: WORKFLOWS_API_VERSION,
+      });
+
+      const body: UpdateWorkflowPayload = {
+        name: workflow.name,
+        description: workflow.description,
+        enabled: workflow.enabled,
+        tags: workflow.tags,
+        yaml: buildOnlineEvalWorkflowYaml(config),
+      };
+
       return services.http!.put(getWorkflowUrl(workflowId), {
         body: JSON.stringify(body),
         version: WORKFLOWS_API_VERSION,
       });
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.onlineEvals.all });
+    onSuccess: async (_, { workflowId }) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.onlineEvals.list() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.onlineEvals.detail(workflowId) }),
+      ]);
     },
   });
 };

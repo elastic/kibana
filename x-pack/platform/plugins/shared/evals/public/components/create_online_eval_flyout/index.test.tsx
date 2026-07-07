@@ -10,9 +10,11 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { CreateOnlineEvalFlyout } from '.';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useCreateOnlineEvalWorkflow } from '../../hooks/use_online_eval_workflows';
+import { useLlmConnectors } from '../../hooks/use_llm_connectors';
 import { parseOnlineEvalWorkflowYaml } from '../../../common/online_evals/workflow_yaml';
 
 jest.mock('../../hooks/use_online_eval_workflows');
+jest.mock('../../hooks/use_llm_connectors');
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
@@ -81,6 +83,7 @@ jest.mock('@elastic/eui', () => {
 
 const mockedUseKibana = jest.mocked(useKibana);
 const mockedUseCreateOnlineEvalWorkflow = jest.mocked(useCreateOnlineEvalWorkflow);
+const mockedUseLlmConnectors = jest.mocked(useLlmConnectors);
 
 describe('CreateOnlineEvalFlyout', () => {
   const mutateAsync = jest.fn();
@@ -114,13 +117,6 @@ describe('CreateOnlineEvalFlyout', () => {
         };
       }
 
-      if (path === '/api/actions/connectors') {
-        return [
-          { id: 'connector-allowed', name: 'Judge Connector', connector_type_id: '.gen-ai' },
-          { id: 'connector-ignored', name: 'Webhook', connector_type_id: '.webhook' },
-        ];
-      }
-
       throw new Error(`Unexpected GET ${path}`);
     });
 
@@ -136,32 +132,57 @@ describe('CreateOnlineEvalFlyout', () => {
       mutateAsync,
       isLoading: false,
     } as unknown as ReturnType<typeof useCreateOnlineEvalWorkflow>);
+    mockedUseLlmConnectors.mockReturnValue({
+      connectors: [{ id: 'connector-allowed', name: 'Judge Connector' }],
+      isLoading: false,
+      error: null,
+    });
   });
 
   const getByTestSubj = (testSubj: string) =>
     container.querySelector(`[data-test-subj="${testSubj}"]`) as HTMLElement;
 
-  it('submits workflow yaml that round-trips to the entered config', async () => {
+  it('offers 5m as a schedule option', async () => {
     ({ container } = render(<CreateOnlineEvalFlyout onClose={onClose} />));
 
     await waitFor(() =>
       expect(httpGet).toHaveBeenCalledWith('/internal/evals/evaluators', { version: '1' })
     );
-    await waitFor(() => expect(httpGet).toHaveBeenCalledWith('/api/actions/connectors'));
 
+    const scheduleSelect = getByTestSubj('onlineEvalCreateEverySelect') as HTMLSelectElement;
+    const optionValues = Array.from(scheduleSelect.options).map((option) => option.value);
+
+    expect(optionValues).toEqual(['5m', '15m', '1h', '6h', '1d']);
+  });
+
+  it('renders advanced fields only after expanding the accordion', async () => {
+    ({ container } = render(<CreateOnlineEvalFlyout onClose={onClose} />));
+
+    await waitFor(() =>
+      expect(httpGet).toHaveBeenCalledWith('/internal/evals/evaluators', { version: '1' })
+    );
+
+    const advancedAccordionButton = screen.getByRole('button', { name: 'Advanced' });
+    expect(advancedAccordionButton).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.click(advancedAccordionButton);
+    expect(advancedAccordionButton).toHaveAttribute('aria-expanded', 'true');
+
+    expect(getByTestSubj('onlineEvalCreateIndexPatternInput')).toBeInTheDocument();
+    expect(getByTestSubj('onlineEvalCreateWindowInput')).toBeInTheDocument();
+    expect(getByTestSubj('onlineEvalCreateLagInput')).toBeInTheDocument();
+    expect(getByTestSubj('onlineEvalCreateMaxTracesInput')).toBeInTheDocument();
+  });
+
+  it('submits workflow yaml that round-trips to the default config', async () => {
+    ({ container } = render(<CreateOnlineEvalFlyout onClose={onClose} />));
+
+    await waitFor(() =>
+      expect(httpGet).toHaveBeenCalledWith('/internal/evals/evaluators', { version: '1' })
+    );
     fireEvent.change(getByTestSubj('onlineEvalCreateNameInput'), {
       target: { value: 'nightly monitor' },
     });
-    fireEvent.change(getByTestSubj('onlineEvalCreateIndexPatternInput'), {
-      target: { value: 'traces-agent_builder.otel-default' },
-    });
-    fireEvent.change(getByTestSubj('onlineEvalCreateExtraWhereInput'), {
-      target: { value: 'attributes.service.name == "assistant"' },
-    });
-    fireEvent.change(getByTestSubj('onlineEvalCreateWindowInput'), { target: { value: '90' } });
-    fireEvent.change(getByTestSubj('onlineEvalCreateLagInput'), { target: { value: '15' } });
-    fireEvent.change(getByTestSubj('onlineEvalCreateMaxTracesInput'), { target: { value: '42' } });
-    fireEvent.change(getByTestSubj('onlineEvalCreateEverySelect'), { target: { value: '6h' } });
 
     fireEvent.change(getByTestSubj('onlineEvalCreateEvaluatorsCombo'), {
       target: { value: 'correctness' },
@@ -185,11 +206,10 @@ describe('CreateOnlineEvalFlyout', () => {
     expect(parsed).toEqual({
       name: 'nightly monitor',
       indexPattern: 'traces-agent_builder.otel-default',
-      extraEsqlWhere: 'attributes.service.name == "assistant"',
-      windowMinutes: 90,
+      windowMinutes: 60,
       lagMinutes: 15,
-      maxTracesPerRun: 42,
-      every: '6h',
+      maxTracesPerRun: 25,
+      every: '1h',
       evaluators: [{ name: 'correctness', version: '1.2.3' }],
       connectorId: 'connector-allowed',
     });

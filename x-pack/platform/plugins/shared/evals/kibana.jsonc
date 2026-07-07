@@ -17,6 +17,6 @@
       "dataViews"
     ],
     "optionalPlugins": ["management"],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": ["kibanaReact", "data"]
   }
 }

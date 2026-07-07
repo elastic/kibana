@@ -17,14 +17,27 @@ import {
   useToggleOnlineEvalWorkflow,
 } from '../../hooks/use_online_eval_workflows';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
+import { useLlmConnectors } from '../../hooks/use_llm_connectors';
 
 jest.mock('../../hooks/use_online_eval_workflows');
 jest.mock('../../hooks/use_evals_permissions');
+jest.mock('../../hooks/use_llm_connectors');
+jest.mock('../../components/create_online_eval_flyout', () => ({
+  CreateOnlineEvalFlyout: ({ onClose }: { onClose: () => void }) => (
+    <div data-test-subj="createOnlineEvalFlyoutMock">
+      <button onClick={onClose} type="button">
+        close
+      </button>
+      create flyout mock
+    </div>
+  ),
+}));
 
 const mockedUseOnlineEvalWorkflows = jest.mocked(useOnlineEvalWorkflows);
 const mockedUseToggleOnlineEvalWorkflow = jest.mocked(useToggleOnlineEvalWorkflow);
 const mockedUseDeleteOnlineEvalWorkflow = jest.mocked(useDeleteOnlineEvalWorkflow);
 const mockedUseEvalsPermissions = jest.mocked(useEvalsPermissions);
+const mockedUseLlmConnectors = jest.mocked(useLlmConnectors);
 
 const renderPage = () => {
   const history = createMemoryHistory({ initialEntries: ['/online'] });
@@ -58,6 +71,11 @@ const buildWorkflow = (
 describe('OnlineEvalsListPage', () => {
   beforeEach(() => {
     mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: true });
+    mockedUseLlmConnectors.mockReturnValue({
+      connectors: [{ id: 'connector-1', name: 'Judge connector' }],
+      isLoading: false,
+      error: null,
+    });
     mockedUseToggleOnlineEvalWorkflow.mockReturnValue({
       mutate: jest.fn(),
       isLoading: false,
@@ -140,5 +158,100 @@ describe('OnlineEvalsListPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
 
     expect(mutate).toHaveBeenCalledWith({ workflowId: 'workflow-1' });
+  });
+
+  it('shows actionable empty-state CTA and opens create flyout when connectors exist', () => {
+    mockedUseOnlineEvalWorkflows.mockReturnValue({
+      data: {
+        page: 1,
+        size: 10,
+        total: 0,
+        workflows: [],
+      },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof useOnlineEvalWorkflows>);
+
+    const { container } = renderPage();
+
+    fireEvent.click(
+      container.querySelector('[data-test-subj="createOnlineEvalEmptyStateButton"]') as HTMLElement
+    );
+    expect(screen.getByText('create flyout mock')).toBeInTheDocument();
+  });
+
+  it('shows warning callout and no empty-state CTA when no connectors exist', () => {
+    mockedUseLlmConnectors.mockReturnValue({
+      connectors: [],
+      isLoading: false,
+      error: null,
+    });
+    mockedUseOnlineEvalWorkflows.mockReturnValue({
+      data: {
+        page: 1,
+        size: 10,
+        total: 0,
+        workflows: [],
+      },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof useOnlineEvalWorkflows>);
+
+    const { container } = renderPage();
+
+    expect(screen.getByText('No AI connector configured')).toBeInTheDocument();
+    expect(
+      container.querySelector('[data-test-subj="createOnlineEvalEmptyStateButton"]')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows privilege warning callout when manage permission is missing', () => {
+    mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: false });
+    mockedUseOnlineEvalWorkflows.mockReturnValue({
+      data: {
+        page: 1,
+        size: 10,
+        total: 1,
+        workflows: [buildWorkflow()],
+      },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof useOnlineEvalWorkflows>);
+
+    const { container } = renderPage();
+
+    expect(
+      screen.getByText('You need additional privileges to manage online evaluations')
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector('[data-test-subj="onlineEvalsListNoPermissionCallout"]')
+    ).toBeInTheDocument();
+  });
+
+  it('does not show privilege warning callout when manage permission exists', () => {
+    mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: true });
+    mockedUseOnlineEvalWorkflows.mockReturnValue({
+      data: {
+        page: 1,
+        size: 10,
+        total: 1,
+        workflows: [buildWorkflow()],
+      },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof useOnlineEvalWorkflows>);
+
+    const { container } = renderPage();
+
+    expect(
+      screen.queryByText('You need additional privileges to manage online evaluations')
+    ).not.toBeInTheDocument();
+    expect(
+      container.querySelector('[data-test-subj="onlineEvalsListNoPermissionCallout"]')
+    ).not.toBeInTheDocument();
   });
 });

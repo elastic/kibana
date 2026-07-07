@@ -20,15 +20,26 @@ const TRACE_ID_TEMPLATE = '{{ foreach.item[1] }}';
 const CONNECTOR_ID_TEMPLATE = '{{ consts.connector_id }}';
 const WORKFLOW_ID_TEMPLATE = '{{ workflow.id }}';
 const WORKFLOW_NAME_TEMPLATE = '{{ workflow.name }}';
-const EVALUATE_RESULTS_TEMPLATE = '{{ steps.evaluate.output.body.results }}';
+// `${{ ... }}` (not `{{ ... }}`) is required here: the workflow templating engine
+// stringifies plain `{{ }}` interpolations, which would turn this array into a
+// string and fail `IngestOnlineScoresRequestBody`'s `results: array` validation.
+// No `.body` segment: a `kibana.request` step's `output` is the parsed HTTP
+// response body directly (`{ results: [...] }`), not `{ body: { results: [...] } }`.
+const EVALUATE_RESULTS_TEMPLATE = '${{ steps.evaluate.output.results }}';
 
 const WINDOW_AND_LAG_REGEX =
   /\|\s*WHERE\s+@timestamp\s*>=\s*NOW\(\)\s*-\s*(\d+)m\s+AND\s+@timestamp\s*<\s*NOW\(\)\s*-\s*(\d+)m/i;
 const LIMIT_REGEX = /\|\s*LIMIT\s+(\d+)/i;
 const FROM_REGEX = /^FROM\s+(.+)$/i;
 const WHERE_PREFIX_REGEX = /^\|\s*WHERE\s+/i;
-const EVALUATOR_FILTER_REGEX =
-  /^\|\s*WHERE\s+parent_span_id\s+IS\s+NULL\s+AND\s+attributes\.evaluator\.name\s+IS\s+NULL$/i;
+// Matches the trace-filter line across all generations of the sample query so
+// workflows created by older builds keep parsing (and the line is never
+// misread as the user's extra WHERE filter):
+// - current: KQL()-based LLM selection + evaluator exclusion
+// - interim: bare attributes.* column references (crashed on fresh clusters)
+// - v1: evaluator exclusion only
+const TRACE_FILTER_REGEX =
+  /^\|\s*WHERE\s+parent_span_id\s+IS\s+NULL\s+AND\s+(?:KQL\("attributes\.gen_ai\.operation\.name:\*"\)\s+AND\s+NOT\s+KQL\("attributes\.evaluator\.name:\*"\)|attributes\.evaluator\.name\s+IS\s+NULL(?:\s+AND\s+attributes\.gen_ai\.operation\.name\s+IS\s+NOT\s+NULL)?)$/i;
 
 interface WorkflowStep {
   name: string;
@@ -68,7 +79,10 @@ const buildEsqlQuery = ({
   const queryLines = [
     `FROM ${indexPattern}`,
     `| WHERE @timestamp >= NOW() - ${totalWindowMinutes}m AND @timestamp < NOW() - ${lagMinutes}m`,
-    '| WHERE parent_span_id IS NULL AND attributes.evaluator.name IS NULL',
+    // Dynamic attributes.* columns may be unmapped on fresh clusters and ES|QL
+    // rejects unknown columns at compile time; KQL() evaluates at the query
+    // layer, where an exists-check on an unmapped field just matches nothing.
+    '| WHERE parent_span_id IS NULL AND KQL("attributes.gen_ai.operation.name:*") AND NOT KQL("attributes.evaluator.name:*")',
     ...(normalizedExtraWhere ? [`| WHERE ${normalizedExtraWhere}`] : []),
     '| STATS latest = MAX(@timestamp) BY trace_id',
     '| KEEP latest, trace_id',
@@ -92,10 +106,10 @@ const parseEsqlQuery = (
 
   const fromLine = lines.find((line) => FROM_REGEX.test(line));
   const windowAndLagLine = lines.find((line) => WINDOW_AND_LAG_REGEX.test(line));
-  const evaluatorFilterLine = lines.find((line) => EVALUATOR_FILTER_REGEX.test(line));
+  const traceFilterLine = lines.find((line) => TRACE_FILTER_REGEX.test(line));
   const limitLine = lines.find((line) => LIMIT_REGEX.test(line));
 
-  if (!fromLine || !windowAndLagLine || !evaluatorFilterLine || !limitLine) {
+  if (!fromLine || !windowAndLagLine || !traceFilterLine || !limitLine) {
     return null;
   }
 
@@ -125,7 +139,7 @@ const parseEsqlQuery = (
     (line) =>
       WHERE_PREFIX_REGEX.test(line) &&
       !WINDOW_AND_LAG_REGEX.test(line) &&
-      !EVALUATOR_FILTER_REGEX.test(line)
+      !TRACE_FILTER_REGEX.test(line)
   );
 
   return {

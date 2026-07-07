@@ -20,7 +20,7 @@ steps:
       query: |-
         FROM traces-agent_builder.otel-default
         | WHERE @timestamp >= NOW() - 60m AND @timestamp < NOW() - 15m
-        | WHERE parent_span_id IS NULL AND attributes.evaluator.name IS NULL
+        | WHERE parent_span_id IS NULL AND KQL(\\"attributes.gen_ai.operation.name:*\\") AND NOT KQL(\\"attributes.evaluator.name:*\\")
         | WHERE attributes.agent_id == 'agent-1'
         | STATS latest = MAX(@timestamp) BY trace_id
         | KEEP latest, trace_id
@@ -65,6 +65,6 @@ steps:
               name: \\"{{ workflow.name }}\\"
             trace_id: \\"{{ foreach.item[1] }}\\"
             connector_id: \\"{{ consts.connector_id }}\\"
-            results: \\"{{ steps.evaluate.output.body.results }}\\"
+            results: \${{ steps.evaluate.output.results }}
 "
 `;

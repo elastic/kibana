@@ -10,6 +10,7 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiButtonIcon,
+  EuiCallOut,
   EuiConfirmModal,
   EuiEmptyPrompt,
   EuiFlyout,
@@ -34,8 +35,11 @@ import {
   type OnlineEvalWorkflowListItem,
 } from '../../hooks/use_online_eval_workflows';
 import { CreateOnlineEvalFlyout } from '../../components/create_online_eval_flyout';
+import { useLlmConnectors } from '../../hooks/use_llm_connectors';
 
 const WORKFLOWS_DOCS_URL = 'https://www.elastic.co/docs/explore-analyze/workflows';
+const CONNECTORS_MANAGEMENT_URL =
+  '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors';
 
 const tableCaption = i18n.translate('xpack.evals.onlineEvaluations.list.tableCaption', {
   defaultMessage: 'Online evaluations workflows',
@@ -50,6 +54,7 @@ export const OnlineEvalsListPage: React.FC = () => {
   const [isCreateFlyoutOpen, setIsCreateFlyoutOpen] = React.useState(false);
 
   const { data, isLoading, error, refetch } = useOnlineEvalWorkflows();
+  const { connectors, isLoading: isLoadingConnectors } = useLlmConnectors();
   const toggleOnlineEvalWorkflow = useToggleOnlineEvalWorkflow();
   const deleteOnlineEvalWorkflow = useDeleteOnlineEvalWorkflow();
 
@@ -59,6 +64,9 @@ export const OnlineEvalsListPage: React.FC = () => {
     error != null &&
     isHttpFetchError(error) &&
     (error.response?.status === 403 || error.response?.status === 404);
+  const hasLlmConnectors = connectors.length > 0;
+  const hasNoLlmConnectors = !isLoadingConnectors && !hasLlmConnectors;
+  const isCreateDisabled = !canManage || isWorkflowsApiUnavailable || hasNoLlmConnectors;
 
   const columns: Array<EuiBasicTableColumn<OnlineEvalWorkflowListItem>> = [
     {
@@ -165,7 +173,7 @@ export const OnlineEvalsListPage: React.FC = () => {
               fill
               iconType="plusInCircle"
               onClick={() => setIsCreateFlyoutOpen(true)}
-              isDisabled={!canManage || isWorkflowsApiUnavailable}
+              isDisabled={isCreateDisabled}
               data-test-subj="createOnlineEvalButton"
             >
               {i18n.translate('xpack.evals.onlineEvaluations.list.createButtonLabel', {
@@ -175,6 +183,19 @@ export const OnlineEvalsListPage: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
+        {!canManage ? (
+          <>
+            <EuiCallOut
+              title={i18n.translate('xpack.evals.onlineEvaluations.list.permissionsCallout.title', {
+                defaultMessage: 'You need additional privileges to manage online evaluations',
+              })}
+              iconType="lock"
+              color="warning"
+              data-test-subj="onlineEvalsListNoPermissionCallout"
+            />
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
         {isWorkflowsApiUnavailable ? (
           <EuiEmptyPrompt
             iconType="lock"
@@ -239,12 +260,71 @@ export const OnlineEvalsListPage: React.FC = () => {
               </h2>
             }
             body={
-              <p>
-                {i18n.translate('xpack.evals.onlineEvaluations.list.empty.body', {
-                  defaultMessage:
-                    'Create your first online evaluation to monitor evaluator scores over time.',
-                })}
-              </p>
+              <>
+                <p>
+                  {i18n.translate('xpack.evals.onlineEvaluations.list.empty.body', {
+                    defaultMessage:
+                      'Create your first online evaluation to monitor evaluator scores over time.',
+                  })}
+                </p>
+                <p>
+                  {i18n.translate('xpack.evals.onlineEvaluations.list.empty.tracingPrereqBody', {
+                    defaultMessage:
+                      'Groundedness scoring requires tracing enabled with experimental features and all advanced capture settings turned on: includeUserPrompts, includeLlmResponses, and includeToolDetails.',
+                  })}
+                </p>
+                {hasNoLlmConnectors ? (
+                  <EuiCallOut
+                    title={i18n.translate(
+                      'xpack.evals.onlineEvaluations.list.empty.noConnectorCalloutTitle',
+                      {
+                        defaultMessage: 'No AI connector configured',
+                      }
+                    )}
+                    color="warning"
+                    iconType="warning"
+                    size="s"
+                  >
+                    <p>
+                      {i18n.translate(
+                        'xpack.evals.onlineEvaluations.list.empty.noConnectorCalloutBody',
+                        {
+                          defaultMessage:
+                            'Set up an AI connector in Stack Management before creating an online evaluation.',
+                        }
+                      )}{' '}
+                      <EuiLink href={CONNECTORS_MANAGEMENT_URL}>
+                        {i18n.translate(
+                          'xpack.evals.onlineEvaluations.list.empty.noConnectorCalloutLink',
+                          {
+                            defaultMessage: 'Open connectors',
+                          }
+                        )}
+                      </EuiLink>
+                    </p>
+                  </EuiCallOut>
+                ) : null}
+              </>
+            }
+            actions={
+              hasNoLlmConnectors
+                ? undefined
+                : [
+                    <EuiButton
+                      fill
+                      iconType="plusInCircle"
+                      onClick={() => setIsCreateFlyoutOpen(true)}
+                      isDisabled={!canManage}
+                      data-test-subj="createOnlineEvalEmptyStateButton"
+                    >
+                      {i18n.translate(
+                        'xpack.evals.onlineEvaluations.list.empty.createButtonLabel',
+                        {
+                          defaultMessage: 'Create online evaluation',
+                        }
+                      )}
+                    </EuiButton>,
+                  ]
             }
           />
         ) : (

@@ -9,7 +9,6 @@ import type { Logger } from '@kbn/logging';
 import { extractChatEvidence } from '../chat_evidence';
 import type { TraceAccessor } from '../types';
 import { createTraceAccessor } from '../trace_accessor';
-import { rowsFromEsqlResponse } from '../esql_utils';
 
 interface GroundednessEvidence {
   user_query: string;
@@ -29,17 +28,21 @@ export class IncompleteGroundednessEvidenceError extends Error {
   }
 }
 
-const TOOL_CALL_ID_COLUMN = 'attributes.gen_ai.tool.call.id';
-const TOOL_NAME_COLUMN = 'attributes.gen_ai.tool.name';
-const TOOL_ARGUMENTS_COLUMN = 'attributes.gen_ai.tool.call.arguments';
-const TOOL_RESULT_COLUMN = 'attributes.gen_ai.tool.call.result';
+const TOOL_CALL_ID_ATTR = 'gen_ai.tool.call.id';
+const TOOL_NAME_ATTR = 'gen_ai.tool.name';
+const TOOL_ARGUMENTS_ATTR = 'gen_ai.tool.call.arguments';
+const TOOL_RESULT_ATTR = 'gen_ai.tool.call.result';
 
-interface ToolSpanRow extends Record<string, unknown> {
-  [TOOL_CALL_ID_COLUMN]: string | null;
-  [TOOL_NAME_COLUMN]: string | null;
-  [TOOL_ARGUMENTS_COLUMN]: string | null;
-  [TOOL_RESULT_COLUMN]: string | null;
+interface ToolSpanSource {
+  attributes?: Record<string, unknown>;
 }
+
+const getAttribute = (doc: ToolSpanSource, attr: string): unknown => doc.attributes?.[attr];
+
+const getStringAttribute = (doc: ToolSpanSource, attr: string): string | undefined => {
+  const value = getAttribute(doc, attr);
+  return typeof value === 'string' ? value : undefined;
+};
 
 const parseJsonIfPossible = (value: unknown): unknown => {
   if (typeof value !== 'string') {
@@ -57,10 +60,6 @@ const parseJsonIfPossible = (value: unknown): unknown => {
     return value;
   }
 };
-
-const TOOL_SPANS_PIPELINE = `| WHERE attributes.elastic.inference.span.kind == "TOOL"
-| KEEP attributes.gen_ai.tool.call.id, attributes.gen_ai.tool.name, attributes.gen_ai.tool.call.arguments, attributes.gen_ai.tool.call.result, @timestamp
-| SORT @timestamp ASC`;
 
 export const extractGroundednessEvidence = async (
   traceAccessor: TraceAccessor,
@@ -86,14 +85,22 @@ export const extractGroundednessEvidence = async (
     throw new IncompleteGroundednessEvidenceError(incompleteEvidence);
   }
 
-  const toolResponse = await accessor.runEsql('traces', TOOL_SPANS_PIPELINE);
-  const toolRows = rowsFromEsqlResponse<ToolSpanRow>(toolResponse);
+  const toolHits = await accessor.search<ToolSpanSource>('traces', {
+    filter: [{ term: { 'attributes.elastic.inference.span.kind': 'TOOL' } }],
+    sort: [{ '@timestamp': { order: 'asc' } }],
+    fields: [
+      `attributes.${TOOL_CALL_ID_ATTR}`,
+      `attributes.${TOOL_NAME_ATTR}`,
+      `attributes.${TOOL_ARGUMENTS_ATTR}`,
+      `attributes.${TOOL_RESULT_ATTR}`,
+    ],
+  });
 
-  const toolCallHistory = toolRows.map((toolRow) => ({
-    tool_call_id: toolRow[TOOL_CALL_ID_COLUMN] ?? undefined,
-    tool_id: toolRow[TOOL_NAME_COLUMN] ?? undefined,
-    arguments: parseJsonIfPossible(toolRow[TOOL_ARGUMENTS_COLUMN]),
-    result: parseJsonIfPossible(toolRow[TOOL_RESULT_COLUMN]),
+  const toolCallHistory = toolHits.map((toolHit) => ({
+    tool_call_id: getStringAttribute(toolHit, TOOL_CALL_ID_ATTR),
+    tool_id: getStringAttribute(toolHit, TOOL_NAME_ATTR),
+    arguments: parseJsonIfPossible(getAttribute(toolHit, TOOL_ARGUMENTS_ATTR)),
+    result: parseJsonIfPossible(getAttribute(toolHit, TOOL_RESULT_ATTR)),
   }));
 
   return {

@@ -38,18 +38,22 @@ export function createSpanLatencyEvaluator({
   traceEsClient,
   log,
   spanName,
+  spanNamePattern,
 }: {
   traceEsClient: EsClient;
   log: ToolingLog;
-  spanName: string;
+  spanName?: string;
+  spanNamePattern?: string;
 }): Evaluator {
+  const nameFilter = spanNamePattern ? `name LIKE "${spanNamePattern}"` : `name == "${spanName}"`;
+
   return createTraceBasedEvaluator({
     traceEsClient,
     log,
     config: {
       name: 'Latency',
       buildQuery: (traceId) => `FROM traces-*
-| WHERE trace.id == "${traceId}" AND name == "${spanName}"
+| WHERE trace.id == "${traceId}" AND ${nameFilter}
 | EVAL latency_seconds = TO_DOUBLE(duration) / 1000000000
 | KEEP latency_seconds`,
       extractResult: (response) => {

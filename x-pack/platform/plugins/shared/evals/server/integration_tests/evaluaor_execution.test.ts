@@ -10,7 +10,7 @@ import { httpServiceMock } from '@kbn/core/server/mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { BoundInferenceClient } from '@kbn/inference-common';
-import { API_VERSIONS, EVALS_EVALUATE_URL } from '@kbn/evals-common';
+import { API_VERSIONS, EVALS_EVALUATE_URL, TRACES_INDEX_PATTERN } from '@kbn/evals-common';
 import { EVALS_API_PRIVILEGES } from '../../common';
 import { createEvaluatorRegistry } from '../evaluators/registry';
 import type { GroundednessAnalysis } from '../evaluators/groundedness/types';
@@ -22,7 +22,10 @@ import { registerEvaluateRoute } from '../routes/evaluators/evaluate';
 
 const logger = loggingSystemMock.createLogger();
 
-const createMockEsqlQuery = ({ hasToolEvidence }: { hasToolEvidence: boolean }) => {
+// Chat evidence and tool-call history are read via DSL `_search` (not ES|QL): `_source`
+// still holds the full value even when a long `gen_ai.*` event field exceeded a
+// keyword's `ignore_above` and got dropped from doc values.
+const createMockSearch = ({ hasToolEvidence }: { hasToolEvidence: boolean }) => {
   const userPrompt = hasToolEvidence
     ? 'What is the payment service status?'
     : 'What is the billing service status?';
@@ -30,52 +33,48 @@ const createMockEsqlQuery = ({ hasToolEvidence }: { hasToolEvidence: boolean }) 
     ? 'The payment service is healthy, as confirmed by the health check tool.'
     : 'The billing service has 99.9% uptime based on the last 30 days.';
 
-  return jest.fn().mockImplementation(async ({ query }: { query: string }) => {
-    if (query.includes('event_name == "gen_ai.user.message"')) {
+  return jest.fn().mockImplementation(async (params: { index: string; _source?: string[] }) => {
+    const fields = params._source ?? [];
+
+    if (fields.includes('attributes.content')) {
+      return { hits: { hits: [{ _source: { attributes: { content: userPrompt } } }] } };
+    }
+
+    if (fields.includes('attributes.message.content')) {
       return {
-        columns: [
-          { name: '@timestamp', type: 'date' },
-          { name: 'attributes.content', type: 'keyword' },
-          { name: 'span_id', type: 'keyword' },
-        ],
-        values: [[new Date().toISOString(), userPrompt, 'span-001']],
+        hits: { hits: [{ _source: { attributes: { 'message.content': agentResponse } } }] },
       };
     }
 
-    if (query.includes('event_name == "gen_ai.choice"')) {
+    if (params.index === TRACES_INDEX_PATTERN) {
       return {
-        columns: [
-          { name: '@timestamp', type: 'date' },
-          { name: 'attributes.message.content', type: 'keyword' },
-          { name: 'span_id', type: 'keyword' },
-        ],
-        values: [[new Date().toISOString(), agentResponse, 'span-002']],
+        hits: {
+          hits: hasToolEvidence
+            ? [
+                {
+                  _source: {
+                    attributes: {
+                      'gen_ai.tool.call.id': 'call_123',
+                      'gen_ai.tool.name': 'health_check',
+                      'gen_ai.tool.call.arguments': '{"service":"payment"}',
+                      'gen_ai.tool.call.result': '{"status":"healthy"}',
+                    },
+                  },
+                },
+              ]
+            : [],
+        },
       };
     }
 
-    if (query.includes('attributes.elastic.inference.span.kind == "TOOL"')) {
-      return {
-        columns: [
-          { name: 'attributes.gen_ai.tool.call.id', type: 'keyword' },
-          { name: 'attributes.gen_ai.tool.name', type: 'keyword' },
-          { name: 'attributes.gen_ai.tool.call.arguments', type: 'keyword' },
-          { name: 'attributes.gen_ai.tool.call.result', type: 'keyword' },
-          { name: '@timestamp', type: 'date' },
-        ],
-        values: hasToolEvidence
-          ? [
-              [
-                'call_123',
-                'health_check',
-                '{"service":"payment"}',
-                '{"status":"healthy"}',
-                new Date().toISOString(),
-              ],
-            ]
-          : [],
-      };
-    }
+    throw new Error(`Unexpected DSL search in integration test: ${JSON.stringify(params)}`);
+  });
+};
 
+// The `latency` evaluator still aggregates via ES|QL `STATS` (numeric, unaffected by
+// ignore_above), so it keeps its own mock separate from the DSL search mock above.
+const createMockEsqlQuery = () =>
+  jest.fn().mockImplementation(async ({ query }: { query: string }) => {
     if (query.includes('latency_seconds')) {
       return {
         columns: [{ name: 'latency_seconds', type: 'double' }],
@@ -85,10 +84,17 @@ const createMockEsqlQuery = ({ hasToolEvidence }: { hasToolEvidence: boolean }) 
 
     throw new Error(`Unexpected ES|QL query in integration test: ${query}`);
   });
-};
 
 describe('trace evaluators integration', () => {
-  const setupRoute = ({ esqlQuery, prompt }: { esqlQuery: jest.Mock; prompt: jest.Mock }) => {
+  const setupRoute = ({
+    dslSearch,
+    esqlQuery = createMockEsqlQuery(),
+    prompt,
+  }: {
+    dslSearch: jest.Mock;
+    esqlQuery?: jest.Mock;
+    prompt: jest.Mock;
+  }) => {
     const router = httpServiceMock.createRouter();
     const versionedRouter = router.versioned as MockedVersionedRouter;
     const getClient = jest.fn().mockReturnValue({ prompt } as unknown as BoundInferenceClient);
@@ -116,6 +122,7 @@ describe('trace evaluators integration', () => {
               esql: {
                 query: esqlQuery,
               },
+              search: dslSearch,
             },
           },
         },
@@ -174,7 +181,7 @@ describe('trace evaluators integration', () => {
         };
       });
     const { handler, context } = setupRoute({
-      esqlQuery: createMockEsqlQuery({ hasToolEvidence: true }),
+      dslSearch: createMockSearch({ hasToolEvidence: true }),
       prompt,
     });
 
@@ -254,7 +261,7 @@ describe('trace evaluators integration', () => {
       ],
     });
     const hallucinatedRoute = setupRoute({
-      esqlQuery: createMockEsqlQuery({ hasToolEvidence: false }),
+      dslSearch: createMockSearch({ hasToolEvidence: false }),
       prompt: hallucinatedPrompt,
     });
     const hallucinatedResponse = await hallucinatedRoute.handler(
@@ -309,7 +316,7 @@ describe('trace evaluators integration', () => {
         };
       });
     const { handler, context } = setupRoute({
-      esqlQuery: createMockEsqlQuery({ hasToolEvidence: true }),
+      dslSearch: createMockSearch({ hasToolEvidence: true }),
       prompt: correctnessPrompt,
     });
 
@@ -345,7 +352,7 @@ describe('trace evaluators integration', () => {
 
   it('returns 400 when correctness evaluator is called with invalid reference data', async () => {
     const { handler, context } = setupRoute({
-      esqlQuery: createMockEsqlQuery({ hasToolEvidence: true }),
+      dslSearch: createMockSearch({ hasToolEvidence: true }),
       prompt: jest.fn(),
     });
 

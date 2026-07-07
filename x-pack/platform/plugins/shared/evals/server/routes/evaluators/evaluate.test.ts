@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { context as otelContext, propagation } from '@opentelemetry/api';
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
+import { EVALUATOR_NAME_BAGGAGE_KEY } from '@kbn/inference-tracing';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -92,12 +95,18 @@ describe('POST /internal/evals/_evaluate', () => {
     return { handler, routeConfig, logger };
   };
 
+  let contextManager: AsyncLocalStorageContextManager;
+
   beforeEach(() => {
     awaitTraceReadyMock.mockResolvedValue(undefined);
+    contextManager = new AsyncLocalStorageContextManager();
+    otelContext.setGlobalContextManager(contextManager);
+    contextManager.enable();
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+    contextManager.disable();
   });
 
   it('registers manage privilege authz requirement', () => {
@@ -183,6 +192,40 @@ describe('POST /internal/evals/_evaluate', () => {
         log: logger,
       })
     );
+  });
+
+  it('tags spans emitted during evaluate() with the running evaluator name via baggage', async () => {
+    const observedBaggageValues: Array<string | undefined> = [];
+    const evaluate = jest.fn().mockImplementation(async () => {
+      const baggage = propagation.getBaggage(otelContext.active());
+      observedBaggageValues.push(
+        baggage?.getEntry(EVALUATOR_NAME_BAGGAGE_KEY)?.value as string | undefined
+      );
+      return { scores: [{ name: 'groundedness', score: 1 }] };
+    });
+    const groundedness = buildEvaluator({ name: 'groundedness', kind: 'llm', evaluate });
+    const { handler } = setup({
+      evaluatorRegistry: buildEvaluatorRegistry([groundedness]),
+      inferenceStart: {
+        getClient: jest.fn().mockReturnValue({ prompt: jest.fn() }),
+      } as unknown as InferenceServerStart,
+    });
+
+    await handler(
+      buildContext() as unknown as Parameters<typeof handler>[0],
+      {
+        body: {
+          subject: { traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }] },
+          evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(observedBaggageValues).toEqual(['groundedness']);
+    // Baggage set during the call must not leak onto the ambient context afterwards.
+    const baggageAfter = propagation.getBaggage(otelContext.active());
+    expect(baggageAfter?.getEntry(EVALUATOR_NAME_BAGGAGE_KEY)).toBeUndefined();
   });
 
   it('returns 400 for unknown evaluator names', async () => {

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import {
+  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -29,9 +30,8 @@ import { API_VERSIONS, EVALS_EVALUATORS_URL, type ListEvaluatorsResponse } from 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useCreateOnlineEvalWorkflow } from '../../hooks/use_online_eval_workflows';
+import { useLlmConnectors } from '../../hooks/use_llm_connectors';
 import { buildOnlineEvalWorkflowYaml } from '../../../common/online_evals/workflow_yaml';
-
-const ALLOWED_CONNECTOR_TYPE_IDS = new Set(['.gen-ai', '.bedrock', '.gemini', '.inference']);
 
 interface EvaluatorOption extends EuiComboBoxOptionOption<string> {
   value: string;
@@ -41,12 +41,6 @@ interface EvaluatorOption extends EuiComboBoxOptionOption<string> {
 
 interface ConnectorOption extends EuiComboBoxOptionOption<string> {
   value: string;
-}
-
-interface ConnectorsApiResponseItem {
-  id: string;
-  name: string;
-  connector_type_id: string;
 }
 
 export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => {
@@ -63,10 +57,18 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
   const [selectedEvaluators, setSelectedEvaluators] = React.useState<EvaluatorOption[]>([]);
   const [selectedConnector, setSelectedConnector] = React.useState<ConnectorOption[]>([]);
   const [evaluatorOptions, setEvaluatorOptions] = React.useState<EvaluatorOption[]>([]);
-  const [connectorOptions, setConnectorOptions] = React.useState<ConnectorOption[]>([]);
   const [isLoadingEvaluators, setIsLoadingEvaluators] = React.useState(false);
-  const [isLoadingConnectors, setIsLoadingConnectors] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const { connectors, isLoading: isLoadingConnectors, error: connectorsError } = useLlmConnectors();
+
+  const connectorOptions = React.useMemo<ConnectorOption[]>(
+    () =>
+      connectors.map((connector) => ({
+        value: connector.id,
+        label: connector.name,
+      })),
+    [connectors]
+  );
 
   React.useEffect(() => {
     let didCancel = false;
@@ -127,47 +129,21 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
       }
     };
 
-    const loadConnectors = async () => {
-      setIsLoadingConnectors(true);
-      try {
-        const response = await services.http!.get<ConnectorsApiResponseItem[]>(
-          '/api/actions/connectors'
-        );
-        if (didCancel) {
-          return;
-        }
-
-        setConnectorOptions(
-          response
-            .filter((connector) => ALLOWED_CONNECTOR_TYPE_IDS.has(connector.connector_type_id))
-            .map((connector) => ({
-              value: connector.id,
-              label: connector.name,
-            }))
-        );
-      } catch (error) {
-        if (!didCancel) {
-          setErrorMessage(
-            i18n.translate('xpack.evals.onlineEvaluations.createFlyout.loadConnectorsError', {
-              defaultMessage: 'Failed to load connectors: {message}',
-              values: { message: String(error) },
-            })
-          );
-        }
-      } finally {
-        if (!didCancel) {
-          setIsLoadingConnectors(false);
-        }
-      }
-    };
-
     loadEvaluators();
-    loadConnectors();
 
     return () => {
       didCancel = true;
     };
   }, [services.http]);
+
+  const combinedErrorMessage =
+    errorMessage ??
+    (connectorsError
+      ? i18n.translate('xpack.evals.onlineEvaluations.createFlyout.loadConnectorsError', {
+          defaultMessage: 'Failed to load connectors: {message}',
+          values: { message: String(connectorsError) },
+        })
+      : null);
 
   const hasLlmEvaluator = selectedEvaluators.some((option) => option.kind === 'llm');
   const selectedConnectorId = selectedConnector[0]?.value;
@@ -246,7 +222,7 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {errorMessage ? (
+        {combinedErrorMessage ? (
           <>
             <EuiCallOut
               title={i18n.translate(
@@ -259,7 +235,7 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
               iconType="error"
               size="s"
             >
-              <p>{errorMessage}</p>
+              <p>{combinedErrorMessage}</p>
             </EuiCallOut>
             <EuiSpacer size="m" />
           </>
@@ -299,26 +275,6 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
           </EuiFormRow>
 
           <EuiFormRow
-            label={i18n.translate('xpack.evals.onlineEvaluations.createFlyout.indexPatternLabel', {
-              defaultMessage: 'Source index pattern',
-            })}
-            helpText={i18n.translate(
-              'xpack.evals.onlineEvaluations.createFlyout.indexPatternHelpText',
-              {
-                defaultMessage: 'TODO: switch to a space-aware Agent Builder traces default.',
-              }
-            )}
-            fullWidth
-          >
-            <EuiFieldText
-              fullWidth
-              value={indexPattern}
-              onChange={(event) => setIndexPattern(event.target.value)}
-              data-test-subj="onlineEvalCreateIndexPatternInput"
-            />
-          </EuiFormRow>
-
-          <EuiFormRow
             label={i18n.translate('xpack.evals.onlineEvaluations.createFlyout.extraWhereLabel', {
               defaultMessage: 'Optional ES|QL WHERE filter',
             })}
@@ -334,51 +290,6 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
           </EuiFormRow>
 
           <EuiFormRow
-            label={i18n.translate('xpack.evals.onlineEvaluations.createFlyout.windowLabel', {
-              defaultMessage: 'Window (minutes)',
-            })}
-            fullWidth
-          >
-            <EuiFieldNumber
-              fullWidth
-              min={1}
-              value={windowMinutes}
-              onChange={(event) => setWindowMinutes(Number(event.target.value) || 1)}
-              data-test-subj="onlineEvalCreateWindowInput"
-            />
-          </EuiFormRow>
-
-          <EuiFormRow
-            label={i18n.translate('xpack.evals.onlineEvaluations.createFlyout.lagLabel', {
-              defaultMessage: 'Lag (minutes)',
-            })}
-            fullWidth
-          >
-            <EuiFieldNumber
-              fullWidth
-              min={0}
-              value={lagMinutes}
-              onChange={(event) => setLagMinutes(Number(event.target.value) || 0)}
-              data-test-subj="onlineEvalCreateLagInput"
-            />
-          </EuiFormRow>
-
-          <EuiFormRow
-            label={i18n.translate('xpack.evals.onlineEvaluations.createFlyout.maxTracesLabel', {
-              defaultMessage: 'Max traces per run',
-            })}
-            fullWidth
-          >
-            <EuiFieldNumber
-              fullWidth
-              min={1}
-              value={maxTracesPerRun}
-              onChange={(event) => setMaxTracesPerRun(Number(event.target.value) || 1)}
-              data-test-subj="onlineEvalCreateMaxTracesInput"
-            />
-          </EuiFormRow>
-
-          <EuiFormRow
             label={i18n.translate('xpack.evals.onlineEvaluations.createFlyout.everyLabel', {
               defaultMessage: 'Schedule',
             })}
@@ -387,6 +298,7 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
             <EuiSelect
               fullWidth
               options={[
+                { value: '5m', text: '5m' },
                 { value: '15m', text: '15m' },
                 { value: '1h', text: '1h' },
                 { value: '6h', text: '6h' },
@@ -448,6 +360,89 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
               data-test-subj="onlineEvalCreateConnectorCombo"
             />
           </EuiFormRow>
+
+          <EuiSpacer size="m" />
+
+          <EuiAccordion
+            id="onlineEvalCreateAdvancedAccordion"
+            buttonContent={i18n.translate(
+              'xpack.evals.onlineEvaluations.createFlyout.advancedAccordionLabel',
+              {
+                defaultMessage: 'Advanced',
+              }
+            )}
+            data-test-subj="onlineEvalCreateAdvancedAccordion"
+          >
+            <EuiSpacer size="m" />
+
+            <EuiFormRow
+              label={i18n.translate(
+                'xpack.evals.onlineEvaluations.createFlyout.indexPatternLabel',
+                {
+                  defaultMessage: 'Source index pattern',
+                }
+              )}
+              helpText={i18n.translate(
+                'xpack.evals.onlineEvaluations.createFlyout.indexPatternHelpText',
+                {
+                  defaultMessage: 'TODO: switch to a space-aware Agent Builder traces default.',
+                }
+              )}
+              fullWidth
+            >
+              <EuiFieldText
+                fullWidth
+                value={indexPattern}
+                onChange={(event) => setIndexPattern(event.target.value)}
+                data-test-subj="onlineEvalCreateIndexPatternInput"
+              />
+            </EuiFormRow>
+
+            <EuiFormRow
+              label={i18n.translate('xpack.evals.onlineEvaluations.createFlyout.windowLabel', {
+                defaultMessage: 'Window (minutes)',
+              })}
+              fullWidth
+            >
+              <EuiFieldNumber
+                fullWidth
+                min={1}
+                value={windowMinutes}
+                onChange={(event) => setWindowMinutes(Number(event.target.value) || 1)}
+                data-test-subj="onlineEvalCreateWindowInput"
+              />
+            </EuiFormRow>
+
+            <EuiFormRow
+              label={i18n.translate('xpack.evals.onlineEvaluations.createFlyout.lagLabel', {
+                defaultMessage: 'Lag (minutes)',
+              })}
+              fullWidth
+            >
+              <EuiFieldNumber
+                fullWidth
+                min={0}
+                value={lagMinutes}
+                onChange={(event) => setLagMinutes(Number(event.target.value) || 0)}
+                data-test-subj="onlineEvalCreateLagInput"
+              />
+            </EuiFormRow>
+
+            <EuiFormRow
+              label={i18n.translate('xpack.evals.onlineEvaluations.createFlyout.maxTracesLabel', {
+                defaultMessage: 'Max traces per run',
+              })}
+              fullWidth
+            >
+              <EuiFieldNumber
+                fullWidth
+                min={1}
+                value={maxTracesPerRun}
+                onChange={(event) => setMaxTracesPerRun(Number(event.target.value) || 1)}
+                data-test-subj="onlineEvalCreateMaxTracesInput"
+              />
+            </EuiFormRow>
+          </EuiAccordion>
         </EuiForm>
       </EuiFlyoutBody>
 

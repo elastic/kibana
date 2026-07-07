@@ -7,47 +7,53 @@
 
 import type { TraceAccessor } from './types';
 import { createTraceAccessor } from './trace_accessor';
-import { rowsFromEsqlResponse } from './esql_utils';
 
-const USER_MESSAGE_CONTENT_COLUMN = 'attributes.content';
-const AGENT_RESPONSE_CONTENT_COLUMN = 'attributes.message.content';
+const USER_MESSAGE_CONTENT_ATTR = 'content';
+const AGENT_RESPONSE_CONTENT_ATTR = 'message.content';
 
-interface UserMessageRow extends Record<string, unknown> {
-  [USER_MESSAGE_CONTENT_COLUMN]: string | null;
+interface EventSource {
+  attributes?: Record<string, unknown>;
 }
 
-interface AgentResponseRow extends Record<string, unknown> {
-  [AGENT_RESPONSE_CONTENT_COLUMN]: string | null;
-}
+const getAttribute = (doc: EventSource, attr: string): string | null => {
+  const value = doc.attributes?.[attr];
+  return typeof value === 'string' ? value : null;
+};
 
-const USER_MESSAGE_PIPELINE = `| WHERE event_name == "gen_ai.user.message"
-| KEEP @timestamp, ${USER_MESSAGE_CONTENT_COLUMN}, span_id
-| SORT @timestamp ASC
-| LIMIT 1`;
-
-const AGENT_RESPONSE_PIPELINE = `| WHERE event_name == "gen_ai.choice"
-| KEEP @timestamp, ${AGENT_RESPONSE_CONTENT_COLUMN}, span_id
-| SORT @timestamp DESC
-| LIMIT 1`;
-
+/**
+ * DSL, not ES|QL: `gen_ai.*` event content routinely exceeds the default
+ * keyword `ignore_above` (1024 chars), which drops the value from doc values
+ * (ES|QL reads doc values, so it would see `null`) while leaving it intact in
+ * `_source` (which a DSL search reads).
+ */
 export const extractChatEvidence = async (
   traceAccessor: TraceAccessor
 ): Promise<{ user_query: string; agent_response: string }> => {
   const accessor = createTraceAccessor(traceAccessor);
 
-  const userMsgResponse = await accessor.runEsql('logs', USER_MESSAGE_PIPELINE);
-  const userMsgRows = rowsFromEsqlResponse<UserMessageRow>(userMsgResponse);
+  const userMsgHits = await accessor.search<EventSource>('logs', {
+    filter: [{ term: { event_name: 'gen_ai.user.message' } }],
+    sort: [{ '@timestamp': { order: 'asc' } }],
+    size: 1,
+    fields: [`attributes.${USER_MESSAGE_CONTENT_ATTR}`],
+  });
 
-  if (userMsgRows.length === 0) {
+  if (userMsgHits.length === 0) {
     throw new Error(`No user message span events found for trace ${accessor.traceId}`);
   }
 
-  const userQuery = userMsgRows[0][USER_MESSAGE_CONTENT_COLUMN] ?? '';
+  const userQuery = getAttribute(userMsgHits[0], USER_MESSAGE_CONTENT_ATTR) ?? '';
 
-  const agentRespResponse = await accessor.runEsql('logs', AGENT_RESPONSE_PIPELINE);
-  const agentRespRows = rowsFromEsqlResponse<AgentResponseRow>(agentRespResponse);
+  const agentRespHits = await accessor.search<EventSource>('logs', {
+    filter: [{ term: { event_name: 'gen_ai.choice' } }],
+    sort: [{ '@timestamp': { order: 'desc' } }],
+    size: 1,
+    fields: [`attributes.${AGENT_RESPONSE_CONTENT_ATTR}`],
+  });
   const agentResponse =
-    agentRespRows.length > 0 ? agentRespRows[0][AGENT_RESPONSE_CONTENT_COLUMN] ?? '' : '';
+    agentRespHits.length > 0
+      ? getAttribute(agentRespHits[0], AGENT_RESPONSE_CONTENT_ATTR) ?? ''
+      : '';
 
   return { user_query: userQuery, agent_response: agentResponse };
 };

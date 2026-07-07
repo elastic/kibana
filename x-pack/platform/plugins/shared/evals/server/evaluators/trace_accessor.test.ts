@@ -13,10 +13,12 @@ describe('createTraceAccessor', () => {
 
   const createEsClient = () => {
     const queryMock = jest.fn().mockResolvedValue({ columns: [], values: [] });
+    const searchMock = jest.fn().mockResolvedValue({ hits: { hits: [] } });
     const esClient = {
       esql: { query: queryMock },
+      search: searchMock,
     } as unknown as ElasticsearchClient;
-    return { esClient, queryMock };
+    return { esClient, queryMock, searchMock };
   };
 
   describe('source resolution', () => {
@@ -109,6 +111,90 @@ describe('createTraceAccessor', () => {
         'Invalid trace_id: must be a 32-character hex string'
       );
       expect(queryMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('search (DSL)', () => {
+    it('builds a bool filter scoped to the trace, merged with the caller filter', async () => {
+      const { esClient, searchMock } = createEsClient();
+      const accessor = createTraceAccessor({ traceId: validTraceId, esClient });
+
+      await accessor.search('logs', {
+        filter: [{ term: { event_name: 'gen_ai.user.message' } }],
+        size: 1,
+        fields: ['attributes.content'],
+      });
+
+      const params = searchMock.mock.calls[0][0];
+      expect(params.index).toBe('logs-*');
+      expect(params.query).toEqual({
+        bool: {
+          filter: [
+            { term: { trace_id: validTraceId } },
+            { term: { event_name: 'gen_ai.user.message' } },
+          ],
+        },
+      });
+    });
+
+    it('uses trace.id for the "traces" source', async () => {
+      const { esClient, searchMock } = createEsClient();
+      const accessor = createTraceAccessor({ traceId: validTraceId, esClient });
+
+      await accessor.search('traces', {
+        filter: [{ term: { 'attributes.elastic.inference.span.kind': 'TOOL' } }],
+        fields: ['attributes.gen_ai.tool.name'],
+      });
+
+      const params = searchMock.mock.calls[0][0];
+      expect(params.index).toBe('traces-*');
+      expect(params.query.bool.filter[0]).toEqual({ term: { 'trace.id': validTraceId } });
+    });
+
+    it('passes sort, size, and _source through, defaulting size to 1000', async () => {
+      const { esClient, searchMock } = createEsClient();
+      const accessor = createTraceAccessor({ traceId: validTraceId, esClient });
+
+      await accessor.search('logs', {
+        filter: [],
+        sort: [{ '@timestamp': { order: 'desc' } }],
+        fields: ['attributes.message.content'],
+      });
+
+      const params = searchMock.mock.calls[0][0];
+      expect(params.sort).toEqual([{ '@timestamp': { order: 'desc' } }]);
+      expect(params.size).toBe(1000);
+      expect(params._source).toEqual(['attributes.message.content']);
+    });
+
+    it('returns the _source of each hit, reading past ignore_above-dropped doc values', async () => {
+      const { esClient, searchMock } = createEsClient();
+      searchMock.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            { _source: { attributes: { 'message.content': 'A'.repeat(5000) } } },
+            { _source: undefined },
+          ],
+        },
+      });
+      const accessor = createTraceAccessor({ traceId: validTraceId, esClient });
+
+      const results = await accessor.search('logs', {
+        filter: [],
+        fields: ['attributes.message.content'],
+      });
+
+      expect(results).toEqual([{ attributes: { 'message.content': 'A'.repeat(5000) } }]);
+    });
+
+    it('throws before calling ES when trace_id is not valid hex', async () => {
+      const { esClient, searchMock } = createEsClient();
+      const accessor = createTraceAccessor({ traceId: 'not-a-valid-hex-trace-id', esClient });
+
+      await expect(accessor.search('traces', { filter: [], fields: [] })).rejects.toThrow(
+        'Invalid trace_id: must be a 32-character hex string'
+      );
+      expect(searchMock).not.toHaveBeenCalled();
     });
   });
 });

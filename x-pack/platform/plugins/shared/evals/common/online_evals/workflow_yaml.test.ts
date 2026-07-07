@@ -13,6 +13,9 @@ import {
   type OnlineEvalWorkflowConfig,
 } from './workflow_yaml';
 
+const CURRENT_TRACE_FILTER_LINE =
+  '| WHERE parent_span_id IS NULL AND KQL("attributes.gen_ai.operation.name:*") AND NOT KQL("attributes.evaluator.name:*")';
+
 const getConfig = (): OnlineEvalWorkflowConfig => ({
   name: 'My online monitor',
   indexPattern: 'traces-agent_builder.otel-default',
@@ -40,6 +43,33 @@ describe('online eval workflow yaml', () => {
     const yaml = buildOnlineEvalWorkflowYaml(config);
 
     expect(parseOnlineEvalWorkflowYaml(yaml)).toEqual(config);
+  });
+
+  it('parses v1 trace filter workflows (evaluator exclusion only)', () => {
+    const config = getConfig();
+    const yaml = buildOnlineEvalWorkflowYaml(config).replace(
+      CURRENT_TRACE_FILTER_LINE,
+      '| WHERE parent_span_id IS NULL AND attributes.evaluator.name IS NULL'
+    );
+
+    expect(parseOnlineEvalWorkflowYaml(yaml)).toEqual(config);
+  });
+
+  it('parses interim trace filter workflows (bare attributes.* column references)', () => {
+    const config = getConfig();
+    const yaml = buildOnlineEvalWorkflowYaml(config).replace(
+      CURRENT_TRACE_FILTER_LINE,
+      '| WHERE parent_span_id IS NULL AND attributes.evaluator.name IS NULL AND attributes.gen_ai.operation.name IS NOT NULL'
+    );
+
+    expect(parseOnlineEvalWorkflowYaml(yaml)).toEqual(config);
+  });
+
+  it('does not reference dynamic attributes.* fields as bare ES|QL columns in the trace filter', () => {
+    const yaml = buildOnlineEvalWorkflowYaml(getConfig());
+
+    expect(yaml).toContain(CURRENT_TRACE_FILTER_LINE);
+    expect(yaml).not.toContain('attributes.evaluator.name IS NULL');
   });
 
   it('returns undefined for non-online-evals workflows', () => {

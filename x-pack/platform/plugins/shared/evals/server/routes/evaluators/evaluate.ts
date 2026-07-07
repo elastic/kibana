@@ -19,6 +19,7 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
 import { awaitTraceReady } from '../../evaluators/trace_readiness';
+import { withEvaluatorNameBaggage } from '../../evaluators/evaluator_tracing_context';
 import type { EvaluatorDefinition } from '../../evaluators/types';
 import type { RouteDependencies } from '../register_routes';
 
@@ -159,12 +160,14 @@ export const registerEvaluateRoute = ({
                 ? await getInferenceClient(config.connector_id)
                 : undefined;
 
-            const result = await definition.evaluate({
-              trace: traceAccessor,
-              referenceData: parsedReferenceData,
-              inferenceClient,
-              log: logger,
-            });
+            const result = await withEvaluatorNameBaggage(definition.name, () =>
+              definition.evaluate({
+                trace: traceAccessor,
+                referenceData: parsedReferenceData,
+                inferenceClient,
+                log: logger,
+              })
+            );
 
             results.push({
               status: 'ok',

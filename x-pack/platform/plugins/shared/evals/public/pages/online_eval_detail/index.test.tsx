@@ -16,9 +16,11 @@ import {
   useDeleteOnlineEvalWorkflow,
   useOnlineEvalWorkflow,
   useToggleOnlineEvalWorkflow,
+  useUpdateOnlineEvalWorkflow,
 } from '../../hooks/use_online_eval_workflows';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { useEvalsTraceFetcher } from '../../hooks/use_evals_api';
+import { useLlmConnectors } from '../../hooks/use_llm_connectors';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
@@ -27,6 +29,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 jest.mock('../../hooks/use_online_eval_workflows');
 jest.mock('../../hooks/use_evals_permissions');
 jest.mock('../../hooks/use_evals_api');
+jest.mock('../../hooks/use_llm_connectors');
 
 jest.mock('@kbn/lens-embeddable-utils', () => ({
   LensConfigBuilder: jest.fn().mockImplementation(() => ({
@@ -50,14 +53,29 @@ const mockedUseKibana = jest.mocked(useKibana);
 const mockedUseOnlineEvalWorkflow = jest.mocked(useOnlineEvalWorkflow);
 const mockedUseToggleOnlineEvalWorkflow = jest.mocked(useToggleOnlineEvalWorkflow);
 const mockedUseDeleteOnlineEvalWorkflow = jest.mocked(useDeleteOnlineEvalWorkflow);
+const mockedUseUpdateOnlineEvalWorkflow = jest.mocked(useUpdateOnlineEvalWorkflow);
 const mockedUseEvalsPermissions = jest.mocked(useEvalsPermissions);
 const mockedUseEvalsTraceFetcher = jest.mocked(useEvalsTraceFetcher);
+const mockedUseLlmConnectors = jest.mocked(useLlmConnectors);
 
 const lensEmbeddableComponent = jest.fn((props: { attributes?: unknown }) => (
   <div data-test-subj="mockLensEmbeddable">{JSON.stringify(props.attributes)}</div>
 ));
 const httpGet = jest.fn();
 const dataViewsCreate = jest.fn();
+const updateMutateAsync = jest.fn();
+
+const parsedConfig = {
+  name: 'quality monitor',
+  indexPattern: 'traces-agent_builder.otel-default',
+  extraEsqlWhere: 'attributes.service.name == "agent"',
+  windowMinutes: 60,
+  lagMinutes: 15,
+  maxTracesPerRun: 25,
+  every: '1h',
+  evaluators: [{ name: 'correctness', version: '1.0.0' }],
+  connectorId: 'connector-1',
+};
 
 const renderPage = () => {
   const history = createMemoryHistory({ initialEntries: ['/online/workflow-1'] });
@@ -88,6 +106,7 @@ describe('OnlineEvalDetailPage', () => {
         name: '[online-eval] quality monitor',
         enabled: true,
         yaml: 'version: "1"',
+        parsedConfig,
       },
       isLoading: false,
       error: null,
@@ -100,26 +119,52 @@ describe('OnlineEvalDetailPage', () => {
       mutate: jest.fn(),
       isLoading: false,
     } as unknown as ReturnType<typeof useDeleteOnlineEvalWorkflow>);
+    mockedUseUpdateOnlineEvalWorkflow.mockReturnValue({
+      mutateAsync: updateMutateAsync,
+      isLoading: false,
+      error: null,
+    } as unknown as ReturnType<typeof useUpdateOnlineEvalWorkflow>);
+    mockedUseLlmConnectors.mockReturnValue({
+      connectors: [{ id: 'connector-1', name: 'Default connector' }],
+      isLoading: false,
+      error: null,
+    });
     dataViewsCreate.mockResolvedValue({
       id: 'online-scores-data-view',
     });
-    httpGet.mockResolvedValue({
-      total: 1,
-      data: [
-        {
-          '@timestamp': '2026-07-03T14:00:00.000Z',
-          monitor: { id: 'workflow-1', name: '[online-eval] quality monitor' },
-          trace_id: 'trace-123',
-          evaluator: { name: 'correctness', version: '1.0.0', kind: 'llm' },
-          score: {
-            name: 'factuality',
-            value: 0.9,
-            label: 'pass',
-            explanation: 'The answer matches the expected output.',
+    httpGet.mockImplementation(async (url: string) => {
+      if (url === EVALS_ONLINE_SCORES_URL) {
+        return {
+          total: 1,
+          data: [
+            {
+              '@timestamp': '2026-07-03T14:00:00.000Z',
+              monitor: { id: 'workflow-1', name: '[online-eval] quality monitor' },
+              trace_id: 'trace-123',
+              evaluator: { name: 'correctness', version: '1.0.0', kind: 'llm' },
+              score: {
+                name: 'factuality',
+                value: 0.9,
+                label: 'pass',
+                explanation: 'The answer matches the expected output.',
+              },
+            },
+          ],
+        };
+      }
+
+      return {
+        evaluators: [
+          {
+            name: 'correctness',
+            version: '1.0.0',
+            kind: 'llm',
           },
-        },
-      ],
+        ],
+      };
     });
+    updateMutateAsync.mockReset();
+    updateMutateAsync.mockResolvedValue(undefined);
     lensEmbeddableComponent.mockClear();
   });
 
@@ -168,5 +213,81 @@ describe('OnlineEvalDetailPage', () => {
     fireEvent.click(await screen.findByText('trace-123'));
 
     expect(await screen.findByText('Trace waterfall trace-123')).toBeInTheDocument();
+  });
+
+  it('does not show the bottom bar when settings are pristine', async () => {
+    renderPage();
+
+    await screen.findByTestId('onlineEvalDetailEverySelect');
+    expect(screen.queryByTestId('onlineEvalDetailBottomBar')).not.toBeInTheDocument();
+  });
+
+  it('shows bottom bar after editing and cancel resets draft', async () => {
+    renderPage();
+
+    const windowInput = (await screen.findByTestId(
+      'onlineEvalDetailWindowInput'
+    )) as HTMLInputElement;
+    fireEvent.change(windowInput, { target: { value: '90' } });
+
+    expect(await screen.findByTestId('onlineEvalDetailBottomBar')).toBeInTheDocument();
+    expect(windowInput.value).toBe('90');
+
+    fireEvent.click(screen.getByTestId('onlineEvalDetailCancelButton'));
+    expect(
+      ((await screen.findByTestId('onlineEvalDetailWindowInput')) as HTMLInputElement).value
+    ).toBe('60');
+    expect(screen.queryByTestId('onlineEvalDetailBottomBar')).not.toBeInTheDocument();
+  });
+
+  it('saves edited settings through update mutation', async () => {
+    renderPage();
+
+    fireEvent.change(await screen.findByTestId('onlineEvalDetailEverySelect'), {
+      target: { value: '5m' },
+    });
+    fireEvent.click(await screen.findByTestId('onlineEvalDetailSaveButton'));
+
+    await waitFor(() => {
+      expect(updateMutateAsync).toHaveBeenCalledWith({
+        workflowId: 'workflow-1',
+        config: expect.objectContaining({
+          every: '5m',
+        }),
+      });
+    });
+  });
+
+  it('shows active callout when workflow is enabled', async () => {
+    renderPage();
+    expect(await screen.findByTestId('onlineEvalDetailActiveCallout')).toBeInTheDocument();
+  });
+
+  it('hides active callout when workflow is disabled', async () => {
+    mockedUseOnlineEvalWorkflow.mockReturnValue({
+      data: {
+        id: 'workflow-1',
+        name: '[online-eval] quality monitor',
+        enabled: false,
+        yaml: 'version: "1"',
+        parsedConfig,
+      },
+      isLoading: false,
+      error: null,
+    } as unknown as ReturnType<typeof useOnlineEvalWorkflow>);
+
+    renderPage();
+    expect(screen.queryByTestId('onlineEvalDetailActiveCallout')).not.toBeInTheDocument();
+  });
+
+  it('disables editing and shows lock callout when user cannot manage', async () => {
+    mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: false });
+
+    renderPage();
+
+    expect(await screen.findByTestId('onlineEvalDetailNoPermissionCallout')).toBeInTheDocument();
+    expect(await screen.findByTestId('onlineEvalDetailEverySelect')).toBeDisabled();
+    expect(await screen.findByTestId('onlineEvalDetailWindowInput')).toBeDisabled();
+    expect(await screen.findByTestId('onlineEvalDetailExtraWhereInput')).toBeDisabled();
   });
 });
