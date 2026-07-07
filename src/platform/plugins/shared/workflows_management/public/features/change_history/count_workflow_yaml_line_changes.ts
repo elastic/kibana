@@ -7,28 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { diffLines } from 'diff';
+import { computeWorkflowYamlDiffStats } from '@kbn/workflows-ui';
 
 /* Fallback to line hunks when semantic diff is not possible. */
-export const countWorkflowYamlLineChanges = (baselineYaml: string, targetYaml: string): number => {
-  if (baselineYaml === targetYaml) {
-    return 0;
-  }
-
-  const changes = diffLines(baselineYaml, targetYaml, { ignoreNewlineAtEof: true });
-  let hunkCount = 0;
-  let inHunk = false;
-
-  for (const change of changes) {
-    if (change.added || change.removed) {
-      if (!inHunk) {
-        hunkCount += 1;
-        inHunk = true;
-      }
-    } else {
-      inHunk = false;
-    }
-  }
-
-  return hunkCount;
-};
+export const countWorkflowYamlLineChanges = (baselineYaml: string, targetYaml: string): number =>
+  computeWorkflowYamlDiffStats(baselineYaml, targetYaml).hunkCount;
