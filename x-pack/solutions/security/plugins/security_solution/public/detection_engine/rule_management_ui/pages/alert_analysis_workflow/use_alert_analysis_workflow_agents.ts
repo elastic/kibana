@@ -45,8 +45,11 @@ export const useAlertAnalysisWorkflowAgents = (
   return useMemo(
     () => ({
       agents: data ?? [],
-      isLoading,
+      // react-query v4 keeps `isLoading` true for a disabled query, which would otherwise leave the
+      // agent selector spinning forever when Agent Builder is unavailable. Gate it on the same
+      // condition as the query's `enabled`.
+      isLoading: isLoading && enabled && Boolean(agentBuilder),
     }),
-    [data, isLoading]
+    [data, isLoading, enabled, agentBuilder]
   );
 };
