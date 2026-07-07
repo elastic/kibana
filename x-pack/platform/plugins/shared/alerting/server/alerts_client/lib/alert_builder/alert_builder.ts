@@ -27,6 +27,7 @@ import type { IIndexPatternString } from '../../../alerts_service/resource_insta
 import type { TrackedAADAlerts } from '../../types';
 import { buildOngoingAlert } from './build_ongoing_alert';
 import { buildNewAlert } from './build_new_alert';
+import { buildGraduatedAlert } from './build_graduated_alert';
 import { buildRecoveredAlert } from './build_recovered_alert';
 import { buildUpdatedRecoveredAlert } from './build_updated_recovered_alert';
 import { buildDelayedAlert } from './build_delayed_alert';
@@ -184,22 +185,45 @@ export class AlertBuilder<
         continue;
       }
       if (activeAlert) {
-        const trackedAlert = this.trackedAlerts.get(activeAlert.getUuid());
-        if (!!trackedAlert && get(trackedAlert, ALERT_STATUS) === ALERT_STATUS_ACTIVE) {
+        const uuid = activeAlert.getUuid();
+        const trackedActive = this.trackedAlerts.active[uuid];
+        const trackedDelayed = this.trackedAlerts.delayed[uuid];
+
+        if (trackedActive) {
           const isImproving = isAlertImproving<
             AlertData,
             State,
             Context,
             ActionGroupIds,
             RecoveryActionGroupId
-          >(trackedAlert, activeAlert, this.ruleType.actionGroups);
+          >(trackedActive, activeAlert, this.ruleType.actionGroups);
           activeAlertsToIndex.push(
             buildOngoingAlert<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>({
-              alert: trackedAlert,
+              alert: trackedActive,
               legacyAlert: activeAlert,
               rule: this.rule,
               ruleData: this.alertRuleData,
               isImproving,
+              runTimestamp: this.runTimestampString,
+              timestamp: this.currentTime,
+              payload: this.reportedAlerts[id],
+              kibanaVersion: this.kibanaVersion,
+              dangerouslyCreateAlertsInAllSpaces: this.createAlertsInAllSpaces,
+            })
+          );
+        } else if (trackedDelayed) {
+          // The alert is graduating from `delayed` to `active`. The delayed
+          // predecessor doc carries the rule type fields reported during the
+          // delayed runs, which the graduated builder merges in. This keeps
+          // the resulting active doc complete even when the executor does
+          // not report a fresh payload on the run that triggers graduation
+          // (e.g. flap-hold reactivation).
+          activeAlertsToIndex.push(
+            buildGraduatedAlert<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>({
+              alert: trackedDelayed,
+              legacyAlert: activeAlert,
+              rule: this.rule,
+              ruleData: this.alertRuleData,
               runTimestamp: this.runTimestampString,
               timestamp: this.currentTime,
               payload: this.reportedAlerts[id],
@@ -277,8 +301,13 @@ export class AlertBuilder<
       delayedAlertsToIndex.push(
         buildDelayedAlert<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>({
           legacyAlert: delayedAlert,
-          timestamp: this.currentTime,
           rule: this.rule,
+          ruleData: this.alertRuleData,
+          payload: this.reportedAlerts[delayedAlert.getId()],
+          runTimestamp: this.runTimestampString,
+          timestamp: this.currentTime,
+          kibanaVersion: this.kibanaVersion,
+          dangerouslyCreateAlertsInAllSpaces: this.createAlertsInAllSpaces,
         })
       );
     }

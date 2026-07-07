@@ -7,7 +7,7 @@
 
 import type { EsClient } from '@kbn/scout-security';
 import type { apiTest } from '@kbn/scout-security';
-import type { GetStatusResult } from '../../../../server/domain/types';
+import type { EntityStoreStatusResponseBody } from '../../../../server/routes/apis/status';
 import { hashEuid } from '../../../../common/domain/euid';
 import type { EntityType } from '../../../../common';
 
@@ -223,17 +223,19 @@ export const triggerMaintainerRun = async (
   apiClient: ForceLogExtractionApiClient,
   headers: Record<string, string>,
   maintainerId = 'automated-resolution',
-  { maxRetries = 5, retryDelayMs = 2000 } = {}
+  { maxRetries = 5, retryDelayMs = 2000, sync = false } = {}
 ) => {
+  // Use `sync: true` in tests that need a settled watermark before proceeding.
+  const runUrl = `${ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN(
+    maintainerId
+  )}?sync=${sync}`;
+
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const response = await apiClient.post(
-      ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN(maintainerId),
-      {
-        headers,
-        responseType: 'json',
-        body: {},
-      }
-    );
+    const response = await apiClient.post(runUrl, {
+      headers,
+      responseType: 'json',
+      body: {},
+    });
 
     if (response.statusCode === 200) {
       return response;
@@ -296,9 +298,7 @@ export const getStatus = (
   apiClient: ApiClientFixture,
   headers: Record<string, string>,
   { includeComponents = false } = {}
-): Promise<
-  Omit<ApiClientResponse, 'body'> & { body: Pick<GetStatusResult, 'engines' | 'status'> }
-> =>
+): Promise<Omit<ApiClientResponse, 'body'> & { body: EntityStoreStatusResponseBody }> =>
   apiClient.get(
     includeComponents
       ? `${ENTITY_STORE_ROUTES.public.STATUS}?include_components=true`

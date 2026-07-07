@@ -6,10 +6,17 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { IUiSettingsClient, Logger } from '@kbn/core/server';
-import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
-import type { TaskResult } from '@kbn/streams-schema';
-import { notFound } from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
+import type { ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { notFound, serverUnavailable } from '@hapi/boom';
+import {
+  STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
+  STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+  STREAMS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
+  STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import type {
@@ -20,34 +27,32 @@ import type {
 } from '../../../lib/memory';
 import { MemoryServiceImpl } from '../../../lib/memory';
 import type { StreamsServer } from '../../../types';
-import { taskActionSchema } from '../../../lib/tasks/task_action_schema';
-import { handleTaskAction } from '../../utils/task_helpers';
-import {
-  CONVERSATION_SCRAPER_TASK_TYPE,
-  type ConversationScraperTaskParams,
-  type ConversationScraperTaskResult,
-} from '../../../lib/tasks/task_definitions/conversation_scraper';
-import {
-  MEMORY_CONSOLIDATION_TASK_TYPE,
-  type MemoryConsolidationTaskParams,
-  type MemoryConsolidationTaskResult,
-} from '../../../lib/tasks/task_definitions/memory_consolidation';
+import { triggerMemorySynthesisWorkflow } from '../../../lib/memory/trigger_memory_synthesis_workflow';
+import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { isSignificantEventsMemoryEnabled } from '../../../lib/memory/is_significant_events_memory_enabled';
+import { FeatureNotEnabledError } from '../../../lib/streams/errors/feature_not_enabled_error';
 
-const assertMemoryEnabled = async (uiSettingsClient: IUiSettingsClient) => {
-  const useMemory = await uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
+const assertMemoryEnabled = async ({
+  server,
+  licensing,
+  uiSettingsClient,
+}: {
+  server: StreamsServer;
+  licensing: LicensingPluginStart;
+  uiSettingsClient: IUiSettingsClient;
+}) => {
+  await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+  const useMemory = await isSignificantEventsMemoryEnabled(server.core.featureFlags);
   if (!useMemory) {
-    throw new Error(
-      'Memory is disabled. Enable the Streams memory advanced setting (observability:streamsEnableMemory).'
+    throw new FeatureNotEnabledError(
+      'Memory is disabled. Enable the streams.significantEventsMemoryEnabled feature flag.'
     );
   }
 };
 
-const getMemoryService = (server: StreamsServer, logger: Logger) => {
-  return new MemoryServiceImpl({
-    logger,
-    esClient: server.core.elasticsearch.client.asInternalUser,
-  });
-};
+const createMemoryService = (esClient: ElasticsearchClient, logger: Logger) =>
+  new MemoryServiceImpl({ logger, esClient });
 
 const createEntryRoute = createServerRoute({
   endpoint: 'POST /internal/streams/memory/entries',
@@ -71,9 +76,11 @@ const createEntryRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
-    const { uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled(uiSettingsClient);
-    const memory = getMemoryService(server, logger);
+    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
@@ -103,9 +110,11 @@ const getEntryRoute = createServerRoute({
     path: z.object({ id: z.string() }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
-    const { uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled(uiSettingsClient);
-    const memory = getMemoryService(server, logger);
+    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     return memory.get({ id: params.path.id });
   },
@@ -126,9 +135,11 @@ const getEntryByNameRoute = createServerRoute({
     query: z.object({ name: z.string() }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
-    const { uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled(uiSettingsClient);
-    const memory = getMemoryService(server, logger);
+    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const entry = await memory.getByName({ name: params.query.name });
     if (!entry) {
@@ -162,9 +173,11 @@ const updateEntryRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
-    const { uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled(uiSettingsClient);
-    const memory = getMemoryService(server, logger);
+    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
@@ -199,9 +212,11 @@ const deleteEntryRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<{ deleted: boolean }> => {
-    const { uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled(uiSettingsClient);
-    const memory = getMemoryService(server, logger);
+    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
@@ -227,9 +242,11 @@ const renameEntryRoute = createServerRoute({
     body: z.object({ new_name: z.string() }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
-    const { uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled(uiSettingsClient);
-    const memory = getMemoryService(server, logger);
+    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
@@ -269,9 +286,11 @@ const searchRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<{ results: MemorySearchResult[] }> => {
-    const { uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled(uiSettingsClient);
-    const memory = getMemoryService(server, logger);
+    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const results = await memory.search({
       query: params.body.query,
@@ -301,13 +320,17 @@ const getCategoryTreeRoute = createServerRoute({
     server,
     logger,
     getScopedClients,
-  }): Promise<{ tree: MemoryCategoryNode[] }> => {
-    const { uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled(uiSettingsClient);
-    const memory = getMemoryService(server, logger);
+  }): Promise<{
+    tree: MemoryCategoryNode[];
+    uncategorized: Array<{ id: string; name: string; title: string }>;
+  }> => {
+    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
-    const tree = await memory.getCategoryTree();
-    return { tree };
+    return memory.getCategoryTree();
   },
 });
 
@@ -338,9 +361,11 @@ const getHistoryRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<{ history: MemoryVersionRecord[] }> => {
-    const { uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled(uiSettingsClient);
-    const memory = getMemoryService(server, logger);
+    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const history = await memory.getHistory({
       entryId: params.path.id,
@@ -374,9 +399,11 @@ const getVersionRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<MemoryVersionRecord> => {
-    const { uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled(uiSettingsClient);
-    const memory = getMemoryService(server, logger);
+    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     return memory.getVersion({
       entryId: params.path.id,
@@ -411,9 +438,11 @@ const recentChangesRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<{ changes: MemoryVersionRecord[] }> => {
-    const { uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled(uiSettingsClient);
-    const memory = getMemoryService(server, logger);
+    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const changes = await memory.getRecentChanges({
       size: params.query?.size,
@@ -422,98 +451,225 @@ const recentChangesRoute = createServerRoute({
   },
 });
 
-const SCRAPER_TASK_ID = 'streams_conversation_scraper_singleton';
-const CONSOLIDATION_TASK_ID = 'streams_memory_consolidation_singleton';
+const createWorkflowTriggerRoute = (
+  endpoint: `POST ${string}`,
+  managedWorkflowId: string,
+  summary: string
+) =>
+  createServerRoute({
+    endpoint,
+    options: { access: 'internal', summary },
+    security: { authz: { requiredPrivileges: [STREAMS_API_PRIVILEGES.manage] } },
+    params: z.object({ body: z.object({}).passthrough().optional() }),
+    handler: async ({
+      request,
+      server,
+      logger,
+      getScopedClients,
+    }): Promise<{ executionId: string }> => {
+      const { licensing, uiSettingsClient } = await getScopedClients({ request });
+      await assertMemoryEnabled({ server, licensing, uiSettingsClient });
 
-const scrapeConversationsRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/memory/_scrape_conversations',
-  options: {
-    access: 'internal',
-    summary: 'Trigger conversation scraping for memory',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      const wfMgmt = server.workflowsManagement;
+      if (!wfMgmt) {
+        throw serverUnavailable(
+          'Workflows management plugin is not available. Cannot trigger memory workflow.'
+        );
+      }
+
+      // Use the user's current space so the execution appears in the Workflows UI.
+      const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+
+      const workflow = await wfMgmt.management.getWorkflow(managedWorkflowId, spaceId);
+      if (!workflow || !workflow.definition) {
+        throw notFound(
+          `Managed workflow "${managedWorkflowId}" not found. Kibana may still be starting up.`
+        );
+      }
+
+      const executionId = await wfMgmt.management.runWorkflow(
+        { ...workflow, definition: workflow.definition },
+        spaceId,
+        {},
+        request,
+        'sigevents-memory-ui'
+      );
+
+      logger.info(`Triggered managed workflow "${managedWorkflowId}", executionId=${executionId}`);
+      return { executionId };
     },
-  },
-  params: z.object({
-    body: taskActionSchema({}),
-  }),
+  });
+
+const scrapeConversationsRoute = createWorkflowTriggerRoute(
+  'POST /internal/streams/memory/_scrape_conversations',
+  STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+  'Trigger conversation scraping for memory'
+);
+
+const consolidateMemoryRoute = createWorkflowTriggerRoute(
+  'POST /internal/streams/memory/_consolidate',
+  STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
+  'Trigger memory consolidation'
+);
+
+const synthesizeMemoryRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/memory/_synthesize',
+  options: { access: 'internal', summary: 'Trigger memory synthesis from significant events' },
+  security: { authz: { requiredPrivileges: [STREAMS_API_PRIVILEGES.manage] } },
+  params: z.object({ body: z.object({}).passthrough().optional() }),
   handler: async ({
-    params,
     request,
+    server,
+    logger,
     getScopedClients,
-  }): Promise<TaskResult<ConversationScraperTaskResult>> => {
-    const { taskClient, uiSettingsClient: scraperUiSettings } = await getScopedClients({ request });
-    await assertMemoryEnabled(scraperUiSettings);
+  }): Promise<{ executionId: string }> => {
+    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
 
-    const { body } = params;
-
-    const actionParams =
-      body.action === 'schedule'
-        ? ({
-            action: body.action,
-            scheduleConfig: {
-              taskType: CONVERSATION_SCRAPER_TASK_TYPE,
-              taskId: SCRAPER_TASK_ID,
-              params: {},
-              request,
-            },
-          } as const)
-        : ({ action: body.action } as const);
-
-    return handleTaskAction<ConversationScraperTaskParams, ConversationScraperTaskResult>({
-      taskClient,
-      taskId: SCRAPER_TASK_ID,
-      ...actionParams,
+    const executionId = await triggerMemorySynthesisWorkflow({
+      workflowsManagement: server.workflowsManagement,
+      spaces: server.spaces,
+      request,
+      logger,
+      triggeredBy: 'sigevents-memory-ui',
     });
+
+    if (!executionId) {
+      throw serverUnavailable(
+        'Memory synthesis workflow is not available. Ensure workflows management is enabled and Kibana has finished installing managed workflows.'
+      );
+    }
+
+    return { executionId };
   },
 });
 
-const consolidateMemoryRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/memory/_consolidate',
-  options: {
-    access: 'internal',
-    summary: 'Trigger memory consolidation and cleanup',
+const detectGapsRoute = createWorkflowTriggerRoute(
+  'POST /internal/streams/memory/_detect_gaps',
+  STREAMS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
+  'Trigger gap detection for memory'
+);
+
+const MEMORY_WORKFLOW_IDS = [
+  STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+  STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
+  STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID,
+  STREAMS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
+] as const;
+
+const getMemoryWorkflowsEnabledRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/memory/_workflows/enabled',
+  options: { access: 'internal', summary: 'Get enabled state of all memory workflows' },
+  security: { authz: { requiredPrivileges: [STREAMS_API_PRIVILEGES.read] } },
+  params: z.object({}),
+  handler: async ({
+    request,
+    server,
+    getScopedClients,
+  }): Promise<{
+    enabled: boolean;
+    workflows: Array<{ id: string; enabled: boolean }>;
+  }> => {
+    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+
+    const wfMgmt = server.workflowsManagement;
+    if (!wfMgmt) {
+      return {
+        enabled: false,
+        workflows: MEMORY_WORKFLOW_IDS.map((id) => ({ id, enabled: false })),
+      };
+    }
+
+    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    const fetchedWorkflows = await Promise.all(
+      MEMORY_WORKFLOW_IDS.map((id) => wfMgmt.management.getWorkflow(id, spaceId))
+    );
+    const workflows = MEMORY_WORKFLOW_IDS.map((id, index) => ({
+      id,
+      enabled: fetchedWorkflows[index]?.enabled === true,
+    }));
+    const enabled = workflows.every((workflow) => workflow.enabled);
+    return { enabled, workflows };
   },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    body: taskActionSchema({}),
-  }),
+});
+
+const setMemoryWorkflowsEnabledRoute = createServerRoute({
+  endpoint: 'PUT /internal/streams/memory/_workflows/enabled',
+  options: { access: 'internal', summary: 'Enable or disable all memory workflows' },
+  security: { authz: { requiredPrivileges: [STREAMS_API_PRIVILEGES.manage] } },
+  params: z.object({ body: z.object({ enabled: z.boolean() }) }),
   handler: async ({
     params,
     request,
+    server,
+    logger,
     getScopedClients,
-  }): Promise<TaskResult<MemoryConsolidationTaskResult>> => {
-    const { taskClient, uiSettingsClient: consolidateUiSettings } = await getScopedClients({
-      request,
-    });
-    await assertMemoryEnabled(consolidateUiSettings);
+  }): Promise<{ success: boolean }> => {
+    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
 
-    const { body } = params;
+    const wfMgmt = server.workflowsManagement;
+    if (!wfMgmt) {
+      throw serverUnavailable(
+        'Workflows management plugin is not available. Cannot update memory workflows.'
+      );
+    }
 
-    const actionParams =
-      body.action === 'schedule'
-        ? ({
-            action: body.action,
-            scheduleConfig: {
-              taskType: MEMORY_CONSOLIDATION_TASK_TYPE,
-              taskId: CONSOLIDATION_TASK_ID,
-              params: {},
-              request,
-            },
-          } as const)
-        : ({ action: body.action } as const);
+    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    const { enabled } = params.body;
 
-    return handleTaskAction<MemoryConsolidationTaskParams, MemoryConsolidationTaskResult>({
-      taskClient,
-      taskId: CONSOLIDATION_TASK_ID,
-      ...actionParams,
-    });
+    // Toggle every workflow we can and collect per-workflow failures rather than
+    // throwing on the first one, so a partial installation doesn't leave the
+    // remaining workflows untouched. `updateWorkflow` does not throw when an
+    // enable is refused: enabling a workflow without a valid definition (the
+    // "Kibana may still be starting up" window) is silently ignored, so we guard
+    // that case and reconcile against the returned `enabled` state.
+    const failures: string[] = [];
+
+    for (const managedWorkflowId of MEMORY_WORKFLOW_IDS) {
+      const workflow = await wfMgmt.management.getWorkflow(managedWorkflowId, spaceId);
+      if (!workflow) {
+        failures.push(`"${managedWorkflowId}" was not found`);
+        continue;
+      }
+      if (enabled && !workflow.definition) {
+        failures.push(`"${managedWorkflowId}" is not fully installed yet`);
+        continue;
+      }
+
+      const result = await wfMgmt.management.updateWorkflow(
+        workflow.id,
+        { enabled },
+        spaceId,
+        request
+      );
+      if (result.enabled !== enabled) {
+        const validationDetail = result.validationErrors.join('; ');
+        failures.push(
+          validationDetail
+            ? i18n.translate('xpack.streams.memory.workflowUpdateFailedWithDetailErrorMessage', {
+                defaultMessage: 'Could not update workflow "{workflowId}": {detail}',
+                values: { workflowId: managedWorkflowId, detail: validationDetail },
+              })
+            : i18n.translate('xpack.streams.memory.workflowUpdateFailedErrorMessage', {
+                defaultMessage: 'Could not update workflow "{workflowId}"',
+                values: { workflowId: managedWorkflowId },
+              })
+        );
+      }
+    }
+
+    if (failures.length > 0) {
+      const message = `Failed to ${
+        enabled ? 'enable' : 'disable'
+      } all memory workflows. Kibana may still be starting up. Details: ${failures.join(', ')}.`;
+      logger.warn(message);
+      throw serverUnavailable(message);
+    }
+
+    logger.info(`Memory workflows ${enabled ? 'enabled' : 'disabled'} for space "${spaceId}".`);
+    return { success: true };
   },
 });
 
@@ -531,4 +687,8 @@ export const internalMemoryRoutes = {
   ...recentChangesRoute,
   ...scrapeConversationsRoute,
   ...consolidateMemoryRoute,
+  ...synthesizeMemoryRoute,
+  ...detectGapsRoute,
+  ...getMemoryWorkflowsEnabledRoute,
+  ...setMemoryWorkflowsEnabledRoute,
 };

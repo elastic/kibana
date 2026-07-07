@@ -16,7 +16,7 @@ import { RunbookField } from './runbook_field';
 const RunbookValueSpy = () => {
   const { watch } = useFormContext<FormValues>();
   const runbookValue =
-    watch('artifacts')?.find((artifact) => artifact.type === 'runbook')?.value ?? '';
+    watch('runbookArtifacts')?.find((artifact) => artifact.type === 'runbook')?.value ?? '';
   return <div data-test-subj="runbookValueSpy">{runbookValue}</div>;
 };
 
@@ -25,7 +25,7 @@ const createDefaultValues = (runbook: string = ''): Partial<FormValues> => ({
     name: 'Test rule',
     enabled: true,
   },
-  ...(runbook ? { artifacts: [{ id: 'runbook', type: 'runbook', value: runbook }] } : {}),
+  ...(runbook ? { runbookArtifacts: [{ id: 'runbook', type: 'runbook', value: runbook }] } : {}),
 });
 
 describe('RunbookField', () => {

@@ -28,7 +28,6 @@
     "@kbn/presentation-publishing",
     "@kbn/content-management-utils",
     "@kbn/field-formats-plugin",
-    "@kbn/presentation-panel-plugin",
     "@kbn/std",
     "@kbn/esql-types",
     "@kbn/css-utils",
@@ -40,7 +39,12 @@
     "@kbn/kql",
     "@kbn/control-group-renderer",
     "@kbn/utility-types",
-    "@kbn/esql-language"
+    "@kbn/esql-language",
+    "@kbn/es-types",
+    "@kbn/esql",
+    "@kbn/presentation-publishing-schemas",
+    "@kbn/controls-renderer",
+    "@kbn/field-formats-common"
   ],
   "exclude": ["target/**/*"]
 }

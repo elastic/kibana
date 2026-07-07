@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
 import type { ActionsAuthorization } from '../../../../authorization/actions_authorization';
@@ -255,6 +256,121 @@ describe('update()', () => {
       });
 
       expect(result.authMode).toBe('per-user');
+    });
+  });
+
+  describe('spec connector config.authType on update', () => {
+    test('rejects changing per-user auth type when saved config.authType is present', async () => {
+      const soResult = makeSavedObjectResult({
+        authMode: 'per-user',
+        config: { authType: 'oauth_authorization_code' },
+        secrets: {},
+      });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(soResult);
+
+      const actionType = getConnectorType({
+        source: ACTION_TYPE_SOURCES.spec,
+        validate: {
+          config: { schema: z.any() },
+          secrets: { schema: z.any() },
+          params: { schema: z.object({}) },
+        },
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      await expect(
+        update({
+          context: mockContext,
+          id: '1',
+          action: {
+            name: 'Test Connector',
+            config: {},
+            secrets: { authType: 'bearer' },
+          },
+        })
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Authentication type cannot be changed for per-user connectors. Connector: 1.]`
+      );
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    test('persists config.authType from secrets when config is empty (spec source)', async () => {
+      const soResult = makeSavedObjectResult({
+        authMode: 'shared',
+        config: { authType: 'bearer' },
+        secrets: {},
+      });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(soResult);
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(soResult);
+
+      const actionType = getConnectorType({
+        source: ACTION_TYPE_SOURCES.spec,
+        validate: {
+          config: { schema: z.any() },
+          secrets: { schema: z.any() },
+          params: { schema: z.object({}) },
+        },
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      await update({
+        context: mockContext,
+        id: '1',
+        action: {
+          name: 'Test Connector',
+          config: {},
+          secrets: { authType: 'bearer', token: 'secret' },
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({
+          config: { authType: 'bearer' },
+          secrets: { authType: 'bearer', token: 'secret' },
+        }),
+        expect.anything()
+      );
+    });
+
+    test('does not inject config.authType for stack source on update', async () => {
+      const soResult = makeSavedObjectResult({
+        authMode: 'shared',
+        config: {},
+        secrets: {},
+      });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(soResult);
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(soResult);
+
+      const actionType = getConnectorType({
+        source: ACTION_TYPE_SOURCES.stack,
+        validate: {
+          config: { schema: z.any() },
+          secrets: { schema: z.any() },
+          params: { schema: z.object({}) },
+        },
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      await update({
+        context: mockContext,
+        id: '1',
+        action: {
+          name: 'Test Connector',
+          config: {},
+          secrets: { authType: 'bearer', token: 't' },
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({
+          config: {},
+          secrets: { authType: 'bearer', token: 't' },
+        }),
+        expect.anything()
+      );
     });
   });
 

@@ -30,7 +30,7 @@ import { useFormattedDate } from './use_formatted_date';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type { State } from '../../../common/store/types';
 import { userRequestedAdditionalRelatedEvents } from '../../store/data/action';
-import { EventKind } from '../../../flyout_v2/document/constants/event_kinds';
+import { EventKind } from '../../../flyout_v2/document/main/constants/event_kinds';
 
 export type NodeEventOnClick = ({
   documentId,

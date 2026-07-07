@@ -335,6 +335,7 @@ function FilterItemComponent(props: FilterItemProps) {
     panelProps: {
       css: styles.popoverDragAndDrop,
     },
+    focusTrapProps: { clickOutsideDisables: false },
   };
 
   return readOnly ? (

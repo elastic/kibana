@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useEuiTheme } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
@@ -25,7 +25,6 @@ interface OsqueryEditorProps {
 }
 
 const editorOptions = {
-  theme: 'osquery',
   automaticLayout: true,
 };
 const MIN_HEIGHT = 100;
@@ -44,6 +43,16 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
   // When the editor is inside a modal (z-index 8000), suggestions appear behind the modal.
   // Override to render above modals in all contexts.
   const overflowWidgetsZIndex = (euiTheme.levels.modal as number) + 1;
+
+  const containerStyle = useMemo(
+    () => ({
+      border: euiTheme.border.thin,
+      borderRadius: euiTheme.border.radius.medium,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      overflow: 'hidden' as const,
+    }),
+    [euiTheme.border.thin, euiTheme.border.radius.medium, euiTheme.colors.backgroundBaseSubdued]
+  );
 
   useDebounce(
     () => {
@@ -87,16 +96,19 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
   );
 
   return (
-    <CodeEditor
-      languageId={'sql'}
-      value={editorValue}
-      onChange={setEditorValue}
-      options={editorOptions}
-      height={height + 'px'}
-      width="100%"
-      editorDidMount={editorDidMount}
-      overflowWidgetsContainerZIndexOverride={overflowWidgetsZIndex}
-    />
+    <div style={containerStyle}>
+      <CodeEditor
+        languageId={'sql'}
+        value={editorValue}
+        onChange={setEditorValue}
+        options={editorOptions}
+        height={height + 'px'}
+        width="100%"
+        editorDidMount={editorDidMount}
+        overflowWidgetsContainerZIndexOverride={overflowWidgetsZIndex}
+        transparentBackground
+      />
+    </div>
   );
 };
 

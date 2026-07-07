@@ -94,6 +94,7 @@ function createInternalStateStoreMock({
   const tabsStorageManager = createTabsStorageManager({
     urlStateStorage: stateStorageContainer,
     storage: services.storage,
+    profileStateRegistry: services.profileStateRegistry,
   });
   const searchSessionManager = new DiscoverSearchSessionManager({
     history: services.history,
@@ -399,8 +400,6 @@ export function getDiscoverInternalStateMock({
                 persistedDiscoverSession?.tabs.some((tab) => tab.timeRestore) ?? false,
               newDescription: persistedDiscoverSession?.description ?? 'new description',
               newTags: persistedDiscoverSession?.tags ?? [],
-              isTitleDuplicateConfirmed: false,
-              onTitleDuplicate: jest.fn(),
               ...params,
             })
           )

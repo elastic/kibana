@@ -71,4 +71,39 @@ describe('openLazyFlyout', () => {
     openLazyFlyout({ core, parentApi, loadContent });
     expect(openFlyout).toHaveBeenCalled();
   });
+
+  it('uses overlay type when parent publishes panelFlyoutType overlay', () => {
+    const parentApi = {
+      openOverlay: jest.fn(),
+      clearOverlays: jest.fn(),
+      panelFlyoutType: 'overlay' as const,
+    };
+
+    openLazyFlyout({ core, parentApi, loadContent });
+
+    expect(openFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        type: 'overlay',
+        ownFocus: false,
+      })
+    );
+  });
+
+  it('prefers explicit flyoutProps.type over parent panelFlyoutType', () => {
+    const parentApi = {
+      openOverlay: jest.fn(),
+      clearOverlays: jest.fn(),
+      panelFlyoutType: 'overlay' as const,
+    };
+
+    openLazyFlyout({ core, parentApi, loadContent, flyoutProps: { type: 'push' } });
+
+    expect(openFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        type: 'push',
+      })
+    );
+  });
 });

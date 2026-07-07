@@ -255,6 +255,84 @@ export default ({ getService }: FtrProviderContext) => {
           expect(alerts_candidate_count).toBe(2);
         });
       });
+
+      describe('alerts_suppressed_count', () => {
+        it('records alerts_suppressed_count as 0 when no suppression is configured', async () => {
+          const timestamp = new Date().toISOString();
+          const threatIndicatorDocument = {
+            '@timestamp': timestamp,
+            host: { name: 'test-1' },
+          };
+          const document = {
+            '@timestamp': timestamp,
+            host: { name: 'test-1' },
+          };
+          const rule = getThreatMatchRuleParams({
+            threat_query: '*:*',
+            threat_index: ['ti_test_1'],
+            query: '*:*',
+            index: ['test-data-1'],
+            from: 'now-35m',
+            interval: '30m',
+            enabled: true,
+          });
+
+          await indexThreatIndicatorDocuments([threatIndicatorDocument]);
+          await indexListOfSourceDocuments([document]);
+
+          const createdRule = await createRule(supertest, log, rule);
+          const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+
+          expect(alerts.hits.hits).toHaveLength(1);
+
+          const { alerts_suppressed_count } =
+            await getLatestSecurityRuleExecutionMetricsFromEventLog(es, log, createdRule.id);
+
+          expect(alerts_suppressed_count).toBe(0);
+        });
+
+        it('records alerts_suppressed_count when alerts are suppressed', async () => {
+          const timestamp = new Date().toISOString();
+          const threatIndicatorDocument = {
+            '@timestamp': timestamp,
+            host: { name: 'test-1' },
+          };
+          const document = {
+            '@timestamp': timestamp,
+            host: { name: 'test-1' },
+          };
+          const rule = getThreatMatchRuleParams({
+            threat_query: '*:*',
+            threat_index: ['ti_test_1'],
+            query: '*:*',
+            index: ['test-data-1'],
+            from: 'now-35m',
+            interval: '30m',
+            alert_suppression: {
+              group_by: ['host.name'],
+              duration: {
+                value: 300,
+                unit: 'm',
+              },
+              missing_fields_strategy: 'suppress',
+            },
+            enabled: true,
+          });
+
+          await indexThreatIndicatorDocuments([threatIndicatorDocument]);
+          await indexListOfSourceDocuments([document, document]);
+
+          const createdRule = await createRule(supertest, log, rule);
+          const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+
+          expect(alerts.hits.hits).toHaveLength(1);
+
+          const { alerts_suppressed_count } =
+            await getLatestSecurityRuleExecutionMetricsFromEventLog(es, log, createdRule.id);
+
+          expect(alerts_suppressed_count).toBe(1);
+        });
+      });
     });
   });
 };

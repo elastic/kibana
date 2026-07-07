@@ -4,27 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { sloIdSchema } from '../../../schema/slo';
-import { historicalSummarySchema } from '../fetch_historical_summary';
+import { z } from '@kbn/zod';
+import {
+  compositeSloIdSchema,
+  compositeErrorBudgetSchema,
+  compositeStatusSchema,
+} from '../../../schema/composite_slo';
 
-const fetchCompositeHistoricalSummaryParamsSchema = t.type({
-  body: t.type({
-    list: t.array(sloIdSchema),
+const compositeHistoricalSummarySchema = z.object({
+  date: z.string(),
+  status: compositeStatusSchema,
+  sliValue: z.number(),
+  errorBudget: compositeErrorBudgetSchema,
+});
+
+const fetchCompositeHistoricalSummaryParamsSchema = z.object({
+  body: z.object({
+    list: z.array(compositeSloIdSchema),
   }),
 });
 
-const fetchCompositeHistoricalSummaryResponseSchema = t.array(
-  t.type({
-    compositeId: sloIdSchema,
-    data: t.array(historicalSummarySchema),
+const fetchCompositeHistoricalSummaryResponseSchema = z.array(
+  z.object({
+    compositeId: compositeSloIdSchema,
+    data: z.array(compositeHistoricalSummarySchema),
   })
 );
 
-type FetchCompositeHistoricalSummaryParams = t.TypeOf<
-  typeof fetchCompositeHistoricalSummaryParamsSchema.props.body
+type FetchCompositeHistoricalSummaryParams = z.infer<
+  typeof fetchCompositeHistoricalSummaryParamsSchema.shape.body
 >;
-type FetchCompositeHistoricalSummaryResponse = t.OutputOf<
+type FetchCompositeHistoricalSummaryResponse = z.infer<
   typeof fetchCompositeHistoricalSummaryResponseSchema
 >;
 

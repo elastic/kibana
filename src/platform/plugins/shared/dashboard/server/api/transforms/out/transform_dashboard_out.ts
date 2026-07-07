@@ -9,22 +9,24 @@
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
+
+import { DEFAULT_DASHBOARD_STATE } from '../../../../common/default_dashboard_state';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
-import type { DashboardState } from '../../types';
-import { transformPinnedPanelsOut } from './transform_pinned_panels_out';
-import { transformSearchSourceOut } from './transform_search_source_out';
+import type { getDashboardStateSchema } from '../../dashboard_state_schemas';
+import type { DashboardState, Warnings } from '../../types';
 import { transformOptionsOut } from './transform_options_out';
 import { transformPanelsOut } from './transform_panels_out';
-import type { Warnings } from '../../types';
+import { transformPinnedPanelsOut } from './transform_pinned_panels_out';
+import { transformSearchSourceOut } from './transform_search_source_out';
+import { logger } from '../../../kibana_services';
 
 export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
-  references?: SavedObjectReference[],
-  isDashboardAppRequest: boolean = false
+  references: SavedObjectReference[] | undefined = undefined,
+  isDashboardAppRequest: boolean = false,
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
 ): {
-  dashboardState: Partial<
-    Omit<DashboardState, 'options'> & { options: Partial<DashboardState['options']> }
-  >;
+  dashboardState: DashboardState;
   warnings: Warnings;
 } {
   const {
@@ -55,7 +57,11 @@ export function transformDashboardOut(
     isDashboardAppRequest
   );
 
-  const pinnedPanels = transformPinnedPanelsOut(legacyControls, pinned_panels, references ?? []);
+  const { panels: pinnedPanels, warnings: pinnedPanelWarnings } = transformPinnedPanelsOut(
+    legacyControls,
+    pinned_panels,
+    references
+  );
 
   const timeRange =
     timeRestore && timeFrom && timeTo
@@ -67,25 +73,76 @@ export function transformDashboardOut(
 
   const options = transformOptionsOut(optionsJSON ?? '{}', legacyControls?.showApplySelections);
 
-  const { filters, query } = transformSearchSourceOut(kibanaSavedObjectMeta, references);
+  const {
+    filters,
+    query,
+    warnings: searchSourceWarnings,
+  } = transformSearchSourceOut(kibanaSavedObjectMeta, references, strictValidationSchema);
+
+  /**
+   * Handle validating each state key that wasn't already validated above; if any validation fails,
+   * just default back to the default state for that key
+   */
+  const otherStateWarnings: Warnings = [];
+  let validatedState: Partial<
+    Pick<
+      DashboardState,
+      | 'description'
+      | 'project_routing'
+      | 'refresh_interval'
+      | 'tags'
+      | 'time_range'
+      | 'title'
+      | 'options'
+    >
+  > = {
+    description,
+    options: options as DashboardState['options'], // defaults will be injected, so safe to remove partial typing
+    project_routing: projectRouting,
+    ...(refreshInterval && {
+      refresh_interval: { pause: refreshInterval.pause, value: refreshInterval.value },
+    }),
+    tags,
+    time_range: timeRange,
+    title: title ?? '',
+  };
+  (Object.keys(validatedState) as Array<keyof typeof validatedState>).forEach((key) => {
+    try {
+      validatedState = {
+        ...validatedState,
+        [key]: strictValidationSchema.validateKey(key, validatedState[key]),
+      };
+    } catch (error) {
+      const warningMessage = `Unexpected error transforming ${key}. Error: ${error.message}`;
+      logger.warn(warningMessage);
+      otherStateWarnings.push({
+        type: 'dropped_property',
+        message: warningMessage,
+        key,
+        value: validatedState[key],
+      });
+      // fallback to default state
+      validatedState = {
+        ...validatedState,
+        [key]: DEFAULT_DASHBOARD_STATE[key],
+      };
+    }
+  });
+  // drop keys that are undefined
+  validatedState = Object.fromEntries(
+    Object.entries(validatedState).filter(([_, value]) => value !== undefined)
+  );
 
   // try to maintain a consistent (alphabetical) order of keys
   return {
     dashboardState: {
-      ...(description && { description }),
+      ...(validatedState as DashboardState), // defaults have been injected at this point, so casting is safe
+      /** These keys were validated seperately, since they each have unique error handling */
       ...(filters && { filters }),
-      ...(Object.keys(options).length && { options }),
       panels,
       pinned_panels: pinnedPanels,
-      ...(projectRouting !== undefined && { project_routing: projectRouting }),
       ...(query && { query }),
-      ...(refreshInterval && {
-        refresh_interval: { pause: refreshInterval.pause, value: refreshInterval.value },
-      }),
-      ...(tags && tags.length && { tags }),
-      ...(timeRange && { time_range: timeRange }),
-      title: title ?? '',
     },
-    warnings,
+    warnings: [...warnings, ...pinnedPanelWarnings, ...searchSourceWarnings, ...otherStateWarnings],
   };
 }

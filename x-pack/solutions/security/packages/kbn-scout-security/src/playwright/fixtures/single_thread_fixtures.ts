@@ -74,6 +74,7 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
       extendedApiServices.attackDiscovery = getAttackDiscoveryApiService({
         kbnClient,
         log,
+        esClient,
       });
 
       await use(extendedApiServices);

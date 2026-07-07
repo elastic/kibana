@@ -24,14 +24,14 @@ type DiscoverPage = PageObjects['discover'];
 const openDocViewerAndTraceTimeline = async (pageObjects: {
   discover: DiscoverPage;
   tracesExperience: {
-    openOverviewTab: (d: DiscoverPage) => Promise<void>;
+    openOverviewTab: () => Promise<void>;
     flyout: TracesFlyout;
   };
 }) => {
   await pageObjects.discover.writeAndSubmitEsqlQuery(
     `${TRACES.ESQL_QUERY} | WHERE transaction.name == "${RICH_TRACE.TRANSACTION_NAME}"`
   );
-  await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
+  await pageObjects.tracesExperience.openOverviewTab();
   await pageObjects.tracesExperience.flyout.traceSummary.fullScreenButton.click();
   await expect(pageObjects.tracesExperience.flyout.waterfallFlyout.container).toBeVisible();
 };
@@ -48,7 +48,7 @@ spaceTest.describe(
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects, page }) => {
       await browserAuth.loginAsViewer();
-      await pageObjects.discover.goto();
+      await pageObjects.discover.goto({ queryMode: 'esql' });
       // Suppress the tour so it does not overlap the waterfall flyout interactions.
       await page.evaluate(() => localStorage.setItem('fullscreenWaterfallTourDismissed', 'true'));
     });

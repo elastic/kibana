@@ -10,11 +10,11 @@
 import type { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { XYPersistedState, XYDataLayerConfig } from '@kbn/lens-common';
-import type { XYState, XYStateNoESQL, XYStateESQL, XYLayer } from '../../../schema';
+import type { XYConfig, XYConfigNoESQL, XYConfigESQL, XYLayer } from '../../../schema';
 import type { DataSourceStateLayer } from '../../utils';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
 import { buildXYLayer } from './state_layers';
-import { getIdForLayer, isAPIesqlXYLayer, isLensStateDataLayer } from './helpers';
+import { isAPIesqlXYLayer, isLensStateDataLayer } from './helpers';
 import { nonNullable, isFormBasedLayer, isTextBasedLayer } from '../../utils';
 import { getReversibleMappings, getScaleTypeFromColumnType } from '../utils';
 import {
@@ -73,7 +73,7 @@ function convertAPIDomainToStateFormat(
 }
 
 function convertAxisSettingsToStateFormat(
-  axis: XYState['axis']
+  axis: XYConfig['axis']
 ): Pick<
   XYPersistedState,
   | 'xTitle'
@@ -168,23 +168,12 @@ function getLayerPresence(dataLayers: XYDataLayerConfig[]): LayerPresence {
   };
 }
 
-type LayerToDataView = Record<string, string>;
-
 export function buildVisualizationState(
-  config: XYState,
-  usedDataViews: LayerToDataView,
+  config: XYConfig,
   annotationGroupReferences: SavedObjectReference[]
 ): XYPersistedState {
   const layers = config.layers
-    .map((layer, index) =>
-      buildXYLayer(
-        config,
-        layer,
-        index,
-        usedDataViews[getIdForLayer(layer, index)],
-        annotationGroupReferences
-      )
-    )
+    .map((layer, index) => buildXYLayer(config, layer, index, annotationGroupReferences))
     .filter(nonNullable);
   return {
     preferredSeriesType: layers.filter(isLensStateDataLayer)[0]?.seriesType ?? 'bar_stacked',
@@ -195,11 +184,11 @@ export function buildVisualizationState(
   };
 }
 
-function areAllLayersEsql(apiLayers: XYLayer[]): apiLayers is XYStateESQL['layers'] {
+function areAllLayersEsql(apiLayers: XYLayer[]): apiLayers is XYConfigESQL['layers'] {
   return apiLayers.length > 0 && apiLayers.every(isAPIesqlXYLayer);
 }
 
-function areAllLayersNoEsql(apiLayers: XYLayer[]): apiLayers is XYStateNoESQL['layers'] {
+function areAllLayersNoEsql(apiLayers: XYLayer[]): apiLayers is XYConfigNoESQL['layers'] {
   return apiLayers.length > 0 && apiLayers.every((l) => !isAPIesqlXYLayer(l));
 }
 
@@ -209,7 +198,7 @@ export function buildVisualizationAPI(
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
   internalReferences: SavedObjectReference[]
-): XYState {
+): XYConfig {
   const dataLayers = config.layers.filter(isLensStateDataLayer);
   if (!dataLayers.length) {
     throw new Error('At least one data layer is required to build the XY API state');
@@ -362,7 +351,7 @@ function convertAxisSettingsToAPIFormat(
   config: XYPersistedState,
   layers: Record<string, DataSourceStateLayer>,
   usedModes: Set<YAxisMode>
-): NonNullable<XYState['axis']> {
+): NonNullable<XYConfig['axis']> {
   let xAxisScale: XScaleSchemaType | undefined;
   const firstLayer = config.layers[0];
   const dataSourceLayer = layers[firstLayer.layerId];

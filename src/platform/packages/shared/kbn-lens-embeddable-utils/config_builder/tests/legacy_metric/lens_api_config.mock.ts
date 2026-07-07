@@ -11,12 +11,12 @@ import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_DATA_VIEW_SPEC_TYPE,
 } from '@kbn/as-code-data-views-schema';
-import type { LegacyMetricState, LegacyMetricStateESQL } from '../../schema/charts/legacy_metric';
+import type { LegacyMetricConfig, LegacyMetricConfigESQL } from '../../schema/charts/legacy_metric';
 
 /**
  * Basic legacy metric chart with ad hoc dataView
  */
-export const basicLegacyMetricWithAdHocDataView: LegacyMetricState = {
+export const basicLegacyMetricWithAdHocDataView: LegacyMetricConfig = {
   type: 'legacy_metric',
   title: 'Test Metric',
   data_source: {
@@ -36,7 +36,7 @@ export const basicLegacyMetricWithAdHocDataView: LegacyMetricState = {
 /**
  * Basic legacy metric chart with existing dataView
  */
-export const basicLegacyMetricWithDataView: LegacyMetricState = {
+export const basicLegacyMetricWithDataView: LegacyMetricConfig = {
   type: 'legacy_metric',
   title: 'Test Metric',
   description: 'A test metric chart',
@@ -56,7 +56,7 @@ export const basicLegacyMetricWithDataView: LegacyMetricState = {
 /**
  * ESQL-based legacy metric chart
  */
-export const esqlLegacyMetric: LegacyMetricStateESQL = {
+export const esqlLegacyMetric: LegacyMetricConfigESQL = {
   type: 'legacy_metric',
   title: 'Test ESQL Metric',
   description: 'A test metric chart using ESQL',
@@ -74,7 +74,7 @@ export const esqlLegacyMetric: LegacyMetricStateESQL = {
 /**
  * Comprehensive legacy metric chart with ad hoc dataView
  */
-export const comprehensiveLegacyMetricWithAdHocDataView: LegacyMetricState = {
+export const comprehensiveLegacyMetricWithAdHocDataView: LegacyMetricConfig = {
   type: 'legacy_metric',
   title: 'Comprehensive Test Metric',
   description: 'A comprehensive metric chart with all features',
@@ -108,7 +108,7 @@ export const comprehensiveLegacyMetricWithAdHocDataView: LegacyMetricState = {
 /**
  * Comprehensive legacy metric chart with existing dataView
  */
-export const comprehensiveLegacyMetricWithDataView: LegacyMetricState = {
+export const comprehensiveLegacyMetricWithDataView: LegacyMetricConfig = {
   type: 'legacy_metric',
   title: 'Comprehensive Test Metric',
   description: 'A comprehensive metric chart with all features',
@@ -141,7 +141,7 @@ export const comprehensiveLegacyMetricWithDataView: LegacyMetricState = {
 /**
  * Comprehensive ESQL-based legacy metric chart
  */
-export const comprehensiveEsqlLegacyMetric: LegacyMetricStateESQL = {
+export const comprehensiveEsqlLegacyMetric: LegacyMetricConfigESQL = {
   type: 'legacy_metric',
   title: 'Test ESQL Metric',
   description: 'A test metric chart using ESQL',
@@ -172,7 +172,7 @@ export const comprehensiveEsqlLegacyMetric: LegacyMetricStateESQL = {
 /**
  * Legacy metric chart with dataView and apply_color_to, but without a defined color
  */
-export const legacyMetricWithApplyColorToWithoutColor: LegacyMetricState = {
+export const legacyMetricWithApplyColorToWithoutColor: LegacyMetricConfig = {
   type: 'legacy_metric',
   title: 'Comprehensive Test Metric',
   description: 'A comprehensive metric chart with all features',
@@ -196,7 +196,7 @@ export const legacyMetricWithApplyColorToWithoutColor: LegacyMetricState = {
 /**
  * Legacy metric chart with dataView and color, but without a definedapply_color_to
  */
-export const legacyMetricWithColorWithoutApplyColorTo: LegacyMetricState = {
+export const legacyMetricWithColorWithoutApplyColorTo: LegacyMetricConfig = {
   type: 'legacy_metric',
   title: 'Comprehensive Test Metric',
   description: 'A comprehensive metric chart with all features',

@@ -26,7 +26,7 @@ const FORBIDDEN_HEADERS = [
 ];
 const REDACTED_HEADER_TEXT = '[REDACTED]';
 
-type HapiHeaders = Record<string, string | string[]>;
+type HapiHeaders = Record<string, string | string[] | undefined>;
 
 // We are excluding sensitive headers by default, until we have a log filtering mechanism.
 function redactSensitiveHeaders(key: string, value: string | string[]): string | string[] {
@@ -35,13 +35,13 @@ function redactSensitiveHeaders(key: string, value: string | string[]): string |
 
 // Shallow clone the headers so they are not mutated if filtered by a RewriteAppender.
 function cloneAndFilterHeaders(headers?: HapiHeaders) {
-  const result = {} as HapiHeaders;
+  const result = {} as Record<string, string | string[]>;
   if (headers) {
     for (const key of Object.keys(headers)) {
-      result[key] = redactSensitiveHeaders(
-        key,
-        Array.isArray(headers[key]) ? [...headers[key]] : headers[key]
-      );
+      const value = headers[key];
+      if (value !== undefined) {
+        result[key] = redactSensitiveHeaders(key, Array.isArray(value) ? [...value] : value);
+      }
     }
   }
   return result;
@@ -108,7 +108,9 @@ export function getEcsResponseLog(request: Request, log: Logger) {
       query,
     },
     user_agent: {
-      original: request.headers['user-agent'],
+      original: Array.isArray(request.headers['user-agent'])
+        ? request.headers['user-agent'][0]
+        : request.headers['user-agent'],
     },
     trace: traceId ? { id: traceId } : undefined,
   };

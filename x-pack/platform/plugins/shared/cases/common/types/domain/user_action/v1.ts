@@ -26,6 +26,7 @@ import { TitleUserActionRt } from './title/v1';
 import { CustomFieldsUserActionRt } from './custom_fields/v1';
 import { ObservablesUserActionRt } from './observables/v1';
 import { ExtendedFieldsUserActionRt } from './extended_fields/v1';
+import { TemplateUserActionRt } from './template/v1';
 export { UserActionTypes, UserActionActions } from './action/v1';
 export { StatusUserActionRt } from './status/v1';
 
@@ -65,6 +66,7 @@ const BasicUserActionsRt = rt.union([
   CustomFieldsUserActionRt,
   ObservablesUserActionRt,
   ExtendedFieldsUserActionRt,
+  TemplateUserActionRt,
 ]);
 
 const CommonUserActionsWithIdsRt = rt.union([BasicUserActionsRt, CommentUserActionRt]);
@@ -162,3 +164,4 @@ export type CustomFieldsUserAction = UserAction<rt.TypeOf<typeof CustomFieldsUse
 export type ObservablesUserAction = UserAction<rt.TypeOf<typeof ObservablesUserActionRt>>;
 export type ExtendedFieldsUserAction = UserAction<rt.TypeOf<typeof ExtendedFieldsUserActionRt>>;
 export { ExtendedFieldsRt } from './extended_fields/v1';
+export type TemplateUserAction = UserAction<rt.TypeOf<typeof TemplateUserActionRt>>;

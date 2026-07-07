@@ -168,7 +168,10 @@ export interface ExecuteTypeCheckValidationOptions {
   extendedDiagnostics?: boolean;
   pretty?: boolean;
   verbose?: boolean;
-  withArchive?: boolean;
+  /** Restore cached `target/types` artifacts from GCS before running `tsc -b`. */
+  restoreArchive?: boolean;
+  /** Upload the resulting `target/types` artifacts to GCS after a successful `tsc -b`. */
+  uploadArchive?: boolean;
 }
 
 /**
@@ -183,7 +186,8 @@ export const executeTypeCheckValidation = async ({
   extendedDiagnostics = false,
   pretty = true,
   verbose = false,
-  withArchive = false,
+  restoreArchive = false,
+  uploadArchive = false,
 }: ExecuteTypeCheckValidationOptions): Promise<TscValidationResult | null> => {
   // Lazy-load so reusable consumers can avoid TS project metadata work until needed.
   const { TS_PROJECTS } = await import('@kbn/ts-projects');
@@ -285,10 +289,10 @@ export const executeTypeCheckValidation = async ({
       rootRefsConfigCreated = true;
     }
 
-    if (withArchive) {
+    if (restoreArchive) {
       await restoreTSBuildArtifacts(log);
     } else {
-      log.verbose('Skipping TypeScript cache restore because --with-archive was not provided.');
+      log.verbose('Skipping TypeScript cache restore because --restore-archive was not provided.');
     }
 
     createdConfigs = await createTypeCheckConfigs(log, selectedProjects, TS_PROJECTS);
@@ -325,8 +329,7 @@ export const executeTypeCheckValidation = async ({
 
   // Cleanup always runs, even if setup or tsc failed partway through
   try {
-    // Archive artifacts (only after successful tsc)
-    if (withArchive && !tscFailed) {
+    if (uploadArchive && !tscFailed) {
       const localChanges = await detectLocalChanges();
       const hasLocalChanges = localChanges.length > 0;
       if (hasLocalChanges) {
@@ -341,8 +344,8 @@ export const executeTypeCheckValidation = async ({
       } else {
         await archiveTSBuildArtifacts(log);
       }
-    } else if (!withArchive) {
-      log.verbose('Skipping TypeScript cache archive because --with-archive was not provided.');
+    } else if (!uploadArchive) {
+      log.verbose('Skipping TypeScript cache archive because --upload-archive was not provided.');
     }
   } finally {
     if (cleanup) {

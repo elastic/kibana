@@ -12,7 +12,7 @@ import {
 } from '@kbn/agent-builder-common';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import type { AgentExecutionClient, ExecutionPeek } from './persistence';
-import { ExecutionStatus } from './types';
+import { ExecutionStatus } from '@kbn/agent-builder-common';
 import { followExecution$ } from './execution_follower';
 import * as constants from './constants';
 

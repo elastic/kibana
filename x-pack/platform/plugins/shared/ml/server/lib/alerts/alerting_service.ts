@@ -28,19 +28,10 @@ import {
   ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
 import type { AnomalyDateFunction } from '@kbn/ml-anomaly-utils/types';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { getSpaceUrlPrefix, type SpaceId } from '@kbn/core-spaces-common';
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { ANOMALY_RESULT_TYPE_SCORE_FIELDS } from '../../../common/constants/alerts';
-import { getAnomalyDescription } from '../../../common/util/anomaly_description';
-import { getMetricChangeDescription } from '../../../common/util/metric_change_description';
-import { formatTimeValue } from '../../../common/util/format_time_value';
-import type { MlClient } from '../ml_client';
-import type {
-  MlAnomalyDetectionAlertParams,
-  MlAnomalyDetectionAlertPreviewRequest,
-} from '../../routes/schemas/alerting_schema';
 import type {
   AlertExecutionResult,
   FormattedRecordAnomalyAlertDoc,
@@ -51,7 +42,17 @@ import type {
   TopHitsResultsKeys,
   TopInfluencerAADDoc,
   TopRecordAADDoc,
-} from '../../../common/types/alerts';
+} from '@kbn/ml-common-types/alerts';
+import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
+import { ANOMALY_RESULT_TYPE_SCORE_FIELDS } from '../../../common/constants/alerts';
+import { formatTimeValue } from '../../../common/util/format_time_value';
+import { getAnomalyDescription } from '../../../common/util/anomaly_description';
+import { getMetricChangeDescription } from '../../../common/util/metric_change_description';
+import type { MlClient } from '../ml_client';
+import type {
+  MlAnomalyDetectionAlertParams,
+  MlAnomalyDetectionAlertPreviewRequest,
+} from '../../routes/schemas/alerting_schema';
 import type {
   AnomalyDetectionAlertContext,
   AnomalyDetectionAlertPayload,
@@ -59,7 +60,6 @@ import type {
 import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
 import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/alerts';
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
-import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
 import { getTypicalAndActualValues } from '../../models/results_service/results_service';
 import type { GetDataViewsService } from '../data_views_utils';
 import { assertUserError } from './utils';
@@ -185,8 +185,8 @@ export function buildExplorerUrl(
     },
   };
 
-  const spacePathComponent: string =
-    !spaceId || spaceId === DEFAULT_SPACE_ID ? '' : `/s/${spaceId}`;
+  // spaceId comes from alerting executor contract (string) — written by validated handlers. Trusted boundary.
+  const spacePathComponent = spaceId ? getSpaceUrlPrefix(spaceId as SpaceId) : '';
 
   return `${spacePathComponent}/app/ml/explorer/?_g=${encodeURIComponent(
     rison.encode(globalState)
@@ -194,9 +194,9 @@ export function buildExplorerUrl(
 }
 
 export interface AnomalyDetectionAlertFieldFormatters {
-  numberFormatter: IFieldFormat['convert'];
+  numberFormatter: IFieldFormat['convertToText'];
   dateFormatter?: IFieldFormat;
-  fieldFormatters: Record<string, IFieldFormat['convert']>;
+  fieldFormatters: Record<string, IFieldFormat['convertToText']>;
 }
 
 export interface AnomalyDetectionRuleState {
@@ -239,14 +239,14 @@ export function alertingServiceProvider(
     const fieldFormatters = fieldFormatMap
       ? Object.entries(fieldFormatMap).reduce((acc, [fieldName, config]) => {
           const formatter = fieldFormatsRegistry.deserialize(config);
-          acc[fieldName] = formatter.convert.bind(formatter);
+          acc[fieldName] = (v: unknown) => formatter.convertToText(v);
           return acc;
-        }, {} as Record<string, IFieldFormat['convert']>)
+        }, {} as Record<string, IFieldFormat['convertToText']>)
       : {};
 
     // store formatters to pass to the executor state update
     contextFieldFormatters = {
-      numberFormatter: numberFormatter.convert.bind(numberFormatter),
+      numberFormatter: (v: unknown) => numberFormatter.convertToText(v),
       dateFormatter,
       fieldFormatters,
     };
@@ -462,7 +462,7 @@ export function alertingServiceProvider(
       // resolved moment instead of reusing the shorter display text.
       const { moment: resolvedMoment } = formatTimeValue(value, source.function, source, timezone);
       const formattedDayOfWeek = resolvedMoment.format('ddd');
-      const formattedDate = formatters.dateFormatter.convert(resolvedMoment.valueOf(), 'text', {
+      const formattedDate = formatters.dateFormatter.convertToText(resolvedMoment.valueOf(), {
         timezone,
       });
       return `${formattedDayOfWeek} ${formattedDate} UTC`;

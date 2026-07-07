@@ -11,7 +11,6 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 // Full screen classes
 export const METRICS_GRID_CLASS = 'metricsGrid';
-export const METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS = 'metricsGridWrapper--fullScreen';
 export const METRICS_GRID_FULL_SCREEN_CLASS = `${METRICS_GRID_CLASS}--fullScreen`;
 export const METRICS_GRID_RESTRICT_BODY_CLASS = `${METRICS_GRID_CLASS}--restrictBody`;
 
@@ -31,6 +30,9 @@ export const ACTION_COPY_TO_DASHBOARD = 'ACTION_METRICS_EXPERIENCE_COPY_TO_DASHB
 export const ACTION_VIEW_DETAILS = 'ACTION_METRICS_EXPERIENCE_VIEW_DETAILS';
 export const ACTION_EXPLORE_IN_DISCOVER_TAB = 'ACTION_METRICS_EXPERIENCE_EXPLORE_IN_DISCOVER_TAB';
 export const ACTION_OPEN_IN_DISCOVER = 'ACTION_OPEN_IN_DISCOVER';
+// Note: `ACTION_INSPECT_PANEL` is the canonical inspect-panel action ID and is owned
+// by the embeddable plugin. Consumers should import it directly from
+// `@kbn/embeddable-plugin/public` rather than re-exporting it from here.
 /** Set of numeric field types used for metrics */
 export const NUMERIC_TYPES = [
   ES_FIELD_TYPES.LONG,

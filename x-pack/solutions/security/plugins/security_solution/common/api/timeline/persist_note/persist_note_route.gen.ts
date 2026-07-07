@@ -14,31 +14,35 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { BareNote, Note } from '../model/components.gen';
 
+export const ResponseNote = lazySchema(() =>
+  z.object({
+    note: Note,
+  })
+);
 export type ResponseNote = z.infer<typeof ResponseNote>;
-export const ResponseNote = z.object({
-  note: Note,
-});
 
+export const PersistNoteRouteRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * Note payload (timeline, text, optional event linkage, metadata).
+     */
+    note: BareNote,
+    /**
+     * The `savedObjectId` of the note to update. Omit when creating a new note.
+     */
+    noteId: z.string().nullable().optional(),
+    /**
+     * Saved object version string from a previous read; optional on update.
+     */
+    version: z.string().nullable().optional(),
+  })
+);
 export type PersistNoteRouteRequestBody = z.infer<typeof PersistNoteRouteRequestBody>;
-export const PersistNoteRouteRequestBody = z.object({
-  /**
-   * The note to add or update.
-   */
-  note: BareNote,
-  /**
-   * The `savedObjectId` of the note
-   */
-  noteId: z.string().nullable().optional(),
-  /**
-   * The version of the note
-   */
-  version: z.string().nullable().optional(),
-});
 export type PersistNoteRouteRequestBodyInput = z.input<typeof PersistNoteRouteRequestBody>;
 
+export const PersistNoteRouteResponse = lazySchema(() => ResponseNote);
 export type PersistNoteRouteResponse = z.infer<typeof PersistNoteRouteResponse>;
-export const PersistNoteRouteResponse = ResponseNote;

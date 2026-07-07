@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLAstAllCommands, ESQLSingleAstItem } from '@elastic/esql/types';
-import { pipeCompleteItem } from '../complete_items';
+import { newLineAndPipeCompleteItems } from '../complete_items';
 import { suggestForExpression } from '../../definitions/utils';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext, Location } from '../types';
@@ -35,13 +35,14 @@ export async function autocomplete(
     callbacks,
     options: {
       preferredExpressionType: 'boolean',
+      allowSubquery: context?.subquerySupport === true,
     },
   });
 
   const { expressionType, isComplete, insideFunction } = computed;
 
   if (expressionType === 'boolean' && isComplete && !insideFunction) {
-    suggestions.push(pipeCompleteItem);
+    suggestions.push(...newLineAndPipeCompleteItems);
   }
 
   return suggestions;

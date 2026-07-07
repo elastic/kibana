@@ -105,6 +105,27 @@ spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {
 
 Do not use `esArchiver` to manipulate system indices — use `kbnClient`.
 
+### Suite-wide cleanup with `globalTeardownHook`
+
+For state that's shared **across spec files** (e.g., data ingested in `global.setup.ts`, feature-flag overrides, global `uiSettings`), use the optional `globalTeardownHook` in `parallel_tests/global.teardown.ts`. It runs once after all workers finish, even if tests failed.
+
+```typescript
+import { globalTeardownHook } from '@kbn/scout-security'; // or '@kbn/scout' / '@kbn/scout-oblt'
+
+globalTeardownHook('Reset shared state', async ({ kbnClient, apiServices, log }) => {
+  // Revert global uiSettings or feature flags toggled for the whole suite
+  await kbnClient.uiSettings.unset('my:setting');
+  await apiServices.core.settings({ 'feature_flags.overrides': { 'my.flag': 'false' } });
+});
+```
+
+**Cautions:**
+
+- **`esArchiver` is intentionally not exposed** in `globalTeardownHook`. Scout's `esArchiver` only supports `loadIfNeeded` — archive unloading was never offered because it's slow and unnecessary (leftover indexes in the cluster don't break tests with idempotent `loadIfNeeded`). For state that does need resetting, use `esClient.indices.delete` / `deleteDataStream` / `deleteByQuery`.
+- **Don't load new data here** — teardown is for resetting state. Data loading belongs in `globalSetupHook`.
+- **Per-test/per-suite cleanup still belongs in `afterEach`/`afterAll`** — the global teardown is for state that other configs (running against the same Kibana/ES) would otherwise inherit.
+- Optional and opt-in by file presence: add `parallel_tests/global.teardown.ts` and you're done. `runGlobalSetup: true` already wires the project up.
+
 ## test.step() for Execution Time
 
 Each `test()` block creates a new browser context. Use `test.step()` for multi-step flows to reuse context:

@@ -13,11 +13,9 @@ import type {
   CaseConnectors,
   UserActionUI,
   AttachmentUIV2,
-  UseFetchAlertData,
   CaseUserActionsStats,
   CasesConfigurationUI,
 } from '../../containers/types';
-import type { CasesNavigation } from '../links';
 import type { UNSUPPORTED_ACTION_TYPES } from './constants';
 import type { OnUpdateFields } from '../case_view/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
@@ -32,13 +30,9 @@ export interface UserActionTreeProps {
   currentUserProfile: CurrentUserProfile;
   data: CaseUI;
   casesConfiguration: CasesConfigurationUI;
-  getRuleDetailsHref?: RuleDetailsNavigation['href'];
-  actionsNavigation?: ActionsNavigation;
-  onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
-  onShowAlertDetails?: (alertId: string, index: string) => void;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   statusActionButton: JSX.Element | null;
-  useFetchAlertData: UseFetchAlertData;
+  attachActionButton?: JSX.Element | null;
   userActivityQueryParams: UserActivityParams;
   userActionsStats: CaseUserActionsStats;
 }
@@ -65,14 +59,8 @@ export interface UserActionBuilderArgs {
   manageMarkdownEditIds: string[];
   selectedOutlineCommentId: string;
   loadingCommentIds: string[];
-  loadingAlertData: boolean;
-  alertData: Record<string, unknown>;
-  actionsNavigation?: ActionsNavigation;
   handleOutlineComment: (id: string) => void;
   handleDeleteComment: (id: string, successToasterTitle: string) => void;
-  onShowAlertDetails?: (alertId: string, index: string) => void;
-  getRuleDetailsHref?: RuleDetailsNavigation['href'];
-  onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
   euiTheme: EuiThemeComputed<{}>;
 }
 
@@ -81,9 +69,6 @@ export type UserActionBuilder = (args: UserActionBuilderArgs) => {
 };
 
 export type UserActionBuilderMap = Record<SupportedUserActionTypes, UserActionBuilder>;
-
-export type RuleDetailsNavigation = CasesNavigation<string | null | undefined, 'configurable'>;
-export type ActionsNavigation = CasesNavigation<string, 'configurable'>;
 
 interface Signal {
   rule: {

@@ -70,7 +70,6 @@ function StylePanel({
               defaultMessage:
                 'The alignment is not yet supported with the new charts library. Please, enable the gauge legacy charts library advanced setting.',
             })}
-            delay="long"
             position="right"
           >
             {alignmentSelect}

@@ -6,6 +6,15 @@ paths:
   /internal/elastic_assistant/alert_summary/_bulk_action:
     post:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/internal/elastic_assistant/alert_summary/_bulk_action' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"create":[{"alertId":"alert-id-1","summary":"Brute force attempt detected.","replacements":{}}]}'
       x-labels: [ess, serverless]
       operationId: PerformAlertSummaryBulkAction
       summary: Apply a bulk action to alert summaries
@@ -28,6 +37,14 @@ paths:
                   type: array
                   items:
                     $ref: '#/components/schemas/AlertSummaryUpdateProps'
+            examples:
+              create:
+                - alertId: "alert-id-1"
+                  summary: "This alert indicates a potential brute force login attempt from IP 203.0.113.42."
+                  replacements: {}
+              update:
+                - id: "summary-id-1"
+                  summary: "Updated: confirmed as a true positive after investigation."
       responses:
         200:
           description: Indicates a successful call.
@@ -35,8 +52,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AlertSummaryBulkCrudActionResponse'
+              examples:
+                PerformAlertSummaryBulkActionResponse200Example:
+                  summary: A successful bulk action response.
+                  value:
+                    success: true
+                    status_code: 200
+                    message: Bulk action completed successfully
+                    alert_summaries_count: 2
+                    attributes:
+                      results:
+                        created:
+                          - id: "summary-id-new"
+                            alertId: "alert-id-1"
+                            summary: "This alert indicates a potential brute force login attempt from IP 203.0.113.42."
+                            replacements: {}
+                            createdAt: "2024-01-15T10:00:00.000Z"
+                            createdBy: "user@example.com"
+                            updatedAt: "2024-01-15T10:00:00.000Z"
+                            updatedBy: "user@example.com"
+                            namespace: "default"
+                        updated:
+                          - id: "summary-id-1"
+                            alertId: "alert-id-2"
+                            summary: "Updated: confirmed as a true positive after investigation."
+                            replacements: {}
+                            createdAt: "2024-01-14T09:00:00.000Z"
+                            createdBy: "user@example.com"
+                            updatedAt: "2024-01-15T10:00:00.000Z"
+                            updatedBy: "user@example.com"
+                            namespace: "default"
+                        deleted: []
+                        skipped: []
+                      summary:
+                        succeeded: 2
+                        skipped: 0
+                        failed: 0
+                        total: 2
         400:
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -48,21 +102,32 @@ paths:
                     type: string
                   message:
                     type: string
+              examples:
+                PerformAlertSummaryBulkActionResponse400Example:
+                  summary: A bad request response.
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: "Invalid request body."
 
 components:
   schemas:
     AlertSummaryBulkActionSkipReason:
       type: string
+      description: The reason an alert summary was skipped during a bulk action.
       enum:
         - ALERT_SUMMARY_NOT_MODIFIED
 
     AlertSummaryBulkActionSkipResult:
       type: object
+      description: Details about an alert summary that was skipped during a bulk action.
       properties:
         id:
           type: string
+          description: The ID of the skipped alert summary.
         alertId:
           type: string
+          description: The ID of the alert associated with the skipped summary.
         skip_reason:
           $ref: '#/components/schemas/AlertSummaryBulkActionSkipReason'
       required:
@@ -71,25 +136,33 @@ components:
 
     AlertSummaryDetailsInError:
       type: object
+      description: Details about an alert summary that encountered an error during a bulk action.
       properties:
         alertId:
           type: string
+          description: The ID of the alert associated with the errored summary.
         id:
           type: string
+          description: The ID of the alert summary that encountered an error.
       required:
         - id
 
     NormalizedAlertSummaryError:
       type: object
+      description: A normalized error object returned when one or more alert summaries fail during a bulk action.
       properties:
         message:
           type: string
+          description: A human-readable description of the error.
         status_code:
           type: integer
+          description: The HTTP status code associated with the error.
         err_code:
           type: string
+          description: A machine-readable error code.
         alert_summaries:
           type: array
+          description: The alert summaries that encountered this error.
           items:
             $ref: '#/components/schemas/AlertSummaryDetailsInError'
       required:
@@ -99,6 +172,7 @@ components:
 
     AlertSummaryResponse:
       type: object
+      description: An alert summary created by the Elastic Assistant for a specific security alert.
       required:
         - id
         - alertId
@@ -113,20 +187,27 @@ components:
           $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyTimestamp'
         summary:
           type: string
+          description: The AI-generated summary of the alert.
         recommendedActions:
           type: string
+          description: AI-generated recommended actions for responding to the alert.
         replacements:
           $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
         updatedAt:
           type: string
+          description: The timestamp when the alert summary was last updated.
         updatedBy:
           type: string
+          description: The user who last updated the alert summary.
         createdAt:
           type: string
+          description: The timestamp when the alert summary was created.
         createdBy:
           type: string
+          description: The user who created the alert summary.
         users:
           type: array
+          description: The users associated with this alert summary.
           items:
             $ref: '../common_attributes.schema.yaml#/components/schemas/User'
         namespace:
@@ -135,21 +216,26 @@ components:
 
     AlertSummaryBulkCrudActionResults:
       type: object
+      description: The results of a bulk action on alert summaries.
       properties:
         updated:
           type: array
+          description: Alert summaries that were successfully updated.
           items:
             $ref: '#/components/schemas/AlertSummaryResponse'
         created:
           type: array
+          description: Alert summaries that were successfully created.
           items:
             $ref: '#/components/schemas/AlertSummaryResponse'
         deleted:
           type: array
+          description: IDs of alert summaries that were successfully deleted.
           items:
             type: string
         skipped:
           type: array
+          description: Alert summaries that were skipped because no changes were needed.
           items:
             $ref: '#/components/schemas/AlertSummaryBulkActionSkipResult'
       required:

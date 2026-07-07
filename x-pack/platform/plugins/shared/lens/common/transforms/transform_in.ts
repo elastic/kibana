@@ -8,8 +8,8 @@
 import {
   isLensAPIFormat,
   isLensLegacyFormat,
-} from '@kbn/lens-embeddable-utils/config_builder/utils';
-import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+  type LensConfigBuilder,
+} from '@kbn/lens-embeddable-utils';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { DOC_TYPE } from '../constants';
 import { extractLensReferences } from '../references';

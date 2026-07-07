@@ -26,15 +26,15 @@ type DiscoverPage = PageObjects['discover'];
 const openTraceTimeline = async (pageObjects: {
   discover: DiscoverPage;
   tracesExperience: {
-    openOverviewTab: (d: DiscoverPage) => Promise<void>;
+    openOverviewTab: () => Promise<void>;
     flyout: TracesFlyout;
   };
 }) => {
-  await pageObjects.discover.goto();
+  await pageObjects.discover.goto({ queryMode: 'esql' });
   await pageObjects.discover.writeAndSubmitEsqlQuery(
     `${TRACES.ESQL_QUERY} | WHERE transaction.name == "${RICH_TRACE.TRANSACTION_NAME}"`
   );
-  await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
+  await pageObjects.tracesExperience.openOverviewTab();
   const { flyout } = pageObjects.tracesExperience;
   await flyout.traceSummary.fullScreenButton.click();
   await expect(flyout.waterfallFlyout.container).toBeVisible();
@@ -201,11 +201,11 @@ spaceTest.describe(
 
         await spaceTest.step('setup: login and open the scroll target span document', async () => {
           await browserAuth.loginAsViewer();
-          await pageObjects.discover.goto();
+          await pageObjects.discover.goto({ queryMode: 'esql' });
           await pageObjects.discover.writeAndSubmitEsqlQuery(
             `${TRACES.ESQL_QUERY} | WHERE span.name == "${DEEP_TRACE.SCROLL_TARGET_SPAN_NAME}"`
           );
-          await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
+          await pageObjects.tracesExperience.openOverviewTab();
         });
 
         await spaceTest.step('Open the full-screen waterfall', async () => {
@@ -279,7 +279,7 @@ spaceTest.describe(
         await spaceTest.step(
           'Internal span child flyout - switch back to original tab',
           async () => {
-            await pageObjects.discover.navigateToTabByName('Untitled');
+            await pageObjects.unifiedTabs.navigateToTabByName('Untitled');
           }
         );
 
@@ -302,7 +302,7 @@ spaceTest.describe(
         await spaceTest.step(
           'Internal span child flyout - switch back to original tab',
           async () => {
-            await pageObjects.discover.navigateToTabByName('Untitled');
+            await pageObjects.unifiedTabs.navigateToTabByName('Untitled');
           }
         );
 

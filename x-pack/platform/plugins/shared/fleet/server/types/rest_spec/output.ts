@@ -12,13 +12,13 @@ import { ListResponseSchema } from '../../routes/schema/utils';
 
 export const GetOneOutputRequestSchema = {
   params: schema.object({
-    outputId: schema.string(),
+    outputId: schema.string({ meta: { description: 'The ID of the output' } }),
   }),
 };
 
 export const DeleteOutputRequestSchema = {
   params: schema.object({
-    outputId: schema.string(),
+    outputId: schema.string({ meta: { description: 'The ID of the output' } }),
   }),
 };
 
@@ -44,14 +44,14 @@ export const PostOutputRequestSchema = {
 
 export const PutOutputRequestSchema = {
   params: schema.object({
-    outputId: schema.string(),
+    outputId: schema.string({ meta: { description: 'The ID of the output' } }),
   }),
   body: UpdateOutputSchema,
 };
 
 export const GetLatestOutputHealthRequestSchema = {
   params: schema.object({
-    outputId: schema.string(),
+    outputId: schema.string({ meta: { description: 'The ID of the output' } }),
   }),
 };
 

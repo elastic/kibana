@@ -18,7 +18,10 @@ import {
   InvalidYamlSyntaxError,
   isWorkflowConflictError,
   isWorkflowValidationError,
-} from '../../../../common/lib/errors';
+} from '@kbn/workflows-yaml';
+import { WorkflowChangeHistoryDisabledError } from '../../../lib/workflow_change_history_disabled_error';
+import { WorkflowHistoryEventNotFoundError } from '../../../lib/workflow_history_event_not_found_error';
+import { WorkflowForbiddenError } from '../../workflow_forbidden_error';
 
 /**
  * Unified error handler for workflow management routes
@@ -66,10 +69,37 @@ export function handleRouteError(
     });
   }
 
+  if (error instanceof WorkflowHistoryEventNotFoundError) {
+    return response.notFound({
+      body: {
+        message: error.message,
+      },
+    });
+  }
+
   // Generic error handler
   if (isWorkflowConflictError(error)) {
     return response.conflict({
       body: error.toJSON(),
+    });
+  }
+
+  if (error instanceof WorkflowForbiddenError) {
+    return response.forbidden({
+      body: {
+        message: error.message,
+      },
+    });
+  }
+
+  if (error instanceof WorkflowChangeHistoryDisabledError) {
+    return response.badRequest({
+      body: {
+        message: error.message,
+        attributes: {
+          code: 'HISTORY_DISABLED',
+        },
+      },
     });
   }
 

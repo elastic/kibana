@@ -9,15 +9,14 @@ import {
   EVALS_EXAMPLE_SCORES_URL,
   API_VERSIONS,
   INTERNAL_API_ACCESS,
-  EVALUATIONS_INDEX_PATTERN,
   MAX_SCORES_PER_QUERY,
-  buildRouteValidationWithZod,
   buildExampleScoresQuery,
   SCORES_SORT_ORDER,
   GetExampleScoresRequestParams,
   type EvaluationScoreDocument,
 } from '@kbn/evals-common';
-import { PLUGIN_ID } from '../../../common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
 const EXAMPLE_SCORES_SORT_ORDER = [
@@ -31,7 +30,7 @@ export const registerGetExampleScoresRoute = ({ router, logger }: RouteDependenc
       path: EVALS_EXAMPLE_SCORES_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PLUGIN_ID] },
+        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.read] },
       },
       summary: 'Get example scores',
     })
@@ -47,11 +46,9 @@ export const registerGetExampleScoresRoute = ({ router, logger }: RouteDependenc
       async (context, request, response) => {
         try {
           const { exampleId } = request.params;
-          const coreContext = await context.core;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
+          const evalsContext = await context.evals;
 
-          const searchResponse = await esClient.search({
-            index: EVALUATIONS_INDEX_PATTERN,
+          const searchResponse = await evalsContext.evaluationScoreService.search({
             query: buildExampleScoresQuery(exampleId),
             sort: EXAMPLE_SCORES_SORT_ORDER,
             size: MAX_SCORES_PER_QUERY,

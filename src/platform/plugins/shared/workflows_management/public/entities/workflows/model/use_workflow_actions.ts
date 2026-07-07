@@ -9,6 +9,7 @@
 
 import { v4 as generateUuid } from 'uuid';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { resolveCollisionId } from '@kbn/human-readable-id';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type {
   RunStepCommand,
@@ -16,6 +17,7 @@ import type {
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowListDto,
+  WorkflowYaml,
 } from '@kbn/workflows';
 import type { BulkCreateWorkflowsResponse } from '@kbn/workflows-ui';
 import { useRunWorkflow, useWorkflowsApi } from '@kbn/workflows-ui';
@@ -33,6 +35,8 @@ type HttpError = IHttpFetchError<ResponseErrorBody>;
 export interface UpdateWorkflowParams {
   id: string;
   workflow: Partial<WorkflowDetailDto>;
+  /** Workflow definition from list/detail cache; used for enable/disable telemetry metadata. */
+  workflowDefinition?: Partial<WorkflowYaml> | null;
   isBulkAction?: boolean;
   bulkActionCount?: number;
   /**
@@ -48,7 +52,7 @@ export interface PreflightImportResult {
   conflicts: Array<{ id: string; existingName: string }>;
   parseErrors: string[];
   workflows: WorkflowPreview[];
-  rawWorkflows: Array<{ id: string; yaml: string }>;
+  rawWorkflows: Array<{ id: string; originalId: string; yaml: string }>;
 }
 
 export interface ImportWorkflowsResult {
@@ -57,9 +61,10 @@ export interface ImportWorkflowsResult {
 }
 
 export interface ImportWorkflowsParams {
-  workflows: Array<{ id: string; yaml: string }>;
+  workflows: Array<{ id: string; originalId: string; yaml: string }>;
   overwrite?: boolean;
   generateNewIds?: boolean;
+  conflictIds: Array<{ id: string; existingName: string }>;
 }
 
 // Context type for storing previous query data to enable rollback on mutation errors
@@ -150,6 +155,7 @@ export function useWorkflowActions() {
       telemetry.reportWorkflowUpdated({
         workflowId: variables.id,
         workflowUpdate: variables.workflow,
+        workflowDefinition: variables.workflowDefinition,
         hasValidationErrors: false,
         validationErrorCount: 0,
         isBulkAction: variables.isBulkAction ?? false,
@@ -166,6 +172,7 @@ export function useWorkflowActions() {
       telemetry.reportWorkflowUpdated({
         workflowId: variables.id,
         workflowUpdate: variables.workflow,
+        workflowDefinition: variables.workflowDefinition,
         hasValidationErrors: false,
         validationErrorCount: 0,
         isBulkAction: variables.isBulkAction ?? false,
@@ -251,7 +258,10 @@ export function useWorkflowActions() {
     },
   });
 
-  const runWorkflow = useRunWorkflow<{ triggerTab?: WorkflowTriggerTab }>({
+  const runWorkflow = useRunWorkflow<{
+    triggerTab?: WorkflowTriggerTab;
+    hasCustomEventTrigger?: boolean;
+  }>({
     onSuccess: (_, variables) => {
       const inputCount = Object.keys(variables.inputs || {}).length;
 
@@ -263,6 +273,7 @@ export function useWorkflowActions() {
         origin: 'workflow_list',
         error: undefined,
         triggerTab: variables.triggerTab,
+        hasCustomEventTrigger: variables.hasCustomEventTrigger,
       });
 
       // FIX: ensure workflow execution document is created at the end of the mutation
@@ -282,6 +293,7 @@ export function useWorkflowActions() {
         origin: 'workflow_list',
         error: errorObj,
         triggerTab: variables.triggerTab,
+        hasCustomEventTrigger: variables.hasCustomEventTrigger,
       });
     },
   });
@@ -383,24 +395,44 @@ export function useWorkflowActions() {
     ImportWorkflowsParams
   >({
     mutationKey: ['POST', 'workflows', '_bulk_create'],
-    mutationFn: ({ workflows, overwrite, generateNewIds }) => {
-      let processedWorkflows = workflows;
+    mutationFn: ({ workflows, overwrite, generateNewIds, conflictIds }) => {
+      // Build base mapping from the original (export) persisted ID to the
+      // desired import ID (slug-of-name or UUID fallback). This is always
+      // needed because cross-workflow `workflow-id` references in the YAML
+      // were written using the persisted export ID, not the slug-of-name.
+      const baseIdMapping = new Map<string, string>(workflows.map((w) => [w.originalId, w.id]));
+
+      let processedWorkflows: Array<{ id: string; yaml: string }>;
 
       if (generateNewIds) {
+        const conflictIdMapping = new Set(conflictIds.map((c) => c.id));
         const idMapping = new Map<string, string>();
         for (const w of workflows) {
-          idMapping.set(w.id, `workflow-${generateUuid()}`);
+          const id = resolveCollisionId(w.id, conflictIdMapping, `workflow-${generateUuid()}`);
+          // register the resolved ID so the next workflow in the batch cannot collide with it
+          conflictIdMapping.add(id);
+          idMapping.set(w.originalId, id);
         }
         processedWorkflows = workflows.map((w) => {
-          const newId = idMapping.get(w.id);
+          const newId = idMapping.get(w.originalId);
           if (!newId) {
-            throw new Error(`Missing ID mapping for workflow ${w.id}`);
+            throw new Error(`Missing ID mapping for workflow ${w.originalId}`);
           }
           return {
             id: newId,
             yaml: rewriteWorkflowReferences(w.yaml, idMapping),
           };
         });
+      } else {
+        // Only rewrite references when IDs actually changed (legacy exports where
+        // the original ID doesn't conform to the current pattern and was regenerated
+        // to a slug). For conforming exports originalId === id, so the mapping is an
+        // identity and rewriting is unnecessary.
+        const needsRewrite = workflows.some((w) => w.originalId !== w.id);
+        processedWorkflows = workflows.map((w) => ({
+          id: w.id,
+          yaml: needsRewrite ? rewriteWorkflowReferences(w.yaml, baseIdMapping) : w.yaml,
+        }));
       }
 
       return api.bulkCreateWorkflows({ workflows: processedWorkflows, overwrite });

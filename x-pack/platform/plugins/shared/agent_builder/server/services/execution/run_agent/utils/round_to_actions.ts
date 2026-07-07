@@ -31,38 +31,38 @@ export const roundToActions = ({
 
     if (completed.length > 0) {
       actions.push(
-        toolCallAction(
-          completed.map((step) => ({
+        toolCallAction({
+          toolCalls: completed.map((step) => ({
             toolName: toolIdMapping.get(step.tool_id) ?? step.tool_id,
             toolCallId: step.tool_call_id,
             args: step.params,
             reasoning: getStepReasoning(reasoningSteps, step.tool_call_id),
           })),
-          groupMessage
-        )
+          message: groupMessage,
+        })
       );
       actions.push(
-        executeToolAction(
-          completed.map((step) => ({
+        executeToolAction({
+          toolResults: completed.map((step) => ({
             toolCallId: step.tool_call_id,
             content: JSON.stringify({ results: step.results }),
             artifact: { results: step.results },
-          }))
-        )
+          })),
+        })
       );
     }
 
     if (pending.length > 0) {
       actions.push(
-        toolCallAction(
-          pending.map((step) => ({
+        toolCallAction({
+          toolCalls: pending.map((step) => ({
             toolName: toolIdMapping.get(step.tool_id) ?? step.tool_id,
             toolCallId: step.tool_call_id,
             args: step.params,
             reasoning: getStepReasoning(reasoningSteps, step.tool_call_id),
           })),
-          groupMessage
-        )
+          message: groupMessage,
+        })
       );
     }
   }

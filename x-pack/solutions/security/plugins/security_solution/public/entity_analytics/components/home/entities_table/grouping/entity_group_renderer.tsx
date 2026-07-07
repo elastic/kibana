@@ -30,7 +30,7 @@ import { getRiskLevel } from '../../../../../../common/entity_analytics/risk_eng
 import { formatRiskScore } from '../../../../common/utils';
 import { getRiskScoreColors } from '../risk_score_cell';
 import type { EntitiesGroupingAggregation, TargetMetadataMap } from './use_fetch_grouped_data';
-import { ENTITY_GROUPING_OPTIONS } from '../constants';
+import { ENTITY_GROUPING_OPTIONS, TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT } from '../constants';
 
 const entitiesStatLabel = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entitiesTable.group.stat.entities',
@@ -50,11 +50,13 @@ const openEntityFlyoutLabel = i18n.translate(
 const ResolutionGroupPanel = ({
   bucket,
   targetMetadata,
+  tableId,
 }: {
   bucket: RawBucket<EntitiesGroupingAggregation>;
   targetMetadata: TargetMetadataMap;
+  tableId: string;
 }) => {
-  const { openRightPanel } = useExpandableFlyoutApi();
+  const { openFlyout } = useExpandableFlyoutApi();
 
   const entityId = String(bucket.key_as_string ?? bucket.key);
   const metadata = targetMetadata.get(entityId);
@@ -74,17 +76,19 @@ const ResolutionGroupPanel = ({
       const panelParam = EntityPanelParamByType[entityType];
       if (!panelKey || !panelParam) return;
 
-      openRightPanel({
-        id: panelKey,
-        params: {
-          [panelParam]: targetEntityName,
-          entityId,
-          contextID: ENTITY_ANALYTICS_TABLE_ID,
-          scopeId: ENTITY_ANALYTICS_TABLE_ID,
+      openFlyout({
+        right: {
+          id: panelKey,
+          params: {
+            [panelParam]: targetEntityName,
+            entityId,
+            contextID: tableId,
+            scopeId: tableId,
+          },
         },
       });
     },
-    [openRightPanel, targetEntityName, entityType, entityId]
+    [openFlyout, targetEntityName, entityType, entityId, tableId]
   );
 
   return (
@@ -94,6 +98,7 @@ const ResolutionGroupPanel = ({
           <EuiToolTip content={openEntityFlyoutLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               aria-label={openEntityFlyoutLabel}
+              data-test-subj={TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT}
               iconType="expand"
               size="xs"
               onClick={handleOpenFlyout}
@@ -116,14 +121,19 @@ const ResolutionGroupPanel = ({
   );
 };
 
-export const createGroupPanelRenderer = (targetMetadata: TargetMetadataMap) => {
+export const createGroupPanelRenderer = (
+  targetMetadata: TargetMetadataMap,
+  tableId: string = ENTITY_ANALYTICS_TABLE_ID
+) => {
   const GroupPanelRenderer = (
     selectedGroup: string,
     bucket: RawBucket<EntitiesGroupingAggregation>,
     _nullGroupMessage?: string
   ) => {
     if (selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION) {
-      return <ResolutionGroupPanel bucket={bucket} targetMetadata={targetMetadata} />;
+      return (
+        <ResolutionGroupPanel bucket={bucket} targetMetadata={targetMetadata} tableId={tableId} />
+      );
     }
 
     if (selectedGroup === ENTITY_GROUPING_OPTIONS.ENTITY_TYPE) {
@@ -197,7 +207,10 @@ export const createGroupStatsRenderer = (targetMetadata: TargetMetadataMap) => {
     if (selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION) {
       const entityId = String(bucket.key_as_string ?? bucket.key);
       const metadata = targetMetadata.get(entityId);
-      const riskScore = metadata?.riskScore ?? bucket.resolutionRiskScore?.value ?? null;
+      const groupScore = metadata?.riskScore ?? bucket.resolutionRiskScore?.value;
+      const isSoloGroup = bucket.doc_count === 1;
+      const individualScore = isSoloGroup ? metadata?.individualRiskScore : undefined;
+      const riskScore = groupScore ?? individualScore ?? null;
 
       stats.push({
         title: riskScoreLabel,

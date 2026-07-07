@@ -22,6 +22,8 @@ import {
 import { css } from '@emotion/react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
@@ -83,6 +85,11 @@ export const PluginDetails: React.FC<PluginDetailsProps> = ({ plugin }) => {
             iconType="arrowLeft"
             href={createAgentBuilderUrl(appPaths.plugins.list)}
             data-test-subj="agentBuilderBackToPluginsButton"
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.globalManagement.BACK_TO_LIST,
+              detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+            })}
           >
             {labels.plugins.backToPluginsButton}
           </EuiButtonEmpty>,
@@ -155,7 +162,16 @@ export const PluginDetails: React.FC<PluginDetailsProps> = ({ plugin }) => {
             </FieldRow>
             <FieldRow label={labels.plugins.sourceLabel}>
               {plugin.source_url ? (
-                <EuiLink href={plugin.source_url} target="_blank" external>
+                <EuiLink
+                  href={plugin.source_url}
+                  target="_blank"
+                  external
+                  {...getEbtProps({
+                    element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                    action: AGENT_BUILDER_UI_EBT.action.globalManagement.PLUGIN_SOURCE_LINK,
+                    detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+                  })}
+                >
                   {plugin.source_url}
                 </EuiLink>
               ) : (
@@ -192,6 +208,11 @@ export const PluginDetails: React.FC<PluginDetailsProps> = ({ plugin }) => {
                     <EuiLink
                       href={createAgentBuilderUrl(appPaths.skills.details({ skillId }))}
                       data-test-subj={`agentBuilderPluginSkillLink-${skillId}`}
+                      {...getEbtProps({
+                        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                        action: AGENT_BUILDER_UI_EBT.action.globalManagement.PLUGIN_SKILL_LINK,
+                        detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+                      })}
                     >
                       {skillId}
                     </EuiLink>

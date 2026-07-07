@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableState, DatatableStateESQL } from '../../schema';
+import type { DatatableConfig, DatatableConfigESQL } from '../../schema';
 
 /**
  * Basic ESQL datatable with single metric column
  */
-export const singleMetricESQLDatatable: DatatableState = {
+export const singleMetricESQLDatatable: DatatableConfig = {
   title: 'Single metric',
   type: 'data_table',
   data_source: {
@@ -26,12 +26,12 @@ export const singleMetricESQLDatatable: DatatableState = {
       column: 'bytes',
     },
   ],
-} satisfies DatatableStateESQL;
+} satisfies DatatableConfigESQL;
 
 /**
  * ESQL datatable with multiple metrics, rows, and split_metrics_by columns
  */
-export const multipleMetricRowSplitESQLDatatable: DatatableState = {
+export const multipleMetricRowSplitESQLDatatable: DatatableConfig = {
   title: 'Multiple metrics, rows, split by',
   type: 'data_table',
   data_source: {
@@ -64,12 +64,12 @@ export const multipleMetricRowSplitESQLDatatable: DatatableState = {
       column: 'geo.dest',
     },
   ],
-} satisfies DatatableStateESQL;
+} satisfies DatatableConfigESQL;
 
 /**
  * Full config ESQL datatable
  */
-export const fullConfigESQLDatatable: DatatableState = {
+export const fullConfigESQLDatatable: DatatableConfig = {
   title: 'Full config',
   type: 'data_table',
   data_source: {
@@ -157,12 +157,12 @@ export const fullConfigESQLDatatable: DatatableState = {
     },
     paging: 10,
   },
-} satisfies DatatableStateESQL;
+} satisfies DatatableConfigESQL;
 
 /**
  * ESQL datatable sorted by a pivoted metric column (split_metrics_by)
  */
-export const sortedByPivotedMetricColumnESQLDatatable: DatatableState = {
+export const sortedByPivotedMetricColumnESQLDatatable: DatatableConfig = {
   title: 'Sorted by pivoted metric column',
   type: 'data_table',
   data_source: {
@@ -256,12 +256,12 @@ export const sortedByPivotedMetricColumnESQLDatatable: DatatableState = {
       direction: 'desc',
     },
   },
-} satisfies DatatableStateESQL;
+} satisfies DatatableConfigESQL;
 
 /**
  * ESQL datatable sorted by a row column
  */
-export const sortedByRowColumnESQLDatatable: DatatableState = {
+export const sortedByRowColumnESQLDatatable: DatatableConfig = {
   title: 'Sorted by row column',
   type: 'data_table',
   data_source: {
@@ -354,4 +354,4 @@ export const sortedByRowColumnESQLDatatable: DatatableState = {
       direction: 'desc',
     },
   },
-} satisfies DatatableStateESQL;
+} satisfies DatatableConfigESQL;

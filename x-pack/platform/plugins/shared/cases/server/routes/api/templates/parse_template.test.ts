@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
+import { stringify as yamlStringify } from 'yaml';
 import type { Template } from '../../../../common/types/domain/template/v1';
 import { parseTemplate } from './parse_template';
 
 const buildDefinition = (name: string) =>
-  yaml.dump({
+  yamlStringify({
     name,
     fields: [
       {
@@ -57,7 +57,7 @@ describe('parseTemplate', () => {
       description: 'A description',
       tags: ['tag-1', 'tag-2'],
       fieldCount: 1,
-      fieldNames: ['test_field'],
+      fieldNames: [{ name: 'test_field', label: 'Test Field', type: 'keyword', control: 'TEXT' }],
       usageCount: 5,
       lastUsedAt: '2024-01-15T10:00:00.000Z',
       isDefault: true,
@@ -74,7 +74,9 @@ describe('parseTemplate', () => {
     expect(result.tags).toEqual(['tag-1', 'tag-2']);
     expect(result.author).toBe('test-user');
     expect(result.fieldCount).toBe(1);
-    expect(result.fieldNames).toEqual(['test_field']);
+    expect(result.fieldNames).toEqual([
+      { name: 'test_field', label: 'Test Field', type: 'keyword', control: 'TEXT' },
+    ]);
     expect(result.usageCount).toBe(5);
     expect(result.lastUsedAt).toBe('2024-01-15T10:00:00.000Z');
     expect(result.isDefault).toBe(true);
@@ -96,7 +98,7 @@ describe('parseTemplate', () => {
   });
 
   it('parses severity and category from the definition', () => {
-    const definition = yaml.dump({
+    const definition = yamlStringify({
       name: 'Template with severity',
       severity: 'high',
       category: 'security',
@@ -115,5 +117,30 @@ describe('parseTemplate', () => {
 
     expect(result.definition.severity).toBeUndefined();
     expect(result.definition.category).toBeUndefined();
+  });
+
+  it('includes definitionString with the original YAML', () => {
+    const template = createTemplate();
+    const result = parseTemplate(template);
+
+    expect(result.definitionString).toBe(template.definition);
+    expect(typeof result.definitionString).toBe('string');
+  });
+
+  it('preserves YAML comments in definitionString', () => {
+    const yamlWithComments = `# Template header
+name: Test Template
+# Field configuration
+fields:
+  - control: INPUT_TEXT
+    name: test_field
+    type: keyword`;
+
+    const template = createTemplate({ definition: yamlWithComments });
+    const result = parseTemplate(template);
+
+    expect(result.definitionString).toBe(yamlWithComments);
+    expect(result.definitionString).toContain('# Template header');
+    expect(result.definitionString).toContain('# Field configuration');
   });
 });

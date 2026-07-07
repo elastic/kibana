@@ -61,6 +61,23 @@ describe('ModelEndpointRow', () => {
     expect(screen.getByLabelText('Preconfigured endpoint')).toBeInTheDocument();
   });
 
+  it('associates preconfigured tooltip text with the focusable trigger for screen readers', () => {
+    render(
+      <ModelEndpointRow
+        endpoint={createEndpoint({ inference_id: '.elser-endpoint' })}
+        onView={onView}
+        onCopy={onCopy}
+      />
+    );
+
+    const trigger = screen.getByLabelText('Preconfigured endpoint');
+    const tooltipText = screen.getByText(
+      'Preconfigured endpoints are system generated and can not be edited'
+    );
+
+    expect(trigger).toHaveAttribute('aria-describedby', tooltipText.getAttribute('id'));
+  });
+
   it('does not show lock icon for user-defined endpoints', () => {
     render(<ModelEndpointRow endpoint={createEndpoint()} onView={onView} onCopy={onCopy} />);
 

@@ -8,7 +8,13 @@
 import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import type { Error } from '@kbn/apm-types';
-import { type ErrorsByTraceId, type UnifiedSpanDocument, type TraceRootSpan } from '@kbn/apm-types';
+import type {
+  ErrorsByTraceId,
+  UnifiedSpanDocument,
+  TraceRootSpan,
+  FocusedTraceItems,
+  TransactionDetailRedirectInfo,
+} from '@kbn/apm-types';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
 import type { Span } from '../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../typings/es_schemas/ui/transaction';
@@ -20,16 +26,10 @@ import { environmentRt, kueryRt, probabilityRt, rangeRt } from '../default_api_t
 import { getSpan } from '../transactions/get_span';
 import { getTransaction } from '../transactions/get_transaction';
 import { getTransactionByName } from '../transactions/get_transaction_by_name';
-import {
-  getRootTransactionByTraceId,
-  type TransactionDetailRedirectInfo,
-} from '../transactions/get_transaction_by_trace';
-import type { FocusedTraceItems } from './build_focused_trace_items';
+import { getRootTransactionByTraceId } from '../transactions/get_transaction_by_trace';
 import { buildFocusedTraceItems, findRootItem } from './build_focused_trace_items';
 import type { TopTracesPrimaryStatsResponse } from './get_top_traces_primary_stats';
 import { getTopTracesPrimaryStats } from './get_top_traces_primary_stats';
-import type { TraceItems } from './get_trace_items';
-import { getTraceItems } from './get_trace_items';
 import { getTraceSummaryCount } from './get_trace_summary_count';
 import { getUnifiedTraceItems } from './get_unified_trace_items';
 import { getUnifiedTraceErrors } from './get_unified_trace_errors';
@@ -78,54 +78,6 @@ const tracesRoute = createApmServerRoute({
       end,
       randomSampler,
     });
-  },
-});
-
-const tracesByIdRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/traces/{traceId}',
-  params: t.type({
-    path: t.type({
-      traceId: t.string,
-    }),
-    query: t.intersection([
-      rangeRt,
-      t.type({ entryTransactionId: t.string }),
-      t.partial({ maxTraceItems: toNumberRt }),
-    ]),
-  }),
-  security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<{
-    traceItems: TraceItems;
-    entryTransaction?: Transaction;
-  }> => {
-    const apmEventClient = await getApmEventClient(resources);
-    const { params, config, logger } = resources;
-    const { traceId } = params.path;
-    const { start, end, entryTransactionId } = params.query;
-    const [traceItems, entryTransaction] = await Promise.all([
-      getTraceItems({
-        traceId,
-        config,
-        apmEventClient,
-        start,
-        end,
-        maxTraceItemsFromUrlParam: params.query.maxTraceItems,
-        logger,
-      }),
-      getTransaction({
-        transactionId: entryTransactionId,
-        traceId,
-        apmEventClient,
-        start,
-        end,
-      }),
-    ]);
-    return {
-      traceItems,
-      entryTransaction,
-    };
   },
 });
 
@@ -524,7 +476,6 @@ const unifiedTraceSpanRoute = createApmServerRoute({
 });
 
 export const traceRouteRepository = {
-  ...tracesByIdRoute,
   ...unifiedTracesByIdRoute,
   ...tracesRoute,
   ...rootTransactionByTraceIdRoute,

@@ -11,12 +11,36 @@ import type {
   dataViewReferenceSchema,
   dataViewSchema,
   dataViewSpecSchema,
-} from './schema_data_view';
+  fieldSettingsSchema,
+} from './data_views/schema_embedded_data_view';
 import type { esqlDataSourceSchema } from './schema_esql_data_source';
-import type { runtimeFieldSchema } from './schema_runtime_field';
+import type {
+  compositeRuntimeFieldSchema,
+  runtimeFieldBaseSchema,
+  runtimeFieldSchema,
+} from './runtime_fields/schema_embedded_runtime_field';
+import type {
+  savedDataViewSpecSchema,
+  savedFieldSettingsSchema,
+} from './data_views/schema_saved_data_view';
+import type {
+  savedCompositeRuntimeFieldSchema,
+  savedPrimitiveRuntimeFieldSchema,
+  savedRuntimeFieldSchema,
+} from './runtime_fields/schema_saved_runtime_fields';
 
+export type AsCodeFieldSettings = TypeOf<typeof fieldSettingsSchema>;
+export type AsCodeCompositeRuntimeField = TypeOf<typeof compositeRuntimeFieldSchema>;
+export type AsCodeRuntimeBaseField = TypeOf<typeof runtimeFieldBaseSchema>;
 export type AsCodeRuntimeField = TypeOf<typeof runtimeFieldSchema>;
 export type AsCodeDataViewReference = TypeOf<typeof dataViewReferenceSchema>;
 export type AsCodeDataViewSpec = TypeOf<typeof dataViewSpecSchema>;
 export type AsCodeDataView = TypeOf<typeof dataViewSchema>;
 export type AsCodeEsqlDataSource = TypeOf<typeof esqlDataSourceSchema>;
+
+// Saved schemas
+export type AsCodeSavedFieldSettings = TypeOf<typeof savedFieldSettingsSchema>;
+export type AsCodeSavedCompositeRuntimeField = TypeOf<typeof savedCompositeRuntimeFieldSchema>;
+export type AsCodeSavedPrimitiveRuntimeField = TypeOf<typeof savedPrimitiveRuntimeFieldSchema>;
+export type AsCodeSavedRuntimeField = TypeOf<typeof savedRuntimeFieldSchema>;
+export type AsCodeSavedDataView = TypeOf<typeof savedDataViewSpecSchema>;

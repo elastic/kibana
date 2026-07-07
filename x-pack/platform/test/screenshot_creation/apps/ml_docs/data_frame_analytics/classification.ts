@@ -6,7 +6,7 @@
  */
 
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
-import type { DeepPartial } from '@kbn/ml-plugin/common/types/common';
+import type { DeepPartial } from '@kbn/ml-common-types/common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { FLIGHTS_INDEX_PATTERN } from '..';

@@ -23,6 +23,7 @@ export { ElapsedTimestampTooltip } from './components/elapsed_timestamp_tooltip'
 
 export {
   enableInspectEsQueries,
+  searchExcludedDataTiers,
   maxSuggestions,
   enableComparisonByDefault,
   defaultApmServiceEnvironment,
@@ -43,7 +44,7 @@ export {
   profilingAzureCostDiscountRate,
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
-  apmUseUnifiedTraceWaterfall,
+  apmTraceLogsDefaultColumns,
   enableDiagnosticMode,
 } from './ui_settings_keys';
 
@@ -57,6 +58,7 @@ export const casesFeatureId = 'observabilityCases';
 export const casesFeatureIdV2 = 'observabilityCasesV2';
 export const casesFeatureIdV3 = 'observabilityCasesV3';
 export const sloFeatureId = 'slo';
+export const observabilityAlertsFeatureId = 'observabilityAlerts';
 // The ID of the observability app. Should more appropriately be called
 // 'observability' but it's used in telemetry by applicationUsage so we don't
 // want to change it.

@@ -7,20 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
-import type { ReactElement } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import reactElementToJSXString from 'react-element-to-jsx-string';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
+  EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCodeBlock,
+  EuiDescriptionList,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiLink,
+  EuiPageTemplate,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import {
   useContentListItems,
@@ -33,6 +44,7 @@ import {
   NO_CREATOR_USER_LABEL,
 } from '@kbn/content-list-provider';
 import type {
+  ContentListItem,
   FindItemsParams,
   FindItemsResult,
   FilterFacetConfig,
@@ -54,8 +66,232 @@ import {
 export { mockTagsService, createMockFavoritesClient, mockContentListUserProfilesServices };
 
 // =============================================================================
+// Content Editor Flyout (mock)
+// =============================================================================
+
+/**
+ * Lightweight stand-in for `@kbn/content-management-content-editor`'s flyout
+ * — that one needs Kibana core services that Storybook doesn't provide.
+ */
+const ContentEditorFlyout = ({ item, onClose }: { item: ContentListItem; onClose: () => void }) => {
+  const titleId = useGeneratedHtmlId({ prefix: 'contentListContentEditorFlyoutTitle' });
+
+  return (
+    <EuiFlyout aria-labelledby={titleId} onClose={onClose} size="s" ownFocus>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 id={titleId}>{item.title}</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiDescriptionList
+          type="column"
+          compressed
+          listItems={[
+            { title: 'ID', description: item.id },
+            { title: 'Description', description: item.description || '—' },
+            { title: 'Type', description: item.type || '—' },
+            {
+              title: 'Updated',
+              description: item.updatedAt ? new Date(item.updatedAt).toLocaleString() : '—',
+            },
+            { title: 'Tags', description: item.tags?.join(', ') || '—' },
+          ]}
+        />
+      </EuiFlyoutBody>
+    </EuiFlyout>
+  );
+};
+
+/**
+ * Returns `open` (suitable for `features.contentEditor.open`) and a
+ * `flyout` element to render alongside the list.
+ *
+ * @example
+ * ```tsx
+ * const { open, flyout } = useContentEditorFlyout();
+ * ```
+ */
+export const useContentEditorFlyout = (): {
+  open: (item: ContentListItem) => void;
+  flyout: ReactNode;
+} => {
+  const [openItem, setOpenItem] = useState<ContentListItem | null>(null);
+  const open = useCallback((item: ContentListItem) => setOpenItem(item), []);
+  const flyout = openItem ? (
+    <ContentEditorFlyout item={openItem} onClose={() => setOpenItem(null)} />
+  ) : null;
+
+  return { open, flyout };
+};
+
+// =============================================================================
+// Kibana-shaped Storybook chrome
+// =============================================================================
+
+export const DashboardListingStoryFrame = ({ children }: { children: ReactNode }) => (
+  <EuiPageTemplate panelled restrictWidth={false}>
+    <EuiPageTemplate.Header
+      data-test-subj="top-nav"
+      pageTitle="Dashboards"
+      tabs={[
+        {
+          label: 'Dashboards',
+          isSelected: true,
+          onClick: () => undefined,
+        },
+      ]}
+    />
+    <EuiPageTemplate.Section>{children}</EuiPageTemplate.Section>
+  </EuiPageTemplate>
+);
+
+export const DashboardListingEmptyPromptMock = ({
+  inProgress = false,
+}: {
+  inProgress?: boolean;
+}) => {
+  const headingId = useGeneratedHtmlId({ prefix: 'dashboardListingHeading' });
+  return (
+    <EuiEmptyPrompt
+      iconType="dashboardApp"
+      title={
+        <h1 id={headingId} data-test-subj="emptyListPrompt">
+          {inProgress ? 'Dashboard in progress' : 'Create your first dashboard'}
+        </h1>
+      }
+      body={
+        <>
+          <p>
+            Analyze all of your Elastic data in one place by creating a dashboard and adding
+            visualizations.
+          </p>
+          {!inProgress && (
+            <p>
+              New to Kibana? <EuiLink href="#">Add some sample data</EuiLink> to take a test drive.
+            </p>
+          )}
+        </>
+      }
+      actions={
+        inProgress ? (
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="center"
+            gutterSize="s"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty size="s" color="danger" data-test-subj="discardDashboardPromptButton">
+                Reset changes
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton fill iconType="pencil" color="primary" data-test-subj="newItemButton">
+                Continue editing
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <EuiButton fill iconType="plusCircle" data-test-subj="newItemButton">
+            Create a dashboard
+          </EuiButton>
+        )
+      }
+    />
+  );
+};
+
+// =============================================================================
+// Generic listing headers
+// =============================================================================
+
+export const ListingPageHeaderMock = ({
+  title,
+  description,
+  actions,
+}: {
+  title: ReactNode;
+  description?: ReactNode;
+  actions?: ReactNode;
+}) => (
+  <>
+    <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween" responsive={false}>
+      <EuiFlexItem>
+        <EuiTitle size="l">
+          <h1>{title}</h1>
+        </EuiTitle>
+        {description ? (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiText color="subdued">
+              <p>{description}</p>
+            </EuiText>
+          </>
+        ) : null}
+      </EuiFlexItem>
+      {actions ? <EuiFlexItem grow={false}>{actions}</EuiFlexItem> : null}
+    </EuiFlexGroup>
+    <EuiSpacer size="l" />
+  </>
+);
+
+// =============================================================================
 // Mock Data
 // =============================================================================
+
+export type StoryMockItem = UserContentCommonSchema & {
+  attributes: {
+    title?: string;
+    description?: string;
+  };
+};
+
+export const toContentListItem = <T extends StoryMockItem>(
+  item: T,
+  extraFields?: (item: T) => Record<string, unknown>
+): ContentListItem => ({
+  id: item.id,
+  title: item.attributes.title ?? '',
+  description: item.attributes.description,
+  type: item.type,
+  updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
+  createdAt: item.createdAt,
+  createdBy: item.createdBy,
+  updatedBy: item.updatedBy,
+  managed: item.managed,
+  tags: extractTagIds(item.references),
+  ...(extraFields ? extraFields(item) : {}),
+});
+
+export const createMockStoryFindItems = <T extends StoryMockItem>({
+  items,
+  favoritesClient,
+  extraFields,
+}: {
+  items: T[];
+  favoritesClient?: FavoritesClientPublic;
+  extraFields?: (item: T) => Record<string, unknown>;
+}) => {
+  const findItems = createMockFindItems({
+    items,
+    favoritesClient,
+  });
+
+  return async (params: FindItemsParams): Promise<FindItemsResult> => {
+    const result = await findItems({
+      searchQuery: params.searchQuery,
+      filters: params.filters as Parameters<typeof findItems>[0]['filters'],
+      sort: params.sort ?? { field: 'title', direction: 'asc' },
+      page: params.page,
+    });
+
+    return {
+      items: result.items.map((item) => toContentListItem(item, extraFields)),
+      total: result.total,
+    };
+  };
+};
 
 /**
  * Build a mock items array of the requested length by cycling through
@@ -104,7 +340,7 @@ export const createStoryFindItems = (options?: {
   } = options ?? {};
 
   const items = buildMockItems(totalItems);
-  const mockFindItems = createMockFindItems({ items, favoritesClient });
+  const mockFindItems = createMockStoryFindItems({ items, favoritesClient });
 
   return async (params: FindItemsParams): Promise<FindItemsResult> => {
     if (delay > 0) {
@@ -115,26 +351,7 @@ export const createStoryFindItems = (options?: {
       return { items: [], total: 0 };
     }
 
-    const result = await mockFindItems({
-      searchQuery: params.searchQuery,
-      filters: params.filters,
-      sort: params.sort ?? { field: 'title', direction: 'asc' },
-      page: params.page,
-    });
-
-    return {
-      items: result.items.map((item) => ({
-        id: item.id,
-        title: item.attributes.title,
-        description: item.attributes.description,
-        type: item.type,
-        updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
-        tags: extractTagIds(item.references),
-        createdBy: item.createdBy,
-        managed: item.managed,
-      })),
-      total: result.total,
-    };
+    return mockFindItems(params);
   };
 };
 
@@ -341,12 +558,17 @@ export const StateDiagnosticPanel = ({
       <EuiPanel color="subdued" hasBorder paddingSize={isOpen ? 'm' : 's'}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType={isOpen ? 'arrowDown' : 'arrowRight'}
-              onClick={() => setIsOpen(!isOpen)}
-              aria-label={isOpen ? 'Collapse diagnostic panel' : 'Expand diagnostic panel'}
-              size="s"
-            />
+            <EuiToolTip
+              content={isOpen ? 'Collapse diagnostic panel' : 'Expand diagnostic panel'}
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+                onClick={() => setIsOpen(!isOpen)}
+                aria-label={isOpen ? 'Collapse diagnostic panel' : 'Expand diagnostic panel'}
+                size="s"
+              />
+            </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="xxs">

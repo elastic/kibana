@@ -28,7 +28,12 @@ import type { RawRule, RawRuleTemplate } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
 import type { RuleTypeRegistry } from '../rule_type_registry';
-export { partiallyUpdateRule, partiallyUpdateRuleWithEs } from './partially_update_rule';
+export {
+  atomicRemoveSnoozedInstancesWithEs,
+  partiallyUpdateRule,
+  partiallyUpdateRuleWithEs,
+  type ExpiredSnoozedInstance,
+} from './partially_update_rule';
 import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../../common';
 import {
   adHocRunParamsModelVersions,
@@ -293,6 +298,9 @@ export function setupSavedObjects(
         },
         message: {
           type: 'text',
+        },
+        errorCode: {
+          type: 'keyword',
         },
       },
     },

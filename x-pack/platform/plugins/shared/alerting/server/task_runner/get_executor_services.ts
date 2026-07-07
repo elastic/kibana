@@ -14,6 +14,8 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { AsScopedOptions } from '@kbn/core-elasticsearch-server';
 import { RULE_SAVED_OBJECT_TYPE } from '..';
 import { getEsRequestTimeout } from '../lib';
+import type { CpsData } from '../types';
+import { resolveCpsData } from './resolve_cps_data';
 import type { WrappedScopedClusterClient } from '../lib/wrap_scoped_cluster_client';
 import { createWrappedScopedClusterClientFactory } from '../lib/wrap_scoped_cluster_client';
 import type { WrappedSearchSourceClient } from '../lib/wrap_search_source_client';
@@ -39,7 +41,6 @@ interface GetExecutorServicesOpts {
   ruleResultService: RuleResultService;
   ruleData: { name: string; alertTypeId: string; id: string; spaceId: string };
   ruleTaskTimeout?: string;
-  uiamApiKey?: string | null;
 }
 
 export interface ExecutorServices {
@@ -53,6 +54,7 @@ export interface ExecutorServices {
   getAsyncSearchClient: <T extends AsyncSearchParams>(
     strategy: AsyncSearchStrategies
   ) => AsyncSearchClient<T>;
+  getCpsData: () => Promise<CpsData>;
 }
 
 // Default project routing for rules when CPS is enabled is 'space'
@@ -122,5 +124,7 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServ
         abortController,
       });
     },
+
+    getCpsData: () => resolveCpsData(scopedClusterClient.asCurrentUser, ruleData.spaceId, logger),
   };
 };

@@ -30,6 +30,9 @@ export const registerGetScriptedFieldRoute = (
     .get({
       path: '/api/index_patterns/index_pattern/{id}/scripted_field/{name}',
       access: 'public',
+      summary: 'Get a scripted field',
+      description:
+        'Deprecated. Scripted fields are superseded by runtime fields. Use the runtime field endpoints instead.',
       security: {
         authz: {
           enabled: false,

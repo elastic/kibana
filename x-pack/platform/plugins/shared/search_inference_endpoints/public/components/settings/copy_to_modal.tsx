@@ -24,6 +24,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { EventType } from '../../analytics/constants';
 
 interface CopyToModalProps {
   sourceFeatureName: string;
@@ -43,10 +45,15 @@ export const CopyToModal: React.FC<CopyToModalProps> = ({
   const modalTitleId = useGeneratedHtmlId();
   const { features: registeredFeatures } = useRegisteredFeatures();
   const [idToSelectedMap, setIdToSelectedMap] = useState<Record<string, boolean>>({});
+  const usageTracker = useUsageTracker();
 
-  const handleToggle = useCallback((id: string) => {
-    setIdToSelectedMap((prev) => ({ ...prev, [id]: !prev[id] }));
-  }, []);
+  const handleToggle = useCallback(
+    (id: string) => {
+      usageTracker.count(EventType.COPY_TO_FEATURE_TOGGLED);
+      setIdToSelectedMap((prev) => ({ ...prev, [id]: !prev[id] }));
+    },
+    [usageTracker]
+  );
 
   const treeItems = useMemo(() => {
     const parentNameMap = new Map(

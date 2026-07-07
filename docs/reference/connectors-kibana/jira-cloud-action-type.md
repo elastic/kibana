@@ -102,7 +102,7 @@ To use the Jira Cloud connector with OAuth 2.0, you must create an OAuth app in 
 2. Select **Create** and choose **OAuth 2.0 integration**.
 3. Enter a name for the app (for example, `Kibana connector`) and agree to the developer terms, then select **Create**.
 4. In the app settings, go to **Authorization** and select **Add** next to **OAuth 2.0 (3LO)**.
-5. Set the **Callback URL** to your {{kib}} OAuth callback URL. The format is: `https://<your-kibana-url>/api/actions/_oauth_callback`
+5. Set the **Callback URL** to your {{kib}} OAuth callback URL. The format is: `https://<your-kibana-url>/api/actions/connector/_oauth_callback`
 6. Select **Save changes**.
 
 ### Configure permissions

@@ -19,7 +19,7 @@ export const ENDPOINT_EXCEPTIONS_PAGE_LABELS: ArtifactListPageLabels = {
   }),
   pageAboutInfo: i18n.translate('xpack.securitySolution.endpointExceptions.pageAboutInfo', {
     defaultMessage:
-      'Endpoint exceptions prevent generating an alert by Defend integration on the host.',
+      'Endpoint exceptions prevent Elastic Defend from generating alerts on your hosts.',
   }),
   pageAddButtonTitle: i18n.translate(
     'xpack.securitySolution.endpointExceptions.pageAddButtonTitle',
@@ -127,7 +127,7 @@ export const ENDPOINT_EXCEPTIONS_PAGE_LABELS: ArtifactListPageLabels = {
   }),
   emptyStateInfo: i18n.translate('xpack.securitySolution.endpointExceptions.emptyStateInfo', {
     defaultMessage:
-      'Endpoint exceptions prevent generating an alert by Defend integration on the host.',
+      'Endpoint exceptions prevent Elastic Defend from generating alerts on your hosts.',
   }),
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.endpointExceptions.emptyStatePrimaryButtonLabel',
@@ -149,7 +149,7 @@ export const ABOUT_ENDPOINT_EXCEPTIONS = i18n.translate(
   'xpack.securitySolution.endpointExceptions.aboutInfo',
   {
     defaultMessage:
-      'Endpoint exceptions prevent generating an alert by Defend integration on the host.',
+      'Endpoint exceptions prevent Elastic Defend from generating alerts on your hosts.',
   }
 );
 

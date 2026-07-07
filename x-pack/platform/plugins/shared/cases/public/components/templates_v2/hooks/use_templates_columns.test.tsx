@@ -297,7 +297,10 @@ describe('useTemplatesColumns', () => {
       const template = {
         ...baseTemplate,
         fieldCount: 2,
-        fieldNames: ['severity', 'hostname'],
+        fieldNames: [
+          { name: 'severity', label: 'Severity', type: 'keyword', control: 'TEXT' },
+          { name: 'hostname', label: 'Hostname', type: 'keyword', control: 'TEXT' },
+        ],
         fieldSearchMatches: true,
       };
       render(<>{column.render!(2, template)}</>);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const RESOLUTION_CSV_VALID_ENTITY_TYPES: string[] = ['user', 'host', 'service', 'generic'];
+export const RESOLUTION_CSV_VALID_ENTITY_TYPES: string[] = ['user', 'host', 'service'];
 export const RESOLUTION_CSV_REQUIRED_COLUMNS: string[] = ['type', 'resolved_to'];
 
 export interface ResolutionCsvUploadRowResponse {

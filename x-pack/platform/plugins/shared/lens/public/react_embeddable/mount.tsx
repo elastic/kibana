@@ -77,7 +77,6 @@ const inlineFlyoutStyles = ({ euiTheme }: UseEuiTheme) => `
 export const lensFlyoutProps: OverlayFlyoutOpenOptions & { triggerId?: string } = {
   css: inlineFlyoutStyles,
   'data-test-subj': 'customizeLens',
-  hideCloseButton: true,
   isResizable: true,
   outsideClickCloses: true,
 };

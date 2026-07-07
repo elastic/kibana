@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/langgraph-checkpoint-saver'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/security-generative-ai'
+  defaultOwner: '@elastic/security-threat-hunting'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/langgraph-checkpoint-saver'
   description: Moon project for @kbn/langgraph-checkpoint-saver
   channel: ''
-  owner: '@elastic/security-generative-ai'
+  owner: '@elastic/security-threat-hunting'
   sourceRoot: x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver
 dependsOn:
   - '@kbn/core-test-helpers-kbn-server'

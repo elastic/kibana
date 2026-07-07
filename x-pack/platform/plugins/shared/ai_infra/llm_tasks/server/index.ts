@@ -13,7 +13,6 @@ import type {
   PluginSetupDependencies,
   PluginStartDependencies,
 } from './types';
-import { LlmTasksPlugin } from './plugin';
 
 export { config } from './config';
 
@@ -30,5 +29,7 @@ export const plugin: PluginInitializer<
   LlmTasksPluginStart,
   PluginSetupDependencies,
   PluginStartDependencies
-> = async (pluginInitializerContext: PluginInitializerContext<LlmTasksConfig>) =>
-  new LlmTasksPlugin(pluginInitializerContext);
+> = async (pluginInitializerContext: PluginInitializerContext<LlmTasksConfig>) => {
+  const { LlmTasksPlugin } = await import('./plugin');
+  return new LlmTasksPlugin(pluginInitializerContext);
+};

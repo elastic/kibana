@@ -296,7 +296,7 @@ export function ChartBarPhasesSeries({
   );
 }
 
-function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
+export function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
   const { ilmPhases } = useIlmPhasesColorAndDescription();
   const availablePhases = useMemo(() => {
     if (!phases) return [];

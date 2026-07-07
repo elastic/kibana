@@ -12,13 +12,13 @@ import {
 } from '../../../resources/datastreams/alert_actions';
 import type {
   AlertEpisode,
-  NotificationGroup,
   DispatcherStep,
   DispatcherPipelineState,
   DispatcherStepOutput,
 } from '../types';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
+import { getUnmatchedEpisodes } from './unmatched_episodes';
 
 @injectable()
 export class StoreActionsStep implements DispatcherStep {
@@ -98,7 +98,7 @@ export class StoreActionsStep implements DispatcherStep {
             rule_id: firstEpisode?.rule_id ?? 'unknown',
             group_hash: firstEpisode?.group_hash ?? 'unknown',
             last_series_event_timestamp: now.toISOString(),
-            notification_group_id: group.id,
+            action_group_id: group.id,
             source: 'internal',
             reason: `notified by policy ${group.policyId}`,
             space_id: spaceId,
@@ -113,7 +113,7 @@ export class StoreActionsStep implements DispatcherStep {
             episode,
             actionType: 'unmatched',
             now,
-            reason: 'no matching notification policy',
+            reason: 'no matching action policy',
             spaceId: spaceIdForEpisode(episode),
           })
         ),
@@ -122,23 +122,6 @@ export class StoreActionsStep implements DispatcherStep {
 
     return { type: 'continue' };
   }
-}
-
-function getUnmatchedEpisodes(
-  dispatchable: readonly AlertEpisode[],
-  dispatch: readonly NotificationGroup[],
-  throttled: readonly NotificationGroup[]
-): AlertEpisode[] {
-  const handledEpisodeKeys = new Set<string>();
-  for (const group of [...dispatch, ...throttled]) {
-    for (const episode of group.episodes) {
-      handledEpisodeKeys.add(`${episode.rule_id}:${episode.group_hash}:${episode.episode_id}`);
-    }
-  }
-
-  return dispatchable.filter(
-    (ep) => !handledEpisodeKeys.has(`${ep.rule_id}:${ep.group_hash}:${ep.episode_id}`)
-  );
 }
 
 function toAction({

@@ -42,11 +42,13 @@ export const backfillScheduleIds = async ({
   osqueryContext,
   logger,
   abortController,
+  isRruleFeatureEnabled = false,
 }: {
   coreStart: CoreStart;
   osqueryContext: OsqueryAppContextService;
   logger: Logger;
   abortController?: AbortController;
+  isRruleFeatureEnabled?: boolean;
 }): Promise<{ hadFailures: boolean }> => {
   const internalClient = await getInternalSavedObjectsClient(coreStart);
 
@@ -120,12 +122,24 @@ export const backfillScheduleIds = async ({
                 produce<PackagePolicy>(pp, (draft) => {
                   unset(draft, 'id');
                   removePackFromPolicy(draft, packSO.attributes.name, spaceId);
-                  set(draft, `${packPath}.pack_id`, packSO.id);
-                  set(
-                    draft,
-                    `${packPath}.queries`,
-                    convertSOQueriesToPackConfig(updatedQueries, spaceId)
+                  const { queries: builtQueries, ...packDefaults } = convertSOQueriesToPackConfig(
+                    updatedQueries,
+                    {
+                      spaceId,
+                      packSchedule: {
+                        schedule_type: packSO.attributes.schedule_type,
+                        interval: packSO.attributes.interval,
+                        rrule_schedule: packSO.attributes.rrule_schedule,
+                      },
+                      isRruleFeatureEnabled,
+                    }
                   );
+                  set(draft, `${packPath}.pack_id`, packSO.id);
+                  for (const [k, v] of Object.entries(packDefaults)) {
+                    set(draft, `${packPath}.${k}`, v);
+                  }
+
+                  set(draft, `${packPath}.queries`, builtQueries);
 
                   return draft;
                 })

@@ -8,11 +8,17 @@
  */
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type {
+  ManagedWorkflowsSystemApiProvider,
+  PluginScopedManagedWorkflowsApi,
+  WorkflowsApiRequestHandlerContext,
+  WorkflowsClient,
+  WorkflowsClientProvider,
+} from '@kbn/workflows/server/types';
 import type { z } from '@kbn/zod/v4';
-import type { EventChainContext } from './event_chain_context';
 import type { ServerStepDefinition } from './step_registry/types';
 import type { CommonTriggerDefinition } from '../common';
 import type { WorkflowsExtensionsStartContract } from '../common/types';
@@ -20,66 +26,6 @@ import type { WorkflowsExtensionsStartContract } from '../common/types';
 /** Server-side alias: same as CommonTriggerDefinition (used when registering on the server). */
 export type ServerTriggerDefinition<EventSchema extends z.ZodType = z.ZodType> =
   CommonTriggerDefinition<EventSchema>;
-
-export type { EventChainContext };
-
-/**
- * Parameters passed to the trigger event handler when an event is emitted.
- */
-export interface TriggerEventHandlerParams {
-  timestamp: string;
-  triggerId: string;
-  spaceId: string;
-  payload: Record<string, unknown>;
-  request: KibanaRequest;
-  eventChainContext?: EventChainContext;
-}
-
-/**
- * Handler invoked by the extensions plugin when emitEvent is called.
- * Registered during setup to resolve subscriptions and run workflows.
- */
-export type TriggerEventHandler = (params: TriggerEventHandlerParams) => Promise<void>;
-
-/**
- * Parameters for emitEvent.
- */
-export interface EmitEventParams {
-  triggerId: string;
-  spaceId: string;
-  payload: Record<string, unknown>;
-  request: KibanaRequest;
-}
-
-/**
- * Emits a trigger event. Validates trigger id, then invokes the registered handler (which logs and runs subscribed workflows).
- * @throws Error if triggerId is not registered
- */
-export type EmitEventFn = (params: EmitEventParams) => Promise<void>;
-
-/**
- * Request-scoped client for emitting workflow trigger events.
- * Use from route handlers via ctx.workflows.getWorkflowsClient().
- */
-export interface WorkflowsClient {
-  /**
-   * Emit an event for the given trigger. Subscribed workflows in the current request's space will run.
-   * @param triggerId - Must match a trigger registered via registerTriggerDefinition
-   * @param payload - Event payload; available in workflows as context.event
-   * @throws Error if triggerId is not registered
-   */
-  emitEvent(triggerId: string, payload: Record<string, unknown>): Promise<void>;
-}
-
-/**
- * Workflows route handler context. Available as ctx.workflows for plugins that depend on workflows_extensions.
- */
-export interface WorkflowsRouteHandlerContext {
-  /**
-   * Returns a request-scoped client bound to the current request and space.
-   */
-  getWorkflowsClient(): WorkflowsClient;
-}
 
 /**
  * Server-side plugin setup contract.
@@ -93,7 +39,7 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * @param definition - The step server-side definition
    * @throws Error if definition for the same step type ID is already registered
    */
-  registerStepDefinition(definition: ServerStepDefinition): void;
+  registerStepDefinition(definition: ServerStepDefinitionOrLoader): void;
 
   /**
    * Register a workflow trigger definition.
@@ -105,17 +51,30 @@ export interface WorkflowsExtensionsServerPluginSetup {
   registerTriggerDefinition(definition: ServerTriggerDefinition): void;
 
   /**
-   * Register the handler invoked when emitEvent is called.
-   * Should be called during the plugin's setup phase.
+   * Register the workflows client provider.
    *
-   * @param handler - Function called with triggerId, spaceId, and payload when an event is emitted
+   * @param provider - The workflows client provider
+   * @throws Error if provider is already registered
    */
-  registerTriggerEventHandler(handler: TriggerEventHandler): void;
+  registerWorkflowsClientProvider(provider: WorkflowsClientProvider): void;
+
+  /**
+   * Register a requestless managed workflows provider for startup/system operations.
+   *
+   * @param provider - The managed workflows system API provider
+   * @throws Error if provider is already registered
+   */
+  registerManagedWorkflowsSystemApiProvider(provider: ManagedWorkflowsSystemApiProvider): void;
+
+  /**
+   * Register plugin id as a managed workflows owner during setup.
+   */
+  registerManagedWorkflowOwner(pluginId: string): void;
 }
 
 /**
  * Server-side plugin start contract.
- * Exposes step definitions (from common contract), trigger definitions, and emitEvent.
+ * Exposes step definitions (from common contract) and trigger definitions.
  */
 export type WorkflowsExtensionsServerPluginStart =
   WorkflowsExtensionsStartContract<ServerStepDefinition> & {
@@ -126,17 +85,42 @@ export type WorkflowsExtensionsServerPluginStart =
     getAllTriggerDefinitions(): ServerTriggerDefinition[];
 
     /**
-     * Emit a trigger event.
-     * @throws Error if triggerId is not registered
+     * Get a registered trigger definition by id.
+     * @returns The trigger definition, or undefined if not registered
      */
-    emitEvent: EmitEventFn;
+    getTriggerDefinition(triggerId: string): ServerTriggerDefinition | undefined;
+
+    /**
+     * Get the workflows client for the current request.
+     * @returns The workflows client
+     */
+    getClient(request: KibanaRequest): Promise<WorkflowsClient>;
+
+    /**
+     * Initialize a plugin-scoped managed workflows client. The plugin id is bound once
+     * and reused for install/uninstall/execute.
+     */
+    initManagedWorkflowsClient(pluginId: string): Promise<PluginScopedManagedWorkflowsApi>;
+
+    /**
+     * Returns all plugin ids registered as managed workflow owners during setup.
+     */
+    getManagedWorkflowPluginIds(): string[];
   };
 
 /**
  * Dependencies for the server plugin setup phase.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkflowsExtensionsServerPluginSetupDeps {}
+export type WorkflowsExtensionsServerPluginSetupDeps = Record<string, never>;
+
+export type ServerStepDefinitionOrLoader<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject,
+  State extends z.ZodObject = z.ZodObject
+> =
+  | ServerStepDefinition<Input, Output, Config, State>
+  | (() => Promise<ServerStepDefinition<Input, Output, Config, State> | undefined>);
 
 /**
  * Dependencies for the server plugin start phase.
@@ -146,3 +130,7 @@ export interface WorkflowsExtensionsServerPluginStartDeps {
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
 }
+
+export type WorkflowsExtensionsRequestHandlerContext = CustomRequestHandlerContext<{
+  workflows: WorkflowsApiRequestHandlerContext;
+}>;

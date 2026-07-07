@@ -32,8 +32,6 @@ import type { InputsModelId } from '../../store/inputs/constants';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import * as i18n from './translations';
 import { getScopeFromPath } from '../../../sourcerer/containers/sourcerer_paths';
-import { useSourcererDataView } from '../../../sourcerer/containers';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 export interface ModalInspectProps {
   adHocDataViews?: string[] | null;
@@ -132,14 +130,7 @@ export const ModalInspectQuery = ({
   const { pathname } = useLocation();
   const sourcererScope = inputId === 'timeline' ? PageScope.timeline : getScopeFromPath(pathname);
 
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(sourcererScope);
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const experimentalSelectedPatterns = useSelectedPatterns(sourcererScope);
-
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
+  const selectedPatterns = useSelectedPatterns(sourcererScope);
 
   const modalTitleId = useGeneratedHtmlId();
 

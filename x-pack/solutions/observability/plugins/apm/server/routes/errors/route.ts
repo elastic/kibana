@@ -224,6 +224,8 @@ const errorDistributionRoute = createApmServerRoute({
     query: t.intersection([
       t.partial({
         groupId: t.string,
+        transactionName: t.string,
+        bucketSizeInSeconds: toNumberRt,
       }),
       environmentRt,
       kueryRt,
@@ -236,16 +238,27 @@ const errorDistributionRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { environment, kuery, groupId, start, end, offset } = params.query;
+    const {
+      environment,
+      kuery,
+      groupId,
+      transactionName,
+      start,
+      end,
+      offset,
+      bucketSizeInSeconds,
+    } = params.query;
     return getErrorDistribution({
       environment,
       kuery,
       serviceName,
       groupId,
+      transactionName,
       apmEventClient,
       start,
       end,
       offset,
+      bucketSizeInSeconds,
     });
   },
 });

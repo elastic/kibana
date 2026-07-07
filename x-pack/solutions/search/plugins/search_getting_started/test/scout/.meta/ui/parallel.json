@@ -1,5 +1,5 @@
 {
-  "sha1": "d54c6a4209e26cd8e8095879471dd6c3f910d7b3",
+  "sha1": "6dca8c58a841e6465d505c153c4bc16c33532826",
   "tests": [
     {
       "id": "30a4f04aa24f29d-b2a90d16b4f88bb",
@@ -148,6 +148,20 @@
       }
     },
     {
+      "id": "2cdaac59f15380c-05939fe43b04733",
+      "title": "Getting Started - Viewer: Serverless search connection details flyout shows API Keys tab for viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_viewer.serverless.spec.ts",
+        "line": 30,
+        "column": 9
+      }
+    },
+    {
       "id": "af94f924c5951b5-e20ea19b94541fc",
       "title": "Getting Started - Viewer should display kibana version badge",
       "expectedStatus": "passed",
@@ -164,8 +178,8 @@
       }
     },
     {
-      "id": "af94f924c5951b5-e78af28884bb1b2",
-      "title": "Getting Started - Viewer verifies viewer has limited access to API keys functionality",
+      "id": "af94f924c5951b5-78d73ac44ab7fa6",
+      "title": "Getting Started - Viewer verifies viewer has no access to Search API keys",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

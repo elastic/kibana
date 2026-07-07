@@ -95,10 +95,13 @@ export class SessionManagementService {
       .pipe(
         switchMap(async ({ scheduleRetry }) => {
           try {
-            await Promise.all([
-              this.sessionIndex.initialize(),
-              this.scheduleCleanupTask(taskManager),
-            ]);
+            // Initialize the index first so the session index and its shards are fully ready
+            // before the cleanup task is registered. Task Manager fires newly created tasks
+            // immediately, so registering before initialization completes would cause the
+            // cleanup task to open a PIT on an index whose shards may not yet be available,
+            // resulting in 503 errors on first-ever project bootstrap.
+            await this.sessionIndex.initialize();
+            await this.scheduleCleanupTask(taskManager);
           } catch (err) {
             scheduleRetry();
           }

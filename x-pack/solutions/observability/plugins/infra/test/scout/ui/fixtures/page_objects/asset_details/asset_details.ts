@@ -11,6 +11,8 @@ import { OverviewTab } from './overview_tab';
 import { MetadataTab } from './metadata_tab';
 import { MetricsTab } from './metrics_tab';
 import { LogsTab } from './logs_tab';
+import { ProcessesTab } from './processes_tab';
+import { DashboardsTab } from './dashboards_tab';
 
 export class AssetDetailsPage {
   public readonly hostOverviewTab: OverviewTab;
@@ -22,6 +24,10 @@ export class AssetDetailsPage {
   public readonly dockerMetricsTab: MetricsTab;
 
   public readonly logsTag: LogsTab;
+
+  public readonly processesTab: ProcessesTab;
+
+  public readonly dashboardsTab: DashboardsTab;
 
   public readonly openAsPageButton: Locator;
   public readonly returnButton: Locator;
@@ -36,6 +42,10 @@ export class AssetDetailsPage {
     this.dockerMetricsTab = createLazyPageObject(MetricsTab, this.page, this.kbnUrl, 'Docker');
 
     this.logsTag = createLazyPageObject(LogsTab, this.page, this.kbnUrl);
+
+    this.processesTab = createLazyPageObject(ProcessesTab, this.page, this.kbnUrl);
+
+    this.dashboardsTab = createLazyPageObject(DashboardsTab, this.page, this.kbnUrl);
 
     this.openAsPageButton = this.page.getByTestId('infraAssetDetailsOpenAsPageButton');
     this.returnButton = this.page.getByTestId('infraAssetDetailsReturnButton');

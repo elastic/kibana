@@ -61,23 +61,29 @@ export const getRuleIdsWithGapBodySchema = schema.object(
   }
 );
 
-export const gapsSummarySchema = schema.object({
-  total_unfilled_duration_ms: schema.number(),
-  total_in_progress_duration_ms: schema.number(),
-  total_filled_duration_ms: schema.number(),
-  total_error_duration_ms: schema.number(),
-  total_duration_ms: schema.number(),
-  rules_by_gap_fill_status: schema.object({
-    unfilled: schema.number(),
-    in_progress: schema.number(),
-    filled: schema.number(),
-    error: schema.number(),
-  }),
-});
+export const gapsSummarySchema = schema.object(
+  {
+    total_unfilled_duration_ms: schema.number(),
+    total_in_progress_duration_ms: schema.number(),
+    total_filled_duration_ms: schema.number(),
+    total_error_duration_ms: schema.number(),
+    total_duration_ms: schema.number(),
+    rules_by_gap_fill_status: schema.object({
+      unfilled: schema.number(),
+      in_progress: schema.number(),
+      filled: schema.number(),
+      error: schema.number(),
+    }),
+  },
+  { meta: { id: 'gaps_summary' } }
+);
 
-export const getRuleIdsWithGapResponseSchema = schema.object({
-  total: schema.number(),
-  rule_ids: schema.arrayOf(schema.string()),
-  latest_gap_timestamp: schema.maybe(schema.number()),
-  summary: gapsSummarySchema,
-});
+export const getRuleIdsWithGapResponseSchema = schema.object(
+  {
+    total: schema.number(),
+    rule_ids: schema.arrayOf(schema.string()),
+    latest_gap_timestamp: schema.maybe(schema.number()),
+    summary: gapsSummarySchema,
+  },
+  { meta: { id: 'get_rules_with_gaps_response' } }
+);

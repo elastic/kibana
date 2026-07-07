@@ -33,8 +33,13 @@ const executeEsqlToolSchema = z.object({
     })
     .optional()
     .describe(
-      '(optional) Time range for named parameters ?_tstart and ?_tend. Falls back to screen context or last 24 hours.'
+      '(Optional) Time range for named parameters ?_tstart and ?_tend. Falls back to screen context or last 24 hours.'
     ),
+  limit: z
+    .number()
+    .optional()
+    .default(100)
+    .describe('(Optional) Can be set to limit the number of results to return. Defaults to 100.'),
 });
 
 export const executeEsqlTool = (): BuiltinToolDefinition<typeof executeEsqlToolSchema> => {
@@ -42,6 +47,8 @@ export const executeEsqlTool = (): BuiltinToolDefinition<typeof executeEsqlToolS
     id: platformCoreTools.executeEsql,
     type: ToolType.builtin,
     description: `Execute an ES|QL query and return the results in a tabular format.
+
+## Usage
 
 **IMPORTANT**: This tool only **runs** queries; it does not write them.
 Think of this as the final step after a query has been prepared.
@@ -51,10 +58,16 @@ You **must** get the query from one of two sources before calling this tool:
 2.  A verbatim query provided directly by the user.
 
 Under no circumstances should you invent, guess, or modify a query yourself for this tool.
-If you need a query, use the \`${platformCoreTools.generateEsql}\` tool first.`,
+If you need a query, use the \`${platformCoreTools.generateEsql}\` tool first.
+
+### Using a limit
+
+The \`limit\` parameter can be used to limit the number of results to return. It defaults to 100.
+You should avoid using a higher limit value unless explicitly asked by the user or if you know for sure the length of the data will not be a problem.
+Note that this option can't be used to increase the number of results if the query already defines a \`LIMIT\` clause - the lowest limit will always prevail.`,
     schema: executeEsqlToolSchema,
     handler: async (
-      { query: esqlQuery, params: esqlParams = {}, time_range: explicitTimeRange },
+      { query: esqlQuery, params: esqlParams = {}, time_range: explicitTimeRange, limit = 100 },
       { esClient, attachments }
     ) => {
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
@@ -70,6 +83,7 @@ If you need a query, use the \`${platformCoreTools.generateEsql}\` tool first.`,
         query: esqlQuery,
         params,
         esClient: esClient.asCurrentUser,
+        limit,
       });
 
       // need the interpolated query to return in the results / to display in the UI

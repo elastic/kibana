@@ -25,19 +25,19 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
-import { createDatafeedId } from '../../../../../../common/util/job_utils';
-import type { MlApi } from '../../../../services/ml_api_service';
-import type { IndexPatternTitle } from '../../../../../../common/types/kibana';
-import { getQueryFromSavedSearchObject } from '../../../../util/index_utils';
+import type { IndexPatternTitle } from '@kbn/ml-common-types/kibana';
+import type { Datafeed, DatafeedId } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type {
   Job,
-  Datafeed,
   Detector,
   JobId,
-  DatafeedId,
   BucketSpan,
   CustomSettings,
-} from '../../../../../../common/types/anomaly_detection_jobs';
+} from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { MlCalendar } from '@kbn/ml-common-types/calendars';
+import { createDatafeedId } from '../../../../../../common/util/job_utils';
+import type { MlApi } from '../../../../services/ml_api_service';
+import { getQueryFromSavedSearchObject } from '../../../../util/index_utils';
 import { combineFieldsAndAggs } from '../../../../../../common/util/fields_utils';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { JobRunner, type ProgressSubscriber } from '../job_runner';
@@ -45,7 +45,6 @@ import type { CREATED_BY_LABEL } from '../../../../../../common/constants/new_jo
 import { JOB_TYPE, SHARED_RESULTS_INDEX_NAME } from '../../../../../../common/constants/new_job';
 import { collectAggs } from './util/general';
 import { filterRuntimeMappings } from './util/filter_runtime_mappings';
-import type { MlCalendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
 import { getDatafeedAggregations } from '../../../../../../common/util/datafeed_utils';
 import { getFirstKeyInObject } from '../../../../../../common/util/object_utils';

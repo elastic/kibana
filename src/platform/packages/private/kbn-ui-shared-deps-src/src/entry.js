@@ -27,6 +27,9 @@ export const KbnI18n = require('@kbn/i18n');
 export const KbnI18nReact = require('@kbn/i18n-react');
 export const EmotionCache = require('@emotion/cache');
 export const EmotionReact = require('@emotion/react');
+// JSX runtime exports for SWC's importSource: '@emotion/react'
+export const EmotionReactJsxRuntime = require('@emotion/react/jsx-runtime');
+export const EmotionReactJsxDevRuntime = require('@emotion/react/jsx-dev-runtime');
 export const Moment = require('moment');
 export const MomentTimezone = require('moment-timezone/moment-timezone');
 

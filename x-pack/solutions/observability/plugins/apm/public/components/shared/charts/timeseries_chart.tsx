@@ -40,11 +40,11 @@ import { useChartPointerEventContext } from '../../../context/chart_pointer_even
 import { unit } from '../../../utils/style';
 import { ChartContainer } from './chart_container';
 import {
-  expectedBoundsTitle,
+  EXPECTED_BOUNDS_SERIES_ID,
   getChartAnomalyTimeseries,
 } from './helper/get_chart_anomaly_timeseries';
 import { isTimeseriesEmpty, onBrushEnd } from './helper/helper';
-import { expandApmTimeseriesWithEdgeDottedLines } from './utils/split_line_series_for_edge_dots';
+import { expandTimeseriesWithDottedGapLines } from './utils/timeseries_gap_handling';
 import type { TimeseriesChartWithContextProps } from './timeseries_chart_with_context';
 
 const END_ZONE_LABEL = i18n.translate('xpack.apm.timeseries.endzone', {
@@ -70,6 +70,7 @@ export function TimeseriesChart({
   showAnnotations = true,
   yDomain,
   anomalyTimeseries,
+  anomalyThreshold,
   customTheme = {},
   comparisonEnabled,
   offset,
@@ -86,11 +87,12 @@ export function TimeseriesChart({
     anomalyTimeseries,
     euiTheme,
     anomalyTimeseriesColor: anomalyTimeseries?.color,
+    anomalyThreshold,
   });
   const isEmpty = isTimeseriesEmpty(timeseries);
   const isComparingExpectedBounds = comparisonEnabled && isExpectedBoundsComparison(offset);
   const timeseriesWithEdgeDots = useMemo(
-    () => expandApmTimeseriesWithEdgeDottedLines(timeseries),
+    () => expandTimeseriesWithDottedGapLines(timeseries),
     [timeseries]
   );
   const allSeries = [
@@ -112,14 +114,39 @@ export function TimeseriesChart({
   const max = Math.max(...xValues, ...xValuesExpectedBounds);
   const xFormatter = niceTimeFormatter([min, max]);
   const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
+
+  const tooltipHeaderFormatter = (value: number): ReactElement | string => {
+    const formattedValue = xFormatter(value);
+    if (max === value) {
+      return (
+        <>
+          <EuiFlexGroup
+            alignItems="center"
+            responsive={false}
+            gutterSize="xs"
+            css={{ fontWeight: 'normal' }}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="info" aria-hidden={true} />
+            </EuiFlexItem>
+            <EuiFlexItem>{END_ZONE_LABEL}</EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="xs" />
+          {formattedValue}
+        </>
+      );
+    }
+    return formattedValue;
+  };
+
   // Using custom legendSort here when comparing expected bounds
   // because by default elastic-charts will show legends for expected bounds first
   // but for consistency, we are making `Expected bounds` last
   // See https://github.com/elastic/elastic-charts/issues/1685
   const legendSort = isComparingExpectedBounds
     ? (a: SeriesIdentifier, b: SeriesIdentifier) => {
-        if ((a as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle) return -1;
-        if ((b as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle) return -1;
+        if ((a as XYChartSeriesIdentifier)?.specId === EXPECTED_BOUNDS_SERIES_ID) return -1;
+        if ((b as XYChartSeriesIdentifier)?.specId === EXPECTED_BOUNDS_SERIES_ID) return -1;
         return 1;
       }
     : undefined;
@@ -149,29 +176,7 @@ export function TimeseriesChart({
         <Tooltip
           stickTo="top"
           showNullValues={false}
-          headerFormatter={({ value }) => {
-            const formattedValue = xFormatter(value);
-            if (max === value) {
-              return (
-                <>
-                  <EuiFlexGroup
-                    alignItems="center"
-                    responsive={false}
-                    gutterSize="xs"
-                    css={{ fontWeight: 'normal' }}
-                  >
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="info" />
-                    </EuiFlexItem>
-                    <EuiFlexItem>{END_ZONE_LABEL}</EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiSpacer size="xs" />
-                  {formattedValue}
-                </>
-              );
-            }
-            return formattedValue;
-          }}
+          headerFormatter={({ value }) => tooltipHeaderFormatter(value)}
         />
         <Settings
           onBrushEnd={(event) => onBrushEnd({ x: (event as XYBrushEvent).x, history })}
@@ -228,31 +233,32 @@ export function TimeseriesChart({
           ]}
           style={endZoneRectAnnotationStyle}
         />
-        {allSeries.map((serie, index) => {
-          const Series = getChartType(serie.type);
+        {allSeries.map((series, index) => {
+          const Series = getChartType(series.type);
 
           return (
             <Series
               timeZone={timeZone}
-              key={serie.id ?? `${serie.title}-${index}`}
-              id={serie.id || serie.title}
-              groupId={serie.groupId}
+              key={series.id ?? `${series.title}-${index}`}
+              id={series.id || series.title}
+              name={series.title}
+              groupId={series.groupId}
               // Defaults to multi layer time axis as of Elastic Charts v70
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="x"
-              yAccessors={serie.yAccessors ?? ['y']}
-              y0Accessors={serie.y0Accessors}
-              stackAccessors={serie.stackAccessors ?? undefined}
-              markSizeAccessor={serie.markSizeAccessor}
-              data={isEmpty ? [] : serie.data}
-              color={serie.color}
+              yAccessors={series.yAccessors ?? ['y']}
+              y0Accessors={series.y0Accessors}
+              stackAccessors={series.stackAccessors ?? undefined}
+              markSizeAccessor={series.markSizeAccessor}
+              data={isEmpty ? [] : series.data}
+              color={series.color}
               curve={CurveType.CURVE_MONOTONE_X}
-              hideInLegend={serie.hideLegend}
-              fit={serie.fit ?? undefined}
-              filterSeriesInTooltip={serie.hideTooltipValue ? () => false : undefined}
-              areaSeriesStyle={serie.areaSeriesStyle}
-              lineSeriesStyle={serie.lineSeriesStyle}
+              hideInLegend={series.hideLegend}
+              fit={series.fit ?? undefined}
+              filterSeriesInTooltip={series.hideTooltipValue ? () => false : undefined}
+              areaSeriesStyle={series.areaSeriesStyle}
+              lineSeriesStyle={series.lineSeriesStyle}
             />
           );
         })}

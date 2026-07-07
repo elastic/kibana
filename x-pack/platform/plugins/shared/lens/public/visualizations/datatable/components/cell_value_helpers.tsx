@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import { EuiBadge, EuiLink } from '@elastic/eui';
 import classNames from 'classnames';
 import type { PaletteOutput } from '@kbn/coloring';
@@ -17,7 +17,7 @@ import type { DatatableColumnConfig } from '../../../../common/expressions';
 import { getContrastColor } from '../../../shared_components/coloring/utils';
 import type { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 
-export type RenderMode = 'badge' | 'link' | 'html';
+export type RenderMode = 'badge' | 'link' | 'formatted';
 
 export type Alignment = 'left' | 'right' | 'center' | undefined;
 
@@ -64,7 +64,7 @@ export const getRenderMode = (
 ): RenderMode => {
   if (colorMode === 'badge' && !isNonColorable) return 'badge';
   if (isClickable) return 'link';
-  return 'html';
+  return 'formatted';
 };
 
 /**
@@ -72,7 +72,7 @@ export const getRenderMode = (
  * dynamic coloring (cell/text/badge). They should remain subdued, consistent with
  * the non-colored ("none") mode.
  */
-export const isNonColorableValue = (rawValue: RawValue): boolean =>
+export const isEmptyValue = (rawValue: RawValue): boolean =>
   rawValue == null ||
   rawValue === MISSING_TOKEN ||
   rawValue === '' ||
@@ -102,7 +102,7 @@ export const applyCellColoring = ({
   isDarkMode,
 }: ApplyColoringArgs): React.CSSProperties | null => {
   if (colorMode === 'none' || colorMode === 'badge') return null;
-  if (isNonColorableValue(rawValue)) return null;
+  if (isEmptyValue(rawValue)) return null;
 
   const color = getCellColor(columnId, palette, colorMapping)(rawValue);
   if (!color) return null;
@@ -122,23 +122,25 @@ export const applyCellColoring = ({
 // Cell renderers
 // -----------------------------
 
-export interface HtmlCellProps {
-  content: string;
+export interface FormattedCellProps {
+  content: ReactNode;
   alignment: Alignment;
   fitRowToContent?: boolean;
   isColored: boolean;
 }
 
-export const HtmlCell = ({ content, alignment, fitRowToContent, isColored }: HtmlCellProps) => (
+export const FormattedCell = ({
+  content,
+  alignment,
+  fitRowToContent,
+  isColored,
+}: FormattedCellProps) => (
   <div
-    /*
-     * dangerouslySetInnerHTML is necessary because the field formatter might produce HTML markup
-     * which is produced in a safe way.
-     */
-    dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
     data-test-subj="lnsTableCellContent"
     className={getCellClassName(alignment, fitRowToContent, isColored)}
-  />
+  >
+    {content}
+  </div>
 );
 
 export interface LinkCellProps {

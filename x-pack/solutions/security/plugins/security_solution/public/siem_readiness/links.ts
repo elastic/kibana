@@ -13,7 +13,6 @@ import type { LinkItem } from '../common/links/types';
 
 export const siemReadinessLinks: LinkItem = {
   capabilities: [[`${SECURITY_FEATURE_ID}.show`]],
-  globalNavPosition: 13,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.siem_readiness', {
       defaultMessage: 'SIEM Readiness',

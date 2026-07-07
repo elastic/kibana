@@ -476,8 +476,7 @@ describe('IndexPattern', () => {
         })
       ).toEqual(
         expect.objectContaining({
-          convert: expect.any(Function),
-          getConverterFor: expect.any(Function),
+          convertToText: expect.any(Function),
         })
       );
     });

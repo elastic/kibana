@@ -15,11 +15,13 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
+  getChartHidden,
+  getTableHidden,
+  getSidebarHidden,
   getDefaultSort,
   getSortArray,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
-import { getChartHidden } from '@kbn/unified-histogram';
 import { cloneDeep } from 'lodash';
 import { ENABLE_ESQL, getInitialESQLQuery } from '@kbn/esql-utils';
 import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
@@ -66,6 +68,10 @@ export function getInitialAppState({
 
   if (typeof mergedState.hideTable !== 'boolean') {
     mergedState.hideTable = undefined;
+  }
+
+  if (typeof mergedState.hideSidebar !== 'boolean') {
+    mergedState.hideSidebar = undefined;
   }
 
   if (mergedState.hideChart && mergedState.hideTable) {
@@ -166,6 +172,8 @@ function getDefaultAppState({
       : persistedTab?.sort ?? [];
   const columns = getDefaultColumns(persistedTab, uiSettings);
   const chartHidden = getChartHidden(storage, 'discover');
+  const tableHidden = getTableHidden(storage, 'discover');
+  const sidebarHidden = getSidebarHidden(storage, 'discover');
   const dataSource = createDataSource({
     dataView: dataView ?? persistedTab?.serializedSearchSource.index,
     query,
@@ -186,6 +194,8 @@ function getDefaultAppState({
     interval: 'auto',
     filters: cloneDeep(persistedTab?.serializedSearchSource.filter),
     hideChart: chartHidden,
+    hideTable: tableHidden,
+    hideSidebar: sidebarHidden,
     viewMode: undefined,
     hideAggregatedPreview: undefined,
     savedQuery: undefined,

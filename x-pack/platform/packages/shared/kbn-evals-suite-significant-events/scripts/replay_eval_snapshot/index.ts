@@ -7,18 +7,52 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { Client } from '@elastic/elasticsearch';
-import type { Feature } from '@kbn/streams-schema';
+import type { Discovery, Feature } from '@kbn/significant-events-schema';
 import {
   SIGEVENTS_SNAPSHOT_RUN,
   replaySignificantEventsSnapshot,
   listAvailableSnapshots,
   loadKIFeaturesFromSnapshot,
+  loadKnowledgeIndicatorsFromSnapshot,
+  loadDiscoveriesFromSnapshot,
+  loadDetectionsFromSnapshot,
 } from '../../src/data_generators/replay';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import { getAllDatasetIds, getDatasetById } from '../../src/datasets';
 import { readKibanaConfig } from '../lib/kibana';
 
 const MANAGED_STREAM_SEARCH_PATTERN = 'logs*';
+
+/**
+ * A feature as stored in the raw KI index: flat envelope fields plus the domain feature payload
+ * nested under `feature` (see `toStoredFeature`). Reshaped via {@link toFeature} for display.
+ */
+interface StoredKiFeature {
+  id?: string;
+  title?: string;
+  description?: string;
+  evidence?: string[];
+  feature?: {
+    type?: Feature['type'];
+    subtype?: Feature['subtype'];
+    properties?: Feature['properties'];
+    confidence?: Feature['confidence'];
+    filter?: Feature['filter'];
+  };
+}
+
+const toFeature = (ki: StoredKiFeature): Feature =>
+  ({
+    id: ki.id,
+    type: ki.feature?.type,
+    subtype: ki.feature?.subtype,
+    title: ki.title,
+    description: ki.description,
+    properties: ki.feature?.properties,
+    confidence: ki.feature?.confidence,
+    evidence: ki.evidence,
+    filter: ki.feature?.filter,
+  } as Feature);
 
 const formatFeature = (feature: Feature): string[] => {
   const lines: string[] = [];
@@ -39,6 +73,44 @@ const formatFeature = (feature: Feature): string[] => {
   if (feature.filter) {
     lines.push(`    filter: ${JSON.stringify(feature.filter)}`);
   }
+  return lines;
+};
+
+const formatDiscovery = (discovery: Discovery): string[] => {
+  const lines: string[] = [];
+  lines.push(
+    `  [${discovery.kind}] ${discovery.discovery_slug} — ${discovery.title ?? '(untitled)'}`
+  );
+  lines.push(`    summary: ${discovery.summary}`);
+  lines.push(`    root cause: ${discovery.root_cause}`);
+
+  if (discovery.evidences?.length) {
+    lines.push(`    evidence (${discovery.evidences.length}):`);
+    for (const e of discovery.evidences.slice(0, 5)) {
+      lines.push(`      - rule: ${e.rule_name} `);
+      lines.push(`      - query: ${e.esql_query}`);
+      lines.push(`      - description: ${e.description}`);
+      lines.push(`      - result: ${e.result}`);
+    }
+    if (discovery.evidences.length > 5) {
+      lines.push(`      ... and ${discovery.evidences.length - 5} more`);
+    }
+  }
+
+  if (discovery.cause_kis?.length) {
+    lines.push(`    cause kis: (${discovery.cause_kis.length}):`);
+    for (const ki of discovery.cause_kis.slice(0, 5)) {
+      lines.push(`      - ${ki.name}`);
+    }
+  }
+
+  if (discovery.dependency_edges?.length) {
+    lines.push(`    dependency edges: (${discovery.dependency_edges.length}):`);
+    for (const edge of discovery.dependency_edges.slice(0, 5)) {
+      lines.push(`      - ${edge.source} -> ${edge.target}: ${edge.exposure}`);
+    }
+  }
+
   return lines;
 };
 
@@ -112,9 +184,38 @@ run(
     await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
 
     log.info('');
-    log.info('Step 2/3 — Loading KI features from snapshot (same as ki_query_generation)...');
+    log.info(
+      'Step 2/3 — Loading snapshot artifacts (features, queries, discoveries, detections)...'
+    );
+    log.info('Each loader returns [] when its index is absent (e.g. features-only snapshots).');
     const streamName = String(flags['stream-name'] || 'logs');
-    const features = await loadKIFeaturesFromSnapshot(esClient, log, scenario, gcs, streamName);
+    const knowledgeIndicators = await loadKnowledgeIndicatorsFromSnapshot(
+      esClient,
+      log,
+      scenario,
+      gcs
+    );
+    const queries = knowledgeIndicators.filter(
+      (ki): ki is { id?: string; query?: { rule_id?: string } } =>
+        (ki as { type?: string }).type === 'query'
+    );
+
+    // Prefer the dedicated (retro-compat) features index; older snapshots only have it there.
+    // Newer snapshots also carry features inside the raw KI index — fall back to those, reshaping
+    // the stored KI doc (flat id/title/description/evidence + nested feature.{type,subtype,...})
+    // back into the flat `Feature` shape `formatFeature` expects.
+    let features = await loadKIFeaturesFromSnapshot(esClient, log, scenario, gcs, streamName);
+    if (features.length === 0) {
+      features = knowledgeIndicators
+        .filter(
+          (ki) =>
+            (ki as { type?: string }).type === 'feature' &&
+            (ki as StoredKiFeature).feature?.type != null
+        )
+        .map((ki) => toFeature(ki as StoredKiFeature));
+    }
+    const discoveries = await loadDiscoveriesFromSnapshot(esClient, log, scenario, gcs);
+    const detections = await loadDetectionsFromSnapshot(esClient, log, scenario, gcs);
 
     log.info('');
     log.info('Step 3/3 — Data summary');
@@ -155,6 +256,35 @@ run(
       log.info('  (none found in snapshot)');
     }
 
+    log.info(`\nSnapshot KI queries (${queries.length}):`);
+    if (queries.length > 0) {
+      for (const query of queries) {
+        log.info(`  rule_id: ${query.query?.rule_id ?? '(none)'} (id: ${query.id ?? '(none)'})`);
+      }
+    } else {
+      log.info('  (none — snapshot taken without query onboarding)');
+    }
+
+    log.info(`\nSnapshot discoveries (${discoveries.length}):`);
+    if (discoveries.length > 0) {
+      for (const discovery of discoveries) {
+        for (const line of formatDiscovery(discovery)) {
+          log.info(line);
+        }
+      }
+    } else {
+      log.info('  (none — snapshot taken without --discovery)');
+    }
+
+    log.info(`\nSnapshot detections (${detections.length}):`);
+    if (detections.length > 0) {
+      for (const detection of detections) {
+        log.info(`  [${detection.kind}] ${detection.rule_name} (${detection.rule_uuid})`);
+      }
+    } else {
+      log.info('  (none — snapshot taken without --discovery)');
+    }
+
     log.info('');
     log.info('='.repeat(70));
     log.info('REPLAY COMPLETE');
@@ -177,6 +307,12 @@ run(
       This script uses the same functions as the eval specs:
         - replaySignificantEventsSnapshot (ki_feature_extraction path)
         - loadKIFeaturesFromSnapshot (ki_query_generation path)
+        - loadKnowledgeIndicatorsFromSnapshot / loadDiscoveriesFromSnapshot /
+          loadDetectionsFromSnapshot (discovery investigator/judge paths)
+
+      Query, discovery, and detection artifacts are only present when the
+      snapshot was captured with query onboarding / --discovery; otherwise
+      those loaders report zero documents.
 
       Use this to inspect snapshot data when refining evaluation criteria
       and expected ground truth for any dataset (otel-demo, bank-of-anthos,

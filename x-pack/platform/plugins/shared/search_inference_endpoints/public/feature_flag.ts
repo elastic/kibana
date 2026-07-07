@@ -6,15 +6,7 @@
  */
 
 import type { IUiSettingsClient } from '@kbn/core/public';
-import {
-  ELASTIC_INFERENCE_SERVICE_FEATURE_FLAG_ID,
-  MODEL_SETTINGS_FEATURE_FLAG_ID,
-} from '../common/constants';
+import { INFERENCE_PREFERENCES_FEATURE_FLAG_ID } from '../common/constants';
 
-export function isModelSettingsEnabled(uiSettings: IUiSettingsClient): boolean {
-  return uiSettings.get<boolean>(MODEL_SETTINGS_FEATURE_FLAG_ID, true);
-}
-
-export function isElasticInferenceServiceEnabled(uiSettings: IUiSettingsClient): boolean {
-  return uiSettings.get<boolean>(ELASTIC_INFERENCE_SERVICE_FEATURE_FLAG_ID, true);
-}
+export const isInferencePreferencesEnabled = (uiSettings: IUiSettingsClient): boolean =>
+  uiSettings.get<boolean>(INFERENCE_PREFERENCES_FEATURE_FLAG_ID, false);

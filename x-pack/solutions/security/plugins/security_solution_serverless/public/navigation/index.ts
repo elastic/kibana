@@ -5,14 +5,18 @@
  * 2.0.
  */
 
+import type { Subscription } from 'rxjs';
 import type { SecurityProductTypes } from '../../common/config';
 import type { Services } from '../common/services';
 import { subscribeBreadcrumbs } from './breadcrumbs';
 import { registerSolutionNavigation } from './navigation';
 import { enableManagementCardsLanding } from './management_cards';
 
-export const startNavigation = (services: Services, productTypes: SecurityProductTypes) => {
+export const startNavigation = (
+  services: Services,
+  productTypes: SecurityProductTypes
+): Subscription => {
   registerSolutionNavigation(services, productTypes);
-  enableManagementCardsLanding(services);
   subscribeBreadcrumbs(services);
+  return enableManagementCardsLanding(services);
 };

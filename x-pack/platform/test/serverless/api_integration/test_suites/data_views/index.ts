@@ -11,18 +11,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('index_patterns', function () {
     this.tags(['esGate']);
 
+    // Remaining FTR coverage. The rest of this suite has been migrated to Scout under
+    // `src/platform/plugins/shared/data_views/test/scout/api/tests/`.
     loadTestFile(require.resolve('./es_errors'));
-    loadTestFile(require.resolve('./existing_indices_route'));
-    loadTestFile(require.resolve('./fields_for_wildcard_route'));
-    loadTestFile(require.resolve('./data_views_crud'));
-    // TODO: Removed `scripted_fields_crud` since
-    // scripted fields are not supported in Serverless
-    loadTestFile(require.resolve('./fields_api'));
-    loadTestFile(require.resolve('./runtime_fields_crud'));
-    loadTestFile(require.resolve('./integration'));
-    // TODO: Removed `deprecations` since
-    // scripted fields are not supported in Serverless
-    loadTestFile(require.resolve('./has_user_index_pattern'));
-    loadTestFile(require.resolve('./swap_references'));
   });
 }

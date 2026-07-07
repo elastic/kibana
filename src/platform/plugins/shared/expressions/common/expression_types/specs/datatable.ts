@@ -54,6 +54,7 @@ export type DatatableColumnType =
   | 'object'
   | 'nested'
   | 'histogram'
+  | 'flattened'
   | 'null';
 
 /**
@@ -102,6 +103,10 @@ export interface DatatableColumnMeta {
    * any extra parameters for the source that produced this column
    */
   sourceParams?: SerializableRecord;
+  /**
+   * raw metadata from the data source (e.g. ES column _meta)
+   */
+  esMeta?: Record<string, unknown>;
 }
 
 interface SourceParamsESQL extends Record<string, unknown> {

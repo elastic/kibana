@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/react-kibana-context-render'
   - '@kbn/lens-common'
+  - '@kbn/i18n'
 tags:
   - plugin
   - prod

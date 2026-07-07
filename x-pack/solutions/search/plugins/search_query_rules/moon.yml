@@ -41,6 +41,7 @@ dependsOn:
   - '@kbn/usage-collection-plugin'
   - '@kbn/cloud-plugin'
   - '@kbn/react-query'
+  - '@kbn/core-chrome-browser'
 tags:
   - plugin
   - prod

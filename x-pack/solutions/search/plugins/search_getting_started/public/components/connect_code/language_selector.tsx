@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 import type { AvailableLanguages } from '@kbn/search-code-examples/src/getting-started-tutorials';
 import type { CodeLanguage } from '@kbn/search-code-examples/src/getting-started-tutorials/types';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 export interface LanguageSelectorProps {
   selectedLanguage: AvailableLanguages;
@@ -27,21 +29,25 @@ export const LanguageSelector = ({
   showLabel = false,
 }: LanguageSelectorProps) => {
   const assetBasePath = useAssetBasePath();
+  const usageTracker = useUsageTracker();
   const languageOptions = useMemo(
     () =>
       options.map((lang) => ({
         value: lang.id as AvailableLanguages,
-        'aria-label': i18n.translate('xpack.gettingStarted.codeLanguage.selectChangeAriaLabel', {
-          defaultMessage:
-            'Change language of code examples to {language} for every instance on this page',
-          values: {
-            language: lang.title,
-          },
-        }),
+        'aria-label': i18n.translate(
+          'xpack.searchGettingStarted.codeLanguage.selectChangeAriaLabel',
+          {
+            defaultMessage:
+              'Change language of code examples to {language} for every instance on this page',
+            values: {
+              language: lang.title,
+            },
+          }
+        ),
         'data-test-subj': `lang-option-${lang.id}`,
         inputDisplay: (
           <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiIcon type={`${assetBasePath}/${lang.icon}`} />
+            <EuiIcon type={`${assetBasePath}/${lang.icon}`} aria-hidden={true} />
             <EuiText>{lang.title}</EuiText>
           </EuiFlexGroup>
         ),
@@ -52,17 +58,23 @@ export const LanguageSelector = ({
     <EuiSuperSelect<AvailableLanguages>
       prepend={
         showLabel
-          ? i18n.translate('xpack.gettingStarted.codeLanguage.selectLabel', {
+          ? i18n.translate('xpack.searchGettingStarted.codeLanguage.selectLabel', {
               defaultMessage: 'Language',
             })
           : undefined
       }
-      aria-label={i18n.translate('xpack.gettingStarted.codeLanguage.selectLabel', {
+      aria-label={i18n.translate('xpack.searchGettingStarted.codeLanguage.selectLabel', {
         defaultMessage: 'Select a programming language for the code examples',
       })}
       options={languageOptions}
       valueOfSelected={selectedLanguage}
-      onChange={onSelectLanguage}
+      onChange={(value) => {
+        usageTracker.click([
+          AnalyticsEvents.languageSelected,
+          `${AnalyticsEvents.languageSelected}_${value}`,
+        ]);
+        onSelectLanguage(value);
+      }}
       data-test-subj="codeExampleLanguageSelect"
     />
   );

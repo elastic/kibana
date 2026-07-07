@@ -14,12 +14,12 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * Type of rule execution run.
  */
+export const RuleRunType = lazySchema(() => z.enum(['backfill', 'standard']));
 export type RuleRunType = z.infer<typeof RuleRunType>;
-export const RuleRunType = z.enum(['backfill', 'standard']);
 export type RuleRunTypeEnum = typeof RuleRunType.enum;
 export const RuleRunTypeEnum = RuleRunType.enum;

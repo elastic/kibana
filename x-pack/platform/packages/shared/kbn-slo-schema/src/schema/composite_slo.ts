@@ -5,84 +5,153 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { dateType, errorBudgetSchema, statusSchema } from './common';
-import { rollingTimeWindowSchema } from './time_window';
-import { occurrencesBudgetingMethodSchema, sloIdSchema, tagsSchema, targetSchema } from './slo';
+import { z } from '@kbn/zod';
 
-const compositeSloMemberSchema = t.intersection([
-  t.type({
-    sloId: sloIdSchema,
-    weight: t.number,
-  }),
-  t.partial({
-    instanceId: t.string,
-  }),
-]);
+const COMPOSITE_SLO_MIN_MEMBERS = 2;
+const COMPOSITE_SLO_MAX_MEMBERS = 25;
 
-const compositeMethodSchema = t.literal('weightedAverage');
+const compositeSloIdSchema = z
+  .string()
+  .min(8)
+  .max(48)
+  .regex(
+    /^[a-z0-9-_]+$/,
+    'Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores'
+  );
 
-const compositeSloBaseDefinitionSchema = t.type({
-  id: sloIdSchema,
-  name: t.string,
-  description: t.string,
-  compositeMethod: compositeMethodSchema,
-  timeWindow: rollingTimeWindowSchema,
-  budgetingMethod: occurrencesBudgetingMethodSchema,
-  objective: targetSchema,
-  tags: tagsSchema,
-  enabled: t.boolean,
-  createdAt: dateType,
-  updatedAt: dateType,
-  createdBy: t.string,
-  updatedBy: t.string,
-  version: t.number,
+const compositeTagsSchema = z.array(z.string()).max(30);
+
+const compositeTargetSchema = z.object({ target: z.number() });
+
+const compositeOccurrencesBudgetingMethodSchema = z.literal('occurrences');
+
+const compositeRollingTimeWindowSchema = z.object({
+  duration: z.string(),
+  type: z.literal('rolling'),
 });
 
-const compositeSloDefinitionSchema = t.intersection([
-  compositeSloBaseDefinitionSchema,
-  t.type({
-    members: t.array(compositeSloMemberSchema),
-  }),
+const compositeSloMemberSchema = z.object({
+  sloId: compositeSloIdSchema,
+  weight: z.number().int().positive(),
+  instanceId: z.string().optional(),
+});
+
+const compositeSloMembersSchema = z
+  .array(compositeSloMemberSchema)
+  .min(COMPOSITE_SLO_MIN_MEMBERS)
+  .max(COMPOSITE_SLO_MAX_MEMBERS)
+  .refine(
+    (members) => {
+      const keys = members.map(({ sloId, instanceId }) => `${sloId}:${instanceId ?? ''}`);
+      return new Set(keys).size === keys.length;
+    },
+    { message: 'Composite SLO members must be unique by sloId and instanceId' }
+  );
+
+const compositeMethodSchema = z.literal('weightedAverage');
+
+const compositeErrorBudgetSchema = z.object({
+  initial: z.number(),
+  consumed: z.number(),
+  remaining: z.number(),
+  isEstimated: z.boolean(),
+});
+
+const compositeStatusSchema = z.union([
+  z.literal('NO_DATA'),
+  z.literal('HEALTHY'),
+  z.literal('DEGRADING'),
+  z.literal('VIOLATED'),
 ]);
+
+const compositeSloBaseDefinitionSchema = z.object({
+  id: compositeSloIdSchema,
+  name: z.string(),
+  description: z.string(),
+  compositeMethod: compositeMethodSchema,
+  timeWindow: compositeRollingTimeWindowSchema,
+  budgetingMethod: compositeOccurrencesBudgetingMethodSchema,
+  objective: compositeTargetSchema,
+  tags: compositeTagsSchema,
+  enabled: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  createdBy: z.string(),
+  updatedBy: z.string(),
+  version: z.number(),
+});
+
+const compositeSloDefinitionSchema = compositeSloBaseDefinitionSchema.extend({
+  members: z
+    .array(compositeSloMemberSchema)
+    .min(COMPOSITE_SLO_MIN_MEMBERS)
+    .max(COMPOSITE_SLO_MAX_MEMBERS),
+});
 
 const storedCompositeSloDefinitionSchema = compositeSloDefinitionSchema;
 
-const compositeSloMemberSummarySchema = t.intersection([
-  t.type({
-    id: t.string,
-    name: t.string,
-    weight: t.number,
-    normalisedWeight: t.number,
-    sliValue: t.number,
-    contribution: t.number,
-    status: statusSchema,
-  }),
-  t.partial({
-    instanceId: t.string,
-  }),
-]);
-
-const compositeSloSummarySchema = t.type({
-  sliValue: t.number,
-  errorBudget: errorBudgetSchema,
-  status: statusSchema,
-  fiveMinuteBurnRate: t.number,
-  oneHourBurnRate: t.number,
-  oneDayBurnRate: t.number,
+// A member summary extends the plain definition member (`sloId`, `weight`, `instanceId`)
+// with the computed per-member health, so a `CompositeSLOMemberWithSummary` is assignable to
+// a `CompositeSLOMember`.
+const compositeSloMemberWithSummarySchema = compositeSloMemberSchema.extend({
+  name: z.string(),
+  normalisedWeight: z.number(),
+  sliValue: z.number(),
+  status: compositeStatusSchema,
+  errorBudget: compositeErrorBudgetSchema.optional(),
+  fiveMinuteBurnRate: z.number().optional(),
+  oneHourBurnRate: z.number().optional(),
+  oneDayBurnRate: z.number().optional(),
 });
 
-export type CompositeSLOMember = t.TypeOf<typeof compositeSloMemberSchema>;
-export type CompositeMethod = t.TypeOf<typeof compositeMethodSchema>;
-export type CompositeSLOMemberSummary = t.TypeOf<typeof compositeSloMemberSummarySchema>;
-export type CompositeSLOSummary = t.TypeOf<typeof compositeSloSummarySchema>;
+const compositeSloSummarySchema = z.object({
+  sliValue: z.number(),
+  errorBudget: compositeErrorBudgetSchema,
+  status: compositeStatusSchema,
+  fiveMinuteBurnRate: z.number(),
+  oneHourBurnRate: z.number(),
+  oneDayBurnRate: z.number(),
+});
+
+const compositeSloDefinitionResponseSchema = compositeSloDefinitionSchema;
+
+// The summary response strictly extends the definition response: it keeps every definition
+// field (including `members`, now widened to member summaries) and adds the composite `summary`.
+const compositeSloWithSummaryResponseSchema = compositeSloDefinitionSchema.extend({
+  summary: compositeSloSummarySchema,
+  members: z.array(compositeSloMemberWithSummarySchema),
+});
+
+type CompositeSLOMemberWithSummary = z.infer<typeof compositeSloMemberWithSummarySchema>;
+type CompositeSLOSummary = z.infer<typeof compositeSloSummarySchema>;
+type CompositeSLODefinitionResponse = z.infer<typeof compositeSloDefinitionResponseSchema>;
+type CompositeSLOWithSummaryResponse = z.infer<typeof compositeSloWithSummaryResponseSchema>;
+
+export type {
+  CompositeSLOMemberWithSummary,
+  CompositeSLOSummary,
+  CompositeSLODefinitionResponse,
+  CompositeSLOWithSummaryResponse,
+};
 
 export {
+  COMPOSITE_SLO_MIN_MEMBERS,
+  COMPOSITE_SLO_MAX_MEMBERS,
+  compositeSloIdSchema,
+  compositeTagsSchema,
+  compositeTargetSchema,
+  compositeOccurrencesBudgetingMethodSchema,
+  compositeRollingTimeWindowSchema,
   compositeSloMemberSchema,
+  compositeSloMembersSchema,
   compositeMethodSchema,
+  compositeErrorBudgetSchema,
+  compositeStatusSchema,
   compositeSloBaseDefinitionSchema,
   compositeSloDefinitionSchema,
   storedCompositeSloDefinitionSchema,
-  compositeSloMemberSummarySchema,
+  compositeSloMemberWithSummarySchema,
   compositeSloSummarySchema,
+  compositeSloDefinitionResponseSchema,
+  compositeSloWithSummaryResponseSchema,
 };

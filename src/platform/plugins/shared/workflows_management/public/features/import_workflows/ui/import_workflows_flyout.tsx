@@ -216,6 +216,7 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
           hasConflicts && conflictResolution === CONFLICT_RESOLUTION_GENERATE_NEW_IDS
             ? true
             : undefined,
+        conflictIds: preflightResult.conflicts,
       },
       {
         onSuccess: (result) => {

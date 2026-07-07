@@ -1,5 +1,5 @@
 # Generate schema by calling:
-# node scripts/generate_openapi.js --rootDir x-pack/solutions/security/plugins/entity_store/
+# cd x-pack/solutions/security/plugins/entity_store && yarn openapi:generate
 openapi: 3.0.0
 info:
   title: Common Entities Schemas
@@ -56,35 +56,53 @@ components:
 
     EngineMetadata:
       type: object
+      description: Internal metadata attached to an entity by the engine that produced it.
       additionalProperties: false
       properties:
         Type:
           type: string
+          description: The engine type that produced this entity record.
 
     EntityField:
       type: object
+      description: Core entity fields shared across all entity types.
       additionalProperties: false
       properties:
         id:
           type: string
+          description: Unique identifier for this entity.
+          example: 'user:jane.doe@example.com'
         name:
           type: string
+          description: Human-readable name of the entity.
+          example: 'jane.doe'
         type:
           type: string
+          description: The entity type.
+          example: 'user'
         sub_type:
           type: string
+          description: Optional sub-type classification for the entity.
         source:
           type: array
+          description: Sources that produced this entity record.
+          example:
+            - 'logs'
+            - 'manual'
           items:
             type: string
         schema_version:
           type: string
+          description: Schema version of the entity record.
+          example: 'v1'
         url:
           type: string
+          description: URL associated with the entity.
         EngineMetadata:
           $ref: '#/components/schemas/EngineMetadata'
         attributes:
           type: object
+          description: Boolean flags describing characteristics of the entity.
           additionalProperties: false
           properties:
             watchlists:
@@ -94,10 +112,13 @@ components:
               description: Watchlist identifiers the entity belongs to (v2).
             asset:
               type: boolean
+              description: Whether the entity is classified as an asset.
             managed:
               type: boolean
+              description: Whether the entity is managed (for example, via a directory service).
             mfa_enabled:
               type: boolean
+              description: Whether multi-factor authentication is enabled for the entity.
             storage_class:
               type: string
               description: Storage tier or class assigned to a storage resource (e.g. hot, warm, cold, standard, archive).
@@ -116,6 +137,7 @@ components:
               description: OAuth consent restriction (e.g. admin_only, verified_only, unrestricted).
         behaviors:
           type: object
+          description: Behavioral signals observed for the entity.
           additionalProperties: false
           properties:
             rule_names:
@@ -127,42 +149,59 @@ components:
               type: array
               items:
                 type: string
-              description: ML anomaly job identifiers (v2).
+              description: Machine learning anomaly job identifiers (v2).
         lifecycle:
           type: object
+          description: Timestamps tracking the entity lifecycle.
           additionalProperties: false
           properties:
             first_seen:
               type: string
               format: date-time
+              description: When the entity was first observed.
+              example: '2026-01-15T10:00:00.000Z'
             last_seen:
               type: string
               format: date-time
+              description: When the entity was last observed.
+              example: '2026-04-10T08:30:00.000Z'
             last_activity:
               type: string
               format: date-time
+              description: When the entity last generated activity.
+              example: '2026-04-10T08:25:00.000Z'
         relationships:
           type: object
+          description: Connections between this entity and other entities.
           additionalProperties: false
           properties:
             administers:
               $ref: '#/components/schemas/EntityRelationship'
+              description: Entities this entity administers (for example, a user who is an admin of a service).
             communicates_with:
               $ref: '#/components/schemas/EntityRelationship'
+              description: Entities this entity communicates with.
             depends_on:
               $ref: '#/components/schemas/EntityRelationship'
+              description: Entities this entity depends on.
             owns_inferred:
               $ref: '#/components/schemas/EntityRelationship'
+              description: Entities inferred to be owned by this entity.
             accesses_infrequently:
               $ref: '#/components/schemas/EntityRelationship'
+              description: Entities this entity accesses infrequently.
             accesses_frequently:
               $ref: '#/components/schemas/EntityRelationship'
+              description: Entities this entity accesses frequently.
             owns:
               $ref: '#/components/schemas/EntityRelationship'
+              description: Entities owned by this entity.
             supervises:
               $ref: '#/components/schemas/EntityRelationship'
+              description: Entities supervised by this entity.
             resolution:
               type: object
+              description: Resolution metadata linking this entity to another.
               additionalProperties: false
               properties:
                 resolved_to:
@@ -170,6 +209,7 @@ components:
                   description: entity.id of the entity this one resolves to
                 risk:
                   type: object
+                  description: Aggregated risk score for the resolution group.
                   additionalProperties: false
                   properties:
                     calculated_level:
@@ -187,6 +227,7 @@ components:
                       description: The normalized numeric value of the resolution group's aggregated risk score.
         risk:
           type: object
+          description: Risk scoring information for the entity.
           additionalProperties: false
           properties:
             calculated_level:
@@ -197,74 +238,117 @@ components:
               type: number
               format: double
               description: The raw numeric value of the given entity's risk score.
+              example: 83.2
             calculated_score_norm:
               type: number
               format: double
               minimum: 0
               maximum: 100
               description: The normalized numeric value of the given entity's risk score. Useful for comparing with other entities.
+              example: 83.2
 
     Asset:
       type: object
+      description: Asset metadata associated with the entity.
       additionalProperties: false
       properties:
         id:
           type: string
+          description: Unique identifier for the asset.
+          example: 'asset-web-server-prod-01'
         name:
           type: string
+          description: Human-readable asset name.
+          example: 'web-server-prod-01'
         owner:
           type: string
+          description: The owner of the asset.
+          example: 'platform-team'
         serial_number:
           type: string
+          description: Serial number of the asset.
+          example: 'SN-2026-04-0042'
         model:
           type: string
+          description: Model name or number.
+          example: 'm5.xlarge'
         vendor:
           type: string
+          description: Vendor or manufacturer.
+          example: 'AWS'
         environment:
           type: string
+          description: Deployment environment (for example, production, staging).
+          example: 'production'
         criticality:
           nullable: true
           $ref: '#/components/schemas/AssetCriticalityLevel'
+          description: The criticality level assigned to this asset.
+          example: 'high_impact'
         business_unit:
           type: string
+          description: Business unit the asset belongs to.
+          example: 'Engineering'
 
     UserEntity:
       type: object
+      description: An entity record representing a user.
       additionalProperties: false
       properties:
         "@timestamp":
           type: string
           format: date-time
+          description: The time the entity record was last updated.
         entity:
           $ref: '#/components/schemas/EntityField'
         user:
           type: object
+          description: Elastic Common Schema (ECS) user fields collected on the entity.
           additionalProperties: false
           properties:
             full_name:
               type: array
+              description: Observed full names of the user.
+              example:
+                - 'Jane Doe'
               items:
                 type: string
             domain:
               type: array
+              description: Observed user domains.
+              example:
+                - 'example.com'
               items:
                 type: string
             roles:
               type: array
+              description: Observed roles assigned to the user.
+              example:
+                - 'admin'
+                - 'analyst'
               items:
                 type: string
             name:
               type: string
+              description: Primary user name.
+              example: 'jane.doe'
             id:
               type: array
+              description: Observed user identifiers.
+              example:
+                - 'u-1234'
               items:
                 type: string
             email:
               type: array
+              description: Observed email addresses.
+              example:
+                - 'jane.doe@example.com'
               items:
                 type: string
             hash:
               type: array
+              description: Observed user hashes.
               items:
                 type: string
             risk:
@@ -274,9 +358,11 @@ components:
           additionalProperties: false
         labels:
           type: object
+          description: Custom key-value labels attached to the entity.
           additionalProperties: true
         tags:
           type: array
+          description: Tags attached to the entity.
           items:
             type: string
         event:
@@ -286,54 +372,80 @@ components:
             ingested:
               type: string
               format: date-time
+              description: When the event was ingested into Elasticsearch.
 
     HostEntity:
       type: object
+      description: An entity record representing a host.
       additionalProperties: false
       properties:
         "@timestamp":
           type: string
           format: date-time
+          description: The time the entity record was last updated.
         entity:
           $ref: '#/components/schemas/EntityField'
         host:
           type: object
+          description: Elastic Common Schema (ECS) host fields collected on the entity.
           additionalProperties: false
           properties:
             hostname:
               type: array
+              description: Observed hostnames.
+              example:
+                - 'web-server-prod-01.example.com'
               items:
                 type: string
             domain:
               type: array
+              description: Observed host domains.
+              example:
+                - 'example.com'
               items:
                 type: string
             ip:
               type: array
+              description: Observed IP addresses.
+              example:
+                - '10.0.1.42'
+                - '172.16.0.5'
               items:
                 type: string
             name:
               type: string
+              description: Primary host name.
+              example: 'web-server-prod-01'
             id:
               type: array
+              description: Observed host identifiers.
+              example:
+                - 'i-0abcd1234efgh5678'
               items:
                 type: string
             type:
               type: array
+              description: Observed host types.
               items:
                 type: string
             mac:
               type: array
+              description: Observed MAC addresses.
+              example:
+                - '02:42:ac:11:00:02'
               items:
                 type: string
             architecture:
               type: array
+              description: Observed CPU architectures.
+              example:
+                - 'x86_64'
               items:
                 type: string
             os:
               type: object
               additionalProperties: false
-              description: ECS host.os fields materialized on the entity latest index (v2).
+              description: Elastic Common Schema (ECS) host.os fields collected on the entity latest index (v2).
               properties:
                 name:
                   oneOf:
@@ -364,9 +476,11 @@ components:
           additionalProperties: false
         labels:
           type: object
+          description: Custom key-value labels attached to the entity.
           additionalProperties: true
         tags:
           type: array
+          description: Tags attached to the entity.
           items:
             type: string
         event:
@@ -376,48 +490,71 @@ components:
             ingested:
               type: string
               format: date-time
+              description: When the event was ingested into Elasticsearch.
 
     ServiceEntity:
       type: object
+      description: An entity record representing a service.
       additionalProperties: false
       properties:
         "@timestamp":
           type: string
           format: date-time
+          description: The time the entity record was last updated.
         entity:
           $ref: '#/components/schemas/EntityField'
         service:
           type: object
+          description: Elastic Common Schema (ECS) service fields collected on the entity.
           additionalProperties: false
           properties:
             name:
               type: string
+              description: Primary service name.
+              example: 'api-gateway'
             address:
               type: string
+              description: Service address.
+              example: 'api-gateway.default.svc.cluster.local:8080'
             environment:
               type: string
+              description: Service environment (for example, production, staging).
+              example: 'production'
             ephemeral_id:
               type: string
+              description: Ephemeral identifier of the service.
             id:
               type: string
+              description: Unique identifier of the service.
+              example: 'svc-api-gateway-prod'
             node:
               type: object
+              description: Node information for the service.
               additionalProperties: false
               properties:
                 name:
                   type: string
+                  description: Node name.
                 role:
                   type: string
+                  description: Node role.
                 roles:
                   type: array
+                  description: Node roles.
                   items:
                     type: string
             state:
               type: string
+              description: Current state of the service.
+              example: 'running'
             type:
               type: string
+              description: Service type.
+              example: 'http'
             version:
               type: string
+              description: Service version.
+              example: '2.4.1'
             risk:
               $ref: '#/components/schemas/EntityRiskSummary'
         asset:
@@ -425,9 +562,11 @@ components:
           additionalProperties: false
         labels:
           type: object
+          description: Custom key-value labels attached to the entity.
           additionalProperties: true
         tags:
           type: array
+          description: Tags attached to the entity.
           items:
             type: string
         event:
@@ -437,14 +576,17 @@ components:
             ingested:
               type: string
               format: date-time
+              description: When the event was ingested into Elasticsearch.
 
     GenericEntity:
       type: object
+      description: A generic entity record that can represent cloud resources, orchestrator workloads, or other entity types not covered by user, host, or service.
       additionalProperties: false
       properties:
         "@timestamp":
           type: string
           format: date-time
+          description: The time the entity record was last updated.
         entity:
           $ref: '#/components/schemas/EntityField'
         asset:
@@ -452,6 +594,7 @@ components:
           additionalProperties: false
         cloud:
           type: object
+          description: Elastic Common Schema (ECS) cloud fields for cloud-hosted entities.
           additionalProperties: false
           properties:
             account:
@@ -460,36 +603,46 @@ components:
               properties:
                 id:
                   type: string
+                  example: '123456789012'
                 name:
                   type: string
+                  example: 'production-account'
             availability_zone:
               type: string
+              example: 'us-east-1a'
             instance:
               type: object
               additionalProperties: false
               properties:
                 id:
                   type: string
+                  example: 'i-0abcd1234efgh5678'
                 name:
                   type: string
+                  example: 'web-server-prod-01'
             machine:
               type: object
               additionalProperties: false
               properties:
                 type:
                   type: string
+                  example: 'm5.xlarge'
             project:
               type: object
               additionalProperties: false
               properties:
                 id:
                   type: string
+                  example: 'proj-analytics-01'
                 name:
                   type: string
+                  example: 'analytics'
             provider:
               type: string
+              example: 'aws'
             region:
               type: string
+              example: 'us-east-1'
             service:
               type: object
               additionalProperties: false
@@ -498,26 +651,34 @@ components:
                   type: string
         orchestrator:
           type: object
+          description: Elastic Common Schema (ECS) orchestrator fields for container-orchestrated entities.
           additionalProperties: false
           properties:
             api_version:
               type: string
+              example: 'v1'
             cluster:
               type: object
               additionalProperties: false
               properties:
                 id:
                   type: string
+                  example: 'cls-abc123'
                 name:
                   type: string
+                  example: 'prod-k8s'
                 url:
                   type: string
+                  example: 'https://k8s.example.com:6443'
                 version:
                   type: string
+                  example: '1.29.2'
             namespace:
               type: string
+              example: 'default'
             organization:
               type: string
+              example: 'engineering'
             resource:
               type: object
               additionalProperties: false
@@ -557,12 +718,8 @@ components:
               type: string
               format: date-time
 
-    # These entities represent the API of Entity Store
-    # where entity is a root field, as it's in the final
-    # index for entities. Note that this is different from the
-    # source logs mapping where `entity` will be nested under
-    # `host`, `user` and `service`
     Entity:
+      description: An entity record from the Entity Store. The `entity` namespace is a root-level field in the latest index, unlike source logs where it is nested under `host`, `user`, or `service`.
       oneOf:
         - $ref: '#/components/schemas/UserEntity'
         - $ref: '#/components/schemas/HostEntity'
@@ -587,19 +744,23 @@ components:
         calculated_level:
           $ref: '#/components/schemas/EntityRiskLevels'
           description: Lexical description of the entity's risk.
+          example: 'High'
         calculated_score:
           type: number
           format: double
           description: The raw numeric value of the given entity's risk score.
+          example: 71.4
         calculated_score_norm:
           type: number
           format: double
           minimum: 0
           maximum: 100
           description: The normalized numeric value of the given entity's risk score.
+          example: 71.4
 
     EntityRiskLevels:
       type: string
+      description: The risk level classification of an entity.
       enum:
         - "Unknown"
         - "Low"

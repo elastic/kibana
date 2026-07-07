@@ -36,6 +36,57 @@ describe('useEnhancedMonacoYamlHoverProvider', () => {
     expect(hover?.contents[0].value).toContain('Some hover content');
   });
 
+  it('should remove standalone "||" lines from hover content', async () => {
+    mockedMonacoYamlHoverProvideHover.mockResolvedValue({
+      contents: [{ value: 'Some hover content\n||\n||' }],
+    });
+    const hover = await getInterceptedHover(
+      null as unknown as monaco.editor.ITextModel,
+      new monaco.Position(1, 1),
+      null as unknown as monaco.CancellationToken
+    );
+    expect(hover?.contents[0].value).toBe('Some hover content');
+    expect(hover?.contents[0].value).not.toContain('||');
+  });
+
+  it('should return null when hover content is only "||" lines', async () => {
+    mockedMonacoYamlHoverProvideHover.mockResolvedValue({
+      contents: [{ value: '||\n||' }],
+    });
+    const hover = await getInterceptedHover(
+      null as unknown as monaco.editor.ITextModel,
+      new monaco.Position(1, 1),
+      null as unknown as monaco.CancellationToken
+    );
+    expect(hover).toBeNull();
+  });
+
+  it('should filter out content entries that are only pipes and whitespace', async () => {
+    mockedMonacoYamlHoverProvideHover.mockResolvedValue({
+      contents: [{ value: 'Valid content' }, { value: ' || ' }, { value: '|' }],
+    });
+    const hover = await getInterceptedHover(
+      null as unknown as monaco.editor.ITextModel,
+      new monaco.Position(1, 1),
+      null as unknown as monaco.CancellationToken
+    );
+    expect(hover?.contents).toHaveLength(1);
+    expect(hover?.contents[0].value).toBe('Valid content');
+  });
+
+  it('should filter out markdown headings that contain only "||"', async () => {
+    // monaco-yaml renders empty oneOf type descriptions as "#### ||"
+    mockedMonacoYamlHoverProvideHover.mockResolvedValue({
+      contents: [{ value: '#### ||' }],
+    });
+    const hover = await getInterceptedHover(
+      null as unknown as monaco.editor.ITextModel,
+      new monaco.Position(1, 1),
+      null as unknown as monaco.CancellationToken
+    );
+    expect(hover).toBeNull();
+  });
+
   it('should not remove "Source: ....json" from the hover content if it is not at the end', async () => {
     const hoverContent = 'Some hover content\nSource: workflow-schema.json\n Some other content';
     mockedMonacoYamlHoverProvideHover.mockResolvedValue({ contents: [{ value: hoverContent }] });

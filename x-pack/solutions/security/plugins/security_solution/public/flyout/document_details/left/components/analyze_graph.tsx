@@ -34,10 +34,8 @@ import { Resolver } from '../../../../resolver/view';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { isActiveTimeline } from '../../../../helpers';
 import { useIsAnalyzerEnabled } from '../../../../detections/hooks/use_is_analyzer_enabled';
-import { AnalyzerPreviewNoDataMessage } from '../../../../flyout_v2/document/components/analyzer_no_data_message';
+import { AnalyzerPreviewNoDataMessage } from '../../../../flyout_v2/document/main/components/analyzer_no_data_message';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER } from '../../../../../common/constants';
 
@@ -81,41 +79,13 @@ export const AnalyzeGraph: FC = () => {
   const { from, to, shouldUpdate } = useTimelineDataFilters(isActiveTimeline(scopeId));
   const filters = useMemo(() => ({ from, to }), [from, to]);
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { selectedPatterns: oldAnalyzerPatterns } = useSourcererDataView(PageScope.analyzer);
-  const experimentalAnalyzerPatterns = useSelectedPatterns(PageScope.analyzer);
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalAnalyzerPatterns
-    : oldAnalyzerPatterns;
+  const selectedPatterns = useSelectedPatterns(PageScope.analyzer);
 
-  const { dataView: experimentalDataView, status: experimentalDataViewStatus } = useDataView(
-    PageScope.analyzer
-  );
-  const { sourcererDataView: oldSourcererDataViewSpec, loading: oldSourcererDataViewIsLoading } =
-    useSourcererDataView(PageScope.analyzer);
-
-  const isLoading: boolean = useMemo(
-    () =>
-      newDataViewPickerEnabled
-        ? experimentalDataViewStatus === 'loading' || experimentalDataViewStatus === 'pristine'
-        : oldSourcererDataViewIsLoading,
-    [experimentalDataViewStatus, newDataViewPickerEnabled, oldSourcererDataViewIsLoading]
-  );
-
+  const { dataView, status } = useDataView(PageScope.analyzer);
+  const isLoading: boolean = useMemo(() => status === 'loading' || status === 'pristine', [status]);
   const isDataViewInvalid: boolean = useMemo(
-    () =>
-      newDataViewPickerEnabled
-        ? experimentalDataViewStatus === 'error' ||
-          (experimentalDataViewStatus === 'ready' && !experimentalDataView.hasMatchedIndices())
-        : !oldSourcererDataViewSpec ||
-          !oldSourcererDataViewSpec.id ||
-          !oldSourcererDataViewSpec.title,
-    [
-      experimentalDataView,
-      experimentalDataViewStatus,
-      newDataViewPickerEnabled,
-      oldSourcererDataViewSpec,
-    ]
+    () => status === 'error' || (status === 'ready' && !dataView.hasMatchedIndices()),
+    [dataView, status]
   );
 
   const onDismiss = useCallback(() => {
@@ -211,6 +181,7 @@ export const AnalyzeGraph: FC = () => {
         shouldUpdate={shouldUpdate}
         filters={filters}
         renderCellActions={cellActionRenderer}
+        useLegacyExpandableFlyout={true}
       />
     </div>
   );

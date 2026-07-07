@@ -7,15 +7,63 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
+import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { createMockWorkflowEventLogger } from '../../workflow_event_logger/mocks';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/types';
 import { StepExecutionRuntime } from '../step_execution_runtime';
+import type { StepIoService } from '../step_io_service';
 import type { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
+
+/**
+ * Builds a `StepIoService` test double that owns its own IO maps — mirrors
+ * the production split where state holds metadata only and the service is
+ * sovereign over `input` / `output`. Lifecycle writes still go through
+ * `state.upsertStep`; the runtime tests assert against those calls directly.
+ */
+function createPassthroughStepIoService(state: WorkflowExecutionState): StepIoService {
+  const inputs = new Map<string, JsonValue>();
+  const outputs = new Map<string, JsonValue | null>();
+  const sizes = new Map<string, number>();
+  return {
+    setStepInput: (id: string, input: JsonValue) => {
+      inputs.set(id, input);
+    },
+    setStepOutput: (id: string, output: JsonValue | null, sizeBytes?: number) => {
+      outputs.set(id, output);
+      if (sizeBytes !== undefined && Number.isFinite(sizeBytes) && sizeBytes >= 0) {
+        sizes.set(id, sizeBytes);
+      }
+    },
+    getStepInput: jest.fn((id: string) => inputs.get(id)),
+    getStepOutput: jest.fn((id: string) => outputs.get(id)),
+    getStepError: jest.fn((id: string) => state.getStepExecution(id)?.error),
+    getLatestStepIO: jest.fn((stepId: string) => {
+      const latest = state.getLatestStepExecution(stepId);
+      if (!latest) return undefined;
+      return {
+        input: inputs.get(latest.id),
+        output: outputs.get(latest.id),
+        error: latest.error,
+      };
+    }),
+    getDataSetVariables: jest.fn(() => ({} as Record<string, unknown>)),
+    getOutputSizeStats: jest.fn(() => {
+      let totalBytes = 0;
+      for (const bytes of sizes.values()) totalBytes += bytes;
+      return { totalBytes, stepCount: sizes.size };
+    }),
+    hasEvictedOutputs: jest.fn().mockReturnValue(false),
+    rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
+    prepareForRead: jest.fn().mockResolvedValue(undefined),
+    releaseTransientlyRehydratedOutputs: jest.fn(),
+  } as unknown as StepIoService;
+}
 
 describe('StepExecutionRuntime', () => {
   let underTest: StepExecutionRuntime;
@@ -23,6 +71,7 @@ describe('StepExecutionRuntime', () => {
   let workflowExecutionGraph: WorkflowGraph;
   let workflowLogger: IWorkflowEventLogger;
   let workflowExecutionState: WorkflowExecutionState;
+  let stepIoService: StepIoService;
   let workflowContextManager: WorkflowContextManager;
   const fakeStepExecutionId = 'fake_step_execution_id';
   const fakeNode = {
@@ -75,6 +124,7 @@ describe('StepExecutionRuntime', () => {
       flushStepChanges: jest.fn(),
       setLastFailedStepContext: jest.fn(),
       getLastFailedStepContext: jest.fn(),
+      accumulateUsage: jest.fn(),
     } as unknown as WorkflowExecutionState;
 
     workflowExecutionGraph = {
@@ -104,6 +154,8 @@ describe('StepExecutionRuntime', () => {
       }
     });
 
+    stepIoService = createPassthroughStepIoService(workflowExecutionState);
+
     underTest = new StepExecutionRuntime({
       node: fakeNode,
       stackFrames: fakeStackFrames,
@@ -112,6 +164,7 @@ describe('StepExecutionRuntime', () => {
       workflowExecutionGraph,
       stepLogger: workflowLogger,
       workflowExecutionState,
+      stepIoService,
     });
   });
 
@@ -130,10 +183,12 @@ describe('StepExecutionRuntime', () => {
     it('should be able to retrieve the step result', () => {
       (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
         stepId: 'node1',
-        input: {},
-        output: { success: true, data: {} },
         error: { type: 'Error', message: 'Fake error' },
       } as Partial<EsWorkflowStepExecution>);
+      // IO lives in the service now — seed it through the passthrough mock.
+      stepIoService.setStepInput(fakeStepExecutionId, {});
+      stepIoService.setStepOutput(fakeStepExecutionId, { success: true, data: {} });
+
       const stepResult = underTest.getCurrentStepResult();
       expect(workflowExecutionState.getStepExecution).toHaveBeenCalledWith(
         `fake_step_execution_id`
@@ -373,6 +428,33 @@ describe('StepExecutionRuntime', () => {
         );
       });
 
+      it('should extract token usage from output.metadata.usage and persist it on the step', () => {
+        underTest.finishStep({
+          message: 'hello',
+          metadata: { usage: { inputTokens: 100, outputTokens: 50, totalTokens: 150 } },
+        });
+
+        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+          expect.objectContaining({
+            usage: { inputTokens: 100, outputTokens: 50, totalTokens: 150 },
+          })
+        );
+        expect(workflowExecutionState.accumulateUsage).toHaveBeenCalledWith({
+          inputTokens: 100,
+          outputTokens: 50,
+          totalTokens: 150,
+        });
+      });
+
+      it('should not tag usage on steps that do not report it', () => {
+        underTest.finishStep({ message: 'hello' });
+
+        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+          expect.not.objectContaining({ usage: expect.anything() })
+        );
+        expect(workflowExecutionState.accumulateUsage).toHaveBeenCalledWith(undefined);
+      });
+
       it('should log successful step execution', () => {
         underTest.finishStep();
         expect(workflowLogger.logInfo).toHaveBeenCalledWith(`Step 'fakeStepId1' completed`, {
@@ -554,6 +636,74 @@ describe('StepExecutionRuntime', () => {
       }
     );
 
+    // Guardrail: errors thrown by custom steps may carry arbitrary, large, or sensitive
+    // payloads (e.g. `KibanaApiCallError` exposes the full parsed HTTP response on `.body`).
+    // `KibanaApiCallError` extends `ExecutionError`, so an uncaught instance persists a
+    // well-formed structured error — but only the safe scalar `status` is in `details`. The
+    // potentially large/sensitive `body` and `headers` live as instance fields outside
+    // `details`, so `toSerializableObject` never writes them to ES — neither on the step
+    // execution nor on the workflow execution. The recovered response body therefore only ever
+    // reaches ES through the (capped) `message`, not as a structured field.
+    it('persists status in details but never the body/headers of a KibanaApiCallError', () => {
+      const error = new KibanaApiCallError({
+        status: 500,
+        headers: { 'x-trace-id': 'trace-secret' },
+        body: { secret: 'do-not-persist', updated: [{ id: 'rule-1' }] },
+        message: 'HTTP 500: {"secret":"do-not-persist"}',
+      });
+
+      underTest.failStep(error);
+
+      const expectedSerializedError = {
+        type: 'KibanaApiCallError',
+        message: 'HTTP 500: {"secret":"do-not-persist"}',
+        details: { status: 500 },
+      };
+
+      // Persisted on the step execution: type + message + details:{status}; no body/headers.
+      const [persistedStep] = (workflowExecutionState.upsertStep as jest.Mock).mock.calls.at(
+        -1
+      ) as [EsWorkflowStepExecution];
+      expect(persistedStep.error).toEqual(expectedSerializedError);
+      expect(persistedStep.error?.details).toEqual({ status: 500 });
+      expect(persistedStep.error?.details).not.toHaveProperty('body');
+      expect(persistedStep.error?.details).not.toHaveProperty('headers');
+      // The raw body/headers must not leak into `details` (the only structured field persisted to ES).
+      // Note: the body text still appears inside the capped `message` string — that is the unchanged
+      // `HTTP <status>: <body>` OOTB behavior, not a structured field.
+      expect(JSON.stringify(persistedStep.error?.details)).not.toContain('do-not-persist');
+      expect(JSON.stringify(persistedStep.error?.details)).not.toContain('x-trace-id');
+
+      // Also guarded at the workflow-execution level.
+      expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
+        error: expectedSerializedError,
+      });
+    });
+
+    it('should extract and accumulate partial token usage from partial output on failure', () => {
+      underTest.failStep(new Error('stream interrupted'), {
+        message: '',
+        metadata: { usage: { inputTokens: 150, outputTokens: 60, totalTokens: 210 } },
+      });
+
+      expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: ExecutionStatus.FAILED,
+          usage: { inputTokens: 150, outputTokens: 60, totalTokens: 210 },
+        })
+      );
+      expect(workflowExecutionState.accumulateUsage).toHaveBeenCalledWith({
+        inputTokens: 150,
+        outputTokens: 60,
+        totalTokens: 210,
+      });
+    });
+
+    it('should not accumulate usage when failing without partial output', () => {
+      underTest.failStep(new Error('boom'));
+      expect(workflowExecutionState.accumulateUsage).toHaveBeenCalledWith(undefined);
+    });
+
     it('should log the failure of the step', () => {
       const error = new Error('Step execution failed');
       underTest.failStep(error);
@@ -592,6 +742,7 @@ describe('StepExecutionRuntime', () => {
         workflowExecutionGraph,
         stepLogger: workflowLogger,
         workflowExecutionState,
+        stepIoService,
       });
 
       runtime.failStep(new Error('fail'));
@@ -617,6 +768,7 @@ describe('StepExecutionRuntime', () => {
         workflowExecutionGraph,
         stepLogger: workflowLogger,
         workflowExecutionState,
+        stepIoService,
       });
 
       runtime.failStep(new Error('fail'));

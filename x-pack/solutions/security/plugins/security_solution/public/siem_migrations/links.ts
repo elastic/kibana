@@ -72,12 +72,6 @@ const subLinks: LinkItem[] = [
     hideTimeline: true,
     hideWhenExperimentalKey: 'siemMigrationsDisabled',
     experimentalKey: 'automaticDashboardsMigration',
-    isBeta: true,
-    betaOptions: {
-      text: i18n.translate('xpack.securitySolution.appLinks.siemMigrationsDashboards.badge', {
-        defaultMessage: 'Technical Preview',
-      }),
-    },
   },
 ];
 
@@ -101,7 +95,6 @@ export const links: LinkItem = {
   ],
   links: subLinks,
   skipUrlState: true,
-  globalNavPosition: 13,
   categories: [
     {
       label: i18n.translate('xpack.securitySolution.appLinks.category.automaticMigrations', {

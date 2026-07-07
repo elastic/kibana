@@ -6,7 +6,8 @@
  */
 
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { uniqBy } from 'lodash';
@@ -53,12 +54,24 @@ export class PackagePolicyService {
     );
   }
 
-  async getByIds({ spaceId, packagePolicyIds }: { spaceId: string; packagePolicyIds: string[] }) {
-    // For legacy reasons, we need to get the package policies from both the space and the default space
-    const clients =
-      spaceId === DEFAULT_SPACE_ID
-        ? [this.getSpaceSoClient(DEFAULT_SPACE_ID)]
-        : [this.getSpaceSoClient(spaceId), this.getSpaceSoClient(DEFAULT_SPACE_ID)];
+  async getByIds({
+    spaceId,
+    packagePolicyIds,
+    additionalSpaceIds,
+  }: {
+    spaceId: string;
+    packagePolicyIds: string[];
+    /**
+     * Extra spaces to look in alongside `spaceId` (and the default space).
+     * Use this when callers need a cross-space view — e.g. the monitor health
+     * API, which reports on monitors that may live in any space.
+     */
+    additionalSpaceIds?: string[];
+  }) {
+    // For legacy reasons, we always include the default space in addition to
+    // the request's space (older package policies were created there).
+    const spaces = new Set<string>([spaceId, DEFAULT_SPACE_ID, ...(additionalSpaceIds ?? [])]);
+    const clients = [...spaces].map((space) => this.getSpaceSoClient(space));
 
     const ids = await Promise.all(
       clients.map((soClient) =>
@@ -67,7 +80,7 @@ export class PackagePolicyService {
         })
       )
     );
-    return ids.flat();
+    return uniqBy(ids.flat(), 'id');
   }
 
   async bulkCreate({
@@ -109,7 +122,7 @@ export class PackagePolicyService {
     policiesToUpdate,
     spaceId,
   }: {
-    policiesToUpdate: NewPackagePolicyWithId[];
+    policiesToUpdate: UpdatePackagePolicyWithId[];
     spaceId: string;
   }) {
     if (policiesToUpdate.length === 0) {
@@ -171,16 +184,16 @@ export class PackagePolicyService {
 
   // The agent policies can be in the default space or the spaceId
   // This function returns the package policies that are in the spaceId and the default space and the correct saved objects client to fetch the package policies
-  private async getDefaultAndSpacePackagePolicies({
+  private async getDefaultAndSpacePackagePolicies<T extends NewPackagePolicyWithId>({
     policies,
     spaceId,
   }: {
-    policies: NewPackagePolicyWithId[];
+    policies: T[];
     spaceId: string;
   }): Promise<
     {
       client: SavedObjectsClientContract;
-      policies: NewPackagePolicyWithId[];
+      policies: T[];
     }[]
   > {
     const agentPolicyIds = new Set(policies.flatMap((pkgPolicy) => pkgPolicy.policy_ids));
@@ -205,8 +218,8 @@ export class PackagePolicyService {
     ).flat();
 
     const agentPolicyById = new Map(agentPolicies.map((ap) => [ap.id, ap]));
-    const defaultSpacePackagePolicies: NewPackagePolicyWithId[] = [];
-    const spacePackagePolicies: NewPackagePolicyWithId[] = [];
+    const defaultSpacePackagePolicies: T[] = [];
+    const spacePackagePolicies: T[] = [];
 
     for (const pkgPolicy of policies) {
       if (pkgPolicy.policy_ids) {
@@ -228,7 +241,7 @@ export class PackagePolicyService {
 
     const res: {
       client: SavedObjectsClientContract;
-      policies: NewPackagePolicyWithId[];
+      policies: T[];
     }[] = [];
 
     if (defaultSpacePackagePolicies.length > 0) {

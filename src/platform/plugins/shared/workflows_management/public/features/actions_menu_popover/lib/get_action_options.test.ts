@@ -14,7 +14,6 @@ import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks'
 import { z } from '@kbn/zod/v4';
 import { flattenOptions, getActionOptions } from './get_action_options';
 import { getAllConnectors, isDeprecatedStepType } from '../../../../common/schema';
-import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
 import { triggerSchemas } from '../../../trigger_schemas';
 import type { ActionOptionData } from '../types';
 import { isActionGroup, isActionOption } from '../types';
@@ -29,9 +28,6 @@ jest.mock('../../../trigger_schemas', () => ({
 jest.mock('@kbn/workflows', () => ({
   ...jest.requireActual('@kbn/workflows'),
   isDynamicConnector: jest.fn(),
-}));
-jest.mock('../../../shared/ui/step_icons/get_step_icon_type', () => ({
-  getStepIconType: jest.fn(),
 }));
 jest.mock('@kbn/i18n', () => ({
   i18n: {
@@ -64,7 +60,6 @@ describe('getActionOptions', () => {
     (isDynamicConnector as jest.MockedFunction<typeof isDynamicConnector>).mockImplementation(
       () => false
     );
-    (getStepIconType as jest.Mock).mockReturnValue('plugs');
   });
 
   it('should return all base action groups', () => {
@@ -410,9 +405,11 @@ describe('getActionOptions', () => {
 
   it('should add dynamic connectors to external group', () => {
     const mockConnector = {
+      actionTypeId: '.slack',
+      displayName: 'Slack',
       type: 'slack.api',
-      description: 'Slack API',
-      iconType: 'logoSlack',
+      summary: 'API',
+      description: 'Slack - API',
       instances: [{ id: 'instance1' }, { id: 'instance2' }],
     };
 
@@ -421,7 +418,6 @@ describe('getActionOptions', () => {
     (isDynamicConnector as jest.MockedFunction<typeof isDynamicConnector>).mockImplementation(
       () => true
     );
-    (getStepIconType as jest.Mock).mockReturnValue('logoSlack');
 
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
     const externalGroup = result.find((group) => group.id === 'external');
@@ -431,14 +427,18 @@ describe('getActionOptions', () => {
       expect(externalGroup.options).toHaveLength(1);
       const option = externalGroup.options[0];
       expect(option.id).toBe('slack');
-      expect(option.label).toBe('slack');
+      expect(option.label).toBe('Slack');
+      expect(option.description).toBe('slack');
     }
   });
 
   it('should create connector groups for dynamic connectors with subtypes', () => {
     const mockConnector = {
-      type: 'slack.api',
-      description: 'Slack API',
+      actionTypeId: '.sharepoint-online',
+      displayName: 'SharePoint Online',
+      type: 'sharepoint-online.getAllSites',
+      summary: 'Get All Sites',
+      description: 'SharePoint Online - Get All Sites',
       instances: [{ id: 'instance1' }],
     };
 
@@ -447,19 +447,21 @@ describe('getActionOptions', () => {
     (isDynamicConnector as jest.MockedFunction<typeof isDynamicConnector>).mockImplementation(
       () => true
     );
-    (getStepIconType as jest.Mock).mockReturnValue('logoSlack');
 
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
     const externalGroup = result.find((group) => group.id === 'external');
 
     expect(externalGroup).toBeDefined();
     if (externalGroup && isActionGroup(externalGroup)) {
-      // Should create a group for 'slack' base type
-      const slackGroup = externalGroup.options.find((opt) => opt.id === 'slack');
-      expect(slackGroup).toBeDefined();
-      if (slackGroup && isActionGroup(slackGroup)) {
-        expect(slackGroup.options).toHaveLength(1);
-        expect(slackGroup.options[0].id).toBe('slack.api');
+      const sharepointGroup = externalGroup.options.find((opt) => opt.id === 'sharepoint-online');
+      expect(sharepointGroup).toBeDefined();
+      if (sharepointGroup && isActionGroup(sharepointGroup)) {
+        expect(sharepointGroup.label).toBe('SharePoint Online');
+        expect(sharepointGroup.description).toBe('sharepoint-online');
+        expect(sharepointGroup.options).toHaveLength(1);
+        expect(sharepointGroup.options[0].id).toBe('sharepoint-online.getAllSites');
+        expect(sharepointGroup.options[0].label).toBe('Get All Sites');
+        expect(sharepointGroup.options[0].description).toBe('sharepoint-online.getAllSites');
       }
     }
   });

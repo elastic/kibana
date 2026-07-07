@@ -4,29 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 import {
-  compositeSloBaseDefinitionSchema,
-  compositeSloMemberSummarySchema,
-  compositeSloSummarySchema,
+  compositeSloDefinitionResponseSchema,
+  compositeSloIdSchema,
+  compositeSloWithSummaryResponseSchema,
 } from '../../../schema/composite_slo';
-import { sloIdSchema } from '../../../schema/slo';
 
-const getCompositeSLOParamsSchema = t.type({
-  path: t.type({
-    id: sloIdSchema,
+const getCompositeSLODefinitionParamsSchema = z.object({
+  path: z.object({
+    id: compositeSloIdSchema,
   }),
 });
 
-const getCompositeSLOResponseSchema = t.intersection([
-  compositeSloBaseDefinitionSchema,
-  t.type({
-    summary: compositeSloSummarySchema,
-    members: t.array(compositeSloMemberSummarySchema),
-  }),
-]);
+const getCompositeSLOResponseSchema = compositeSloWithSummaryResponseSchema;
 
-type GetCompositeSLOResponse = t.OutputOf<typeof getCompositeSLOResponseSchema>;
+const getCompositeSLOParamsSchema = getCompositeSLODefinitionParamsSchema;
 
-export { getCompositeSLOParamsSchema, getCompositeSLOResponseSchema };
-export type { GetCompositeSLOResponse };
+const getCompositeSLODefinitionResponseSchema = compositeSloDefinitionResponseSchema;
+
+type GetCompositeSLOResponse = z.output<typeof getCompositeSLOResponseSchema>;
+type GetCompositeSLODefinitionResponse = z.output<typeof getCompositeSLODefinitionResponseSchema>;
+
+export {
+  getCompositeSLOParamsSchema,
+  getCompositeSLOResponseSchema,
+  getCompositeSLODefinitionResponseSchema,
+};
+export type { GetCompositeSLOResponse, GetCompositeSLODefinitionResponse };

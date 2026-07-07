@@ -16,13 +16,16 @@ import type {
   NewPackagePolicy,
   PackagePolicyConfigRecordEntry,
   RegistryStreamWithDataStream,
+  RegistryDataStream,
 } from '../types';
+
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../constants';
 
 import { doesPackageHaveIntegrations } from '.';
 import {
   getNormalizedDataStreams,
   getNormalizedInputs,
-  isIntegrationPolicyTemplate,
+  getPolicyTemplateDataStreamPaths,
 } from './policy_template';
 
 type PackagePolicyStream = RegistryStream & {
@@ -39,6 +42,34 @@ type PackagePolicyStream = RegistryStream & {
  */
 export const getInputEffectiveName = (input: { name?: string; type: string }): string =>
   input.name ?? input.type;
+
+/**
+ * Returns true if the given data stream effectively uses the OTel collector input type.
+ *
+ * A data stream is considered OTel when any of its `streams[].input` values is either:
+ * - the literal type `'otelcol'`, or
+ * - the `name` of an input within `pkgInfo.policy_templates[*].inputs` whose `type` is `'otelcol'`.
+ *
+ * The second case handles the named-input feature (package-spec 3.6.1+) where multiple inputs
+ * of the same type coexist in one policy template and data streams reference them by name instead
+ * of by type.
+ */
+export const dataStreamUsesOtelInput = (
+  pkgInfo: Pick<PackageInfo, 'policy_templates'>,
+  dataStream: Pick<RegistryDataStream, 'streams'>
+): boolean => {
+  const namedOtelInputs = new Set<string>();
+  for (const tpl of pkgInfo.policy_templates ?? []) {
+    for (const input of getNormalizedInputs(tpl)) {
+      if (input.type === OTEL_COLLECTOR_INPUT_TYPE && input.name) {
+        namedOtelInputs.add(input.name);
+      }
+    }
+  }
+  return (dataStream.streams ?? []).some(
+    (stream) => stream.input === OTEL_COLLECTOR_INPUT_TYPE || namedOtelInputs.has(stream.input)
+  );
+};
 
 /**
  * Builds the composite key used to index input validation results and var definitions.
@@ -112,10 +143,6 @@ export const varsReducer = (
   configObject: PackagePolicyConfigRecord,
   registryVar: RegistryVarsEntry
 ): PackagePolicyConfigRecord => {
-  // section_header vars are decorative only and hold no value
-  if (registryVar.type === 'section_header') {
-    return configObject;
-  }
   const configEntry: PackagePolicyConfigRecordEntry = {
     value: !registryVar.default && registryVar.multi ? [] : registryVar.default,
   };
@@ -141,13 +168,15 @@ export const packageToPackagePolicyInputs = (
 
   packageInfo.policy_templates?.forEach((packagePolicyTemplate) => {
     const normalizedInputs = getNormalizedInputs(packagePolicyTemplate);
+    // Scope stream resolution to this policy template's own data stream(s). For input packages
+    // with several templates that share the same input type, this prevents each template's input
+    // from picking up every template's stream (which duplicated stream vars like data_stream.dataset).
+    const dataStreamPaths = getPolicyTemplateDataStreamPaths(packageInfo, packagePolicyTemplate);
     normalizedInputs?.forEach((packageInput) => {
       const inputKey = `${packagePolicyTemplate.name}-${getInputEffectiveName(packageInput)}`;
       const input = {
         ...packageInput,
-        ...(isIntegrationPolicyTemplate(packagePolicyTemplate) && packagePolicyTemplate.data_streams
-          ? { data_streams: packagePolicyTemplate.data_streams }
-          : {}),
+        ...(dataStreamPaths.length ? { data_streams: dataStreamPaths } : {}),
         policy_template: packagePolicyTemplate.name,
       };
       packageInputsByPolicyTemplateAndType[inputKey] = input;

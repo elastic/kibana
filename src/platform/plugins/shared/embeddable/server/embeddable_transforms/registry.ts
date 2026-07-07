@@ -7,38 +7,62 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ObjectType } from '@kbn/config-schema';
+import type { ObjectType, Type } from '@kbn/config-schema';
 import type { getDrilldownRegistry } from '../drilldowns/registry';
-import type { EmbeddableTransformsSetup } from './types';
+import type { EmbeddableServerDefinition } from './types';
 
-export function getTransformsRegistry(drilldownRegistry: ReturnType<typeof getDrilldownRegistry>) {
-  const transformsRegistry: { [key: string]: EmbeddableTransformsSetup<any, any> } = {};
+export function getEmbeddableServerRegistry(
+  drilldownRegistry: ReturnType<typeof getDrilldownRegistry>
+) {
+  const registry: { [key: string]: EmbeddableServerDefinition<any, any> } = {};
+  let schemaCache: Record<string, Type<object> | undefined> = {};
+
+  function getCachedSchema(type: string) {
+    if (schemaCache[type]) {
+      return schemaCache[type];
+    }
+
+    const { getSchema } = registry[type] ?? {};
+    const schema = getSchema?.(drilldownRegistry.getSchema);
+    schemaCache[type] = schema;
+    return schema;
+  }
 
   return {
-    registerTransforms: (type: string, transforms: EmbeddableTransformsSetup<any, any>) => {
-      if (transformsRegistry[type]) {
+    registerEmbeddableServerDefinition: (
+      type: string,
+      definition: EmbeddableServerDefinition<any, any>
+    ) => {
+      if (registry[type]) {
         throw new Error(`Embeddable transforms for type "${type}" are already registered.`);
       }
 
-      transformsRegistry[type] = transforms;
+      registry[type] = definition;
     },
     getAllEmbeddableSchemas: () => {
-      const schemas: { [key: string]: ObjectType } = {};
-      Object.entries(transformsRegistry).forEach(([type, transformsSetup]) => {
-        const schema = transformsSetup?.getSchema?.(drilldownRegistry.getSchema);
+      const schemas: { [key: string]: { schema: ObjectType; title: string } } = {};
+      Object.entries(registry).forEach(([type, definition]) => {
+        const schema = getCachedSchema(type);
         if (schema) {
-          schemas[type] = schema as ObjectType;
+          schemas[type] = {
+            schema: schema as ObjectType,
+            title: definition.title,
+          };
         }
       });
       return schemas;
     },
     getEmbeddableTransforms: (type: string) => {
-      const { getTransforms, getSchema, throwOnUnmappedPanel } = transformsRegistry[type] ?? {};
+      const { getTransforms, throwOnUnmappedPanel } = registry[type] ?? {};
+      const schema = getCachedSchema(type);
       return {
         ...getTransforms?.(drilldownRegistry.transforms),
-        ...(getSchema ? { schema: getSchema(drilldownRegistry.getSchema) } : {}),
+        ...(schema ? { schema } : {}),
         ...(typeof throwOnUnmappedPanel === 'boolean' ? { throwOnUnmappedPanel } : {}),
       };
+    },
+    resetCache: () => {
+      schemaCache = {};
     },
   };
 }

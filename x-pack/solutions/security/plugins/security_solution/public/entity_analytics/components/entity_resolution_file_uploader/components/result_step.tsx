@@ -23,6 +23,7 @@ export const EntityResolutionResultStep: React.FC<ResultStepProps> = React.memo(
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 defaultMessage="Upload failed"
@@ -53,6 +54,7 @@ export const EntityResolutionResultStep: React.FC<ResultStepProps> = React.memo(
         <EuiSpacer size="m" />
         {allSuccessful && (
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 defaultMessage="All {total} {total, plural, one {row} other {rows}} processed successfully"
@@ -69,6 +71,7 @@ export const EntityResolutionResultStep: React.FC<ResultStepProps> = React.memo(
 
         {partialSuccess && (
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 defaultMessage="Partial upload: {successful} of {total} {total, plural, one {row} other {rows}} successful"
@@ -85,6 +88,7 @@ export const EntityResolutionResultStep: React.FC<ResultStepProps> = React.memo(
 
         {allFailed && (
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 defaultMessage="Upload completed with no successful links"
@@ -114,37 +118,53 @@ export const EntityResolutionResultStep: React.FC<ResultStepProps> = React.memo(
 
 EntityResolutionResultStep.displayName = 'EntityResolutionResultStep';
 
-const ResultStats: React.FC<{ result: ResolutionCsvUploadResponse }> = ({ result }) => (
-  <EuiText size="s">
-    <ul>
-      <li>
-        <FormattedMessage
-          defaultMessage="{count} {count, plural, one {row} other {rows}} linked successfully"
-          id="xpack.securitySolution.entityAnalytics.entityResolutionUpload.successCount"
-          values={{ count: result.successful }}
-        />
-      </li>
-      {result.unmatched > 0 && (
-        <li>
-          <FormattedMessage
-            defaultMessage="{count} {count, plural, one {row} other {rows}} had no matching entities"
-            id="xpack.securitySolution.entityAnalytics.entityResolutionUpload.unmatchedCount"
-            values={{ count: result.unmatched }}
-          />
-        </li>
-      )}
-      {result.failed > 0 && (
-        <li>
-          <FormattedMessage
-            defaultMessage="{count} {count, plural, one {row} other {rows}} failed"
-            id="xpack.securitySolution.entityAnalytics.entityResolutionUpload.failedCount"
-            values={{ count: result.failed }}
-          />
-        </li>
-      )}
-    </ul>
-  </EuiText>
-);
+const ResultStats: React.FC<{ result: ResolutionCsvUploadResponse }> = ({ result }) => {
+  const totalSkipped = result.items.reduce((sum, item) => sum + item.skippedEntities, 0);
+  const totalLinked = result.items.reduce((sum, item) => sum + item.linkedEntities, 0);
+
+  return (
+    <EuiText size="s">
+      <ul>
+        {totalLinked > 0 && (
+          <li>
+            <FormattedMessage
+              defaultMessage="{count} {count, plural, one {entity} other {entities}} linked successfully"
+              id="xpack.securitySolution.entityAnalytics.entityResolutionUpload.successCount"
+              values={{ count: totalLinked }}
+            />
+          </li>
+        )}
+        {totalSkipped > 0 && (
+          <li>
+            <FormattedMessage
+              defaultMessage="{count} already linked {count, plural, one {entity} other {entities}} ignored"
+              id="xpack.securitySolution.entityAnalytics.entityResolutionUpload.skippedCount"
+              values={{ count: totalSkipped }}
+            />
+          </li>
+        )}
+        {result.unmatched > 0 && (
+          <li>
+            <FormattedMessage
+              defaultMessage="{count} {count, plural, one {row} other {rows}} had no matching entities"
+              id="xpack.securitySolution.entityAnalytics.entityResolutionUpload.unmatchedCount"
+              values={{ count: result.unmatched }}
+            />
+          </li>
+        )}
+        {result.failed > 0 && (
+          <li>
+            <FormattedMessage
+              defaultMessage="{count} {count, plural, one {row} other {rows}} failed"
+              id="xpack.securitySolution.entityAnalytics.entityResolutionUpload.failedCount"
+              values={{ count: result.failed }}
+            />
+          </li>
+        )}
+      </ul>
+    </EuiText>
+  );
+};
 
 const ResultDetails: React.FC<{ result: ResolutionCsvUploadResponse }> = ({ result }) => {
   const problemRows = result.items

@@ -26,9 +26,12 @@ interface RunResolutionScoringParams {
   sampleSize: number;
   now: string;
   calculationRunId: string;
+  abortSignal?: AbortSignal;
   watchlistConfigs: Map<string, WatchlistObject>;
   idBasedRiskScoringEnabled: boolean;
   writer: Awaited<ReturnType<RiskScoreDataClient['getWriter']>>;
+  targetEntityIds?: string[];
+  refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];
 }
 
 export const runResolutionScoringStep = async ({
@@ -42,15 +45,19 @@ export const runResolutionScoringStep = async ({
   sampleSize,
   now,
   calculationRunId,
+  abortSignal,
   watchlistConfigs,
   idBasedRiskScoringEnabled,
   writer,
+  targetEntityIds,
+  refresh,
 }: RunResolutionScoringParams): Promise<ResolutionStepResult> => {
   runLogger.debug(
     `starting phase 2 resolution scoring: page_size=${pageSize}, sample_size=${sampleSize}`
   );
   let pagesProcessed = 0;
   let scoresWrittenResolution = 0;
+  let abortedBetweenPages = false;
 
   for await (const pageScores of calculateResolutionEntityScores({
     esClient,
@@ -64,7 +71,14 @@ export const runResolutionScoringStep = async ({
     now,
     calculationRunId,
     watchlistConfigs,
+    abortSignal,
+    targetEntityIds,
   })) {
+    if (abortSignal?.aborted) {
+      runLogger.info('Resolution scoring aborted between pages');
+      abortedBetweenPages = true;
+      break;
+    }
     pagesProcessed += 1;
     if (pageScores.length > 0) {
       scoresWrittenResolution += await persistScoresToRiskIndex({
@@ -72,6 +86,7 @@ export const runResolutionScoringStep = async ({
         entityType,
         scores: pageScores,
         logger: runLogger,
+        refresh,
       });
       await persistScoresToEntityStore({
         crudClient,
@@ -84,14 +99,18 @@ export const runResolutionScoringStep = async ({
   }
 
   if (scoresWrittenResolution === 0) {
-    const skipReason = pagesProcessed === 0 ? 'lookup_empty' : 'no_matching_alerts';
+    const skipReason = abortedBetweenPages
+      ? 'aborted'
+      : pagesProcessed === 0
+      ? 'lookup_empty'
+      : 'no_matching_alerts';
     runLogger.debug(
       `phase 2 resolution scoring produced no writes: reason=${skipReason}, pages=${pagesProcessed}`
     );
     return {
       scoresWritten: 0,
       pagesProcessed,
-      skippedReason: pagesProcessed === 0 ? 'lookup_empty' : undefined,
+      skippedReason: !abortedBetweenPages && pagesProcessed === 0 ? 'lookup_empty' : undefined,
     };
   }
 

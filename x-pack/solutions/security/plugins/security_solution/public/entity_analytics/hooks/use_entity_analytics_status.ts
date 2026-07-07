@@ -88,6 +88,17 @@ export const deriveEntityAnalyticsStatus = ({
     return 'enabling';
   }
 
+  // V2 supersedes the V1 experimental feature flag — check it first
+  if (isEntityStoreV2Enabled) {
+    if (entityStoreStatus === 'installing') {
+      return 'enabling';
+    }
+    if (entityStoreStatus === 'error') {
+      return 'error';
+    }
+    return deriveEntityStoreOnlyStatus(entityStoreStatus);
+  }
+
   if (isEntityStoreFeatureFlagDisabled) {
     return deriveRiskEngineOnlyStatus(riskEngineStatus);
   }
@@ -98,10 +109,6 @@ export const deriveEntityAnalyticsStatus = ({
 
   if (entityStoreStatus === 'error') {
     return 'error';
-  }
-
-  if (isEntityStoreV2Enabled) {
-    return deriveEntityStoreOnlyStatus(entityStoreStatus);
   }
 
   return deriveCombinedStatus(riskEngineStatus, entityStoreStatus);

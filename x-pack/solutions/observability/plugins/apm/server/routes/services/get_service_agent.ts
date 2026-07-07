@@ -8,6 +8,7 @@
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { getAgentName } from '@kbn/elastic-agent-utils';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   AGENT_NAME,
@@ -57,7 +58,6 @@ export async function getServiceAgent({
   ] as const);
 
   const params = {
-    terminate_after: 1,
     apm: {
       events: [ProcessorEvent.error, ProcessorEvent.transaction, ProcessorEvent.metric],
     },
@@ -76,8 +76,13 @@ export async function getServiceAgent({
           { term: { [SERVICE_NAME]: serviceName } },
           ...rangeQuery(start, end),
           {
-            exists: {
-              field: AGENT_NAME,
+            bool: {
+              should: [
+                { exists: { field: AGENT_NAME } },
+                { exists: { field: TELEMETRY_SDK_NAME } },
+                { exists: { field: TELEMETRY_SDK_LANGUAGE } },
+              ],
+              minimum_should_match: 1,
             },
           },
         ],
@@ -101,9 +106,7 @@ export async function getServiceAgent({
       },
     },
     fields,
-    sort: {
-      _score: { order: 'desc' as const },
-    },
+    sort: { '@timestamp': { order: 'desc' as const }, _score: { order: 'desc' as const } },
   };
 
   const response = await apmEventClient.search('get_service_agent_name', params);
@@ -123,8 +126,15 @@ export async function getServiceAgent({
     event[SERVICE_RUNTIME_VERSION] ??
     (hit.fields?.[PROCESS_RUNTIME_VERSION]?.[0] as string | undefined);
 
+  const agentName =
+    getAgentName(
+      event[AGENT_NAME] ?? null,
+      event[TELEMETRY_SDK_LANGUAGE] ?? null,
+      event[TELEMETRY_SDK_NAME] ?? null
+    ) ?? undefined;
+
   return {
-    agentName: event[AGENT_NAME],
+    agentName,
     telemetrySdkName: event[TELEMETRY_SDK_NAME],
     telemetrySdkLanguage: event[TELEMETRY_SDK_LANGUAGE],
     runtimeName: event[SERVICE_RUNTIME_NAME],

@@ -16,6 +16,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiText } from '@elastic/e
 import { FormattedMessage } from '@kbn/i18n-react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-common-types/alerts';
 import type {
   AnomaliesTableData,
   ExplorerJob,
@@ -30,7 +31,6 @@ import { getColumns } from './anomalies_table_columns';
 import { RuleEditorFlyout } from '../rule_editor';
 import type { FocusTrapProps } from '../../util/create_focus_trap_props';
 import { MlAnomalyAlertFlyout } from '../../../alerting/ml_alerting_flyout';
-import type { MlAnomalyDetectionAlertParams } from '../../../../common/types/alerts';
 import { buildAlertParamsFromAnomaly } from './build_alert_params_from_anomaly';
 import type { CustomRuleEditorSource } from '../../../../common/constants/usage_collection';
 

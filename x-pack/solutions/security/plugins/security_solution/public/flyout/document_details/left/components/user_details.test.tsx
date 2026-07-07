@@ -33,9 +33,9 @@ import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { HostPreviewPanelKey } from '../../../entity_details/host_right';
-import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
+import { HOST_PREVIEW_BANNER } from '../../../../flyout_v2/document/main/components/host_entity_overview';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
-import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
+import { USER_PREVIEW_BANNER } from '../../../../flyout_v2/document/main/components/user_entity_overview';
 import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
@@ -76,12 +76,6 @@ jest.mock('uuid', () => ({
 
 jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
 const mockUseMlUserPermissions = useMlCapabilities as jest.Mock;
-
-jest.mock('../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest
-    .fn()
-    .mockReturnValue({ selectedPatterns: ['index'], sourcererDataView: {} }),
-}));
 
 jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () => ({
   AnomalyTableProvider: ({
@@ -253,15 +247,16 @@ describe('<UserDetails />', () => {
         isPlatinumOrTrialLicense: true,
         capabilities: {},
       });
-      const { queryAllByRole } = renderUserDetails(mockContextValue);
-      expect(queryAllByRole('columnheader').length).toBe(3);
-      expect(queryAllByRole('row')[1].textContent).toContain('test host');
-      expect(queryAllByRole('row')[1].textContent).toContain('Low');
+      const { container, queryAllByTestId } = renderUserDetails(mockContextValue);
+      expect(queryAllByTestId(/tableHeaderCell_/).length).toBe(3);
+      expect(container.querySelectorAll('.euiTableRow')[0].textContent).toContain('test host');
+      expect(container.querySelectorAll('.euiTableRow')[0].textContent).toContain('100.XXX.XXX');
+      expect(container.querySelectorAll('.euiTableRow')[0].textContent).toContain('Low');
     });
 
     it('should not render host risk score column when license is not valid', () => {
-      const { queryAllByRole } = renderUserDetails(mockContextValue);
-      expect(queryAllByRole('columnheader').length).toBe(2);
+      const { queryAllByTestId } = renderUserDetails(mockContextValue);
+      expect(queryAllByTestId(/tableHeaderCell_/).length).toBe(2);
     });
 
     it('should render empty table if no related host is returned', () => {

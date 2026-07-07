@@ -26,31 +26,31 @@ describe('ModeFilterPopover', () => {
     expect(screen.getByText('Mode')).toBeInTheDocument();
   });
 
-  it('displays Alerting and Detect only options when opened', () => {
+  it('displays Alert and Signal options when opened', () => {
     render(<ModeFilterPopover {...defaultProps} />);
 
     fireEvent.click(screen.getByTestId('rulesListModeFilter'));
 
-    expect(screen.getByText('Alerting')).toBeInTheDocument();
-    expect(screen.getByText('Detect only')).toBeInTheDocument();
+    expect(screen.getByText('Alert')).toBeInTheDocument();
+    expect(screen.getByText('Signal')).toBeInTheDocument();
   });
 
-  it('calls onChange with "alert" when Alerting is selected', () => {
+  it('calls onChange with "alert" when Alert is selected', () => {
     const onChange = jest.fn();
     render(<ModeFilterPopover value="" onChange={onChange} />);
 
     fireEvent.click(screen.getByTestId('rulesListModeFilter'));
-    fireEvent.click(screen.getByText('Alerting'));
+    fireEvent.click(screen.getByText('Alert'));
 
     expect(onChange).toHaveBeenCalledWith('alert');
   });
 
-  it('calls onChange with "signal" when Detect only is selected', () => {
+  it('calls onChange with "signal" when Signal is selected', () => {
     const onChange = jest.fn();
     render(<ModeFilterPopover value="" onChange={onChange} />);
 
     fireEvent.click(screen.getByTestId('rulesListModeFilter'));
-    fireEvent.click(screen.getByText('Detect only'));
+    fireEvent.click(screen.getByText('Signal'));
 
     expect(onChange).toHaveBeenCalledWith('signal');
   });
@@ -60,7 +60,7 @@ describe('ModeFilterPopover', () => {
     render(<ModeFilterPopover value="alert" onChange={onChange} />);
 
     fireEvent.click(screen.getByTestId('rulesListModeFilter'));
-    fireEvent.click(screen.getByText('Alerting'));
+    fireEvent.click(screen.getByText('Alert'));
 
     expect(onChange).toHaveBeenCalledWith('');
   });

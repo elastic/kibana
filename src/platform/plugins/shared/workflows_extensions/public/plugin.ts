@@ -31,8 +31,8 @@ export class WorkflowsExtensionsPublicPlugin
   private readonly stepRegistry: PublicStepRegistry;
   private readonly triggerRegistry: PublicTriggerRegistry;
 
-  constructor(_initializerContext: PluginInitializerContext) {
-    this.stepRegistry = new PublicStepRegistry();
+  constructor(initializerContext: PluginInitializerContext) {
+    this.stepRegistry = new PublicStepRegistry(initializerContext.logger.get());
     this.triggerRegistry = new PublicTriggerRegistry();
   }
 

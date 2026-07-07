@@ -31,13 +31,16 @@ export class MetricsExperiencePage {
   public readonly searchButton: Locator;
   public readonly searchInput: Locator;
   public readonly emptyState: Locator;
-  public readonly chartActions: ChartActions;
   public readonly chartInteractions: ChartInteractions;
   public readonly breakdownSelector: BreakdownSelector;
   public readonly share: ShareHelper;
   public readonly fullscreenButton: Locator;
+  public readonly chromeHeader: Locator;
+
+  private readonly page: ScoutPage;
 
   constructor(page: ScoutPage) {
+    this.page = page;
     // metricsExperienceRendered is the outer wrapper containing header, grid, and pagination
     this.container = page.testSubj.locator('metricsExperienceRendered');
     this.grid = page.testSubj.locator('unifiedMetricsExperienceGrid');
@@ -45,7 +48,6 @@ export class MetricsExperiencePage {
     this.cards = this.grid.locator('[data-chart-index]');
     this.pagination = createGridPagination(this.container);
     this.flyout = createFlyout(page);
-    this.chartActions = createChartActions(page);
     this.chartInteractions = createChartInteractions(page, (index) => this.getCardByIndex(index));
     this.breakdownSelector = createBreakdownSelector(page);
     this.searchButton = page.testSubj.locator('metricsExperienceToolbarSearch');
@@ -53,6 +55,7 @@ export class MetricsExperiencePage {
     this.emptyState = page.testSubj.locator('metricsExperienceNoData');
     this.share = createShareHelper(page);
     this.fullscreenButton = page.testSubj.locator('metricsExperienceToolbarFullScreen');
+    this.chromeHeader = page.testSubj.locator('kbnChromeLayoutHeader');
   }
 
   public getCardByIndex(index: number): Locator {
@@ -60,18 +63,25 @@ export class MetricsExperiencePage {
   }
 
   /**
-   * Returns quick actions scoped to a specific card by index.
-   * Quick actions (like Explore) are rendered in the hover bar inside the card.
-   * Use this instead of global locators to avoid strict mode violations
-   * when multiple cards have visible hover actions.
+   * Returns action locators scoped to the card at `index`.
+   *
+   * Hover-row actions are scoped to the card element so Playwright strict mode
+   * is satisfied when multiple cards share the same action test-subjs.
+   * `addToCase` remains page-scoped because EUI renders it into a portal.
    */
-  public getQuickActionsForCard(index: number): { explore: Locator } {
-    const card = this.getCardByIndex(index);
-    return {
-      explore: card.locator(
-        '[data-test-subj="embeddablePanelAction-ACTION_METRICS_EXPERIENCE_EXPLORE_IN_DISCOVER_TAB"]'
-      ),
-    };
+  public chartActionsFor(index: number): ChartActions {
+    return createChartActions(this.getCardByIndex(index), this.page);
+  }
+
+  /**
+   * Waits until the first chart card matches the expected id (since pagination/query updates replace cards
+   * asynchronously). Call before `expect(cards).toHaveCount(...)` so the count is not asserted
+   * against a stale page.
+   */
+  public async waitForFirstCard(expectedFirstCardId: string): Promise<void> {
+    await this.grid
+      .locator(`[data-chart-index="0"][id="${expectedFirstCardId}"]`)
+      .waitFor({ state: 'visible' });
   }
 
   public async searchMetric(term: string): Promise<void> {
@@ -91,7 +101,13 @@ export class MetricsExperiencePage {
   }
 
   public async toggleFullscreen(): Promise<void> {
+    // Entering fullscreen triggers `handleEuiFullScreenChanges` which calls
+    // `chrome.setIsVisible(false)` asynchronously. Wait for the chrome header
+    // to actually hide/show before resolving, otherwise subsequent clicks on
+    // the toolbar can be intercepted by the still-sticky chrome header.
+    const isFullscreen = await this.fullscreen.isVisible();
     await this.fullscreenButton.click();
+    await this.chromeHeader.waitFor({ state: isFullscreen ? 'visible' : 'hidden' });
   }
 
   /**
@@ -107,22 +123,33 @@ export class MetricsExperiencePage {
   }
 
   /**
-   * Opens the insights flyout by triggering "View details" from the chart
-   * actions menu of the given card.
+   * Hovers a card to reveal the visible quick-action row, then clicks the
+   * given action locator.
    */
-  public async openInsightsFlyout(cardIndex: number): Promise<void> {
-    await this.openCardContextMenu(cardIndex);
-    await this.chartActions.viewDetails.click();
+  private async clickVisibleQuickAction(cardIndex: number, action: Locator): Promise<void> {
+    const card = this.getCardByIndex(cardIndex);
+    await card.hover();
+    await action.waitFor({ state: 'visible' });
+    await action.click();
   }
 
   /**
-   * Opens the inspector flyout by triggering "Inspect" from the chart
-   * actions menu of the given card.
+   * Opens the insights flyout by clicking "View details" on the visible
+   * quick-action row of the given card.
+   */
+  public async openInsightsFlyout(cardIndex: number): Promise<void> {
+    await this.clickVisibleQuickAction(cardIndex, this.chartActionsFor(cardIndex).viewDetails);
+  }
+
+  /**
+   * Opens the inspector flyout by clicking "Inspect" on the visible
+   * quick-action row of the given card.
+   *
+   * Do NOT switch this to `openCardContextMenu` — `openInspector` is promoted to
+   * the visible row via `METRICS_QUICK_ACTION_IDS` and will not appear in the
+   * context-menu popover when it is already in the hover row.
    */
   public async openInspectorFlyout(cardIndex: number): Promise<void> {
-    await this.openCardContextMenu(cardIndex);
-    await this.getCardByIndex(cardIndex)
-      .locator('[data-test-subj="embeddablePanelAction-openInspector"]')
-      .click();
+    await this.clickVisibleQuickAction(cardIndex, this.chartActionsFor(cardIndex).inspect);
   }
 }

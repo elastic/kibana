@@ -16,4 +16,3 @@ export const plugin = async (initContext: PluginInitializerContext) => {
 };
 
 export type { EsqlServerPluginSetup as PluginSetup };
-export { buildServerESQLCallbacks } from './services/build_server_esql_callbacks';

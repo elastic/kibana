@@ -11,10 +11,8 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('apis', () => {
-    loadTestFile(require.resolve('./core'));
     loadTestFile(require.resolve('./custom_integration'));
     loadTestFile(require.resolve('./general'));
-    loadTestFile(require.resolve('./home'));
     loadTestFile(require.resolve('./data_view_field_editor'));
     loadTestFile(require.resolve('./data_views'));
     loadTestFile(require.resolve('./event_annotations'));
@@ -24,12 +22,11 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./scripts'));
     loadTestFile(require.resolve('./search'));
     loadTestFile(require.resolve('./short_url'));
-    loadTestFile(require.resolve('./suggestions'));
+    // suggestions migrated to Scout: src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions*.spec.ts
     loadTestFile(require.resolve('./status'));
     loadTestFile(require.resolve('./stats'));
     loadTestFile(require.resolve('./ui_metric'));
     loadTestFile(require.resolve('./ui_counters'));
     loadTestFile(require.resolve('./telemetry'));
-    loadTestFile(require.resolve('./esql'));
   });
 }

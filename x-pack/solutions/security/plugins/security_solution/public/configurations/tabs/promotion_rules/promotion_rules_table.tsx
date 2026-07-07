@@ -22,7 +22,7 @@ import { Loader } from '../../../common/components/loader';
 import type { EuiBasicTableOnChange } from '../../../detection_engine/common/types';
 import type { Rule } from '../../../detection_engine/rule_management/logic';
 import { useRuleManagementFilters } from '../../../detection_engine/rule_management/logic/use_rule_management_filters';
-import { useIsUpgradingSecurityPackages } from '../../../detection_engine/rule_management/logic/use_upgrade_security_packages';
+import { useIsBootstrappingEaseRules } from './use_bootstrap_ease_rules';
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../../../detection_engine/rule_management_ui/components/rules_table/constants';
 import { useRulesTableContext } from '../../../detection_engine/rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import {
@@ -47,7 +47,7 @@ export enum PromotionRuleTabs {
 }
 
 export const PromotionRulesTable = () => {
-  const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
+  const isBootstrappingEaseRules = useIsBootstrappingEaseRules();
   const rulesTableContext = useRulesTableContext();
   const { data: ruleManagementFilters } = useRuleManagementFilters();
   const [currentTab, setCurrentTab] = useState(PromotionRuleTabs.management);
@@ -127,7 +127,7 @@ export const PromotionRulesTable = () => {
     [currentTab, handleTabClick, installedTotal]
   );
 
-  const shouldShowLinearProgress = (isFetched && isRefetching) || isUpgradingSecurityPackages;
+  const shouldShowLinearProgress = (isFetched && isRefetching) || isBootstrappingEaseRules;
   const shouldShowLoadingOverlay = !isFetched && isRefetching;
 
   return (

@@ -20,9 +20,18 @@ import {
   LatencyAggregationType,
   latencyAggregationTypeRt,
 } from '../../../../common/latency_aggregation_types';
+import {
+  DEFAULT_ANOMALY_THRESHOLD,
+  anomalyThresholdRt,
+} from '../../../../common/anomaly_detection/anomaly_threshold';
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { ALERT_STATUS_ALL, AlertsOverview } from '../../app/alerts_overview';
+import {
+  ALERT_STATUS_ALL,
+  AlertsOverview,
+  AlertsSearchBarContextProvider,
+  AlertsHeaderSearchBar,
+} from '../../app/alerts_overview';
 import { InfraTab } from '../../app/infra_overview/infra_tabs/use_tabs';
 import { ApmServiceTemplate } from '../templates/apm_service_template';
 import { ApmServiceWrapper } from './apm_service_wrapper';
@@ -31,6 +40,8 @@ import type { SearchBar } from '../../shared/search_bar/search_bar';
 import { ServiceDependencies } from '../../app/service_dependencies';
 import { ServiceDashboards } from '../../app/service_dashboards';
 import { ErrorGroupDetails } from '../../app/error_group_details';
+import { ServiceMapSearchBar } from '../../app/service_map/service_map_search_bar';
+import { ServiceMapSearchProvider } from '../../app/service_map/service_map_search_context';
 
 const ErrorGroupOverview = dynamic(() =>
   import('../../app/error_group_overview').then((mod) => ({ default: mod.ErrorGroupOverview }))
@@ -63,26 +74,47 @@ const TransactionOverview = dynamic(() =>
 const ProfilingOverview = dynamic(() =>
   import('../../app/profiling_overview').then((mod) => ({ default: mod.ProfilingOverview }))
 );
+const ProfilingHeaderSearchBar = dynamic(() =>
+  import('../../app/profiling_overview').then((mod) => ({
+    default: mod.ProfilingHeaderSearchBar,
+  }))
+);
 
 function page({
   title,
   tab,
   element,
   searchBarOptions,
+  customSearchBar,
+  bottomHeaderContent,
+  contentWrapper,
+  contextWrapper: ContextWrapper,
 }: {
   title: string;
   tab: React.ComponentProps<typeof ApmServiceTemplate>['selectedTab'];
   element: React.ReactElement<any, any>;
   searchBarOptions?: React.ComponentProps<typeof SearchBar>;
+  customSearchBar?: React.ReactNode;
+  bottomHeaderContent?: React.ComponentType;
+  contentWrapper?: React.ComponentType<{ children: React.ReactNode }>;
+  contextWrapper?: React.ComponentType<{ children: React.ReactNode }>;
 }): {
   element: React.ReactElement<any, any>;
 } {
+  const template = (
+    <ApmServiceTemplate
+      title={title}
+      selectedTab={tab}
+      searchBarOptions={searchBarOptions}
+      customSearchBar={customSearchBar}
+      bottomHeaderContent={bottomHeaderContent}
+      contentWrapper={contentWrapper}
+    >
+      {element}
+    </ApmServiceTemplate>
+  );
   return {
-    element: (
-      <ApmServiceTemplate title={title} selectedTab={tab} searchBarOptions={searchBarOptions}>
-        {element}
-      </ApmServiceTemplate>
-    ),
+    element: ContextWrapper ? <ContextWrapper>{template}</ContextWrapper> : template,
   };
 }
 
@@ -130,6 +162,7 @@ export const serviceDetailRoute = {
           }),
           t.partial({
             latencyAggregationType: latencyAggregationTypeRt,
+            anomalyThreshold: anomalyThresholdRt,
             transactionType: t.string,
             refreshPaused: t.union([t.literal('true'), t.literal('false')]),
             refreshInterval: t.string,
@@ -144,6 +177,7 @@ export const serviceDetailRoute = {
         environment: ENVIRONMENT_ALL.value,
         serviceGroup: '',
         latencyAggregationType: LatencyAggregationType.avg,
+        anomalyThreshold: DEFAULT_ANOMALY_THRESHOLD,
       },
     },
     children: {
@@ -328,8 +362,11 @@ export const serviceDetailRoute = {
           defaultMessage: 'Service map',
         }),
         element: <ServiceMapServiceDetail />,
+        customSearchBar: <ServiceMapSearchBar />,
+        contextWrapper: ServiceMapSearchProvider,
         searchBarOptions: {
           showTimeComparison: true,
+          showFilterBar: true,
         },
       }),
       '/services/{serviceName}/logs': page({
@@ -373,6 +410,8 @@ export const serviceDetailRoute = {
           searchBarOptions: {
             showUnifiedSearchBar: false,
           },
+          bottomHeaderContent: AlertsHeaderSearchBar,
+          contentWrapper: AlertsSearchBarContextProvider,
         }),
         params: t.partial({
           query: t.partial({
@@ -394,6 +433,7 @@ export const serviceDetailRoute = {
           searchBarOptions: {
             hidden: true,
           },
+          bottomHeaderContent: ProfilingHeaderSearchBar,
         }),
       },
       '/services/{serviceName}/dashboards': {

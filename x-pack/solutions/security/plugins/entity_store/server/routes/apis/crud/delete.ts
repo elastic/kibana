@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import path from 'node:path';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
@@ -15,7 +16,7 @@ import { wrapMiddlewares } from '../../middleware';
 import { EntityNotFoundError } from '../../../domain/errors';
 
 const bodySchema = z.object({
-  entityId: z.string(),
+  entityId: z.string().describe('The identifier of the entity to delete.'),
 });
 
 export function registerCRUDDelete(router: EntityStorePluginRouter) {
@@ -23,6 +24,12 @@ export function registerCRUDDelete(router: EntityStorePluginRouter) {
     .delete({
       path: ENTITY_STORE_ROUTES.public.CRUD_DELETE,
       access: 'public',
+      summary: 'Delete an entity',
+      description:
+        'Delete a single entity record from the Entity Store. The entity is immediately removed from the latest index.',
+      options: {
+        tags: ['oas-tag:Security entity store'],
+      },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -33,8 +40,11 @@ export function registerCRUDDelete(router: EntityStorePluginRouter) {
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(bodySchema),
+            body: buildStrictRouteValidationWithZod(bodySchema),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, '../examples/entities_delete.yaml'),
         },
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {

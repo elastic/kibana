@@ -69,6 +69,10 @@ export interface RunAgentParams {
    * The action to perform: "regenerate" re-executes the last round with original input (requires conversation_id).
    */
   action?: ConversationAction;
+  /**
+   * The execution ID for this run. Used for sub-agent parent tracking.
+   */
+  executionId?: string;
 }
 
 export interface RunAgentResponse {

@@ -23,7 +23,9 @@ import {
   ALERT_EVALUATION_VALUES,
   ALERT_FLAPPING,
   ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
   ALERT_RULE_NAME,
+  ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
@@ -38,6 +40,7 @@ import type { TopAlert } from '../../typings/alerts';
 import { useFetchBulkCases } from '../../hooks/use_fetch_bulk_cases';
 import { useCaseViewNavigation } from '../../hooks/use_case_view_navigation';
 import { useKibana } from '../../utils/kibana_react';
+import { useAuthorizedToReadRuleType } from '../../hooks/use_authorized_to_read_rule_type';
 import type { FlyoutThresholdData } from './helpers/map_rules_params_with_flyout';
 import { mapRuleParamsWithFlyout } from './helpers/map_rules_params_with_flyout';
 import { ColumnIDs, overviewColumns } from './overview_columns';
@@ -60,15 +63,27 @@ export const AlertOverview = memo(
         basePath: { prepend },
       },
     } = useKibana().services;
+    const authorizedToReadRuleType = useAuthorizedToReadRuleType();
     const { cases, isLoading } = useFetchBulkCases({ ids: alert.fields[ALERT_CASE_IDS] || [] });
     const dateFormat = useUiSetting<string>('dateFormat');
+
     const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
     const [ruleCriteria, setRuleCriteria] = useState<FlyoutThresholdData[] | undefined>([]);
+
+    const alertRuleTypeId = alert.fields[ALERT_RULE_TYPE_ID];
+    const alertConsumer = alert.fields[ALERT_RULE_CONSUMER];
     const alertStart = alert.fields[ALERT_START];
     const alertEnd = alert.fields[ALERT_END];
     const ruleId = get(alert.fields, ALERT_RULE_UUID) ?? null;
+
+    // Rule read is authorized per rule type (and consumer), so gate the rule links
+    // on the specific rule behind this alert rather than a coarse "any rules" flag.
+    const canReadAlertRule = Boolean(
+      alertRuleTypeId && authorizedToReadRuleType(alertRuleTypeId, alertConsumer)
+    );
+
     const linkToRule =
-      pageId !== RULE_DETAILS_PAGE_ID && ruleId
+      canReadAlertRule && pageId !== RULE_DETAILS_PAGE_ID && ruleId
         ? prepend(paths.observability.ruleDetails(ruleId))
         : null;
 
@@ -110,6 +125,7 @@ export const AlertOverview = memo(
           meta: {
             alertEnd,
             timeRange,
+            alertRuleTypeId,
             groups: getSources(alert) || [],
           },
         },
@@ -158,6 +174,7 @@ export const AlertOverview = memo(
           value: alert.fields[ALERT_RULE_NAME],
           meta: {
             ruleLink:
+              canReadAlertRule &&
               alert.fields[ALERT_RULE_UUID] &&
               prepend(paths.observability.ruleDetails(alert.fields[ALERT_RULE_UUID])),
           },
@@ -186,6 +203,7 @@ export const AlertOverview = memo(
       alertStatus,
       alert,
       alertEnd,
+      alertRuleTypeId,
       timeRange,
       dateFormat,
       ruleCriteria,
@@ -193,6 +211,7 @@ export const AlertOverview = memo(
       cases,
       navigateToCaseView,
       isLoading,
+      canReadAlertRule,
     ]);
 
     return (

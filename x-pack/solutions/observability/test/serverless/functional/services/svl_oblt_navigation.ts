@@ -25,17 +25,7 @@ export function SvlObltNavigationServiceProvider({
     async navigateToDiscoverPage() {
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('discover');
-        await testSubjects.exists('discoverQueryTotalHits', { timeout: 20_000 });
-      });
-    },
-
-    async navigateToObsCases() {
-      await PageObjects.common.navigateToUrl('observability', 'cases');
-    },
-
-    async expectNotFoundPage() {
-      await testSubjects.existOrFail('observabilityPageNotFoundBanner', {
-        timeout: 20_000,
+        await testSubjects.existOrFail('dscPage', { timeout: 20_000 });
       });
     },
   };

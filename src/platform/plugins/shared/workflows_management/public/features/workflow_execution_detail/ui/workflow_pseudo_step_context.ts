@@ -74,13 +74,28 @@ export function buildTriggerStepExecutionFromContext(
     workflowExecution.stepExecutions
   );
 
+  // For non-manual triggers (alert/document/scheduled/event), manual inputs supplied alongside
+  // the event are stored in context.inputs and surfaced as the step's output field. The server
+  // always persists an `inputs` key (an empty object when no manual inputs were supplied), so we
+  // must check for a non-empty object rather than `!== undefined` to avoid surfacing an empty output.
+  const ctx = workflowExecution.context as Record<string, unknown> | undefined | null;
+  const manualInputs = ctx?.inputs;
+  const hasManualInputs =
+    manualInputs != null &&
+    typeof manualInputs === 'object' &&
+    Object.keys(manualInputs).length > 0;
+  const triggerOutput: JsonValue | undefined =
+    triggerContext.triggerType !== 'manual' && hasManualInputs
+      ? (manualInputs as JsonValue)
+      : (workflowExecution.context?.output as JsonValue | undefined) ?? undefined;
+
   return {
     id: 'trigger',
     stepId: triggerContext.triggerType,
     stepType: `trigger_${triggerContext.triggerType}`,
     status: failedBeforeSteps ? ExecutionStatus.FAILED : ExecutionStatus.COMPLETED,
     input: triggerContext.input,
-    output: (workflowExecution.context?.output as JsonValue | undefined) ?? undefined,
+    output: triggerOutput,
     error: failedBeforeSteps ? workflowExecution.error ?? undefined : undefined,
     scopeStack: [],
     workflowRunId: workflowExecution.id,
@@ -109,6 +124,31 @@ export function buildOverviewStepExecutionFromContext(
         traceId: workflowExecution.traceId,
         entryTransactionId: workflowExecution.entryTransactionId,
       },
+    };
+  }
+
+  // Surface document-level error on Overview kv tree when the trigger row does not
+  // already attach the same execution.error (failed-before-steps → trigger pseudo-step only).
+  const failedBeforeSteps = isFailedBeforeSteps(
+    workflowExecution.status,
+    workflowExecution.stepExecutions
+  );
+  if (workflowExecution.error && !failedBeforeSteps) {
+    contextData = {
+      ...contextData,
+      executionError: {
+        type: workflowExecution.error.type,
+        message: workflowExecution.error.message,
+      },
+    };
+  }
+
+  const cancellationReason = (workflowExecution as { cancellationReason?: string })
+    .cancellationReason;
+  if (workflowExecution.status === ExecutionStatus.SKIPPED && cancellationReason) {
+    contextData = {
+      ...contextData,
+      skipReason: cancellationReason,
     };
   }
 

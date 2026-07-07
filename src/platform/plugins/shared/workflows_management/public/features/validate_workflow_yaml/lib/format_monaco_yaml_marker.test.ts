@@ -13,17 +13,19 @@ import { SCHEDULED_INTERVAL_ERROR, SCHEDULED_INTERVAL_PATTERN } from '@kbn/workf
 import { z } from '@kbn/zod/v4';
 import { formatMonacoYamlMarker } from './format_monaco_yaml_marker';
 
-jest.mock('../../../../common/lib/yaml', () => ({
+const mockEnrichErrorMessage = jest.fn();
+
+jest.mock('@kbn/workflows/common/utils/yaml', () => ({
   getPathAtOffset: jest.fn().mockReturnValue([]),
 }));
 
-jest.mock('../../../../common/lib/zod', () => ({
-  formatZodError: jest.fn().mockReturnValue({ message: 'formatted error' }),
+jest.mock('@kbn/workflows-yaml', () => ({
+  enrichErrorMessage: (...args: any[]) => mockEnrichErrorMessage(...args),
 }));
 
-const { formatZodError } = jest.requireMock<{
-  formatZodError: jest.Mock;
-}>('../../../../common/lib/zod');
+jest.mock('../../../../common/lib/connector_params_schema_resolver', () => ({
+  connectorParamsSchemaResolver: jest.fn().mockReturnValue(null),
+}));
 
 type IMarkerData = monaco.editor.IMarkerData;
 type ITextModel = monaco.editor.ITextModel;
@@ -51,7 +53,7 @@ const dummySchema = z.string();
 describe('formatMonacoYamlMarker', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    formatZodError.mockReturnValue({ message: 'formatted error' });
+    mockEnrichErrorMessage.mockReturnValue({ message: 'enriched message', enriched: true });
   });
 
   it('returns the marker unchanged when source is not yaml-schema', () => {
@@ -66,6 +68,7 @@ describe('formatMonacoYamlMarker', () => {
     const marker = createMarker({
       source: 'yaml-schema:workflow',
       severity: monaco.MarkerSeverity.Warning,
+      message: 'Some message',
     });
     const result = formatMonacoYamlMarker(marker, createEditorModel(), dummySchema, null);
 
@@ -94,6 +97,40 @@ describe('formatMonacoYamlMarker', () => {
     expect(result.severity).toBe(monaco.MarkerSeverity.Error);
   });
 
+  it('should call enrichErrorMessage if message matches a numeric enum pattern', () => {
+    const marker = createMarker({
+      source: 'yaml-schema:workflow',
+      message: 'Invalid enum value. Expected 0 | 1',
+    });
+    const yamlDoc = parseDocument('key: value');
+    const result = formatMonacoYamlMarker(marker, createEditorModel(), dummySchema, yamlDoc);
+
+    expect(mockEnrichErrorMessage).toHaveBeenCalledWith(
+      [],
+      marker.message,
+      'unknown',
+      expect.objectContaining({ schema: dummySchema, yamlDocument: yamlDoc })
+    );
+    expect(result.message).toBe('enriched message');
+  });
+
+  it('should call enrichErrorMessage if message matches an invalid type pattern', () => {
+    const marker = createMarker({
+      source: 'yaml-schema:workflow',
+      message: 'Incorrect type. Expected "object"',
+    });
+    const yamlDoc = parseDocument('key: value');
+    const result = formatMonacoYamlMarker(marker, createEditorModel(), dummySchema, yamlDoc);
+
+    expect(mockEnrichErrorMessage).toHaveBeenCalledWith(
+      [],
+      marker.message,
+      'unknown',
+      expect.objectContaining({ schema: dummySchema, yamlDocument: yamlDoc })
+    );
+    expect(result.message).toBe('enriched message');
+  });
+
   describe('numeric enum patterns', () => {
     it.each([
       'Expected "0 | 1 | 2"',
@@ -106,8 +143,8 @@ describe('formatMonacoYamlMarker', () => {
       const yamlDoc = parseDocument('key: value');
       const result = formatMonacoYamlMarker(marker, createEditorModel(), dummySchema, yamlDoc);
 
-      expect(formatZodError).toHaveBeenCalled();
-      expect(result.message).toBe('formatted error');
+      expect(mockEnrichErrorMessage).toHaveBeenCalled();
+      expect(result.message).toBe('enriched message');
     });
   });
 
@@ -121,8 +158,8 @@ describe('formatMonacoYamlMarker', () => {
       const yamlDoc = parseDocument('key: value');
       const result = formatMonacoYamlMarker(marker, createEditorModel(), dummySchema, yamlDoc);
 
-      expect(formatZodError).toHaveBeenCalled();
-      expect(result.message).toBe('formatted error');
+      expect(mockEnrichErrorMessage).toHaveBeenCalled();
+      expect(result.message).toBe('enriched message');
     });
   });
 
@@ -134,13 +171,13 @@ describe('formatMonacoYamlMarker', () => {
     const yamlDoc = parseDocument('key: value');
     const result = formatMonacoYamlMarker(marker, createEditorModel(), dummySchema, yamlDoc);
 
-    expect(formatZodError).toHaveBeenCalled();
-    expect(result.message).toBe('formatted error');
+    expect(mockEnrichErrorMessage).toHaveBeenCalled();
+    expect(result.message).toBe('enriched message');
   });
 
-  it('falls back to the original message when formatZodError throws', () => {
-    formatZodError.mockImplementation(() => {
-      throw new Error('formatting failed');
+  it('falls back to the original message when enrichErrorMessage throws', () => {
+    mockEnrichErrorMessage.mockImplementation(() => {
+      throw new Error('enrichment failed');
     });
 
     const marker = createMarker({
@@ -155,7 +192,20 @@ describe('formatMonacoYamlMarker', () => {
     expect(result.message).toBe('Expected "0 | 1 | 2"');
   });
 
-  it('does not call formatZodError for non-matching messages', () => {
+  it('should return original message if enrichment is not applied', () => {
+    mockEnrichErrorMessage.mockReturnValue({ message: 'original', enriched: false });
+
+    const marker = createMarker({
+      source: 'yaml-schema:workflow',
+      message: 'Invalid enum value. Expected 0 | 1',
+    });
+    const yamlDoc = parseDocument('key: value');
+    const result = formatMonacoYamlMarker(marker, createEditorModel(), dummySchema, yamlDoc);
+
+    expect(result.message).toBe('Invalid enum value. Expected 0 | 1');
+  });
+
+  it('does not call enrichErrorMessage for non-matching messages', () => {
     const marker = createMarker({
       source: 'yaml-schema:workflow',
       message: 'Property foo is not allowed',
@@ -163,7 +213,7 @@ describe('formatMonacoYamlMarker', () => {
     const yamlDoc = parseDocument('key: value');
     const result = formatMonacoYamlMarker(marker, createEditorModel(), dummySchema, yamlDoc);
 
-    expect(formatZodError).not.toHaveBeenCalled();
+    expect(mockEnrichErrorMessage).not.toHaveBeenCalled();
     expect(result.message).toBe('Property foo is not allowed');
     expect(result.severity).toBe(monaco.MarkerSeverity.Error);
   });
@@ -175,8 +225,8 @@ describe('formatMonacoYamlMarker', () => {
     });
     const result = formatMonacoYamlMarker(marker, createEditorModel(), dummySchema, null);
 
-    expect(formatZodError).toHaveBeenCalled();
-    expect(result.message).toBe('formatted error');
+    expect(mockEnrichErrorMessage).toHaveBeenCalled();
+    expect(result.message).toBe('enriched message');
   });
 
   it('preserves all other marker properties (position, source, etc.)', () => {
@@ -205,7 +255,7 @@ describe('formatMonacoYamlMarker', () => {
     const result = formatMonacoYamlMarker(marker, createEditorModel(), dummySchema, null);
 
     // Empty message should not match any pattern
-    expect(formatZodError).not.toHaveBeenCalled();
+    expect(mockEnrichErrorMessage).not.toHaveBeenCalled();
     expect(result.message).toBe('');
   });
 });

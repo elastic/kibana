@@ -9,6 +9,7 @@
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { useCallback, useEffect, useMemo } from 'react';
+import { setBreakdownField } from '@kbn/discover-utils';
 import type {
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramFetchParams,
@@ -26,7 +27,6 @@ import {
   topPanelHeightSelector,
 } from '../utils/state_selectors';
 import { useStateSelector } from './use_state_selector';
-import { setBreakdownField } from '../utils/local_storage_utils';
 
 export const useStateProps = ({
   services,

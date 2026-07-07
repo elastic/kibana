@@ -270,7 +270,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
         const subset = hits.filter((h) =>
           docMatchesQuery((getDocSource(h) ?? {}) as Record<string, unknown>, scenario.query)
         );
-        expect(subset).toHaveLength(1);
+        expect(subset, `scenario "${scenario.id}"`).toHaveLength(1);
         expect(getEuidFromObject('user', subset[0])).toBe(scenario.expectedEuid);
         expect(scenario.expectedMeta).toBeDefined();
         const expectedMeta = scenario.expectedMeta!;
@@ -286,8 +286,11 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
         hasDocWith(hits, (s) => s.user?.name === 'alice.local' && s.host?.id === 'host-nonidp-001')
       ).toBe(true);
 
-      expect(hasDocWith(hits, (s) => s.user?.email === 'invalid-idp-illegal@test.com')).toBe(false);
-      expect(hasDocWith(hits, (s) => s.user?.name === 'not-captured-no-event')).toBe(false);
+      // All these documents could potentially be a contributor to the EUID, so we should include them.
+      expect(hasDocWith(hits, (s) => s.user?.email === 'invalid-idp-illegal@test.com')).toBe(true);
+      expect(hasDocWith(hits, (s) => s.user?.name === 'not-captured-no-event')).toBe(true);
+
+      // Outcome failure should never be present
       expect(hasDocWith(hits, (s) => s.user?.name === 'ignored-outcome-failure')).toBe(false);
 
       const bareOnlyTimestamp = hasDocWith(hits, (s) => {

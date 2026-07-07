@@ -172,7 +172,7 @@ describe('SaveTimelineModal', () => {
 
       expect(getByTestId('save-timeline-modal-callout')).toBeInTheDocument();
       expect(getByTestId('save-timeline-modal-callout')).toHaveTextContent(
-        'You have an unsaved timeline. Do you wish to save it?'
+        'You have an unsaved Timeline. Do you wish to save it?'
       );
     });
 

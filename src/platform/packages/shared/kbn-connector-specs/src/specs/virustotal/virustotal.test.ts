@@ -251,6 +251,26 @@ describe('VirusTotalConnector', () => {
   });
 
   describe('scanUrl action', () => {
+    it('should accept absolute URLs and bare domains in the input schema', () => {
+      expect(
+        VirusTotalConnector.actions.scanUrl.input.safeParse({ url: 'https://example.com' }).success
+      ).toBe(true);
+      expect(
+        VirusTotalConnector.actions.scanUrl.input.safeParse({ url: 'ftp://example.com' }).success
+      ).toBe(false);
+      expect(
+        VirusTotalConnector.actions.scanUrl.input.safeParse({
+          url: 'acme.example',
+        }).success
+      ).toBe(true);
+      expect(
+        VirusTotalConnector.actions.scanUrl.input.safeParse({ url: 'localhost' }).success
+      ).toBe(false);
+      expect(
+        VirusTotalConnector.actions.scanUrl.input.safeParse({ url: 'not a domain' }).success
+      ).toBe(false);
+    });
+
     it('should submit URL for scanning and retrieve results', async () => {
       const mockSubmitResponse = {
         data: {
@@ -303,6 +323,48 @@ describe('VirusTotalConnector', () => {
           undetected: 67,
           harmless: 0,
         },
+      });
+    });
+
+    it('should retrieve domain report when given a bare domain', async () => {
+      const mockDomainResponse = {
+        data: {
+          data: {
+            id: 'acme.example',
+            type: 'domain',
+            attributes: {
+              reputation: -10,
+              last_analysis_stats: {
+                malicious: 4,
+                suspicious: 1,
+                undetected: 83,
+                harmless: 0,
+              },
+            },
+          },
+        },
+      };
+      mockClient.get.mockResolvedValue(mockDomainResponse);
+
+      const result = await VirusTotalConnector.actions.scanUrl.handler(mockContext, {
+        url: 'acme.example',
+      });
+
+      expect(mockClient.post).not.toHaveBeenCalled();
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://www.virustotal.com/api/v3/domains/acme.example'
+      );
+      expect(result).toEqual({
+        id: 'acme.example',
+        type: 'domain',
+        attributes: mockDomainResponse.data.data.attributes,
+        stats: {
+          malicious: 4,
+          suspicious: 1,
+          undetected: 83,
+          harmless: 0,
+        },
+        reputation: -10,
       });
     });
 
@@ -377,6 +439,165 @@ describe('VirusTotalConnector', () => {
           failOnError: true,
         })
       ).rejects.toThrow('VirusTotal API request failed (HTTP 429)');
+    });
+  });
+
+  describe('getAnalysisResults action', () => {
+    it('should retrieve analysis results by analysis ID by default', async () => {
+      const mockResponse = {
+        data: {
+          data: {
+            id: 'u-analysis-id-12345',
+            type: 'analysis',
+            attributes: {
+              status: 'completed',
+              stats: {
+                malicious: 2,
+                suspicious: 0,
+                undetected: 68,
+                harmless: 0,
+              },
+            },
+            links: {
+              self: 'https://www.virustotal.com/api/v3/analyses/u-analysis-id-12345',
+            },
+          },
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await VirusTotalConnector.actions.getAnalysisResults.handler(mockContext, {
+        id: 'u-analysis-id-12345',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://www.virustotal.com/api/v3/analyses/u-analysis-id-12345'
+      );
+      expect(result).toEqual({
+        id: 'u-analysis-id-12345',
+        type: 'analysis',
+        attributes: mockResponse.data.data.attributes,
+        status: 'completed',
+        stats: {
+          malicious: 2,
+          suspicious: 0,
+          undetected: 68,
+          harmless: 0,
+        },
+        links: mockResponse.data.data.links,
+      });
+    });
+
+    it.each([
+      ['file', '44d88612fea8a8f36de82e1278abb02f', 'files/44d88612fea8a8f36de82e1278abb02f'],
+      ['domain', 'EXAMPLE.com', 'domains/example.com'],
+      ['ip', '8.8.8.8', 'ip_addresses/8.8.8.8'],
+    ] as const)(
+      'should retrieve %s report results',
+      async (resourceType, id, expectedResourcePath) => {
+        const mockResponse = {
+          data: {
+            data: {
+              id: id.toLowerCase(),
+              type: resourceType,
+              attributes: {
+                last_analysis_stats: {
+                  malicious: 0,
+                  suspicious: 0,
+                  undetected: 70,
+                  harmless: 0,
+                },
+              },
+            },
+          },
+        };
+        mockClient.get.mockResolvedValue(mockResponse);
+
+        const result = (await VirusTotalConnector.actions.getAnalysisResults.handler(mockContext, {
+          id,
+          resourceType,
+        })) as { stats: { malicious: number } };
+
+        expect(mockClient.get).toHaveBeenCalledWith(
+          `https://www.virustotal.com/api/v3/${expectedResourcePath}`
+        );
+        expect(result.stats.malicious).toBe(0);
+      }
+    );
+
+    it('should convert a full URL to the VirusTotal URL identifier for URL reports', async () => {
+      const mockResponse = {
+        data: {
+          data: {
+            id: 'aHR0cHM6Ly9zdXNwaWNpb3VzLmV4YW1wbGUuY29t',
+            type: 'url',
+            attributes: {
+              last_analysis_stats: {
+                malicious: 2,
+                suspicious: 1,
+                undetected: 67,
+                harmless: 0,
+              },
+            },
+          },
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = (await VirusTotalConnector.actions.getAnalysisResults.handler(mockContext, {
+        id: 'https://suspicious.example.com',
+        resourceType: 'url',
+      })) as { type: string; stats: { malicious: number } };
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://www.virustotal.com/api/v3/urls/aHR0cHM6Ly9zdXNwaWNpb3VzLmV4YW1wbGUuY29t'
+      );
+      expect(result.type).toBe('url');
+      expect(result.stats.malicious).toBe(2);
+    });
+
+    it('should return error details when result lookup fails and failOnError is false', async () => {
+      const error: HttpError = new Error('Not found');
+      error.response = {
+        status: 404,
+        data: {
+          error: {
+            code: 'NotFoundError',
+            message: 'Analysis not found',
+          },
+        },
+      };
+      mockClient.get.mockRejectedValue(error);
+
+      const result = (await VirusTotalConnector.actions.getAnalysisResults.handler(mockContext, {
+        id: 'missing-analysis-id',
+      })) as {
+        id: null;
+        error: { status: number; message: string };
+      };
+
+      expect(result.error.status).toBe(404);
+      expect(result.error.message).toBe('VirusTotal analysis results not found');
+    });
+
+    it('should throw error when result lookup fails and failOnError is true', async () => {
+      const error: HttpError = new Error('Rate limit exceeded');
+      error.response = {
+        status: 429,
+        data: {
+          error: {
+            code: 'QuotaExceededError',
+          },
+        },
+      };
+      mockClient.get.mockRejectedValue(error);
+
+      await expect(
+        VirusTotalConnector.actions.getAnalysisResults.handler(mockContext, {
+          id: 'u-analysis-id-12345',
+          failOnError: true,
+        })
+      ).rejects.toThrow('VirusTotal analysis results request failed (HTTP 429)');
     });
   });
 

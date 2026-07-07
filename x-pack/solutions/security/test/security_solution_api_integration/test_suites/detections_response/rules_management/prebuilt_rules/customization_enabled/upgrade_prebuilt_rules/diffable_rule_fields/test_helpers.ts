@@ -217,14 +217,17 @@ export function testFieldUpgradesToMergedValue(
 
     const hasRuleFieldsToPatch = Object.keys(ruleUpgradeAssets.patch).length > 0;
 
+    const ruleId = ruleUpgradeAssets.upgrade.rule_id ?? DEFAULT_TEST_RULE_ID;
+    const version = ruleUpgradeAssets.upgrade.version ?? DEFAULT_RULE_UPDATE_VERSION;
+
     const response = await performUpgradePrebuiltRules(es, supertest, {
       mode: ModeEnum.SPECIFIC_RULES,
       on_conflict: onConflict,
       rules: [
         {
-          rule_id: ruleUpgradeAssets.upgrade.rule_id ?? DEFAULT_TEST_RULE_ID,
+          rule_id: ruleId,
           revision: hasRuleFieldsToPatch ? 1 : 0,
-          version: ruleUpgradeAssets.upgrade.version ?? DEFAULT_RULE_UPDATE_VERSION,
+          version,
           fields: {
             [diffableRuleFieldName]: {
               pick_version: 'MERGED',
@@ -235,10 +238,10 @@ export function testFieldUpgradesToMergedValue(
     });
 
     const upgradedRule = await detectionsApi.readRule({
-      query: { rule_id: DEFAULT_TEST_RULE_ID },
+      query: { rule_id: ruleId },
     });
 
-    expectRuleFields(response.results.updated[0], expectedFieldsAfterUpgrade);
+    expect(response.results.updated[0]).toMatchObject({ rule_id: ruleId, version });
     expectRuleFields(upgradedRule.body, expectedFieldsAfterUpgrade);
   });
 }
@@ -291,13 +294,16 @@ export function testFieldUpgradesToResolvedValue(
 
     const hasRuleFieldsToPatch = Object.keys(ruleUpgradeAssets.patch).length > 0;
 
+    const ruleId = ruleUpgradeAssets.upgrade.rule_id ?? DEFAULT_TEST_RULE_ID;
+    const version = ruleUpgradeAssets.upgrade.version ?? DEFAULT_RULE_UPDATE_VERSION;
+
     const response = await performUpgradePrebuiltRules(deps.es, deps.supertest, {
       mode: ModeEnum.SPECIFIC_RULES,
       rules: [
         {
           rule_id: ruleUpgradeAssets.upgrade.rule_id ?? DEFAULT_TEST_RULE_ID,
           revision: hasRuleFieldsToPatch ? 1 : 0,
-          version: ruleUpgradeAssets.upgrade.version ?? DEFAULT_RULE_UPDATE_VERSION,
+          version,
           fields: {
             [diffableRuleFieldName]: {
               pick_version: 'RESOLVED',
@@ -309,10 +315,10 @@ export function testFieldUpgradesToResolvedValue(
     });
 
     const upgradedRule = await deps.detectionsApi.readRule({
-      query: { rule_id: DEFAULT_TEST_RULE_ID },
+      query: { rule_id: ruleId },
     });
 
-    expectRuleFields(response.results.updated[0], expectedFieldsAfterUpgrade);
+    expect(response.results.updated[0]).toMatchObject({ rule_id: ruleId, version });
     expectRuleFields(upgradedRule.body, expectedFieldsAfterUpgrade);
   });
 }

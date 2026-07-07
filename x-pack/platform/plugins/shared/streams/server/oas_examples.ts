@@ -16,6 +16,7 @@
  */
 
 import type { Streams } from '@kbn/streams-schema';
+import type { SignificantEventsGetResponse, StreamQuery } from '@kbn/significant-events-schema';
 
 // ---------------------------------------------------------------------------
 // PUT /api/streams/{name}  –  wired stream
@@ -48,7 +49,6 @@ export const createWiredStreamRequest: Streams.WiredStream.UpsertRequest = {
   },
   dashboards: [],
   rules: [],
-  queries: [],
 };
 
 // ---------------------------------------------------------------------------
@@ -80,7 +80,6 @@ export const updateClassicStreamRequest: Streams.ClassicStream.UpsertRequest = {
   },
   dashboards: [],
   rules: [],
-  queries: [],
 };
 
 // ---------------------------------------------------------------------------
@@ -98,7 +97,6 @@ export const createQueryStreamRequest: Streams.QueryStream.UpsertRequest = {
   },
   dashboards: [],
   rules: [],
-  queries: [],
 };
 
 // ---------------------------------------------------------------------------
@@ -230,7 +228,6 @@ export const getWiredStreamResponse: Streams.WiredStream.GetResponse = {
   },
   dashboards: [],
   rules: [],
-  queries: [],
   data_stream_exists: true,
   inherited_fields: {
     '@timestamp': { type: 'date', from: 'logs' },
@@ -291,6 +288,116 @@ export const getWiredIngestResponse: { ingest: Streams.WiredStream.Definition['i
       ],
     },
   },
+};
+
+// ---------------------------------------------------------------------------
+// PUT /api/streams/{name}/queries/{queryId}
+// ---------------------------------------------------------------------------
+
+export const upsertStreamQueryRequest = {
+  title: 'Error count by host',
+  description: 'Count error-level log events grouped by host name',
+  esql: {
+    query: 'FROM logs* | WHERE log.level == "error" | STATS count = COUNT(*) BY host.name',
+  },
+};
+
+// ---------------------------------------------------------------------------
+// POST /api/streams/{name}/queries/_bulk
+// ---------------------------------------------------------------------------
+
+export const bulkStreamQueriesRequest = {
+  operations: [
+    {
+      index: {
+        id: 'error-count-by-host',
+        title: 'Error count by host',
+        description: 'Count error-level log events grouped by host name',
+        esql: {
+          query: 'FROM logs* | WHERE log.level == "error" | STATS count = COUNT(*) BY host.name',
+        },
+      },
+    },
+    {
+      delete: { id: 'old-query-id' },
+    },
+  ],
+};
+
+// ---------------------------------------------------------------------------
+// POST /api/streams/{name}/content/export
+// ---------------------------------------------------------------------------
+
+export const exportContentRequest = {
+  name: 'nginx-pack',
+  description: 'Nginx stream content pack',
+  version: '1.0.0',
+  include: { objects: { all: {} } },
+};
+
+// ---------------------------------------------------------------------------
+// GET /api/streams/{name}/queries  –  list queries response
+// ---------------------------------------------------------------------------
+
+export const listStreamQueriesResponse: { queries: StreamQuery[] } = {
+  queries: [
+    {
+      id: 'error-count-by-host',
+      title: 'Error count by host',
+      description: 'Count error-level log events grouped by host name',
+      type: 'match',
+      esql: {
+        query: 'FROM logs.nginx | WHERE log.level == "error" | STATS count = COUNT(*) BY host.name',
+      },
+      severity_score: 75,
+    },
+    {
+      id: 'high-latency-requests',
+      title: 'High latency requests',
+      description: 'Requests with response time above 2 seconds',
+      type: 'match',
+      esql: {
+        query: 'FROM logs.nginx | WHERE http.response_time > 2000',
+      },
+      severity_score: 50,
+    },
+  ],
+};
+
+// ---------------------------------------------------------------------------
+// GET /api/streams/{name}/significant_events  –  significant events response
+// ---------------------------------------------------------------------------
+
+export const getSignificantEventsResponse: SignificantEventsGetResponse = {
+  significant_events: [
+    {
+      id: 'error-count-by-host',
+      title: 'Error count by host',
+      description: 'Count error-level log events grouped by host name',
+      type: 'match',
+      esql: {
+        query: 'FROM logs.nginx | WHERE log.level == "error" | STATS count = COUNT(*) BY host.name',
+      },
+      severity_score: 75,
+      stream_name: 'logs.nginx',
+      occurrences: [
+        { date: '2025-01-15T10:00:00.000Z', count: 42 },
+        { date: '2025-01-15T11:00:00.000Z', count: 18 },
+        { date: '2025-01-15T12:00:00.000Z', count: 7 },
+      ],
+      change_points: {
+        type: {
+          spike: { p_value: 0.002, change_point: 1 },
+        },
+      },
+      rule_backed: false,
+    },
+  ],
+  aggregated_occurrences: [
+    { date: '2025-01-15T10:00:00.000Z', count: 42 },
+    { date: '2025-01-15T11:00:00.000Z', count: 18 },
+    { date: '2025-01-15T12:00:00.000Z', count: 7 },
+  ],
 };
 
 // ---------------------------------------------------------------------------

@@ -77,6 +77,7 @@ import type {
   CustomGridColumnsConfiguration,
   DataGridPaginationMode,
   CustomBulkActions,
+  DocMap,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -213,7 +214,7 @@ interface InternalUnifiedDataTableProps {
   /**
    * function to change sorting of the documents, skipped when isSortEnabled is set to false
    */
-  onSort?: (sort: string[][]) => void;
+  onSort?: (sort: SortOrder[]) => void;
   /**
    * Array of documents provided by Elasticsearch
    */
@@ -250,6 +251,13 @@ interface InternalUnifiedDataTableProps {
    * Manage user sorting control
    */
   isSortEnabled?: boolean;
+  /**
+   * Only for ES|QL mode for now.
+   * When false, disables in-memory (client-side) row sorting. Use this when sorting is performed
+   * server-side (e.g. via a SORT clause in ES|QL) so the table displays the already-sorted rows
+   * verbatim instead of reordering them again. Defaults to true.
+   */
+  isInMemorySortEnabled?: boolean;
   /**
    * Current sort setting
    */
@@ -424,6 +432,14 @@ interface InternalUnifiedDataTableProps {
    **/
   visibleCellActions?: number;
   /**
+   * Total number of visible slots in the actions column, including the overflow
+   * menu button when it appears. Defaults to 2 (one inline control + one overflow menu).
+   *
+   * When the total number of controls is `visibleRowLeadingControls` or fewer,
+   * all render inline with no overflow menu.
+   */
+  visibleRowLeadingControls?: number;
+  /**
    * Disable cell actions for the table.
    */
   disableCellActions?: boolean;
@@ -485,6 +501,12 @@ interface InternalUnifiedDataTableProps {
   customBulkActions?: CustomBulkActions;
 
   /**
+   * When true, hides the built-in copy (as text/markdown/JSON) and show-selected bulk actions,
+   * leaving only custom bulk actions and selection management controls.
+   */
+  hideDefaultBulkActions?: boolean;
+
+  /**
    * When editing fields, it will create a new ad-hoc data view instead of modifying the existing one.
    */
   shouldKeepAdHocDataViewImmutable?: boolean;
@@ -521,6 +543,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       onUpdateHeaderRowHeight,
       controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
       rowAdditionalLeadingControls,
+      visibleRowLeadingControls,
       dataView,
       loadingState,
       onFilter,
@@ -536,6 +559,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       showFullScreenButton = true,
       sort,
       isSortEnabled = true,
+      isInMemorySortEnabled = true,
       isPaginationEnabled = true,
       paginationMode = DEFAULT_PAGINATION_MODE,
       cellActionsTriggerId,
@@ -585,6 +609,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       disableCellActions = false,
       disableCellPopover = false,
       customBulkActions,
+      hideDefaultBulkActions,
       shouldKeepAdHocDataViewImmutable,
       onFullScreenChange,
       hideFilteringOnComputedColumns,
@@ -602,14 +627,10 @@ const InternalUnifiedDataTable = React.forwardRef<
     const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
     const displayedColumns = getDisplayedColumns(columns, dataView);
     const defaultColumns = displayedColumns.includes('_source');
-    const docMap = useMemo(
-      () =>
-        new Map<string, { doc: DataTableRecord; docIndex: number }>(
-          rows?.map((row, docIndex) => [row.id, { doc: row, docIndex }]) ?? []
-        ),
+    const docMap = useMemo<DocMap>(
+      () => new Map(rows?.map((row, docIndex) => [row.id, { doc: row, docIndex }]) ?? []),
       [rows]
     );
-    const getDocById = useCallback((id: string) => docMap.get(id)?.doc, [docMap]);
     const selectedDocsState = useSelectedDocs(docMap);
     const {
       isDocSelected,
@@ -666,6 +687,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       dataView,
       isPlainRecord,
       isSortEnabled,
+      isInMemorySortEnabled,
       defaultColumns,
       onSort,
     });
@@ -1122,6 +1144,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         baseColumns: leadColumnsExtraContent,
         rowAdditionalLeadingControls,
         externalControlColumns,
+        visibleRowLeadingControls,
       });
       if (actionsColumn) {
         filteredLeadColumns.push(actionsColumn);
@@ -1135,6 +1158,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       externalControlColumns,
       getRowIndicator,
       rowAdditionalLeadingControls,
+      visibleRowLeadingControls,
     ]);
 
     const additionalControls = useMemo(() => {
@@ -1149,7 +1173,7 @@ const InternalUnifiedDataTable = React.forwardRef<
               <DataTableDocumentToolbarBtn
                 isPlainRecord={isPlainRecord}
                 isFilterActive={isFilterActive}
-                rows={rows!}
+                rows={displayedRows}
                 setIsFilterActive={setIsFilterActive}
                 selectedDocsState={selectedDocsState}
                 enableComparisonMode={enableComparisonMode}
@@ -1160,6 +1184,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 toastNotifications={toastNotifications}
                 columns={visibleColumns}
                 customBulkActions={customBulkActions}
+                hideDefaultBulkActions={hideDefaultBulkActions}
               />
             </EuiFlexItem>
           )}
@@ -1185,7 +1210,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       inTableSearchControl,
       isPlainRecord,
       isFilterActive,
-      rows,
+      displayedRows,
       selectedDocsState,
       enableComparisonMode,
       setIsFilterActive,
@@ -1197,6 +1222,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       visibleColumns,
       renderCustomToolbar,
       customBulkActions,
+      hideDefaultBulkActions,
     ]);
 
     const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
@@ -1425,6 +1451,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 ariaDescribedBy={randomId}
                 ariaLabelledBy={ariaLabelledBy}
                 dataView={dataView}
+                columnsMeta={columnsMeta}
                 isPlainRecord={isPlainRecord}
                 selectedFieldNames={visibleColumns}
                 selectedDocIds={docIdsInSelectionOrder}
@@ -1432,7 +1459,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 forceShowAllFields={defaultColumns}
                 showFullScreenButton={showFullScreenButton}
                 fieldFormats={fieldFormats}
-                getDocById={getDocById}
+                docMap={docMap}
                 replaceSelectedDocs={replaceSelectedDocs}
                 setIsCompareActive={setIsCompareActive}
               />

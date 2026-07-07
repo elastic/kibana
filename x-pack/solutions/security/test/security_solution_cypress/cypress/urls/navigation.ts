@@ -19,6 +19,8 @@ export const POLICIES_URL = '/app/security/administration/policy';
 /** Any artifact tab lives under this path prefix (trusted apps, event filters, blocklist, etc.) */
 export const ADMINISTRATION_URL_PREFIX = '/app/security/administration';
 export const TRUSTED_APPS_URL = '/app/security/administration/trusted_apps';
+export const TRUSTED_DEVICES_URL = '/app/security/administration/trusted_devices';
+export const ENDPOINT_EXCEPTIONS_URL = '/app/security/administration/endpoint_exceptions';
 export const EVENT_FILTERS_URL = '/app/security/administration/event_filters';
 export const BLOCKLIST_URL = '/app/security/administration/blocklist';
 export const HOST_ISOLATION_EXCEPTIONS_URL = `app/security/administration/host_isolation_exceptions`;
@@ -121,6 +123,10 @@ export const CUSTOM_ROLES_URL = 'app/management/security/roles/edit';
 // Alerting
 export const STACK_RULES_URL = 'app/management/insightsAndAlerting/triggersActions/rules';
 export const MAINTENANCE_WINDOW_URL = 'app/management/insightsAndAlerting/maintenanceWindows';
+
+// Configurations
+export const CONFIGURATIONS_INTEGRATIONS_URL = '/app/security/configurations/integrations/browse';
+export const CONFIGURATIONS_BASIC_RULES_URL_FRAGMENT = '/configurations/basic_rules';
 
 // Launchpad
 export const GET_STARTED_URL = '/app/security/get_started';

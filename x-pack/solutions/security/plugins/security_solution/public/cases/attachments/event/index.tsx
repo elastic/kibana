@@ -18,13 +18,13 @@ import {
   toStringArray,
 } from '@kbn/cases-plugin/common';
 import type { UnifiedReferenceAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import { UserActionTitle } from '@kbn/cases-components';
 import { getNonEmptyField } from './utils';
 import {
-  MultipleEventsCommentLabel,
-  SingleEventCommentLabel,
-} from './components/event_comment_label';
-import {
   DELETE_EVENTS_SUCCESS_TITLE,
+  EVENT_COMMENT_LABEL_TITLE,
+  EVENT_DISPLAY_NAME,
+  MULTIPLE_EVENTS_COMMENT_LABEL_TITLE,
   REMOVED_EVENT_LABEL_TITLE,
   REMOVED_EVENTS_LABEL_TITLE,
 } from './translations';
@@ -53,10 +53,16 @@ const getAttachmentViewObject = (props: UnifiedReferenceAttachmentViewProps) => 
   const index = getNonEmptyField(validMetadata?.index);
 
   return {
-    event: isSingleEvent ? (
-      <SingleEventCommentLabel actionId={savedObjectId} />
-    ) : (
-      <MultipleEventsCommentLabel actionId={savedObjectId} totalEvents={eventIds.length} />
+    eventColor: 'subdued' as const,
+    event: (
+      <UserActionTitle
+        label={
+          isSingleEvent
+            ? EVENT_COMMENT_LABEL_TITLE
+            : MULTIPLE_EVENTS_COMMENT_LABEL_TITLE(eventIds.length)
+        }
+        dataTestSubj={`event-user-action-${savedObjectId}`}
+      />
     ),
     timelineAvatar: <EuiAvatar name="event" color="subdued" iconType="bell" aria-label="event" />,
     deleteSuccessTitle: DELETE_EVENTS_SUCCESS_TITLE(Math.max(eventIds.length, 1)),
@@ -91,7 +97,7 @@ const getAttachmentRemovalObject = (props: UnifiedReferenceAttachmentViewProps) 
  */
 export const getEventType = (): UnifiedReferenceAttachmentType => ({
   id: SECURITY_EVENT_ATTACHMENT_TYPE,
-  displayName: 'Event',
+  displayName: EVENT_DISPLAY_NAME,
   icon: 'bell',
   getAttachmentViewObject: (props) => getAttachmentViewObject(props),
   getAttachmentRemovalObject: (props) => getAttachmentRemovalObject(props),

@@ -21,6 +21,7 @@ export const FleetServerHostBaseSchema = schema.object({
   host_urls: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 10 })),
   is_default: schema.maybe(schema.boolean({ defaultValue: false })),
   is_internal: schema.maybe(schema.boolean()),
+  allow_edit: schema.maybe(schema.arrayOf(schema.string({ maxLength: 100 }), { maxSize: 100 })),
   proxy_id: schema.nullable(schema.string()),
   secrets: schema.maybe(
     schema.object({
@@ -81,11 +82,15 @@ export const PostFleetServerHostRequestSchema = {
 };
 
 export const GetOneFleetServerHostRequestSchema = {
-  params: schema.object({ itemId: schema.string() }),
+  params: schema.object({
+    itemId: schema.string({ meta: { description: 'The ID of the Fleet Server host' } }),
+  }),
 };
 
 export const PutFleetServerHostRequestSchema = {
-  params: schema.object({ itemId: schema.string() }),
+  params: schema.object({
+    itemId: schema.string({ meta: { description: 'The ID of the Fleet Server host' } }),
+  }),
   body: FleetServerHostBaseSchema,
 };
 

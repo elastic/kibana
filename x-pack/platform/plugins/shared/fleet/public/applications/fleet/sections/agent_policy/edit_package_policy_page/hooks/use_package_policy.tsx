@@ -9,6 +9,8 @@ import { useCallback, useEffect, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { omit, pick } from 'lodash';
 
+import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-language';
+
 import type {
   GetOnePackagePolicyResponse,
   UpgradePackagePolicyDryRunResponse,
@@ -121,7 +123,7 @@ export function usePackagePolicyWithRelatedData(
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
           packageInfo,
-          yaml.parse
+          { safeLoadYaml: yaml.parse, conditionValidator: validateAgentConditionExpression }
         );
         setValidationResults(newValidationResult);
         // eslint-disable-next-line no-console
@@ -274,8 +276,20 @@ export function usePackagePolicyWithRelatedData(
                 )?.vars;
               let newInputVars = inputVars;
               if (basePolicyInputVars && inputVars) {
-                // merging vars from dry run with updated ones
-                newInputVars = mergeVars(inputVars, basePolicyInputVars);
+                // Iterate over the dry run keys (authoritative schema — includes new vars added
+                // by the upgrade). For each key, prefer the dry run value when non-null; fall back
+                // to the old policy value only when the dry run produced no value. This ensures:
+                //  - New vars introduced by the upgrade are not silently dropped (dry run is base)
+                //  - migrate_from results are not overwritten by stale old-policy values
+                newInputVars = Object.entries(
+                  inputVars as PackagePolicyConfigRecord
+                ).reduce<PackagePolicyConfigRecord>((acc, [key, dryRunEntry]) => {
+                  acc[key] = {
+                    ...dryRunEntry,
+                    value: dryRunEntry.value ?? basePolicyInputVars[key]?.value,
+                  };
+                  return acc;
+                }, {});
               }
               // Fix duration vars, if it's a migrated setting, and it's a plain old number with no suffix
               if (basePackage.name === 'apm') {
@@ -317,7 +331,7 @@ export function usePackagePolicyWithRelatedData(
               const newValidationResults = validatePackagePolicy(
                 newPackagePolicy,
                 packageData.item,
-                yaml.parse
+                { safeLoadYaml: yaml.parse, conditionValidator: validateAgentConditionExpression }
               );
               setValidationResults(newValidationResults);
 

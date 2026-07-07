@@ -8,7 +8,7 @@
 import { useEffect, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { useStorage } from '@kbn/ml-local-storage';
-import { ML_SCHEDULED_MODEL_DEPLOYMENTS } from '../../../../common/types/storage';
+import { ML_SCHEDULED_MODEL_DEPLOYMENTS } from '@kbn/ml-common-types/storage';
 import type { ScheduledDeployment, TrainedModelsService } from '../trained_models_service';
 import { useMlKibana } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';

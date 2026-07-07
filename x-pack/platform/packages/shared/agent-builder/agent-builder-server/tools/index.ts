@@ -23,6 +23,7 @@ export {
   type ToolHandlerFn,
   type ToolHandlerReturn,
   type ToolHandlerContext,
+  type ToolHandlerCallContext,
   type ToolHandlerResult,
   type ToolHandlerPromptReturn,
   type ToolHandlerStandardReturn,

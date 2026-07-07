@@ -9,6 +9,8 @@ import type {
   DeprecationInfo,
   RegistryElasticsearch,
   RegistryPolicyTemplate,
+  RegistryProviderPermissions,
+  RegistrySection,
   RegistryVarsEntry,
 } from './epm';
 
@@ -63,6 +65,7 @@ export interface PackageSpecManifest {
   policy_templates?: RegistryPolicyTemplate[];
   vars?: RegistryVarsEntry[];
   var_groups?: RegistryVarGroup[];
+  sections?: RegistrySection[];
   owner: { github?: string; type?: 'elastic' | 'partner' | 'community' };
   elasticsearch?: Pick<
     RegistryElasticsearch,
@@ -79,6 +82,8 @@ export interface PackageSpecManifest {
     datasets?: DiscoveryDataset[];
   };
   deprecated?: DeprecationInfo;
+  /** Package-level cloud provider permissions (package-spec 3.7.0+). */
+  provider_permissions?: RegistryProviderPermissions[];
 }
 export interface DiscoveryDataset {
   name: string;

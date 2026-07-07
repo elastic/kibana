@@ -22,18 +22,16 @@ import {
 } from '@elastic/eui';
 import type { BoolQuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PageScope } from '../../../data_view_manager/constants';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import { RISK_SCORE_INDEX_PATTERN } from '../../../../common/entity_analytics/risk_engine';
+import { getAlertsIndex } from '../../../../common/entity_analytics/utils';
 import { RiskScorePreviewTable } from './risk_score_preview_table';
 import * as i18n from '../../translations';
 import { useRiskScorePreview } from '../../api/hooks/use_preview_risk_scores';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { EntityIconByType } from '../entity_store/helpers';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useEntityAnalyticsTypes } from '../../hooks/use_enabled_entity_types';
 import type { AlertFilter } from './common';
 
@@ -171,22 +169,16 @@ const RiskEnginePreview: React.FC<{
     bool: { must: [], filter: [], should: [], must_not: [] },
   });
 
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(PageScope.alerts);
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
-
-  const sourcererDataView = newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView;
+  const spaceId = useSpaceId();
 
   const { data, isLoading, refetch, isError } = useRiskScorePreview({
-    data_view_id: sourcererDataView?.title,
+    data_view_id: spaceId ? getAlertsIndex(spaceId) : undefined,
     filter: filters,
     range: {
       start: from,
       end: to,
     },
     exclude_alert_statuses: includeClosedAlerts ? [] : ['closed'],
-    // Pass filters to API (will only work once backend PR merges)
     filters: alertFilters && alertFilters.length > 0 ? alertFilters : undefined,
   });
 

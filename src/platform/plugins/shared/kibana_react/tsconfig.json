@@ -4,13 +4,11 @@
     "outDir": "target/types",
   },
   "include": [
-    ".storybook/**/*",
     "common/**/*",
     "public/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
-    "@kbn/storybook",
     "@kbn/core",
     "@kbn/test-jest-helpers",
     "@kbn/i18n",

@@ -7,6 +7,7 @@
 
 import type {
   Logger,
+  SavedObject,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
@@ -19,6 +20,7 @@ import type {
 } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder, toElasticsearchQuery } from '@kbn/es-query';
 
 import type {
@@ -33,10 +35,12 @@ import type {
 } from '../../../common/types/domain';
 import { caseStatuses } from '../../../common/types/domain';
 import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
+import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../common/utils/attachments';
 import { decodeOrThrow } from '../../common/runtime_types';
 import type {
   SavedObjectFindOptionsKueryNode,
@@ -45,7 +49,7 @@ import type {
 } from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
-import { combineFilters } from '../../client/utils';
+import { buildFilter, combineFilters } from '../../client/utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import {
   transformSavedObjectToExternalModel,
@@ -55,8 +59,22 @@ import {
   transformESModelToCase,
 } from './transform';
 import type { AttachmentService } from '../attachments';
+import type {
+  CasesActivityV2WriterContract,
+  CasesAnalyticsV2WriterContract,
+} from '../../cases_analytics_v2';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 import { createCaseError, isSOError } from '../../common/error';
+import type {
+  ResolvedExtendedFieldFilter,
+  ResolvedFieldLabelFilter,
+} from './extended_field_search_utils';
+import {
+  buildExtendedFieldRuntimeMappings,
+  buildFieldLabelRuntimeMappings,
+  buildAllExtendedFieldValuesRuntimeMapping,
+  EF_ALL_VALUES_FIELD,
+} from './extended_field_search_utils';
 import type {
   CasePersistedAttributes,
   CaseSavedObjectTransformed,
@@ -95,36 +113,126 @@ import {
 
 const PartialCaseTransformedAttributesRt = getPartialCaseTransformedAttributesRt();
 
+/**
+ * Merges the legacy (`cases-comments`) and unified (`cases-attachments`) responses for
+ * `getCaseIdsByAlertId` so that downstream consumers see a single response with deduped
+ * case-id buckets and the union of authorized saved objects.
+ */
+const mergeCaseIdsByAlertIdResponses = (
+  legacyResponse: SavedObjectsFindResponse<{ owner: string }, GetCaseIdsByAlertIdAggs>,
+  unifiedResponse: SavedObjectsFindResponse<{ owner: string }, GetCaseIdsByAlertIdAggs>
+): SavedObjectsFindResponse<{ owner: string }, GetCaseIdsByAlertIdAggs> => {
+  const legacyBuckets = legacyResponse.aggregations?.references.caseIds.buckets ?? [];
+  const unifiedBuckets = unifiedResponse.aggregations?.references.caseIds.buckets ?? [];
+
+  const mergedKeys = new Set<string>();
+  const mergedBuckets: Array<{ key: string }> = [];
+  for (const bucket of [...legacyBuckets, ...unifiedBuckets]) {
+    if (!mergedKeys.has(bucket.key)) {
+      mergedKeys.add(bucket.key);
+      mergedBuckets.push({ key: bucket.key });
+    }
+  }
+
+  const legacyDocCount = legacyResponse.aggregations?.references.doc_count ?? 0;
+  const unifiedDocCount = unifiedResponse.aggregations?.references.doc_count ?? 0;
+
+  // Dedupe saved_objects across legacy + unified by id
+  const seenSavedObjectIds = new Set<string>();
+  const dedupedSavedObjects = [
+    ...legacyResponse.saved_objects,
+    ...unifiedResponse.saved_objects,
+  ].filter((so) => {
+    if (seenSavedObjectIds.has(so.id)) {
+      return false;
+    }
+    seenSavedObjectIds.add(so.id);
+    return true;
+  });
+
+  return {
+    ...legacyResponse,
+    total: dedupedSavedObjects.length,
+    saved_objects: dedupedSavedObjects,
+    aggregations: {
+      references: {
+        doc_count: legacyDocCount + unifiedDocCount,
+        caseIds: { buckets: mergedBuckets },
+      },
+    },
+  };
+};
+
+/**
+ * `cases-comments.comment` is a text-analyzed field: we use `match_phrase` so the user's
+ * input has to appear as a contiguous sequence
+ *
+ * `cases-comments.alertId` and `cases-comments.eventId` are keyword fields used
+ * to look up an exact ID, so a regular `match` is the correct semantic
+ */
+const buildAttachmentSearchClause = (
+  field: string,
+  search: string
+): estypes.QueryDslQueryContainer => {
+  // TODO: add support for CASE_ATTACHMENT_SAVED_OBJECT
+  // https://github.com/elastic/security-team/issues/15066
+  if (field === `${CASE_COMMENT_SAVED_OBJECT}.comment`) {
+    return { match_phrase: { [field]: search } };
+  }
+  return { match: { [field]: search } };
+};
+
 export class CasesService {
   private readonly log: Logger;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly attachmentService: AttachmentService;
+  /**
+   * Cases-as-data v2 writer. Fire-and-forget hook fired post-success on case
+   * create / patch / delete. When `xpack.cases.analyticsV2.enabled=false` this
+   * is `V2_NOOP_WRITER` and every call compiles down to nothing — the cases
+   * primary write path is unaffected.
+   */
+  private readonly analyticsV2Writer: CasesAnalyticsV2WriterContract;
+  /**
+   * Cases-as-data v2 activity writer. Same lifetime/contract as
+   * `analyticsV2Writer`; consumed here only for cascade-delete on case
+   * removal — every other activity write originates from the user-actions
+   * service.
+   */
+  private readonly analyticsV2ActivityWriter: CasesActivityV2WriterContract;
 
   constructor({
     log,
     unsecuredSavedObjectsClient,
     attachmentService,
+    analyticsV2Writer,
+    analyticsV2ActivityWriter,
   }: {
     log: Logger;
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     attachmentService: AttachmentService;
+    analyticsV2Writer: CasesAnalyticsV2WriterContract;
+    analyticsV2ActivityWriter: CasesActivityV2WriterContract;
   }) {
     this.log = log;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.attachmentService = attachmentService;
+    this.analyticsV2Writer = analyticsV2Writer;
+    this.analyticsV2ActivityWriter = analyticsV2ActivityWriter;
   }
 
   private buildCaseIdsAggs = (
+    soType: string,
     size: number = 100
   ): Record<string, estypes.AggregationsAggregationContainer> => ({
     references: {
       nested: {
-        path: `${CASE_COMMENT_SAVED_OBJECT}.references`,
+        path: `${soType}.references`,
       },
       aggregations: {
         caseIds: {
           terms: {
-            field: `${CASE_COMMENT_SAVED_OBJECT}.references.id`,
+            field: `${soType}.references.id`,
             size,
           },
         },
@@ -135,41 +243,87 @@ export class CasesService {
   public async getCaseIdsByAlertId({
     alertId,
     filter,
+    unifiedFilter,
   }: GetCaseIdsByAlertIdArgs): Promise<
     SavedObjectsFindResponse<{ owner: string }, GetCaseIdsByAlertIdAggs>
   > {
     try {
       this.log.debug(`Attempting to GET all cases for alert id ${alertId}`);
-      const combinedFilter = combineFilters([
-        nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`, alertId),
-        filter,
+
+      const [legacyResponse, unifiedResponse] = await Promise.all([
+        this.findCaseIdsForAlertByType({
+          alertId,
+          soType: CASE_COMMENT_SAVED_OBJECT,
+          alertIdField: 'alertId',
+          filter,
+        }),
+        this.findCaseIdsForAlertByType({
+          alertId,
+          soType: CASE_ATTACHMENT_SAVED_OBJECT,
+          alertIdField: 'attachmentId',
+          extraFilter: buildFilter({
+            filters: UNIFIED_ALERT_TYPES_ARRAY,
+            field: 'type',
+            operator: 'or',
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+          }),
+          filter: unifiedFilter,
+        }),
       ]);
 
-      const response = await this.unsecuredSavedObjectsClient.find<
-        { owner: string },
-        GetCaseIdsByAlertIdAggs
-      >({
-        type: CASE_COMMENT_SAVED_OBJECT,
-        fields: includeFieldsRequiredForAuthentication(),
-        page: 1,
-        perPage: 1,
-        sortField: defaultSortField,
-        aggs: this.buildCaseIdsAggs(MAX_DOCS_PER_PAGE),
-        filter: combinedFilter,
-      });
-
-      const owners: Array<SavedObjectsFindResult<{ owner: string }>> = [];
-      for (const so of response.saved_objects) {
-        const validatedAttributes = decodeOrThrow(OwnerRt)(so.attributes);
-
-        owners.push(Object.assign(so, { attributes: validatedAttributes }));
-      }
-
-      return Object.assign(response, { saved_objects: owners });
+      return mergeCaseIdsByAlertIdResponses(legacyResponse, unifiedResponse);
     } catch (error) {
       this.log.error(`Error on GET all cases for alert id ${alertId}: ${error}`);
       throw error;
     }
+  }
+
+  /**
+   * Runs the per-saved-object-type alert→case lookup. Each saved-object type uses
+   * its own nested-aggregation path (`<soType>.references`), so legacy and unified
+   * attachments cannot share a single `find` aggregation; they are issued as
+   * sibling queries and merged by `getCaseIdsByAlertId`.
+   */
+  private async findCaseIdsForAlertByType({
+    alertId,
+    soType,
+    alertIdField,
+    extraFilter,
+    filter,
+  }: {
+    alertId: string;
+    soType: typeof CASE_COMMENT_SAVED_OBJECT | typeof CASE_ATTACHMENT_SAVED_OBJECT;
+    alertIdField: 'alertId' | 'attachmentId';
+    extraFilter?: KueryNode;
+    filter?: KueryNode;
+  }): Promise<SavedObjectsFindResponse<{ owner: string }, GetCaseIdsByAlertIdAggs>> {
+    const combinedFilter = combineFilters([
+      nodeBuilder.is(`${soType}.attributes.${alertIdField}`, alertId),
+      extraFilter,
+      filter,
+    ]);
+
+    const response = await this.unsecuredSavedObjectsClient.find<
+      { owner: string },
+      GetCaseIdsByAlertIdAggs
+    >({
+      type: soType,
+      fields: includeFieldsRequiredForAuthentication(),
+      page: 1,
+      perPage: 1,
+      sortField: defaultSortField,
+      aggs: this.buildCaseIdsAggs(soType, MAX_DOCS_PER_PAGE),
+      filter: combinedFilter,
+    });
+
+    const owners: Array<SavedObjectsFindResult<{ owner: string }>> = [];
+    for (const so of response.saved_objects) {
+      const validatedAttributes = decodeOrThrow(OwnerRt)(so.attributes);
+
+      owners.push(Object.assign(so, { attributes: validatedAttributes }));
+    }
+
+    return Object.assign(response, { saved_objects: owners });
   }
 
   /**
@@ -198,14 +352,7 @@ export class CasesService {
       namespaces,
       query: {
         bool: {
-          should: [
-            ...attachmentSearchFields.map((field) => ({
-              // use match instead of term to support non-keyword search for fields like comments
-              match: {
-                [field]: search,
-              },
-            })),
-          ],
+          should: attachmentSearchFields.map((field) => buildAttachmentSearchClause(field, search)),
         },
       },
     });
@@ -271,9 +418,13 @@ export class CasesService {
   public async searchCasesGroupedByID({
     caseOptions,
     namespaces,
+    extendedFieldFilters,
+    fieldLabelFilters,
   }: {
     caseOptions: SavedObjectFindOptionsKueryNode;
     namespaces: string[];
+    extendedFieldFilters?: ResolvedExtendedFieldFilter[][];
+    fieldLabelFilters?: ResolvedFieldLabelFilter[];
   }): Promise<CasesMapWithPageInfo> {
     const caseIdsByAttachmentSearch = await this.getCaseIdsByAttachmentSearch(
       namespaces,
@@ -284,15 +435,41 @@ export class CasesService {
       search: caseOptions.search,
       searchFields: caseOptions.searchFields,
       caseIds: caseIdsByAttachmentSearch,
+      extendedFieldFilters,
+      fieldLabelFilters,
     });
 
     const filterQuery = caseOptions.filter ? toElasticsearchQuery(caseOptions.filter) : undefined;
     const query = mergeSearchQuery(searchQuery, filterQuery);
 
+    const extendedFieldRuntimeMappings =
+      extendedFieldFilters && extendedFieldFilters.length > 0
+        ? buildExtendedFieldRuntimeMappings(extendedFieldFilters)
+        : {};
+
+    const fieldLabelRuntimeMappings =
+      fieldLabelFilters && fieldLabelFilters.length > 0
+        ? buildFieldLabelRuntimeMappings(fieldLabelFilters)
+        : {};
+
+    const allValuesRuntimeMappings =
+      caseOptions.search && caseOptions.searchFields?.includes(EF_ALL_VALUES_FIELD)
+        ? buildAllExtendedFieldValuesRuntimeMapping()
+        : {};
+
+    const runtimeMappings = {
+      ...extendedFieldRuntimeMappings,
+      ...fieldLabelRuntimeMappings,
+      ...allValuesRuntimeMappings,
+    };
+
+    const hasRuntimeMappings = Object.keys(runtimeMappings).length > 0;
+
     const cases = await this.searchCases({
       type: [CASE_SAVED_OBJECT],
       namespaces,
       query,
+      ...(hasRuntimeMappings ? { runtime_mappings: runtimeMappings } : {}),
       ...convertFindQueryParams(caseOptions),
     });
 
@@ -393,6 +570,14 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to DELETE case ${caseId}`);
       await this.unsecuredSavedObjectsClient.delete(CASE_SAVED_OBJECT, caseId, { refresh });
+
+      // Cases-as-data v2: drop the analytics doc post-success. Fire-and-forget;
+      // the writer swallows 404s internally.
+      this.analyticsV2Writer.deleteCase(caseId);
+      // Cascade to `.cases-activity`. The case SO delete cascades to its
+      // user-action SOs at the SO layer, but reconciliation can't see the
+      // gap (deleted SOs are gone) — mirror the cascade explicitly here.
+      this.analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds([caseId]);
     } catch (error) {
       this.log.error(`Error on DELETE case ${caseId}: ${error}`);
       throw error;
@@ -408,7 +593,44 @@ export class CasesService {
   }) {
     try {
       this.log.debug(() => `Attempting to bulk delete case entities ${JSON.stringify(entities)}`);
-      await this.unsecuredSavedObjectsClient.bulkDelete(entities, options);
+      const bulkDeleteResult = await this.unsecuredSavedObjectsClient.bulkDelete(entities, options);
+
+      // Cases-as-data v2: drop analytics docs ONLY for entities whose SO
+      // delete actually succeeded. The bulkDelete response carries a
+      // per-entity status; iterating `entities` blindly would remove the
+      // analytics doc even when the underlying SO survives (version
+      // conflict, lost shard, etc.). That state is unrecoverable because
+      // reconciliation can't see it — the surviving SO's `updated_at`
+      // didn't change, so the filter won't pick it up.
+      //
+      // `success: true` covers both 200 (deleted) and 404 (already gone) —
+      // either way the post-state is "SO absent", which is what the
+      // analytics delete is mirroring. Failures (success: false) skip the
+      // analytics call, leaving the doc in place to match the SO.
+      //
+      // Collect successful case ids and dispatch as one bulk delete to the
+      // analytics writer — looping `deleteCase` per item would fan out to
+      // N ES delete requests (same write-amplification concern as the
+      // bulk-upsert paths).
+      //
+      // Comments / attachments / user-actions are tracked by their own
+      // surfaces (added in PR 2) so they're skipped here.
+      const entityById = new Map(entities.map((e) => [`${e.type}:${e.id}`, e]));
+      const idsToDelete: string[] = [];
+      for (const status of bulkDeleteResult.statuses) {
+        if (status.success) {
+          const entity = entityById.get(`${status.type}:${status.id}`);
+          if (entity?.type === CASE_SAVED_OBJECT) {
+            idsToDelete.push(entity.id);
+          }
+        }
+      }
+      this.analyticsV2Writer.bulkDeleteCases(idsToDelete);
+      // Cascade to `.cases-activity` for the same set of case ids — the
+      // SO-layer cascade removes the user-action SOs, and reconciliation
+      // can't see the gap (deleted SOs are gone), so we drop the analytics
+      // mirror explicitly. No-op when `idsToDelete` is empty.
+      this.analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds(idsToDelete);
     } catch (error) {
       this.log.error(`Error bulk deleting case entities ${JSON.stringify(entities)}: ${error}`);
     }
@@ -765,6 +987,9 @@ export class CasesService {
         { id, references: transformedAttributes.referenceHandler.build(), refresh }
       );
 
+      // Cases-as-data v2: fire-and-forget upsert. No-op when v2 is disabled.
+      this.analyticsV2Writer.upsertCase(createdCase);
+
       const res = transformSavedObjectToExternalModel(createdCase);
       const decodedRes = decodeOrThrow(CaseTransformedAttributesRt)(res.attributes);
 
@@ -808,16 +1033,27 @@ export class CasesService {
           }
         );
 
+      // Cases-as-data v2: collect successfully-created SOs and dispatch as
+      // a single bulk to the analytics writer. Looping `upsertCase` per
+      // item would fan out to N ES `index` requests, saturating the
+      // connection pool the rest of Kibana shares — `bulkUpsertCases`
+      // collapses that to one `_bulk` request.
+      const successfulAnalyticsV2Mirrors: Array<(typeof bulkCreateResponse.saved_objects)[number]> =
+        [];
       const res = bulkCreateResponse.saved_objects.map((theCase) => {
         if (isSOError<CasePersistedAttributes>(theCase)) {
           return theCase;
         }
+        successfulAnalyticsV2Mirrors.push(theCase);
 
         const transformedCase = transformSavedObjectToExternalModel(theCase);
         const decodedRes = decodeOrThrow(CaseTransformedAttributesRt)(transformedCase.attributes);
 
         return { ...transformedCase, attributes: decodedRes };
       });
+      this.analyticsV2Writer.bulkUpsertCases(
+        successfulAnalyticsV2Mirrors as Array<SavedObject<CasePersistedAttributes>>
+      );
 
       return { saved_objects: res };
     } catch (error) {
@@ -840,6 +1076,12 @@ export class CasesService {
         updatedAttributes
       );
       const transformedAttributes = transformAttributesToESModel(decodedAttributes);
+      // Compute the merged reference list once and share it between the SO
+      // update and the analytics-writer synthesis. Mirrors the
+      // `builtReferences` pattern in patchCases — without this, the two
+      // callers could subtly diverge if anyone changed how the references
+      // are computed in only one place.
+      const builtReferences = transformedAttributes.referenceHandler.build(originalCase.references);
 
       const updatedCase = await this.unsecuredSavedObjectsClient.update<CasePersistedAttributes>(
         CASE_SAVED_OBJECT,
@@ -847,10 +1089,26 @@ export class CasesService {
         transformedAttributes.attributes,
         {
           version,
-          references: transformedAttributes.referenceHandler.build(originalCase.references),
+          references: builtReferences,
           refresh,
         }
       );
+
+      // Cases-as-data v2: synthesize the post-patch SO from originalCase + patch
+      // attributes to avoid an extra SO get round-trip.
+      // originalCase is the external model (string status/severity,
+      // external_service.connector_id). Convert to the persisted model first —
+      // using it raw silently drops status/severity for untouched fields and
+      // injects connector_id into the strict mapping.
+      this.analyticsV2Writer.upsertCase({
+        ...originalCase,
+        attributes: {
+          ...transformAttributesToESModel(originalCase.attributes ?? {}).attributes,
+          ...transformedAttributes.attributes,
+        } as CasePersistedAttributes,
+        version: updatedCase.version ?? originalCase.version,
+        references: builtReferences ?? [],
+      });
 
       const res = transformUpdateResponseToExternalModel(updatedCase);
       const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(res.attributes);
@@ -872,30 +1130,66 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to UPDATE case ${cases.map((c) => c.caseId).join(', ')}`);
 
-      const bulkUpdate = cases.map(({ caseId, updatedAttributes, version, originalCase }) => {
+      // Keep the per-case originalCase + transformed-attributes pair around so
+      // we can synthesize a post-update SavedObject for the analytics writer
+      // after `bulkUpdate` succeeds. We can't read `bulkUpdate`'s response for
+      // this because it returns partial attributes, not the full merged state.
+      const perCaseUpdate = cases.map(({ caseId, updatedAttributes, version, originalCase }) => {
         const decodedAttributes = decodeOrThrow(PartialCaseTransformedAttributesRt)(
           updatedAttributes
         );
-
         const { attributes, referenceHandler } = transformAttributesToESModel(decodedAttributes);
+        const builtReferences = referenceHandler.build(originalCase.references);
         return {
-          type: CASE_SAVED_OBJECT,
-          id: caseId,
-          attributes,
-          references: referenceHandler.build(originalCase.references),
+          caseId,
           version,
+          originalCase,
+          esAttributes: attributes,
+          references: builtReferences,
         };
       });
+
+      const bulkUpdate = perCaseUpdate.map(({ caseId, version, esAttributes, references }) => ({
+        type: CASE_SAVED_OBJECT,
+        id: caseId,
+        attributes: esAttributes,
+        references,
+        version,
+      }));
 
       const updatedCases =
         await this.unsecuredSavedObjectsClient.bulkUpdate<CasePersistedAttributes>(bulkUpdate, {
           refresh,
         });
 
+      // Index of per-case context by id, for cheap lookup during the post-pass.
+      const updateContextById = new Map(perCaseUpdate.map((u) => [u.caseId, u]));
+
+      // Cases-as-data v2: synthesize the post-update SO for each
+      // successfully-patched case (`originalCase + new attributes`) and
+      // dispatch as one bulk write. Same fan-out-collapse rationale as
+      // `bulkCreateCases`.
+      const analyticsV2Mirrors: Array<SavedObject<CasePersistedAttributes>> = [];
+
       const res = updatedCases.saved_objects.reduce((acc, theCase) => {
         if (isSOError(theCase)) {
           acc.push(theCase);
           return acc;
+        }
+
+        // Same synthesize-from-originalCase pattern as patchCase: convert the
+        // external-model base to the persisted model before spreading the patch.
+        const ctx = updateContextById.get(theCase.id);
+        if (ctx) {
+          analyticsV2Mirrors.push({
+            ...ctx.originalCase,
+            attributes: {
+              ...transformAttributesToESModel(ctx.originalCase.attributes ?? {}).attributes,
+              ...ctx.esAttributes,
+            } as CasePersistedAttributes,
+            version: theCase.version ?? ctx.originalCase.version,
+            references: ctx.references ?? [],
+          });
         }
 
         const so = Object.assign(theCase, transformUpdateResponseToExternalModel(theCase));
@@ -906,6 +1200,8 @@ export class CasesService {
 
         return acc;
       }, [] as Array<SavedObjectsUpdateResponse<CaseTransformedAttributes> | SOWithErrors<CaseTransformedAttributes>>);
+
+      this.analyticsV2Writer.bulkUpsertCases(analyticsV2Mirrors);
 
       return Object.assign(updatedCases, {
         saved_objects: res,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiIcon, EuiSelect, EuiToolTip } from '@elastic/eui';
+import { EuiFormRow, EuiIconTip, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { CollapseFunction } from '../../common/expressions';
@@ -28,24 +28,34 @@ export function CollapseSetting({
   display?: 'rowCompressed' | 'columnCompressed';
 }) {
   return (
-    <>
+    <div
+      css={({
+        euiTheme: {
+          size: { base },
+        },
+      }) => ({
+        padding: `0 ${base} ${base} ${base}`,
+      })}
+    >
       <EuiFormRow
         id="lns-indexPattern-collapse-by"
         label={
-          <EuiToolTip
-            delay="long"
-            position="top"
-            content={i18n.translate('xpack.lens.collapse.infoIcon', {
-              defaultMessage:
-                'Do not show this dimension in the visualization and aggregate all metric values which have the same value for this dimension into a single number.',
-            })}
-          >
-            <span tabIndex={0}>
-              {i18n.translate('xpack.lens.collapse.label', { defaultMessage: 'Collapse by' })}
-              {''}
-              <EuiIcon type="question" color="subdued" size="s" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
+          <>
+            {i18n.translate('xpack.lens.collapse.label', { defaultMessage: 'Collapse by' })}{' '}
+            <EuiIconTip
+              color="subdued"
+              content={i18n.translate('xpack.lens.collapse.infoIcon', {
+                defaultMessage:
+                  'Do not show this dimension in the visualization and aggregate all metric values which have the same value for this dimension into a single number.',
+              })}
+              iconProps={{
+                className: 'eui-alignTop',
+              }}
+              position="top"
+              size="s"
+              type="question"
+            />
+          </>
         }
         display={display ?? 'rowCompressed'}
         fullWidth
@@ -61,6 +71,6 @@ export function CollapseSetting({
           }}
         />
       </EuiFormRow>
-    </>
+    </div>
   );
 }

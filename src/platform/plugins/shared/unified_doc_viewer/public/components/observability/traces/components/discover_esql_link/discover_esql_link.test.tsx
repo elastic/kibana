@@ -14,6 +14,8 @@ import '@testing-library/jest-dom';
 import { DiscoverEsqlLink } from '.';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
 import { useDocViewerExtensionActionsContext } from '../../../../../hooks/use_doc_viewer_extension_actions';
+import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
+import { TRACES_DOC_VIEWER_EBT_ELEMENTS, TRACES_DOC_VIEWER_EBT_DETAILS } from '../../ebt_constants';
 
 jest.mock('../../../../../hooks/use_discover_link_and_esql_query', () => ({
   useDiscoverLinkAndEsqlQuery: jest.fn(),
@@ -28,6 +30,11 @@ describe('DiscoverEsqlLink', () => {
   const whereClause = undefined;
   const tabLabel = 'Tab label';
   const dataTestSubj = 'discoverEsqlLink';
+  const ebt = {
+    action: EBT_CLICK_ACTIONS.VIEW_SPAN,
+    element: TRACES_DOC_VIEWER_EBT_ELEMENTS.SPAN_LINKS,
+    detail: TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -45,6 +52,7 @@ describe('DiscoverEsqlLink', () => {
         whereClause={whereClause}
         tabLabel={tabLabel}
         dataTestSubj={dataTestSubj}
+        ebt={ebt}
       >
         Child
       </DiscoverEsqlLink>
@@ -66,12 +74,17 @@ describe('DiscoverEsqlLink', () => {
         whereClause={whereClause}
         tabLabel={tabLabel}
         dataTestSubj={dataTestSubj}
+        ebt={ebt}
       >
         Child
       </DiscoverEsqlLink>
     );
 
-    expect(getByTestId(dataTestSubj)).toHaveAttribute('href', '/app/discover#/?_a=1');
+    const link = getByTestId(dataTestSubj);
+    expect(link).toHaveAttribute('href', '/app/discover#/?_a=1');
+    expect(link).toHaveAttribute('data-ebt-action', EBT_CLICK_ACTIONS.VIEW_SPAN);
+    expect(link).toHaveAttribute('data-ebt-element', TRACES_DOC_VIEWER_EBT_ELEMENTS.SPAN_LINKS);
+    expect(link).toHaveAttribute('data-ebt-detail', TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC);
   });
 
   it('calls openInNewTab on plain left click when esqlQueryString is available', () => {
@@ -88,6 +101,7 @@ describe('DiscoverEsqlLink', () => {
         whereClause={whereClause}
         tabLabel={tabLabel}
         dataTestSubj={dataTestSubj}
+        ebt={ebt}
       >
         Child
       </DiscoverEsqlLink>
@@ -118,6 +132,7 @@ describe('DiscoverEsqlLink', () => {
         whereClause={whereClause}
         tabLabel={tabLabel}
         dataTestSubj={dataTestSubj}
+        ebt={ebt}
       >
         Child
       </DiscoverEsqlLink>

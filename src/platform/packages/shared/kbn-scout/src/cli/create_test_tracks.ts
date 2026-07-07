@@ -21,8 +21,24 @@ import dedent from 'dedent';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { writeFileSync } from 'node:fs';
 import path from 'path';
+import { findPackageForPath } from '@kbn/repo-packages';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { TestTrackLoad } from '../execution/test_track';
 import { TestTrack } from '../execution/test_track';
+import type { SerializedScoutTestingScope } from '../tests_discovery/testing_scope';
+import { readScoutTestingScope } from '../tests_discovery/testing_scope';
+
+/**
+ * Selects which Scout test configs are eligible for distribution into lanes.
+ *
+ * - `null`            → no filter (full suite)
+ * - `kind: 'modules'` → keep configs whose owning @kbn/ module ID is in `ids`
+ * - `kind: 'configs'` → keep configs whose repo-relative path is in `paths`
+ */
+export type TestLoadFilter =
+  | { kind: 'modules'; ids: ReadonlySet<string> }
+  | { kind: 'configs'; paths: ReadonlySet<string> }
+  | null;
 
 export interface ScoutCIConfig {
   plugins: {
@@ -64,6 +80,7 @@ export function identifyTestLoads(
   scoutCIConfig: ScoutCIConfig,
   testConfigStats: ScoutTestConfigStats,
   testTarget: ScoutTestTarget,
+  filter: TestLoadFilter,
   log: ToolingLog
 ): ScoutCITestLoad[] {
   const testLoads = testConfigs.all
@@ -73,6 +90,16 @@ export function identifyTestLoads(
         return test.tags.includes(testTarget.playwrightTag);
       })
     )
+    .filter((config) => {
+      if (!filter) return true;
+      if (filter.kind === 'configs') {
+        return filter.paths.has(config.path);
+      }
+      // kind === 'modules'
+      if (filter.ids.size === 0) return true;
+      const resolvedModuleID = findPackageForPath(REPO_ROOT, config.path)?.id;
+      return resolvedModuleID ? filter.ids.has(resolvedModuleID) : false;
+    })
     .map((config) => {
       let enabled: boolean;
       switch (config.module.type) {
@@ -320,7 +347,8 @@ function displayMultiTrackSummary(
   log: ToolingLog
 ) {
   if (tracks.length === 0) {
-    throw createFlagError('Multi-track summary requested, but the provided track list is empty');
+    log.warning('Multi-track summary requested, but the provided track list is empty');
+    return;
   }
 
   const panel = new CliTable3();
@@ -413,6 +441,7 @@ export const createTestTracks: Command<void> = {
       'targetRuntimeMinutes',
       'minRuntimeMinutes',
       'estimatedLaneSetupMinutes',
+      'testing-scope',
     ],
     boolean: ['showIndividualTrackSummaries', 'showMultiTrackSummary'],
     default: {
@@ -426,9 +455,36 @@ export const createTestTracks: Command<void> = {
     --estimatedLaneSetupMinutes     (optional)  How long a lane setup is expected to take
     --showIndividualTrackSummaries  (optional)  Display individual test track summaries
     --showMultiTrackSummary         (optional)  Display multi-track summary
+    --testing-scope                 (optional)  Path to a 'testing_scope.json' produced by 'scout resolve-testing-scope'.
+                                                Distribution is restricted to:
+                                                  - tests-only      → only Playwright configs touched by the diff
+                                                  - dependency-tree → only configs whose @kbn/ module is affected
+                                                  - full            → no filter (all configs are distributed)
     `,
   },
   run: async ({ flagsReader, log }) => {
+    const testingScopePath = flagsReader.string('testing-scope');
+    const scope: SerializedScoutTestingScope = testingScopePath
+      ? readScoutTestingScope(testingScopePath)
+      : { kind: 'full', affectedModules: [] };
+
+    let filter: TestLoadFilter = null;
+    if (scope.kind === 'tests-only') {
+      const paths = new Set(scope.affectedConfigs ?? []);
+      filter = { kind: 'configs', paths };
+      log.info(
+        `Selective testing (tests-only): limiting distribution to ${paths.size} affected config(s)`
+      );
+    } else if (scope.kind === 'dependency-tree') {
+      const ids = new Set(scope.affectedModules);
+      filter = { kind: 'modules', ids };
+      log.info(
+        `Selective testing (dependency-tree): limiting distribution to ${ids.size} affected module(s)`
+      );
+    } else {
+      log.info('Distributing all eligible configs (full scope)');
+    }
+
     const selectedTestTargets: ScoutTestTarget[] = flagsReader
       .requiredArrayOfStrings('testTarget')
       .map(ScoutTestTarget.fromTag);
@@ -452,7 +508,10 @@ export const createTestTracks: Command<void> = {
     const scoutCIConfig = loadScoutCIConfig();
 
     const testLoadsByTarget = selectedTestTargets.reduce((loadsByTarget, target) => {
-      loadsByTarget.set(target, identifyTestLoads(scoutCIConfig, testConfigStats, target, log));
+      loadsByTarget.set(
+        target,
+        identifyTestLoads(scoutCIConfig, testConfigStats, target, filter, log)
+      );
       return loadsByTarget;
     }, new Map<ScoutTestTarget, ScoutCITestLoad[]>());
 
@@ -510,19 +569,31 @@ export const createTestTracks: Command<void> = {
             : [...new Set(loads.map((load) => load.config.server.configSet))];
 
         // Each server config set gets its own track
-        return configSets.map((configSet) => {
+        return configSets.flatMap((configSet): TestTrack[] => {
           log.info(
             `Building test track for test target '${target.tag}' with server config set '${configSet}'`
           );
+
+          const enabledLoads = loads.filter(
+            (load) => load.enabled && load.config.server.configSet === configSet
+          );
+
+          if (enabledLoads.length === 0) {
+            log.warning(
+              `No enabled test loads found for test target '${target.tag}' and server config set '${configSet}'`
+            );
+            return [];
+          }
+
           const track = buildTrack(
             Math.max(minimumRuntime, runtimeTarget),
             estimatedLaneSetupDuration,
             target,
-            loads.filter((load) => load.enabled && load.config.server.configSet === configSet),
+            enabledLoads,
             log
           );
           track.metadata.server = { configSet };
-          return track;
+          return [track];
         });
       })
       .toArray();

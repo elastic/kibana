@@ -46,7 +46,6 @@ import { detectionRulesClientMock } from '../../rule_management/logic/detection_
 import { packageServiceMock } from '@kbn/fleet-plugin/server/services/epm/package_service.mock';
 import type { EndpointInternalFleetServicesInterface } from '../../../../endpoint/services/fleet';
 import { siemMigrationsServiceMock } from '../../../siem_migrations/__mocks__/mocks';
-import { AssetInventoryDataClientMock } from '../../../asset_inventory/asset_inventory_data_client.mock';
 import { createProductFeaturesServiceMock } from '../../../product_features_service/mocks';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { padPackageInstallationClientMock } from '../../../entity_analytics/privilege_monitoring/privileged_access_detection/pad_package_installation_client.mock';
@@ -95,7 +94,6 @@ export const createMockClients = () => {
     siemRuleMigrationsClient: siemMigrationsServiceMock.createRulesClient(),
     siemDashboardMigrationsClient: siemMigrationsServiceMock.createDashboardsClient(),
     getInferenceClient: jest.fn(),
-    assetInventoryDataClient: AssetInventoryDataClientMock.create(),
     productFeaturesService: createProductFeaturesServiceMock(),
     logger: loggerMock.create(),
   };
@@ -215,7 +213,6 @@ const createSecuritySolutionRequestContextMock = (
       getDashboardsClient: jest.fn(() => clients.siemDashboardMigrationsClient),
     },
     getInferenceClient: jest.fn(() => clients.getInferenceClient()),
-    getAssetInventoryClient: jest.fn(() => clients.assetInventoryDataClient),
     getProductFeatureService: jest.fn(() => clients.productFeaturesService),
     getMlAuthz: jest.fn(() => ({
       validateRuleType: jest.fn(async () => ({ valid: true, message: undefined })),

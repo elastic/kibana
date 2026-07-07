@@ -13,7 +13,6 @@ import type {
   EvalsSetupDependencies,
   EvalsStartDependencies,
 } from './types';
-import { EvalsPlugin } from './plugin';
 
 export type { EvalsPluginSetup, EvalsPluginStart };
 
@@ -22,7 +21,9 @@ export const plugin: PluginInitializer<
   EvalsPluginStart,
   EvalsSetupDependencies,
   EvalsStartDependencies
-> = async (pluginInitializerContext: PluginInitializerContext<EvalsConfig>) =>
-  new EvalsPlugin(pluginInitializerContext);
+> = async (pluginInitializerContext: PluginInitializerContext<EvalsConfig>) => {
+  const { EvalsPlugin } = await import('./plugin');
+  return new EvalsPlugin(pluginInitializerContext);
+};
 
 export { config } from './config';

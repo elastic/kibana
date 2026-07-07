@@ -14,32 +14,36 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { Replacements } from '../conversations/common_attributes.gen';
 import { ScreenContext } from '../common_attributes.gen';
 
+export const PostEvaluateBody = lazySchema(() =>
+  z.object({
+    graphs: z.array(z.string()).min(1).max(1),
+    datasetName: z.string(),
+    evaluatorConnectorId: z.string().optional(),
+    connectorIds: z.array(z.string()),
+    runName: z.string().optional(),
+    alertsIndexPattern: z.string().optional().default('.alerts-security.alerts-default'),
+    langSmithApiKey: z.string().optional(),
+    langSmithProject: z.string().optional(),
+    replacements: Replacements.optional().default({}),
+    screenContext: ScreenContext.optional(),
+    size: z.number().optional().default(20),
+  })
+);
 export type PostEvaluateBody = z.infer<typeof PostEvaluateBody>;
-export const PostEvaluateBody = z.object({
-  graphs: z.array(z.string()).min(1).max(1),
-  datasetName: z.string(),
-  evaluatorConnectorId: z.string().optional(),
-  connectorIds: z.array(z.string()),
-  runName: z.string().optional(),
-  alertsIndexPattern: z.string().optional().default('.alerts-security.alerts-default'),
-  langSmithApiKey: z.string().optional(),
-  langSmithProject: z.string().optional(),
-  replacements: Replacements.optional().default({}),
-  screenContext: ScreenContext.optional(),
-  size: z.number().optional().default(20),
-});
 
+export const PostEvaluateRequestBody = lazySchema(() => PostEvaluateBody);
 export type PostEvaluateRequestBody = z.infer<typeof PostEvaluateRequestBody>;
-export const PostEvaluateRequestBody = PostEvaluateBody;
 export type PostEvaluateRequestBodyInput = z.input<typeof PostEvaluateRequestBody>;
 
+export const PostEvaluateResponse = lazySchema(() =>
+  z.object({
+    evaluationId: z.string(),
+    success: z.boolean(),
+  })
+);
 export type PostEvaluateResponse = z.infer<typeof PostEvaluateResponse>;
-export const PostEvaluateResponse = z.object({
-  evaluationId: z.string(),
-  success: z.boolean(),
-});

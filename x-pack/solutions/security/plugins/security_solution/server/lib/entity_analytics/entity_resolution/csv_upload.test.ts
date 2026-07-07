@@ -74,6 +74,17 @@ describe('processResolutionCsvUpload', () => {
       expect(result.items[0].error).toContain('Invalid entity type');
     });
 
+    it('should reject generic entity type', async () => {
+      const csv = 'type,user.email,resolved_to\ngeneric,thing@example.com,target:1';
+      const result = await processResolutionCsvUpload(createMockStream(csv), deps());
+
+      expect(result.total).toBe(1);
+      expect(result.failed).toBe(1);
+      expect(result.items[0].status).toBe('error');
+      expect(result.items[0].error).toContain('Invalid entity type');
+      expect(result.items[0].error).toContain('generic');
+    });
+
     it('should reject missing resolved_to', async () => {
       const csv = 'type,user.email,resolved_to\nuser,test@example.com,';
       const result = await processResolutionCsvUpload(createMockStream(csv), deps());
@@ -102,7 +113,6 @@ describe('processResolutionCsvUpload', () => {
         'user,alice,target:1',
         'host,server1,target:1',
         'service,api,target:1',
-        'generic,thing,target:1',
       ].join('\n');
 
       const result = await processResolutionCsvUpload(createMockStream(csv), deps());
@@ -304,6 +314,7 @@ describe('processResolutionCsvUpload', () => {
         linked: ['alias:1', 'alias:2'],
         skipped: [],
         target_id: 'target:golden',
+        entity_type: 'user',
       });
 
       const csv = 'type,user.email,resolved_to\nuser,shared@test.com,target:golden';
@@ -335,6 +346,7 @@ describe('processResolutionCsvUpload', () => {
         linked: ['alias:1'],
         skipped: [],
         target_id: 'target:golden',
+        entity_type: 'user',
       });
 
       const csv = 'type,user.email,resolved_to\nuser,alias@test.com,target:golden';
@@ -348,6 +360,7 @@ describe('processResolutionCsvUpload', () => {
         linked: [],
         skipped: ['alias:1'],
         target_id: 'target:golden',
+        entity_type: 'user',
       });
 
       const csv = 'type,user.email,resolved_to\nuser,alias@test.com,target:golden';
@@ -443,6 +456,7 @@ describe('processResolutionCsvUpload', () => {
         linked: ['alias:1'],
         skipped: [],
         target_id: 'target:1',
+        entity_type: 'user',
       });
 
       const csv = [

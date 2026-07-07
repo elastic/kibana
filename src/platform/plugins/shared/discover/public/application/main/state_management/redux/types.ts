@@ -10,7 +10,7 @@
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { RefreshInterval, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -73,6 +73,10 @@ export interface DiscoverAppState {
    */
   hideTable?: boolean;
   /**
+   * Hide the field list sidebar (collapsed state)
+   */
+  hideSidebar?: boolean;
+  /**
    * The current data source
    */
   dataSource?: DiscoverDataSource;
@@ -124,11 +128,18 @@ export interface DiscoverAppState {
    * Density of table
    */
   density?: DataGridDensity;
+  /**
+   * When true, ES|QL queries use approximate execution for faster, estimated results.
+   * Intentionally URL-only and not persisted to saved sessions in v1 — this may need to
+   * be reconsidered in a future version once the embedding story is clearer.
+   */
+  isApproximate?: boolean;
 }
 
 export interface CascadedDocumentsState {
   availableCascadeGroups: string[];
   selectedCascadeGroups: string[];
+  columnsMeta: DataTableColumnsMeta;
   cascadedDocumentsMap: Record<string, DataTableRecord[] | undefined>;
 }
 
@@ -147,6 +158,7 @@ export const DEFAULT_PROFILE_STATE_FIELDS = [
   'breakdownField',
   'hideChart',
   'hideTable',
+  'hideSidebar',
 ] as const;
 
 export type DefaultProfileStateField = (typeof DEFAULT_PROFILE_STATE_FIELDS)[number];
@@ -203,6 +215,7 @@ export interface TabState extends TabItem {
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saving of the Discover Session
   defaultProfileState: DefaultProfileState;
+  profileState: Record<string, object | undefined>;
   uiState: {
     esqlEditor?: Partial<ESQLEditorRestorableState>;
     dataGrid?: Partial<UnifiedDataTableRestorableState>;

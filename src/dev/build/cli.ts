@@ -69,6 +69,7 @@ if (showHelp) {
         --version-qualifier                  {dim Suffix version with a qualifier}
         --with-example-plugins               {dim Pass to include example plugins in the build output}
         --with-test-plugins                  {dim Pass to include test plugins in the build output}
+        --tar-zstd                           {dim Create kibana.tar.zst archives instead of tar.gz}
     `) + '\n'
   );
   process.exit(1);

@@ -15,7 +15,7 @@ import {
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import type { ApmRoutes } from '../../routing/apm_route_config';
@@ -35,8 +35,9 @@ import { TransactionDetailLink } from '../../shared/links/apm/transaction_detail
 import type { ITableColumn } from '../../shared/managed_table';
 import { ManagedTable } from '../../shared/managed_table';
 import { ServiceLink } from '../../shared/links/apm/service_link';
-import { TruncateWithTooltip } from '../../shared/truncate_with_tooltip';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import { useApmIndexSettingsContext } from '../../../context/apm_index_settings/use_apm_index_settings_context';
+import { useTraceActions } from './use_trace_actions';
 
 const StyledTransactionLink = styled(TransactionDetailLink)`
   font-size: ${() => useEuiFontSize('s').fontSize};
@@ -68,7 +69,7 @@ export function getTraceListColumns({
       name: i18n.translate('xpack.apm.tracesTable.nameColumnLabel', {
         defaultMessage: 'Name',
       }),
-      width: '40%',
+      maxWidth: '40%',
       sortable: true,
       render: (_: string, { serviceName, transactionName, transactionType }: TraceGroup) => (
         <EuiToolTip content={transactionName} anchorClassName="eui-textTruncate">
@@ -95,18 +96,14 @@ export function getTraceListColumns({
       name: i18n.translate('xpack.apm.tracesTable.originatingServiceColumnLabel', {
         defaultMessage: 'Originating service',
       }),
+      minWidth: '14em',
+      maxWidth: '25em',
       sortable: true,
       render: (_: string, { serviceName, agentName, transactionType }) => (
-        <TruncateWithTooltip
-          data-test-subj="apmTraceListAppLink"
-          text={serviceName || NOT_AVAILABLE_LABEL}
-          content={
-            <ServiceLink
-              agentName={agentName}
-              query={{ ...query, transactionType, serviceGroup: '' }}
-              serviceName={serviceName}
-            />
-          }
+        <ServiceLink
+          agentName={agentName}
+          query={{ ...query, transactionType, serviceGroup: '' }}
+          serviceName={serviceName || NOT_AVAILABLE_LABEL}
         />
       ),
     },
@@ -156,7 +153,13 @@ export function getTraceListColumns({
             {i18n.translate('xpack.apm.tracesTable.impactColumnLabel', {
               defaultMessage: 'Impact',
             })}{' '}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </>
         </EuiToolTip>
       ),
@@ -179,13 +182,32 @@ export function TraceList({ response }: Props) {
   const { data: { items } = { items: [] }, status } = response;
   const { onPageReady } = usePerformanceContext();
 
-  const {
-    query,
-    query: { rangeFrom, rangeTo },
-  } = useApmParams('/traces');
+  const { query } = useApmParams('/traces');
+  const { environment, kuery, rangeFrom, rangeTo } = query;
   const { link } = useApmRouter();
+  const { indexSettings = [], indexSettingsStatus } = useApmIndexSettingsContext();
 
   const traceListColumns = useMemo(() => getTraceListColumns({ query, link }), [query, link]);
+
+  const traceRowActions = useTraceActions({
+    kuery,
+    environment,
+    rangeFrom,
+    rangeTo,
+    indexSettings,
+  });
+
+  // Prevent an empty row action menu while index settings load or when a row is
+  // missing one of the disambiguating fields (`serviceName` / `transactionName`
+  // / `transactionType`) that scope the Discover link.
+  const isActionsDisabled = useCallback(
+    (item: TraceGroup) =>
+      indexSettingsStatus !== FETCH_STATUS.SUCCESS ||
+      !item.serviceName ||
+      !item.transactionName ||
+      !item.transactionType,
+    [indexSettingsStatus]
+  );
 
   useEffect(() => {
     if (status === FETCH_STATUS.SUCCESS) {
@@ -205,6 +227,9 @@ export function TraceList({ response }: Props) {
       initialSortDirection="desc"
       noItemsMessage={noItemsMessage}
       initialPageSize={25}
+      actions={traceRowActions}
+      isActionsDisabled={isActionsDisabled}
+      tableLayout="auto"
     />
   );
 }

@@ -27,4 +27,12 @@ components:
       example:
         data:
           total: 2
-          edges: [{}, {}]
+          edges:
+            - _id: 'row-001'
+              fields:
+                host.uptime:
+                  - '12345'
+            - _id: 'row-002'
+              fields:
+                host.uptime:
+                  - '67890'

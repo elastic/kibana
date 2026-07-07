@@ -6,28 +6,27 @@
  */
 
 import {
+  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
-  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
-  EuiSpacer,
-  EuiFlexGroup,
   EuiResizableContainer,
-  EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
-import React, { memo, useCallback, useRef, useState, useMemo, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
-import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
 import { EndpointExceptionsMovedCallout } from '../../../../exceptions/components/endpoint_exceptions_moved_callout';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
+  isEsqlRule,
   isMlRule,
   isThreatMatchRule,
-  isEsqlRule,
 } from '../../../../../common/detection_engine/utils';
 import { useCreateRule } from '../../../rule_management/logic';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
@@ -53,9 +52,9 @@ import {
 } from '../../../rule_creation/components/step_rule_actions';
 import * as RuleI18n from '../../../common/translations';
 import {
-  redirectToDetections,
   getActionMessageParams,
   MaxWidthEuiFlexItem,
+  redirectToDetections,
 } from '../../../common/helpers';
 import type { DefineStepRule } from '../../../common/types';
 import { RuleStep } from '../../../common/types';
@@ -90,6 +89,7 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachment_to_chat_button';
 import { useAgentBuilderRuleCreation } from './hooks/use_agent_builder_rule_creation';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { useRuleCreationTelemetry } from './hooks/use_rule_creation_telemetry';
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -117,9 +117,8 @@ const MyEuiPanel = styled(EuiPanel)<{
 MyEuiPanel.displayName = 'MyEuiPanel';
 
 const CreateRulePageComponent: React.FC<{}> = () => {
-  const { application, triggersActionsUi, cps } = useKibana().services;
+  const { application, triggersActionsUi } = useKibana().services;
   const { navigateToApp } = application;
-  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
@@ -131,14 +130,6 @@ const CreateRulePageComponent: React.FC<{}> = () => {
   const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
   const getNextStep = (step: RuleStep): RuleStep | undefined =>
     ruleStepsOrder[ruleStepsOrder.indexOf(step) + 1];
-  // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
-  const defineRuleRef = useRef<EuiAccordion | null>(null);
-  // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
-  const aboutRuleRef = useRef<EuiAccordion | null>(null);
-  // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
-  const scheduleRuleRef = useRef<EuiAccordion | null>(null);
-  // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
-  const ruleActionsRef = useRef<EuiAccordion | null>(null);
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
@@ -223,7 +214,8 @@ const CreateRulePageComponent: React.FC<{}> = () => {
   const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
 
   const onAiCreatedRuleAppliedRef = useRef<(() => void | Promise<void>) | undefined>(undefined);
-  const isAiRuleAppliedRef = useRef(false);
+  const { isAiRuleAppliedRef, getAiMeta, reportRuleCreated, reportRuleCreationError } =
+    useRuleCreationTelemetry(ruleType);
 
   const { isAiRuleUpdateRef } = useAgentBuilderRuleCreation({
     defineStepForm,
@@ -303,6 +295,22 @@ const CreateRulePageComponent: React.FC<{}> = () => {
     (isOpen: boolean) => handleAccordionToggle(RuleStep.ruleActions, isOpen),
     [handleAccordionToggle]
   );
+
+  const toggleStepAccordion = useCallback(
+    (step: RuleStep | null) => {
+      if (step === RuleStep.defineRule) {
+        handleAccordionToggle(RuleStep.defineRule, true);
+      } else if (step === RuleStep.aboutRule) {
+        handleAccordionToggle(RuleStep.aboutRule, true);
+      } else if (step === RuleStep.scheduleRule) {
+        handleAccordionToggle(RuleStep.scheduleRule, true);
+      } else if (step === RuleStep.ruleActions) {
+        handleAccordionToggle(RuleStep.ruleActions, true);
+      }
+    },
+    [handleAccordionToggle]
+  );
+
   const goToStep = useCallback(
     (step: RuleStep) => {
       if (
@@ -314,20 +322,8 @@ const CreateRulePageComponent: React.FC<{}> = () => {
       }
       setActiveStep(step);
     },
-    [activeStep, openSteps]
+    [activeStep, isAiRuleAppliedRef, openSteps, toggleStepAccordion]
   );
-
-  const toggleStepAccordion = (step: RuleStep | null) => {
-    if (step === RuleStep.defineRule) {
-      defineRuleRef.current?.onToggle();
-    } else if (step === RuleStep.aboutRule) {
-      aboutRuleRef.current?.onToggle();
-    } else if (step === RuleStep.scheduleRule) {
-      scheduleRuleRef.current?.onToggle();
-    } else if (step === RuleStep.ruleActions) {
-      ruleActionsRef.current?.onToggle();
-    }
-  };
 
   const openStepsRef = useRef(openSteps);
   openStepsRef.current = openSteps;
@@ -340,13 +336,13 @@ const CreateRulePageComponent: React.FC<{}> = () => {
     isAiRuleAppliedRef.current = true;
     const o = openStepsRef.current;
     if (o[RuleStep.defineRule]) {
-      toggleStepAccordionRef.current(RuleStep.defineRule);
+      handleAccordionToggle(RuleStep.defineRule, false);
     }
     if (o[RuleStep.aboutRule]) {
-      toggleStepAccordionRef.current(RuleStep.aboutRule);
+      handleAccordionToggle(RuleStep.aboutRule, false);
     }
     if (o[RuleStep.scheduleRule]) {
-      toggleStepAccordionRef.current(RuleStep.scheduleRule);
+      handleAccordionToggle(RuleStep.scheduleRule, false);
     }
 
     await Promise.all([
@@ -444,7 +440,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
         goToStep(step);
       }
     },
-    [validateStep, activeStep, goToStep]
+    [validateStep, activeStep, goToStep, isAiRuleAppliedRef]
   );
 
   const createRuleFromFormData = useCallback(
@@ -461,28 +457,41 @@ const CreateRulePageComponent: React.FC<{}> = () => {
         }
         await startMlJobs(localDefineStepData.machineLearningJobId);
       };
-      const [, createdRule] = await Promise.all([
-        startMlJobsIfNeeded(),
-        createRule(
-          formatRule<RuleCreateProps>(
-            localDefineStepData,
-            localAboutStepData,
-            localScheduleStepData,
-            {
-              ...localActionsStepData,
-              enabled,
-            },
-            triggersActionsUi.actionTypeRegistry
-          )
-        ),
-      ]);
 
-      addSuccess(i18n.SUCCESSFULLY_CREATED_RULES(createdRule.name));
+      const formattedRule = formatRule<RuleCreateProps>(
+        localDefineStepData,
+        localAboutStepData,
+        localScheduleStepData,
+        {
+          ...localActionsStepData,
+          enabled,
+        },
+        triggersActionsUi.actionTypeRegistry
+      );
 
-      navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.rules,
-        path: getRuleDetailsUrl(createdRule.id),
-      });
+      const aiMeta = getAiMeta();
+      if (aiMeta) {
+        formattedRule.meta = { ...formattedRule.meta, ...aiMeta };
+      }
+
+      try {
+        const [, createdRule] = await Promise.all([
+          startMlJobsIfNeeded(),
+          createRule(formattedRule),
+        ]);
+
+        reportRuleCreated({ rule: createdRule });
+
+        addSuccess(i18n.SUCCESSFULLY_CREATED_RULES(createdRule.name));
+
+        navigateToApp(APP_UI_ID, {
+          deepLinkId: SecurityPageName.rules,
+          path: getRuleDetailsUrl(createdRule.id),
+        });
+      } catch (error) {
+        reportRuleCreationError({ ruleType, error });
+        throw error;
+      }
     },
     [
       aboutStepForm,
@@ -491,7 +500,10 @@ const CreateRulePageComponent: React.FC<{}> = () => {
       createRule,
       defineFieldsTransform,
       defineStepForm,
+      getAiMeta,
       navigateToApp,
+      reportRuleCreated,
+      reportRuleCreationError,
       ruleType,
       scheduleStepForm,
       startMlJobs,
@@ -949,11 +961,11 @@ const CreateRulePageComponent: React.FC<{}> = () => {
                       />
                       <MyEuiPanel zindex={4} hasBorder>
                         <MemoEuiAccordion
+                          forceState={openSteps[RuleStep.defineRule] ? 'open' : 'closed'}
                           initialIsOpen={true}
                           id={RuleStep.defineRule}
                           buttonContent={defineRuleButton}
                           paddingSize="xs"
-                          ref={defineRuleRef}
                           onToggle={toggleDefineStep}
                           extraAction={memoDefineStepExtraAction}
                         >
@@ -963,11 +975,11 @@ const CreateRulePageComponent: React.FC<{}> = () => {
                       <EuiSpacer size="l" />
                       <MyEuiPanel hasBorder zindex={3}>
                         <MemoEuiAccordion
+                          forceState={openSteps[RuleStep.aboutRule] ? 'open' : 'closed'}
                           initialIsOpen={false}
                           id={RuleStep.aboutRule}
                           buttonContent={aboutRuleButton}
                           paddingSize="xs"
-                          ref={aboutRuleRef}
                           onToggle={toggleAboutStep}
                           extraAction={memoAboutStepExtraAction}
                         >
@@ -977,11 +989,11 @@ const CreateRulePageComponent: React.FC<{}> = () => {
                       <EuiSpacer size="l" />
                       <MyEuiPanel hasBorder zindex={2}>
                         <MemoEuiAccordion
+                          forceState={openSteps[RuleStep.scheduleRule] ? 'open' : 'closed'}
                           initialIsOpen={false}
                           id={RuleStep.scheduleRule}
                           buttonContent={scheduleRuleButton}
                           paddingSize="xs"
-                          ref={scheduleRuleRef}
                           onToggle={toggleScheduleStep}
                           extraAction={memoScheduleStepExtraAction}
                         >
@@ -991,11 +1003,11 @@ const CreateRulePageComponent: React.FC<{}> = () => {
                       <EuiSpacer size="l" />
                       <MyEuiPanel hasBorder zindex={1}>
                         <MemoEuiAccordion
+                          forceState={openSteps[RuleStep.ruleActions] ? 'open' : 'closed'}
                           initialIsOpen={false}
                           id={RuleStep.ruleActions}
                           buttonContent={ruleActionsButton}
                           paddingSize="xs"
-                          ref={ruleActionsRef}
                           onToggle={toggleActionsStep}
                           extraAction={memoActionsStepExtraAction}
                         >

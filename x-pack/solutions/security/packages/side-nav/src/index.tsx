@@ -7,9 +7,9 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { SolutionSideNavInteractionVariant, SolutionSideNavProps } from './solution_side_nav';
+import type { SolutionSideNavProps } from './solution_side_nav';
 
-export type { SolutionSideNavProps, SolutionSideNavInteractionVariant };
+export type { SolutionSideNavProps };
 
 const SolutionSideNavLazy = lazy(() => import('./solution_side_nav'));
 

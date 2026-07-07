@@ -1,0 +1,46 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postAgentAndPackagePoliciesRequestExample:
+          description: 'Create an agent policy and assign a package policy in one request'
+          value:
+            name: 'My agentless policy'
+            namespace: 'default'
+            supports_agentless: true
+            package_policies:
+              - name: 'nginx-agentless'
+                package:
+                  name: 'nginx'
+                  version: '1.20.0'
+                inputs: {}
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          postAgentAndPackagePoliciesExample:
+            description: 'The created agent policy with package policies'
+            value:
+              item:
+                id: 'agent-policy-id-3'
+                name: 'My agentless policy'
+                namespace: 'default'
+                is_managed: false
+                is_protected: false
+                status: 'active'
+                revision: 1
+                updated_at: '2024-01-15T10:00:00.000Z'
+                updated_by: 'user1'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

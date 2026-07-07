@@ -19,6 +19,8 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
+  - '@kbn/task-manager-plugin'
+  - '@kbn/response-ops-scheduling-types'
 tags:
   - plugin
   - prod

@@ -86,7 +86,7 @@ const AssetCriticalitySelectorComponent: React.FC<{
         <EuiFlexGroup
           direction="row"
           alignItems="center"
-          justifyContent="spaceBetween"
+          justifyContent={compressed ? 'flexStart' : 'spaceBetween'}
           data-test-subj="asset-criticality-selector"
           wrap={false}
           gutterSize={'xs'}
@@ -102,19 +102,29 @@ const AssetCriticalitySelectorComponent: React.FC<{
             />
           </EuiFlexItem>
           {compressed && criticality.privileges.data?.has_write_permissions && (
-            <EuiFlexItem>
-              <EuiButtonIcon
-                data-test-subj="asset-criticality-change-btn"
-                iconSize="s"
-                iconType={'pencil'}
-                aria-label={i18n.translate(
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.securitySolution.entityAnalytics.assetCriticality.compressedButtonArialLabel',
                   {
                     defaultMessage: 'Change asset criticality',
                   }
                 )}
-                onClick={() => toggleModal(true)}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="asset-criticality-change-btn"
+                  iconSize="s"
+                  iconType={'pencil'}
+                  aria-label={i18n.translate(
+                    'xpack.securitySolution.entityAnalytics.assetCriticality.compressedButtonArialLabel',
+                    {
+                      defaultMessage: 'Change asset criticality',
+                    }
+                  )}
+                  onClick={() => toggleModal(true)}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           )}
 
@@ -250,7 +260,7 @@ export const AssetCriticalityTitle = () => (
     content={
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.assetCriticality.accordionTooltip"
-        defaultMessage="You can now categorize entities based on your organization's sensitivity and business risk. The classification tiers can be used to prioritize alert triage and investigation tasks. If the entity risk engine is enabled, the asset classification tier will dynamically impact the entity risk."
+        defaultMessage="You can now categorize entities based on your organization's sensitivity and business risk. The classification tiers can be used to prioritize alert triage and investigation tasks. If the entity risk score maintainer is enabled, the asset classification tier will dynamically impact the entity risk."
       />
     }
   >

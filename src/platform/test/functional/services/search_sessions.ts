@@ -23,6 +23,7 @@ export class SearchSessionsService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
+  private readonly retryOnStale = this.ctx.getService('retryOnStale');
   private readonly security = this.ctx.getService('security');
   private readonly toasts = this.ctx.getService('toasts');
   private readonly es = this.ctx.getService('es');
@@ -58,6 +59,11 @@ export class SearchSessionsService extends FtrService {
   }: { searchSessionName?: string; isSubmitButton?: boolean; withRefresh?: boolean } = {}) {
     this.log.debug('save the search session');
     if (withRefresh) {
+      // The button might be in the cancel or loading state, in those cases we won't be able to find the test subject, so we wait for it to be present.
+      await this.retry.waitFor('refresh button to be present', async () => {
+        return await this.testSubjects.exists('querySubmitButton');
+      });
+
       await this.testSubjects.clickWhenNotDisabledWithoutRetry('querySubmitButton');
     }
 
@@ -75,6 +81,50 @@ export class SearchSessionsService extends FtrService {
         return count > 0;
       }
     );
+  }
+
+  public async expectCompletedSearchToast() {
+    await this.retry.waitFor(
+      'the toast appears indicating that the search session is completed',
+      () => this.testSubjects.exists('backgroundSearchCompletedToastLink')
+    );
+  }
+
+  public async openCompletedSearchFromToast() {
+    await this.retry.try(async () => {
+      const link = await this.testSubjects.find('backgroundSearchCompletedToastLink');
+      if (!link) throw new Error('Background search completed toast link not found');
+      await link.click();
+    });
+    // After clicking the link, the toast is no longer needed
+    await this.dismissSuccessToast();
+  }
+
+  private async dismissSuccessToast() {
+    await this.retryOnStale(async () => {
+      const successToast = await this.getSuccessToast();
+      if (!successToast) return;
+      const closeBtn = await successToast.findByTestSubject('toastCloseButton');
+      await closeBtn.click();
+
+      await this.retry.waitFor('success toast to be dismissed', async () => {
+        const _successToast = await this.getSuccessToast();
+        return !_successToast;
+      });
+    });
+  }
+
+  private async getSuccessToast() {
+    return await this.retryOnStale(async () => {
+      const toasts = await this.toasts.getAll();
+      for (const toast of toasts) {
+        const text = await toast.getVisibleText();
+        if (text.includes('Background search completed')) {
+          return toast;
+        }
+      }
+      return null;
+    });
   }
 
   public async openFlyoutFromToast() {
@@ -107,6 +157,36 @@ export class SearchSessionsService extends FtrService {
 
   public async expectManagementTable() {
     await this.testSubjects.existOrFail('searchSessionsMgmtUiTable');
+  }
+
+  public async expectNoErrorsOrWarnings() {
+    expect(await this.hasErrorsOrWarnings()).to.be(false);
+  }
+
+  public async hasErrorsOrWarnings() {
+    const messages = [
+      // Warnings
+      'Your background search is still running',
+      // Errors
+      'Timed out',
+      'Search Error',
+      'Cannot retrieve search results',
+      'Unable to connect to the Kibana server',
+      'Failed to edit name of the background search',
+      'Failed to fetch background search info',
+    ];
+
+    return await this.retryOnStale(async () => {
+      const toasts = await this.toasts.getAll();
+      for (const toast of toasts) {
+        const text = await toast.getVisibleText();
+        if (messages.some((message) => text.includes(message))) {
+          return true;
+        }
+      }
+
+      return false;
+    });
   }
 
   /*

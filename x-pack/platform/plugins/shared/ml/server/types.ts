@@ -27,9 +27,10 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { CPSServerSetup } from '@kbn/cps/server';
 import type { RouteGuard } from './lib/route_guard';
-import type { ResolveMlCapabilities } from '../common/types/capabilities';
 import type { MlLicense } from '../common/license';
 import type { MlFeatures } from '../common/constants/app';
 
@@ -57,6 +58,7 @@ export interface SavedObjectsRouteDeps {
 export interface PluginsSetup {
   cloud: CloudSetup;
   data: DataPluginSetup;
+  embeddable: EmbeddableSetup;
   fieldFormats: FieldFormatsSetup;
   features: FeaturesPluginSetup;
   home: HomeServerPluginSetup;

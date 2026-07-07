@@ -10,14 +10,17 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { BehaviorSubject, firstValueFrom, of, map, catchError, take, timeout } from 'rxjs';
-import { i18n as i18nLib } from '@kbn/i18n';
+import { i18n as i18nLib, EN_LOCALE } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
+import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import {
   type DarkModeValue,
   type ThemeName,
@@ -37,7 +40,7 @@ import type {
   RenderingMetadata,
   RenderingStartDeps,
 } from './types';
-import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
+import { registerBootstrapRoute, bootstrapRendererFactory, isRspackModeEnabled } from './bootstrap';
 import {
   getSettingValue,
   getCommonStylesheetPaths,
@@ -45,6 +48,7 @@ import {
   getScriptPaths,
   getBrowserLoggingConfig,
 } from './render_utils';
+import { resolveLocale } from './resolve_locale';
 import { filterUiPlugins } from './filter_ui_plugins';
 import { getApmConfig } from './get_apm_config';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
@@ -69,10 +73,13 @@ export const DEFAULT_THEME_NAME_FEATURE_FLAG = 'coreRendering.defaultThemeName';
 /** @internal */
 export class RenderingService {
   private readonly themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
+  private readonly logger: Logger;
   private airgapped: boolean = false;
   private isCoreRenderingInReactConcurrentMode: boolean = true;
-
-  constructor(private readonly coreContext: CoreContext) {}
+  private userStorageStart?: UserStorageServiceStart;
+  constructor(private readonly coreContext: CoreContext) {
+    this.logger = coreContext.logger.get('rendering');
+  }
 
   public async preboot({
     http,
@@ -141,7 +148,8 @@ export class RenderingService {
     };
   }
 
-  public start({ featureFlags }: RenderingStartDeps) {
+  public start({ featureFlags, userStorage }: RenderingStartDeps) {
+    this.userStorageStart = userStorage;
     featureFlags
       .getStringValue$<ThemeName>(DEFAULT_THEME_NAME_FEATURE_FLAG, DEFAULT_THEME_NAME)
       // Parse the input feature flag value to ensure it's of type ThemeName
@@ -190,28 +198,37 @@ export class RenderingService {
     const { serverBasePath, publicBaseUrl } = http.basePath;
 
     // Grouping all async HTTP requests to run them concurrently for performance reasons.
+    // Anonymous pages skip user-scoped values and async default values (the latter typically
+    // call ES via `asCurrentUser`, which would 401 on an unauthenticated request).
     const [
       defaultSettings,
       settingsUserValues = {},
       globalSettingsUserValues = {},
       userSettingDarkMode,
-    ] = await Promise.all([
-      // All sites
-      withAsyncDefaultValues(request, uiSettings.client?.getRegistered()),
-      // Only non-anonymous pages
-      ...(!isAnonymousPage
-        ? ([
-            uiSettings.client?.getUserProvided(),
-            uiSettings.globalClient?.getUserProvided(),
+      userSettingLocale,
+      userStorageValues = {},
+    ] = await Promise.all(
+      isAnonymousPage
+        ? [uiSettings.client?.getRegistered() ?? {}]
+        : ([
+            withAsyncDefaultValues(request, uiSettings.client?.getRegistered()),
+            uiSettings.client?.getUserProvided(true),
+            uiSettings.globalClient?.getUserProvided(true),
             // dark mode
             userSettings?.getUserSettingDarkMode(request),
+            // locale
+            userSettings?.getUserSettingLocale(request),
+            // user storage
+            this.fetchUserStorage(request),
           ] as [
+            ReturnType<typeof withAsyncDefaultValues>,
             Promise<Record<string, UserProvidedValues>>,
             Promise<Record<string, UserProvidedValues>>,
-            Promise<DarkModeValue> | undefined
+            Promise<DarkModeValue> | undefined,
+            Promise<string> | undefined,
+            Promise<Record<string, unknown>>
           ])
-        : []),
-    ]);
+    );
 
     const settings = {
       defaults: defaultSettings,
@@ -270,29 +287,70 @@ export class RenderingService {
 
     const loggingConfig = await getBrowserLoggingConfig(this.coreContext.configService);
 
-    const locale = i18nLib.getLocale();
-    let translationsUrl: string;
-    if (usingCdn) {
-      translationsUrl = `${staticAssetsHrefBase}/translations/${locale}.json`;
-    } else {
-      const translationHash = i18n.getTranslationHash();
-      translationsUrl = `${serverBasePath}/translations/${translationHash}/${locale}.json`;
+    const configLocale = i18nLib.getLocale();
+    const translationHashes = i18n.getTranslationHashes();
+    const availableLocales = i18n.getAvailableLocales();
+    const isServerless = this.coreContext.env.packageInfo.buildFlavor === 'serverless';
+    const { locale: effectiveLocale, setCookieHeader } = resolveLocale({
+      request,
+      userSettingLocale,
+      configLocale,
+      configuredLocales: availableLocales.map((entry) => entry.id),
+      translationHashes,
+      isServerless,
+      serverBasePath,
+      allowLocaleCookie: i18n.allowLocaleCookie,
+    });
+    // When the effective locale is English, the browser's pre-allocated `intl`
+    // instance is already wired to English (see kbn-i18n module initialisation).
+    // Signal null so the browser skips the HTTP fetch and react re-renders.
+    let translationsUrl: string | null = null;
+    if (effectiveLocale !== EN_LOCALE) {
+      if (usingCdn) {
+        translationsUrl = `${staticAssetsHrefBase}/translations/${effectiveLocale}.json`;
+      } else {
+        const translationHash = translationHashes[effectiveLocale] ?? i18n.getTranslationHash();
+        translationsUrl = `${serverBasePath}/translations/${translationHash}/${effectiveLocale}.json`;
+      }
     }
 
     const apmConfig = getApmConfig(request.url.pathname);
 
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
+
+    const useRspack = isRspackModeEnabled();
+    const uiPublicUrl = `${staticAssetsHrefBase}/ui`;
+
+    // Script preloads are intentionally removed for Rspack mode. Under HTTP/1.1
+    // (dev mode), <link rel="preload" as="script"> tags saturate the 6-connection
+    // limit and delay critical CSS, regressing FCP by ~4x. The bootstrap load()
+    // array already ensures all scripts are fetched with "High" priority via
+    // dynamic <script async=false> tags, so preloads provide no benefit and
+    // actively harm performance.
+    //
+    // Font preloads are kept: they are small, high-priority, and give the browser
+    // a head start on WOFF2 downloads during HTML parsing.
+    const preloadFonts = useRspack
+      ? [
+          `${uiPublicUrl}/fonts/inter/Inter-Regular.woff2`,
+          `${uiPublicUrl}/fonts/inter/Inter-Medium.woff2`,
+          `${uiPublicUrl}/fonts/inter/Inter-SemiBold.woff2`,
+        ]
+      : undefined;
+
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
       hardenPrototypes: http.prototypeHardening,
-      uiPublicUrl: `${staticAssetsHrefBase}/ui`,
+      uiPublicUrl,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
-      locale,
+      locale: effectiveLocale,
       themeVersion,
       darkMode,
       stylesheetPaths: commonStylesheetPaths,
       scriptPaths,
+      preloadFonts,
+      optimizeFontLoading: useRspack || undefined,
       customBranding: {
         faviconSVG: branding?.faviconSVG,
         faviconPNG: branding?.faviconPNG,
@@ -305,6 +363,7 @@ export class RenderingService {
         branch: env.packageInfo.branch,
         basePath,
         serverBasePath,
+        spaceId: request.spaceId,
         publicBaseUrl,
         assetsHrefBase: staticAssetsHrefBase,
         logging: loggingConfig,
@@ -318,6 +377,7 @@ export class RenderingService {
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           translationsUrl,
+          availableLocales: availableLocales.map(({ id, label }) => ({ id, label })),
         },
         theme: {
           darkMode,
@@ -350,13 +410,47 @@ export class RenderingService {
           uiSettings: settings,
           globalUiSettings: globalSettings,
         },
+        userStorage: { values: userStorageValues },
       },
     };
 
-    return `<!DOCTYPE html>${renderToStaticMarkup(<Template metadata={metadata} />)}`;
+    const cookieHeaders: Record<string, string> = i18n.allowLocaleCookie
+      ? { 'set-cookie': setCookieHeader }
+      : {};
+
+    return {
+      body: `<!DOCTYPE html>${renderToStaticMarkup(<Template metadata={metadata} />)}`,
+      headers: cookieHeaders,
+    };
   }
 
   public async stop() {}
+
+  private async fetchUserStorage(request: KibanaRequest): Promise<Record<string, unknown>> {
+    const userStorage = this.userStorageStart;
+    if (!userStorage) return {};
+
+    const client = userStorage.asScoped(request);
+    if (!client) return {};
+
+    try {
+      return await client.getForInjection();
+    } catch (err) {
+      // Authorization errors are expected for users whose auth realm does not
+      // grant access to user-storage saved objects (e.g. certain SAML configs).
+      // Degrade gracefully so the page still renders with default values.
+      if (
+        SavedObjectsErrorHelpers.isForbiddenError(err) ||
+        SavedObjectsErrorHelpers.isNotAuthorizedError(err)
+      ) {
+        this.logger.debug(`User storage preload skipped (not authorized): ${err.message}`);
+        return {};
+      }
+
+      this.logger.error(`User storage preload failed: ${err.message}`);
+      throw err;
+    }
+  }
 }
 
 const getUiConfig = async (uiPlugins: UiPlugins, pluginId: string) => {

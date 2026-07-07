@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/group1/_discover_histogram.ts
+
 import expect from '@kbn/expect';
 import type { TimeStrings } from '../../../page_objects/common_page';
 import type { FtrProviderContext } from '../ftr_provider_context';
@@ -35,9 +37,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover histogram', function describeIndexTests() {
     before(async () => {
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await esArchiver.load(
         'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
       );
@@ -52,6 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await common.navigateToApp('discover');
     });
+
     after(async () => {
       await esArchiver.unload(
         'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
@@ -59,6 +59,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.restoreDefaults();
       await common.unsetTime();
+    });
+
+    beforeEach(async () => {
+      await browser.clearLocalStorage();
     });
 
     async function prepareTest(time: TimeStrings, interval?: string) {
@@ -135,6 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const chartCanvasExist = await elasticChart.canvasExists();
       expect(chartCanvasExist).to.be(true);
     });
+
     it('should visualize weekly data with within DST changes', async () => {
       const from = 'Mar 1, 2018 @ 00:00:00.000';
       const to = 'May 1, 2018 @ 00:00:00.000';
@@ -142,6 +147,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const chartCanvasExist = await elasticChart.canvasExists();
       expect(chartCanvasExist).to.be(true);
     });
+
     it('should visualize monthly data with different years scaled to 30 days', async () => {
       const from = 'Jan 1, 2010 @ 00:00:00.000';
       const to = 'Mar 21, 2019 @ 00:00:00.000';
@@ -151,6 +157,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const chartIntervalIconTip = await discover.getChartIntervalWarningIcon();
       expect(chartIntervalIconTip).to.be(false);
     });
+
     it('should visualize monthly data with different years scaled to seconds', async () => {
       const from = 'Jan 1, 2010 @ 00:00:00.000';
       const to = 'Mar 21, 2019 @ 00:00:00.000';
@@ -160,6 +167,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const chartIntervalIconTip = await discover.getChartIntervalWarningIcon();
       expect(chartIntervalIconTip).to.be(true);
     });
+
     it('should allow hide/show histogram, persisted in url state', async () => {
       const from = 'Jan 1, 2010 @ 00:00:00.000';
       const to = 'Mar 21, 2019 @ 00:00:00.000';
@@ -182,6 +190,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(canvasExists).to.be(true);
       });
     });
+
+    it('should allow hide/show histogram, persisted after navigating away and back', async () => {
+      const from = 'Jan 1, 2010 @ 00:00:00.000';
+      const to = 'Mar 21, 2019 @ 00:00:00.000';
+      await prepareTest({ from, to });
+      let canvasExists = await elasticChart.canvasExists();
+      expect(canvasExists).to.be(true);
+      await discover.toggleChartVisibility();
+      await retry.try(async () => {
+        canvasExists = await elasticChart.canvasExists();
+        expect(canvasExists).to.be(false);
+      });
+      await dashboard.navigateToApp();
+      await header.waitUntilLoadingHasFinished();
+      await common.navigateToApp('discover');
+      await header.waitUntilLoadingHasFinished();
+      canvasExists = await elasticChart.canvasExists();
+      expect(canvasExists).to.be(false);
+      await discover.toggleChartVisibility();
+      await header.waitUntilLoadingHasFinished();
+      await retry.try(async () => {
+        canvasExists = await elasticChart.canvasExists();
+        expect(canvasExists).to.be(true);
+      });
+    });
+
     it('should allow hiding the histogram, persisted in saved search', async () => {
       const from = 'Jan 1, 2010 @ 00:00:00.000';
       const to = 'Mar 21, 2019 @ 00:00:00.000';
@@ -231,6 +265,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(true);
     });
+
     it('should show permitted hidden histogram state when returning back to discover', async () => {
       // close chart
       await discover.toggleChartVisibility();
@@ -271,9 +306,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should recover from broken query search when clearing the query bar', async () => {
       await common.navigateToApp('discover');
-      await discover.waitUntilSearchingHasFinished();
-      // Make sure the chart is visible
-      await discover.toggleChartVisibility();
       await discover.waitUntilSearchingHasFinished();
       // type an invalid search query, hit refresh
       await queryBar.setQuery('this is > not valid');

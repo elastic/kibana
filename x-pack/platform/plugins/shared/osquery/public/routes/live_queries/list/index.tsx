@@ -66,7 +66,7 @@ const NewLiveQueryButton = React.memo(() => {
     >
       <FormattedMessage
         id="xpack.osquery.liveQueriesHistory.newLiveQueryButtonLabel"
-        defaultMessage="New live query"
+        defaultMessage="Run query"
       />
     </EuiButton>
   );

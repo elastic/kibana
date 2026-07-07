@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
-import { getFormatByAccessor, getColumnByAccessor } from '@kbn/chart-expressions-common';
+import { getColumnByAccessor, getFormatByAccessor } from '@kbn/chart-expressions-common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { FieldFormat, FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import { isNumber, isUndefined } from 'lodash';
 
 export const getFormat = (
   columns: DatatableColumn[],
@@ -25,4 +27,33 @@ export const getFormat = (
         }
       : undefined
   );
+};
+
+/**
+ * Reads a single key from the field format's params, unwrapping decorator formats such as `suffix` by
+ * walking nested `params.params` until the key is found or `maxDepth` is reached.
+ */
+export const getFormatParam = (format: FieldFormat, param: string, maxDepth = 3) => {
+  const getNested = (params: FieldFormatParams, depth: number) => {
+    if (depth > maxDepth) {
+      return undefined;
+    }
+
+    if (!isUndefined(params[param])) {
+      return params[param];
+    }
+
+    const nested = params?.params;
+
+    if (nested && typeof nested === 'object' && !Array.isArray(nested)) {
+      return getNested(nested, depth + 1);
+    }
+  };
+
+  return getNested(format.params(), 0);
+};
+
+export const getDecimalsFromFormat = (format: FieldFormat) => {
+  const value = getFormatParam(format, 'decimals');
+  return isNumber(value) ? value : undefined;
 };

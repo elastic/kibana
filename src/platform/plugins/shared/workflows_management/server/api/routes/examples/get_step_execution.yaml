@@ -27,6 +27,42 @@ responses:
               error: null
               state: null
               scopeStack: []
+          getWaitForInputStepExecutionResponseExample:
+            description: >-
+              Example response for a Human-In-The-Loop `wait_for_input`
+              step. Once a responder submits via any client (Kibana
+              Inbox UI, Slack, Agent Builder, raw API/MCP), the
+              `hitl` envelope is populated synchronously — before
+              Task Manager runs the resume — so every reader can
+              detect the "responded but not yet resumed" state from
+              this single doc.
+            value:
+              id: step-exec-002
+              stepId: approve_change
+              stepType: wait_for_input
+              workflowRunId: exec-a1b2c3d4-e5f6-7890
+              workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+              spaceId: default
+              status: completed
+              isTestRun: false
+              startedAt: '2025-11-20T12:00:01.000Z'
+              finishedAt: '2025-11-20T12:05:30.000Z'
+              executionTimeMs: 329000
+              topologicalIndex: 1
+              globalExecutionIndex: 1
+              stepExecutionIndex: 0
+              input:
+                message: 'Approve change to production?'
+              output:
+                approved: true
+                reason: 'looks good'
+              hitl:
+                respondedBy: alice
+                respondedAt: '2025-11-20T12:05:29.000Z'
+                channel: kibana-ui
+              error: null
+              state: null
+              scopeStack: []
 x-codeSamples:
   - lang: curl
     source: |

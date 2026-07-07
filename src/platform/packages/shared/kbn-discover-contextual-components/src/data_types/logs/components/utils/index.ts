@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './truncate_preserve_highlight_tags';
+export { truncateReactNode } from './truncate_react_node';
+export { extractTextFromReactNode } from './extract_text_from_react_node';

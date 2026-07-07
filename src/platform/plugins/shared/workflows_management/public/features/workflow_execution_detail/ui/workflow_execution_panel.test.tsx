@@ -211,6 +211,17 @@ describe('WorkflowExecutionPanel', () => {
       expect(screen.queryByTestId('cancel-execution-button')).not.toBeInTheDocument();
     });
 
+    it('should not show cancel button when finishedAt is set even if status were stale', () => {
+      renderComponent({
+        execution: {
+          ...mockExecution,
+          status: ExecutionStatus.RUNNING,
+          finishedAt: '2025-08-05T20:01:00.000Z',
+        },
+      });
+      expect(screen.queryByTestId('cancel-execution-button')).not.toBeInTheDocument();
+    });
+
     it('should not show cancel button when execution is null', () => {
       renderComponent({ execution: null });
       expect(screen.queryByTestId('cancel-execution-button')).not.toBeInTheDocument();

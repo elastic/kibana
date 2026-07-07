@@ -18,7 +18,7 @@ export const ADD_DATA_STREAM_DISABLED_TOOLTIP = i18n.translate(
   'xpack.automaticImport.dataStreams.addDataStreamDisabledTooltip',
   {
     defaultMessage:
-      'Enter an integration name (at least 2 characters) and description before adding a data stream.',
+      'Enter a unique integration name (at least 2 characters) and description before adding a data stream.',
   }
 );
 
@@ -379,6 +379,39 @@ export const STATUS_LABELS = Object.freeze({
   }),
   deleting: i18n.translate('xpack.automaticImport.dataStreams.status.deleting', {
     defaultMessage: 'Deleting...',
+  }),
+});
+
+export const PHASE_LABELS = Object.freeze({
+  analyzing_logs: i18n.translate('xpack.automaticImport.dataStreams.phase.analyzingLogs', {
+    defaultMessage: 'Analyzing logs',
+  }),
+  mapping_to_ecs: i18n.translate('xpack.automaticImport.dataStreams.phase.mappingToEcs', {
+    defaultMessage: 'Mapping to ECS',
+  }),
+  building_pipeline: i18n.translate('xpack.automaticImport.dataStreams.phase.buildingPipeline', {
+    defaultMessage: 'Building ingest pipeline',
+  }),
+  fixing_pipeline: i18n.translate('xpack.automaticImport.dataStreams.phase.fixingPipeline', {
+    defaultMessage: 'Fixing ingest pipeline',
+  }),
+  mapping_event_fields: i18n.translate(
+    'xpack.automaticImport.dataStreams.phase.mappingEventFields',
+    {
+      defaultMessage: 'Mapping event fields',
+    }
+  ),
+  mapping_related_fields: i18n.translate(
+    'xpack.automaticImport.dataStreams.phase.mappingRelatedFields',
+    {
+      defaultMessage: 'Mapping related fields',
+    }
+  ),
+  reviewing: i18n.translate('xpack.automaticImport.dataStreams.phase.reviewing', {
+    defaultMessage: 'Reviewing',
+  }),
+  finalizing: i18n.translate('xpack.automaticImport.dataStreams.phase.finalizing', {
+    defaultMessage: 'Finalizing',
   }),
 });
 

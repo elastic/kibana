@@ -18,6 +18,7 @@ import {
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { KbnPaletteId } from '@kbn/palettes';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { DeepWriteable, LensAttributes } from '../../types';
 import {
   DEFAULT_PRIMARY_POSITION,
@@ -42,15 +43,15 @@ import {
   operationFromColumn,
 } from '../utils';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
+import { fromDateHistogramLensApiToLensState } from '../columns/date_histogram';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
-import type { MetricState } from '../../schema';
+import type { MetricConfig } from '../../schema';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import type { LensApiBucketOperations } from '../../schema/bucket_ops';
 import { generateLayer } from '../utils';
 import type {
-  MetricStateESQL,
-  MetricStateNoESQL,
-  MetricStyling,
+  MetricConfigESQL,
+  MetricConfigNoESQL,
   PrimaryMetricType,
   SecondaryMetricType,
 } from '../../schema/charts/metric';
@@ -77,16 +78,17 @@ import { isAPIColumnOfBucketType, isAPIColumnOfMetricType } from '../columns/uti
 
 type MetricApiCompareType = Extract<Required<SecondaryMetricType>, { compare: any }>['compare'];
 
-type WritableMetricStateWithoutDataset = DeepWriteable<Omit<MetricState, 'data_source'>>;
+type WritableMetricConfigWithoutDataset = DeepWriteable<Omit<MetricConfig, 'data_source'>>;
 
 const ACCESSOR = 'metric_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const TRENDLINE_LAYER_ID = 'layer_0_trendline';
 const LENS_METRIC_COMPARE_TO_REVERSED = false;
 
+type MetricStyling = NonNullable<MetricConfig['styling']>;
 type MetricIconName = NonNullable<NonNullable<MetricStyling['icon']>['name']>;
 
-const iconCompat = getReversibleMappings<MetricIconName, string>([
+export const iconCompat = getReversibleMappings<MetricIconName, string>([
   ['alert', 'alert'],
   ['asterisk', 'asterisk'],
   ['bell', 'bell'],
@@ -138,11 +140,11 @@ function fromCompareAPIToLensState(compareToConfig: MetricApiCompareType): {
   };
 }
 
-function isSecondaryMetric(metric: MetricState['metrics'][number]): metric is SecondaryMetricType {
+function isSecondaryMetric(metric: MetricConfig['metrics'][number]): metric is SecondaryMetricType {
   return metric.type === 'secondary';
 }
 
-function isPrimaryMetric(metric: MetricState['metrics'][number]): metric is PrimaryMetricType {
+function isPrimaryMetric(metric: MetricConfig['metrics'][number]): metric is PrimaryMetricType {
   return metric.type === 'primary';
 }
 
@@ -186,10 +188,12 @@ function convertStylingToAPIFormat(
   visualization: MetricVisualizationState,
   hasSecondary: boolean
 ): MetricStyling {
+  const iconName = visualization.icon ? iconCompat.toAPI(visualization.icon) : undefined;
+
   return stripUndefined({
-    icon: visualization.icon
+    icon: iconName
       ? {
-          name: iconCompat.toAPI(visualization.icon),
+          name: iconName,
           alignment: visualization.iconAlign ?? DEFAULT_PRIMARY_ICON_ALIGNMENT,
         }
       : undefined,
@@ -229,7 +233,7 @@ function convertStylingToAPIFormat(
   });
 }
 
-function buildVisualizationState(config: MetricState): MetricVisualizationState {
+function buildVisualizationState(config: MetricConfig): MetricVisualizationState {
   const layer = config;
 
   const [primaryMetric, secondaryMetric] = layer.metrics;
@@ -253,7 +257,7 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
       ? { palette: fromColorByValueAPIToLensState(primaryMetric.color) }
       : {}),
     ...(primaryMetric.apply_color_to ? { applyColorTo: primaryMetric.apply_color_to } : {}),
-    subtitle: primaryMetric.subtitle ?? '',
+    ...(primaryMetric.subtitle ? { subtitle: primaryMetric.subtitle } : {}),
     showBar: false,
     ...convertStylingToStateFormat(layer.styling, !!secondaryMetric),
     ...(secondaryMetric
@@ -273,7 +277,7 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
           maxCols: layer.breakdown_by.columns,
         }
       : {}),
-    collapseFn: layer.breakdown_by?.collapse_by,
+    ...(layer.breakdown_by?.collapse_by ? { collapseFn: layer.breakdown_by.collapse_by } : {}),
     ...(primaryMetric?.background_chart?.type === 'bar'
       ? {
           maxAccessor: getAccessorName('max'),
@@ -331,7 +335,7 @@ function buildFromTextBasedLayer(
   layer: TextBasedLayer,
   metricAccessor: string,
   visualization: MetricVisualizationState
-): WritableMetricStateWithoutDataset {
+): WritableMetricConfigWithoutDataset {
   return enrichConfigurationWithVisualizationProperties(
     {
       type: 'metric',
@@ -346,7 +350,7 @@ function buildFromTextBasedLayer(
                   type: 'bar',
                   max_value: getValueApiColumn(visualization.maxAccessor, layer),
                   ...(visualization.progressDirection
-                    ? { direction: visualization.progressDirection }
+                    ? { orientation: visualization.progressDirection }
                     : {}),
                 },
               }
@@ -358,7 +362,7 @@ function buildFromTextBasedLayer(
               ...getValueApiColumn(visualization.secondaryMetricAccessor, layer),
             }
           : undefined,
-      ].filter(nonNullable) as MetricState['metrics'],
+      ].filter(nonNullable) as MetricConfig['metrics'],
       ...(visualization.breakdownByAccessor
         ? {
             breakdown_by: {
@@ -376,7 +380,7 @@ function buildFromFormBasedLayer(
   layer: PersistedIndexPatternLayer,
   metricAccessor: string,
   visualization: MetricVisualizationState
-): WritableMetricStateWithoutDataset {
+): WritableMetricConfigWithoutDataset {
   const metric = operationFromColumn(metricAccessor, layer);
   if (!metric || !isAPIColumnOfMetricType(metric)) {
     throw Error('The primary metric must refer to a metric operation.');
@@ -435,7 +439,7 @@ function buildFromFormBasedLayer(
     {
       type: 'metric',
       ...generateApiLayer(layer),
-      metrics: metrics as MetricState['metrics'],
+      metrics: metrics as MetricConfig['metrics'],
       ...(breakdown_by
         ? {
             breakdown_by: {
@@ -450,9 +454,9 @@ function buildFromFormBasedLayer(
 }
 
 function enrichConfigurationWithVisualizationProperties(
-  state: WritableMetricStateWithoutDataset,
+  state: WritableMetricConfigWithoutDataset,
   visualization: MetricVisualizationState
-): WritableMetricStateWithoutDataset {
+): WritableMetricConfigWithoutDataset {
   const [primaryMetric, secondaryMetric] = state.metrics;
 
   if (isSecondaryMetric(primaryMetric)) {
@@ -467,7 +471,8 @@ function enrichConfigurationWithVisualizationProperties(
     }
 
     if (visualization.trendlineLayerType) {
-      primaryMetric.background_chart = { ...primaryMetric.background_chart, type: 'trend' };
+      // Trend takes precedence; do not retain bar-only fields (e.g. max_value) on the API config.
+      primaryMetric.background_chart = { type: 'trend' };
     }
 
     if (visualization.palette) {
@@ -480,7 +485,8 @@ function enrichConfigurationWithVisualizationProperties(
       primaryMetric.color = AUTO_COLOR;
     }
 
-    if (visualization.applyColorTo) {
+    // Check for valid enum, some integration panels have applyColorTo === 'bar', which is not a valid API enum; treat unknown values as unselected.
+    if (visualization.applyColorTo === 'value' || visualization.applyColorTo === 'background') {
       primaryMetric.apply_color_to = visualization.applyColorTo;
     }
   }
@@ -525,7 +531,7 @@ function reverseBuildVisualizationState(
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
-): MetricState {
+): MetricConfig {
   const metricAccessor = getMetricAccessor(visualization);
   if (metricAccessor == null) {
     throw new Error('Metric accessor is missing in the visualization state');
@@ -544,14 +550,14 @@ function reverseBuildVisualizationState(
   }
 
   return {
-    data_source: dataSource satisfies MetricState['data_source'],
+    data_source: dataSource satisfies MetricConfig['data_source'],
     ...(isTextBasedLayer(layer)
       ? buildFromTextBasedLayer(layer, metricAccessor, visualization)
       : buildFromFormBasedLayer(layer, metricAccessor, visualization)),
-  } as MetricState;
+  } as MetricConfig;
 }
 
-function buildFormBasedLayer(layer: MetricStateNoESQL): FormBasedPersistedState['layers'] {
+function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState['layers'] {
   const [primaryMetric, secondaryMetric] = layer.metrics ?? [];
   if (!isAPIColumnOfMetricType(primaryMetric) || isSecondaryMetric(primaryMetric)) {
     throw Error('The primary metric must refer to a metric operation.');
@@ -577,8 +583,20 @@ function buildFormBasedLayer(layer: MetricStateNoESQL): FormBasedPersistedState[
 
   addLayerColumn(defaultLayer, getAccessorName('metric'), newPrimaryColumns);
   if (trendLineLayer) {
+    // Histogram first so columnOrder matches editor-built trendline layers and tabify agg order.
+    addLayerColumn(
+      trendLineLayer,
+      HISTOGRAM_COLUMN_NAME,
+      fromDateHistogramLensApiToLensState({
+        operation: 'date_histogram',
+        field: '',
+        suggested_interval: 'auto',
+        use_original_time_range: false,
+        include_empty_rows: true,
+        drop_partial_intervals: false,
+      })
+    );
     addLayerColumn(trendLineLayer, `${ACCESSOR}_trendline`, newPrimaryColumns);
-    addLayerColumn(trendLineLayer, HISTOGRAM_COLUMN_NAME, newPrimaryColumns);
   }
 
   if (layer.breakdown_by) {
@@ -621,7 +639,7 @@ function buildFormBasedLayer(layer: MetricStateNoESQL): FormBasedPersistedState[
   return layers;
 }
 
-function getValueColumns(layer: MetricStateESQL) {
+function getValueColumns(layer: MetricConfigESQL) {
   const [primaryMetric, secondaryMetric] = layer.metrics ?? [];
   if (isSecondaryMetric(primaryMetric)) {
     throw Error('The primary metric must refer to a metric operation.');
@@ -652,26 +670,31 @@ export type MetricAttributesWithoutFiltersAndQuery = Omit<MetricAttributes, 'sta
   state: Omit<MetricAttributes['state'], 'filters' | 'query'>;
 };
 
-export function fromAPItoLensState(config: MetricState): MetricAttributesWithoutFiltersAndQuery {
+export function fromAPItoLensState(config: MetricConfig): MetricAttributesWithoutFiltersAndQuery {
   const _buildDataLayer = (cfg: unknown, i: number) =>
-    buildFormBasedLayer(cfg as MetricStateNoESQL);
+    buildFormBasedLayer(cfg as MetricConfigNoESQL);
 
   const { layers, usedDataviews } = buildDatasourceStates(config, _buildDataLayer, getValueColumns);
 
   const visualization = buildVisualizationState(config);
 
   const { adHocDataViews, internalReferences } = getAdhocDataviews(usedDataviews);
-  const regularDataViews = Object.values(usedDataviews).filter(
-    (v): v is { id: string; type: 'dataView' } => v.type === 'dataView'
-  );
-  const references = regularDataViews.length
-    ? buildReferences({ [DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
+
+  const regularDataViewsByLayer: Record<string, string> = {};
+  for (const [layerId, dv] of Object.entries(usedDataviews)) {
+    if (dv.type === 'dataView') {
+      regularDataViewsByLayer[layerId] = dv.id;
+    }
+  }
+  const references = Object.keys(regularDataViewsByLayer).length
+    ? buildReferences(regularDataViewsByLayer)
     : [];
 
   return {
     visualizationType: 'lnsMetric',
     ...getSharedChartAPIToLensState(config),
     references,
+    version: LENS_ITEM_LATEST_VERSION,
     state: {
       datasourceStates: layers,
       internalReferences,
@@ -681,7 +704,7 @@ export function fromAPItoLensState(config: MetricState): MetricAttributesWithout
   };
 }
 
-export function fromLensStateToAPI(config: LensAttributes): MetricState {
+export function fromLensStateToAPI(config: LensAttributes): MetricConfig {
   const { state } = config;
   const visualization = state.visualization as MetricVisualizationState;
   const layers = getDatasourceLayers(state);

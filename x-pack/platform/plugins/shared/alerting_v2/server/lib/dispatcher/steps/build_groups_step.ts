@@ -9,11 +9,13 @@ import { injectable } from 'inversify';
 import { get } from 'lodash';
 import objectHash from 'object-hash';
 import type {
+  ActionGroup,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
   MatchedPair,
-  NotificationGroup,
+  Rule,
+  RuleId,
 } from '../types';
 
 @injectable()
@@ -21,16 +23,19 @@ export class BuildGroupsStep implements DispatcherStep {
   public readonly name = 'build_groups';
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { matched = [] } = state;
+    const { matched = [], rules } = state;
 
-    const groups = buildNotificationGroups(matched);
+    const groups = buildActionGroups(matched, rules);
 
     return { type: 'continue', data: { groups } };
   }
 }
 
-export function buildNotificationGroups(matched: readonly MatchedPair[]): NotificationGroup[] {
-  const groupMap = new Map<string, NotificationGroup>();
+export function buildActionGroups(
+  matched: readonly MatchedPair[],
+  rules?: Map<RuleId, Rule>
+): ActionGroup[] {
+  const groupMap = new Map<string, ActionGroup>();
 
   for (const { episode, policy } of matched) {
     let groupKey: Record<string, unknown>;
@@ -51,23 +56,29 @@ export function buildNotificationGroups(matched: readonly MatchedPair[]): Notifi
         break;
     }
 
-    const notificationGroupId = objectHash({
+    const actionGroupId = objectHash({
       policyId: policy.id,
       groupKey,
     });
 
-    if (!groupMap.has(notificationGroupId)) {
-      groupMap.set(notificationGroupId, {
-        id: notificationGroupId,
+    if (!groupMap.has(actionGroupId)) {
+      groupMap.set(actionGroupId, {
+        id: actionGroupId,
         spaceId: policy.spaceId,
         policyId: policy.id,
         destinations: policy.destinations,
         groupKey,
         episodes: [],
+        rules: {},
       });
     }
 
-    groupMap.get(notificationGroupId)!.episodes.push(episode);
+    const group = groupMap.get(actionGroupId)!;
+    group.episodes.push(episode);
+    const rule = rules?.get(episode.rule_id);
+    if (rule) {
+      group.rules[episode.rule_id] = { name: rule.name };
+    }
   }
 
   return [...groupMap.values()];

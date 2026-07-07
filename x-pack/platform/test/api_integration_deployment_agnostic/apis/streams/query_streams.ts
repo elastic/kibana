@@ -14,6 +14,8 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import {
+  createEsqlView,
+  deleteEsqlView,
   deleteStream,
   disableStreams,
   enableStreams,
@@ -26,9 +28,6 @@ import {
   putStream,
 } from './helpers/requests';
 
-/**
- * Helper to create a query stream upsert request
- */
 function createQueryStreamRequest(
   esql: string,
   viewName: string,
@@ -46,31 +45,6 @@ function createQueryStreamRequest(
     },
     ...emptyAssets,
   };
-}
-
-/**
- * Helper to create an ES|QL view (simulating wired stream views that will land soon)
- */
-async function createEsqlView(esClient: Client, viewName: string, query: string): Promise<void> {
-  await esClient.transport.request({
-    method: 'PUT',
-    path: `/_query/view/${viewName}`,
-    body: { query },
-  });
-}
-
-/**
- * Helper to delete an ES|QL view
- */
-async function deleteEsqlView(esClient: Client, viewName: string): Promise<void> {
-  try {
-    await esClient.transport.request({
-      method: 'DELETE',
-      path: `/_query/view/${viewName}`,
-    });
-  } catch {
-    // Ignore if view doesn't exist
-  }
 }
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -93,6 +67,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
 
       await forkStream(apiClient, 'logs.otel', {
         stream: { name: PARENT_STREAM_NAME },
@@ -130,6 +105,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     describe('Parent view reference validation', () => {
@@ -217,6 +193,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         // Clean up
         await deleteStream(apiClient, rootQueryStreamName);
+      });
+
+      it('should reject root-level query stream with legacy logs root name', async () => {
+        const response = (await putStream(
+          apiClient,
+          'logs',
+          createQueryStreamRequest('FROM logs.otel | LIMIT 10', getEsqlViewName('logs')),
+          400
+        )) as unknown as { message: string };
+
+        expect(response.message).to.contain(
+          'Cannot create query stream: a stream with name "logs" is reserved for the legacy root stream'
+        );
       });
 
       it('should reject child referencing grandparent instead of immediate parent', async () => {

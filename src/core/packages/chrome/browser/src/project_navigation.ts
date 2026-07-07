@@ -35,10 +35,11 @@ import type { AppId as SecurityApp, DeepLinkId as SecurityLink } from '@kbn/deep
 import type { AppId as FleetApp, DeepLinkId as FleetLink } from '@kbn/deeplinks-fleet';
 import type { AppId as SharedApp, DeepLinkId as SharedLink } from '@kbn/deeplinks-shared';
 import type { WorkplaceAIApp, DeepLinkId as WorkplaceAILink } from '@kbn/deeplinks-workplace-ai';
+import type { VectordbApp, DeepLinkId as VectordbLink } from '@kbn/deeplinks-vectordb';
 import type { DeepLinkId as AgentBuilderLink } from '@kbn/deeplinks-agent-builder';
 import type { AppId as WorkflowsApp, DeepLinkId as WorkflowsLink } from '@kbn/deeplinks-workflows';
 import type { KibanaProject } from '@kbn/projects-solutions-groups';
-import type { BadgeType } from '@kbn/core-chrome-navigation';
+import type { BadgeType } from '@kbn/ui-side-navigation';
 
 import type { ChromeNavLink } from './nav_links';
 
@@ -59,6 +60,7 @@ export type AppId =
   | FleetApp
   | SharedApp
   | WorkplaceAIApp
+  | VectordbApp
   | WorkflowsApp;
 
 /** @public */
@@ -73,6 +75,7 @@ export type AppDeepLinkId =
   | FleetLink
   | SharedLink
   | WorkplaceAILink
+  | VectordbLink
   | AgentBuilderLink
   | WorkflowsLink;
 
@@ -288,3 +291,24 @@ export type EuiSideNavItemTypeEnhanced<T = unknown> = Omit<EuiSideNavItemType<T>
   iconToString?: string;
   nameToString?: string;
 };
+
+/** A single user-specified move: place item `id` directly after item `afterId` (or at position 0 if `afterId` is null). */
+export interface NavigationCustomizationMove {
+  id: string;
+  afterId: string | null;
+}
+
+/**
+ * Customization configuration for navigation items, stored as a delta from the default order.
+ * Resilient to nav items being added, removed, or reordered by default across releases.
+ */
+export interface NavigationCustomization {
+  /**
+   * User-specified moves applied sequentially on top of the default order.
+   * Only items the user explicitly moved are recorded.
+   * Moves operate on the full item list (including hidden items).
+   */
+  moves: NavigationCustomizationMove[];
+  /** IDs of items to hide from the main navigation (moved to overflow menu). */
+  hidden: AppDeepLinkId[];
+}

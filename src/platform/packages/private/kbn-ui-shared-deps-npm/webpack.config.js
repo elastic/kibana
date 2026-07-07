@@ -71,6 +71,8 @@ module.exports = (_, argv) => {
         '@elastic/numeral',
         '@emotion/cache',
         '@emotion/react',
+        '@emotion/react/jsx-runtime',
+        '@emotion/react/jsx-dev-runtime',
         '@hello-pangea/dnd/dist/dnd.js',
         '@reduxjs/toolkit',
         'redux',

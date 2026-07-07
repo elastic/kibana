@@ -16,27 +16,30 @@ import { createDeletionDetectionService } from './deletion_detection/deletion_de
 export type IndexSyncService = ReturnType<typeof createIndexSyncService>;
 
 export const createIndexSyncService = ({
-  esClient,
+  internalEsClient,
+  dataEsClient,
   crudClient,
   logger,
   descriptorClient,
   watchlist,
 }: {
-  esClient: ElasticsearchClient;
+  internalEsClient: ElasticsearchClient;
+  dataEsClient: ElasticsearchClient;
   crudClient: CRUDClient;
   logger: Logger;
   descriptorClient: WatchlistEntitySourceClient;
   watchlist: { name: string; id: string; index: string };
 }) => {
   const updateDetectionService = createUpdateDetectionService({
-    esClient,
+    internalEsClient,
+    dataEsClient,
     crudClient,
     logger,
     descriptorClient,
     watchlist,
   });
   const deletionDetectionService = createDeletionDetectionService({
-    esClient,
+    esClient: internalEsClient,
     crudClient,
     logger,
     descriptorClient,
@@ -46,9 +49,14 @@ export const createIndexSyncService = ({
 
   const plainIndexSync = async (sources: SyncSourceEntry[]) => {
     await sourcesSyncService.syncBySourceIds({
-      descriptorClient,
       sources,
-      process: async (source, entityStoreEntityIdsByType, correlationMap, watchlistsByEuid) => {
+      process: async (
+        source,
+        entityStoreEntityIdsByType,
+        correlationMap,
+        watchlistsByEuid,
+        pageRange
+      ) => {
         const entities = await updateDetectionService.updateDetection(
           source,
           entityStoreEntityIdsByType,
@@ -56,7 +64,12 @@ export const createIndexSyncService = ({
           watchlistsByEuid
         );
         const currentEuids = entities.map((e) => e.euid);
-        await deletionDetectionService.deletionDetection(source, currentEuids, watchlistsByEuid);
+        await deletionDetectionService.deletionDetection(
+          source,
+          currentEuids,
+          watchlistsByEuid,
+          pageRange
+        );
       },
     });
   };

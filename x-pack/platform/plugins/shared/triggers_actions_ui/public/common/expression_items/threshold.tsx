@@ -86,6 +86,10 @@ export const ThresholdExpression = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.triggersActionsUI.common.expressionItems.threshold.popoverAriaLabel',
+        { defaultMessage: 'Threshold' }
+      )}
       button={
         <EuiExpression
           data-test-subj="thresholdPopover"

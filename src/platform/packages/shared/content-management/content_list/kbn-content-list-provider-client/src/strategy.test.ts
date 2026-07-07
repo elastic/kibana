@@ -12,6 +12,7 @@ import type { FindItemsParams } from '@kbn/content-list-provider';
 import { createClientStrategy } from './strategy';
 import type { ItemDecorator } from './strategy';
 import type { TableListViewFindItemsFn } from './types';
+import { defineContentListFilter, type ContentListFilterMap } from './filters';
 
 const createParams = (overrides?: Partial<FindItemsParams>): FindItemsParams => ({
   searchQuery: '',
@@ -38,6 +39,19 @@ describe('createClientStrategy', () => {
   ): jest.Mock<ReturnType<TableListViewFindItemsFn>> => {
     return jest.fn().mockResolvedValue({ hits: items, total: items.length });
   };
+
+  const createdByFilter = defineContentListFilter({
+    id: 'createdBy',
+    title: 'Created by',
+    getItemValue: (item: UserContentCommonSchema) => item.createdBy,
+  });
+
+  const tagFilter = defineContentListFilter({
+    id: 'tag',
+    title: 'Tags',
+    getItemValue: (item: UserContentCommonSchema) =>
+      item.references?.filter((ref) => ref.type === 'tag').map((ref) => ref.id) ?? [],
+  });
 
   describe('findItems', () => {
     it('calls the consumer with searchQuery and signal', async () => {
@@ -87,6 +101,41 @@ describe('createClientStrategy', () => {
       expect(result.total).toBe(2);
     });
 
+    it('transforms tags, managed, and audit metadata from UserContentCommonSchema', async () => {
+      const richItem: UserContentCommonSchema = {
+        id: 'rich-1',
+        type: 'dashboard',
+        updatedAt: '2024-06-15T12:00:00.000Z',
+        updatedBy: 'user-2',
+        createdAt: '2024-01-01T00:00:00.000Z',
+        createdBy: 'user-1',
+        managed: true,
+        references: [
+          { type: 'tag', id: 'tag-1', name: 'tag-ref-tag-1' },
+          { type: 'tag', id: 'tag-2', name: 'tag-ref-tag-2' },
+          { type: 'index-pattern', id: 'ip-1', name: 'some-pattern' },
+        ],
+        attributes: { title: 'Rich Dashboard', description: 'Has all fields' },
+      };
+      const mockFindItems = createMockFindItems([richItem]);
+      const { findItems } = createClientStrategy(mockFindItems);
+
+      const result = await findItems(createParams());
+
+      expect(result.items[0]).toEqual({
+        id: 'rich-1',
+        title: 'Rich Dashboard',
+        description: 'Has all fields',
+        type: 'dashboard',
+        updatedAt: new Date('2024-06-15T12:00:00.000Z'),
+        tags: ['tag-1', 'tag-2'],
+        createdAt: '2024-01-01T00:00:00.000Z',
+        createdBy: 'user-1',
+        updatedBy: 'user-2',
+        managed: true,
+      });
+    });
+
     it('handles empty results', async () => {
       const mockFindItems = createMockFindItems([]);
       const { findItems } = createClientStrategy(mockFindItems);
@@ -132,7 +181,9 @@ describe('createClientStrategy', () => {
       const item1: UserContentCommonSchema = { ...createMockItem('1'), createdBy: 'u_jane' };
       const item2: UserContentCommonSchema = { ...createMockItem('2'), createdBy: 'u_diego' };
       const mockFindItems = createMockFindItems([item1, item2]);
-      const { findItems } = createClientStrategy(mockFindItems);
+      const { findItems } = createClientStrategy(mockFindItems, undefined, undefined, {
+        createdBy: createdByFilter,
+      });
 
       await findItems(createParams({ searchQuery: 'test' }));
       const result = await findItems(
@@ -145,6 +196,38 @@ describe('createClientStrategy', () => {
       expect(mockFindItems).toHaveBeenCalledTimes(1);
       expect(result.items).toHaveLength(1);
       expect(result.items[0].id).toBe('1');
+    });
+
+    it('keeps cached items when custom filter definitions change', async () => {
+      let customFilters: ContentListFilterMap = {};
+      const mockFindItems = createMockFindItems([
+        createMockItem('1'),
+        { ...createMockItem('2'), type: 'visualization' },
+      ]);
+      const { findItems } = createClientStrategy(
+        mockFindItems,
+        undefined,
+        undefined,
+        () => customFilters
+      );
+
+      await findItems(createParams({ searchQuery: 'ecommer' }));
+      customFilters = {
+        contentType: defineContentListFilter({
+          id: 'contentType',
+          title: 'Content type',
+          getItemValue: (item: UserContentCommonSchema) => item.type,
+        }),
+      };
+      const result = await findItems(
+        createParams({
+          searchQuery: 'ecommer',
+          filters: { contentType: { include: ['visualization'] } },
+        })
+      );
+
+      expect(mockFindItems).toHaveBeenCalledTimes(1);
+      expect(result.items.map(({ id }) => id)).toEqual(['2']);
     });
   });
 
@@ -190,7 +273,9 @@ describe('createClientStrategy', () => {
       const item1: UserContentCommonSchema = { ...createMockItem('1'), createdBy: 'u_jane' };
       const item2: UserContentCommonSchema = { ...createMockItem('2'), createdBy: 'u_diego' };
       const mockFindItems = createMockFindItems([item1, item2]);
-      const { findItems } = createClientStrategy(mockFindItems);
+      const { findItems } = createClientStrategy(mockFindItems, undefined, undefined, {
+        createdBy: createdByFilter,
+      });
 
       const result = await findItems(
         createParams({ filters: { createdBy: { include: ['u_jane'] } } })
@@ -210,7 +295,9 @@ describe('createClientStrategy', () => {
         references: [{ type: 'tag', id: 'tag-2', name: 'tag-2' }],
       };
       const mockFindItems = createMockFindItems([item1, item2]);
-      const { findItems } = createClientStrategy(mockFindItems);
+      const { findItems } = createClientStrategy(mockFindItems, undefined, undefined, {
+        tag: tagFilter,
+      });
 
       const result = await findItems(createParams({ filters: { tag: { include: ['tag-1'] } } }));
 

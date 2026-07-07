@@ -12,6 +12,26 @@ import type { ScoutPage } from '..';
 import { expect } from '../../../ui';
 
 /**
+ * Minimal description of a Monaco text model used inside `page.evaluate` callbacks.
+ * Interfaces are TypeScript-only and are erased at compile time, so these are safe
+ * to reference from stringified evaluate functions.
+ */
+interface MonacoModel {
+  getValue(): string;
+  setValue(value: string): void;
+  getPositionAt(offset: number): unknown;
+  uri: { toString(): string };
+}
+
+/** Minimal description of a Monaco editor instance used inside `page.evaluate` callbacks. */
+interface MonacoEditorInstance {
+  getModel(): { uri: { toString(): string } } | null;
+  setPosition(pos: unknown): void;
+  focus(): void;
+  trigger(source: string, handlerId: string, payload: unknown): void;
+}
+
+/**
  * Page object that wraps common interactions with the Kibana Monaco-based code editor.
  *
  * Initially the API is intentionally aligned with the FTR `MonacoEditorService`
@@ -50,9 +70,9 @@ export class KibanaCodeEditorWrapper {
           throw new Error('MonacoEnvironment.monaco.editor is not available');
         }
 
-        const values: string[] = monacoEnv.monaco.editor
-          .getModels()
-          .map((model: any) => model.getValue() as string);
+        const values: string[] = (monacoEnv.monaco.editor.getModels() as MonacoModel[]).map(
+          (model) => model.getValue()
+        );
 
         if (!values.length) {
           return '';
@@ -87,8 +107,7 @@ export class KibanaCodeEditorWrapper {
           throw new Error('MonacoEnvironment.monaco.editor is not available');
         }
 
-        const editor = monacoEnv.monaco.editor;
-        const textModels: any[] = editor.getModels();
+        const textModels = monacoEnv.monaco.editor.getModels() as MonacoModel[];
 
         if (!textModels.length) {
           throw new Error('No Monaco editor models found');
@@ -128,5 +147,88 @@ export class KibanaCodeEditorWrapper {
     return this.page.locator(
       '[data-test-subj="kbnCodeEditorEditorOverflowWidgetsContainer"] .suggest-widget'
     );
+  }
+
+  /**
+   * Returns a locator for the Monaco suggestion detail panel (the documentation pop-up
+   * displayed alongside the autocomplete suggestion list).
+   *
+   * The detail panel has no `data-test-subj`. Monaco renders it as an *overlay widget*
+   * (via `addOverlayWidget`) which is placed inside the main `.monaco-editor` element,
+   * NOT inside the overflow-widgets container (which only holds content widgets).
+   */
+  public getSuggestDetailsContainer() {
+    return this.page.locator('.suggest-details-container');
+  }
+
+  /**
+   * Positions the cursor after the given `text` in the editor model (if provided),
+   * then programmatically triggers the Monaco autocomplete suggestion list.
+   *
+   * @param text - Optional substring to position the cursor after before triggering.
+   *   When omitted the cursor stays at its current position.
+   * @param nthIndex - Index of the Monaco text model to use. Defaults to `0`.
+   */
+  async triggerSuggest(text?: string, nthIndex: number = 0): Promise<void> {
+    await this.page.evaluate(
+      ({ searchText, modelIndex }) => {
+        const monacoEnv = (window as any).MonacoEnvironment;
+        if (!monacoEnv?.monaco?.editor) {
+          throw new Error('MonacoEnvironment.monaco.editor is not available');
+        }
+
+        const models = monacoEnv.monaco.editor.getModels() as MonacoModel[];
+        if (!models.length) {
+          throw new Error('No Monaco editor models found');
+        }
+
+        const model = models[modelIndex] ?? models[0];
+        const editors = monacoEnv.monaco.editor.getEditors() as MonacoEditorInstance[];
+        const editorInstance =
+          editors.find((e) => e.getModel()?.uri?.toString() === model.uri.toString()) ?? editors[0];
+
+        if (!editorInstance) {
+          throw new Error('No Monaco editor instance found');
+        }
+
+        if (searchText !== undefined) {
+          const content: string = model.getValue();
+          const offset = content.indexOf(searchText);
+          if (offset === -1) {
+            throw new Error(`Text "${searchText}" not found in editor`);
+          }
+          const position = model.getPositionAt(offset + searchText.length);
+          editorInstance.setPosition(position);
+        }
+
+        editorInstance.focus();
+        editorInstance.trigger('scout-test', 'editor.action.triggerSuggest', {});
+      },
+      { searchText: text, modelIndex: nthIndex }
+    );
+  }
+
+  /**
+   * Toggles the Monaco suggestion detail panel (the documentation pop-up displayed
+   * alongside the autocomplete suggestion list) for the given editor instance.
+   *
+   * The precondition `HasFocusedSuggestion` must already be satisfied — call
+   * `triggerSuggest()` and navigate to an item with `ArrowDown` before calling this.
+   *
+   * @param editorIndex - Index of the editor instance to target. Defaults to `0`.
+   */
+  async toggleSuggestDetails(editorIndex: number = 0): Promise<void> {
+    await this.page.evaluate((index) => {
+      const monacoEnv = (window as any).MonacoEnvironment;
+      if (!monacoEnv?.monaco?.editor) {
+        throw new Error('MonacoEnvironment.monaco.editor is not available');
+      }
+      const editors = monacoEnv.monaco.editor.getEditors() as MonacoEditorInstance[];
+      const editor = editors[index] ?? editors[0];
+      if (!editor) {
+        throw new Error('No Monaco editor instance found');
+      }
+      editor.trigger('scout-test', 'toggleSuggestionDetails', {});
+    }, editorIndex);
   }
 }

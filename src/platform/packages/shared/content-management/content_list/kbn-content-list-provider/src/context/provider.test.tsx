@@ -232,6 +232,25 @@ describe('ContentListProvider', () => {
         expect(result.current.supports.tags).toBe(false);
       });
     });
+
+    describe('contentEditor feature', () => {
+      it('passes `features.contentEditor` through to the context', () => {
+        const open = jest.fn();
+        const { result } = renderHook(() => useContentListConfig(), {
+          wrapper: createWrapper({ features: { contentEditor: { open } } }),
+        });
+
+        expect(result.current.features.contentEditor?.open).toBe(open);
+      });
+
+      it('omits `features.contentEditor` when not supplied', () => {
+        const { result } = renderHook(() => useContentListConfig(), {
+          wrapper: createWrapper(),
+        });
+
+        expect(result.current.features.contentEditor).toBeUndefined();
+      });
+    });
   });
 
   describe('features pass-through', () => {

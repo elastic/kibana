@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensBaseLayer } from '@kbn/lens-embeddable-utils';
 import { DISK_READ_IOPS_LABEL, DISK_WRITE_IOPS_LABEL } from '../../../shared/charts/constants';
 
 export const dockerContainerDiskIORead: LensBaseLayer = {

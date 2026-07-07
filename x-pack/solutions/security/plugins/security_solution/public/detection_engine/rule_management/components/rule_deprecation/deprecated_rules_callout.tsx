@@ -11,7 +11,7 @@ import * as i18n from './translations';
 
 interface DeprecatedRulesCalloutProps {
   title: string;
-  description: string;
+  description: React.ReactNode;
   reason?: string;
   buttons: React.ReactNode[];
   onDismiss?: () => void;
@@ -48,7 +48,7 @@ export const DeprecatedRulesCallout: React.FC<DeprecatedRulesCalloutProps> = ({
         <EuiText size="s" data-test-subj="deprecated-rule-callout-description">
           <p>{description}</p>
         </EuiText>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="s">
           {buttons.map((button, index) => (
             <EuiFlexItem grow={false} key={index}>

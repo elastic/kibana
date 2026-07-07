@@ -27,6 +27,6 @@ export const useFieldFormatter = (fieldFormats: FieldFormatsStart) => {
       id: fieldType,
       params: params ?? defaultFieldFormatParams[fieldType],
     });
-    return fieldFormatter.convert.bind(fieldFormatter);
+    return (v: unknown) => fieldFormatter.convertToText(v);
   };
 };
