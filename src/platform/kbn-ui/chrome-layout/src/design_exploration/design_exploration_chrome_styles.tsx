@@ -92,24 +92,66 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
       padding-left: 4px !important;
     }
 
-    ${scope} .euiFormControlLayout input:not(:focus):not(:disabled):not(:invalid):not([aria-invalid='true']),
-    ${scope} .euiFormControlLayout select:not(:focus):not(:disabled),
-    ${scope} .euiFormControlLayout textarea:not(:focus):not(:disabled):not(:invalid):not([aria-invalid='true']),
+    ${scope} .euiFormControlLayout:not(.euiFormControlLayout--group):not(:focus-within):not(:has(:invalid, [aria-invalid='true'])):not(:has(:disabled)) {
+      border: none !important;
+      border-radius: calc(${DESIGN_EXPLORATION_RADIUS_CONTROL}px * 0.5) !important;
+      box-shadow: ${embeddablePanelShadow} !important;
+    }
+
     ${scope}
-      .euiFormControlLayout:not(:focus-within)
+      .euiFormControlLayout:not(.euiFormControlLayout--group):not(:focus-within):not(:has(:invalid, [aria-invalid='true']))
+      input:not(:focus):not(:disabled),
+    ${scope}
+      .euiFormControlLayout:not(.euiFormControlLayout--group):not(:focus-within):not(:has(:invalid, [aria-invalid='true']))
+      select:not(:focus):not(:disabled),
+    ${scope}
+      .euiFormControlLayout:not(.euiFormControlLayout--group):not(:focus-within):not(:has(:invalid, [aria-invalid='true']))
+      textarea:not(:focus):not(:disabled),
+    ${scope}
+      .euiFormControlLayout:not(.euiFormControlLayout--group):not(:focus-within):not(:has(:invalid, [aria-invalid='true']))
       .euiFormControlLayout__childrenWrapper:not(:has(:focus, .euiPopover-isOpen)),
+    ${scope}
+      .euiFormControlLayout:not(.euiFormControlLayout--group):not(:focus-within):not(:has(:invalid, [aria-invalid='true']))
+      .euiFormControlButton:not(:focus):not(:disabled),
+    ${scope}
+      .euiFormControlLayout--group:not(:focus-within)
+      input:not(:focus):not(:disabled),
+    ${scope}
+      .euiFormControlLayout--group:not(:focus-within)
+      select:not(:focus):not(:disabled),
+    ${scope}
+      .euiFormControlLayout--group:not(:focus-within)
+      textarea:not(:focus):not(:disabled),
+    ${scope}
+      .euiFormControlLayout--group:not(:focus-within)
+      .euiFormControlLayout__childrenWrapper:not(:has(:focus, .euiPopover-isOpen)),
+    ${scope}
+      .euiFormControlLayout--group:not(:focus-within)
+      .euiFormControlButton:not(:focus):not(:disabled) {
+      border: none !important;
+      box-shadow: none !important;
+      outline: none !important;
+    }
+
     ${scope} .euiFormControlButton:not(:focus):not(:disabled):not([aria-invalid='true']),
     ${scope} .euiFilePicker:not(:focus-within):not(.euiFilePicker-isInvalid) {
-      --euiFormControlStateColor: ${formControlBorder} !important;
-      --euiFormControlStateHoverColor: ${formControlBorderHover} !important;
+      border: none !important;
+      box-shadow: ${embeddablePanelShadow} !important;
     }
 
-    ${scope} .euiFormControlLayout--group:not(:focus-within):not(:has(:invalid, [aria-invalid='true']))::after {
-      border-color: ${formControlBorder} !important;
+    ${scope} .euiFormControlLayout--group:not(:focus-within) {
+      overflow: visible !important;
+      border: none !important;
+      box-shadow: ${embeddablePanelShadow} !important;
     }
 
-    ${scope} .euiFormControlLayout--group:not(:focus-within):not(:has(:invalid, [aria-invalid='true'])):hover:not(:has(:disabled, [readOnly]))::after {
-      border-color: ${formControlBorderHover} !important;
+    ${scope} .euiFormControlLayout--group:not(:focus-within)::after {
+      border: none !important;
+      box-shadow: none !important;
+    }
+
+    ${scope} .euiFormControlLayout--group:not(:focus-within):hover:not(:has(:disabled, [readOnly])) {
+      box-shadow: ${embeddablePanelShadow} !important;
     }
 
     ${scope} [data-test-subj='globalQueryBar'] {
@@ -135,6 +177,11 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
       border-radius: ${DESIGN_EXPLORATION_RADIUS_CONTROL}px !important;
       border: none !important;
       box-shadow: ${embeddablePanelShadow} !important;
+    }
+
+    ${scope} [data-test-subj='appHeader'] [data-test-subj='appHeaderTitle'] {
+      font-size: 14px !important;
+      font-weight: 500 !important;
     }
 
     ${scope} .kbnChromeLayoutApplication:has([data-test-subj='appHeader']) {
