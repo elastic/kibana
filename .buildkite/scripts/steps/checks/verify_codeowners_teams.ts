@@ -12,7 +12,7 @@ import { getCodeOwnersEntries, getTeams } from '@kbn/code-owners';
 /**
  * Collect the GitHub team handles tracked in the public team registry.
  */
-function getRegistryGithubTeams(): Set<string> {
+export function getRegistryGithubTeams(): Set<string> {
   const teams = new Set<string>();
 
   for (const team of getTeams()) {
@@ -31,7 +31,7 @@ function getRegistryGithubTeams(): Set<string> {
  * that appear as code owners are intentionally ignored. Handles are returned
  * without the leading `@`, matching the registry format.
  */
-function getCodeownersTeams(): Set<string> {
+export function getCodeownersTeams(): Set<string> {
   const teams = new Set<string>();
 
   for (const entry of getCodeOwnersEntries()) {
@@ -48,6 +48,17 @@ function getCodeownersTeams(): Set<string> {
   return teams;
 }
 
+/**
+ * Return the CODEOWNERS teams that are not tracked in the public team registry,
+ * sorted for stable output.
+ */
+export function findUnrecognizedTeams(
+  codeownersTeams: Set<string>,
+  registryTeams: Set<string>
+): string[] {
+  return [...codeownersTeams].filter((team) => !registryTeams.has(team)).sort();
+}
+
 function main(): void {
   console.log('Loading teams from the @kbn/code-owners registry...');
   const registryTeams = getRegistryGithubTeams();
@@ -57,31 +68,25 @@ function main(): void {
   const codeownersTeams = getCodeownersTeams();
   console.log(`Found ${codeownersTeams.size} unique teams in CODEOWNERS`);
 
-  let hasErrors = false;
-
-  const invalidTeams = [...codeownersTeams].filter((team) => !registryTeams.has(team));
+  const invalidTeams = findUnrecognizedTeams(codeownersTeams, registryTeams);
 
   if (invalidTeams.length > 0) {
-    hasErrors = true;
     console.error('\nERROR: The following teams in CODEOWNERS are not recognized:');
-    console.error('They are not present in the @kbn/code-owners registry (teams.jsonc)');
-    console.error('and are not in the known-valid allowlist.\n');
-    for (const team of invalidTeams.sort()) {
+    console.error('They are not present in the @kbn/code-owners registry (teams.jsonc).\n');
+    for (const team of invalidTeams) {
       console.error(`  - ${team}`);
     }
     console.error(
-      '\nTo fix: either add the team to teams.jsonc in\n' +
+      '\nTo fix: add the team to teams.jsonc in\n' +
         'src/platform/packages/private/kbn-code-owners,\n' +
-        'or add it to ALLOWED_UNTRACKED_TEAMS in verify_codeowners_teams.ts\n' +
-        '(requires approval from @elastic/kibana-security).\n'
+        'or remove the invalid owner from CODEOWNERS.\n'
     );
-  }
-
-  if (hasErrors) {
     process.exit(1);
   }
 
   console.log('All CODEOWNERS teams are valid.');
 }
 
-main();
+if (require.main === module) {
+  main();
+}
