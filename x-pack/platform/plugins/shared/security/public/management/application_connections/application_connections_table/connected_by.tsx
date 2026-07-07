@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiAvatar, EuiFlexGroup, EuiText } from '@elastic/eui';
+import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
 
 import type { OAuthConnectionUser } from '../service/application_connections_api_client';
@@ -47,7 +47,11 @@ export const ConnectedBy = ({ userId, user, 'data-test-subj': dataTestSubj }: Co
       responsive={false}
       data-test-subj={dataTestSubj}
     >
-      {user && <EuiAvatar name={displayName ?? ''} size="s" />}
+      {user && (
+        <EuiFlexItem grow={false}>
+          <EuiAvatar name={displayName ?? ''} size="s" />
+        </EuiFlexItem>
+      )}
       <EuiText size="s">{displayName}</EuiText>
     </EuiFlexGroup>
   );

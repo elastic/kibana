@@ -1486,6 +1486,35 @@ describe('UiamService', () => {
       expect(fetchSpy).toHaveBeenCalledTimes(3);
     });
 
+    it('returns partial results when some batches fail', async () => {
+      const userIds = Array.from({ length: 120 }, (_, i) => `user-${i}`);
+
+      fetchSpy
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ users: { 'user-0': { first_name: 'First' } } }),
+        })
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          headers: new Headers(),
+          json: async () => ({ error: { message: 'Internal Server Error' } }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ users: { 'user-100': { first_name: 'Third' } } }),
+        });
+
+      await expect(uiamService.resolveUsers('access-token', userIds)).resolves.toEqual({
+        users: {
+          'user-0': { first_name: 'First' },
+          'user-100': { first_name: 'Third' },
+        },
+      });
+
+      expect(fetchSpy).toHaveBeenCalledTimes(3);
+    });
+
     it('throws error if resolution fails', async () => {
       fetchSpy.mockResolvedValue({
         ok: false,

@@ -219,14 +219,7 @@ export class UiamOAuth implements UiamOAuthType {
     const accessToken = UiamOAuth.getAccessToken(request);
     this.logger.debug(`Attempting to resolve ${userIds.length} user(s)`);
 
-    try {
-      const result = await this.uiam.resolveUsers(accessToken, userIds);
-      this.logger.debug('Users resolved successfully');
-      return result;
-    } catch (e) {
-      this.logger.error(`Failed to resolve users: ${getDetailedErrorMessage(e)}`);
-      throw e;
-    }
+    return this.uiam.resolveUsers(accessToken, userIds);
   }
 
   /**

@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { readFileSync } from 'fs';
-import { chunk } from 'lodash';
+import { chunk, partition } from 'lodash';
 import { Agent } from 'undici';
 
 import type { Logger } from '@kbn/core/server';
@@ -857,42 +857,53 @@ export class UiamService implements UiamServicePublic {
       return { users: {} };
     }
 
-    try {
-      this.#logger.debug(`Attempting to resolve ${uniqueUserIds.length} user(s).`);
+    this.#logger.debug(`Attempting to resolve ${uniqueUserIds.length} user(s).`);
 
-      const responses = await Promise.all(
-        chunk(uniqueUserIds, RESOLVE_USERS_BATCH_SIZE).map(
-          async (batch): Promise<ResolvedUsersResponse> => {
-            const url = new URL(`${this.#config.url}/uiam/api/v1/users`);
-            url.searchParams.set('user_id', batch.join(','));
+    const batches = chunk(uniqueUserIds, RESOLVE_USERS_BATCH_SIZE);
+    const results = await Promise.allSettled(
+      batches.map(async (batch): Promise<ResolvedUsersResponse> => {
+        const url = new URL(`${this.#config.url}/uiam/api/v1/users`);
+        url.searchParams.set('user_id', batch.join(','));
 
-            return UiamService.#parseUiamResponse(
-              await fetch(url.toString(), {
-                method: 'GET',
-                headers: {
-                  'User-Agent': this.#userAgentHeader,
-                  [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
-                  Authorization: `Bearer ${accessToken}`,
-                },
-                // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
-                dispatcher: this.#dispatcher,
-              })
-            );
-          }
-        )
-      );
+        return UiamService.#parseUiamResponse(
+          await fetch(url.toString(), {
+            method: 'GET',
+            headers: {
+              'User-Agent': this.#userAgentHeader,
+              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+              Authorization: `Bearer ${accessToken}`,
+            },
+            // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+            dispatcher: this.#dispatcher,
+          })
+        );
+      })
+    );
 
-      const users: ResolvedUsersResponse['users'] = Object.assign(
-        {},
-        ...responses.map((response) => response.users)
-      );
+    const [fulfilled, failures] = partition(
+      results,
+      (result): result is PromiseFulfilledResult<ResolvedUsersResponse> =>
+        result.status === 'fulfilled'
+    );
 
-      this.#logger.debug('Successfully resolved users.');
-      return { users };
-    } catch (err) {
-      this.#logger.error(() => `Failed to resolve users: ${getDetailedErrorMessage(err)}`);
-      throw err;
+    const users: ResolvedUsersResponse['users'] = Object.assign(
+      {},
+      ...fulfilled.map((result) => result.value.users)
+    );
+
+    if (failures.length === batches.length) {
+      throw failures[0].reason;
     }
+
+    if (failures.length > 0) {
+      this.#logger.warn(
+        () =>
+          `Failed to resolve ${failures.length} of ${batches.length} user batch(es); returning partial results.`
+      );
+    }
+
+    this.#logger.debug('Successfully resolved users.');
+    return { users };
   }
 
   /**

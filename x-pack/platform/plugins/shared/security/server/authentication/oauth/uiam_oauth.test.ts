@@ -361,13 +361,11 @@ describe('UiamOAuth', () => {
       expect(mockUiam.resolveUsers).toHaveBeenCalledWith('essu_access_token', ['user-1']);
     });
 
-    it('logs and throws error when UIAM call fails', async () => {
+    it('propagates the error when UIAM call fails', async () => {
       mockUiam.resolveUsers.mockRejectedValue(new Error('UIAM error'));
       const request = createMockRequest('Bearer essu_access_token');
 
       await expect(uiamOAuth.resolveUsers(request, ['user-1'])).rejects.toThrow('UIAM error');
-
-      expect(logger.error).toHaveBeenCalledWith('Failed to resolve users: UIAM error');
     });
   });
 
