@@ -31,6 +31,7 @@ import {
   type TelemetryReporter,
 } from '../telemetry/events';
 import { getMetadataEntitiesDataStreamName } from '../domain/asset_manager/metadata_data_stream';
+import { executeEsqlQuery } from '../infra/elasticsearch/esql';
 import { wrapTaskRun } from '../telemetry/traces';
 
 const config = TasksConfig[EntityStoreTaskType.enum.statusReport];
@@ -55,53 +56,38 @@ export const getResolutionState = async (
   esClient: ElasticsearchClient,
   index: string,
   entityType: EntityType,
-  signal: AbortSignal
+  abortController: AbortController
 ): Promise<{
   resolvedEntities: number;
   targetEntities: number;
-  resolutionGroups: number;
   maxGroupSize: number;
+  avgGroupSize: number;
 }> => {
-  const response = await esClient.search(
-    {
-      index,
-      size: 0,
-      query: { term: { 'entity.EngineMetadata.Type': entityType } },
-      aggs: {
-        resolved_entities: {
-          filter: { exists: { field: 'entity.relationships.resolution.resolved_to' } },
-        },
-        // `cardinality` is approximate (HyperLogLog++) above ~40k distinct values; for a
-        // periodic snapshot of resolution targets this estimate is acceptable.
-        resolution_groups: {
-          cardinality: { field: 'entity.relationships.resolution.resolved_to' },
-        },
-        group_sizes: {
-          terms: { field: 'entity.relationships.resolution.resolved_to', size: 10000 },
-          aggs: { alias_count: { value_count: { field: 'entity.id' } } },
-        },
-        max_group_aliases: {
-          max_bucket: { buckets_path: 'group_sizes>alias_count' },
-        },
-      },
-    },
-    { signal }
-  );
+  // Target: canonical entity (no `resolved_to`). Alias: entity with `resolved_to` set.
+  // Resolution group = one target + its aliases. Query counts aliases only; target via +1 below.
+  const query = `FROM ${index}
+    | WHERE entity.EngineMetadata.Type == "${entityType}" AND entity.relationships.resolution.resolved_to IS NOT NULL
+    | STATS aliasCount = COUNT(*) BY entity.relationships.resolution.resolved_to
+    | STATS resolvedEntities = SUM(aliasCount), resolutionGroups = COUNT(*), maxGroupAliases = MAX(aliasCount)`;
 
-  const aggs = response.aggregations as
-    | {
-        resolved_entities: { doc_count: number };
-        resolution_groups: { value: number };
-        max_group_aliases: { value: number | null };
-      }
-    | undefined;
+  const { columns, values } = await executeEsqlQuery({ esClient, query, abortController });
 
-  const resolvedEntities = aggs?.resolved_entities?.doc_count ?? 0;
-  const targetEntities = aggs?.resolution_groups?.value ?? 0;
-  const resolutionGroups = targetEntities;
-  const maxGroupSize = resolutionGroups > 0 ? (aggs?.max_group_aliases?.value ?? 0) + 1 : 0;
+  // No aliases: ES returns null for SUM/MAX; report as 0. Look up by column name, not position.
+  const row = values[0] ?? [];
+  const readSummaryValue = (columnName: string): number => {
+    const idx = columns.findIndex((c) => c.name === columnName);
+    const value = idx === -1 ? null : row[idx];
+    return typeof value === 'number' ? value : 0;
+  };
 
-  return { resolvedEntities, targetEntities, resolutionGroups, maxGroupSize };
+  const resolvedEntities = readSummaryValue('resolvedEntities');
+  // One group per distinct resolution target, so resolutionGroups === targetEntities by construction.
+  const targetEntities = readSummaryValue('resolutionGroups');
+  // Group size includes the target (+1). avg: (resolvedEntities / targetEntities) + 1 per group.
+  const maxGroupSize = targetEntities > 0 ? readSummaryValue('maxGroupAliases') + 1 : 0;
+  const avgGroupSize = targetEntities > 0 ? resolvedEntities / targetEntities + 1 : 0;
+
+  return { resolvedEntities, targetEntities, maxGroupSize, avgGroupSize };
 };
 
 const toHealthReportPayload = (statusResult: GetStatusResult) => {
@@ -190,10 +176,9 @@ async function runTask({
           namespace,
         });
 
-        const { resolvedEntities, targetEntities, resolutionGroups, maxGroupSize } =
-          await getResolutionState(esClient, index, entityType, abortSignal);
+        const { resolvedEntities, targetEntities, maxGroupSize, avgGroupSize } =
+          await getResolutionState(esClient, index, entityType, abortController);
         const standaloneEntities = Math.max(0, storeSize - resolvedEntities - targetEntities);
-        const avgGroupSize = resolutionGroups > 0 ? resolvedEntities / resolutionGroups + 1 : 0;
         telemetryReporter.reportEvent(ENTITY_STORE_RESOLUTION_STATE_EVENT, {
           entityType,
           namespace,
@@ -201,7 +186,7 @@ async function runTask({
           resolvedEntities,
           targetEntities,
           standaloneEntities,
-          resolutionGroups,
+          resolutionGroups: targetEntities,
           avgGroupSize,
           maxGroupSize,
         });

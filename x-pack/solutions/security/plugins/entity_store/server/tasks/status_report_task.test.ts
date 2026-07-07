@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
 import { registerStatusReportTask, getResolutionState } from './status_report_task';
@@ -34,117 +34,103 @@ const NAMESPACE = 'default';
 const METADATA_INDEX = getMetadataEntitiesDataStreamName(NAMESPACE);
 const LATEST_INDEX = getLatestEntitiesIndexName(NAMESPACE);
 
-const makeSearchResponse = ({
-  resolvedDocCount,
-  resolutionGroupsValue,
-  maxBucketValue,
-}: {
-  resolvedDocCount: number;
-  resolutionGroupsValue: number;
-  maxBucketValue: number | null;
-}) => ({
-  aggregations: {
-    resolved_entities: { doc_count: resolvedDocCount },
-    resolution_groups: { value: resolutionGroupsValue },
-    max_group_aliases: { value: maxBucketValue },
-  },
+const makeEsqlResponse = (values: Array<Array<number | null>>) => ({
+  columns: [
+    { name: 'resolvedEntities', type: 'long' },
+    { name: 'resolutionGroups', type: 'long' },
+    { name: 'maxGroupAliases', type: 'long' },
+  ],
+  values,
 });
 
 describe('getResolutionState', () => {
-  const signal = new AbortController().signal;
+  it('returns correct values for a populated resolution state', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResolvedValue(makeEsqlResponse([[4, 2, 3]]));
 
-  it('returns all zeros when no resolution groups exist', async () => {
-    const search = jest
-      .fn()
-      .mockResolvedValue(
-        makeSearchResponse({ resolvedDocCount: 0, resolutionGroupsValue: 0, maxBucketValue: null })
-      );
-    const esClient = { search } as unknown as ElasticsearchClient;
+    const result = await getResolutionState(esClient, 'test-index', 'user', new AbortController());
 
-    const result = await getResolutionState(esClient, 'test-index', 'user', signal);
+    expect(result).toEqual({
+      resolvedEntities: 4,
+      targetEntities: 2,
+      maxGroupSize: 4,
+      avgGroupSize: 3,
+    });
+  });
+
+  it('returns all zeros when the ESQL summary row has null counts', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResolvedValue(makeEsqlResponse([[null, 0, null]]));
+
+    const result = await getResolutionState(esClient, 'test-index', 'user', new AbortController());
 
     expect(result).toEqual({
       resolvedEntities: 0,
       targetEntities: 0,
-      resolutionGroups: 0,
       maxGroupSize: 0,
+      avgGroupSize: 0,
     });
   });
 
-  it('returns correct values for a mixed resolution state', async () => {
-    const search = jest
-      .fn()
-      .mockResolvedValue(
-        makeSearchResponse({ resolvedDocCount: 8, resolutionGroupsValue: 3, maxBucketValue: 4 })
-      );
-    const esClient = { search } as unknown as ElasticsearchClient;
+  it('returns all zeros when the ESQL response has no rows', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResolvedValue(makeEsqlResponse([]));
 
-    const result = await getResolutionState(esClient, 'test-index', 'host', signal);
+    const result = await getResolutionState(esClient, 'test-index', 'user', new AbortController());
 
     expect(result).toEqual({
-      resolvedEntities: 8,
-      targetEntities: 3,
-      resolutionGroups: 3,
-      maxGroupSize: 5, // 4 aliases + 1 target
+      resolvedEntities: 0,
+      targetEntities: 0,
+      maxGroupSize: 0,
+      avgGroupSize: 0,
     });
   });
 
-  it('coalesces null max_bucket value to 0 when resolution groups exist', async () => {
-    const search = jest
-      .fn()
-      .mockResolvedValue(
-        makeSearchResponse({ resolvedDocCount: 5, resolutionGroupsValue: 2, maxBucketValue: null })
-      );
-    const esClient = { search } as unknown as ElasticsearchClient;
+  it('maps summary values by column name regardless of column order', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResolvedValue({
+      columns: [
+        { name: 'maxGroupAliases', type: 'long' },
+        { name: 'resolvedEntities', type: 'long' },
+        { name: 'resolutionGroups', type: 'long' },
+      ],
+      values: [[3, 4, 2]],
+    });
 
-    const result = await getResolutionState(esClient, 'test-index', 'service', signal);
+    const result = await getResolutionState(esClient, 'test-index', 'user', new AbortController());
 
     expect(result).toEqual({
-      resolvedEntities: 5,
+      resolvedEntities: 4,
       targetEntities: 2,
-      resolutionGroups: 2,
-      maxGroupSize: 1, // (null ?? 0) + 1 = 1
+      maxGroupSize: 4,
+      avgGroupSize: 3,
     });
   });
 
-  it('passes the abort signal to the ES search call', async () => {
-    const search = jest
-      .fn()
-      .mockResolvedValue(
-        makeSearchResponse({ resolvedDocCount: 0, resolutionGroupsValue: 0, maxBucketValue: null })
-      );
-    const esClient = { search } as unknown as ElasticsearchClient;
+  it('passes the abort controller signal to the ESQL query call', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResolvedValue(makeEsqlResponse([[0, 0, 0]]));
     const abortController = new AbortController();
 
-    await getResolutionState(esClient, 'my-index', 'generic', abortController.signal);
+    await getResolutionState(esClient, 'my-index', 'generic', abortController);
 
-    expect(search).toHaveBeenCalledWith(expect.any(Object), {
+    expect(esClient.esql.query).toHaveBeenCalledWith(expect.any(Object), {
       signal: abortController.signal,
     });
   });
 
-  it('queries the given index, scopes to the entity type, and requests the aggregations it parses', async () => {
-    const search = jest
-      .fn()
-      .mockResolvedValue(
-        makeSearchResponse({ resolvedDocCount: 0, resolutionGroupsValue: 0, maxBucketValue: null })
-      );
-    const esClient = { search } as unknown as ElasticsearchClient;
+  it('queries the given index and scopes to the entity type in the ESQL pipeline', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResolvedValue(makeEsqlResponse([[0, 0, 0]]));
 
-    await getResolutionState(esClient, 'my-index', 'host', signal);
+    await getResolutionState(esClient, 'my-index', 'host', new AbortController());
 
-    // Guards against an aggregation-key rename in the query drifting from the
-    // keys the response parser reads (resolved_entities / resolution_groups / max_group_aliases).
-    const [searchParams] = search.mock.calls[0];
-    expect(searchParams.index).toBe('my-index');
-    expect(searchParams.query).toEqual({ term: { 'entity.EngineMetadata.Type': 'host' } });
-    expect(Object.keys(searchParams.aggs)).toEqual(
-      expect.arrayContaining([
-        'resolved_entities',
-        'resolution_groups',
-        'group_sizes',
-        'max_group_aliases',
-      ])
+    const [queryParams] = esClient.esql.query.mock.calls[0];
+    expect(queryParams.query).toContain('FROM my-index');
+    expect(queryParams.query).toContain('entity.EngineMetadata.Type == "host"');
+    expect(queryParams.query).toContain('entity.relationships.resolution.resolved_to IS NOT NULL');
+    expect(queryParams.query).toContain(
+      'STATS resolvedEntities = SUM(aliasCount), resolutionGroups = COUNT(*), maxGroupAliases = MAX(aliasCount)'
     );
   });
 });
@@ -153,8 +139,9 @@ describe('status report task — usage, resolution state & metadata telemetry', 
   let logger: MockedLogger;
   let reportEvent: jest.Mock;
   let count: jest.Mock;
-  let search: jest.Mock;
+  let esqlQuery: jest.Mock;
   let getStatus: jest.Mock;
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
   // Drives the task the way task-manager does: register, grab the definition,
   // build the runner and run it once.
@@ -186,15 +173,14 @@ describe('status report task — usage, resolution state & metadata telemetry', 
       params.query ? { count: 5 } : { count: 42 }
     );
     // Default resolution state: 3 resolved entities in 1 group, max bucket = 2 aliases
-    search = jest
-      .fn()
-      .mockResolvedValue(
-        makeSearchResponse({ resolvedDocCount: 3, resolutionGroupsValue: 1, maxBucketValue: 2 })
-      );
+    esqlQuery = jest.fn().mockResolvedValue(makeEsqlResponse([[3, 1, 2]]));
+    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.count.mockImplementation(count);
+    esClient.esql.query.mockImplementation(esqlQuery);
 
     createAssetManagerClientMock.mockResolvedValue({
       assetManagerClient: { getStatus },
-      esClient: { count, search } as unknown as ElasticsearchClient,
+      esClient,
     });
   });
 
@@ -234,10 +220,15 @@ describe('status report task — usage, resolution state & metadata telemetry', 
   });
 
   it('fires one resolution state event per entity type with correctly computed payload', async () => {
-    // storeSize = 5 (from count mock), resolvedEntities=3, targetEntities=1, resolutionGroups=1
-    // standaloneEntities = max(0, 5 - 3 - 1) = 1
-    // avgGroupSize = 3/1 + 1 = 4
-    // maxGroupSize = 2 + 1 = 3
+    // storeSize = 7, resolvedEntities=4, targetEntities=2
+    // standaloneEntities = max(0, 7 - 4 - 2) = 1
+    // avgGroupSize = 4/2 + 1 = 3
+    // maxGroupSize = 3 + 1 = 4
+    count.mockImplementation(async (params: { query?: unknown }) =>
+      params.query ? { count: 7 } : { count: 42 }
+    );
+    esqlQuery.mockResolvedValue(makeEsqlResponse([[4, 2, 3]]));
+
     await runStatusReportTask();
 
     const resolutionStateCalls = reportEvent.mock.calls.filter(
@@ -253,22 +244,20 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     resolutionStateCalls.forEach(([, payload]) => {
       expect(payload).toMatchObject({
         namespace: NAMESPACE,
-        totalEntities: 5,
-        resolvedEntities: 3,
-        targetEntities: 1,
+        totalEntities: 7,
+        resolvedEntities: 4,
+        targetEntities: 2,
         standaloneEntities: 1,
-        resolutionGroups: 1,
-        avgGroupSize: 4,
-        maxGroupSize: 3,
+        resolutionGroups: 2,
+        avgGroupSize: 3,
+        maxGroupSize: 4,
       });
     });
   });
 
   it('reports zeros for the no-resolution case and treats all entities as standalone', async () => {
     // storeSize = 5, no resolution groups → standaloneEntities = totalEntities, avgGroupSize = 0
-    search.mockResolvedValue(
-      makeSearchResponse({ resolvedDocCount: 0, resolutionGroupsValue: 0, maxBucketValue: null })
-    );
+    esqlQuery.mockResolvedValue(makeEsqlResponse([[null, 0, null]]));
 
     await runStatusReportTask();
 
@@ -289,9 +278,7 @@ describe('status report task — usage, resolution state & metadata telemetry', 
 
   it('reports a fractional avgGroupSize when the average is non-integer', async () => {
     // resolvedEntities=5 across resolutionGroups=2 → avgGroupSize = 5/2 + 1 = 3.5 (float field)
-    search.mockResolvedValue(
-      makeSearchResponse({ resolvedDocCount: 5, resolutionGroupsValue: 2, maxBucketValue: 3 })
-    );
+    esqlQuery.mockResolvedValue(makeEsqlResponse([[5, 2, 3]]));
 
     await runStatusReportTask();
 
@@ -302,8 +289,8 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     expect(payload.avgGroupSize).toBe(3.5);
   });
 
-  it('collects the error, does not report resolution state, and rethrows when the aggregation fails', async () => {
-    search.mockRejectedValue(new Error('boom'));
+  it('collects the error, does not report resolution state, and rethrows when the ESQL query fails', async () => {
+    esqlQuery.mockRejectedValue(new Error('boom'));
 
     await expect(runStatusReportTask()).rejects.toThrow('boom');
 
@@ -318,9 +305,7 @@ describe('status report task — usage, resolution state & metadata telemetry', 
 
   it('clamps standaloneEntities to 0 when arithmetic would go negative', async () => {
     // storeSize = 5, resolvedEntities=4, targetEntities=3 → 5 - 4 - 3 = -2 → clamped to 0
-    search.mockResolvedValue(
-      makeSearchResponse({ resolvedDocCount: 4, resolutionGroupsValue: 3, maxBucketValue: 1 })
-    );
+    esqlQuery.mockResolvedValue(makeEsqlResponse([[4, 3, 1]]));
 
     await runStatusReportTask();
 
@@ -340,9 +325,9 @@ describe('status report task — usage, resolution state & metadata telemetry', 
       expect(params.index).toBe(LATEST_INDEX);
     });
 
-    expect(search).toHaveBeenCalledTimes(ALL_ENTITY_TYPES.length);
-    search.mock.calls.forEach(([params]) => {
-      expect(params.index).toBe(LATEST_INDEX);
+    expect(esqlQuery).toHaveBeenCalledTimes(ALL_ENTITY_TYPES.length);
+    esqlQuery.mock.calls.forEach(([params]) => {
+      expect(params.query).toContain(`FROM ${LATEST_INDEX}`);
     });
   });
 
@@ -364,7 +349,7 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     expect(usageReported).toBe(false);
     expect(resolutionReported).toBe(false);
     // getResolutionState is never reached when getStoreSize throws first.
-    expect(search).not.toHaveBeenCalled();
+    expect(esqlQuery).not.toHaveBeenCalled();
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('Error reporting store usage for')
     );
@@ -372,14 +357,9 @@ describe('status report task — usage, resolution state & metadata telemetry', 
 
   it('isolates failures per entity type — a failure for one type still reports the others', async () => {
     const [failingType] = ALL_ENTITY_TYPES;
-    search.mockImplementation(async (params: { query: { term: Record<string, unknown> } }) => {
-      const requestedType = params.query.term['entity.EngineMetadata.Type'];
-      if (requestedType === failingType) throw new Error('boom');
-      return makeSearchResponse({
-        resolvedDocCount: 3,
-        resolutionGroupsValue: 1,
-        maxBucketValue: 2,
-      });
+    esqlQuery.mockImplementation(async ({ query }: { query: string }) => {
+      if (query.includes(`"${failingType}"`)) throw new Error('boom');
+      return makeEsqlResponse([[3, 1, 2]]);
     });
 
     await expect(runStatusReportTask()).rejects.toThrow('boom');
@@ -393,7 +373,7 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     expect(new Set(resolutionStateTypes)).toEqual(
       new Set(ALL_ENTITY_TYPES.filter((type) => type !== failingType))
     );
-    // Usage events are unaffected — they fire before the resolution search for every type.
+    // Usage events are unaffected — they fire before the resolution query for every type.
     const usageTypes = reportEvent.mock.calls
       .filter(([eventType]) => eventType === ENTITY_STORE_USAGE_EVENT.eventType)
       .map(([, payload]) => payload.entityType);
