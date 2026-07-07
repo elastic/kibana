@@ -33,6 +33,33 @@ jest.mock('@kbn/core-di-browser', () => ({
   CoreStart: (key: string) => key,
 }));
 
+const INLINE_DEFS = [
+  {
+    id: 'email',
+    label: 'Email',
+    iconType: 'email',
+    connectorTypeId: '.email',
+    paramsTemplate: 'to: ""\n',
+  },
+  {
+    id: 'slack',
+    label: 'Slack',
+    iconType: 'logoSlack',
+    connectorTypeId: '.slack',
+    paramsTemplate: 'message: ""\n',
+  },
+];
+
+jest.mock('@kbn/alerting-v2-rule-form', () => ({
+  INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
+  getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
+  InlineWorkflowEditor: ({ value }: { value: { id: string } }) => (
+    <div data-test-subj={`inlineWorkflowEditor-${value.id}`} />
+  ),
+  isActionValid: () => true,
+  buildInlineWorkflowYaml: () => 'workflow: yaml',
+}));
+
 jest.mock('./components/matcher_input', () => ({
   MatcherInput: (props: {
     value: string;
@@ -259,5 +286,20 @@ describe('ActionPolicyForm', () => {
     expect(screen.getByText('Workflows are not enabled')).toBeInTheDocument();
     expect(screen.getByTestId('workflowsDisabledSettingsLink')).toBeInTheDocument();
     expect(screen.queryByTestId('destinationsInput')).not.toBeInTheDocument();
+  });
+
+  it('renders the simple workflow builder add buttons when workflows are enabled', () => {
+    renderForm();
+
+    expect(screen.getByTestId('simpleWorkflowBuilder')).toBeInTheDocument();
+    expect(screen.getByTestId('simpleWorkflowAdd-email')).toBeInTheDocument();
+    expect(screen.getByTestId('simpleWorkflowAdd-slack')).toBeInTheDocument();
+  });
+
+  it('hides the simple workflow builder when workflows are disabled', () => {
+    mockWorkflowsEnabled = false;
+    renderForm();
+
+    expect(screen.queryByTestId('simpleWorkflowBuilder')).not.toBeInTheDocument();
   });
 });

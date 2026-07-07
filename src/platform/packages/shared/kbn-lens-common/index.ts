@@ -213,6 +213,7 @@ export type {
   IconPosition,
   Alignment,
   PrimaryMetricPosition,
+  MetricDensity,
   MetricStyleTemplateId,
   MetricStyleTemplatePresetId,
   MetricLayoutWithDefault,
@@ -259,6 +260,7 @@ export {
   isPersistedByReferenceAnnotationsLayer,
   isPersistedByValueAnnotationsLayer,
   isPersistedLinkedByValueAnnotationsLayer,
+  isRuntimeByReferenceAnnotationsLayer,
 } from './visualizations/xy/persistence';
 export type {
   LensEmbeddableInput,

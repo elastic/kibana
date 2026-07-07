@@ -226,7 +226,11 @@ export const Main: FunctionComponent<MainProps> = ({
   const handleDataSourceSave = useCallback(
     async (dataSource: DataSourceWithSecrets): Promise<string | null> => {
       try {
-        await dataClient.add(dataSource);
+        if (dataSourceFlyout.kind === 'edit') {
+          await dataClient.update(dataSource);
+        } else {
+          await dataClient.add(dataSource);
+        }
         setItems(await dataClient.get());
         setDataSourceFlyout({ kind: 'closed' });
         return null;
@@ -234,7 +238,7 @@ export const Main: FunctionComponent<MainProps> = ({
         return getFlyoutSaveErrorMessage(e);
       }
     },
-    [dataClient]
+    [dataClient, dataSourceFlyout.kind]
   );
 
   const handleEditDataSource = useCallback((item: DataSource) => {
@@ -477,16 +481,32 @@ export const Main: FunctionComponent<MainProps> = ({
             ),
           },
           {
-            name: mainTranslations.columns.dataSources.deleteAction,
-            description: mainTranslations.columns.dataSources.deleteActionDescription,
-            icon: 'trash',
-            color: 'danger',
-            type: 'icon',
-            enabled: (item) => (dataSetsCountByDataSource.get(item.name) ?? 0) === 0,
-            onClick: (item) => {
-              handleDeleteDataSource(item);
+            // Same limitation as the edit action above: EUI can't show a tooltip on a
+            // disabled default action icon, so this renders the button manually to explain
+            // why deleting is disabled.
+            render: (item: DataSource) => {
+              const hasDataSets = (dataSetsCountByDataSource.get(item.name) ?? 0) > 0;
+              return (
+                <EuiToolTip
+                  content={
+                    hasDataSets
+                      ? mainTranslations.columns.dataSources.deleteActionHasDataSetsDescription
+                      : mainTranslations.columns.dataSources.deleteActionDescription
+                  }
+                >
+                  <span>
+                    <EuiButtonIcon
+                      aria-label={mainTranslations.columns.dataSources.deleteAction}
+                      iconType="trash"
+                      color="danger"
+                      isDisabled={hasDataSets}
+                      onClick={() => handleDeleteDataSource(item)}
+                      data-test-subj="dataSetsDeleteIconButton"
+                    />
+                  </span>
+                </EuiToolTip>
+              );
             },
-            'data-test-subj': 'dataSetsDeleteIconButton',
           },
         ],
       },
@@ -706,6 +726,10 @@ export const Main: FunctionComponent<MainProps> = ({
                 selected: selectedItems,
                 onSelectionChange: setSelectedItems,
                 selectable: (row) => (dataSetsCountByDataSource.get(row.name) ?? 0) === 0,
+                selectableMessage: (selectable) =>
+                  selectable
+                    ? ''
+                    : mainTranslations.columns.dataSources.deleteActionHasDataSetsDescription,
               }}
               sorting
               pagination={{
