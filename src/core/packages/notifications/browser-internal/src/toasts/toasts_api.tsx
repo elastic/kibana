@@ -224,6 +224,7 @@ export class ToastsApi implements IToasts {
       color: 'danger',
       toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:error'),
       text: message,
+      'data-test-subj': 'errorToast',
       actionProps: getErrorToastActionProps({
         title: options.title,
         error,
