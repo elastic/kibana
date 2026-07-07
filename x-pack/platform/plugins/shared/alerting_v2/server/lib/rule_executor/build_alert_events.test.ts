@@ -11,6 +11,7 @@ import {
   buildRecoveryAlertEvents,
   buildQueryRecoveryAlertEvents,
   buildContinuedBreachAlertEvents,
+  buildNoDataAlertEvents,
 } from './build_alert_events';
 import type { BuildAlertEventsBaseOpts } from './build_alert_events';
 
@@ -333,6 +334,67 @@ describe('buildContinuedBreachAlertEvents', () => {
     });
 
     expect(events).toEqual([]);
+  });
+});
+
+describe('buildNoDataAlertEvents', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  it('creates no_data events with an empty data payload for the supplied group hashes', () => {
+    const events = buildNoDataAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'default',
+      groupHashes: ['hash-a', 'hash-b'],
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+    });
+
+    expect(events).toHaveLength(2);
+    expect(events[0]).toEqual({
+      '@timestamp': '2025-01-01T00:00:00.000Z',
+      scheduled_timestamp: '2024-12-31T23:59:00.000Z',
+      rule: { id: 'rule-123', version: 1 },
+      group_hash: 'hash-a',
+      data: {},
+      status: 'no_data',
+      source: 'internal',
+      type: 'signal',
+      space_id: 'default',
+    });
+    expect(events.map((e) => e.group_hash)).toEqual(['hash-a', 'hash-b']);
+    expect(events.every((e) => e.status === 'no_data')).toBe(true);
+  });
+
+  it('returns an empty array when there are no group hashes', () => {
+    const events = buildNoDataAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'default',
+      groupHashes: [],
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+    });
+
+    expect(events).toEqual([]);
+  });
+
+  it('sets space_id on no_data alert events from the provided spaceId', () => {
+    const events = buildNoDataAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      spaceId: 'custom-space',
+      groupHashes: ['hash-a'],
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+    });
+
+    expect(events).toHaveLength(1);
+    expect(events[0].space_id).toBe('custom-space');
   });
 });
 

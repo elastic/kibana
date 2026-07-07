@@ -76,9 +76,7 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         return;
       }
 
-      const breachedGroupHashes = new Set(
-        alertEventsBatch.filter((e) => e.status === 'breached').map((e) => e.group_hash)
-      );
+      const breachedGroupHashes = new Set(alertEventsBatch.map((e) => e.group_hash));
 
       const effectiveQuery = getRecoverEsqlQuery(rule.query, rule.recovery_strategy);
       const recoveryEvents = effectiveQuery

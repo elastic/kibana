@@ -153,6 +153,8 @@ describe('CreateRecoveryEventsStep', () => {
       expect(result.type).toBe('continue');
       const alertEvents = result.state.alertEventsBatch!;
       expect(alertEvents).toHaveLength(2);
+      expect(alertEvents[0].status).toBe('breached');
+      expect(alertEvents[0].group_hash).toBe('hash-1');
       expect(alertEvents[1].status).toBe('recovered');
       expect(alertEvents[1].group_hash).toBe('hash-2');
     });
@@ -311,6 +313,8 @@ describe('CreateRecoveryEventsStep', () => {
         expect(result.type).toBe('continue');
         const alertEvents = result.state.alertEventsBatch!;
         expect(alertEvents).toHaveLength(2);
+        expect(alertEvents[0].status).toBe('breached');
+        expect(alertEvents[0].group_hash).toBe('hash-1');
         expect(alertEvents[1].status).toBe('recovered');
         expect(alertEvents[1].group_hash).toBe('hash-2');
       });
@@ -346,6 +350,8 @@ describe('CreateRecoveryEventsStep', () => {
       expect(result.type).toBe('continue');
       const alertEvents = result.state.alertEventsBatch!;
       expect(alertEvents).toHaveLength(2);
+      expect(alertEvents[0].status).toBe('breached');
+      expect(alertEvents[0].group_hash).toBe('hash-1');
       expect(alertEvents[1].status).toBe('recovered');
       expect(alertEvents[1].group_hash).toBe('hash-2');
     });

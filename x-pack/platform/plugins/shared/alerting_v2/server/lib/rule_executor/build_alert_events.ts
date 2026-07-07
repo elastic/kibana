@@ -52,6 +52,18 @@ function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');
 }
 
+export const buildExecutionUuid = ({
+  ruleId,
+  spaceId,
+  scheduledTimestamp,
+  suffix,
+}: {
+  ruleId: string;
+  spaceId: string;
+  scheduledTimestamp: string;
+  suffix?: string;
+}): string => sha256(`${ruleId}|${spaceId}|${scheduledTimestamp}${suffix ? `|${suffix}` : ''}`);
+
 export function buildGroupHash({
   rowDoc,
   groupKeyFields,
@@ -93,7 +105,7 @@ export function createAlertEventsBatchBuilder({
 }: BuildAlertEventsBaseOpts): AlertEventsBatchBuilder {
   // Stable per run to support retries without duplicating documents.
   // Include spaceId to avoid collisions when multiple spaces write into the same data stream.
-  const executionUuid = sha256(`${ruleId}|${spaceId}|${scheduledTimestamp}`);
+  const executionUuid = buildExecutionUuid({ ruleId, spaceId, scheduledTimestamp });
 
   // Timestamp when the alert event is written to the index.
   const wroteAt = new Date().toISOString();
@@ -300,7 +312,12 @@ export function buildQueryRecoveryAlertEvents({
     return [];
   }
 
-  const executionUuid = sha256(`${ruleId}|${spaceId}|${scheduledTimestamp}|recovery`);
+  const executionUuid = buildExecutionUuid({
+    ruleId,
+    spaceId,
+    scheduledTimestamp,
+    suffix: 'recovery',
+  });
   const groupingFields = ruleAttributes.grouping?.fields ?? [];
   const activeGroupHashSet = new Set(activeGroupHashes.map(({ group_hash }) => group_hash));
 

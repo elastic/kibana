@@ -12,7 +12,7 @@ import { stableStringify } from '@kbn/std';
 import { getNoDataEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { isEsqlUserError } from '../../errors/esql_user_error';
 import type { PipelineStateStream, RuleExecutionInput, RuleExecutionStep } from '../types';
-import { buildGroupHash, rowToDocument } from '../build_alert_events';
+import { buildExecutionUuid, buildGroupHash, rowToDocument } from '../build_alert_events';
 import { getQueryPayload } from '../get_query_payload';
 import {
   LoggerServiceToken,
@@ -116,7 +116,11 @@ export class DetectDataPresenceStep implements RuleExecutionStep {
         abortSignal: input.executionContext.signal,
       });
 
-      return collectGroupHashesFromResponse({ rule, esqlResponse });
+      return collectGroupHashesFromResponse({
+        rule,
+        esqlResponse,
+        input,
+      });
     } catch (error) {
       if (isEsqlUserError(error)) {
         throw createTaskRunError(error as Error, TaskErrorSource.USER);
@@ -129,10 +133,13 @@ export class DetectDataPresenceStep implements RuleExecutionStep {
 function collectGroupHashesFromResponse({
   rule,
   esqlResponse,
+  input,
 }: {
   rule: RuleResponse;
   esqlResponse: EsqlQueryResponse;
+  input: RuleExecutionInput;
 }): Set<string> {
+  const { ruleId, spaceId, scheduledAt } = input;
   const columns = esqlResponse.columns ?? [];
   const values = esqlResponse.values ?? [];
 
@@ -141,6 +148,12 @@ function collectGroupHashesFromResponse({
   }
 
   const groupingFields = rule.grouping?.fields ?? [];
+  const executionUuid = buildExecutionUuid({
+    ruleId,
+    spaceId,
+    scheduledTimestamp: scheduledAt,
+    suffix: 'no_data',
+  });
   const groupHashes = new Set<string>();
 
   for (let i = 0; i < values.length; i++) {
@@ -149,7 +162,9 @@ function collectGroupHashesFromResponse({
     const hash = buildGroupHash({
       rowDoc,
       groupKeyFields: groupingFields,
-      fallbackSeed: `no_data|row:${i}`,
+      get fallbackSeed(): string {
+        return `${executionUuid}|row:${i}|${stableStringify(rowDoc)}`;
+      },
     });
 
     groupHashes.add(hash);

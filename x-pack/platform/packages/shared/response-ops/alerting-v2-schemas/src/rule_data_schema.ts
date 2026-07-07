@@ -384,7 +384,7 @@ export const createRuleDataBaseSchema = z
     no_data_strategy: noDataStrategySchema
       .optional()
       .describe(
-        'How to handle no-data situations. "emit" emits a no-data event; "last_known_status" holds the last known status; "recover" forces recovery; "none" disables no-data detection. Standalone-format rules must provide a `no_data` query block when this is not "none"; composed-format rules use `base` as the data-presence query.'
+        'How to handle no-data situations. "last_known_status" holds the last known status; "recover" forces recovery; "none" disables no-data detection. "emit" is not currently accepted by the create/update API. Standalone-format rules must provide a `no_data` query block when this is not "none"; composed-format rules use `base` as the data-presence query.'
       ),
     state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional(),

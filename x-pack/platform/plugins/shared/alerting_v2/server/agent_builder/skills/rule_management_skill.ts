@@ -243,7 +243,7 @@ Refer to the [rule-schema reference](./references/rule-schema.md) for allowed va
 | Value | Behaviour |
 |---|---|
 | \`'none'\` | No-data situations are ignored (default). |
-| \`'emit'\` | Emits a \`no_data\` alert event when no_data query returns no rows for the group. |
+| \`'emit'\` | Emits a \`no_data\` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API. |
 | \`'last_known_status'\` | Holds the last known episode status when no data is present. |
 | \`'recover'\` | Forces recovery when no data is present. |
 

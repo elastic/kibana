@@ -8,7 +8,6 @@
 import { injectable } from 'inversify';
 import {
   alertEpisodeStatus,
-  alertEventStatus,
   type AlertEpisodeStatus,
   type AlertEventStatus,
 } from '../../../resources/datastreams/alert_events';
@@ -19,10 +18,12 @@ import type { ITransitionStrategy, StateTransitionContext, StateTransitionResult
 export class BasicTransitionStrategy implements ITransitionStrategy {
   readonly name: string = 'basic';
 
-  // Deterministic state machine transitions using current episode status and alert event status.
-  // `no_data` events are not in this table. Their outcome also depends on `rule.no_data_strategy`, and is resolved in getNextStatusForNoData below
-  protected readonly stateMachine: Partial<
-    Record<AlertEpisodeStatus, Partial<Record<AlertEventStatus, AlertEpisodeStatus>>>
+  // Deterministic transitions for `breached` and `recovered`.
+  // The `no_data` transition depends on the rule's no_data_strategy,
+  // and it is determined per-strategy in getStateMachine below.
+  protected readonly baseTransitions: Record<
+    AlertEpisodeStatus,
+    { breached: AlertEpisodeStatus; recovered: AlertEpisodeStatus }
   > = {
     [alertEpisodeStatus.inactive]: {
       breached: alertEpisodeStatus.pending,
@@ -57,11 +58,7 @@ export class BasicTransitionStrategy implements ITransitionStrategy {
       return { status: alertEpisodeStatus.pending };
     }
 
-    if (alertEvent.status === alertEventStatus.no_data) {
-      return { status: this.getNextStatusForNoData(rule, currentAlertEpisodeStatus) };
-    }
-
-    const stateRules = this.stateMachine[currentAlertEpisodeStatus];
+    const stateRules = this.getStateMachine(rule.no_data_strategy, currentAlertEpisodeStatus);
 
     if (!stateRules) {
       return { status: alertEpisodeStatus.pending };
@@ -72,16 +69,23 @@ export class BasicTransitionStrategy implements ITransitionStrategy {
     return { status: nextState ?? currentAlertEpisodeStatus ?? alertEpisodeStatus.pending };
   }
 
-  private getNextStatusForNoData(
-    rule: RuleResponse,
+  private getStateMachine(
+    noDataStrategy: RuleResponse['no_data_strategy'],
     currentStatus: AlertEpisodeStatus
-  ): AlertEpisodeStatus {
-    if (rule.no_data_strategy === 'emit') {
-      return alertEpisodeStatus.active;
-    } else if (rule.no_data_strategy === 'recover') {
-      return this.stateMachine[currentStatus]?.recovered ?? currentStatus;
+  ): Record<AlertEventStatus, AlertEpisodeStatus> | undefined {
+    const base = this.baseTransitions[currentStatus];
+    if (!base) {
+      return undefined;
     }
+
     // for all other no_data_strategy types return the last known episode status
-    return currentStatus;
+    let noData: AlertEpisodeStatus = currentStatus;
+    if (noDataStrategy === 'emit') {
+      noData = alertEpisodeStatus.active;
+    } else if (noDataStrategy === 'recover') {
+      noData = base.recovered;
+    }
+
+    return { breached: base.breached, recovered: base.recovered, no_data: noData };
   }
 }
