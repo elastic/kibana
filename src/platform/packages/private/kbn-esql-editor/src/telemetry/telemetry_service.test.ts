@@ -8,7 +8,6 @@
  */
 
 import type { AnalyticsServiceStart } from '@kbn/core/server';
-import { QuerySource } from '@kbn/esql-types';
 import {
   ESQLEditorTelemetryService,
   AiReviewAction,
@@ -25,7 +24,6 @@ import {
   ESQL_COMMENT_TO_ESQL_REVIEWED,
   ESQL_FIX_WITH_AI_SUBMITTED,
   ESQL_FIX_WITH_AI_REVIEWED,
-  ESQL_QUERY_SUBMITTED,
 } from './events_registration';
 import { reportEsqlError } from '../report_error';
 
@@ -47,46 +45,6 @@ describe('ESQLEditorTelemetryService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  describe('trackQuerySubmitted', () => {
-    it('tracks query submission metadata', () => {
-      telemetryService.trackQuerySubmitted({
-        source: QuerySource.MANUAL,
-        query: 'FROM logs-* | LIMIT 10',
-      });
-
-      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
-        ESQL_QUERY_SUBMITTED,
-        expect.objectContaining({
-          query_source: QuerySource.MANUAL,
-          query_length: expect.any(String),
-          query_lines: '1',
-          anti_limit_before_aggregate: false,
-          anti_missing_sort_before_limit: false,
-        })
-      );
-    });
-
-    it('tracks invalid query submissions with safe fallback metadata', () => {
-      const invalidQuery = 'FROM logs-* | ???';
-
-      telemetryService.trackQuerySubmitted({
-        source: QuerySource.MANUAL,
-        query: invalidQuery,
-      });
-
-      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
-        ESQL_QUERY_SUBMITTED,
-        expect.objectContaining({
-          query_source: QuerySource.MANUAL,
-          query_length: expect.any(String),
-          query_lines: '1',
-          anti_limit_before_aggregate: false,
-          anti_missing_sort_before_limit: false,
-        })
-      );
-    });
   });
 
   describe('trackLookupJoinHoverActionShown', () => {

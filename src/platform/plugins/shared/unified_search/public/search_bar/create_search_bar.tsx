@@ -98,7 +98,7 @@ const defaultOnQuerySubmit = <QT extends AggregateQuery | Query = Query>(
 
   const { timefilter } = queryService.timefilter;
 
-  return (payload: { dateRange: TimeRange; query?: QT | Query }, _isUpdate?: boolean) => {
+  return (payload: { dateRange: TimeRange; query?: QT | Query }) => {
     const currentTime = timefilter.getTime();
     const isUpdate =
       !isEqual(currentTime, payload.dateRange) || !isEqual(payload.query, currentQuery);

@@ -18,6 +18,8 @@ import { IndexPatternFieldEditorPlugin } from './plugin';
 import { render, screen, waitFor } from '@testing-library/react';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 
+jest.mock('@kbn/esql-language', () => ({}));
+
 jest.mock('@kbn/react-kibana-mount', () => {
   const original = jest.requireActual('@kbn/react-kibana-mount');
 

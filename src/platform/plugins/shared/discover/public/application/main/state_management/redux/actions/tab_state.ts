@@ -348,7 +348,7 @@ export const onQuerySubmit: InternalStateThunkActionCreator<
 > = ({ tabId, payload, isUpdate }) =>
   function onQuerySubmitThunkFn(
     dispatch,
-    _getState,
+    getState,
     { searchSessionManager, runtimeStateManager, services }
   ) {
     const { scopedEbtManager$, dataStateContainer$ } = selectTabRuntimeState(

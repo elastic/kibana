@@ -44,7 +44,7 @@ const kqlQuery = {
   language: 'kuery',
 };
 
-const esqlQuery: AggregateQuery = {
+const esqlQuery = {
   esql: 'from test',
 };
 

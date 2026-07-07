@@ -172,31 +172,21 @@ export class ESQLEditorTelemetryService {
   }
 
   public trackQuerySubmitted({ source, query }: TelemetryQuerySubmittedProps) {
-    let queryLength = query.length.toString();
-    let hasLimitBeforeStats = false;
-    let hasMissingSortBeforeLimit = false;
-
-    try {
-      // parsing and prettifying the raw query
-      // to remove comments for accurately measuring its length
-      const { root } = Parser.parse(query);
-      const prettyQuery = BasicPrettyPrinter.print(root);
-      queryLength = prettyQuery.length.toString();
-      hasLimitBeforeStats =
-        source === QuerySource.HELP || source === QuerySource.AUTOCOMPLETE
-          ? false
-          : hasLimitBeforeAggregate(query);
-      hasMissingSortBeforeLimit =
-        source === QuerySource.HELP || source === QuerySource.AUTOCOMPLETE
-          ? false
-          : missingSortBeforeLimit(query);
-    } catch {
-      // Keep submission telemetry best-effort for invalid or partially typed queries.
-    }
-
+    // parsing and prettifying the raw query
+    // to remove comments for accurately measuring its length
+    const { root } = Parser.parse(query);
+    const prettyQuery = BasicPrettyPrinter.print(root);
+    const hasLimitBeforeStats =
+      source === QuerySource.HELP || source === QuerySource.AUTOCOMPLETE
+        ? false
+        : hasLimitBeforeAggregate(query);
+    const hasMissingSortBeforeLimit =
+      source === QuerySource.HELP || source === QuerySource.AUTOCOMPLETE
+        ? false
+        : missingSortBeforeLimit(query);
     this._reportEvent(ESQL_QUERY_SUBMITTED, {
       query_source: source,
-      query_length: queryLength,
+      query_length: prettyQuery.length.toString(),
       query_lines: query.split('\n').length.toString(),
       anti_limit_before_aggregate: hasLimitBeforeStats,
       anti_missing_sort_before_limit: hasMissingSortBeforeLimit,
