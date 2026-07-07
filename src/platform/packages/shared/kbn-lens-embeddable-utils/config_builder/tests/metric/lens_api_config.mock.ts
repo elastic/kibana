@@ -103,6 +103,9 @@ export const simpleMetricAPIAttributes = {
       empty_as_null: true,
     },
   ],
+  styling: {
+    density: 'default',
+  },
 } as MetricConfig;
 
 export const complexESQLMetricAPIAttributes = {

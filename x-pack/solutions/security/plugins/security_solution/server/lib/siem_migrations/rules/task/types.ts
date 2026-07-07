@@ -13,14 +13,14 @@ import type { StoredRuleMigrationRule } from '../types';
 import type { getRuleMigrationAgent } from './agent';
 import type { RuleMigrationTelemetryClient } from './rule_migrations_telemetry_client';
 import type { ChatModel } from '../../common/task/util/actions_client_chat';
-import type { MigrationResources } from '../../common/task/retrievers/resource_retriever';
 import type { RuleMigrationsRetriever } from './retrievers';
 import type { MigrateRuleConfig } from './agent/types';
+import type { EnrichedMigrationResources } from '../../common/task/util/enrich_lookup_resources';
 
 export type MigrationAgent = ReturnType<typeof getRuleMigrationAgent>;
 
 export interface RuleMigrationInput extends Pick<StoredRuleMigrationRule, 'id' | 'original_rule'> {
-  resources: MigrationResources;
+  resources: EnrichedMigrationResources;
 }
 
 export interface RuleMigrationTaskCreateClientParams {
