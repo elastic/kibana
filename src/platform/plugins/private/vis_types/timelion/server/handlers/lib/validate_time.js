@@ -15,6 +15,14 @@ import { toMS } from '../../../common/lib/to_milliseconds';
 export default function validateTime(time, tlConfig) {
   const span = moment.duration(moment(time.to).diff(moment(time.from))).asMilliseconds();
   const interval = toMS(time.interval);
+  if (!Number.isFinite(interval) || interval <= 0) {
+    throw new Error(
+      i18n.translate('timelion.serverSideErrors.invalidIntervalErrorMessage', {
+        defaultMessage: 'Invalid interval: {interval}',
+        values: { interval: time.interval },
+      })
+    );
+  }
   const bucketCount = span / interval;
   const maxBuckets = tlConfig.settings['timelion:max_buckets'];
   if (bucketCount > maxBuckets) {
