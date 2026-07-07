@@ -10,16 +10,13 @@
 import { tryPrettyPrintJsonBlocks } from './format_json_content';
 
 describe('tryPrettyPrintJsonBlocks', () => {
-  it('returns undefined when the value is undefined or null', () => {
-    expect(tryPrettyPrintJsonBlocks(undefined)).toBeUndefined();
-    expect(tryPrettyPrintJsonBlocks(null)).toBeUndefined();
+  it('returns undefined for an empty string', () => {
+    expect(tryPrettyPrintJsonBlocks('')).toBeUndefined();
   });
 
   it('returns undefined for a value that contains no JSON, regardless of length', () => {
     expect(tryPrettyPrintJsonBlocks('a short message')).toBeUndefined();
     expect(tryPrettyPrintJsonBlocks('a plain log line '.repeat(50))).toBeUndefined();
-    expect(tryPrettyPrintJsonBlocks(55)).toBeUndefined();
-    expect(tryPrettyPrintJsonBlocks(true)).toBeUndefined();
   });
 
   it('pretty-prints valid JSON values', () => {

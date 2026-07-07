@@ -13,9 +13,8 @@
  * the result reads clearly. Returns the transformed string, or undefined
  * when the value contains no JSON to format, so the caller can render it as-is.
  */
-export const tryPrettyPrintJsonBlocks = (value: unknown): string | undefined => {
-  const stringValue = String(value);
-  const segments = extractEmbeddedJsonSegments(stringValue);
+export const tryPrettyPrintJsonBlocks = (value: string): string | undefined => {
+  const segments = extractEmbeddedJsonSegments(value);
   if (!segments.length) {
     return undefined;
   }
@@ -24,7 +23,7 @@ export const tryPrettyPrintJsonBlocks = (value: unknown): string | undefined => 
   let cursor = 0;
 
   for (const segment of segments) {
-    const precedingText = stringValue.slice(cursor, segment.start).trim();
+    const precedingText = value.slice(cursor, segment.start).trim();
     if (precedingText) {
       parts.push(precedingText);
     }
@@ -32,7 +31,7 @@ export const tryPrettyPrintJsonBlocks = (value: unknown): string | undefined => 
     cursor = segment.end;
   }
 
-  const trailingText = stringValue.slice(cursor).trim();
+  const trailingText = value.slice(cursor).trim();
   if (trailingText) {
     parts.push(trailingText);
   }
