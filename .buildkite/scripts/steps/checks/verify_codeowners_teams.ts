@@ -10,41 +10,6 @@
 import { getCodeOwnersEntries, getTeams } from '@kbn/code-owners';
 
 /**
- * Teams that are allowed to be untracked in the public team registry (`@kbn/code-owners` `teams.jsonc`).
- */
-const ALLOWED_UNTRACKED_TEAMS = new Set([
-  'elastic/cloud-services',
-  'elastic/contextual-security',
-  'elastic/docs',
-  'elastic/eui',
-  'elastic/eui-team',
-  'elastic/jinastic',
-  'elastic/kibana-accessibility',
-  'elastic/kibana-performance-testing',
-  'elastic/kibana-tech-leads',
-  'elastic/kibana-telemetry',
-  'elastic/kibana-visualization',
-  'elastic/obs-cloudnative-monitoring',
-  'elastic/obs-sig-events-team',
-  'elastic/obs-ux-management-team',
-  'elastic/observability-bi',
-  'elastic/observability-design',
-  'elastic/observability-ui',
-  'elastic/observablt-robots',
-  'elastic/platform-docs',
-  'elastic/search-design',
-  'elastic/search-inference-team',
-  'elastic/security-design',
-  'elastic/security-detection-platform',
-  'elastic/security-engineering-productivity',
-  'elastic/security-genai-research-and-development',
-  'elastic/security-ml',
-  'elastic/security-pds-deployment',
-  'elastic/ski-docs',
-  'elastic/streams-ui',
-]);
-
-/**
  * Collect the GitHub team handles tracked in the public team registry.
  */
 function getRegistryGithubTeams(): Set<string> {
@@ -94,9 +59,7 @@ function main(): void {
 
   let hasErrors = false;
 
-  const invalidTeams = [...codeownersTeams].filter(
-    (team) => !registryTeams.has(team) && !ALLOWED_UNTRACKED_TEAMS.has(team)
-  );
+  const invalidTeams = [...codeownersTeams].filter((team) => !registryTeams.has(team));
 
   if (invalidTeams.length > 0) {
     hasErrors = true;
@@ -111,24 +74,6 @@ function main(): void {
         'src/platform/packages/private/kbn-code-owners,\n' +
         'or add it to ALLOWED_UNTRACKED_TEAMS in verify_codeowners_teams.ts\n' +
         '(requires approval from @elastic/kibana-security).\n'
-    );
-  }
-
-  // Reverse check: every allowlisted team must still be referenced in CODEOWNERS,
-  // otherwise the allowlist has accumulated stale entries that should be removed.
-  const staleAllowlistTeams = [...ALLOWED_UNTRACKED_TEAMS].filter(
-    (team) => !codeownersTeams.has(team)
-  );
-
-  if (staleAllowlistTeams.length > 0) {
-    hasErrors = true;
-    console.error('\nERROR: The following ALLOWED_UNTRACKED_TEAMS entries are no longer used:');
-    console.error('They are not referenced anywhere in CODEOWNERS.\n');
-    for (const team of staleAllowlistTeams.sort()) {
-      console.error(`  - ${team}`);
-    }
-    console.error(
-      '\nTo fix: remove these teams from ALLOWED_UNTRACKED_TEAMS in\nverify_codeowners_teams.ts\n'
     );
   }
 
