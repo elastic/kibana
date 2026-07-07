@@ -10,6 +10,7 @@
 import type {
   EsWorkflowExecution,
   EsWorkflowStepExecution,
+  WorkflowStepTokenUsage,
   WorkflowTokenUsage,
 } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
@@ -163,6 +164,16 @@ export class WorkflowExecutionState {
     if (accumulated) {
       this.updateWorkflowExecution({ usage: accumulated });
     }
+  }
+
+  /**
+   * Appends one step's usage entry to the per-execution list in finish order.
+   * Unlike `accumulateUsage`, entries are never merged, so two steps on the
+   * same connector stay attributable to the step that produced each.
+   */
+  public recordStepUsage(stepUsage: WorkflowStepTokenUsage): void {
+    const stepUsages = [...(this.workflowExecution.stepUsage ?? []), stepUsage];
+    this.updateWorkflowExecution({ stepUsage: stepUsages });
   }
 
   public getAllStepExecutions(): StepExecutionMetadata[] {

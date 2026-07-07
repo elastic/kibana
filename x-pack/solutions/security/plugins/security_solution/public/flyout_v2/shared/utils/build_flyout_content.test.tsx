@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { buildFlyoutContent } from './build_flyout_content';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 
-jest.mock('../../../flyout/document_details/right/components/table_field_name_cell', () => ({
+jest.mock('../components/table_field_name_cell', () => ({
   getEcsField: (field: string) => {
     const ecsMap: Record<string, { type: string }> = {
       'source.ip': { type: 'ip' },
