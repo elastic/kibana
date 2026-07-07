@@ -34,7 +34,6 @@ import { ApmTimeRangeMetadataContextProvider } from '../time_range_metadata/time
 import type { ApmPluginContextValue } from './apm_plugin_context';
 import { ApmPluginContext } from './apm_plugin_context';
 import { mockApmPluginContextValue } from './mock_apm_plugin_context';
-import { setApmInternalServices } from '../../plugin';
 
 const mockPerformanceApi = {
   onPageReady: () => {},
