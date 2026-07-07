@@ -22,7 +22,7 @@ describe('rule_engagement_event', () => {
     );
   });
 
-  test.each(['edit', 'snooze', 'mute', 'disable', 'delete', 'clone'] as const)(
+  test.each(['edit', 'snooze', 'mute', 'disable', 'enable', 'delete', 'clone'] as const)(
     'reportRuleEngagementEvent reports a %s action',
     (action) => {
       const reportEvent = jest.fn();

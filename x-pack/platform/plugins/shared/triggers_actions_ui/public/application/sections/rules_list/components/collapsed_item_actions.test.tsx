@@ -539,6 +539,23 @@ describe('CollapsedItemActions', () => {
         });
       });
 
+      test('reports an enable action when enable is clicked', async () => {
+        render(<CollapsedItemActions {...getPropsWithRule({ enabled: false })} />);
+
+        await userEvent.click(screen.getByTestId('selectActionButton'));
+        await waitForEuiPopoverOpen();
+
+        await userEvent.click(screen.getByTestId('disableButton'));
+
+        await waitFor(() => {
+          expect(reportEvent).toHaveBeenCalledWith(RULE_ENGAGEMENT_EVENT_TYPE, {
+            action: 'enable',
+            rule_id: '1',
+            rule_type_id: 'test_rule_type',
+          });
+        });
+      });
+
       test('reports a snooze action when a snooze schedule is applied', async () => {
         render(<CollapsedItemActions {...getPropsWithRule()} />);
 

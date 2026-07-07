@@ -25,7 +25,14 @@ import type {
  */
 export const RULE_ENGAGEMENT_EVENT_TYPE = 'rule_engagement_action';
 
-export type RuleEngagementAction = 'edit' | 'snooze' | 'mute' | 'disable' | 'delete' | 'clone';
+export type RuleEngagementAction =
+  | 'edit'
+  | 'snooze'
+  | 'mute'
+  | 'disable'
+  | 'enable'
+  | 'delete'
+  | 'clone';
 
 export interface RuleEngagementEventData {
   action: RuleEngagementAction;

@@ -192,13 +192,18 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   }, []);
 
   const onEnable = useCallback(async () => {
+    reportRuleEngagementEvent(analytics, {
+      action: 'enable',
+      rule_id: item.id,
+      rule_type_id: item.ruleTypeId,
+    });
     asyncScheduler.schedule(async () => {
       await bulkEnableRules({ ids: [item.id] });
       onRuleChanged();
     }, 10);
     setIsDisabled(false);
     setIsPopoverOpen(false);
-  }, [bulkEnableRules, onRuleChanged, item.id]);
+  }, [bulkEnableRules, onRuleChanged, item.id, item.ruleTypeId, analytics]);
 
   const onDisable = useCallback(
     async (untrack: boolean) => {
