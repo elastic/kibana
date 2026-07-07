@@ -29,6 +29,7 @@ export type Environment = t.TypeOf<typeof environmentRt>['environment'];
  * migrated (elastic/kibana#243355).
  */
 
+// nonEmptyStringRt omitted: unreachable in the io-ts union too (t.string matches first).
 export const environmentStringSchema = z.union([
   z.literal(ENVIRONMENT_NOT_DEFINED.value),
   z.literal(ENVIRONMENT_ALL.value),

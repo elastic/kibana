@@ -135,6 +135,7 @@ export const transactionDataSourceSchema = z.object({
   ]),
 });
 
+// No reverse (BoolQuery -> string) direction, unlike filtersRt.encode() - zod transforms are one-way.
 export const filtersSchema = z.string().transform((value, ctx): BoolQuery => {
   try {
     const filters = JSON.parse(value);

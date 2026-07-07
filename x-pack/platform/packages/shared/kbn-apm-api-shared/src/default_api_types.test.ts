@@ -144,4 +144,10 @@ describe('filtersSchema', () => {
 
     expectParseError(result);
   });
+
+  it('rejects a non-iterable filter/must_not value', () => {
+    const result = filtersSchema.safeParse(JSON.stringify({ filter: 123 }));
+
+    expectParseError(result);
+  });
 });
