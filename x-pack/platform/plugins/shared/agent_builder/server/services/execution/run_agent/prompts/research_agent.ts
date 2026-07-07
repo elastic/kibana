@@ -17,6 +17,7 @@ import { formatDate } from './utils/helpers';
 import { getFileSystemInstructions } from './utils/filestore';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
 import { renderVisualizationPrompt } from './utils/visualizations';
+import { renderRenderersPrompt } from './utils/renderers';
 
 type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntimeParams;
 
@@ -57,6 +58,7 @@ const getAgentSystemMessage = async ({
   skills,
   experimentalFeatures,
   capabilities,
+  renderers,
 }: ResearchAgentPromptParams): Promise<string> => {
   const visEnabled = capabilities.visualizations;
 
@@ -139,6 +141,8 @@ When the user picks from the @ menu, the message includes markdown links: \`[@la
 ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 
 ${renderAttachmentPrompt()}
+
+${renderRenderersPrompt(renderers, { bashEnabled: experimentalFeatures.bash })}
 
 ## ADDITIONAL INFO
 - Current date: ${formatDate(conversationTimestamp)}`);

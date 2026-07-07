@@ -74,11 +74,11 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
   );
 
   apiTest(
-    'bulk: processes mixed action types and persists each side effect',
+    'bulk: processes mixed (non-lifecycle) action types and persists each side effect',
     async ({ apiClient, apiServices }) => {
       const ruleId = 'bulk-mixed-rule';
       const groupHashTag = 'bulk-mixed-group-tag';
-      const groupHashActivate = 'bulk-mixed-group-activate';
+      const groupHashSnooze = 'bulk-mixed-group-snooze';
       const groupHashAck = 'bulk-mixed-group-ack';
       const ackEpisodeId = 'bulk-mixed-ack-episode';
 
@@ -90,8 +90,8 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
         }),
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
-          group_hash: groupHashActivate,
-          episode: { id: 'bulk-mixed-activate-episode', status: 'active' },
+          group_hash: groupHashSnooze,
+          episode: { id: 'bulk-mixed-snooze-episode', status: 'active' },
         }),
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
@@ -104,7 +104,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
         headers: writerHeaders,
         body: [
           { group_hash: groupHashTag, action_type: 'tag', tags: ['important', 'reviewed'] },
-          { group_hash: groupHashActivate, action_type: 'activate', reason: 'needs attention' },
+          { group_hash: groupHashSnooze, action_type: 'snooze', expiry: '2099-01-01T00:00:00Z' },
           { group_hash: groupHashAck, action_type: 'ack', episode_id: ackEpisodeId },
         ],
       });
@@ -114,21 +114,21 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
 
       const actions = await apiServices.alertingV2.alertActions.find({
         ruleId,
-        actionTypes: ['tag', 'activate', 'ack'],
+        actionTypes: ['tag', 'snooze', 'ack'],
       });
       expect(actions).toHaveLength(3);
 
       const tagAction = actions.find((doc) => doc.action_type === 'tag');
-      const activateAction = actions.find((doc) => doc.action_type === 'activate');
+      const snoozeAction = actions.find((doc) => doc.action_type === 'snooze');
       const ackAction = actions.find((doc) => doc.action_type === 'ack');
 
       expect(tagAction).toMatchObject({
         group_hash: groupHashTag,
         tags: ['important', 'reviewed'],
       });
-      expect(activateAction).toMatchObject({
-        group_hash: groupHashActivate,
-        reason: 'needs attention',
+      expect(snoozeAction).toMatchObject({
+        group_hash: groupHashSnooze,
+        expiry: '2099-01-01T00:00:00Z',
       });
       expect(ackAction).toMatchObject({ group_hash: groupHashAck, episode_id: ackEpisodeId });
     }
@@ -202,6 +202,210 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
         actionTypes: ['ack', 'snooze'],
       });
       expect(actions).toHaveLength(0);
+    }
+  );
+
+  apiTest(
+    'lifecycle: bulk deactivate writes the synthetic .rule-events doc and flips episode.status to inactive',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'bulk-deactivate-rule';
+      const groupHash = 'bulk-deactivate-group';
+      const episodeId = 'bulk-deactivate-episode';
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          status: 'breached',
+          source: 'engine-x',
+          type: 'alert',
+          episode: { id: episodeId, status: 'active' },
+        }),
+      ]);
+
+      const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
+        headers: writerHeaders,
+        body: [{ group_hash: groupHash, action_type: 'deactivate', reason: 'bulk deactivate' }],
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toStrictEqual({ processed: 1, total: 1 });
+
+      const actions = await apiServices.alertingV2.alertActions.find({
+        ruleId,
+        actionTypes: ['deactivate'],
+      });
+      expect(actions).toHaveLength(1);
+      expect(actions[0]).toMatchObject({
+        action_type: 'deactivate',
+        group_hash: groupHash,
+        episode_id: episodeId,
+        rule_id: ruleId,
+        reason: 'bulk deactivate',
+      });
+
+      // The bulk dispatch must produce the synthetic rule-event so the next
+      // UI/API read sees the deactivation immediately — without waiting for
+      // the next rule run. The `source` is propagated from the last
+      // engine-emitted event, not hardcoded, so the synthetic doc stays
+      // consistent with the alert lineage.
+      const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);
+      expect(latestStates.get(groupHash)).toMatchObject({
+        rule: { id: ruleId },
+        group_hash: groupHash,
+        status: 'recovered',
+        source: 'engine-x',
+        type: 'alert',
+        episode: { id: episodeId, status: 'inactive' },
+      });
+    }
+  );
+
+  apiTest(
+    'lifecycle: bulk activate writes the synthetic .rule-events doc and flips episode.status to active + breached',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'bulk-activate-rule';
+      const groupHash = 'bulk-activate-group';
+      const episodeId = 'bulk-activate-episode';
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          status: 'recovered',
+          source: 'engine-x',
+          type: 'alert',
+          episode: { id: episodeId, status: 'inactive' },
+        }),
+      ]);
+
+      const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
+        headers: writerHeaders,
+        body: [{ group_hash: groupHash, action_type: 'activate', reason: 'bulk activate' }],
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toStrictEqual({ processed: 1, total: 1 });
+
+      const actions = await apiServices.alertingV2.alertActions.find({
+        ruleId,
+        actionTypes: ['activate'],
+      });
+      expect(actions).toHaveLength(1);
+      expect(actions[0]).toMatchObject({
+        action_type: 'activate',
+        group_hash: groupHash,
+        episode_id: episodeId,
+        reason: 'bulk activate',
+      });
+
+      // The synthetic activate doc propagates `source` from the current
+      // alert event (the seeded inactive doc from a prior recovery),
+      // so the reopened event stays consistent with the alert lineage.
+      const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);
+      expect(latestStates.get(groupHash)).toMatchObject({
+        rule: { id: ruleId },
+        group_hash: groupHash,
+        status: 'breached',
+        source: 'engine-x',
+        type: 'alert',
+        episode: { id: episodeId, status: 'active' },
+      });
+    }
+  );
+
+  apiTest(
+    'lifecycle: silently skips a bulk deactivate item whose episode is already inactive',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'bulk-skip-deactivate-rule';
+      const groupHashOk = 'bulk-skip-deactivate-ok-group';
+      const groupHashAlreadyInactive = 'bulk-skip-deactivate-inactive-group';
+      const episodeIdOk = 'bulk-skip-deactivate-ok-episode';
+      const episodeIdInactive = 'bulk-skip-deactivate-inactive-episode';
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHashOk,
+          status: 'breached',
+          type: 'alert',
+          episode: { id: episodeIdOk, status: 'active' },
+        }),
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHashAlreadyInactive,
+          status: 'recovered',
+          type: 'alert',
+          episode: { id: episodeIdInactive, status: 'inactive' },
+        }),
+      ]);
+
+      const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
+        headers: writerHeaders,
+        body: [
+          { group_hash: groupHashOk, action_type: 'deactivate', reason: 'should write' },
+          {
+            group_hash: groupHashAlreadyInactive,
+            action_type: 'deactivate',
+            reason: 'should be skipped',
+          },
+        ],
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toStrictEqual({ processed: 1, total: 2 });
+
+      const actions = await apiServices.alertingV2.alertActions.find({
+        ruleId,
+        actionTypes: ['deactivate'],
+      });
+      expect(actions).toHaveLength(1);
+      expect(actions[0]).toMatchObject({
+        group_hash: groupHashOk,
+        action_type: 'deactivate',
+        reason: 'should write',
+      });
+    }
+  );
+
+  apiTest(
+    'lifecycle: silently skips a bulk activate item whose episode is still active',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'bulk-skip-activate-rule';
+      const groupHash = 'bulk-skip-activate-group';
+      const episodeId = 'bulk-skip-activate-episode';
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          status: 'breached',
+          type: 'alert',
+          episode: { id: episodeId, status: 'active' },
+        }),
+      ]);
+
+      const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
+        headers: writerHeaders,
+        body: [
+          { group_hash: groupHash, action_type: 'activate', reason: 'precondition will fail' },
+        ],
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toStrictEqual({ processed: 0, total: 1 });
+
+      const actions = await apiServices.alertingV2.alertActions.find({
+        ruleId,
+        actionTypes: ['activate'],
+      });
+      expect(actions).toHaveLength(0);
+
+      // The latest .rule-events state must remain unchanged.
+      const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);
+      expect(latestStates.get(groupHash)).toMatchObject({
+        episode: { id: episodeId, status: 'active' },
+      });
     }
   );
 
