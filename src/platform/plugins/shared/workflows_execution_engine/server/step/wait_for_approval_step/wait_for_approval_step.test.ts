@@ -22,16 +22,21 @@ import {
   sendWaitForApprovalNotifications,
 } from '../hitl_notifications/send_wait_for_approval_notifications';
 
-jest.mock('@kbn/workflows/server', () => ({
-  ...jest.requireActual('@kbn/workflows/server'),
-  createExternalResumeApiKey: jest.fn().mockResolvedValue({
-    id: 'api-key-id',
-    encoded: 'encoded-api-key',
+jest.mock('../wait_for_input_step/hitl_external_resume_helpers', () => ({
+  invalidateHitlExternalResumeTokenIfPresent: jest.fn(),
+  mintHitlExternalResumeToken: jest.fn().mockReturnValue({
+    token: 'resume-token',
+    tokenHash: 'resume-token-hash',
+    expiresAt: '2999-01-01T00:00:00.000Z',
   }),
 }));
 
-const mockCreateExternalResumeApiKey = jest.requireMock('@kbn/workflows/server')
-  .createExternalResumeApiKey as jest.Mock;
+const mockMintHitlExternalResumeToken = jest.requireMock(
+  '../wait_for_input_step/hitl_external_resume_helpers'
+).mintHitlExternalResumeToken as jest.Mock;
+const mockInvalidateHitlExternalResumeTokenIfPresent = jest.requireMock(
+  '../wait_for_input_step/hitl_external_resume_helpers'
+).invalidateHitlExternalResumeTokenIfPresent as jest.Mock;
 
 jest.mock('../hitl_notifications/has_external_hitl_channels', () => ({
   hasExternalHitlChannels: jest.fn().mockReturnValue(false),
@@ -63,7 +68,8 @@ describe('WaitForApprovalStepImpl', () => {
     mockBuildWaitForApprovalResumeLinks.mockClear();
     mockSendWaitForApprovalNotifications.mockReset();
     mockSendWaitForApprovalNotifications.mockResolvedValue(undefined);
-    mockCreateExternalResumeApiKey.mockClear();
+    mockMintHitlExternalResumeToken.mockClear();
+    mockInvalidateHitlExternalResumeTokenIfPresent.mockClear();
 
     node = {
       id: 'request-approval',
@@ -139,14 +145,14 @@ describe('WaitForApprovalStepImpl', () => {
     });
   });
 
-  it('does not mint an external resume API key without channels', async () => {
+  it('does not mint an external resume token without channels', async () => {
     await underTest.run();
 
-    expect(mockCreateExternalResumeApiKey).not.toHaveBeenCalled();
+    expect(mockMintHitlExternalResumeToken).not.toHaveBeenCalled();
     expect(mockSendWaitForApprovalNotifications).not.toHaveBeenCalled();
   });
 
-  it('mints an API key and sends notifications when channels are configured', async () => {
+  it('mints a resume token and sends notifications when channels are configured', async () => {
     mockHasExternalHitlChannels.mockReturnValue(true);
     node.configuration = {
       ...node.configuration,
@@ -160,19 +166,20 @@ describe('WaitForApprovalStepImpl', () => {
 
     await underTest.run();
 
-    expect(mockCreateExternalResumeApiKey).toHaveBeenCalled();
+    expect(mockMintHitlExternalResumeToken).toHaveBeenCalled();
     expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith(
       expect.objectContaining({
-        _hitlApiKeyId: 'api-key-id',
+        _hitlTokenHash: 'resume-token-hash',
+        _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
       })
     );
     expect(mockBuildWaitForApprovalResumeLinks).toHaveBeenCalledWith(
-      expect.objectContaining({ encodedApiKey: 'encoded-api-key' })
+      expect.objectContaining({ stepId: 'test-step-exec-id', token: 'resume-token' })
     );
     expect(mockSendWaitForApprovalNotifications).toHaveBeenCalled();
   });
 
-  it('persists the external resume API key id before sending notifications', async () => {
+  it('persists the external resume token metadata before sending notifications', async () => {
     mockHasExternalHitlChannels.mockReturnValue(true);
     node.configuration = {
       ...node.configuration,
@@ -189,14 +196,15 @@ describe('WaitForApprovalStepImpl', () => {
     expect(mockStepExecutionRuntime.setInput).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
-        _hitlApiKeyId: 'api-key-id',
+        _hitlTokenHash: 'resume-token-hash',
+        _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
       })
     );
     expect(mockSendWaitForApprovalNotifications).toHaveBeenCalled();
     expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledTimes(2);
   });
 
-  it('persists the external resume API key id when notification delivery fails', async () => {
+  it('persists the external resume token metadata when notification delivery fails', async () => {
     mockHasExternalHitlChannels.mockReturnValue(true);
     mockSendWaitForApprovalNotifications.mockRejectedValue(new Error('Slack connector failed'));
     node.configuration = {
@@ -213,7 +221,8 @@ describe('WaitForApprovalStepImpl', () => {
 
     expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith(
       expect.objectContaining({
-        _hitlApiKeyId: 'api-key-id',
+        _hitlTokenHash: 'resume-token-hash',
+        _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
       })
     );
   });
@@ -234,22 +243,10 @@ describe('WaitForApprovalStepImpl', () => {
     expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
   });
 
-  it('invalidates the external resume API key on in-app resume', async () => {
-    const invalidateAsInternalUser = jest.fn().mockResolvedValue(undefined);
-    dependencies = {
-      spaceId: 'default',
-      coreStart: {
-        security: {
-          authc: {
-            apiKeys: { invalidateAsInternalUser },
-          },
-        },
-      },
-    } as unknown as ContextDependencies;
-
+  it('finishes on in-app resume without external token cleanup', async () => {
     mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(false);
     (mockStepExecutionRuntime as { stepExecution?: unknown }).stepExecution = {
-      input: { _hitlApiKeyId: 'api-key-id' },
+      input: { _hitlTokenHash: 'resume-token-hash' },
     };
     mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
       id: 'exec-abc',
@@ -267,7 +264,6 @@ describe('WaitForApprovalStepImpl', () => {
 
     await underTest.run();
 
-    expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['api-key-id'] });
     expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalled();
   });
 
@@ -277,7 +273,7 @@ describe('WaitForApprovalStepImpl', () => {
       id: 'exec-abc',
       context: {
         resumeInput: { approved: false },
-        resumedBy: 'api_key:api-key-id',
+        resumedBy: 'external_resume:step-exec-1',
       },
     } as unknown as ReturnType<WorkflowExecutionRuntimeManager['getWorkflowExecution']>);
 
@@ -285,11 +281,11 @@ describe('WaitForApprovalStepImpl', () => {
 
     expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
       response: { approved: false },
-      respondedBy: 'api_key:api-key-id',
+      respondedBy: 'external_resume:step-exec-1',
     });
   });
 
-  it('fails with TimeoutError and invalidates the external resume API key when approval wait expires', async () => {
+  it('fails with TimeoutError when approval wait expires', async () => {
     jest.useFakeTimers();
     try {
       jest.setSystemTime(new Date('2025-06-01T12:01:00.000Z'));
@@ -298,22 +294,10 @@ describe('WaitForApprovalStepImpl', () => {
         timeout: '30s',
       } as WaitForApprovalStep;
 
-      const invalidateAsInternalUser = jest.fn().mockResolvedValue(undefined);
-      dependencies = {
-        spaceId: 'default',
-        coreStart: {
-          security: {
-            authc: {
-              apiKeys: { invalidateAsInternalUser },
-            },
-          },
-        },
-      } as unknown as ContextDependencies;
-
       mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(false);
       (mockStepExecutionRuntime as { stepExecution?: unknown }).stepExecution = {
         startedAt: '2025-06-01T12:00:00.000Z',
-        input: { _hitlApiKeyId: 'api-key-id' },
+        input: { _hitlTokenHash: 'resume-token-hash' },
       };
       mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
         id: 'exec-abc',
@@ -331,7 +315,6 @@ describe('WaitForApprovalStepImpl', () => {
 
       await underTest.run();
 
-      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['api-key-id'] });
       expect(mockStepExecutionRuntime.failStep).toHaveBeenCalledWith(
         expect.objectContaining({
           toSerializableObject: expect.any(Function),
@@ -386,33 +369,11 @@ describe('WaitForApprovalStepImpl', () => {
   });
 
   describe('onCancel', () => {
-    it('invalidates the external resume API key when the step is cancelled', async () => {
-      const invalidateAsInternalUser = jest.fn().mockResolvedValue(undefined);
-      dependencies = {
-        spaceId: 'default',
-        coreStart: {
-          security: {
-            authc: {
-              apiKeys: { invalidateAsInternalUser },
-            },
-          },
-        },
-      } as unknown as ContextDependencies;
-      underTest = new WaitForApprovalStepImpl(
-        node,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        workflowLogger,
-        connectorExecutor,
-        dependencies
+    it('invalidates the external resume token when the step is cancelled', async () => {
+      await expect(underTest.onCancel()).resolves.toBeUndefined();
+      expect(mockInvalidateHitlExternalResumeTokenIfPresent).toHaveBeenCalledWith(
+        mockStepExecutionRuntime
       );
-      (mockStepExecutionRuntime as { stepExecution?: unknown }).stepExecution = {
-        input: { _hitlApiKeyId: 'api-key-id' },
-      };
-
-      await underTest.onCancel();
-
-      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['api-key-id'] });
     });
   });
 });

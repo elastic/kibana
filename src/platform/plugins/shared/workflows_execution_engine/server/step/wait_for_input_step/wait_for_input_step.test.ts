@@ -18,11 +18,12 @@ import type { ContextDependencies } from '../../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 
-jest.mock('@kbn/workflows/server', () => ({
-  ...jest.requireActual('@kbn/workflows/server'),
-  createExternalResumeApiKey: jest.fn().mockResolvedValue({
-    id: 'api-key-id',
-    encoded: 'encoded-api-key',
+jest.mock('./hitl_external_resume_helpers', () => ({
+  invalidateHitlExternalResumeTokenIfPresent: jest.fn(),
+  mintHitlExternalResumeToken: jest.fn().mockReturnValue({
+    token: 'resume-token',
+    tokenHash: 'resume-token-hash',
+    expiresAt: '2999-01-01T00:00:00.000Z',
   }),
 }));
 
@@ -34,8 +35,11 @@ jest.mock('../hitl_notifications/send_wait_for_input_notifications', () => ({
   sendWaitForInputNotifications: jest.fn(),
 }));
 
-const mockCreateExternalResumeApiKey = jest.requireMock('@kbn/workflows/server')
-  .createExternalResumeApiKey as jest.Mock;
+const mockMintHitlExternalResumeToken = jest.requireMock('./hitl_external_resume_helpers')
+  .mintHitlExternalResumeToken as jest.Mock;
+const mockInvalidateHitlExternalResumeTokenIfPresent = jest.requireMock(
+  './hitl_external_resume_helpers'
+).invalidateHitlExternalResumeTokenIfPresent as jest.Mock;
 
 const { hasExternalHitlChannels } = jest.requireMock(
   '../hitl_notifications/has_external_hitl_channels'
@@ -60,7 +64,8 @@ describe('WaitForInputStepImpl', () => {
     mockHasExternalHitlChannels.mockReturnValue(false);
     mockSendWaitForInputNotifications.mockReset();
     mockSendWaitForInputNotifications.mockResolvedValue(undefined);
-    mockCreateExternalResumeApiKey.mockClear();
+    mockMintHitlExternalResumeToken.mockClear();
+    mockInvalidateHitlExternalResumeTokenIfPresent.mockClear();
 
     node = {
       id: 'wait-for-input-step',
@@ -214,7 +219,7 @@ describe('WaitForInputStepImpl', () => {
       expect(mockStepExecutionRuntime.updateWorkflowExecution).not.toHaveBeenCalled();
     });
 
-    it('should persist the external resume API key id before sending notifications', async () => {
+    it('should persist the external resume token metadata before sending notifications', async () => {
       mockHasExternalHitlChannels.mockReturnValue(true);
       node.configuration = {
         ...node.configuration,
@@ -228,11 +233,12 @@ describe('WaitForInputStepImpl', () => {
 
       await underTest.run();
 
-      expect(mockCreateExternalResumeApiKey).toHaveBeenCalled();
+      expect(mockMintHitlExternalResumeToken).toHaveBeenCalled();
       expect(mockStepExecutionRuntime.setInput).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
-          _hitlApiKeyId: 'api-key-id',
+          _hitlTokenHash: 'resume-token-hash',
+          _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
           message: 'Please approve',
         })
       );
@@ -240,7 +246,7 @@ describe('WaitForInputStepImpl', () => {
       expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledTimes(2);
     });
 
-    it('should persist the external resume API key id when notification delivery fails', async () => {
+    it('should persist the external resume token metadata when notification delivery fails', async () => {
       mockHasExternalHitlChannels.mockReturnValue(true);
       mockSendWaitForInputNotifications.mockRejectedValue(new Error('Slack connector failed'));
       node.configuration = {
@@ -257,7 +263,8 @@ describe('WaitForInputStepImpl', () => {
 
       expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith(
         expect.objectContaining({
-          _hitlApiKeyId: 'api-key-id',
+          _hitlTokenHash: 'resume-token-hash',
+          _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
         })
       );
     });
@@ -426,59 +433,18 @@ describe('WaitForInputStepImpl', () => {
   });
 
   describe('onCancel', () => {
-    it('invalidates the external resume API key when the step is cancelled', async () => {
-      const invalidateAsInternalUser = jest.fn().mockResolvedValue({});
-      mockDependencies = {
-        ...mockDependencies,
-        coreStart: {
-          security: {
-            authc: {
-              apiKeys: { invalidateAsInternalUser },
-            },
-          },
-        },
-      } as unknown as ContextDependencies;
-      underTest = new WaitForInputStepImpl(
-        node,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        workflowLogger,
-        mockConnectorExecutor,
-        mockDependencies
+    it('invalidates the external resume token when the step is cancelled', async () => {
+      await expect(underTest.onCancel()).resolves.toBeUndefined();
+      expect(mockInvalidateHitlExternalResumeTokenIfPresent).toHaveBeenCalledWith(
+        mockStepExecutionRuntime
       );
-      (mockStepExecutionRuntime as { stepExecution?: unknown }).stepExecution = {
-        input: { _hitlApiKeyId: 'api-key-id' },
-      };
-
-      await underTest.onCancel();
-
-      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['api-key-id'] });
     });
 
-    it('does nothing when no external resume API key was minted', async () => {
-      const invalidateAsInternalUser = jest.fn().mockResolvedValue({});
-      mockDependencies = {
-        ...mockDependencies,
-        coreStart: {
-          security: {
-            authc: {
-              apiKeys: { invalidateAsInternalUser },
-            },
-          },
-        },
-      } as unknown as ContextDependencies;
-      underTest = new WaitForInputStepImpl(
-        node,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        workflowLogger,
-        mockConnectorExecutor,
-        mockDependencies
+    it('still delegates cleanup when no external resume token was minted', async () => {
+      await expect(underTest.onCancel()).resolves.toBeUndefined();
+      expect(mockInvalidateHitlExternalResumeTokenIfPresent).toHaveBeenCalledWith(
+        mockStepExecutionRuntime
       );
-
-      await underTest.onCancel();
-
-      expect(invalidateAsInternalUser).not.toHaveBeenCalled();
     });
   });
 });

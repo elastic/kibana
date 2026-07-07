@@ -10,21 +10,18 @@
 import { buildExternalResumeUrl } from './build_external_resume_url';
 
 describe('buildExternalResumeUrl', () => {
-  const encodedApiKey = Buffer.from('api-key-id:secret').toString('base64');
-
-  it('builds a default-space resume URL with apiKey and approved flag', () => {
+  it('builds a default-space resume URL with token and approved flag', () => {
     const url = buildExternalResumeUrl({
       kibanaUrl: 'https://kibana.example',
       spaceId: 'default',
       executionId: 'exec-1',
-      apiKey: encodedApiKey,
+      stepId: 'step-exec-1',
+      token: 'resume-token',
       approved: true,
     });
 
     expect(url).toBe(
-      `https://kibana.example/api/workflows/executions/exec-1/resume/external?apiKey=${encodeURIComponent(
-        encodedApiKey
-      )}&approved=true`
+      'https://kibana.example/api/workflows/executions/exec-1/steps/step-exec-1/resume/external?token=resume-token&approved=true'
     );
   });
 
@@ -33,11 +30,14 @@ describe('buildExternalResumeUrl', () => {
       kibanaUrl: 'https://kibana.example',
       spaceId: 'marketing',
       executionId: 'exec-1',
-      apiKey: encodedApiKey,
+      stepId: 'step-exec-1',
+      token: 'resume-token',
       approved: false,
     });
 
-    expect(url).toContain('/s/marketing/api/workflows/executions/exec-1/resume/external');
+    expect(url).toContain(
+      '/s/marketing/api/workflows/executions/exec-1/steps/step-exec-1/resume/external'
+    );
     expect(url).toContain('approved=false');
   });
 });

@@ -13,7 +13,7 @@ x-codeSamples:
   - lang: curl
     source: |
       curl \
-        -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/resume/external?apiKey=${ENCODED_API_KEY}&approved=true"
+        -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/steps/{stepId}/resume/external?token=${RESUME_TOKEN}&approved=true"
   - lang: Console
     source: |
-      GET kbn://api/workflows/executions/{executionId}/resume/external?apiKey={encodedApiKey}&approved=true
+      GET kbn://api/workflows/executions/{executionId}/steps/{stepId}/resume/external?token={resumeToken}&approved=true

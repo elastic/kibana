@@ -1020,9 +1020,7 @@ export const WorkflowHitlTemplateContextSchema = z.object({
     .string()
     .max(MAX_HITL_EXTERNAL_LINK_LENGTH)
     .optional()
-    .describe(
-      'External GET resume URL with apiKey set. Append `&<field>=<value>` per with.schema.'
-    ),
+    .describe('External GET resume URL with token set. Append `&<field>=<value>` per with.schema.'),
 });
 
 export const WorkflowTemplatePersistedContextSchema = z.object({

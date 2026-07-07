@@ -10,20 +10,17 @@
 import { buildExternalResumeFormUrl } from './build_external_resume_form_url';
 
 describe('buildExternalResumeFormUrl', () => {
-  const encodedApiKey = Buffer.from('api-key-id:secret').toString('base64');
-
-  it('builds a default-space form URL with apiKey', () => {
+  it('builds a default-space form URL with token', () => {
     const url = buildExternalResumeFormUrl({
       kibanaUrl: 'https://kibana.example',
       spaceId: 'default',
       executionId: 'exec-1',
-      apiKey: encodedApiKey,
+      stepId: 'step-exec-1',
+      token: 'resume-token',
     });
 
     expect(url).toBe(
-      `https://kibana.example/api/workflows/executions/exec-1/resume/external/form?apiKey=${encodeURIComponent(
-        encodedApiKey
-      )}`
+      'https://kibana.example/api/workflows/executions/exec-1/steps/step-exec-1/resume/external/form?token=resume-token'
     );
   });
 
@@ -32,9 +29,12 @@ describe('buildExternalResumeFormUrl', () => {
       kibanaUrl: 'https://kibana.example',
       spaceId: 'marketing',
       executionId: 'exec-1',
-      apiKey: encodedApiKey,
+      stepId: 'step-exec-1',
+      token: 'resume-token',
     });
 
-    expect(url).toContain('/s/marketing/api/workflows/executions/exec-1/resume/external/form');
+    expect(url).toContain(
+      '/s/marketing/api/workflows/executions/exec-1/steps/step-exec-1/resume/external/form'
+    );
   });
 });

@@ -11,7 +11,8 @@ import {
   DEFAULT_WAIT_FOR_APPROVAL_APPROVE_LABEL,
   DEFAULT_WAIT_FOR_APPROVAL_REJECT_LABEL,
   DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
-  HITL_API_KEY_ID_INPUT_FIELD,
+  HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
+  HITL_TOKEN_HASH_INPUT_FIELD,
   isHitlExternalResumeEnabled,
   WAIT_FOR_APPROVAL_RESPONSE_SCHEMA,
 } from '@kbn/workflows';
@@ -30,8 +31,8 @@ import {
 } from '../hitl_notifications/send_wait_for_approval_notifications';
 import type { CancellableNode, NodeImplementation } from '../node_implementation';
 import {
-  invalidateHitlExternalResumeApiKeyIfPresent,
-  mintHitlExternalResumeApiKey,
+  invalidateHitlExternalResumeTokenIfPresent,
+  mintHitlExternalResumeToken,
 } from '../wait_for_input_step/hitl_external_resume_helpers';
 import { hasHitlWaitExpired } from '../wait_for_input_step/hitl_timeout_helpers';
 import {
@@ -51,11 +52,7 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
   ) {}
 
   async onCancel(): Promise<void> {
-    await invalidateHitlExternalResumeApiKeyIfPresent({
-      stepExecutionRuntime: this.stepExecutionRuntime,
-      dependencies: this.dependencies,
-      workflowLogger: this.workflowLogger,
-    });
+    invalidateHitlExternalResumeTokenIfPresent(this.stepExecutionRuntime);
   }
 
   async run(): Promise<void> {
@@ -113,15 +110,14 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
       }
 
       const timeout = this.node.configuration.timeout ?? DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT;
-      const apiKey = await mintHitlExternalResumeApiKey({
+      const resumeToken = mintHitlExternalResumeToken({
         stepExecutionRuntime: this.stepExecutionRuntime,
         execution,
-        stepId: this.node.stepId,
-        spaceId,
         timeout,
       });
 
-      stepInput[HITL_API_KEY_ID_INPUT_FIELD] = apiKey.id;
+      stepInput[HITL_TOKEN_HASH_INPUT_FIELD] = resumeToken.tokenHash;
+      stepInput[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD] = resumeToken.expiresAt;
       this.stepExecutionRuntime.setInput(stepInput);
 
       await this.sendExternalNotifications({
@@ -129,7 +125,7 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
         message,
         approveLabel,
         rejectLabel,
-        encodedApiKey: apiKey.encoded,
+        token: resumeToken.token,
         execution,
         spaceId,
       });
@@ -147,7 +143,7 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
     message,
     approveLabel,
     rejectLabel,
-    encodedApiKey,
+    token,
     execution,
     spaceId,
   }: {
@@ -157,7 +153,7 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
     message: string;
     approveLabel: string;
     rejectLabel: string;
-    encodedApiKey: string;
+    token: string;
     execution: ReturnType<WorkflowExecutionRuntimeManager['getWorkflowExecution']>;
     spaceId: string;
   }): Promise<void> {
@@ -165,7 +161,8 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
       kibanaUrl: getKibanaUrl(this.dependencies.coreStart, this.dependencies.cloudSetup),
       spaceId,
       executionId: execution.id,
-      encodedApiKey,
+      stepId: this.stepExecutionRuntime.stepExecutionId,
+      token,
     });
 
     await sendWaitForApprovalNotifications({
@@ -187,11 +184,7 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
     const startedAt = this.stepExecutionRuntime.stepExecution?.startedAt;
 
     if (resumeInput == null && hasHitlWaitExpired(startedAt, timeout)) {
-      await invalidateHitlExternalResumeApiKeyIfPresent({
-        stepExecutionRuntime: this.stepExecutionRuntime,
-        dependencies: this.dependencies,
-        workflowLogger: this.workflowLogger,
-      });
+      invalidateHitlExternalResumeTokenIfPresent(this.stepExecutionRuntime);
       this.stepExecutionRuntime.failStep(
         new ExecutionError({
           type: 'TimeoutError',
@@ -201,11 +194,7 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
       return;
     }
 
-    await invalidateHitlExternalResumeApiKeyIfPresent({
-      stepExecutionRuntime: this.stepExecutionRuntime,
-      dependencies: this.dependencies,
-      workflowLogger: this.workflowLogger,
-    });
+    invalidateHitlExternalResumeTokenIfPresent(this.stepExecutionRuntime);
 
     resumeHitlWaitStep({
       stepExecutionRuntime: this.stepExecutionRuntime,

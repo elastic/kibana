@@ -65,10 +65,8 @@ import type { z } from '@kbn/zod/v4';
 import {
   type ExternalResumeFormPageParams,
   type ExternalResumeViaGetParams,
-  type ExternalResumeWorkflowExecutionParams,
   type ExternalResumeWorkflowExecutionWithInputParams,
   getExternalResumeFormPage,
-  resumeWorkflowExecutionExternally,
   resumeWorkflowExecutionExternallyViaGet,
   resumeWorkflowExecutionExternallyWithInput,
 } from './external_resume/external_resume_service';
@@ -944,12 +942,6 @@ export class WorkflowsManagementApi {
     params: { page?: number; perPage?: number; includeReasoning?: boolean } = {}
   ): Promise<WaitForInputListResult> {
     return this.workflowsService.listWaitingForInputSteps(spaceId, params);
-  }
-
-  public async resumeWorkflowExecutionExternally(
-    params: ExternalResumeWorkflowExecutionParams
-  ): Promise<ResumeWorkflowExecutionResponseDto> {
-    return resumeWorkflowExecutionExternally(this.workflowsService, params);
   }
 
   public async resumeWorkflowExecutionExternallyViaGet(

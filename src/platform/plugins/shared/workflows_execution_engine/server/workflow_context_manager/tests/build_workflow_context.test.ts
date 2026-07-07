@@ -163,9 +163,9 @@ describe('buildWorkflowContext', () => {
         context: {
           hitl: {
             externalFormLink:
-              'http://localhost:5601/api/workflows/executions/ex-1/resume/external/form?apiKey=abc',
+              'http://localhost:5601/api/workflows/executions/ex-1/steps/step-1/resume/external/form?token=abc',
             externalQueryLink:
-              'http://localhost:5601/api/workflows/executions/ex-1/resume/external?apiKey=abc',
+              'http://localhost:5601/api/workflows/executions/ex-1/steps/step-1/resume/external?token=abc',
           },
         },
       };

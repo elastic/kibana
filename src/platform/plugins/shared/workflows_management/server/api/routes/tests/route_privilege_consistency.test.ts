@@ -349,30 +349,30 @@ const ROUTE_REQUEST_FIXTURES: Record<string, { params?: any; body?: any; query?:
     params: { executionId: 'test-exec-id' },
     body: { input: {} },
   },
-  'GET:/api/workflows/executions/{executionId}/resume/external/form': {
-    params: { executionId: 'test-exec-id' },
-    query: { apiKey: 'test-api-key' },
+  'GET:/api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form': {
+    params: { executionId: 'test-exec-id', stepId: 'test-step-exec-id' },
+    query: { token: 'test-token' },
   },
-  'GET:/api/workflows/executions/{executionId}/resume/external': {
-    params: { executionId: 'test-exec-id' },
-    query: { apiKey: 'test-api-key', approved: true },
+  'GET:/api/workflows/executions/{executionId}/steps/{stepId}/resume/external': {
+    params: { executionId: 'test-exec-id', stepId: 'test-step-exec-id' },
+    query: { token: 'test-token', approved: true },
   },
-  'POST:/api/workflows/executions/{executionId}/resume/external': {
-    params: { executionId: 'test-exec-id' },
-    query: { apiKey: 'test-api-key' },
+  'POST:/api/workflows/executions/{executionId}/steps/{stepId}/resume/external': {
+    params: { executionId: 'test-exec-id', stepId: 'test-step-exec-id' },
+    query: { token: 'test-token' },
     body: {},
   },
 };
 
-/** Public routes that authenticate via external resume API key, not Kibana privileges. */
-const EXTERNAL_API_KEY_AUTH_ROUTES = new Set([
-  'GET:/api/workflows/executions/{executionId}/resume/external/form',
-  'GET:/api/workflows/executions/{executionId}/resume/external',
-  'POST:/api/workflows/executions/{executionId}/resume/external',
+/** Public routes that authenticate via external resume token, not Kibana privileges. */
+const EXTERNAL_TOKEN_AUTH_ROUTES = new Set([
+  'GET:/api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form',
+  'GET:/api/workflows/executions/{executionId}/steps/{stepId}/resume/external',
+  'POST:/api/workflows/executions/{executionId}/steps/{stepId}/resume/external',
 ]);
 
 const PRIVILEGED_ROUTE_KEYS = Object.keys(ROUTE_REQUEST_FIXTURES).filter(
-  (routeKey) => !EXTERNAL_API_KEY_AUTH_ROUTES.has(routeKey)
+  (routeKey) => !EXTERNAL_TOKEN_AUTH_ROUTES.has(routeKey)
 );
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -668,7 +668,7 @@ describe('Route privilege/ES-operation consistency', () => {
 
   it('should have security config on every route', () => {
     for (const [routeKey, route] of capturedRoutes) {
-      if (EXTERNAL_API_KEY_AUTH_ROUTES.has(routeKey)) {
+      if (EXTERNAL_TOKEN_AUTH_ROUTES.has(routeKey)) {
         expect(route.security?.authc?.enabled).toBe(false);
         expect(route.security?.authz?.enabled).toBe(false);
       } else {
@@ -678,9 +678,9 @@ describe('Route privilege/ES-operation consistency', () => {
     }
   });
 
-  describe('external API key auth routes', () => {
-    it.each([...EXTERNAL_API_KEY_AUTH_ROUTES])(
-      '%s: disables Kibana session auth in favor of API key auth',
+  describe('external token auth routes', () => {
+    it.each([...EXTERNAL_TOKEN_AUTH_ROUTES])(
+      '%s: disables Kibana session auth in favor of token auth',
       (routeKey) => {
         const route = capturedRoutes.get(routeKey);
         expect(route).toBeDefined();

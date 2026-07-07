@@ -9,9 +9,10 @@
 
 import {
   DEFAULT_WAIT_FOR_INPUT_TIMEOUT,
-  HITL_API_KEY_ID_INPUT_FIELD,
   HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY,
+  HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
+  HITL_TOKEN_HASH_INPUT_FIELD,
   isHitlExternalResumeEnabled,
 } from '@kbn/workflows';
 import type { WaitForInputGraphNode } from '@kbn/workflows/graph';
@@ -21,8 +22,8 @@ import {
   ExecutionError,
 } from '@kbn/workflows/server';
 import {
-  invalidateHitlExternalResumeApiKeyIfPresent,
-  mintHitlExternalResumeApiKey,
+  invalidateHitlExternalResumeTokenIfPresent,
+  mintHitlExternalResumeToken,
 } from './hitl_external_resume_helpers';
 import { hasHitlWaitExpired } from './hitl_timeout_helpers';
 import { resumeHitlWaitStep, shouldSkipHitlWaitEntry, tryEnterHitlWait } from './hitl_wait_helpers';
@@ -47,11 +48,7 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
   ) {}
 
   async onCancel(): Promise<void> {
-    await invalidateHitlExternalResumeApiKeyIfPresent({
-      stepExecutionRuntime: this.stepExecutionRuntime,
-      dependencies: this.dependencies,
-      workflowLogger: this.workflowLogger,
-    });
+    invalidateHitlExternalResumeTokenIfPresent(this.stepExecutionRuntime);
   }
 
   async run(): Promise<void> {
@@ -106,15 +103,14 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
       }
 
       const timeout = this.node.configuration.timeout ?? DEFAULT_WAIT_FOR_INPUT_TIMEOUT;
-      const apiKey = await mintHitlExternalResumeApiKey({
+      const resumeToken = mintHitlExternalResumeToken({
         stepExecutionRuntime: this.stepExecutionRuntime,
         execution,
-        stepId: this.node.stepId,
-        spaceId,
         timeout,
       });
 
-      stepInput[HITL_API_KEY_ID_INPUT_FIELD] = apiKey.id;
+      stepInput[HITL_TOKEN_HASH_INPUT_FIELD] = resumeToken.tokenHash;
+      stepInput[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD] = resumeToken.expiresAt;
       this.stepExecutionRuntime.setInput(stepInput);
 
       const kibanaUrl = getKibanaUrl(this.dependencies.coreStart, this.dependencies.cloudSetup);
@@ -122,13 +118,15 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
         kibanaUrl,
         spaceId,
         executionId: execution.id,
-        apiKey: apiKey.encoded,
+        stepId: this.stepExecutionRuntime.stepExecutionId,
+        token: resumeToken.token,
       });
       const queryLink = buildExternalResumeUrl({
         kibanaUrl,
         spaceId,
         executionId: execution.id,
-        apiKey: apiKey.encoded,
+        stepId: this.stepExecutionRuntime.stepExecutionId,
+        token: resumeToken.token,
       });
 
       const hitlTemplateContext = {
@@ -166,11 +164,7 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
     const startedAt = this.stepExecutionRuntime.stepExecution?.startedAt;
 
     if (resumeInput == null && hasHitlWaitExpired(startedAt, timeout)) {
-      await invalidateHitlExternalResumeApiKeyIfPresent({
-        stepExecutionRuntime: this.stepExecutionRuntime,
-        dependencies: this.dependencies,
-        workflowLogger: this.workflowLogger,
-      });
+      invalidateHitlExternalResumeTokenIfPresent(this.stepExecutionRuntime);
       this.stepExecutionRuntime.failStep(
         new ExecutionError({
           type: 'TimeoutError',
@@ -180,11 +174,7 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
       return;
     }
 
-    await invalidateHitlExternalResumeApiKeyIfPresent({
-      stepExecutionRuntime: this.stepExecutionRuntime,
-      dependencies: this.dependencies,
-      workflowLogger: this.workflowLogger,
-    });
+    invalidateHitlExternalResumeTokenIfPresent(this.stepExecutionRuntime);
 
     resumeHitlWaitStep({
       stepExecutionRuntime: this.stepExecutionRuntime,

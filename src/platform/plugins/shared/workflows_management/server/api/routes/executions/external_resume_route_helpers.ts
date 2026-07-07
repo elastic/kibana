@@ -19,11 +19,11 @@ import { AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 export const EXTERNAL_RESUME_SECURITY = {
   authc: {
     enabled: false,
-    reason: 'External resume uses a short-lived API key token instead of a Kibana session.',
+    reason: 'External resume uses a short-lived resume token instead of a Kibana session.',
   },
   authz: {
     enabled: false,
-    reason: 'External resume authorizes by matching the API key metadata to the execution.',
+    reason: 'External resume authorizes by matching the resume token hash to the step execution.',
   },
 } as const;
 
@@ -45,8 +45,18 @@ const EXTERNAL_RESUME_UNEXPECTED_ERROR_MESSAGE = i18n.translate(
   }
 );
 
+const EXTERNAL_RESUME_INVALID_LINK_MESSAGE = i18n.translate(
+  'workflowsManagement.externalResume.invalidLink',
+  {
+    defaultMessage:
+      'This workflow response link is no longer valid. Request a new link from the workflow owner.',
+  }
+);
+
 const EXTERNAL_RESUME_HTML_HEADERS = {
   'content-type': 'text/html; charset=utf-8',
+  'cache-control': 'no-store',
+  'referrer-policy': 'no-referrer',
   // Belt-and-suspenders: block script execution if schema-derived markup is ever mishandled.
   'content-security-policy': "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'",
 } as const;
@@ -64,7 +74,12 @@ export function handleExternalResumeError(
   logger?: Logger
 ) {
   if (error instanceof ExternalResumeError) {
-    return htmlError(response, error.statusCode, error.message);
+    logger?.debug(() => `External resume failed: ${error.message}`);
+    return htmlError(
+      response,
+      error.expose ? error.statusCode : 401,
+      error.expose ? error.message : EXTERNAL_RESUME_INVALID_LINK_MESSAGE
+    );
   }
 
   logger?.debug(

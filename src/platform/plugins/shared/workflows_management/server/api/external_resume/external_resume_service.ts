@@ -7,18 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus, HITL_API_KEY_ID_INPUT_FIELD, isHitlWaitStepType } from '@kbn/workflows';
+import { timingSafeEqual } from 'node:crypto';
+import {
+  ExecutionStatus,
+  HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
+  HITL_TOKEN_HASH_INPUT_FIELD,
+  isHitlWaitStepType,
+} from '@kbn/workflows';
 import type { ResumeWorkflowExecutionResponseDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
-import {
-  EXTERNAL_RESUME_API_PATH,
-  getAuthenticatedExternalResumeApiKeyId,
-} from '@kbn/workflows/server';
+import { computeTokenHmac, EXTERNAL_RESUME_API_PATH } from '@kbn/workflows/server';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import { createExternalResumeApiKeyRequest } from './create_external_resume_api_key_request';
 import { ExternalResumeError } from './external_resume_error';
 import {
   buildExternalResumeFormFieldsHtml,
@@ -28,75 +30,51 @@ import {
 import { renderExternalResumeFormPage } from './render_external_resume_page';
 import type { WorkflowsService } from '../workflows_management_service';
 
-export interface ExternalResumeWorkflowExecutionParams {
-  apiKey: string;
-  approved: boolean;
-  executionId: string;
-  spaceId: string;
-}
-
 export interface ExternalResumeViaGetParams {
-  apiKey: string;
+  token: string;
   executionId: string;
+  stepId: string;
   spaceId: string;
   query: Record<string, unknown>;
 }
 
 export interface ExternalResumeWorkflowExecutionWithInputParams {
-  apiKey: string;
+  token: string;
   executionId: string;
+  stepId: string;
   spaceId: string;
   input: Record<string, unknown>;
 }
 
 export interface ExternalResumeFormPageParams {
-  apiKey: string;
+  token: string;
   executionId: string;
+  stepId: string;
   spaceId: string;
   basePath: string;
 }
 
-interface ApiKeyAuthenticateResponse {
-  api_key?: {
-    id?: string;
-    name?: string;
-  };
-}
-
 interface ResolvedExternalResumeContext {
-  authenticatedApiKeyId: string;
-  execution: NonNullable<Awaited<ReturnType<WorkflowsService['getWorkflowExecution']>>>;
   stepExecution: WorkflowStepExecutionDto;
-}
-
-export async function resumeWorkflowExecutionExternally(
-  workflowsService: WorkflowsService,
-  { apiKey, approved, executionId, spaceId }: ExternalResumeWorkflowExecutionParams
-): Promise<ResumeWorkflowExecutionResponseDto> {
-  return resumeWorkflowExecutionExternallyViaGet(workflowsService, {
-    apiKey,
-    executionId,
-    spaceId,
-    query: { apiKey, approved },
-  });
 }
 
 export async function resumeWorkflowExecutionExternallyViaGet(
   workflowsService: WorkflowsService,
-  { apiKey, executionId, spaceId, query }: ExternalResumeViaGetParams
+  { token, executionId, stepId, spaceId, query }: ExternalResumeViaGetParams
 ): Promise<ResumeWorkflowExecutionResponseDto> {
-  const { authenticatedApiKeyId, stepExecution } = await resolveExternalResumeContext(
-    workflowsService,
-    { apiKey, executionId, spaceId }
-  );
+  const { stepExecution } = await resolveExternalResumeContext(workflowsService, {
+    token,
+    executionId,
+    stepId,
+    spaceId,
+  });
 
   if (stepExecution.stepType === 'waitForApproval') {
     if (!Object.hasOwn(query, 'approved')) {
-      throw new ExternalResumeError('approved query parameter is required', 400);
+      throw new ExternalResumeError('approved query parameter is required', 400, true);
     }
 
     return resumeWorkflowExecutionWithResolvedContext(workflowsService, {
-      authenticatedApiKeyId,
       stepExecutionId: stepExecution.id,
       executionId,
       spaceId,
@@ -110,14 +88,14 @@ export async function resumeWorkflowExecutionExternallyViaGet(
     if (Object.keys(queryInput).length === 0) {
       throw new ExternalResumeError(
         'Query-param resume requires at least one schema field; use the form link instead.',
-        400
+        400,
+        true
       );
     }
 
     const validatedInput = parseExternalResumeFormSubmission(queryInput, schema);
 
     return resumeWorkflowExecutionWithResolvedContext(workflowsService, {
-      authenticatedApiKeyId,
       stepExecutionId: stepExecution.id,
       executionId,
       spaceId,
@@ -125,22 +103,25 @@ export async function resumeWorkflowExecutionExternallyViaGet(
     });
   }
 
-  throw new ExternalResumeError('This workflow step does not support external resume', 400);
+  throw new ExternalResumeError('This workflow step does not support external resume', 400, true);
 }
 
 export async function resumeWorkflowExecutionExternallyWithInput(
   workflowsService: WorkflowsService,
-  { apiKey, executionId, spaceId, input }: ExternalResumeWorkflowExecutionWithInputParams
+  { token, executionId, stepId, spaceId, input }: ExternalResumeWorkflowExecutionWithInputParams
 ): Promise<ResumeWorkflowExecutionResponseDto> {
-  const { authenticatedApiKeyId, stepExecution } = await resolveExternalResumeContext(
-    workflowsService,
-    { apiKey, executionId, spaceId }
-  );
+  const { stepExecution } = await resolveExternalResumeContext(workflowsService, {
+    token,
+    executionId,
+    stepId,
+    spaceId,
+  });
 
   if (stepExecution.stepType !== 'waitForInput') {
     throw new ExternalResumeError(
       'This workflow step does not accept structured external input',
-      400
+      400,
+      true
     );
   }
 
@@ -148,7 +129,6 @@ export async function resumeWorkflowExecutionExternallyWithInput(
   const validatedInput = parseExternalResumeFormSubmission(input, schema);
 
   return resumeWorkflowExecutionWithResolvedContext(workflowsService, {
-    authenticatedApiKeyId,
     stepExecutionId: stepExecution.id,
     executionId,
     spaceId,
@@ -158,16 +138,21 @@ export async function resumeWorkflowExecutionExternallyWithInput(
 
 export async function getExternalResumeFormPage(
   workflowsService: WorkflowsService,
-  { apiKey, executionId, spaceId, basePath }: ExternalResumeFormPageParams
+  { token, executionId, stepId, spaceId, basePath }: ExternalResumeFormPageParams
 ): Promise<string> {
   const { stepExecution } = await resolveExternalResumeContext(workflowsService, {
-    apiKey,
+    token,
     executionId,
+    stepId,
     spaceId,
   });
 
   if (stepExecution.stepType !== 'waitForInput') {
-    throw new ExternalResumeError('This workflow step does not expose an external input form', 400);
+    throw new ExternalResumeError(
+      'This workflow step does not expose an external input form',
+      400,
+      true
+    );
   }
 
   const stepInput = getStepInputRecord(stepExecution.input);
@@ -176,7 +161,7 @@ export async function getExternalResumeFormPage(
 
   return renderExternalResumeFormPage({
     message,
-    formActionUrl: buildExternalResumePublicPath({ basePath, executionId, apiKey }),
+    formActionUrl: buildExternalResumePublicPath({ basePath, executionId, stepId, token }),
     fieldsHtml: buildExternalResumeFormFieldsHtml(schema),
   });
 }
@@ -184,24 +169,26 @@ export async function getExternalResumeFormPage(
 export function buildExternalResumePublicPath({
   basePath,
   executionId,
-  apiKey,
+  stepId,
+  token,
   approved,
 }: {
   basePath: string;
   executionId: string;
-  apiKey?: string;
+  stepId: string;
+  token: string;
   approved?: boolean;
 }): string {
-  const path = EXTERNAL_RESUME_API_PATH.replace('{executionId}', executionId);
+  const path = EXTERNAL_RESUME_API_PATH.replace('{executionId}', executionId).replace(
+    '{stepId}',
+    stepId
+  );
   const params = new URLSearchParams();
-  if (apiKey) {
-    params.set('apiKey', apiKey);
-  }
+  params.set('token', token);
   if (approved !== undefined) {
     params.set('approved', String(approved));
   }
-  const query = params.toString();
-  return query.length > 0 ? `${basePath}${path}?${query}` : `${basePath}${path}`;
+  return `${basePath}${path}?${params.toString()}`;
 }
 
 export function parseExternalResumeFormSubmission(
@@ -213,84 +200,78 @@ export function parseExternalResumeFormSubmission(
     return validateExternalResumeInput(parsed, schema);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Invalid form submission';
-    throw new ExternalResumeError(message, 400);
+    throw new ExternalResumeError(message, 400, true);
   }
 }
 
 async function resolveExternalResumeContext(
   workflowsService: WorkflowsService,
   {
-    apiKey,
+    token,
     executionId,
+    stepId,
     spaceId,
   }: {
-    apiKey: string;
+    token: string;
     executionId: string;
+    stepId: string;
     spaceId: string;
   }
 ): Promise<ResolvedExternalResumeContext> {
-  const coreStart = await workflowsService.getCoreStart();
-  const apiKeyRequest = createExternalResumeApiKeyRequest(apiKey, spaceId);
-
-  let authentication: ApiKeyAuthenticateResponse;
-  try {
-    authentication = (await coreStart.elasticsearch.client
-      .asScoped(apiKeyRequest)
-      .asCurrentUser.security.authenticate()) as ApiKeyAuthenticateResponse;
-  } catch {
-    throw new ExternalResumeError('Invalid external resume API key', 401);
-  }
-
-  const authenticatedApiKeyId = getAuthenticatedExternalResumeApiKeyId(authentication);
-  if (!authenticatedApiKeyId) {
-    throw new ExternalResumeError('Invalid external resume API key', 401);
-  }
-
-  const execution = await workflowsService.getWorkflowExecution(executionId, spaceId, {
-    includeInput: true,
-  });
-
-  if (!execution) {
+  const stepExecution = await workflowsService.getStepExecution(
+    { executionId, id: stepId },
+    spaceId
+  );
+  if (!stepExecution) {
     throw new ExternalResumeError('Workflow execution not found', 404);
   }
 
-  const lookup = getExternalResumeStepExecution(execution, authenticatedApiKeyId);
+  const lookup = validateExternalResumeStepExecution(stepExecution);
 
   if ('reason' in lookup) {
-    if (lookup.reason === 'api_key_mismatch') {
-      throw new ExternalResumeError('API key does not match this workflow execution', 403);
-    }
     throw new ExternalResumeError('This workflow response link is no longer valid', 409);
   }
 
-  const { stepExecution } = lookup;
-
-  if (stepExecution.finishedAt || stepExecution.error) {
-    throw new ExternalResumeError('This workflow response link is no longer valid', 409);
+  const stepInput = getStepInputRecord(stepExecution.input);
+  const expiresAt = stepInput[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD];
+  const expiresAtMs = typeof expiresAt === 'string' ? Date.parse(expiresAt) : NaN;
+  if (!Number.isFinite(expiresAtMs) || expiresAtMs <= Date.now()) {
+    throw new ExternalResumeError('Link expired or already used', 401);
   }
 
-  return { authenticatedApiKeyId, execution, stepExecution };
+  const storedHash = stepInput[HITL_TOKEN_HASH_INPUT_FIELD];
+  if (typeof storedHash !== 'string') {
+    throw new ExternalResumeError('Invalid resume token', 401);
+  }
+
+  const computed = Buffer.from(
+    computeTokenHmac(token, executionId, stepId, String(expiresAt)),
+    'hex'
+  );
+  const stored = Buffer.from(storedHash, 'hex');
+  if (computed.length !== stored.length || !timingSafeEqual(computed, stored)) {
+    throw new ExternalResumeError('Invalid resume token', 401);
+  }
+
+  return { stepExecution };
 }
 
 async function resumeWorkflowExecutionWithResolvedContext(
   workflowsService: WorkflowsService,
   {
-    authenticatedApiKeyId,
     stepExecutionId,
     executionId,
     spaceId,
     input,
   }: {
-    authenticatedApiKeyId: string;
     stepExecutionId: string;
     executionId: string;
     spaceId: string;
     input: Record<string, unknown>;
   }
 ): Promise<ResumeWorkflowExecutionResponseDto> {
-  const coreStart = await workflowsService.getCoreStart();
   const workflowsExecutionEngine = await workflowsService.getWorkflowsExecutionEngine();
-  const resumedBy = `api_key:${authenticatedApiKeyId}`;
+  const resumedBy = `external_resume:${stepExecutionId}`;
 
   const claimed = await workflowsService.claimHitlStepForExternalResume(
     stepExecutionId,
@@ -302,19 +283,13 @@ async function resumeWorkflowExecutionWithResolvedContext(
   }
 
   try {
-    const result = await workflowsExecutionEngine.resumeWorkflowExecution(
+    return await workflowsExecutionEngine.resumeWorkflowExecution(
       executionId,
       spaceId,
       input,
       undefined,
       { resumedBy }
     );
-
-    await coreStart.security.authc.apiKeys.invalidateAsInternalUser({
-      ids: [authenticatedApiKeyId],
-    });
-
-    return result;
   } catch (error) {
     if (error instanceof WorkflowExecutionNotFoundError) {
       throw new ExternalResumeError('Workflow execution not found', 404);
@@ -326,54 +301,27 @@ async function resumeWorkflowExecutionWithResolvedContext(
   }
 }
 
-type ExternalResumeStepLookupFailureReason =
-  | 'execution_not_waiting'
-  | 'execution_finished'
-  | 'api_key_mismatch';
+type ExternalResumeStepLookupFailureReason = 'step_not_waiting' | 'step_finished';
 
 type ExternalResumeStepLookupResult =
   | { stepExecution: WorkflowStepExecutionDto }
   | { reason: ExternalResumeStepLookupFailureReason };
 
-function getExternalResumeStepExecution(
-  execution: {
-    id: string;
-    status: ExecutionStatus;
-    finishedAt?: string;
-    stepExecutions: WorkflowStepExecutionDto[];
-  },
-  apiKeyId: string
+function validateExternalResumeStepExecution(
+  stepExecution: WorkflowStepExecutionDto
 ): ExternalResumeStepLookupResult {
-  if (execution.status !== ExecutionStatus.WAITING_FOR_INPUT) {
-    return { reason: 'execution_not_waiting' };
+  if (
+    !isHitlWaitStepType(stepExecution.stepType) ||
+    stepExecution.status !== ExecutionStatus.WAITING_FOR_INPUT
+  ) {
+    return { reason: 'step_not_waiting' };
   }
 
-  if (execution.finishedAt) {
-    return { reason: 'execution_finished' };
-  }
-
-  const stepExecution = execution.stepExecutions.find(
-    (candidate) =>
-      candidate.workflowRunId === execution.id &&
-      isHitlWaitStepType(candidate.stepType) &&
-      candidate.status === ExecutionStatus.WAITING_FOR_INPUT &&
-      getExternalResumeApiKeyId(candidate.input) === apiKeyId
-  );
-
-  if (!stepExecution) {
-    return { reason: 'api_key_mismatch' };
+  if (stepExecution.finishedAt || stepExecution.error) {
+    return { reason: 'step_finished' };
   }
 
   return { stepExecution };
-}
-
-export function getExternalResumeApiKeyId(input: unknown): string | undefined {
-  if (input == null || typeof input !== 'object' || !(HITL_API_KEY_ID_INPUT_FIELD in input)) {
-    return undefined;
-  }
-
-  const apiKeyId = (input as Record<string, unknown>)[HITL_API_KEY_ID_INPUT_FIELD];
-  return typeof apiKeyId === 'string' && apiKeyId.length > 0 ? apiKeyId : undefined;
 }
 
 function getStepInputRecord(input: unknown): Record<string, unknown> {
@@ -410,7 +358,7 @@ function getExternalResumeInputFromQuery(
   const input: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(query)) {
-    if (key !== 'apiKey' && allowed.has(key)) {
+    if (key !== 'token' && allowed.has(key)) {
       input[key] = normalizeExternalResumeQueryValue(value, properties[key]);
     }
   }
@@ -427,43 +375,13 @@ export function parseApprovedQueryParam(value: unknown): boolean {
     return false;
   }
 
-  throw new ExternalResumeError('approved query parameter must be true or false', 400);
+  throw new ExternalResumeError('approved query parameter must be true or false', 400, true);
 }
 
-export function parseExternalResumeApiKeyFromAuthorization(
-  authorization: string | undefined
-): string {
-  const prefix = 'ApiKey ';
-  if (authorization == null || !authorization.startsWith(prefix)) {
-    throw new ExternalResumeError('Missing or invalid Authorization header', 401);
+export function resolveExternalResumeCredentials(query: { token?: string }): { token: string } {
+  const { token } = query;
+  if (typeof token !== 'string' || token.length === 0) {
+    throw new ExternalResumeError('token query parameter is required', 401);
   }
-
-  const apiKey = authorization.slice(prefix.length).trim();
-  if (apiKey.length === 0) {
-    throw new ExternalResumeError('Missing or invalid Authorization header', 401);
-  }
-
-  return apiKey;
-}
-
-export function resolveExternalResumeApiKey({
-  authorization,
-  queryApiKey,
-}: {
-  authorization?: string | string[];
-  queryApiKey?: string;
-}): string {
-  const authorizationHeader = Array.isArray(authorization) ? authorization[0] : authorization;
-  if (authorizationHeader != null && authorizationHeader.trim().length > 0) {
-    return parseExternalResumeApiKeyFromAuthorization(authorizationHeader);
-  }
-
-  if (typeof queryApiKey === 'string' && queryApiKey.length > 0) {
-    return queryApiKey;
-  }
-
-  throw new ExternalResumeError(
-    'External resume API key must be provided via Authorization header or apiKey query parameter',
-    401
-  );
+  return { token };
 }

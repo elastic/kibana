@@ -8,7 +8,11 @@
  */
 
 export class ExternalResumeError extends Error {
-  constructor(message: string, public readonly statusCode: number) {
+  constructor(
+    message: string,
+    public readonly statusCode: number,
+    public readonly expose: boolean = false
+  ) {
     super(message);
     this.name = 'ExternalResumeError';
   }

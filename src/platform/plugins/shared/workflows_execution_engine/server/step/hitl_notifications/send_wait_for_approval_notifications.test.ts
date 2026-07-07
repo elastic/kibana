@@ -37,18 +37,20 @@ describe('send_wait_for_approval_notifications', () => {
   });
 
   describe('buildWaitForApprovalResumeLinks', () => {
-    it('builds approve and reject URLs with encoded apiKey', () => {
+    it('builds approve and reject URLs with the resume token', () => {
       const links = buildWaitForApprovalResumeLinks({
         kibanaUrl: 'https://kibana.example',
         spaceId: 'default',
         executionId: 'exec-1',
-        encodedApiKey: 'encoded-api-key',
+        stepId: 'step-exec-1',
+        token: 'resume-token',
       });
 
       expect(links.approveUrl).toContain('approved=true');
       expect(links.rejectUrl).toContain('approved=false');
-      expect(links.approveUrl).toContain('apiKey=encoded-api-key');
-      expect(links.rejectUrl).toContain('apiKey=encoded-api-key');
+      expect(links.approveUrl).toContain('/steps/step-exec-1/resume/external');
+      expect(links.approveUrl).toContain('token=resume-token');
+      expect(links.rejectUrl).toContain('token=resume-token');
     });
   });
 
@@ -61,8 +63,8 @@ describe('send_wait_for_approval_notifications', () => {
     it('sends webhook slack notification with mrkdwn-safe resume links', async () => {
       const execute = jest.fn().mockResolvedValue({ status: 'ok' });
       const resumeLinksWithQuery = {
-        approveUrl: 'https://kibana.example/approve?apiKey=abc&approved=true',
-        rejectUrl: 'https://kibana.example/reject?apiKey=abc&approved=false',
+        approveUrl: 'https://kibana.example/approve?token=abc&approved=true',
+        rejectUrl: 'https://kibana.example/reject?token=abc&approved=false',
       };
 
       await sendWaitForApprovalNotifications({
@@ -81,7 +83,7 @@ describe('send_wait_for_approval_notifications', () => {
       expect(execute.mock.calls[0][0].connectorType).toBe('slack');
       expect(execute.mock.calls[0][0].input.message).toContain('&amp;approved=true');
       expect(execute.mock.calls[0][0].input.message).toContain(
-        '<https://kibana.example/approve?apiKey=abc&amp;approved=true|Approve>'
+        '<https://kibana.example/approve?token=abc&amp;approved=true|Approve>'
       );
     });
 

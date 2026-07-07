@@ -9,8 +9,8 @@
 
 export const DEFAULT_WAIT_FOR_INPUT_TIMEOUT = '72h' as const;
 
-/** Max length for encoded Elasticsearch API keys in external resume URLs. */
-export const MAX_HITL_EXTERNAL_RESUME_API_KEY_LENGTH = 1024 as const;
+/** Max length for external resume tokens in HITL URLs. */
+export const MAX_HITL_EXTERNAL_RESUME_TOKEN_LENGTH = 128 as const;
 
 /** Max length for connector saved-object id / name in HITL channel config. */
 export const MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH = 512 as const;
@@ -36,8 +36,11 @@ export const MAX_HITL_GRAPH_NODE_ID_LENGTH = 255 as const;
 /** Max length for keys in dynamic waitForInput response records. */
 export const MAX_HITL_RESPONSE_FIELD_KEY_LENGTH = 512 as const;
 
-/** Internal `stepExecution.input` field storing the external HITL resume API key id. */
-export const HITL_API_KEY_ID_INPUT_FIELD = '_hitlApiKeyId' as const;
+/** Internal `stepExecution.input` field storing the external HITL resume token hash. */
+export const HITL_TOKEN_HASH_INPUT_FIELD = '_hitlTokenHash' as const;
+
+/** Internal `stepExecution.input` field storing the external HITL resume token expiry. */
+export const HITL_TOKEN_EXPIRES_AT_INPUT_FIELD = '_hitlTokenExpiresAt' as const;
 
 /** Workflow context path: `context.hitl.externalFormLink`. */
 export const HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY = 'externalFormLink' as const;

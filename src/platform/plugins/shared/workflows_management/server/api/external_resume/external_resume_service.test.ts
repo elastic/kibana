@@ -7,118 +7,318 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
-import { ExecutionStatus } from '@kbn/workflows';
-import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
+  HITL_TOKEN_HASH_INPUT_FIELD,
+} from '@kbn/workflows';
+import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { WorkflowExecutionInvalidStatusError } from '@kbn/workflows/common/errors';
+import { computeTokenHmac } from '@kbn/workflows/server';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { ExternalResumeError } from './external_resume_error';
 import {
   buildExternalResumePublicPath,
   getExternalResumeFormPage,
   parseApprovedQueryParam,
-  parseExternalResumeApiKeyFromAuthorization,
-  resolveExternalResumeApiKey,
-  resumeWorkflowExecutionExternally,
+  resolveExternalResumeCredentials,
   resumeWorkflowExecutionExternallyViaGet,
   resumeWorkflowExecutionExternallyWithInput,
 } from './external_resume_service';
 import type { WorkflowsService } from '../workflows_management_service';
 
-const ENCODED_API_KEY = Buffer.from('api-key-id:secret').toString('base64');
+const TOKEN = 'resume-token';
+const FUTURE_DATE = '2999-01-01T00:00:00.000Z';
+const EXEC_ID = 'exec-1';
+const STEP_EXEC_ID = 'step-exec-1';
+const TOKEN_HASH = computeTokenHmac(TOKEN, EXEC_ID, STEP_EXEC_ID, FUTURE_DATE);
 
-describe('resumeWorkflowExecutionExternally', () => {
-  const invalidateAsInternalUser = jest.fn();
+function createStepExecution(
+  overrides: Partial<EsWorkflowStepExecution> = {}
+): EsWorkflowStepExecution {
+  return {
+    id: 'step-exec-1',
+    workflowRunId: 'exec-1',
+    spaceId: 'default',
+    stepId: 'request-input',
+    stepType: 'waitForInput',
+    status: ExecutionStatus.WAITING_FOR_INPUT,
+    input: {
+      [HITL_TOKEN_HASH_INPUT_FIELD]: TOKEN_HASH,
+      [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: FUTURE_DATE,
+      schema: {
+        type: 'object',
+        properties: {
+          severity: { type: 'string', title: 'Severity' },
+        },
+      },
+    },
+    ...overrides,
+  } as EsWorkflowStepExecution;
+}
 
+describe('external resume service', () => {
   const workflowsService = {
-    getCoreStart: jest.fn(),
-    getWorkflowExecution: jest.fn(),
+    getStepExecution: jest.fn(),
     getWorkflowsExecutionEngine: jest.fn(),
     claimHitlStepForExternalResume: jest.fn(),
   } as unknown as jest.Mocked<WorkflowsService>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    const coreStart = coreMock.createStart();
-    invalidateAsInternalUser.mockResolvedValue({});
-    coreStart.security.authc.apiKeys.invalidateAsInternalUser = invalidateAsInternalUser;
-    coreStart.elasticsearch.client.asScoped = jest.fn().mockReturnValue({
-      asCurrentUser: {
-        security: {
-          authenticate: jest.fn().mockResolvedValue({
-            api_key: {
-              id: 'api-key-id',
-            },
-          }),
-        },
-      },
-    });
-    workflowsService.getCoreStart.mockResolvedValue(coreStart);
+    workflowsService.getStepExecution.mockResolvedValue(createStepExecution());
     workflowsService.claimHitlStepForExternalResume.mockResolvedValue(true);
-    workflowsService.getWorkflowExecution.mockResolvedValue({
-      id: 'exec-1',
-      status: ExecutionStatus.WAITING_FOR_INPUT,
-      stepExecutions: [
-        {
-          id: 'step-exec-1',
-          workflowRunId: 'exec-1',
-          stepId: 'request-approval',
-          stepType: 'waitForApproval',
-          status: ExecutionStatus.WAITING_FOR_INPUT,
-          input: {
-            _hitlApiKeyId: 'api-key-id',
-          },
-        } as unknown as WorkflowStepExecutionDto,
-      ],
-    } as unknown as WorkflowExecutionDto);
     workflowsService.getWorkflowsExecutionEngine.mockResolvedValue({
-      resumeWorkflowExecution: jest.fn().mockResolvedValue({ resumedBy: 'api_key:api-key-id' }),
+      resumeWorkflowExecution: jest.fn().mockResolvedValue({
+        resumedBy: 'external_resume:step-exec-1',
+      }),
     } as unknown as WorkflowsExecutionEnginePluginStart);
   });
 
-  it('resumes a waiting step after authenticating the API key', async () => {
-    await resumeWorkflowExecutionExternally(workflowsService, {
-      approved: true,
+  it('resumes a waiting waitForInput step with validated POST input', async () => {
+    await resumeWorkflowExecutionExternallyWithInput(workflowsService, {
       executionId: 'exec-1',
+      stepId: 'step-exec-1',
       spaceId: 'default',
-      apiKey: ENCODED_API_KEY,
+      token: TOKEN,
+      input: { severity: 'high' },
     });
 
-    expect(workflowsService.getWorkflowExecution).toHaveBeenCalledWith('exec-1', 'default', {
-      includeInput: true,
-    });
-
+    expect(workflowsService.getStepExecution).toHaveBeenCalledWith(
+      { executionId: 'exec-1', id: 'step-exec-1' },
+      'default'
+    );
     expect(workflowsService.claimHitlStepForExternalResume).toHaveBeenCalledWith(
       'step-exec-1',
-      'api_key:api-key-id',
+      'external_resume:step-exec-1',
       'default'
     );
 
     const engine = await workflowsService.getWorkflowsExecutionEngine();
-    const claimOrder = workflowsService.claimHitlStepForExternalResume.mock.invocationCallOrder[0];
-    const resumeOrder = (engine.resumeWorkflowExecution as jest.Mock).mock.invocationCallOrder[0];
-    expect(claimOrder).toBeLessThan(resumeOrder);
+    expect(engine.resumeWorkflowExecution).toHaveBeenCalledWith(
+      'exec-1',
+      'default',
+      { severity: 'high' },
+      undefined,
+      { resumedBy: 'external_resume:step-exec-1' }
+    );
+  });
+
+  it('resumes a waiting waitForApproval step via GET', async () => {
+    workflowsService.getStepExecution.mockResolvedValue(
+      createStepExecution({
+        stepType: 'waitForApproval',
+        input: {
+          [HITL_TOKEN_HASH_INPUT_FIELD]: TOKEN_HASH,
+          [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: FUTURE_DATE,
+        },
+      })
+    );
+
+    await resumeWorkflowExecutionExternallyViaGet(workflowsService, {
+      executionId: 'exec-1',
+      stepId: 'step-exec-1',
+      spaceId: 'default',
+      token: TOKEN,
+      query: { token: TOKEN, approved: 'true' },
+    });
+
+    const engine = await workflowsService.getWorkflowsExecutionEngine();
     expect(engine.resumeWorkflowExecution).toHaveBeenCalledWith(
       'exec-1',
       'default',
       { approved: true },
       undefined,
-      { resumedBy: 'api_key:api-key-id' }
+      { resumedBy: 'external_resume:step-exec-1' }
+    );
+  });
+
+  it('rejects bare waitForInput GET resume with no schema field query params', async () => {
+    await expect(
+      resumeWorkflowExecutionExternallyViaGet(workflowsService, {
+        executionId: 'exec-1',
+        stepId: 'step-exec-1',
+        spaceId: 'default',
+        token: TOKEN,
+        query: { token: TOKEN },
+      })
+    ).rejects.toEqual(
+      new ExternalResumeError(
+        'Query-param resume requires at least one schema field; use the form link instead.',
+        400,
+        true
+      )
     );
 
-    expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['api-key-id'] });
+    const engine = await workflowsService.getWorkflowsExecutionEngine();
+    expect(engine.resumeWorkflowExecution).not.toHaveBeenCalled();
+  });
+
+  it('rejects waitForInput GET resume when required schema fields are missing', async () => {
+    workflowsService.getStepExecution.mockResolvedValue(
+      createStepExecution({
+        input: {
+          [HITL_TOKEN_HASH_INPUT_FIELD]: TOKEN_HASH,
+          [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: FUTURE_DATE,
+          schema: {
+            type: 'object',
+            properties: {
+              severity: { type: 'string' },
+            },
+            required: ['severity'],
+          },
+        },
+      })
+    );
+
+    await expect(
+      resumeWorkflowExecutionExternallyViaGet(workflowsService, {
+        executionId: 'exec-1',
+        stepId: 'step-exec-1',
+        spaceId: 'default',
+        token: TOKEN,
+        query: { token: TOKEN, approved: 'true' },
+      })
+    ).rejects.toThrow(ExternalResumeError);
+  });
+
+  it('resumes a waiting waitForInput step via GET query params', async () => {
+    await resumeWorkflowExecutionExternallyViaGet(workflowsService, {
+      executionId: 'exec-1',
+      stepId: 'step-exec-1',
+      spaceId: 'default',
+      token: TOKEN,
+      query: { token: TOKEN, severity: 'high' },
+    });
+
+    const engine = await workflowsService.getWorkflowsExecutionEngine();
+    expect(workflowsService.claimHitlStepForExternalResume).toHaveBeenCalledWith(
+      'step-exec-1',
+      'external_resume:step-exec-1',
+      'default'
+    );
+    expect(engine.resumeWorkflowExecution).toHaveBeenCalledWith(
+      'exec-1',
+      'default',
+      { severity: 'high' },
+      undefined,
+      { resumedBy: 'external_resume:step-exec-1' }
+    );
+  });
+
+  it('preserves repeated query params for array schema fields on GET resume', async () => {
+    workflowsService.getStepExecution.mockResolvedValue(
+      createStepExecution({
+        input: {
+          [HITL_TOKEN_HASH_INPUT_FIELD]: TOKEN_HASH,
+          [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: FUTURE_DATE,
+          schema: {
+            type: 'object',
+            properties: {
+              tactics: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                  enum: ['initial_access', 'execution', 'persistence'],
+                },
+              },
+            },
+            required: ['tactics'],
+          },
+        },
+      })
+    );
+
+    await resumeWorkflowExecutionExternallyViaGet(workflowsService, {
+      executionId: 'exec-1',
+      stepId: 'step-exec-1',
+      spaceId: 'default',
+      token: TOKEN,
+      query: {
+        token: TOKEN,
+        tactics: ['initial_access', 'execution'],
+      },
+    });
+
+    const engine = await workflowsService.getWorkflowsExecutionEngine();
+    expect(engine.resumeWorkflowExecution).toHaveBeenCalledWith(
+      'exec-1',
+      'default',
+      { tactics: ['initial_access', 'execution'] },
+      undefined,
+      { resumedBy: 'external_resume:step-exec-1' }
+    );
+  });
+
+  it('ignores non-schema query params on waitForInput GET resume', async () => {
+    await resumeWorkflowExecutionExternallyViaGet(workflowsService, {
+      executionId: 'exec-1',
+      stepId: 'step-exec-1',
+      spaceId: 'default',
+      token: TOKEN,
+      query: {
+        token: TOKEN,
+        severity: 'high',
+        approved: 'true',
+        injected: 'value',
+      },
+    });
+
+    const engine = await workflowsService.getWorkflowsExecutionEngine();
+    expect(engine.resumeWorkflowExecution).toHaveBeenCalledWith(
+      'exec-1',
+      'default',
+      { severity: 'high' },
+      undefined,
+      { resumedBy: 'external_resume:step-exec-1' }
+    );
+  });
+
+  it('rejects an invalid token', async () => {
+    await expect(
+      resumeWorkflowExecutionExternallyWithInput(workflowsService, {
+        executionId: 'exec-1',
+        stepId: 'step-exec-1',
+        spaceId: 'default',
+        token: 'wrong-token',
+        input: { severity: 'high' },
+      })
+    ).rejects.toEqual(new ExternalResumeError('Invalid resume token', 401));
+  });
+
+  it('rejects an expired token', async () => {
+    const expiredDate = '2020-01-01T00:00:00.000Z';
+    const expiredHash = computeTokenHmac(TOKEN, EXEC_ID, STEP_EXEC_ID, expiredDate);
+    workflowsService.getStepExecution.mockResolvedValue(
+      createStepExecution({
+        input: {
+          [HITL_TOKEN_HASH_INPUT_FIELD]: expiredHash,
+          [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: expiredDate,
+        },
+      })
+    );
+
+    await expect(
+      resumeWorkflowExecutionExternallyWithInput(workflowsService, {
+        executionId: EXEC_ID,
+        stepId: STEP_EXEC_ID,
+        spaceId: 'default',
+        token: TOKEN,
+        input: { severity: 'high' },
+      })
+    ).rejects.toEqual(new ExternalResumeError('Link expired or already used', 401));
   });
 
   it('rejects when the waiting step was already claimed', async () => {
     workflowsService.claimHitlStepForExternalResume.mockResolvedValue(false);
 
     await expect(
-      resumeWorkflowExecutionExternally(workflowsService, {
-        approved: true,
+      resumeWorkflowExecutionExternallyWithInput(workflowsService, {
         executionId: 'exec-1',
+        stepId: 'step-exec-1',
         spaceId: 'default',
-        apiKey: ENCODED_API_KEY,
+        token: TOKEN,
+        input: { severity: 'high' },
       })
     ).rejects.toEqual(
       new ExternalResumeError('This workflow response link is no longer valid', 409)
@@ -126,107 +326,6 @@ describe('resumeWorkflowExecutionExternally', () => {
 
     const engine = await workflowsService.getWorkflowsExecutionEngine();
     expect(engine.resumeWorkflowExecution).not.toHaveBeenCalled();
-    expect(invalidateAsInternalUser).not.toHaveBeenCalled();
-  });
-
-  it('rejects when API key authentication fails', async () => {
-    const coreStart = await workflowsService.getCoreStart();
-    coreStart.elasticsearch.client.asScoped = jest.fn().mockReturnValue({
-      asCurrentUser: {
-        security: {
-          authenticate: jest.fn().mockRejectedValue(new Error('invalid api key')),
-        },
-      },
-    });
-
-    await expect(
-      resumeWorkflowExecutionExternally(workflowsService, {
-        approved: true,
-        executionId: 'exec-1',
-        spaceId: 'default',
-        apiKey: ENCODED_API_KEY,
-      })
-    ).rejects.toEqual(new ExternalResumeError('Invalid external resume API key', 401));
-  });
-
-  it('rejects when the API key does not match a waiting step', async () => {
-    workflowsService.getWorkflowExecution.mockResolvedValue(null);
-
-    await expect(
-      resumeWorkflowExecutionExternally(workflowsService, {
-        approved: true,
-        executionId: 'other-exec',
-        spaceId: 'default',
-        apiKey: ENCODED_API_KEY,
-      })
-    ).rejects.toEqual(new ExternalResumeError('Workflow execution not found', 404));
-  });
-
-  it('rejects when the API key does not match any waiting step on the execution', async () => {
-    workflowsService.getWorkflowExecution.mockResolvedValue({
-      id: 'exec-1',
-      status: ExecutionStatus.WAITING_FOR_INPUT,
-      stepExecutions: [
-        {
-          workflowRunId: 'exec-1',
-          stepType: 'waitForApproval',
-          status: ExecutionStatus.WAITING_FOR_INPUT,
-          input: {
-            _hitlApiKeyId: 'different-api-key-id',
-          },
-        } as unknown as WorkflowStepExecutionDto,
-      ],
-    } as unknown as WorkflowExecutionDto);
-
-    await expect(
-      resumeWorkflowExecutionExternally(workflowsService, {
-        approved: true,
-        executionId: 'exec-1',
-        spaceId: 'default',
-        apiKey: ENCODED_API_KEY,
-      })
-    ).rejects.toEqual(
-      new ExternalResumeError('API key does not match this workflow execution', 403)
-    );
-  });
-
-  it('rejects when the execution is no longer waiting for input', async () => {
-    workflowsService.getWorkflowExecution.mockResolvedValue({
-      id: 'exec-1',
-      status: ExecutionStatus.RUNNING,
-      stepExecutions: [],
-    } as unknown as WorkflowExecutionDto);
-
-    await expect(
-      resumeWorkflowExecutionExternally(workflowsService, {
-        approved: true,
-        executionId: 'exec-1',
-        spaceId: 'default',
-        apiKey: ENCODED_API_KEY,
-      })
-    ).rejects.toEqual(
-      new ExternalResumeError('This workflow response link is no longer valid', 409)
-    );
-  });
-
-  it('rejects when the execution finishedAt is set while still marked waiting', async () => {
-    workflowsService.getWorkflowExecution.mockResolvedValue({
-      id: 'exec-1',
-      status: ExecutionStatus.WAITING_FOR_INPUT,
-      finishedAt: '2026-01-01T00:00:00.000Z',
-      stepExecutions: [],
-    } as unknown as WorkflowExecutionDto);
-
-    await expect(
-      resumeWorkflowExecutionExternally(workflowsService, {
-        approved: true,
-        executionId: 'exec-1',
-        spaceId: 'default',
-        apiKey: ENCODED_API_KEY,
-      })
-    ).rejects.toEqual(
-      new ExternalResumeError('This workflow response link is no longer valid', 409)
-    );
   });
 
   it('maps engine invalid-status errors to ExternalResumeError', async () => {
@@ -239,11 +338,12 @@ describe('resumeWorkflowExecutionExternally', () => {
     } as unknown as WorkflowsExecutionEnginePluginStart);
 
     await expect(
-      resumeWorkflowExecutionExternally(workflowsService, {
-        approved: true,
+      resumeWorkflowExecutionExternallyWithInput(workflowsService, {
         executionId: 'exec-1',
+        stepId: 'step-exec-1',
         spaceId: 'default',
-        apiKey: ENCODED_API_KEY,
+        token: TOKEN,
+        input: { severity: 'high' },
       })
     ).rejects.toEqual(
       new ExternalResumeError('Workflow execution is not waiting for external input', 409)
@@ -251,297 +351,36 @@ describe('resumeWorkflowExecutionExternally', () => {
   });
 });
 
-describe('resumeWorkflowExecutionExternallyWithInput', () => {
-  const invalidateAsInternalUser = jest.fn();
-
-  const workflowsService = {
-    getCoreStart: jest.fn(),
-    getWorkflowExecution: jest.fn(),
-    getWorkflowsExecutionEngine: jest.fn(),
-    claimHitlStepForExternalResume: jest.fn(),
-  } as unknown as jest.Mocked<WorkflowsService>;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-
-    const coreStart = coreMock.createStart();
-    invalidateAsInternalUser.mockResolvedValue({});
-    coreStart.security.authc.apiKeys.invalidateAsInternalUser = invalidateAsInternalUser;
-    coreStart.elasticsearch.client.asScoped = jest.fn().mockReturnValue({
-      asCurrentUser: {
-        security: {
-          authenticate: jest.fn().mockResolvedValue({
-            api_key: {
-              id: 'api-key-id',
-            },
-          }),
-        },
-      },
-    });
-    workflowsService.getCoreStart.mockResolvedValue(coreStart);
-    workflowsService.claimHitlStepForExternalResume.mockResolvedValue(true);
-    workflowsService.getWorkflowExecution.mockResolvedValue({
-      id: 'exec-1',
-      status: ExecutionStatus.WAITING_FOR_INPUT,
-      stepExecutions: [
-        {
-          id: 'step-exec-1',
-          workflowRunId: 'exec-1',
-          stepId: 'request-input',
-          stepType: 'waitForInput',
-          status: ExecutionStatus.WAITING_FOR_INPUT,
-          input: {
-            _hitlApiKeyId: 'api-key-id',
-            schema: {
-              type: 'object',
-              properties: {
-                severity: { type: 'string' },
-              },
-            },
-          },
-        } as unknown as WorkflowStepExecutionDto,
-      ],
-    } as unknown as WorkflowExecutionDto);
-    workflowsService.getWorkflowsExecutionEngine.mockResolvedValue({
-      resumeWorkflowExecution: jest.fn().mockResolvedValue({ resumedBy: 'api_key:api-key-id' }),
-    } as unknown as WorkflowsExecutionEnginePluginStart);
-  });
-
-  it('resumes a waiting waitForInput step with validated input', async () => {
-    await resumeWorkflowExecutionExternallyWithInput(workflowsService, {
-      executionId: 'exec-1',
-      spaceId: 'default',
-      apiKey: ENCODED_API_KEY,
-      input: { severity: 'high' },
-    });
-
-    const engine = await workflowsService.getWorkflowsExecutionEngine();
-    expect(workflowsService.claimHitlStepForExternalResume).toHaveBeenCalledWith(
-      'step-exec-1',
-      'api_key:api-key-id',
-      'default'
-    );
-    expect(engine.resumeWorkflowExecution).toHaveBeenCalledWith(
-      'exec-1',
-      'default',
-      { severity: 'high' },
-      undefined,
-      { resumedBy: 'api_key:api-key-id' }
-    );
-    expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['api-key-id'] });
-  });
-
-  it('rejects bare waitForInput GET resume with no schema field query params', async () => {
-    await expect(
-      resumeWorkflowExecutionExternallyViaGet(workflowsService, {
-        executionId: 'exec-1',
-        spaceId: 'default',
-        apiKey: ENCODED_API_KEY,
-        query: { apiKey: ENCODED_API_KEY },
-      })
-    ).rejects.toEqual(
-      new ExternalResumeError(
-        'Query-param resume requires at least one schema field; use the form link instead.',
-        400
-      )
-    );
-
-    const engine = await workflowsService.getWorkflowsExecutionEngine();
-    expect(engine.resumeWorkflowExecution).not.toHaveBeenCalled();
-    expect(invalidateAsInternalUser).not.toHaveBeenCalled();
-  });
-
-  it('rejects waitForInput GET resume when required schema fields are missing', async () => {
-    workflowsService.getWorkflowExecution.mockResolvedValue({
-      id: 'exec-1',
-      status: ExecutionStatus.WAITING_FOR_INPUT,
-      stepExecutions: [
-        {
-          workflowRunId: 'exec-1',
-          stepId: 'request-input',
-          stepType: 'waitForInput',
-          status: ExecutionStatus.WAITING_FOR_INPUT,
-          input: {
-            _hitlApiKeyId: 'api-key-id',
-            schema: {
-              type: 'object',
-              properties: {
-                severity: { type: 'string' },
-              },
-              required: ['severity'],
-            },
-          },
-        } as unknown as WorkflowStepExecutionDto,
-      ],
-    } as unknown as WorkflowExecutionDto);
-
-    await expect(
-      resumeWorkflowExecutionExternallyViaGet(workflowsService, {
-        executionId: 'exec-1',
-        spaceId: 'default',
-        apiKey: ENCODED_API_KEY,
-        query: { apiKey: ENCODED_API_KEY, approved: 'true' },
-      })
-    ).rejects.toThrow(ExternalResumeError);
-  });
-
-  it('resumes a waiting waitForInput step via GET query params', async () => {
-    await resumeWorkflowExecutionExternallyViaGet(workflowsService, {
-      executionId: 'exec-1',
-      spaceId: 'default',
-      apiKey: ENCODED_API_KEY,
-      query: { apiKey: ENCODED_API_KEY, severity: 'high' },
-    });
-
-    const engine = await workflowsService.getWorkflowsExecutionEngine();
-    expect(workflowsService.claimHitlStepForExternalResume).toHaveBeenCalledWith(
-      'step-exec-1',
-      'api_key:api-key-id',
-      'default'
-    );
-    expect(engine.resumeWorkflowExecution).toHaveBeenCalledWith(
-      'exec-1',
-      'default',
-      { severity: 'high' },
-      undefined,
-      { resumedBy: 'api_key:api-key-id' }
-    );
-  });
-
-  it('preserves repeated query params for array schema fields on GET resume', async () => {
-    workflowsService.getWorkflowExecution.mockResolvedValue({
-      id: 'exec-1',
-      status: ExecutionStatus.WAITING_FOR_INPUT,
-      stepExecutions: [
-        {
-          id: 'step-exec-1',
-          workflowRunId: 'exec-1',
-          stepId: 'request-input',
-          stepType: 'waitForInput',
-          status: ExecutionStatus.WAITING_FOR_INPUT,
-          input: {
-            _hitlApiKeyId: 'api-key-id',
-            schema: {
-              type: 'object',
-              properties: {
-                tactics: {
-                  type: 'array',
-                  items: {
-                    type: 'string',
-                    enum: ['initial_access', 'execution', 'persistence'],
-                  },
-                },
-              },
-              required: ['tactics'],
-            },
-          },
-        } as unknown as WorkflowStepExecutionDto,
-      ],
-    } as unknown as WorkflowExecutionDto);
-
-    await resumeWorkflowExecutionExternallyViaGet(workflowsService, {
-      executionId: 'exec-1',
-      spaceId: 'default',
-      apiKey: ENCODED_API_KEY,
-      query: {
-        apiKey: ENCODED_API_KEY,
-        tactics: ['initial_access', 'execution'],
-      },
-    });
-
-    const engine = await workflowsService.getWorkflowsExecutionEngine();
-    expect(workflowsService.claimHitlStepForExternalResume).toHaveBeenCalledWith(
-      'step-exec-1',
-      'api_key:api-key-id',
-      'default'
-    );
-    expect(engine.resumeWorkflowExecution).toHaveBeenCalledWith(
-      'exec-1',
-      'default',
-      { tactics: ['initial_access', 'execution'] },
-      undefined,
-      { resumedBy: 'api_key:api-key-id' }
-    );
-  });
-
-  it('ignores non-schema query params on waitForInput GET resume', async () => {
-    await resumeWorkflowExecutionExternallyViaGet(workflowsService, {
-      executionId: 'exec-1',
-      spaceId: 'default',
-      apiKey: ENCODED_API_KEY,
-      query: {
-        apiKey: ENCODED_API_KEY,
-        severity: 'high',
-        approved: 'true',
-        injected: 'value',
-      },
-    });
-
-    const engine = await workflowsService.getWorkflowsExecutionEngine();
-    expect(workflowsService.claimHitlStepForExternalResume).toHaveBeenCalledWith(
-      'step-exec-1',
-      'api_key:api-key-id',
-      'default'
-    );
-    expect(engine.resumeWorkflowExecution).toHaveBeenCalledWith(
-      'exec-1',
-      'default',
-      { severity: 'high' },
-      undefined,
-      { resumedBy: 'api_key:api-key-id' }
-    );
-  });
-});
-
 describe('getExternalResumeFormPage', () => {
   const workflowsService = {
-    getCoreStart: jest.fn(),
-    getWorkflowExecution: jest.fn(),
+    getStepExecution: jest.fn(),
   } as unknown as jest.Mocked<WorkflowsService>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    const coreStart = coreMock.createStart();
-    coreStart.elasticsearch.client.asScoped = jest.fn().mockReturnValue({
-      asCurrentUser: {
-        security: {
-          authenticate: jest.fn().mockResolvedValue({
-            api_key: {
-              id: 'api-key-id',
-            },
-          }),
-        },
-      },
-    });
-    workflowsService.getCoreStart.mockResolvedValue(coreStart);
-    workflowsService.getWorkflowExecution.mockResolvedValue({
-      id: 'exec-1',
-      status: ExecutionStatus.WAITING_FOR_INPUT,
-      stepExecutions: [
-        {
-          workflowRunId: 'exec-1',
-          stepType: 'waitForInput',
-          status: ExecutionStatus.WAITING_FOR_INPUT,
-          input: {
-            _hitlApiKeyId: 'api-key-id',
-            message: 'Please respond',
-            schema: {
-              type: 'object',
-              properties: {
-                severity: { type: 'string', title: 'Severity' },
-              },
+    workflowsService.getStepExecution.mockResolvedValue(
+      createStepExecution({
+        input: {
+          [HITL_TOKEN_HASH_INPUT_FIELD]: TOKEN_HASH,
+          [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: FUTURE_DATE,
+          message: 'Please respond',
+          schema: {
+            type: 'object',
+            properties: {
+              severity: { type: 'string', title: 'Severity' },
             },
           },
-        } as unknown as WorkflowStepExecutionDto,
-      ],
-    } as unknown as WorkflowExecutionDto);
+        },
+      })
+    );
   });
 
   it('returns an HTML form page', async () => {
     const html = await getExternalResumeFormPage(workflowsService, {
       executionId: 'exec-1',
+      stepId: 'step-exec-1',
       spaceId: 'default',
-      apiKey: ENCODED_API_KEY,
+      token: TOKEN,
       basePath: '',
     });
 
@@ -552,68 +391,21 @@ describe('getExternalResumeFormPage', () => {
       `action="${buildExternalResumePublicPath({
         basePath: '',
         executionId: 'exec-1',
-        apiKey: ENCODED_API_KEY,
-      })}"`
-    );
-  });
-
-  it('includes Kibana basePath in the form action URL', async () => {
-    const html = await getExternalResumeFormPage(workflowsService, {
-      executionId: 'exec-1',
-      spaceId: 'default',
-      apiKey: ENCODED_API_KEY,
-      basePath: '/kbn',
-    });
-
-    expect(html).toContain(
-      `action="${buildExternalResumePublicPath({
-        basePath: '/kbn',
-        executionId: 'exec-1',
-        apiKey: ENCODED_API_KEY,
+        stepId: 'step-exec-1',
+        token: TOKEN,
       })}"`
     );
   });
 });
 
-describe('resolveExternalResumeApiKey', () => {
-  it('prefers the Authorization header when present', () => {
-    expect(
-      resolveExternalResumeApiKey({
-        authorization: 'ApiKey header-key',
-        queryApiKey: 'query-key',
-      })
-    ).toBe('header-key');
+describe('resolveExternalResumeCredentials', () => {
+  it('returns the token query parameter', () => {
+    expect(resolveExternalResumeCredentials({ token: 'token-1' })).toEqual({ token: 'token-1' });
   });
 
-  it('falls back to the apiKey query parameter', () => {
-    expect(
-      resolveExternalResumeApiKey({
-        queryApiKey: 'query-key',
-      })
-    ).toBe('query-key');
-  });
-
-  it('rejects requests with no credential', () => {
-    expect(() => resolveExternalResumeApiKey({})).toThrow(
-      new ExternalResumeError(
-        'External resume API key must be provided via Authorization header or apiKey query parameter',
-        401
-      )
-    );
-  });
-});
-
-describe('parseExternalResumeApiKeyFromAuthorization', () => {
-  it('extracts the encoded API key credential', () => {
-    expect(parseExternalResumeApiKeyFromAuthorization('ApiKey abc123')).toBe('abc123');
-  });
-
-  it('rejects missing or invalid Authorization headers', () => {
-    expect(() => parseExternalResumeApiKeyFromAuthorization(undefined)).toThrow(
-      new ExternalResumeError('Missing or invalid Authorization header', 401)
-    );
-    expect(() => parseExternalResumeApiKeyFromAuthorization('Bearer token')).toThrow(
-      new ExternalResumeError('Missing or invalid Authorization header', 401)
+  it('rejects requests with no token', () => {
+    expect(() => resolveExternalResumeCredentials({})).toThrow(
+      new ExternalResumeError('token query parameter is required', 401)
     );
   });
 });
@@ -628,7 +420,7 @@ describe('parseApprovedQueryParam', () => {
 
   it('rejects invalid values', () => {
     expect(() => parseApprovedQueryParam('maybe')).toThrow(
-      new ExternalResumeError('approved query parameter must be true or false', 400)
+      new ExternalResumeError('approved query parameter must be true or false', 400, true)
     );
   });
 });

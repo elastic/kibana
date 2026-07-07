@@ -219,6 +219,10 @@ export class WorkflowTaskManager {
     };
   }
 
+  async runSoon(taskId: string): Promise<void> {
+    await this.taskManager.runSoon(taskId);
+  }
+
   async forceRunIdleTasks(
     workflowExecutionId: string,
     options?: { spaceId: string; fakeRequest: KibanaRequest }

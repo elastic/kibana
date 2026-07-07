@@ -1334,7 +1334,7 @@ export class WorkflowsExecutionEnginePlugin
         return;
       }
 
-      await workflowTaskManager.scheduleImmediateResume({
+      const { taskId } = await workflowTaskManager.scheduleImmediateResume({
         executionId,
         spaceId,
         fakeRequest: request,
@@ -1350,11 +1350,8 @@ export class WorkflowsExecutionEnginePlugin
           );
         });
 
-      // Same idea as cancel: nudge TM so the resume task runs as soon as possible
-      await workflowTaskManager.forceRunIdleTasks(executionId, {
-        spaceId,
-        fakeRequest: request,
-      });
+      // Same idea as cancel: nudge TM so the specific resume task runs as soon as possible.
+      await workflowTaskManager.runSoon(taskId);
     };
 
     this.internalResumeWorkflowExecutionHandler = internalResumeWorkflowExecution;

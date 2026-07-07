@@ -747,8 +747,10 @@ describe('Execution Routes', () => {
   });
 
   describe('registerExecutionRoutes hitlExternalResume kill switch', () => {
-    const externalResumePath = '/api/workflows/executions/{executionId}/resume/external';
-    const externalResumeFormPath = '/api/workflows/executions/{executionId}/resume/external/form';
+    const externalResumePath =
+      '/api/workflows/executions/{executionId}/steps/{stepId}/resume/external';
+    const externalResumeFormPath =
+      '/api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form';
 
     it('does not register external resume routes when hitlExternalResume is disabled', () => {
       routeHandlers = {};
@@ -767,22 +769,22 @@ describe('Execution Routes', () => {
     });
   });
 
-  describe('GET /api/workflows/executions/{executionId}/resume/external (external_resume)', () => {
-    const path = '/api/workflows/executions/{executionId}/resume/external';
+  describe('GET /api/workflows/executions/{executionId}/steps/{stepId}/resume/external (external_resume)', () => {
+    const path = '/api/workflows/executions/{executionId}/steps/{stepId}/resume/external';
 
     it('should register the route handler', () => {
       expect(handler('GET', path)).toBeDefined();
     });
 
-    it('should resume via API key and return HTML', async () => {
+    it('should resume via token and return HTML', async () => {
       mockApi.resumeWorkflowExecutionExternallyViaGet.mockResolvedValue({
-        resumedBy: 'api_key:api-key-id',
+        resumedBy: 'external_resume:step-exec-1',
       });
       const h = handler('GET', path)!;
       const request = {
-        params: { executionId: 'ex-1' },
+        params: { executionId: 'ex-1', stepId: 'step-exec-1' },
         query: {
-          apiKey: 'encoded-api-key',
+          token: 'resume-token',
           approved: 'true',
         },
       };
@@ -790,17 +792,22 @@ describe('Execution Routes', () => {
       const result = await h(mockContext, request as any, mockResponse as any);
 
       expect(mockApi.resumeWorkflowExecutionExternallyViaGet).toHaveBeenCalledWith({
-        apiKey: 'encoded-api-key',
+        token: 'resume-token',
         executionId: 'ex-1',
+        stepId: 'step-exec-1',
         spaceId: 'default',
         query: {
-          apiKey: 'encoded-api-key',
+          token: 'resume-token',
           approved: 'true',
         },
       });
       expect(result).toMatchObject({
         type: 'ok',
-        headers: { 'content-type': 'text/html; charset=utf-8' },
+        headers: {
+          'content-type': 'text/html; charset=utf-8',
+          'cache-control': 'no-store',
+          'referrer-policy': 'no-referrer',
+        },
       });
       expect(typeof result.body).toBe('string');
       expect(result.body).toContain('Thank you');
@@ -808,12 +815,12 @@ describe('Execution Routes', () => {
 
     it('should return HTML error page when resume fails', async () => {
       mockApi.resumeWorkflowExecutionExternallyViaGet.mockRejectedValue(
-        new ExternalResumeError('Invalid external resume API key', 401)
+        new ExternalResumeError('Invalid resume token', 401)
       );
       const h = handler('GET', path)!;
       const request = {
-        params: { executionId: 'ex-1' },
-        query: { apiKey: 'bad-api-key', approved: 'false' },
+        params: { executionId: 'ex-1', stepId: 'step-exec-1' },
+        query: { token: 'bad-token', approved: 'false' },
       };
 
       const result = await h(mockContext, request as any, mockResponse as any);
@@ -822,16 +829,20 @@ describe('Execution Routes', () => {
         status: 401,
         options: {
           bypassErrorFormat: true,
-          headers: { 'content-type': 'text/html; charset=utf-8' },
+          headers: {
+            'content-type': 'text/html; charset=utf-8',
+            'cache-control': 'no-store',
+            'referrer-policy': 'no-referrer',
+          },
         },
       });
       expect(typeof result.body).toBe('string');
-      expect(result.body).toContain('Unable to submit response');
+      expect(result.body).toContain('This workflow response link is no longer valid');
     });
   });
 
-  describe('GET /api/workflows/executions/{executionId}/resume/external/form (external_resume_form)', () => {
-    const path = '/api/workflows/executions/{executionId}/resume/external/form';
+  describe('GET /api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form (external_resume_form)', () => {
+    const path = '/api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form';
 
     it('should register the route handler', () => {
       expect(handler('GET', path)).toBeDefined();
@@ -841,81 +852,69 @@ describe('Execution Routes', () => {
       mockApi.getExternalResumeFormPage.mockResolvedValue('<html>form</html>');
       const h = handler('GET', path)!;
       const request = {
-        params: { executionId: 'ex-1' },
-        query: { apiKey: 'encoded-api-key' },
+        params: { executionId: 'ex-1', stepId: 'step-exec-1' },
+        query: { token: 'resume-token' },
         basePath: '/kbn',
       };
 
       const result = await h(mockContext, request as any, mockResponse as any);
 
       expect(mockApi.getExternalResumeFormPage).toHaveBeenCalledWith({
-        apiKey: 'encoded-api-key',
+        token: 'resume-token',
         executionId: 'ex-1',
+        stepId: 'step-exec-1',
         spaceId: 'default',
         basePath: '/kbn',
       });
       expect(result).toMatchObject({
         type: 'ok',
-        headers: { 'content-type': 'text/html; charset=utf-8' },
+        headers: {
+          'content-type': 'text/html; charset=utf-8',
+          'cache-control': 'no-store',
+          'referrer-policy': 'no-referrer',
+        },
         body: '<html>form</html>',
       });
     });
   });
 
-  describe('POST /api/workflows/executions/{executionId}/resume/external (external_resume_input)', () => {
-    const path = '/api/workflows/executions/{executionId}/resume/external';
+  describe('POST /api/workflows/executions/{executionId}/steps/{stepId}/resume/external (external_resume_input)', () => {
+    const path = '/api/workflows/executions/{executionId}/steps/{stepId}/resume/external';
 
     it('should register the route handler', () => {
       expect(handler('POST', path)).toBeDefined();
     });
 
-    it('should resume via API key query param and return HTML', async () => {
+    it('should resume via token query param and return HTML', async () => {
       mockApi.resumeWorkflowExecutionExternallyWithInput.mockResolvedValue({
-        resumedBy: 'api_key:api-key-id',
+        resumedBy: 'external_resume:step-exec-1',
       });
       const h = handler('POST', path)!;
       const request = {
-        params: { executionId: 'ex-1' },
-        query: { apiKey: 'encoded-api-key' },
+        params: { executionId: 'ex-1', stepId: 'step-exec-1' },
+        query: { token: 'resume-token' },
         body: { severity: 'high' },
       };
 
       const result = await h(mockContext, request as any, mockResponse as any);
 
       expect(mockApi.resumeWorkflowExecutionExternallyWithInput).toHaveBeenCalledWith({
-        apiKey: 'encoded-api-key',
+        token: 'resume-token',
         executionId: 'ex-1',
+        stepId: 'step-exec-1',
         spaceId: 'default',
         input: { severity: 'high' },
       });
       expect(result).toMatchObject({
         type: 'ok',
-        headers: { 'content-type': 'text/html; charset=utf-8' },
+        headers: {
+          'content-type': 'text/html; charset=utf-8',
+          'cache-control': 'no-store',
+          'referrer-policy': 'no-referrer',
+        },
       });
       expect(typeof result.body).toBe('string');
       expect(result.body).toContain('Thank you');
-    });
-
-    it('should resume via Authorization header when provided', async () => {
-      mockApi.resumeWorkflowExecutionExternallyWithInput.mockResolvedValue({
-        resumedBy: 'api_key:api-key-id',
-      });
-      const h = handler('POST', path)!;
-      const request = {
-        params: { executionId: 'ex-1' },
-        query: {},
-        headers: { authorization: 'ApiKey header-api-key' },
-        body: { severity: 'high' },
-      };
-
-      await h(mockContext, request as any, mockResponse as any);
-
-      expect(mockApi.resumeWorkflowExecutionExternallyWithInput).toHaveBeenCalledWith({
-        apiKey: 'header-api-key',
-        executionId: 'ex-1',
-        spaceId: 'default',
-        input: { severity: 'high' },
-      });
     });
   });
 

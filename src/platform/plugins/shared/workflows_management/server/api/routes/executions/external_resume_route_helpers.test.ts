@@ -20,15 +20,28 @@ describe('handleExternalResumeError', () => {
     jest.clearAllMocks();
   });
 
-  it('returns curated ExternalResumeError messages with their status codes', () => {
+  it('returns a generic invalid-link response for non-exposed ExternalResumeError messages', () => {
     const result = handleExternalResumeError(
       response as any,
-      new ExternalResumeError('Invalid external resume API key', 401)
-    );
+      new ExternalResumeError('Invalid resume token', 401)
+    ) as unknown as { statusCode: number; body: string };
 
     expect(result).toMatchObject({
       statusCode: 401,
-      body: expect.stringContaining('Invalid external resume API key'),
+      body: expect.stringContaining('This workflow response link is no longer valid'),
+    });
+    expect(result.body).not.toContain('Invalid resume token');
+  });
+
+  it('returns exposed ExternalResumeError messages with their status codes', () => {
+    const result = handleExternalResumeError(
+      response as any,
+      new ExternalResumeError('approved query parameter is required', 400, true)
+    );
+
+    expect(result).toMatchObject({
+      statusCode: 400,
+      body: expect.stringContaining('approved query parameter is required'),
     });
   });
 
