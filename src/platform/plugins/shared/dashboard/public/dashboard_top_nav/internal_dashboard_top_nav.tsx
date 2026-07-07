@@ -143,7 +143,7 @@ export function InternalDashboardTopNav({
   forceHideUnifiedSearch,
   redirectTo,
   setCustomHeaderActionMenu,
-  showBorderBottom = true,
+  showBorderBottom = false,
   showResetChange = true,
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);

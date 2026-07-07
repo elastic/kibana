@@ -10,6 +10,7 @@
 import React, { useEffect } from 'react';
 import { Global, css } from '@emotion/react';
 import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
+import { getScrollContainer } from '@kbn/ui-chrome-layout-utils';
 
 /** Gutter between chrome panels. */
 export const DESIGN_EXPLORATION_GAP = 8;
@@ -26,7 +27,13 @@ export const DESIGN_EXPLORATION_BORDER_WIDTH = 0.5;
 /** Default inner padding for nav panel content. */
 export const DESIGN_EXPLORATION_PADDING = 16;
 
+/** Application top bar slot height when Chrome app header is shown. */
+export const DESIGN_EXPLORATION_TOP_BAR_HEIGHT = 80;
+
 export const DESIGN_EXPLORATION_BODY_ATTR = 'data-design-exploration';
+
+/** Set on body when the app scroll container (ancestor of `.kbnAppWrapper`) has scrolled. */
+export const DESIGN_EXPLORATION_SCROLLED_BODY_ATTR = 'data-design-exploration-scrolled';
 
 const panelSelectorList = [
   '.kbnChromeLayoutNavigation',
@@ -62,13 +69,17 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} [data-test-subj='globalQueryBar'] {
-      padding: ${DESIGN_EXPLORATION_PADDING}px !important;
-      padding-bottom: 12px !important;
+      padding: 0 ${DESIGN_EXPLORATION_PADDING}px 12px !important;
     }
 
     ${scope} [data-test-subj='controls-group-wrapper'] {
       padding-inline: ${DESIGN_EXPLORATION_PADDING}px !important;
       padding-bottom: ${DESIGN_EXPLORATION_PADDING}px !important;
+    }
+
+    ${scope}[${DESIGN_EXPLORATION_SCROLLED_BODY_ATTR}='true']
+      [data-test-subj='controls-group-wrapper'] {
+      border-bottom: 1px solid ${colors.borderBaseSubdued} !important;
     }
 
     ${scope}:has([data-test-subj='dashboardContainer'], #dashboardListingHeading)
@@ -77,15 +88,50 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
       margin-inline: 0 !important;
       margin-top: 0 !important;
       border-radius: ${DESIGN_EXPLORATION_RADIUS_CONTROL}px !important;
+      border: 1px solid ${colors.borderBaseSubdued} !important;
+    }
+
+    ${scope} .kbnChromeLayoutApplication:has([data-test-subj='appHeader']) {
+      --kbn-application--top-bar-height: ${DESIGN_EXPLORATION_TOP_BAR_HEIGHT}px !important;
+    }
+
+    ${scope} .kbnChromeLayoutApplication > div:has([data-test-subj='appHeader']) {
+      height: ${DESIGN_EXPLORATION_TOP_BAR_HEIGHT}px !important;
+      min-height: ${DESIGN_EXPLORATION_TOP_BAR_HEIGHT}px !important;
+      background-color: color-mix(
+        in srgb,
+        ${colors.backgroundBasePlain} 75%,
+        transparent
+      ) !important;
+      backdrop-filter: blur(10px) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
+    }
+
+    ${scope} .kbnChromeLayoutApplication div:has(> [data-test-subj='appHeader']) [data-test-subj='appHeader'] {
+      background: transparent !important;
+    }
+
+    ${scope} .kbnChromeLayoutApplication div:has(> [data-test-subj='appHeader']) {
+      margin: ${DESIGN_EXPLORATION_PADDING}px !important;
+      min-height: 48px !important;
     }
 
     ${scope} .kbnChromeLayoutApplication {
       background-color: transparent !important;
       box-shadow: none !important;
+      outline: none !important;
     }
 
     ${scope} .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
       background: transparent !important;
+      top: ${DESIGN_EXPLORATION_TOP_BAR_HEIGHT}px !important;
+      background-color: color-mix(
+        in srgb,
+        ${colors.backgroundBasePlain} 75%,
+        transparent
+      ) !important;
+      backdrop-filter: blur(10px) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
     }
 
     ${scope} .dshDashboardViewportWrapper,
@@ -112,8 +158,22 @@ export const DesignExplorationChromeGlobalStyles = () => {
   useEffect(() => {
     document.body.setAttribute(DESIGN_EXPLORATION_BODY_ATTR, 'true');
 
+    const scrollContainer = getScrollContainer();
+    const updateScrolledState = () => {
+      if (scrollContainer.scrollTop > 0) {
+        document.body.setAttribute(DESIGN_EXPLORATION_SCROLLED_BODY_ATTR, 'true');
+      } else {
+        document.body.removeAttribute(DESIGN_EXPLORATION_SCROLLED_BODY_ATTR);
+      }
+    };
+
+    updateScrolledState();
+    scrollContainer.addEventListener('scroll', updateScrolledState, { passive: true });
+
     return () => {
+      scrollContainer.removeEventListener('scroll', updateScrolledState);
       document.body.removeAttribute(DESIGN_EXPLORATION_BODY_ATTR);
+      document.body.removeAttribute(DESIGN_EXPLORATION_SCROLLED_BODY_ATTR);
     };
   }, []);
 
