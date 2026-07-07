@@ -2571,6 +2571,14 @@
       "addLabels": ["Team:EUI"],
       "minimumReleaseAge": "14 days",
       "enabled": true
+    },
+    {
+      "groupName": "@elastic/eui-illustrations",
+      "matchDepNames": ["@elastic/eui-illustrations", "@elastic/eui-theme-common"],
+      "reviewers": ["team:eui-team"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:EUI"],
+      "enabled": true
     }
   ],
   "customManagers": [
