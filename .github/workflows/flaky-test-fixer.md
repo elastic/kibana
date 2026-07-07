@@ -100,6 +100,49 @@ safe-outputs:
     # transport makes the shallow safe_outputs checkout run `git fetch --unshallow`,
     # which on a repo Kibana's size cannot finish within the 15m job timeout.
     patch-format: am
+  # Adds the fix PR's URL to the outcome comment. The agent can't do this itself:
+  # it doesn't know the PR number while it runs (safe_outputs creates the PR
+  # afterwards), so this job runs after safe_outputs and edits the just-posted comment.
+  jobs:
+    link-fix-pr:
+      description: 'Append the newly-opened fix PR''s URL to the outcome comment on the issue. Call this exactly once, and only after you have opened a draft PR.'
+      runs-on: ubuntu-latest
+      needs: safe_outputs
+      if: needs.safe_outputs.outputs.created_pr_url != '' && needs.safe_outputs.outputs.comment_id != ''
+      permissions:
+        issues: write
+      inputs:
+        confirm:
+          description: 'Set to true to append the opened fix PR link to the outcome comment. Only call this after a PR has been opened.'
+          required: true
+          type: boolean
+      env:
+        # The URL of the fix PR that safe_outputs just created (the link to add).
+        GH_AW_PR_URL: ${{ needs.safe_outputs.outputs.created_pr_url }}
+        # The id of the outcome comment safe_outputs just posted (which comment to edit).
+        GH_AW_COMMENT_ID: ${{ needs.safe_outputs.outputs.comment_id }}
+      steps:
+        - name: Append PR link to outcome comment
+          uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+          with:
+            github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+            script: |
+              const prUrl = process.env.GH_AW_PR_URL;
+              const commentId = Number(process.env.GH_AW_COMMENT_ID);
+              if (!prUrl || !Number.isInteger(commentId)) {
+                core.info('Missing PR URL or comment id; nothing to do.');
+                return;
+              }
+              const { owner, repo } = context.repo;
+              const { data: comment } = await github.rest.issues.getComment({ owner, repo, comment_id: commentId });
+              const body = comment.body || '';
+              if (body.includes(prUrl)) {
+                core.info('Comment already references the PR URL; nothing to do.');
+                return;
+              }
+              const updated = `${body.trimEnd()}\n\n**Fix PR:** ${prUrl}`;
+              await github.rest.issues.updateComment({ owner, repo, comment_id: commentId, body: updated });
+              core.info(`Appended ${prUrl} to comment ${commentId}.`);
 
 strict: false
 timeout-minutes: 90
@@ -125,6 +168,7 @@ Kibana is already bootstrapped for you.
 4. Verify the patch: lint and type check it with `node scripts/eslint` and `node scripts/type_check` (and, for a Jest test, run it with `node scripts/jest`). FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
 5. Open the PR (see "PR format" below).
 6. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
+7. **Only if you opened a PR in step 5**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and appends the new PR's URL to your outcome comment. You cannot know the PR number while running (the PR is created afterwards), so never write the URL into the comment yourself — this tool is how the link gets there.
 
 ## PR format
 
@@ -171,9 +215,10 @@ Follow this format:
   ```markdown
   ### ✅ A fix PR is ready for review
 
-  <one very concise sentence on what the PR changes> — find the draft PR in this issue's timeline. cc @<github-handle-here>
+  <one very concise sentence on what the PR changes>. cc @<github-handle-here>
   ```
-  The PR carries `Fixes #${{ env.ISSUE_NUMBER }}`, so don't include a URL.
+  Don't write the PR URL or number yourself.
+  
 - **Existing PR already covers it**:
   ```markdown
   ### 🔁 A fix is already in flight
@@ -187,4 +232,3 @@ Follow this format:
   The failure is infrastructure-side (the CI agent lost its Elasticsearch connection mid-run), not test-side, so there's nothing to patch here. cc @<github-handle-here>
   ```
   Swap in the actual one-clause reason — e.g. the test already passes on `main`, the failure is infrastructure / not test-side, or the root cause can't be confidently identified.
-
