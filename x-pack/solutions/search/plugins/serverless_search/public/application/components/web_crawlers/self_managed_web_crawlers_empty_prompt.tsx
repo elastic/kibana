@@ -56,13 +56,13 @@ export const SelfManagedWebCrawlersEmptyPrompt = () => {
                       justifyContent="center"
                     >
                       <EuiFlexItem grow={false}>
-                        <EuiIcon color="primary" size="l" type="web" aria-hidden={true} />
+                        <EuiIcon color="primary" size="l" type="web" aria-hidden />
                       </EuiFlexItem>
                       <EuiFlexItem>
-                        <EuiIcon size="m" type="sortRight" aria-hidden={true} />
+                        <EuiIcon size="m" type="sortRight" aria-hidden />
                       </EuiFlexItem>
                       <EuiFlexItem>
-                        <EuiIcon color="primary" size="l" type="rocket" aria-hidden={true} />
+                        <EuiIcon color="primary" size="l" type="rocket" aria-hidden />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                     <EuiFlexItem>
@@ -115,7 +115,7 @@ export const SelfManagedWebCrawlersEmptyPrompt = () => {
                         gutterSize="s"
                       >
                         <EuiFlexItem grow={false}>
-                          <EuiIcon color="primary" size="l" type="globe" aria-hidden={true} />
+                          <EuiIcon color="primary" size="l" type="globe" aria-hidden />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>
@@ -144,23 +144,23 @@ export const SelfManagedWebCrawlersEmptyPrompt = () => {
                         justifyContent="center"
                       >
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type="globe" aria-hidden={true} />
+                          <EuiIcon color="primary" size="l" type="globe" aria-hidden />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiIcon size="m" type="sortRight" aria-hidden={true} />
+                          <EuiIcon size="m" type="sortRight" aria-hidden />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type="web" aria-hidden={true} />
+                          <EuiIcon color="primary" size="l" type="web" aria-hidden />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiIcon size="m" type="sortRight" aria-hidden={true} />
+                          <EuiIcon size="m" type="sortRight" aria-hidden />
                         </EuiFlexItem>
                         <EuiFlexItem>
                           <EuiIcon
                             color="primary"
                             size="l"
                             type="logoElasticsearch"
-                            aria-hidden={true}
+                            aria-hidden
                           />
                         </EuiFlexItem>
                       </EuiFlexGroup>

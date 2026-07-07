@@ -75,7 +75,7 @@ export const ElasticManagedConnectorsEmptyPrompt: React.FC = () => {
                                   color="primary"
                                   size="l"
                                   type="documents"
-                                  aria-hidden={true}
+                                  aria-hidden
                                 />
                               </EuiFlexItem>
                             )}
@@ -116,10 +116,10 @@ export const ElasticManagedConnectorsEmptyPrompt: React.FC = () => {
                         justifyContent="center"
                       >
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type="plugs" aria-hidden={true} />
+                          <EuiIcon color="primary" size="l" type="plugs" aria-hidden />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type="logoElastic" aria-hidden={true} />
+                          <EuiIcon color="primary" size="l" type="logoElastic" aria-hidden />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>
