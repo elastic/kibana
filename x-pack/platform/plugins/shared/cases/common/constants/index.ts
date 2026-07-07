@@ -164,6 +164,7 @@ export const MAX_CATEGORY_FILTER_LENGTH = 100 as const;
 export const MAX_TAGS_FILTER_LENGTH = 100 as const;
 export const MAX_ASSIGNEES_FILTER_LENGTH = 100 as const;
 export const MAX_REPORTERS_FILTER_LENGTH = 100 as const;
+export const MAX_USER_ACTION_AUTHORS_FILTER_LENGTH = 100 as const;
 export const MAX_SUPPORTED_CONNECTORS_RETURNED = 1000 as const;
 
 /**
@@ -171,6 +172,11 @@ export const MAX_SUPPORTED_CONNECTORS_RETURNED = 1000 as const;
  */
 
 export const MAX_TITLE_LENGTH = 160 as const;
+export const MAX_OWNER_LENGTH = 30 as const;
+export const MAX_ISO_DATE_LENGTH = 30 as const;
+export const MAX_ATTACHMENT_ID_LENGTH = 512 as const; // ES `_id` upper bound
+export const MAX_ATTACHMENT_TYPE_LENGTH = 50 as const;
+export const MAX_USERNAME_LENGTH = 1024 as const;
 export const MAX_RULE_NAME_LENGTH = 100 as const;
 export const MAX_SUFFIX_LENGTH = 60 as const;
 export const MAX_CATEGORY_LENGTH = 50 as const;
@@ -289,6 +295,7 @@ export const LOCAL_STORAGE_KEYS = {
   templatesYamlEditorCreateState: 'templates.yaml.editor.create',
   templatesYamlEditorEditState: 'templates.yaml.editor.edit',
   userActivitySortOrder: 'cases.userActivity.sortOrder',
+  userActivityFilters: 'cases.userActivity.redesign.filters',
   casesUtilityBarHideMaxLimitWarning: 'cases.utilityBar.hideMaxLimitWarning',
   caseViewSidebarOpen: 'cases.caseView.sidebarOpen',
 };
