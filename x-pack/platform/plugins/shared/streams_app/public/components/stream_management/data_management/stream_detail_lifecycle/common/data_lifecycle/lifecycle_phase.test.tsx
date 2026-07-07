@@ -108,6 +108,48 @@ describe('LifecyclePhase', () => {
       expect(onClick).not.toHaveBeenCalled();
       expect(screen.queryByTestId('lifecyclePhase-warm-popoverTitle')).not.toBeInTheDocument();
     });
+
+    it('does nothing when disableInteractions is true, even with an edit flyout open', () => {
+      const onEditPhase = jest.fn();
+      const onClick = jest.fn();
+
+      render(
+        <LifecyclePhase
+          label="warm"
+          color="#FFA500"
+          onEditPhase={onEditPhase}
+          onClick={onClick}
+          canManageLifecycle
+          isEditLifecycleFlyoutOpen
+          disableInteractions
+        />
+      );
+
+      fireEvent.click(screen.getByRole('button'));
+
+      expect(onEditPhase).not.toHaveBeenCalled();
+      expect(onClick).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('lifecyclePhase-warm-popoverTitle')).not.toBeInTheDocument();
+    });
+
+    it('does not open the popover when disableInteractions is true', () => {
+      const onClick = jest.fn();
+
+      render(
+        <LifecyclePhase
+          label="hot"
+          color="#FF0000"
+          onClick={onClick}
+          canManageLifecycle
+          disableInteractions
+        />
+      );
+
+      fireEvent.click(screen.getByRole('button'));
+
+      expect(onClick).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('lifecyclePhase-hot-popoverTitle')).not.toBeInTheDocument();
+    });
   });
 
   describe('Popover content', () => {
@@ -283,6 +325,20 @@ describe('LifecyclePhase', () => {
           size="1.0 GB"
           canManageLifecycle
           isEditLifecycleFlyoutOpen
+        />
+      );
+
+      expect(screen.queryByTestId('lifecyclePhase-hot-size')).not.toBeInTheDocument();
+    });
+
+    it('should hide size label when disableInteractions is true', () => {
+      render(
+        <LifecyclePhase
+          label="hot"
+          color="#FF0000"
+          size="1.0 GB"
+          canManageLifecycle
+          disableInteractions
         />
       );
 
