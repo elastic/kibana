@@ -68,6 +68,10 @@ export const unisolateHostTool = (
           spaceId,
           username,
           agentType: 'endpoint',
+          // Analyst-initiated via chat (gated behind HITL confirmation), not a
+          // system/rule-triggered action — RESPONSE_ACTIONS_SUPPORT_MAP only
+          // allows `unisolate` for `manual` action type on the `endpoint` agent.
+          isAutomated: false,
         });
 
         // The response actions API needs endpoint_ids, not host names.
