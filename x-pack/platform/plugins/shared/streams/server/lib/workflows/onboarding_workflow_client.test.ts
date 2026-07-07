@@ -11,7 +11,7 @@ import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema'
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
-  STREAMS_KI_ONBOARDING_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
   StreamsKIsOnboardingClient,
@@ -20,7 +20,7 @@ import {
 } from './onboarding_workflow_client';
 const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => ({
   getWorkflow: jest.fn().mockResolvedValue({
-    id: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
+    id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
     name: 'onboarding',
     enabled: true,
     definition: {},
@@ -69,7 +69,7 @@ describe('StreamsKIsOnboardingClient', () => {
 
   describe('concurrency key sync with onboarding YAML', () => {
     it('buildConcurrencyKey produces keys that match the YAML concurrency template', () => {
-      const definition = getManagedWorkflowDefinition(STREAMS_KI_ONBOARDING_WORKFLOW_ID);
+      const definition = getManagedWorkflowDefinition(SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID);
       expect(definition).toBeDefined();
       expect(definition!.yaml).toBeDefined();
 
@@ -101,11 +101,11 @@ describe('StreamsKIsOnboardingClient', () => {
 
       expect(result).toEqual({ executionId: 'execution-id' });
       expect(managementApi.getWorkflow).toHaveBeenCalledWith(
-        STREAMS_KI_ONBOARDING_WORKFLOW_ID,
+        SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
         '*'
       );
       expect(managementApi.runWorkflow).toHaveBeenCalledWith(
-        expect.objectContaining({ id: STREAMS_KI_ONBOARDING_WORKFLOW_ID }),
+        expect.objectContaining({ id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID }),
         'default',
         expect.objectContaining({ streamName: 'logs.nginx' }),
         request
@@ -333,7 +333,7 @@ describe('StreamsKIsOnboardingClient', () => {
       expect(managementApi.getWorkflowExecutions).toHaveBeenCalledTimes(1);
       expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
         expect.objectContaining({
-          workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
+          workflowId: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
           size: 10000,
           sortField: 'createdAt',
           sortOrder: 'desc',
