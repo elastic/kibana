@@ -29,7 +29,7 @@ describe('useFetchPersistedAiSummary', () => {
     canRead: true,
     summary: {
       highlights: [{ title: 'Risk', text: 'Elevated risk' }],
-      recommendedActions: ['Investigate'],
+      recommended_actions: ['Investigate'],
       generated_at: 1748771200000,
       generated_by: 'alice',
       staleness: { enabled_signals: ['risk_score'], snapshot: { risk_score: 72 } },

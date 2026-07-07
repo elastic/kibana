@@ -38,7 +38,7 @@ export interface EntitySummaryStaleness {
 /** POST body for saving a summary. The API route adds `generated_by` from the authenticated user. */
 export interface SaveEntityAiSummarySummary {
   highlights: EntitySummaryHighlight[];
-  recommendedActions?: string[] | null;
+  recommended_actions?: string[] | null;
   generated_at: number;
   staleness: EntitySummaryStaleness;
 }
@@ -66,7 +66,7 @@ export interface SaveEntityAiSummaryParams {
  */
 export interface PersistedEntityAiSummary {
   highlights: EntitySummaryHighlight[];
-  recommendedActions?: string[] | null;
+  recommended_actions?: string[] | null;
   /** Unix timestamp (ms) of when the summary was generated. */
   generated_at: number;
   /** Username of the user who triggered generation (set server-side). */

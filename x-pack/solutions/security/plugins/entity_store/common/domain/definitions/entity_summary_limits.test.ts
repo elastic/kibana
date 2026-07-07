@@ -21,10 +21,10 @@ describe('capEntitySummaryContent', () => {
     const highlights = makeHighlights(MAX_ENTITY_SUMMARY_HIGHLIGHTS);
     const recommendedActions = makeActions(MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS);
 
-    const result = capEntitySummaryContent({ highlights, recommendedActions });
+    const result = capEntitySummaryContent({ highlights, recommended_actions: recommendedActions });
 
     expect(result.highlights).toEqual(highlights);
-    expect(result.recommendedActions).toEqual(recommendedActions);
+    expect(result.recommended_actions).toEqual(recommendedActions);
     expect(result).toMatchObject({
       highlightsCount: MAX_ENTITY_SUMMARY_HIGHLIGHTS,
       recommendedActionsCount: MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS,
@@ -47,9 +47,9 @@ describe('capEntitySummaryContent', () => {
     const highlights = makeHighlights(1);
     const recommendedActions = makeActions(MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS + 2);
 
-    const result = capEntitySummaryContent({ highlights, recommendedActions });
+    const result = capEntitySummaryContent({ highlights, recommended_actions: recommendedActions });
 
-    expect(result.recommendedActions).toEqual(
+    expect(result.recommended_actions).toEqual(
       recommendedActions.slice(0, MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS)
     );
     expect(result.recommendedActionsCount).toBe(MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS + 2);
@@ -59,7 +59,7 @@ describe('capEntitySummaryContent', () => {
   it('preserves null recommendedActions as null (does not coerce to [])', () => {
     const result = capEntitySummaryContent({ highlights: makeHighlights(1) });
 
-    expect(result.recommendedActions).toBeNull();
+    expect(result.recommended_actions).toBeNull();
     expect(result.recommendedActionsCount).toBe(0);
     expect(result.recommendedActionsDropped).toBe(0);
   });
@@ -68,11 +68,11 @@ describe('capEntitySummaryContent', () => {
     const result = capEntitySummaryContent({
       // Simulate corrupted / unexpected model output.
       highlights: undefined as unknown as [],
-      recommendedActions: 'nope' as unknown as string[],
+      recommended_actions: 'nope' as unknown as string[],
     });
 
     expect(result.highlights).toEqual([]);
-    expect(result.recommendedActions).toBeNull();
+    expect(result.recommended_actions).toBeNull();
     expect(result.highlightsCount).toBe(0);
     expect(result.recommendedActionsCount).toBe(0);
   });

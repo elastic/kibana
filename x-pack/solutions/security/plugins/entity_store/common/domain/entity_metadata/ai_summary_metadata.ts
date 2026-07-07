@@ -50,7 +50,7 @@ export interface AiSummaryMetadataDoc {
   'Ai_summary.generated_by': string;
   'Ai_summary.generated_at': number;
   'Ai_summary.highlights': AiSummaryHighlightItem[];
-  'Ai_summary.recommendedActions'?: string[] | null;
+  'Ai_summary.recommended_actions'?: string[] | null;
   'Ai_summary.anomaly_job_ids'?: string[];
   'Ai_summary.variant_id'?: string;
   'Ai_summary.staleness': AiSummaryMetadataStaleness;

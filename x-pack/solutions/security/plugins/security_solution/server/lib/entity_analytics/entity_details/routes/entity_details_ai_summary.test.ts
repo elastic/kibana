@@ -33,7 +33,7 @@ const BASE_REQUEST_BODY = {
   entityType: 'user',
   summary: {
     highlights: [{ title: 'Risk overview', text: 'Entity has elevated risk.' }],
-    recommendedActions: ['Investigate login activity'],
+    recommended_actions: ['Investigate login activity'],
     generated_at: 1748771200000,
     staleness: {
       enabled_signals: ['risk_score'],
@@ -197,7 +197,7 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
       summary: {
         ...BASE_REQUEST_BODY.summary,
         highlights: overshootHighlights,
-        recommendedActions: overshootActions,
+        recommended_actions: overshootActions,
       },
     });
     await server.inject(request, context);
@@ -207,10 +207,10 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
     expect(docs[0]['Ai_summary.highlights']).toEqual(
       overshootHighlights.slice(0, MAX_ENTITY_SUMMARY_HIGHLIGHTS)
     );
-    expect(docs[0]['Ai_summary.recommendedActions']).toHaveLength(
+    expect(docs[0]['Ai_summary.recommended_actions']).toHaveLength(
       MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS
     );
-    expect(docs[0]['Ai_summary.recommendedActions']).toEqual(
+    expect(docs[0]['Ai_summary.recommended_actions']).toEqual(
       overshootActions.slice(0, MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS)
     );
   });

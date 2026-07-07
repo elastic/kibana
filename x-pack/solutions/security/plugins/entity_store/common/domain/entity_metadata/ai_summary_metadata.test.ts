@@ -48,7 +48,7 @@ describe('AiSummaryMetadataDoc', () => {
       'Ai_summary.highlights': [
         { title: 'Risk overview', text: 'Entity has elevated risk score.' },
       ],
-      'Ai_summary.recommendedActions': ['Investigate login activity'],
+      'Ai_summary.recommended_actions': ['Investigate login activity'],
       'Ai_summary.anomaly_job_ids': ['security-job-1'],
       'Ai_summary.variant_id': 'default',
       'Ai_summary.staleness': {
@@ -57,7 +57,7 @@ describe('AiSummaryMetadataDoc', () => {
       },
     };
     expect(fullDoc['event.ingested']).toBe('2026-06-01T10:00:05.000Z');
-    expect(fullDoc['Ai_summary.recommendedActions']).toEqual(['Investigate login activity']);
+    expect(fullDoc['Ai_summary.recommended_actions']).toEqual(['Investigate login activity']);
     expect(fullDoc['Ai_summary.anomaly_job_ids']).toEqual(['security-job-1']);
     expect(fullDoc['Ai_summary.variant_id']).toBe('default');
   });
@@ -116,7 +116,7 @@ const AI_SUMMARY_FLAT_TEMPLATE_PATHS = [
   'entity.type',
   'Ai_summary.generated_by',
   'Ai_summary.generated_at',
-  'Ai_summary.recommendedActions',
+  'Ai_summary.recommended_actions',
   'Ai_summary.anomaly_job_ids',
   'Ai_summary.variant_id',
   'Ai_summary.staleness.enabled_signals',
@@ -140,7 +140,7 @@ const AI_SUMMARY_METADATA_FIELD_PATHS = [
   'Ai_summary.generated_by',
   'Ai_summary.generated_at',
   'Ai_summary.highlights',
-  'Ai_summary.recommendedActions',
+  'Ai_summary.recommended_actions',
   'Ai_summary.anomaly_job_ids',
   'Ai_summary.variant_id',
   'Ai_summary.staleness',

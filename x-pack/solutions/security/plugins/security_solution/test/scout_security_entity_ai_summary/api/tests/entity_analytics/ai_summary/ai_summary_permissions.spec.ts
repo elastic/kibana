@@ -69,7 +69,7 @@ const buildSummaryBody = (overrides: { generated_at?: number } = {}) => ({
   entityType: TEST_ENTITY_TYPE,
   summary: {
     highlights: [{ title: 'Risk overview', text: 'Entity shows elevated risk.' }],
-    recommendedActions: ['Investigate recent logins'],
+    recommended_actions: ['Investigate recent logins'],
     generated_at: overrides.generated_at ?? Date.now(),
     staleness: {
       enabled_signals: ['risk_score'],
@@ -154,7 +154,7 @@ apiTest.describe(
           canRead: true,
           summary: {
             highlights: [{ title: 'Risk overview', text: 'Entity shows elevated risk.' }],
-            recommendedActions: ['Investigate recent logins'],
+            recommended_actions: ['Investigate recent logins'],
             staleness: { enabled_signals: ['risk_score'], snapshot: { risk_score: 72 } },
           },
         });

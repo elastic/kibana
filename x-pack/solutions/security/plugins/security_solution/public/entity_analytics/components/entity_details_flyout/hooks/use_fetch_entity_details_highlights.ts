@@ -47,7 +47,7 @@ const entityHighlightsSchema = {
       description:
         'A list of highlight items, each with a title and text. Only include highlights for which information is available in the context.',
     },
-    recommendedActions: {
+    recommended_actions: {
       type: 'array',
       items: {
         type: 'string',
@@ -77,8 +77,8 @@ const buildResultFromStoredSummary = (
   response: {
     // Guard against corrupted stored data — highlights must be an array
     highlights: Array.isArray(storedSummary.highlights) ? storedSummary.highlights : [],
-    recommendedActions: Array.isArray(storedSummary.recommendedActions)
-      ? storedSummary.recommendedActions
+    recommended_actions: Array.isArray(storedSummary.recommended_actions)
+      ? storedSummary.recommended_actions
       : null,
   },
   replacements: {},
@@ -203,16 +203,19 @@ export const useFetchEntityDetailsHighlights = ({
       // Capture the raw counts the model produced before capping, so persist-time telemetry
       // can measure overshoot (the persisted/capped doc can't reveal it on its own).
       const modelHighlightsCount = typedOutput.highlights.length;
-      const modelRecommendedActionsCount = typedOutput.recommendedActions?.length ?? 0;
+      const modelRecommendedActionsCount = typedOutput.recommended_actions?.length ?? 0;
 
       // Apply the structural caps up front so the in-session view matches the persisted
       // document (which the server also caps) — avoids showing more items now than after
       // a reopen. Caps counts rather than truncating prose.
-      const { highlights, recommendedActions } = capEntitySummaryContent({
+      const { highlights, recommended_actions: recommendedActions } = capEntitySummaryContent({
         highlights: typedOutput.highlights,
-        recommendedActions: typedOutput.recommendedActions,
+        recommended_actions: typedOutput.recommended_actions,
       });
-      const cappedOutput: EntityHighlightsResponse = { highlights, recommendedActions };
+      const cappedOutput: EntityHighlightsResponse = {
+        highlights,
+        recommended_actions: recommendedActions,
+      };
 
       userTriggeredGeneration.current = true;
       setGenerationBaseline(entitySnapshot ?? null);
@@ -230,7 +233,7 @@ export const useFetchEntityDetailsHighlights = ({
         entityType,
         summary: {
           highlights,
-          recommendedActions,
+          recommended_actions: recommendedActions,
           generated_at: generatedAt,
           staleness: buildEntitySummaryStaleness({
             riskScoreNorm: entitySnapshot?.riskScoreNorm ?? null,

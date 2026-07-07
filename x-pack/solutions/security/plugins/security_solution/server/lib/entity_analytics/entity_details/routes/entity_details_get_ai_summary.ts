@@ -37,7 +37,7 @@ const GetAiSummaryRequestQuery = z.object({
  */
 const toPersistedSummary = (doc: AiSummaryMetadataDoc): PersistedEntityAiSummary => ({
   highlights: doc['Ai_summary.highlights'],
-  recommendedActions: doc['Ai_summary.recommendedActions'] ?? null,
+  recommended_actions: doc['Ai_summary.recommended_actions'] ?? null,
   generated_at: doc['Ai_summary.generated_at'],
   generated_by: doc['Ai_summary.generated_by'],
   staleness: {

@@ -35,7 +35,7 @@ const STORED_DOC: AiSummaryMetadataDoc = {
   'Ai_summary.generated_by': 'alice',
   'Ai_summary.generated_at': 1748771200000,
   'Ai_summary.highlights': [{ title: 'Risk overview', text: 'Elevated risk.' }],
-  'Ai_summary.recommendedActions': ['Investigate login activity'],
+  'Ai_summary.recommended_actions': ['Investigate login activity'],
   'Ai_summary.staleness': {
     enabled_signals: ['risk_score'],
     snapshot: { risk_score: 72.5 },
@@ -103,7 +103,7 @@ describe('GET /internal/entity_details/ai_summary - entityDetailsGetAiSummaryRou
       canRead: true,
       summary: {
         highlights: [{ title: 'Risk overview', text: 'Elevated risk.' }],
-        recommendedActions: ['Investigate login activity'],
+        recommended_actions: ['Investigate login activity'],
         generated_at: 1748771200000,
         generated_by: 'alice',
         staleness: { enabled_signals: ['risk_score'], snapshot: { risk_score: 72.5 } },

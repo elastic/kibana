@@ -46,7 +46,7 @@ export const MAX_SUMMARY_VARIANT_ID_LENGTH = 256;
 /** The LLM-produced content subject to the structural caps. */
 export interface EntitySummaryContent {
   highlights: EntitySummaryHighlight[];
-  recommendedActions?: string[] | null;
+  recommended_actions?: string[] | null;
 }
 
 export interface CappedEntitySummaryContent {
@@ -57,7 +57,7 @@ export interface CappedEntitySummaryContent {
    * {@link MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS}. `null`/absent is preserved as
    * `null` so callers can keep omitting the field rather than writing `[]`.
    */
-  recommendedActions: string[] | null;
+  recommended_actions: string[] | null;
   /** Highlights the model produced before capping (for telemetry). */
   highlightsCount: number;
   /** Recommended actions the model produced before capping (for telemetry). */
@@ -77,8 +77,8 @@ export const capEntitySummaryContent = (
   content: EntitySummaryContent
 ): CappedEntitySummaryContent => {
   const highlights = Array.isArray(content.highlights) ? content.highlights : [];
-  const recommendedActions = Array.isArray(content.recommendedActions)
-    ? content.recommendedActions
+  const recommendedActions = Array.isArray(content.recommended_actions)
+    ? content.recommended_actions
     : null;
 
   const cappedHighlights = highlights.slice(0, MAX_ENTITY_SUMMARY_HIGHLIGHTS);
@@ -91,7 +91,7 @@ export const capEntitySummaryContent = (
 
   return {
     highlights: cappedHighlights,
-    recommendedActions: cappedRecommendedActions,
+    recommended_actions: cappedRecommendedActions,
     highlightsCount: highlights.length,
     recommendedActionsCount,
     highlightsDropped: highlights.length - cappedHighlights.length,

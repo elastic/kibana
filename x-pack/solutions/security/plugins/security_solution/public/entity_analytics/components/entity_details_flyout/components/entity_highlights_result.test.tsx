@@ -25,7 +25,7 @@ describe('EntityHighlightsResult', () => {
           text: 'The asset is critical.',
         },
       ],
-      recommendedActions: ['Review login attempts', 'Check user permissions'],
+      recommended_actions: ['Review login attempts', 'Check user permissions'],
     },
     replacements: { anonymized_user: 'test-user' },
   };
@@ -73,7 +73,7 @@ describe('EntityHighlightsResult', () => {
     const emptyResult = {
       response: {
         highlights: [],
-        recommendedActions: null,
+        recommended_actions: null,
       },
       replacements: {},
     };
@@ -102,7 +102,7 @@ describe('EntityHighlightsResult', () => {
             text: 'User [anonymized_user] has high risk activity.',
           },
         ],
-        recommendedActions: null,
+        recommended_actions: null,
       },
       replacements: { anonymized_user: 'test-user' },
     };
@@ -129,7 +129,7 @@ describe('EntityHighlightsResult', () => {
             text: 'User [anonymized_user] has high risk activity.',
           },
         ],
-        recommendedActions: null,
+        recommended_actions: null,
       },
       replacements: { anonymized_user: 'test-user' },
     };
@@ -249,7 +249,7 @@ describe('EntityHighlightsResult', () => {
     const emptyResult = {
       response: {
         highlights: [],
-        recommendedActions: null,
+        recommended_actions: null,
       },
       replacements: {},
     };
@@ -276,7 +276,7 @@ describe('EntityHighlightsResult', () => {
             text: 'User activity detected.',
           },
         ],
-        recommendedActions: ['Review [anonymized_user] permissions'],
+        recommended_actions: ['Review [anonymized_user] permissions'],
       },
       replacements: { anonymized_user: 'test-user' },
     };
@@ -306,7 +306,7 @@ describe('EntityHighlightsResult', () => {
             text: 'User activity detected.',
           },
         ],
-        recommendedActions: ['Review [anonymized_user] permissions'],
+        recommended_actions: ['Review [anonymized_user] permissions'],
       },
       replacements: { anonymized_user: 'test-user' },
     };
@@ -326,7 +326,7 @@ describe('EntityHighlightsResult', () => {
     ).toBeInTheDocument();
   });
 
-  it('does not render recommended actions section when recommendedActions is null', () => {
+  it('does not render recommended actions section when recommended_actions is null', () => {
     const resultWithoutActions = {
       response: {
         highlights: [
@@ -335,7 +335,7 @@ describe('EntityHighlightsResult', () => {
             text: 'User activity detected.',
           },
         ],
-        recommendedActions: null,
+        recommended_actions: null,
       },
       replacements: {},
     };
@@ -353,7 +353,7 @@ describe('EntityHighlightsResult', () => {
     expect(screen.queryByText('Recommended actions')).not.toBeInTheDocument();
   });
 
-  it('does not render recommended actions section when recommendedActions is empty array', () => {
+  it('does not render recommended actions section when recommended_actions is empty array', () => {
     const resultWithEmptyActions = {
       response: {
         highlights: [
@@ -362,7 +362,7 @@ describe('EntityHighlightsResult', () => {
             text: 'User activity detected.',
           },
         ],
-        recommendedActions: [],
+        recommended_actions: [],
       },
       replacements: {},
     };

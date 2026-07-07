@@ -46,7 +46,7 @@ const SaveAiSummaryRequestBody = z.object({
   entityType: z.string().max(MAX_ENTITY_TYPE_LENGTH),
   summary: z.object({
     highlights: z.array(AiSummaryHighlightItem),
-    recommendedActions: z.array(z.string().max(MAX_SUMMARY_TEXT_LENGTH)).nullable().optional(),
+    recommended_actions: z.array(z.string().max(MAX_SUMMARY_TEXT_LENGTH)).nullable().optional(),
     generated_at: z.number(),
     // generated_by is intentionally excluded from the request body —
     // it is derived server-side from the authenticated user to prevent spoofing.
@@ -108,9 +108,9 @@ export const entityDetailsAiSummaryRoute = ({
           // consumer of the datastream (flyout reopen, other users, Agent Builder) sees a
           // bounded summary regardless of how much the model produced. Counts are capped
           // rather than the prose truncated, so nothing is cut mid-sentence.
-          const { highlights, recommendedActions } = capEntitySummaryContent({
+          const { highlights, recommended_actions: recommendedActions } = capEntitySummaryContent({
             highlights: summary.highlights,
-            recommendedActions: summary.recommendedActions,
+            recommended_actions: summary.recommended_actions,
           });
 
           // Write via the internal ES client so the user's own metadata index write
@@ -130,7 +130,7 @@ export const entityDetailsAiSummaryRoute = ({
           // which lives on the client; relocating that de-anonymization flow to the server is
           // the bulk of the work (server-side inference is otherwise the norm across Security
           // AI — Attack Discovery, Defend Insights, SIEM migrations). Doing so would let us
-          // drop the client-supplied `highlights`/`recommendedActions` body entirely.
+          // drop the client-supplied `highlights`/`recommended_actions` body entirely.
           const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
           const metadataClient = entityStore.createEntityMetadataClient(internalEsClient, spaceId);
 
@@ -144,7 +144,7 @@ export const entityDetailsAiSummaryRoute = ({
             'Ai_summary.generated_at': summary.generated_at,
             'Ai_summary.highlights': highlights,
             ...(recommendedActions != null && {
-              'Ai_summary.recommendedActions': recommendedActions,
+              'Ai_summary.recommended_actions': recommendedActions,
             }),
             ...(summary.anomaly_job_ids != null && {
               'Ai_summary.anomaly_job_ids': summary.anomaly_job_ids,

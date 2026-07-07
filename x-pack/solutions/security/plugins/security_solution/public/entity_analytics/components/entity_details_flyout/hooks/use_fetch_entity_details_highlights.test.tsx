@@ -65,7 +65,7 @@ const mockSuccessfulInferenceOutput: {
 } = {
   output: {
     highlights: [{ title: 'Test Highlight', text: 'Test highlight text' }],
-    recommendedActions: ['Action 1', 'Action 2'],
+    recommended_actions: ['Action 1', 'Action 2'],
   },
   content: 'AI generated analysis of the entity',
 };
@@ -74,7 +74,7 @@ const mockEntitySnapshot: EntitySummaryStalenessEntitySnapshot = { riskScoreNorm
 
 const mockStoredSummary: PersistedEntityAiSummary = {
   highlights: [{ title: 'Stored Highlight', text: 'Stored highlight text' }],
-  recommendedActions: ['Stored action'],
+  recommended_actions: ['Stored action'],
   generated_at: 1_700_000_000_000,
   generated_by: 'stored-user',
   staleness: {
@@ -291,7 +291,7 @@ describe('useFetchEntityDetailsHighlights', () => {
         entityType: 'user',
         summary: {
           highlights: mockSuccessfulInferenceOutput.output.highlights,
-          recommendedActions: mockSuccessfulInferenceOutput.output.recommendedActions,
+          recommended_actions: mockSuccessfulInferenceOutput.output.recommended_actions,
           generated_at: expect.any(Number),
           staleness: {
             enabled_signals: ['risk_score'],
@@ -416,7 +416,7 @@ describe('useFetchEntityDetailsHighlights', () => {
       expect(result.current.result).toEqual({
         response: {
           highlights: mockStoredSummary.highlights,
-          recommendedActions: mockStoredSummary.recommendedActions,
+          recommended_actions: mockStoredSummary.recommended_actions,
         },
         replacements: {},
         summaryAsText: '',

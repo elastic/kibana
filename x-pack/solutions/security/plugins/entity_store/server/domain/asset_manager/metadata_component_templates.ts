@@ -46,7 +46,7 @@ export const getMetadataIndexMappings = (): MappingTypeMapping => ({
     'Ai_summary.generated_by': { type: 'keyword' },
     'Ai_summary.generated_at': { type: 'date', format: 'epoch_millis' },
     'Ai_summary.highlights': { type: 'object', enabled: false },
-    'Ai_summary.recommendedActions': { type: 'keyword', index: false, doc_values: false },
+    'Ai_summary.recommended_actions': { type: 'keyword', index: false, doc_values: false },
     'Ai_summary.anomaly_job_ids': { type: 'keyword' },
     'Ai_summary.variant_id': { type: 'keyword' },
     'Ai_summary.staleness.enabled_signals': { type: 'keyword' },

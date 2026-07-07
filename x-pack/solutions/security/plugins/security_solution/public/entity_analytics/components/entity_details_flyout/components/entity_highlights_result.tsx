@@ -194,7 +194,7 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
             />
           </EuiText>
         )}
-        {anonymizedResult.recommendedActions && anonymizedResult.recommendedActions.length > 0 && (
+        {anonymizedResult.recommended_actions && anonymizedResult.recommended_actions.length > 0 && (
           <>
             <EuiHorizontalRule margin="m" />
             <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -214,7 +214,7 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
             </EuiFlexGroup>
             <EuiSpacer size="s" />
             <EuiMarkdownFormat textSize="xs" color="default">
-              {anonymizedResult.recommendedActions.map((action) => `- ${action}`).join('\n')}
+              {anonymizedResult.recommended_actions.map((action) => `- ${action}`).join('\n')}
             </EuiMarkdownFormat>
           </>
         )}
@@ -323,8 +323,8 @@ const useAnonymizedResponse = (
             replacements: assistantResult.replacements,
           }),
         })),
-        recommendedActions: response.recommendedActions
-          ? response.recommendedActions.map((action) =>
+        recommended_actions: response.recommended_actions
+          ? response.recommended_actions.map((action) =>
               replaceAnonymizedValuesWithOriginalValues({
                 messageContent: action,
                 replacements: assistantResult.replacements,
@@ -344,8 +344,8 @@ const formatTextToCopy = (response: EntityHighlightsResponse | null): string => 
     .map((highlight) => `- ${highlight.title}\n${highlight.text}\n`)
     .join('\n')
     .concat(
-      response.recommendedActions
-        ? `\nRecommended actions:\n${response.recommendedActions
+      response.recommended_actions
+        ? `\nRecommended actions:\n${response.recommended_actions
             .map((action) => `- ${action} \n`)
             .join('\n')}`
         : ''
