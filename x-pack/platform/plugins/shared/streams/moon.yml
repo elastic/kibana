@@ -105,6 +105,7 @@ dependsOn:
   - '@kbn/agent-context-layer-plugin'
   - '@kbn/traced-es-client'
   - '@kbn/core-http-server-mocks'
+  - '@kbn/actions-utils'
 tags:
   - plugin
   - prod
