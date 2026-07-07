@@ -11,9 +11,13 @@ import { v4 } from 'uuid';
 import { type KibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { WORKFLOW_RESUME_TASK_TYPE } from './types';
-import type { ResumeWorkflowExecutionParams } from './types';
+import { getWorkflowRunTaskId } from './get_workflow_run_task_id';
+import { WORKFLOW_RESUME_TASK_TYPE, WORKFLOW_RUN_TASK_TYPE } from './types';
+import type { ResumeWorkflowExecutionParams, StartWorkflowExecutionParams } from './types';
+import { resolveQueueTtlMs } from '../concurrency/queue_concurrency_utils';
 import { generateExecutionTaskScope } from '../utils';
+
+export { getWorkflowRunTaskId } from './get_workflow_run_task_id';
 
 /** Stable task id so idle-timeout (workflow + enclosing step) resumes dedupe per execution. */
 export const getWorkflowGlobalTimeoutResumeTaskId = (workflowExecutionId: string): string =>
@@ -111,6 +115,74 @@ export class WorkflowTaskManager {
     return {
       taskId: task.id,
     };
+  }
+
+  /**
+   * Schedules a dormant `workflow:run` for a queued execution using the trigger user's credentials.
+   * The task runs at queue TTL unless promoted earlier via {@link promoteQueuedRunTask}.
+   */
+  async scheduleDormantQueuedRunTask({
+    workflowExecution,
+    request,
+  }: {
+    workflowExecution: EsWorkflowExecution;
+    request: KibanaRequest;
+  }): Promise<{ taskId: string }> {
+    if (!workflowExecution.id || !workflowExecution.spaceId) {
+      throw new Error('Workflow execution must have id and spaceId to schedule a queued run task');
+    }
+
+    const triggeredBy = workflowExecution.triggeredBy || 'manual';
+    const taskId = getWorkflowRunTaskId(workflowExecution.id, triggeredBy);
+    const runAt = new Date(
+      Date.now() + resolveQueueTtlMs(workflowExecution.workflowDefinition?.settings?.concurrency)
+    );
+
+    await this.taskManager.removeIfExists(taskId);
+
+    const task = await this.taskManager.schedule(
+      {
+        id: taskId,
+        taskType: WORKFLOW_RUN_TASK_TYPE,
+        params: {
+          workflowRunId: workflowExecution.id,
+          spaceId: workflowExecution.spaceId,
+        } satisfies StartWorkflowExecutionParams,
+        state: {
+          lastRunAt: null,
+          lastRunStatus: null,
+          lastRunError: null,
+        },
+        runAt,
+        scope: generateExecutionTaskScope(workflowExecution),
+        enabled: true,
+      },
+      { request }
+    );
+
+    return { taskId: task.id };
+  }
+
+  async promoteQueuedRunTask({
+    executionId,
+    triggeredBy,
+  }: {
+    executionId: string;
+    triggeredBy?: string;
+  }): Promise<void> {
+    await this.taskManager.runSoon(getWorkflowRunTaskId(executionId, triggeredBy || 'manual'));
+  }
+
+  async removeQueuedRunTask({
+    executionId,
+    triggeredBy,
+  }: {
+    executionId: string;
+    triggeredBy?: string;
+  }): Promise<void> {
+    await this.taskManager.removeIfExists(
+      getWorkflowRunTaskId(executionId, triggeredBy || 'manual')
+    );
   }
 
   async scheduleImmediateResume({

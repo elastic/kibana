@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { AppMenuBadge } from './components/app_menu_badge';
@@ -305,22 +306,38 @@ export const getPopoverSwitchItems = ({
   switchConfig: AppMenuSwitch;
 }): EuiContextMenuPanelItemDescriptor[] => {
   const separator = createSeparatorItem('switch-separator');
+  const { title, content } = getTooltip({
+    tooltipContent: switchConfig.tooltipContent,
+    tooltipTitle: switchConfig.tooltipTitle,
+  });
+  const showTooltip = Boolean(content || title);
 
   return [
     separator,
     {
       key: `switch-${switchConfig.id}`,
-      renderItem: () => (
-        <EuiSwitch
-          id={switchConfig.id}
-          label={switchConfig.label}
-          labelProps={switchConfig.labelProps}
-          checked={switchConfig.checked}
-          onChange={(e) => switchConfig.onChange(e.target.checked)}
-          compressed
-          data-test-subj={switchConfig['data-test-subj'] ?? APP_MENU_TEST_SUBJECTS.switch}
-        />
-      ),
+      renderItem: () => {
+        const switchElement = (
+          <EuiSwitch
+            id={switchConfig.id}
+            label={switchConfig.label}
+            labelProps={switchConfig.labelProps}
+            checked={switchConfig.checked}
+            onChange={(e) => switchConfig.onChange(e.target.checked)}
+            disabled={switchConfig.disabled}
+            compressed
+            data-test-subj={switchConfig['data-test-subj'] ?? APP_MENU_TEST_SUBJECTS.switch}
+          />
+        );
+
+        return showTooltip ? (
+          <EuiToolTip content={content} title={title}>
+            {switchElement}
+          </EuiToolTip>
+        ) : (
+          switchElement
+        );
+      },
     },
   ];
 };

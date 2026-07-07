@@ -68,6 +68,9 @@ function convertTreeToEuiTreeViewItems(
     const selected = selectedId === stepExecution?.id;
 
     const stepId = stepExecution?.stepId ?? item.stepId;
+    // Prefer a resolved display label (e.g. a static parallel branch name) over
+    // the raw stepId, which for parallel/foreach scope nodes is the bare index.
+    const displayLabel = item.displayLabel ?? stepId;
     const stepType = stepExecution?.stepType ?? item.stepType;
 
     // Check if this is a skeleton step (not yet received from server) or a loading placeholder
@@ -120,7 +123,7 @@ function convertTreeToEuiTreeViewItems(
       ),
       label: (
         <StepExecutionTreeItemLabel
-          stepId={stepId}
+          stepId={displayLabel}
           selected={selected}
           status={status}
           executionTimeMs={stepExecution?.executionTimeMs ?? null}
