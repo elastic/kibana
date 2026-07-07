@@ -559,6 +559,8 @@ const StreamDetailGeneralDataInner = ({
                 onUpgradeEnterprise: frozenPhaseGating.flyoutProps.onUpgradeEnterprise,
                 createDefaultRepositoryHref:
                   frozenPhaseGating.flyoutProps.createDefaultRepositoryHref,
+                manageRepositoriesHref: frozenPhaseGating.flyoutProps.manageRepositoriesHref,
+                hasExistingRepositories: frozenPhaseGating.flyoutProps.hasExistingRepositories,
                 onRefreshDefaultRepository:
                   frozenPhaseGating.flyoutProps.onRefreshDefaultRepository,
                 isRefreshingDefaultRepository:

@@ -20,8 +20,8 @@ const toInputDetections = (discoveries: Array<Partial<Discovery>>): Array<Partia
     }));
 
 /**
- * Canonical cascade discovery — the lean ground truth shared by the investigator (expected output)
- * and the judge (input). Evidences carry the `esql_query` to re-run but are deliberately NOT
+ * Canonical cascade discovery — the lean ground truth shared by the discovery (expected output)
+ * and the judge (input) agents. Evidences carry the `esql_query` to re-run but are deliberately NOT
  * pre-stamped `confirmed` — the judge must re-verify each query via execute_esql and stamp
  * `confirmed: true` itself before promoting (Critical Rule 5). Every field here is seeded by one of
  * the cascade `detections`, so the canonical input and this expected answer stay self-consistent.
@@ -211,7 +211,7 @@ const BENIGN_AUTH_DISCOVERY: Partial<Discovery> = {
   ],
 };
 
-export const discoveryInvestigator: DatasetConfig['discoveryInvestigator'] = [
+export const discovery: DatasetConfig['discovery'] = [
   {
     input: {
       scenario_id: 'ledger-db-disconnect',
