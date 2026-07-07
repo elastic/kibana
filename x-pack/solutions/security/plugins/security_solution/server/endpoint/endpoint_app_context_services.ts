@@ -591,6 +591,7 @@ export class EndpointAppContextService {
     taskId,
     taskType,
     spaceId,
+    isAutomated = true,
   }: {
     spaceId: string;
     agentType?: ResponseActionAgentType;
@@ -599,6 +600,15 @@ export class EndpointAppContextService {
     taskId?: string;
     /** Used with background task and needed for `UnsecuredActionsClient`  */
     taskType?: string;
+    /**
+     * Whether the action is system/rule-triggered (`true`, the default — preserves behavior for
+     * detection-rule response actions and the pending-actions task runner) or was requested
+     * directly by an analyst/user (`false` — e.g. AI Agent skill tools gated behind HITL
+     * confirmation). `RESPONSE_ACTIONS_SUPPORT_MAP` gates several actions (isolate, unisolate,
+     * running-processes, scan) as unsupported for `automated` on some agent types, so callers
+     * representing user-initiated actions MUST pass `false`.
+     */
+    isAutomated?: boolean;
   }): ResponseActionsClient {
     if (!this.startDependencies?.esClient) {
       throw new EndpointAppContentServicesNotStartedError();
@@ -609,7 +619,7 @@ export class EndpointAppContextService {
       esClient: this.startDependencies.esClient,
       username,
       spaceId,
-      isAutomated: true,
+      isAutomated,
       connectorActions: new NormalizedExternalConnectorClient(
         this.startDependencies.connectorActions.getUnsecuredActionsClient(),
         this.createLogger('responseActions'),
