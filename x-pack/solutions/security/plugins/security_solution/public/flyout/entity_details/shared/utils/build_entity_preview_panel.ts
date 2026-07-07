@@ -36,7 +36,10 @@ export const buildEntityPreviewPanel = ({
 }: BuildEntityPreviewPanelArgs): FlyoutPanelProps | undefined => {
   const id =
     engineType && engineType in EntityPanelKeyByType
-      ? EntityPanelKeyByType[engineType as keyof typeof EntityPanelKeyByType]
+      ? // `EntityPanelKeyByType[generic]` is `undefined` (no dedicated generic key), so fall back to
+        // the generic entity panel — otherwise generic entities open nothing from the graph.
+        EntityPanelKeyByType[engineType as keyof typeof EntityPanelKeyByType] ??
+        GenericEntityPanelKey
       : GenericEntityPanelKey;
 
   if (!id) {

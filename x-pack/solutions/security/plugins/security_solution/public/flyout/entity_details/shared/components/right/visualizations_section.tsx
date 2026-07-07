@@ -60,7 +60,6 @@ export const VisualizationsSection = memo(
               entityId={entityId}
               // header link + arrow only shown when navigation is wired up (onShowGraph set)
               showIcon={!isPreviewMode && openDetailsPanel != null}
-              disableNavigation={isPreviewMode || scopeId === TableId.rulePreview}
               onShowGraph={
                 isPreviewMode || scopeId === TableId.rulePreview
                   ? undefined

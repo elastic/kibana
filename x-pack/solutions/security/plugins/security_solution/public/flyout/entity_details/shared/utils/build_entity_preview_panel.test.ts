@@ -77,11 +77,15 @@ describe('buildEntityPreviewPanel', () => {
     });
   });
 
-  it('returns undefined when the engineType maps to no panel', () => {
-    // The `generic` engine type is present in the lookup but maps to `undefined`.
+  it('falls back to the generic panel for the generic engine type', () => {
+    // The `generic` engine type is present in the lookup but maps to `undefined`, so it must fall
+    // back to the generic entity panel (otherwise generic entities open nothing from the graph).
     expect(EntityPanelKeyByType.generic).toBeUndefined();
     expect(
       buildEntityPreviewPanel({ engineType: 'generic', entityId, entityName: 'x', scopeId })
-    ).toBeUndefined();
+    ).toEqual({
+      id: GenericEntityPanelKey,
+      params: commonParams,
+    });
   });
 });

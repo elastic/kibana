@@ -33,10 +33,7 @@ import { DocumentFlyoutWrapper } from '../../main/document_flyout_wrapper';
 import { useDefaultDocumentFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 import { Network } from '../../../network/main';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
-import { HostPanel } from '../../../../flyout/entity_details/host_right';
-import { UserPanel } from '../../../../flyout/entity_details/user_right';
-import { ServicePanel } from '../../../../flyout/entity_details/service_right';
-import { GenericEntityPanel } from '../../../../flyout/entity_details/generic_right';
+import { renderEntityDetails } from '../../../entity/shared/render_entity_details';
 
 export const GRAPH_TOOLS_TEST_ID = `${PREFIX}GraphTools` as const;
 
@@ -123,46 +120,24 @@ export const GraphDetails = memo(
         entityId: string;
         entityName: string | undefined;
       }) => {
-        let child: React.ReactNode;
-        if (engineType === 'host') {
-          child = (
-            <HostPanel
-              contextID={GRAPH_SCOPE_ID}
-              scopeId={GRAPH_SCOPE_ID}
-              hostName={entityName ?? ''}
-              entityId={entityId}
-              isPreviewMode
-            />
-          );
-        } else if (engineType === 'user') {
-          child = (
-            <UserPanel
-              contextID={GRAPH_SCOPE_ID}
-              scopeId={GRAPH_SCOPE_ID}
-              userName={entityName ?? ''}
-              entityId={entityId}
-              isPreviewMode
-            />
-          );
-        } else if (engineType === 'service') {
-          child = (
-            <ServicePanel
-              contextID={GRAPH_SCOPE_ID}
-              scopeId={GRAPH_SCOPE_ID}
-              serviceName={entityName ?? ''}
-              entityId={entityId}
-              isPreviewMode
-            />
-          );
-        } else {
-          child = <GenericEntityPanel scopeId={GRAPH_SCOPE_ID} entityId={entityId} isPreviewMode />;
-        }
-
-        overlays.openSystemFlyout(flyoutProviders({ services, store, history, children: child }), {
-          ...defaultFlyoutProperties,
-          historyKey,
-          session: 'inherit',
-        });
+        overlays.openSystemFlyout(
+          flyoutProviders({
+            services,
+            store,
+            history,
+            children: renderEntityDetails({
+              engineType,
+              entityId,
+              entityName,
+              scopeId: GRAPH_SCOPE_ID,
+            }),
+          }),
+          {
+            ...defaultFlyoutProperties,
+            historyKey,
+            session: 'inherit',
+          }
+        );
       },
       [defaultFlyoutProperties, history, historyKey, overlays, services, store]
     );
