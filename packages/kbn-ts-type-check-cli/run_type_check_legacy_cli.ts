@@ -63,6 +63,10 @@ export const runLegacyTypeCheckCli = () => {
           !project.isTypeCheckDisabled() && (!projectFilter || project.path === projectFilter)
       );
 
+      if (projectFilter && projects.length === 0) {
+        throw createFailError(`Could not find a TypeScript project at '${projectFilter}'.`);
+      }
+
       const createdConfigs = await createTypeCheckConfigs(log, projects, TS_PROJECTS);
       let tscFailed = false;
       try {
