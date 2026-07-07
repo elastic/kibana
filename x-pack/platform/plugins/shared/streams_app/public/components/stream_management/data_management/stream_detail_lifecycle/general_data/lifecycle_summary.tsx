@@ -120,6 +120,8 @@ interface LifecycleSummaryProps {
   dataPhaseSelectedPhase?: PhaseName;
   /** Phases with active validation errors in the open "Edit data phases" flyout, shown in red on the timeline. */
   dataPhaseInvalidPhases?: PhaseName[];
+  /** While true, the delete phase is highlighted on the timeline as the one being edited. */
+  isEditingDeletePhase?: boolean;
   frozenPhaseGating?: {
     excludeFrozen: boolean;
     showEnterpriseLicenseRequiredBadge: boolean;
@@ -377,6 +379,9 @@ const IlmLifecycleSummary = ({
           uiState={{
             editedPhaseName: ilmSummary.editingPhase,
             isEditLifecycleFlyoutOpen,
+            // While an unrelated flyout (e.g. the successful lifecycle method switcher) is open,
+            // phase/downsample clicks must not open ILM's own edit-phases flyout.
+            disableInteractions: isExternalFlyoutOpen,
             invalidPhases,
           }}
         />
@@ -396,6 +401,7 @@ const NonIlmLifecycleSummary = ({
   onAddDataPhase,
   dataPhaseSelectedPhase,
   dataPhaseInvalidPhases,
+  isEditingDeletePhase = false,
   frozenPhaseGating,
   isExternalFlyoutOpen = false,
   isDataPhaseFlyoutOpen = false,
@@ -595,6 +601,8 @@ const NonIlmLifecycleSummary = ({
   const editedTimelinePhaseLabel =
     isDataPhaseEditing && dataPhaseSelectedPhase
       ? timelineModelPhases.find((p) => p.name === dataPhaseSelectedPhase)?.label
+      : isEditingDeletePhase
+      ? timelineModelPhases.find((p) => p.isDelete)?.label
       : undefined;
 
   return (
@@ -716,6 +724,9 @@ const NonIlmLifecycleSummary = ({
           // Treat the data phases flyout like the downsample-steps flyout: timeline clicks navigate
           // into it rather than opening per-phase/-step popovers.
           isEditLifecycleFlyoutOpen: dslSummary.isEditLifecycleFlyoutOpen || isDataPhaseEditing,
+          // While an unrelated flyout (e.g. the successful lifecycle method switcher or the
+          // successful delete phase flyout) is open, phase/downsample clicks must be fully inert.
+          disableInteractions: isExternalFlyoutOpen,
           invalidStepIndices,
           invalidPhases: dataPhaseInvalidPhases,
         }}
