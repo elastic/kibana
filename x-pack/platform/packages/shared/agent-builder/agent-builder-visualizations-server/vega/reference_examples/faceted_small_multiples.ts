@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-/**
- * Faceted small multiples: a top-level `facet` + per-cell `spec`, with `columns`
- * as a sibling and explicit per-cell sizing (auto-size does not apply to facets).
- * Loaded on demand by the reference-example catalog only when the request matches.
- */
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
   title: 'p95 Latency Over Time by Service',

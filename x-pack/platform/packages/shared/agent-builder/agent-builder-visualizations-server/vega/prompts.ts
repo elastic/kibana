@@ -9,22 +9,7 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 
-/**
- * Vega-specific ES|QL guidance appended to the shared instructions when
- * generating the query for a Vega chart.
- *
- * Kibana's Vega ES|QL renderer only *filters* rows by the time picker when the
- * query filters on the raw source time field itself; binding `?_tstart`/`?_tend`
- * inside `BUCKET(...)` only sets the bucket extent and does NOT drop rows outside
- * the selected range (see issue #275519). So, unlike Lens (which applies the time
- * range for us), every time-based Vega query must filter its own rows and must do
- * so on the original source field — not a `RENAME`/`EVAL`-derived one.
- *
- * It also asks the model to `RENAME` dotted result columns (e.g. `host.name`) to
- * dotless aliases at the source: Vega reads a dot as a nested-object path, so a
- * flat dotted column would otherwise render as "undefined". `field_escaping`
- * remains a deterministic fallback for provided/recovered queries.
- */
+// Vega-specific ES|QL guidance; see issue #275519 for the time-filtering quirk.
 export const vegaEsqlAdditionalInstructions = `
 ## Vega time-range filtering (required)
 
@@ -40,10 +25,6 @@ Vega interprets a dot in a field name as a nested-object path, but ES|QL result 
 - RENAME every such column to a readable, dotless alias in the query, e.g. \`RENAME host.name AS host\` or \`RENAME geo.dest AS destination\`, and reference the alias in the spec. Prefer this over leaving dotted names for the renderer to escape.
 - This applies to dimension/metric columns only. Do NOT rename the time field this way — keep filtering and bucketing on the raw source time field exactly as required above.`;
 
-/**
- * Describe the result columns of the backing ES|QL query so the model binds
- * encodings to real field names and types instead of guessing.
- */
 const formatColumns = (columns: EsqlEsqlColumnInfo[] | undefined): string => {
   if (!columns || columns.length === 0) {
     return 'No column information is available; infer fields from the ES|QL query.';
@@ -66,11 +47,7 @@ export const createAuthorVegaSpecPrompt = ({
   columns?: EsqlEsqlColumnInfo[];
   existingSpec?: string;
   chartType?: SupportedChartType;
-  /**
-   * Pre-selected, pre-loaded reference-example block to inject (see
-   * `reference_examples`). Loaded by the caller so only matched examples are
-   * materialized; empty string when nothing matched.
-   */
+  /** Pre-selected, pre-loaded reference-example block (see `reference_examples`). */
   referenceExamples?: string;
   additionalContext?: string;
 }): BaseMessageLike[] => {

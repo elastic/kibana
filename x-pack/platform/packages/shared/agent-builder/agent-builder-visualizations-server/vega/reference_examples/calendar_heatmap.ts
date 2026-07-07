@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-/**
- * Calendar heatmap: a GitHub-style grid of a `rect` mark with an ordinal `x` for
- * the week and an ordinal `y` for the weekday (explicitly sorted Mon→Sun), colored
- * by a sequential scheme. The week/weekday buckets are derived with `EVAL
- * DATE_FORMAT(...)`. Loaded on demand by the reference-example catalog only when
- * the request matches.
- */
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
   title: 'Activity by Week and Weekday',

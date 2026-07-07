@@ -5,44 +5,20 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
+import type { BaseMessageLike } from '@langchain/core/messages';
+import type { Logger } from '@kbn/logging';
+import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 
-/**
- * A curated Vega-Lite reference example the authoring model can adapt.
- *
- * The catalog only covers the *non-trivial* chart shapes that a standard Lens
- * chart cannot express and that the model most often gets structurally wrong —
- * combination (dual-axis) charts, faceted small multiples, scatter/bubble plots,
- * heatmaps, timeline/Gantt ranged bars, and calendar heatmaps. Simple single-series
- * bar/line charts are deliberately omitted: they route to Lens and need no example
- * here. Chart shapes that Vega-Lite cannot express (Sankey, radar, sunburst) are
- * out of scope until raw-Vega support lands.
- *
- * Only lightweight metadata (`match`, `title`, `description`) lives here; the
- * spec body is *referenced content* loaded on demand via {@link VegaReferenceExample.load}
- * so a request only pays to materialize the examples it actually matches. Each
- * spec is a guideline-compliant skeleton (auto-sizing, single legend per shared
- * scale, `sort: null` on shared axes, escaped dotted fields, explicit time-range
- * filtering on the raw source field), with colors left to the theme / built-in
- * schemes rather than a hardcoded palette.
- */
 export interface VegaReferenceExample {
-  /** Stable identifier (also used in tests). */
   readonly id: string;
-  /** Short human-facing title shown above the spec. */
   readonly title: string;
-  /** When to reach for this pattern. */
+  /** Shown to the model to guide selection. */
   readonly description: string;
-  /**
-   * Patterns matched (case-insensitively, statelessly) against the request text.
-   * Defined without the global flag so repeated `test()` calls stay stateless.
-   */
-  readonly match: readonly RegExp[];
-  /** Lazily load the illustrative Vega-Lite (v6) spec for this example. */
   readonly load: () => Promise<Record<string, unknown>>;
 }
 
-/** A reference example whose spec body has been materialized. */
 export interface LoadedVegaReferenceExample {
   readonly id: string;
   readonly title: string;
@@ -50,24 +26,13 @@ export interface LoadedVegaReferenceExample {
   readonly spec: Record<string, unknown>;
 }
 
-/**
- * Catalog metadata, in priority order for equal-score ties. Spec bodies are
- * referenced (not imported) so they load only when their example is selected.
- */
+// Spec bodies are referenced (not imported) so they load only when selected.
 export const VEGA_REFERENCE_EXAMPLES: readonly VegaReferenceExample[] = [
   {
     id: 'layered_combo_dual_axis',
     title: 'Combination chart (bars + overlaid line, dual axis)',
     description:
       'Two metrics over a shared axis: bars for one, an overlaid line for the other, on independent y-scales. Share the x encoding at the top level, set `sort: null` on any shared categorical axis, give each layer its own y `axis.title`, and put `resolve.scale.y = "independent"` at the top level.',
-    match: [
-      /dual[-\s]?axis/,
-      /\bcombo\b|combination/,
-      /overla(y|id|ying)/,
-      /bar.*\bline\b|\bline\b.*bar/,
-      /(count|bars?).*(average|avg|line)/,
-      /two (metrics|measures|series|y[-\s]?axes)/,
-    ],
     load: () => import('./layered_combo_dual_axis').then((module) => module.spec),
   },
   {
@@ -75,14 +40,6 @@ export const VEGA_REFERENCE_EXAMPLES: readonly VegaReferenceExample[] = [
     title: 'Faceted small multiples (one panel per category)',
     description:
       'Split one chart into a grid of small multiples: a top-level `facet` (the splitting field) plus a per-cell `spec`, with `columns` as a SIBLING of `facet`/`spec` (never inside `facet`). Auto-sizing does not apply to facets, so set explicit `width`/`height` on the inner `spec`. Keep the facet field low-cardinality (pre-limit in ES|QL).',
-    match: [
-      /small multiples/,
-      /\bfacet(s|ed|ing)?\b/,
-      /one (panel|chart|plot|line|graph) per\b/,
-      /a (panel|chart|plot) (for|per) each/,
-      /grid of (charts|panels|plots)/,
-      /split (in)?to (panels|charts|plots)/,
-    ],
     load: () => import('./faceted_small_multiples').then((module) => module.spec),
   },
   {
@@ -90,14 +47,6 @@ export const VEGA_REFERENCE_EXAMPLES: readonly VegaReferenceExample[] = [
     title: 'Scatter / bubble plot (encoded size)',
     description:
       'Relate two measures per entity with a `point` mark: quantitative `x` and `y`, a third measure as `size` (bubble), and a category as `color`. Disable zero baselines (`scale.zero = false`) when comparing magnitudes. Still filter by the time picker even without a temporal axis.',
-    match: [
-      /scatter/,
-      /bubble/,
-      /correlat/,
-      /\bvs\.?\b|versus/,
-      /size\s*=|bubble size|sized? by/,
-      /relationship between/,
-    ],
     load: () => import('./scatter_bubble').then((module) => module.spec),
   },
   {
@@ -105,7 +54,6 @@ export const VEGA_REFERENCE_EXAMPLES: readonly VegaReferenceExample[] = [
     title: 'Heatmap (two categories + color measure)',
     description:
       'Density across two dimensions with a `rect` mark: an ordinal/nominal `x` and `y`, and a sequential `color` scheme for the measure. Extract categorical buckets with `EVAL`, but keep the time-picker filter on the raw source field.',
-    match: [/heat\s?map/, /\bmatrix\b/, /\bby hour\b.*\bday\b|\bday\b.*\bby hour\b/, /density/],
     load: () => import('./heatmap').then((module) => module.spec),
   },
   {
@@ -113,14 +61,6 @@ export const VEGA_REFERENCE_EXAMPLES: readonly VegaReferenceExample[] = [
     title: 'Timeline / Gantt (ranged bars)',
     description:
       'Show the start-to-end span of each item as a horizontal ranged bar: a `bar` mark with a temporal `x` (start) and `x2` (end) against a nominal `y` (the item). Produce the start/end columns in ES|QL (e.g. `MIN`/`MAX` of the time field per item), pre-sort by start and set `sort: null` on `y`. Keep the time-picker filter on the raw source field.',
-    match: [
-      /\bgantt\b/,
-      /timeline/,
-      /\bschedule\b/,
-      /duration(s)? (of|per|by|for)\b/,
-      /start (and|to) end|(start|end) (time|date)s?/,
-      /\bspans?\b/,
-    ],
     load: () => import('./timeline_gantt').then((module) => module.spec),
   },
   {
@@ -128,68 +68,119 @@ export const VEGA_REFERENCE_EXAMPLES: readonly VegaReferenceExample[] = [
     title: 'Calendar heatmap (week × weekday grid)',
     description:
       'GitHub-style calendar heatmap: a `rect` mark with an ordinal `x` for the week and an ordinal `y` for the weekday (explicitly sorted Mon→Sun via `sort`), colored by a sequential `scheme`. Derive the week/weekday buckets with `EVAL DATE_FORMAT(...)` and keep the time-picker filter on the raw source field.',
-    match: [
-      /calendar/,
-      /contribution (graph|chart)/,
-      /github[-\s]?style/,
-      /by (week and )?weekday/,
-      /activity (heat\s?map|calendar)/,
-    ],
     load: () => import('./calendar_heatmap').then((module) => module.spec),
   },
 ];
 
-/** Never inject more than this many examples, to keep the prompt bounded. */
 const MAX_SELECTED_EXAMPLES = 2;
 
-/**
- * Pick the reference examples whose keyword patterns best match the request,
- * returning their metadata only (no spec content is loaded here). Returns the
- * highest-scoring examples (at most {@link MAX_SELECTED_EXAMPLES}), or an empty
- * array when nothing matches — a plain chart gets no example rather than a
- * misleading one. Catalog order breaks ties so selection is deterministic.
- */
-export const selectReferenceExamples = (
-  nlQuery: string,
-  chartType?: SupportedChartType
-): VegaReferenceExample[] => {
-  const haystack = `${nlQuery} ${chartType ?? ''}`.toLowerCase();
+const exampleById = (id: string): VegaReferenceExample | undefined =>
+  VEGA_REFERENCE_EXAMPLES.find((example) => example.id === id);
 
-  return VEGA_REFERENCE_EXAMPLES.map((example) => ({
-    example,
-    score: example.match.reduce((total, pattern) => total + (pattern.test(haystack) ? 1 : 0), 0),
-  }))
-    .filter(({ score }) => score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, MAX_SELECTED_EXAMPLES)
-    .map(({ example }) => example);
+export const formatReferenceCatalog = (): string =>
+  VEGA_REFERENCE_EXAMPLES.map(
+    (example) => `- id: "${example.id}" — ${example.title}\n  ${example.description}`
+  ).join('\n');
+
+const referenceSelectionSchema = z.object({
+  exampleIds: z
+    .array(z.string())
+    .default([])
+    .describe(
+      'IDs (from the catalog) of the reference examples whose STRUCTURE matches the request. Order by relevance. Use an empty array when none apply — e.g. a plain single-series bar/line chart, which needs no example.'
+    ),
+});
+
+export const createExampleSelectorPrompt = ({
+  nlQuery,
+  chartType,
+}: {
+  nlQuery: string;
+  chartType?: SupportedChartType;
+}): BaseMessageLike[] => {
+  const chartTypeHint = chartType ? `\nSuggested chart style: "${chartType}".` : '';
+
+  return [
+    [
+      'system',
+      `You are a Vega-Lite visualization expert selecting reference examples for a chart-authoring model.
+
+You are given a catalog of curated Vega-Lite example shapes and a chart request. Decide which example(s), if any, illustrate the STRUCTURE the request needs, and return their ids by calling the 'select_reference_examples' tool.
+
+RULES:
+1. Match on the chart's SHAPE/structure (combination, facet, scatter/bubble, heatmap, timeline, calendar), NOT on the specific fields or data in the request.
+2. Select at most ${MAX_SELECTED_EXAMPLES}, ordered by relevance. Most requests need zero or one.
+3. Return an EMPTY array when no example fits — e.g. a plain single-series bar or line chart. Do NOT force an unrelated example.
+4. Only return ids that appear verbatim in the catalog.
+
+CATALOG:
+${formatReferenceCatalog()}`,
+    ],
+    [
+      'human',
+      `Chart request:
+<user_query>
+${nlQuery}
+</user_query>${chartTypeHint}
+
+Call 'select_reference_examples' with the ids of the matching example(s), or an empty array if none apply.`,
+    ],
+  ];
 };
 
-/**
- * Select the matching examples and load *only their* spec bodies. This is the
- * single entry point that materializes referenced content, so unmatched examples
- * are never loaded.
- */
-export const loadReferenceExamples = async (
-  nlQuery: string,
-  chartType?: SupportedChartType
-): Promise<LoadedVegaReferenceExample[]> => {
-  const selected = selectReferenceExamples(nlQuery, chartType);
+// Best-effort: any failure yields an empty selection so authoring is not blocked.
+export const selectReferenceExamples = async ({
+  nlQuery,
+  chartType,
+  model,
+  logger,
+}: {
+  nlQuery: string;
+  chartType?: SupportedChartType;
+  model: ScopedModel;
+  logger?: Logger;
+}): Promise<VegaReferenceExample[]> => {
+  try {
+    const selectorModel = model.chatModel.withStructuredOutput(referenceSelectionSchema, {
+      name: 'select_reference_examples',
+    });
 
-  return Promise.all(
-    selected.map(async ({ id, title, description, load }) => ({
+    const response = await selectorModel.invoke(
+      createExampleSelectorPrompt({ nlQuery, chartType })
+    );
+    const requestedIds = Array.isArray(response?.exampleIds) ? response.exampleIds : [];
+
+    const selected: VegaReferenceExample[] = [];
+    for (const id of requestedIds) {
+      const example = exampleById(id);
+      if (example && !selected.includes(example)) {
+        selected.push(example);
+      }
+      if (selected.length >= MAX_SELECTED_EXAMPLES) {
+        break;
+      }
+    }
+
+    return selected;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    logger?.warn(`Reference-example selection failed; authoring without examples: ${message}`);
+    return [];
+  }
+};
+
+export const loadReferenceExamples = async (
+  examples: readonly VegaReferenceExample[]
+): Promise<LoadedVegaReferenceExample[]> =>
+  Promise.all(
+    examples.map(async ({ id, title, description, load }) => ({
       id,
       title,
       description,
       spec: await load(),
     }))
   );
-};
 
-/**
- * Render loaded examples as a prompt section. Returns an empty string when there
- * are none so callers can inject it unconditionally.
- */
 export const formatReferenceExamples = (examples: LoadedVegaReferenceExample[]): string => {
   if (examples.length === 0) {
     return '';
@@ -211,4 +202,22 @@ REFERENCE EXAMPLES:
 Adapt the structural pattern(s) below to the request. Do NOT copy their data source, fields, or query — bind the columns listed above. They illustrate correct structure only.
 
 ${blocks}`;
+};
+
+export const buildReferenceExamplesBlock = async ({
+  nlQuery,
+  chartType,
+  model,
+  logger,
+}: {
+  nlQuery: string;
+  chartType?: SupportedChartType;
+  model: ScopedModel;
+  logger?: Logger;
+}): Promise<string> => {
+  const selected = await selectReferenceExamples({ nlQuery, chartType, model, logger });
+  if (selected.length === 0) {
+    return '';
+  }
+  return formatReferenceExamples(await loadReferenceExamples(selected));
 };

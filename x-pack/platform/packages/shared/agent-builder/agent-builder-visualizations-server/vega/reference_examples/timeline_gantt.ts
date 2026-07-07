@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/**
- * Timeline / Gantt: a `bar` mark drawn as a ranged bar via a temporal `x` (start)
- * and `x2` (end) against a nominal `y` (the item). Start/end columns come from the
- * ES|QL query (here `MIN`/`MAX` of the time field per item). Loaded on demand by
- * the reference-example catalog only when the request matches.
- */
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
   title: 'Pipeline Stage Timeline',

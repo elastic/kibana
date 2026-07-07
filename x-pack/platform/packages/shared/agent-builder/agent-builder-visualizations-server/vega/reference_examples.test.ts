@@ -5,87 +5,150 @@
  * 2.0.
  */
 
+import type { ScopedModel } from '@kbn/agent-builder-server';
+import type { Logger } from '@kbn/logging';
 import {
   VEGA_REFERENCE_EXAMPLES,
+  buildReferenceExamplesBlock,
+  createExampleSelectorPrompt,
+  formatReferenceCatalog,
   formatReferenceExamples,
   loadReferenceExamples,
   selectReferenceExamples,
 } from './reference_examples';
 
-const idsFor = (nlQuery: string): string[] =>
-  selectReferenceExamples(nlQuery).map((example) => example.id);
+/**
+ * Build a mock ScopedModel whose structured-output selector returns `exampleIds`
+ * (or throws, to exercise the fail-open path).
+ */
+const mockModel = (
+  result: { exampleIds?: string[] } | (() => never)
+): { model: ScopedModel; invoke: jest.Mock; withStructuredOutput: jest.Mock } => {
+  const invoke = jest.fn(async () => {
+    if (typeof result === 'function') {
+      return result();
+    }
+    return result;
+  });
+  const withStructuredOutput = jest.fn(() => ({ invoke }));
+  return {
+    model: { chatModel: { withStructuredOutput } } as unknown as ScopedModel,
+    invoke,
+    withStructuredOutput,
+  };
+};
+
+const mockLogger = (): Logger => ({ warn: jest.fn() } as unknown as Logger);
+
+const idsFor = async (result: { exampleIds?: string[] }): Promise<string[]> => {
+  const { model } = mockModel(result);
+  const selected = await selectReferenceExamples({ nlQuery: 'any request', model });
+  return selected.map((example) => example.id);
+};
+
+describe('formatReferenceCatalog', () => {
+  it('lists every example id, title and description (no spec bodies)', () => {
+    const catalog = formatReferenceCatalog();
+    for (const example of VEGA_REFERENCE_EXAMPLES) {
+      expect(catalog).toContain(`id: "${example.id}"`);
+      expect(catalog).toContain(example.title);
+    }
+    // A selection catalog must not carry heavy spec bodies.
+    expect(catalog).not.toContain('$schema');
+  });
+});
+
+describe('createExampleSelectorPrompt', () => {
+  it('embeds the catalog, the request and the tool name', () => {
+    const [system, human] = createExampleSelectorPrompt({ nlQuery: 'a heatmap by hour and day' });
+    const systemText = String((system as [string, string])[1]);
+    const humanText = String((human as [string, string])[1]);
+
+    expect(systemText).toContain('select_reference_examples');
+    expect(systemText).toContain('id: "heatmap"');
+    expect(humanText).toContain('a heatmap by hour and day');
+  });
+
+  it('includes the chart-type hint only when provided', () => {
+    const [, humanNoHint] = createExampleSelectorPrompt({ nlQuery: 'x' });
+    expect(String((humanNoHint as [string, string])[1])).not.toContain('Suggested chart style');
+  });
+});
 
 describe('selectReferenceExamples', () => {
-  it('selects the combination example for a bar + overlaid line request', () => {
+  it('resolves the model-returned ids to catalog examples', async () => {
+    expect(await idsFor({ exampleIds: ['scatter_bubble'] })).toEqual(['scatter_bubble']);
+  });
+
+  it('ignores ids that are not in the catalog', async () => {
+    expect(await idsFor({ exampleIds: ['not_a_real_example', 'heatmap'] })).toEqual(['heatmap']);
+  });
+
+  it('dedupes repeated ids', async () => {
+    expect(await idsFor({ exampleIds: ['heatmap', 'heatmap'] })).toEqual(['heatmap']);
+  });
+
+  it('caps the selection at two examples, preserving order', async () => {
     expect(
-      idsFor('bars of daily request count with an overlaid line of average response time')
-    ).toContain('layered_combo_dual_axis');
+      await idsFor({
+        exampleIds: ['layered_combo_dual_axis', 'faceted_small_multiples', 'scatter_bubble'],
+      })
+    ).toEqual(['layered_combo_dual_axis', 'faceted_small_multiples']);
   });
 
-  it('selects the faceted example for a small-multiples request', () => {
-    expect(idsFor('small multiples of p95 latency over time, one panel per service')).toContain(
-      'faceted_small_multiples'
-    );
+  it('returns nothing when the model selects no example (plain chart)', async () => {
+    expect(await idsFor({ exampleIds: [] })).toEqual([]);
+    expect(await idsFor({})).toEqual([]);
   });
 
-  it('selects the scatter example for a scatter/bubble request', () => {
-    expect(
-      idsFor('scatter of latency vs throughput per host, bubble size = error count')
-    ).toContain('scatter_bubble');
+  it('fails open to no examples (and warns) when the model call throws', async () => {
+    const { model } = mockModel(() => {
+      throw new Error('model unavailable');
+    });
+    const logger = mockLogger();
+
+    const selected = await selectReferenceExamples({ nlQuery: 'x', model, logger });
+
+    expect(selected).toEqual([]);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('model unavailable'));
   });
 
-  it('selects the heatmap example for a heatmap request', () => {
-    expect(idsFor('a heatmap of activity by hour and day')).toContain('heatmap');
-  });
-
-  it('selects the timeline/gantt example for a gantt/duration request', () => {
-    expect(idsFor('a gantt chart of deployment stage durations')).toContain('timeline_gantt');
-  });
-
-  it('selects the calendar-heatmap example for a calendar request', () => {
-    expect(idsFor('a calendar heatmap of logins by week and weekday')).toContain(
-      'calendar_heatmap'
-    );
-  });
-
-  it('returns no example for a plain single-series chart (routes to Lens)', () => {
-    expect(selectReferenceExamples('top 10 services by error count as a bar chart')).toEqual([]);
-  });
-
-  it('is case-insensitive', () => {
-    expect(idsFor('SCATTER of X VS Y')).toContain('scatter_bubble');
-  });
-
-  it('ranks the higher-scoring example first', () => {
-    // Matches scatter strongly (scatter, vs, bubble size) and faceted weakly.
-    const [first] = idsFor('scatter plot of latency vs throughput, bubble size by errors');
-    expect(first).toBe('scatter_bubble');
-  });
-
-  it('never returns more than two examples', () => {
-    const many = selectReferenceExamples(
-      'a combination bar and line dual-axis scatter bubble heatmap small multiples facet chart'
-    );
-    expect(many.length).toBeLessThanOrEqual(2);
-  });
-
-  it('selection is stateless across repeated calls (no global-regex lastIndex drift)', () => {
-    const first = idsFor('scatter of latency vs throughput');
-    const second = idsFor('scatter of latency vs throughput');
-    expect(second).toEqual(first);
+  it('requests structured output under the select_reference_examples tool name', async () => {
+    const { model, withStructuredOutput } = mockModel({ exampleIds: [] });
+    await selectReferenceExamples({ nlQuery: 'x', model });
+    expect(withStructuredOutput).toHaveBeenCalledWith(expect.anything(), {
+      name: 'select_reference_examples',
+    });
   });
 });
 
 describe('loadReferenceExamples', () => {
-  it('materializes only the matched examples with their spec bodies', async () => {
-    const loaded = await loadReferenceExamples('scatter of latency vs throughput');
+  it('materializes the spec body for each selected example', async () => {
+    const [scatter] = VEGA_REFERENCE_EXAMPLES.filter((e) => e.id === 'scatter_bubble');
+    const loaded = await loadReferenceExamples([scatter]);
 
     expect(loaded.map((example) => example.id)).toEqual(['scatter_bubble']);
     expect(loaded[0].spec.$schema).toBe('https://vega.github.io/schema/vega-lite/v6.json');
   });
 
-  it('loads nothing for a plain single-series chart', async () => {
-    expect(await loadReferenceExamples('top 10 services by error count')).toEqual([]);
+  it('loads nothing when no examples are selected', async () => {
+    expect(await loadReferenceExamples([])).toEqual([]);
+  });
+});
+
+describe('buildReferenceExamplesBlock', () => {
+  it('selects, loads and formats the matched examples into a prompt block', async () => {
+    const { model } = mockModel({ exampleIds: ['scatter_bubble'] });
+    const block = await buildReferenceExamplesBlock({ nlQuery: 'scatter of x vs y', model });
+
+    expect(block).toContain('REFERENCE EXAMPLES');
+    expect(block).toContain('Scatter / bubble plot (encoded size)');
+    expect(block).toContain('```json');
+  });
+
+  it('returns an empty string when the model selects nothing (no bodies loaded)', async () => {
+    const { model } = mockModel({ exampleIds: [] });
+    expect(await buildReferenceExamplesBlock({ nlQuery: 'top 10 services', model })).toBe('');
   });
 });
 
@@ -150,7 +213,8 @@ describe('formatReferenceExamples', () => {
   });
 
   it('renders a titled JSON block per example and warns against copying data', async () => {
-    const rendered = formatReferenceExamples(await loadReferenceExamples('scatter of x vs y'));
+    const [scatter] = VEGA_REFERENCE_EXAMPLES.filter((e) => e.id === 'scatter_bubble');
+    const rendered = formatReferenceExamples(await loadReferenceExamples([scatter]));
     expect(rendered).toContain('REFERENCE EXAMPLES');
     expect(rendered).toContain('Scatter / bubble plot (encoded size)');
     expect(rendered).toContain('```json');

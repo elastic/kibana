@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-/**
- * Heatmap: a `rect` mark spanning two categorical/ordinal axes with a sequential
- * color scheme for the measure. Loaded on demand by the reference-example catalog
- * only when the request matches.
- */
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
   title: 'Event Density by Hour and Day',

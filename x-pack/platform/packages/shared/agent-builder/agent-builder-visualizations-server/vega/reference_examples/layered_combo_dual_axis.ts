@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-/**
- * Combination (dual-axis) chart: bars for one metric with an overlaid line for
- * another, on independent y-scales. Loaded on demand by the reference-example
- * catalog only when the request matches.
- */
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
   title: 'Daily Request Count with Average Latency',

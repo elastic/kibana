@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-/**
- * Scatter / bubble plot: a `point` mark relating two measures per entity, with a
- * third measure encoded as `size` and a category as `color`. Loaded on demand by
- * the reference-example catalog only when the request matches.
- */
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
   title: 'Latency vs Throughput by Host (bubble = error count)',
