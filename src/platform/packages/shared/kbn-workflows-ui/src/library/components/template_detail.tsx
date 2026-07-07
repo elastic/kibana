@@ -295,12 +295,21 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
       transform: 'translateX(-50%)',
       zIndex: 2,
     }),
-    // Editor fills the panel; 8px inset on top/right/bottom, left keeps Monaco's gutter.
+    // Editor fills the panel; the per-view inset below adds the framing.
     editorInset: css({
       flexGrow: 1,
       minHeight: 0,
       overflow: 'hidden',
+    }),
+    // YAML keeps a flush-left gutter (8px on top/right/bottom, 0 left) so Monaco's
+    // line numbers sit against the panel edge.
+    yamlInset: css({
       padding: `${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.s} 0`,
+    }),
+    // Graph is full-bleed: the canvas fills the panel so its floating controls
+    // (minimap, zoom, bottom bar) sit a uniform 16px in from the panel borders.
+    graphInset: css({
+      padding: 0,
     }),
   };
 
@@ -435,7 +444,13 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
         </div>
 
         <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
-          <EuiFlexItem grow css={styles.editorInset}>
+          <EuiFlexItem
+            grow
+            css={[
+              styles.editorInset,
+              activePreviewView === 'graph' ? styles.graphInset : styles.yamlInset,
+            ]}
+          >
             {activePreviewView === 'graph' ? (
               <ReactFlowProvider>
                 <WorkflowGraphCanvasWithoutProvider

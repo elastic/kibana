@@ -113,7 +113,7 @@ function CanvasZoomControls({ onResetView }: { onResetView: () => void }) {
   const handleZoomIn = useCallback(() => zoomIn({ duration: 200 }), [zoomIn]);
 
   return (
-    <Panel position="bottom-right" style={{ margin: 12 }}>
+    <Panel position="bottom-right" style={{ margin: 16 }}>
       <div
         css={{
           background: euiTheme.colors.backgroundBasePlain,
@@ -497,14 +497,14 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
         | undefined;
       const status = data?.stepExecution?.status;
       if (status === 'failed') return euiTheme.colors.danger;
-      // Figma (node 10808:19179): the trigger node reads as pink (accent) in the
-      // minimap, matching its icon accent; all other steps are blue (primary).
-      // Tokens keep the light look (#0b64dd / #ee72a6) and adapt in dark mode.
+      // Figma (node 10808:19179): the trigger node reads as pink in the minimap,
+      // matching its icon; all other steps are blue. Uses the same vis tokens as
+      // the node icons — euiColorVis2 (#61a2ff) / euiColorVis4 (#ee72a6).
       const isTriggerNode =
         data?.isTrigger || (data?.stepType ? TRIGGER_STEP_TYPES.has(data.stepType) : false);
-      return isTriggerNode ? euiTheme.colors.accent : euiTheme.colors.primary;
+      return isTriggerNode ? euiTheme.colors.vis.euiColorVis4 : euiTheme.colors.vis.euiColorVis2;
     },
-    [euiTheme.colors.danger, euiTheme.colors.accent, euiTheme.colors.primary]
+    [euiTheme.colors.danger, euiTheme.colors.vis.euiColorVis4, euiTheme.colors.vis.euiColorVis2]
   );
 
   const dimmed = !isYamlValid;
@@ -614,6 +614,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
                   nodeStrokeWidth={0}
                   nodeBorderRadius={2}
                   style={{
+                    margin: 16,
                     width: 160,
                     height: 126,
                     boxSizing: 'border-box',
