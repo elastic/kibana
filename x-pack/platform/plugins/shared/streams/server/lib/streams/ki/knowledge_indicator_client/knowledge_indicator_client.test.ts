@@ -298,6 +298,36 @@ describe('KnowledgeIndicatorClient.deleteIndicators', () => {
   });
 });
 
+describe('KnowledgeIndicatorClient.getStreamNamesWithKnowledgeIndicators', () => {
+  it('returns distinct sorted stream names from active feature and query revisions', async () => {
+    const { client, runEsql } = makeClient();
+    runEsql.mockResolvedValueOnce({
+      hits: [
+        createFeatureDoc({ 'stream.name': 'logs.nginx' }),
+        createFeatureDoc({ slug: 'feat-2', 'stream.name': 'logs.apache' }),
+        {
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+          id: 'query-1',
+          type: KI_TYPE_QUERY,
+          'stream.name': 'logs.nginx',
+          title: 'High error rate',
+          query: {
+            esql: 'FROM logs | STATS c = COUNT(*)',
+            query_type: 'match',
+            severity_score: 80,
+            rule_backed: false,
+          },
+        },
+      ],
+    });
+
+    await expect(client.getStreamNamesWithKnowledgeIndicators()).resolves.toEqual([
+      'logs.apache',
+      'logs.nginx',
+    ]);
+  });
+});
+
 describe('KnowledgeIndicatorClient.getFeatures', () => {
   const printedQueryFor = (runEsql: jest.Mock): string => {
     const query = runEsql.mock.calls[0][1] as { print: () => string };

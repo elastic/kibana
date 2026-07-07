@@ -13,39 +13,44 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { max } from 'lodash/fp';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
-import { getTabsOnUsersDetailsUrl } from '../../../common/components/link_to/redirect_to_users';
-import { UsersTableType } from '../../../explore/users/store/model';
-import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
-import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
-import { FlyoutHeader } from '../../shared/components/flyout_header';
-import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
-import type { FirstLastSeenData } from '../../../flyout_v2/entity/shared/components/observed_entity/types';
-import type { ManagedUserData } from '../shared/hooks/use_managed_user';
-import type { IdentityFields } from '../../document_details/shared/utils';
-import type { RiskSeverity } from '../../../../common/search_strategy';
-import { EntitySourceBadge } from '../shared/components/entity_source_badge';
-import { RiskLevelBadge } from '../shared/components/risk_level_badge';
+import { ManagedUserDatasetKey } from '../../../../../common/search_strategy/security_solution/users/managed_details';
+import { getTabsOnUsersDetailsUrl } from '../../../../common/components/link_to/redirect_to_users';
+import { UsersTableType } from '../../../../explore/users/store/model';
+import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
+import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
+import { FlyoutTitle } from '../../../shared/components/flyout_title';
+import type { FirstLastSeenData } from '../../shared/components/observed_entity/types';
+import type { ManagedUserData } from '../../../../flyout/entity_details/shared/hooks/use_managed_user';
+import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
+import type { RiskSeverity } from '../../../../../common/search_strategy';
+import { EntitySourceBadge } from '../../../../flyout/entity_details/shared/components/entity_source_badge';
+import { RiskLevelBadge } from '../../../../flyout/entity_details/shared/components/risk_level_badge';
 
-interface UserPanelHeaderProps {
+export interface HeaderProps {
+  /** User name displayed as the flyout title. */
   userName: string;
+  /** Managed user data (Okta/Entra) used for the Managed badge. */
   managedUser: ManagedUserData;
+  /** First/last seen timestamps for the user. */
   lastSeen: FirstLastSeenData;
+  /** Entity store entity ID, used for the entity source badge. */
   entityId?: string;
+  /** Key-value map of identity fields used to resolve the user. */
   identityFields?: IdentityFields;
+  /** Whether the user exists in the entity store. */
   isEntityInStore?: boolean;
+  /** Risk severity level for the user. */
   riskLevel?: RiskSeverity;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
 const urlParamOverride = { timeline: { isOpen: false } };
 
-export const UserPanelHeader = ({
+export const Header = ({
   userName,
   managedUser,
   lastSeen,
@@ -53,7 +58,7 @@ export const UserPanelHeader = ({
   identityFields,
   isEntityInStore,
   riskLevel,
-}: UserPanelHeaderProps) => {
+}: HeaderProps) => {
   const oktaTimestamp = managedUser.data?.[ManagedUserDatasetKey.OKTA]?.fields?.[
     '@timestamp'
   ][0] as string | undefined;
@@ -73,15 +78,7 @@ export const UserPanelHeader = ({
   );
 
   return (
-    <FlyoutHeader
-      data-test-subj="user-panel-header"
-      hasBorder={false}
-      css={css`
-        & > .euiPanel {
-          padding-bottom: 0;
-        }
-      `}
-    >
+    <div data-test-subj="user-panel-header">
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
         {!isEntityInStore && (
           <EuiFlexItem grow={false}>
@@ -177,6 +174,6 @@ export const UserPanelHeader = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </FlyoutHeader>
+    </div>
   );
 };
