@@ -43,6 +43,10 @@ describe('validateTime', () => {
     expect(() => validateTime(makeTime(''), tlConfig)).to.throwError(/Invalid interval/);
   });
 
+  test('accepts the default "auto" interval', () => {
+    expect(validateTime(makeTime('auto'), tlConfig)).to.be(true);
+  });
+
   test('throws when bucket count exceeds max_buckets', () => {
     expect(() => validateTime(makeTime('1s'), tlConfig)).to.throwError(/Max buckets exceeded/);
   });

@@ -13,6 +13,11 @@ import moment from 'moment';
 import { toMS } from '../../../common/lib/to_milliseconds';
 
 export default function validateTime(time, tlConfig) {
+  // 'auto' is resolved to a concrete interval by calculateInterval after this check
+  if (time.interval === 'auto') {
+    return true;
+  }
+
   const span = moment.duration(moment(time.to).diff(moment(time.from))).asMilliseconds();
   const interval = toMS(time.interval);
   if (!Number.isFinite(interval) || interval <= 0) {
