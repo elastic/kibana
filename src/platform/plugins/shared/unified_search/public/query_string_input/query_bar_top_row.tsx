@@ -63,6 +63,7 @@ import {
   type DateRangePickerOnChangeProps,
   type AutoRefreshSettings,
 } from '@kbn/date-range-picker';
+import { useDateRangePickerPresets } from '@kbn/date-range-picker-presets';
 import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
@@ -75,6 +76,8 @@ import { FilterBarContextProvider } from '../filter_bar/filter_bar_context';
 
 /** Feature flag key for the new DateRangePicker. Falls back to `true` (new picker). */
 const DATE_RANGE_PICKER_FEATURE_FLAG = 'unifiedSearch.newDateRangePickerEnabled';
+const DATE_RANGE_PICKER_PRESETS_PERSISTENCE_FEATURE_FLAG =
+  'unifiedSearch.dateRangePickerPresetsPersistenceEnabled';
 
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
@@ -417,6 +420,27 @@ export const QueryBarTopRow = React.memo(
 
     const shouldUseLegacyTimePicker =
       !enableDateRangePicker || !isDateRangePickerFeatureFlagEnabled;
+
+    const isPresetsPersistenceFeatureFlagEnabled$ = useMemo(
+      () =>
+        featureFlags
+          ? featureFlags
+              .getBooleanValue$(DATE_RANGE_PICKER_PRESETS_PERSISTENCE_FEATURE_FLAG, true)
+              .pipe(distinctUntilChanged())
+          : of(true),
+      [featureFlags]
+    );
+    const isPresetsPersistenceFeatureFlagEnabled = useObservable(
+      isPresetsPersistenceFeatureFlagEnabled$,
+      true
+    );
+    const shouldPersistDateRangePickerPresets =
+      !shouldUseLegacyTimePicker && isPresetsPersistenceFeatureFlagEnabled;
+    const dateRangePickerPresets = useDateRangePickerPresets({
+      service: data.dateRangePickerPresets,
+      persistenceEnabled: shouldPersistDateRangePickerPresets,
+      notifications,
+    });
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
     const shouldRenderESQLUi = Boolean(showQueryInput && isQueryLangSelected);
@@ -868,8 +892,10 @@ export const QueryBarTopRow = React.memo(
               compressed
               collapsed={isMobile || isQueryInputFocused}
               showTimeWindowButtons
-              presets={commonlyUsedRanges}
+              presets={dateRangePickerPresets.presets}
               recent={recentlyUsedRanges}
+              onPresetSave={dateRangePickerPresets.onPresetSave}
+              onPresetDelete={dateRangePickerPresets.onPresetDelete}
               settings={dateRangePickerSettingsWithAutoRefresh}
               onSettingsChange={onDateRangePickerSettingsChange}
               onRefresh={propsOnRefreshChange ? onDateRangePickerRefresh : undefined}

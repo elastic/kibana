@@ -31,6 +31,7 @@
     "@kbn/management-settings-ids",
     "@kbn/agent-context-layer-plugin",
     "@kbn/actions-plugin",
+    "@kbn/code-editor",
     "@kbn/logging-mocks",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/agent-builder-plugin",

@@ -12,6 +12,7 @@ export {
   convertToSerializableGraph,
   visitWaitForInputStep,
 } from './build_execution_graph/build_execution_graph';
+export { GraphBuildError, isGraphBuildError } from './build_execution_graph/graph_build_error';
 export { WorkflowGraph } from './workflow_graph/workflow_graph';
 
 export type {
@@ -27,6 +28,10 @@ export type {
   EnterWhileNodeConfigurationSchema,
   EnterWhileNode,
   ExitWhileNode,
+  EnterParallelNode,
+  EnterParallelNodeConfiguration,
+  EnterParallelNodeConfigurationSchema,
+  ExitParallelNode,
   EnterIfNode,
   EnterRetryNode,
   EnterSwitchNode,
@@ -91,6 +96,8 @@ export {
   isEnterNormalPath,
   isExitForeach,
   isExitWhile,
+  isEnterParallel,
+  isExitParallel,
   isExitIf,
   isExitRetry,
   isExitTryBlock,
