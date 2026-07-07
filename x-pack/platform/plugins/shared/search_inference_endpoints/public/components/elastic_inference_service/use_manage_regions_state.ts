@@ -26,6 +26,7 @@ export const useManageRegionsState = (onClose: () => void) => {
   const availableRegions = useMemo(() => getAvailableRegions(eisEndpoints ?? []), [eisEndpoints]);
 
   const [checkedKeys, setCheckedKeys] = useState<Set<string>>(new Set());
+  const [initialCheckedKeys, setInitialCheckedKeys] = useState<Set<string>>(new Set());
   const [syncedFromPolicy, setSyncedFromPolicy] = useState(false);
   const [expandedZones, setExpandedZones] = useState<Set<string>>(new Set());
   const [isCallOutDismissed, setIsCallOutDismissed] = useState(false);
@@ -36,9 +37,13 @@ export const useManageRegionsState = (onClose: () => void) => {
       const existing = policy?.region_policy?.allowed_regions ?? [];
       if (existing.length > 0) {
         const availableKeys = new Set(availableRegions.map(regionKey));
-        setCheckedKeys(new Set(existing.map(regionKey).filter((k) => availableKeys.has(k))));
+        const seeded = new Set(existing.map(regionKey).filter((k) => availableKeys.has(k)));
+        setCheckedKeys(seeded);
+        setInitialCheckedKeys(seeded);
       } else {
-        setCheckedKeys(new Set(availableRegions.map(regionKey)));
+        const seeded = new Set(availableRegions.map(regionKey));
+        setCheckedKeys(seeded);
+        setInitialCheckedKeys(seeded);
       }
       setSyncedFromPolicy(true);
     }
@@ -63,6 +68,10 @@ export const useManageRegionsState = (onClose: () => void) => {
   const isAllExpanded = zoneGroups.length > 0 && expandedZones.size === zoneGroups.length;
   const isLoading = isPolicyLoading || isEndpointsLoading;
   const isError = isPolicyError || isEndpointsError;
+  const isDirty =
+    syncedFromPolicy &&
+    (checkedKeys.size !== initialCheckedKeys.size ||
+      [...checkedKeys].some((k) => !initialCheckedKeys.has(k)));
 
   const handleSelectAll = useCallback(() => {
     if (allSelected) {
@@ -145,6 +154,7 @@ export const useManageRegionsState = (onClose: () => void) => {
     isLoading,
     isError,
     isSaving,
+    isDirty,
     handleDismissCallOut,
     handleSelectAll,
     handleToggleRegion,
