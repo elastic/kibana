@@ -45,6 +45,7 @@ interface Props {
   isEditing: boolean;
   ruleId?: string;
   builderType?: string;
+  onManualSplit?: () => void;
 }
 
 const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
@@ -59,6 +60,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         dispatch={props.dispatch}
         services={props.services}
         isEditing={props.isEditing}
+        onManualSplit={props.onManualSplit}
       />
     ),
     validate: (methods, s) => {
@@ -117,12 +119,8 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         <CentralizedActionPoliciesPanel http={props.services.http} />
         <EuiSpacer size="m" />
         <LinkedActionPoliciesStep http={props.services.http} ruleId={props.ruleId} />
-        {props.ruleId === undefined && (
-          <>
-            <EuiHorizontalRule margin="m" />
-            <NotificationsStep />
-          </>
-        )}
+        <EuiHorizontalRule margin="m" />
+        <NotificationsStep http={props.services.http} ruleId={props.ruleId} />
       </>
     ),
     validate: (methods) => {
@@ -177,6 +175,7 @@ export const ComposeDiscoverForm = ({
   isEditing,
   ruleId,
   builderType,
+  onManualSplit,
 }: Props) => {
   const isAlert = useWatch<FormValues, 'kind'>({ name: 'kind' }) === 'alert';
   const { steps, renderCustomRecovery } = useMemo(
@@ -194,6 +193,7 @@ export const ComposeDiscoverForm = ({
     isEditing,
     ruleId,
     renderCustomRecovery,
+    onManualSplit,
   });
 
   if (!isAlertConditionStep) {
