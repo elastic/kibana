@@ -99,11 +99,25 @@ interface UploadedQueryState {
   interval?: string | number;
   timeout?: number;
   query?: string;
+  ecs_mapping?: Record<string, unknown>;
 }
 let capturedQueriesState: UploadedQueryState[] = [];
+let capturedPackState: {
+  name?: string;
+  description?: string;
+  enabled?: boolean;
+  schedule?: { scheduleType?: string } & Record<string, unknown>;
+} = {};
 const FormStateProbe: React.FC = () => {
   const queries = useWatch({ name: 'queries' }) as UploadedQueryState[] | undefined;
+  const name = useWatch({ name: 'name' }) as string | undefined;
+  const description = useWatch({ name: 'description' }) as string | undefined;
+  const enabled = useWatch({ name: 'enabled' }) as boolean | undefined;
+  const schedule = useWatch({ name: 'schedule' }) as
+    | ({ scheduleType?: string } & Record<string, unknown>)
+    | undefined;
   capturedQueriesState = queries ?? [];
+  capturedPackState = { name, description, enabled, schedule };
 
   return null;
 };
@@ -114,6 +128,8 @@ const FormWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const methods = useForm<Record<string, unknown>>({
     defaultValues: {
       name: '',
+      description: '',
+      enabled: true,
       queries: [],
       schedule_type: undefined,
       interval: undefined,
@@ -147,6 +163,7 @@ describe('QueriesField', () => {
   beforeEach(() => {
     capturedUploaderOnChange = null;
     capturedQueriesState = [];
+    capturedPackState = {};
     jest.clearAllMocks();
   });
 
@@ -194,6 +211,151 @@ describe('QueriesField', () => {
       // populated from the uploaded content, not left empty.
       expect(byId['uptime-check'].query).toBe('select * from uptime;');
       expect(byId['fallback-query'].query).toBe('select 1;');
+    });
+
+    it('preserves per-query ecs_mapping on import', () => {
+      renderQueriesField();
+
+      act(() => {
+        capturedUploaderOnChange!(
+          {
+            queries: {
+              proc: {
+                query: 'select * from processes;',
+                interval: '60',
+                ecs_mapping: { 'process.pid': { field: 'pid' } },
+              },
+            },
+          },
+          'test-pack'
+        );
+      });
+
+      const byId = Object.fromEntries(capturedQueriesState.map((q) => [q.id, q]));
+      expect(byId.proc.ecs_mapping).toEqual({ 'process.pid': { field: 'pid' } });
+    });
+
+    it('falls back to a top-level ecs_mapping when a query has none', () => {
+      renderQueriesField();
+
+      act(() => {
+        capturedUploaderOnChange!(
+          {
+            ecs_mapping: { 'host.name': { field: 'hostname' } },
+            queries: { q: { query: 'select 1;', interval: '60' } },
+          },
+          'test-pack'
+        );
+      });
+
+      const byId = Object.fromEntries(capturedQueriesState.map((q) => [q.id, q]));
+      expect(byId.q.ecs_mapping).toEqual({ 'host.name': { field: 'hostname' } });
+    });
+
+    it('leaves queries without ecs_mapping untouched', () => {
+      renderQueriesField();
+
+      act(() => {
+        capturedUploaderOnChange!(
+          { queries: { q: { query: 'select 1;', interval: '60' } } },
+          'test-pack'
+        );
+      });
+
+      const byId = Object.fromEntries(capturedQueriesState.map((q) => [q.id, q]));
+      expect(byId.q).not.toHaveProperty('ecs_mapping');
+    });
+
+    it('uses the in-file pack name over the filename (1:1 across clusters)', () => {
+      renderQueriesField();
+
+      act(() => {
+        capturedUploaderOnChange!(
+          { name: 'forensics-pack', queries: { q: { query: 'select 1;', interval: '60' } } },
+          'renamed-file'
+        );
+      });
+
+      expect(capturedPackState.name).toBe('forensics-pack');
+    });
+
+    it('falls back to the filename when the file has no name (community .conf)', () => {
+      renderQueriesField();
+
+      act(() => {
+        capturedUploaderOnChange!(
+          { queries: { q: { query: 'select 1;', interval: '60' } } },
+          'from-filename'
+        );
+      });
+
+      expect(capturedPackState.name).toBe('from-filename');
+    });
+
+    it('imports the pack description', () => {
+      renderQueriesField();
+
+      act(() => {
+        capturedUploaderOnChange!(
+          {
+            name: 'p',
+            description: 'imported description',
+            queries: { q: { query: 'select 1;', interval: '60' } },
+          },
+          'file'
+        );
+      });
+
+      expect(capturedPackState.description).toBe('imported description');
+    });
+
+    it('lands the imported pack disabled regardless of any enabled in the file', () => {
+      renderQueriesField();
+
+      act(() => {
+        capturedUploaderOnChange!(
+          {
+            name: 'p',
+            enabled: true,
+            queries: { q: { query: 'select 1;', interval: '60' } },
+          },
+          'file'
+        );
+      });
+
+      expect(capturedPackState.enabled).toBe(false);
+    });
+
+    it('restores a pack-level rrule schedule from the file when present', () => {
+      renderQueriesField();
+
+      act(() => {
+        capturedUploaderOnChange!(
+          {
+            name: 'p',
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-07-07T00:00:00.000Z' },
+            queries: { q: { query: 'select 1;', interval: '60' } },
+          },
+          'file'
+        );
+      });
+
+      expect(capturedPackState.schedule?.scheduleType).toBe('rrule');
+    });
+
+    it('does not set a schedule when the file has no pack-level schedule', () => {
+      renderQueriesField();
+
+      act(() => {
+        capturedUploaderOnChange!(
+          { name: 'p', queries: { q: { query: 'select 1;', interval: '60' } } },
+          'file'
+        );
+      });
+
+      // Left at the form default (undefined here) — import did not touch it.
+      expect(capturedPackState.schedule).toBeUndefined();
     });
   });
 });

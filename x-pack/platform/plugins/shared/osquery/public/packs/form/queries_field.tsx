@@ -20,7 +20,7 @@ import { QueryFlyout } from '../queries/query_flyout';
 import { OsqueryPackUploader } from './pack_uploader';
 import { getSupportedPlatforms } from '../queries/platforms';
 import type { PackQueryFormData } from '../queries/use_pack_query_form';
-import { serializeSchedule } from './schedule_serializer';
+import { serializeSchedule, deserializeSchedule } from './schedule_serializer';
 import type { ScheduleFormData } from '../../components/schedule_section/types';
 
 interface QueriesFieldProps {
@@ -165,15 +165,51 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
               snapshot: newQuery.snapshot ?? parsedContent.snapshot,
               removed: newQuery.removed ?? parsedContent.removed,
               platform: getSupportedPlatforms(newQuery.platform ?? parsedContent.platform),
+              // ECS mappings ride in the osquery object form, which is what the
+              // pack form field (`PackQueryFormData.ecs_mapping`) stores — pass
+              // through as-is (mirrors the manual query-edit path). Preserving it
+              // here is what makes an exported pack round-trip 1:1.
+              ecs_mapping: newQuery.ecs_mapping ?? parsedContent.ecs_mapping,
             },
             (value) => !isEmpty(value) || value === false
           )
         )
       );
 
-      handleNameChange(uploadedPackName);
+      // A Kibana-pack JSON carries its own `name`/`description`; prefer those so
+      // the pack reconstructs 1:1 across clusters. Fall back to the filename for
+      // community `.conf` files that have no in-file name.
+      if (!isEmpty(parsedContent.name)) {
+        setValue('name', parsedContent.name);
+      } else {
+        handleNameChange(uploadedPackName);
+      }
+
+      if (!isEmpty(parsedContent.description)) {
+        setValue('description', parsedContent.description);
+      }
+
+      // Imported packs land disabled regardless of any `enabled` in the file:
+      // the operator assigns target-cluster policies and enables deliberately.
+      setValue('enabled', false);
+
+      // Pack-level schedule (rrule / interval), carried 1:1 when the file has
+      // one. Presence is the gate: export only emits it when the source pack
+      // had a schedule (rruleScheduling on), and on a flag-off target the form's
+      // deserializer/submit path strips it — so setting it here is safe either
+      // way and dormant until the feature ships.
+      if (!isEmpty(parsedContent.schedule_type)) {
+        setValue(
+          'schedule',
+          deserializeSchedule({
+            schedule_type: parsedContent.schedule_type,
+            interval: parsedContent.interval,
+            rrule_schedule: parsedContent.rrule_schedule,
+          })
+        );
+      }
     },
-    [handleNameChange, replace]
+    [handleNameChange, replace, setValue]
   );
 
   const tableData = useMemo(() => (fieldValue?.length ? fieldValue : []), [fieldValue]);

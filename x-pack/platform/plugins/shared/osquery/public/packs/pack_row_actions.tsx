@@ -11,9 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 
 import { useKibana } from '../common/lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 import { useCopyPack } from './use_copy_pack';
 import { useDeletePack } from './use_delete_pack';
 import { RowActionsMenu } from '../components/row_actions_menu';
+import { downloadPackAsJson } from './form/pack_serializer';
 import type { PackSavedObject } from './types';
 
 interface PackRowActionsProps {
@@ -33,6 +35,7 @@ const DELETE_MODAL_CONFIG = {
 
 const PackRowActionsComponent: React.FC<PackRowActionsProps> = ({ item }) => {
   const permissions = useKibana().services.application.capabilities.osquery;
+  const isExportPackEnabled = useIsExperimentalFeatureEnabled('exportPack');
   const { push } = useHistory();
 
   const copyPackMutation = useCopyPack({ packId: item.saved_object_id });
@@ -47,6 +50,10 @@ const PackRowActionsComponent: React.FC<PackRowActionsProps> = ({ item }) => {
   }, [copyPackMutation]);
 
   const handleDelete = useCallback(() => deletePackMutation.mutateAsync(), [deletePackMutation]);
+
+  const handleExport = useCallback(() => {
+    downloadPackAsJson(item);
+  }, [item]);
 
   const actionsAriaLabel = useMemo(
     () =>
@@ -81,6 +88,14 @@ const PackRowActionsComponent: React.FC<PackRowActionsProps> = ({ item }) => {
     []
   );
 
+  const exportLabel = useMemo(
+    () =>
+      i18n.translate('xpack.osquery.packList.rowActions.exportLabel', {
+        defaultMessage: 'Export pack',
+      }),
+    []
+  );
+
   return (
     <RowActionsMenu
       itemName={item.name}
@@ -94,6 +109,8 @@ const PackRowActionsComponent: React.FC<PackRowActionsProps> = ({ item }) => {
       onEdit={handleEdit}
       onDuplicate={handleDuplicate}
       onDelete={handleDelete}
+      onExport={isExportPackEnabled ? handleExport : undefined}
+      exportLabel={isExportPackEnabled ? exportLabel : undefined}
     />
   );
 };

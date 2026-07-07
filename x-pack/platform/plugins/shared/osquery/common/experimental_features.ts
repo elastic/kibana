@@ -31,6 +31,13 @@ export const allowedExperimentalValues = Object.freeze({
    */
   exportResults: true,
   /**
+   * Enables the per-pack "Export pack" row action in the Packs table, which
+   * serializes a pack to an osquery-standard `.conf` file and downloads it
+   * (round-trips through the existing pack importer). Read-only; requires only
+   * pack read access.
+   */
+  exportPack: false,
+  /**
    * Enables RFC 5545 RRULE-based recurrence scheduling for packs and pack queries
    * as an alternative to native interval-based scheduling. When enabled, the
    * pack form and pack query flyout expose a Schedule section, the API accepts

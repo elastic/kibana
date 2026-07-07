@@ -124,4 +124,50 @@ describe('RowActionsMenu', () => {
     expect(screen.queryByText('Delete this item?')).not.toBeInTheDocument();
     expect(defaultProps.onDelete).not.toHaveBeenCalled();
   });
+
+  describe('export action', () => {
+    it('does not render an export item when onExport is not provided', () => {
+      renderWithIntl(React.createElement(RowActionsMenu, defaultProps));
+      fireEvent.click(screen.getByLabelText('Actions for test-item'));
+
+      expect(screen.queryByText('Export')).not.toBeInTheDocument();
+    });
+
+    it('renders an export item when onExport is provided', () => {
+      const onExport = jest.fn();
+      renderWithIntl(
+        React.createElement(RowActionsMenu, { ...defaultProps, onExport, exportLabel: 'Export' })
+      );
+      fireEvent.click(screen.getByLabelText('Actions for test-item'));
+
+      expect(screen.getByText('Export')).toBeInTheDocument();
+    });
+
+    it('renders the export item even when canWrite is false (read-only operation)', () => {
+      const onExport = jest.fn();
+      renderWithIntl(
+        React.createElement(RowActionsMenu, {
+          ...defaultProps,
+          canWrite: false,
+          onExport,
+          exportLabel: 'Export',
+        })
+      );
+      fireEvent.click(screen.getByLabelText('Actions for test-item'));
+
+      expect(screen.getByText('Export')).toBeInTheDocument();
+      expect(screen.queryByText('Duplicate')).not.toBeInTheDocument();
+    });
+
+    it('calls onExport when export is clicked', () => {
+      const onExport = jest.fn();
+      renderWithIntl(
+        React.createElement(RowActionsMenu, { ...defaultProps, onExport, exportLabel: 'Export' })
+      );
+      fireEvent.click(screen.getByLabelText('Actions for test-item'));
+      fireEvent.click(screen.getByText('Export'));
+
+      expect(onExport).toHaveBeenCalledTimes(1);
+    });
+  });
 });
