@@ -209,6 +209,12 @@ export interface UsageStats {
   'observability:streamsEnableCanvas': boolean;
   'observability:streamsSigEventsIndexPatterns': string;
   'securitySolution:entityStoreEnableV2': boolean;
+  'securitySolution:alertAnalysisWorkflowEnabled': boolean;
+  'securitySolution:alertAnalysisWorkflowAutoCloseEnabled': boolean;
+  'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMinThreshold': number;
+  'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMaxThreshold': number;
+  'securitySolution:alertAnalysisWorkflowConnectorId': string;
+  'securitySolution:alertAnalysisWorkflowCreateConversation': boolean;
   'elasticRamen:enabled': boolean;
   'query_activity:minRunningTime': number;
   'genAiSettings:tokenUsageTracking': boolean;

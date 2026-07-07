@@ -18,6 +18,7 @@ import { ToolsService } from './tools';
 import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './execution/runner';
 import { ConversationServiceImpl } from './conversation';
+import { createWorkspaceService } from './workspaces';
 import { type AttachmentService, createAttachmentService } from './attachments';
 import { type RendererService, createRendererService } from './renderers';
 import { HooksService } from './hooks';
@@ -188,6 +189,7 @@ export class ServiceManager {
       toolsService: tools,
       agentsService: agents,
       attachmentsService: attachments,
+      renderersService: renderers,
       skillServiceStart: skillsServiceStart,
       pluginsServiceStart: plugins,
       trackingService,
@@ -204,6 +206,13 @@ export class ServiceManager {
       elasticsearch,
       spaces,
       agents,
+    });
+
+    const workspaces = createWorkspaceService({
+      logger: logger.get('workspaces'),
+      elasticsearch,
+      spaces,
+      conversations,
     });
 
     const auditLogService = new AuditLogService({
@@ -254,6 +263,7 @@ export class ServiceManager {
       renderers,
       skills: skillsServiceStart,
       conversations,
+      workspaces,
       runnerFactory,
       auditLogService,
       execution: executionService,
