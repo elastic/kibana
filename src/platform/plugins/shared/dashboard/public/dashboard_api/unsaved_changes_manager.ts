@@ -51,7 +51,6 @@ export function initializeUnsavedChangesManager({
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
   projectRoutingManager?: ReturnType<typeof initializeProjectRoutingManager>;
   approximationManager: ReturnType<typeof initializeApproximationManager>;
-  getState: () => DashboardState;
   setState: (state: DashboardState) => void;
   onSave$: PublishesOnSave['onSave$'];
 }): {

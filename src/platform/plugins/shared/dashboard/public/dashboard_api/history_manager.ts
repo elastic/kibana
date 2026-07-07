@@ -31,6 +31,17 @@ export function initializeHistoryManager({
   const { api: historyApi, cleanup: cleanupHistoryTracking } = startTrackingHistory<DashboardState>(
     {
       state$: dashboardState$,
+      mapState: (state) => {
+        const sortById = (
+          { id: idA }: DashboardState['panels'][number] | DashboardState['pinned_panels'][number],
+          { id: idB }: DashboardState['panels'][number] | DashboardState['pinned_panels'][number]
+        ) => (idA ?? '').localeCompare(idB ?? '');
+        return {
+          ...state,
+          panels: state.panels.sort(sortById),
+          // pinned_panels: state.pinned_panels.sort(sortById),
+        };
+      },
       maxSize: 10,
     }
   );

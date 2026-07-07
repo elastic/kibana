@@ -407,14 +407,12 @@ export function InternalDashboardTopNav({
       undo: {
         disabled: undoDisabled,
         onClick: () => {
-          console.log('UNDO');
           dashboardInternalApi.undo();
         },
       },
       redo: {
         disabled: redoDisabled,
         onClick: () => {
-          console.log('REDO');
           dashboardInternalApi.redo();
         },
       },

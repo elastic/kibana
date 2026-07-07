@@ -162,6 +162,7 @@ export function getDashboardApi({
 
   function getState() {
     const { panels, pinned_panels } = layoutManager.internalApi.serializeLayout();
+    console.log({ panels, pinned_panels });
     const unifiedSearchState = unifiedSearchManager.internalApi.getState();
     const projectRoutingState = projectRoutingManager?.internalApi.getState();
     const approximationState = approximationManager.internalApi.getState();
