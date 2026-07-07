@@ -107,6 +107,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     toolManager,
     experimentalFeatures,
     todoStateManager,
+    renderers,
   } = context;
 
   ensureValidInput({ input: nextInput, conversation, action });
@@ -261,6 +262,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     outputSchema,
     conversationTimestamp,
     experimentalFeatures,
+    renderers: renderers?.getRegisteredRenderers() ?? [],
   });
 
   const agentGraph = createAgentGraph({
