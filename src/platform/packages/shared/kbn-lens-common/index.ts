@@ -217,6 +217,7 @@ export type {
   IconPosition,
   Alignment,
   PrimaryMetricPosition,
+  MetricDensity,
   MetricStyleTemplateId,
   MetricStyleTemplatePresetId,
   MetricLayoutWithDefault,
