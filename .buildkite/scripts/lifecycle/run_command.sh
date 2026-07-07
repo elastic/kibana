@@ -42,8 +42,7 @@ run_with_self_timeout() {
   local budget_min="$1"
   shift
 
-  echo "--- Running command with a ${budget_min}m self-timeout (Buildkite timeout: ${BUILDKITE_TIMEOUT}m)"
-  echo "Exceeding it exits 124, distinct from -1 (agent lost / spot preemption), so retries can be scoped to real infra loss."
+  echo "--- Running script (timeout set to ${budget_min}m)"
 
   # GNU timeout exits 124 on deadline (even after escalating to SIGKILL).
   timeout --signal=TERM --kill-after="${kill_after}" "${budget_min}m" "$@"
