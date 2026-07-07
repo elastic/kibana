@@ -13,6 +13,7 @@ import {
   IP_FIELD_TYPE,
   LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
+  USER_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { FlyoutLoading } from '../components/flyout_loading';
@@ -20,6 +21,7 @@ import { FlyoutLoading } from '../components/flyout_loading';
 const Host = lazy(() => import('../../entity/host/main').then((m) => ({ default: m.Host })));
 const Network = lazy(() => import('../../network/main').then((m) => ({ default: m.Network })));
 const RuleDetails = lazy(() => import('../../rule/main').then((m) => ({ default: m.RuleDetails })));
+const User = lazy(() => import('../../entity/user/main').then((m) => ({ default: m.User })));
 
 const SuspenseFallback = <FlyoutLoading />;
 
@@ -31,6 +33,7 @@ const SuspenseFallback = <FlyoutLoading />;
  * - IP fields → Network details flyout (value = IP address)
  * - Rule name field → Rule details flyout (value = rule ID)
  * - Host name → Host details flyout (pass hit for entity resolution)
+ * - User name → User details flyout (pass hit for entity resolution)
  */
 export const buildFlyoutContent = (
   field: string,
@@ -63,6 +66,14 @@ export const buildFlyoutContent = (
     return (
       <Suspense fallback={SuspenseFallback}>
         <Host hostName={value} hit={hit} />
+      </Suspense>
+    );
+  }
+
+  if (field === USER_NAME_FIELD_NAME) {
+    return (
+      <Suspense fallback={SuspenseFallback}>
+        <User userName={value} hit={hit} />
       </Suspense>
     );
   }

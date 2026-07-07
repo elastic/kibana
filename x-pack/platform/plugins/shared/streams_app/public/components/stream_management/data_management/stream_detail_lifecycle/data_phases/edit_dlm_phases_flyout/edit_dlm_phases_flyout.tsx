@@ -33,7 +33,7 @@ import { useDataPhasesFlyoutStyles } from '../shared';
 import { useIlmPhasesColorAndDescription } from '../../hooks/use_ilm_phases_color_and_description';
 import {
   formatDuration,
-  getAfterFieldHelpText,
+  getTimingBoundHelpText,
   getDoubledDurationFromPrevious,
   parseIntervalWithDefaultUnit,
   type PreservedTimeUnit,
@@ -377,6 +377,21 @@ export const EditDlmPhasesFlyout = ({
     if (!frozenEnabled) return null;
     const isHidden = selectedPhase !== 'frozen';
     const isFrozenAfterDisabled = showFrozenEnterpriseCallout || hasFrozenDefaultRepositoryWarning;
+    const nextPhaseAfter = deleteEnabled
+      ? formatDuration(
+          methods.getValues('delete.afterValue'),
+          methods.getValues('delete.afterUnit'),
+          {
+            integerOnly: true,
+            minInclusive: 0,
+          }
+        )
+      : undefined;
+    const frozenAfterHelpText = nextPhaseAfter
+      ? getTimingBoundHelpText({
+          upper: { neighbor: { type: 'phase', phase: 'delete' }, value: nextPhaseAfter },
+        })
+      : undefined;
     return (
       <div hidden={isHidden} data-test-subj={`${dataTestSubj}Panel-frozen`}>
         <EuiText size="s" color="subdued" css={phaseDescriptionNoBottomPaddingStyles}>
@@ -399,6 +414,7 @@ export const EditDlmPhasesFlyout = ({
                     ? String(errors.frozen.afterValue.message)
                     : undefined
                 }
+                helpText={frozenAfterHelpText}
                 timeUnitOptions={TIME_UNIT_OPTIONS}
                 validatePathsOnCommit={['frozen.afterValue', 'delete.afterValue']}
               />
@@ -446,17 +462,22 @@ export const EditDlmPhasesFlyout = ({
   const renderDeletePanel = () => {
     if (!deleteEnabled) return null;
     const isHidden = selectedPhase !== 'delete';
-    const previousPhase: PhaseName = frozenEnabled ? 'frozen' : 'hot';
     const previousPhaseAfter = frozenEnabled
       ? formatDuration(
           methods.getValues('frozen.afterValue'),
-          methods.getValues('frozen.afterUnit')
+          methods.getValues('frozen.afterUnit'),
+          {
+            integerOnly: true,
+            minInclusive: 0,
+          }
         )
       : undefined;
-    const deleteAfterHelpText = getAfterFieldHelpText({
-      previousPhase,
-      previousPhaseAfter,
-    });
+    const deleteAfterHelpText =
+      frozenEnabled && previousPhaseAfter
+        ? getTimingBoundHelpText({
+            lower: { neighbor: { type: 'phase', phase: 'frozen' }, value: previousPhaseAfter },
+          })
+        : undefined;
 
     return (
       <div hidden={isHidden} data-test-subj={`${dataTestSubj}Panel-delete`}>
