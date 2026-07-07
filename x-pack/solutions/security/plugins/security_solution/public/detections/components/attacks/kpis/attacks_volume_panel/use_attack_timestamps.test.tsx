@@ -8,18 +8,10 @@
 import { renderHook } from '@testing-library/react';
 import { useAttackTimestamps } from './use_attack_timestamps';
 import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/use_query';
-import {
-  fetchQueryAttacks,
-  fetchQueryUnifiedAlerts,
-} from '../../../../containers/detection_engine/alerts/api';
-import { useAttacksPageFetchMethod } from '../../../../hooks/attacks/use_attacks_page_fetch_method';
 
 jest.mock('../../../../containers/detection_engine/alerts/use_query', () => ({
   useQueryAlerts: jest.fn(),
 }));
-jest.mock('../../../../hooks/attacks/use_attacks_page_fetch_method');
-
-const mockUseAttacksPageFetchMethod = useAttacksPageFetchMethod as jest.Mock;
 
 describe('useAttackTimestamps', () => {
   const mockSetQuery = jest.fn();
@@ -27,7 +19,6 @@ describe('useAttackTimestamps', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseAttacksPageFetchMethod.mockReturnValue(fetchQueryUnifiedAlerts);
   });
 
   it('skips query when no attack IDs provided', () => {
@@ -73,29 +64,10 @@ describe('useAttackTimestamps', () => {
     });
     expect(useQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
-        fetchMethod: fetchQueryUnifiedAlerts,
         skip: false,
         query: expect.objectContaining({
           query: { ids: { values: ['attack-1', 'attack-2'] } },
         }),
-      })
-    );
-  });
-
-  it('uses fetchQueryAttacks when publicAttacksApiEnabled is on', () => {
-    mockUseAttacksPageFetchMethod.mockReturnValue(fetchQueryAttacks);
-    (useQueryAlerts as jest.Mock).mockReturnValue({
-      data: undefined,
-      loading: false,
-      refetch: mockRefetch,
-      setQuery: mockSetQuery,
-    });
-
-    renderHook(() => useAttackTimestamps({ attackIds: ['attack-1'] }));
-
-    expect(useQueryAlerts).toHaveBeenCalledWith(
-      expect.objectContaining({
-        fetchMethod: fetchQueryAttacks,
       })
     );
   });
