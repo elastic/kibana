@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/sse-utils-client'
   - '@kbn/sse-utils-server'
   - '@kbn/core-http-browser'
+  - '@kbn/core-http-browser-mocks'
   - '@kbn/features-plugin'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/i18n'
