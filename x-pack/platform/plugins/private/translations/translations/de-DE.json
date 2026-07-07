@@ -42912,7 +42912,6 @@
     "xpack.securitySolution.entityAnalytics.threatHunting.leads.generatingDescription": "Die Analyse von Entitäten, Risiko-Scores und Alerts zur Ermittlung von Hunting-Leads ...",
     "xpack.securitySolution.entityAnalytics.threatHunting.leads.loading": "Wird geladen ...",
     "xpack.securitySolution.entityAnalytics.threatHunting.leads.noDataDescription": "Es wurden keine Entitäten, Risikobewertungen oder Warnmeldungen gefunden, die Hunting-Leads generieren könnten. Stellen Sie sicher, dass der Entitätsspeicher und die Risiko-Engine aktiviert sind und Daten verfügbar sind.",
-    "xpack.securitySolution.entityAnalytics.threatHunting.leads.noDataTitle": "Keine Daten gefunden",
     "xpack.securitySolution.entityAnalytics.threatHunting.leads.scheduleUpdateError": "Fehler beim Aktualisieren des Zeitplans",
     "xpack.securitySolution.entityAnalytics.threatHunting.leads.searchPlaceholder": "Leads suchen...",
     "xpack.securitySolution.entityAnalytics.threatHunting.leads.staleness.expired": "Abgelaufen",
