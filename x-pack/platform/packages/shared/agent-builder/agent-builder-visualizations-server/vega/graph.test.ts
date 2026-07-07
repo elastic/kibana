@@ -223,20 +223,6 @@ describe('createVegaGraph', () => {
     expect(invoke).toHaveBeenCalledTimes(3);
   });
 
-  it('passes sample rows from the provided query to the validator', async () => {
-    invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
-    mockedExecuteEsql.mockResolvedValue({
-      columns: [{ name: 'host', type: 'keyword' }],
-      values: [['web-1'], ['web-2']],
-    } as Awaited<ReturnType<typeof executeEsql>>);
-
-    await run({ esqlQuery: PROVIDED_ESQL });
-
-    expect(mockedValidateVegaSpec).toHaveBeenCalledWith(
-      expect.objectContaining({ rows: [{ host: 'web-1' }, { host: 'web-2' }] })
-    );
-  });
-
   it('regenerates a corrected query when the provided ES|QL fails to execute', async () => {
     invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
     // The provided query throws (an invalid, agent-invented query); the

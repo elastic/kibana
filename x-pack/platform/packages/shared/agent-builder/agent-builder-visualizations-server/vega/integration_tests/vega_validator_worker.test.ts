@@ -14,13 +14,12 @@ import { Worker } from 'node:worker_threads';
  * errors.
  */
 interface WorkerResponse {
-  id: string;
   ok: boolean;
   error?: string;
   warnings?: string[];
 }
 
-const WORKER_PATH = require.resolve('./vega_validator_wrapper.js');
+const WORKER_PATH = require.resolve('../vega_validator_wrapper.js');
 
 const withEsqlData = (spec: Record<string, unknown>) => ({
   $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
@@ -28,32 +27,27 @@ const withEsqlData = (spec: Record<string, unknown>) => ({
   ...spec,
 });
 
-const SAMPLE_ROWS = [
-  { status: 'ok', count: 10 },
-  { status: 'err', count: 3 },
-];
-
 describe('vega_validator_worker', () => {
   let worker: Worker;
-  const responses = new Map<string, (response: WorkerResponse) => void>();
 
   beforeAll(() => {
     worker = new Worker(WORKER_PATH);
-    worker.on('message', (response: WorkerResponse) => responses.get(response.id)?.(response));
   });
 
   afterAll(async () => {
     await worker.terminate();
   });
 
-  const validate = (id: string, spec: Record<string, unknown>): Promise<WorkerResponse> =>
+  // The worker answers one message per request; tests run sequentially, so
+  // waiting for the next 'message' event pairs each response to its request.
+  const validate = (spec: Record<string, unknown>): Promise<WorkerResponse> =>
     new Promise((resolve) => {
-      responses.set(id, resolve);
-      worker.postMessage({ id, spec: withEsqlData(spec), rows: SAMPLE_ROWS });
+      worker.once('message', resolve);
+      worker.postMessage({ spec: withEsqlData(spec) });
     });
 
   it('passes a valid Vega-Lite spec', async () => {
-    const result = await validate('good', {
+    const result = await validate({
       mark: 'bar',
       encoding: {
         x: { field: 'status', type: 'nominal' },
@@ -65,7 +59,7 @@ describe('vega_validator_worker', () => {
   });
 
   it('reports a render-time expression error', async () => {
-    const result = await validate('bad-expression', {
+    const result = await validate({
       transform: [{ filter: 'datum.count >' }],
       mark: 'point',
       encoding: { x: { field: 'status', type: 'nominal' } },
@@ -76,7 +70,7 @@ describe('vega_validator_worker', () => {
   });
 
   it('reports a compile-time encoding error', async () => {
-    const result = await validate('bad-encoding', {
+    const result = await validate({
       mark: 'bar',
       encoding: { x: { field: 'status', type: 'not-a-real-type' } },
     });

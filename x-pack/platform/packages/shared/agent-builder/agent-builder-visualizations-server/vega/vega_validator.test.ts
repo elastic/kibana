@@ -6,18 +6,18 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import { validateVegaSpec } from './vega_validator';
 
 interface PostedMessage {
-  id: number;
   spec: Record<string, unknown>;
-  rows: Array<Record<string, unknown>>;
 }
 
 type Handler = (arg: unknown) => void;
 
-/** Controllable fake `Worker`; each instance records posts and lets tests emit. */
+/** Controllable fake `Worker`; records posts and lets tests emit events. */
 class MockWorker {
   public readonly posted: PostedMessage[] = [];
+  public readonly terminate = jest.fn().mockResolvedValue(0);
   private readonly handlers: Record<string, Handler[]> = {};
 
   on(event: string, cb: Handler) {
@@ -27,7 +27,6 @@ class MockWorker {
   postMessage(message: PostedMessage) {
     this.posted.push(message);
   }
-  unref() {}
   emit(event: string, arg?: unknown) {
     (this.handlers[event] ?? []).forEach((cb) => cb(arg));
   }
@@ -48,62 +47,73 @@ const createLogger = (): Logger =>
 
 describe('validateVegaSpec', () => {
   let logger: Logger;
-  let validateVegaSpec: typeof import('./vega_validator').validateVegaSpec;
 
-  // The validator caches a singleton worker; reset the module per test so each
-  // gets a fresh worker whose handlers bind that test's logger.
-  beforeEach(async () => {
-    jest.resetModules();
+  beforeEach(() => {
     mockWorkerInstances.length = 0;
     logger = createLogger();
-    ({ validateVegaSpec } = await import('./vega_validator'));
   });
 
-  const onlyWorker = () => mockWorkerInstances[0];
+  const lastWorker = () => mockWorkerInstances[mockWorkerInstances.length - 1];
 
   it('resolves with warnings when the worker reports success', async () => {
     const promise = validateVegaSpec({ spec: { mark: 'bar' }, logger });
-    const { id } = onlyWorker().posted[0];
-    onlyWorker().emit('message', { id, ok: true, warnings: ['a minor warning'] });
+    lastWorker().emit('message', { ok: true, warnings: ['a minor warning'] });
 
     await expect(promise).resolves.toEqual({ error: undefined, warnings: ['a minor warning'] });
   });
 
   it('resolves with the error when the worker rejects the spec', async () => {
     const promise = validateVegaSpec({ spec: { mark: 'bogus' }, logger });
-    const { id } = onlyWorker().posted[0];
-    onlyWorker().emit('message', { id, ok: false, error: 'Unrecognized mark bogus' });
+    lastWorker().emit('message', { ok: false, error: 'Unrecognized mark bogus' });
 
     await expect(promise).resolves.toEqual({ error: 'Unrecognized mark bogus', warnings: [] });
   });
 
-  it('caps the rows sent to the worker', async () => {
-    const rows = Array.from({ length: 500 }, (_, i) => ({ i }));
-    const promise = validateVegaSpec({ spec: { mark: 'bar' }, rows, logger });
-    const posted = onlyWorker().posted[0];
-
-    expect(posted.rows).toHaveLength(200);
-    onlyWorker().emit('message', { id: posted.id, ok: true, warnings: [] });
+  it('terminates the worker after a completed validation', async () => {
+    const promise = validateVegaSpec({ spec: { mark: 'bar' }, logger });
+    lastWorker().emit('message', { ok: true, warnings: [] });
     await promise;
+
+    expect(lastWorker().terminate).toHaveBeenCalled();
   });
 
-  it('fails open (no error) when validation times out', async () => {
+  it('spawns a fresh worker per validation', async () => {
+    const first = validateVegaSpec({ spec: { mark: 'bar' }, logger });
+    lastWorker().emit('message', { ok: true, warnings: [] });
+    await first;
+
+    const second = validateVegaSpec({ spec: { mark: 'line' }, logger });
+    lastWorker().emit('message', { ok: true, warnings: [] });
+    await second;
+
+    expect(mockWorkerInstances).toHaveLength(2);
+  });
+
+  it('fails open and terminates the worker when validation times out', async () => {
     jest.useFakeTimers();
     try {
       const promise = validateVegaSpec({ spec: { mark: 'bar' }, logger });
       jest.advanceTimersByTime(10_000);
       await expect(promise).resolves.toEqual({ warnings: [] });
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('timed out'));
+      expect(lastWorker().terminate).toHaveBeenCalled();
     } finally {
       jest.useRealTimers();
     }
   });
 
-  it('fails open for all in-flight requests when the worker errors', async () => {
+  it('fails open when the worker errors', async () => {
     const promise = validateVegaSpec({ spec: { mark: 'bar' }, logger });
-    onlyWorker().emit('error', new Error('worker crashed'));
+    lastWorker().emit('error', new Error('worker crashed'));
 
     await expect(promise).resolves.toEqual({ warnings: [] });
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('worker crashed'));
+  });
+
+  it('fails open when the worker exits before responding', async () => {
+    const promise = validateVegaSpec({ spec: { mark: 'bar' }, logger });
+    lastWorker().emit('exit', 1);
+
+    await expect(promise).resolves.toEqual({ warnings: [] });
   });
 });

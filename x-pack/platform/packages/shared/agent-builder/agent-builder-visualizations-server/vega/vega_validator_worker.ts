@@ -35,9 +35,7 @@ interface VegaView {
 type ViewCtor = new (runtime: object, opts: { renderer: 'none'; logger: unknown }) => VegaView;
 
 interface ValidationRequest {
-  id: number;
   spec: Record<string, unknown>;
-  rows?: Array<Record<string, unknown>>;
 }
 
 let libs: Promise<{ compile: CompileFn; parse: ParseFn; View: ViewCtor }> | undefined;
@@ -57,13 +55,13 @@ const loadLibs = () => {
 
 /**
  * Swap the Kibana ES|QL `data` source (a `{ url: { '%type%': 'esql', … } }`
- * object Vega cannot fetch) for inline sample rows so the headless run does not
- * attempt a network fetch. Validation only needs the spec's structure, so an
- * empty array is fine when no rows are available.
+ * object Vega cannot fetch) for an inline empty dataset so the headless run
+ * does not attempt a network fetch. Validation only needs the spec's structure
+ * (compile/transform/expression errors surface without data).
  */
-const inlineData = (spec: Record<string, unknown>, rows?: Array<Record<string, unknown>>) => ({
+const inlineData = (spec: Record<string, unknown>) => ({
   ...spec,
-  data: { values: Array.isArray(rows) ? rows : [] },
+  data: { values: [] },
 });
 
 const createCollectingLogger = (warnings: string[]) => ({
@@ -91,16 +89,13 @@ const createCollectingLogger = (warnings: string[]) => ({
   },
 });
 
-const validate = async (
-  spec: Record<string, unknown>,
-  rows?: Array<Record<string, unknown>>
-): Promise<string[]> => {
+const validate = async (spec: Record<string, unknown>): Promise<string[]> => {
   const { compile, parse, View } = await loadLibs();
   const warnings: string[] = [];
   const logger = createCollectingLogger(warnings);
 
   // Vega-Lite compile: catches invalid marks/encodings/transforms/scales.
-  const { spec: vegaSpec } = compile(inlineData(spec, rows), { logger });
+  const { spec: vegaSpec } = compile(inlineData(spec), { logger });
 
   // Vega render (headless, AST interpreter so no eval/CSP concerns): catches
   // render-time errors compilation cannot, e.g. bad expressions or transforms.
@@ -112,13 +107,12 @@ const validate = async (
   return warnings;
 };
 
-parentPort?.on('message', async ({ id, spec, rows }: ValidationRequest) => {
+parentPort?.on('message', async ({ spec }: ValidationRequest) => {
   try {
-    const warnings = await validate(spec, rows);
-    parentPort?.postMessage({ id, ok: true, warnings });
+    const warnings = await validate(spec);
+    parentPort?.postMessage({ ok: true, warnings });
   } catch (error) {
     parentPort?.postMessage({
-      id,
       ok: false,
       error: error instanceof Error ? error.message : String(error),
     });

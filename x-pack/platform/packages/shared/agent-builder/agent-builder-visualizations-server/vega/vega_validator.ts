@@ -16,7 +16,6 @@ export interface VegaValidationResult {
 }
 
 interface WorkerResponse {
-  id: number;
   ok: boolean;
   error?: string;
   warnings?: string[];
@@ -30,65 +29,6 @@ interface WorkerResponse {
  */
 const WORKER_PATH = require.resolve('./vega_validator_wrapper.js');
 const VALIDATION_TIMEOUT_MS = 10_000;
-/** Cap rows sent to the worker so validation stays cheap and IPC payloads small. */
-const MAX_VALIDATION_ROWS = 200;
-
-let worker: Worker | undefined;
-let nextRequestId = 0;
-const pending = new Map<
-  number,
-  { resolve: (result: VegaValidationResult) => void; timer: NodeJS.Timeout }
->();
-
-const settle = (id: number, result: VegaValidationResult): void => {
-  const entry = pending.get(id);
-  if (!entry) {
-    return;
-  }
-  clearTimeout(entry.timer);
-  pending.delete(id);
-  entry.resolve(result);
-};
-
-// Infra failures (worker crash/exit) must not block spec generation: fail open
-// by resolving every in-flight request as "no error, no warnings".
-const failOpenAll = (): void => {
-  for (const id of [...pending.keys()]) {
-    settle(id, { warnings: [] });
-  }
-};
-
-const getWorker = (logger: Logger): Worker | undefined => {
-  if (worker) {
-    return worker;
-  }
-  try {
-    worker = new Worker(WORKER_PATH);
-  } catch (error) {
-    logger.warn(
-      `Could not start Vega validator worker: ${error instanceof Error ? error.message : error}`
-    );
-    return undefined;
-  }
-  worker.on('message', (response: WorkerResponse) =>
-    settle(response.id, {
-      error: response.ok ? undefined : response.error,
-      warnings: response.warnings ?? [],
-    })
-  );
-  worker.on('error', (error) => {
-    logger.warn(`Vega validator worker error: ${error.message}`);
-    worker = undefined;
-    failOpenAll();
-  });
-  worker.on('exit', () => {
-    worker = undefined;
-    failOpenAll();
-  });
-  // Don't keep the Kibana process alive on account of the validator worker.
-  worker.unref();
-  return worker;
-};
 
 /**
  * Compile a Vega-Lite spec to Vega and run it headless in a worker thread to
@@ -96,29 +36,57 @@ const getWorker = (logger: Logger): Worker | undefined => {
  * stored. Returns `{ error }` when Vega rejects the spec; otherwise
  * `{ warnings }`. Infra failures or timeouts fail open (resolve with no error)
  * so they never block generation.
+ *
+ * A fresh worker is spawned per call and always terminated afterwards, so the
+ * timeout genuinely cancels runaway compile/render work (vega runs synchronous
+ * CPU-bound code a shared worker could never abandon).
  */
-export const validateVegaSpec = ({
+export const validateVegaSpec = async ({
   spec,
-  rows = [],
   logger,
 }: {
   spec: Record<string, unknown>;
-  rows?: Array<Record<string, unknown>>;
   logger: Logger;
 }): Promise<VegaValidationResult> => {
-  const activeWorker = getWorker(logger);
-  if (!activeWorker) {
-    return Promise.resolve({ warnings: [] });
+  let worker: Worker;
+  try {
+    worker = new Worker(WORKER_PATH);
+  } catch (error) {
+    logger.warn(
+      `Could not start Vega validator worker: ${error instanceof Error ? error.message : error}`
+    );
+    return { warnings: [] };
   }
 
-  const id = nextRequestId++;
-  return new Promise<VegaValidationResult>((resolve) => {
-    const timer = setTimeout(() => {
-      logger.warn('Vega validation timed out; skipping');
-      settle(id, { warnings: [] });
-    }, VALIDATION_TIMEOUT_MS);
+  try {
+    return await new Promise<VegaValidationResult>((resolve) => {
+      const timer = setTimeout(() => {
+        logger.warn('Vega validation timed out; skipping');
+        resolve({ warnings: [] });
+      }, VALIDATION_TIMEOUT_MS);
 
-    pending.set(id, { resolve, timer });
-    activeWorker.postMessage({ id, spec, rows: rows.slice(0, MAX_VALIDATION_ROWS) });
-  });
+      worker.on('message', (response: WorkerResponse) => {
+        clearTimeout(timer);
+        resolve({
+          error: response.ok ? undefined : response.error,
+          warnings: response.warnings ?? [],
+        });
+      });
+      // Infra failures (worker crash/exit) must not block spec generation:
+      // fail open by resolving with "no error, no warnings".
+      worker.on('error', (error) => {
+        clearTimeout(timer);
+        logger.warn(`Vega validator worker error: ${error.message}`);
+        resolve({ warnings: [] });
+      });
+      worker.on('exit', () => {
+        clearTimeout(timer);
+        resolve({ warnings: [] });
+      });
+
+      worker.postMessage({ spec });
+    });
+  } finally {
+    void worker.terminate();
+  }
 };

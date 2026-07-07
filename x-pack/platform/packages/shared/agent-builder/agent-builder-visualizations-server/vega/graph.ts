@@ -6,7 +6,7 @@
  */
 
 import { StateGraph, Annotation } from '@langchain/langgraph';
-import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -58,27 +58,6 @@ const RENDERABLE_VIEW_KEYS = [
 const hasRenderableView = (spec: Record<string, unknown>): boolean =>
   RENDERABLE_VIEW_KEYS.some((key) => key in spec);
 
-/**
- * Turn ES|QL columnar results into row objects keyed by column name, the shape
- * the headless validator inlines as sample data. Returns `undefined` when either
- * side is missing so the validator falls back to running on empty data.
- */
-const toRowObjects = (
-  columns: EsqlEsqlColumnInfo[] | undefined,
-  values: FieldValue[][] | undefined
-): Array<Record<string, unknown>> | undefined => {
-  if (!columns || !values) {
-    return undefined;
-  }
-  return values.map((row) => {
-    const record: Record<string, unknown> = {};
-    columns.forEach((column, columnIndex) => {
-      record[column.name] = row[columnIndex];
-    });
-    return record;
-  });
-};
-
 const parseSpecFromResponse = (responseText: string): Record<string, unknown> => {
   const jsonMatches = Array.from(responseText.matchAll(INLINE_JSON_REGEX));
   const jsonText = jsonMatches.length > 0 ? jsonMatches[0][1].trim() : responseText.trim();
@@ -100,8 +79,6 @@ const VegaStateAnnotation = Annotation.Root({
   // internal
   esqlQuery: Annotation<string>(),
   columns: Annotation<EsqlEsqlColumnInfo[] | undefined>(),
-  /** Sample result rows (when available) used to headless-validate the spec. */
-  rows: Annotation<Array<Record<string, unknown>> | undefined>(),
   currentAttempt: Annotation<number>({ reducer: (_, newValue) => newValue, default: () => 0 }),
   actions: Annotation<VegaAction[]>({
     reducer: (a, b) => [...a, ...b],
@@ -139,7 +116,6 @@ export const createVegaGraph = async (
     try {
       let query = state.esqlQuery;
       let columns: EsqlEsqlColumnInfo[] | undefined;
-      let rows: Array<Record<string, unknown>> | undefined;
 
       // A provided query is only trustworthy if it actually runs: the caller may
       // pass an LLM-invented query whose error (e.g. a type mismatch) AST
@@ -149,13 +125,11 @@ export const createVegaGraph = async (
       if (query) {
         try {
           logger.debug('Validating provided ES|QL query for Vega visualization');
-          const executed = await executeEsql({
+          ({ columns } = await executeEsql({
             query,
             params: timeRangeParams,
             esClient: esClient.asCurrentUser,
-          });
-          columns = executed.columns;
-          rows = toRowObjects(executed.columns, executed.values);
+          }));
         } catch (providedError) {
           const message =
             providedError instanceof Error ? providedError.message : String(providedError);
@@ -205,17 +179,15 @@ export const createVegaGraph = async (
         // was validated without returning rows, since spec authoring needs them.
         columns = generated.columns;
         if (!columns) {
-          const executed = await executeEsql({
+          ({ columns } = await executeEsql({
             query,
             params: timeRangeParams,
             esClient: esClient.asCurrentUser,
-          });
-          columns = executed.columns;
-          rows = toRowObjects(executed.columns, executed.values);
+          }));
         }
       }
 
-      action = { type: 'generate_esql', success: true, query, columns, rows };
+      action = { type: 'generate_esql', success: true, query, columns };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       logger.error(`Failed to resolve ES|QL query for Vega: ${message}`);
@@ -225,7 +197,6 @@ export const createVegaGraph = async (
     return {
       esqlQuery: action.query ?? state.esqlQuery,
       columns: action.columns,
-      rows: action.rows,
       actions: [action],
     };
   };
@@ -310,7 +281,6 @@ export const createVegaGraph = async (
       // infra failures/timeouts fail open (no error) so they never block.
       const { error: renderError, warnings } = await validateVegaSpec({
         spec: normalized,
-        rows: state.rows,
         logger,
       });
       if (renderError) {
@@ -326,7 +296,6 @@ export const createVegaGraph = async (
         // Pretty-print so the stored/displayed spec stays human-readable.
         spec: JSON.stringify(normalized, null, 2),
         attempt,
-        warnings,
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
