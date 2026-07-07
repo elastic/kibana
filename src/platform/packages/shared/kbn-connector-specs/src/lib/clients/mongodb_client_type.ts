@@ -9,19 +9,7 @@
 
 import type { MongoClient } from 'mongodb';
 import type { ClientTypeSpec } from './client_type_spec';
-
-/**
- * Decodes an `Authorization: Basic <base64>` header into username/password.
- * Splits on the first colon only so passwords containing colons are handled correctly.
- */
-const parseBasicAuthHeader = (header: string): { username: string; password: string } | null => {
-  const match = /^Basic (.+)$/i.exec(header);
-  if (!match) return null;
-  const decoded = Buffer.from(match[1], 'base64').toString('utf8');
-  const colonIdx = decoded.indexOf(':');
-  if (colonIdx === -1) return null;
-  return { username: decoded.slice(0, colonIdx), password: decoded.slice(colonIdx + 1) };
-};
+import { parseBasicAuthHeader } from './parse_basic_auth_header';
 
 export const mongodbClientType: ClientTypeSpec<MongoClient> = {
   id: 'mongodb',

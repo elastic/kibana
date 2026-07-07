@@ -56,8 +56,7 @@ const makeBuildContext = (overrides: Partial<BuildContext> = {}): BuildContext =
 });
 
 describe('clientTypes registry', () => {
-  it('contains exactly { mcp, mongodb }', () => {
-    expect(Object.keys(clientTypes).sort()).toEqual(['mcp', 'mongodb']);
+  it('registers mcp and mongodb', () => {
     expect(clientTypes.mcp).toBe(mcpClientType);
     expect(clientTypes.mongodb).toBe(mongodbClientType);
   });

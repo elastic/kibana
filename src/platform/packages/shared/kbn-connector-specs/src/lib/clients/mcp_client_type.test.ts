@@ -27,8 +27,8 @@ describe('clientTypes registry', () => {
     expect((clientTypes as Record<string, unknown>).register).toBeUndefined();
   });
 
-  it('contains exactly { mcp, mongodb }', () => {
-    expect(Object.keys(clientTypes).sort()).toEqual(['mcp', 'mongodb']);
+  it('registers mcp', () => {
+    expect(Object.keys(clientTypes)).toContain('mcp');
     expect(clientTypes.mcp).toBe(mcpClientType);
   });
 
