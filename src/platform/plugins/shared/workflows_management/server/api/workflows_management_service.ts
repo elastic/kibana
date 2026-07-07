@@ -37,7 +37,6 @@ import type {
   WorkflowStatsDto,
 } from '@kbn/workflows';
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
-import { readWorkflowVersioningEnabled } from '@kbn/workflows/server';
 import type {
   ExecuteManagedWorkflowOptions,
   GetManagedWorkflowStatusOptions,
@@ -79,12 +78,14 @@ import type {
   RestoreWorkflowVersionResponseDto,
   WorkflowChangesHistoryResponse,
 } from '../../common/lib/workflow_change_history/types';
-import type { BulkFailureEntry } from '../lib/bulk_id_helpers';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { getHistoryForWorkflow } from '../lib/get_workflow_change_history';
 import { ManagedWorkflowsService } from '../services/managed_workflows_service';
 import { WorkflowChangeHistoryService } from '../services/workflow_change_history_service';
-import { WorkflowCrudService } from '../services/workflow_crud_service';
+import {
+  type BulkCreateWorkflowsResult,
+  WorkflowCrudService,
+} from '../services/workflow_crud_service';
 import type {
   ProcessedWaitForInputFacets,
   ProcessedWaitForInputFilters,
@@ -211,15 +212,7 @@ export class WorkflowsService {
       esClient: this.esClient,
     });
 
-    const workflowVersioningEnabled = await readWorkflowVersioningEnabled(coreStart, this.logger);
-
-    if (workflowVersioningEnabled) {
-      await this.initializeChangeHistoryService(coreStart);
-    } else {
-      this.logger.debug(
-        'Workflow version history is disabled; skipping change-history data stream init'
-      );
-    }
+    await this.initializeChangeHistoryService(coreStart);
 
     this.crudService = new WorkflowCrudService({
       logger: this.logger,
@@ -232,7 +225,6 @@ export class WorkflowsService {
       validationService: this.validationService,
       getCoreStart: () => this.coreStart,
       changeHistoryService: this.changeHistoryService,
-      workflowVersioningEnabled,
     });
 
     this.managedWorkflowsService = new ManagedWorkflowsService({
@@ -282,8 +274,10 @@ export class WorkflowsService {
       {
         changeHistoryService: this.changeHistoryService,
         getWorkflowSource: (workflowId, sid) =>
-          this.crudService.getWorkflowDocumentSource(workflowId, sid, { includeGlobal: true }),
-        workflowVersioningEnabled: await readWorkflowVersioningEnabled(this.coreStart, this.logger),
+          this.crudService.getWorkflowDocumentSource(workflowId, sid, {
+            includeGlobal: true,
+            includeDeleted: true,
+          }),
       },
       { workflowId: id, spaceId, ...options }
     );
@@ -322,7 +316,7 @@ export class WorkflowsService {
     spaceId: string,
     request: KibanaRequest,
     options?: { overwrite?: boolean }
-  ): Promise<{ created: WorkflowDetailDto[]; failed: BulkFailureEntry[] }> {
+  ): Promise<BulkCreateWorkflowsResult> {
     await this.ensureInitialized();
     return this.crudService.bulkCreateWorkflows(workflows, spaceId, request, options);
   }
@@ -364,13 +358,16 @@ export class WorkflowsService {
    * Used when a user opts out of workflows by toggling the per-space UI setting
    * off, or when availability (license / config) requires a global bulk disable.
    */
-  public async disableAllWorkflows(spaceId?: string): Promise<{
+  public async disableAllWorkflows(
+    spaceId?: string,
+    request?: KibanaRequest
+  ): Promise<{
     total: number;
     disabled: number;
     failures: Array<{ id: string; error: string }>;
   }> {
     await this.ensureInitialized();
-    return this.crudService.disableAllWorkflows(spaceId);
+    return this.crudService.disableAllWorkflows(spaceId, request);
   }
 
   public async getWorkflowsSubscribedToTrigger(

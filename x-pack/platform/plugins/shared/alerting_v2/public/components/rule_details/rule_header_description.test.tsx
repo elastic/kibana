@@ -73,6 +73,20 @@ describe('RuleHeaderDescription', () => {
     const { container } = wrap(<RuleHeaderDescription />, rule);
     expect(container.innerHTML).toBe('');
   });
+
+  it('renders both description and tags by default', () => {
+    const rule = {
+      ...baseRule,
+      metadata: {
+        name: 'My Rule',
+        description: 'Some description',
+        tags: ['prod', 'infra'],
+      },
+    } as RuleApiResponse;
+    wrap(<RuleHeaderDescription />, rule);
+    expect(screen.getByTestId('ruleDescription')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleTags')).toBeInTheDocument();
+  });
 });
 
 describe('RuleTitleWithBadges', () => {

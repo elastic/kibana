@@ -15,6 +15,7 @@ import type {
   EnterDefaultBranchNode,
   EnterForeachNode,
   EnterIfNode,
+  EnterParallelNode,
   EnterRetryNode,
   EnterSwitchNode,
   EnterTryBlockNode,
@@ -69,6 +70,7 @@ import {
   ExitTryBlockNodeImpl,
 } from './on_failure/fallback_step';
 import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './on_failure/retry_step';
+import { EnterParallelNodeImpl, ExitParallelNodeImpl } from './parallel_step';
 import {
   EnterBranchNodeImpl,
   EnterSwitchNodeImpl,
@@ -218,6 +220,18 @@ export class NodesFactory {
           this.stepIoService,
           this.workflowGraph
         );
+      case 'enter-parallel':
+        return new EnterParallelNodeImpl(
+          node as EnterParallelNode,
+          this.workflowRuntime,
+          stepExecutionRuntime,
+          stepLogger,
+          this.stepExecutionRuntimeFactory,
+          this,
+          this.workflowGraph
+        );
+      case 'exit-parallel':
+        return new ExitParallelNodeImpl(this.workflowRuntime);
       case 'loop-break':
         return new LoopBreakNodeImpl(
           node as LoopBreakNode,

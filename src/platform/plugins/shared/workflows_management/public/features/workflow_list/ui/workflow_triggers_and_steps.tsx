@@ -13,10 +13,10 @@ import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from '
 import { i18n } from '@kbn/i18n';
 import type { Step, WorkflowExecutionHistoryModel } from '@kbn/workflows';
 import { collectAllSteps } from '@kbn/workflows';
+import { getBaseConnectorType } from '@kbn/workflows-ui';
 import type { WorkflowTrigger } from '../../../../common/lib/trigger_types';
 import * as commonI18n from '../../../../common/translations';
 import { getWorkflowNextExecutionTime } from '../../../lib/next_execution_time';
-import { getBaseConnectorType } from '../../../shared/ui/step_icons/get_base_connector_type';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 import { PopoverItems } from '../../../widgets/worflows_triggers_list/popover_items';
