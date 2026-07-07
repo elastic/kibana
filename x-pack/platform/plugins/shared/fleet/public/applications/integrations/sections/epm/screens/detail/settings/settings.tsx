@@ -175,6 +175,8 @@ export const SettingsPage: React.FC<Props> = memo(
       [installationInfo?.namespace_customization_enabled_for]
     );
 
+    const namespaceCustomizationSettings = installationInfo?.namespace_customization_settings;
+
     const handleNamespaceCustomizationChange = useCallback(
       (next: string[]) => {
         updateNamespaceCustomizationMutation.mutate(
@@ -390,6 +392,7 @@ export const SettingsPage: React.FC<Props> = memo(
                       <NamespaceCustomizationSection
                         savedNamespaces={namespaceCustomizationEnabledFor}
                         allowedNamespacePrefixes={allowedNamespacePrefixes}
+                        namespaceCustomizationSettings={namespaceCustomizationSettings}
                         disabled={!authz.integrations.writePackageSettings}
                         isSubmitting={updateNamespaceCustomizationMutation.isLoading}
                         onSave={handleNamespaceCustomizationChange}

@@ -117,6 +117,7 @@ export const LifecycleBar: React.FC<LifecycleBarProps> = ({
         hasShadow={false}
         hasBorder={false}
         css={{
+          height: '56px',
           backgroundColor: euiTheme.colors.backgroundBaseSubdued,
           borderRadius: '8px',
           padding: '4px 2px',
@@ -130,6 +131,7 @@ export const LifecycleBar: React.FC<LifecycleBarProps> = ({
             gridTemplateColumns,
             paddingInline: euiTheme.size.xxs,
             boxSizing: 'border-box',
+            height: '100%',
           }}
         >
           {phases.map((phase, index) => (
@@ -141,10 +143,10 @@ export const LifecycleBar: React.FC<LifecycleBarProps> = ({
                 flexBasis: 0,
                 minWidth: 0,
                 gridColumn: `span ${phaseColumnSpans[index]}`,
-                paddingBlock: euiTheme.size.xxs,
                 paddingInline: euiTheme.size.xxs,
                 boxSizing: 'border-box',
                 justifyContent: 'center',
+                height: '100%',
               }}
             >
               {renderLifecyclePhase(
