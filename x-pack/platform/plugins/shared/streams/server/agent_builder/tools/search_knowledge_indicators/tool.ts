@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { platformStreamsSigEventsTools, ToolType } from '@kbn/agent-builder-common';
+import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
   BuiltinToolDefinition,
@@ -21,7 +21,7 @@ import { assertSignificantEventsAccess } from '../../../routes/utils/assert_sign
 import { searchKnowledgeIndicatorsToolHandler } from './handler';
 
 export const STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID =
-  platformStreamsSigEventsTools.searchKnowledgeIndicators;
+  platformSignificantEventsTools.searchKnowledgeIndicators;
 
 const searchKnowledgeIndicatorsSchema = z.object({
   stream_names: z
