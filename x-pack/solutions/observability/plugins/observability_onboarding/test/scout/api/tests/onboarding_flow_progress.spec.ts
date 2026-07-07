@@ -21,6 +21,7 @@ const NO_ACCESS_USER_ROLE: KibanaRole = {
 };
 
 // Failing: See https://github.com/elastic/kibana/issues/265767
+// Cross-user 404 ownership behavior is covered in onboarding_flow_ownership.spec.ts.
 apiTest.describe.skip(
   'Observability onboarding GET flow progress',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
