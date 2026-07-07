@@ -133,6 +133,7 @@
 @types/connect@3.4.38
 @types/eslint-scope@3.7.7
 @types/eslint@8.44.2
+@types/estree@0.0.50
 @types/estree@1.0.9
 @types/express-serve-static-core@4.19.8
 @types/express@4.17.21
