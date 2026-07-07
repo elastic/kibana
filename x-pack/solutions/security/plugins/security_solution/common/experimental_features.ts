@@ -82,13 +82,8 @@ export const allowedExperimentalValues = Object.freeze({
    * Ships disabled: this skill dispatches destructive endpoint response actions,
    * so it must not be enabled by default on any branch. Enable it explicitly via
    * config (or a Scout evals config) for local/CI testing.
-   *
-   * DEMO ONLY — MUST REVERT TO `false` BEFORE MERGE (see PR #272111 e2e demo
-   * handoff). Temporarily defaulted on so the persisted Cloud QA deployment for
-   * this PR registers the skill for end-to-end demo testing. The production
-   * default is `false`; do not ship this line.
    */
-  endpointResponseActionsSkill: true,
+  endpointResponseActionsSkill: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
