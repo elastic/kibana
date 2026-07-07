@@ -39,7 +39,16 @@ export const CopyExportedSentinelQuery = React.memo(() => {
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiCallOut title="Supported Rules" color="warning" iconType="alert">
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.securitySolution.siemMigrations.copyExportedSentinelQuery.supportedRulesTitle"
+              defaultMessage="Supported rules"
+            />
+          }
+          color="warning"
+          iconType="alert"
+        >
           <FormattedMessage
             id="xpack.securitySolution.siemMigrations.copyExportedSentinelQuery.rulesTypesupport"
             defaultMessage="As of now only Scheduled & NRT rules are supported for migration. Please make sure your export file contains only these type of rules."
