@@ -9,20 +9,9 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
 import { appContextService } from '../app_context';
-import { DATA_TIERS } from '../../../common/constants';
+import { DATA_TIERS, OPAMP_NON_REPORTING_STATUSES } from '../../../common/constants';
 
 const AGGREGATION_MAX_SIZE = 1000;
-
-// Agents in these states are not actively reporting OTel telemetry.
-// Excluding them from the hostname-keyed metrics query prevents a newly enrolled collector
-// on the same host from leaking its live metrics to a stale/offline agent entry.
-// See https://github.com/elastic/kibana/issues/274843
-const NON_REPORTING_OPAMP_STATUSES: Array<NonNullable<Agent['status']>> = [
-  'offline',
-  'inactive',
-  'unenrolled',
-  'uninstalled',
-];
 
 export async function fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, agents: Agent[]) {
   const logger = appContextService.getLogger();
@@ -70,7 +59,7 @@ async function _fetchAndAssignOtelMetrics(esClient: ElasticsearchClient, agents:
   const agentById = new Map(agents.map((a) => [a.id, a]));
   const instanceIdToAgentId = new Map<string, string>();
   for (const agent of agents) {
-    if (agent.status && NON_REPORTING_OPAMP_STATUSES.includes(agent.status)) {
+    if (agent.status && OPAMP_NON_REPORTING_STATUSES.includes(agent.status)) {
       continue;
     }
     const instanceId =

@@ -13,18 +13,14 @@ import type { Agent } from '../../../../../types';
 import { useGetAgentEffectiveConfigQuery } from '../../../../../hooks';
 import { CollectorConfigView } from '../../../../../../../components/otel_ui';
 import { CollectorContextProvider } from '../../../../../../../components/otel_ui/collector_config_view/collector_context';
-
-const NON_REPORTING_STATUSES: Array<NonNullable<Agent['status']>> = [
-  'offline',
-  'inactive',
-  'unenrolled',
-  'uninstalled',
-];
+import { OPAMP_NON_REPORTING_STATUSES } from '../../../../../../../../common/constants';
 
 export const AgentCollectorConfig: React.FunctionComponent<{ agent: Agent }> = ({ agent }) => {
   const { data: agentData, isLoading } = useGetAgentEffectiveConfigQuery(agent.id);
   const offlineAt =
-    agent.status && NON_REPORTING_STATUSES.includes(agent.status) ? agent.last_checkin : undefined;
+    agent.status && OPAMP_NON_REPORTING_STATUSES.includes(agent.status)
+      ? agent.last_checkin
+      : undefined;
 
   if (isLoading) {
     return <EuiLoadingSpinner />;

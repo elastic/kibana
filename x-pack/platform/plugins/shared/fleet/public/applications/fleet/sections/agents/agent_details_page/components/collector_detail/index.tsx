@@ -15,13 +15,7 @@ import { CollectorConfigView } from '../../../../../../../components/otel_ui';
 import { CollectorContextProvider } from '../../../../../../../components/otel_ui/collector_config_view/collector_context';
 import { CollectorDetailTabs } from '../../../../../../../components/otel_ui/collector_config_view/collector_detail/collector_detail_tabs';
 import { ErrorPatternPanel } from '../../../../../../../components/otel_ui/collector_config_view/error_pattern_panel';
-
-const NON_REPORTING_STATUSES: Array<NonNullable<Agent['status']>> = [
-  'offline',
-  'inactive',
-  'unenrolled',
-  'uninstalled',
-];
+import { OPAMP_NON_REPORTING_STATUSES } from '../../../../../../../../common/constants';
 
 export const CollectorDetailsContent: React.FunctionComponent<{ agent: Agent }> = ({ agent }) => {
   const { data: configData, isLoading } = useGetAgentEffectiveConfigQuery(agent.id);
@@ -30,7 +24,9 @@ export const CollectorDetailsContent: React.FunctionComponent<{ agent: Agent }> 
     agent.non_identifying_attributes?.['elastic.display.name'] ?? agent.id
   );
   const offlineAt =
-    agent.status && NON_REPORTING_STATUSES.includes(agent.status) ? agent.last_checkin : undefined;
+    agent.status && OPAMP_NON_REPORTING_STATUSES.includes(agent.status)
+      ? agent.last_checkin
+      : undefined;
 
   if (isLoading) {
     return <EuiLoadingSpinner />;
