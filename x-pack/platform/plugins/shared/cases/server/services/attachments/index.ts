@@ -674,19 +674,11 @@ export class AttachmentService {
             unifiedAttributes,
             { ...options }
           );
-        // analyticsV2 mirror. The SO `update` response is a partial — it
-        // typically only carries the patch. The analytics doc is keyed
-        // on `_id` and the writer does an `index` (full upsert), so we
-        // re-read what we wrote: build a minimal SavedObject around the
-        // SO id and the merged attributes we know about. Forward-compat
-        // gap: if the SO has fields we didn't patch, the analytics doc
-        // ends up with only the patched-in fields. Reconciliation
-        // walks the source SO every tick and re-emits the full shape,
-        // so the gap closes within one reconciliation interval.
-        this.context.analyticsV2AttachmentsWriter.upsertAttachment({
-          ...res,
-          attributes: unifiedAttributes,
-        } as unknown as SavedObject<UnifiedAttachmentAttributes>);
+        // analyticsV2 mirror via a full re-read — see `mirrorUpdatedAttachments`.
+        // Mirroring the partial `update` response directly would drop the
+        // immutable creation fields (`created_at` → `@timestamp`) and flicker
+        // the edited attachment off time-filtered views until reconciliation.
+        this.mirrorUpdatedAttachments([{ type: CASE_ATTACHMENT_SAVED_OBJECT, id: savedObjectId }]);
         return Object.assign(res, { attributes: decodedAttributes });
       }
 
@@ -731,14 +723,9 @@ export class AttachmentService {
         transformedAttachment.attributes
       );
 
-      // analyticsV2 mirror. Same forward-compat gap as the unified
-      // branch above: SO `update` is a partial; the analytics doc
-      // re-indexes with whatever the patch carried. Reconciliation
-      // closes the gap on the next tick.
-      this.context.analyticsV2AttachmentsWriter.upsertAttachment({
-        ...res,
-        attributes: stripUnifiedOnlyFields(extractedAttributes),
-      } as unknown as SavedObject<AttachmentPersistedAttributes>);
+      // analyticsV2 mirror via a full re-read — same reason as the unified
+      // branch above (`mirrorUpdatedAttachments`).
+      this.mirrorUpdatedAttachments([{ type: CASE_COMMENT_SAVED_OBJECT, id: savedObjectId }]);
 
       return Object.assign(transformedAttachment, { attributes: validatedAttributes });
     } catch (error) {
@@ -918,16 +905,13 @@ export class AttachmentService {
     const validatedAttachments: Array<
       SavedObjectsUpdateResponse<AttachmentTransformedAttributesV2>
     > = [];
-    // Mirror only the successful entries to analytics. SO bulkUpdate
-    // returns a per-entry partial response (only the patched fields);
-    // attaching the matching `comments[i].updatedAttributes` lets the
-    // analytics doc-builder run against the same shape it would have
-    // seen on a `update()` call. The forward-compat gap noted on the
-    // single `update` paths applies here too — reconciliation closes
-    // it on the next tick.
-    const successesToMirror: Array<
-      SavedObject<AttachmentPersistedAttributes | UnifiedAttachmentAttributes>
-    > = [];
+    // Collect the `{type, id}` of each successful entry so analytics can
+    // mirror via a full re-read. SO bulkUpdate returns a per-entry partial
+    // response (only the patched fields), so mirroring it directly would
+    // drop the immutable creation fields — same degradation as the single
+    // `update` paths. `mirrorUpdatedAttachments` re-reads the persisted
+    // SOs so the analytics docs carry `@timestamp` / `created_*`.
+    const successRefsToMirror: Array<{ type: string; id: string }> = [];
 
     for (let i = 0; i < res.saved_objects.length; i++) {
       const attachment = res.saved_objects[i];
@@ -943,10 +927,7 @@ export class AttachmentService {
         const validatedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
           comments[i].updatedAttributes
         );
-        successesToMirror.push({
-          ...attachment,
-          attributes: validatedAttributes,
-        } as unknown as SavedObject<UnifiedAttachmentAttributes>);
+        successRefsToMirror.push({ type: attachment.type, id: attachment.id });
         validatedAttachments.push(Object.assign(attachment, { attributes: validatedAttributes }));
       } else {
         const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
@@ -966,24 +947,70 @@ export class AttachmentService {
           transformedAttachment.attributes
         );
 
-        successesToMirror.push({
-          ...attachment,
-          attributes: legacyAttributes,
-        } as unknown as SavedObject<AttachmentPersistedAttributes>);
+        successRefsToMirror.push({ type: attachment.type, id: attachment.id });
         validatedAttachments.push(
           Object.assign(transformedAttachment, { attributes: validatedAttributes })
         );
       }
     }
 
-    // analyticsV2 mirror — single bulk request regardless of how many
-    // entries succeeded. See `transformAndDecodeBulkCreateResponse`
-    // for the rationale.
-    if (successesToMirror.length > 0) {
-      this.context.analyticsV2AttachmentsWriter.bulkUpsertAttachments(successesToMirror);
-    }
+    // analyticsV2 mirror — single re-read + bulk upsert regardless of how
+    // many entries succeeded. See `mirrorUpdatedAttachments`.
+    this.mirrorUpdatedAttachments(successRefsToMirror);
 
     return Object.assign(res, { saved_objects: validatedAttachments });
+  }
+
+  /**
+   * Mirror updated attachment SOs to the `.cases-attachments` analytics
+   * index by re-reading their full persisted shape.
+   *
+   * WHY re-read instead of mirroring the update response: the SO
+   * `update` / `bulkUpdate` response is a partial patch — it carries
+   * only the fields the caller changed. Mirroring it directly writes an
+   * analytics doc missing the immutable creation fields, most importantly
+   * `created_at` (which the doc-builder maps to `@timestamp`) and
+   * `created_by`. A doc without `@timestamp` silently drops out of every
+   * time-filtered Discover / Lens view, so an edited attachment would
+   * flicker off the timeline until the next reconciliation tick repaired
+   * it. Re-reading gives the mirror the same full SO shape the create
+   * path already has.
+   *
+   * Fire-and-forget: the re-read runs off the user-facing update path
+   * (never awaited) so analytics never adds latency to — or fails — the
+   * attachment edit. A failed re-read (or a stale read under
+   * `refresh: false`) is backstopped by reconciliation, which re-emits
+   * the full shape every tick, so we log at WARN and move on. Errors are
+   * swallowed here rather than in the writer because the read, not the
+   * write, is what can throw.
+   */
+  private mirrorUpdatedAttachments(refs: Array<{ type: string; id: string }>): void {
+    if (refs.length === 0) {
+      return;
+    }
+
+    void this.context.unsecuredSavedObjectsClient
+      .bulkGet<UnifiedAttachmentAttributes | AttachmentPersistedAttributes>(refs)
+      .then(({ saved_objects: savedObjects }) => {
+        const sos = savedObjects.filter(
+          (so): so is SavedObject<UnifiedAttachmentAttributes | AttachmentPersistedAttributes> =>
+            !isSOError(so)
+        );
+        if (sos.length === 1) {
+          this.context.analyticsV2AttachmentsWriter.upsertAttachment(sos[0]);
+        } else if (sos.length > 1) {
+          this.context.analyticsV2AttachmentsWriter.bulkUpsertAttachments(sos);
+        }
+      })
+      .catch((error) => {
+        this.context.log.warn(
+          `cases-analyticsV2: attachments update-mirror re-read failed [ids=${refs
+            .map((ref) => ref.id)
+            .join(',')}]: ${
+            error?.message ?? error
+          }. Reconciliation will re-emit the full shape on the next tick.`
+        );
+      });
   }
 
   public async find({

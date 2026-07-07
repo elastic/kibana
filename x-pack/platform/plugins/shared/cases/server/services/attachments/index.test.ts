@@ -887,6 +887,188 @@ describe('AttachmentService', () => {
     });
   });
 
+  describe('analyticsV2 mirror re-reads the full SO on update', () => {
+    // The SO `update` / `bulkUpdate` response is a partial patch. Mirroring it
+    // directly would write an analytics doc missing `created_at` (→ `@timestamp`)
+    // and `created_by`, dropping edited attachments out of time-filtered views.
+    // These tests pin that the mirror re-reads the persisted SO (via `bulkGet`)
+    // so the immutable creation fields reach the analytics writer.
+    const flushMicrotasks = () => new Promise((resolve) => setImmediate(resolve));
+
+    // Sentinel `created_at` returned ONLY by the re-read. If the mirror used the
+    // update response instead of the re-read, the mirrored value would differ.
+    const REREAD_CREATED_AT = '2020-06-06T06:06:06.666Z';
+
+    const makeMirrorWriter = () => ({
+      upsertAttachment: jest.fn(),
+      deleteAttachment: jest.fn(),
+      bulkUpsertAttachments: jest.fn(),
+      bulkDeleteAttachments: jest.fn(),
+      bulkDeleteAttachmentsByCaseIds: jest.fn(),
+      bulkUpsertAttachmentsAwait: jest.fn(async () => {}),
+    });
+
+    const makeService = (writer: ReturnType<typeof makeMirrorWriter>, attachmentsEnabled = false) =>
+      new AttachmentService({
+        log: mockLogger,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(attachmentsEnabled),
+        analyticsV2AttachmentsWriter: writer,
+      });
+
+    // `bulkGet` feeds BOTH `resolveAttachmentSavedObjectTypes` (probes both
+    // types to resolve the write target) AND the mirror re-read. Return the
+    // full SO — carrying the sentinel `created_at` — for `targetType`, and a
+    // 404 for the other type.
+    const stubReadFullSO = (targetType: string) => {
+      unsecuredSavedObjectsClient.bulkGet.mockImplementation((objects) => {
+        const requests = objects as Array<{ id: string; type: string }>;
+        return Promise.resolve({
+          saved_objects: requests.map(({ id, type }) =>
+            type === targetType
+              ? { ...createUserAttachment({ created_at: REREAD_CREATED_AT }), id, type }
+              : { ...createErrorSO(type), id }
+          ) as unknown as SavedObjectsBulkResponse['saved_objects'],
+        });
+      });
+    };
+
+    it('legacy update: mirrors the re-read SO (created_at/created_by), not the partial patch', async () => {
+      const writer = makeMirrorWriter();
+      const svc = makeService(writer);
+      stubReadFullSO(CASE_COMMENT_SAVED_OBJECT);
+
+      // Partial patch response — the real SO client returns only patched fields.
+      unsecuredSavedObjectsClient.update.mockResolvedValue({
+        id: '1',
+        type: CASE_COMMENT_SAVED_OBJECT,
+        references: [],
+        version: 'v2',
+        attributes: { comment: 'edited' },
+      } as unknown as ReturnType<typeof createUserAttachment>);
+
+      await svc.update({
+        savedObjectId: '1',
+        updatedAttributes: createUserAttachment().attributes,
+        options: {},
+      });
+      await flushMicrotasks();
+
+      expect(writer.upsertAttachment).toHaveBeenCalledTimes(1);
+      const mirrored = writer.upsertAttachment.mock.calls[0][0];
+      expect(mirrored.attributes.created_at).toBe(REREAD_CREATED_AT);
+      expect(mirrored.attributes.created_by).toEqual({
+        full_name: 'elastic',
+        email: 'testemail@elastic.co',
+        username: 'elastic',
+      });
+    });
+
+    it('unified update: mirrors the re-read SO from the cases-attachments type', async () => {
+      const writer = makeMirrorWriter();
+      const svc = makeService(writer, true);
+      stubReadFullSO(CASE_ATTACHMENT_SAVED_OBJECT);
+
+      unsecuredSavedObjectsClient.update.mockResolvedValue({
+        id: '1',
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+        references: [],
+        version: 'v2',
+        attributes: { comment: 'edited' },
+      } as unknown as ReturnType<typeof createUserAttachment>);
+
+      await svc.update({
+        savedObjectId: '1',
+        updatedAttributes: createUserAttachment().attributes,
+        options: {},
+      });
+      await flushMicrotasks();
+
+      expect(writer.upsertAttachment).toHaveBeenCalledTimes(1);
+      expect(writer.upsertAttachment.mock.calls[0][0].attributes.created_at).toBe(
+        REREAD_CREATED_AT
+      );
+    });
+
+    it('bulkUpdate: bulk re-reads the successful ids and bulk-upserts the full SOs', async () => {
+      const writer = makeMirrorWriter();
+      const svc = makeService(writer);
+      stubReadFullSO(CASE_COMMENT_SAVED_OBJECT);
+
+      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            ...createUserAttachment(),
+            id: '1',
+            type: CASE_COMMENT_SAVED_OBJECT,
+            attributes: { comment: 'edited 1' },
+          },
+          {
+            ...createUserAttachment(),
+            id: '2',
+            type: CASE_COMMENT_SAVED_OBJECT,
+            attributes: { comment: 'edited 2' },
+          },
+        ],
+      });
+
+      await svc.bulkUpdate({
+        comments: [
+          { savedObjectId: '1', updatedAttributes: createUserAttachment().attributes, options: {} },
+          { savedObjectId: '2', updatedAttributes: createUserAttachment().attributes, options: {} },
+        ],
+      });
+      await flushMicrotasks();
+
+      expect(writer.bulkUpsertAttachments).toHaveBeenCalledTimes(1);
+      const mirrored = writer.bulkUpsertAttachments.mock.calls[0][0];
+      expect(mirrored).toHaveLength(2);
+      expect(
+        mirrored.every(
+          (so: { attributes: { created_at: string } }) =>
+            so.attributes.created_at === REREAD_CREATED_AT
+        )
+      ).toBe(true);
+    });
+
+    it('does not throw and logs a WARN when the mirror re-read fails', async () => {
+      const writer = makeMirrorWriter();
+      const svc = makeService(writer);
+
+      // First `bulkGet` (SO-type resolution) succeeds; the second (mirror
+      // re-read) rejects. The failed re-read must be swallowed — reconciliation
+      // is the backstop — and never break the user-facing update.
+      unsecuredSavedObjectsClient.bulkGet
+        .mockImplementationOnce((objects) => {
+          const requests = objects as Array<{ id: string; type: string }>;
+          return Promise.resolve({
+            saved_objects: requests.map(({ id, type }) =>
+              type === CASE_COMMENT_SAVED_OBJECT
+                ? { ...createUserAttachment(), id, type }
+                : { ...createErrorSO(type), id }
+            ) as unknown as SavedObjectsBulkResponse['saved_objects'],
+          });
+        })
+        .mockImplementationOnce(() => Promise.reject(new Error('reread boom')));
+
+      unsecuredSavedObjectsClient.update.mockResolvedValue(createUserAttachment());
+
+      await expect(
+        svc.update({
+          savedObjectId: '1',
+          updatedAttributes: createUserAttachment().attributes,
+          options: {},
+        })
+      ).resolves.not.toThrow();
+      await flushMicrotasks();
+
+      expect(writer.upsertAttachment).not.toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('attachments update-mirror re-read failed')
+      );
+    });
+  });
+
   describe('bulkUpdate', () => {
     const soClientRes = {
       id: '1',
@@ -1181,7 +1363,10 @@ describe('AttachmentService', () => {
           ],
         });
 
-        expect(unsecuredSavedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
+        // SO-type resolution batches every id (both candidate types) into the
+        // FIRST bulkGet — a single round trip. (A second bulkGet re-reads the
+        // successful ids for the analytics mirror; see the "analyticsV2 mirror
+        // re-reads the full SO on update" suite.)
         const [bulkGetRequest] = unsecuredSavedObjectsClient.bulkGet.mock.calls[0];
         expect(bulkGetRequest).toEqual([
           { id: 'unified-id', type: CASE_ATTACHMENT_SAVED_OBJECT },

@@ -13,9 +13,7 @@ import type { CasesAttachmentsV2WriterContract } from '../writer/attachments';
 import { runReconciliation, type RunReconciliationResult } from './runner';
 import { runActivityReconciliation, type RunActivityReconciliationResult } from './activity_runner';
 import {
-  ATTACHMENT_SOURCE_TYPES,
   runAttachmentsReconciliation,
-  type RunAttachmentsReconciliationDeps,
   type RunAttachmentsReconciliationResult,
 } from './attachments_runner';
 import { resetReconciliationTask } from '.';
@@ -30,16 +28,6 @@ export interface RunFullResetDeps {
   activityWriter: CasesActivityV2WriterContract;
   /** Attachments-surface writer. Real instance, not the noop. */
   attachmentsWriter: CasesAttachmentsV2WriterContract;
-  /**
-   * Source SO types the attachments walk runs against. See
-   * `attachments_runner.ts` for the gating logic (pre-migration:
-   * `legacyOnly`; post-migration: `dualSource`). Optional with a
-   * defensive `legacyOnly` default — the legacy `cases-comments` SO
-   * type is always registered, so falling back to it cannot trip a
-   * "SO type not registered" failure even if the caller forgets to
-   * thread the flag through.
-   */
-  attachmentSourceTypes?: RunAttachmentsReconciliationDeps['sourceTypes'];
   /**
    * Task Manager start contract. Used after both walks complete to
    * atomically reset the periodic reconciliation task's persisted state.
@@ -138,7 +126,6 @@ export async function runFullReset({
   writer,
   activityWriter,
   attachmentsWriter,
-  attachmentSourceTypes = ATTACHMENT_SOURCE_TYPES.legacyOnly,
   taskManager,
   intervalMinutes,
   pageDelayMs,
@@ -221,7 +208,6 @@ export async function runFullReset({
           logger,
           lastRunAt: undefined,
           pageDelayMs,
-          sourceTypes: attachmentSourceTypes,
           onPageComplete: ({ processed }) => onProgress?.({ phase: 'attachments', processed }),
         });
         return { result, error: null };

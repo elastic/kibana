@@ -12,7 +12,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 import { runReconciliation } from './runner';
 import { runActivityReconciliation } from './activity_runner';
-import { runAttachmentsReconciliation, ATTACHMENT_SOURCE_TYPES } from './attachments_runner';
+import { runAttachmentsReconciliation } from './attachments_runner';
 import { resetReconciliationTask } from '.';
 import { runFullReset } from './reset_runner';
 import type { CasesAnalyticsV2WriterContract } from '../writer';
@@ -21,11 +21,7 @@ import type { CasesAttachmentsV2WriterContract } from '../writer/attachments';
 
 jest.mock('./runner', () => ({ runReconciliation: jest.fn() }));
 jest.mock('./activity_runner', () => ({ runActivityReconciliation: jest.fn() }));
-// Keep the real ATTACHMENT_SOURCE_TYPES constant; mock only the runner fn.
-jest.mock('./attachments_runner', () => ({
-  ...jest.requireActual('./attachments_runner'),
-  runAttachmentsReconciliation: jest.fn(),
-}));
+jest.mock('./attachments_runner', () => ({ runAttachmentsReconciliation: jest.fn() }));
 jest.mock('.', () => ({ resetReconciliationTask: jest.fn() }));
 
 const runReconciliationMock = runReconciliation as jest.Mock;
@@ -40,7 +36,6 @@ const buildDeps = (overrides: Partial<Parameters<typeof runFullReset>[0]> = {}) 
   writer: {} as unknown as CasesAnalyticsV2WriterContract,
   activityWriter: {} as unknown as CasesActivityV2WriterContract,
   attachmentsWriter: {} as unknown as CasesAttachmentsV2WriterContract,
-  attachmentSourceTypes: ATTACHMENT_SOURCE_TYPES.dualSource,
   taskManager: {} as unknown as TaskManagerStartContract,
   intervalMinutes: 30,
   pageDelayMs: 0,
@@ -137,12 +132,14 @@ describe('runFullReset', () => {
     expect(initialState).not.toHaveProperty('attachments_last_run_at');
   });
 
-  it('threads attachmentSourceTypes through to the attachments runner', async () => {
-    await runFullReset(buildDeps({ attachmentSourceTypes: ATTACHMENT_SOURCE_TYPES.legacyOnly }));
+  it('invokes the attachments runner without a source-type gate (ungated dual-source)', async () => {
+    // Since PR #275225 both attachment SO types are always registered, so the
+    // reset never gates the attachments walk to a single source — the runner
+    // always walks both. Guard against a `sourceTypes` gate being reintroduced.
+    await runFullReset(buildDeps());
 
-    expect(runAttachmentsReconciliationMock.mock.calls[0][0]).toMatchObject({
-      sourceTypes: ATTACHMENT_SOURCE_TYPES.legacyOnly,
-    });
+    expect(runAttachmentsReconciliationMock).toHaveBeenCalledTimes(1);
+    expect(runAttachmentsReconciliationMock.mock.calls[0][0]).not.toHaveProperty('sourceTypes');
   });
 
   it('skips cursor seeding when task manager is unavailable', async () => {

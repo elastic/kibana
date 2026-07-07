@@ -14,96 +14,37 @@ import type {
   UnifiedAttachmentAttributes,
 } from '../../common/types/attachments_v2';
 import type { AttachmentSource, CasesAttachmentsV2WriterContract } from '../writer/attachments';
+import {
+  RECONCILIATION_NAMESPACES_ALL,
+  RECONCILIATION_PAGE_SIZE,
+  RECONCILIATION_SUMMARY_TOP_N_SPACES,
+} from './constants';
 
 /**
- * Number of attachment SOs fetched per ES round-trip. Matched to the
- * cases + activity runners (250) so a single Task Manager tick budget
- * covers a similar number of docs across surfaces while cutting
- * round-trips. Attachments can carry larger `data` / `metadata` blobs
- * than user actions, but the `JSON.stringify` cost is bounded by the
- * mapping's `ignore_above` truncation in the doc-builder.
- */
-const PAGE_SIZE = 250;
-
-/**
- * SO-namespaces value meaning "every namespace". Same rationale as in
- * the cases + activity runners: the unscoped internal client defaults
- * to `[DEFAULT_NAMESPACE_STRING]`; explicit `['*']` opts every space
- * in. Kept identical to the other runners' values so a future change
- * to the contract can be found with one search.
- */
-const NAMESPACES_ALL: string[] = ['*'];
-
-/**
- * Cap on the per-space breakdown reported in the summary log line.
- * Same rationale as in the cases + activity runners.
- */
-const SUMMARY_TOP_N_SPACES = 25;
-
-/**
- * Source SO type descriptor for the attachments runner. The runner
- * walks one or both of these depending on whether the unified
- * `cases-attachments` SO type is registered with core (which is
- * gated behind `xpack.cases.attachments.enabled`). Order matters for
- * the single-source-per-space-summary log line: legacy first so an
- * administrator scanning logs sees the pre-migration source ahead of
- * the post-migration source.
+ * The two SO types the attachments runner walks on every tick. Since
+ * PR #275225 the unified `cases-attachments` SO type is always
+ * registered with core alongside the legacy `cases-comments` type, so
+ * every tick walks both unconditionally — there is no config-gated
+ * single-source mode to select. Legacy is listed first only so the
+ * per-source summary log line reads consistently across ticks.
  *
  * Both types feed the same writer (`bulkUpsertAttachmentsAwait`); the
  * doc-builder normalizes both shapes into the unified analytics doc.
  * The single shared cursor (`attachments_last_run_at`) drives both
- * walks — idempotent upsert means a re-emit of an attachment that
- * appears in both source types post-migration overwrites the prior
- * write with no analytics-side consequence.
+ * walks — idempotent upsert means an attachment that appears in both
+ * source types (e.g. an id migrated between buckets) overwrites the
+ * prior write with no analytics-side consequence.
  */
-interface AttachmentSourceType {
-  type: string;
-  label: 'legacy' | 'unified';
-}
-
-/**
- * Source SO types the runner walks when the unified
- * `cases-attachments` SO type is registered. Exported for the
- * service layer to pin the contract — the service decides whether
- * to walk one or both based on the `cases.attachments.enabled`
- * config flag.
- */
-export const ATTACHMENT_SOURCE_TYPES: {
-  legacyOnly: ReadonlyArray<AttachmentSourceType>;
-  dualSource: ReadonlyArray<AttachmentSourceType>;
-} = {
-  legacyOnly: [{ type: CASE_COMMENT_SAVED_OBJECT, label: 'legacy' }],
-  dualSource: [
-    { type: CASE_COMMENT_SAVED_OBJECT, label: 'legacy' },
-    { type: CASE_ATTACHMENT_SAVED_OBJECT, label: 'unified' },
-  ],
-};
+const SOURCE_TYPES: ReadonlyArray<{ type: string; label: 'legacy' | 'unified' }> = [
+  { type: CASE_COMMENT_SAVED_OBJECT, label: 'legacy' },
+  { type: CASE_ATTACHMENT_SAVED_OBJECT, label: 'unified' },
+];
 
 export interface RunAttachmentsReconciliationDeps {
   /** Internal SO client (no request scope). Used to walk every attachment across every space. */
   savedObjectsClient: SavedObjectsClientContract;
   attachmentsWriter: CasesAttachmentsV2WriterContract;
   logger: Logger;
-  /**
-   * Source SO types to walk. Pre-migration tenants
-   * (`xpack.cases.attachments.enabled: false`, the current default)
-   * only have `cases-comments` registered with core's SO registry, so
-   * the runner walks only that type. Post-migration / mid-migration
-   * tenants register both and the runner walks both.
-   *
-   * Walking an unregistered SO type via `openPointInTimeForType`
-   * throws `Saved object type 'cases-attachments' is not registered`
-   * at start, which is why the source list has to be injected
-   * (the service layer reads the `cases.attachments.enabled` flag
-   * once and pins the right list per tick).
-   *
-   * Defaults to `ATTACHMENT_SOURCE_TYPES.dualSource` so a caller that
-   * forgets to set this on a post-migration tenant gets the full
-   * dual-source walk rather than silently dropping the unified
-   * source. Pre-migration callers MUST set this explicitly to
-   * `ATTACHMENT_SOURCE_TYPES.legacyOnly`.
-   */
-  sourceTypes?: ReadonlyArray<AttachmentSourceType>;
   /**
    * ISO timestamp from the previous successful tick. Only attachments
    * updated (or created, on the OR-NULL branch) after this point are
@@ -170,7 +111,6 @@ export async function runAttachmentsReconciliation({
   lastRunAt,
   pageDelayMs = 0,
   onPageComplete,
-  sourceTypes = ATTACHMENT_SOURCE_TYPES.dualSource,
 }: RunAttachmentsReconciliationDeps): Promise<RunAttachmentsReconciliationResult> {
   // Tick start, captured before any I/O. Persisted as the new cursor
   // on a successful drain so attachments updated during the tick land
@@ -183,7 +123,7 @@ export async function runAttachmentsReconciliation({
   // so the summary surfaces the migration progress at a glance.
   const processedBySpace = new Map<string, number>();
 
-  for (const { type: soType, label } of sourceTypes) {
+  for (const { type: soType, label } of SOURCE_TYPES) {
     const fieldPrefix = `${soType}.attributes`;
 
     // Same shape as the cases-surface filter — see runner.ts for the
@@ -202,7 +142,7 @@ export async function runAttachmentsReconciliation({
     // snapshot. `NAMESPACES_ALL` is required for the same reason as in
     // the other runners.
     const pit = await savedObjectsClient.openPointInTimeForType(soType, {
-      namespaces: NAMESPACES_ALL,
+      namespaces: RECONCILIATION_NAMESPACES_ALL as string[],
     });
 
     let searchAfter: SortResults | undefined;
@@ -216,12 +156,12 @@ export async function runAttachmentsReconciliation({
           filter,
           // Must pass `namespaces: ['*']` even with the unscoped internal
           // SO client — see runner.ts for the detailed explanation.
-          namespaces: NAMESPACES_ALL,
+          namespaces: RECONCILIATION_NAMESPACES_ALL as string[],
           // No `sortField` — with a PIT the SO API defaults to
           // `_shard_doc`, which is unique per doc (no ties → no
           // searchAfter skips or dupes) and is the recommended sort for
           // PIT walks.
-          perPage: PAGE_SIZE,
+          perPage: RECONCILIATION_PAGE_SIZE,
           pit: { id: pit.id },
           searchAfter,
         });
@@ -250,7 +190,7 @@ export async function runAttachmentsReconciliation({
 
         searchAfter = getLastSort(page.saved_objects);
 
-        if (page.saved_objects.length < PAGE_SIZE) {
+        if (page.saved_objects.length < RECONCILIATION_PAGE_SIZE) {
           break;
         }
 
@@ -302,7 +242,7 @@ function formatTopSpaces(processedBySpace: Map<string, number>): string {
 
   const top: Array<[string, number]> = [];
   for (const entry of processedBySpace) {
-    if (top.length < SUMMARY_TOP_N_SPACES) {
+    if (top.length < RECONCILIATION_SUMMARY_TOP_N_SPACES) {
       top.push(entry);
     } else {
       let minIdx = 0;
@@ -319,8 +259,8 @@ function formatTopSpaces(processedBySpace: Map<string, number>): string {
     if (i > 0) summary += ', ';
     summary += `${top[i][0]}=${top[i][1]}`;
   }
-  if (processedBySpace.size > SUMMARY_TOP_N_SPACES) {
-    summary += `, ... +${processedBySpace.size - SUMMARY_TOP_N_SPACES} more`;
+  if (processedBySpace.size > RECONCILIATION_SUMMARY_TOP_N_SPACES) {
+    summary += `, ... +${processedBySpace.size - RECONCILIATION_SUMMARY_TOP_N_SPACES} more`;
   }
   summary += '}';
   return summary;

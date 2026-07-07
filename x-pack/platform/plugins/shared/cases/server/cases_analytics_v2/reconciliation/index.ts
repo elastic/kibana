@@ -17,11 +17,7 @@ import type { CasesActivityV2WriterContract } from '../writer/activity';
 import type { CasesAttachmentsV2WriterContract } from '../writer/attachments';
 import { runReconciliation } from './runner';
 import { runActivityReconciliation } from './activity_runner';
-import {
-  ATTACHMENT_SOURCE_TYPES,
-  runAttachmentsReconciliation,
-  type RunAttachmentsReconciliationDeps,
-} from './attachments_runner';
+import { runAttachmentsReconciliation } from './attachments_runner';
 
 /**
  * Task type registered with Task Manager. Namespaced with `cases.analyticsV2.`
@@ -59,14 +55,6 @@ interface RegisterReconciliationTaskArgs {
     writer: CasesAnalyticsV2WriterContract;
     activityWriter: CasesActivityV2WriterContract;
     attachmentsWriter: CasesAttachmentsV2WriterContract;
-    /**
-     * Which source SO types the attachments runner walks per tick.
-     * Gated on whether the unified `cases-attachments` SO type is
-     * registered with core — see `attachments_runner.ts` for the
-     * detailed reasoning. Pre-migration tenants get `legacyOnly`;
-     * post-migration tenants get `dualSource`.
-     */
-    attachmentSourceTypes: RunAttachmentsReconciliationDeps['sourceTypes'];
   }>;
 }
 
@@ -184,7 +172,6 @@ export function registerReconciliationTask({
               attachmentsWriter: deps.attachmentsWriter,
               logger,
               lastRunAt: attachmentsLastRunAt,
-              sourceTypes: deps.attachmentSourceTypes ?? ATTACHMENT_SOURCE_TYPES.legacyOnly,
             });
             nextState.attachments_last_run_at = result.newLastRunAt;
           } catch (err) {

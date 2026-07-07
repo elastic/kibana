@@ -20,7 +20,7 @@ import type {
   UnifiedAttachmentAttributes,
 } from '../../common/types/attachments_v2';
 import type { CasesAttachmentsV2WriterContract } from '../writer/attachments';
-import { ATTACHMENT_SOURCE_TYPES, runAttachmentsReconciliation } from './attachments_runner';
+import { runAttachmentsReconciliation } from './attachments_runner';
 
 /**
  * Tests for the attachments-surface reconciliation runner. The
@@ -31,8 +31,8 @@ import { ATTACHMENT_SOURCE_TYPES, runAttachmentsReconciliation } from './attachm
  *
  * The dual-source path is the highest-risk part of the runner — a
  * subtle offset / cursor / counter regression there would silently
- * skip post-migration tenants' attachments. Tests below pin:
- *   - both source SO types are walked.
+ * skip a source type's attachments. Tests below pin:
+ *   - both source SO types are always walked (ungated).
  *   - the shared `processed` counter is monotonically cumulative.
  *   - the filter is the cases-surface OR-NULL shape (mutable surface).
  *   - `namespaces: ['*']` is opted into on every PIT open and every
@@ -317,21 +317,17 @@ describe('runAttachmentsReconciliation', () => {
   });
 
   /**
-   * Pre-migration tenants (`xpack.cases.attachments.enabled: false`,
-   * the current default) have only `cases-comments` registered with
-   * core's SO registry. Walking `cases-attachments` would throw
-   * `Saved object type 'cases-attachments' is not registered`. The
-   * caller (service layer) signals pre-migration by passing
-   * `sourceTypes: ATTACHMENT_SOURCE_TYPES.legacyOnly`.
+   * Since PR #275225 the unified `cases-attachments` SO is always
+   * registered alongside legacy `cases-comments`, so the runner walks
+   * BOTH source types on every tick with no config-gated single-source
+   * mode — there is no `sourceTypes` opt-in to pass. This test pins the
+   * ungated dual-source contract: both PITs open, both types walked.
    */
-  it('walks ONLY cases-comments when sourceTypes is legacyOnly (pre-migration)', async () => {
+  it('always walks BOTH cases-comments and cases-attachments (ungated dual-source)', async () => {
     const client = savedObjectsClientMock.create();
     const writer = makeAttachmentsWriterMock();
     stubDualSourceFinds(client, {
       legacy: [makeAttachmentSO(CASE_COMMENT_SAVED_OBJECT, 'l-1')],
-      // `unified` entries should never be requested — if the runner
-      // queries `cases-attachments` despite the legacy-only opt-in,
-      // the assertion below catches it.
       unified: [makeAttachmentSO(CASE_ATTACHMENT_SAVED_OBJECT, 'u-1')],
     });
 
@@ -340,24 +336,24 @@ describe('runAttachmentsReconciliation', () => {
       attachmentsWriter: writer,
       logger,
       lastRunAt: undefined,
-      sourceTypes: ATTACHMENT_SOURCE_TYPES.legacyOnly,
     });
 
-    // Exactly one PIT — for the legacy type only.
-    expect(client.openPointInTimeForType).toHaveBeenCalledTimes(1);
+    // One PIT per source type — both must be opened.
+    expect(client.openPointInTimeForType).toHaveBeenCalledTimes(2);
     expect(client.openPointInTimeForType).toHaveBeenCalledWith(
       CASE_COMMENT_SAVED_OBJECT,
       expect.objectContaining({ namespaces: ['*'] })
     );
-    expect(client.openPointInTimeForType).not.toHaveBeenCalledWith(
+    expect(client.openPointInTimeForType).toHaveBeenCalledWith(
       CASE_ATTACHMENT_SAVED_OBJECT,
-      expect.anything()
+      expect.objectContaining({ namespaces: ['*'] })
     );
-    // Every `find` call is for the legacy type only.
-    for (const call of (client.find as jest.Mock).mock.calls) {
-      const arg = call[0] as { type: string };
-      expect(arg.type).toBe(CASE_COMMENT_SAVED_OBJECT);
-    }
+    // Both source types are queried via `find`.
+    const findTypes = (client.find as jest.Mock).mock.calls.map(
+      (call) => (call[0] as { type: string }).type
+    );
+    expect(findTypes).toContain(CASE_COMMENT_SAVED_OBJECT);
+    expect(findTypes).toContain(CASE_ATTACHMENT_SAVED_OBJECT);
   });
 
   it('advances the cursor to tick start time on successful drain', async () => {

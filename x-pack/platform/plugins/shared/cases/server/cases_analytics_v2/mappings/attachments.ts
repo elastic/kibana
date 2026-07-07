@@ -12,16 +12,13 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
  * per attachment, keyed on the source SO id.
  *
  * The canonical document shape is the **unified** `cases-attachments`
- * SO schema. The doc-builder feeds both the legacy `cases-comments` SO
- * and the new `cases-attachments` SO through
- * `getAttachmentTypeTransformers(...).toUnifiedSchema(...)` so the
- * analytics index is consistent regardless of where in the in-flight
- * SO migration (security-team#15066) a tenant sits:
- *   - pre-migration tenants: only `cases-comments` exists; legacy →
- *     unified shape happens at write time.
- *   - mid-migration tenants: both SO types coexist; both feed in.
- *   - post-migration tenants: only `cases-attachments` exists; identity
- *     transform.
+ * SO schema. Both the legacy `cases-comments` SO and the newer
+ * `cases-attachments` SO exist side by side (legacy comments are not
+ * back-migrated), so the doc-builder feeds both through
+ * `getAttachmentTypeTransformers(...).toUnifiedSchema(...)` — legacy
+ * comments are projected to the unified shape, unified attachments pass
+ * through the identity transform — keeping this index consistent
+ * regardless of which source type an attachment was written as.
  *
  * Doc `_id` is the source SO id verbatim. SO ids are unique across
  * `cases-comments` and `cases-attachments` (the `AttachmentService`'s
@@ -51,13 +48,13 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
  *     reference-style `attachment_id`, polymorphic `data` and
  *     `metadata` stringified for schema-drift insurance, plus a
  *     curated set of typed extracts for the common analytical pivots
- *     (`comment`, `alert.rule.*`, `actions.type`).
+ *     (`comment`, `alert.rule.*` + `alert.indices`, `event.indices`).
  *
  * Intentional divergences from the unified SO shape:
  *   - `data`: the unified SO carries it as `Record<string, JsonValue>`.
  *     The analytics index strict-maps a few curated extracts and
  *     stringifies the full blob as `attachment.data_json`
- *     (`keyword`, `ignore_above`). Same rationale as the activity
+ *     (`wildcard`, no length cap). Same rationale as the activity
  *     surface's `payload_json` — analysts can reach into the payload
  *     via ES|QL `MV_FROM_JSON` while typed extracts power Lens
  *     facets natively.
@@ -79,9 +76,9 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
  *
  * Curated extracts are bounded keyword / text fields chosen for value
  * to common analyses (comment-volume tracking, alert-rule attribution,
- * endpoint-action distribution). They're populated only when the
- * attachment `type` carries the matching payload field; other types
- * leave them unset.
+ * alert/event source-index distribution). They're populated only when
+ * the attachment `type` is the matching subtype; other types leave them
+ * unset and remain fully queryable via `data_json` / `metadata_json`.
  */
 export const ATTACHMENTS_INDEX_MAPPING: MappingTypeMapping = {
   dynamic: 'strict',
@@ -145,7 +142,7 @@ export const ATTACHMENTS_INDEX_MAPPING: MappingTypeMapping = {
         type: { type: 'keyword' },
 
         // For reference-style attachments (`alert`, `event`,
-        // `securityAlert`, `securityEvent`, etc.): the referenced
+        // `security.alert`, `security.event`, etc.): the referenced
         // entity ids. Unified payloads carry `attachmentId` as
         // `string | string[]`; the doc-builder normalizes to
         // `string[]` so queries don't have to handle both shapes.
@@ -171,19 +168,22 @@ export const ATTACHMENTS_INDEX_MAPPING: MappingTypeMapping = {
 
         // ----- Curated extracts -----
 
-        // For `user` and `actions` subtypes: the user-visible comment
-        // text. `text + keyword` so analysts can full-text search
-        // (Discover) AND group (Lens). Sourced from `data.content`
-        // (unified) / `comment` (legacy) at doc-build time.
+        // For value subtypes (`comment`, and the legacy `user`
+        // subtype): the user-visible comment text. `text + keyword` so
+        // analysts can full-text search (Discover) AND group (Lens).
+        // Sourced from `data.content` (unified) / `comment` (legacy) at
+        // doc-build time.
         comment: {
           type: 'text',
           fields: { keyword: { type: 'keyword', ignore_above: 8191 } },
         },
 
-        // Alert-rule extracts. For alert-style attachments, the rule
-        // attribution lives under `metadata.rule` in the unified shape
-        // and is the highest-signal metadata field for downstream
-        // dashboards (alerts-by-rule, top-rules-per-tenant).
+        // Alert-subtype extracts. The originating rule (`metadata.rule`
+        // unified / top-level `rule` legacy) is the highest-signal
+        // metadata field for downstream dashboards (alerts-by-rule,
+        // top-rules-per-tenant); `indices` captures the alerts' source
+        // indices (`metadata.index` unified / top-level `index` legacy),
+        // multi-value when the attachment spans indices.
         alert: {
           properties: {
             rule: {
@@ -192,37 +192,17 @@ export const ATTACHMENTS_INDEX_MAPPING: MappingTypeMapping = {
                 name: { type: 'keyword' },
               },
             },
-            // `metadata.index` for alert/event subtypes; multi-value
-            // when the alert spans indices.
             indices: { type: 'keyword' },
           },
         },
 
-        // Endpoint-action extracts. Used by the security `actions`
-        // subtype (isolate / unisolate). Powers per-action-type
-        // distribution dashboards.
-        actions: {
+        // Event-subtype extracts. Events are reference attachments with
+        // no originating rule, so only the source indices are curated
+        // (`metadata.index` unified / top-level `index` legacy),
+        // multi-value when the attachment spans indices.
+        event: {
           properties: {
-            type: { type: 'keyword' },
-          },
-        },
-
-        // External reference attribution. The plugin-registered type
-        // id (`.files`, `endpoint`, etc.) is high-signal for tracking
-        // which attachment plugins are in use cluster-wide.
-        external_reference: {
-          properties: {
-            type_id: { type: 'keyword' },
-            storage_type: { type: 'keyword' },
-          },
-        },
-
-        // Persistable-state subtype attribution. Same rationale as
-        // `external_reference.type_id` — tracks which persistable
-        // attachment registrations are in use.
-        persistable_state: {
-          properties: {
-            type_id: { type: 'keyword' },
+            indices: { type: 'keyword' },
           },
         },
       },

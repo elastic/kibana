@@ -63,41 +63,26 @@ grow per-event and shouldn't be locked to a single shard.
 ### Attachments dual-source
 
 The attachments surface is **populated from two source SO types** —
-`cases-comments` (legacy) and `cases-attachments` (new unified shape) —
-because Kibana is mid-migration from the former to the latter
-(security-team#15066). Both sources flow through the same writer; the
-doc-builder calls
+`cases-comments` (legacy) and `cases-attachments` (new unified shape).
+Both types coexist: the unified `cases-attachments` SO is **always
+registered** (since [#275225](https://github.com/elastic/kibana/pull/275225)),
+and legacy `cases-comments` SOs are never back-migrated, so any tenant
+can hold attachments of either type at once. Both sources flow through
+the same writer; the doc-builder calls
 `getAttachmentTypeTransformers(...).toUnifiedSchema(...)` on the SO
 attributes so the analytics index always reflects the **unified** shape
-regardless of which source SO the AttachmentService wrote to.
+regardless of which source SO the AttachmentService wrote to (legacy →
+unified projection, or an identity transform for already-unified
+attributes).
 
-Concretely:
-- **Pre-migration tenants** (`xpack.cases.attachments.enabled: false`,
-  the current default): the cases plugin only registers the legacy
-  `cases-comments` SO type with core. The AttachmentService writes to
-  `cases-comments`; the writer hook fires, the doc-builder normalizes
-  legacy → unified, the analytics doc lands in the unified shape.
-  The reconciliation runner walks **only** `cases-comments` (the
-  unified SO type isn't registered, and walking it via
-  `openPointInTimeForType` would throw at start with
-  `Saved object type 'cases-attachments' is not registered`).
-- **Post-migration tenants** (`xpack.cases.attachments.enabled: true`):
-  both SO types are registered. The AttachmentService writes to
-  `cases-attachments`; the writer hook fires with the already-unified
-  attributes; the doc-builder is a near no-op transform.
-  Reconciliation walks both `cases-comments` and `cases-attachments`
-  into the unified analytics index.
-- **Mid-migration tenants**: both SO types coexist on disk; both
-  writer hooks fire (one per source); reconciliation walks both SO
-  types into the same index.
-
-The runtime list of source SO types is decided once at v2 service
-construction from `xpack.cases.attachments.enabled` and pinned for
-every reconciliation + reset tick. The `CASE_ATTACHMENT_SAVED_OBJECT`
-constant is also opted into the v2 internal SO repository
-conditionally on the same flag (`plugin.ts`) — opting in an
-unregistered SO type makes `createInternalRepository` throw at start
-with `Missing mappings for saved objects types: 'cases-attachments'`.
+Because both SO types are always registered, there is no source-type
+gating: the reconciliation + reset runners unconditionally walk **both**
+`cases-comments` and `cases-attachments`, and both are opted into the
+v2 internal SO repository (`plugin.ts`) unconditionally. (Historically
+this was gated on `xpack.cases.attachments.enabled` to avoid walking /
+opting-in an unregistered SO type — `openPointInTimeForType` and
+`createInternalRepository` both throw at start for an unregistered
+type — but that flag no longer controls registration.)
 
 Doc `_id` is the source SO id verbatim. SO ids are unique across both
 source types (the `AttachmentService.bulkDelete` path issues parallel
@@ -604,22 +589,22 @@ on one surface pins only its own cursor; the others keep advancing.
 
 `.cases-attachments` mirrors **both** the legacy `cases-comments` SO
 and the new unified `cases-attachments` SO into a single analytics
-index in the unified shape — see "Attachments dual-source" above for
-the migration framing. Same fire-and-forget hook + reconciliation
-backstop architecture as the cases surface, with the following
-deliberate differences:
+index in the unified shape — see "Attachments dual-source" above. Same
+fire-and-forget hook + reconciliation backstop architecture as the
+cases surface, with the following deliberate differences:
 
 - **Mutable.** Attachments support create + patch + delete. The
   reconciliation runner uses the cases-surface filter shape
   (`updated_at > tracker OR (updated_at IS MISSING AND created_at > tracker)`)
   — same null-branch logic that handles never-patched cases applies
   to never-patched attachments.
-- **Dual-source walk.** The reconciliation runner walks `cases-comments`
-  first, then `cases-attachments`, both into the same index. SO ids
-  are unique across the two types so an attachment that's been
+- **Dual-source walk.** The reconciliation runner unconditionally walks
+  `cases-comments` first, then `cases-attachments`, both into the same
+  index (both SO types are always registered — no source-type gating).
+  SO ids are unique across the two types so an attachment that's been
   migrated post-write doesn't double-emit (the second walk's upsert
-  overwrites by `_id`). Per-source per-space counts in the summary
-  log line surface migration progress at a glance — keys are
+  overwrites by `_id`). Per-source per-space counts in the summary log
+  line surface the legacy/unified split at a glance — keys are
   `legacy:<space>` / `unified:<space>`.
 - **Cascade on case delete.** Same shape as the activity cascade —
   `bulkDeleteAttachmentsByCaseIds` runs a `delete_by_query` on
@@ -632,14 +617,18 @@ deliberate differences:
   persistable state) and `metadata` (for reference subtypes — alert
   rule attribution, file metadata) as plugin-defined
   `Record<string, JsonValue>`. The doc-builder strict-maps a curated
-  set of extracts (`attachment.comment`, `attachment.alert.rule.{id,name}`,
-  `attachment.alert.indices`, `attachment.actions.type`,
-  `attachment.external_reference.{type_id,storage_type}`,
-  `attachment.persistable_state.type_id`) for the common analytical
-  pivots, AND stringifies the full blobs as `attachment.data_json` /
-  `attachment.metadata_json` (`keyword`, `ignore_above: 32766`) so
-  analysts can reach into any plugin-defined sub-field via ES|QL
-  `MV_FROM_JSON`.
+  set of extracts — `attachment.comment` (value subtypes),
+  `attachment.alert.rule.{id,name}` + `attachment.alert.indices` (alert
+  subtypes), and `attachment.event.indices` (event subtypes) — for the
+  common analytical pivots, AND stringifies the full blobs as
+  `attachment.data_json` / `attachment.metadata_json` (`wildcard`, no
+  length cap) so analysts can reach into any plugin-defined sub-field
+  via ES|QL `MV_FROM_JSON`. Only these extracts are curated; every
+  other subtype's shape stays fully queryable via the JSON blobs, so no
+  signal is lost by not giving each subtype its own mapped column. Same
+  `wildcard`-not-`keyword` rationale as the activity surface's
+  `payload_json` (a `keyword` past `ignore_above` silently drops
+  oversized values from the index).
 - **No `index.mode: lookup`.** `.cases-attachments` is the **fact**
   table in the analytics model, joined to `.cases` via ES|QL `LOOKUP
   JOIN .cases ON cases.id`.

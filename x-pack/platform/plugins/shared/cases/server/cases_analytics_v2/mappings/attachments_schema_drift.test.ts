@@ -13,6 +13,10 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
 } from '../../../common/constants';
 import { AttachmentType } from '../../../common/types/domain';
+import {
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
+} from '../../../common/constants/attachments';
 import type {
   AttachmentPersistedAttributes,
   UnifiedAttachmentAttributes,
@@ -36,14 +40,15 @@ import { ATTACHMENTS_INDEX_MAPPING } from './attachments';
  * every emitted dotted path resolves in the mapping.
  *
  * Layer 2 (per-subtype curated extracts). The curated fields
- * (`attachment.comment`, `attachment.alert.rule.{id,name}`,
- * `attachment.alert.indices`, `attachment.actions.type`,
- * `attachment.external_reference.{type_id,storage_type}`,
- * `attachment.persistable_state.type_id`) are populated only for the
- * subtypes that own them. A regression that silently drops one of
- * these is otherwise invisible — docs still pass strict mapping, they
- * just lose analytics dimensions. This layer pins the per-subtype
- * contract.
+ * (`attachment.comment`, `attachment.alert.rule.{id,name}` +
+ * `attachment.alert.indices`, and `attachment.event.indices`) are
+ * populated only for the subtypes that own them. A regression that
+ * silently drops one of these is otherwise invisible — docs still pass
+ * strict mapping, they just lose analytics dimensions. This layer pins
+ * the per-subtype contract, and asserts the dropped legacy extracts
+ * (`actions` / `external_reference` / `persistable_state`) are NOT
+ * re-introduced — their signal now lives in `data_json` / `metadata_json`
+ * and the reference-id / `type` fields.
  *
  * Layer 3 (every-subtype-has-a-fixture). The `AttachmentType` enum is
  * the canonical list of legacy subtypes; the unified shape adds
@@ -99,6 +104,21 @@ const isCovered = (path: string, mappedPaths: Set<string>): boolean => {
     if (mappedPaths.has(p)) return true;
   }
   return false;
+};
+
+// Curated extracts that were intentionally dropped (mapping + doc-builder).
+// Their signal now lives in `data_json` / `metadata_json` and the reference-id
+// / `type` fields. Guard against either surface silently re-introducing them.
+const DROPPED_EXTRACT_PREFIXES = [
+  'attachment.actions',
+  'attachment.external_reference',
+  'attachment.persistable_state',
+];
+const expectNoDroppedExtracts = (doc: ReturnType<typeof buildAttachmentDoc>): void => {
+  const reintroduced = flatten(doc).filter((p) =>
+    DROPPED_EXTRACT_PREFIXES.some((prefix) => p === prefix || p.startsWith(`${prefix}.`))
+  );
+  expect(reintroduced).toEqual([]);
 };
 
 // ----- SO fixture builders -----
@@ -170,7 +190,7 @@ const FIXTURES = {
     rule: { id: 'rule-1', name: 'Suspicious activity' },
   } as Partial<AttachmentPersistedAttributes>),
   alert_unified: makeUnifiedSO('alert-unified', {
-    type: 'securityAlert',
+    type: SECURITY_ALERT_ATTACHMENT_TYPE,
     attachmentId: ['alert-123', 'alert-456'],
     metadata: {
       index: ['.alerts-security.alerts-default'],
@@ -226,11 +246,21 @@ const FIXTURES = {
 
   // `event` is a legacy reference subtype (external events by id). It shares
   // the alert family but stores its ids under `eventId`; the doc-builder must
-  // capture that into `attachment.attachment_id`.
+  // capture that into `attachment.attachment_id`, and the (top-level `index`)
+  // source indices into `attachment.event.indices`.
   event_legacy: makeLegacySO('event-legacy', {
     type: AttachmentType.event,
     eventId: 'event-1',
+    index: '.ds-logs-endpoint.events.process-default',
   } as unknown as Partial<AttachmentPersistedAttributes>),
+  // Unified event subtype (`security.event`): ids under `attachmentId`, source
+  // indices lifted into `metadata.index`. Mirrors the alert-unified shape but
+  // without a `rule` — events have no originating rule.
+  event_unified: makeUnifiedSO('event-unified', {
+    type: SECURITY_EVENT_ATTACHMENT_TYPE,
+    attachmentId: ['event-1', 'event-2'],
+    metadata: { index: ['.ds-logs-endpoint.events.process-default'] },
+  } as unknown as Partial<UnifiedAttachmentAttributes>),
 
   // Newer unified-only reference types (no legacy v1 equivalent). Each
   // references an external saved object by id via `attachmentId`:
@@ -292,49 +322,57 @@ describe('per-subtype curated extracts', () => {
     expect(doc.attachment.attachment_id).toEqual(['alert-123', 'alert-456']);
   });
 
-  it('actions (legacy): populates attachment.actions.type and attachment.comment', () => {
+  it('event (legacy): populates attachment.event.indices + attachment_id, no alert.rule', () => {
+    const doc = buildAttachmentDoc(FIXTURES.event_legacy);
+    expect(doc.attachment.event?.indices).toEqual(['.ds-logs-endpoint.events.process-default']);
+    expect(doc.attachment.attachment_id).toEqual(['event-1']);
+    // Events have no originating rule — the alert extract must stay unset so
+    // event-vs-alert stays a clean split in Lens.
+    expect(doc.attachment.alert).toBeUndefined();
+  });
+
+  it('event (unified): populates attachment.event.indices from metadata.index', () => {
+    const doc = buildAttachmentDoc(FIXTURES.event_unified);
+    expect(doc.attachment.event?.indices).toEqual(['.ds-logs-endpoint.events.process-default']);
+    expect(doc.attachment.attachment_id).toEqual(['event-1', 'event-2']);
+    expect(doc.attachment.alert).toBeUndefined();
+  });
+
+  it('actions (legacy): comment preserved; dropped-extract fields absent', () => {
+    // The legacy `actions` curated extract was intentionally dropped — its
+    // per-action-type detail lives in `data_json` / `metadata_json` now. The
+    // analyst comment is still curated (value-subtype path).
     const doc = buildAttachmentDoc(FIXTURES.actions_legacy);
-    expect(doc.attachment.actions?.type).toBe('isolate');
     expect(doc.attachment.comment).toBe('Isolating endpoint');
+    expectNoDroppedExtracts(doc);
   });
 
-  it('actions (unified): populates attachment.actions.type from metadata.actionType', () => {
-    // The unified `security.endpoint` SO carries the action type as
-    // `metadata.actionType` (matches the indexed field on the
-    // `cases-attachments` SO mapping). Pinning the extract here so a
-    // regression that drops the unified-path read silently degrades
-    // post-migration analytics fails this assertion immediately
-    // instead of leaving the column unpopulated in the index.
+  it('actions (unified security.endpoint): reference id captured; dropped-extract fields absent', () => {
     const doc = buildAttachmentDoc(FIXTURES.actions_unified);
-    expect(doc.attachment.actions?.type).toBe('isolate');
     expect(doc.attachment.attachment_id).toEqual(['action-1']);
+    // The `metadata.actionType` signal is preserved in `metadata_json` rather
+    // than a dedicated column.
+    expect(doc.attachment.metadata_json).toContain('isolate');
+    expectNoDroppedExtracts(doc);
   });
 
-  it('externalReference (legacy): populates external_reference.type_id + storage_type', () => {
+  it('externalReference (legacy): type_id signal in data blobs; dropped-extract fields absent', () => {
     const doc = buildAttachmentDoc(FIXTURES.externalReference_legacy);
-    expect(doc.attachment.external_reference?.type_id).toBe('.files');
-    expect(doc.attachment.external_reference?.storage_type).toBe('savedObject');
+    expectNoDroppedExtracts(doc);
   });
 
-  it('externalReference (unified): unified subtype name carries the type_id signal', () => {
+  it('externalReference (unified): unified subtype name carries the type signal', () => {
     const doc = buildAttachmentDoc(FIXTURES.externalReference_unified);
     // After legacy → unified normalization the legacy
-    // `externalReferenceAttachmentTypeId` is replaced by the unified
-    // `type` field; the `external_reference.type_id` curated extract
-    // is therefore absent on unified-only fixtures. Track the type via
-    // `attachment.type`.
+    // `externalReferenceAttachmentTypeId` is replaced by the unified `type`
+    // field, which is where the "which plugin" signal now lives.
     expect(doc.attachment.type).toBe('files');
-    expect(doc.attachment.external_reference).toBeUndefined();
+    expectNoDroppedExtracts(doc);
   });
 
-  it('persistableState (legacy): populates persistable_state.type_id', () => {
+  it('persistableState (legacy): type signal in data blobs; dropped-extract fields absent', () => {
     const doc = buildAttachmentDoc(FIXTURES.persistableState_legacy);
-    expect(doc.attachment.persistable_state?.type_id).toBe('.lens');
-  });
-
-  it('event (legacy): captures eventId into attachment.attachment_id', () => {
-    const doc = buildAttachmentDoc(FIXTURES.event_legacy);
-    expect(doc.attachment.attachment_id).toEqual(['event-1']);
+    expectNoDroppedExtracts(doc);
   });
 
   it('dashboard (unified reference): captures the referenced dashboard id + type', () => {

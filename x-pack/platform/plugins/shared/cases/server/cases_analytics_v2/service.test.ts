@@ -32,7 +32,6 @@ const buildService = () =>
     enableAdminRoutes: false,
     resetTaskTimeoutMinutes: 60,
     resetPageDelayMs: 0,
-    unifiedAttachmentsSoEnabled: false,
     templatesEnabled: true,
   });
 
@@ -144,7 +143,6 @@ describe('CasesAnalyticsV2Service', () => {
         enableAdminRoutes: false,
         resetTaskTimeoutMinutes: 60,
         resetPageDelayMs: 0,
-        unifiedAttachmentsSoEnabled: false,
         templatesEnabled: false,
       });
 

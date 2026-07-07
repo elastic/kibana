@@ -534,8 +534,6 @@ export interface AttachmentDocSource {
       rule?: { id?: string | null; name?: string | null };
       indices?: string[];
     };
-    actions?: { type?: string };
-    external_reference?: { type_id?: string; storage_type?: string };
-    persistable_state?: { type_id?: string };
+    event?: { indices?: string[] };
   };
 }

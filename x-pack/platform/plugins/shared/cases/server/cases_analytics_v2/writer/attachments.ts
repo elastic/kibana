@@ -32,11 +32,12 @@ const RETRYABLE_BULK_ITEM_STATUSES = new Set<number>([408, 409, 429, 500, 502, 5
 
 /**
  * Source-SO union for the attachments writer. The same writer hooks
- * fire from BOTH:
- *   - `AttachmentService` writes against `cases-comments` (legacy SO,
- *     pre-migration) — `AttachmentPersistedAttributes`.
+ * fire from BOTH source types, which coexist (legacy comments are not
+ * back-migrated):
+ *   - `AttachmentService` writes against `cases-comments` (legacy SO) —
+ *     `AttachmentPersistedAttributes`.
  *   - `AttachmentService` writes against `cases-attachments` (unified
- *     SO, post-migration) — `UnifiedAttachmentAttributes`.
+ *     SO) — `UnifiedAttachmentAttributes`.
  * The doc-builder normalizes both into the unified analytics shape.
  * See `buildAttachmentDoc`.
  */

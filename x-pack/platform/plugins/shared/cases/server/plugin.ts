@@ -156,17 +156,6 @@ export class CasePlugin
       // backfill within budget. See the config schema.
       resetTaskTimeoutMinutes: this.caseConfig.analyticsV2.resetTaskTimeoutMinutes,
       resetPageDelayMs: this.caseConfig.analyticsV2.resetPageDelayMs,
-      // Mirrors `xpack.cases.attachments.enabled` — the gate that
-      // controls whether the unified `cases-attachments` SO type is
-      // registered with core's SO registry. The attachments
-      // reconciliation runner uses this to decide whether to walk one
-      // (`cases-comments` only) or both (`cases-comments` +
-      // `cases-attachments`) source SO types. Same gate also controls
-      // whether `CASE_ATTACHMENT_SAVED_OBJECT` is opted into the v2
-      // internal SO repository at start. Pre-migration tenants (the
-      // current default) have only `cases-comments` on disk, so
-      // walking only that type is the correct shape.
-      unifiedAttachmentsSoEnabled: this.caseConfig.attachments?.enabled === true,
       // When templates is off, `cases-templates` isn't registered with core,
       // so reading it would throw "Missing mappings for saved objects types".
       // The flag lets the data view sub-service short-circuit to an empty
@@ -397,22 +386,15 @@ export class CasePlugin
         // (data-views plugin); opting it in here grants the internal client
         // the cross-namespace delete it needs.
         //
-        // `cases-attachments` is conditional: it's only registered with
-        // core's SO type registry when `xpack.cases.attachments.enabled`
-        // is true (see `setup()` above). Opting an unregistered SO type
-        // into `createInternalRepository` throws at start with
-        // `Missing mappings for saved objects types: 'cases-attachments'`,
-        // so we mirror the same gate here. Pre-migration tenants
-        // (default) only ever have `cases-comments` on disk anyway, so
-        // the attachments runner walking only the legacy type is the
-        // correct shape — the dual-source walk activates once the
-        // tenant opts into the new SO type.
-        const isUnifiedAttachmentsRegistered = this.caseConfig.attachments?.enabled === true;
+        // Both attachment SO types are always registered with core (the
+        // unified `cases-attachments` type is registered unconditionally
+        // since #275225), so both are opted in here and the attachments
+        // reconciliation runner always walks both source types.
         const v2InternalRepository = core.savedObjects.createInternalRepository([
           CASE_SAVED_OBJECT,
           CASE_USER_ACTION_SAVED_OBJECT,
           CASE_COMMENT_SAVED_OBJECT,
-          ...(isUnifiedAttachmentsRegistered ? [CASE_ATTACHMENT_SAVED_OBJECT] : []),
+          CASE_ATTACHMENT_SAVED_OBJECT,
           ...(this.caseConfig.templates?.enabled ? [CASE_TEMPLATE_SAVED_OBJECT] : []),
           'index-pattern',
         ]);
