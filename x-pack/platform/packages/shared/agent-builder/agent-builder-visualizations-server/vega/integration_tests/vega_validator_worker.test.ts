@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { createServer, type Server } from 'node:http';
+import type { AddressInfo } from 'node:net';
 import { Worker } from 'node:worker_threads';
 
 /**
@@ -77,5 +79,44 @@ describe('vega_validator_worker', () => {
 
     expect(result.ok).toBe(false);
     expect(result.error).toBeTruthy();
+  });
+
+  // The spec is authored by an LLM from user prompts, so a prompt-injection path
+  // could steer it into leaving an external `url` in the spec. Normalization only
+  // swaps the top-level data source, so a `lookup` transform's `from.data.url`
+  // survives; the headless render must not fetch it (blind SSRF / local-file
+  // read from the Kibana server). Validation still passes: a blocked load is a
+  // Vega warning, not a spec rejection, and the dataset is simply left empty.
+  it('does not fetch an external lookup.from.data.url during validation', async () => {
+    const server: Server = createServer((_req, res) => res.end('[]'));
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const requested: string[] = [];
+    server.on('request', (req) => requested.push(req.url ?? ''));
+
+    try {
+      const { port } = server.address() as AddressInfo;
+      const result = await validate({
+        transform: [
+          {
+            lookup: 'status',
+            from: {
+              data: { url: `http://127.0.0.1:${port}/ssrf-via-lookup` },
+              key: 'status',
+              fields: ['label'],
+            },
+          },
+        ],
+        mark: 'bar',
+        encoding: {
+          x: { field: 'status', type: 'nominal' },
+          y: { field: 'count', type: 'quantitative' },
+        },
+      });
+
+      expect(result.ok).toBe(true);
+      expect(requested).toEqual([]);
+    } finally {
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+    }
   });
 });

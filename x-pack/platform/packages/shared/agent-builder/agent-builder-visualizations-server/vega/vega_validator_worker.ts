@@ -32,7 +32,15 @@ interface VegaView {
   runAsync: () => Promise<unknown>;
   finalize: () => void;
 }
-type ViewCtor = new (runtime: object, opts: { renderer: 'none'; logger: unknown }) => VegaView;
+/** The `vega-loader` surface a `View` uses to fetch external resources. */
+interface VegaLoader {
+  load: (uri: string) => Promise<string>;
+  sanitize: (uri: string) => Promise<{ href: string }>;
+}
+type ViewCtor = new (
+  runtime: object,
+  opts: { renderer: 'none'; logger: unknown; loader: VegaLoader }
+) => VegaView;
 
 interface ValidationRequest {
   spec: Record<string, unknown>;
@@ -69,6 +77,23 @@ const inlineData = (spec: Record<string, unknown>) => ({
   ...spec,
   data: { values: [] },
 });
+
+/**
+ * A `vega-loader` that refuses every fetch. Validation only needs the spec's
+ * structure, never remote data, and the spec is LLM-authored from user prompts,
+ * so any `url` left in it (a top-level source, a nested view's `data`, a
+ * `lookup` transform's `from.data.url`, or an image mark) must not be fetched by
+ * the headless render — that runs on the Kibana server and would be a blind SSRF
+ * (cloud-metadata / internal-service reachability) or local-file read. Blocking
+ * at the loader closes every variant at once. A blocked load is surfaced by Vega
+ * as a warning (`df.warn('Loading failed', …)`), not an error, so it leaves the
+ * dataset empty rather than failing validation; genuine compile/render errors
+ * still surface.
+ */
+const createRejectingLoader = (): VegaLoader => {
+  const reject = () => Promise.reject(new Error('external loading disabled during validation'));
+  return { load: reject, sanitize: reject };
+};
 
 const createCollectingLogger = (warnings: string[]) => ({
   _level: 2,
@@ -108,7 +133,7 @@ const validate = async (
   // Vega render (headless, AST interpreter so no eval/CSP concerns): catches
   // render-time errors compilation cannot, e.g. bad expressions or transforms.
   const runtime = parse(vegaSpec, undefined, { ast: true });
-  const view = new View(runtime, { renderer: 'none', logger });
+  const view = new View(runtime, { renderer: 'none', logger, loader: createRejectingLoader() });
   await view.runAsync();
   view.finalize();
 
