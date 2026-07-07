@@ -47,6 +47,7 @@ export interface UsageStats {
   'observability:enableInfrastructureAssetCustomDashboards': boolean;
   'observability:apmEnableTableSearchBar': boolean;
   'observability:apmEnableServiceInventoryTableSearchBar': boolean;
+  'observability:apmTraceLogsDefaultColumns': string[];
   'observability:logSources': string[];
   'observability:newLogsOverview': boolean;
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
@@ -197,6 +198,7 @@ export interface UsageStats {
   'observability:enableDiagnosticMode': boolean;
   'observability:streamsEnableSignificantEvents': boolean;
   'observability:streamsEnableSignificantEventsDiscovery': boolean;
+  'observability:streamsEnableSignificantEventsAlertingV2': boolean;
   'genAiSettings:defaultAIConnector': string;
   'genAiSettings:defaultAIConnectorOnly': boolean;
   'agentBuilder:prePromptWorkflowIds': string[];
@@ -207,6 +209,12 @@ export interface UsageStats {
   'observability:streamsEnableCanvas': boolean;
   'observability:streamsSigEventsIndexPatterns': string;
   'securitySolution:entityStoreEnableV2': boolean;
+  'securitySolution:alertAnalysisWorkflowEnabled': boolean;
+  'securitySolution:alertAnalysisWorkflowAutoCloseEnabled': boolean;
+  'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMinThreshold': number;
+  'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMaxThreshold': number;
+  'securitySolution:alertAnalysisWorkflowConnectorId': string;
+  'securitySolution:alertAnalysisWorkflowCreateConversation': boolean;
   'elasticRamen:enabled': boolean;
   'query_activity:minRunningTime': number;
   'genAiSettings:tokenUsageTracking': boolean;

@@ -314,11 +314,11 @@ export function XYChart({
 
   const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
 
-  const isTimeViz = isTimeChart(dataLayers);
+  const isTimeVis = isTimeChart(dataLayers);
 
   useEffect(() => {
     const chartSizeSpec: ChartSizeSpec =
-      isTimeViz && !isHorizontalChart(dataLayers)
+      isTimeVis && !isHorizontalChart(dataLayers)
         ? {
             aspectRatio: {
               x: 16,
@@ -337,7 +337,7 @@ export function XYChart({
           };
 
     setChartSize(chartSizeSpec);
-  }, [dataLayers, isTimeViz, setChartSize]);
+  }, [dataLayers, isTimeVis, setChartSize]);
 
   const formattedDatatables = useMemo(
     () =>
@@ -438,9 +438,9 @@ export function XYChart({
       (layer) => isDataLayer(layer) && layer.splitAccessors && layer.splitAccessors.length
     );
 
-  const defaultXScaleType = isTimeViz ? XScaleTypes.TIME : XScaleTypes.ORDINAL;
+  const defaultXScaleType = isTimeVis ? XScaleTypes.TIME : XScaleTypes.ORDINAL;
 
-  const isHistogramViz = dataLayers.every((l) => l.isHistogram);
+  const isHistogramVis = dataLayers.every((l) => l.isHistogram);
   const hasBars = dataLayers.some((l) => l.seriesType === SeriesTypes.BAR);
   const isHorizontalBarChart = isHorizontalChart(dataLayers) && hasBars;
 
@@ -448,8 +448,8 @@ export function XYChart({
     data.datatableUtilities,
     dataLayers,
     minInterval,
-    isTimeViz,
-    isHistogramViz,
+    isTimeVis,
+    isHistogramVis,
     hasBars,
     timeZone,
     xAxisConfig?.extent
@@ -471,7 +471,7 @@ export function XYChart({
   };
 
   const referenceLineLayers = getReferenceLayers(layers);
-  const [rangeAnnotations, lineAnnotations] = isTimeViz
+  const [rangeAnnotations, lineAnnotations] = isTimeVis
     ? partition(annotations?.datatable.rows, isRangeAnnotation)
     : [[], []];
 
@@ -680,7 +680,7 @@ export function XYChart({
       return;
     }
     const [min, max] = x;
-    if (!xAxisColumn || !isHistogramViz) {
+    if (!xAxisColumn || !isHistogramVis) {
       return;
     }
 
@@ -717,7 +717,7 @@ export function XYChart({
       isHistogram && (isStacked || seriesType !== SeriesTypes.BAR || !chartHasMoreThanOneBarSeries)
   );
 
-  const isHorizontalTimeAxis = isTimeViz && isHistogramModeEnabled && !shouldRotate;
+  const isHorizontalTimeAxis = isTimeVis && isHistogramModeEnabled && !shouldRotate;
 
   const defaultXAxisPosition = shouldRotate ? Position.Left : Position.Bottom;
 
@@ -852,7 +852,7 @@ export function XYChart({
                           splitRowAccessor: splitRowId,
                         }}
                         layers={dataLayers}
-                        xDomain={isTimeViz ? rawXDomain : undefined}
+                        xDomain={isTimeVis ? rawXDomain : undefined}
                       />
                     )
                   : undefined
@@ -884,7 +884,7 @@ export function XYChart({
                 layout: legend.layout,
               })}
               legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
-              legendValues={isHistogramViz ? legend.legendStats : []}
+              legendValues={isHistogramVis ? legend.legendStats : []}
               legendTitle={getLegendTitle(legend.title, dataLayers[0], legend.isTitleVisible)}
               legendActionOnHover={interactive}
               theme={[
@@ -925,7 +925,7 @@ export function XYChart({
                   : [settingsThemeOverrides]),
               ]}
               baseTheme={chartBaseTheme}
-              allowBrushingLastHistogramBin={isTimeViz}
+              allowBrushingLastHistogramBin={isTimeVis}
               rotation={shouldRotate ? 90 : 0}
               xDomain={xDomain}
               // enable brushing only for time charts, for both ES|QL and DSL queries
@@ -957,7 +957,7 @@ export function XYChart({
               {...settingsOverrides}
             />
             <XYCurrentTime
-              enabled={Boolean(args.addTimeMarker && isTimeViz)}
+              enabled={Boolean(args.addTimeMarker && isTimeVis)}
               isDarkMode={darkMode}
               domain={rawXDomain}
             />
@@ -1082,7 +1082,7 @@ export function XYChart({
                 formatters={referenceLinesFormatters}
               />
             ) : null}
-            {(rangeAnnotations.length || lineAnnotations.length) && isTimeViz ? (
+            {(rangeAnnotations.length || lineAnnotations.length) && isTimeVis ? (
               <Annotations
                 rangeAnnotations={rangeAnnotations}
                 groupedLineAnnotations={groupedLineAnnotations}
