@@ -65,6 +65,15 @@ export {
   AttackDiscoverySchedule,
   AttackDiscoveryScheduleCreateProps,
   AttackDiscoveryScheduleUpdateProps,
+  ScheduleAction,
+  ScheduleGeneralAction,
+  WorkflowConfig,
 } from './common/schedules/schedule_types.gen';
+
+// Schedule workflow config validation (at-least-one-toggle).
+export {
+  AT_LEAST_ONE_RETRIEVAL_TOGGLE_MESSAGE,
+  hasAtLeastOneRetrievalToggle,
+} from './common/schedules/workflow_config_validation';
 
 // Note: workflow_steps/* is added in later PRs alongside its source files.

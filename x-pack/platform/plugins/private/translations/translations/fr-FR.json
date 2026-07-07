@@ -38535,6 +38535,7 @@
     "xpack.securitySolution.attackDiscovery.schedule.detailsFlyout.saveButtonTitle": "Enregistrer",
     "xpack.securitySolution.attackDiscovery.schedule.disableSchedulesSuccess": "{succeeded, plural, one {# attack discovery schedule} other {# attack discovery schedules}} disabled successfully.",
     "xpack.securitySolution.attackDiscovery.schedule.fetchScheduleRuleTypeFailDescription": "Impossible de récupérer le type de règle du calendrier de découverte des attaques",
+    "xpack.securitySolution.attackDiscovery.schedule.fieldConnectorIdHelpText": "Ce connecteur s'appliquera à ce planning, seulement.",
     "xpack.securitySolution.attackDiscovery.schedule.fieldConnectorIdLabel": "Connecteur",
     "xpack.securitySolution.attackDiscovery.schedule.fieldIntervalLabel": "S'exécute toutes les",
     "xpack.securitySolution.attackDiscovery.schedule.fieldNameLabel": "Nom",

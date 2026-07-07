@@ -38629,6 +38629,7 @@
     "xpack.securitySolution.attackDiscovery.schedule.enableSchedulesSuccess": "{succeeded, plural, one {# attack discovery schedule} other {# attack discovery schedules}} wurde erfolgreich aktiviert.",
     "xpack.securitySolution.attackDiscovery.schedule.fetchScheduleRuleTypeFailDescription": "Fehler beim Abrufen des Regeltyps für den Zeitplan zur Erkennung von Angriffen",
     "xpack.securitySolution.attackDiscovery.schedule.fetchSchedulesFailDescription": "{failed, plural, one {attack discovery schedule} other {attack discovery schedules}} konnte nicht abgerufen werden",
+    "xpack.securitySolution.attackDiscovery.schedule.fieldConnectorIdHelpText": "Dieser Connector gilt nur für diesen Zeitplan.",
     "xpack.securitySolution.attackDiscovery.schedule.fieldConnectorIdLabel": "Connector",
     "xpack.securitySolution.attackDiscovery.schedule.fieldIntervalLabel": "Wird ausgeführt alle:",
     "xpack.securitySolution.attackDiscovery.schedule.fieldNameLabel": "Name",
