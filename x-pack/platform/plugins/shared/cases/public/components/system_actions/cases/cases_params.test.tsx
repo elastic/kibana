@@ -21,6 +21,7 @@ import { templatesConfigurationMock } from '../../../containers/mock';
 import * as utils from '../../../containers/configure/utils';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
+import { MAX_OPEN_CASES_DEFAULT_MAXIMUM } from '../../../../common/constants';
 
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view');
 jest.mock('../../../common/lib/kibana/use_application');
@@ -97,7 +98,13 @@ describe('CasesParamsFields renders', () => {
     });
     useGetAllCaseConfigurationsMock.mockImplementation(() => useGetAllCaseConfigurationsResponse);
     useKibanaMock.mockReturnValue({
-      services: { ...createStartServicesMock(), data: { dataViews: {} } },
+      services: {
+        ...createStartServicesMock(),
+        uiSettings: {
+          get: jest.fn().mockReturnValue(MAX_OPEN_CASES_DEFAULT_MAXIMUM),
+        },
+        data: { dataViews: {} },
+      },
     } as unknown as ReturnType<typeof useKibana>);
   });
 
@@ -182,6 +189,31 @@ describe('CasesParamsFields renders', () => {
 
     // set to an invalid value
     fireEvent.change(maximumCasesInput, { target: { value: '22' } });
+    expect(maximumCasesInput).toBeInvalid();
+  });
+
+  it('uses the configured advanced setting ceiling for the maximum amount of cases', async () => {
+    useKibanaMock.mockReturnValue({
+      services: {
+        ...createStartServicesMock(),
+        uiSettings: {
+          get: jest.fn().mockReturnValue(30),
+        },
+        data: { dataViews: {} },
+      },
+    } as unknown as ReturnType<typeof useKibana>);
+
+    render(<CasesParamsFields {...defaultProps} />);
+
+    expect(
+      await screen.findByText('Set the maximum amount of cases to be opened. (Max 30)')
+    ).toBeInTheDocument();
+
+    const maximumCasesInput = await screen.findByTestId('maximum-case-to-open-input');
+    fireEvent.change(maximumCasesInput, { target: { value: '30' } });
+    expect(maximumCasesInput).toBeValid();
+
+    fireEvent.change(maximumCasesInput, { target: { value: '31' } });
     expect(maximumCasesInput).toBeInvalid();
   });
 

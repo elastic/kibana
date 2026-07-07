@@ -6,13 +6,17 @@
  */
 
 import { CASE_SAVED_OBJECT } from '../../../../common/constants';
-import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
+import { CaseStatuses, UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 import { UserActionBuilder } from '../abstract_builder';
 import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 
 export class StatusUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'status'>): UserActionEvent {
     const action = UserActionActions.update;
+    const shouldLogCloseReasonSyncMessage =
+      args.payload.status === CaseStatuses.closed &&
+      args.payload.syncAlerts === true &&
+      args.payload.closeReason != null;
 
     const parameters = this.buildCommonUserAction({
       ...args,
@@ -22,8 +26,17 @@ export class StatusUserActionBuilder extends UserActionBuilder {
       type: UserActionTypes.status,
     });
 
+    parameters.attributes.payload = {
+      ...parameters.attributes.payload,
+      ...(shouldLogCloseReasonSyncMessage ? { closeReason: args.payload.closeReason } : {}),
+      ...(args.payload.syncedAlertCount != null
+        ? { syncedAlertCount: args.payload.syncedAlertCount }
+        : {}),
+    };
     const getMessage = (id?: string) =>
-      `User updated the status for case id: ${args.caseId} - user action id: ${id}`;
+      shouldLogCloseReasonSyncMessage
+        ? `User closed case id: ${args.caseId} and synced alerts with a close reason - user action id: ${id}`
+        : `User updated the status for case id: ${args.caseId} - user action id: ${id}`;
 
     const eventDetails: EventDetails = {
       getMessage,

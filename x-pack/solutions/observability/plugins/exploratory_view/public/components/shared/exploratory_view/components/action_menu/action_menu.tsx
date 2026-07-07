@@ -56,7 +56,7 @@ export function ExpViewActionMenuContent({
                 lens.navigateToPrefilledEditor(
                   {
                     id: '',
-                    timeRange,
+                    time_range: timeRange,
                     attributes: lensAttributes,
                   },
                   {

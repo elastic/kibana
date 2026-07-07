@@ -6,6 +6,10 @@
  */
 
 import { AddObservableRequestRt, UpdateObservableRequestRt } from './v1';
+import {
+  AddObservableRequestSchema,
+  UpdateObservableRequestSchema,
+} from '../../api_zod/observable/v1';
 
 describe('AddObservableRequestRT', () => {
   it('has expected attributes in request', () => {
@@ -24,6 +28,19 @@ describe('AddObservableRequestRT', () => {
       right: defaultRequest,
     });
   });
+
+  it('zod: has expected attributes in request', () => {
+    const defaultRequest = {
+      observable: {
+        description: null,
+        typeKey: 'ef528526-2af9-4345-9b78-046512c5bbd6',
+        value: 'email@example.com',
+      },
+    };
+    const result = AddObservableRequestSchema.safeParse(defaultRequest);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
+  });
 });
 
 describe('UpdateObservableRequestRT', () => {
@@ -41,5 +58,17 @@ describe('UpdateObservableRequestRT', () => {
       _tag: 'Right',
       right: defaultRequest,
     });
+  });
+
+  it('zod: has expected attributes in request', () => {
+    const defaultRequest = {
+      observable: {
+        description: null,
+        value: 'email@example.com',
+      },
+    };
+    const result = UpdateObservableRequestSchema.safeParse(defaultRequest);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
   });
 });

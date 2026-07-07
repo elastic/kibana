@@ -21,10 +21,26 @@ jest.mock('../../../../common/lib/kibana', () => {
     useKibana: () => ({
       services: {
         telemetry: mockedTelemetry,
+        uiSettings: {
+          get: jest.fn().mockReturnValue(false),
+        },
       },
     }),
+    useUiSetting: () => false,
   };
 });
+
+jest.mock('../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
+  useEntityFromStore: jest.fn().mockReturnValue({
+    entity: null,
+    entityRecord: null,
+    firstSeen: null,
+    lastSeen: null,
+    isLoading: false,
+    error: null,
+    refetch: jest.fn(),
+  }),
+}));
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),

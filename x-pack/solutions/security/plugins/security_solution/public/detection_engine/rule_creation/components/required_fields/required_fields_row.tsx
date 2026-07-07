@@ -6,7 +6,14 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiTextColor } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiTextColor,
+  EuiToolTip,
+} from '@elastic/eui';
 import { UseField } from '../../../../shared_imports';
 import { NameComboBox } from './name_combobox';
 import { TypeComboBox } from './type_combobox';
@@ -59,6 +66,7 @@ export const RequiredFieldRow = ({
       readDefaultValueOnForm={!item.isNew}
       componentProps={{
         itemId: item.id,
+        autoFocus: item.isNew,
         onRemove: handleRemove,
         typesByFieldName,
         getWarnings,
@@ -71,6 +79,7 @@ export const RequiredFieldRow = ({
 interface RequiredFieldFieldProps {
   field: FieldHook<RequiredFieldInput>;
   onRemove: () => void;
+  autoFocus?: boolean;
   typesByFieldName: Record<string, string[] | undefined>;
   availableFieldNames: string[];
   getWarnings: ({ name, type }: { name: string; type: string }) => {
@@ -84,6 +93,7 @@ const RequiredFieldField = ({
   field,
   typesByFieldName,
   onRemove,
+  autoFocus,
   availableFieldNames,
   getWarnings,
   itemId,
@@ -125,6 +135,7 @@ const RequiredFieldField = ({
           <NameComboBox
             field={field}
             itemId={itemId}
+            autoFocus={autoFocus}
             availableFieldNames={availableFieldNames}
             typesByFieldName={typesByFieldName}
             nameWarning={nameWarning}
@@ -141,13 +152,18 @@ const RequiredFieldField = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            color="danger"
-            iconType="trash"
-            onClick={onRemove}
-            aria-label={i18n.REMOVE_REQUIRED_FIELD_BUTTON_ARIA_LABEL}
-            data-test-subj={`removeRequiredFieldButton-${field.value.name}`}
-          />
+          <EuiToolTip
+            content={i18n.REMOVE_REQUIRED_FIELD_BUTTON_ARIA_LABEL}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              color="danger"
+              iconType="trash"
+              onClick={onRemove}
+              aria-label={i18n.REMOVE_REQUIRED_FIELD_BUTTON_ARIA_LABEL}
+              data-test-subj={`removeRequiredFieldButton-${field.value.name}`}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFormRow>

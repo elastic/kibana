@@ -41,6 +41,7 @@ export const SyntheticsSharedContext: React.FC<
         storage,
         contentManagement: startPlugins.contentManagement,
         data: startPlugins.data,
+        dataViews: startPlugins.dataViews,
         inspector: startPlugins.inspector,
         triggersActionsUi: startPlugins.triggersActionsUi,
         observability: startPlugins.observability,
@@ -58,6 +59,7 @@ export const SyntheticsSharedContext: React.FC<
         serverless: startPlugins.serverless,
         charts: startPlugins.charts,
         uiActions: startPlugins.uiActions,
+        agentBuilder: startPlugins.agentBuilder,
       }}
     >
       <EuiThemeProvider darkMode={darkMode}>

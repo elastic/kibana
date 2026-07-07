@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import type {
@@ -57,6 +57,8 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         savedObjectsData
       );
 
+      const modifiedParamKeys = savedObjectsData.map((obj) => obj.attributes.key);
+
       await asyncGlobalParamsPropagation({
         server,
         paramsSpacesToSync: Array.from(
@@ -67,6 +69,7 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
             )
           )
         ),
+        modifiedParamKeys,
       });
 
       if (savedObjectsData.length > 1) {

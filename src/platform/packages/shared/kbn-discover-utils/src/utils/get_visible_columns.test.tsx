@@ -72,7 +72,7 @@ describe('getVisibleColumns utils', function () {
         }
       });
 
-      it('should return false if no _source columns is passed, text-based datasource', () => {
+      it('should forward showTimeCol if no _source columns is passed, text-based datasource', () => {
         for (const showTimeCol of [true, false]) {
           expect(
             canPrependTimeFieldColumn(
@@ -82,7 +82,7 @@ describe('getVisibleColumns utils', function () {
               showTimeCol,
               true
             )
-          ).toBe(false);
+          ).toBe(showTimeCol);
         }
       });
 

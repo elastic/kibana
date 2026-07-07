@@ -10,9 +10,15 @@ import type {
   ToolCallWithResult,
   ConversationRoundStepMixin,
   ReasoningStep,
+  CompactionStep,
+  BackgroundAgentCompleteStep,
+  TodosStep,
+  AskUserQuestionStep,
   ConversationRoundStepType,
   Conversation,
 } from '@kbn/agent-builder-common/chat/conversation';
+import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
+import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state';
 
 export type ConversationCreateRequest = Omit<
   Conversation,
@@ -22,7 +28,12 @@ export type ConversationCreateRequest = Omit<
 };
 
 export type ConversationUpdateRequest = Pick<Conversation, 'id'> &
-  Partial<Pick<Conversation, 'title' | 'rounds' | 'attachments' | 'state'>>;
+  Partial<
+    Pick<
+      Conversation,
+      'title' | 'rounds' | 'attachments' | 'state' | 'status' | 'read' | 'workspace_id'
+    >
+  >;
 
 export interface ConversationListOptions {
   agentId?: string;
@@ -46,12 +57,37 @@ export type PersistentToolCallStep = ConversationRoundStepMixin<
 /**
  * A union of all possible persistent step types.
  */
-export type PersistentConversationRoundStep = PersistentToolCallStep | ReasoningStep;
+export type PersistentConversationRoundStep =
+  | PersistentToolCallStep
+  | ReasoningStep
+  | CompactionStep
+  | BackgroundAgentCompleteStep
+  | TodosStep
+  | AskUserQuestionStep;
+
+/**
+ * Legacy fields that may exist in old persisted documents.
+ * These are normalized to the current model shape during deserialization.
+ */
+interface LegacyRoundFields {
+  /** @deprecated Use `pending_prompts` (array). Normalized on read. */
+  pending_prompt?: PromptRequest;
+}
+
+/**
+ * Legacy fields that may exist in old persisted RoundState documents.
+ * Normalized to use `nodes` (array) during deserialization.
+ */
+export interface LegacyAgentStateFields {
+  /** @deprecated Use `nodes` (array). Normalized on read. */
+  node?: AgentNodeState;
+}
 
 /**
  * Represents a conversation round suitable for persistence, with tool
  * call results serialized to a string.
  */
-export type PersistentConversationRound = Omit<ConversationRound, 'steps'> & {
-  steps: PersistentConversationRoundStep[];
-};
+export type PersistentConversationRound = Omit<ConversationRound, 'steps'> &
+  LegacyRoundFields & {
+    steps: PersistentConversationRoundStep[];
+  };

@@ -8,14 +8,18 @@
 // Security-specific test framework
 export { test, spaceTest } from './src/playwright';
 
+// Security-specific test constants
+export { CUSTOM_QUERY_RULE } from './src/playwright/constants/detection_rules';
+export { FULL_KIBANA_SECURITY_ROLE } from './src/playwright/constants/roles';
+export { ES as SECURITY_ARCHIVES } from './src/playwright/constants/archives';
+
 // re-exported test framework from @kbn/scout
-export { expect, lighthouseTest, apiTest, globalSetupHook, tags } from '@kbn/scout';
+export { lighthouseTest, apiTest, globalSetupHook, globalTeardownHook, tags } from '@kbn/scout';
 
 // re-exported fixtures & configuration from @kbn/scout
 export {
   browserAuthFixture,
   apiServicesFixture,
-  synthtraceFixture,
   createPlaywrightConfig,
   createLazyPageObject,
 } from '@kbn/scout';
@@ -43,7 +47,10 @@ export type {
   SecurityParallelTestFixtures,
   SecurityParallelApiServicesFixture,
   SecurityParallelWorkerFixtures,
+  ThreatMatchRuleCreatePage,
 } from './src/playwright';
+
+export * from './src/playwright/fixtures/test';
 
 // Re-exported Scout core types
 export type {
@@ -58,12 +65,7 @@ export type {
 } from '@kbn/scout';
 
 // Re-exported fixture types
-export type {
-  ApiServicesFixture,
-  BrowserAuthFixture,
-  SamlAuth,
-  SynthtraceFixture,
-} from '@kbn/scout';
+export type { ApiServicesFixture, BrowserAuthFixture, SamlAuth } from '@kbn/scout';
 
 // Re-exported service & configuration types
 export type {

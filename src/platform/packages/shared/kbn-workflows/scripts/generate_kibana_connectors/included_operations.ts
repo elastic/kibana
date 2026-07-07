@@ -15,10 +15,12 @@ export { OPERATION_TYPE_OVERRIDES } from '../../spec/kibana/aliases';
  */
 export const INCLUDED_OPERATIONS = [
   'createCaseDefaultSpace',
-  'post_agent_builder_converse',
   'getCaseDefaultSpace',
   'updateCaseDefaultSpace',
   'addCaseCommentDefaultSpace',
   'SetAlertsStatus',
   'SetAlertTags',
+  'get-streams',
+  'get-streams-name',
+  'get-streams-name-significant-events',
 ];

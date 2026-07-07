@@ -12,6 +12,7 @@ import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { getGapsSummaryByRuleIdsRoute } from './get_gaps_summary_by_rule_ids_route';
 import { gapFillStatus } from '../../../../../common';
+import { gapReasonType } from '../../../../../common/constants/gap_reason';
 
 jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
@@ -73,6 +74,34 @@ describe('getGapsSummaryByRuleIdsRoute', () => {
           },
         ],
       },
+    });
+  });
+
+  test('should pass excluded_reasons through to rulesClient', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const excludedReasons = [gapReasonType.RULE_DISABLED];
+
+    rulesClient.getGapsSummaryByRuleIds.mockResolvedValueOnce(mockResult);
+    getGapsSummaryByRuleIdsRoute(router, licenseState);
+
+    const bodyWithExcludedReasons = {
+      ...mockBody,
+      excluded_reasons: excludedReasons,
+    };
+    const [, handler] = router.post.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      { body: bodyWithExcludedReasons }
+    );
+
+    await handler(context, req, res);
+
+    expect(rulesClient.getGapsSummaryByRuleIds).toHaveBeenLastCalledWith({
+      start: mockBody.start,
+      end: mockBody.end,
+      ruleIds: mockBody.rule_ids,
+      excludedReasons,
     });
   });
 

@@ -24,7 +24,7 @@ interface DetailPanelAlertTabDeps {
   hasNextPageAlerts?: boolean;
   fetchNextPageAlerts: () => void;
   onJumpToEvent: (event: ProcessEvent) => void;
-  onShowAlertDetails: (alertId: string) => void;
+  onShowAlertDetails: (alertId: string, alertIndex: string) => void;
   investigatedAlertId?: string;
 }
 

@@ -86,7 +86,7 @@ export const MaintenanceWindowsPage = React.memo(() => {
       chrome.setBadge({
         text: i18n.READ_ONLY_BADGE_TEXT,
         tooltip: i18n.READ_ONLY_BADGE_TOOLTIP,
-        iconType: 'glasses',
+        iconType: 'readOnly',
       });
     }
   }, [chrome, readOnly]);
@@ -137,7 +137,7 @@ export const MaintenanceWindowsPage = React.memo(() => {
             <EuiButton
               data-test-subj="mw-create-button"
               onClick={handleClickCreate}
-              iconType="plusInCircle"
+              iconType="plusCircle"
               fill
             >
               {i18n.CREATE_NEW_BUTTON}

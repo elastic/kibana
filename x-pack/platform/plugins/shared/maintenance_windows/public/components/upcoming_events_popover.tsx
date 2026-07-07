@@ -18,19 +18,20 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   formatDate,
 } from '@elastic/eui';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { recurringSummary } from '@kbn/response-ops-recurring-schedule-form/utils/recurring_summary';
 import { getPresets } from '@kbn/response-ops-recurring-schedule-form/utils/get_presets';
-import type { MaintenanceWindow } from '../../common';
+import type { MaintenanceWindowUI } from '../../common';
 import { MAINTENANCE_WINDOW_DATE_FORMAT } from '../../common';
 import * as i18n from '../translations';
 import { useUiSetting } from '../utils/kibana_react';
 import { convertFromMaintenanceWindowToForm } from '../helpers/convert_from_maintenance_window_to_form';
 
 interface UpcomingEventsPopoverProps {
-  maintenanceWindowFindResponse: MaintenanceWindow;
+  maintenanceWindowFindResponse: MaintenanceWindowUI;
 }
 
 export const UpcomingEventsPopover: React.FC<UpcomingEventsPopoverProps> = React.memo(
@@ -70,16 +71,19 @@ export const UpcomingEventsPopover: React.FC<UpcomingEventsPopoverProps> = React
 
     return (
       <EuiPopover
+        aria-label={i18n.UPCOMING_EVENTS_POPOVER_ARIA_LABEL}
         button={
-          <EuiButtonIcon
-            data-test-subj="upcoming-events-icon-button"
-            color="text"
-            display="base"
-            iconType="calendar"
-            size="s"
-            aria-label="Upcoming events"
-            onClick={onButtonClick}
-          />
+          <EuiToolTip content="Upcoming events" disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="upcoming-events-icon-button"
+              color="text"
+              display="base"
+              iconType="calendar"
+              size="s"
+              aria-label="Upcoming events"
+              onClick={onButtonClick}
+            />
+          </EuiToolTip>
         }
         isOpen={isPopoverOpen}
         closePopover={closePopover}
@@ -110,7 +114,7 @@ export const UpcomingEventsPopover: React.FC<UpcomingEventsPopoverProps> = React
                 css={{ width: '300px' }}
               >
                 <EuiFlexItem grow={false}>
-                  <EuiIcon color="subdued" type="calendar" />
+                  <EuiIcon color="subdued" type="calendar" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText color="subdued" size="s">

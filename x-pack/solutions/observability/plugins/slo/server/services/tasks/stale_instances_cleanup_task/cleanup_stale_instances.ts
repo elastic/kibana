@@ -6,7 +6,9 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger, SavedObjectsClient } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import {
   DEFAULT_STALE_SLO_THRESHOLD_HOURS,
   SUMMARY_DESTINATION_INDEX_PATTERN,
@@ -239,7 +241,11 @@ async function hasDocumentsToDelete(
 ): Promise<boolean> {
   const { esClient, abortController } = dependencies;
   const response = await esClient.count(
-    { index: SUMMARY_DESTINATION_INDEX_PATTERN, terminate_after: 1, query },
+    {
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
+      terminate_after: 1,
+      query: query as QueryDslQueryContainer,
+    },
     { signal: abortController.signal }
   );
 
@@ -259,7 +265,7 @@ async function executeDeleteByQuery(
       slices: 'auto',
       max_docs: MAX_DOCS_PER_DELETE,
       requests_per_second: REQUESTS_PER_SECOND,
-      query,
+      query: query as QueryDslQueryContainer,
     },
     { signal: abortController.signal }
   );
@@ -301,7 +307,7 @@ async function getEnabledSpaceSettings(
 
   for (const result of response.saved_objects) {
     const spaceId = settingsObjects.find((obj) => obj.id === result.id)?.spaceId ?? 'default';
-    if (result.error) {
+    if (isSavedObjectErrorResult(result)) {
       logger.debug(`Skipping space '${spaceId}': no settings found`);
       continue;
     }

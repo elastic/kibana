@@ -47,7 +47,13 @@ export const WorkflowInsightsPolicyResponseFailureResult = ({
     >
       <EuiFlexGroup alignItems={'flexStart'} gutterSize={'m'}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="globe" size="l" color="warning" css={{ marginTop: '18px' }} />
+          <EuiIcon
+            type="globe"
+            size="l"
+            color="warning"
+            aria-hidden={true}
+            css={{ marginTop: '18px' }}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem>
@@ -71,7 +77,7 @@ export const WorkflowInsightsPolicyResponseFailureResult = ({
           <EuiButtonEmpty
             data-test-subj={`workflowInsightsResult-${index}-remediation`}
             aria-label={ariaLabel}
-            iconType="popout"
+            iconType="external"
             href={insight.remediation.link}
             target="_blank"
             css={{

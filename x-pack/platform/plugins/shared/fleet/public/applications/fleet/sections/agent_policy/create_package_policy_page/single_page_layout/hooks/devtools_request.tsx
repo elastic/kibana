@@ -21,6 +21,7 @@ import {
   HIDDEN_API_REFERENCE_PACKAGES,
 } from '../../../../../../../../common/constants';
 import type { PackageInfo, NewAgentPolicy, NewPackagePolicy } from '../../../../../types';
+import { ExperimentalFeaturesService } from '../../../../../services';
 import { SelectedPolicyTab } from '../../components';
 import { generateCreateAgentlessPolicyDevToolsRequest } from '../../../services/devtools_request';
 
@@ -31,6 +32,7 @@ export function useDevToolsRequest({
   selectedPolicyTab,
   withSysMonitoring,
   packagePolicyId,
+  createDatasetTemplates,
 }: {
   withSysMonitoring: boolean;
   selectedPolicyTab: SelectedPolicyTab;
@@ -38,8 +40,13 @@ export function useDevToolsRequest({
   packagePolicy: NewPackagePolicy;
   packageInfo?: PackageInfo;
   packagePolicyId?: string;
+  createDatasetTemplates?: boolean;
 }) {
   const showDevtoolsRequest = !HIDDEN_API_REFERENCE_PACKAGES.includes(packageInfo?.name ?? '');
+
+  const { enableVarGroups } = ExperimentalFeaturesService.get();
+  const varGroups =
+    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
 
   const [devtoolRequest, devtoolRequestDescription] = useMemo(() => {
     if (selectedPolicyTab === SelectedPolicyTab.NEW) {
@@ -47,7 +54,13 @@ export function useDevToolsRequest({
 
       if (packagePolicy.supports_agentless) {
         return [
-          generateCreateAgentlessPolicyDevToolsRequest(packagePolicy),
+          generateCreateAgentlessPolicyDevToolsRequest(
+            {
+              ...packagePolicy,
+              create_dataset_templates: createDatasetTemplates,
+            },
+            varGroups
+          ),
           i18n.translate(
             'xpack.fleet.editPackagePolicy.devtoolsRequestAgentlessPolicyDescription',
             {
@@ -71,7 +84,9 @@ export function useDevToolsRequest({
                 ])
               )
             : generateCreatePackagePolicyDevToolsRequest({
-                ...{ ...packagePolicy, policy_ids: [''] },
+                ...packagePolicy,
+                policy_ids: [''],
+                create_dataset_templates: createDatasetTemplates,
               })
         }`,
         packagePolicyId
@@ -100,6 +115,7 @@ export function useDevToolsRequest({
           )
         : generateCreatePackagePolicyDevToolsRequest({
             ...packagePolicy,
+            create_dataset_templates: createDatasetTemplates,
           }),
       packagePolicyId
         ? i18n.translate('xpack.fleet.editPackagePolicy.devtoolsRequestDescription', {
@@ -109,7 +125,15 @@ export function useDevToolsRequest({
             defaultMessage: 'This Kibana request creates a new package policy.',
           }),
     ];
-  }, [packagePolicy, newAgentPolicy, withSysMonitoring, selectedPolicyTab, packagePolicyId]);
+  }, [
+    packagePolicy,
+    newAgentPolicy,
+    withSysMonitoring,
+    selectedPolicyTab,
+    packagePolicyId,
+    createDatasetTemplates,
+    varGroups,
+  ]);
 
   return { showDevtoolsRequest, devtoolRequest, devtoolRequestDescription };
 }

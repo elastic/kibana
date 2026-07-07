@@ -12,6 +12,7 @@ import { useParams } from 'react-router-dom';
 import { EventEmitter } from 'events';
 
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
+import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 import { VisualizeConstants } from '@kbn/visualizations-common';
 import {
   useChromeVisibility,
@@ -31,6 +32,9 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const { id: visualizationIdFromUrl } = useParams<{ id: string }>();
   const [originatingApp, setOriginatingApp] = useState<string>();
   const [originatingPath, setOriginatingPath] = useState<string>();
+  const [incomingBreadcrumbs, setIncomingBreadcrumbs] = useState<
+    EmbeddableEditorBreadcrumb[] | undefined
+  >();
   const [embeddableIdValue, setEmbeddableId] = useState<string>();
   const [embeddableInput, setEmbeddableInput] = useState<VisualizeInput>();
   const { services } = useKibana<VisualizeServices>();
@@ -45,6 +49,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
       searchSessionId,
       embeddableId,
       originatingPath: pathValue,
+      breadcrumbs: breadcrumbsValue,
       valueInput: valueInputValue,
     } = stateTransferService.getIncomingEditorState(VisualizeConstants.APP_ID) || {};
 
@@ -57,6 +62,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     setEmbeddableId(embeddableId);
     setOriginatingApp(value);
     setOriginatingPath(pathValue);
+    setIncomingBreadcrumbs(breadcrumbsValue);
   }, [services]);
   const { savedVisInstance, visEditorRef, visEditorController } = useSavedVisInstance(
     services,
@@ -64,7 +70,9 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     isChromeVisible,
     originatingApp,
     visualizationIdFromUrl,
-    embeddableInput
+    embeddableInput,
+    originatingPath,
+    incomingBreadcrumbs
   );
 
   const editorName = savedVisInstance?.vis.type.title.toLowerCase().replace(' ', '_') || '';
@@ -114,6 +122,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
       originatingApp={originatingApp}
       setOriginatingApp={setOriginatingApp}
       originatingPath={originatingPath}
+      incomingBreadcrumbs={incomingBreadcrumbs}
       visualizationIdFromUrl={visualizationIdFromUrl}
       setHasUnsavedChanges={setHasUnsavedChanges}
       visEditorRef={visEditorRef}

@@ -18,14 +18,15 @@ export function useLocationName(monitor: OverviewStatusMetaData) {
       dispatch(getServiceLocations());
     }
   });
-  const locationId = monitor?.locationId;
+  const locationId = monitor.locations[0].id!;
+  const locationLabel = monitor.locations[0].label;
 
   return useMemo(() => {
-    if (!locationsLoaded || monitor.locationLabel) {
-      return monitor.locationLabel ?? monitor.locationId;
+    if (!locationsLoaded || locationLabel) {
+      return locationLabel ?? locationId;
     } else {
       const location = locations.find((loc) => loc.id === locationId);
-      return location?.label ?? (monitor.locationLabel || monitor.locationId);
+      return location?.label ?? (locationLabel || locationId);
     }
-  }, [locationsLoaded, locations, locationId, monitor]);
+  }, [locationsLoaded, locationLabel, locationId, locations]);
 }

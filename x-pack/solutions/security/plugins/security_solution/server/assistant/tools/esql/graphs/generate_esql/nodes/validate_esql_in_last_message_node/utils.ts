@@ -6,7 +6,8 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { parse, type EditorError } from '@kbn/esql-language';
+import { parse } from '@elastic/esql';
+import type { EditorError } from '@elastic/esql/types';
 import { isEmpty } from 'lodash';
 
 export interface ValidateEsqlResult {

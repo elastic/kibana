@@ -91,7 +91,7 @@ export function ResultLinks({ jobs }) {
         >
           <EuiButtonIcon
             href={anomalyExplorerLink}
-            iconType="visTable"
+            iconType="table"
             aria-label={openJobsInAnomalyExplorerText}
             isDisabled={jobActionsDisabled === true}
             data-test-subj="mlOpenJobsInAnomalyExplorerButton"

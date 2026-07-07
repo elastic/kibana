@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { MlRoute } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
@@ -21,7 +22,6 @@ import {
   getStackManagementBreadcrumb,
 } from '../../breadcrumbs';
 import { MlPageHeader } from '../../../components/page_header';
-import { ML_PAGES } from '../../../../locator';
 import { PageTitle } from '../../../components/page_title';
 
 const SuppliedConfigurations = dynamic(async () => ({

@@ -249,7 +249,7 @@ export const getDatasetQualityTableColumns = ({
             'data-test-subj': 'datasetQualitySizeColumn',
             field: 'sizeBytes',
             sortable: true,
-            render: (_: any, dataStreamStat: DataStreamStat) => {
+            render: (_: unknown, dataStreamStat: DataStreamStat) => {
               return (
                 <PrivilegesWarningIconWrapper
                   title={`sizeBytes-${dataStreamStat.title}`}
@@ -330,7 +330,7 @@ export const getDatasetQualityTableColumns = ({
             },
             field: 'failedDocs.percentage',
             sortable: true,
-            render: (_: any, dataStreamStat: DataStreamStat) => {
+            render: (_: unknown, dataStreamStat: DataStreamStat) => {
               if (
                 !dataStreamStat.hasFailureStore &&
                 dataStreamStat.userPrivileges?.canReadFailureStore
@@ -391,7 +391,7 @@ export const getDatasetQualityTableColumns = ({
                 ) : (
                   fieldFormats
                     .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
-                    .convert(timestamp)
+                    .convertToText(timestamp)
                 )}
               </EuiSkeletonRectangle>
             ),

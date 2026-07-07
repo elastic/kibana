@@ -10,20 +10,32 @@ import path from 'node:path';
 import { test } from './fixtures/base_page';
 import { HostDetailsPage } from './pom/pages/host_details.page';
 import { assertEnv } from '../lib/assert_env';
+import { assertDiscoverHasData, assertStreamHasData } from '../lib/validation_helpers';
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page, onboardingHomePage }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
+  await onboardingHomePage.maybeClickIntroducingAIAgentModalContinueBtn();
 });
 
-test('Auto-detect logs and metrics', async ({ page, onboardingHomePage, autoDetectFlowPage }) => {
+test('Auto-detect logs and metrics', async ({
+  page,
+  onboardingHomePage,
+  autoDetectFlowPage,
+  wiredStreamsSelector,
+}) => {
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
 
   const isLogsEssentialsMode = process.env.LOGS_ESSENTIALS_MODE === 'true';
+  const useWiredStreams = process.env.USE_WIRED_STREAMS === 'true';
   const fileName = 'code_snippet_logs_auto_detect.sh';
   const outputPath = path.join(__dirname, '..', process.env.ARTIFACTS_FOLDER, fileName);
 
   await onboardingHomePage.selectHostUseCase();
   await onboardingHomePage.selectAutoDetectWithElasticAgent();
+
+  if (useWiredStreams) {
+    await wiredStreamsSelector.selectWiredStreamsMode();
+  }
 
   await autoDetectFlowPage.assertVisibilityCodeBlock();
   await autoDetectFlowPage.copyToClipboard();
@@ -36,7 +48,11 @@ test('Auto-detect logs and metrics', async ({ page, onboardingHomePage, autoDete
    */
   fs.writeFileSync(outputPath, clipboardData);
 
-  await autoDetectFlowPage.assertReceivedDataIndicator();
+  if (useWiredStreams) {
+    await autoDetectFlowPage.assertLogsDataReceivedIndicator();
+  } else {
+    await autoDetectFlowPage.assertReceivedDataIndicator();
+  }
 
   /**
    * Host Details page sometime shows "No Data"
@@ -50,24 +66,36 @@ test('Auto-detect logs and metrics', async ({ page, onboardingHomePage, autoDete
    */
   await page.waitForTimeout(2 * 60000);
 
-  await autoDetectFlowPage.clickAutoDetectSystemIntegrationCTA();
-
   /**
-   * Host Details pages open in a new tab, so it
-   * needs to be captured using the `popup` event.
+   * Wired streams only reroutes logs (to logs.ecs); metrics are unaffected.
+   * So for wired streams we validate log delivery via Discover and the Streams
+   * page, and intentionally skip the Host Details dashboard check. Dashboard
+   * validation is already covered by the non-wired test variants.
+   *
+   * Both "wired streams" and "wired streams + logs essentials" fall into this
+   * single branch because the validation path is identical for both.
    */
-  const hostDetailsPage = new HostDetailsPage(await page.waitForEvent('popup'));
-
-  if (!isLogsEssentialsMode) {
-    await hostDetailsPage.assertCpuPercentageNotEmpty();
+  if (useWiredStreams) {
+    if (await autoDetectFlowPage.hasCustomLogsExploreButtons()) {
+      const popupPage = await autoDetectFlowPage.clickCustomLogsExploreInPopup();
+      await assertDiscoverHasData(popupPage, { assertHitCount: true });
+    }
+    await assertStreamHasData(page, 'logs.ecs');
   } else {
-    await autoDetectFlowPage.assertReceivedDataIndicator();
+    await autoDetectFlowPage.clickAutoDetectSystemIntegrationCTA();
 
-    await page.goto(`${process.env.KIBANA_BASE_URL}/app/discover`);
+    /**
+     * Host Details pages open in a new tab, so it
+     * needs to be captured using the `popup` event.
+     */
+    const hostDetailsPage = new HostDetailsPage(await page.waitForEvent('popup'));
 
-    const { DiscoverValidationPage } = await import('./pom/pages/discover_validation.page');
-    const discoverValidation = new DiscoverValidationPage(page);
-    await discoverValidation.waitForDiscoverToLoad();
-    await discoverValidation.assertHasAnyLogData();
+    if (!isLogsEssentialsMode) {
+      await hostDetailsPage.assertCpuPercentageNotEmpty();
+    } else {
+      await autoDetectFlowPage.assertReceivedDataIndicator();
+      await page.goto(`${process.env.KIBANA_BASE_URL}/app/discover`);
+      await assertDiscoverHasData(page);
+    }
   }
 });

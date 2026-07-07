@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["**/*.ts", "**/*.tsx", "../../../../../typings/emotion.d.ts"],
+  "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/i18n",

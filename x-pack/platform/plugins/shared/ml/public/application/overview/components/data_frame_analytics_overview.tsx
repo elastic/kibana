@@ -10,11 +10,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ML_PAGES } from '../../../locator';
-import dfaImage from '../../data_frame_analytics/pages/analytics_management/components/empty_prompt/analysis_monitors.png';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import dfaImage from '../../data_frame_analytics/pages/analytics_management/components/empty_prompt/analysis_monitors.svg';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { useMlApi, useMlLocator, useMlManagementLocator } from '../../contexts/kibana';
-import { mlNodesAvailable } from '../../ml_nodes_check';
 import { MLEmptyPromptCard } from '../../components/overview/ml_empty_prompt_card';
 import { AnalyticsEmptyPrompt } from '../../data_frame_analytics/pages/analytics_management/components/empty_prompt/empty_prompt';
 import { useOverviewPageCustomCss } from '../overview_ml_page';
@@ -24,16 +23,8 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
   const mlManagementLocator = useMlManagementLocator();
 
   const [hasDFAs, setHasDFAs] = useState(false);
-  const [canCreateDataFrameAnalytics, canStartStopDataFrameAnalytics, canGetDataFrameAnalytics] =
-    usePermissionCheck([
-      'canCreateDataFrameAnalytics',
-      'canStartStopDataFrameAnalytics',
-      'canGetDataFrameAnalytics',
-    ]);
+  const canGetDataFrameAnalytics = usePermissionCheck('canGetDataFrameAnalytics');
   const overviewPageCardCustomCss = useOverviewPageCustomCss();
-
-  const disabled =
-    !mlNodesAvailable() || !canCreateDataFrameAnalytics || !canStartStopDataFrameAnalytics;
 
   const navigateToResultsExplorer = useCallback(async () => {
     if (!mlLocator) return;
@@ -55,7 +46,7 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
 
   const availableActions = useMemo(() => {
     const actions: React.ReactNode[] = [];
-    if (hasDFAs) {
+    if (hasDFAs && canGetDataFrameAnalytics) {
       actions.push(
         <EuiButton
           color="text"
@@ -70,12 +61,11 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
         </EuiButton>
       );
     }
-    if (!disabled) {
+    if (canGetDataFrameAnalytics) {
       actions.push(
         <EuiButtonEmpty
           color="text"
           onClick={navigateToDFAManagementPath}
-          isDisabled={disabled}
           data-test-subj="mlAnalyticsManageDFAJobsButton"
         >
           <FormattedMessage
@@ -86,13 +76,7 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
       );
     }
     return actions;
-  }, [
-    disabled,
-    navigateToDFAManagementPath,
-    hasDFAs,
-    navigateToResultsExplorer,
-    canGetDataFrameAnalytics,
-  ]);
+  }, [canGetDataFrameAnalytics, navigateToDFAManagementPath, hasDFAs, navigateToResultsExplorer]);
 
   const mlApi = useMlApi();
   useEffect(() => {
@@ -106,11 +90,12 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
   }, [mlApi]);
 
   return !hasDFAs ? (
-    <AnalyticsEmptyPrompt customCss={overviewPageCardCustomCss} />
+    <AnalyticsEmptyPrompt customCss={overviewPageCardCustomCss} iconSize="m" />
   ) : (
     <MLEmptyPromptCard
       customCss={overviewPageCardCustomCss}
       iconSrc={dfaImage}
+      iconSize="m"
       iconAlt={i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
         defaultMessage: 'Tailored predictive models',
       })}

@@ -16,12 +16,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  useSiemReadinessApi,
-  useMitreAttackIndicesDocCounts,
-  useIntegrationDisplayNames,
-} from '@kbn/siem-readiness';
+import { useSiemReadinessApi } from '../../../../hooks/use_siem_readiness_api';
+import { useMitreAttackIndicesDocCounts } from '../../../../hooks/use_mitre_attack_indices_doc_counts';
+import { useIntegrationDisplayNames } from '../../../../hooks/use_integration_display_names';
+import { useDetectionRulesByIntegration } from '../../../../hooks/use_get_detection_rules_by_integration';
 import { IntegrationSelectablePopover } from '../../../components/integrations_selectable_popover';
+import { createIntegrationStatusMapFromSets } from '../create_integration_status_maps';
 
 interface DetectionRule {
   rule_id?: string;
@@ -138,22 +138,13 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const [activeTacticPopover, setActiveTacticPopover] = useState<string | null>(null);
 
-  const { getDetectionRules, getIntegrations } = useSiemReadinessApi();
+  const { getDetectionRules } = useSiemReadinessApi();
   const integrationDisplayNames = useIntegrationDisplayNames();
+  const { enabledPackagesSet, disabledPackagesSet } = useDetectionRulesByIntegration();
 
   const enabledRules = useMemo(
     () => (getDetectionRules.data?.data || []).filter((rule: DetectionRule) => rule.enabled),
     [getDetectionRules.data]
-  );
-
-  const installedPackageNames = useMemo(
-    () =>
-      new Set(
-        getIntegrations?.data?.items
-          ?.filter((pkg) => pkg.status === 'installed')
-          .map((pkg) => pkg.name) || []
-      ),
-    [getIntegrations?.data]
   );
 
   const activeRuleIndices = useMemo(() => {
@@ -193,7 +184,7 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
         // Track integrations required by this rule but not installed
         rule.related_integrations?.forEach(
           (integration: { package: string; version?: string; integration?: string }) => {
-            if (integration.package && !installedPackageNames.has(integration.package)) {
+            if (integration.package && !enabledPackagesSet.has(integration.package)) {
               missingIntegrations.add(integration.package);
             }
           }
@@ -229,7 +220,7 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
         statusColor,
       };
     });
-  }, [enabledRules, installedPackageNames, mitreAttackIndicesDocCounts, euiTheme]);
+  }, [enabledRules, enabledPackagesSet, mitreAttackIndicesDocCounts, euiTheme]);
 
   if (!getDetectionRules.data) {
     return (
@@ -259,7 +250,7 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
             'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttack.summary',
             {
               defaultMessage:
-                'This diagram shows which MITRE ATT&CK tactics have enabled rules mapped to them and whether any of those rules are missing required integrations',
+                'This diagram shows which MITRE ATT&CK tactics have enabled rules mapped to them and whether any of those rules have missing or disabled integrations',
             }
           )}
         </EuiText>
@@ -298,10 +289,12 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
               closePopover={() => setActiveTacticPopover(null)}
               button={
                 <div
-                  onClick={() => setActiveTacticPopover(tactic.tacticId)}
+                  onClick={() =>
+                    tactic.missingPackages.length > 0 && setActiveTacticPopover(tactic.tacticId)
+                  }
                   // Keyboard accessibility: Opens the popover when user presses Enter or Space
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
+                    if ((e.key === 'Enter' || e.key === ' ') && tactic.missingPackages.length > 0) {
                       e.preventDefault();
                       setActiveTacticPopover(tactic.tacticId);
                     }
@@ -312,7 +305,7 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
                   style={{
                     backgroundColor: tactic.statusColor,
                     padding: euiTheme.size.s,
-                    cursor: 'pointer',
+                    cursor: tactic.missingPackages.length > 0 ? 'pointer' : 'default',
                     height: '100%',
                     display: 'flex',
                     flexDirection: 'column',
@@ -329,9 +322,9 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
                       <div>
                         <strong> {tactic.missingPackages.length}</strong>
                         {i18n.translate(
-                          'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttack.missingIntegrations',
+                          'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttack.missingOrDisabledIntegrations',
                           {
-                            defaultMessage: ' missing integrations',
+                            defaultMessage: ' missing or disabled integrations',
                           }
                         )}
                       </div>
@@ -368,11 +361,23 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
               }
             >
               <IntegrationSelectablePopover
-                options={tactic.missingPackages.map((pkg) => ({
-                  label: integrationDisplayNames.data?.get(pkg) || pkg,
-                  key: pkg,
-                }))}
+                options={tactic.missingPackages
+                  .map((pkg) => ({
+                    label: integrationDisplayNames.data?.get(pkg) || pkg,
+                    key: pkg,
+                    isDisabled: disabledPackagesSet.has(pkg),
+                  }))
+                  .sort((a, b) => {
+                    if (a.isDisabled !== b.isDisabled) return a.isDisabled ? -1 : 1;
+                    return a.label.localeCompare(b.label);
+                  })}
+                statusMap={createIntegrationStatusMapFromSets(
+                  tactic.missingPackages,
+                  enabledPackagesSet,
+                  disabledPackagesSet
+                )}
                 showOnlySelectable
+                telemetrySource="mitre_attack"
               />
             </EuiPopover>
           ))}
@@ -394,7 +399,7 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
             label={i18n.translate(
               'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttack.legend.warning',
               {
-                defaultMessage: 'Warning: Missing integrations or rule data',
+                defaultMessage: 'Warning: Missing or disabled integrations, or rule data',
               }
             )}
           />

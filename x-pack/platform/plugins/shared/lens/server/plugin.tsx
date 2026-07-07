@@ -21,6 +21,7 @@ import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import type {
   TaskManagerSetupContract,
@@ -29,7 +30,7 @@ import type {
 import type { EmbeddableRegistryDefinition, EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import {
   LENS_CONTENT_TYPE,
   LENS_ITEM_LATEST_VERSION,
@@ -43,6 +44,8 @@ import { LensStorage } from './content_management';
 import { registerLensAPIRoutes } from './api/routes';
 import { fetchLensFeatureFlags } from '../common';
 import { registerLensEmbeddableTransforms } from './transforms';
+import { registerLensEmbeddableTransformsForDashboardApp } from './dashboard_app_transforms';
+import { registerDiscoverDrilldown } from './drilldowns/register_discover_drilldown';
 
 export interface PluginSetupContract {
   taskManager?: TaskManagerSetupContract;
@@ -51,6 +54,7 @@ export interface PluginSetupContract {
   data: DataPluginSetup;
   share?: SharePluginSetup;
   contentManagement: ContentManagementServerSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface PluginStartContract {
@@ -84,7 +88,7 @@ export class LensServerPlugin
     this.logger = initializerContext.logger.get();
   }
 
-  setup(core: CoreSetup<PluginStartContract>, plugins: PluginSetupContract) {
+  setup(core: CoreSetup<PluginStartContract>, plugins: PluginSetupContract): LensServerPluginSetup {
     const getFilterMigrations = plugins.data.query.filterManager.getAllMigrations.bind(
       plugins.data.query.filterManager
     );
@@ -112,9 +116,12 @@ export class LensServerPlugin
       this.customVisualizationMigrations
     );
 
+    registerDiscoverDrilldown(plugins.embeddable);
+
     plugins.embeddable.registerEmbeddableFactory(
       lensEmbeddableFactory() as unknown as EmbeddableRegistryDefinition
     );
+
     const builder = new LensConfigBuilder();
 
     registerLensAPIRoutes({
@@ -122,6 +129,7 @@ export class LensServerPlugin
       contentManagement: plugins.contentManagement,
       builder,
       logger: this.logger,
+      usageCounter: plugins.usageCollection?.createUsageCounter('lens_visualizations_api'),
     });
 
     core
@@ -132,6 +140,9 @@ export class LensServerPlugin
 
         // Need to wait for feature flags to be set before registering transforms
         registerLensEmbeddableTransforms(plugins.embeddable, builder);
+
+        // Transforms for Lens used in Dashboard App only
+        registerLensEmbeddableTransformsForDashboardApp(plugins.embeddable, builder);
 
         flags.apiFormat$.subscribe((value) => {
           builder.setEnabled(value);

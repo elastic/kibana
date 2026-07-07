@@ -7,6 +7,7 @@
 
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import { rawApiKeyPendingInvalidationSchemaV1 } from '../schemas/raw_api_key_pending_invalidation';
+import { rawApiKeyPendingInvalidationSchemaV2 } from '../schemas/raw_api_key_pending_invalidation';
 
 export const apiKeyPendingInvalidationModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -17,6 +18,25 @@ export const apiKeyPendingInvalidationModelVersions: SavedObjectsModelVersionMap
         { unknowns: 'ignore' }
       ),
       create: rawApiKeyPendingInvalidationSchemaV1,
+    },
+  },
+  '2': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          uiamApiKey: {
+            type: 'binary',
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: rawApiKeyPendingInvalidationSchemaV2.extends(
+        {},
+        { unknowns: 'ignore' }
+      ),
+      create: rawApiKeyPendingInvalidationSchemaV2,
     },
   },
 };

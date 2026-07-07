@@ -6,9 +6,10 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 
-test.describe('Index template wizard - Create', { tag: ['@ess'] }, () => {
+test.describe('Index template wizard - Create', { tag: tags.stateful.classic }, () => {
   test.afterEach(async ({ esClient, log }) => {
     try {
       await esClient.indices.deleteIndexTemplate({ name: 'test-index-template' });
@@ -31,8 +32,8 @@ test.describe('Index template wizard - Create', { tag: ['@ess'] }, () => {
     await page.testSubj.locator('createTemplateButton').click();
 
     await test.step('verify page title', async () => {
-      await expect(page.testSubj.locator('pageTitle')).toBeVisible();
-      await expect(page.testSubj.locator('pageTitle')).toHaveText('Create template');
+      await expect(page.testSubj.locator('appHeaderTitle')).toBeVisible();
+      await expect(page.testSubj.locator('appHeaderTitle')).toHaveText('Create template');
     });
 
     await test.step('1: Logistics', async () => {

@@ -9,12 +9,12 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
-import type { ESQLControlState } from '@kbn/esql-types';
 import type { VIEW_MODE, NEW_TAB_ID } from './constants';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
@@ -116,6 +116,14 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    */
   hideChart?: boolean;
   /**
+   * Used to force the data table to be hidden or visible
+   */
+  hideTable?: boolean;
+  /**
+   * Used to force the field list sidebar to be hidden or visible
+   */
+  hideSidebar?: boolean;
+  /**
    * Number of rows to sample for Discover grid
    */
   sampleSize?: number;
@@ -126,7 +134,11 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
   /**
    * Optionally add some ESQL controls
    */
-  esqlControls?: ControlPanelsState<ESQLControlState> & SerializableRecord;
+  esqlControls?: ControlPanelsState<OptionsListESQLControlState> & SerializableRecord;
+  /**
+   * When true, ES|QL queries use approximate execution for faster, estimated results.
+   */
+  isApproximate?: boolean;
 }
 
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
@@ -136,7 +148,7 @@ export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
  */
 export interface MainHistoryLocationState {
   dataViewSpec?: DataViewSpec;
-  esqlControls?: ControlPanelsState<ESQLControlState>;
+  esqlControls?: ControlPanelsState<OptionsListESQLControlState>;
   isAlertResults?: boolean;
 }
 

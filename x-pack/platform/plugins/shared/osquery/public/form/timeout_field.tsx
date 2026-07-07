@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { QUERY_TIMEOUT } from '../../common/constants';
+import { validateTimeout } from './validations';
 
 interface TimeoutFieldProps {
   euiFieldProps?: Record<string, unknown>;
@@ -25,21 +26,7 @@ const TimeoutFieldComponent = ({ euiFieldProps }: TimeoutFieldProps) => {
     name: 'timeout',
     defaultValue: QUERY_TIMEOUT.DEFAULT,
     rules: {
-      validate: (currentValue: number) => {
-        if (currentValue < QUERY_TIMEOUT.DEFAULT || isNaN(currentValue)) {
-          return i18n.translate('xpack.osquery.pack.queryFlyoutForm.timeoutFieldMinNumberError', {
-            defaultMessage: 'The timeout value must be {timeoutInSeconds} seconds or higher.',
-            values: { timeoutInSeconds: QUERY_TIMEOUT.DEFAULT },
-          });
-        }
-
-        if (currentValue > QUERY_TIMEOUT.MAX) {
-          return i18n.translate('xpack.osquery.pack.queryFlyoutForm.timeoutFieldMaxNumberError', {
-            defaultMessage: 'The timeout value must be {timeoutInSeconds} seconds or or lower. ',
-            values: { timeoutInSeconds: QUERY_TIMEOUT.MAX },
-          });
-        }
-      },
+      validate: validateTimeout,
     },
   });
   const handleChange = useCallback(

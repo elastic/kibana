@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/group4/_adhoc_data_views.ts
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const toasts = getService('toasts');
-  const esArchiver = getService('esArchiver');
   const filterBar = getService('filterBar');
   const fieldEditor = getService('fieldEditor');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -48,9 +49,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover.json'
       );
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
 
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await common.navigateToApp('discover');
@@ -58,7 +56,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
     });
 
     it('should navigate back correctly from to surrounding and single views', async () => {
@@ -292,6 +289,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.goBack();
       await header.waitUntilLoadingHasFinished();
 
+      await retry.waitFor('two toasts to appear', async () => {
+        return (await toasts.getCount()) >= 2;
+      });
       const [firstToast, secondToast] = await toasts.getAll();
 
       expect([await firstToast.getVisibleText(), await secondToast.getVisibleText()].sort()).to.eql(

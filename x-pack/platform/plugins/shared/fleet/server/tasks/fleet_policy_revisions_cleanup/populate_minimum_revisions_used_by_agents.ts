@@ -54,8 +54,19 @@ const queryMinimumRevisionsUsedByAgents = async (
       ignore_unavailable: true,
       size: 0,
       query: {
-        terms: {
-          policy_id: policyIds,
+        bool: {
+          filter: [
+            {
+              terms: {
+                policy_id: policyIds,
+              },
+            },
+            {
+              term: {
+                active: true,
+              },
+            },
+          ],
         },
       },
       aggs: {

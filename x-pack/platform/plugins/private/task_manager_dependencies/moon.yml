@@ -4,22 +4,22 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/task-manager-dependencies-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/task-manager-dependencies-plugin'
+  title: '@kbn/task-manager-dependencies-plugin'
   description: Moon project for @kbn/task-manager-dependencies-plugin
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/private/task_manager_dependencies
+  sourceRoot: x-pack/platform/plugins/private/task_manager_dependencies
 dependsOn:
   - '@kbn/core'
   - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/event-log-plugin'
   - '@kbn/security-plugin'
   - '@kbn/task-manager-plugin'
 tags:

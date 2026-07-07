@@ -118,6 +118,17 @@ describe('MaintenanceWindowClient - finish', () => {
         freq: Frequency.WEEKLY,
         count: 5,
       } as MaintenanceWindow['rRule'],
+      schedule: {
+        custom: {
+          start: '2023-03-26T00:00:00.000Z',
+          timezone: 'CET',
+          duration: '1h',
+          recurring: {
+            every: '1w',
+            occurrences: 5,
+          },
+        },
+      },
       events: modifiedEvents,
       expirationDate: moment(new Date(firstTimestamp)).tz('UTC').add(2, 'week').toISOString(),
     });

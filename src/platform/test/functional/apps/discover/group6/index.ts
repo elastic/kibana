@@ -16,20 +16,12 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   describe('discover/group6', function () {
     before(async function () {
       await browser.setWindowSize(1600, 1200);
-    });
-
-    after(async function unloadMakelogs() {
-      await esArchiver.unload(
+      await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
     });
 
     loadTestFile(require.resolve('./_sidebar'));
     loadTestFile(require.resolve('./_sidebar_field_stats'));
-    loadTestFile(require.resolve('./_time_field_column'));
-    loadTestFile(require.resolve('./_unsaved_changes_modal'));
-    loadTestFile(require.resolve('./_unsaved_changes_notification_indicator'));
-    loadTestFile(require.resolve('./_view_mode_toggle'));
-    loadTestFile(require.resolve('./_field_stats_table'));
   });
 }

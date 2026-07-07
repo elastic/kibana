@@ -138,6 +138,49 @@ describe('action params validation', () => {
         to: [],
         cc: [],
         bcc: [],
+        replyTo: [],
+        message: [],
+        subject: [],
+      },
+    });
+  });
+
+  test('action params validation fails when all recipient fields are empty', async () => {
+    const actionParams = {
+      to: [],
+      cc: [],
+      bcc: [],
+      message: 'message',
+      subject: 'test',
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
+      errors: {
+        to: ['At least one recipient is required.'],
+        cc: ['At least one recipient is required.'],
+        bcc: ['At least one recipient is required.'],
+        replyTo: [],
+        message: [],
+        subject: [],
+      },
+    });
+  });
+
+  test('action params validation fails when all recipients are empty strings', async () => {
+    const actionParams = {
+      to: ['', ' '],
+      cc: [''],
+      bcc: [],
+      message: 'message',
+      subject: 'test',
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
+      errors: {
+        to: ['At least one recipient is required.'],
+        cc: ['At least one recipient is required.'],
+        bcc: ['At least one recipient is required.'],
+        replyTo: [],
         message: [],
         subject: [],
       },
@@ -157,7 +200,52 @@ describe('action params validation', () => {
         to: ['Email address invalid.com is not valid.'],
         cc: ['Email address bob@notallowed.com is not allowed.'],
         bcc: ['Email address another-invalid.com is not valid.'],
+        replyTo: [],
         message: ['Message is required.'],
+        subject: [],
+      },
+    });
+  });
+
+  test('action params validation succeeds when replyTo is provided and valid', async () => {
+    const actionParams = {
+      to: ['bob@example.com'],
+      cc: ['cc@example.com'],
+      bcc: [],
+      replyTo: ['reply@example.com'],
+      message: 'message',
+      subject: 'test',
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
+      errors: {
+        to: [],
+        cc: [],
+        bcc: [],
+        replyTo: [],
+        message: [],
+        subject: [],
+      },
+    });
+  });
+
+  test('action params validation fails when replyTo is invalid', async () => {
+    const actionParams = {
+      to: ['bob@example.com'],
+      cc: ['cc@example.com'],
+      bcc: [],
+      replyTo: ['invalidEmail'],
+      message: 'message',
+      subject: 'test',
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
+      errors: {
+        to: [],
+        cc: [],
+        bcc: [],
+        replyTo: ['Email address invalidEmail is not valid.'],
+        message: [],
         subject: [],
       },
     });

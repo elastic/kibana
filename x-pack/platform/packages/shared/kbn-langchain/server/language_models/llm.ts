@@ -12,6 +12,8 @@ import { get } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
+import type { InferenceClient } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
 import { DEFAULT_TIMEOUT, getDefaultArguments } from './constants';
 
 import { getMessageContentAndRole } from './helpers';
@@ -22,6 +24,8 @@ const LLM_TYPE = 'ActionsClientLlm';
 interface ActionsClientLlmParams {
   actionsClient: PublicMethodsOf<ActionsClient>;
   connectorId: string;
+  inferenceClient?: InferenceClient;
+  isInferenceEndpoint?: boolean;
   llmType?: string;
   logger: Logger;
   model?: string;
@@ -35,6 +39,8 @@ interface ActionsClientLlmParams {
 export class ActionsClientLlm extends LLM {
   #actionsClient: PublicMethodsOf<ActionsClient>;
   #connectorId: string;
+  #inferenceClient?: InferenceClient;
+  #isInferenceEndpoint: boolean;
   #logger: Logger;
   #traceId: string;
   #timeout?: number;
@@ -50,6 +56,8 @@ export class ActionsClientLlm extends LLM {
   constructor({
     actionsClient,
     connectorId,
+    inferenceClient,
+    isInferenceEndpoint = false,
     traceId = uuidv4(),
     llmType,
     logger,
@@ -65,6 +73,8 @@ export class ActionsClientLlm extends LLM {
 
     this.#actionsClient = actionsClient;
     this.#connectorId = connectorId;
+    this.#inferenceClient = inferenceClient;
+    this.#isInferenceEndpoint = isInferenceEndpoint;
     this.#traceId = traceId;
     this.llmType = llmType ?? LLM_TYPE;
     this.#logger = logger;
@@ -94,6 +104,24 @@ export class ActionsClientLlm extends LLM {
           assistantMessage
         )} `
     );
+
+    if (this.#isInferenceEndpoint) {
+      if (!this.#inferenceClient) {
+        throw new Error(
+          `${LLM_TYPE}: inferenceClient is required when isInferenceEndpoint is true`
+        );
+      }
+
+      const result = await this.#inferenceClient.chatComplete({
+        connectorId: this.#connectorId,
+        messages: [{ role: MessageRole.User, content: prompt }],
+        temperature: this.temperature,
+        modelName: this.model,
+        timeout: this.#timeout,
+      });
+
+      return result.content;
+    }
 
     // create a new connector request body with the assistant message:
     const requestBody = {

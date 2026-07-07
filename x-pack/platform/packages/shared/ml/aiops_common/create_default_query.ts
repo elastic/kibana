@@ -23,26 +23,27 @@ export function createDefaultQuery(
     query.bool = Object.create(null) as QueryDslBoolQuery;
   }
 
-  if (query.bool.must === undefined) {
-    query.bool.must = [];
+  const bool = query.bool;
+  if (bool.must === undefined) {
+    bool.must = [];
     if (query.match_all !== undefined) {
-      query.bool.must.push({ match_all: query.match_all });
+      bool.must.push({ match_all: query.match_all });
       delete query.match_all;
     }
     if (query.query_string !== undefined) {
-      query.bool.must.push({ query_string: query.query_string });
+      bool.must.push({ query_string: query.query_string });
       delete query.query_string;
     }
   }
   if (query.multi_match !== undefined) {
-    query.bool.should = {
+    bool.should = {
       multi_match: query.multi_match,
     };
     delete query.multi_match;
   }
 
   if (timeRange !== undefined) {
-    (query.bool.must as QueryDslQueryContainer[]).push({
+    (bool.must as QueryDslQueryContainer[]).push({
       range: {
         [timeField]: {
           gte: timeRange.from,

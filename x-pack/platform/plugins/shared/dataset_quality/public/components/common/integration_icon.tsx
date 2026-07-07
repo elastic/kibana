@@ -7,6 +7,7 @@
 
 import { EuiIcon } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { NONE } from '../../../common/constants';
 import type { Integration } from '../../../common/data_streams_stats/integration';
@@ -26,6 +27,12 @@ export const IntegrationIcon = ({ integration }: IntegrationIconProps) => {
       tryApi
     />
   ) : (
-    <EuiIcon type={loggingIcon} size="m" />
+    <EuiIcon
+      type={loggingIcon}
+      size="m"
+      aria-label={i18n.translate('xpack.datasetQuality.weightedIcon.loggingAriaLabel', {
+        defaultMessage: 'Logging',
+      })}
+    />
   );
 };

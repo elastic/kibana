@@ -8,7 +8,11 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolType } from '@kbn/agent-builder-common';
 import { createToolNotFoundError, createBadRequestError } from '@kbn/agent-builder-common';
-import type { ToolProviderFn, ReadonlyToolProvider } from '../tool_provider';
+import type {
+  ToolProviderFn,
+  ReadonlyToolProvider,
+  ToolProviderListFilters,
+} from '../tool_provider';
 import type { BuiltinToolRegistry } from './builtin_registry';
 import type {
   AnyToolTypeDefinition,
@@ -74,12 +78,26 @@ export const createBuiltinToolProvider = ({
       }
       return convertTool({ tool, definition, context, cache: availabilityCache });
     },
-    list() {
+    list(filters?: ToolProviderListFilters) {
+      const typeFilter =
+        filters?.types && filters.types.length > 0 ? new Set(filters.types) : undefined;
+      const tagFilter =
+        filters?.tags && filters.tags.length > 0 ? new Set(filters.tags) : undefined;
+
       const tools = registry.list();
       return tools
         .filter((tool) => {
           // evict unknown tools - atm it's used for workflow tools if the plugin is disabled.
-          return definitionMap[tool.type];
+          if (!definitionMap[tool.type]) {
+            return false;
+          }
+          if (typeFilter && !typeFilter.has(tool.type)) {
+            return false;
+          }
+          if (tagFilter && !tool.tags.some((tag) => tagFilter.has(tag))) {
+            return false;
+          }
+          return true;
         })
         .map((tool) => {
           const definition = definitionMap[tool.type]!;

@@ -7,103 +7,124 @@
 
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
-import { createEsClientForTesting } from '@kbn/test';
-import { EvaluationScoreRepository } from '../../utils/score_repository';
+import { KbnClient } from '@kbn/kbn-client';
+import { computePairedTTestResults, pairScores } from '@kbn/evals-common';
+import { EvalsClient } from '../../utils/evals_client';
+import { getEvaluationsKbnClient } from '../../utils/evaluations_kbn_client';
 import { formatPairedTTestReport } from '../../utils/reporting/compare_report';
-import { computePairedTTestResults, pairScores } from '../../utils/statistical_analysis';
 
-const DEFAULT_EVALUATIONS_ES_URL = 'http://elastic:changeme@localhost:9220';
+const DEFAULT_EVALUATIONS_KBN_URL = 'http://elastic:changeme@localhost:5601';
 
 export const compareCmd: Command<void> = {
   name: 'compare',
   description: `
-  Compare two evaluation runs using paired t-tests.
+  Compare two evaluation experiments using paired t-tests.
 
-  NOTE: The two runs must use the same experiment orchestrator (e.g. Kibana or Phoenix), due to the different handling of the dataset/example IDs.
+  NOTE: The two experiments must use the same experiment orchestrator (e.g. Kibana or Phoenix), due to the different handling of the dataset/example IDs.
+  Scores are read from the evals plugin on the target Kibana.
+  Configure target/auth with EVALUATIONS_KBN_URL and EVALUATIONS_KBN_API_KEY.
 
   Example:
-    node scripts/evals compare <run-id-1> <run-id-2>
+    node scripts/evals compare <experiment-id-1> <experiment-id-2>
   `,
   run: async ({ log, flagsReader }) => {
-    const [firstRunId, secondRunId, ...extraArgs] = flagsReader.getPositionals();
+    const [firstExperimentId, secondExperimentId, ...extraArgs] = flagsReader.getPositionals();
 
-    if (!firstRunId || !secondRunId) {
+    if (!firstExperimentId || !secondExperimentId) {
       throw createFlagError(
-        'Two run IDs are required. Example: node scripts/evals compare <run-id-1> <run-id-2>'
+        'Two experiment IDs are required. Example: node scripts/evals compare <experiment-id-1> <experiment-id-2>. Configure target Kibana with EVALUATIONS_KBN_URL and EVALUATIONS_KBN_API_KEY.'
       );
     }
 
     if (extraArgs.length > 0) {
-      throw createFlagError('Unexpected extra arguments. Provide exactly two run IDs.');
+      throw createFlagError('Unexpected extra arguments. Provide exactly two experiment IDs.');
     }
 
-    const evaluationsEsUrl = process.env.EVALUATIONS_ES_URL ?? DEFAULT_EVALUATIONS_ES_URL;
-    if (!process.env.EVALUATIONS_ES_URL) {
-      log.warning(`EVALUATIONS_ES_URL not set; defaulting to ${DEFAULT_EVALUATIONS_ES_URL}.`);
+    const evaluationsKbnUrl = process.env.EVALUATIONS_KBN_URL;
+    if (!evaluationsKbnUrl) {
+      log.warning(`EVALUATIONS_KBN_URL not set; defaulting to ${DEFAULT_EVALUATIONS_KBN_URL}.`);
     }
 
-    const esClient = createEsClientForTesting({ esUrl: evaluationsEsUrl });
-    const scoreRepository = new EvaluationScoreRepository(esClient, log);
+    const defaultKbnClient = new KbnClient({ log, url: DEFAULT_EVALUATIONS_KBN_URL });
+    const kbnClient = getEvaluationsKbnClient({
+      kbnClient: defaultKbnClient,
+      log,
+      evaluationsKbnUrl,
+      evaluationsKbnApiKey: process.env.EVALUATIONS_KBN_API_KEY,
+    });
+    const evalsClient = new EvalsClient(kbnClient, log);
 
-    const [firstRunScores, secondRunScores] = await Promise.all([
-      scoreRepository.getScoresByRunId(firstRunId),
-      scoreRepository.getScoresByRunId(secondRunId),
+    try {
+      await evalsClient.assertPluginEnabled();
+    } catch (error) {
+      throw createFlagError(
+        [
+          error instanceof Error ? error.message : String(error),
+          'Set EVALUATIONS_KBN_URL to a Kibana instance with xpack.evals.enabled=true.',
+          'Set EVALUATIONS_KBN_API_KEY when authenticating to a non-local target.',
+        ].join('\n')
+      );
+    }
+
+    const [firstExperimentScores, secondExperimentScores] = await Promise.all([
+      evalsClient.getExperimentScores(firstExperimentId),
+      evalsClient.getExperimentScores(secondExperimentId),
     ]);
 
-    if (firstRunScores.length === 0) {
-      throw new Error(`No scores found for run ID: ${firstRunId}`);
+    if (firstExperimentScores.length === 0) {
+      throw new Error(`No scores found for experiment ID: ${firstExperimentId}`);
     }
 
-    if (secondRunScores.length === 0) {
-      throw new Error(`No scores found for run ID: ${secondRunId}`);
+    if (secondExperimentScores.length === 0) {
+      throw new Error(`No scores found for experiment ID: ${secondExperimentId}`);
     }
 
-    const firstRunDatasets = new Map(
-      firstRunScores.map((score) => [score.example.dataset.id, score.example.dataset.name])
+    const firstExperimentDatasets = new Map(
+      firstExperimentScores.map((score) => [score.example.dataset.id, score.example.dataset.name])
     );
-    const secondRunDatasets = new Map(
-      secondRunScores.map((score) => [score.example.dataset.id, score.example.dataset.name])
+    const secondExperimentDatasets = new Map(
+      secondExperimentScores.map((score) => [score.example.dataset.id, score.example.dataset.name])
     );
-    const overlappingDatasetIds = [...firstRunDatasets.keys()].filter((id) =>
-      secondRunDatasets.has(id)
+    const overlappingDatasetIds = [...firstExperimentDatasets.keys()].filter((id) =>
+      secondExperimentDatasets.has(id)
     );
 
     if (overlappingDatasetIds.length === 0) {
-      throw new Error('No overlapping datasets found between the two runs.');
+      throw new Error('No overlapping datasets found between the two experiments.');
     }
 
     log.info(`Found ${overlappingDatasetIds.length} overlapping dataset(s).`);
 
     const overlappingDatasetSet = new Set(overlappingDatasetIds);
-    const filteredFirstRunScores = firstRunScores.filter((score) =>
+    const filteredFirstScores = firstExperimentScores.filter((score) =>
       overlappingDatasetSet.has(score.example.dataset.id)
     );
-    const filteredSecondRunScores = secondRunScores.filter((score) =>
+    const filteredSecondScores = secondExperimentScores.filter((score) =>
       overlappingDatasetSet.has(score.example.dataset.id)
     );
 
     const { pairs, skippedMissingPairs, skippedNullScores } = pairScores(
-      filteredFirstRunScores,
-      filteredSecondRunScores
+      filteredFirstScores,
+      filteredSecondScores
     );
 
     if (pairs.length === 0) {
-      throw new Error('No paired scores found between the two runs.');
+      throw new Error('No paired scores found between the two experiments.');
     }
 
     log.info(
       `Paired ${pairs.length} scores (skipped ${skippedMissingPairs} missing pairs, ${skippedNullScores} null scores).`
     );
 
-    const results = computePairedTTestResults(filteredFirstRunScores, filteredSecondRunScores);
+    const results = computePairedTTestResults(pairs);
     if (results.length === 0) {
       log.warning('No t-test results returned.');
       return;
     }
 
     const report = formatPairedTTestReport({
-      runIdA: firstRunId,
-      runIdB: secondRunId,
+      experimentIdA: firstExperimentId,
+      experimentIdB: secondExperimentId,
       results,
     });
 

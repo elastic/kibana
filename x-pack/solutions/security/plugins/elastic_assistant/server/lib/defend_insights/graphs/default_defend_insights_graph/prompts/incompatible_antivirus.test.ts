@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import { promptDictionary, getPromptsByGroupId } from '../../../../prompt';
 import { getIncompatibleAntivirusPrompt } from './incompatible_antivirus';
 import { promptGroupId } from '../../../../prompt/local_prompt_object';
@@ -23,7 +21,6 @@ jest.mock('../../../../prompt', () => {
 const mockGetPromptsByGroupId = getPromptsByGroupId as jest.Mock;
 
 describe('getIncompatibleAntivirusPrompt', () => {
-  const actionsClient = {} as jest.Mocked<PublicMethodsOf<ActionsClient>>;
   const savedObjectsClient = {} as jest.Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
@@ -66,7 +63,6 @@ describe('getIncompatibleAntivirusPrompt', () => {
 
   it('should return all prompts', async () => {
     const result = await getIncompatibleAntivirusPrompt({
-      actionsClient,
       connectorId: 'test-connector-id',
       savedObjectsClient,
       model: '4',
@@ -108,7 +104,6 @@ describe('getIncompatibleAntivirusPrompt', () => {
     mockGetPromptsByGroupId.mockResolvedValue([]);
 
     const result = await getIncompatibleAntivirusPrompt({
-      actionsClient,
       connectorId: 'test-connector-id',
       savedObjectsClient,
     });

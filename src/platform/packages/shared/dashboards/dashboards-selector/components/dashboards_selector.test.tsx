@@ -154,7 +154,7 @@ describe('DashboardsSelector', () => {
       expect(mockSearchExecute).toHaveBeenCalledWith(
         expect.objectContaining({
           search: {
-            search: MOCK_FIRST_DASHBOARD_TITLE,
+            query: MOCK_FIRST_DASHBOARD_TITLE,
             per_page: 100,
           },
           trigger: { id: 'searchDashboards' },
@@ -181,7 +181,7 @@ describe('DashboardsSelector', () => {
       expect(mockSearchExecute).toHaveBeenCalledWith(
         expect.objectContaining({
           search: {
-            search: '',
+            query: '',
             per_page: 100,
           },
         })
@@ -220,7 +220,7 @@ describe('DashboardsSelector', () => {
       expect(mockSearchExecute).toHaveBeenLastCalledWith(
         expect.objectContaining({
           search: {
-            search: '',
+            query: '',
             per_page: 100,
           },
         })

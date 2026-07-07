@@ -16,17 +16,19 @@ import type {
   OptionsListSelection,
   OptionsListSortingType,
 } from '@kbn/controls-schemas';
+import { ControlValuesSource, DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 
-import { isValidSearch } from '../../../../common/options_list/is_valid_search';
-import type { OptionsListSuccessResponse } from '../../../../common/options_list/types';
+import type {
+  OptionsListFailureResponse,
+  OptionsListSuccessResponse,
+} from '../../../../common/options_list/types';
+import { buildOptionsListFetchBody } from './build_options_list_fetch_body';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
-import type { OptionsListComponentApi, OptionsListControlApi } from './types';
-import { getFetchContextFilters, getFetchContextTimeRange } from '../utils';
+import type { DSLOptionsListComponentApi, OptionsListControlApi } from './types';
 import type { DataControlStateManager } from '../data_control_manager';
 
 export function fetchAndValidate$({
   api,
-  allowExpensiveQueries$,
   requestSize$,
   runPastTimeout$,
   selectedOptions$,
@@ -35,11 +37,10 @@ export function fetchAndValidate$({
 }: {
   api: DataControlStateManager['api'] &
     Pick<OptionsListControlApi, 'parentApi' | 'uuid'> &
-    Pick<OptionsListComponentApi, 'loadMoreSubject'> & {
+    Pick<DSLOptionsListComponentApi, 'loadMoreSubject'> & {
       loadingSuggestions$: BehaviorSubject<boolean>;
       debouncedSearchString: Observable<string>;
     };
-  allowExpensiveQueries$: PublishingSubject<boolean>;
   requestSize$: PublishingSubject<number>;
   runPastTimeout$: PublishingSubject<boolean | undefined>;
   selectedOptions$: PublishingSubject<OptionsListSelection[] | undefined>;
@@ -52,13 +53,14 @@ export function fetchAndValidate$({
   return combineLatest({
     dataViews: api.dataViews$,
     field: api.field$,
+    esqlQuery: api.esqlQuery$,
+    valuesSource: api.valuesSource$,
     fetchContext: fetch$(api),
     useGlobalFilters: api.useGlobalFilters$,
     searchString: api.debouncedSearchString,
     ignoreValidations: api.ignoreValidations$,
     sort: sort$,
     searchTechnique: searchTechnique$,
-    allowExpensiveQueries: allowExpensiveQueries$,
     // cannot use requestSize directly, because we need to be able to reset the size to the default without refetching
     loadMore: api.loadMoreSubject.pipe(
       startWith(null), // start with null so that `combineLatest` subscription fires
@@ -76,7 +78,6 @@ export function fetchAndValidate$({
     switchMap(
       async ([
         {
-          allowExpensiveQueries,
           dataViews,
           field,
           fetchContext,
@@ -85,44 +86,56 @@ export function fetchAndValidate$({
           searchString,
           sort,
           searchTechnique,
+          esqlQuery,
+          valuesSource,
         },
         requestSize,
         runPastTimeout,
         selectedOptions,
       ]) => {
-        const dataView = dataViews?.[0];
-        if (
-          !dataView ||
-          !field ||
-          !isValidSearch({ searchString, fieldType: field.type, searchTechnique })
-        ) {
-          return { suggestions: [] };
+        let built: ReturnType<typeof buildOptionsListFetchBody>;
+        try {
+          built = buildOptionsListFetchBody({
+            valuesSource: valuesSource ?? ControlValuesSource.FIELD,
+            esqlQuery,
+            dataViews,
+            field,
+            fetchContext,
+            useGlobalFilters,
+            searchString,
+            sort: sort ?? DEFAULT_DSL_OPTIONS_LIST_STATE.sort,
+            searchTechnique: searchTechnique ?? DEFAULT_DSL_OPTIONS_LIST_STATE.search_technique,
+            requestSize,
+            runPastTimeout: runPastTimeout ?? false,
+            selectedOptions: selectedOptions ?? [],
+            ignoreValidations,
+          });
+        } catch (error) {
+          return { error };
+        }
+
+        if (built.outcome === 'empty') {
+          const emptyResponse = built.response;
+          if ('totalCardinality' in emptyResponse) {
+            return emptyResponse;
+          }
+          return { suggestions: emptyResponse.suggestions, totalCardinality: 0 };
+        }
+
+        if (built.showLoadingSuggestions) {
+          api.loadingSuggestions$.next(true);
         }
 
         /** Fetch the suggestions list + perform validation */
-        api.loadingSuggestions$.next(true);
-
-        const request = {
-          sort,
-          dataView,
-          searchString,
-          runPastTimeout,
-          searchTechnique,
-          selectedOptions,
-          field: field.toSpec(),
-          size: requestSize,
-
-          ignoreValidations,
-          ...fetchContext,
-          timeRange: getFetchContextTimeRange(fetchContext, useGlobalFilters),
-          filters: getFetchContextFilters(fetchContext, useGlobalFilters),
-          allowExpensiveQueries,
-        };
-
         const newAbortController = new AbortController();
         abortController = newAbortController;
         try {
-          return await requestCache.runFetchRequest(request, newAbortController.signal);
+          const result = await requestCache.runFetchRequest(built.body, newAbortController.signal);
+          if ('error' in result) {
+            const err = (result as OptionsListFailureResponse).error;
+            return { error: err === 'aborted' ? new Error('Request aborted') : err };
+          }
+          return result;
         } catch (error) {
           return { error };
         }

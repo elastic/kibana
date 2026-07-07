@@ -17,7 +17,6 @@ import {
   savedObjectsClientMock,
   savedObjectsServiceMock,
   securityServiceMock,
-  coreMock,
 } from '@kbn/core/server/mocks';
 import type {
   IRouter,
@@ -50,7 +49,8 @@ import type { PluginStartContract as ActionPluginStartContract } from '@kbn/acti
 import type { Mutable } from 'utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { ScriptsLibraryMock } from '../services/scripts_library/mocks';
 import { referenceDataMocks } from '../lib/reference_data/mocks';
 import { createTelemetryConfigProviderMock } from '../../../common/telemetry_config/mocks';
@@ -111,9 +111,14 @@ export const createMockEndpointAppContextService = (
     fleetDependencies: fleetStartServices,
   }).service.asInternalUser();
   const endpointMetadataService = new EndpointMetadataService(
-    esClient,
-    savedObjectsClientMock.create(),
-    fleetServices
+    {
+      getInternalEsClient: () => esClient,
+      getInternalFleetServices: () => fleetServices,
+      savedObjects: { createInternalScopedSoClient: () => savedObjectsClientMock.create() },
+      createLogger: () => loggingSystemMock.create().get(),
+      isCcsEnabled: jest.fn().mockResolvedValue(false),
+    } as unknown as EndpointAppContextService,
+    DEFAULT_SPACE_ID
   );
   const casesClientMock = createCasesClientMock();
   const fleetFromHostFilesClientMock = createFleetFromHostFilesClientMock();
@@ -146,24 +151,42 @@ export const createMockEndpointAppContextService = (
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     getExceptionListsClient: jest.fn().mockReturnValue(exceptionListsClient!),
     getMessageSigningService: jest.fn().mockReturnValue(messageSigningService),
-    getFleetActionsClient: jest.fn(async (_) => fleetActionsClientMock),
+    getFleetActionsClient: jest.fn(async () => fleetActionsClientMock),
     getTelemetryService: jest.fn().mockReturnValue(telemetryServiceMock),
-    getInternalResponseActionsClient: jest.fn(() => {
+    getInternalResponseActionsClient: jest.fn((_) => {
       return responseActionsClientMock.create();
     }),
     savedObjects: createSavedObjectsClientFactoryMock({ savedObjectsServiceStart }).service,
     isServerless: jest.fn().mockReturnValue(false),
+    isCcsEnabled: jest.fn().mockResolvedValue(false),
     getInternalEsClient: jest.fn().mockReturnValue(esClient),
-    getActiveSpace: jest.fn(async () => ({
+    getActiveSpace: jest.fn(async (_) => ({
       id: DEFAULT_SPACE_ID,
       name: 'default',
       disabledFeatures: [],
     })),
-    getSpaceId: jest.fn().mockReturnValue('default'),
+    getActiveSpaceId: jest.fn().mockReturnValue(DEFAULT_SPACE_ID),
+    getAccessibleSpaces: jest.fn(async (_) => [
+      {
+        id: DEFAULT_SPACE_ID,
+        name: 'default',
+        disabledFeatures: [],
+      },
+    ]),
     getReferenceDataClient: jest.fn().mockReturnValue(referenceDataMocks.createClient()),
     getServerConfigValue: jest.fn(),
     getScriptsLibraryClient: jest.fn().mockReturnValue(scriptsClient),
-  } as unknown as jest.Mocked<EndpointAppContextService>;
+    getAgentBuilder: jest.fn(),
+    getScopedEndpointArtifactClient: jest.fn(),
+    isEndpointExceptionsPerPolicyEnabled: jest.fn().mockResolvedValue(true),
+  } as Omit<
+    jest.Mocked<EndpointAppContextService>,
+    | 'config'
+    | 'security'
+    | 'fleetStartServices'
+    | 'savedObjectsServiceStart'
+    | 'exceptionListsClient'
+  > as jest.Mocked<EndpointAppContextService>;
 };
 
 /**
@@ -176,7 +199,6 @@ export const createMockEndpointAppContextServiceSetupContract =
       cloud: cloudMock.createSetup(),
       loggerFactory: loggingSystemMock.create(),
       telemetry: analyticsServiceMock.createAnalyticsServiceSetup(),
-      httpServiceSetup: coreMock.createSetup().http,
     };
   };
 
@@ -272,6 +294,8 @@ export const createMockEndpointAppContextServiceStartContract =
       } as unknown as jest.Mocked<ActionPluginStartContract>,
       telemetryConfigProvider: createTelemetryConfigProviderMock(),
       spacesService,
+      agentBuilder: agentBuilderMocks.createStart(),
+      getExceptionListClient: jest.fn().mockReturnValue(listMock.getExceptionListClient()),
     };
 
     return startContract;

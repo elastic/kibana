@@ -77,5 +77,21 @@ describe('Actions Plugin', () => {
       const pluginSetup = plugin.setup();
       expect(pluginSetup.isWebhookSslWithPfxEnabled).toBe(false);
     });
+
+    it('returns isEarsEnabled as false when neither config key is set', async () => {
+      const context = coreMock.createPluginInitializerContext({});
+      const plugin = new Plugin(context);
+      const pluginSetup = plugin.setup();
+      expect(pluginSetup.isEarsEnabled).toBe(false);
+    });
+
+    it('returns isEarsEnabled as true when auth.ears.enabled is set', async () => {
+      const context = coreMock.createPluginInitializerContext({
+        auth: { ears: { enabled: true } },
+      });
+      const plugin = new Plugin(context);
+      const pluginSetup = plugin.setup();
+      expect(pluginSetup.isEarsEnabled).toBe(true);
+    });
   });
 });

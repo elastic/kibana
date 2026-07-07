@@ -78,7 +78,7 @@ export const TreeNav = () => {
   return (
     <>
       {isCollapsed && (
-        <EuiToolTip content={TREE_NAVIGATION_EXPAND}>
+        <EuiToolTip content={TREE_NAVIGATION_EXPAND} disableScreenReaderOutput>
           <EuiButtonIcon
             onClick={handleToggleCollapse}
             iconType="menuRight"
@@ -102,7 +102,7 @@ export const TreeNav = () => {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={TREE_NAVIGATION_COLLAPSE}>
+            <EuiToolTip content={TREE_NAVIGATION_COLLAPSE} disableScreenReaderOutput>
               <EuiButtonIcon
                 onClick={handleToggleCollapse}
                 iconType="menuLeft"

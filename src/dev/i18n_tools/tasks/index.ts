@@ -16,3 +16,4 @@ export { writeExtractedMessagesToFile } from './write_extraced_messages_to_file'
 export { extractDefaultMessagesTask } from './extract_default_translations';
 export { validateTranslationFiles } from './validate_translation_files';
 export { integrateTranslations } from './integrate_translations';
+export { reportTranslationCoverage } from './report_translation_coverage';

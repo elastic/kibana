@@ -19,6 +19,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   const roleScopedSupertest = getService('roleScopedSupertest');
 
+  // semconv coverage gap: `infra.semconvHost(...)` in @kbn/synthtrace-client emits
+  // cpu/memory/filesystem/network docs but does not yet emit Otel process docs
+  // (process.command_line, metrics.process.cpu.utilization, etc.). The route
+  // accepts `schema: 'semconv'`, but adding a meaningful test requires either
+  // extending the synthtrace client or shipping an Otel process esArchiver
+  // fixture. Tracked as part of issue #264011 follow-up; ECS coverage below
+  // remains the canonical assertion until then.
   describe('API /api/metrics/process_list', () => {
     let supertestWithAdminScope: SupertestWithRoleScopeType;
 

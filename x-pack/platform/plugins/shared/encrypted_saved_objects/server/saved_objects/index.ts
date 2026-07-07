@@ -31,7 +31,7 @@ import { getDescriptorNamespace, normalizeNamespace } from './get_descriptor_nam
 import { SavedObjectsEncryptionExtension } from './saved_objects_encryption_extension';
 import type { EncryptedSavedObjectsService } from '../crypto';
 
-export { normalizeNamespace };
+export { normalizeNamespace, SavedObjectsEncryptionExtension };
 export type { EncryptedSavedObjectsClient, EncryptedSavedObjectsClientOptions };
 
 interface SetupSavedObjectsParams {

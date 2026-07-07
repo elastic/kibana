@@ -77,6 +77,10 @@ export const DELETE_LABEL = i18n.translate('xpack.synthetics.management.deleteLa
   defaultMessage: 'Delete',
 });
 
+export const RESET_LABEL = i18n.translate('xpack.synthetics.management.resetLabel', {
+  defaultMessage: 'Reset',
+});
+
 export const DELETE_DESCRIPTION_LABEL = i18n.translate(
   'xpack.synthetics.management.confirmDescriptionLabel',
   {

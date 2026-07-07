@@ -78,22 +78,7 @@ describe('SourcererButton', () => {
     expect(getByTestId('resolver:graph-controls:sourcerer-button')).toBeInTheDocument();
   });
 
-  it('should render sourcerer when feature flag is disabled', async () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
-    const { getByTestId } = render(
-      <TestProviders store={store}>
-        <SourcererButton
-          id="test"
-          closePopover={() => {}}
-          setActivePopover={() => {}}
-          isOpen={true}
-        />
-      </TestProviders>
-    );
-    expect(getByTestId('analyzer-sourcerer')).toBeInTheDocument();
-  });
-
-  it('should render data view picker when feature flag is enabled', async () => {
+  it('should render data view picker', async () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     const { getByTestId } = render(
       <TestProviders store={store}>

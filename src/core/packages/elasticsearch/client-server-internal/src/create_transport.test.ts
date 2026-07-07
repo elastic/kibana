@@ -11,8 +11,10 @@ import { transportConstructorMock, transportRequestMock } from './create_transpo
 
 import { errors } from '@elastic/elasticsearch';
 import type { BaseConnectionPool } from '@elastic/elasticsearch';
+import type { Logger } from '@kbn/logging';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { InternalUnauthorizedErrorHandler } from './retry_unauthorized';
-import type { ErrorHandlerAccessor } from './create_transport';
+import type { ErrorHandlerAccessor, OnRequestHandler } from './create_transport';
 import { createTransport } from './create_transport';
 
 const createConnectionPool = () => {
@@ -34,10 +36,12 @@ const createUnauthorizedError = () => {
 describe('createTransport', () => {
   let getUnauthorizedErrorHandler: jest.MockedFunction<ErrorHandlerAccessor>;
   let getExecutionContext: jest.MockedFunction<() => string | undefined>;
+  let mockLogger: Logger;
 
   beforeEach(() => {
     getUnauthorizedErrorHandler = jest.fn();
     getExecutionContext = jest.fn();
+    mockLogger = loggingSystemMock.createLogger();
   });
 
   afterEach(() => {
@@ -49,6 +53,8 @@ describe('createTransport', () => {
     return createTransport({
       getUnauthorizedErrorHandler,
       getExecutionContext,
+      onRequest: jest.fn(),
+      logger: mockLogger,
     });
   };
 
@@ -537,6 +543,140 @@ describe('createTransport', () => {
         requestParams,
         expect.objectContaining({
           headers: { authorization: 'retry', foo: 'bar' },
+        })
+      );
+    });
+  });
+
+  describe('`scoped` parameter and `onRequest` hook', () => {
+    it('calls onRequest with scoped: false when scoped is not provided', async () => {
+      const onRequest: jest.MockedFunction<OnRequestHandler> = jest.fn();
+
+      const transportClass = createTransport({
+        getUnauthorizedErrorHandler,
+        getExecutionContext,
+        onRequest,
+        logger: mockLogger,
+      });
+      const transport = new transportClass(baseConstructorParams);
+      const requestParams = { method: 'GET', path: '/' };
+
+      await transport.request(requestParams, {});
+
+      expect(onRequest).toHaveBeenCalledTimes(1);
+      expect(onRequest).toHaveBeenCalledWith(
+        { scoped: false },
+        requestParams,
+        expect.any(Object),
+        mockLogger
+      );
+    });
+
+    it('calls onRequest with scoped: true when scoped is true', async () => {
+      const onRequest: jest.MockedFunction<OnRequestHandler> = jest.fn();
+
+      const transportClass = createTransport({
+        scoped: true,
+        getUnauthorizedErrorHandler,
+        getExecutionContext,
+        onRequest,
+        logger: mockLogger,
+      });
+      const transport = new transportClass(baseConstructorParams);
+      const requestParams = { method: 'GET', path: '/' };
+
+      await transport.request(requestParams, {});
+
+      expect(onRequest).toHaveBeenCalledTimes(1);
+      expect(onRequest).toHaveBeenCalledWith(
+        { scoped: true },
+        requestParams,
+        expect.any(Object),
+        mockLogger
+      );
+    });
+
+    it('calls onRequest with scoped: false when scoped is explicitly false', async () => {
+      const onRequest: jest.MockedFunction<OnRequestHandler> = jest.fn();
+
+      const transportClass = createTransport({
+        scoped: false,
+        getUnauthorizedErrorHandler,
+        getExecutionContext,
+        onRequest,
+        logger: mockLogger,
+      });
+      const transport = new transportClass(baseConstructorParams);
+      const requestParams = { method: 'GET', path: '/' };
+
+      await transport.request(requestParams, {});
+
+      expect(onRequest).toHaveBeenCalledTimes(1);
+      expect(onRequest).toHaveBeenCalledWith(
+        { scoped: false },
+        requestParams,
+        expect.any(Object),
+        mockLogger
+      );
+    });
+
+    it('passes the correct options to onRequest', async () => {
+      const onRequest: jest.MockedFunction<OnRequestHandler> = jest.fn();
+
+      const transportClass = createTransport({
+        scoped: true,
+        getUnauthorizedErrorHandler,
+        getExecutionContext,
+        onRequest,
+        logger: mockLogger,
+      });
+      const headers = { authorization: 'test-auth' };
+      const transport = new transportClass({ ...baseConstructorParams, headers });
+      const requestParams = { method: 'GET', path: '/test' };
+      const requestOptions = { opaqueId: 'test-opaque-id' };
+
+      await transport.request(requestParams, requestOptions);
+
+      expect(onRequest).toHaveBeenCalledTimes(1);
+      expect(onRequest).toHaveBeenCalledWith(
+        { scoped: true },
+        requestParams,
+        expect.objectContaining({
+          opaqueId: 'test-opaque-id',
+          headers: { authorization: 'test-auth' },
+        }),
+        mockLogger
+      );
+    });
+
+    it('allows onRequest to mutate options (e.g., add querystring params)', async () => {
+      const onRequest: jest.MockedFunction<OnRequestHandler> = jest.fn(
+        (ctx, params, options, logger) => {
+          options!.querystring = {
+            ...options!.querystring,
+            some_field: 'some_value',
+          };
+        }
+      );
+
+      const transportClass = createTransport({
+        scoped: true,
+        getUnauthorizedErrorHandler,
+        getExecutionContext,
+        onRequest,
+        logger: mockLogger,
+      });
+      const transport = new transportClass(baseConstructorParams);
+      const requestParams = { method: 'GET', path: '/_search' };
+
+      await transport.request(requestParams, {});
+
+      expect(onRequest).toHaveBeenCalledTimes(1);
+      expect(transportRequestMock).toHaveBeenCalledTimes(1);
+      expect(transportRequestMock).toHaveBeenCalledWith(
+        requestParams,
+        expect.objectContaining({
+          querystring: { some_field: 'some_value' },
         })
       );
     });

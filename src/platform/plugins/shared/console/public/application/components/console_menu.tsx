@@ -11,7 +11,13 @@ import React, { Component } from 'react';
 
 import type { NotificationsSetup } from '@kbn/core/public';
 
-import { EuiContextMenuPanel, EuiContextMenuItem, EuiPopover, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -109,15 +115,22 @@ export class ConsoleMenu extends Component<Props, State> {
 
   render() {
     const button = (
-      <EuiButtonIcon
-        onClick={this.onButtonClick}
-        data-test-subj="toggleConsoleMenu"
-        aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
+      <EuiToolTip
+        content={i18n.translate('console.requestOptionsButtonAriaLabel', {
           defaultMessage: 'Request options',
         })}
-        iconType="boxesVertical"
-        iconSize="s"
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          onClick={this.onButtonClick}
+          data-test-subj="toggleConsoleMenu"
+          aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
+            defaultMessage: 'Request options',
+          })}
+          iconType="boxesVertical"
+          iconSize="s"
+        />
+      </EuiToolTip>
     );
 
     const items = [
@@ -130,7 +143,7 @@ export class ConsoleMenu extends Component<Props, State> {
           this.closePopover();
           this.copyAsCurl();
         }}
-        icon="copyClipboard"
+        icon="copy"
       >
         <FormattedMessage
           id="console.requestOptions.copyAsUrlButtonLabel"
@@ -141,7 +154,7 @@ export class ConsoleMenu extends Component<Props, State> {
         data-test-subj="consoleMenuAutoIndent"
         key="Auto indent"
         onClick={this.autoIndent}
-        icon="arrowEnd"
+        icon="chevronLimitRight"
       >
         <FormattedMessage
           id="console.requestOptions.autoIndentButtonLabel"
@@ -172,6 +185,9 @@ export class ConsoleMenu extends Component<Props, State> {
           closePopover={this.closePopover}
           panelPaddingSize="none"
           anchorPosition="downLeft"
+          aria-label={i18n.translate('console.consoleMenu.popoverAriaLabel', {
+            defaultMessage: 'Request options',
+          })}
         >
           <EuiContextMenuPanel items={items} data-test-subj="consoleMenu" />
         </EuiPopover>

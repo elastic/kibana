@@ -10,9 +10,8 @@
 import { createCellActionFactory } from '@kbn/cell-actions/actions';
 import { useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import type { AdditionalCellActionsParams } from '../types';
+import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
-  DISCOVER_CELL_ACTIONS_TRIGGER,
   type AdditionalCellAction,
   type AdditionalCellActionContext,
   type DiscoverCellAction,
@@ -35,19 +34,13 @@ export const useAdditionalCellActions = ({
   query,
   filters,
   timeRange,
-  extensionActions,
-}: Omit<AdditionalCellActionContext, 'field' | 'value'> & {
-  extensionActions?: AdditionalCellActionsParams['actions'];
-}) => {
+}: Omit<AdditionalCellActionContext, 'field' | 'value'>) => {
   const { uiActions } = useDiscoverServices();
   const [instanceId, setInstanceId] = useState<string | undefined>();
   const getAdditionalCellActionsAccessor = useProfileAccessor('getAdditionalCellActions');
   const additionalCellActions = useMemo(
-    () =>
-      getAdditionalCellActionsAccessor(() => [])({
-        actions: extensionActions ?? {},
-      }),
-    [extensionActions, getAdditionalCellActionsAccessor]
+    () => getAdditionalCellActionsAccessor(() => [])(),
+    [getAdditionalCellActionsAccessor]
   );
 
   useEffect(() => {
@@ -57,15 +50,15 @@ export const useAdditionalCellActions = ({
     );
 
     actions.forEach((action) => {
-      uiActions.registerAction(action);
-      uiActions.attachAction(DISCOVER_CELL_ACTIONS_TRIGGER.id, action.id);
+      uiActions.registerActionAsync(action.id, async () => action);
+      uiActions.attachAction(DISCOVER_CELL_ACTIONS_TRIGGER_ID, action.id);
     });
 
     setInstanceId(currentInstanceId);
 
     return () => {
       actions.forEach((action) => {
-        uiActions.detachAction(DISCOVER_CELL_ACTIONS_TRIGGER.id, action.id);
+        uiActions.detachAction(DISCOVER_CELL_ACTIONS_TRIGGER_ID, action.id);
         uiActions.unregisterAction(action.id);
       });
 

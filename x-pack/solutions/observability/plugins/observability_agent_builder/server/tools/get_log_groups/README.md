@@ -86,4 +86,4 @@ POST kbn://api/agent_builder/tools/_execute
 1. **Start broad**: Call `get_log_groups()` to see all logs and exceptions
 2. **Identify hotspot**: Find the service or pattern with most errors
 3. **Drill down**: Call `get_log_groups(kqlFilter='service.name: "..."')` to focus on a specific service
-4. **Investigate**: Use `get_correlated_logs` with a trace.id from the sample to understand the sequence of events
+4. **Investigate**: Use `get_traces` with a trace.id from the sample to understand the sequence of events

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiPopover,
   EuiBadgeGroup,
@@ -24,10 +24,6 @@ export interface PopoverItemsProps<T> {
   popoverTitle?: string;
   numberOfItemsToDisplay?: number;
   dataTestPrefix?: string;
-}
-
-interface OverflowListProps<T> {
-  readonly items: T[];
 }
 
 const PopoverItemsWrapper = styled(EuiFlexGroup)`
@@ -60,43 +56,60 @@ const PopoverItemsComponent = <T extends unknown>({
   numberOfItemsToDisplay = 0,
   dataTestPrefix = 'items',
 }: PopoverItemsProps<T>) => {
-  const [isExceptionOverflowPopoverOpen, setIsExceptionOverflowPopoverOpen] = useState(false);
+  const [isOverflowPopoverOpen, setIsOverflowPopoverOpen] = useState(false);
+  const { visibleItems, overflowItems, hasOverflowItems, shouldShowVisibleItems } = useMemo(() => {
+    return {
+      visibleItems: items.slice(0, numberOfItemsToDisplay),
+      overflowItems: items.slice(numberOfItemsToDisplay),
+      hasOverflowItems: items.length > numberOfItemsToDisplay,
+      shouldShowVisibleItems: numberOfItemsToDisplay !== 0,
+    };
+  }, [items, numberOfItemsToDisplay]);
 
-  const OverflowList = ({ items: itemsToRender }: OverflowListProps<T>) => (
-    <>{itemsToRender.map(renderItem)}</>
+  const onPopoverButtonClick = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
+      e.stopPropagation();
+      setIsOverflowPopoverOpen((isOpen) => !isOpen);
+    },
+    []
   );
 
-  if (items.length <= numberOfItemsToDisplay) {
+  const closePopover = useCallback(() => {
+    setIsOverflowPopoverOpen(false);
+  }, []);
+
+  if (!hasOverflowItems) {
     return (
       <PopoverItemsWrapper data-test-subj={dataTestPrefix} alignItems="center" gutterSize="s">
-        <OverflowList items={items} />
+        {items.map(renderItem)}
       </PopoverItemsWrapper>
     );
   }
 
   return (
     <PopoverItemsWrapper alignItems="center" gutterSize="s" data-test-subj={dataTestPrefix}>
-      {numberOfItemsToDisplay !== 0 && (
+      {shouldShowVisibleItems && (
         <EuiFlexItem grow={1} className="eui-textTruncate">
-          <OverflowList items={items.slice(0, numberOfItemsToDisplay)} />
+          {visibleItems.map(renderItem)}
         </EuiFlexItem>
       )}
       <EuiPopover
         ownFocus
+        aria-label={popoverTitle ?? popoverButtonTitle}
         data-test-subj={`${dataTestPrefix}DisplayPopover`}
         button={
           <EuiBadge
             iconType={popoverButtonIcon}
             color="hollow"
             data-test-subj={`${dataTestPrefix}DisplayPopoverButton`}
-            onClick={() => setIsExceptionOverflowPopoverOpen(!isExceptionOverflowPopoverOpen)}
+            onClick={onPopoverButtonClick}
             onClickAriaLabel={popoverButtonTitle}
           >
             {popoverButtonTitle}
           </EuiBadge>
         }
-        isOpen={isExceptionOverflowPopoverOpen}
-        closePopover={() => setIsExceptionOverflowPopoverOpen(!isExceptionOverflowPopoverOpen)}
+        isOpen={isOverflowPopoverOpen}
+        closePopover={closePopover}
         repositionOnScroll
       >
         {popoverTitle ? (
@@ -105,7 +118,7 @@ const PopoverItemsComponent = <T extends unknown>({
           </EuiPopoverTitle>
         ) : null}
         <PopoverWrapper data-test-subj={`${dataTestPrefix}DisplayPopoverWrapper`}>
-          <OverflowList items={items.slice(numberOfItemsToDisplay)} />
+          {overflowItems.map(renderItem)}
         </PopoverWrapper>
       </EuiPopover>
     </PopoverItemsWrapper>

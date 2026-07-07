@@ -36,6 +36,14 @@ Array [
   },
   Object {
     "cost": 1,
+    "taskType": "actions:.http",
+  },
+  Object {
+    "cost": 1,
+    "taskType": "actions:.http-system",
+  },
+  Object {
+    "cost": 1,
     "taskType": "actions:.index",
   },
   Object {

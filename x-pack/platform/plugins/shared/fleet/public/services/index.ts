@@ -28,10 +28,10 @@ export {
   appRoutesService,
   packageToPackagePolicy,
   packageToPackagePolicyInputs,
-  fullAgentPolicyToYaml,
   isPackageLimited,
   doesAgentPolicyAlreadyIncludePackage,
   isValidNamespace,
+  isValidDuration,
   LicenseService,
   isAgentUpgradeable,
   getNotUpgradeableMessage,
@@ -50,3 +50,6 @@ export { isPackageUpdatable } from './is_package_updatable';
 export { pkgKeyFromPackageInfo } from './pkg_key_from_package_info';
 export { createExtensionRegistrationCallback } from './ui_extensions';
 export { incrementPolicyName } from './increment_policy_name';
+
+export { getYamlFormatters } from './yaml_formatters';
+export { useYaml } from './use_yaml';

@@ -19,6 +19,11 @@ import {
   extractRulesCapabilities,
   getRulesCapabilitiesInitialState,
 } from '../../utils/rules_capabilities';
+import type { AlertsUICapabilities } from '../../utils/alerts_capabilities';
+import {
+  extractAlertsCapabilities,
+  getAlertsCapabilitiesInitialState,
+} from '../../utils/alerts_capabilities';
 
 export interface UserPrivilegesState {
   listPrivileges: ReturnType<typeof useFetchListPrivileges>;
@@ -28,6 +33,7 @@ export interface UserPrivilegesState {
   timelinePrivileges: { crud: boolean; read: boolean };
   notesPrivileges: { crud: boolean; read: boolean };
   rulesPrivileges: RulesUICapabilities;
+  alertsPrivileges: AlertsUICapabilities;
 }
 
 export const initialUserPrivilegesState = (): UserPrivilegesState => ({
@@ -38,6 +44,7 @@ export const initialUserPrivilegesState = (): UserPrivilegesState => ({
   timelinePrivileges: { crud: false, read: false },
   notesPrivileges: { crud: false, read: false },
   rulesPrivileges: getRulesCapabilitiesInitialState(),
+  alertsPrivileges: getAlertsCapabilitiesInitialState(),
 });
 export const UserPrivilegesContext = createContext<UserPrivilegesState>(
   initialUserPrivilegesState()
@@ -59,10 +66,20 @@ export const UserPrivilegesProvider = ({
     () => extractRulesCapabilities(kibanaCapabilities),
     [kibanaCapabilities]
   );
+
+  const alertsPrivileges = useMemo(
+    () => extractAlertsCapabilities(kibanaCapabilities),
+    [kibanaCapabilities]
+  );
+
   const shouldFetchListPrivileges = read || rulesPrivileges.rules.read;
+  const shouldFetchDetectionEnginePrivileges =
+    read || rulesPrivileges.rules.read || alertsPrivileges.alerts.read;
 
   const listPrivileges = useFetchListPrivileges(shouldFetchListPrivileges);
-  const detectionEnginePrivileges = useFetchDetectionEnginePrivileges();
+  const detectionEnginePrivileges = useFetchDetectionEnginePrivileges(
+    shouldFetchDetectionEnginePrivileges
+  );
   const endpointPrivileges = useEndpointPrivileges();
 
   const siemPrivileges = useMemo(
@@ -92,6 +109,7 @@ export const UserPrivilegesProvider = ({
       timelinePrivileges,
       notesPrivileges,
       rulesPrivileges,
+      alertsPrivileges,
     }),
     [
       listPrivileges,
@@ -101,6 +119,7 @@ export const UserPrivilegesProvider = ({
       timelinePrivileges,
       notesPrivileges,
       rulesPrivileges,
+      alertsPrivileges,
     ]
   );
 

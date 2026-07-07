@@ -19,8 +19,8 @@ spec:
       description: Runs manually for pull requests
     spec:
       env:
-        ELASTIC_PR_COMMENTS_ENABLED: 'true'
-        ELASTIC_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
+        KIBANA_PR_COMMENTS_ENABLED: 'true'
+        KIBANA_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
         GITHUB_BUILD_COMMIT_STATUS_CONTEXT: kibana-ci
         SCOUT_REPORTER_ENABLED: 'true'
       allow_rebuilds: true
@@ -29,6 +29,15 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/scripts/pipelines/pull_request/pipeline.sh
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite
+              - .node-version
+              - package.json
+              - tsconfig.base.json
+              - versions.json
+            cleanup_sparse_state: true
       provider_settings:
         build_branches: false
         build_pull_requests: true

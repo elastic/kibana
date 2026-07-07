@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import chroma from 'chroma-js';
 
 import type { Props as ColorManagerProps } from '../color_manager';
@@ -57,13 +56,4 @@ export const ColorPicker: FC<Props> = ({
       />
     </div>
   );
-};
-
-ColorPicker.propTypes = {
-  colors: PropTypes.array,
-  hasButtons: PropTypes.bool,
-  onAddColor: PropTypes.func,
-  onChange: PropTypes.func.isRequired,
-  onRemoveColor: PropTypes.func,
-  value: PropTypes.string,
 };

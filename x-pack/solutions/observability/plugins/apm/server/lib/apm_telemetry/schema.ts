@@ -460,6 +460,13 @@ const apmPerAgentSchema: Pick<MakeSchemaFrom<APMUsage, true>, 'services_per_agen
           'Total number of services utilizing the opentelemetry/java/elastic agent within the last day',
       },
     },
+    'opentelemetry/java/opentelemetry-java-instrumentation': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the opentelemetry/java/opentelemetry-java-instrumentation agent within the last day',
+      },
+    },
     'opentelemetry/dotnet/elastic': {
       type: 'long',
       _meta: {
@@ -531,6 +538,7 @@ const apmPerAgentSchema: Pick<MakeSchemaFrom<APMUsage, true>, 'services_per_agen
     'otlp/webjs': agentSchema,
     'ios/swift': agentSchema,
     'opentelemetry/java/elastic': agentSchema,
+    'opentelemetry/java/opentelemetry-java-instrumentation': agentSchema,
     'opentelemetry/dotnet/elastic': agentSchema,
     'opentelemetry/nodejs/elastic': agentSchema,
     'opentelemetry/php/elastic': agentSchema,

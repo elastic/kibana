@@ -285,7 +285,7 @@ exports[`Relationships should render index patterns normally 1`] = `
           Object {
             "id": "1",
             "meta": Object {
-              "icon": "search",
+              "icon": "magnify",
               "inAppUrl": Object {
                 "path": "/app/discover#//1",
                 "uiCapabilitiesPath": "discover_v2.show",
@@ -571,7 +571,7 @@ exports[`Relationships should render searches normally 1`] = `
           content="search"
           position="top"
           size="m"
-          type="search"
+          type="magnify"
         />
           
         MySearch

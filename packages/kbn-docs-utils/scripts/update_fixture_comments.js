@@ -12,8 +12,12 @@ const path = require('node:path');
 
 const categories = [
   { key: 'missingComments', title: 'missing comments' },
+  { key: 'paramDocMismatches', title: 'param doc mismatches' },
+  { key: 'missingComplexTypeInfo', title: 'missing complex type info' },
+  { key: 'missingReturns', title: 'missing returns' },
   { key: 'isAnyType', title: 'any usage' },
   { key: 'noReferences', title: 'no references' },
+  { key: 'unnamedExports', title: 'unnamed exports' },
 ];
 
 /**
@@ -49,7 +53,9 @@ const groupByFile = (stats) => {
     const entries = stats[key] || [];
     entries.forEach((entry) => {
       const absPath = normalizePath(entry.path);
-      if (!byFile.has(absPath)) byFile.set(absPath, emptyCategories());
+      if (!byFile.has(absPath)) {
+        byFile.set(absPath, emptyCategories());
+      }
       byFile.get(absPath)[key].push(entry);
     });
   });
@@ -62,11 +68,14 @@ const formatCategory = (title, entries) => {
   const sorted = [...entries].sort((a, b) => {
     const lineA = a.lineNumber ?? Number.MAX_SAFE_INTEGER;
     const lineB = b.lineNumber ?? Number.MAX_SAFE_INTEGER;
-    return lineA === lineB ? a.label.localeCompare(b.label) : lineA - lineB;
+    const labelA = a.label || a.textSnippet || '';
+    const labelB = b.label || b.textSnippet || '';
+    return lineA === lineB ? labelA.localeCompare(labelB) : lineA - lineB;
   });
   sorted.forEach((entry) => {
     const lineInfo = entry.lineNumber != null ? `line ${entry.lineNumber}` : 'unknown line';
-    lines.push(`//     ${lineInfo} - ${entry.label}`);
+    const label = entry.label || entry.textSnippet || '(unnamed)';
+    lines.push(`//     ${lineInfo} - ${label}`);
   });
   return lines.join('\n');
 };
@@ -76,7 +85,9 @@ const buildBlock = (fileStats) => {
   let added = false;
   categories.forEach(({ key, title }) => {
     const entries = fileStats[key] || [];
-    if (!entries.length) return;
+    if (!entries.length) {
+      return;
+    }
     parts.push(formatCategory(title, entries));
     added = true;
   });
@@ -101,7 +112,9 @@ const main = () => {
   const byFile = groupByFile(stats);
 
   byFile.forEach((fileStats, absPath) => {
-    if (!fs.existsSync(absPath)) return;
+    if (!fs.existsSync(absPath)) {
+      return;
+    }
     const original = fs.readFileSync(absPath, 'utf8');
     const block = buildBlock(fileStats);
     const next = replaceBlock(original, block);

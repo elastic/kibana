@@ -8,4 +8,11 @@
  */
 
 export const ENABLE_ESQL = 'enableESQL';
-export const FEEDBACK_LINK = 'https://ela.st/esql-feedback';
+
+// Temporary feature flag for ES|QL approximation
+export const ESQL_APPROXIMATION_FEATURE_FLAG_KEY = 'esql.approximation';
+
+/**
+ * Denotes placeholder value for property on a record that is not set.
+ */
+export const GROUP_NOT_SET_VALUE = '(null)';

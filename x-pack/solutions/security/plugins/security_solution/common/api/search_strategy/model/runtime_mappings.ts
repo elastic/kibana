@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type MappingRuntimeFieldType =
   | 'boolean'
@@ -19,6 +19,7 @@ export type MappingRuntimeFieldType =
 
 export const runtimeMappings = z
   .record(
+    z.string(),
     z.object({
       type: z.union([
         z.literal('boolean'),
@@ -34,7 +35,7 @@ export const runtimeMappings = z
         .union([
           z.string(),
           z.object({ source: z.string() }),
-          z.object({ id: z.string(), params: z.record(z.any()) }),
+          z.object({ id: z.string(), params: z.record(z.string(), z.unknown()) }),
         ])
         .optional(),
       fetch_fields: z.array(z.string()).optional(),

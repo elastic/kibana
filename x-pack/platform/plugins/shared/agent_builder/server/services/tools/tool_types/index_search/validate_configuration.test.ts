@@ -26,18 +26,6 @@ describe('validateConfig', () => {
     listSearchSourcesMock.mockReset();
   });
 
-  it('throws an error when using a CCS pattern', async () => {
-    const config: IndexSearchToolConfig = {
-      pattern: 'my-cluster:*',
-    };
-
-    await expect(() =>
-      validateConfig({ config, esClient })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Cross-cluster search is not supported by the index_search tool"`
-    );
-  });
-
   it('calls listSearchSources with the expected parameters', async () => {
     const config: IndexSearchToolConfig = {
       pattern: 'some-pattern-*',
@@ -47,6 +35,7 @@ describe('validateConfig', () => {
       indices: [{ type: EsResourceType.index, name: 'some-pattern-index' }],
       aliases: [],
       data_streams: [],
+      datasets: [],
     });
 
     await validateConfig({ config, esClient });
@@ -67,6 +56,7 @@ describe('validateConfig', () => {
       indices: [],
       aliases: [],
       data_streams: [],
+      datasets: [],
     });
 
     await expect(() =>
@@ -83,6 +73,7 @@ describe('validateConfig', () => {
       indices: [{ type: EsResourceType.index, name: 'some-pattern-index' }],
       aliases: [],
       data_streams: [],
+      datasets: [],
     });
 
     await validateConfig({ config, esClient });

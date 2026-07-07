@@ -23,14 +23,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
 
-import type {
-  PackageInfo,
-  RegistryVarsEntry,
-  RegistryStream,
-  RegistryInput,
-} from '../../../../../types';
+import type { PackageInfo, RegistryVarsEntry } from '../../../../../types';
 import { useStartServices } from '../../../../../../../hooks';
-import { getStreamsForInputType } from '../../../../../../../../common/services';
+import {
+  getDocumentationPageInputs,
+  type DocumentationPageInputStream,
+} from '../../../../../../../../common/services';
 import { SideBarColumn } from '../../../components/side_bar_column';
 
 interface Props {
@@ -38,31 +36,12 @@ interface Props {
   integration?: string | null;
 }
 
-const getInputs = ({ packageInfo, integration }: Props) => {
-  return packageInfo.policy_templates?.reduce((acc, policyTemplate) => {
-    if (integration && policyTemplate.name !== integration) {
-      return acc;
-    }
-    if ('inputs' in policyTemplate && policyTemplate.inputs) {
-      return [
-        ...acc,
-        ...policyTemplate.inputs.map((input) => ({
-          key: `${policyTemplate.name}-${input.type}`,
-          ...input,
-          streams: getStreamsForInputType(input.type, packageInfo, []),
-        })),
-      ];
-    }
-    return acc;
-  }, [] as RegistryInputWithStreams[]);
-};
-
 export const hasDocumentation = ({ packageInfo, integration }: Props) => {
   if (packageInfo.vars && packageInfo.vars.length > 0) {
     return true;
   }
 
-  if ((getInputs({ packageInfo, integration }) || []).length > 0) {
+  if (getDocumentationPageInputs(packageInfo, integration).length > 0) {
     return true;
   }
 };
@@ -114,13 +93,8 @@ export const DocumentationPage: React.FunctionComponent<Props> = ({ packageInfo,
   );
 };
 
-type RegistryInputWithStreams = RegistryInput & {
-  key: string;
-  streams: Array<RegistryStream & { data_stream: { type: string; dataset: string } }>;
-};
-
 const StreamsSection: React.FunctionComponent<{
-  streams: RegistryInputWithStreams['streams'];
+  streams: DocumentationPageInputStream[];
 }> = ({ streams }) => {
   if (streams.length === 0) {
     return null;
@@ -139,8 +113,8 @@ const StreamsSection: React.FunctionComponent<{
       <EuiSpacer size="m" />
       {streams.map((dataStream) => (
         <EuiAccordion
-          key={dataStream.data_stream.type + dataStream.data_stream.dataset}
-          id={dataStream.data_stream.type + dataStream.data_stream.dataset}
+          key={`${dataStream.data_stream.type ?? 'dynamic'}-${dataStream.data_stream.dataset}`}
+          id={`${dataStream.data_stream.type ?? 'dynamic'}-${dataStream.data_stream.dataset}`}
           buttonContent={
             <EuiText>
               <EuiCode>{dataStream.data_stream.dataset}</EuiCode>({dataStream.title})
@@ -166,7 +140,10 @@ const Inputs: React.FunctionComponent<{
   packageInfo: PackageInfo;
   integration?: string | null;
 }> = ({ packageInfo, integration }) => {
-  const inputs = useMemo(() => getInputs({ packageInfo, integration }), [packageInfo, integration]);
+  const inputs = useMemo(
+    () => getDocumentationPageInputs(packageInfo, integration),
+    [packageInfo, integration]
+  );
   return (
     <>
       <EuiSpacer size="m" />

@@ -6,7 +6,8 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { escapeQuotes } from '@kbn/es-query';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import {
@@ -130,7 +131,9 @@ export async function updateAgentPolicySpaces({
   const uninstallTokensRes = await soClient.find<UninstallTokenSOAttributes>({
     perPage: SO_SEARCH_LIMIT,
     type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-    filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.policy_id:"${agentPolicyId}"`,
+    filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.policy_id:"${escapeQuotes(
+      agentPolicyId
+    )}"`,
   });
 
   if (uninstallTokensRes.total > 0) {
@@ -168,19 +171,22 @@ export async function updateAgentPolicySpaces({
 
   // Update agent actions
   if (agentIndexExists) {
-    const pitId = await openPointInTime(esClient);
+    let pitId = await openPointInTime(esClient);
 
     try {
       let hasMore = true;
       let searchAfter: SortResults | undefined;
       while (hasMore) {
-        const { agents } = await getAgentsByKuery(esClient, newSpaceSoClient, {
-          kuery: `policy_id:"${agentPolicyId}"`,
+        const { agents, pit } = await getAgentsByKuery(esClient, newSpaceSoClient, {
+          kuery: `policy_id:"${escapeQuotes(agentPolicyId)}"`,
           showInactive: true,
           perPage: UPDATE_AGENT_BATCH_SIZE,
           pitId,
           searchAfter,
         });
+        if (pit) {
+          pitId = pit;
+        }
 
         if (agents.length === 0) {
           hasMore = false;

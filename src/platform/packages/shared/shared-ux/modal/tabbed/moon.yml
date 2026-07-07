@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/shared-ux-tabbed-modal'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/shared-ux-tabbed-modal'
+  title: '@kbn/shared-ux-tabbed-modal'
   description: Moon project for @kbn/shared-ux-tabbed-modal
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/packages/shared/shared-ux/modal/tabbed
+  sourceRoot: src/platform/packages/shared/shared-ux/modal/tabbed
 dependsOn:
   - '@kbn/shared-ux-storybook-mock'
 tags:
@@ -32,16 +31,6 @@ fileGroups:
     - storybook/**/*
     - index.*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

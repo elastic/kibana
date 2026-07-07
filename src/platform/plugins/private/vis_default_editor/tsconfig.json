@@ -4,8 +4,7 @@
     "outDir": "target/types",
   },
   "include": [
-    "public/**/*",
-    "../../../../../typings/emotion.d.ts",
+    "public/**/*"
   ],
   "kbn_references": [
     "@kbn/core",

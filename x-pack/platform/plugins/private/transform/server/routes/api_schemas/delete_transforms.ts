@@ -20,7 +20,8 @@ export const deleteTransformsRequestSchema = schema.object({
     schema.object({
       id: schema.string(),
       state: transformStateSchema,
-    })
+    }),
+    { maxSize: 1000 }
   ),
   deleteDestIndex: schema.maybe(schema.boolean()),
   deleteDestDataView: schema.maybe(schema.boolean()),

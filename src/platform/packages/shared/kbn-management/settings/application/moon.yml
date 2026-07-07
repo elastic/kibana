@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/management-settings-application'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/management-settings-application'
+  title: '@kbn/management-settings-application'
   description: Moon project for @kbn/management-settings-application
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-management/settings/application
+  sourceRoot: src/platform/packages/shared/kbn-management/settings/application
 dependsOn:
   - '@kbn/core-ui-settings-browser'
   - '@kbn/management-settings-types'
@@ -38,6 +37,7 @@ dependsOn:
   - '@kbn/core-chrome-browser'
   - '@kbn/core-user-profile-browser-mocks'
   - '@kbn/spaces-plugin'
+  - '@kbn/core'
 tags:
   - shared-browser
   - package

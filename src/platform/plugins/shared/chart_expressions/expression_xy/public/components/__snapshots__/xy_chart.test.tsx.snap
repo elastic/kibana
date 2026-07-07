@@ -18,6 +18,7 @@ exports[`XYChart component annotations should render basic line annotation 1`] =
     <Marker
       config={
         Object {
+          "color": "#2B394F",
           "customTooltip": [Function],
           "icon": "triangle",
           "id": "annotation",
@@ -41,7 +42,7 @@ exports[`XYChart component annotations should render basic line annotation 1`] =
       "line": Object {
         "dash": undefined,
         "opacity": 1,
-        "stroke": "#BC1E70",
+        "stroke": "#2B394F",
         "strokeWidth": 1,
       },
     }
@@ -85,7 +86,7 @@ Array [
     outsideDimension={14}
     style={
       Object {
-        "fill": "#F04E981A",
+        "fill": "#2B394F1A",
         "opacity": 1,
       }
     }
@@ -100,7 +101,7 @@ exports[`XYChart component annotations should render grouped line annotations pr
     Array [
       Object {
         "dataValue": 1647591917125,
-        "details": "",
+        "details": "3 event annotations",
       },
     ]
   }
@@ -116,7 +117,7 @@ exports[`XYChart component annotations should render grouped line annotations pr
           "icon": "3",
           "id": "event1",
           "isGrouped": true,
-          "label": "",
+          "label": "3 event annotations",
           "lineStyle": "dashed",
           "lineWidth": 3,
           "position": "bottom",
@@ -155,7 +156,7 @@ exports[`XYChart component annotations should render grouped line annotations wi
     Array [
       Object {
         "dataValue": 1647591917125,
-        "details": "",
+        "details": "2 event annotations",
       },
     ]
   }
@@ -166,12 +167,12 @@ exports[`XYChart component annotations should render grouped line annotations wi
     <Marker
       config={
         Object {
-          "color": "#BC1E70",
+          "color": "#2B394F",
           "customTooltip": [Function],
           "icon": "2",
           "id": "event1",
           "isGrouped": true,
-          "label": "",
+          "label": "2 event annotations",
           "lineStyle": "solid",
           "lineWidth": 1,
           "position": "bottom",
@@ -192,7 +193,7 @@ exports[`XYChart component annotations should render grouped line annotations wi
       "line": Object {
         "dash": undefined,
         "opacity": 1,
-        "stroke": "#BC1E70",
+        "stroke": "#2B394F",
         "strokeWidth": 1,
       },
     }
@@ -221,7 +222,7 @@ exports[`XYChart component annotations should render simplified annotations when
       "line": Object {
         "dash": undefined,
         "opacity": 1,
-        "stroke": "#BC1E70",
+        "stroke": "#2B394F",
         "strokeWidth": 1,
       },
     }
@@ -265,7 +266,7 @@ Array [
     outsideDimension={2}
     style={
       Object {
-        "fill": "#F04E981A",
+        "fill": "#2B394F1A",
         "opacity": 1,
       }
     }
@@ -542,6 +543,7 @@ exports[`XYChart component it renders area 1`] = `
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -720,6 +722,12 @@ exports[`XYChart component it renders area 1`] = `
                   "padding": 0,
                 },
                 "rect": Object {
+                  "dimmed": Object {
+                    "fill": "#ECF1F9",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 1,
                 },
                 "rectBorder": Object {
@@ -754,6 +762,7 @@ exports[`XYChart component it renders area 1`] = `
                   "#D9C6EF",
                 ],
                 "fallbackBandColor": "#ECF1F9",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "minHeight": 64,
                 "nonFiniteText": "N/A",
                 "textColor": "#1D2A3E",
@@ -964,6 +973,7 @@ exports[`XYChart component it renders area 1`] = `
                 "horizontalHeight": 64,
                 "labelOptions": Object {
                   "maxLines": 1,
+                  "widthLimit": 250,
                 },
                 "margin": 0,
                 "spacingBuffer": 10,
@@ -1030,17 +1040,19 @@ exports[`XYChart component it renders area 1`] = `
                 "border": "#E3E8F2",
                 "emptyBackground": "transparent",
                 "extraTextAlign": "right",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
                 "textLightColor": "#E3E8F2",
                 "textSubtitleDarkColor": "#1D2A3E",
                 "textSubtitleLightColor": "#CAD3E2",
-                "titleWeight": "bold",
+                "titleWeight": 500,
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
                 "valuePosition": "bottom",
@@ -1048,6 +1060,9 @@ exports[`XYChart component it renders area 1`] = `
               },
               "partition": Object {
                 "circlePadding": 4,
+                "dimmed": Object {
+                  "fill": "#ECF1F9",
+                },
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
@@ -1143,6 +1158,7 @@ exports[`XYChart component it renders area 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -1177,6 +1193,7 @@ exports[`XYChart component it renders area 1`] = `
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -1996,6 +2013,7 @@ exports[`XYChart component it renders bar 1`] = `
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -2174,6 +2192,12 @@ exports[`XYChart component it renders bar 1`] = `
                   "padding": 0,
                 },
                 "rect": Object {
+                  "dimmed": Object {
+                    "fill": "#ECF1F9",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 1,
                 },
                 "rectBorder": Object {
@@ -2208,6 +2232,7 @@ exports[`XYChart component it renders bar 1`] = `
                   "#D9C6EF",
                 ],
                 "fallbackBandColor": "#ECF1F9",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "minHeight": 64,
                 "nonFiniteText": "N/A",
                 "textColor": "#1D2A3E",
@@ -2418,6 +2443,7 @@ exports[`XYChart component it renders bar 1`] = `
                 "horizontalHeight": 64,
                 "labelOptions": Object {
                   "maxLines": 1,
+                  "widthLimit": 250,
                 },
                 "margin": 0,
                 "spacingBuffer": 10,
@@ -2484,17 +2510,19 @@ exports[`XYChart component it renders bar 1`] = `
                 "border": "#E3E8F2",
                 "emptyBackground": "transparent",
                 "extraTextAlign": "right",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
                 "textLightColor": "#E3E8F2",
                 "textSubtitleDarkColor": "#1D2A3E",
                 "textSubtitleLightColor": "#CAD3E2",
-                "titleWeight": "bold",
+                "titleWeight": 500,
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
                 "valuePosition": "bottom",
@@ -2502,6 +2530,9 @@ exports[`XYChart component it renders bar 1`] = `
               },
               "partition": Object {
                 "circlePadding": 4,
+                "dimmed": Object {
+                  "fill": "#ECF1F9",
+                },
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
@@ -2597,6 +2628,7 @@ exports[`XYChart component it renders bar 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -2631,6 +2663,7 @@ exports[`XYChart component it renders bar 1`] = `
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -3450,6 +3483,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -3628,6 +3662,12 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                   "padding": 0,
                 },
                 "rect": Object {
+                  "dimmed": Object {
+                    "fill": "#ECF1F9",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 1,
                 },
                 "rectBorder": Object {
@@ -3662,6 +3702,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                   "#D9C6EF",
                 ],
                 "fallbackBandColor": "#ECF1F9",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "minHeight": 64,
                 "nonFiniteText": "N/A",
                 "textColor": "#1D2A3E",
@@ -3872,6 +3913,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 "horizontalHeight": 64,
                 "labelOptions": Object {
                   "maxLines": 1,
+                  "widthLimit": 250,
                 },
                 "margin": 0,
                 "spacingBuffer": 10,
@@ -3938,17 +3980,19 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 "border": "#E3E8F2",
                 "emptyBackground": "transparent",
                 "extraTextAlign": "right",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
                 "textLightColor": "#E3E8F2",
                 "textSubtitleDarkColor": "#1D2A3E",
                 "textSubtitleLightColor": "#CAD3E2",
-                "titleWeight": "bold",
+                "titleWeight": 500,
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
                 "valuePosition": "bottom",
@@ -3956,6 +4000,9 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               },
               "partition": Object {
                 "circlePadding": 4,
+                "dimmed": Object {
+                  "fill": "#ECF1F9",
+                },
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
@@ -4051,6 +4098,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -4085,6 +4133,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -4136,6 +4185,8 @@ exports[`XYChart component it renders horizontal bar 1`] = `
             }
           }
           tickFormat={[Function]}
+          tickLabelMaxLength="40%"
+          tickLabelTruncate="middle"
           title="c"
         />
         <Component
@@ -4904,6 +4955,7 @@ exports[`XYChart component it renders line 1`] = `
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -5082,6 +5134,12 @@ exports[`XYChart component it renders line 1`] = `
                   "padding": 0,
                 },
                 "rect": Object {
+                  "dimmed": Object {
+                    "fill": "#ECF1F9",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 1,
                 },
                 "rectBorder": Object {
@@ -5116,6 +5174,7 @@ exports[`XYChart component it renders line 1`] = `
                   "#D9C6EF",
                 ],
                 "fallbackBandColor": "#ECF1F9",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "minHeight": 64,
                 "nonFiniteText": "N/A",
                 "textColor": "#1D2A3E",
@@ -5326,6 +5385,7 @@ exports[`XYChart component it renders line 1`] = `
                 "horizontalHeight": 64,
                 "labelOptions": Object {
                   "maxLines": 1,
+                  "widthLimit": 250,
                 },
                 "margin": 0,
                 "spacingBuffer": 10,
@@ -5392,17 +5452,19 @@ exports[`XYChart component it renders line 1`] = `
                 "border": "#E3E8F2",
                 "emptyBackground": "transparent",
                 "extraTextAlign": "right",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
                 "textLightColor": "#E3E8F2",
                 "textSubtitleDarkColor": "#1D2A3E",
                 "textSubtitleLightColor": "#CAD3E2",
-                "titleWeight": "bold",
+                "titleWeight": 500,
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
                 "valuePosition": "bottom",
@@ -5410,6 +5472,9 @@ exports[`XYChart component it renders line 1`] = `
               },
               "partition": Object {
                 "circlePadding": 4,
+                "dimmed": Object {
+                  "fill": "#ECF1F9",
+                },
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
@@ -5505,6 +5570,7 @@ exports[`XYChart component it renders line 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -5539,6 +5605,7 @@ exports[`XYChart component it renders line 1`] = `
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -6358,6 +6425,7 @@ exports[`XYChart component it renders stacked area 1`] = `
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -6536,6 +6604,12 @@ exports[`XYChart component it renders stacked area 1`] = `
                   "padding": 0,
                 },
                 "rect": Object {
+                  "dimmed": Object {
+                    "fill": "#ECF1F9",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 1,
                 },
                 "rectBorder": Object {
@@ -6570,6 +6644,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                   "#D9C6EF",
                 ],
                 "fallbackBandColor": "#ECF1F9",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "minHeight": 64,
                 "nonFiniteText": "N/A",
                 "textColor": "#1D2A3E",
@@ -6780,6 +6855,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                 "horizontalHeight": 64,
                 "labelOptions": Object {
                   "maxLines": 1,
+                  "widthLimit": 250,
                 },
                 "margin": 0,
                 "spacingBuffer": 10,
@@ -6846,17 +6922,19 @@ exports[`XYChart component it renders stacked area 1`] = `
                 "border": "#E3E8F2",
                 "emptyBackground": "transparent",
                 "extraTextAlign": "right",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
                 "textLightColor": "#E3E8F2",
                 "textSubtitleDarkColor": "#1D2A3E",
                 "textSubtitleLightColor": "#CAD3E2",
-                "titleWeight": "bold",
+                "titleWeight": 500,
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
                 "valuePosition": "bottom",
@@ -6864,6 +6942,9 @@ exports[`XYChart component it renders stacked area 1`] = `
               },
               "partition": Object {
                 "circlePadding": 4,
+                "dimmed": Object {
+                  "fill": "#ECF1F9",
+                },
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
@@ -6959,6 +7040,7 @@ exports[`XYChart component it renders stacked area 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -6993,6 +7075,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -7812,6 +7895,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -7990,6 +8074,12 @@ exports[`XYChart component it renders stacked bar 1`] = `
                   "padding": 0,
                 },
                 "rect": Object {
+                  "dimmed": Object {
+                    "fill": "#ECF1F9",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 1,
                 },
                 "rectBorder": Object {
@@ -8024,6 +8114,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                   "#D9C6EF",
                 ],
                 "fallbackBandColor": "#ECF1F9",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "minHeight": 64,
                 "nonFiniteText": "N/A",
                 "textColor": "#1D2A3E",
@@ -8234,6 +8325,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 "horizontalHeight": 64,
                 "labelOptions": Object {
                   "maxLines": 1,
+                  "widthLimit": 250,
                 },
                 "margin": 0,
                 "spacingBuffer": 10,
@@ -8300,17 +8392,19 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 "border": "#E3E8F2",
                 "emptyBackground": "transparent",
                 "extraTextAlign": "right",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
                 "textLightColor": "#E3E8F2",
                 "textSubtitleDarkColor": "#1D2A3E",
                 "textSubtitleLightColor": "#CAD3E2",
-                "titleWeight": "bold",
+                "titleWeight": 500,
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
                 "valuePosition": "bottom",
@@ -8318,6 +8412,9 @@ exports[`XYChart component it renders stacked bar 1`] = `
               },
               "partition": Object {
                 "circlePadding": 4,
+                "dimmed": Object {
+                  "fill": "#ECF1F9",
+                },
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
@@ -8413,6 +8510,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -8447,6 +8545,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -9266,6 +9365,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -9444,6 +9544,12 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                   "padding": 0,
                 },
                 "rect": Object {
+                  "dimmed": Object {
+                    "fill": "#ECF1F9",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 1,
                 },
                 "rectBorder": Object {
@@ -9478,6 +9584,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                   "#D9C6EF",
                 ],
                 "fallbackBandColor": "#ECF1F9",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "minHeight": 64,
                 "nonFiniteText": "N/A",
                 "textColor": "#1D2A3E",
@@ -9688,6 +9795,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 "horizontalHeight": 64,
                 "labelOptions": Object {
                   "maxLines": 1,
+                  "widthLimit": 250,
                 },
                 "margin": 0,
                 "spacingBuffer": 10,
@@ -9754,17 +9862,19 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 "border": "#E3E8F2",
                 "emptyBackground": "transparent",
                 "extraTextAlign": "right",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
                 "textLightColor": "#E3E8F2",
                 "textSubtitleDarkColor": "#1D2A3E",
                 "textSubtitleLightColor": "#CAD3E2",
-                "titleWeight": "bold",
+                "titleWeight": 500,
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
                 "valuePosition": "bottom",
@@ -9772,6 +9882,9 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               },
               "partition": Object {
                 "circlePadding": 4,
+                "dimmed": Object {
+                  "fill": "#ECF1F9",
+                },
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
@@ -9867,6 +9980,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -9901,6 +10015,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -9952,6 +10067,8 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             }
           }
           tickFormat={[Function]}
+          tickLabelMaxLength="40%"
+          tickLabelTruncate="middle"
           title="c"
         />
         <Component
@@ -10739,6 +10856,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -10917,6 +11035,12 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "padding": 0,
                 },
                 "rect": Object {
+                  "dimmed": Object {
+                    "fill": "#ECF1F9",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 1,
                 },
                 "rectBorder": Object {
@@ -10951,6 +11075,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "#D9C6EF",
                 ],
                 "fallbackBandColor": "#ECF1F9",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "minHeight": 64,
                 "nonFiniteText": "N/A",
                 "textColor": "#1D2A3E",
@@ -11161,6 +11286,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 "horizontalHeight": 64,
                 "labelOptions": Object {
                   "maxLines": 1,
+                  "widthLimit": 250,
                 },
                 "margin": 0,
                 "spacingBuffer": 10,
@@ -11227,17 +11353,19 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 "border": "#E3E8F2",
                 "emptyBackground": "transparent",
                 "extraTextAlign": "right",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
                 "textLightColor": "#E3E8F2",
                 "textSubtitleDarkColor": "#1D2A3E",
                 "textSubtitleLightColor": "#CAD3E2",
-                "titleWeight": "bold",
+                "titleWeight": 500,
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
                 "valuePosition": "bottom",
@@ -11245,6 +11373,9 @@ exports[`XYChart component split chart should render split chart if both, splitR
               },
               "partition": Object {
                 "circlePadding": 4,
+                "dimmed": Object {
+                  "fill": "#ECF1F9",
+                },
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
@@ -11340,6 +11471,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -11374,6 +11506,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -12283,6 +12416,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -12461,6 +12595,12 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "padding": 0,
                 },
                 "rect": Object {
+                  "dimmed": Object {
+                    "fill": "#ECF1F9",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 1,
                 },
                 "rectBorder": Object {
@@ -12495,6 +12635,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "#D9C6EF",
                 ],
                 "fallbackBandColor": "#ECF1F9",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "minHeight": 64,
                 "nonFiniteText": "N/A",
                 "textColor": "#1D2A3E",
@@ -12705,6 +12846,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 "horizontalHeight": 64,
                 "labelOptions": Object {
                   "maxLines": 1,
+                  "widthLimit": 250,
                 },
                 "margin": 0,
                 "spacingBuffer": 10,
@@ -12771,17 +12913,19 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 "border": "#E3E8F2",
                 "emptyBackground": "transparent",
                 "extraTextAlign": "right",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
                 "textLightColor": "#E3E8F2",
                 "textSubtitleDarkColor": "#1D2A3E",
                 "textSubtitleLightColor": "#CAD3E2",
-                "titleWeight": "bold",
+                "titleWeight": 500,
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
                 "valuePosition": "bottom",
@@ -12789,6 +12933,9 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               },
               "partition": Object {
                 "circlePadding": 4,
+                "dimmed": Object {
+                  "fill": "#ECF1F9",
+                },
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
@@ -12884,6 +13031,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -12918,6 +13066,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,
@@ -13820,6 +13969,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -13998,6 +14148,12 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "padding": 0,
                 },
                 "rect": Object {
+                  "dimmed": Object {
+                    "fill": "#ECF1F9",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 1,
                 },
                 "rectBorder": Object {
@@ -14032,6 +14188,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "#D9C6EF",
                 ],
                 "fallbackBandColor": "#ECF1F9",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "minHeight": 64,
                 "nonFiniteText": "N/A",
                 "textColor": "#1D2A3E",
@@ -14242,6 +14399,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "horizontalHeight": 64,
                 "labelOptions": Object {
                   "maxLines": 1,
+                  "widthLimit": 250,
                 },
                 "margin": 0,
                 "spacingBuffer": 10,
@@ -14308,17 +14466,19 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "border": "#E3E8F2",
                 "emptyBackground": "transparent",
                 "extraTextAlign": "right",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
                 "textLightColor": "#E3E8F2",
                 "textSubtitleDarkColor": "#1D2A3E",
                 "textSubtitleLightColor": "#CAD3E2",
-                "titleWeight": "bold",
+                "titleWeight": 500,
                 "titlesTextAlign": "left",
                 "valueFontSize": "default",
                 "valuePosition": "bottom",
@@ -14326,6 +14486,9 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               },
               "partition": Object {
                 "circlePadding": 4,
+                "dimmed": Object {
+                  "fill": "#ECF1F9",
+                },
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
@@ -14421,6 +14584,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "type": [Function],
             }
           }
+          legendActionOnHover={true}
           legendPosition="top"
           legendSize={130}
           legendValues={Array []}
@@ -14455,6 +14619,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "legend": Object {
                   "labelOptions": Object {
                     "maxLines": 0,
+                    "widthLimit": 0,
                   },
                 },
                 "markSizeRatio": undefined,

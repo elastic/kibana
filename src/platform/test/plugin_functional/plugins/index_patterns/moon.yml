@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/index-patterns-test-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-data-discovery'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/index-patterns-test-plugin'
+  title: '@kbn/index-patterns-test-plugin'
   description: Moon project for @kbn/index-patterns-test-plugin
   channel: ''
   owner: '@elastic/kibana-data-discovery'
-  metadata:
-    sourceRoot: src/platform/test/plugin_functional/plugins/index_patterns
+  sourceRoot: src/platform/test/plugin_functional/plugins/index_patterns
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'

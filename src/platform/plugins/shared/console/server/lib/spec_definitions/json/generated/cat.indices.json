@@ -207,6 +207,7 @@
       "_cat/indices/{index}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-indices",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-cat-indices",
     "availability": {
       "stack": true,
       "serverless": true

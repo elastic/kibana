@@ -24,6 +24,8 @@ export type StrictMappingTypeMapping = Strict<api.MappingTypeMapping>;
 export type AnyMapping = Strict<api.MappingProperty>;
 export type KeywordMapping = Strict<api.MappingKeywordProperty>;
 export type TextMapping = Strict<api.MappingTextProperty>;
+export type MatchOnlyTextMapping = Strict<api.MappingMatchOnlyTextProperty>;
+export type SemanticTextMapping = Strict<api.MappingSemanticTextProperty>;
 export type DateMapping = Strict<api.MappingDateProperty>;
 export type DateNanosMapping = Strict<api.MappingDateNanosProperty>;
 export type LongMapping = Strict<api.MappingLongNumberProperty>;
@@ -34,9 +36,10 @@ export type FlattenedMapping = Strict<api.MappingFlattenedProperty>;
 
 export type ObjectMapping<T = Record<string, AnyMapping>> = Omit<
   Strict<api.MappingObjectProperty>,
-  'properties'
+  'dynamic' | 'properties'
 > & {
   type: 'object';
+  dynamic?: StrictDynamic;
   properties: T extends Record<string, AnyMapping> ? T : never;
 };
 
@@ -45,6 +48,8 @@ type AllMappingPropertyType = Required<api.MappingProperty>['type'];
 type SupportedMappingPropertyType = AllMappingPropertyType &
   (
     | 'text'
+    | 'match_only_text'
+    | 'semantic_text'
     | 'integer'
     | 'keyword'
     | 'boolean'
@@ -55,7 +60,9 @@ type SupportedMappingPropertyType = AllMappingPropertyType &
     | 'date_nanos'
     | 'double'
     | 'long'
+    | 'flattened'
     | 'object'
+    | 'flattened'
   );
 
 type MappingPropertyObjectType = Required<ObjectMapping, 'type'>;
@@ -78,6 +85,10 @@ export type ToPrimitives<O extends { properties: Record<string, MappingProperty>
             : string
           : T extends 'text'
           ? string
+          : T extends 'match_only_text'
+          ? string
+          : T extends 'semantic_text'
+          ? string
           : T extends 'integer'
           ? number
           : T extends 'long'
@@ -98,6 +109,8 @@ export type ToPrimitives<O extends { properties: Record<string, MappingProperty>
             : string | number
           : T extends 'date_nanos'
           ? string
+          : T extends 'flattened'
+          ? Record<string, unknown>
           : T extends 'object'
           ? O['properties'][K] extends AnyMappingDefinition
             ? ToPrimitives<O['properties'][K]>

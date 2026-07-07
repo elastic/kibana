@@ -6,6 +6,7 @@
   "include": [
     "public/**/*",
     "server/**/*",
+    "test/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -49,6 +50,10 @@
     "@kbn/shared-ux-table-persist",
     "@kbn/css-utils",
     "@kbn/saved-objects-tagging-oss-plugin",
+    "@kbn/cps-utils",
+    "@kbn/cps",
+    "@kbn/discover-utils",
+    "@kbn/scout",
   ],
   "exclude": [
     "target/**/*",

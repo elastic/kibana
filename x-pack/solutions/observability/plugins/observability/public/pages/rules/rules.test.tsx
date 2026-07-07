@@ -134,9 +134,9 @@ describe('RulesPage with all capabilities', () => {
 
     fireEvent.click(await wrapper.findByText('Rule type 1'));
     await waitFor(() => {
-      expect(mockApplication.navigateToUrl).toHaveBeenCalledWith(
-        '/app/observability/alerts/rules/create/1'
-      );
+      expect(mockApplication.navigateToApp).toHaveBeenCalledWith('rules', {
+        path: '/create/1',
+      });
     });
   });
 });

@@ -18,7 +18,9 @@ export function useTransactionProfilingSetting() {
   const { core } = useApmPluginContext();
   const isProfilingPluginEnabled = useProfilingPluginSetting();
 
-  const isTransactionProfilingEnabled = core.uiSettings.get<boolean>(apmEnableTransactionProfiling);
+  const isTransactionProfilingEnabled = core?.uiSettings?.get<boolean>(
+    apmEnableTransactionProfiling
+  );
 
   return isProfilingPluginEnabled && isTransactionProfilingEnabled;
 }

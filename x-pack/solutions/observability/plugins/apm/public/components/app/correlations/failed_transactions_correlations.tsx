@@ -28,6 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { CORRELATIONS_EBT_ELEMENTS } from './ebt_constants';
 import { FieldStatsPopover } from './context_popover/field_stats_popover';
 import { asPercent, asPreciseDecimal } from '../../../../common/utils/formatters';
 import type { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
@@ -52,7 +53,9 @@ import { getTransactionDistributionChartData } from './get_transaction_distribut
 import { ChartTitleToolTip } from './chart_title_tool_tip';
 import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_chart_with_scrubber';
 import { TotalDocCountLabel } from '../../shared/charts/duration_distribution_chart/total_doc_count_label';
-import { OpenInDiscoverButton } from '../../shared/links/discover_links/open_in_discover_button';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { OpenInDiscover } from '../../shared/links/discover_links/open_in_discover';
 
 export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => void }) {
   const { euiTheme } = useEuiTheme();
@@ -61,6 +64,24 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
     core: { notifications },
   } = useApmPluginContext();
   const trackApmEvent = useUiTracker({ app: 'apm' });
+
+  const { serviceName } = useApmServiceContext();
+
+  const {
+    query: {
+      rangeFrom,
+      rangeTo,
+      kuery,
+      environment,
+      transactionName,
+      transactionType,
+      sampleRangeFrom,
+      sampleRangeTo,
+    },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
+  );
 
   const { progress, response, startFetch, cancelFetch } = useFailedTransactionsCorrelations();
 
@@ -286,7 +307,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
               'xpack.apm.correlations.correlationsTable.filterDescription',
               { defaultMessage: 'Filter by value' }
             ),
-            icon: 'plusInCircle',
+            icon: 'plusCircle',
             type: 'icon',
             onClick: ({ fieldName, fieldValue }: FailedTransactionsCorrelation) =>
               onAddFilter({
@@ -303,7 +324,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
               'xpack.apm.correlations.correlationsTable.excludeDescription',
               { defaultMessage: 'Filter out value' }
             ),
-            icon: 'minusInCircle',
+            icon: 'minusCircle',
             type: 'icon',
             onClick: ({ fieldName, fieldValue }: FailedTransactionsCorrelation) =>
               onAddFilter({
@@ -383,7 +404,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
           h.fieldValue === selectedSignificantTerm.fieldValue
       );
     } else if (pinnedSignificantTerm) {
-      return correlationTerms.find(
+      return correlationTerms?.find(
         (h) =>
           h.fieldName === pinnedSignificantTerm.fieldName &&
           h.fieldValue === pinnedSignificantTerm.fieldValue
@@ -429,7 +450,27 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <OpenInDiscoverButton dataTestSubj="apmFailedCorrelationsViewInDiscoverButton" />
+          <OpenInDiscover
+            dataTestSubj="apmFailedCorrelationsViewInDiscoverButton"
+            label={i18n.translate('xpack.apm.failedTransactionsCorrelations.openInDiscover', {
+              defaultMessage: 'Open in Discover',
+            })}
+            variant="emptyButton"
+            indexType="traces"
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            queryParams={{
+              kuery,
+              serviceName,
+              environment,
+              transactionName,
+              transactionType,
+              sampleRangeFrom,
+              sampleRangeTo,
+              sortDirection: 'DESC',
+            }}
+            ebt={{ element: CORRELATIONS_EBT_ELEMENTS.FAILED_TRANSACTIONS }}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>

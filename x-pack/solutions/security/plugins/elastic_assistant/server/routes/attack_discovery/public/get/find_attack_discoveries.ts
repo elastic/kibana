@@ -6,6 +6,7 @@
  */
 
 import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
+import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
@@ -14,7 +15,7 @@ import {
   AttackDiscoveryFindRequestQuery,
   AttackDiscoveryFindResponse,
 } from '@kbn/elastic-assistant-common';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 
 import { performChecks } from '../../../helpers';
 import { buildResponse } from '../../../../lib/build_response';
@@ -30,7 +31,7 @@ export const findAttackDiscoveriesRoute = (
       path: ATTACK_DISCOVERY_FIND,
       security: {
         authz: {
-          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL],
+          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL, ALERTS_API_READ],
         },
       },
     })
@@ -78,6 +79,14 @@ export const findAttackDiscoveriesRoute = (
 
         try {
           const { query } = request;
+
+          if (query.shared !== undefined && query.include_all_authors !== undefined) {
+            return resp.error({
+              body: 'The parameters "shared" and "include_all_authors" are mutually exclusive.',
+              statusCode: 400,
+            });
+          }
+
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
 
           if (!dataClient) {
@@ -99,6 +108,7 @@ export const findAttackDiscoveriesRoute = (
               alertIds: query.alert_ids,
               includeUniqueAlertIds: query.include_unique_alert_ids ?? false,
               ids: query.ids,
+              includeAllAuthors: query.include_all_authors,
               search: query.search,
               shared: query.shared,
               status: query.status,

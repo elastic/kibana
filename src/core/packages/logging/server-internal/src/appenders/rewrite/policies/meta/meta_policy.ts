@@ -26,7 +26,8 @@ export const metaRewritePolicyConfigSchema = schema.object({
       value: schema.maybe(
         schema.nullable(schema.oneOf([schema.string(), schema.number(), schema.boolean()]))
       ),
-    })
+    }),
+    { maxSize: 100 }
   ),
 });
 

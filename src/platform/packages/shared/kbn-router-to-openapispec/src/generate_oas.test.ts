@@ -172,6 +172,56 @@ describe('generateOpenApiDocument', () => {
       ).toMatchSnapshot();
     });
 
+    it('propagates field availability metadata to the generated OpenAPI document', async () => {
+      const oas = await generateOpenApiDocument(
+        {
+          routers: [
+            createRouter({
+              routes: [
+                {
+                  isVersioned: false,
+                  path: '/availability',
+                  method: 'post',
+                  validationSchemas: {
+                    request: {
+                      body: schema.object({
+                        foo: schema.string({
+                          meta: { availability: { stability: 'stable', since: '9.4.0' } },
+                        }),
+                      }),
+                    },
+                  },
+                  options: { tags: ['foo'], access: 'public' },
+                  handler: jest.fn(),
+                },
+              ],
+            }),
+          ],
+          versionedRouters: [],
+        },
+        {
+          title: 'test',
+          baseUrl: 'https://test.oas',
+          version: '99.99.99',
+        }
+      );
+
+      expect(
+        get(oas, [
+          'paths',
+          '/availability',
+          'post',
+          'requestBody',
+          'content',
+          'application/json',
+          'schema',
+          'properties',
+          'foo',
+          'x-state',
+        ])
+      ).toBe('Generally available; added in 9.4.0');
+    });
+
     it('handles recursive schemas', async () => {
       const id = 'recursive';
       const recursiveSchema: Type<RecursiveType> = schema.object(
@@ -286,6 +336,128 @@ describe('generateOpenApiDocument', () => {
           }
         )
       ).toMatchSnapshot();
+    });
+
+    // Regression coverage for https://github.com/elastic/kibana/issues/271809.
+    //
+    // `ObjectType.extends()` inherits `meta.id` from the base when the caller
+    // does not pass a fresh one. When the same OAS generation pass also
+    // references the bare base under that same id, the two shapes collide in
+    // the shared schemas registry (last-write-wins) and one of them silently
+    // loses fields in the bundled spec. The regression is silent today; these
+    // tests document the behaviour and verify that opting into a distinct
+    // `meta.id` on the extension prevents the collision.
+    describe('extends() without a fresh meta.id (issue #271809)', () => {
+      const buildOas = (
+        baseSchema: Type<unknown>,
+        extendedSchema: Type<unknown>,
+        // Two routes are wired so the same OAS pass sees both shapes. The
+        // order matters: the base route is registered after the extended one,
+        // mirroring the production case where `UpgradePackagePoliciesResponseBodySchema`
+        // (bare base) is processed after `DeletePackagePoliciesResponseBodySchema`
+        // (extension) and overwrites it.
+        opts: { reverseOrder?: boolean } = {}
+      ) =>
+        generateOpenApiDocument(
+          {
+            routers: [
+              createRouter({
+                routes: [
+                  {
+                    isVersioned: false,
+                    path: opts.reverseOrder ? '/base' : '/extended',
+                    method: 'post',
+                    validationSchemas: {
+                      request: { body: opts.reverseOrder ? baseSchema : extendedSchema },
+                    },
+                    options: { access: 'public' },
+                    handler: jest.fn(),
+                  },
+                  {
+                    isVersioned: false,
+                    path: opts.reverseOrder ? '/extended' : '/base',
+                    method: 'post',
+                    validationSchemas: {
+                      request: { body: opts.reverseOrder ? extendedSchema : baseSchema },
+                    },
+                    options: { access: 'public' },
+                    handler: jest.fn(),
+                  },
+                ],
+              }),
+            ],
+            versionedRouters: [],
+          },
+          { title: 'test', baseUrl: 'https://test.oas', version: '99.99.99' }
+        );
+
+      it('drops extension keys when extends() inherits meta.id from the base', async () => {
+        const base = schema.object(
+          { id: schema.string(), success: schema.boolean() },
+          { meta: { id: 'package_policy_status_response' } }
+        );
+        // Note: no `{ meta: { id: ... } }` second argument. The extended
+        // schema therefore inherits `meta.id: 'package_policy_status_response'`
+        // from the base, and collides with it in the shared schemas registry.
+        const extended = base.extends({
+          policy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+          policy_ids: schema.arrayOf(schema.string()),
+          output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+        });
+
+        const oas = await buildOas(base, extended);
+        const component = get(oas, ['components', 'schemas', 'package_policy_status_response']) as
+          | { properties?: Record<string, unknown> }
+          | undefined;
+
+        // Today, the bare base wins (registered last) and the extension keys
+        // are silently lost. This assertion documents the buggy behaviour so
+        // any future improvement that fixes it (e.g. config-schema no longer
+        // inheriting meta.id, or the OAS bundler detecting collisions) will
+        // surface here as a deliberate update rather than an accidental
+        // regression.
+        expect(component?.properties).toEqual({
+          id: { type: 'string' },
+          success: { type: 'boolean' },
+        });
+      });
+
+      it('preserves all keys when the extension declares a distinct meta.id', async () => {
+        const base = schema.object(
+          { id: schema.string(), success: schema.boolean() },
+          { meta: { id: 'package_policy_status_response' } }
+        );
+        const extended = base.extends(
+          {
+            policy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+            policy_ids: schema.arrayOf(schema.string()),
+            output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+          },
+          { meta: { id: 'delete_package_policies_response_item' } }
+        );
+
+        const oas = await buildOas(base, extended);
+
+        const baseComponent = get(oas, [
+          'components',
+          'schemas',
+          'package_policy_status_response',
+        ]) as { properties?: Record<string, unknown> } | undefined;
+        const extendedComponent = get(oas, [
+          'components',
+          'schemas',
+          'delete_package_policies_response_item',
+        ]) as { properties?: Record<string, unknown> } | undefined;
+
+        expect(Object.keys(baseComponent?.properties ?? {}).sort()).toEqual(['id', 'success']);
+        expect(Object.keys(extendedComponent?.properties ?? {}).sort()).toEqual([
+          'id',
+          'output_id',
+          'policy_id',
+          'policy_ids',
+          'success',
+        ]);
+      });
     });
   });
 
@@ -491,25 +663,7 @@ describe('generateOpenApiDocument', () => {
           versionedRouters: {},
         } as CreateTestRouterArgs,
         expectedPath: '/test-path/{id}/{path}',
-        expectedState: 'Technical Preview',
-      },
-      {
-        name: 'router with beta stability',
-        routerConfig: {
-          routers: {
-            testRouter: {
-              routes: [
-                {
-                  path: '/test-path/{id}/{path*}',
-                  options: { availability: { stability: 'beta' }, access: 'public' },
-                },
-              ],
-            },
-          },
-          versionedRouters: {},
-        } as CreateTestRouterArgs,
-        expectedPath: '/test-path/{id}/{path}',
-        expectedState: 'Beta',
+        expectedState: 'Experimental',
       },
       {
         name: 'router with stable stability',
@@ -566,33 +720,7 @@ describe('generateOpenApiDocument', () => {
           },
         } as CreateTestRouterArgs,
         expectedPath: '/test-path',
-        expectedState: 'Technical Preview',
-      },
-      {
-        name: 'versioned router with beta stability',
-        routerConfig: {
-          routers: {},
-          versionedRouters: {
-            testVersionedRouter: {
-              routes: [
-                {
-                  path: '/test-path',
-                  options: {
-                    access: 'public',
-                    options: { availability: { stability: 'beta' } },
-                    security: {
-                      authz: {
-                        requiredPrivileges: ['foo'],
-                      },
-                    },
-                  },
-                },
-              ],
-            },
-          },
-        } as CreateTestRouterArgs,
-        expectedPath: '/test-path',
-        expectedState: 'Beta',
+        expectedState: 'Experimental',
       },
       {
         name: 'versioned router with stable stability',
@@ -619,6 +747,50 @@ describe('generateOpenApiDocument', () => {
         } as CreateTestRouterArgs,
         expectedPath: '/test-path',
         expectedState: 'Generally available',
+      },
+      {
+        name: 'router with tech_preview stability',
+        routerConfig: {
+          routers: {
+            testRouter: {
+              routes: [
+                {
+                  path: '/test-path/{id}/{path*}',
+                  options: { availability: { stability: 'tech_preview' }, access: 'public' },
+                },
+              ],
+            },
+          },
+          versionedRouters: {},
+        } as CreateTestRouterArgs,
+        expectedPath: '/test-path/{id}/{path}',
+        expectedState: 'Technical Preview',
+      },
+      {
+        name: 'versioned router with tech_preview stability',
+        routerConfig: {
+          routers: {},
+          versionedRouters: {
+            testVersionedRouter: {
+              routes: [
+                {
+                  path: '/test-path',
+                  options: {
+                    access: 'public',
+                    options: { availability: { stability: 'tech_preview' } },
+                    security: {
+                      authz: {
+                        requiredPrivileges: ['foo'],
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        } as CreateTestRouterArgs,
+        expectedPath: '/test-path',
+        expectedState: 'Technical Preview',
       },
       {
         name: 'versioned router without availability',
@@ -692,7 +864,14 @@ describe('generateOpenApiDocument', () => {
   });
 
   it('merges operation objects', async () => {
-    const oasOperationObject = () => ({
+    const oasOperationObject = async () => ({
+      description: 'Merged operation description',
+      'x-codeSamples': [
+        {
+          lang: 'curl',
+          source: 'curl https://test.oas/foo',
+        },
+      ],
       requestBody: {
         content: {
           'application/json': {
@@ -766,6 +945,16 @@ describe('generateOpenApiDocument', () => {
         value: 999,
       },
     });
+
+    expect(get(oas, ['paths', '/foo/{id}/{path}', 'get', 'description'])).toBe(
+      'Merged operation description'
+    );
+    expect(get(oas, ['paths', '/foo/{id}/{path}', 'get', 'x-codeSamples'])).toEqual([
+      {
+        lang: 'curl',
+        source: 'curl https://test.oas/foo',
+      },
+    ]);
 
     expect(
       get(oas, ['paths', '/bar', 'get', 'requestBody', 'content', 'application/json', 'examples'])

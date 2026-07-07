@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BasicPrettyPrinter } from '@kbn/esql-language';
+import { BasicPrettyPrinter } from '@elastic/esql';
 import type { Query, QueryPipeline, QueryRequest } from '../types';
 import { buildQueryAst } from './build_query_ast';
 import { replaceParameters } from './replace_parameters';

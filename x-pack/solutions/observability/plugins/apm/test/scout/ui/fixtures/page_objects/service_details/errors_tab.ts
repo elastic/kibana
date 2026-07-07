@@ -38,7 +38,10 @@ export class ErrorsTab extends ServiceDetailsTab {
   }
 
   async clickErrorLink(errorMessage: string) {
-    await this.getErrorLink(errorMessage).click();
+    const link = this.getErrorLink(errorMessage);
+    await link.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await link.scrollIntoViewIfNeeded();
+    await link.click();
   }
   // #endregion
 }

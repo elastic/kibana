@@ -13,6 +13,4 @@ export type {
   GridData,
   SavedDashboardPanel,
   SavedDashboardSection,
-  StoredControlState,
-  StoredControlGroupInput,
 } from './schema';

@@ -187,7 +187,7 @@ export const AddParamFlyout = ({
         <EuiButton
           data-test-subj="syntheticsAddParamFlyoutButton"
           fill
-          iconType="plusInCircleFilled"
+          iconType="plusCircle"
           iconSide="left"
           onClick={() => setIsFlyoutVisible(true)}
           isDisabled={!canSave}

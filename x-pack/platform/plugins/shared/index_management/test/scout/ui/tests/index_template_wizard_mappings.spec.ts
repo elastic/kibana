@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFieldTextWrapper } from '@kbn/scout';
+import { EuiFieldTextWrapper, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-test.describe('Index template wizard - Mappings step', { tag: ['@ess'] }, () => {
+test.describe('Index template wizard - Mappings step', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects, page }) => {
     await browserAuth.loginAsIndexManagementUser();
     await pageObjects.indexManagement.navigateToIndexManagementTab('templates');

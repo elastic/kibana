@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/shared-ux-file-mocks'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/shared-ux-file-mocks'
+  title: '@kbn/shared-ux-file-mocks'
   description: Moon project for @kbn/shared-ux-file-mocks
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/packages/shared/shared-ux/file/mocks
+  sourceRoot: src/platform/packages/shared/shared-ux/file/mocks
 dependsOn:
   - '@kbn/utility-types-jest'
   - '@kbn/shared-ux-file-types'

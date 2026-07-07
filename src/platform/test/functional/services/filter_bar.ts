@@ -146,7 +146,8 @@ export class FilterBarService extends FtrService {
    * Removes all filters
    */
   public async removeAllFilters(): Promise<void> {
-    await this.testSubjects.click('showQueryBarMenu');
+    // Use pressEnter instead of click to avoid ElementClickInterceptedError if a tooltip covers the button
+    await this.testSubjects.pressEnter('showQueryBarMenu');
     await this.testSubjects.click('filter-sets-removeAllFilters');
     await this.header.waitUntilLoadingHasFinished();
     await this.common.waitUntilUrlIncludes('filters:!()');

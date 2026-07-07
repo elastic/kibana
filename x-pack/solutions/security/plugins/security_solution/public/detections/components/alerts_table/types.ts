@@ -82,7 +82,6 @@ export interface SecurityAlertsTableContext {
 export type SecurityAlertsTableProps = AlertsTablePropsWithRef<SecurityAlertsTableContext>;
 export type GetSecurityAlertsTableProp<PropKey extends keyof SecurityAlertsTableProps> =
   NonNullable<SecurityAlertsTableProps[PropKey]>;
-export type { AlertWithLegacyFormats } from '@kbn/response-ops-alerts-table/types';
 
 export type GroupTakeActionItems = (props: {
   /**
@@ -105,4 +104,8 @@ export type GroupTakeActionItems = (props: {
    * Meta-data about the selected group
    */
   groupBucket: GroupingBucket<AlertsGroupingAggregation>;
+  /**
+   * Callback to close the containing popover menu
+   */
+  closePopover: () => void;
 }) => JSX.Element | undefined;

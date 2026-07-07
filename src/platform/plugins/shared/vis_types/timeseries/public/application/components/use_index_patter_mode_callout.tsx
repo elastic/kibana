@@ -38,7 +38,7 @@ export const UseIndexPatternModeCallout = () => {
           defaultMessage="TSVB supports data views"
         />
       }
-      iconType="cheer"
+      iconType="popper"
       size="s"
     >
       <p>

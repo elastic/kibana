@@ -13,12 +13,10 @@
     "server": true,
     "requiredPlugins": [
       "embeddable",
-      "uiActionsEnhanced"
     ],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
-      "imageEmbeddable",
       "uiActions"
     ]
   }

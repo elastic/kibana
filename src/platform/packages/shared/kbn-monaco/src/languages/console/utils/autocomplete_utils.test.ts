@@ -73,6 +73,19 @@ describe('autocomplete_utils', () => {
         esqlQueryIndex: -1,
       });
     });
+
+    it('does not treat longer words as request methods (e.g. GETS, POSTER)', () => {
+      const methods = ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH'] as const;
+      for (const method of methods) {
+        const requestMethod = `${method}A`;
+        const request = `${requestMethod} _query\n{\n  "query": "SELECT * FROM logs `;
+        expect(checkForTripleQuotesAndEsqlQuery(request)).toEqual({
+          insideTripleQuotes: false,
+          insideEsqlQuery: false,
+          esqlQueryIndex: -1,
+        });
+      }
+    });
   });
 
   it('sets insideEsqlQuery for single quoted query after POST _query', () => {
@@ -114,6 +127,16 @@ describe('autocomplete_utils', () => {
     });
   });
 
+  it('detects query with /_query/async endpoint', () => {
+    const request = `POST /_query/async\n{\n  "query": "FROM logs | STATS `;
+    const result = checkForTripleQuotesAndEsqlQuery(request);
+    expect(result).toEqual({
+      insideTripleQuotes: false,
+      insideEsqlQuery: true,
+      esqlQueryIndex: request.indexOf('"FROM logs ') + 1,
+    });
+  });
+
   it('detects triple quoted query after POST   _query?foo=bar with extra spaces', () => {
     const request = `POST   _query?foo=bar\n{\n  "query": """FROM metrics `;
     const result = checkForTripleQuotesAndEsqlQuery(request);
@@ -121,6 +144,36 @@ describe('autocomplete_utils', () => {
       insideTripleQuotes: true,
       insideEsqlQuery: true,
       esqlQueryIndex: request.indexOf('"""') + 3,
+    });
+  });
+
+  it('detects query when request line is indented', () => {
+    const request = `  \tPOST _query\n{\n  "query": "FROM logs | STATS `;
+    const result = checkForTripleQuotesAndEsqlQuery(request);
+    expect(result).toEqual({
+      insideTripleQuotes: false,
+      insideEsqlQuery: true,
+      esqlQueryIndex: request.indexOf('"FROM logs ') + 1,
+    });
+  });
+
+  it('detects query value with whitespace around the colon', () => {
+    const request = `POST _query\n{\n  "query"  :\t "FROM logs | STATS `;
+    const result = checkForTripleQuotesAndEsqlQuery(request);
+    expect(result).toEqual({
+      insideTripleQuotes: false,
+      insideEsqlQuery: true,
+      esqlQueryIndex: request.indexOf('"FROM logs ') + 1,
+    });
+  });
+
+  it('does not treat near-miss keys as the "query" value', () => {
+    const request = `POST _query\n{\n  "queryx": "FROM logs | STATS `;
+    const result = checkForTripleQuotesAndEsqlQuery(request);
+    expect(result).toEqual({
+      insideTripleQuotes: false,
+      insideEsqlQuery: false,
+      esqlQueryIndex: -1,
     });
   });
 

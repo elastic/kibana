@@ -14,11 +14,15 @@ import {
   EuiSwitch,
   EuiSpacer,
   EuiFilterButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
   EuiLoadingSpinner,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -37,22 +41,41 @@ const formatOptions = (
   excludedValues?: string[],
   showCount?: boolean
 ): EuiSelectableOption[] => {
-  const uniqueValues: Record<string, number> = {};
+  const uniqueValues: Record<string, { count: number; tooltip?: string }> = {};
 
-  values?.forEach(({ label, count }) => {
-    uniqueValues[label] = count;
+  values?.forEach(({ label, count, tooltip }) => {
+    uniqueValues[label] = { count, tooltip };
   });
 
-  return Object.entries(uniqueValues).map(([label, count]) => ({
-    label,
-    append: showCount ? (
+  return Object.entries(uniqueValues).map(([label, { count, tooltip }]) => {
+    const counter = (
       <Counter>
         <EuiText size="xs">{count}</EuiText>
       </Counter>
-    ) : null,
-    ...(selectedValue?.includes(label) ? { checked: 'on' } : {}),
-    ...(excludedValues?.includes(label) ? { checked: 'off' } : {}),
-  }));
+    );
+    const tooltipIcon = <EuiIconTip type="question" color="subdued" content={tooltip} />;
+
+    let append: EuiSelectableOption['append'] = null;
+    if (showCount && tooltip) {
+      append = (
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>{counter}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{tooltipIcon}</EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    } else if (showCount) {
+      append = counter;
+    } else if (tooltip) {
+      append = tooltipIcon;
+    }
+
+    return {
+      label,
+      append,
+      ...(selectedValue?.includes(label) ? { checked: 'on' } : {}),
+      ...(excludedValues?.includes(label) ? { checked: 'off' } : {}),
+    };
+  });
 };
 
 export function FieldValueSelection({
@@ -76,6 +99,9 @@ export function FieldValueSelection({
   compressed = true,
   useLogicalAND,
   showLogicalConditionSwitch = false,
+  isDisabled = false,
+  disabledTooltip,
+  dataTestSubj,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
   const { euiTheme } = useEuiTheme();
@@ -122,8 +148,9 @@ export function FieldValueSelection({
       iconType="arrowDown"
       iconSide="right"
       onClick={onButtonClick}
-      data-test-subj={'fieldValueSelectionBtn'}
+      data-test-subj={dataTestSubj ?? 'fieldValueSelectionBtn'}
       fullWidth={fullWidth}
+      isDisabled={isDisabled}
     >
       {label}
     </EuiButton>
@@ -133,6 +160,7 @@ export function FieldValueSelection({
 
   const filterButton = (
     <EuiFilterButton
+      data-test-subj={dataTestSubj ?? `o11yFilterGroupButton-${label}`}
       aria-label={i18n.translate('xpack.observabilityShared.fieldValueSelection.label', {
         defaultMessage: 'expands filter group for {label} filter',
         values: { label },
@@ -143,10 +171,24 @@ export function FieldValueSelection({
       numActiveFilters={numOfFilters}
       numFilters={options.length}
       onClick={onButtonClick}
+      isDisabled={isDisabled}
     >
       {label}
     </EuiFilterButton>
   );
+
+  if (isDisabled) {
+    const triggerButton = button || (asFilterButton ? filterButton : anchorButton);
+    return (
+      <Wrapper>
+        {disabledTooltip ? (
+          <EuiToolTip content={disabledTooltip}>{triggerButton}</EuiToolTip>
+        ) : (
+          triggerButton
+        )}
+      </Wrapper>
+    );
+  }
 
   const applyDisabled = () => {
     const currSelected = (options ?? [])
@@ -194,6 +236,7 @@ export function FieldValueSelection({
           }}
           listProps={{
             onFocusBadge: false,
+            paddingSize: 's',
           }}
           options={options}
           onChange={onChange}

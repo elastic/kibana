@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
@@ -31,12 +31,12 @@ const logRateAnalysisSchema = z.object({
   deviation: z
     .object(timeRangeSchemaRequired)
     .describe('Time range representing the time period with unusual behavior.'),
-  searchQuery: z
-    .record(z.any())
+  kqlFilter: z
+    .string()
+    .optional()
     .describe(
-      'Optional Elasticsearch query DSL filter that limits which documents are analyzed. Defaults to a match_all query.'
-    )
-    .optional(),
+      'Optional KQL filter to narrow which documents are analyzed. Examples: "service.name: checkout", "log.level: error".'
+    ),
 });
 
 export function createRunLogRateAnalysisTool({
@@ -61,7 +61,7 @@ How it works:
 Compares a baseline time window to a deviation window and performs statistical correlation analysis to find fields/patterns associated with the change.
 
 Do NOT use for:
-- Understanding the sequence of events for a specific error (use get_correlated_logs)
+- Understanding the sequence of events for a specific error (use get_traces)
 - Getting a general overview of log types (use get_log_groups)
 - Investigating individual log entries or transactions`,
     schema: logRateAnalysisSchema,
@@ -73,7 +73,7 @@ Do NOT use for:
       },
     },
     handler: async (toolParams, context) => {
-      const { index, timeFieldName, baseline, deviation, searchQuery } = toolParams;
+      const { index, timeFieldName, baseline, deviation, kqlFilter } = toolParams;
 
       try {
         const esClient = context.esClient.asCurrentUser;
@@ -85,7 +85,7 @@ Do NOT use for:
           timeFieldName,
           baseline,
           deviation,
-          searchQuery,
+          kqlFilter,
         });
 
         return {

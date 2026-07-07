@@ -8,10 +8,18 @@
 import { scaleLog } from 'd3-scale';
 
 import { isFiniteNumber } from '@kbn/observability-plugin/common/utils/is_finite_number';
-import type { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
+import type {
+  CommonCorrelationsQueryParams,
+  EntityType,
+} from '../../../../common/correlations/types';
 import type { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
-import { getDurationField, getEventType } from '../utils';
+import {
+  getDurationField,
+  getDurationFieldFromEntityType,
+  getEventType,
+  getEventTypeFromEntityType,
+} from '../utils';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getBackwardCompatibleDocumentTypeFilter } from '../../../lib/helpers/transactions';
 
@@ -24,20 +32,22 @@ const getHistogramRangeSteps = (min: number, max: number, steps: number) => {
 
 export const fetchDurationHistogramRangeSteps = async ({
   chartType,
+  entityType,
   apmEventClient,
   start,
   end,
   environment,
   kuery,
   query,
-  searchMetrics,
+  searchMetrics = false,
   durationMinOverride,
   durationMaxOverride,
   isOtel = false,
 }: CommonCorrelationsQueryParams & {
-  chartType: LatencyDistributionChartType;
+  chartType?: LatencyDistributionChartType;
+  entityType?: EntityType;
   apmEventClient: APMEventClient;
-  searchMetrics: boolean;
+  searchMetrics?: boolean;
   durationMinOverride?: number;
   durationMaxOverride?: number;
   isOtel?: boolean;
@@ -47,6 +57,7 @@ export const fetchDurationHistogramRangeSteps = async ({
   rangeSteps: number[];
 }> => {
   const steps = 100;
+  const useEntityType = entityType !== undefined;
 
   if (durationMinOverride && durationMaxOverride) {
     // these values should never be 0, so if they are we set them to 1
@@ -60,22 +71,29 @@ export const fetchDurationHistogramRangeSteps = async ({
     };
   }
 
-  const durationField = getDurationField(chartType, searchMetrics, isOtel);
+  const durationField = useEntityType
+    ? getDurationFieldFromEntityType(entityType, isOtel)
+    : getDurationField(chartType!, searchMetrics, isOtel);
 
   // when using metrics data, ensure we filter by docs with the appropriate duration field
-  const filteredQuery = searchMetrics
-    ? {
-        bool: {
-          filter: [query, ...getBackwardCompatibleDocumentTypeFilter(true)],
-        },
-      }
-    : query;
+  const filteredQuery =
+    !useEntityType && searchMetrics
+      ? {
+          bool: {
+            filter: [query, ...getBackwardCompatibleDocumentTypeFilter(true)],
+          },
+        }
+      : query;
+
+  const eventType = useEntityType
+    ? getEventTypeFromEntityType(entityType)
+    : getEventType(chartType!, searchMetrics);
 
   const resp = await apmEventClient.search(
     'get_duration_histogram_range_steps',
     {
       apm: {
-        events: [getEventType(chartType, searchMetrics)],
+        events: [eventType],
       },
       track_total_hits: 1,
       size: 0,

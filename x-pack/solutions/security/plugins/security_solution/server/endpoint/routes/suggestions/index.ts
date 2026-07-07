@@ -35,6 +35,7 @@ import { withEndpointAuthz } from '../with_endpoint_authz';
 import { errorHandler } from '../error_handler';
 import { buildIndexNameWithNamespace } from '../../../../common/endpoint/utils/index_name_utilities';
 import { buildBaseEndpointMetadataFilter } from '../../../../common/endpoint/utils/endpoint_metadata_filter';
+import { prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
 
 export function registerEndpointSuggestionsRoutes(
   router: SecuritySolutionPluginRouter,
@@ -50,7 +51,6 @@ export function registerEndpointSuggestionsRoutes(
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -102,6 +102,7 @@ export const getEndpointSuggestionsRequestHandler = (
     try {
       const config = await firstValueFrom(config$);
       const { savedObjects, elasticsearch } = await context.core;
+      const ccsEnabled = await endpointContext.service.isCcsEnabled();
       const securitySolutionContext = await context.securitySolution;
       const spaceId = securitySolutionContext.getSpaceId();
       let fullFilters: QueryDslQueryContainer[] = filters
@@ -134,11 +135,14 @@ export const getEndpointSuggestionsRequestHandler = (
           });
         }
 
-        const indexPattern = namespaces
-          .map((namespace) =>
-            buildIndexNameWithNamespace(baseIndexPattern, namespace, { preserveWildcard: true })
-          )
-          .join(',');
+        const indexPattern = prefixIndexPatternsWithCcs(
+          namespaces
+            .map((namespace) =>
+              buildIndexNameWithNamespace(baseIndexPattern, namespace, { preserveWildcard: true })
+            )
+            .join(','),
+          ccsEnabled
+        );
 
         if (indexPattern) {
           logger.debug(`Index pattern to be used: ${indexPattern}`);
@@ -151,7 +155,7 @@ export const getEndpointSuggestionsRequestHandler = (
         }
       } else if (suggestionType === 'endpoints') {
         suggestionMethod = termsAggSuggestions;
-        index = INDEX_PATTERNS[suggestionType];
+        index = prefixIndexPatternsWithCcs(INDEX_PATTERNS[suggestionType], ccsEnabled);
 
         const agentPolicyIds: string[] = [];
         const fleetService = securitySolutionContext.getInternalFleetServices();

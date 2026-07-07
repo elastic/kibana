@@ -13,6 +13,7 @@ import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
+  coreFeatureFlagsMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
@@ -64,6 +65,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: createAPIKeyMock,
+  cloneAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -81,6 +83,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   alertsService: null,
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 const MOCK_API_KEY = Buffer.from('123:abc').toString('base64');

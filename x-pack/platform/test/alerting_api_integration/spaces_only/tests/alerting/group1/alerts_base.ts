@@ -136,6 +136,7 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
       const alertTestRecordWithoutDates = omit(alertTestRecord._source, [
         'alertInfo.createdAt',
         'alertInfo.updatedAt',
+        'alertInfo.lastEnabledAt',
       ]);
       expect(alertTestRecordWithoutDates).to.eql(expected);
       expect(alertTestRecord._source.alertInfo.createdAt).to.match(

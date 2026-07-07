@@ -9,7 +9,13 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['common', 'indexManagement', 'header', 'svlCommonPage']);
+  const pageObjects = getPageObjects([
+    'common',
+    'indexManagement',
+    'header',
+    'svlCommonPage',
+    'appMenu',
+  ]);
   const log = getService('log');
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
@@ -19,9 +25,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const POLICY_NAME = `policy-${Math.random()}`;
 
   describe('Create enrich policy', function () {
-    // TimeoutError:  Waiting for element to be located By(css selector, [data-test-subj="enrichPoliciesEmptyPromptCreateButton"])
-    this.tags(['failsOnMKI']);
-
     before(async () => {
       log.debug('Creating test index');
       try {
@@ -46,7 +49,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       log.debug('Navigating to the enrich policies tab');
       await pageObjects.svlCommonPage.loginAsAdmin();
       await pageObjects.indexManagement.navigateToIndexManagementTab('enrich_policies');
+      await pageObjects.header.waitUntilLoadingHasFinished();
       // Click create policy button
+      await testSubjects.existOrFail('enrichPoliciesEmptyPromptCreateButton');
       await testSubjects.click('enrichPoliciesEmptyPromptCreateButton');
     });
 
@@ -66,8 +71,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('shows create enrich policies page and docs link', async () => {
-      expect(await testSubjects.exists('createEnrichPolicyHeaderContent')).to.be(true);
-      expect(await testSubjects.exists('createEnrichPolicyDocumentationLink')).to.be(true);
+      expect(await testSubjects.getVisibleText('appHeaderTitle')).to.be('Create enrich policy');
+      expect(await pageObjects.appMenu.menuItemExists('appHeaderMenuDocumentation')).to.be(true);
     });
 
     it('can create an enrich policy', async () => {

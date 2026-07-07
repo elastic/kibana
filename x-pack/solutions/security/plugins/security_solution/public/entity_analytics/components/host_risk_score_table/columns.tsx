@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiLink, EuiText } from '@elastic/eui';
-import {
-  SecurityCellActions,
-  CellActionsMode,
-  SecurityCellActionsTrigger,
-} from '../../../common/components/cell_actions';
+import React, { type SyntheticEvent } from 'react';
+import { EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { SecurityCellActions, CellActionsMode } from '../../../common/components/cell_actions';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../common/components/links';
 import type { HostRiskScoreColumns } from '.';
@@ -27,8 +24,10 @@ import { formatRiskScore } from '../../common';
 
 export const getHostRiskScoreColumns = ({
   dispatchSeverityUpdate,
+  openHostFlyout,
 }: {
   dispatchSeverityUpdate: (s: RiskSeverity) => void;
+  openHostFlyout: (hostName: string) => void;
 }): HostRiskScoreColumns => [
   {
     field: 'host.name',
@@ -44,7 +43,7 @@ export const getHostRiskScoreColumns = ({
             mode={CellActionsMode.HOVER_DOWN}
             visibleCellActions={5}
             showActionTooltips
-            triggerId={SecurityCellActionsTrigger.DEFAULT}
+            triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
             data={{
               value: hostName,
               field: 'host.name',
@@ -53,7 +52,14 @@ export const getHostRiskScoreColumns = ({
               telemetry: CELL_ACTIONS_TELEMETRY,
             }}
           >
-            <HostDetailsLink hostName={hostName} hostTab={HostsTableType.risk} />
+            <HostDetailsLink
+              hostName={hostName}
+              hostTab={HostsTableType.risk}
+              onClick={(e: SyntheticEvent) => {
+                e.preventDefault();
+                openHostFlyout(hostName);
+              }}
+            />
           </SecurityCellActions>
         );
       }
@@ -82,9 +88,9 @@ export const getHostRiskScoreColumns = ({
     render: (riskScore) => {
       if (riskScore != null) {
         return (
-          <span data-test-subj="risk-score-truncate" title={`${riskScore}`}>
-            {formatRiskScore(riskScore)}
-          </span>
+          <EuiToolTip content={`${riskScore}`}>
+            <span data-test-subj="risk-score-truncate">{formatRiskScore(riskScore)}</span>
+          </EuiToolTip>
         );
       }
       return getEmptyTagValue();

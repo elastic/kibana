@@ -4,17 +4,17 @@ Stop local running elasticsearch and kibana (the server brings it up)
 
 Start the server for ECH stateful
 ```sh
-node scripts/scout.js start-server --stateful
+node scripts/scout.js start-server --location local --arch stateful --domain classic
 ```
 
 Or serverless security
 ```sh
-node scripts/scout.js start-server --serverless=security
+node scripts/scout.js start-server --location local --arch serverless --domain security_complete
 ```
 
 And then run
 ```sh
-npx playwright test --config x-pack/solutions/security/plugins/entity_store/test/scout/api/playwright.config.ts --project=local
+node scripts/playwright test --config x-pack/solutions/security/plugins/entity_store/test/scout/api/playwright.config.ts --project=local
 ```
 
 ### Generating archives

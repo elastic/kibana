@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import {
   ALERT_INSTANCE_ID,
   ALERT_RULE_UUID,
@@ -23,9 +23,9 @@ export default function bulkMuteUnmuteTests({ getService }: FtrProviderContext) 
   const es = getService('es');
   const retry = getService('retry');
   const supertest = getService('supertest');
+  const esTestIndexTool = new ESTestIndexTool(es, retry);
 
-  // Failing: See https://github.com/elastic/kibana/issues/246730
-  describe.skip('bulkMuteUnmute', () => {
+  describe('bulkMuteUnmute', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     const createRule = async (): Promise<string> => {
@@ -93,7 +93,11 @@ export default function bulkMuteUnmuteTests({ getService }: FtrProviderContext) 
         .set('kbn-xsrf', 'foo')
         .send({ rules });
 
-    afterEach(async () => {
+    before(async () => {
+      await esTestIndexTool.setup();
+    });
+
+    after(async () => {
       await es.deleteByQuery({
         index: alertAsDataIndex,
         query: { match_all: {} },
@@ -101,6 +105,7 @@ export default function bulkMuteUnmuteTests({ getService }: FtrProviderContext) 
         ignore_unavailable: true,
       });
       await objectRemover.removeAll();
+      await esTestIndexTool.destroy();
     });
 
     describe('bulk mute', () => {

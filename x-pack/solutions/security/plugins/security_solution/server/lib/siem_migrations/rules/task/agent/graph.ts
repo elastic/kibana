@@ -7,13 +7,13 @@
 
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
+import { AIMessage } from '@langchain/core/messages';
 import { getCreateSemanticQueryNode } from './nodes/create_semantic_query';
 import { getMatchPrebuiltRuleNode } from './nodes/match_prebuilt_rule';
 import { migrateRuleConfigSchema, migrateRuleState } from './state';
 import { getTranslateRuleGraph } from './sub_graphs/translate_rule';
 import type { MigrateRuleConfig, MigrateRuleGraphParams, MigrateRuleState } from './types';
-import { getResolveDepsNode } from './nodes/resolve_dependencies_node/resolve_dependencies';
-import { getVendorRouter } from './edges/vendor_edge';
+import { getSourceRuleToNaturalLanguageNode } from './nodes/source_rule_to_natural_language/source_rule_to_natural_language';
 
 export function getRuleMigrationAgent({
   model,
@@ -30,7 +30,8 @@ export function getRuleMigrationAgent({
     telemetryClient,
   });
 
-  const resolveDepsToolNode = new ToolNode([tools.getRulesByName, tools.getResourceByType]);
+  const resolveDepsTools = [tools.getRulesByName, tools.getResourceByType];
+  const resolveDepsToolNode = new ToolNode(resolveDepsTools);
 
   const translationSubGraph = getTranslateRuleGraph({
     model,
@@ -39,29 +40,28 @@ export function getRuleMigrationAgent({
     telemetryClient,
     logger,
   });
-  const resolveDependenciesNode = getResolveDepsNode({
-    model: model.bindTools(Object.values(tools)),
+  const sourceRuleToNaturalLanguageNode = getSourceRuleToNaturalLanguageNode({
+    model: model.bindTools(resolveDepsTools),
   });
   const createSemanticQueryNode = getCreateSemanticQueryNode({ model });
 
   const siemMigrationAgentGraph = new StateGraph(migrateRuleState, migrateRuleConfigSchema)
     // Nodes
-    .addNode('resolveDependencies', resolveDependenciesNode)
+    .addNode('sourceRuleToNaturalLanguage', sourceRuleToNaturalLanguageNode)
     .addNode('createSemanticQuery', createSemanticQueryNode)
     .addNode('resolveDepsTools', resolveDepsToolNode)
     .addNode('matchPrebuiltRule', matchPrebuiltRuleNode)
     .addNode('translationSubGraph', translationSubGraph)
     // Edges
-    .addConditionalEdges(START, getVendorRouter('qradar'), {
-      is_qradar: 'resolveDependencies',
-      is_not_qradar: 'createSemanticQuery',
+    .addConditionalEdges(START, vendorNeedsInterpretation, {
+      to_natural_language: 'sourceRuleToNaturalLanguage',
+      not_to_natural_language: 'createSemanticQuery',
     })
-    // .addEdge(START, 'createSemanticQuery')
-    .addConditionalEdges('resolveDependencies', toolRouter, {
+    .addConditionalEdges('sourceRuleToNaturalLanguage', toolRouter, {
       hasToolCalls: 'resolveDepsTools',
       noToolCalls: 'createSemanticQuery',
     })
-    .addEdge('resolveDepsTools', 'resolveDependencies')
+    .addEdge('resolveDepsTools', 'sourceRuleToNaturalLanguage')
     .addConditionalEdges('createSemanticQuery', skipPrebuiltRuleConditional, [
       'matchPrebuiltRule',
       'translationSubGraph',
@@ -75,6 +75,13 @@ export function getRuleMigrationAgent({
   const graph = siemMigrationAgentGraph.compile();
   graph.name = 'Rule Migration Graph'; // Customizes the name displayed in LangSmith
   return graph;
+}
+
+function vendorNeedsInterpretation(state: MigrateRuleState): string {
+  const { vendor } = state.original_rule;
+  return vendor === 'qradar' || vendor === 'microsoft-sentinel'
+    ? 'to_natural_language'
+    : 'not_to_natural_language';
 }
 
 const skipPrebuiltRuleConditional = (_state: MigrateRuleState, config: MigrateRuleConfig) => {
@@ -94,5 +101,7 @@ const matchedPrebuiltRuleConditional = (state: MigrateRuleState) => {
 export function toolRouter(state: MigrateRuleState): string {
   const messages = state.messages;
   const lastMessage = messages.at(-1);
-  return lastMessage?.tool_calls?.length ? 'hasToolCalls' : 'noToolCalls';
+  return AIMessage.isInstance(lastMessage) && lastMessage?.tool_calls?.length
+    ? 'hasToolCalls'
+    : 'noToolCalls';
 }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRouter, RouteConfigOptions, HttpAuth } from '@kbn/core-http-server';
+import type { IRouter, HttpAuth } from '@kbn/core-http-server';
 import { createRoot, request } from '@kbn/core-test-helpers-kbn-server';
 
 describe('http auth', () => {
@@ -26,19 +26,21 @@ describe('http auth', () => {
     await root.shutdown();
   });
 
-  const registerRoute = (
-    router: IRouter,
-    auth: HttpAuth,
-    authRequired: RouteConfigOptions<'get'>['authRequired']
-  ) => {
+  const testRouteAuthz = {
+    enabled: false as const,
+    reason: 'This route is part of an HTTP integration test and does not require authorization.',
+  };
+
+  const registerRoute = (router: IRouter, auth: HttpAuth, authcEnabled: boolean | 'optional') => {
+    const security =
+      authcEnabled === true
+        ? { authz: testRouteAuthz }
+        : { authc: { enabled: authcEnabled, reason: '' }, authz: testRouteAuthz };
     router.get(
       {
         path: '/route',
-        security: { authz: { enabled: false, reason: '' } },
+        security,
         validate: false,
-        options: {
-          authRequired,
-        },
       },
       (context, req, res) => res.ok({ body: { authenticated: auth.isAuthenticated(req) } })
     );

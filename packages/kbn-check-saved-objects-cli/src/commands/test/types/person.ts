@@ -34,7 +34,35 @@ const fullNameBackfill: SavedObjectModelDataBackfillFn<PersonV1, PersonV2> = (do
   };
 };
 
-export const PERSON_SO_TYPE: Partial<SavedObjectsType> = {
+export const PERSON_SO_TYPE_V1: Partial<SavedObjectsType> = {
+  name: 'person-so-type',
+  mappings: {
+    dynamic: false,
+    properties: {
+      firstName: { type: 'text' },
+      lastName: { type: 'text' },
+    },
+  },
+  modelVersions: {
+    1: {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            firstName: { type: 'text' },
+            lastName: { type: 'text' },
+          },
+        },
+      ],
+      schemas: {
+        forwardCompatibility: personSchemaV1.extends({}, { unknowns: 'ignore' }),
+        create: personSchemaV1,
+      },
+    },
+  },
+};
+
+export const PERSON_SO_TYPE_V2: Partial<SavedObjectsType> = {
   name: 'person-so-type',
   mappings: {
     dynamic: false,

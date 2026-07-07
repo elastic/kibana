@@ -22,6 +22,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
 import useEvent from 'react-use/lib/useEvent';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { SharedConversationCallout } from './shared_conversation_callout';
 import { AssistantBody } from './assistant_body';
 import { useCurrentConversation } from './use_current_conversation';
@@ -35,7 +36,6 @@ import { ContextPills } from './context_pills';
 import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selected_prompt_context';
 import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
-import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { ConversationSidePanel } from './conversations/conversation_sidepanel';
 import { SelectedPromptContexts } from './prompt_editor/selected_prompt_contexts';
 import { AssistantHeader } from './assistant_header';
@@ -124,6 +124,7 @@ const AssistantComponent: React.FC<Props> = ({
   // Connector details
   const { data: connectors, isFetchedAfterMount: isFetchedConnectors } = useLoadConnectors({
     http,
+    featureId: 'elastic_assistant',
     settings,
   });
   const defaultConnector = useMemo(

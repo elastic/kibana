@@ -15,12 +15,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
+  // Switching `lnsXYvis` to a datatable re-applies the datatable's empty-rows
+  // default to its `@timestamp` row, which inserts empty boundary buckets and
+  // shifts every later row/cell assertion in this shared-state suite. Turn the
+  // option back off so the table matches the populated-only layout the
+  // assertions below were written against.
+  const disableEmptyRowsOnDateHistogramRow = async () => {
+    const triggerTexts = await lens.getDimensionTriggersTexts('lnsDatatable_rows');
+    const dateHistogramIndex = triggerTexts.findIndex((text) => text.includes('@timestamp'));
+    await lens.openDimensionEditor(
+      'lnsDatatable_rows > lns-dimensionTrigger',
+      0,
+      dateHistogramIndex
+    );
+    await testSubjects.setEuiSwitch('indexPattern-include-empty-rows', 'uncheck');
+    await lens.closeDimensionEditor();
+  };
+
   describe('lens datatable', () => {
     it('should able to sort a table by a column', async () => {
       await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await lens.clickVisualizeListItemTitle('lnsXYvis');
       await lens.switchToVisualization('lnsDatatable');
+      await disableEmptyRowsOnDateHistogramRow();
       // Sort by number
       await lens.changeTableSortingBy(2, 'ascending');
       await lens.waitForVisualization();
@@ -188,7 +206,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const styleObj = await lens.getDatatableCellStyle(0, 2);
       expect(styleObj['background-color']).to.be('rgb(140, 217, 187)');
       // should also set text color when in cell mode
-      expect(styleObj.color).to.be('rgb(0, 0, 0)');
+      expect(styleObj.color).to.be('rgb(7, 16, 31)');
     });
 
     it('should open the palette panel to customize the palette look', async () => {
@@ -239,10 +257,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lnsPalettePanel_dynamicColoring_reverseColors');
       await lens.waitForVisualization();
       const styleObj = await lens.getDatatableCellStyle(1, 1);
-      expect(styleObj['background-color']).to.be('rgb(200, 222, 255)');
+      expect(styleObj['background-color']).to.be('rgb(207, 225, 255)');
       // should also set text color when in cell mode
-      expect(styleObj.color).to.be('rgb(0, 0, 0)');
+      expect(styleObj.color).to.be('rgb(7, 16, 31)');
       await lens.closePalettePanel();
+    });
+
+    it('should render values as badges when badge coloring is enabled', async () => {
+      await lens.setTableDynamicColoring('badge');
+      await lens.waitForVisualization();
+      const cell = await lens.getDatatableCell(0, 2);
+      const badge = await cell.findByTestSubject('lnsTableCellContentBadge');
+      const badgeText = await badge.getVisibleText();
+      expect(badgeText).to.not.be.empty();
+      const cellStyle = await lens.getDatatableCellStyle(0, 2);
+      expect(cellStyle['background-color']).to.be(undefined);
     });
 
     it('should allow to show a summary table for metric columns', async () => {

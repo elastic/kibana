@@ -15,6 +15,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { FileUploadManager } from '@kbn/file-upload';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { FileUploadPluginStart, MessageImporter } from '@kbn/file-upload-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
@@ -43,6 +44,7 @@ export interface EditLookupIndexFlyoutDeps {
   fieldFormats: FieldFormatsStart;
   share: SharePluginStart;
   fileUpload: FileUploadPluginStart;
+  kql: KqlPluginStart;
 }
 
 export type FlyoutDeps = EditLookupIndexFlyoutDeps & {
@@ -73,6 +75,7 @@ export interface KibanaContextExtra {
   fileUpload: FileUploadPluginStart;
   messageImporter: MessageImporter;
   storage: Storage;
+  kql: KqlPluginStart;
 }
 
 export interface IndexEditorError {

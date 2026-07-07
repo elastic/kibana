@@ -35,9 +35,20 @@ The context variables available are:
 - `pattern` - the entire pattern, as an array of 'a' and '-' chars
 - `runs` - total number of runs of the rule
 
-There is no UX for this (yet), so you'll need to use `curl` to create/update
-the rule.  The following also uses [`jq`](https://stedolan.github.io/jq/) 
-to create a connector and capture it's id to use with the rule.
+## Using the UI
+
+Run Kibana with `--run-examples` to enable the alerting example plugin.
+Navigate to **Stack Management > Rules** and create a new rule of type
+**Example: Creates alerts on a pattern, for testing**. The UI lets you
+add/remove alert instances, edit their patterns, and shows an execution
+preview grid. Set a long schedule (e.g. daily) and use **Run Soon** to
+step through executions manually.
+
+## Using curl
+
+You can also use `curl` to create/update the rule. The following also
+uses [`jq`](https://stedolan.github.io/jq/) to create a connector and
+capture its id to use with the rule.
 
 ```console
 SERVER_LOG_ID=`curl $KBN_URL/api/actions/connector -H "kbn-xsrf: foo" -H "content-type: application/json" -d '{

@@ -15,6 +15,9 @@ export const RotateKeyPairSchema = {
       {
         acknowledge: schema.boolean({
           defaultValue: false,
+          meta: {
+            description: 'Set to true to confirm you understand the risks of rotating the key pair',
+          },
         }),
       },
       {

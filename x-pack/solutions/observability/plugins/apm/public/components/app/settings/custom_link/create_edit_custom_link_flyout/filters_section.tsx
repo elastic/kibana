@@ -198,7 +198,7 @@ export function AddFilterButton({
         }
       )}
       data-test-subj="apmCustomLinkAddFilterButtonAddAnotherFilterButton"
-      iconType="plusInCircle"
+      iconType="plusCircle"
       onClick={onClick}
       disabled={isDisabled}
     >

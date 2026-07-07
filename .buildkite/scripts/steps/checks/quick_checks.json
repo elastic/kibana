@@ -16,6 +16,10 @@
     "mayChangeFiles": true
   },
   {
+    "script": ".buildkite/scripts/steps/checks/verify_user_activity_docs.sh",
+    "mayChangeFiles": true
+  },
+  {
     "script": ".buildkite/scripts/steps/checks/event_log.sh",
     "mayChangeFiles": true
   },
@@ -95,5 +99,8 @@
   {
     "script": ".buildkite/scripts/steps/checks/verify_moon_projects.sh",
     "mayChangeFiles": true
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/unused_deps.sh"
   }
 ]

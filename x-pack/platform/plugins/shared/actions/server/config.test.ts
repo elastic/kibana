@@ -25,6 +25,20 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "auth": Object {
+          "oauth_authorization_code": Object {
+            "rate_limits": Object {
+              "authorize": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+              "callback": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+            },
+          },
+        },
         "enableFooterInEmail": true,
         "enabledActionTypes": Array [
           "*",
@@ -59,6 +73,20 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "auth": Object {
+          "oauth_authorization_code": Object {
+            "rate_limits": Object {
+              "authorize": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+              "callback": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+            },
+          },
+        },
         "enableFooterInEmail": true,
         "enabledActionTypes": Array [
           "*",
@@ -202,6 +230,20 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "auth": Object {
+          "oauth_authorization_code": Object {
+            "rate_limits": Object {
+              "authorize": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+              "callback": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+            },
+          },
+        },
         "enableFooterInEmail": true,
         "enabledActionTypes": Array [
           "*",
@@ -372,6 +414,20 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "auth": Object {
+          "oauth_authorization_code": Object {
+            "rate_limits": Object {
+              "authorize": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+              "callback": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+            },
+          },
+        },
         "enableFooterInEmail": true,
         "enabledActionTypes": Array [
           "*",
@@ -496,6 +552,56 @@ describe('config validation', () => {
       const result = configSchema.validate(config);
       expect(result.email?.services?.enabled).toEqual(['google-mail', 'amazon-ses']);
       expect(result.email?.services?.ses).toBeUndefined();
+    });
+  });
+
+  describe('auth.ears.ssl', () => {
+    test('accepts certificate and key together', () => {
+      const result = configSchema.validate({
+        auth: {
+          ears: {
+            ssl: {
+              verificationMode: 'full',
+              certificate: '/path/to/cert.pem',
+              key: '/path/to/key.pem',
+            },
+          },
+        },
+      });
+      expect(result.auth?.ears?.ssl?.certificate).toBe('/path/to/cert.pem');
+      expect(result.auth?.ears?.ssl?.key).toBe('/path/to/key.pem');
+    });
+
+    test('throws when certificate is specified without key', () => {
+      expect(() =>
+        configSchema.validate({
+          auth: {
+            ears: {
+              ssl: {
+                certificate: '/path/to/cert.pem',
+              },
+            },
+          },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[auth.ears.ssl]: must specify [auth.ears.ssl.key] when [auth.ears.ssl.certificate] is specified"`
+      );
+    });
+
+    test('throws when key is specified without certificate', () => {
+      expect(() =>
+        configSchema.validate({
+          auth: {
+            ears: {
+              ssl: {
+                key: '/path/to/key.pem',
+              },
+            },
+          },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[auth.ears.ssl]: must specify [auth.ears.ssl.certificate] when [auth.ears.ssl.key] is specified"`
+      );
     });
   });
 });

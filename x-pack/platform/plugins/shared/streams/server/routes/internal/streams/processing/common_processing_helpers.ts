@@ -9,12 +9,13 @@ import type {
   CustomToolChoice,
   InferenceClient,
   Prompt,
+  PromptOptions,
   PromptVersion,
   ToolCallOfToolDefinitions,
 } from '@kbn/inference-common';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
-import { Streams } from '@kbn/streams-schema';
+import { isOtelStream } from '@kbn/streams-schema';
 import { prefixOTelField } from '@kbn/otel-semantic-conventions';
 import type { StreamsClient } from '../../../../lib/streams/client';
 import { NoLLMSuggestionsError } from './no_llm_suggestions_error';
@@ -33,15 +34,15 @@ type ToolCallArgumentsOfPrompt<TPrompt extends Prompt> = ToolCallOfToolDefinitio
 
 /**
  * Determines whether OTEL field names should be used for a given stream.
- * Returns true if the stream is a wired stream or matches the logs-*.otel-* pattern.
+ * Returns true if the stream uses OTel naming conventions (wired non-ECS streams
+ * or classic streams matching the logs-*.otel-* pattern).
  */
 export async function determineOtelFieldNameUsage(
   streamsClient: StreamsClient,
   streamName: string
 ): Promise<boolean> {
   const stream = await streamsClient.getStream(streamName);
-  const isWiredStream = Streams.WiredStream.Definition.is(stream);
-  return isWiredStream || !!streamName.match(/^logs-.*\.otel-/);
+  return isOtelStream(stream);
 }
 
 /**
@@ -50,6 +51,7 @@ export async function determineOtelFieldNameUsage(
  */
 export async function callInferenceWithPrompt<
   TPrompt extends Prompt<
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     any,
     Array<Omit<PromptVersion, 'toolChoice'> & { toolChoice: CustomToolChoice }>
   >
@@ -67,7 +69,7 @@ export async function callInferenceWithPrompt<
     input: {
       sample_messages: sampleMessages,
       review_fields: JSON.stringify(reviewFields),
-    },
+    } as PromptOptions<TPrompt>['input'],
     abortSignal: signal,
   });
 

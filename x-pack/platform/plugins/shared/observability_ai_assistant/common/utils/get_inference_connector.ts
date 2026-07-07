@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { Connector } from '@kbn/actions-plugin/server';
 import {
   getConnectorProvider,
   getConnectorFamily,
   getConnectorModel,
   connectorToInference,
+  type InferenceConnector as CommonInferenceConnector,
+  type RawConnector,
   type InferenceConnectorType,
   type ModelFamily,
   type ModelProvider,
@@ -26,12 +27,13 @@ export interface InferenceConnector {
 }
 
 export const getInferenceConnectorInfo = (
-  connector?: Connector
+  connector?: CommonInferenceConnector | RawConnector
 ): InferenceConnector | undefined => {
   if (!connector) {
     return;
   }
-  const inferenceConnector = connectorToInference(connector);
+  const inferenceConnector =
+    'connectorId' in connector ? connector : connectorToInference(connector);
   const modelFamily = getConnectorFamily(inferenceConnector);
   const modelProvider = getConnectorProvider(inferenceConnector);
   const modelId = getConnectorModel(inferenceConnector);

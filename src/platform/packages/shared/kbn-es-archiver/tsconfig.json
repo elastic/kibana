@@ -22,6 +22,7 @@
     "@kbn/repo-info",
     "@kbn/jest-serializers",
     "@kbn/apm-utils",
+    "@kbn/std",
   ],
   "exclude": [
     "target/**/*",

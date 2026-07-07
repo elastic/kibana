@@ -23,11 +23,29 @@ import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { createActionService } from './handlers/action/create_action_service';
 
+export interface CheckResponseActionAuthzParams {
+  saved_query_id?: string;
+  pack_id?: string;
+}
+
 export interface OsqueryPluginSetup {
   createActionService: ReturnType<typeof createActionService>;
+  /**
+   * Validates that the requesting user has the required osquery privileges
+   * for the given response action configuration.
+   * Throws a 403 CustomHttpRequestError if the user lacks authorization.
+   *
+   * Used by security_solution when creating/updating detection rules
+   * that include osquery response actions.
+   */
+  checkResponseActionAuthz: (
+    request: KibanaRequest,
+    actionParams: CheckResponseActionAuthzParams
+  ) => Promise<void>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -50,6 +68,7 @@ export interface StartPlugins {
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
   fleet?: FleetStartContract;
+  security: SecurityPluginStart;
   taskManager?: TaskManagerPluginStart;
   telemetry?: TelemetryPluginStart;
   ruleRegistry?: RuleRegistryPluginStartContract;

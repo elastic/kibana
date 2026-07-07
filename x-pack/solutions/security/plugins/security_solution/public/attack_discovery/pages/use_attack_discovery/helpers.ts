@@ -56,8 +56,7 @@ const getAzureApiVersionParameter = (url: string): string | undefined => {
 export const getRequestBody = ({
   alertsIndexPattern,
   anonymizationFields,
-  genAiConfig,
-  selectedConnector,
+  connectorId,
   size,
   traceOptions,
 }: {
@@ -79,9 +78,8 @@ export const getRequestBody = ({
       namespace?: string | undefined;
     }>;
   };
-  genAiConfig?: GenAiConfig;
+  connectorId: string;
   size: number;
-  selectedConnector?: ActionConnector;
   traceOptions: TraceOptions;
 }): PostAttackDiscoveryGenerateRequestBody => ({
   alertsIndexPattern: alertsIndexPattern ?? '',
@@ -96,9 +94,7 @@ export const getRequestBody = ({
   size,
   subAction: 'invokeAI', // non-streaming
   apiConfig: {
-    connectorId: selectedConnector?.id ?? '',
-    actionTypeId: selectedConnector?.actionTypeId ?? '',
-    provider: genAiConfig?.apiProvider,
-    model: genAiConfig?.defaultModel,
+    connectorId,
+    actionTypeId: '', // resolved server-side via inference.getConnectorById
   },
 });

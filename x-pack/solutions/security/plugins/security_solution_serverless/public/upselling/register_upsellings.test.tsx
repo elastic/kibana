@@ -15,8 +15,10 @@ import { mockServices } from '../common/services/__mocks__/services.mock';
 import { of } from 'rxjs';
 
 const mockGetEnabledProductFeatures = jest.fn();
+const mockGetRequiredProductTypesForFeature = jest.fn();
 jest.mock('../../common/pli/pli_features', () => ({
   getEnabledProductFeatures: () => mockGetEnabledProductFeatures(),
+  getRequiredProductTypesForFeature: () => mockGetRequiredProductTypesForFeature(),
 }));
 
 const setPages = jest.fn();
@@ -78,5 +80,16 @@ describe('registerUpsellings', () => {
     );
     expect(setMessages).toHaveBeenCalledTimes(1);
     expect(setMessages).toHaveBeenCalledWith(expectedMessagesObject);
+  });
+
+  it('should set the unavailable workflows when the workflows feature is disabled', () => {
+    mockGetEnabledProductFeatures.mockReturnValue([]);
+    mockGetRequiredProductTypesForFeature.mockReturnValue(['Security: Complete']);
+
+    registerUpsellings(allProductTypes, mockServices);
+
+    expect(mockServices.workflowsManagement?.setUnavailableInServerlessTier).toHaveBeenCalledWith({
+      requiredProducts: ['Security: Complete'],
+    });
   });
 });

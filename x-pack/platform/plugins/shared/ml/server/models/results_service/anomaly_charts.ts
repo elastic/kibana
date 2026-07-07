@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import type { ErrorType } from 'eventsource-parser';
+import { each, find, get, keyBy, map, reduce, sortBy } from 'lodash';
+import { extent, max, min } from 'd3';
+
+import type { estypes } from '@elastic/elasticsearch';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { each, find, get, keyBy, map, reduce, sortBy } from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
-import { extent, max, min } from 'd3';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import {
@@ -27,11 +30,8 @@ import {
 } from '@kbn/ml-anomaly-utils';
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
-
+import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import type { CriteriaField } from '@kbn/ml-anomaly-utils/types';
-import type { ErrorType } from 'eventsource-parser';
-import type { SeverityThreshold } from '../../../common/types/anomalies';
-import type { MlClient } from '../../lib/ml_client';
 import type {
   MetricData,
   ModelPlotOutput,
@@ -42,7 +42,11 @@ import type {
   ChartPoint,
   SeriesConfig,
   ExplorerChartsData,
-} from '../../../common/types/results';
+} from '@kbn/ml-common-types/results';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import { getSeverityThresholdMax } from '../../../common/util/severity_threshold';
+
 import {
   isMappableJob,
   isModelPlotChartableForDetector,
@@ -51,13 +55,13 @@ import {
   ML_MEDIAN_PERCENTS,
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
-import type { CombinedJob, Datafeed } from '../../shared';
-
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { findAggField } from '../../../common/util/validation_utils';
 import type { ChartType } from '../../../common/constants/charts';
 import { CHART_TYPE, SCHEDULE_EVENT_MARKER_ENTITY } from '../../../common/constants/charts';
 import { getChartType } from '../../../common/util/chart_utils';
+
+import type { MlClient } from '../../lib/ml_client';
 import type { MlJob } from '../..';
 
 export function chartLimits(data: ChartPoint[] = []) {
@@ -955,9 +959,11 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
     const filteredRecords = anomalyRecords.filter((record) => {
       return severity.some((threshold) => {
+        const thresholdMax = getSeverityThresholdMax(threshold);
+
         return (
           Number(record.record_score) >= threshold.min &&
-          (threshold.max === undefined || Number(record.record_score) <= threshold.max)
+          (thresholdMax === undefined || Number(record.record_score) <= thresholdMax)
         );
       });
     });
@@ -1946,14 +1952,18 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       });
     }
 
-    const thresholdCriteria = threshold.map((t) => ({
-      range: {
-        record_score: {
-          gte: t.min,
-          ...(t.max !== undefined && { lte: t.max }),
+    const thresholdCriteria = threshold.map((t) => {
+      const thresholdMax = getSeverityThresholdMax(t);
+
+      return {
+        range: {
+          record_score: {
+            gte: t.min,
+            ...(thresholdMax !== undefined && { lte: thresholdMax }),
+          },
         },
-      },
-    }));
+      };
+    });
 
     boolCriteria.push({
       bool: {

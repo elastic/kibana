@@ -10,7 +10,7 @@
 import type YAML from 'yaml';
 import { isScalar } from 'yaml';
 import type { monaco } from '@kbn/monaco';
-import { isDynamicValue, isLiquidTagValue, isVariableValue } from '../../../../common/lib/regex';
+import { isDynamicValue, isLiquidTagValue, isVariableValue } from '@kbn/workflows-yaml';
 import { getScalarValueAtOffset } from '../../../../common/lib/yaml/get_scalar_value_at_offset';
 
 export function filterMonacoYamlMarkers(

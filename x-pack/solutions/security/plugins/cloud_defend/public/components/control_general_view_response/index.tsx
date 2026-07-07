@@ -287,7 +287,7 @@ export const ControlGeneralViewResponse = ({
               <b>{i18n.actions}: </b>
               {response.actions?.map((action, i) => (
                 <span key={action}>
-                  <b css={{ color: action === 'block' ? colors.danger : colors.ink }}>
+                  <b css={{ color: action === 'block' ? colors.danger : colors.textInk }}>
                     {action[0].toUpperCase() + action.slice(1)}
                   </b>
                   {i !== (response.actions?.length || 0) - 1 && ', '}
@@ -299,12 +299,14 @@ export const ControlGeneralViewResponse = ({
           <EuiFlexItem>
             <EuiPopover
               button={
-                <EuiButtonIcon
-                  iconType="boxesHorizontal"
-                  onClick={onTogglePopover}
-                  aria-label="Response options"
-                  data-test-subj="cloud-defend-btnresponsepopover"
-                />
+                <EuiToolTip content="Response options" disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="boxesHorizontal"
+                    onClick={onTogglePopover}
+                    aria-label="Response options"
+                    data-test-subj="cloud-defend-btnresponsepopover"
+                  />
+                </EuiToolTip>
               }
               isOpen={isPopoverOpen}
               closePopover={closePopover}
@@ -312,7 +314,6 @@ export const ControlGeneralViewResponse = ({
               anchorPosition="downLeft"
             >
               <EuiContextMenuPanel
-                size="s"
                 items={[
                   <EuiContextMenuItem
                     key="duplicate"

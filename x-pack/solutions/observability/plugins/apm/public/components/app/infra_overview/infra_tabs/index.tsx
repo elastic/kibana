@@ -8,47 +8,22 @@
 import { EuiLoadingSpinner, EuiTabs, EuiTab } from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useTimeRange } from '../../../../hooks/use_time_range';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useInfrastructureAttributes } from '../use_infrastructure_attributes';
 import { EmptyPrompt } from './empty_prompt';
 import { FailurePrompt } from './failure_prompt';
-import { useTabs } from './use_tabs';
+import { InfraTab, useTabs } from './use_tabs';
 import { push } from '../../../shared/links/url_helpers';
 
-const INITIAL_STATE = {
-  containerIds: [],
-  hostNames: [],
-  podNames: [],
+const infraTabTestSubjects: Record<InfraTab, string> = {
+  [InfraTab.containers]: 'apmInfraTabsContainersTab',
+  [InfraTab.pods]: 'apmInfraTabsPodsTab',
+  [InfraTab.hosts]: 'apmInfraTabsHostsTab',
 };
 
 export function InfraTabs() {
-  const { serviceName } = useApmServiceContext();
+  const { agentName, data, detailTab, end, start, status } = useInfrastructureAttributes();
   const history = useHistory();
-  const {
-    query: { environment, kuery, rangeFrom, rangeTo, detailTab },
-  } = useApmParams('/services/{serviceName}/infrastructure');
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const { data = INITIAL_STATE, status } = useFetcher(
-    (callApmApi) => {
-      if (start && end) {
-        return callApmApi('GET /internal/apm/services/{serviceName}/infrastructure_attributes', {
-          params: {
-            path: { serviceName },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-            },
-          },
-        });
-      }
-    },
-    [environment, kuery, serviceName, start, end]
-  );
 
   const { containerIds, podNames, hostNames } = data;
 
@@ -56,6 +31,7 @@ export function InfraTabs() {
     containerIds,
     podNames,
     hostNames,
+    agentName,
     start,
     end,
   });
@@ -97,6 +73,7 @@ export function InfraTabs() {
         {tabs.map(({ id, name }) => {
           return (
             <EuiTab
+              key={id}
               onClick={() => {
                 push(history, {
                   query: {
@@ -106,6 +83,7 @@ export function InfraTabs() {
               }}
               isSelected={currentTab.id === id}
               id={id}
+              data-test-subj={infraTabTestSubjects[id]}
             >
               {name}
             </EuiTab>

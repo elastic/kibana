@@ -35,9 +35,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
 
-  // https://github.com/elastic/kibana/pull/190690
-  // fails after missing `awaits` were added
-  // Flaky: See https://github.com/elastic/kibana/issues/241493
   describe('Case View', function () {
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
@@ -101,7 +98,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         // validate user action
         const newComment = await find.byCssSelector(
-          '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+          '[data-test-subj="comment-comment-comment"] [data-test-subj="scrollable-markdown"]'
         );
         expect(await newComment.getVisibleText()).equal('Test comment from automation');
       });
@@ -397,9 +394,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('case-view-tab-title-attachments');
       });
       it('adds a file to the case', async () => {
-        await testSubjects.click('case-view-tab-title-files');
-        await testSubjects.existOrFail('case-view-tab-content-files');
-
         await cases.casesFilesTable.addFile(require.resolve('./note.txt'));
 
         const uploadedFileName = await testSubjects.getVisibleText('cases-files-name-text');

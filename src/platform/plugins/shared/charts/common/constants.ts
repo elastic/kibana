@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KbnPaletteId } from '@kbn/palettes';
+
+type SystemPaletteId = KbnPaletteId | 'kibana_palette' | 'custom' | 'negative' | 'positive';
+
 // Currently supported palettes. This list might be extended dynamically in a later release
-export const paletteIds = [
+export const paletteIds: SystemPaletteId[] = [
   'default',
+  'elastic_line_optimized',
   'kibana_palette',
   'custom',
   'status',

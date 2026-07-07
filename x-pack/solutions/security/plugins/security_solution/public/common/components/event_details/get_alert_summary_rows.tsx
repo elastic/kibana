@@ -4,23 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { find, uniqBy } from 'lodash/fp';
+import { uniqBy } from 'lodash/fp';
 import { ALERT_RULE_PARAMETERS, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 
-import { EventCode, EventCategory } from '@kbn/securitysolution-ecs';
+import { EventCategory, EventCode } from '@kbn/securitysolution-ecs';
 import { i18n } from '@kbn/i18n';
 import { SUPPORTED_AGENT_ID_ALERT_FIELDS } from '../../../../common/endpoint/service/response_actions/constants';
 import {
+  ALERTS_HEADERS_NEW_TERMS,
+  ALERTS_HEADERS_NEW_TERMS_FIELDS,
+  ALERTS_HEADERS_RULE_DESCRIPTION,
   ALERTS_HEADERS_THRESHOLD_CARDINALITY,
   ALERTS_HEADERS_THRESHOLD_COUNT,
   ALERTS_HEADERS_THRESHOLD_TERMS,
-  ALERTS_HEADERS_RULE_DESCRIPTION,
-  ALERTS_HEADERS_NEW_TERMS,
-  ALERTS_HEADERS_NEW_TERMS_FIELDS,
 } from '../../../detections/components/alerts_table/translations';
 import {
-  ALERT_NEW_TERMS_FIELDS,
   ALERT_NEW_TERMS,
+  ALERT_NEW_TERMS_FIELDS,
   ALERT_THRESHOLD_RESULT,
 } from '../../../../common/field_maps/field_names';
 import {
@@ -29,7 +29,6 @@ import {
   QUARANTINED_PATH_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import type { EventSummaryField } from './types';
-import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { EVENT_SOURCE_FIELD_DESCRIPTOR } from './translations';
 
 const THRESHOLD_TERMS_FIELD = `${ALERT_THRESHOLD_RESULT}.terms.field`;
@@ -50,13 +49,19 @@ const RULE_TYPE = i18n.translate('xpack.securitySolution.detections.alerts.ruleT
   defaultMessage: 'Rule type',
 });
 
+/** Host EUID fields (entity store priority: host.entity.id > host.id > host.name > host.hostname) */
+const HOST_EUID_FIELDS: EventSummaryField[] = [{ id: 'host.name' }];
+
+/** Shown in highlighted fields; other user identity fields stay on the document for EUID / entity resolution. */
+const USER_EUID_FIELDS: EventSummaryField[] = [{ id: 'user.name' }];
+
 /** Always show these fields */
 export const alwaysDisplayedFields: EventSummaryField[] = [
   {
     id: EVENT_SOURCE_FIELD_NAME,
     overrideField: EVENT_SOURCE_FIELD_DESCRIPTOR,
   },
-  { id: 'host.name' },
+  ...HOST_EUID_FIELDS,
 
   // Add all fields used to identify the agent ID in alert events and override them to
   // show the `agent.status` field name/value
@@ -70,7 +75,7 @@ export const alwaysDisplayedFields: EventSummaryField[] = [
 
   // ** //
   { id: 'Endpoint.policy.applied.artifacts.global.channel' },
-  { id: 'user.name' },
+  ...USER_EUID_FIELDS,
   { id: 'rule.name' },
   { id: 'cloud.provider' },
   { id: 'cloud.region' },
@@ -292,28 +297,4 @@ export function getHighlightedFieldsToDisplay({
 interface EventCategories {
   primaryEventCategory?: string;
   allEventCategories?: string[];
-}
-
-/**
- * Extract the event's categories
- * @param data The event details
- * @returns The event's primary category and all other categories in case there is more than one
- */
-export function getEventCategoriesFromData(data: TimelineEventsDetailsItem[]): EventCategories {
-  const eventCategoryField = find({ category: 'event', field: 'event.category' }, data);
-
-  let primaryEventCategory: string | undefined;
-  let allEventCategories: string[] | undefined;
-
-  if (Array.isArray(eventCategoryField?.originalValue)) {
-    primaryEventCategory = eventCategoryField?.originalValue[0];
-    allEventCategories = eventCategoryField?.originalValue;
-  } else {
-    primaryEventCategory = eventCategoryField?.originalValue;
-    if (primaryEventCategory) {
-      allEventCategories = [primaryEventCategory];
-    }
-  }
-
-  return { primaryEventCategory, allEventCategories };
 }

@@ -26,7 +26,7 @@ export const TooltipWrapper: React.FunctionComponent<TooltipWrapperProps> = ({
   return (
     <>
       {condition ? (
-        <EuiToolTip content={tooltipContent} delay="long" {...tooltipProps}>
+        <EuiToolTip content={tooltipContent} {...tooltipProps}>
           <>{children}</>
         </EuiToolTip>
       ) : (

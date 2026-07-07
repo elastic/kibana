@@ -7,7 +7,6 @@
       "node",
       "react",
       "@kbn/ambient-ui-types",
-      "../../../../../typings/emotion.d.ts"
     ]
   },
   "include": [

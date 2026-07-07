@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+
 import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
@@ -20,7 +22,6 @@ import memoizeOne from 'memoize-one';
 import { flatten, isEqual } from 'lodash';
 import type {
   DatasourceDimensionEditorProps,
-  DatasourceDataPanelProps,
   DatasourceLayerPanelProps,
   PublicAPIProps,
   DataType,
@@ -36,9 +37,9 @@ import type {
   Datasource,
   DatasourceSuggestion,
 } from '@kbn/lens-common';
-import { TextBasedDataPanel } from './components/datapanel';
 import { TextBasedDimensionEditor } from './components/dimension_editor';
 import { TextBasedDimensionTrigger } from './components/dimension_trigger';
+import { LayerSettingsPanel } from './layer_settings';
 import { toExpression } from './to_expression';
 import { generateId } from '../../id_generator';
 import { getUniqueLabelGenerator, nonNullable } from '../../utils';
@@ -307,7 +308,7 @@ export function getTextBasedDatasource({
     return [];
   };
   const TextBasedDatasource: Datasource<TextBasedPrivateState, TextBasedPersistedState> = {
-    id: 'textBased',
+    id: LENS_DATASOURCE_ID.TEXT_BASED,
 
     checkIntegrity: () => {
       return [];
@@ -348,9 +349,29 @@ export function getTextBasedDatasource({
         };
       });
 
-      const initState = state || { layers: {} };
+      const initState = state ?? { layers: {} };
+      const hydratedLayers: typeof initState.layers = {};
+
+      // Validate the layers without a timeField configured at runtime.
+      // The ad-hoc DataView specs are regenerated at initialization (with time field
+      // detection via HTTP), but the persisted layer state may not have a timeField (if comes from the API)
+      // This ensures each layer picks up the correct timeFieldName so that
+      // time-based filtering works correctly for ES|QL visualizations.
+      for (const [layerId, layer] of Object.entries(initState.layers)) {
+        if (layer.timeField || !indexPatterns) {
+          hydratedLayers[layerId] = layer;
+          continue;
+        }
+
+        const matchedIndexPattern = layer.index ? indexPatterns[layer.index] : undefined;
+        hydratedLayers[layerId] = matchedIndexPattern?.timeFieldName
+          ? { ...layer, timeField: matchedIndexPattern.timeFieldName }
+          : layer;
+      }
+
       return {
         ...initState,
+        layers: hydratedLayers,
         indexPatternRefs: refs,
         initialContext: context,
       };
@@ -444,15 +465,10 @@ export function getTextBasedDatasource({
     getLayers(state: TextBasedPrivateState) {
       return state && state.layers ? Object.keys(state?.layers) : [];
     },
-    isTimeBased: (state, indexPatterns) => {
+    isTimeBased: (state) => {
       if (!state) return false;
       const { layers } = state;
-      return (
-        Boolean(layers) &&
-        Object.values(layers).some((layer) => {
-          return layer.index && Boolean(indexPatterns[layer.index]?.timeFieldName);
-        })
-      );
+      return Boolean(layers) && Object.values(layers).some((layer) => Boolean(layer.timeField));
     },
     getUsedDataView: (state: TextBasedPrivateState, layerId?: string) => {
       if (!layerId || !state.layers[layerId].index) {
@@ -473,18 +489,7 @@ export function getTextBasedDatasource({
       );
     },
 
-    DataPanelComponent(props: DatasourceDataPanelProps<TextBasedPrivateState>) {
-      const layerFields = TextBasedDatasource?.getSelectedFields?.(props.state);
-      return (
-        <TextBasedDataPanel
-          data={data}
-          dataViews={dataViews}
-          expressions={expressions}
-          layerFields={layerFields}
-          {...props}
-        />
-      );
-    },
+    DataPanelComponent: () => null,
 
     DimensionTriggerComponent: (props: DatasourceDimensionTriggerProps<TextBasedPrivateState>) => {
       const columnLabelMap = TextBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
@@ -517,6 +522,8 @@ export function getTextBasedDatasource({
       return null;
     },
 
+    LayerSettingsComponent: LayerSettingsPanel,
+
     uniqueLabels(state: TextBasedPrivateState) {
       const layers = state.layers;
       const columnLabelMap = {} as Record<string, string>;
@@ -527,7 +534,9 @@ export function getTextBasedDatasource({
           return;
         }
         Object.values(layer.columns).forEach((column) => {
-          columnLabelMap[column.columnId] = uniqueLabelGenerator(column.label ?? column.fieldName);
+          columnLabelMap[column.columnId] = uniqueLabelGenerator(
+            column.customLabel ? column.label ?? column.fieldName : column.fieldName
+          );
         });
       });
 
@@ -537,15 +546,17 @@ export function getTextBasedDatasource({
     onDrop,
     getPublicAPI({ state, layerId, indexPatterns }: PublicAPIProps<TextBasedPrivateState>) {
       return {
-        datasourceId: 'textBased',
+        datasourceId: LENS_DATASOURCE_ID.TEXT_BASED,
 
         getTableSpec: () => {
-          return (
-            state.layers[layerId]?.columns.map((column) => ({
-              columnId: column.columnId,
-              fields: [column.fieldName],
-            })) || []
-          );
+          const layerColumns = state.layers[layerId]?.columns ?? [];
+          // Column ordering: non-metric columns (rows) before metric columns
+          const nonMetric = layerColumns.filter((col) => !(col.inMetricDimension ?? false));
+          const metric = layerColumns.filter((col) => col.inMetricDimension ?? false);
+          return [...nonMetric, ...metric].map((column) => ({
+            columnId: column.columnId,
+            fields: [column.fieldName],
+          }));
         },
         getOperationForColumnId: (columnId: string) => {
           const layer = state.layers[layerId];

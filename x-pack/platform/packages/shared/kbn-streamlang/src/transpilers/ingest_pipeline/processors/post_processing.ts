@@ -10,7 +10,7 @@ import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/ty
 // This can be used to apply any post-processing directly to the ingest pipeline processors.
 export const applyPostProcessing = (processors: IngestProcessorContainer[]) => {
   return processors.map((processor) => {
-    if ('grok' in processor && processor.grok) {
+    if (processor?.grok) {
       return {
         grok: {
           ...processor.grok,

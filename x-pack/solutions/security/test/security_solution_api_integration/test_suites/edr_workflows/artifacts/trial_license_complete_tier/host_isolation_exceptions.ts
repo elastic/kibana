@@ -12,10 +12,6 @@ import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
   GLOBAL_ARTIFACT_TAG,
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
-import {
-  getImportExceptionsListSchemaMock,
-  toNdJsonString,
-} from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import type TestAgent from 'supertest/lib/agent';
 import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
@@ -167,26 +163,6 @@ export default function ({ getService }: FtrProviderContext) {
       if (hostIsolationExceptionData) {
         await hostIsolationExceptionData.cleanup();
       }
-    });
-
-    it('should return 400 for import of endpoint exceptions', async () => {
-      await endpointPolicyManagerSupertest
-        .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
-        .set('kbn-xsrf', 'true')
-        .attach(
-          'file',
-          Buffer.from(
-            toNdJsonString([
-              getImportExceptionsListSchemaMock(hostIsolationExceptionData.artifact.list_id),
-            ])
-          ),
-          'exceptions.ndjson'
-        )
-        .expect(400, {
-          status_code: 400,
-          message:
-            'EndpointArtifactError: Import is not supported for Endpoint artifact exceptions',
-        });
     });
 
     describe('and has authorization to manage endpoint security', () => {

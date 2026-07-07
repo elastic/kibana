@@ -25,6 +25,7 @@ import { lazyObject } from '@kbn/lazy-object';
 const createSetupMock = () => {
   const mock: jest.Mocked<SecurityServiceSetup> = lazyObject({
     registerSecurityDelegate: jest.fn(),
+    acquireFakeRequestEnricher: jest.fn().mockReturnValue(jest.fn()),
     fips: { isEnabled: jest.fn() },
   });
 
@@ -39,6 +40,7 @@ const createStartMock = (): SecurityStartMock => {
   const mock = lazyObject({
     authc: lazyObject({
       getCurrentUser: jest.fn(),
+      getRedactedSessionId: jest.fn().mockResolvedValue(undefined),
       apiKeys: apiKeysMock.create(),
     }),
     audit: auditServiceMock.create(),
@@ -50,7 +52,9 @@ const createStartMock = (): SecurityStartMock => {
 const createInternalSetupMock = () => {
   const mock: jest.Mocked<InternalSecurityServiceSetup> = lazyObject({
     registerSecurityDelegate: jest.fn(),
+    acquireFakeRequestEnricher: jest.fn().mockReturnValue(jest.fn()),
     fips: { isEnabled: jest.fn() },
+    uiam: { sharedSecret: 'some-shared-secret' },
   });
 
   return mock;
@@ -66,6 +70,7 @@ const createInternalStartMock = (): InternalSecurityStartMock => {
   const mock = lazyObject({
     authc: lazyObject({
       getCurrentUser: jest.fn(),
+      getRedactedSessionId: jest.fn().mockResolvedValue(undefined),
       apiKeys: apiKeysMock.create(),
     }),
     audit: auditServiceMock.create(),
@@ -97,7 +102,7 @@ const createRequestHandlerContextMock = () => {
         uiam: {
           grant: jest.fn(),
           invalidate: jest.fn(),
-          getScopedClusterClientWithApiKey: jest.fn(),
+          convert: jest.fn(),
         },
       }),
     }),

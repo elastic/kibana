@@ -65,6 +65,8 @@ export const IndicatorBarchartLegendAction: FC<IndicatorBarchartLegendActionProp
       key={TIMELINE_BUTTON_TEST_ID}
       data={group}
       field={field.label}
+      onAnnounce={announceIndicatorActionChange}
+      showPopover={setPopover}
       data-test-subj={TIMELINE_BUTTON_TEST_ID}
     />,
     <CopyToClipboardContextMenu
@@ -87,7 +89,7 @@ export const IndicatorBarchartLegendAction: FC<IndicatorBarchartLegendActionProp
         <EuiToolTip content={BUTTON_LABEL} disableScreenReaderOutput>
           <EuiButtonIcon
             aria-label={BUTTON_LABEL}
-            iconType="boxesHorizontal"
+            iconType="boxesVertical"
             iconSize="s"
             size="xs"
             onClick={() => setPopover((prevIsPopoverOpen) => !prevIsPopoverOpen)}
@@ -99,9 +101,10 @@ export const IndicatorBarchartLegendAction: FC<IndicatorBarchartLegendActionProp
       closePopover={() => setPopover(false)}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      aria-label={BUTTON_LABEL}
     >
       <ReduxProvider store={store}>
-        <EuiContextMenuPanel size="s" items={popoverItems} />
+        <EuiContextMenuPanel items={popoverItems} />
       </ReduxProvider>
     </EuiPopover>
   );

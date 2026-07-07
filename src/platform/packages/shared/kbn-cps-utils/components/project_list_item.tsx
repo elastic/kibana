@@ -72,7 +72,7 @@ export const ProjectListItem = ({ project, index, isOriginProject }: ProjectList
         <EuiFlexItem grow={false}>
           <EuiFlexGroup responsive={false} gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={getSolutionIcon(project._type)} />
+              <EuiIcon type={getSolutionIcon(project._type)} aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="text">
@@ -99,11 +99,15 @@ export const ProjectListItem = ({ project, index, isOriginProject }: ProjectList
                   title={i18n.translate('cpsUtils.projectPicker.tagTooltipTitle', {
                     defaultMessage: 'Custom tags',
                   })}
-                  content={tags.map((tag) => (
+                  content={
                     <EuiThemeProvider colorMode="dark">
-                      <EuiBadge css={{ margin: `${euiTheme.size.xs}` }}>{tag}</EuiBadge>
+                      {tags.map((tag) => (
+                        <EuiBadge key={tag} css={{ margin: `${euiTheme.size.xs}` }}>
+                          {tag}
+                        </EuiBadge>
+                      ))}
                     </EuiThemeProvider>
-                  ))}
+                  }
                 >
                   <EuiBadge iconType="tag" tabIndex={0}>
                     {tags.length}

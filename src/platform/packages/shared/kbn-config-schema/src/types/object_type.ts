@@ -212,7 +212,7 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
     return new ObjectType(extendedProps, extendedOptions);
   }
 
-  protected handleError(type: string, { reason, value }: Record<string, any>) {
+  protected handleError(type: string, { reason, value, child }: Record<string, any>) {
     switch (type) {
       case 'any.required':
       case 'object.base':
@@ -220,7 +220,9 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       case 'object.parse':
         return `could not parse object value from json input`;
       case 'object.unknown':
-        return `definition for this key is missing`;
+        return child
+          ? `Additional properties are not allowed ('${child}' was unexpected)`
+          : `Additional properties are not allowed (an unexpected property was found)`;
       case 'object.child':
         return reason[0];
     }

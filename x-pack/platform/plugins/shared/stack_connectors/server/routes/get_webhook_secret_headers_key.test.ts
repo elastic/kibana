@@ -108,7 +108,8 @@ describe('getWebhookSecretHeadersKeyRoute', () => {
 
     expect(mockResponse.badRequest).toHaveBeenCalledWith({
       body: {
-        message: 'Connector must be one of the following types: .webhook, .cases-webhook, .mcp',
+        message:
+          'Connector must be one of the following types: .webhook, .cases-webhook, .mcp, .http',
       },
     });
   });

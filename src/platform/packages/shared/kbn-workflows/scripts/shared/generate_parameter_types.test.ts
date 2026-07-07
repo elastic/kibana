@@ -8,7 +8,10 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
-import { generateParameterTypes } from './generate_parameter_types';
+import {
+  generateParameterTypes,
+  generateParameterTypesForOperation,
+} from './generate_parameter_types';
 
 describe('generateParameterTypes', () => {
   it('should generate parameter types from simple operation with inline parameters', () => {
@@ -199,5 +202,105 @@ describe('generateParameterTypes', () => {
     const parameterTypes = generateParameterTypes([operationWithOneOf], openApiDocument);
     expect(parameterTypes).toBeDefined();
     expect(parameterTypes.bodyParams).toEqual(['bodyParam1', 'bodyParam2']);
+  });
+  it('should extract body params from allOf composition schemas', () => {
+    const operation: OpenAPIV3.OperationObject = {
+      requestBody: {
+        content: {
+          'application/json': {
+            schema: {
+              allOf: [
+                { $ref: '#/components/schemas/base' },
+                { $ref: '#/components/schemas/extended' },
+              ],
+            },
+          },
+        },
+      },
+      responses: { '200': { description: 'OK' } },
+      operationId: 'allOfOp',
+    };
+    const doc: OpenAPIV3.Document = {
+      openapi: '3.0.0',
+      info: { title: 'Test', version: '1.0.0' },
+      paths: {},
+      components: {
+        schemas: {
+          base: { type: 'object', properties: { baseField: { type: 'string' } } },
+          extended: { type: 'object', properties: { extField: { type: 'number' } } },
+        },
+      },
+    };
+    const result = generateParameterTypes([operation], doc);
+    expect(result.bodyParams).toEqual(expect.arrayContaining(['baseField', 'extField']));
+  });
+  it('should extract body params from anyOf composition schemas', () => {
+    const operation: OpenAPIV3.OperationObject = {
+      requestBody: {
+        content: {
+          'application/json': {
+            schema: {
+              anyOf: [
+                { $ref: '#/components/schemas/optionA' },
+                { $ref: '#/components/schemas/optionB' },
+              ],
+            },
+          },
+        },
+      },
+      responses: { '200': { description: 'OK' } },
+      operationId: 'anyOfOp',
+    };
+    const doc: OpenAPIV3.Document = {
+      openapi: '3.0.0',
+      info: { title: 'Test', version: '1.0.0' },
+      paths: {},
+      components: {
+        schemas: {
+          optionA: { type: 'object', properties: { fieldA: { type: 'string' } } },
+          optionB: { type: 'object', properties: { fieldB: { type: 'number' } } },
+        },
+      },
+    };
+    const result = generateParameterTypes([operation], doc);
+    expect(result.bodyParams).toEqual(expect.arrayContaining(['fieldA', 'fieldB']));
+  });
+  it('should return empty bodyParams when body schema $ref cannot be resolved', () => {
+    const operation: OpenAPIV3.OperationObject = {
+      requestBody: {
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/NonExistent' },
+          },
+        },
+      },
+      responses: { '200': { description: 'OK' } },
+      operationId: 'unresolvable',
+    };
+    const doc: OpenAPIV3.Document = {
+      openapi: '3.0.0',
+      info: { title: 'Test', version: '1.0.0' },
+      paths: {},
+      components: { schemas: {} },
+    };
+    const result = generateParameterTypes([operation], doc);
+    expect(result.bodyParams).toEqual([]);
+  });
+});
+
+describe('generateParameterTypesForOperation', () => {
+  it('should delegate to generateParameterTypes for a single operation', () => {
+    const operation: OpenAPIV3.OperationObject = {
+      parameters: [{ name: 'q', in: 'query' }],
+      responses: { '200': { description: 'OK' } },
+      operationId: 'singleOp',
+    };
+    const doc: OpenAPIV3.Document = {
+      openapi: '3.0.0',
+      info: { title: 'Test', version: '1.0.0' },
+      paths: {},
+    };
+    const result = generateParameterTypesForOperation(operation, doc);
+    expect(result.urlParams).toEqual(['q']);
   });
 });

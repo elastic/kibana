@@ -7,6 +7,7 @@
 
 import type {
   NewPackagePolicy,
+  PackageInfo,
   SINGLE_ACCOUNT,
   ORGANIZATION_ACCOUNT,
 } from '@kbn/fleet-plugin/common';
@@ -84,6 +85,7 @@ export interface GetAwsCredentialTypeConfigParams {
   optionId: string;
   showCloudConnectors: boolean;
   provider: CloudProviders;
+  packageInfo?: PackageInfo;
 }
 
 export type CloudConnectorType = typeof CLOUD_CONNECTOR_TYPE;
@@ -109,7 +111,11 @@ export type AwsCredentialsType =
   | 'cloud_formation';
 
 // GCP types
-export type GcpCredentialsType = 'credentials-file' | 'credentials-json' | 'credentials-none';
+export type GcpCredentialsType =
+  | 'credentials-file'
+  | 'credentials-json'
+  | 'credentials-none'
+  | 'cloud_connectors';
 
 export type GcpCredentialsTypeFieldMap = {
   [key in GcpCredentialsType]: string[];

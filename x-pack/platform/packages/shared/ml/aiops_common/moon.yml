@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/aiops-common'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/ml-ui'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/aiops-common'
+  title: '@kbn/aiops-common'
   description: Moon project for @kbn/aiops-common
   channel: ''
   owner: '@elastic/ml-ui'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/ml/aiops_common
+  sourceRoot: x-pack/platform/packages/shared/ml/aiops_common
 dependsOn:
   - '@kbn/ml-is-populated-object'
   - '@kbn/i18n'
@@ -32,16 +31,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

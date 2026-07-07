@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export type { ToolServiceStartContract, ExecuteToolParams, ExecuteToolReturn } from './contract';
+export type {
+  ToolServiceStartContract,
+  ExecuteToolParams,
+  ExecuteToolReturn,
+  ListWorkflowsParams,
+  ListWorkflowsResponse,
+  WorkflowListItem,
+} from './contract';

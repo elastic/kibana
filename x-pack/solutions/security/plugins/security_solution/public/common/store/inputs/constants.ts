@@ -8,7 +8,6 @@
 export enum InputsModelId {
   global = 'global',
   timeline = 'timeline',
-  socTrends = 'socTrends',
   valueReport = 'valueReport',
 }
 

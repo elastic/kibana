@@ -269,7 +269,7 @@ async function getActions(
           nbAgentsAck: 0,
           version: hit._source.data?.version as string,
           startTime: source.start_time,
-          type: source.type as AgentActionType,
+          type: (source.data?.rollback === true ? 'ROLLBACK' : source.type) as AgentActionType,
           nbAgentsActioned: source.total ?? 0,
           status: isExpired
             ? 'EXPIRED'

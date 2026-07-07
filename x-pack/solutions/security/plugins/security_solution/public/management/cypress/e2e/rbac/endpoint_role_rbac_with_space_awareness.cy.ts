@@ -107,6 +107,7 @@ describe(
           'Event FiltersNone',
           'Endpoint ExceptionsNone',
           'Elastic Defend Policy ManagementNone',
+          'Elastic Defend Scripts ManagementNone',
           'Response Actions HistoryNone',
           'Host IsolationAll',
           'Process OperationsNone',

@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import { some } from 'lodash';
-import { API_VERSIONS } from '@kbn/osquery-plugin/common/constants';
-import type { UsePacksResponse } from '@kbn/osquery-plugin/public/packs/use_packs';
-import { request } from './common';
 import { closeModalIfVisible, closeToastIfVisible } from './integrations';
-import { cleanupPack } from './api_fixtures';
 
 export const preparePack = (packName: string) => {
   cy.contains('Packs').click();
@@ -30,20 +25,4 @@ export const changePackActiveStatus = (packName: string) => {
   cy.contains(regex).should('exist');
   closeToastIfVisible();
   cy.contains(regex).should('not.exist');
-};
-
-export const cleanupAllPrebuiltPacks = () => {
-  request<UsePacksResponse>({
-    method: 'GET',
-    url: '/api/osquery/packs',
-    headers: {
-      'Elastic-Api-Version': API_VERSIONS.public.v1,
-    },
-  }).then((response) => {
-    const prebuiltPacks = response.body.data?.filter((pack) =>
-      some(pack.references, { type: 'osquery-pack-asset' })
-    );
-
-    return Promise.all(prebuiltPacks?.map((pack) => cleanupPack(pack.saved_object_id)));
-  });
 };

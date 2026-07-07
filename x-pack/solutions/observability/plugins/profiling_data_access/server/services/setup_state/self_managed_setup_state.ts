@@ -7,6 +7,7 @@
 
 import {
   validateMaximumBuckets,
+  validateProfilingStatus,
   validateResourceManagement,
 } from '../../../common/cluster_settings';
 import { hasProfilingData } from '../../../common/has_profiling_data';
@@ -16,7 +17,12 @@ import { createDefaultSetupState, mergePartialSetupStates } from '../../../commo
 export async function selfManagedSetupState(params: ProfilingSetupOptions): Promise<SetupState> {
   const state = createDefaultSetupState();
 
-  const verifyFunctions = [validateMaximumBuckets, validateResourceManagement, hasProfilingData];
+  const verifyFunctions = [
+    validateProfilingStatus,
+    validateMaximumBuckets,
+    validateResourceManagement,
+    hasProfilingData,
+  ];
 
   const partialStates = await Promise.all(verifyFunctions.map((fn) => fn(params)));
 

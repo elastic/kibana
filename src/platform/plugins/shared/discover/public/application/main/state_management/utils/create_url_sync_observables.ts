@@ -12,10 +12,14 @@ import { isEqual } from 'lodash';
 import { type GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { type INullableBaseStateContainer } from '@kbn/kibana-utils-plugin/public';
 import type { AnyAction, ThunkDispatch } from '@reduxjs/toolkit';
-import type { InternalStateDependencies } from '../redux/internal_state';
-import { selectTab, selectTabAppState } from '../redux/selectors';
-import { internalStateActions } from '../redux';
-import type { DiscoverAppState, DiscoverInternalState } from '../redux/types';
+import {
+  internalStateActions,
+  selectTab,
+  selectTabAppState,
+  type DiscoverAppState,
+  type DiscoverInternalState,
+  type InternalStateDependencies,
+} from '../redux';
 import { createTabAppStateObservable } from './create_tab_app_state_observable';
 
 /**
@@ -42,17 +46,19 @@ export const createUrlSyncObservables = ({
     getState,
   });
 
-  const appStateContainer: INullableBaseStateContainer<DiscoverAppState> = {
+  const createAppStateContainer = (
+    isSystemTriggered: boolean
+  ): INullableBaseStateContainer<DiscoverAppState> => ({
     get: () => getAppState(),
     set: (appState) => {
       if (!appState) {
         return;
       }
 
-      dispatch(internalStateActions.setAppState({ tabId, appState }));
+      dispatch(internalStateActions.setAppState({ tabId, appState, isSystemTriggered }));
     },
     state$: appState$,
-  };
+  });
 
   const getGlobalState = (): GlobalQueryStateFromUrl => {
     const tabState = selectTab(getState(), tabId);
@@ -92,8 +98,7 @@ export const createUrlSyncObservables = ({
 
   return {
     appState$,
-    appStateContainer,
-    globalState$,
+    createAppStateContainer,
     globalStateContainer,
   };
 };

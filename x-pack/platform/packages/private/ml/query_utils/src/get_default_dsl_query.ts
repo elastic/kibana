@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 
 import type { estypes } from '@elastic/elasticsearch';
 
-const DEFAULT_DSL_QUERY: estypes.QueryDslQueryContainer = {
+const DEFAULT_DSL_QUERY: NonNullable<estypes.QueryDslQueryContainer> = {
   bool: {
     must: [
       {
@@ -22,6 +22,6 @@ const DEFAULT_DSL_QUERY: estypes.QueryDslQueryContainer = {
 /**
  * Default DSL query which matches all the results
  */
-export function getDefaultDSLQuery(): estypes.QueryDslQueryContainer {
+export function getDefaultDSLQuery(): NonNullable<estypes.QueryDslQueryContainer> {
   return cloneDeep(DEFAULT_DSL_QUERY);
 }

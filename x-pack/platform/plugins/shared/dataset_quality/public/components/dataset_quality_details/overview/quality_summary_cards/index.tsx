@@ -26,8 +26,8 @@ const degradedDocTooltip = (
     id="xpack.datasetQuality.details.degradedDocTooltip"
     defaultMessage="Documents with the {ignoredProperty} property, usually due to malformed fields or exceeding the limit of total fields when {ignoredAboveSetting}."
     values={{
-      ignoredProperty: <EuiCode transparentBackground>_ignored</EuiCode>,
-      ignoredAboveSetting: <EuiCode transparentBackground>_ignore_above: false</EuiCode>,
+      ignoredProperty: <EuiCode>_ignored</EuiCode>,
+      ignoredAboveSetting: <EuiCode>_ignore_above: false</EuiCode>,
     }}
   />
 );

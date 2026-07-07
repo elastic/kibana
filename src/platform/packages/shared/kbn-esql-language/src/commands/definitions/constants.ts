@@ -15,137 +15,68 @@ export const EDITOR_MARKER = 'marker_esql_editor';
 // List for suggestions (human-friendly)
 export const timeUnitsToSuggest: Literals[] = [
   {
-    name: 'year',
+    name: 'y',
     description: i18n.translate('kbn-esql-language.esql.definitions.dateDurationDefinition.year', {
-      defaultMessage: 'Year',
+      defaultMessage: 'Year (y)',
     }),
   },
   {
-    name: 'years',
-    description: i18n.translate('kbn-esql-language.esql.definitions.dateDurationDefinition.years', {
-      defaultMessage: 'Years (Plural)',
-    }),
-  },
-  {
-    name: 'quarter',
+    name: 'q',
     description: i18n.translate(
       'kbn-esql-language.esql.definitions.dateDurationDefinition.quarter',
       {
-        defaultMessage: 'Quarter',
+        defaultMessage: 'Quarter (q)',
       }
     ),
   },
   {
-    name: 'quarters',
-    description: i18n.translate(
-      'kbn-esql-language.esql.definitions.dateDurationDefinition.quarters',
-      {
-        defaultMessage: 'Quarters (Plural)',
-      }
-    ),
-  },
-  {
-    name: 'month',
+    name: 'mo',
     description: i18n.translate('kbn-esql-language.esql.definitions.dateDurationDefinition.month', {
-      defaultMessage: 'Month',
+      defaultMessage: 'Month (mo)',
     }),
   },
   {
-    name: 'months',
-    description: i18n.translate(
-      'kbn-esql-language.esql.definitions.dateDurationDefinition.months',
-      {
-        defaultMessage: 'Months (Plural)',
-      }
-    ),
-  },
-  {
-    name: 'week',
+    name: 'w',
     description: i18n.translate('kbn-esql-language.esql.definitions.dateDurationDefinition.week', {
-      defaultMessage: 'Week',
+      defaultMessage: 'Week (w)',
     }),
   },
   {
-    name: 'weeks',
-    description: i18n.translate('kbn-esql-language.esql.definitions.dateDurationDefinition.weeks', {
-      defaultMessage: 'Weeks (Plural)',
-    }),
-  },
-  {
-    name: 'day',
+    name: 'd',
     description: i18n.translate('kbn-esql-language.esql.definitions.dateDurationDefinition.day', {
-      defaultMessage: 'Day',
+      defaultMessage: 'Day (d)',
     }),
   },
   {
-    name: 'days',
-    description: i18n.translate('kbn-esql-language.esql.definitions.dateDurationDefinition.days', {
-      defaultMessage: 'Days (Plural)',
-    }),
-  },
-  {
-    name: 'hour',
+    name: 'h',
     description: i18n.translate('kbn-esql-language.esql.definitions.dateDurationDefinition.hour', {
-      defaultMessage: 'Hour',
+      defaultMessage: 'Hour (h)',
     }),
   },
   {
-    name: 'hours',
-    description: i18n.translate('kbn-esql-language.esql.definitions.dateDurationDefinition.hours', {
-      defaultMessage: 'Hours (Plural)',
-    }),
-  },
-  {
-    name: 'minute',
+    name: 'm',
     description: i18n.translate(
       'kbn-esql-language.esql.definitions.dateDurationDefinition.minute',
       {
-        defaultMessage: 'Minute',
+        defaultMessage: 'Minute (m)',
       }
     ),
   },
   {
-    name: 'minutes',
-    description: i18n.translate(
-      'kbn-esql-language.esql.definitions.dateDurationDefinition.minutes',
-      {
-        defaultMessage: 'Minutes (Plural)',
-      }
-    ),
-  },
-  {
-    name: 'second',
+    name: 's',
     description: i18n.translate(
       'kbn-esql-language.esql.definitions.dateDurationDefinition.second',
       {
-        defaultMessage: 'Second',
+        defaultMessage: 'Second (s)',
       }
     ),
   },
   {
-    name: 'seconds',
-    description: i18n.translate(
-      'kbn-esql-language.esql.definitions.dateDurationDefinition.seconds',
-      {
-        defaultMessage: 'Seconds (Plural)',
-      }
-    ),
-  },
-  {
-    name: 'millisecond',
+    name: 'ms',
     description: i18n.translate(
       'kbn-esql-language.esql.definitions.dateDurationDefinition.millisecond',
       {
-        defaultMessage: 'Millisecond',
-      }
-    ),
-  },
-  {
-    name: 'milliseconds',
-    description: i18n.translate(
-      'kbn-esql-language.esql.definitions.dateDurationDefinition.milliseconds',
-      {
-        defaultMessage: 'Milliseconds (Plural)',
+        defaultMessage: 'Millisecond (ms)',
       }
     ),
   },
@@ -155,7 +86,6 @@ export const FULL_TEXT_SEARCH_FUNCTIONS = [
   'match',
   'match_operator',
   'match_phrase',
-  'multi_match',
   'qstr',
   'kql',
 ];

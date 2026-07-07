@@ -39,7 +39,7 @@ exports[`JobsTableFilters renders correctly against snapshot 1`] = `
       <EuiButton
         href="https://www.elastic.co/subscriptions"
         iconSide="right"
-        iconType="popout"
+        iconType="external"
         target="_blank"
       >
         Subscription plans

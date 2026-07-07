@@ -6,28 +6,66 @@
  */
 
 import type { Moment } from 'moment';
+import { z } from '@kbn/zod/v4';
 
-import type { DefendInsightType } from '@kbn/elastic-assistant-common';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-export enum Category {
-  Endpoint = 'endpoint',
+/**
+ * Single source of truth for all workflow insight enum values.
+ * All schemas (Zod, kbn/config-schema, OpenAPI YAML) must match these lists.
+ */
+
+export const WORKFLOW_INSIGHT_TYPE_VALUES = [
+  'incompatible_antivirus',
+  'policy_response_failure',
+  'custom',
+] as const;
+
+export const WORKFLOW_INSIGHT_CATEGORY_VALUES = ['endpoint'] as const;
+
+export const WORKFLOW_INSIGHT_SOURCE_TYPE_VALUES = ['llm-connector'] as const;
+
+export const WORKFLOW_INSIGHT_TARGET_TYPE_VALUES = ['endpoint'] as const;
+
+export const WORKFLOW_INSIGHT_ACTION_TYPE_VALUES = [
+  'refreshed',
+  'remediated',
+  'suppressed',
+  'dismissed',
+] as const;
+
+export const WorkflowInsightType = z.enum(WORKFLOW_INSIGHT_TYPE_VALUES);
+export type WorkflowInsightType = z.infer<typeof WorkflowInsightType>;
+
+export const WorkflowInsightCategory = z.enum(WORKFLOW_INSIGHT_CATEGORY_VALUES);
+export type WorkflowInsightCategory = z.infer<typeof WorkflowInsightCategory>;
+
+export const WorkflowInsightSourceType = z.enum(WORKFLOW_INSIGHT_SOURCE_TYPE_VALUES);
+export type WorkflowInsightSourceType = z.infer<typeof WorkflowInsightSourceType>;
+
+export const WorkflowInsightTargetType = z.enum(WORKFLOW_INSIGHT_TARGET_TYPE_VALUES);
+export type WorkflowInsightTargetType = z.infer<typeof WorkflowInsightTargetType>;
+
+export const WorkflowInsightActionType = z.enum(WORKFLOW_INSIGHT_ACTION_TYPE_VALUES);
+export type WorkflowInsightActionType = z.infer<typeof WorkflowInsightActionType>;
+
+/**
+ * DefendInsight is the raw insight produced by the LLM,
+ * SecurityWorkflowInsight is the enriched final insight
+ */
+export interface DefendInsightEvent {
+  id: string;
+  endpointId: string;
+  value: string;
 }
 
-export enum SourceType {
-  LlmConnector = 'llm-connector',
+export interface DefendInsight {
+  group: string;
+  events?: DefendInsightEvent[];
+  remediation?: Record<string, unknown>;
 }
 
-export enum TargetType {
-  Endpoint = 'endpoint',
-}
-
-export enum ActionType {
-  Refreshed = 'refreshed', // new or refreshed
-  Remediated = 'remediated',
-  Suppressed = 'suppressed', // temporarily supressed, can be refreshed
-  Dismissed = 'dismissed', // "permanently" dismissed, cannot be normally refreshed
-}
+export type DefendInsights = DefendInsight[];
 
 export type ExceptionListRemediationType = Pick<
   ExceptionListItemSchema,
@@ -38,20 +76,20 @@ export interface SecurityWorkflowInsight {
   id?: string;
   '@timestamp': Moment;
   message: string;
-  category: Category;
-  type: DefendInsightType;
+  category: WorkflowInsightCategory;
+  type: WorkflowInsightType;
   source: {
-    type: SourceType;
+    type: WorkflowInsightSourceType;
     id: string;
     data_range_start: Moment;
     data_range_end: Moment;
   };
   target: {
-    type: TargetType;
+    type: WorkflowInsightTargetType;
     ids: string[];
   };
   action: {
-    type: ActionType;
+    type: WorkflowInsightActionType;
     timestamp: Moment;
   };
   value: string;
@@ -71,11 +109,11 @@ export interface SearchParams {
   size?: number;
   from?: number;
   ids?: string[];
-  categories?: Category[];
-  types?: DefendInsightType[];
-  sourceTypes?: SourceType[];
+  categories?: WorkflowInsightCategory[];
+  types?: WorkflowInsightType[];
+  sourceTypes?: WorkflowInsightSourceType[];
   sourceIds?: string[];
-  targetTypes?: TargetType[];
+  targetTypes?: WorkflowInsightTargetType[];
   targetIds?: string[];
-  actionTypes?: ActionType[];
+  actionTypes?: WorkflowInsightActionType[];
 }

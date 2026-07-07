@@ -44,6 +44,7 @@ import type {
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
 import type {
+  AlertFormatter,
   ValidationResult,
   UserConfiguredActionConnector,
   ActionConnector,
@@ -316,6 +317,11 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
     | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<any>>;
   isInternallyManaged?: boolean;
+  /**
+   * Optional formatter for alert-level context (reason, deep link URL).
+   * Used to generate "View in App" links for individual alerts.
+   */
+  format?: AlertFormatter;
 }
 
 export interface IErrorObject {

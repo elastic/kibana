@@ -18,10 +18,10 @@ jest.mock('@kbn/i18n', () => {
 });
 
 describe('getUnitLabel', () => {
-  describe('undefined and special units of count', () => {
-    it('returns "count" label when unit is undefined', () => {
-      const result = getUnitLabel({ unit: undefined });
-      expect(result).toBe('count');
+  describe('null and special units of count', () => {
+    it('returns "null" label when unit is undefined', () => {
+      const result = getUnitLabel({ unit: null });
+      expect(result).toBe('null');
     });
 
     it('returns original unit string for special units of count', () => {

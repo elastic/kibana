@@ -34,7 +34,7 @@ export const getIconHeaderColumns = ({
             'data-test-subj': 'notes-count-header-icon',
           }}
           size="m"
-          type="editorComment"
+          type="comment"
         />
       ),
       render: (
@@ -76,14 +76,21 @@ export const getIconHeaderColumns = ({
             'data-test-subj': 'favorites-header-icon',
           }}
           size="m"
-          type="starEmpty"
+          type="star"
         />
       ),
       render: (favorite: FavoriteTimelineResult[] | null | undefined) => {
         const isFavorite = favorite != null && favorite.length > 0;
-        const fill = isFavorite ? 'starFilled' : 'starEmpty';
+        const fill = isFavorite ? 'starFill' : 'star';
 
-        return <EuiIcon data-test-subj={`favorite-${fill}-star`} type={fill} size="m" />;
+        return (
+          <EuiIcon
+            data-test-subj={`favorite-${fill}-star`}
+            type={fill}
+            size="m"
+            aria-hidden={true}
+          />
+        );
       },
       sortable: false,
       width: ACTION_COLUMN_WIDTH,

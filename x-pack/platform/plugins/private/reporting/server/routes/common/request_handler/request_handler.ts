@@ -31,11 +31,11 @@ export const handleUnavailable = (res: KibanaResponseFactory) => {
   return res.custom({ statusCode: 503, body: 'Not Available' });
 };
 
-const ParamsValidation = schema.recordOf(schema.string(), schema.string());
-const QueryValidation = schema.nullable(
+export const ParamsValidation = schema.recordOf(schema.string(), schema.string());
+export const QueryValidation = schema.nullable(
   schema.recordOf(schema.string(), schema.maybe(schema.string()))
 );
-const BodyValidation = schema.nullable(
+export const BodyValidation = schema.nullable(
   schema.recordOf(schema.string(), schema.maybe(schema.any()))
 );
 

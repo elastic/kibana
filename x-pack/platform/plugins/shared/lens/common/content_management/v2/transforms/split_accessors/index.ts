@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { XYState } from '../../../../../public';
+import type { XYVisualizationState } from '../../../../../public';
 import type { LensAttributes } from '../../../../../server/content_management/v2';
 import { convertToSplitAccessorsFn, type DeprecatedSplitAccessorState } from './xy';
 
 export function convertToSplitAccessors(attributes: LensAttributes): LensAttributes {
   if (attributes.visualizationType === 'lnsXY' && attributes.state?.visualization) {
-    const visState = attributes.state.visualization as XYState | DeprecatedSplitAccessorState;
+    const visState = attributes.state.visualization as
+      | XYVisualizationState
+      | DeprecatedSplitAccessorState;
     return {
       ...attributes,
       state: {

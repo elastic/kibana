@@ -65,19 +65,18 @@ import type {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 
 import { css, injectGlobal } from '@emotion/css';
-import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
+import {
+  VisualizeConstants,
+  VISUALIZE_EMBEDDABLE_TYPE,
+  VISUALIZE_SAVED_OBJECT_TYPE,
+} from '@kbn/visualizations-common';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
-import {
-  aggBasedVisualizationTrigger,
-  dashboardVisualizationPanelTrigger,
-  visualizeEditorTrigger,
-} from './triggers';
 import type { VisEditorsRegistry } from './vis_editors_registry';
 import { createVisEditorsRegistry } from './vis_editors_registry';
 import { showNewVisModal } from './wizard';
@@ -116,7 +115,6 @@ import {
   setSavedSearch,
   setDataViews,
   setInspector,
-  getTypes,
   setNotifications,
 } from './services';
 import type { ListingViewRegistry } from './types';
@@ -124,6 +122,7 @@ import type { VisualizationSavedObjectAttributes } from '../common/content_manag
 import { LATEST_VERSION, CONTENT_ID } from '../common/content_management';
 import { registerActions } from './actions/register_actions';
 import type { VisualizeByReferenceState } from '../common/embeddable/types';
+import { VegaIcon } from './components/vega_icon';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -183,7 +182,6 @@ export interface VisualizationsStartDeps {
   contentManagement: ContentManagementPublicStart;
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
 }
 
 const styles = {
@@ -481,16 +479,9 @@ export class VisualizationsPlugin
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
     expressions.registerFunction(xyDimensionExpressionFunction);
-    uiActions.registerTrigger(aggBasedVisualizationTrigger);
-    uiActions.registerTrigger(visualizeEditorTrigger);
-    uiActions.registerTrigger(dashboardVisualizationPanelTrigger);
-    embeddable.registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
-      const {
-        plugins: { embeddable: embeddableStart, embeddableEnhanced: embeddableEnhancedStart },
-      } = start();
-
-      const { getVisualizeEmbeddableFactory } = await import('./embeddable/embeddable_module');
-      return getVisualizeEmbeddableFactory({ embeddableStart, embeddableEnhancedStart });
+    embeddable.registerEmbeddablePublicDefinition(VISUALIZE_EMBEDDABLE_TYPE, async () => {
+      const { visualizeEmbeddableFactory } = await import('./embeddable/embeddable_module');
+      return visualizeEmbeddableFactory;
     });
     embeddable.registerAddFromLibraryType<VisualizationSavedObjectAttributes>({
       onAdd: async (container, savedObject) => {
@@ -506,13 +497,13 @@ export class VisualizationsPlugin
           }
         );
       },
-      savedObjectType: VISUALIZE_EMBEDDABLE_TYPE,
+      savedObjectType: VISUALIZE_SAVED_OBJECT_TYPE,
       savedObjectName: i18n.translate('visualizations.visualizeSavedObjectName', {
         defaultMessage: 'Visualization',
       }),
       getIconForSavedObject: (savedObject) => {
         const visState = JSON.parse(savedObject.attributes.visState ?? '{}');
-        return getTypes().get(visState.type)?.icon ?? '';
+        return visState.type === 'vega' ? VegaIcon : 'visualizeApp';
       },
     });
     embeddable.registerLegacyURLTransform(
@@ -555,6 +546,7 @@ export class VisualizationsPlugin
       dataViews,
       inspector,
       serverless,
+      cps,
     }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
@@ -590,7 +582,7 @@ export class VisualizationsPlugin
         const isServerless = Boolean(serverless);
         const isSolutionView = space.solution && space.solution !== 'classic';
         const visibleIn: AppDeepLinkLocations[] =
-          isServerless || isSolutionView ? [] : ['globalSearch', 'sideNav'];
+          isServerless || isSolutionView ? [] : ['globalSearch', 'classicSideNav'];
         this.visibilityUpdater.next(() => ({ visibleIn }));
       });
     }
@@ -600,6 +592,10 @@ export class VisualizationsPlugin
     }
 
     registerActions(uiActions, data, types);
+
+    cps?.cpsManager?.registerAppAccess('visualize', (location: string) =>
+      location.includes('type:vega') ? ProjectRoutingAccess.EDITABLE : ProjectRoutingAccess.DISABLED
+    );
 
     return {
       ...types,

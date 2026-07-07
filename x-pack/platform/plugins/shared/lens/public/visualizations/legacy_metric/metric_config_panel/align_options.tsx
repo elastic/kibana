@@ -23,21 +23,21 @@ const alignButtonIcons = [
     label: i18n.translate('xpack.lens.legacyMetric.alignLabel.left', {
       defaultMessage: 'Align left',
     }),
-    iconType: 'editorAlignLeft',
+    iconType: 'textAlignLeft',
   },
   {
     id: `center`,
     label: i18n.translate('xpack.lens.legacyMetric.alignLabel.center', {
       defaultMessage: 'Align center',
     }),
-    iconType: 'editorAlignCenter',
+    iconType: 'textAlignCenter',
   },
   {
     id: `right`,
     label: i18n.translate('xpack.lens.legacyMetric.alignLabel.right', {
       defaultMessage: 'Align right',
     }),
-    iconType: 'editorAlignRight',
+    iconType: 'textAlignRight',
   },
 ];
 

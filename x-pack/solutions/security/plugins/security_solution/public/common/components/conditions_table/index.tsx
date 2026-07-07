@@ -7,6 +7,7 @@
 
 import React from 'react';
 import styled from '@emotion/styled';
+import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableProps } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiHideFor } from '@elastic/eui';
 
@@ -33,7 +34,12 @@ export const ConditionsTable = <T extends object>({ badge, ...props }: Condition
         </EuiHideFor>
       )}
       <EuiFlexItem grow={1}>
-        <EuiBasicTable {...props} />
+        <EuiBasicTable
+          tableCaption={i18n.translate('xpack.securitySolution.conditionsTable.caption', {
+            defaultMessage: 'Conditions',
+          })}
+          {...props}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

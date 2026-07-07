@@ -55,7 +55,7 @@ const Stacktrace = ({
       data-test-subj="docTableStacktraceExist"
       label={stacktraceAvailableControlButton}
       tooltipContent={stacktraceAvailableControlButton}
-      iconType="apmTrace"
+      iconType="chartWaterfall"
       onClick={undefined}
       {...props}
     />
@@ -65,7 +65,7 @@ const Stacktrace = ({
       data-test-subj="docTableStacktraceDoesNotExist"
       label={stacktraceNotAvailableControlButton}
       tooltipContent={stacktraceNotAvailableControlButton}
-      iconType="apmTrace"
+      iconType="chartWaterfall"
       onClick={undefined}
       {...props}
     />

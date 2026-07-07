@@ -11,7 +11,7 @@ import { IntegrationTabId, type Tab } from '../types';
 export const INTEGRATION_TABS: Tab[] = [
   {
     category: '',
-    iconType: 'starFilled',
+    iconType: 'starFill',
     id: IntegrationTabId.recommended,
     label: 'Recommended',
     overflow: 'hidden',

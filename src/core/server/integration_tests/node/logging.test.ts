@@ -72,7 +72,12 @@ describe('node service global context', () => {
 
         expect(mockConsoleLog).toHaveBeenCalledTimes(1);
         expect(JSON.parse(mockConsoleLog.mock.calls[0][0])).toEqual(
-          expect.objectContaining({ service: { node: { roles } } })
+          expect.objectContaining({
+            service: expect.objectContaining({
+              node: { roles },
+              version: expect.any(String),
+            }),
+          })
         );
       });
     });

@@ -30,12 +30,14 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
+import type { CPSPluginStart } from '@kbn/cps/public/types';
 import type { MlServicesContext } from '../../app';
 
 interface StartPlugins {
@@ -45,6 +47,7 @@ interface StartPlugins {
   dashboard: DashboardStart;
   data: DataPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
+  dataViewFieldEditor: DataViewFieldEditorStart;
   dataViews: DataViewsPublicPluginStart;
   dataVisualizer?: DataVisualizerPluginStart;
   embeddable: EmbeddableStart;
@@ -67,6 +70,7 @@ interface StartPlugins {
   usageCollection?: UsageCollectionSetup;
   fieldsMetadata: FieldsMetadataPublicStart;
   fileUpload: FileUploadPluginStart;
+  cps?: CPSPluginStart;
 }
 export type StartServices = CoreStart &
   StartPlugins & {

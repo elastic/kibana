@@ -13,17 +13,20 @@ import { useFetch, REQUEST_NAMES } from '../../../common/hooks/use_fetch';
 import { SecurityPageName } from '../../../../common/constants';
 import { useGetSecuritySolutionUrl } from '../../../common/components/link_to';
 
-const CTI_TAG_NAME = 'threat intel';
+export const CTI_TAG_NAME = 'threat intel';
 
 const useCtiInstalledDashboards = () => {
-  const { http } = useKibana().services;
+  const { http, savedObjectsTagging } = useKibana().services;
 
   const {
     data: ctiTags,
     isLoading: isLoadingTags,
     error: errorTags,
   } = useFetch(REQUEST_NAMES.CTI_TAGS, getTagsByName, {
-    initialParameters: { http, tagName: CTI_TAG_NAME },
+    initialParameters: {
+      savedObjectsTaggingClient: savedObjectsTagging?.client,
+      tagName: CTI_TAG_NAME,
+    },
   });
 
   const {

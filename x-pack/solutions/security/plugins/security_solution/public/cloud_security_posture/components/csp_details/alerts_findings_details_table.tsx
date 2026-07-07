@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { encode } from '@kbn/rison';
 import { capitalize } from 'lodash';
 import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
@@ -26,8 +26,8 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { buildEntityAlertsQuery } from '@kbn/cloud-security-posture-common/utils/helpers';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { TableId } from '@kbn/securitysolution-data-table';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import {
@@ -37,16 +37,17 @@ import {
 } from '../../../overview/components/detection_response/translations';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { useNavigateToAlertsPageWithFilters } from '../../../common/hooks/use_navigate_to_alerts_page_with_filters';
-import { DocumentDetailsPreviewPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
+import type { ESBoolQuery } from '../../../../common/typed_json';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { useUiSetting } from '../../../common/lib/kibana';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { getSeverityColor } from '../../../detections/components/alerts_kpis/severity_level_panel/helpers';
 import { SeverityBadge } from '../../../common/components/severity_badge';
-import { ALERT_PREVIEW_BANNER } from '../../../flyout/document_details/preview/constants';
 import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
 import { useNonClosedAlerts } from '../../hooks/use_non_closed_alerts';
+import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 enum KIBANA_ALERTS {
@@ -85,7 +86,21 @@ interface AlertsDetailsFields {
 }
 
 export const AlertsDetailsTable = memo(
-  ({ field, value }: { field: CloudPostureEntityIdentifier; value: string }) => {
+  ({
+    field,
+    value,
+    entityId,
+    entityType,
+    onShowAlert,
+  }: {
+    field: CloudPostureEntityIdentifier;
+    value: string;
+    /** Canonical entity store id (`host.entity.id` / `user.entity.id`); when set with Entity Store v2, identity is loaded from the store for EUID DSL. */
+    entityId?: string;
+    entityType?: 'host' | 'user';
+    /** Callback executed after opening the alert details for a row. */
+    onShowAlert: (eventId: string, indexName: string) => void;
+  }) => {
     const { euiTheme } = useEuiTheme();
 
     useEffect(() => {
@@ -137,25 +152,99 @@ export const AlertsDetailsTable = memo(
       },
     });
 
-    const { signalIndexName } = useSignalIndex();
-    const { data, setQuery } = useQueryAlerts({
-      query: buildEntityAlertsQuery({
-        field,
-        to,
-        from,
-        queryValue: value,
-        size: 500,
-        severity: '',
-        sortField,
-        sortDirection,
-      }),
-      queryName: ALERTS_QUERY_NAMES.BY_RULE_BY_STATUS,
-      indexName: signalIndexName,
+    const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
+    const entityTypeResolved: 'host' | 'user' =
+      entityType ?? (field === 'user.name' ? 'user' : 'host');
+
+    const { entityRecord, isLoading: entityFromStoreLoading } = useEntityFromStore({
+      entityId,
+      entityType: entityTypeResolved,
+      skip: !entityStoreV2Enabled || !entityId,
     });
 
+    const euidApi = useEntityStoreEuidApi();
+    const euidEntityFilter = useMemo((): QueryDslQueryContainer | undefined => {
+      if (!euidApi?.euid) {
+        return undefined;
+      }
+      return euidApi.euid.dsl.getEuidFilterBasedOnDocument(entityTypeResolved, entityRecord);
+    }, [euidApi?.euid, entityTypeResolved, entityRecord]);
+
+    const filterAlertsByEuid = Boolean(euidApi?.euid && euidEntityFilter);
+    /** Wait for entity-store lookup when `entityId` is set; after it finishes with no record, fall back to field/value filters. */
+    const skipEntityResolution =
+      entityStoreV2Enabled && Boolean(entityId) && entityFromStoreLoading;
+
+    const entityFilterForQuery: QueryDslQueryContainer | undefined = filterAlertsByEuid
+      ? euidEntityFilter
+      : undefined;
+
+    const buildAlertsListQuery = useCallback(
+      (opts: {
+        severity?: string;
+        sortField?: AlertsSortFieldType;
+        sortDirection?: 'asc' | 'desc';
+      }) =>
+        buildEntityAlertsQuery({
+          field,
+          to,
+          from,
+          queryValue: value,
+          size: 500,
+          severity: opts.severity ?? '',
+          sortField: opts.sortField ?? sortField,
+          sortDirection: opts.sortDirection ?? sortDirection,
+          entityFilter: entityFilterForQuery,
+        }),
+      [entityFilterForQuery, field, from, sortDirection, sortField, to, value]
+    );
+
+    const alertsListQuery = useMemo(
+      () =>
+        buildEntityAlertsQuery({
+          field,
+          to,
+          from,
+          queryValue: value,
+          size: 500,
+          severity: currentFilter,
+          sortField,
+          sortDirection,
+          entityFilter: entityFilterForQuery,
+        }),
+      [currentFilter, entityFilterForQuery, field, from, sortDirection, sortField, to, value]
+    );
+
+    const { signalIndexName } = useSignalIndex();
+    const { data, setQuery } = useQueryAlerts({
+      query: alertsListQuery,
+      queryName: ALERTS_QUERY_NAMES.BY_RULE_BY_STATUS,
+      indexName: signalIndexName,
+      skip: skipEntityResolution,
+    });
+
+    useEffect(() => {
+      setQuery(alertsListQuery);
+    }, [alertsListQuery, setQuery]);
+
+    const alertsByStatusIdentityFields = useMemo((): Record<string, string> => {
+      if (filterAlertsByEuid) {
+        return {};
+      }
+      return { [field]: value };
+    }, [field, filterAlertsByEuid, value]);
+
+    const alertsByStatusAdditionalFilters = useMemo((): ESBoolQuery[] | undefined => {
+      if (!filterAlertsByEuid || !euidEntityFilter) {
+        return undefined;
+      }
+      return [euidEntityFilter] as ESBoolQuery[];
+    }, [euidEntityFilter, filterAlertsByEuid]);
+
     const { filteredAlertsData: alertsData } = useNonClosedAlerts({
-      field,
-      value,
+      identityFields: alertsByStatusIdentityFields,
+      additionalFilters: alertsByStatusAdditionalFilters,
+      skip: skipEntityResolution,
       to,
       from,
       queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}`,
@@ -178,12 +267,7 @@ export const AlertsDetailsTable = memo(
       filter: () => {
         setCurrentFilter(key);
         setQuery(
-          buildEntityAlertsQuery({
-            field,
-            to,
-            from,
-            queryValue: value,
-            size: 500,
+          buildAlertsListQuery({
             severity: key,
             sortField,
             sortDirection,
@@ -193,16 +277,7 @@ export const AlertsDetailsTable = memo(
       isCurrentFilter: currentFilter === key,
       reset: (event: React.MouseEvent<SVGElement, MouseEvent>) => {
         setCurrentFilter('');
-        setQuery(
-          buildEntityAlertsQuery({
-            field,
-            to,
-            from,
-            queryValue: value,
-            size: 500,
-            severity: '',
-          })
-        );
+        setQuery(buildAlertsListQuery({ severity: '' }));
         event?.stopPropagation();
       },
     }));
@@ -241,12 +316,7 @@ export const AlertsDetailsTable = memo(
           setSortField(fieldSort);
           setSortDirection(direction);
           setQuery(
-            buildEntityAlertsQuery({
-              field,
-              to,
-              from,
-              queryValue: value,
-              size: 500,
+            buildAlertsListQuery({
               severity: currentFilter,
               sortField: fieldSort,
               sortDirection: direction,
@@ -254,28 +324,8 @@ export const AlertsDetailsTable = memo(
           );
         }
       },
-      [currentFilter, field, from, setQuery, to, value]
+      [buildAlertsListQuery, currentFilter, setQuery]
     );
-
-    const { openPreviewPanel } = useExpandableFlyoutApi();
-
-    const handleOnEventAlertDetailPanelOpened = useCallback(
-      (eventId: string, indexName: string, tableId: string) => {
-        openPreviewPanel({
-          id: DocumentDetailsPreviewPanelKey,
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: tableId,
-            isPreviewMode: true,
-            banner: ALERT_PREVIEW_BANNER,
-          },
-        });
-      },
-      [openPreviewPanel]
-    );
-
-    const tableId = TableId.alertsOnRuleDetailsPage;
 
     const columns: Array<EuiBasicTableColumn<ContextualFlyoutAlertsField>> = [
       {
@@ -283,8 +333,8 @@ export const AlertsDetailsTable = memo(
         name: '',
         width: '5%',
         render: (id: string, alert: ContextualFlyoutAlertsField) => (
-          <EuiLink onClick={() => handleOnEventAlertDetailPanelOpened(id, alert.index, tableId)}>
-            <EuiIcon type={'expand'} />
+          <EuiLink onClick={() => onShowAlert(id, alert.index)}>
+            <EuiIcon type={'expand'} aria-hidden={true} />
           </EuiLink>
         ),
       },
@@ -341,13 +391,13 @@ export const AlertsDetailsTable = memo(
                 field === 'host.name'
                   ? OPEN_IN_ALERTS_TITLE_HOSTNAME
                   : OPEN_IN_ALERTS_TITLE_USERNAME,
-              selectedOptions: [value],
-              fieldName: field,
+              selected_options: [value],
+              field_name: field,
             },
             {
               title: OPEN_IN_ALERTS_TITLE_STATUS,
-              selectedOptions: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
-              fieldName: 'kibana.alert.workflow_status',
+              selected_options: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
+              field_name: 'kibana.alert.workflow_status',
             },
           ],
           true,
@@ -364,7 +414,7 @@ export const AlertsDetailsTable = memo(
               {i18n.translate('xpack.securitySolution.flyout.left.insights.alerts.tableTitle', {
                 defaultMessage: 'Alerts ',
               })}
-              <EuiIcon type={'popout'} />
+              <EuiIcon type="external" aria-hidden={true} />
             </h1>
           </EuiLink>
 
@@ -377,7 +427,7 @@ export const AlertsDetailsTable = memo(
             columns={columns}
             pagination={pagination}
             onChange={onTableChange}
-            data-test-subj={'securitySolutionFlyoutMisconfigurationFindingsTable'}
+            data-test-subj={'securitySolutionFlyoutAlertsFindingsTable'}
             sorting={sorting}
             tableCaption={i18n.translate(
               'xpack.securitySolution.flyout.left.insights.alerts.tableCaption',

@@ -9,7 +9,7 @@
 
 import type { History } from 'history';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { RouteComponentProps } from 'react-router-dom';
 import { withRouter, Redirect } from 'react-router-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -118,7 +118,8 @@ const FooApp = ({ history, coreStart }: { history: History; coreStart: CoreStart
 );
 
 export const renderApp = (coreStart: CoreStart, { history, element }: AppMountParameters) => {
-  ReactDOM.render(<FooApp history={history} coreStart={coreStart} />, element);
+  const root = createRoot(element);
+  root.render(<FooApp history={history} coreStart={coreStart} />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

@@ -8,21 +8,50 @@
  */
 import type { Reference } from '@kbn/content-management-utils';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
-import { transformTitlesOut } from '@kbn/presentation-publishing';
+import { convertCamelCasedKeysToSnakeCase, transformTitlesOut } from '@kbn/presentation-publishing';
 import { flow } from 'lodash';
 import type { ImageEmbeddableState } from '../server';
+
+export function getTransformOut(
+  transformDrilldownsOut: DrilldownTransforms['transformOut']
+): (storedState: object, panelReferences?: Reference[]) => ImageEmbeddableState {
+  return (storedState: object, panelReferences?: Reference[]) => {
+    const transformsFlow = flow(
+      // Strip fileImageMeta from src and hoist objectFit out of sizing — both removed in 9.4.0
+      (state: Record<string, unknown>) => {
+        if ('imageConfig' in state === false) return state;
+        const config = state.imageConfig as Record<string, unknown>;
+
+        const updated = { ...config };
+
+        const src = updated.src as Record<string, unknown> | undefined;
+        if (src?.fileImageMeta) {
+          delete src.fileImageMeta;
+        }
+
+        const sizing = updated.sizing as Record<string, unknown> | undefined;
+        if (sizing) {
+          updated.objectFit = sizing.objectFit;
+          delete updated.sizing;
+        }
+
+        return { ...state, imageConfig: updated };
+      },
+      transformTitlesOut<ImageEmbeddableState>,
+      (state: ImageEmbeddableState) => transformDrilldownsOut(state, panelReferences),
+      // snake case last as snake casing may effect other transforms
+      // BWC transforms may be looking for original camel cased keys
+      convertCamelCasedKeysToSnakeCase
+    );
+    return transformsFlow(storedState as ImageEmbeddableState);
+  };
+}
 
 export function getTransforms(drilldownTransforms: DrilldownTransforms) {
   return {
     transformIn: (state: ImageEmbeddableState) => {
       return drilldownTransforms.transformIn(state);
     },
-    transformOut: (storedState: ImageEmbeddableState, references?: Reference[]) => {
-      const transformsFlow = flow(
-        transformTitlesOut<ImageEmbeddableState>,
-        (state: ImageEmbeddableState) => drilldownTransforms.transformOut(state, references)
-      );
-      return transformsFlow(storedState);
-    },
+    transformOut: getTransformOut(drilldownTransforms.transformOut),
   };
 }

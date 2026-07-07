@@ -36,13 +36,13 @@ const nonAuthorizedResponse: Promise<EntityAnalyticsPrivileges> = Promise.resolv
 export const useAssetCriticalityPrivileges = (
   queryKey: string
 ): UseQueryResult<EntityAnalyticsPrivileges, SecurityAppError> => {
-  const { fetchAssetCriticalityPrivileges } = useEntityAnalyticsRoutes();
+  const { fetchEntityStoreV2Privileges } = useEntityAnalyticsRoutes();
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
 
   return useQuery({
     queryKey: [ASSET_CRITICALITY_KEY, PRIVILEGES_KEY, queryKey, hasEntityAnalyticsCapability],
     queryFn: hasEntityAnalyticsCapability
-      ? fetchAssetCriticalityPrivileges
+      ? fetchEntityStoreV2Privileges
       : () => nonAuthorizedResponse,
   });
 };

@@ -50,17 +50,57 @@ describe('updateAlertsStatus', () => {
             },
             "script": Object {
               "lang": "painless",
-              "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                      ctx._source['kibana.alert.workflow_status'] = 'closed';
-                      ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
-                    }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'closed'
-                    }",
+              "params": Object {
+                "reason": null,
+                "shouldRemoveWorkflowReason": false,
+                "status": "closed",
+                "updatedAt": "2022-02-21T17:35:00.000Z",
+              },
+              "source": "
+            boolean statusChanged = false;
+            boolean signalStatusChanged = false;
+            if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
+              statusChanged = true;
+              ctx._source['kibana.alert.workflow_status'] = params.status;
+              ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
+              if (params.reason != null) {
+                  ctx._source['kibana.alert.workflow_reason'] = params.reason;
+              }
+              if (params.shouldRemoveWorkflowReason) {
+                ctx._source.remove('kibana.alert.workflow_reason');
+              }
+            }
+            if (
+              ctx._source.signal != null &&
+              ctx._source.signal.status != null &&
+              ctx._source.signal.status != params.status
+            ) {
+              signalStatusChanged = true;
+              ctx._source.signal.status = params.status;
+            }
+
+            if (!statusChanged && !signalStatusChanged) {
+              ctx.op = 'noop';
+            }
+          ",
             },
           },
         ]
       `);
+    });
+
+    it('returns total updated alert count', async () => {
+      esClient.updateByQuery
+        .mockResolvedValueOnce({ updated: 2, version_conflicts: 0 })
+        .mockResolvedValueOnce({ updated: 1, version_conflicts: 1 });
+
+      const result = await alertService.updateAlertsStatus([
+        { id: 'id1', index: '1', status: CaseStatuses.closed },
+        { id: 'id2', index: '1', status: CaseStatuses.closed },
+        { id: 'id3', index: '1', status: CaseStatuses.open },
+      ]);
+
+      expect(result).toBe(3);
     });
 
     it('buckets the alerts by index', async () => {
@@ -88,13 +128,39 @@ describe('updateAlertsStatus', () => {
             },
             "script": Object {
               "lang": "painless",
-              "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                      ctx._source['kibana.alert.workflow_status'] = 'closed';
-                      ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
-                    }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'closed'
-                    }",
+              "params": Object {
+                "reason": null,
+                "shouldRemoveWorkflowReason": false,
+                "status": "closed",
+                "updatedAt": "2022-02-21T17:35:00.000Z",
+              },
+              "source": "
+            boolean statusChanged = false;
+            boolean signalStatusChanged = false;
+            if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
+              statusChanged = true;
+              ctx._source['kibana.alert.workflow_status'] = params.status;
+              ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
+              if (params.reason != null) {
+                  ctx._source['kibana.alert.workflow_reason'] = params.reason;
+              }
+              if (params.shouldRemoveWorkflowReason) {
+                ctx._source.remove('kibana.alert.workflow_reason');
+              }
+            }
+            if (
+              ctx._source.signal != null &&
+              ctx._source.signal.status != null &&
+              ctx._source.signal.status != params.status
+            ) {
+              signalStatusChanged = true;
+              ctx._source.signal.status = params.status;
+            }
+
+            if (!statusChanged && !signalStatusChanged) {
+              ctx.op = 'noop';
+            }
+          ",
             },
           },
         ]
@@ -122,14 +188,39 @@ describe('updateAlertsStatus', () => {
             },
             "script": Object {
               "lang": "painless",
-              "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                      ctx._source['kibana.alert.workflow_status'] = 'acknowledged';
-                      ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
-                    }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'acknowledged'
-                    }
-                    ctx._source.remove('kibana.alert.workflow_reason')",
+              "params": Object {
+                "reason": null,
+                "shouldRemoveWorkflowReason": true,
+                "status": "acknowledged",
+                "updatedAt": "2022-02-21T17:35:00.000Z",
+              },
+              "source": "
+            boolean statusChanged = false;
+            boolean signalStatusChanged = false;
+            if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
+              statusChanged = true;
+              ctx._source['kibana.alert.workflow_status'] = params.status;
+              ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
+              if (params.reason != null) {
+                  ctx._source['kibana.alert.workflow_reason'] = params.reason;
+              }
+              if (params.shouldRemoveWorkflowReason) {
+                ctx._source.remove('kibana.alert.workflow_reason');
+              }
+            }
+            if (
+              ctx._source.signal != null &&
+              ctx._source.signal.status != null &&
+              ctx._source.signal.status != params.status
+            ) {
+              signalStatusChanged = true;
+              ctx._source.signal.status = params.status;
+            }
+
+            if (!statusChanged && !signalStatusChanged) {
+              ctx.op = 'noop';
+            }
+          ",
             },
           },
         ]
@@ -161,13 +252,39 @@ describe('updateAlertsStatus', () => {
             },
             "script": Object {
               "lang": "painless",
-              "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                      ctx._source['kibana.alert.workflow_status'] = 'closed';
-                      ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
-                    }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'closed'
-                    }",
+              "params": Object {
+                "reason": null,
+                "shouldRemoveWorkflowReason": false,
+                "status": "closed",
+                "updatedAt": "2022-02-21T17:35:00.000Z",
+              },
+              "source": "
+            boolean statusChanged = false;
+            boolean signalStatusChanged = false;
+            if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
+              statusChanged = true;
+              ctx._source['kibana.alert.workflow_status'] = params.status;
+              ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
+              if (params.reason != null) {
+                  ctx._source['kibana.alert.workflow_reason'] = params.reason;
+              }
+              if (params.shouldRemoveWorkflowReason) {
+                ctx._source.remove('kibana.alert.workflow_reason');
+              }
+            }
+            if (
+              ctx._source.signal != null &&
+              ctx._source.signal.status != null &&
+              ctx._source.signal.status != params.status
+            ) {
+              signalStatusChanged = true;
+              ctx._source.signal.status = params.status;
+            }
+
+            if (!statusChanged && !signalStatusChanged) {
+              ctx.op = 'noop';
+            }
+          ",
             },
           },
         ]
@@ -189,14 +306,39 @@ describe('updateAlertsStatus', () => {
             },
             "script": Object {
               "lang": "painless",
-              "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                      ctx._source['kibana.alert.workflow_status'] = 'open';
-                      ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
-                    }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'open'
-                    }
-                    ctx._source.remove('kibana.alert.workflow_reason')",
+              "params": Object {
+                "reason": null,
+                "shouldRemoveWorkflowReason": true,
+                "status": "open",
+                "updatedAt": "2022-02-21T17:35:00.000Z",
+              },
+              "source": "
+            boolean statusChanged = false;
+            boolean signalStatusChanged = false;
+            if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
+              statusChanged = true;
+              ctx._source['kibana.alert.workflow_status'] = params.status;
+              ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
+              if (params.reason != null) {
+                  ctx._source['kibana.alert.workflow_reason'] = params.reason;
+              }
+              if (params.shouldRemoveWorkflowReason) {
+                ctx._source.remove('kibana.alert.workflow_reason');
+              }
+            }
+            if (
+              ctx._source.signal != null &&
+              ctx._source.signal.status != null &&
+              ctx._source.signal.status != params.status
+            ) {
+              signalStatusChanged = true;
+              ctx._source.signal.status = params.status;
+            }
+
+            if (!statusChanged && !signalStatusChanged) {
+              ctx.op = 'noop';
+            }
+          ",
             },
           },
         ]
@@ -228,13 +370,39 @@ describe('updateAlertsStatus', () => {
             },
             "script": Object {
               "lang": "painless",
-              "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                      ctx._source['kibana.alert.workflow_status'] = 'closed';
-                      ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
-                    }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'closed'
-                    }",
+              "params": Object {
+                "reason": null,
+                "shouldRemoveWorkflowReason": false,
+                "status": "closed",
+                "updatedAt": "2022-02-21T17:35:00.000Z",
+              },
+              "source": "
+            boolean statusChanged = false;
+            boolean signalStatusChanged = false;
+            if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
+              statusChanged = true;
+              ctx._source['kibana.alert.workflow_status'] = params.status;
+              ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
+              if (params.reason != null) {
+                  ctx._source['kibana.alert.workflow_reason'] = params.reason;
+              }
+              if (params.shouldRemoveWorkflowReason) {
+                ctx._source.remove('kibana.alert.workflow_reason');
+              }
+            }
+            if (
+              ctx._source.signal != null &&
+              ctx._source.signal.status != null &&
+              ctx._source.signal.status != params.status
+            ) {
+              signalStatusChanged = true;
+              ctx._source.signal.status = params.status;
+            }
+
+            if (!statusChanged && !signalStatusChanged) {
+              ctx.op = 'noop';
+            }
+          ",
             },
           },
         ]
@@ -256,14 +424,39 @@ describe('updateAlertsStatus', () => {
             },
             "script": Object {
               "lang": "painless",
-              "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                      ctx._source['kibana.alert.workflow_status'] = 'open';
-                      ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
-                    }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'open'
-                    }
-                    ctx._source.remove('kibana.alert.workflow_reason')",
+              "params": Object {
+                "reason": null,
+                "shouldRemoveWorkflowReason": true,
+                "status": "open",
+                "updatedAt": "2022-02-21T17:35:00.000Z",
+              },
+              "source": "
+            boolean statusChanged = false;
+            boolean signalStatusChanged = false;
+            if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
+              statusChanged = true;
+              ctx._source['kibana.alert.workflow_status'] = params.status;
+              ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
+              if (params.reason != null) {
+                  ctx._source['kibana.alert.workflow_reason'] = params.reason;
+              }
+              if (params.shouldRemoveWorkflowReason) {
+                ctx._source.remove('kibana.alert.workflow_reason');
+              }
+            }
+            if (
+              ctx._source.signal != null &&
+              ctx._source.signal.status != null &&
+              ctx._source.signal.status != params.status
+            ) {
+              signalStatusChanged = true;
+              ctx._source.signal.status = params.status;
+            }
+
+            if (!statusChanged && !signalStatusChanged) {
+              ctx.op = 'noop';
+            }
+          ",
             },
           },
         ]

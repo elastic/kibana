@@ -28,7 +28,7 @@ export const aggregateResults = async (
     perPage: number,
     searchAfter?: SortResults,
     pitId?: string
-  ) => Promise<{ results: string[]; total: number; searchAfter?: SortResults }>,
+  ) => Promise<{ results: string[]; total: number; searchAfter?: SortResults; pitId?: string }>,
   esClient: ElasticsearchClient,
   context: OsqueryAppContext
 ) => {
@@ -39,13 +39,19 @@ export const aggregateResults = async (
     // One page only, no need for PIT
     results = initialResults;
   } else {
-    const { id: pitId } = await esClient.openPointInTime({
-      index: AGENTS_INDEX,
-      keep_alive: '10m',
-    });
+    let pitId = (
+      await esClient.openPointInTime({
+        index: AGENTS_INDEX,
+        keep_alive: '10m',
+      })
+    ).id;
     let currentSort: SortResults | undefined;
     // Refetch first page with PIT
-    const { results: pitInitialResults, searchAfter } = await generator(
+    const {
+      results: pitInitialResults,
+      searchAfter,
+      pitId: returnedPitId,
+    } = await generator(
       1,
       PER_PAGE,
       currentSort, // No searchAfter for first page, its built based on first page results
@@ -53,16 +59,17 @@ export const aggregateResults = async (
     );
     results = pitInitialResults;
     currentSort = searchAfter;
+    pitId = returnedPitId ?? pitId;
     let currPage = 2;
     while (currPage <= totalPages) {
-      const { results: additionalResults, searchAfter: additionalSearchAfter } = await generator(
-        currPage++,
-        PER_PAGE,
-        currentSort,
-        pitId
-      );
+      const {
+        results: additionalResults,
+        searchAfter: additionalSearchAfter,
+        pitId: additionalPitId,
+      } = await generator(currPage++, PER_PAGE, currentSort, pitId);
       results.push(...additionalResults);
       currentSort = additionalSearchAfter;
+      pitId = additionalPitId ?? pitId;
     }
 
     try {
@@ -171,6 +178,7 @@ export const parseAgentSelection = async (
               res.agents.length > 0 && res.agents[res.agents.length - 1].sort
                 ? res.agents[res.agents.length - 1].sort
                 : undefined,
+            pitId: res.pit,
           };
         },
         esClient,
@@ -208,6 +216,7 @@ export const parseAgentSelection = async (
                 res.agents.length > 0 && res.agents[res.agents.length - 1].sort
                   ? res.agents[res.agents.length - 1].sort
                   : undefined,
+              pitId: res.pit,
             };
           },
           esClient,

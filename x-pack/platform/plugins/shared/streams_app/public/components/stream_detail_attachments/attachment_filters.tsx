@@ -87,7 +87,7 @@ export function AttachmentFilters({
 
   const typeFilterButton = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={toggleTypePopover}
       isSelected={isTypePopoverOpen}
       numFilters={ATTACHMENT_TYPE_OPTIONS.length}
@@ -102,7 +102,7 @@ export function AttachmentFilters({
 
   const tagsFilterButton = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       badgeColor="accent"
       onClick={toggleTagsPopover}
       isSelected={isTagsPopoverOpen}
@@ -154,6 +154,7 @@ export function AttachmentFilters({
                 checked: filters.types.includes(option.value) ? 'on' : undefined,
                 value: option.value,
               }))}
+              listProps={{ paddingSize: 's' }}
               onChange={(newOptions) => {
                 onFiltersChange((prev) => ({
                   ...prev,
@@ -196,6 +197,7 @@ export function AttachmentFilters({
                 checked: filters.tags.includes(tag.id) ? 'on' : undefined,
                 tagId: tag.id,
               }))}
+              listProps={{ paddingSize: 's' }}
               onChange={(newOptions) => {
                 onFiltersChange((prev) => ({
                   ...prev,

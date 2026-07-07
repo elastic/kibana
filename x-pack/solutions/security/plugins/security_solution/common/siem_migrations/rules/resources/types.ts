@@ -22,7 +22,7 @@ export interface ResourceIdentifiers {
   fromResource: (resource: SiemMigrationResourceData) => SiemMigrationResourceBase[];
 }
 
-const RESOURCE_IDENT_SUPPORTED_VENDORS = ['splunk', 'qradar'] as const;
+const RESOURCE_IDENT_SUPPORTED_VENDORS = ['splunk', 'qradar', 'microsoft-sentinel'] as const;
 
 export type ResourceSupportedVendor = (typeof RESOURCE_IDENT_SUPPORTED_VENDORS)[number];
 

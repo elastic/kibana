@@ -11,7 +11,9 @@ import type { ArrayElement } from '@kbn/utility-types';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
+  CASE_FIELD_DEFINITION_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
+  CASE_TEMPLATE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '../../common/constants';
 import type { Verbs, OperationDetails } from './types';
@@ -200,6 +202,17 @@ const CaseOperations = {
   },
 };
 
+const TemplateOperations = {
+  [WriteOperations.ManageTemplate]: {
+    ecsType: EVENT_TYPES.change,
+    name: WriteOperations.ManageTemplate as const,
+    action: 'case_template_manage',
+    verbs: updateVerbs,
+    docType: 'case templates',
+    savedObjectType: CASE_TEMPLATE_SAVED_OBJECT,
+  },
+};
+
 const ConfigurationOperations = {
   [ReadOperations.FindConfigurations]: {
     ecsType: EVENT_TYPES.access,
@@ -323,6 +336,7 @@ const AttachmentOperations = {
  */
 export const Operations: Record<ReadOperations | WriteOperations, OperationDetails> = {
   ...CaseOperations,
+  ...TemplateOperations,
   ...ConfigurationOperations,
   ...AttachmentOperations,
   [ReadOperations.GetTags]: {
@@ -396,5 +410,13 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     verbs: accessVerbs,
     docType: 'cases',
     savedObjectType: CASE_SAVED_OBJECT,
+  },
+  [ReadOperations.GetFieldDefinitions]: {
+    ecsType: EVENT_TYPES.access,
+    name: ReadOperations.GetFieldDefinitions as const,
+    action: 'case_field_definitions_get',
+    verbs: accessVerbs,
+    docType: 'case field definitions',
+    savedObjectType: CASE_FIELD_DEFINITION_SAVED_OBJECT,
   },
 };

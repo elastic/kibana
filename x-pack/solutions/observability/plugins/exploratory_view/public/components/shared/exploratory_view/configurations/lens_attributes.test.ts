@@ -21,7 +21,7 @@ import { sampleAttributeKpi } from './test_data/sample_attribute_kpi';
 import { RECORDS_FIELD, REPORT_METRIC_FIELD, PERCENTILE_RANKS, ReportTypes } from './constants';
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { sampleAttributeWithReferenceLines } from './test_data/sample_attribute_with_reference_lines';
-import type { XYState } from '@kbn/lens-plugin/public';
+import type { XYVisualizationState } from '@kbn/lens-plugin/public';
 import type { Query } from '@kbn/es-query';
 
 describe('Lens Attribute', () => {
@@ -347,7 +347,7 @@ describe('Lens Attribute', () => {
     expect(lnsAttr.getLayers()).toEqual(sampleAttribute.state.datasourceStates.formBased.layers);
   });
 
-  it('should return expected XYState', function () {
+  it('should return expected XYVisualizationState', function () {
     expect(lnsAttr.getXyState()).toEqual({
       axisTitlesVisibilitySettings: { x: false, yLeft: true, yRight: true },
       curveType: 'CURVE_MONOTONE_X',
@@ -463,7 +463,7 @@ describe('Lens Attribute', () => {
         layerId: 'layer0',
       });
 
-      expect((lnsAttr.visualization as XYState)?.layers).toEqual([
+      expect((lnsAttr.visualization as XYVisualizationState)?.layers).toEqual([
         {
           accessors: ['y-axis-column-layer0-0'],
           layerId: 'layer0',

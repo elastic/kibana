@@ -6,7 +6,7 @@
  */
 
 import { getReviewFields } from './get_review_fields';
-import type { DissectPattern, DissectAST } from '../types';
+import type { DissectPattern, DissectAST, DissectFieldNode } from '../types';
 
 // Helper to parse a pattern string into AST
 function parsePattern(patternString: string): DissectAST {
@@ -18,7 +18,7 @@ function parsePattern(patternString: string): DissectAST {
     if (match[1]) {
       // Field node
       const fieldContent = match[1];
-      const modifiers: any = {};
+      const modifiers: DissectFieldNode['modifiers'] = {};
       let fieldName = fieldContent;
 
       // Parse modifiers

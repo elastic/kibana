@@ -12,7 +12,6 @@ import type { SavedObject } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   executionContextServiceMock,
-  httpServiceMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
   savedObjectsServiceMock,
@@ -29,7 +28,10 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskPriority, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { AdHocTaskRunner } from './ad_hoc_task_runner';
+import type { AdHocTaskRunnerConstructorParams } from './ad_hoc_task_runner';
+import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import type { TaskRunnerContext } from './types';
+import { ApiKeyType } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import type { ContextOpts } from '../lib/alerting_event_logger/alerting_event_logger';
@@ -66,6 +68,7 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_SEVERITY_IMPROVING,
+  ALERT_SNOOZED,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_RULE_CATEGORY,
@@ -167,7 +170,6 @@ const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType
   actionsPlugin: actionsMock.createStart(),
   alertsService,
   backfillClient,
-  basePathService: httpServiceMock.createBasePath(),
   cancelAlertsOnRuleTimeout: true,
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   data: dataPlugin,
@@ -189,6 +191,7 @@ const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType
   usageCounter: mockUsageCounter,
   isServerless: false,
   getEventLogClient: jest.fn(),
+  apiKeyType: ApiKeyType.ES,
 };
 
 const mockedTaskInstance: ConcreteTaskInstance = {
@@ -230,6 +233,15 @@ const ruleTypeWithAlerts: jest.Mocked<UntypedNormalizedRuleType> = {
 };
 
 const RULE_ID = 'rule-id';
+
+const createAdHocTaskRunner = (overrides: Partial<AdHocTaskRunnerConstructorParams> = {}) =>
+  new AdHocTaskRunner({
+    context: taskRunnerFactoryInitializerParams,
+    internalSavedObjectsRepository,
+    taskInstance: mockedTaskInstance,
+    executionUuid: UUID,
+    ...overrides,
+  });
 
 describe('Ad Hoc Task Runner', () => {
   let mockedAdHocRunSO: SavedObject<AdHocRunSO>;
@@ -413,6 +425,10 @@ describe('Ad Hoc Task Runner', () => {
   afterAll(() => fakeTimer.restore());
 
   test('successfully executes the task', async () => {
+    const addFrameworkMetricsSpy = jest.spyOn(
+      RuleMonitoringService.prototype,
+      'addFrameworkMetrics'
+    );
     ruleTypeWithAlerts.executor.mockImplementation(
       async ({
         services: executorServices,
@@ -433,15 +449,15 @@ describe('Ad Hoc Task Runner', () => {
       }
     );
 
-    const taskRunner = new AdHocTaskRunner({
-      context: taskRunnerFactoryInitializerParams,
-      internalSavedObjectsRepository,
-      taskInstance: mockedTaskInstance,
-    });
+    const taskRunner = createAdHocTaskRunner();
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toEqual({ state: {}, runAt: new Date('1970-01-01T00:00:00.000Z') });
+    expect(addFrameworkMetricsSpy).toHaveBeenCalledWith({
+      total_search_duration_ms: 23423,
+    });
+    addFrameworkMetricsSpy.mockRestore();
     await taskRunner.cleanup();
 
     // Verify all the expected calls were made before calling the rule executor
@@ -535,6 +551,7 @@ describe('Ad Hoc Task Runner', () => {
           [ALERT_RULE_TYPE_ID]: ruleTypeWithAlerts.id,
           [ALERT_RULE_TAGS]: mockedAdHocRunSO.attributes.rule.tags,
           [ALERT_RULE_UUID]: RULE_ID,
+          [ALERT_SNOOZED]: false,
           [ALERT_START]: schedule1.runAt,
           [ALERT_STATUS]: 'active',
           [ALERT_TIME_RANGE]: { gte: schedule1.runAt },
@@ -580,6 +597,58 @@ describe('Ad Hoc Task Runner', () => {
       `rule test:rule-id: 'test' has 1 active alerts: [{"instanceId":"1","actionGroup":"default"}]`
     );
     expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  test('uses executionUuid from constructor as the rule execution id', async () => {
+    const executionUuid = 'custom-adhoc-execution-uuid-from-task-manager';
+    mockValidateRuleTypeParams.mockReturnValue(mockedAdHocRunSO.attributes.rule.params);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedAdHocRunSO);
+    const taskRunner = createAdHocTaskRunner({ executionUuid });
+    await taskRunner.run();
+    expect(alertingEventLogger.initialize).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: expect.objectContaining({ executionId: executionUuid }),
+      })
+    );
+  });
+
+  test('passes consumer metrics to AlertingEventLogger', async () => {
+    const consumerMetrics = {
+      matched_indices_count: 3,
+      alerts_candidate_count: 100,
+      total_enrichment_duration_ms: 50,
+    };
+    ruleTypeWithAlerts.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string,
+        RuleAlertData
+      >) => {
+        executorServices.ruleMonitoringService?.setMetrics(consumerMetrics);
+        return { state: {} };
+      }
+    );
+
+    const taskRunner = createAdHocTaskRunner();
+
+    await taskRunner.run();
+    await taskRunner.cleanup();
+
+    expect(alertingEventLogger.done).toHaveBeenCalledWith(
+      expect.objectContaining({
+        consumerMetrics,
+        backfill: {
+          id: mockedAdHocRunSO.id,
+          start: schedule1.runAt,
+          interval: schedule1.interval,
+        },
+      })
+    );
   });
 
   test('should schedule actions for rule with actions', async () => {
@@ -642,10 +711,8 @@ describe('Ad Hoc Task Runner', () => {
       }
     );
 
-    const taskRunner = new AdHocTaskRunner({
+    const taskRunner = createAdHocTaskRunner({
       context: { ...taskRunnerFactoryInitializerParams, alertsService: mockAlertsService },
-      internalSavedObjectsRepository,
-      taskInstance: mockedTaskInstance,
     });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
@@ -723,11 +790,7 @@ describe('Ad Hoc Task Runner', () => {
         return { state: {} };
       }
     );
-    const taskRunner = new AdHocTaskRunner({
-      context: taskRunnerFactoryInitializerParams,
-      internalSavedObjectsRepository,
-      taskInstance: mockedTaskInstance,
-    });
+    const taskRunner = createAdHocTaskRunner();
 
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       ...mockedAdHocRunSO,
@@ -836,11 +899,7 @@ describe('Ad Hoc Task Runner', () => {
         return { state: {} };
       }
     );
-    const taskRunner = new AdHocTaskRunner({
-      context: taskRunnerFactoryInitializerParams,
-      internalSavedObjectsRepository,
-      taskInstance: mockedTaskInstance,
-    });
+    const taskRunner = createAdHocTaskRunner();
 
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       ...mockedAdHocRunSO,
@@ -954,11 +1013,7 @@ describe('Ad Hoc Task Runner', () => {
 
   describe('error handling', () => {
     test('should handle errors decrypting ad hoc rule run SO', async () => {
-      const taskRunner = new AdHocTaskRunner({
-        context: taskRunnerFactoryInitializerParams,
-        internalSavedObjectsRepository,
-        taskInstance: mockedTaskInstance,
-      });
+      const taskRunner = createAdHocTaskRunner();
 
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockImplementationOnce(() => {
         throw new Error('fail fail');
@@ -1020,11 +1075,7 @@ describe('Ad Hoc Task Runner', () => {
         throw new Error('no rule type');
       });
 
-      const taskRunner = new AdHocTaskRunner({
-        context: taskRunnerFactoryInitializerParams,
-        internalSavedObjectsRepository,
-        taskInstance: mockedTaskInstance,
-      });
+      const taskRunner = createAdHocTaskRunner();
 
       const runnerResult = await taskRunner.run();
       // should not return a new runAt
@@ -1082,11 +1133,7 @@ describe('Ad Hoc Task Runner', () => {
         throw new Error('rule type not enabled');
       });
 
-      const taskRunner = new AdHocTaskRunner({
-        context: taskRunnerFactoryInitializerParams,
-        internalSavedObjectsRepository,
-        taskInstance: mockedTaskInstance,
-      });
+      const taskRunner = createAdHocTaskRunner();
 
       const runnerResult = await taskRunner.run();
       // should not return a new runAt
@@ -1144,11 +1191,7 @@ describe('Ad Hoc Task Runner', () => {
         throw new Error('params not valid');
       });
 
-      const taskRunner = new AdHocTaskRunner({
-        context: taskRunnerFactoryInitializerParams,
-        internalSavedObjectsRepository,
-        taskInstance: mockedTaskInstance,
-      });
+      const taskRunner = createAdHocTaskRunner();
 
       const runnerResult = await taskRunner.run();
       // should not return a new runAt
@@ -1208,11 +1251,7 @@ describe('Ad Hoc Task Runner', () => {
         throw new Error('executor failed');
       });
 
-      const taskRunner = new AdHocTaskRunner({
-        context: taskRunnerFactoryInitializerParams,
-        internalSavedObjectsRepository,
-        taskInstance: mockedTaskInstance,
-      });
+      const taskRunner = createAdHocTaskRunner();
 
       const runnerResult = await taskRunner.run();
       // should return a new runAt to try to next scheduled execution
@@ -1283,11 +1322,7 @@ describe('Ad Hoc Task Runner', () => {
       internalSavedObjectsRepository.delete.mockImplementationOnce(() => {
         throw new Error('trouble deleting this');
       });
-      const taskRunner = new AdHocTaskRunner({
-        context: taskRunnerFactoryInitializerParams,
-        internalSavedObjectsRepository,
-        taskInstance: mockedTaskInstance,
-      });
+      const taskRunner = createAdHocTaskRunner();
 
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
         ...mockedAdHocRunSO,
@@ -1361,11 +1396,7 @@ describe('Ad Hoc Task Runner', () => {
 
   describe('timeout', () => {
     test('should handle task cancellation signal due to timeout', async () => {
-      const taskRunner = new AdHocTaskRunner({
-        context: taskRunnerFactoryInitializerParams,
-        internalSavedObjectsRepository,
-        taskInstance: mockedTaskInstance,
-      });
+      const taskRunner = createAdHocTaskRunner();
 
       const promise = taskRunner.run();
       await Promise.resolve();
@@ -1450,11 +1481,7 @@ describe('Ad Hoc Task Runner', () => {
           schedule: [{ ...schedule1, status: adHocRunStatus.COMPLETE }, schedule2],
         },
       });
-      const taskRunner = new AdHocTaskRunner({
-        context: taskRunnerFactoryInitializerParams,
-        internalSavedObjectsRepository,
-        taskInstance: mockedTaskInstance,
-      });
+      const taskRunner = createAdHocTaskRunner();
 
       const promise = taskRunner.run();
       await Promise.resolve();
@@ -1537,11 +1564,7 @@ describe('Ad Hoc Task Runner', () => {
         throw new Error('Search has been aborted due to cancelled execution');
       });
 
-      const taskRunner = new AdHocTaskRunner({
-        context: taskRunnerFactoryInitializerParams,
-        internalSavedObjectsRepository,
-        taskInstance: mockedTaskInstance,
-      });
+      const taskRunner = createAdHocTaskRunner();
 
       const promise = taskRunner.run();
       await Promise.resolve();

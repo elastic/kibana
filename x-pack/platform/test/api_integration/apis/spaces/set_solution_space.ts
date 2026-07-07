@@ -170,7 +170,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(400);
 
       expect(body.message).to.eql(
-        '[request body]: types that failed validation:\n- [request body.0.solution_type]: definition for this key is missing\n- [request body.1.solution]: definition for this key is missing'
+        "[request body]: types that failed validation:\n- [request body.0.solution_type]: Additional properties are not allowed ('solution_type' was unexpected)\n- [request body.1.solution]: Additional properties are not allowed ('solution' was unexpected)"
       );
     });
 

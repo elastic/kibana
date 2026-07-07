@@ -6,18 +6,35 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
+import { EuiContextMenuItem, EuiCopy, EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
-import { EXCLUDED_FROM_PACKAGE_POLICY_COPY_PACKAGES } from '../../common/constants';
+import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
+
+import {
+  EXCLUDED_FROM_PACKAGE_POLICY_COPY_PACKAGES,
+  FLEET_CONNECTORS_PACKAGE,
+} from '../../common/constants';
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
-import { useAgentPolicyRefresh, useAuthz, useLink } from '../hooks';
+import {
+  useAgentPolicyRefresh,
+  useAuthz,
+  useGetOneAgentPolicy,
+  useLink,
+  useStartServices,
+  useUpgradeReviewActions,
+} from '../hooks';
 import { policyHasFleetServer } from '../services';
+
+import { scheduleAutoOpenModal } from '../applications/integrations/sections/epm/screens/installed_integrations/components/pending_upgrade_review_status';
 
 import { AgentEnrollmentFlyout } from './agent_enrollment_flyout';
 import { ContextMenuActions } from './context_menu_actions';
 import { DangerEuiContextMenuItem } from './danger_eui_context_menu_item';
 import { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
+
+const CONNECTORS_PATH = '/data/content_connectors/connectors';
 
 export const PackagePolicyActionsMenu: React.FunctionComponent<{
   agentPolicies: AgentPolicy[];
@@ -46,10 +63,47 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const refreshAgentPolicy = useAgentPolicyRefresh();
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(defaultIsOpen);
 
+  const { cloud, application } = useStartServices();
+
   const isManaged = Boolean(packagePolicy.is_managed);
   const agentPolicyIsManaged = Boolean(agentPolicy?.is_managed);
   const isOrphanedPolicy = !agentPolicy && packagePolicy.policy_ids.length === 0;
   const isAgentlessPolicy = packagePolicy.supports_agentless;
+
+  // For agentless policies the agentPolicies prop may be empty (the parent hook doesn't always
+  // fetch them). Fetch the agent policy directly so we can include cluster_id in the support bundle.
+  const agentlessPolicyId =
+    isAgentlessPolicy && !agentPolicy ? packagePolicy.policy_ids[0] : undefined;
+  const { data: agentlessPolicyData } = useGetOneAgentPolicy(agentlessPolicyId);
+  const effectiveAgentPolicy = agentPolicy ?? agentlessPolicyData?.item;
+
+  const supportBundleText = useMemo(() => {
+    if (!isAgentlessPolicy) return '';
+    return [
+      'elastic-support-bundle',
+      cloud?.isServerlessEnabled && cloud?.serverless?.projectId
+        ? `project_id=${cloud.serverless.projectId}`
+        : null,
+      !cloud?.isServerlessEnabled && cloud?.deploymentId
+        ? `deployment_id=${cloud.deploymentId}`
+        : null,
+      effectiveAgentPolicy?.agentless?.cluster_id
+        ? `cluster_id=${effectiveAgentPolicy.agentless.cluster_id}`
+        : null,
+      effectiveAgentPolicy?.id ?? packagePolicy.policy_ids[0]
+        ? `policy_id=${effectiveAgentPolicy?.id ?? packagePolicy.policy_ids[0]}`
+        : null,
+      packagePolicy.package?.name ? `integration=${packagePolicy.package.name}` : null,
+    ]
+      .filter(Boolean)
+      .join('\n');
+  }, [
+    isAgentlessPolicy,
+    cloud,
+    effectiveAgentPolicy,
+    packagePolicy.policy_ids,
+    packagePolicy.package?.name,
+  ]);
 
   const isAddAgentVisible =
     showAddAgent && agentPolicy && !agentPolicyIsManaged && !agentPolicy?.supports_agentless;
@@ -57,6 +111,17 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const onEnrollmentFlyoutClose = useMemo(() => {
     return () => setIsEnrollmentFlyoutOpen(false);
   }, []);
+  const { handleReEnable: handleReviewUpgrade } = useUpgradeReviewActions({
+    pkgName: packagePolicy.package?.name || '',
+    pkgTitle: packagePolicy.package?.title || '',
+    targetVersion: packagePolicy.pendingUpgradeReview?.target_version || '',
+  });
+
+  const isConnectorPolicy = packagePolicy.package?.name === FLEET_CONNECTORS_PACKAGE;
+  const connectorId = packagePolicy.inputs
+    .map((input) => input?.vars?.connector_id?.value)
+    .find(Boolean);
+
   const menuItems = [
     // FIXME: implement View package policy action
     // <EuiContextMenuItem
@@ -74,7 +139,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       ? [
           <EuiContextMenuItem
             data-test-subj="PackagePolicyActionsAddAgentItem"
-            icon="plusInCircle"
+            icon="plusCircle"
             onClick={() => {
               setIsActionsMenuOpen(false);
               setIsEnrollmentFlyoutOpen(true);
@@ -110,7 +175,30 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         defaultMessage="Edit integration"
       />
     </EuiContextMenuItem>,
-    ...(packagePolicy.hasUpgrade
+    ...(packagePolicy.hasUpgrade &&
+    packagePolicy.keepPoliciesUpToDate &&
+    packagePolicy.pendingUpgradeReview &&
+    packagePolicy.pendingUpgradeReview.action !== 'accepted'
+      ? [
+          <EuiContextMenuItem
+            data-test-subj="PackagePolicyActionsDeclinedUpgradeItem"
+            disabled={!canWriteIntegrationPolicies}
+            icon="refresh"
+            onClick={() => {
+              setIsActionsMenuOpen(false);
+              scheduleAutoOpenModal(packagePolicy.package?.name || '');
+              handleReviewUpgrade();
+            }}
+            key="packagePolicyDeclinedUpgrade"
+          >
+            <FormattedMessage
+              id="xpack.fleet.policyDetails.packagePoliciesTable.declinedUpgradeActionTitle"
+              data-test-subj="DeclinedUpgradeIntegrationPolicy"
+              defaultMessage="Review policy upgrade"
+            />
+          </EuiContextMenuItem>,
+        ]
+      : packagePolicy.hasUpgrade
       ? [
           <EuiContextMenuItem
             data-test-subj="PackagePolicyActionsUpgradeItem"
@@ -161,7 +249,49 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         defaultMessage="Copy integration"
       />
     </EuiContextMenuItem>,
+    ...(isConnectorPolicy
+      ? [
+          <EuiContextMenuItem
+            data-test-subj="PackagePolicyActionsManageConnectorItem"
+            icon="gear"
+            onClick={() => {
+              setIsActionsMenuOpen(false);
+              application.navigateToApp(MANAGEMENT_APP_ID, {
+                path: connectorId ? `${CONNECTORS_PATH}/${connectorId}` : CONNECTORS_PATH,
+              });
+            }}
+            key="packagePolicyManageConnector"
+          >
+            <FormattedMessage
+              id="xpack.fleet.policyDetails.packagePoliciesTable.manageConnectorActionTitle"
+              defaultMessage="Manage connector"
+            />
+          </EuiContextMenuItem>,
+        ]
+      : []),
   ];
+
+  if (isAgentlessPolicy) {
+    menuItems.push(
+      <EuiCopy textToCopy={supportBundleText} key="packagePolicyCopySupportInfo">
+        {(copy) => (
+          <EuiContextMenuItem
+            data-test-subj="PackagePolicyActionsCopySupportInfoItem"
+            icon="copy"
+            onClick={() => {
+              copy();
+              setIsActionsMenuOpen(false);
+            }}
+          >
+            <FormattedMessage
+              id="xpack.fleet.policyDetails.packagePoliciesTable.copySupportInfoActionTitle"
+              defaultMessage="Copy support info"
+            />
+          </EuiContextMenuItem>
+        )}
+      </EuiCopy>
+    );
+  }
 
   if (!agentPolicy || !agentPolicyIsManaged || agentPolicy?.supports_agentless) {
     const ContextMenuItem = canWriteIntegrationPolicies
@@ -219,6 +349,10 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         isOpen={isActionsMenuOpen}
         items={menuItems}
         onChange={(open) => setIsActionsMenuOpen(open)}
+        aria-label={i18n.translate('xpack.fleet.packagePolicyActionsMenu.actionsAriaLabel', {
+          defaultMessage: 'Actions for {policyName}',
+          values: { policyName: packagePolicy.name },
+        })}
       />
     </>
   );

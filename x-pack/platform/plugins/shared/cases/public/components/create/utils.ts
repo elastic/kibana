@@ -8,11 +8,13 @@
 import { isEmpty } from 'lodash';
 import type { CasePostRequest } from '../../../common';
 import { GENERAL_CASES_OWNER } from '../../../common';
+import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import type { ActionConnector } from '../../../common/types/domain';
-import { CaseSeverity } from '../../../common/types/domain';
+import { getInitialCaseValue } from '../../../common/utils/get_initial_case_value';
+import { getNoneConnector } from '../../../common/utils/connectors';
 import type { CasesConfigurationUI } from '../../containers/types';
 import type { CaseFormFieldsSchemaProps } from '../case_form_fields/schema';
-import { normalizeActionConnector, getNoneConnector } from '../configure_cases/utils';
+import { normalizeActionConnector } from '../configure_cases/utils';
 import {
   customFieldsFormDeserializer,
   customFieldsFormSerializer,
@@ -20,31 +22,16 @@ import {
   getConnectorsFormSerializer,
 } from '../utils';
 
-type GetInitialCaseValueArgs = Partial<Omit<CasePostRequest, 'owner'>> &
-  Pick<CasePostRequest, 'owner'>;
-
-export const getInitialCaseValue = ({
-  owner,
-  connector,
-  ...restFields
-}: GetInitialCaseValueArgs): CasePostRequest => ({
-  title: '',
-  assignees: [],
-  tags: [],
-  category: undefined,
-  severity: CaseSeverity.LOW as const,
-  description: '',
-  settings: { syncAlerts: true, extractObservables: true },
-  customFields: [],
-  ...restFields,
-  connector: connector ?? getNoneConnector(),
-  owner,
-});
-
 export const trimUserFormData = (
   userFormData: Omit<
     CaseFormFieldsSchemaProps,
-    'connectorId' | 'fields' | 'syncAlerts' | 'extractObservables' | 'customFields'
+    | 'connectorId'
+    | 'fields'
+    | 'syncAlerts'
+    | 'extractObservables'
+    | 'customFields'
+    | 'templateId'
+    | 'templateVersion'
   >
 ) => {
   let formData = {
@@ -65,7 +52,13 @@ export const trimUserFormData = (
 };
 
 export const createFormDeserializer = (data: CasePostRequest): CaseFormFieldsSchemaProps => {
-  const { connector, settings, customFields, ...restData } = data;
+  const {
+    connector,
+    settings,
+    customFields,
+    [CASE_EXTENDED_FIELDS]: extendedFieldsFromResponse,
+    ...restData
+  } = data;
 
   return {
     ...restData,
@@ -74,6 +67,9 @@ export const createFormDeserializer = (data: CasePostRequest): CaseFormFieldsSch
     syncAlerts: settings.syncAlerts,
     extractObservables: settings.extractObservables ?? false,
     customFields: customFieldsFormDeserializer(customFields) ?? {},
+    ...(extendedFieldsFromResponse != null
+      ? { [CASE_EXTENDED_FIELDS]: extendedFieldsFromResponse }
+      : {}),
   };
 };
 
@@ -95,6 +91,9 @@ export const createFormSerializer = (
     syncAlerts,
     extractObservables,
     customFields,
+    templateId,
+    templateVersion,
+    [CASE_EXTENDED_FIELDS]: extendedFields,
     ...restData
   } = data;
 
@@ -117,6 +116,10 @@ export const createFormSerializer = (
     settings: { syncAlerts: syncAlerts ?? false, extractObservables: extractObservables ?? false },
     owner: currentConfiguration.owner,
     customFields: transformedCustomFields,
+    ...(extendedFields != null ? { [CASE_EXTENDED_FIELDS]: extendedFields } : {}),
+    ...(templateId && templateVersion
+      ? { template: { id: templateId, version: templateVersion } }
+      : {}),
   };
 };
 

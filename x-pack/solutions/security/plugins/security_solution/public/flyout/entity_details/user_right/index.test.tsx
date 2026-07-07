@@ -22,6 +22,7 @@ import {
 } from '@kbn/expandable-flyout';
 import { mockManagedUserData, mockObservedUser } from './mocks';
 import { mockRiskScoreState } from '../../shared/mocks';
+import { mockUserEntityRiskScores } from '../mocks';
 
 const mockProps: UserPanelProps = {
   userName: 'test',
@@ -35,6 +36,11 @@ jest.mock('../../../common/components/visualization_actions/visualization_embedd
 const mockedUseRiskScore = jest.fn().mockReturnValue(mockRiskScoreState);
 jest.mock('../../../entity_analytics/api/hooks/use_risk_score', () => ({
   useRiskScore: () => mockedUseRiskScore(),
+}));
+
+const mockedUseEntityRiskScores = jest.fn();
+jest.mock('../../../entity_analytics/api/hooks/use_entity_risk_scores', () => ({
+  useEntityRiskScores: () => mockedUseEntityRiskScores(),
 }));
 
 const mockedUseManagedUser = jest.fn().mockReturnValue(mockManagedUserData);
@@ -66,6 +72,7 @@ describe('UserPanel', () => {
     mockedUseRiskScore.mockReturnValue(mockRiskScoreState);
     mockedUseManagedUser.mockReturnValue(mockManagedUserData);
     mockedUseObservedUser.mockReturnValue(mockObservedUser);
+    mockedUseEntityRiskScores.mockReturnValue(mockUserEntityRiskScores);
     jest.mocked(useExpandableFlyoutHistory).mockReturnValue(flyoutHistory);
     jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
@@ -89,12 +96,13 @@ describe('UserPanel', () => {
       isLoading: true,
     });
 
-    const { getByTestId } = render(
+    const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <UserPanel {...mockProps} />
       </TestProviders>
     );
 
-    expect(getByTestId('securitySolutionFlyoutLoading')).toBeInTheDocument();
+    expect(queryByTestId('securitySolutionFlyoutLoading')).not.toBeInTheDocument();
+    expect(getByTestId('observedDataSectionLoadingSpinner')).toBeInTheDocument();
   });
 });

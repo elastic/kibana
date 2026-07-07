@@ -35,7 +35,7 @@ export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderCont
 
   const clickDisableFromDropDownMenu = async () => testSubjects.click('statusDropdownDisabledItem');
 
-  const clickLogsTab = async () => testSubjects.click('ruleLogsTab');
+  const clickLogsTab = async () => testSubjects.click('logsTab');
 
   const clickOnRuleInEventLogs = async () => {
     await find.clickByButtonText('metric-threshold');

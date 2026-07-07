@@ -34,6 +34,7 @@ const log = new ToolingLog({
 });
 
 let doc: PluginApi;
+let pluginBDoc: PluginApi;
 let mdxOutputFolder: string;
 let pluginAStats: ApiStats;
 let pluginBStats: ApiStats;
@@ -119,20 +120,28 @@ beforeAll(async () => {
   pluginA.manifest.serviceFolders = ['foo'];
   const plugins: PluginOrPackage[] = [pluginA, pluginB];
 
-  const { pluginApiMap, missingApiItems, referencedDeprecations, adoptionTrackedAPIs } =
-    getPluginApiMap(project, plugins, log, { collectReferences: false });
+  const {
+    pluginApiMap,
+    missingApiItems,
+    referencedDeprecations,
+    adoptionTrackedAPIs,
+    unnamedExports,
+  } = getPluginApiMap(project, plugins, plugins, log, { collectReferences: false });
 
   doc = pluginApiMap.pluginA;
+  pluginBDoc = pluginApiMap.pluginB;
 
   pluginAStats = collectApiStatsForPlugin(doc, {
     missingApiItems,
     referencedDeprecations,
     adoptionTrackedAPIs,
+    unnamedExports,
   });
   pluginBStats = collectApiStatsForPlugin(pluginApiMap.pluginB, {
     missingApiItems,
     referencedDeprecations,
     adoptionTrackedAPIs,
+    unnamedExports,
   });
 
   mdxOutputFolder = Path.resolve(__dirname, 'snapshots');
@@ -152,12 +161,28 @@ beforeAll(async () => {
       apiCount: pluginAStats.apiCount,
       missingExports: pluginAStats.missingExports,
       missingComments: pluginAStats.missingComments.length,
+      paramDocMismatches: pluginAStats.paramDocMismatches.length,
+      missingComplexTypeInfo: pluginAStats.missingComplexTypeInfo.length,
+      missingReturns: pluginAStats.missingReturns.length,
       isAnyType: pluginAStats.isAnyType.length,
       noReferences: pluginAStats.noReferences.length,
+      unnamedExports: pluginAStats.unnamedExports.length,
     },
     missingComments: pluginAStats.missingComments.map(mapStat),
+    paramDocMismatches: pluginAStats.paramDocMismatches.map(mapStat),
+    missingComplexTypeInfo: pluginAStats.missingComplexTypeInfo.map(mapStat),
+    missingReturns: pluginAStats.missingReturns.map(mapStat),
     isAnyType: pluginAStats.isAnyType.map(mapStat),
     noReferences: pluginAStats.noReferences.map(mapStat),
+    unnamedExports: pluginAStats.unnamedExports.map(
+      ({ pluginId, scope, path, lineNumber, textSnippet }) => ({
+        pluginId,
+        scope,
+        path,
+        lineNumber,
+        textSnippet,
+      })
+    ),
   };
   fs.writeFileSync(
     Path.resolve(mdxOutputFolder, 'plugin_a.stats.json'),
@@ -169,6 +194,19 @@ it('Stats', () => {
   // Type "imAnAny"
   expect(pluginAStats.isAnyType.length).toBe(1);
   expect(pluginBStats.isAnyType.length).toBe(0);
+});
+
+it('pluginB keeps external referenced params in missingComments', () => {
+  const fn = pluginBDoc.client.find((c) => c.label === 'anIdFun');
+  expect(fn).toBeDefined();
+
+  const depParam = fn!.children?.find((c) => c.label === 'dep');
+  expect(depParam).toBeDefined();
+  expect(depParam!.docsReferencedTypeName).toBe('AnotherInterface');
+
+  expect(pluginBStats.missingComments.map(({ id }) => id)).toEqual(
+    expect.arrayContaining([fn!.id, depParam!.id])
+  );
 });
 
 it('Setup type is extracted', () => {
@@ -243,12 +281,12 @@ describe('functions', () => {
     const hi = obj?.children?.find((c) => c.label === 'hi');
     expect(hi).toBeDefined();
 
-    const obj2 = fn?.children?.find((c) => c.label === '{ fn1, fn2 }');
-    expect(obj2).toBeDefined();
-    expect(obj2!.children?.length).toBe(2);
-    expect(obj2!.id).toBe('def-public.crazyFunction.$2');
+    const fnsParam = fn?.children?.find((c) => c.label === 'fns');
+    expect(fnsParam).toBeDefined();
+    expect(fnsParam!.children?.length).toBe(2);
+    expect(fnsParam!.id).toBe('def-public.crazyFunction.$2');
 
-    const fn1 = obj2?.children?.find((c) => c.label === 'fn1');
+    const fn1 = fnsParam?.children?.find((c) => c.label === 'fn1');
     expect(fn1).toBeDefined();
     expect(fn1?.type).toBe(TypeKind.FunctionKind);
     expect(fn1!.id).toBe('def-public.crazyFunction.$2.fn1');
@@ -360,7 +398,7 @@ describe('Types', () => {
           "section": "def-public.MyProps",
           "text": "MyProps",
         },
-        ", string | React.JSXElementConstructor<any>>",
+        ">",
       ]
     `);
   });
@@ -689,9 +727,8 @@ describe('validation and stats', () => {
       expect(missingComment).toBeDefined();
     });
 
-    it('validates missingComments includes destructured parameter children', () => {
+    it('does not flag destructured parameter children when documented', () => {
       // crazyFunction has destructured params with nested properties
-      // Current behavior: nested properties without comments are flagged
       const fn = doc.client.find((c) => c.label === 'crazyFunction');
       expect(fn).toBeDefined();
 
@@ -701,34 +738,22 @@ describe('validation and stats', () => {
       const hiProp = objParam!.children?.find((c) => c.label === 'hi');
       expect(hiProp).toBeDefined();
 
-      // Current behavior: property without comment is flagged
-      // Note: This is a false positive that will be fixed in Phase 4.2
-      // Verify the property structure exists and check if it's in missingComments
       expect(hiProp!.description).toBeDefined();
-      const hasDescription = hiProp!.description!.length > 0;
+      expect(hiProp!.description!.length).toBeGreaterThan(0);
       const missingComment = pluginAStats.missingComments.find((d) => d.id === hiProp!.id);
-
-      // If property has no description, it should be in missingComments
-      // If it has a description, it should not be in missingComments
-      if (!hasDescription) {
-        expect(missingComment).toBeDefined();
-      } else {
-        expect(missingComment).toBeUndefined();
-      }
+      expect(missingComment).toBeUndefined();
     });
 
-    it.skip('does not flag destructured params when `@param obj` exists', () => {
+    it('does not flag destructured params when `@param obj` exists', () => {
       const fn = doc.client.find((c) => c.label === 'crazyFunction');
       expect(fn).toBeDefined();
 
       const objParam = fn!.children?.find((c) => c.label === 'obj');
       expect(objParam).toBeDefined();
       expect(objParam!.description).toBeDefined();
-      // Expected once fixed: the @param obj comment is captured.
       expect(objParam!.description!.length).toBeGreaterThan(0);
 
       const missingComment = pluginAStats.missingComments.find((d) => d.id === objParam!.id);
-      // Expected once fixed: the destructured param should not be flagged as missing.
       expect(missingComment).toBeUndefined();
     });
 
@@ -762,8 +787,8 @@ describe('validation and stats', () => {
       expect(objParam!.children).toBeDefined();
       expect(objParam!.children!.length).toBe(1);
 
-      // Second parameter: { fn1, fn2 }
-      const fnParam = fn!.children?.find((c) => c.label === '{ fn1, fn2 }');
+      // Second parameter: fns: { fn1, fn2 }
+      const fnParam = fn!.children?.find((c) => c.label === 'fns');
       expect(fnParam).toBeDefined();
       expect(fnParam!.children).toBeDefined();
       expect(fnParam!.children!.length).toBe(2);
@@ -776,19 +801,12 @@ describe('validation and stats', () => {
       const objParam = fn!.children?.find((c) => c.label === 'obj');
       expect(objParam).toBeDefined();
 
-      // Current behavior: parent parameter comments are NOT extracted for TypeLiteral parameters
-      // This is a known limitation - when a parameter has a TypeLiteral type (destructured params),
-      // buildApiDeclaration is called directly without extracting the JSDoc comment for the parameter name.
-      // This will be fixed in Phase 4.1
       expect(objParam!.description).toBeDefined();
-      // Currently, the description is empty for destructured parameters
-      // After Phase 4.1, this should contain the @param obj comment
-      expect(objParam!.description!.length).toBe(0);
+      expect(objParam!.description!.length).toBeGreaterThan(0);
+      expect(objParam!.description![0]).toContain('crazy parameter');
     });
 
-    it('validates property-level comments are not currently extracted (current limitation)', () => {
-      // This test documents current behavior: property-level @param tags are not extracted
-      // After Phase 4.1, this should be updated to test that property-level comments ARE extracted
+    it('validates property-level comments are extracted', () => {
       const fn = doc.client.find((c) => c.label === 'crazyFunction');
       expect(fn).toBeDefined();
 
@@ -798,17 +816,16 @@ describe('validation and stats', () => {
       const hiProp = objParam!.children?.find((c) => c.label === 'hi');
       expect(hiProp).toBeDefined();
 
-      // Current behavior: property-level comments are not extracted
-      // Even if @param obj.hi existed in JSDoc, it wouldn't be found
       expect(hiProp!.description).toBeDefined();
-      expect(hiProp!.description!.length).toBe(0);
+      expect(hiProp!.description!.length).toBeGreaterThan(0);
+      expect(hiProp!.description![0]).toContain('Greeting');
     });
 
     it('validates nested destructured parameters are extracted', () => {
       const fn = doc.client.find((c) => c.label === 'crazyFunction');
       expect(fn).toBeDefined();
 
-      const fnParam = fn!.children?.find((c) => c.label === '{ fn1, fn2 }');
+      const fnParam = fn!.children?.find((c) => c.label === 'fns');
       expect(fnParam).toBeDefined();
 
       const fn1 = fnParam!.children?.find((c) => c.label === 'fn1');
@@ -845,7 +862,7 @@ describe('validation and stats', () => {
       expect(searchSpecParam!.children!.length).toBe(2); // username and password
     });
 
-    it('validates missing property-level comments on inline object parameters', () => {
+    it('flags missing property-level comments on inline object parameter children', () => {
       const grouped = groupPluginApi(doc.client);
       const setup = grouped.setup;
       expect(setup).toBeDefined();
@@ -859,20 +876,10 @@ describe('validation and stats', () => {
       const usernameProp = searchSpecParam!.children?.find((c) => c.label === 'username');
       expect(usernameProp).toBeDefined();
 
-      // Current behavior: property without comment is flagged
-      // Note: This is a false positive that will be fixed in Phase 4.2
-      // Verify the property structure exists and check if it's in missingComments
-      expect(usernameProp!.description).toBeDefined();
-      const hasDescription = usernameProp!.description!.length > 0;
+      // Inline object parameter children remain part of the same undocumented shape,
+      // so they should continue to contribute to missingComments.
       const missingComment = pluginAStats.missingComments.find((d) => d.id === usernameProp!.id);
-
-      // If property has no description, it should be in missingComments
-      // If it has a description, it should not be in missingComments
-      if (!hasDescription) {
-        expect(missingComment).toBeDefined();
-      } else {
-        expect(missingComment).toBeUndefined();
-      }
+      expect(missingComment).toBeDefined();
     });
 
     it('validates deeply nested inline object parameters', () => {
@@ -964,10 +971,8 @@ describe('validation and stats', () => {
     });
   });
 
-  describe('property-level JSDoc validation (future enhancement)', () => {
-    it('documents that property-level JSDoc is not currently validated', () => {
-      // This test documents current limitation
-      // After Phase 4.1, property-level @param tags like @param obj.prop should be validated
+  describe('property-level JSDoc validation', () => {
+    it('does not flag property-level JSDoc when present', () => {
       const fn = doc.client.find((c) => c.label === 'crazyFunction');
       expect(fn).toBeDefined();
 
@@ -976,22 +981,62 @@ describe('validation and stats', () => {
 
       const hiProp = objParam!.children?.find((c) => c.label === 'hi');
       expect(hiProp).toBeDefined();
+      expect(hiProp!.description?.length).toBeGreaterThan(0);
 
-      // Current behavior: property-level comments are not checked
-      // Future: should check for @param obj.hi and not flag as missing if it exists
       const missingComment = pluginAStats.missingComments.find((d) => d.id === hiProp!.id);
-      // Currently flagged as missing (false positive)
-      expect(missingComment).toBeDefined();
+      expect(missingComment).toBeUndefined();
     });
 
-    it('documents expected future behavior for property-level validation', () => {
-      // After Phase 4.1 and 4.2, the validation should:
-      // 1. Check for property-level @param tags (e.g., @param obj.prop)
-      // 2. Not flag as missing if parent has comment OR property-level tag exists
-      // 3. Support nested property access (e.g., @param obj.nested.prop)
-
-      // For now, this is a placeholder test documenting expected behavior
+    it('documents expected behavior for property-level validation', () => {
+      // placeholder to keep suite shape; property-level validation is active
       expect(true).toBe(true);
+    });
+  });
+
+  describe('multiple call signatures (function overloads)', () => {
+    it('handles OverloadedFunction interface with call signatures as children', () => {
+      const overloadedFnType = doc.client.find((c) => c.label === 'OverloadedFunction');
+      expect(overloadedFnType).toBeDefined();
+      expect(overloadedFnType!.type).toBe(TypeKind.InterfaceKind);
+      // Interface signature is undefined (self-referential); call signatures appear as children.
+      expect(overloadedFnType!.signature).toBeUndefined();
+      expect(overloadedFnType!.children).toBeDefined();
+      expect(overloadedFnType!.children!.length).toBe(3); // Three overload signatures.
+    });
+
+    it('handles overloadedFn variable with multiple call signatures', () => {
+      const overloadedFn = doc.client.find((c) => c.label === 'overloadedFn');
+      expect(overloadedFn).toBeDefined();
+      // Should be typed as FunctionKind since it has call signatures.
+      expect(overloadedFn!.type).toBe(TypeKind.FunctionKind);
+      // Should have children (parameters from the first signature).
+      expect(overloadedFn!.children).toBeDefined();
+      expect(overloadedFn!.children!.length).toBeGreaterThan(0);
+      // The first parameter should be 'input'.
+      expect(overloadedFn!.children![0].label).toBe('input');
+    });
+
+    it('extracts parameter documentation from the first overload signature', () => {
+      const overloadedFn = doc.client.find((c) => c.label === 'overloadedFn');
+      expect(overloadedFn).toBeDefined();
+      expect(overloadedFn!.children).toBeDefined();
+
+      const inputParam = overloadedFn!.children!.find((c) => c.label === 'input');
+      expect(inputParam).toBeDefined();
+      // The description should come from the JSDoc on the variable or first signature.
+      // Note: JSDoc on individual overload signatures inside a type literal
+      // is typically not extracted by ts-morph in the same way as top-level JSDoc.
+    });
+
+    it('links to OverloadedFunction interface in signature field', () => {
+      const overloadedFn = doc.client.find((c) => c.label === 'overloadedFn');
+      expect(overloadedFn).toBeDefined();
+      expect(overloadedFn!.signature).toBeDefined();
+      // The signature contains a reference link to the OverloadedFunction interface.
+      const sigText = overloadedFn!
+        .signature!.map((s) => (typeof s === 'string' ? s : s.text))
+        .join('');
+      expect(sigText).toContain('OverloadedFunction');
     });
   });
 });

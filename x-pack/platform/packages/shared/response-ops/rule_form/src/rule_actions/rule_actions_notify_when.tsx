@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { css } from '@emotion/css'; // We can't use @emotion/react - this component gets used with plugins that use both styled-components and Emotion
 import { i18n } from '@kbn/i18n';
 import type { RuleNotifyWhenType, RuleAction, RuleActionFrequency } from '@kbn/alerting-types';
@@ -22,10 +22,10 @@ import {
   EuiSpacer,
   EuiSuperSelect,
   EuiPopover,
-  EuiButtonEmpty,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   useEuiTheme,
+  EuiFormPrepend,
 } from '@elastic/eui';
 import { some, filter, map } from 'fp-ts/Option';
 import { pipe } from 'fp-ts/pipeable';
@@ -157,6 +157,7 @@ export interface RuleActionsNotifyWhenProps {
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
   onChange: (frequency: RuleActionFrequency) => void;
   onUseDefaultMessage: () => void;
+  isRecoveredActionGroup?: boolean;
 }
 
 export const RuleActionsNotifyWhen = ({
@@ -169,6 +170,7 @@ export const RuleActionsNotifyWhen = ({
   notifyWhenSelectOptions = NOTIFY_WHEN_OPTIONS,
   onChange,
   onUseDefaultMessage,
+  isRecoveredActionGroup = false,
 }: RuleActionsNotifyWhenProps) => {
   const [summaryMenuOpen, setSummaryMenuOpen] = useState(false);
 
@@ -192,8 +194,17 @@ export const RuleActionsNotifyWhen = ({
   );
 
   const forEachAlertNotifyWhenOptions = useMemo(
-    () => notifyWhenSelectOptions.filter((o) => o.isForEachAlertOption).map((o) => o.value),
-    [notifyWhenSelectOptions]
+    () =>
+      notifyWhenSelectOptions
+        .filter((o) => {
+          if (!o.isForEachAlertOption) return;
+          if (isRecoveredActionGroup) {
+            return o.value.value === RuleNotifyWhen.CHANGE;
+          }
+          return true;
+        })
+        .map((o) => o.value),
+    [notifyWhenSelectOptions, isRecoveredActionGroup]
   );
 
   const notifyWhenOptions = useMemo(
@@ -223,6 +234,16 @@ export const RuleActionsNotifyWhen = ({
     },
     [forEachAlertNotifyWhenOptions, summaryNotifyWhenOptions]
   );
+
+  useEffect(() => {
+    if (selectedOptionDoesNotExist(frequency.summary)) {
+      onChange({
+        ...frequency,
+        notifyWhen: getDefaultNotifyWhenOption(frequency.summary),
+        throttle: frequency.summary ? frequency.throttle : null,
+      });
+    }
+  }, [frequency, selectedOptionDoesNotExist, getDefaultNotifyWhenOption, onChange]);
 
   const selectSummaryOption = useCallback(
     (summary: boolean) => {
@@ -294,14 +315,12 @@ export const RuleActionsNotifyWhen = ({
         { defaultMessage: 'Action frequency type select' }
       )}
       button={
-        <EuiButtonEmpty
-          size="xs"
-          iconType="arrowDown"
-          iconSide="right"
+        <EuiFormPrepend
+          element="button"
+          iconRight="chevronSingleDown"
+          label={frequency.summary ? SUMMARY_OF_ALERTS : FOR_EACH_ALERT}
           onClick={useCallback(() => setSummaryMenuOpen(!summaryMenuOpen), [summaryMenuOpen])}
-        >
-          {frequency.summary ? SUMMARY_OF_ALERTS : FOR_EACH_ALERT}
-        </EuiButtonEmpty>
+        />
       }
     >
       <EuiContextMenuPanel items={summaryOptions} />

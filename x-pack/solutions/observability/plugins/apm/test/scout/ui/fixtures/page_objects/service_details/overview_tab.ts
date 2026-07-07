@@ -22,6 +22,10 @@ export class OverviewTab extends ServiceDetailsTab {
   public readonly instancesLatencyDistribution: Locator;
   public readonly serviceOverviewInstancesTable: Locator;
 
+  public readonly coldstartRateChart: Locator;
+  public readonly coldstartRateChartTitle: Locator;
+  public readonly transactionBreakdownChart: Locator;
+
   constructor(page: ScoutPage, kbnUrl: KibanaUrl, defaultServiceName: string) {
     super(page, kbnUrl, defaultServiceName);
     this.tab = this.page.getByTestId(`${this.tabName}Tab`);
@@ -31,13 +35,14 @@ export class OverviewTab extends ServiceDetailsTab {
     this.serviceOverviewErrorsTable = this.page.getByTestId('serviceOverviewErrorsTable');
     this.instancesLatencyDistribution = this.page.getByTestId('instancesLatencyDistribution');
     this.serviceOverviewInstancesTable = this.page.getByTestId('serviceOverviewInstancesTable');
+    this.coldstartRateChart = this.page.getByTestId('coldstartRate');
+    this.coldstartRateChartTitle = this.page.getByTestId('coldstartRateChartTitle');
+    this.transactionBreakdownChart = this.page.getByTestId('transactionBreakdownChart');
   }
 
   protected async waitForTabLoad(): Promise<void> {
-    await Promise.all([
-      this.latencyChart.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT }),
-      this.throughputChart.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT }),
-    ]);
+    await this.latencyChart.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await this.throughputChart.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   // #region Charts and Tables

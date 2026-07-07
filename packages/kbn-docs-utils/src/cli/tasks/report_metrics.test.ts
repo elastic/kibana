@@ -64,6 +64,7 @@ describe('reportMetrics', () => {
       plugins: [mockPlugin],
       pathsByPlugin: new Map(),
       project: {} as any,
+      allPlugins: [mockPlugin],
     };
 
     apiMapResult = {
@@ -72,14 +73,18 @@ describe('reportMetrics', () => {
       referencedDeprecations: {},
       unreferencedDeprecations: {},
       adoptionTrackedAPIs: {},
+      unnamedExports: {},
     };
 
     allPluginStats = {
       'test-plugin': {
         apiCount: 5,
         missingComments: [],
+        missingComplexTypeInfo: [],
         isAnyType: [],
         noReferences: [],
+        paramDocMismatches: [],
+        missingReturns: [],
         missingExports: 0,
         deprecatedAPIsReferencedCount: 0,
         unreferencedDeprecatedApisCount: 0,
@@ -92,6 +97,7 @@ describe('reportMetrics', () => {
         eslintDisableLineCount: 0,
         eslintDisableFileCount: 0,
         enzymeImportCount: 0,
+        unnamedExports: [],
       },
     };
   });

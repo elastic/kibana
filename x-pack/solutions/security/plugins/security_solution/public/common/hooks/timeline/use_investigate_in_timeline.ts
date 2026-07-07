@@ -8,6 +8,7 @@
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
+import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useSelectDataView } from '../../../data_view_manager/hooks/use_select_data_view';
 import { useCreateTimeline } from '../../../timelines/hooks/use_create_timeline';
@@ -19,8 +20,6 @@ import { InputsModelId } from '../../store/inputs/constants';
 import type { TimeRange } from '../../store/inputs/model';
 import { TimelineId } from '../../../../common/types/timeline';
 import { TimelineTypeEnum } from '../../../../common/api/timeline';
-import { sourcererActions } from '../../store/actions';
-import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 
 interface InvestigateInTimelineArgs {
   /**
@@ -47,6 +46,10 @@ interface InvestigateInTimelineArgs {
    * Whether to keep the current data view or reset it to the default.
    */
   keepDataView?: boolean;
+  /**
+   * Optional data view id to use for the timeline.
+   */
+  dataViewId?: string;
 }
 
 /**
@@ -59,7 +62,7 @@ export const useInvestigateInTimeline = () => {
 
   const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
   const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const timelineSelectedPatterns = useSelectedPatterns(PageScope.timeline);
 
   const clearTimelineTemplate = useCreateTimeline({
     timelineId: TimelineId.active,
@@ -80,6 +83,7 @@ export const useInvestigateInTimeline = () => {
       filters,
       timeRange,
       keepDataView,
+      dataViewId,
     }: InvestigateInTimelineArgs) => {
       const hasTemplateProviders =
         dataProviders && dataProviders.find((provider) => provider.type === 'template');
@@ -128,22 +132,21 @@ export const useInvestigateInTimeline = () => {
         }
         // Only show detection alerts
         // (This is required so the timeline event count matches the prevalence count)
-        if (!keepDataView) {
-          if (newDataViewPickerEnabled) {
-            setSelectedDataView({
-              scope: PageScope.timeline,
-              id: defaultDataView.id,
-              fallbackPatterns: [signalIndexName || ''],
-            });
-          } else {
-            dispatch(
-              sourcererActions.setSelectedDataView({
-                id: PageScope.timeline,
-                selectedDataViewId: defaultDataView.id,
-                selectedPatterns: [signalIndexName || ''],
-              })
-            );
-          }
+        if (dataViewId) {
+          const fallbackPatterns = timelineSelectedPatterns.length
+            ? timelineSelectedPatterns
+            : [signalIndexName || ''];
+          setSelectedDataView({
+            scope: PageScope.timeline,
+            id: dataViewId,
+            fallbackPatterns,
+          });
+        } else if (!keepDataView) {
+          setSelectedDataView({
+            scope: PageScope.timeline,
+            id: defaultDataView.id,
+            fallbackPatterns: [signalIndexName || ''],
+          });
         }
         // Unlock the time range from the global time range
         dispatch(inputsActions.removeLinkTo([InputsModelId.timeline, InputsModelId.global]));
@@ -153,10 +156,10 @@ export const useInvestigateInTimeline = () => {
       clearTimelineTemplate,
       clearTimelineDefault,
       dispatch,
-      newDataViewPickerEnabled,
       setSelectedDataView,
       defaultDataView.id,
       signalIndexName,
+      timelineSelectedPatterns,
     ]
   );
 

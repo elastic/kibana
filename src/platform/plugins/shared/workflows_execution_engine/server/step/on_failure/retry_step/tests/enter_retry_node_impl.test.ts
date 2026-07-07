@@ -199,6 +199,76 @@ describe('EnterRetryNodeImpl', () => {
         expect(workflowRuntime.navigateToNextNode).toHaveBeenCalled();
       });
     });
+
+    describe('when exponential backoff is configured', () => {
+      beforeEach(() => {
+        node.configuration = {
+          'max-attempts': 3,
+          delay: '1s',
+          strategy: 'exponential',
+          multiplier: 2,
+        };
+        (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({ attempt: 1 });
+        stepExecutionRuntime.tryEnterWaitUntil = jest.fn().mockReturnValue(true);
+      });
+
+      it('should call tryEnterWaitUntil with a date (exponential delay for attempt 1 = 2s)', async () => {
+        const now = Date.now();
+        await underTest.run();
+        expect(stepExecutionRuntime.tryEnterWaitUntil).toHaveBeenCalledTimes(1);
+        const [resumeDate] = (stepExecutionRuntime.tryEnterWaitUntil as jest.Mock).mock.calls[0];
+        expect(resumeDate).toBeInstanceOf(Date);
+        const expectedMin = now + 1900;
+        const expectedMax = now + 2100;
+        expect(resumeDate.getTime()).toBeGreaterThanOrEqual(expectedMin);
+        expect(resumeDate.getTime()).toBeLessThanOrEqual(expectedMax);
+      });
+
+      it('should log debug message with delay ms and attempt', async () => {
+        await underTest.run();
+        expect(workflowLogger.logDebug).toHaveBeenCalledWith(
+          `Delaying retry for 2000ms (attempt 2).`
+        );
+      });
+    });
+
+    describe('when re-entering after wait period (resumeAt exists in state)', () => {
+      beforeEach(() => {
+        node.configuration = {
+          'max-attempts': 3,
+          delay: '1s',
+          strategy: 'exponential',
+        };
+        stepExecutionRuntime.tryEnterWaitUntil = jest.fn().mockReturnValue(false);
+        (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+          attempt: 1,
+          resumeAt: '2026-02-08T16:00:26.485Z',
+        });
+      });
+
+      it('should advance attempt without entering new wait', async () => {
+        await underTest.run();
+        expect(stepExecutionRuntime.tryEnterWaitUntil).not.toHaveBeenCalled();
+        expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({ attempt: 2 });
+      });
+
+      it('should enter next attempt scope', async () => {
+        await underTest.run();
+        expect(workflowRuntime.enterScope).toHaveBeenCalledWith('3-attempt');
+      });
+
+      it('should navigate to next node', async () => {
+        await underTest.run();
+        expect(workflowRuntime.navigateToNextNode).toHaveBeenCalled();
+      });
+
+      it('should log retry message', async () => {
+        await underTest.run();
+        expect(workflowLogger.logDebug).toHaveBeenCalledWith(
+          `Retrying "retryStep1" step. (attempt 2).`
+        );
+      });
+    });
   });
 
   describe('catchError', () => {

@@ -15,7 +15,7 @@ import {
   FindSecurityAIPromptsResponse,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { getPromptsByGroupId } from '../../lib/prompt';
+import { getPromptsByGroupId, getInferenceConnectorById } from '../../lib/prompt';
 import type { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { performChecks } from '../helpers';
@@ -64,12 +64,13 @@ export const findSecurityAIPromptsRoute = (router: ElasticAssistantPluginRouter,
           if (!checkResponse.isSuccess) {
             return checkResponse.response;
           }
-          const actions = ctx.elasticAssistant.actions;
-          const actionsClient = await actions.getActionsClientWithRequest(request);
           const savedObjectsClient = ctx.elasticAssistant.savedObjectsClient;
 
           const prompts = await getPromptsByGroupId({
-            actionsClient,
+            getInferenceConnectorById: getInferenceConnectorById(
+              ctx.elasticAssistant.inference,
+              request
+            ),
             connectorId: query.connector_id,
             promptGroupId: query.prompt_group_id,
             promptIds: query.prompt_ids,

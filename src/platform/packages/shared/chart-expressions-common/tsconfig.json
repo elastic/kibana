@@ -5,7 +5,8 @@
     "types": [
       "jest",
       "node",
-      "@emotion/react/types/css-prop",
+      "react",
+      "@kbn/ambient-ui-types",
     ]
   },
   "include": [
@@ -22,5 +23,6 @@
     "@kbn/coloring",
     "@kbn/i18n",
     "@kbn/field-formats-plugin",
+    "@kbn/css-utils",
   ]
 }

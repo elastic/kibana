@@ -7,10 +7,6 @@
 
 import expect from '@kbn/expect';
 import type { Streams } from '@kbn/streams-schema';
-import {
-  OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
-  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
-} from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { disableStreams, enableStreams, indexDocument } from './helpers/requests';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -18,7 +14,7 @@ import { createStreamsRepositoryAdminClient } from './helpers/repository_client'
 import { loadDashboards } from './helpers/dashboards';
 
 const TEST_STREAM_NAME = 'logs-test-default';
-const WIRED_STREAM_NAME = 'logs.wiredChild';
+const WIRED_STREAM_NAME = 'logs.otel.wiredChild';
 const TEST_DASHBOARD_ID = '9230e631-1f1a-476d-b613-4b074c6cfdd0';
 
 const oldProcessing = [
@@ -74,17 +70,6 @@ const migratedProcessing = {
 // Do not update these if tests are failing - this is testing whether they get migrated correctly - you should
 // always make sure that existing definitions and links keep working.
 
-const assetLinks = [
-  {
-    'asset.type': 'query',
-    'asset.id': '12345',
-    'asset.uuid': '761ea54139754abb6e486ec1e29ea5c7f4df1387',
-    'stream.name': TEST_STREAM_NAME,
-    'query.title': 'Test',
-    'query.kql.query': 'atest',
-  },
-];
-
 const attachmentLinks = [
   {
     'attachment.type': 'dashboard',
@@ -119,7 +104,7 @@ const wiredStreamDefinition = {
     wired: {
       routing: [
         {
-          destination: 'logs.wiredChild.child',
+          destination: 'logs.otel.wiredChild.child',
           if: {
             field: 'resource.attributes.host.name',
             operator: 'eq' as const,
@@ -137,9 +122,11 @@ const wiredStreamDefinition = {
 };
 
 const expectedStreamsResponse: Streams.ClassicStream.Definition = {
+  type: 'classic',
   name: TEST_STREAM_NAME,
   description: '',
   updated_at: new Date(0).toISOString(),
+  query_streams: [],
   ingest: {
     lifecycle: {
       ilm: {
@@ -156,9 +143,11 @@ const expectedStreamsResponse: Streams.ClassicStream.Definition = {
 };
 
 const expectedWiredStreamsResponse: Streams.WiredStream.Definition = {
+  type: 'wired',
   name: WIRED_STREAM_NAME,
   description: '',
   updated_at: new Date(0).toISOString(),
+  query_streams: [],
   ingest: {
     lifecycle: {
       ilm: {
@@ -172,7 +161,7 @@ const expectedWiredStreamsResponse: Streams.WiredStream.Definition = {
     wired: {
       routing: [
         {
-          destination: 'logs.wiredChild.child',
+          destination: 'logs.otel.wiredChild.child',
           where: {
             field: 'resource.attributes.host.name',
             eq: 'myHost',
@@ -198,16 +187,6 @@ const expectedDashboard = {
   tags: [],
   description: '',
   streamNames: [TEST_STREAM_NAME],
-};
-
-const expectedQueriesResponse = {
-  queries: [
-    {
-      id: '12345',
-      title: 'Test',
-      kql: { query: 'atest' },
-    },
-  ],
 };
 
 function expectStreams(expectedStreams: string[], persistedStreams: Streams.all.Definition[]) {
@@ -236,17 +215,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await loadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
-        [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: true,
-      });
       // link and unlink dashboard to make sure attachments index is created
       await apiClient.fetch(
         'PUT /api/streams/{streamName}/attachments/{attachmentType}/{attachmentId} 2023-10-31',
         {
           params: {
             path: {
-              streamName: 'logs',
+              streamName: 'logs.otel',
               attachmentType: 'dashboard',
               attachmentId: TEST_DASHBOARD_ID,
             },
@@ -258,34 +233,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         {
           params: {
             path: {
-              streamName: 'logs',
+              streamName: 'logs.otel',
               attachmentType: 'dashboard',
               attachmentId: TEST_DASHBOARD_ID,
             },
           },
         }
       );
-      // link and unlink query asset to make sure assets index is created
-      await apiClient.fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
-        params: {
-          path: {
-            name: 'logs',
-            queryId: 'test-query-init',
-          },
-          body: {
-            title: 'Init Query',
-            kql: { query: 'test' },
-          },
-        },
-      });
-      await apiClient.fetch('DELETE /api/streams/{name}/queries/{queryId} 2023-10-31', {
-        params: {
-          path: {
-            name: 'logs',
-            queryId: 'test-query-init',
-          },
-        },
-      });
 
       await esClient.index({
         index: '.kibana_streams-000001',
@@ -300,16 +254,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       await Promise.all(
-        assetLinks.map((link) =>
-          esClient.index({
-            index: '.kibana_streams_assets-000001',
-            id: link['asset.uuid'],
-            document: link,
-          })
-        )
-      );
-
-      await Promise.all(
         attachmentLinks.map((link) =>
           esClient.index({
             index: '.kibana_streams_attachments-000001',
@@ -321,17 +265,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       // Refresh the index to make the document searchable
       await esClient.indices.refresh({ index: '.kibana_streams-000001' });
-      await esClient.indices.refresh({ index: '.kibana_streams_assets-000001' });
       await esClient.indices.refresh({ index: '.kibana_streams_attachments-000001' });
     });
 
     after(async () => {
       await disableStreams(apiClient);
       await esClient.indices.deleteDataStream({ name: TEST_STREAM_NAME });
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
-        [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: false,
-      });
     });
 
     it('should read and return existing orphaned classic stream', async () => {
@@ -346,7 +285,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const listResponse = await apiClient.fetch('GET /api/streams 2023-10-31');
       expect(listResponse.status).to.eql(200);
-      expectStreams(['logs', TEST_STREAM_NAME], listResponse.body.streams);
+      expectStreams(['logs.otel', 'logs.ecs', TEST_STREAM_NAME], listResponse.body.streams);
 
       const dashboardResponse = await apiClient.fetch(
         'GET /api/streams/{streamName}/attachments 2023-10-31',
@@ -377,7 +316,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const listResponse = await apiClient.fetch('GET /api/streams 2023-10-31');
       expect(listResponse.status).to.eql(200);
-      expectStreams(['logs', TEST_STREAM_NAME], listResponse.body.streams);
+      expectStreams(['logs.otel', 'logs.ecs', TEST_STREAM_NAME], listResponse.body.streams);
 
       const dashboardResponse = await apiClient.fetch(
         'GET /api/streams/{streamName}/attachments 2023-10-31',
@@ -407,16 +346,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(rest).to.eql(expectedDashboard);
       expect(createdAt).to.be.a('string');
       expect(updatedAt).to.be.a('string');
-    });
-
-    it('should read expected queries for classic stream', async () => {
-      const response = await apiClient.fetch('GET /api/streams/{name}/queries 2023-10-31', {
-        params: {
-          path: { name: TEST_STREAM_NAME },
-        },
-      });
-      expect(response.status).to.eql(200);
-      expect(response.body.queries).to.eql(expectedQueriesResponse.queries);
     });
 
     it('should migrate routing "if" condition to Streamlang syntax in wired streams', async () => {

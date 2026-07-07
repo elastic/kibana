@@ -7,17 +7,18 @@
 
 import React, { useCallback, useState } from 'react';
 import {
-  EuiPanel,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiButtonIcon,
-  useEuiTheme,
-  EuiPopover,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiNotificationBadge,
   EuiIcon,
+  EuiNotificationBadge,
+  EuiPanel,
+  EuiPopover,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { DraggableProvidedDragHandleProps } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -148,7 +149,7 @@ export const QueryRuleListItemContent: React.FC<QueryRuleListItemContentProps> =
                   }
                 )}
               >
-                <EuiIcon type="grab" />
+                <EuiIcon type="dragVertical" aria-hidden={true} />
               </EuiPanel>
             ) : (
               <EuiPanel
@@ -201,47 +202,61 @@ export const QueryRuleListItemContent: React.FC<QueryRuleListItemContentProps> =
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiPopover
+                  aria-label={i18n.translate(
+                    'xpack.search.queryRulesetDetail.draggableList.actionsPopover.ariaLabel',
+                    { defaultMessage: 'Rule actions' }
+                  )}
                   id="queryRuleActionsPopover"
                   button={
-                    <EuiButtonIcon
-                      aria-label={
-                        isDraggable
-                          ? i18n.translate(
-                              'xpack.search.queryRulesetDetail.draggableList.actionsButton.aria.label.draggable',
-                              {
-                                defaultMessage: 'Click to reach actions menu for rule {ruleId}',
-                                values: {
-                                  ruleId: queryRule.rule_id,
-                                },
-                              }
-                            )
-                          : i18n.translate(
-                              'xpack.search.queryRulesetDetail.draggableList.actionsButton.aria.label.searchResult',
-                              {
-                                defaultMessage:
-                                  'Click to reach actions menu for {actionType} rule with ID: {ruleId}. ' +
-                                  'The rule has {documentCount, plural, one {document} other {documents}} ' +
-                                  'and {criteriaCount} {criteriaCount, plural, one {criterion} other {criteria}}. ' +
-                                  'Visible criteria: {visibleCriteria}',
-                                values: {
-                                  actionType: queryRule.type === 'exclude' ? 'exclude' : 'pinned',
-                                  ruleId: queryRule.rule_id,
-                                  documentCount: queryRule.actions.docs?.length ?? 0,
-                                  criteriaCount: Array.isArray(queryRule.criteria)
-                                    ? queryRule.criteria.length
-                                    : 1,
-                                  visibleCriteria: getVisibleCriteriaDescription(queryRule),
-                                },
-                              }
-                            )
-                      }
-                      data-test-subj="searchQueryRulesQueryRulesetDetailButton"
-                      iconType="boxesHorizontal"
-                      color="text"
-                      onClick={() => {
-                        openPopover();
-                      }}
-                    />
+                    <EuiToolTip
+                      content={i18n.translate(
+                        'xpack.search.queryRulesetDetail.draggableList.actionsButton.tooltip',
+                        {
+                          defaultMessage: 'Delete rule',
+                        }
+                      )}
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        aria-label={
+                          isDraggable
+                            ? i18n.translate(
+                                'xpack.search.queryRulesetDetail.draggableList.actionsButton.aria.label.draggable',
+                                {
+                                  defaultMessage: 'Click to reach actions menu for rule {ruleId}',
+                                  values: {
+                                    ruleId: queryRule.rule_id,
+                                  },
+                                }
+                              )
+                            : i18n.translate(
+                                'xpack.search.queryRulesetDetail.draggableList.actionsButton.aria.label.searchResult',
+                                {
+                                  defaultMessage:
+                                    'Click to reach actions menu for {actionType} rule with ID: {ruleId}. ' +
+                                    'The rule has {documentCount, plural, one {document} other {documents}} ' +
+                                    'and {criteriaCount} {criteriaCount, plural, one {criterion} other {criteria}}. ' +
+                                    'Visible criteria: {visibleCriteria}',
+                                  values: {
+                                    actionType: queryRule.type === 'exclude' ? 'exclude' : 'pinned',
+                                    ruleId: queryRule.rule_id,
+                                    documentCount: queryRule.actions.docs?.length ?? 0,
+                                    criteriaCount: Array.isArray(queryRule.criteria)
+                                      ? queryRule.criteria.length
+                                      : 1,
+                                    visibleCriteria: getVisibleCriteriaDescription(queryRule),
+                                  },
+                                }
+                              )
+                        }
+                        data-test-subj="searchQueryRulesQueryRulesetDetailButton"
+                        iconType="boxesVertical"
+                        color="text"
+                        onClick={() => {
+                          openPopover();
+                        }}
+                      />
+                    </EuiToolTip>
                   }
                   isOpen={isPopoverOpen}
                   closePopover={closePopover}

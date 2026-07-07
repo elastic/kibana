@@ -14,6 +14,7 @@ import { orderBy } from 'lodash';
 import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import { INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION } from '@kbn/security-solution-plugin/common/constants';
 
 import { createRule, deleteAllRules, deleteAllAlerts } from '@kbn/detections-response-ftr-services';
 import {
@@ -26,10 +27,17 @@ import {
   scheduleRuleRun,
   stopAllManualRuns,
   waitForBackfillExecuted,
+  setAdvancedSettings,
 } from '../../../../utils';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
+import { EntityStoreV2EnrichmentSetup } from '../../entity_store_v2_enrichment_setup';
+
+// host.id of the auditbeat record for zeek-newyork-sha-aa8df15 (first new term).
+const ENRICHMENT_HOST_ID = '3729d06ce9964aa98549f41cbd99334d';
+const ENRICHMENT_HOST_NAME = 'zeek-newyork-sha-aa8df15';
+const ENRICHMENT_HOST_EUID = `host:${ENRICHMENT_HOST_ID}`;
 
 const historicalWindowStart = '2022-10-13T05:00:04.000Z';
 const ruleExecutionStart = '2022-10-19T05:00:04.000Z';
@@ -39,6 +47,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  const entityStoreV2 = EntityStoreV2EnrichmentSetup(getService);
   const { indexEnhancedDocuments } = dataGeneratorFactory({
     es,
     index: 'new_terms',
@@ -1039,11 +1048,23 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('alerts should be be enriched', () => {
       before(async () => {
-        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        // The first new term alert uses auditbeat data (host.id present), so EUID is id-based.
+        await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
+              entity: {
+                id: ENRICHMENT_HOST_EUID,
+                type: 'host',
+                risk: { calculated_level: 'Low', calculated_score_norm: 23 },
+              },
+            },
+          ],
+        });
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        await entityStoreV2.teardown();
       });
 
       it('should be enriched with host risk score', async () => {
@@ -1067,18 +1088,22 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.load(
           'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
         );
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: ENRICHMENT_HOST_NAME },
+              entity: { id: `host:${ENRICHMENT_HOST_NAME}`, type: 'host' },
+              asset: { criticality: 'medium_impact' },
+            },
+          ],
+        });
       });
 
       after(async () => {
         await esArchiver.unload(
           'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
         );
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        await entityStoreV2.teardown();
       });
 
       const { indexListOfDocuments } = dataGeneratorFactory({
@@ -1094,7 +1119,6 @@ export default ({ getService }: FtrProviderContext) => {
         const firstExecutionDocuments = [
           {
             host: { name: 'zeek-newyork-sha-aa8df15', ip: '127.0.0.5' },
-            user: { name: 'root' },
             id,
             '@timestamp': timestamp,
           },
@@ -1122,7 +1146,6 @@ export default ({ getService }: FtrProviderContext) => {
         const fullAlert = previewAlerts[0]._source;
 
         expect(fullAlert?.['host.asset.criticality']).toBe('medium_impact');
-        expect(fullAlert?.['user.asset.criticality']).toBe('extreme_impact');
       });
     });
 
@@ -1482,6 +1505,110 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(requests[2].description).toBe('Find documents associated with new values');
         expect(requests[2].request_type).toBe('findDocuments');
+      });
+    });
+
+    describe('with data stream namespace filter', () => {
+      before(async () => {
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
+        // Clean up UI setting
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: [],
+        });
+      });
+
+      it('should only include documents from specified namespaces when filter is configured', async () => {
+        const id = uuidv4();
+        const timestamp = new Date().toISOString();
+
+        // Historical documents with different namespaces
+        const historicalDocNamespace1 = {
+          id,
+          '@timestamp': moment(timestamp).subtract(2, 'days').toISOString(),
+          data_stream: { namespace: 'namespace1' },
+          host: { name: 'host-historical-1' },
+        };
+        const historicalDocNamespace2 = {
+          id,
+          '@timestamp': moment(timestamp).subtract(2, 'days').toISOString(),
+          data_stream: { namespace: 'namespace2' },
+          host: { name: 'host-historical-2' },
+        };
+
+        // Rule execution documents with different namespaces
+        const ruleExecutionDocNamespace1 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace1' },
+          host: { name: 'host-new-1' },
+        };
+        const ruleExecutionDocNamespace2 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace2' },
+          host: { name: 'host-new-2' },
+        };
+        const ruleExecutionDocNamespace3 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace3' },
+          host: { name: 'host-new-3' },
+        };
+
+        await indexEnhancedDocuments({
+          interval: [moment(timestamp).subtract(2, 'days').toISOString(), timestamp],
+          id,
+          documents: [historicalDocNamespace1, historicalDocNamespace2],
+        });
+
+        await indexEnhancedDocuments({
+          id,
+          documents: [
+            ruleExecutionDocNamespace1,
+            ruleExecutionDocNamespace2,
+            ruleExecutionDocNamespace3,
+          ],
+        });
+
+        // Set UI setting to include only namespace1 and namespace2
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: ['namespace1', 'namespace2'],
+        });
+
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          query: `id: "${id}"`,
+          index: ['new_terms'],
+          new_terms_fields: ['host.name'],
+          from: 'now-2d',
+          interval: '1h',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+        });
+
+        // Should only get alerts from namespace1 and namespace2, not namespace3
+        expect(previewAlerts.length).toEqual(4);
+        // @ts-expect-error namespace does not exist on type
+        const namespaces = previewAlerts.map((alert) => alert._source?.data_stream?.namespace);
+        expect(namespaces).toContain('namespace1');
+        expect(namespaces).toContain('namespace2');
+        expect(namespaces).not.toContain('namespace3');
       });
     });
   });

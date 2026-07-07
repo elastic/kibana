@@ -101,7 +101,7 @@ export const ConditionGroup = memo<ConditionGroupProps>(
             <EuiSpacer size="s" />
             <EuiButton
               size="s"
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={onAndClicked}
               data-test-subj={getTestId('AndButton')}
               isDisabled={isAndDisabled}

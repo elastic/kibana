@@ -263,3 +263,37 @@ describe('#solution', () => {
     ).toThrow();
   });
 });
+
+describe('#projectRouting', () => {
+  it('should allow projectRouting to be undefined', () => {
+    expect(() =>
+      spaceBaseSchema.validate({ ...defaultProperties, projectRouting: undefined })
+    ).not.toThrow();
+  });
+
+  it('should allow projectRouting to be a valid string', () => {
+    expect(() =>
+      spaceBaseSchema.validate({ ...defaultProperties, projectRouting: '_alias:_origin' })
+    ).not.toThrow();
+  });
+
+  it('should throw error if projectRouting is not a string', () => {
+    expect(() =>
+      spaceBaseSchema.validate({ ...defaultProperties, projectRouting: 123 })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[projectRouting]: expected value of type [string] but got [number]"`
+    );
+  });
+
+  it('should allow empty string as projectRouting', () => {
+    expect(() =>
+      spaceBaseSchema.validate({ ...defaultProperties, projectRouting: '' })
+    ).not.toThrow();
+  });
+
+  it('should work in serverless schema', () => {
+    expect(() =>
+      spaceServerlessSchema.validate({ ...defaultProperties, projectRouting: '_alias:_origin' })
+    ).not.toThrow();
+  });
+});

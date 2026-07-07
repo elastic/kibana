@@ -24,26 +24,26 @@ export const HIDE_USERS_RISK_SCORE = i18n.translate(
 export const LOADING_RISK_ENGINE_SETTINGS = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.loadingRiskEngineSettings',
   {
-    defaultMessage: 'Loading risk engine settings...',
+    defaultMessage: 'Loading risk score maintainer settings...',
   }
 );
 
-export const RISK_ENGINE_STATUS = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.status',
+export const ENTITY_ANALYTICS_STATUS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.status',
   {
     defaultMessage: 'Status',
   }
 );
 
-export const RISK_ENGINE_STATUS_ON = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.statusOn',
+export const ENTITY_ANALYTICS_STATUS_ON = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.statusOn',
   {
     defaultMessage: 'On',
   }
 );
 
-export const RISK_ENGINE_STATUS_OFF = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.statusOff',
+export const ENTITY_ANALYTICS_STATUS_OFF = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.statusOff',
   {
     defaultMessage: 'Off',
   }
@@ -142,7 +142,8 @@ export const ERROR_PANEL_TITLE = i18n.translate(
 export const ERROR_PANEL_MESSAGE = i18n.translate(
   'xpack.securitySolution.riskScore.errorPanel.message',
   {
-    defaultMessage: 'The risk engine status could not be changed. Fix the following and try again:',
+    defaultMessage:
+      'The risk score maintainer status could not be changed. Fix the following and try again:',
   }
 );
 
@@ -153,24 +154,46 @@ export const ERROR_PANEL_ERRORS = i18n.translate(
   }
 );
 
-export const RISK_ENGINE_TURNED_ON = i18n.translate(
-  'xpack.securitySolution.riskScore.moduleTurnedOn',
+export const ENTITY_ANALYTICS_TURNED_ON = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.moduleTurnedOn',
   {
-    defaultMessage: 'Entity risk score has been turned on',
+    defaultMessage: 'Entity Analytics has been turned on',
   }
 );
 
-export const RISK_ENGINE_TURNED_OFF = i18n.translate(
-  'xpack.securitySolution.riskScore.moduleTurnedOff',
+export const ENTITY_ANALYTICS_TURNED_OFF = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.moduleTurnedOff',
   {
-    defaultMessage: 'Entity risk score has been turned off',
+    defaultMessage: 'Entity Analytics has been turned off',
+  }
+);
+
+export const ENTITY_ANALYTICS_TOGGLE_ERROR = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.toggleError',
+  {
+    defaultMessage: 'Failed to toggle Entity Analytics',
+  }
+);
+
+export const ENTITY_STORE_PREBUILT_WATCHLISTS_WARNING_TITLE = i18n.translate(
+  'xpack.securitySolution.entityStore.prebuiltWatchlistsWarningTitle',
+  {
+    defaultMessage: 'Prebuilt watchlists were not installed',
+  }
+);
+
+export const ENTITY_STORE_PREBUILT_WATCHLISTS_WARNING_TEXT = i18n.translate(
+  'xpack.securitySolution.entityStore.prebuiltWatchlistsWarningText',
+  {
+    defaultMessage:
+      'Entity Store was installed, but standard watchlists could not be provisioned. You can retry later or check Kibana server logs.',
   }
 );
 
 export const RISK_SCORE_ENGINE_RUN_SUCCESS = i18n.translate(
   'xpack.securitySolution.riskScore.engineRunSuccess',
   {
-    defaultMessage: 'Entity risk score engine started successfully',
+    defaultMessage: 'Entity risk score maintainer run started successfully',
   }
 );
 
@@ -205,7 +228,7 @@ export const INCLUDE_CLOSED_ALERTS_LABEL = i18n.translate(
 export const RISK_ENGINE_INCLUDE_CLOSED_ALERTS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.riskScore.includeClosedAlertsDescription',
   {
-    defaultMessage: `Enable this option to factor both open and closed alerts into the risk engine
+    defaultMessage: `Enable this option to factor both open and closed alerts into the risk score maintainer
             calculations. Including closed alerts helps provide a more comprehensive risk assessment
             based on past incidents, leading to more accurate scoring and insights.`,
   }
@@ -213,19 +236,19 @@ export const RISK_ENGINE_INCLUDE_CLOSED_ALERTS_DESCRIPTION = i18n.translate(
 
 export const RISK_ENGINE_NEXT_RUN_TIME = (timeInMinutes: string) =>
   i18n.translate('xpack.securitySolution.riskScore.engineNextRunTime', {
-    defaultMessage: `Next engine run in {timeInMinutes}`,
+    defaultMessage: `Next maintainer run in {timeInMinutes}`,
     values: { timeInMinutes },
   });
 
-export const RISK_ENGINE_STATUS_SWITCH_LABEL = i18n.translate(
-  'xpack.securitySolution.riskScore.riskEngineStatus',
+export const ENTITY_ANALYTICS_STATUS_SWITCH_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.statusSwitchLabel',
   {
-    defaultMessage: 'Risk engine status',
+    defaultMessage: 'Entity analytics',
   }
 );
 
 export const RUN_RISK_SCORE_ENGINE = i18n.translate('xpack.securitySolution.riskScore.runEngine', {
-  defaultMessage: 'Run Engine',
+  defaultMessage: 'Run Maintainer',
 });
 
 export const SAVE_CHANGES = i18n.translate(
@@ -245,7 +268,7 @@ export const DISCARD_CHANGES = i18n.translate(
 export const RISK_SCORE_ENGINE_RUN_FAILURE = i18n.translate(
   'xpack.securitySolution.riskScore.engineRunSuccess',
   {
-    defaultMessage: 'Entity risk score engine failed to start',
+    defaultMessage: 'Entity risk score maintainer run failed to start',
   }
 );
 

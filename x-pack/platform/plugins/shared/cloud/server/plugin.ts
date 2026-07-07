@@ -20,6 +20,7 @@ import type { CloudConfigType } from './config';
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { registerCloudUsageCollector } from './collectors';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
+import { getIsEce } from '../common/get_is_ece';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
 import type { DecodedCloudId } from '../common/decode_cloud_id';
 import { decodeCloudId } from '../common/decode_cloud_id';
@@ -54,6 +55,11 @@ export interface CloudSetup {
    */
   csp?: string;
   /**
+   * The cloud region identifier (e.g., `us-east-1`, `europe-west1`, `eastus2`).
+   * Provider-specific region name without the CSP prefix.
+   */
+  region?: string;
+  /**
    * The Elastic Cloud Organization that owns this deployment/project.
    */
   organizationId?: string;
@@ -61,6 +67,10 @@ export interface CloudSetup {
    * The deployment's ID. Only available when running on Elastic Cloud.
    */
   deploymentId?: string;
+  /**
+   * The Elasticsearch resource ID within the Cloud deployment. Only available when running on Elastic Cloud.
+   */
+  elasticsearchClusterId?: string;
   /**
    * The full URL to the elasticsearch cluster.
    */
@@ -113,6 +123,16 @@ export interface CloudSetup {
     secretToken?: string;
   };
   /**
+   * Managed OTLP service configuration. Only present when the deployment is configured to use the
+   * managed OTLP service (always on observability serverless projects, and feature-flagged on ECH).
+   */
+  managedOtlp?: {
+    /**
+     * URL of the managed OTLP endpoint.
+     */
+    url?: string;
+  };
+  /**
    * Onboarding configuration.
    */
   onboarding: {
@@ -121,6 +141,12 @@ export interface CloudSetup {
      */
     defaultSolution?: SolutionId;
   };
+  /**
+   * `true` when running on ECE (Elastic Cloud Enterprise).
+   * When `isSaasContainer` is missing, cloud-enabled non-serverless deployments are assumed to
+   * be ECE. Self-managed and serverless deployments remain `undefined` unless explicitly set.
+   */
+  isEce?: boolean;
   /**
    * `true` when running on Serverless Elastic Cloud
    * Note that `isCloudEnabled` will always be true when `isServerlessEnabled` is.
@@ -170,6 +196,11 @@ export interface CloudSetup {
    * Method to retrieve if the organization is in trial.
    */
   isInTrial: () => boolean;
+  /**
+   * Method to retrieve the number of days left in the trial.
+   * Returns undefined if trial_end_date is not set, or the number of days remaining (0 if expired).
+   */
+  trialDaysLeft: () => number | undefined;
 }
 
 /**
@@ -196,6 +227,11 @@ export interface CloudStart {
    * Method to retrieve if the organization is in trial.
    */
   isInTrial: () => boolean;
+  /**
+   * Method to retrieve the number of days left in the trial.
+   * Returns undefined if trial_end_date is not set, or the number of days remaining (0 if expired).
+   */
+  trialDaysLeft: () => number | undefined;
 }
 
 export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
@@ -219,6 +255,11 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     const productTier = this.config.serverless?.product_tier;
     const orchestratorTarget = this.config.serverless?.orchestrator_target;
     const isServerlessEnabled = !!projectId;
+    const isEce = getIsEce({
+      isCloudEnabled,
+      isServerlessEnabled,
+      isSaasContainer: this.config.isSaasContainer,
+    });
     const deploymentId = parseDeploymentIdFromDeploymentUrl(this.config.deployment_url);
 
     registerCloudDeploymentMetadataAnalyticsContext(core.analytics, this.config);
@@ -368,19 +409,25 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       ...this.getCloudUrls(),
       cloudId: this.config.id,
       csp: this.config.csp,
+      region: this.config.region,
       organizationId,
       instanceSizeMb: readInstanceSizeMb(),
       deploymentId,
+      elasticsearchClusterId: decodedId?.elasticsearchClusterId,
       elasticsearchUrl,
       kibanaUrl: decodedId?.kibanaUrl,
       cloudHost: decodedId?.host,
       cloudDefaultPort: decodedId?.defaultPort,
       isCloudEnabled,
+      isEce,
       trialEndDate: this.trialEndDate,
       isElasticStaffOwned: this.config.is_elastic_staff_owned,
       apm: {
         url: this.config.apm?.url,
         secretToken: this.config.apm?.secret_token,
+      },
+      managedOtlp: {
+        url: this.config.managed_otlp?.url,
       },
       onboarding: {
         defaultSolution: parseOnboardingSolution(this.config.onboarding?.default_solution),
@@ -398,6 +445,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         organizationInTrial: this.config.serverless?.in_trial,
       },
       isInTrial: this.isInTrial.bind(this),
+      trialDaysLeft: this.trialDaysLeft.bind(this),
     };
   }
 
@@ -406,6 +454,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       ...this.getCloudUrls(),
       isCloudEnabled: getIsCloudEnabled(this.config.id),
       isInTrial: this.isInTrial.bind(this),
+      trialDaysLeft: this.trialDaysLeft.bind(this),
     };
   }
 
@@ -418,18 +467,22 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     };
   }
 
-  private isInTrial(): boolean {
-    if (this.config.serverless?.in_trial) return true;
-    if (this.trialEndDate !== undefined) {
-      if (this.config.trial_end_date) {
-        const endDateMs = this.trialEndDate.getTime();
-        if (!Number.isNaN(endDateMs)) {
-          return Date.now() <= endDateMs;
-        } else {
-          this.logger.error('cloud.trial_end_date config value could not be parsed.');
-        }
+  private trialDaysLeft(): number | undefined {
+    if (this.trialEndDate !== undefined && this.config.trial_end_date) {
+      const endDateMs = this.trialEndDate.getTime();
+      if (!Number.isNaN(endDateMs)) {
+        const diff = endDateMs - Date.now();
+        return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+      } else {
+        this.logger.error('cloud.trial_end_date config value could not be parsed.');
       }
     }
-    return false;
+    return undefined;
+  }
+
+  private isInTrial(): boolean {
+    if (this.config.serverless?.in_trial) return true;
+    const daysLeft = this.trialDaysLeft();
+    return daysLeft !== undefined && daysLeft > 0;
   }
 }
