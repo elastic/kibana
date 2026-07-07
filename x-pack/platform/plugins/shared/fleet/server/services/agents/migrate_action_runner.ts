@@ -33,21 +33,17 @@ export class MigrateActionRunner extends ActionRunner {
   }
 }
 
-export async function bulkMigrateAgentsBatch(
-  esClient: ElasticsearchClient,
+/**
+ * Splits the given agents into those that can be migrated and those that cannot,
+ * mirroring the eligibility rules applied by `bulkMigrateAgentsBatch`. Agents in a
+ * protected policy, fleet-server agents, and migration-unsupported/containerized
+ * agents are collected as errors; the rest are returned in `agentsToAction`.
+ */
+export async function partitionAgentsForMigration(
   soClient: SavedObjectsClientContract,
-  agents: Agent[],
-  options: {
-    actionId?: string;
-    total?: number;
-    spaceId?: string;
-    enrollment_token?: string;
-    uri?: string;
-    settings?: Record<string, any>;
-  }
-) {
+  agents: Agent[]
+): Promise<{ agentsToAction: Agent[]; errors: Record<Agent['id'], Error> }> {
   const errors: Record<Agent['id'], Error> = {};
-  const now = new Date().toISOString();
 
   const agentPolicies = await getAgentPolicyForAgents(soClient, agents);
   const protectedAgentPolicies = agentPolicies.filter((agentPolicy) => agentPolicy?.is_protected);
@@ -81,6 +77,26 @@ export async function bulkMigrateAgentsBatch(
       agentsToAction.push(agent);
     }
   });
+
+  return { agentsToAction, errors };
+}
+
+export async function bulkMigrateAgentsBatch(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  agents: Agent[],
+  options: {
+    actionId?: string;
+    total?: number;
+    spaceId?: string;
+    enrollment_token?: string;
+    uri?: string;
+    settings?: Record<string, any>;
+  }
+) {
+  const now = new Date().toISOString();
+
+  const { agentsToAction, errors } = await partitionAgentsForMigration(soClient, agents);
   const actionId = options.actionId ?? uuidv4();
   const agentIds = agentsToAction.map((agent) => agent.id);
   const total = options.total ?? agentIds.length;
