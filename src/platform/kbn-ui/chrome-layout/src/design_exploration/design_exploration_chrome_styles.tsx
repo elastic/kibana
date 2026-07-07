@@ -57,6 +57,16 @@ export const designExplorationScopedInPanels = (selectors: string) => {
 const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
   const scope = designExplorationScope();
   const { colors } = euiTheme.euiTheme;
+  const isDarkMode = euiTheme.colorMode === 'DARK';
+  const embeddablePanelShadow = isDarkMode
+    ? `0 0 0 1px color-mix(in srgb, ${colors.borderBaseSubdued} 45%, transparent), 0 2px 4px rgba(0, 0, 0, 0.28)`
+    : `0 0 0 1px rgba(0, 0, 0, 0.08), 0 2px 2px rgba(0, 0, 0, 0.04), inset 0 1px 0 0 rgba(255, 255, 255, 0.55)`;
+  const formControlBorder = isDarkMode
+    ? `color-mix(in srgb, ${colors.borderBaseSubdued} 35%, transparent)`
+    : `color-mix(in srgb, ${colors.borderBaseSubdued} 50%, transparent)`;
+  const formControlBorderHover = isDarkMode
+    ? `color-mix(in srgb, ${colors.borderBaseSubdued} 55%, transparent)`
+    : `color-mix(in srgb, ${colors.borderBaseSubdued} 75%, transparent)`;
 
   return css`
     ${scope} [data-test-subj='kbnGridLayout'] {
@@ -66,6 +76,28 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} [data-test-subj='embeddablePanel'] {
       border-radius: ${DESIGN_EXPLORATION_RADIUS_CONTROL}px !important;
+      border: none !important;
+      box-shadow: ${embeddablePanelShadow} !important;
+    }
+
+    ${scope} .euiFormControlLayout input:not(:focus):not(:disabled):not(:invalid):not([aria-invalid='true']),
+    ${scope} .euiFormControlLayout select:not(:focus):not(:disabled),
+    ${scope} .euiFormControlLayout textarea:not(:focus):not(:disabled):not(:invalid):not([aria-invalid='true']),
+    ${scope}
+      .euiFormControlLayout:not(:focus-within)
+      .euiFormControlLayout__childrenWrapper:not(:has(:focus, .euiPopover-isOpen)),
+    ${scope} .euiFormControlButton:not(:focus):not(:disabled):not([aria-invalid='true']),
+    ${scope} .euiFilePicker:not(:focus-within):not(.euiFilePicker-isInvalid) {
+      --euiFormControlStateColor: ${formControlBorder} !important;
+      --euiFormControlStateHoverColor: ${formControlBorderHover} !important;
+    }
+
+    ${scope} .euiFormControlLayout--group:not(:focus-within):not(:has(:invalid, [aria-invalid='true']))::after {
+      border-color: ${formControlBorder} !important;
+    }
+
+    ${scope} .euiFormControlLayout--group:not(:focus-within):not(:has(:invalid, [aria-invalid='true'])):hover:not(:has(:disabled, [readOnly]))::after {
+      border-color: ${formControlBorderHover} !important;
     }
 
     ${scope} [data-test-subj='globalQueryBar'] {
@@ -75,16 +107,18 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
     ${scope} [data-test-subj='controls-group-wrapper'] {
       padding-inline: ${DESIGN_EXPLORATION_PADDING}px !important;
       padding-bottom: ${DESIGN_EXPLORATION_PADDING}px !important;
+      border-bottom: 1px solid transparent !important;
+      transition: border-bottom-color 200ms ease !important;
     }
 
     ${scope}[${DESIGN_EXPLORATION_SCROLLED_BODY_ATTR}='true']
       [data-test-subj='controls-group-wrapper'] {
-      border-bottom: 1px solid ${colors.borderBaseSubdued} !important;
+      border-bottom-color: ${colors.borderBaseSubdued} !important;
     }
 
     ${scope}:has([data-test-subj='dashboardContainer'], #dashboardListingHeading)
       [data-test-subj='appHeader'] {
-      padding-inline: ${DESIGN_EXPLORATION_PADDING}px !important;
+      padding-inline: 12px !important;
       margin-inline: 0 !important;
       margin-top: 0 !important;
       border-radius: ${DESIGN_EXPLORATION_RADIUS_CONTROL}px !important;
@@ -98,6 +132,9 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
     ${scope} .kbnChromeLayoutApplication > div:has([data-test-subj='appHeader']) {
       height: ${DESIGN_EXPLORATION_TOP_BAR_HEIGHT}px !important;
       min-height: ${DESIGN_EXPLORATION_TOP_BAR_HEIGHT}px !important;
+    }
+
+    ${scope} .kbnChromeLayoutApplication div:has(> [data-test-subj='appHeader']) [data-test-subj='appHeader'] {
       background-color: color-mix(
         in srgb,
         ${colors.backgroundBasePlain} 75%,
@@ -105,10 +142,6 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
       ) !important;
       backdrop-filter: blur(10px) !important;
       -webkit-backdrop-filter: blur(10px) !important;
-    }
-
-    ${scope} .kbnChromeLayoutApplication div:has(> [data-test-subj='appHeader']) [data-test-subj='appHeader'] {
-      background: transparent !important;
     }
 
     ${scope} .kbnChromeLayoutApplication div:has(> [data-test-subj='appHeader']) {
@@ -125,6 +158,8 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
     ${scope} .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
       background: transparent !important;
       top: ${DESIGN_EXPLORATION_TOP_BAR_HEIGHT}px !important;
+      margin: ${DESIGN_EXPLORATION_PADDING}px !important;
+      border-radius: ${DESIGN_EXPLORATION_RADIUS_CONTROL}px !important;
       background-color: color-mix(
         in srgb,
         ${colors.backgroundBasePlain} 75%,
