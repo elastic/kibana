@@ -38,8 +38,7 @@ export const RuleFlyoutEditFooter = ({
   const { formData, id } = useRuleFormState();
 
   const saveButtonEbtProps = useMemo(
-    () =>
-      getRuleSaveEbtProps({ element: 'ruleFlyoutEditFooterSaveButton', ruleId: id, formData }),
+    () => getRuleSaveEbtProps({ element: 'ruleFlyoutEditFooterSaveButton', ruleId: id, formData }),
     [id, formData]
   );
 

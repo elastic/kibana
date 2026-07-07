@@ -27,15 +27,15 @@ jest.mock('./hooks/use_load_dependencies', () => ({
 }));
 
 const mutate = jest.fn();
-const useCreateRuleMock = jest.fn(() => ({ mutate, isLoading: false }));
+const mockUseCreateRule = jest.fn(() => ({ mutate, isLoading: false }));
 
 jest.mock('./common/hooks', () => ({
-  useCreateRule: (...args: unknown[]) => useCreateRuleMock(...args),
+  useCreateRule: (...args: unknown[]) => mockUseCreateRule(...args),
 }));
 
-const reportRuleCreatedEvent = jest.fn();
+const mockReportRuleCreatedEvent = jest.fn();
 jest.mock('./common/telemetry', () => ({
-  reportRuleCreatedEvent: (...args: unknown[]) => reportRuleCreatedEvent(...args),
+  reportRuleCreatedEvent: (...args: unknown[]) => mockReportRuleCreatedEvent(...args),
 }));
 
 const { useLoadDependencies } = jest.requireMock('./hooks/use_load_dependencies');
@@ -47,7 +47,7 @@ const basePlugins = {
   http: {},
   docLinks: {},
   notifications: { toasts: { addSuccess, addDanger: jest.fn() } },
-  ruleTypeRegistry: {},
+  ruleTypeRegistry: { list: jest.fn(() => []), has: jest.fn(() => true), get: jest.fn() },
   fieldsMetadata: {},
   application: { capabilities: {} },
 } as unknown as RuleFormPlugins;
@@ -55,7 +55,7 @@ const basePlugins = {
 describe('CreateRuleForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useCreateRuleMock.mockReturnValue({ mutate, isLoading: false });
+    mockUseCreateRule.mockReturnValue({ mutate, isLoading: false });
     useLoadDependencies.mockReturnValue({
       isInitialLoading: false,
       ruleType: { id: '.es-query', authorizedConsumers: { alerts: { all: true } } },
@@ -74,7 +74,7 @@ describe('CreateRuleForm', () => {
     render(
       <CreateRuleForm ruleTypeId=".es-query" plugins={plugins} onSubmit={onSubmit} isFlyout />
     );
-    return useCreateRuleMock.mock.calls[0][0] as {
+    return mockUseCreateRule.mock.calls[0][0] as {
       onSuccess: (
         rule: { id: string; name: string },
         variables: { formData: Record<string, unknown> }
@@ -112,7 +112,7 @@ describe('CreateRuleForm', () => {
       }
     );
 
-    expect(reportRuleCreatedEvent).toHaveBeenCalledWith(
+    expect(mockReportRuleCreatedEvent).toHaveBeenCalledWith(
       { reportEvent },
       expect.objectContaining({
         rule_id: 'rule-1',
@@ -131,6 +131,6 @@ describe('CreateRuleForm', () => {
       { formData: { ruleTypeId: '.es-query', params: {}, artifacts: undefined } }
     );
 
-    expect(reportRuleCreatedEvent).not.toHaveBeenCalled();
+    expect(mockReportRuleCreatedEvent).not.toHaveBeenCalled();
   });
 });

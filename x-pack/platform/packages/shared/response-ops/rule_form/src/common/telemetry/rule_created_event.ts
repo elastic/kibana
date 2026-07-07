@@ -47,8 +47,7 @@ const schema: RootSchema<RuleCreatedEventData> = {
   template_id: {
     type: 'keyword',
     _meta: {
-      description:
-        'The id of the alert/SLO template the rule was created from, when applicable.',
+      description: 'The id of the alert/SLO template the rule was created from, when applicable.',
       optional: true,
     },
   },

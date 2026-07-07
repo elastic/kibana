@@ -8,7 +8,10 @@ import * as React from 'react';
 import moment from 'moment';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import {
+  waitForEuiPopoverOpen,
+  waitForEuiContextMenuPanelTransition,
+} from '@elastic/eui/lib/test/rtl';
 import { CollapsedItemActions } from './collapsed_item_actions';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import type { RuleTableItem, RuleTypeModel } from '../../../../types';
@@ -471,7 +474,6 @@ describe('CollapsedItemActions', () => {
     });
 
     describe('rule_engagement_action telemetry', () => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
       const reportEvent = useKibana().services.analytics.reportEvent as jest.Mock;
 
       afterEach(() => {
@@ -544,6 +546,7 @@ describe('CollapsedItemActions', () => {
         await waitForEuiPopoverOpen();
 
         await userEvent.click(screen.getByTestId('snoozeButton'));
+        await waitForEuiContextMenuPanelTransition();
 
         // One of the "commonly used" quick-snooze links; avoids depending on the default
         // value of the custom interval input.
