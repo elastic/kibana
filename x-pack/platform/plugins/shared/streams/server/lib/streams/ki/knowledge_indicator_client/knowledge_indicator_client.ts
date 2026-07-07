@@ -100,6 +100,7 @@ export class KnowledgeIndicatorClient {
       minConfidence?: number;
       limit?: number;
       includeExcluded?: boolean;
+      includeExpired?: boolean;
       sort?: ComposerSortShorthand[];
     }
   ): Promise<{ hits: Feature[] }> {

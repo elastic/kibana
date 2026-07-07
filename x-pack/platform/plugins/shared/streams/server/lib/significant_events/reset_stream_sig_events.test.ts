@@ -69,6 +69,11 @@ describe('resetSignificantEvents', () => {
     expect(streamsKIsOnboardingClient.cancelAllRunning).toHaveBeenCalledWith({ request });
     expect(kiClient.deleteAllQueries).toHaveBeenCalledTimes(2);
     expect(kiClient.deleteIndicators).toHaveBeenCalledTimes(2);
+    // Feature count must mirror `deleteIndicators`, which deletes excluded/expired features too.
+    expect(kiClient.getFeatures).toHaveBeenCalledWith(expect.any(String), {
+      includeExcluded: true,
+      includeExpired: true,
+    });
     expect(esClient.deleteByQuery).toHaveBeenCalledWith(
       {
         index: '.alerts-streams.alerts-default',

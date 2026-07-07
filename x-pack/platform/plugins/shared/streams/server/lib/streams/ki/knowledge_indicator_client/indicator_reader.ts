@@ -264,10 +264,7 @@ export class IndicatorReader {
     const docs = await this.revisionReader.fetchLatestRevisions(where, IS_NOT_DELETED);
     const streamNames = new Set<string>();
     for (const doc of docs) {
-      const streamName = doc['stream.name'];
-      if (streamName) {
-        streamNames.add(streamName);
-      }
+      streamNames.add(doc['stream.name']);
     }
     return [...streamNames].sort();
   }

@@ -69,7 +69,12 @@ const collectResetSnapshot = async (kiClient: KnowledgeIndicatorClient): Promise
     }
     streamCounts.rules = queryLinks.filter((link) => link.rule_backed && link.rule_id).length;
 
-    const { hits: features } = await kiClient.getFeatures(streamName);
+    // Match `deleteIndicators`, which tombstones every non-deleted feature: count excluded and
+    // expired features too, otherwise this snapshot undercounts what the reset actually deletes.
+    const { hits: features } = await kiClient.getFeatures(streamName, {
+      includeExcluded: true,
+      includeExpired: true,
+    });
     streamCounts.features = features.length;
 
     byStream[streamName] = streamCounts;
