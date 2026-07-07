@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createMockEsClient } from '../../test_utils';
 import { createLoggerService } from '../logger_service/logger_service.mock';
-import { StorageService } from './storage_service';
+import { StorageService, type StorageServiceContract } from './storage_service';
 
 export function createStorageService(): {
   storageService: StorageService;
@@ -19,4 +19,17 @@ export function createStorageService(): {
   const { loggerService, mockLogger } = createLoggerService();
   const storageService = new StorageService(mockEsClient, loggerService);
   return { storageService, mockEsClient, mockLogger };
+}
+
+/**
+ * Returns a fully-stubbed {@link StorageServiceContract} for tests that only
+ * care about *what* was sent to the contract (e.g. unit-testing a pipeline
+ * step). For tests that need to exercise the real ES bulk serialization, use
+ * {@link createStorageService} instead.
+ */
+export function createMockStorageServiceContract(): jest.Mocked<StorageServiceContract> {
+  return {
+    bulkIndexDocs: jest.fn().mockResolvedValue(undefined),
+    bulkIndexDocsAcrossIndices: jest.fn().mockResolvedValue(undefined),
+  };
 }

@@ -132,6 +132,22 @@ describe('WorkflowGraphNode', () => {
     expect(screen.queryByTestId('workflowGraphNodeRetryBadge')).toBeNull();
   });
 
+  it('does not show run action in read-only mode', () => {
+    renderNode({}, false, { onStepRun: jest.fn(), canRunSteps: false });
+
+    fireEvent.mouseEnter(screen.getByRole('button', { name: /Test Step/ }));
+
+    expect(screen.queryByTestId('workflowGraphNodeRunStep')).toBeNull();
+  });
+
+  it('shows run action when step runs are enabled', () => {
+    renderNode({}, false, { onStepRun: jest.fn(), canRunSteps: true });
+
+    fireEvent.mouseEnter(screen.getByRole('button', { name: /Test Step/ }));
+
+    expect(screen.getByTestId('workflowGraphNodeRunStep')).toBeInTheDocument();
+  });
+
   it('calls onStepSelect with the node id when Enter is pressed', () => {
     const onStepSelect = jest.fn();
     renderNode({}, false, { onStepSelect });
