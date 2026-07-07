@@ -34,16 +34,8 @@ export const PREBUILT_RULES_UPGRADE_BATCH_SIZE = 100;
 
 /**
  * Max prebuilt rules fetched from ES and processed by bulk-create per install handler iteration.
+ * Also the batch size passed to the alerting plugin's `rulesClient.bulkCreateRules`,
+ * controlling how many rules it writes to ES per underlying bulk-create call.
+ * A single constant for both layers means no nested re-chunking happens between them.
  */
 export const PREBUILT_RULES_BULK_CREATE_BATCH_SIZE = 500;
-
-/**
- * Batch size passed to the alerting plugin's `rulesClient.bulkCreateRules`,
- * controlling how many rules it writes to ES per underlying bulk-create call.
- *
- * This is independent of PREBUILT_RULES_BULK_CREATE_BATCH_SIZE, which chunks
- * the install queue before assets are fetched and handed off here. Keeping both
- * at 500 means each bulkCreateRules call performs a single ES bulk write.
- * Related discussion: https://github.com/elastic/kibana/pull/275523#issuecomment-4876496484
- */
-export const PREBUILT_RULES_ALERTING_BULK_CREATE_BATCH_SIZE = 500;
