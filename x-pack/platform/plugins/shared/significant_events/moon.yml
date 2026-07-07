@@ -80,10 +80,8 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/usage-collection-plugin'
   - '@kbn/console-plugin'
-  - '@kbn/elastic-agent-utils'
-  - '@kbn/sample-log-parser'
-  - '@kbn/core-http-common'
   - '@kbn/scout'
+  - '@kbn/core-http-server-mocks'
 tags:
   - plugin
   - prod
