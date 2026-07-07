@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { platformStreamsSigEventsTools, ToolType } from '@kbn/agent-builder-common';
+import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { i18n } from '@kbn/i18n';
@@ -16,7 +16,7 @@ import {
 import dedent from 'dedent';
 
 export const STREAMS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID =
-  platformStreamsSigEventsTools.reportInvestigationProgress;
+  platformSignificantEventsTools.reportInvestigationProgress;
 
 const toolDescription = dedent`
   ${i18n.translate('xpack.streams.agentBuilder.tools.investigationProgressReport.description', {
