@@ -9,6 +9,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Streams } from '@kbn/streams-schema';
 import {
+  CLOUD_SUBSCRIPTION_FEATURES_URL,
+  CONTACT_US_URL,
   DefaultSnapshotRepositoryRequiredModal,
   EnterpriseGatingModal,
   SUBSCRIPTION_FEATURES_URL,
@@ -162,8 +164,14 @@ export const useDlmFrozenPhaseGating = ({
               : Boolean(application.capabilities?.management?.stack?.license_management)
           }
           trialStatus={cloud?.trialDaysLeft?.() === 0 ? 'expired' : 'notStarted'}
-          subscriptionFeaturesUrl={SUBSCRIPTION_FEATURES_URL}
-          onPrimaryAction={() => window.open(SUBSCRIPTION_FEATURES_URL, '_blank', 'noopener')}
+          subscriptionFeaturesUrl={
+            cloud?.isCloudEnabled ? CLOUD_SUBSCRIPTION_FEATURES_URL : SUBSCRIPTION_FEATURES_URL
+          }
+          onPrimaryAction={
+            cloud?.isCloudEnabled
+              ? undefined
+              : () => window.open(CONTACT_US_URL, '_blank', 'noopener')
+          }
           onCancel={closeModal}
           data-test-subj="streamsDlmFrozenEnterpriseGatingModal"
         />
