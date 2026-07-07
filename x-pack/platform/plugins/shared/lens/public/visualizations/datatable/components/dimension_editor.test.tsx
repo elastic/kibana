@@ -513,8 +513,7 @@ describe('data table dimension editor', () => {
       state.columns[0].fillStyle = { fillMode: 'single', valueRange: { mode: 'auto' } };
       renderTableDimensionEditor();
 
-      // The `inputWithPopover` dual range exposes two number inputs; none are
-      // rendered while the range is auto.
+      // Custom range inputs are only rendered while the range is custom.
       expect(screen.queryAllByRole('spinbutton')).toHaveLength(0);
     });
 
@@ -527,9 +526,8 @@ describe('data table dimension editor', () => {
       };
       renderTableDimensionEditor();
 
-      // EUI's `inputWithPopover` dual range renders the bounds as two number
-      // inputs (the test-subj does not forward to a single queryable node), so
-      // assert on the rendered min/max spinbuttons instead.
+      // The custom range row renders a consolidated min/max numeric input pair,
+      // so assert on the rendered spinbuttons directly.
       const spinbuttons = screen.getAllByRole('spinbutton');
       expect(spinbuttons).toHaveLength(2);
       spinbuttons.forEach((input) => {
@@ -576,6 +574,22 @@ describe('data table dimension editor', () => {
         expect(Number.isFinite(Number(input.getAttribute('max')))).toBe(true);
         expect(input.getAttribute('value')).not.toBe('');
       });
+    });
+
+    it('does not show an append label on the consolidated custom range inputs', () => {
+      mockFirstColumn({ dataType: 'number' });
+      state.columns[0].colorMode = 'progress';
+      state.columns[0].fillStyle = {
+        fillMode: 'single',
+        valueRange: { mode: 'custom', min: 10, max: 100 },
+      };
+      renderTableDimensionEditor();
+
+      expect(
+        screen
+          .getByTestId('lnsDatatable_progressBar_valueRangeInputs')
+          .querySelector('.euiFormControlLayout__append')
+      ).toBeNull();
     });
 
     it('clears persisted custom bounds when toggling Custom -> Auto (single fill)', async () => {

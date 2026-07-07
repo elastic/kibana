@@ -13,8 +13,7 @@ import {
   EuiColorPicker,
   EuiDualRange,
   EuiFieldNumber,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiFormControlLayoutDelimited,
   EuiFormRow,
   htmlIdGenerator,
 } from '@elastic/eui';
@@ -778,7 +777,6 @@ export function ProgressBarControls({
     [normalizedDraftRange, sliderBoundsMin]
   );
   const sliderStep = basePrecisionUnit;
-
   // Feed the slider a zero-based local coordinate space instead of large
   // absolute numbers so tiny ranges retain stable thumb movement.
   const levels = useMemo<EuiDualRangeProps['levels']>(() => {
@@ -889,11 +887,14 @@ export function ProgressBarControls({
         // "Value range" control above instead of starting at the panel edge.
         <EuiFormRow display="columnCompressed" fullWidth hasEmptyLabelSpace>
           <>
-            <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-              <EuiFlexItem>
+            <EuiFormControlLayoutDelimited
+              compressed
+              fullWidth
+              data-test-subj="lnsDatatable_progressBar_valueRangeInputs"
+              startControl={
                 <EuiFieldNumber
-                  fullWidth
                   compressed
+                  controlOnly
                   step={inputPrecisionUnit}
                   value={rangeInputValues[0]}
                   onFocus={() => setFocusedRangeInput(0)}
@@ -902,14 +903,11 @@ export function ProgressBarControls({
                   aria-label={minValueRangeLabel}
                   data-test-subj="lnsDatatable_progressBar_valueRangeMin"
                 />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <span aria-hidden="true">&rarr;</span>
-              </EuiFlexItem>
-              <EuiFlexItem>
+              }
+              endControl={
                 <EuiFieldNumber
-                  fullWidth
                   compressed
+                  controlOnly
                   step={inputPrecisionUnit}
                   value={rangeInputValues[1]}
                   onFocus={() => setFocusedRangeInput(1)}
@@ -918,8 +916,8 @@ export function ProgressBarControls({
                   aria-label={maxValueRangeLabel}
                   data-test-subj="lnsDatatable_progressBar_valueRangeMax"
                 />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+              }
+            />
             <div
               onMouseDownCapture={beginSliderGesture}
               onTouchStartCapture={beginSliderGesture}
