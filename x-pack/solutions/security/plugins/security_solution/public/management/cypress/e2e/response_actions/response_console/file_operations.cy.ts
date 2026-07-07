@@ -21,14 +21,12 @@ import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
-// Failing: See https://github.com/elastic/kibana/issues/209065
-describe.skip('Response console', { tags: ['@ess', '@serverless'] }, () => {
+describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
   });
 
-  // Failing: See https://github.com/elastic/kibana/issues/276337
-  describe.skip('File operations:', () => {
+  describe('File operations:', () => {
     const homeFilePath = Cypress.env('IS_CI') ? '/home/vagrant' : '/home/ubuntu';
 
     const fileContent = 'This is a test file for the get-file command.';
