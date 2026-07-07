@@ -1,5 +1,6 @@
 summary: List entity resolution rules
-description: Lists managed entity resolution rules and their effective enabled state.
+description: >-
+  Lists managed entity resolution rules and their effective enabled state.
 responses:
   '200':
     description: Entity resolution rules.

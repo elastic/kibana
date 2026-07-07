@@ -1,5 +1,6 @@
 summary: Enable an entity resolution rule
-description: Enables a managed entity resolution rule in the current space.
+description: >-
+  Enables a managed entity resolution rule in the current space.
 responses:
   '200':
     description: Updated entity resolution rule.

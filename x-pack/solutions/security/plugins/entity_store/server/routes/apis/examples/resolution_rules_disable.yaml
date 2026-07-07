@@ -1,5 +1,6 @@
 summary: Disable an entity resolution rule
-description: Disables a managed entity resolution rule in the current space.
+description: >-
+  Disables a managed entity resolution rule in the current space.
 responses:
   '200':
     description: Updated entity resolution rule.

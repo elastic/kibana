@@ -63063,7 +63063,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Lists managed entity resolution rules and their effective enabled state.
+        Lists managed entity resolution rules and their effective enabled state.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
       operationId: get-security-entity-store-resolution-rules
       parameters: []
       responses:
@@ -63100,7 +63100,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Disables a managed entity resolution rule in the current space.
+        Disables a managed entity resolution rule in the current space.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
       operationId: put-security-entity-store-resolution-rules-id-disable
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -63158,7 +63158,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Enables a managed entity resolution rule in the current space.
+        Enables a managed entity resolution rule in the current space.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
       operationId: put-security-entity-store-resolution-rules-id-enable
       parameters:
         - description: A required header to protect against CSRF attacks
