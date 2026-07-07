@@ -203,12 +203,15 @@ export const bulkUpdateAgentTagsHandler: RequestHandler<
   const results = await AgentService.updateAgentTags(
     soClient,
     esClient,
-    { ...agentOptions, batchSize: request.body.batchSize },
+    { ...agentOptions, batchSize: request.body.batchSize, dryRun: request.body.dryRun },
     request.body.tagsToAdd ?? [],
     request.body.tagsToRemove ?? []
   );
 
-  return response.ok({ body: { actionId: results.actionId } });
+  if (request.body.dryRun) {
+    return response.ok({ body: { count: (results as { count: number }).count } });
+  }
+  return response.ok({ body: { actionId: (results as { actionId: string }).actionId } });
 };
 
 export const getAgentsHandler: FleetRequestHandler<
@@ -326,11 +329,14 @@ export const postBulkAgentReassignHandler: RequestHandler<
   const results = await AgentService.reassignAgents(
     soClient,
     esClient,
-    { ...agentOptions, batchSize: request.body.batchSize },
+    { ...agentOptions, batchSize: request.body.batchSize, dryRun: request.body.dryRun },
     request.body.policy_id
   );
 
-  return response.ok({ body: { actionId: results.actionId } });
+  if (request.body.dryRun) {
+    return response.ok({ body: { count: (results as { count: number }).count } });
+  }
+  return response.ok({ body: { actionId: (results as { actionId: string }).actionId } });
 };
 
 export const getAgentStatusForAgentPolicyHandler: FleetRequestHandler<

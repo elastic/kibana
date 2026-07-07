@@ -117,7 +117,7 @@
     "@kbn/presentation-publishing",
     "@kbn/datemath",
     "@kbn/controls-plugin",
-    "@kbn/controls-schemas"
+    "@kbn/controls-schemas",
   ],
   "exclude": ["target/**/*"]
 }

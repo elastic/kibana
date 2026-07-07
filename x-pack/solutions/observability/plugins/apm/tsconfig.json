@@ -161,6 +161,7 @@
     "@kbn/cps",
     "@kbn/cps-utils",
     "@kbn/zod",
+    "@kbn/zod-helpers",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-server",

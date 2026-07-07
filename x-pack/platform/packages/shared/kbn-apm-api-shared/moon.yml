@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/slo-schema'
   - '@kbn/elastic-agent-utils'
   - '@kbn/apm-types-shared'
+  - '@kbn/zod'
 tags:
   - shared-common
   - package

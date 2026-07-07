@@ -100,7 +100,36 @@ export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
-export type { Entity } from './domain/definitions/entity.gen';
+export type {
+  Entity,
+  HostEntity,
+  UserEntity,
+  ServiceEntity,
+  GenericEntity,
+  EntityField,
+  EngineMetadata,
+  Asset,
+} from './domain/definitions/entity.gen';
+export type {
+  EntitySummaryHighlight,
+  EntitySummaryStaleness,
+  EntitySummaryStalenessSignal,
+  EntitySummaryStalenessSnapshot,
+  EntitySummaryStalenessEntitySnapshot,
+  EntitySummaryStalenessReason,
+  SaveEntityAiSummaryParams,
+  SaveEntityAiSummarySummary,
+  PersistedEntityAiSummary,
+  GetPersistedAiSummaryResponse,
+} from './domain/definitions/entity_summary_staleness';
+// Entity AI summary runtime helpers (staleness detection, structural caps, request-length
+// caps) intentionally live behind the `@kbn/entity-store/common/entity_summary` subpath, NOT
+// this page-load barrel, so they only ship in the chunks that use them (lazy flyout / server)
+// rather than on every page load. Only the erased-at-build-time types stay in the barrel.
+export type {
+  EntitySummaryContent,
+  CappedEntitySummaryContent,
+} from './domain/definitions/entity_summary_limits';
 
 export interface IdentitySourceFields {
   /** Fields that participate in identity (EUID composition). */
@@ -128,9 +157,27 @@ export {
   getMetadataEntityIndexPattern,
 } from './domain/entity_index';
 
+export type {
+  EngineStatus,
+  EngineDescriptor,
+  EngineComponentResource,
+  EngineComponentStatus,
+  GetEntityStoreStatusResponse,
+  InitEntityStoreResponse,
+  InspectQuery,
+  ListEntitiesResponse,
+} from './api_types';
+
 export { RELATIONSHIP_KINDS } from './domain/entity_metadata/relationship_metadata';
 export type {
   RelationshipKind,
   RelationshipMetadataDoc,
   RelationshipMetadataMaintainer,
 } from './domain/entity_metadata/relationship_metadata';
+export { AI_SUMMARY_EVENT_ACTION } from './domain/entity_metadata/ai_summary_metadata';
+export type {
+  AiSummaryMetadataDoc,
+  AiSummaryHighlightItem,
+  AiSummaryMetadataStaleness,
+  AiSummaryMetadataStalenessSnapshot,
+} from './domain/entity_metadata/ai_summary_metadata';
