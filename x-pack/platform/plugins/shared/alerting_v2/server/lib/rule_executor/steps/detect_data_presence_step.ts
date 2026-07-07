@@ -7,12 +7,11 @@
 
 import { inject, injectable } from 'inversify';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { stableStringify } from '@kbn/std';
 import { getNoDataEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { isEsqlUserError } from '../../errors/esql_user_error';
 import type { PipelineStateStream, RuleExecutionInput, RuleExecutionStep } from '../types';
-import { buildExecutionUuid, buildGroupHash, rowToDocument } from '../build_alert_events';
+import { buildExecutionUuid, buildGroupHash } from '../build_alert_events';
 import { getQueryPayload } from '../get_query_payload';
 import {
   LoggerServiceToken,
@@ -109,16 +108,16 @@ export class DetectDataPresenceStep implements RuleExecutionStep {
     });
 
     try {
-      const esqlResponse = await this.scopedQueryService.executeQueryRows({
+      const rows = await this.scopedQueryService.executeQueryRows({
         query: noDataQuery,
         filter: queryPayload.filter,
         params: queryPayload.params,
         abortSignal: input.executionContext.signal,
       });
 
-      return collectGroupHashesFromResponse({
+      return collectGroupHashesFromRows({
         rule,
-        esqlResponse,
+        rows,
         input,
       });
     } catch (error) {
@@ -130,20 +129,18 @@ export class DetectDataPresenceStep implements RuleExecutionStep {
   }
 }
 
-function collectGroupHashesFromResponse({
+function collectGroupHashesFromRows({
   rule,
-  esqlResponse,
+  rows,
   input,
 }: {
   rule: RuleResponse;
-  esqlResponse: EsqlQueryResponse;
+  rows: Array<Record<string, unknown>>;
   input: RuleExecutionInput;
 }): Set<string> {
   const { ruleId, spaceId, scheduledAt } = input;
-  const columns = esqlResponse.columns ?? [];
-  const values = esqlResponse.values ?? [];
 
-  if (columns.length === 0 || values.length === 0) {
+  if (rows.length === 0) {
     return new Set();
   }
 
@@ -156,8 +153,8 @@ function collectGroupHashesFromResponse({
   });
   const groupHashes = new Set<string>();
 
-  for (let i = 0; i < values.length; i++) {
-    const rowDoc = rowToDocument(columns, values[i]);
+  for (let i = 0; i < rows.length; i++) {
+    const rowDoc = rows[i];
 
     const hash = buildGroupHash({
       rowDoc,
