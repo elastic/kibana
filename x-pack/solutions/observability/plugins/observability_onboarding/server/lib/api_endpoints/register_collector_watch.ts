@@ -14,6 +14,9 @@ export interface CollectorWatchBody {
   targetId: string;
   apiKeyId: string;
   verificationId: string;
+  endpointId: string;
+  ingestPath: string;
+  signal?: string;
   expiresAt: string;
 }
 

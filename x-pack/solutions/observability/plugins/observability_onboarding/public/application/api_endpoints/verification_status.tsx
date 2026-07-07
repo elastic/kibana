@@ -67,7 +67,7 @@ export const VerificationStatus: React.FC<VerificationStatusProps> = ({
       >
         {i18n.translate('xpack.observability_onboarding.apiEndpoints.verification.unavailable', {
           defaultMessage:
-            'Verification unavailable. Endpoint detection is not active for this key.',
+            'Your API key is ready. Automatic delivery confirmation is not available for this endpoint.',
         })}
       </EuiText>
     );

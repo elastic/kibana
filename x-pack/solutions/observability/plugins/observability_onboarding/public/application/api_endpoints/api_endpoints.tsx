@@ -63,6 +63,7 @@ export const ApiEndpoints = () => {
     endpointId: selectedEndpoint?.id ?? endpoints[0]?.id,
     verificationId: selectedKey?.verificationId,
     status: selectedKey?.status,
+    detectionActive: selectedKey?.detectionActive ?? false,
     endpointLabel: selectedEndpoint?.label ?? '',
     onStatus: setVerification,
   });

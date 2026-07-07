@@ -88,6 +88,9 @@ export const createVerificationForKey = async (
       targetId: target.targetId,
       apiKeyId,
       verificationId,
+      endpointId,
+      ingestPath,
+      ...(signal !== undefined ? { signal } : {}),
       expiresAt: session.expiresAt,
     },
   });

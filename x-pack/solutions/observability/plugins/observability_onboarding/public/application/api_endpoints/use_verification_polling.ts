@@ -24,6 +24,7 @@ export interface UseVerificationPollingParams {
   endpointId: ApiEndpointId;
   verificationId?: string;
   status?: 'waiting' | 'accepted' | 'expired';
+  detectionActive?: boolean;
   endpointLabel: string;
   onStatus: (endpointId: ApiEndpointId, update: VerificationUpdate) => void;
 }
@@ -32,6 +33,7 @@ export function useVerificationPolling({
   endpointId,
   verificationId,
   status,
+  detectionActive,
   endpointLabel,
   onStatus,
 }: UseVerificationPollingParams): void {
@@ -40,7 +42,7 @@ export function useVerificationPolling({
   } = useKibana();
 
   useEffect(() => {
-    if (!verificationId || status !== 'waiting') {
+    if (!verificationId || status !== 'waiting' || !detectionActive) {
       return;
     }
 
@@ -103,5 +105,5 @@ export function useVerificationPolling({
     return () => {
       stopPolling(intervalId);
     };
-  }, [endpointId, endpointLabel, notifications, onStatus, status, verificationId]);
+  }, [detectionActive, endpointId, endpointLabel, notifications, onStatus, status, verificationId]);
 }

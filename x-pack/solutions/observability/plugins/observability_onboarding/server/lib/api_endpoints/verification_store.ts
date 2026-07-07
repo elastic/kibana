@@ -49,6 +49,7 @@ export interface VerificationStore {
   setDetectionActive(verificationId: string, active: boolean): void;
   getByVerificationId(verificationId: string): VerificationSession | undefined;
   markAccepted(input: MarkAcceptedInput): 'accepted' | 'no_match';
+  size(): number;
 }
 
 const DEFAULT_TTL_MS = 60 * 60 * 1000;
@@ -78,8 +79,17 @@ export const createVerificationStore = (opts?: {
     return session;
   };
 
+  const sweepExpired = (): void => {
+    for (const [verificationId, session] of sessions) {
+      if (isExpired(session)) {
+        sessions.delete(verificationId);
+      }
+    }
+  };
+
   return {
     register(input: RegisterInput): VerificationSession {
+      sweepExpired();
       const createdAtMs = now();
       const session: VerificationSession = {
         verificationId: input.verificationId,
@@ -134,6 +144,10 @@ export const createVerificationStore = (opts?: {
       }
 
       return 'accepted';
+    },
+
+    size(): number {
+      return sessions.size;
     },
   };
 };

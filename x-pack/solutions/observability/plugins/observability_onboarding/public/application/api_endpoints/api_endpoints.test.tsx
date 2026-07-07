@@ -97,6 +97,7 @@ describe('ApiEndpoints', () => {
       endpointId: ApiEndpointId.Elasticsearch,
       verificationId: elasticsearchKey.verificationId,
       status: elasticsearchKey.status,
+      detectionActive: true,
       endpointLabel: 'Elasticsearch',
       onStatus: setVerification,
     });
@@ -120,6 +121,7 @@ describe('ApiEndpoints', () => {
       endpointId: ApiEndpointId.Elasticsearch,
       verificationId: undefined,
       status: undefined,
+      detectionActive: false,
       endpointLabel: 'Elasticsearch',
       onStatus: setVerification,
     });
@@ -160,6 +162,7 @@ describe('ApiEndpoints', () => {
       endpointId: ApiEndpointId.Prometheus,
       verificationId: prometheusKey.verificationId,
       status: prometheusKey.status,
+      detectionActive: true,
       endpointLabel: 'Prometheus',
       onStatus: setVerification,
     });

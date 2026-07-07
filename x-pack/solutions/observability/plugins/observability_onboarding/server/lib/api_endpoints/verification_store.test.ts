@@ -40,6 +40,18 @@ describe('createVerificationStore', () => {
     expect(store.getByVerificationId('obs-onb-1')).toBeUndefined();
   });
 
+  it('sweeps expired sessions on register to bound idle memory growth', () => {
+    let nowMs = 0;
+    const store = createVerificationStore({ now: () => nowMs, ttlMs: 1000 });
+    store.register({ ...baseRegister, verificationId: 'obs-onb-1' });
+    expect(store.size()).toBe(1);
+    nowMs = 1000;
+    store.register({ ...baseRegister, verificationId: 'obs-onb-2' });
+    expect(store.size()).toBe(1);
+    expect(store.getByVerificationId('obs-onb-1')).toBeUndefined();
+    expect(store.getByVerificationId('obs-onb-2')?.status).toBe('waiting');
+  });
+
   it('setDetectionActive updates the flag', () => {
     const store = createVerificationStore({ now: () => 0, ttlMs: 1000 });
     store.register(baseRegister);

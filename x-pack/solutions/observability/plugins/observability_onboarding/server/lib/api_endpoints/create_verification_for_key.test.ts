@@ -56,11 +56,69 @@ describe('createVerificationForKey', () => {
           targetId: 'dep-1',
           apiKeyId: 'key-1',
           verificationId: result.verificationId,
+          endpointId: ApiEndpointId.Elasticsearch,
+          ingestPath: 'managed_es_bulk',
+          signal: 'logs',
         }),
       })
     );
     expect(result.detectionActive).toBe(true);
     expect(store.getByVerificationId(result.verificationId)?.detectionActive).toBe(true);
+  });
+
+  it('registers a Prometheus watch with prometheus classification', async () => {
+    const store = createVerificationStore({ now: () => 0 });
+    const registerWatch = jest.fn().mockResolvedValue(true);
+    const result = await createVerificationForKey(
+      { store, registerWatch, logger: loggerMock.create() },
+      {
+        apiKeyId: 'key-1',
+        endpointId: ApiEndpointId.Prometheus,
+        apiEndpointsConfig: {
+          collectorWatchUrl: 'https://collector.example',
+          kibanaToCollectorToken: 'k2c',
+        },
+        cloudSetup: { deploymentId: 'dep-1' },
+      }
+    );
+
+    expect(registerWatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          endpointId: ApiEndpointId.Prometheus,
+          ingestPath: 'managed_prw',
+          signal: 'metrics',
+        }),
+      })
+    );
+    expect(store.getByVerificationId(result.verificationId)?.ingestPath).toBe('managed_prw');
+  });
+
+  it('registers an OpenTelemetry watch with opentelemetry classification and omits signal', async () => {
+    const store = createVerificationStore({ now: () => 0 });
+    const registerWatch = jest.fn().mockResolvedValue(true);
+    const result = await createVerificationForKey(
+      { store, registerWatch, logger: loggerMock.create() },
+      {
+        apiKeyId: 'key-1',
+        endpointId: ApiEndpointId.OpenTelemetry,
+        apiEndpointsConfig: {
+          collectorWatchUrl: 'https://collector.example',
+          kibanaToCollectorToken: 'k2c',
+        },
+        cloudSetup: { deploymentId: 'dep-1' },
+      }
+    );
+
+    const watchBody = registerWatch.mock.calls[0][0].body;
+    expect(watchBody).toEqual(
+      expect.objectContaining({
+        endpointId: ApiEndpointId.OpenTelemetry,
+        ingestPath: 'managed_otlp',
+      })
+    );
+    expect(watchBody).not.toHaveProperty('signal');
+    expect(store.getByVerificationId(result.verificationId)?.signal).toBeUndefined();
   });
 
   it('leaves detectionActive false when watch registration fails', async () => {

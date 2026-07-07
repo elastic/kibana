@@ -24,6 +24,7 @@ const defaultParams = {
   endpointId: ApiEndpointId.Elasticsearch,
   verificationId: 'obs-onb-1',
   status: 'waiting' as const,
+  detectionActive: true,
   endpointLabel: 'Elasticsearch',
 };
 
@@ -199,7 +200,23 @@ describe('useVerificationPolling', () => {
         endpointId: ApiEndpointId.Elasticsearch,
         verificationId: 'obs-onb-1',
         status: 'accepted',
+        detectionActive: true,
         endpointLabel: 'Elasticsearch',
+        onStatus,
+      })
+    );
+    act(() => {
+      jest.advanceTimersByTime(9000);
+    });
+    expect(mockCallApi).not.toHaveBeenCalled();
+  });
+
+  it('does not poll when detection is not active', () => {
+    const onStatus = jest.fn();
+    renderHook(() =>
+      useVerificationPolling({
+        ...defaultParams,
+        detectionActive: false,
         onStatus,
       })
     );
