@@ -462,6 +462,10 @@ export const isNoDataQueryProvidedForStrategy = (data: {
 export const isNoDataStrategyNotEmit = (data: {
   no_data_strategy?: NoDataStrategy | null;
 }): boolean => data.no_data_strategy !== noDataStrategy.emit;
+const rejectEmitNoDataStrategy = {
+  message: 'no_data_strategy "emit" is not currently supported.',
+  path: ['no_data_strategy'],
+};
 
 export const createRuleDataSchema = createRuleDataBaseSchema
   .refine(isStateTransitionAllowed, {
@@ -493,10 +497,7 @@ export const createRuleDataSchema = createRuleDataBaseSchema
       'query.no_data is required when no_data_strategy is not "none" for standalone-format rules.',
     path: ['query', 'no_data'],
   })
-  .refine(isNoDataStrategyNotEmit, {
-    message: 'no_data_strategy "emit" is not currently supported.',
-    path: ['no_data_strategy'],
-  });
+  .refine(isNoDataStrategyNotEmit, rejectEmitNoDataStrategy);
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
 
@@ -522,7 +523,6 @@ export const IMMUTABLE_RULE_FIELDS = ['kind'] as const satisfies ReadonlyArray<
 export type ImmutableRuleField = (typeof IMMUTABLE_RULE_FIELDS)[number];
 
 /** Update rule API schema — all fields optional for partial updates */
-
 export const updateRuleDataSchema = z
   .object({
     metadata: metadataSchema
@@ -533,19 +533,23 @@ export const updateRuleDataSchema = z
     schedule: scheduleSchema.partial().optional().nullable(),
     query: querySchema.optional(),
     recovery_strategy: recoveryStrategySchema.optional().nullable(),
-    // `'emit'` is temporarily rejected (see `noDataStrategySchema`).
-    no_data_strategy: noDataStrategySchema
-      .refine((value) => value !== noDataStrategy.emit, {
-        message: 'no_data_strategy "emit" is not currently supported.',
-      })
-      .optional()
-      .nullable(),
+    no_data_strategy: noDataStrategySchema.optional().nullable(),
     state_transition: stateTransitionSchema.nullable(),
     grouping: groupingSchema.optional().nullable(),
     artifacts: z.array(artifactSchema).max(100).optional().nullable(),
     enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
-  .strip();
+  .strip()
+  .check((ctx) => {
+    if (ctx.value.no_data_strategy === noDataStrategy.emit) {
+      ctx.issues.push({
+        code: 'custom',
+        path: ['no_data_strategy'],
+        message: rejectEmitNoDataStrategy.message,
+        input: ctx.value.no_data_strategy,
+      });
+    }
+  });
 
 export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
 
