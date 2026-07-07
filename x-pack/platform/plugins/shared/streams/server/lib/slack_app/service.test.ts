@@ -257,7 +257,7 @@ describe('SlackAppService', () => {
         RELAY_APP_CONNECTION_SO_TYPE,
         expect.objectContaining({
           status: RELAY_APP_CONNECTION_STATUS.error,
-          apiKeyId: undefined,
+          apiKeyId: null,
           error: 'workspace already bound',
         }),
         { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
@@ -297,7 +297,7 @@ describe('SlackAppService', () => {
           claimId: 'claim-1',
         },
       });
-      fetchClaim.mockResolvedValue({ status: 'complete' });
+      fetchClaim.mockResolvedValue({ status: 'complete', tenant_key: 'tenant-1' });
 
       const result = await new SlackAppService(server).getStatus(request);
 
@@ -305,6 +305,7 @@ describe('SlackAppService', () => {
         RELAY_APP_CONNECTION_SO_TYPE,
         expect.objectContaining({
           status: RELAY_APP_CONNECTION_STATUS.connected,
+          tenantKey: 'tenant-1',
         }),
         { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
       );
@@ -366,7 +367,7 @@ describe('SlackAppService', () => {
         RELAY_APP_CONNECTION_SO_TYPE,
         expect.objectContaining({
           status: RELAY_APP_CONNECTION_STATUS.error,
-          apiKeyId: undefined,
+          apiKeyId: null,
           error: 'teardown incomplete: 1 workspace(s) failed and remain bound; retry to finish',
         }),
         { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }

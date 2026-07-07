@@ -30,7 +30,7 @@ const relayAppConnectionAttributesV1 = schema.object({
   ]),
   // Id of the managed ES API key minted for the Relay; kept so we can invalidate it
   // on disconnect. The secret itself is never stored (it is handed to the Relay).
-  apiKeyId: schema.maybe(schema.string()),
+  apiKeyId: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
   // Claim id issued at install start; required by the Relay's claim poll
   // (`parseClaimInstallInput` on relay main mandates `claim_id` in the body).
   claimId: schema.maybe(schema.string()),
@@ -38,7 +38,7 @@ const relayAppConnectionAttributesV1 = schema.object({
   // host future non-Slack app connections (GitHub, Teams, ...).
   surface: schema.maybe(schema.string()),
   // Relay-side tenant identifier for this binding.
-  tenantKey: schema.maybe(schema.string()),
+  tenantKey: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
   error: schema.maybe(schema.string()),
   createdBy: schema.maybe(schema.string()),
   createdAt: schema.maybe(schema.string()),

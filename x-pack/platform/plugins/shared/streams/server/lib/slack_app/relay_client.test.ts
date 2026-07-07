@@ -74,10 +74,17 @@ describe('RelayClient', () => {
   });
 
   it('maps a 200 claim response to complete', async () => {
-    fetchMock.mockResolvedValue({ ok: true, status: 200 });
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ tenant_key: 'tenant-1' }),
+    });
 
     const client = createClient();
-    await expect(client.fetchClaim('claim-1')).resolves.toEqual({ status: 'complete' });
+    await expect(client.fetchClaim('claim-1')).resolves.toEqual({
+      status: 'complete',
+      tenant_key: 'tenant-1',
+    });
   });
 
   it('throws on a non-ok response', async () => {

@@ -158,6 +158,7 @@ export class SlackAppService {
       status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
       apiKeyId: apiKeyResult.id,
       claimId: installResponse.claim_id,
+      tenantKey: null,
       surface: 'slack',
       createdBy: username,
       createdAt: now,
@@ -192,7 +193,7 @@ export class SlackAppService {
     await this.writeConnection(soClient, {
       ...connection,
       status: RELAY_APP_CONNECTION_STATUS.error,
-      apiKeyId: undefined,
+      apiKeyId: null,
       error: message,
       updatedAt: new Date().toISOString(),
     });
@@ -231,6 +232,7 @@ export class SlackAppService {
         if (claim.status === 'complete') {
           await this.writeConnection(soClient, {
             ...connection,
+            tenantKey: claim.tenant_key,
             status: RELAY_APP_CONNECTION_STATUS.connected,
             updatedAt: new Date().toISOString(),
           });
@@ -296,7 +298,7 @@ export class SlackAppService {
         await this.writeConnection(soClient, {
           ...connection,
           status: RELAY_APP_CONNECTION_STATUS.error,
-          apiKeyId: undefined,
+          apiKeyId: null,
           error: message,
           updatedAt: new Date().toISOString(),
         });

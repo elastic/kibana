@@ -50,7 +50,7 @@ export interface RelayInstallResponse {
   claim_id: string;
 }
 
-export type RelayClaimResponse = { status: 'pending' } | { status: 'complete' };
+export type RelayClaimResponse = { status: 'pending' } | { status: 'complete'; tenant_key: string };
 
 /**
  * Thin HTTP client for the Nightshift Relay service. Kibana -> Relay transport runs
@@ -121,7 +121,13 @@ export class RelayClient {
    */
   async fetchClaim(claimId: string): Promise<RelayClaimResponse> {
     const { response } = await this.post('/v1/slack/install/claim', { claim_id: claimId });
-    return { status: response.status === 202 ? 'pending' : 'complete' };
+
+    if (response.status === 202) {
+      return { status: 'pending' };
+    }
+
+    const claim = (await response.json()) as { tenant_key: string };
+    return { status: 'complete', tenant_key: claim.tenant_key };
   }
 
   /** Unbind on disconnect. Not yet implemented Relay-side; tracked as a follow-up. */
