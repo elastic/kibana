@@ -27,41 +27,42 @@ interface WorkflowMeta {
 
 const extractMeta = (yaml: string): WorkflowMeta => {
   const empty: WorkflowMeta = { triggerTypes: [], stepBaseTypes: [], tags: [], stepCount: 0 };
-  let parsed: Partial<WorkflowYaml> | undefined;
+  // Streaming/partial YAML can produce malformed nested structures that make
+  // `collectAllSteps` throw, so guard the whole extraction.
   try {
-    parsed = parse(yaml) as Partial<WorkflowYaml> | undefined;
+    const parsed = parse(yaml) as Partial<WorkflowYaml> | undefined;
+    if (!parsed || typeof parsed !== 'object') return empty;
+
+    const triggerTypes = Array.isArray(parsed.triggers)
+      ? parsed.triggers
+          .map((t) => (t && typeof t === 'object' ? (t as { type?: string }).type : undefined))
+          .filter((t): t is string => typeof t === 'string' && t.length > 0)
+      : [];
+
+    const stepBaseTypes: string[] = [];
+    const seenSteps = new Set<string>();
+    let stepCount = 0;
+    if (Array.isArray(parsed.steps)) {
+      const allSteps = collectAllSteps(parsed.steps as WorkflowYaml['steps']) as Step[];
+      stepCount = allSteps.length;
+      for (const step of allSteps) {
+        if (!step?.type) continue;
+        const base = getBaseConnectorType(step.type);
+        if (!seenSteps.has(base)) {
+          seenSteps.add(base);
+          stepBaseTypes.push(base);
+        }
+      }
+    }
+
+    const tags = Array.isArray(parsed.tags)
+      ? parsed.tags.filter((t): t is string => typeof t === 'string' && t.length > 0)
+      : [];
+
+    return { triggerTypes, stepBaseTypes, tags, stepCount };
   } catch {
     return empty;
   }
-  if (!parsed || typeof parsed !== 'object') return empty;
-
-  const triggerTypes = Array.isArray(parsed.triggers)
-    ? parsed.triggers
-        .map((t) => (t && typeof t === 'object' ? (t as { type?: string }).type : undefined))
-        .filter((t): t is string => typeof t === 'string' && t.length > 0)
-    : [];
-
-  const stepBaseTypes: string[] = [];
-  const seenSteps = new Set<string>();
-  let stepCount = 0;
-  if (Array.isArray(parsed.steps)) {
-    const allSteps = collectAllSteps(parsed.steps as WorkflowYaml['steps']) as Step[];
-    stepCount = allSteps.length;
-    for (const step of allSteps) {
-      if (!step?.type) continue;
-      const base = getBaseConnectorType(step.type);
-      if (!seenSteps.has(base)) {
-        seenSteps.add(base);
-        stepBaseTypes.push(base);
-      }
-    }
-  }
-
-  const tags = Array.isArray(parsed.tags)
-    ? parsed.tags.filter((t): t is string => typeof t === 'string' && t.length > 0)
-    : [];
-
-  return { triggerTypes, stepBaseTypes, tags, stepCount };
 };
 
 interface WorkflowInfoStripeProps {
