@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -202,11 +202,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
 
   const [isValidating, setIsValidating] = useState(false);
   const [applyErrors, setApplyErrors] = useState<TabValidationError[]>([]);
-
-  // Editing any block invalidates the last apply attempt's errors.
-  useEffect(() => {
-    setApplyErrors([]);
-  }, [query]);
+  const editingLocked = isReadOnly || isValidating;
 
   const handleApply = useCallback(async () => {
     if (!onApply) return;
@@ -265,7 +261,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
       onRecoveryBlockChange: (v: string) => updateQuery({ recover: v }),
       onAlertEditorMount,
       onRecoveryEditorMount,
-      readOnly: isReadOnly,
+      readOnly: editingLocked,
     };
   }, [
     tabs,
@@ -275,7 +271,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
     updateQuery,
     onAlertEditorMount,
     onRecoveryEditorMount,
-    isReadOnly,
+    editingLocked,
   ]);
 
   return (
@@ -295,7 +291,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
       <EuiFlyoutBody>
         <QuerySandbox
           query={activeQuery}
-          onQueryChange={isReadOnly ? undefined : handleQueryChange}
+          onQueryChange={editingLocked ? undefined : handleQueryChange}
           timeField={timeField}
           onTimeFieldChange={onTimeFieldChange}
           timeFieldOptions={timeFieldOptions}

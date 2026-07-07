@@ -197,18 +197,19 @@ describe('QuerySandbox', () => {
     expect(screen.getByText('Something went wrong')).toBeInTheDocument();
   });
 
-  it('hides a stale error and prompts to re-run once the query is edited after the run', () => {
+  it('keeps showing an error after the query is edited, until the next run', () => {
     mockExecutionResult = {
       ...defaultExecutionResult,
       hasRun: true,
       isError: true,
       error: 'Something went wrong',
-      // The executed query differs from the current query prop → stale.
+      // The executed query differs from the current query prop, matching Discover's
+      // behavior of leaving the error up until the user re-runs the query.
       lastExecutedQuery: 'FROM logs-* | STATS count() BY host.name (edited)',
     };
     renderSandbox();
-    expect(screen.queryByText('Query error')).not.toBeInTheDocument();
-    expect(screen.getByText('Run your query to see results')).toBeInTheDocument();
+    expect(screen.getByText('Query error')).toBeInTheDocument();
+    expect(screen.queryByText('Run your query to see results')).not.toBeInTheDocument();
   });
 
   it('shows "No results" when query returns empty rows', () => {

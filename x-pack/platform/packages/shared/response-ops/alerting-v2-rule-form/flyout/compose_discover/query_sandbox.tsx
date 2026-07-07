@@ -189,14 +189,6 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     tab: tabProps?.activeTab,
   });
 
-  /*
-   * A run's results/error only describe the query text that was executed. Once
-   * the user edits the query, that outcome is stale, so we fall back to the
-   * "Run your query" prompt rather than leaving a now-irrelevant error or grid
-   * on screen — matching how the Apply validation error clears on edit.
-   */
-  const isQueryRunCurrent = hasRun && query.trim() === lastExecutedQuery;
-
   const hasAutoRunRef = useRef(false);
 
   useEffect(() => {
@@ -412,7 +404,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         </>
       )}
 
-      {isQueryRunCurrent && !isLoading && !isError && (
+      {hasRun && !isLoading && !isError && (
         <EuiText size="xs" color="subdued">
           {i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.resultCountLabel', {
             defaultMessage: '{count, plural, one {# result} other {# results}}',
@@ -423,7 +415,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
 
       <EuiSpacer size="m" />
 
-      {!isQueryRunCurrent && !isLoading && (
+      {!isLoading && !hasRun && (
         <EuiEmptyPrompt
           iconType="playFilled"
           title={
@@ -449,7 +441,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         />
       )}
 
-      {isQueryRunCurrent && isLoading && (
+      {isLoading && (
         <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="l" />
@@ -457,7 +449,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         </EuiFlexGroup>
       )}
 
-      {isQueryRunCurrent && isError && (
+      {isError && (
         <EuiCallOut
           announceOnMount
           color="danger"
@@ -470,7 +462,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         </EuiCallOut>
       )}
 
-      {isQueryRunCurrent && !isLoading && !isError && rows.length === 0 && query.trim() && (
+      {hasRun && !isLoading && !isError && rows.length === 0 && query.trim() && (
         <EuiEmptyPrompt
           iconType="search"
           title={
@@ -492,7 +484,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         />
       )}
 
-      {isQueryRunCurrent && !isLoading && !isError && rows.length > 0 && (
+      {hasRun && !isLoading && !isError && rows.length > 0 && (
         <>
           <ComposeDiscoverChart
             query={lastExecutedQuery ?? query}
