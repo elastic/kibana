@@ -25,6 +25,7 @@ interface ESQLDataGridAccordionProps {
   dataGridAttrs: ESQLDataGridAttrs;
   query: AggregateQuery;
   isTableView: boolean;
+  isApproximate?: boolean;
   setIsAccordionOpen: (flag: boolean) => void;
   onAccordionToggleCb: (status: boolean) => void;
 }
@@ -34,6 +35,7 @@ export const ESQLDataGridAccordion = ({
   dataGridAttrs,
   query,
   isTableView,
+  isApproximate,
   setIsAccordionOpen,
   onAccordionToggleCb,
 }: ESQLDataGridAccordionProps) => {
@@ -102,6 +104,7 @@ export const ESQLDataGridAccordion = ({
               query={query}
               flyoutType="overlay"
               isTableView={isTableView}
+              isApproximate={isApproximate}
               initialRowHeight={0}
               controlColumnIds={['openDetails']}
             />
