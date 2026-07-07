@@ -849,7 +849,7 @@ export const getAlertAnalysisWorkflowSettings = (): SettingsConfig => ({
     type: 'string',
     category: [APP_ID],
     requiresPageReload: false,
-    schema: schema.string({ minLength: 1 }),
+    schema: schema.string({ minLength: 1, maxLength: 64 }),
     solutionViews: ['classic', 'security'],
     technicalPreview: true,
     readonly: true,
