@@ -793,7 +793,9 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
           );
 
           telemetryTracker.recordResultCount(enrichedResults.length);
-          return { results: [...enrichedResults, ...attachmentSideEffectResults, ...groundingResult] };
+          return {
+            results: [...enrichedResults, ...attachmentSideEffectResults, ...groundingResult],
+          };
         } catch (error) {
           logger.debug(
             `Error enriching entity results: ${
