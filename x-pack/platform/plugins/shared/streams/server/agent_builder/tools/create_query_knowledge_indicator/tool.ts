@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { platformStreamsSigEventsTools, ToolType } from '@kbn/agent-builder-common';
+import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
   BuiltinToolDefinition,
@@ -14,11 +14,8 @@ import type {
   ToolAvailabilityResult,
 } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import {
-  getStreamTypeFromDefinition,
-  type StreamType,
-  upsertStreamQueryRequestSchema,
-} from '@kbn/streams-schema';
+import { getStreamTypeFromDefinition, type StreamType } from '@kbn/streams-schema';
+import { upsertStreamQueryRequestSchema } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { StreamsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -27,7 +24,7 @@ import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { createQueryKnowledgeIndicatorToolHandler } from './handler';
 
 export const STREAMS_CREATE_QUERY_KNOWLEDGE_INDICATOR_TOOL_ID =
-  platformStreamsSigEventsTools.createQueryKnowledgeIndicator;
+  platformSignificantEventsTools.createQueryKnowledgeIndicator;
 
 const queryInputSchema = upsertStreamQueryRequestSchema.extend({
   id: z.string().optional(),
@@ -118,17 +115,20 @@ export function createQueryKnowledgeIndicatorTool({
       let streamType: StreamType | 'unknown' = 'unknown';
 
       try {
-        const { streamsClient, getKnowledgeIndicatorClient, licensing, uiSettingsClient } =
-          await getScopedClients({
-            request,
-          });
+        const scopedClients = await getScopedClients({
+          request,
+        });
 
-        await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+        await assertSignificantEventsAccess({
+          server,
+          licensing: scopedClients.licensing,
+          uiSettingsClient: scopedClients.uiSettingsClient,
+        });
 
-        const definition = await streamsClient.getStream(streamName);
+        const definition = await scopedClients.streamsClient.getStream(streamName);
         streamType = getStreamTypeFromDefinition(definition);
 
-        const kiClient = await getKnowledgeIndicatorClient();
+        const kiClient = await scopedClients.getKnowledgeIndicatorClient();
         const { id } = await createQueryKnowledgeIndicatorToolHandler({
           kiClient,
           definition,

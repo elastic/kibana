@@ -63,7 +63,10 @@ const mockFindByIds = jest.fn(async (ids: string[]) =>
 );
 
 const mockFindDashboardsService = jest.fn(async () => ({
-  search: jest.fn(async () => ({ total: 0, dashboards: [] })),
+  search: jest.fn(async () => ({
+    data: [],
+    meta: { page: 1, per_page: 100, total: 0 },
+  })),
   findById: jest.fn(),
   findByIds: mockFindByIds,
   findByTitle: jest.fn(),
@@ -338,6 +341,36 @@ describe('step validation', () => {
     });
   });
 
+  describe('notifications.render', () => {
+    const renderNotificationsStep = (ruleId?: string) =>
+      render(
+        <ComposeDiscoverForm
+          state={createState({ step: 3 })}
+          dispatch={jest.fn()}
+          services={{ ...createMockServices(), dashboard: mockDashboard }}
+          onRecoveryTypeChange={jest.fn()}
+          onKindChange={jest.fn()}
+          isEditing={ruleId !== undefined}
+          ruleId={ruleId}
+        />,
+        { wrapper: createComposeFormWrapper() }
+      );
+
+    it('renders the simple action policy section in create mode', async () => {
+      renderNotificationsStep();
+      await waitFor(() => {
+        expect(screen.getByText('Simple action policy')).toBeInTheDocument();
+      });
+    });
+
+    it('renders the simple action policy section in edit mode', async () => {
+      renderNotificationsStep('rule-1');
+      await waitFor(() => {
+        expect(screen.getByText('Simple action policy')).toBeInTheDocument();
+      });
+    });
+  });
+
   it('includes the correct steps based on isAlert', () => {
     expect(getSteps(false).steps.map((step) => step.id)).toEqual(['alertCondition', 'details']);
     expect(getSteps(true).steps.map((step) => step.id)).toEqual([
@@ -422,9 +455,15 @@ describe('shell shared fields', () => {
     expect(screen.getByTestId('composeDiscoverModeSelect')).toBeDisabled();
   });
 
-  it('enables ModeSelect in create mode when query is committed', () => {
-    renderShell({ step: 0, queryCommitted: true });
+  it('enables ModeSelect in create mode when query is committed and sandbox is closed', () => {
+    renderShell({ step: 0, queryCommitted: true, childOpen: false });
 
     expect(screen.getByTestId('composeDiscoverModeSelect')).not.toBeDisabled();
+  });
+
+  it('disables ModeSelect when sandbox is open', () => {
+    renderShell({ step: 0, queryCommitted: true, childOpen: true });
+
+    expect(screen.getByTestId('composeDiscoverModeSelect')).toBeDisabled();
   });
 });

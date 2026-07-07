@@ -65,6 +65,13 @@ export const FLYOUT_TAB_RELATED = i18n.translate(
   }
 );
 
+export const FLYOUT_TAB_TIMELINE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.tab.timeline',
+  {
+    defaultMessage: 'Timeline',
+  }
+);
+
 export const FLYOUT_TAB_METADATA = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.flyout.tab.metadata',
   {
@@ -338,27 +345,6 @@ export const RULE_OVERVIEW_VIEW_DETAILS = i18n.translate(
   }
 );
 
-export const RULE_OVERVIEW_KIND_SIGNAL = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.ruleOverview.kind.signal',
-  {
-    defaultMessage: 'Signal',
-  }
-);
-
-export const RULE_OVERVIEW_KIND_ALERTING = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.ruleOverview.kind.alerting',
-  {
-    defaultMessage: 'Alert',
-  }
-);
-
-export const RULE_OVERVIEW_KIND_TOOLTIP = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.ruleOverview.kind.tooltip',
-  {
-    defaultMessage: 'Mode can be changed in the rule edit form',
-  }
-);
-
 export const RULE_OVERVIEW_ENABLED = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.ruleOverview.enabled',
   {
@@ -393,3 +379,28 @@ export const RUNBOOK_SECTION_LOAD_ERROR = i18n.translate(
     defaultMessage: 'Could not load the runbook for this episode.',
   }
 );
+
+/** --- Trend chart section --- */
+export const TREND_CHART_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.trendChart.title',
+  {
+    defaultMessage: 'Trend',
+  }
+);
+
+export const TREND_CHART_LOAD_ERROR = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.trendChart.loadError',
+  {
+    defaultMessage: 'Unable to load the trend chart.',
+  }
+);
+
+export const getTrendChartThresholdComparatorLabel = (
+  metric: string,
+  comparator: string,
+  threshold: number
+): string =>
+  i18n.translate('xpack.alertingV2EpisodesUi.details.trendChart.thresholdComparatorLabel', {
+    defaultMessage: '{metric} {comparator} {threshold}',
+    values: { metric, comparator, threshold },
+  });
