@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import { useStore } from 'react-redux';
+import { useStore } from 'react-redux-v7';
 import { useHistory } from 'react-router-dom';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
