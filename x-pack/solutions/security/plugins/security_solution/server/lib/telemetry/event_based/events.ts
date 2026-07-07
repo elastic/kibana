@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { EventTypeOpts } from '@kbn/core/server';
+import type { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
 import type { CsvErrorCategory } from '../../entity_analytics/entity_resolution/csv_upload';
 import type {
@@ -746,9 +747,17 @@ export const ENTITY_HIGHLIGHTS_USAGE_EVENT: EventTypeOpts<{
 };
 
 export const ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT: EventTypeOpts<{
-  entitiesReturned: number;
-  entityTypes: string[];
+  actionType?: 'read' | 'mutation';
+  /**
+   * @deprecated Use `resultCount` instead. Retained in the schema so historical
+   * rows (written before the rename) can still be queried in BigQuery; no tool
+   * populates this field anymore — dashboards should `COALESCE(resultCount, entitiesReturned)`.
+   */
+  entitiesReturned?: number;
+  entityTypes?: string[];
   errorMessage?: string;
+  userConfirmationOutcome?: ConfirmationStatus;
+  resultCount?: number;
   spaceId: string;
   success: boolean;
   toolId: string;
@@ -761,6 +770,14 @@ export const ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT: EventTypeOpts<{
         description: 'ID of the agent tool being used (e.g. "security.get_entity")',
       },
     },
+    actionType: {
+      type: 'keyword',
+      _meta: {
+        optional: true,
+        description:
+          'Whether the tool call reads data or mutates state ("read" | "mutation"). Omitted for legacy events emitted before this field was introduced.',
+      },
+    },
     entityTypes: {
       type: 'array',
       items: {
@@ -770,13 +787,15 @@ export const ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT: EventTypeOpts<{
         },
       },
       _meta: {
-        description: 'Entity types the tool was called for (e.g. ["host", "user"])',
+        optional: true,
+        description:
+          'Entity types the tool was called for (e.g. ["host", "user"]). Not populated for tools that do not operate on a specific entity type (e.g. watchlist and lead tools).',
       },
     },
     spaceId: {
       type: 'keyword',
       _meta: {
-        description: 'Space where the highlight request originated (e.g. "default")',
+        description: 'Space where the tool invocation originated (e.g. "default")',
       },
     },
     success: {
@@ -788,7 +807,25 @@ export const ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT: EventTypeOpts<{
     entitiesReturned: {
       type: 'long',
       _meta: {
-        description: 'Number of entities returned by the tool',
+        optional: true,
+        description:
+          'Deprecated — use `resultCount` instead. Historical field populated by `get_entity` / `search_entities` before the rename; no tool populates it anymore. Kept in the schema so historical rows remain queryable.',
+      },
+    },
+    resultCount: {
+      type: 'long',
+      _meta: {
+        optional: true,
+        description:
+          'Number of items returned or affected by the tool (entities, watchlists, leads, entities added to a watchlist, …). Replaces `entitiesReturned` for tools whose result set is not "entities". Not populated for tools that do not return a countable result set (e.g. single-record mutations).',
+      },
+    },
+    userConfirmationOutcome: {
+      type: 'keyword',
+      _meta: {
+        optional: true,
+        description:
+          'For HITL-gated mutation tools: "accepted" or "rejected" once the user has responded to the confirmation prompt, or "unprompted" if the tool resolved to a final answer without asking. Omitted entirely for tools that do not require a HITL prompt.',
       },
     },
     errorMessage: {
