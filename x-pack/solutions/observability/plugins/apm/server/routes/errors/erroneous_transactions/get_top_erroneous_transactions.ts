@@ -14,6 +14,7 @@
 
 import { rangeQuery, kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
+import type { TopErroneousTransactionsResponse } from '@kbn/apm-api-shared';
 import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
@@ -127,16 +128,6 @@ async function getTopErroneousTransactions({
       }
     ) ?? []
   );
-}
-
-export interface TopErroneousTransactionsResponse {
-  topErroneousTransactions: Array<{
-    transactionName: string;
-    currentPeriodTimeseries: Array<{ x: number; y: number }>;
-    previousPeriodTimeseries: Array<{ x: number; y: number }>;
-    transactionType: string | undefined;
-    occurrences: number;
-  }>;
 }
 
 export async function getTopErroneousTransactionsPeriods({
