@@ -56,14 +56,31 @@ export function useRelayAppConnection(): UseRelayAppConnection {
     },
   });
 
-  const connectMutation = useMutation<SlackAppConnectResponse, Error>({
+  const connectMutation = useMutation<SlackAppConnectResponse, Error, Window | null>({
     mutationFn: () => http.post<SlackAppConnectResponse>(CONNECT_ROUTE),
-    onSuccess: (response) => {
-      // The Slack OAuth consent happens in the user's browser; open it in a new tab.
-      window.open(response.authorizeUrl, '_blank', 'noopener,noreferrer');
+    onSuccess: (response, authWindow) => {
+      // Navigate the tab opened synchronously on click (see `connect` below).
+      // Opening it here instead — after the request resolves — gets blocked by
+      // most browsers' popup blockers, since it's no longer within the click's
+      // user-activation window (Safari in particular blocks window.open() after
+      // almost any async gap).
+      if (authWindow && !authWindow.closed) {
+        authWindow.location.href = response.authorizeUrl;
+      } else if (!window.open(response.authorizeUrl, '_blank')) {
+        // The synchronous open was itself blocked, or the user closed that tab
+        // before the request resolved. Nothing more script can do here; let the
+        // user know why no tab appeared.
+        notifications.toasts.addWarning({
+          title: i18n.translate(
+            'xpack.streams.significantEventsDiscovery.settings.apps.connectPopupBlocked',
+            { defaultMessage: 'Allow pop-ups for Kibana and try connecting again' }
+          ),
+        });
+      }
       pollDeadlineRef.current = Date.now() + POLL_TIMEOUT_MS;
     },
-    onError: (error) => {
+    onError: (error, authWindow) => {
+      authWindow?.close();
       notifications.toasts.addError(error, {
         title: i18n.translate(
           'xpack.streams.significantEventsDiscovery.settings.apps.connectError',
@@ -103,7 +120,10 @@ export function useRelayAppConnection(): UseRelayAppConnection {
     error: statusQuery.data?.error,
     isMutating: connectMutation.isLoading || disconnectMutation.isLoading,
     connect: async () => {
-      await connectMutation.mutateAsync();
+      // Must happen synchronously, inside the click's user-activation window —
+      // see the comment in connectMutation.onSuccess above.
+      const authWindow = window.open('', '_blank');
+      await connectMutation.mutateAsync(authWindow);
     },
     disconnect: async () => {
       await disconnectMutation.mutateAsync();
