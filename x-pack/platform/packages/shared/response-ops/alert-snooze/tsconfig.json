@@ -24,6 +24,7 @@
     "@kbn/core-notifications-browser",
     "@kbn/core-http-browser-mocks",
     "@kbn/core-notifications-browser-mocks",
-    "@kbn/alerts-ui-shared"
+    "@kbn/alerts-ui-shared",
+    "@kbn/data-views-plugin"
   ]
 }

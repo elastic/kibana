@@ -29,8 +29,15 @@ import {
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import { RuleQueryInspector } from '@kbn/triggers-actions-ui-plugin/public';
-import { AlertSnoozePanelInline, useAlertSnooze } from '@kbn/response-ops-alert-snooze';
-import type { AlertSnoozePayload } from '@kbn/response-ops-alert-snooze';
+import {
+  AlertSnoozePanelInline,
+  useAlertSnooze,
+  useDataConditionTypes,
+} from '@kbn/response-ops-alert-snooze';
+import type {
+  AlertSnoozePayload,
+  UseDataConditionTypesParams,
+} from '@kbn/response-ops-alert-snooze';
 
 import { useKibana } from '../../../utils/kibana_react';
 import type { TopAlert } from '../../../typings/alerts';
@@ -53,6 +60,30 @@ export interface HeaderActionsProps extends AlertDetailsRuleFormFlyoutBaseProps 
   alertIndex?: string;
   alertStatus?: AlertStatus;
   onUntrackAlert: () => void;
+}
+
+/**
+ * Inline snooze form with its `field_change` dropdown wired to the alert index
+ * fields for the alert's rule type. Kept as a small component so the fields are
+ * only fetched when the snooze form is actually opened.
+ */
+function AlertSnoozeForm({
+  http,
+  ruleTypeIds,
+  onApply,
+  onBack,
+}: UseDataConditionTypesParams & {
+  onApply: (payload: AlertSnoozePayload) => void;
+  onBack: () => void;
+}) {
+  const dataConditionTypes = useDataConditionTypes({ http, ruleTypeIds });
+  return (
+    <AlertSnoozePanelInline
+      onApply={onApply}
+      onBack={onBack}
+      dataConditionTypes={dataConditionTypes}
+    />
+  );
 }
 
 export function HeaderActions({
@@ -235,7 +266,11 @@ export function HeaderActions({
           >
             {isAlertSnoozeFormOpen ? (
               <EuiContextMenuPanel>
-                <AlertSnoozePanelInline
+                <AlertSnoozeForm
+                  http={http}
+                  ruleTypeIds={
+                    alert?.fields[ALERT_RULE_TYPE_ID] ? [alert.fields[ALERT_RULE_TYPE_ID]] : []
+                  }
                   onApply={handleSnoozeAlertApply}
                   onBack={() => setIsAlertSnoozeFormOpen(false)}
                 />

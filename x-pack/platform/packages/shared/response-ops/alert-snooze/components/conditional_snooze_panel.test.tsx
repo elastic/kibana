@@ -6,14 +6,20 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { EuiFieldText } from '@elastic/eui';
+import { EuiFieldText, type EuiComboBoxOptionOption } from '@elastic/eui';
 import moment from 'moment';
 import { ConditionalSnoozePanel } from './conditional_snooze_panel';
 import { SNOOZE_DATE_DISPLAY_FORMAT } from './constants';
 import { DataConditionType, type DataConditionTypeDescriptor } from './types';
-import { fieldChangeDescriptor, severityEqualsDescriptor } from './built_in_data_conditions';
+import {
+  createFieldChangeDescriptor,
+  fieldChangeDescriptor,
+  severityChangeDescriptor,
+  severityEqualsDescriptor,
+} from './built_in_data_conditions';
 
 const MOCKED_NOW = '2026-03-09T19:05:00.000Z';
 
@@ -40,9 +46,31 @@ jest.mock('../utils/duration_validation', () => {
   };
 });
 
+// A `field_change` field dropdown pre-populated with a known set of options, so
+// tests can select a field without wiring up the fetching hook.
+const FIELD_OPTIONS: Array<EuiComboBoxOptionOption<string>> = [
+  { label: 'status', value: 'status' },
+  { label: 'a'.repeat(80), value: 'a'.repeat(80) },
+];
+const dataConditionTypesWithOptions: readonly DataConditionTypeDescriptor[] = [
+  createFieldChangeDescriptor({ options: FIELD_OPTIONS }),
+  severityChangeDescriptor,
+  severityEqualsDescriptor,
+];
+
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
 );
+
+/** Selects a value in a `field_change` condition's field combobox. */
+const selectFieldChangeField = async (id: string, value: string) => {
+  const user = userEvent.setup({ pointerEventsCheck: 0 });
+  const combo = within(await screen.findByTestId(`dataConditionField-${id}`)).getByTestId(
+    'comboBoxSearchInput'
+  );
+  await user.click(combo);
+  await user.click(await screen.findByText(value));
+};
 
 describe('ConditionalSnoozePanel', () => {
   const onScheduleChangeMock = jest.fn();
@@ -185,13 +213,17 @@ describe('ConditionalSnoozePanel', () => {
     });
 
     it('truncates very long field names in the preview sentence', async () => {
-      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
+      render(
+        <ConditionalSnoozePanel
+          onScheduleChange={onScheduleChangeMock}
+          dataConditionTypes={dataConditionTypesWithOptions}
+        />,
+        { wrapper }
+      );
 
       const longField = 'a'.repeat(80);
       fireEvent.click(await screen.findByTestId('addDataCondition'));
-      fireEvent.change(await screen.findByTestId(`dataConditionField-dc-1`), {
-        target: { value: longField },
-      });
+      await selectFieldChangeField('dc-1', longField);
       fireEvent.click(await screen.findByTestId(`confirmDataCondition-dc-1`));
 
       const previewEl = await screen.findByTestId('conditionsPreviewText');
@@ -269,7 +301,13 @@ describe('ConditionalSnoozePanel', () => {
     });
 
     it('shows preview text combining multiple confirmed conditions with ANY', async () => {
-      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
+      render(
+        <ConditionalSnoozePanel
+          onScheduleChange={onScheduleChangeMock}
+          dataConditionTypes={dataConditionTypesWithOptions}
+        />,
+        { wrapper }
+      );
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
       fireEvent.change(await screen.findByTestId(`dataConditionType-dc-1`), {
@@ -278,9 +316,7 @@ describe('ConditionalSnoozePanel', () => {
       fireEvent.click(await screen.findByTestId(`confirmDataCondition-dc-1`));
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
-      fireEvent.change(await screen.findByTestId(`dataConditionField-dc-2`), {
-        target: { value: 'status' },
-      });
+      await selectFieldChangeField('dc-2', 'status');
       fireEvent.click(await screen.findByTestId(`confirmDataCondition-dc-2`));
 
       expect(await screen.findByTestId('conditionsPreviewText')).toHaveTextContent(
@@ -289,7 +325,13 @@ describe('ConditionalSnoozePanel', () => {
     });
 
     it('updates preview text to ALL when separator is toggled', async () => {
-      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
+      render(
+        <ConditionalSnoozePanel
+          onScheduleChange={onScheduleChangeMock}
+          dataConditionTypes={dataConditionTypesWithOptions}
+        />,
+        { wrapper }
+      );
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
       fireEvent.change(await screen.findByTestId(`dataConditionType-dc-1`), {
@@ -298,9 +340,7 @@ describe('ConditionalSnoozePanel', () => {
       fireEvent.click(await screen.findByTestId(`confirmDataCondition-dc-1`));
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
-      fireEvent.change(await screen.findByTestId(`dataConditionField-dc-2`), {
-        target: { value: 'status' },
-      });
+      await selectFieldChangeField('dc-2', 'status');
       fireEvent.click(await screen.findByTestId(`confirmDataCondition-dc-2`));
 
       fireEvent.click(await screen.findByTestId('logicalOperator'));
@@ -311,7 +351,13 @@ describe('ConditionalSnoozePanel', () => {
     });
 
     it('reports schedule with conditionOperator all when ALL separator is used', async () => {
-      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
+      render(
+        <ConditionalSnoozePanel
+          onScheduleChange={onScheduleChangeMock}
+          dataConditionTypes={dataConditionTypesWithOptions}
+        />,
+        { wrapper }
+      );
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
       fireEvent.change(await screen.findByTestId(`dataConditionType-dc-1`), {
@@ -320,9 +366,7 @@ describe('ConditionalSnoozePanel', () => {
       fireEvent.click(await screen.findByTestId(`confirmDataCondition-dc-1`));
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
-      fireEvent.change(await screen.findByTestId(`dataConditionField-dc-2`), {
-        target: { value: 'status' },
-      });
+      await selectFieldChangeField('dc-2', 'status');
       fireEvent.click(await screen.findByTestId(`confirmDataCondition-dc-2`));
 
       fireEvent.click(await screen.findByTestId('logicalOperator'));

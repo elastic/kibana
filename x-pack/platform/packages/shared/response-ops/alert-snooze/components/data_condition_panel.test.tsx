@@ -56,7 +56,7 @@ describe('DataConditionPanel', () => {
     expect(screen.getByTestId('confirmDataCondition-dc-1').closest('button')?.disabled).toBe(true);
   });
 
-  it('calls onChange with entry updates from the form fields', () => {
+  it('calls onChange with entry updates from the type dropdown', () => {
     render(<DataConditionPanel entry={createEntry()} onChange={onChangeMock} />, { wrapper });
 
     fireEvent.change(screen.getByTestId('dataConditionType-dc-1'), {
@@ -65,15 +65,6 @@ describe('DataConditionPanel', () => {
     expect(onChangeMock).toHaveBeenLastCalledWith(
       createEntry({
         type: DataConditionType.SEVERITY_EQUALS,
-      })
-    );
-
-    fireEvent.change(screen.getByTestId('dataConditionField-dc-1'), {
-      target: { value: 'severity' },
-    });
-    expect(onChangeMock).toHaveBeenLastCalledWith(
-      createEntry({
-        field: 'severity',
       })
     );
   });

@@ -6,13 +6,20 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSelect,
+  type EuiComboBoxOptionOption,
+} from '@elastic/eui';
 import { ALERT_SEVERITY_VALUES } from '@kbn/rule-data-utils';
 import {
   DataConditionType,
   type AlertSeverityLevel,
   type DataConditionTypeDescriptor,
 } from './types';
+import { FieldChangeFieldSelector } from './field_change_field_selector';
 import { truncateMiddle } from '../utils/truncate';
 import * as i18n from './translations';
 
@@ -45,24 +52,35 @@ const SEVERITY_OPTIONS = ALERT_SEVERITY_VALUES.map((value) => ({
   text: SEVERITY_LABELS[value],
 }));
 
+export interface CreateFieldChangeDescriptorParams {
+  /** Leaf-level scalar alert fields offered in the field dropdown. */
+  options?: Array<EuiComboBoxOptionOption<string>>;
+  isLoading?: boolean;
+}
+
 /**
- * Built-in descriptor: matches when an alert's value for a user-supplied
- * field changes from one ingest to the next. Always available and not a
- * singleton — users can stack several `field_change` rows for different
- * fields.
+ * Builds the built-in `field_change` descriptor: matches when an alert's value
+ * for a user-selected field changes from one ingest to the next. Always
+ * available and not a singleton — users can stack several `field_change` rows
+ * for different fields.
+ *
+ * Field options are injected here. Callers that have fetched options — via
+ * `useFieldChangeDescriptor`/`useDataConditionTypes` —
+ * pass them in.
  */
-export const fieldChangeDescriptor: DataConditionTypeDescriptor = {
+export const createFieldChangeDescriptor = ({
+  options = [],
+  isLoading = false,
+}: CreateFieldChangeDescriptorParams = {}): DataConditionTypeDescriptor => ({
   id: DataConditionType.FIELD_CHANGE,
   label: i18n.CONDITION_TYPE_FIELD_CHANGE,
   isComplete: (entry) => !!entry.field,
   renderInput: (entry, onChange) => (
-    <EuiFieldText
-      value={entry.field}
-      onChange={(e) => onChange({ ...entry, field: e.target.value })}
-      placeholder={i18n.FIELD_NAME_PLACEHOLDER}
-      aria-label={i18n.CONDITION_VALUE_ARIA_LABEL}
-      data-test-subj={`dataConditionField-${entry.id}`}
-      compressed
+    <FieldChangeFieldSelector
+      entry={entry}
+      onChange={onChange}
+      options={options}
+      isLoading={isLoading}
     />
   ),
   renderConfirmedSummary: (entry) => (
@@ -75,7 +93,9 @@ export const fieldChangeDescriptor: DataConditionTypeDescriptor = {
     type: DataConditionType.FIELD_CHANGE,
     field: entry.field,
   }),
-};
+});
+
+export const fieldChangeDescriptor: DataConditionTypeDescriptor = createFieldChangeDescriptor();
 
 /**
  * Built-in descriptor: matches when an alert's severity changes (any

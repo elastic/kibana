@@ -32,6 +32,7 @@ jest.mock('../hooks/use_alert_snooze_state');
 
 jest.mock('@kbn/response-ops-alert-snooze', () => ({
   useAlertSnooze: jest.fn(),
+  useDataConditionTypes: () => [],
   AlertSnoozePanelInline: jest.fn(({ onApply, onBack }) => (
     <div data-test-subj="alertSnoozePanelInlineMock">
       <button

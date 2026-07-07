@@ -53,10 +53,25 @@ export type { UseAlertSnoozeParams, UseAlertSnoozeResult } from './hooks/use_ale
 
 export {
   DEFAULT_DATA_CONDITION_TYPES,
+  createFieldChangeDescriptor,
   fieldChangeDescriptor,
   severityChangeDescriptor,
   severityEqualsDescriptor,
 } from './components/built_in_data_conditions';
+export type { CreateFieldChangeDescriptorParams } from './components/built_in_data_conditions';
+
+export { FieldChangeFieldSelector } from './components/field_change_field_selector';
+export type { FieldChangeFieldSelectorProps } from './components/field_change_field_selector';
+
+export { useDataConditionTypes, useFieldChangeDescriptor } from './hooks/use_data_condition_types';
+export type { UseDataConditionTypesParams } from './hooks/use_data_condition_types';
+
+export { useAlertFieldOptions } from './hooks/use_alert_field_options';
+export type {
+  UseAlertFieldOptionsParams,
+  UseAlertFieldOptionsResult,
+} from './hooks/use_alert_field_options';
+export { toLeafScalarFieldOptions } from './utils/alert_field_options';
 export { DataConditionType } from './components/types';
 export type {
   AlertSeverityLevel,
