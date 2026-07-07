@@ -218,6 +218,9 @@ apiTest.describe(
       const callbackPayload = callbackRequest.body as ChatCallbackFailurePayload;
       expect(callbackPayload.execution_id).toBe(accepted.execution_id);
       expect(callbackPayload.status).toBe(ExecutionStatus.aborted);
+      expect(callbackPayload.error?.code).toBe(AgentBuilderErrorCode.requestAborted);
+      expect(typeof callbackPayload.error?.message).toBe('string');
+      expect(callbackPayload.error?.message.length).toBeGreaterThan(0);
     });
 
     apiTest('continues conversation for repeated Slack source', async ({ apiClient }) => {
