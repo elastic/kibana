@@ -21,8 +21,8 @@ import { getFieldTypeName } from '@kbn/field-utils';
 import {
   FLYOUT_TABLE_FIELD_NAME_CELL_ICON_TEST_ID,
   FLYOUT_TABLE_FIELD_NAME_CELL_TEXT_TEST_ID,
-} from './test_ids';
-import { getExampleText } from '../../../../common/components/event_details/helpers';
+} from '../../../flyout/document_details/right/components/test_ids';
+import { getExampleText } from '../../../common/components/event_details/helpers';
 
 export const getEcsField = (
   field: string

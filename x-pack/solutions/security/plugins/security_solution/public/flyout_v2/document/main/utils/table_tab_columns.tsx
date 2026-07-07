@@ -9,12 +9,14 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiText, EuiToolTip, type EuiBasicTableColumn } from '@elastic/eui';
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldFromBrowserField } from '../tabs/table_tab';
-import { TableFieldNameCell } from '../components/table_field_name_cell';
-import { TableFieldValueCell } from '../components/table_field_value_cell';
+import { TableFieldNameCell } from '../../../shared/components/table_field_name_cell';
+import { TableFieldValueCell } from '../../../shared/components/table_field_value_cell';
 import type { EventFieldsData } from '../../../../common/components/event_details/types';
-import { CellActions } from '../../shared/components/cell_actions';
-import { FLYOUT_TABLE_PIN_ACTION_TEST_ID } from '../components/test_ids';
+import type { CellActionRenderer } from '../../../shared/components/cell_actions';
+import type { OpenFlyoutLinkRenderer } from '../../../shared/components/open_flyout_link';
+import { FLYOUT_TABLE_PIN_ACTION_TEST_ID } from '../../../../flyout/document_details/right/components/test_ids';
 
 export const FIELD = i18n.translate('xpack.securitySolution.flyout.table.fieldCellLabel', {
   defaultMessage: 'Field',
@@ -64,6 +66,21 @@ export type ColumnsProvider = (providerOptions: {
    * Resolved entity store id for host/user preview links for this document
    */
   entityId?: string;
+  /**
+   * Wraps each value cell with cell actions (filter for/out, copy, etc.). The caller decides
+   * what to inject (real security cell actions in Security Solution, no-op elsewhere).
+   */
+  renderCellActions: CellActionRenderer;
+  /**
+   * The source document record, forwarded to the flyout link for entity resolution (new flyout).
+   */
+  hit: DataTableRecord;
+  /**
+   * Optional wrapper that renders a preview link for supported field types (host, ip, rule).
+   * Injected by the caller: the new flyout passes `OpenFlyoutLink`, the legacy flyout omits it
+   * so the value cell keeps using the expandable-flyout `PreviewLink`.
+   */
+  renderFlyoutLink?: OpenFlyoutLinkRenderer;
 }) => Array<EuiBasicTableColumn<TimelineEventsDetailsItem>>;
 
 /**
@@ -78,6 +95,9 @@ export const getTableTabColumns: ColumnsProvider = ({
   isRulePreview,
   onTogglePinned,
   entityId,
+  renderCellActions,
+  hit,
+  renderFlyoutLink,
 }) => [
   {
     name: ' ',
@@ -122,8 +142,11 @@ export const getTableTabColumns: ColumnsProvider = ({
     ),
     render: (values, data) => {
       const fieldFromBrowserField = getFieldFromBrowserField(data.field, browserFields);
-      return (
-        <CellActions field={data.field} value={values} isObjectArray={data.isObjectArray}>
+      return renderCellActions({
+        field: data.field,
+        value: values,
+        scopeId,
+        children: (
           <TableFieldValueCell
             scopeId={scopeId}
             data={data as EventFieldsData}
@@ -134,9 +157,11 @@ export const getTableTabColumns: ColumnsProvider = ({
             isRulePreview={isRulePreview}
             values={values}
             entityId={entityId}
+            hit={hit}
+            renderFlyoutLink={renderFlyoutLink}
           />
-        </CellActions>
-      );
+        ),
+      });
     },
   },
 ];
