@@ -35,9 +35,96 @@ interface RegionZoneListProps {
   onToggleExpand: (zoneId: string, isOpen: boolean) => void;
 }
 
+interface RegionZoneItemProps {
+  zone: ZoneGroup;
+  checkedKeys: Set<string>;
+  expandedZones: Set<string>;
+  onToggleRegion: (key: string) => void;
+  onToggleZone: (zone: ZoneGroup) => void;
+  onToggleExpand: (zoneId: string, isOpen: boolean) => void;
+}
+
 const zoneCheckboxStyles = ({ euiTheme }: UseEuiTheme) => ({
   marginTop: euiTheme.size.xs,
 });
+
+const RegionZoneItem: React.FC<RegionZoneItemProps> = ({
+  zone,
+  checkedKeys,
+  expandedZones,
+  onToggleRegion,
+  onToggleZone,
+  onToggleExpand,
+}) => {
+  const zoneKeys = zone.regions.map(regionKey);
+  const checkedCount = zoneKeys.filter((k) => checkedKeys.has(k)).length;
+  const isZoneChecked = checkedCount === zone.regions.length;
+  const isZoneIndeterminate = checkedCount > 0 && checkedCount < zone.regions.length;
+
+  const extraAction = (
+    <EuiText size="s" color="subdued">
+      {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.zoneCount', {
+        defaultMessage: '{checked} of {total, plural, one {# region} other {# regions}}',
+        values: { checked: checkedCount, total: zone.regions.length },
+      })}
+    </EuiText>
+  );
+
+  return (
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      paddingSize="s"
+      data-test-subj={`manageRegionsZone-${zone.geo}`}
+    >
+      <EuiFlexGroup alignItems="flexStart" gutterSize="s">
+        <EuiFlexItem grow={false} css={zoneCheckboxStyles}>
+          <EuiCheckbox
+            id={`zone-checkbox-${zone.geo}`}
+            checked={isZoneChecked}
+            indeterminate={isZoneIndeterminate}
+            onChange={() => onToggleZone(zone)}
+            label=""
+            aria-label={i18n.translate(
+              'xpack.searchInferenceEndpoints.manageRegions.zoneCheckboxAriaLabel',
+              {
+                defaultMessage: 'Toggle all regions in {zone}',
+                values: { zone: zone.displayName },
+              }
+            )}
+            data-test-subj={`manageRegionsZoneCheckbox-${zone.geo}`}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <EuiAccordion
+            id={`zone-accordion-${zone.geo}`}
+            arrowDisplay="right"
+            buttonContent={<strong>{zone.displayName}</strong>}
+            buttonProps={{ 'data-test-subj': `manageRegionsZoneToggle-${zone.geo}` }}
+            extraAction={extraAction}
+            forceState={expandedZones.has(zone.geo) ? 'open' : 'closed'}
+            onToggle={(isOpen) => onToggleExpand(zone.geo, isOpen)}
+            paddingSize="s"
+          >
+            {zone.regions.map((r) => {
+              const key = regionKey(r);
+              return (
+                <EuiCheckbox
+                  key={key}
+                  id={`region-${key}`}
+                  label={REGION_DISPLAY_NAMES[key] ?? r.region}
+                  checked={checkedKeys.has(key)}
+                  onChange={() => onToggleRegion(key)}
+                  data-test-subj={`manageRegionsCheckbox-${key}`}
+                />
+              );
+            })}
+          </EuiAccordion>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
 
 export const RegionZoneList: React.FC<RegionZoneListProps> = ({
   zoneGroups,
@@ -49,77 +136,17 @@ export const RegionZoneList: React.FC<RegionZoneListProps> = ({
 }) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      {zoneGroups.map((zone) => {
-        const zoneKeys = zone.regions.map(regionKey);
-        const checkedCount = zoneKeys.filter((k) => checkedKeys.has(k)).length;
-        const isZoneChecked = checkedCount === zone.regions.length;
-        const isZoneIndeterminate = checkedCount > 0 && checkedCount < zone.regions.length;
-
-        const extraAction = (
-          <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.zoneCount', {
-              defaultMessage: '{checked} of {total, plural, one {# region} other {# regions}}',
-              values: { checked: checkedCount, total: zone.regions.length },
-            })}
-          </EuiText>
-        );
-
-        return (
-          <EuiPanel
-            key={zone.geo}
-            hasBorder
-            hasShadow={false}
-            paddingSize="s"
-            data-test-subj={`manageRegionsZone-${zone.geo}`}
-          >
-            <EuiFlexGroup alignItems="flexStart" gutterSize="s">
-              <EuiFlexItem grow={false} css={zoneCheckboxStyles}>
-                <EuiCheckbox
-                  id={`zone-checkbox-${zone.geo}`}
-                  checked={isZoneChecked}
-                  indeterminate={isZoneIndeterminate}
-                  onChange={() => onToggleZone(zone)}
-                  label=""
-                  aria-label={i18n.translate(
-                    'xpack.searchInferenceEndpoints.manageRegions.zoneCheckboxAriaLabel',
-                    {
-                      defaultMessage: 'Toggle all regions in {zone}',
-                      values: { zone: zone.displayName },
-                    }
-                  )}
-                  data-test-subj={`manageRegionsZoneCheckbox-${zone.geo}`}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={1}>
-                <EuiAccordion
-                  id={`zone-accordion-${zone.geo}`}
-                  arrowDisplay="right"
-                  buttonContent={<strong>{zone.displayName}</strong>}
-                  buttonProps={{ 'data-test-subj': `manageRegionsZoneToggle-${zone.geo}` }}
-                  extraAction={extraAction}
-                  forceState={expandedZones.has(zone.geo) ? 'open' : 'closed'}
-                  onToggle={(isOpen) => onToggleExpand(zone.geo, isOpen)}
-                  paddingSize="s"
-                >
-                  {zone.regions.map((r) => {
-                    const key = regionKey(r);
-                    return (
-                      <EuiCheckbox
-                        key={key}
-                        id={`region-${key}`}
-                        label={REGION_DISPLAY_NAMES[key] ?? r.region}
-                        checked={checkedKeys.has(key)}
-                        onChange={() => onToggleRegion(key)}
-                        data-test-subj={`manageRegionsCheckbox-${key}`}
-                      />
-                    );
-                  })}
-                </EuiAccordion>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        );
-      })}
+      {zoneGroups.map((zone) => (
+        <RegionZoneItem
+          key={zone.geo}
+          zone={zone}
+          checkedKeys={checkedKeys}
+          expandedZones={expandedZones}
+          onToggleRegion={onToggleRegion}
+          onToggleZone={onToggleZone}
+          onToggleExpand={onToggleExpand}
+        />
+      ))}
     </EuiFlexGroup>
   );
 };
