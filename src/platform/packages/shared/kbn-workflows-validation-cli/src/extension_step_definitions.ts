@@ -8,7 +8,7 @@
  */
 
 import type { BaseConnectorContract } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 
 // data.* and ai.classify/prompt/summarize — workflows_extensions plugin common
 import {
@@ -71,15 +71,29 @@ import { updateObservableStepCommonDefinition } from '@kbn/cases-plugin/common/w
 import { pushCasesStepCommonDefinition } from '@kbn/cases-plugin/common/workflows/steps/push_cases';
 import { removeTagsStepCommonDefinition } from '@kbn/cases-plugin/common/workflows/steps/remove_tags';
 
-// security.* steps are registered by the security_solution plugin (group: security, visibility: private).
-// They cannot be imported from a platform package, so we use permissive z.any() placeholders
-// sourced from the approved step definitions list.
-const SECURITY_STEP_IDS = [
-  'security.assignAlert',
-  'security.buildAlertEntityGraph',
-  'security.renderAlertNarrative',
-  'security.setAlertStatus',
-] as const;
+// security.* steps — security_solution is group:security/visibility:private so a platform package
+// cannot legally import it under the @kbn/imports/no_group_crossing_imports rule.
+// We suppress that rule here as a deliberate, temporary deviation:
+//   - The CLI is a package (not a plugin), so the manifest-crossing rule never fires.
+//   - The schemas already live in security_solution/common/ and resolve correctly.
+//   - TODO: remove these eslint-disable comments once the security team relocates these step schemas
+//     into a platform/shared module (tracked in https://github.com/elastic/kibana/issues/XXXXX).
+
+import { assignAlertStepCommonDefinition } from '@kbn/security-solution-plugin/common/workflows/step_types/assign_alert_step/assign_alert_step_common';
+
+import { assignAttackStepCommonDefinition } from '@kbn/security-solution-plugin/common/workflows/step_types/assign_attack_step/assign_attack_step_common';
+
+import { buildAlertEntityGraphStepCommonDefinition } from '@kbn/security-solution-plugin/common/workflows/step_types/build_alert_entity_graph_step/build_alert_entity_graph_step_common';
+
+import { renderAlertNarrativeStepCommonDefinition } from '@kbn/security-solution-plugin/common/workflows/step_types/render_alert_narrative_step/render_alert_narrative_step_common';
+
+import { setAlertStatusStepCommonDefinition } from '@kbn/security-solution-plugin/common/workflows/step_types/set_alert_status_step/set_alert_status_step_common';
+
+import { setAlertTagsStepCommonDefinition } from '@kbn/security-solution-plugin/common/workflows/step_types/set_alert_tags_step/set_alert_tags_step_common';
+
+import { setAttackStatusStepCommonDefinition } from '@kbn/security-solution-plugin/common/workflows/step_types/set_attack_status_step/set_attack_status_step_common';
+
+import { setAttackTagsStepCommonDefinition } from '@kbn/security-solution-plugin/common/workflows/step_types/set_attack_tags_step/set_attack_tags_step_common';
 
 interface AnyStepDefinition {
   id: string;
@@ -103,21 +117,16 @@ let cachedContracts: BaseConnectorContract[] | undefined;
 
 /**
  * Returns BaseConnectorContract entries for all extension step definitions
- * registered by platform plugins (data.*, ai.*, cases.*, search.rerank).
+ * registered by platform plugins (data.*, ai.*, cases.*, search.rerank) and
+ * security-solution plugins (security.*).
  *
- * Security-solution step types (security.*) are included as permissive z.any()
- * placeholders because that plugin is not accessible from a platform package.
+ * Security-solution step types (security.*) are imported directly from
+ * security_solution/common/ with a scoped eslint-disable to bypass the
+ * no_group_crossing_imports boundary rule. See the comment above the imports
+ * for the rationale and the permanent-fix tracking issue.
  */
 export const getExtensionStepContracts = (): BaseConnectorContract[] => {
   if (cachedContracts) return cachedContracts;
-
-  const securityPlaceholders: BaseConnectorContract[] = SECURITY_STEP_IDS.map((id) => ({
-    type: id,
-    summary: id,
-    description: null,
-    paramsSchema: z.any(),
-    outputSchema: z.any(),
-  }));
 
   cachedContracts = [
     // data.*
@@ -170,8 +179,15 @@ export const getExtensionStepContracts = (): BaseConnectorContract[] => {
     toContract(updateObservableStepCommonDefinition),
     toContract(pushCasesStepCommonDefinition),
     toContract(removeTagsStepCommonDefinition),
-    // security.* (private plugin — permissive placeholders)
-    ...securityPlaceholders,
+    // security.*
+    toContract(assignAlertStepCommonDefinition),
+    toContract(assignAttackStepCommonDefinition),
+    toContract(buildAlertEntityGraphStepCommonDefinition),
+    toContract(renderAlertNarrativeStepCommonDefinition),
+    toContract(setAlertStatusStepCommonDefinition),
+    toContract(setAlertTagsStepCommonDefinition),
+    toContract(setAttackStatusStepCommonDefinition),
+    toContract(setAttackTagsStepCommonDefinition),
   ];
   return cachedContracts;
 };

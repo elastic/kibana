@@ -11,16 +11,26 @@ import type { z } from '@kbn/zod/v4';
 import { generateYamlSchemaFromConnectors, getAllStaticConnectors } from '@kbn/workflows';
 import { getExtensionStepContracts } from './extension_step_definitions';
 
-let cachedSchema: z.ZodType | undefined;
+let cachedLooseSchema: z.ZodType | undefined;
+let cachedStrictSchema: z.ZodType | undefined;
 
-export const buildWorkflowSchema = (): z.ZodType => {
-  if (cachedSchema) return cachedSchema;
+const buildConnectors = () => [...getAllStaticConnectors(), ...getExtensionStepContracts()];
+
+/**
+ * Builds (and caches) the workflow validation Zod schema.
+ *
+ * @param strict When false (default) the schema uses passthrough mode — unknown
+ *   top-level keys (e.g. `template-metadata`) are silently accepted. When true,
+ *   the schema rejects any key that is not explicitly defined.
+ */
+export const buildWorkflowSchema = ({ strict = false }: { strict?: boolean } = {}): z.ZodType => {
+  if (strict) {
+    if (cachedStrictSchema) return cachedStrictSchema;
+    cachedStrictSchema = generateYamlSchemaFromConnectors(buildConnectors(), [], false);
+    return cachedStrictSchema;
+  }
+  if (cachedLooseSchema) return cachedLooseSchema;
   // loose=true: passthrough schema tolerates unknown top-level keys (e.g. template-metadata).
-  const loose = true;
-  cachedSchema = generateYamlSchemaFromConnectors(
-    [...getAllStaticConnectors(), ...getExtensionStepContracts()],
-    [],
-    loose
-  );
-  return cachedSchema;
+  cachedLooseSchema = generateYamlSchemaFromConnectors(buildConnectors(), [], true);
+  return cachedLooseSchema;
 };

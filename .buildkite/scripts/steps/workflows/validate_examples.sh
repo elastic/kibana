@@ -9,7 +9,7 @@ JUNIT_OUT="$KIBANA_DIR/target/workflow-examples-junit.xml"
 
 # Keep this list in sync with the imports in
 # src/platform/packages/shared/kbn-workflows-validation-cli/src/extension_step_definitions.ts
-WORKFLOW_SCHEMA_PATH_PATTERN='^(src/platform/packages/shared/kbn-workflows/|src/platform/packages/shared/kbn-workflows-validation-cli/|src/platform/packages/shared/kbn-workflows-yaml/|src/platform/plugins/shared/workflows_management/|src/platform/plugins/shared/workflows_extensions/|x-pack/platform/plugins/shared/agent_builder/|x-pack/platform/plugins/shared/inference_workflows/|x-pack/platform/plugins/shared/agent_context_layer/|x-pack/platform/plugins/shared/cases/|\.buildkite/scripts/steps/workflows/)'
+WORKFLOW_SCHEMA_PATH_PATTERN='^(src/platform/packages/shared/kbn-workflows/|src/platform/packages/shared/kbn-workflows-validation-cli/|src/platform/packages/shared/kbn-workflows-yaml/|src/platform/plugins/shared/workflows_management/|src/platform/plugins/shared/workflows_extensions/|x-pack/platform/plugins/shared/agent_builder/|x-pack/platform/plugins/shared/inference_workflows/|x-pack/platform/plugins/shared/agent_context_layer/|x-pack/platform/plugins/shared/cases/|x-pack/solutions/security/plugins/security_solution/common/workflows/|\.buildkite/scripts/steps/workflows/)'
 
 report_main_step () {
   echo "--- $1"

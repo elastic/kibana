@@ -31,6 +31,7 @@ export function runValidateExamplesCli(): void {
       const junitOutFlag = flagsReader.string('junit-out');
       const templateFlag = flagsReader.boolean('template');
       const plainFlag = flagsReader.boolean('plain');
+      const strictFlag = flagsReader.boolean('strict');
 
       if (templateFlag && plainFlag) {
         throw createFailError('--template and --plain are mutually exclusive.');
@@ -38,7 +39,7 @@ export function runValidateExamplesCli(): void {
 
       const mode = templateFlag ? 'template' : plainFlag ? 'plain' : 'auto';
 
-      const summary = await runValidation({ rootDir, log, mode });
+      const summary = await runValidation({ rootDir, log, mode, strict: strictFlag });
 
       if (junitOutFlag) {
         const junitPath = Path.resolve(junitOutFlag);
@@ -61,10 +62,10 @@ export function runValidateExamplesCli(): void {
       description:
         'Validate workflow YAML examples (from elastic/workflows or any directory) against the Kibana workflow schema.',
       usage:
-        'node scripts/validate_workflow_examples --dir <path> [--template|--plain] [--junit-out <path>]',
+        'node scripts/validate_workflow_examples --dir <path> [--template|--plain] [--strict] [--junit-out <path>]',
       flags: {
         string: ['dir', 'junit-out'],
-        boolean: ['template', 'plain'],
+        boolean: ['template', 'plain', 'strict'],
         help: `
           --dir            (required) Directory containing workflow YAML examples (.yml/.yaml).
                             The directory is walked recursively; dotfiles and hidden directories
@@ -76,6 +77,10 @@ export function runValidateExamplesCli(): void {
                             file contains a \`template-metadata\` block.
                             Mutually exclusive with --template.
                             Default (no flag): auto-detect per file.
+          --strict         Reject unknown schema keys. Without this flag the schema uses passthrough
+                            mode (unknown keys are silently accepted). Recommended for authoritative
+                            CI gates; elastic/workflows CI uses --strict with --plain or --template
+                            to ensure only schema-defined properties appear.
           --junit-out      Optional path to write a JUnit XML report (consumed by Buildkite).
         `,
       },

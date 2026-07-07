@@ -12,6 +12,10 @@ import { MAX_WORKFLOW_YAML_LENGTH } from '@kbn/workflows';
 import {
   InvalidYamlSchemaError,
   InvalidYamlSyntaxError,
+  isDynamicValue,
+  isInstallValue,
+  isLiquidTagValue,
+  isVariableValue,
   parseWorkflowYamlToJSON,
 } from '@kbn/workflows-yaml';
 import { detectTemplateSafe, validateTemplateMetadata } from './template_schema';
@@ -75,6 +79,63 @@ export const validateExampleYaml = (
   return validateAsPlain(yaml, schema);
 };
 
+/**
+ * Returns a shallow copy of `doc` with the `template-metadata` root key removed.
+ * Used so template body validation sees only the workflow fields, regardless of
+ * whether the schema is strict or loose.
+ */
+const stripTemplateMetadata = (doc: unknown): unknown => {
+  if (doc == null || typeof doc !== 'object' || Array.isArray(doc)) {
+    return doc;
+  }
+  const { ['template-metadata']: _metadata, ...rest } = doc as Record<string, unknown>;
+  return rest;
+};
+
+/**
+ * Validates a pre-parsed JSON document against `schema`, applying the same
+ * dynamic-value suppression as `parseWorkflowYamlToJSON` (Liquid expressions,
+ * install-time placeholders, and `${{ }}` dynamic refs are never flagged as
+ * schema errors). Used for template body validation where the YAML has already
+ * been parsed and `template-metadata` has been stripped.
+ */
+const validateDocAsPlain = (doc: unknown, schema: z.ZodType): ValidationOutcome => {
+  const result = schema.safeParse(doc);
+  if (result.success) {
+    return { kind: 'ok' };
+  }
+
+  // Mirror the dynamic-value filter in parseWorkflowYamlToJSON.
+  const filteredIssues = result.error.issues.filter((issue) => {
+    if (!issue.path || issue.path.length === 0) {
+      return true;
+    }
+    let value: unknown = doc;
+    for (const segment of issue.path) {
+      if (value == null || typeof value !== 'object') {
+        return true;
+      }
+      value = (value as Record<string, unknown>)[segment as string];
+    }
+    return !(
+      isDynamicValue(value) ||
+      isVariableValue(value) ||
+      isLiquidTagValue(value) ||
+      isInstallValue(value)
+    );
+  });
+
+  if (filteredIssues.length === 0) {
+    return { kind: 'ok' };
+  }
+
+  const issues = filteredIssues.map((issue) => ({
+    path: issue.path.map(String).join('.') || '<root>',
+    message: issue.message,
+  }));
+  return { kind: 'schema-error', issues };
+};
+
 const validateAsPlain = (yaml: string, schema: z.ZodType): ValidationOutcome => {
   const result = parseWorkflowYamlToJSON(yaml, schema);
 
@@ -100,9 +161,15 @@ const validateAsPlain = (yaml: string, schema: z.ZodType): ValidationOutcome => 
 };
 
 const validateAsTemplate = (yaml: string, schema: z.ZodType, doc: unknown): ValidationOutcome => {
-  // Validate body (passthrough schema ignores template-metadata key) then metadata.
-  // Surface syntax errors first — body validation catches them.
-  const bodyOutcome = validateAsPlain(yaml, schema);
+  // Strip `template-metadata` before body validation so the key never reaches the
+  // schema — necessary for strict schemas (loose=false) which reject unknown keys,
+  // and harmless for loose schemas. Metadata is validated separately below.
+  //
+  // We use validateDocAsPlain on the pre-parsed doc rather than calling
+  // validateAsPlain(yaml, schema) which would re-parse and include template-metadata.
+  // YAML syntax is already confirmed valid by detectTemplateSafe.
+  const strippedDoc = stripTemplateMetadata(doc);
+  const bodyOutcome = validateDocAsPlain(strippedDoc, schema);
   if (bodyOutcome.kind === 'syntax-error' || bodyOutcome.kind === 'unexpected-error') {
     return bodyOutcome;
   }

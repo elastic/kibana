@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/cases-plugin'
   - '@kbn/inference-workflows-plugin'
   - '@kbn/agent-context-layer-plugin'
+  - '@kbn/security-solution-plugin'
 tags:
   - shared-common
   - package

@@ -17,6 +17,7 @@
     "@kbn/agent-builder-plugin",
     "@kbn/cases-plugin",
     "@kbn/inference-workflows-plugin",
-    "@kbn/agent-context-layer-plugin"
+    "@kbn/agent-context-layer-plugin",
+    "@kbn/security-solution-plugin"
   ]
 }

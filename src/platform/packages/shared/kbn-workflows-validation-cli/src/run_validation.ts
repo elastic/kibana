@@ -23,6 +23,8 @@ export interface RunOptions {
   readonly rootDir: string;
   readonly log: ToolingLog;
   readonly mode?: ValidationMode;
+  /** When true the schema rejects unknown keys; when false (default) unknown keys pass through. */
+  readonly strict?: boolean;
 }
 
 export interface RunSummary {
@@ -36,6 +38,7 @@ export async function runValidation({
   rootDir,
   log,
   mode = 'auto',
+  strict = false,
 }: RunOptions): Promise<RunSummary> {
   const files = await discoverExampleFiles(rootDir);
   if (files.length === 0) {
@@ -44,7 +47,7 @@ export async function runValidation({
   }
   log.info(`Validating ${files.length} example(s) under ${rootDir}`);
 
-  const schema = buildWorkflowSchema();
+  const schema = buildWorkflowSchema({ strict });
   const results: ExampleResult[] = [];
   let passed = 0;
   let failed = 0;
