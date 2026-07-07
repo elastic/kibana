@@ -25,12 +25,6 @@ export const isChatCallbackRequestBodyPayload = (
   return 'callback' in payload;
 };
 
-export type ChatCallbackStatus =
-  | ExecutionStatus.scheduled
-  | ExecutionStatus.completed
-  | ExecutionStatus.failed
-  | ExecutionStatus.aborted;
-
 export interface ChatCallbackAcceptedResponse {
   execution_id: string;
   status: ExecutionStatus.scheduled;
