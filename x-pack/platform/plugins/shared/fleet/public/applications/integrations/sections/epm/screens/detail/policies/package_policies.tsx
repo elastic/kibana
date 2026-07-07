@@ -98,6 +98,11 @@ export const PackagePoliciesPage = ({
   } = useGetPackageInfoByKeyQuery(
     name,
     version,
+    // `prerelease` is inert on a specific-version GET: the requested version is returned either
+    // way, and the flag only shapes the `latestVersion` metadata, which this path never reads
+    // (only the manifest's policy templates/inputs, for expansion). Hardcoded so the fetch does
+    // not have to wait on a settings read like the edit/copy paths, whose loaders resolve it
+    // from settings as part of a sequential load.
     { full: true, prerelease: true },
     // Only the agentless-API adapter path needs the full manifest; the legacy source
     // returns full package policies that need no re-expansion.
