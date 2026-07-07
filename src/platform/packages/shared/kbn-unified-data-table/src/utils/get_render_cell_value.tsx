@@ -291,6 +291,7 @@ function renderPopoverContent({
               max-height: 500px;
               overflow: auto;
             `}
+            tabIndex={0}
           >
             {formatFieldValueReact({
               value: formattedValue,
