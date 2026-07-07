@@ -10,16 +10,18 @@ import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
 
 const DASHBOARD_ID_PREFIX = 'agent-builder-overview';
-const QUERY_KEY = ['agentBuilderTracingDashboardStatus'];
+const QUERY_KEY_BASE = 'agentBuilderTracingDashboardStatus';
 
-export const useDashboardStatus = () => {
+export const useDashboardStatus = (tracingEnabledSaved: boolean) => {
   const {
     services: { spaces, dashboard, notifications, genAiSettingsApi },
   } = useKibana();
   const queryClient = useQueryClient();
 
+  const queryKey = [QUERY_KEY_BASE, tracingEnabledSaved];
+
   const { data, isLoading } = useQuery({
-    queryKey: QUERY_KEY,
+    queryKey,
     queryFn: async () => {
       const activeSpace = await spaces?.getActiveSpace();
       const spaceId = activeSpace?.id ?? 'default';
@@ -43,7 +45,7 @@ export const useDashboardStatus = () => {
       );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey });
     },
     onError: (error: { body?: { message?: string }; message?: string }) => {
       notifications.toasts.addDanger({
