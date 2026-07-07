@@ -105,7 +105,7 @@ export const UNSUPPORTED_MITRE_ID_ERROR = (id: string) =>
 
 export const RENAMED_FROM_HINT = (previousName: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.mitreAttack.renamedFromHint', {
-    defaultMessage: 'Renamed from "{previousName}" in the current MITRE ATT&CK\u00AE version.',
+    defaultMessage: 'Renamed from "{previousName}" in the currently supported MITRE ATT&CK\u00AE version.',
     values: { previousName },
   });
 
@@ -114,7 +114,7 @@ export const TECHNIQUE_REASSIGNED_FROM_TACTIC_ERROR = (id: string) =>
     'xpack.securitySolution.detectionEngine.mitreAttack.techniqueReassignedFromTacticError',
     {
       defaultMessage:
-        '"{id}" is no longer assigned to the selected tactic in the current MITRE ATT&CK\u00AE version. Choose a tactic this technique belongs to, or replace it.',
+        '"{id}" is no longer assigned to the selected tactic in the currently supported MITRE ATT&CK\u00AE version. Choose a valid tactic for this technique, or select a different technique.',
       values: { id },
     }
   );

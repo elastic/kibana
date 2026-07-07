@@ -203,7 +203,7 @@ export const INVALID_MITRE_RULES_CALLOUT_PREBUILT_NOTICE = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesCallout.prebuiltNotice',
   {
     defaultMessage:
-      'Elastic prebuilt rule mappings were updated for this MITRE ATT&CK\u00AE version. Make sure to install the latest prebuilt rule updates so their coverage stays accurate.',
+      'Elastic prebuilt rule mappings were updated for this MITRE ATT&CK\u00AE version. Install the latest prebuilt rule updates to keep coverage accurate.',
   }
 );
 
@@ -217,7 +217,7 @@ export const INVALID_MITRE_RULES_VIEW_RULES_BUTTON = i18n.translate(
 export const INVALID_MITRE_RULES_MODAL_TITLE = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesModal.title',
   {
-    defaultMessage: 'Rules with outdated MITRE mappings',
+    defaultMessage: 'Rules with outdated MITRE ATT&CK\u00AE mappings',
   }
 );
 
