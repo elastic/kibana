@@ -8,6 +8,7 @@
 import { EuiFlyoutBody, EuiPortal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { Environment } from '../../../../common/environment_rt';
 import type { ServiceNodeData } from '../../../../common/service_map';
 import { ResponsiveFlyout } from '../responsive_flyout';
@@ -42,6 +43,7 @@ interface ServiceFlyoutProps {
   initialRangeFrom: string;
   initialRangeTo: string;
   initialTransactionType?: string;
+  share: SharePluginSetup;
   onView?: (params: { tabId: ServiceFlyoutTabId }) => void;
   onClose: () => void;
 }
@@ -53,6 +55,7 @@ export function ServiceFlyout({
   initialRangeFrom,
   initialRangeTo,
   initialTransactionType,
+  share,
   onView,
   onClose,
 }: ServiceFlyoutProps) {
@@ -130,6 +133,7 @@ export function ServiceFlyout({
           rangeFrom={flyoutRange.rangeFrom}
           rangeTo={flyoutRange.rangeTo}
           transactionType={transactionType}
+          share={share}
         />
       </ResponsiveFlyout>
     </EuiPortal>

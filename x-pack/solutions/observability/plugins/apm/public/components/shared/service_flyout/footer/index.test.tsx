@@ -20,10 +20,14 @@ jest.mock('../hooks/use_service_links', () => ({
   useServiceLinks: (...args: unknown[]) => mockUseServiceLinks(...args),
 }));
 
-const mockUseManageSlosUrl = jest.fn();
+const mockGetManageSlosUrl = jest.fn();
 jest.mock('../../../../hooks/use_manage_slos_url', () => ({
-  useManageSlosUrl: (...args: unknown[]) => mockUseManageSlosUrl(...args),
+  getManageSlosUrl: (...args: unknown[]) => mockGetManageSlosUrl(...args),
 }));
+
+const mockShare = {
+  url: { locators: { get: jest.fn() } },
+} as any;
 
 function renderFooter() {
   return render(
@@ -34,6 +38,7 @@ function renderFooter() {
         rangeFrom="now-15m"
         rangeTo="now"
         transactionType="request"
+        share={mockShare}
       />
     </IntlProvider>
   );
@@ -53,7 +58,7 @@ describe('ServiceFlyoutFooter', () => {
       indexType === 'traces' ? '/app/discover/traces' : '/app/discover/logs'
     );
     mockUseServiceLinks.mockReturnValue({ alertsHref: '/app/apm/alerts' });
-    mockUseManageSlosUrl.mockReturnValue('/app/slos');
+    mockGetManageSlosUrl.mockReturnValue('/app/slos');
   }
 
   it('passes empty string transactionType to the traces Discover link before the type resolves', () => {
@@ -66,6 +71,7 @@ describe('ServiceFlyoutFooter', () => {
           rangeFrom="now-15m"
           rangeTo="now"
           transactionType=""
+          share={mockShare}
         />
       </IntlProvider>
     );
@@ -156,7 +162,7 @@ describe('ServiceFlyoutFooter', () => {
   it('disables the actions button when no actions are available', () => {
     mockUseDiscoverHref.mockReturnValue(undefined);
     mockUseServiceLinks.mockReturnValue({ alertsHref: undefined });
-    mockUseManageSlosUrl.mockReturnValue(undefined);
+    mockGetManageSlosUrl.mockReturnValue(undefined);
     renderFooter();
 
     expect(screen.getByTestId('serviceFlyoutActionsButton')).toBeDisabled();
@@ -165,7 +171,7 @@ describe('ServiceFlyoutFooter', () => {
   it('omits the Discover actions when no Discover hrefs resolve', () => {
     mockUseDiscoverHref.mockReturnValue(undefined);
     mockUseServiceLinks.mockReturnValue({ alertsHref: '/app/apm/alerts' });
-    mockUseManageSlosUrl.mockReturnValue('/app/slos');
+    mockGetManageSlosUrl.mockReturnValue('/app/slos');
     renderFooter();
 
     openActionsMenu();

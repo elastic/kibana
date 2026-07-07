@@ -9,8 +9,11 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/
 import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import type { SloListLocatorParams } from '@kbn/deeplinks-observability';
+import { sloListLocatorID } from '@kbn/deeplinks-observability';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { Environment } from '../../../../../common/environment_rt';
-import { useManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
+import { getManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
 import { useDiscoverHref } from '../../links/discover_links/use_discover_href';
 import { ActionsContextMenu, type ActionGroups } from '../../actions_context_menu';
 import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
@@ -22,6 +25,7 @@ interface ServiceFlyoutFooterProps {
   rangeFrom: string;
   rangeTo: string;
   transactionType: string;
+  share: SharePluginSetup;
 }
 
 export function ServiceFlyoutFooter({
@@ -30,6 +34,7 @@ export function ServiceFlyoutFooter({
   rangeFrom,
   rangeTo,
   transactionType,
+  share,
 }: ServiceFlyoutFooterProps) {
   const { alertsHref } = useServiceLinks({
     serviceName,
@@ -39,7 +44,11 @@ export function ServiceFlyoutFooter({
     kuery: '',
   });
 
-  const slosHref = useManageSlosUrl({ serviceName, environment });
+  const sloListLocator = share?.url?.locators?.get<SloListLocatorParams>(sloListLocatorID);
+  const slosHref = useMemo(
+    () => getManageSlosUrl(sloListLocator, { serviceName, environment }),
+    [sloListLocator, serviceName, environment]
+  );
 
   const tracesDiscoverHref = useDiscoverHref({
     indexType: 'traces',
