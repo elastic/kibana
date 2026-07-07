@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { CheckEngineEnabledStep } from './check_engine_enabled_step';
 export { WaitForResourcesStep } from './wait_for_resources_step';
 export { FetchRuleStep } from './fetch_rule_step';
 export { ValidateRuleStep } from './validate_rule_step';
