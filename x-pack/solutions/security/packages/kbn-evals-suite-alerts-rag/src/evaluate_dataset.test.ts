@@ -57,7 +57,9 @@ describe('buildAlertsRagEvaluators', () => {
   const expectedNames = [
     // Quantitative correctness — deterministic scores from the precomputed
     // CorrectnessAnalysis attached by the task function. Provided by
-    // `createQuantitativeCorrectnessEvaluators` from @kbn/evals.
+    // `createAgentBuilderCorrectnessEvaluators` from @kbn/evals (same evaluator
+    // names as the shared correctness set, but Factuality uses the
+    // NOT_IN_GROUND_TRUTH-excluded scorer).
     'Factuality',
     'Relevance',
     'Sequence Accuracy',

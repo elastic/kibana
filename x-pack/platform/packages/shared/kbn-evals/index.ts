@@ -97,6 +97,10 @@ export {
   calculateFactualScore,
   calculateRelevanceScore,
 } from './src/evaluators/correctness/scoring';
+export {
+  calculateAgentBuilderFactualScore,
+  createAgentBuilderCorrectnessEvaluators,
+} from './src/evaluators/correctness/agent_builder_scoring';
 export { createQuantitativeGroundednessEvaluator } from './src/evaluators/groundedness';
 export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';
 export {

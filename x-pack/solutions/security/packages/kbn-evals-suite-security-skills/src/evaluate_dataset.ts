@@ -7,7 +7,7 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import {
-  createQuantitativeCorrectnessEvaluators,
+  createAgentBuilderCorrectnessEvaluators,
   createSkillInvocationEvaluator,
   buildSkillInvokedCaseExpression,
   createTrajectoryEvaluator,
@@ -235,7 +235,7 @@ export const buildSecuritySkillsEvaluators = ({
     evaluators.traceBasedEvaluators;
 
   return [
-    ...(createQuantitativeCorrectnessEvaluators() as Array<
+    ...(createAgentBuilderCorrectnessEvaluators() as Array<
       Evaluator<SecuritySkillsDatasetExample, TaskOutput>
     >),
     createExpectedToolCalledEvaluator(),

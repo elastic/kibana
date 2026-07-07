@@ -15,11 +15,7 @@ import type {
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { extractSearchRetrievedDocs } from './rag_extractor';
-import {
-  allowedDomainToolIdsForExample,
-  calculateAgentBuilderFactualScore,
-  createEvaluateExternalDataset,
-} from './evaluate_dataset';
+import { allowedDomainToolIdsForExample, createEvaluateExternalDataset } from './evaluate_dataset';
 import type { AgentBuilderEvaluationChatClient } from './chat_client';
 
 describe('extractSearchRetrievedDocs', () => {
@@ -246,84 +242,5 @@ describe('allowedDomainToolIdsForExample', () => {
 
   it('returns null when expectedOnlyToolId is absent', () => {
     expect(allowedDomainToolIdsForExample({ category: 'find-rules' })).toBeNull();
-  });
-});
-
-describe('calculateAgentBuilderFactualScore', () => {
-  const buildAnalysis = (
-    claims: Array<{ verdict: string; centrality: 'central' | 'peripheral' }>
-  ): any => ({
-    summary: {
-      factual_accuracy_summary: 'ACCURATE',
-      relevance_summary: 'RELEVANT',
-      sequence_accuracy_summary: 'NOT_APPLICABLE',
-    },
-    analysis: claims.map((c) => ({
-      claim: 'test claim',
-      centrality: c.centrality,
-      centrality_reason: '',
-      verdict: c.verdict,
-      sequence_match: 'NOT_APPLICABLE',
-      justification_snippet: undefined,
-      explanation: '',
-    })),
-  });
-
-  it('returns 0 for empty analysis', () => {
-    expect(calculateAgentBuilderFactualScore(buildAnalysis([]))).toBe(0);
-  });
-
-  it('returns 1 when all claims are FULLY_SUPPORTED', () => {
-    expect(
-      calculateAgentBuilderFactualScore(
-        buildAnalysis([
-          { verdict: 'FULLY_SUPPORTED', centrality: 'central' },
-          { verdict: 'FULLY_SUPPORTED', centrality: 'peripheral' },
-        ])
-      )
-    ).toBe(1);
-  });
-
-  it('tanks to 0 for a contradicted central claim (geometric-mean intent preserved)', () => {
-    expect(
-      calculateAgentBuilderFactualScore(
-        buildAnalysis([
-          { verdict: 'FULLY_SUPPORTED', centrality: 'central' },
-          { verdict: 'FULLY_SUPPORTED', centrality: 'central' },
-          { verdict: 'CONTRADICTED', centrality: 'central' },
-        ])
-      )
-    ).toBe(0);
-  });
-
-  it('does not penalize extra NOT_IN_GROUND_TRUTH claims when verifiable claims are accurate', () => {
-    const analysis = buildAnalysis([
-      { verdict: 'FULLY_SUPPORTED', centrality: 'central' },
-      { verdict: 'FULLY_SUPPORTED', centrality: 'central' },
-      { verdict: 'NOT_IN_GROUND_TRUTH', centrality: 'central' },
-      { verdict: 'NOT_IN_GROUND_TRUTH', centrality: 'central' },
-      { verdict: 'NOT_IN_GROUND_TRUTH', centrality: 'central' },
-    ]);
-    expect(calculateAgentBuilderFactualScore(analysis)).toBe(1);
-  });
-
-  it('reflects verifiable-claim accuracy without dilution from extra claims', () => {
-    const analysis = buildAnalysis([
-      { verdict: 'FULLY_SUPPORTED', centrality: 'central' },
-      { verdict: 'FULLY_SUPPORTED', centrality: 'central' },
-      { verdict: 'PARTIALLY_SUPPORTED', centrality: 'central' },
-      { verdict: 'NOT_IN_GROUND_TRUTH', centrality: 'central' },
-      { verdict: 'NOT_IN_GROUND_TRUTH', centrality: 'central' },
-    ]);
-    expect(calculateAgentBuilderFactualScore(analysis)).toBeCloseTo(Math.pow(0.9, 1 / 3), 5);
-  });
-
-  it('falls back to scoring unverifiable claims when no claim can be checked', () => {
-    const analysis = buildAnalysis([
-      { verdict: 'NOT_IN_GROUND_TRUTH', centrality: 'central' },
-      { verdict: 'NOT_IN_GROUND_TRUTH', centrality: 'central' },
-      { verdict: 'NOT_IN_GROUND_TRUTH', centrality: 'central' },
-    ]);
-    expect(calculateAgentBuilderFactualScore(analysis)).toBeCloseTo(0.1, 5);
   });
 });

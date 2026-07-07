@@ -30,18 +30,6 @@ const CLAIM_FACTUAL_SCORE_MAP = {
  * This function computes the geometric mean of the scores assigned to each claim,
  * ensuring that a single critically incorrect claim (such as a contradicted central claim
  * with a score of 0.0) will result in an overall factual score of 0.0.
- *
- * `NOT_IN_GROUND_TRUTH` claims are excluded from the geometric mean when at least one
- * claim CAN be checked against the reference. Such claims are, by definition, statements
- * that the reference neither supports nor contradicts — they are extra information, not
- * factual errors. Including them in the geometric product conflates "the answer is richer
- * than the (often thin) reference" with "the answer is wrong": a low fixed weight (0.1 for
- * central) multiplicatively crushes an otherwise-accurate answer, producing a uniform low
- * score that is a scoring artifact rather than a measure of accuracy (see security-team#18060).
- * Coverage of the reference is already measured separately by the Relevance score. When every
- * claim is unverifiable, there is no reference overlap to score against, so the original
- * behaviour is retained (the unverifiable claims are scored) to avoid rewarding a fully
- * off-reference answer with a perfect score.
  */
 export function calculateFactualScore(correctnessEvaluation: CorrectnessAnalysis): number {
   const analysis = correctnessEvaluation?.analysis;
@@ -49,13 +37,8 @@ export function calculateFactualScore(correctnessEvaluation: CorrectnessAnalysis
     return 0.0;
   }
 
-  const verifiableClaims = analysis.filter(
-    (claim) => (claim.verdict || 'NOT_IN_GROUND_TRUTH') !== 'NOT_IN_GROUND_TRUTH'
-  );
-  const scoredClaims = verifiableClaims.length > 0 ? verifiableClaims : analysis;
-
   let productOfScores = 1.0;
-  for (const claim of scoredClaims) {
+  for (const claim of analysis) {
     const verdict = claim.verdict || 'NOT_IN_GROUND_TRUTH';
     const centrality = claim.centrality || 'peripheral';
 
@@ -72,7 +55,7 @@ export function calculateFactualScore(correctnessEvaluation: CorrectnessAnalysis
   }
 
   // Geometric mean: n-th root of the product
-  const numClaims = scoredClaims.length;
+  const numClaims = analysis.length;
   const score = productOfScores > 0 ? Math.pow(productOfScores, 1 / numClaims) : 0.0;
 
   return score;
