@@ -10,7 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: [
-    '<rootDir>/src/platform/packages/private/kbn-workflow-graph-screenshot-cli',
-  ],
+  roots: ['<rootDir>/src/platform/packages/private/kbn-workflow-graph-screenshot-cli'],
 };
