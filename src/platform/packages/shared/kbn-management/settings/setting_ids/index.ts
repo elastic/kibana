@@ -247,6 +247,8 @@ export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION =
   'securitySolution:alertAnalysisWorkflowCreateConversation' as const;
 export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED =
   'securitySolution:alertAnalysisWorkflowEnabled' as const;
+export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX =
+  'securitySolution:alertAnalysisWorkflowTagPrefix' as const;
 // Cases settings
 export const CASES_MAX_OPEN_CASES_PER_RULE_RUN_ID = 'cases:maxOpenCasesPerRuleRun' as const;
 

@@ -18,6 +18,7 @@ import {
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX,
 } from '@kbn/management-settings-ids';
 import type { StartPlugins } from '../../plugin';
 import type {
@@ -115,7 +116,8 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
         .mockResolvedValueOnce(0.7) // autoCloseConfidenceScoreMinThreshold
         .mockResolvedValueOnce(0.9) // autoCloseConfidenceScoreMaxThreshold
         .mockResolvedValueOnce('connector-abc') // connectorId
-        .mockResolvedValueOnce(true); // createConversation
+        .mockResolvedValueOnce(true) // createConversation
+        .mockResolvedValueOnce('alert-analysis'); // tagPrefix
     };
 
     it('returns the current space-scoped settings', async () => {
@@ -135,6 +137,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
             autoCloseConfidenceScoreMaxThreshold: 0.9,
             connectorId: 'connector-abc',
             createConversation: true,
+            tagPrefix: 'alert-analysis',
           },
           workflowId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
         },
@@ -173,6 +176,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
       autoCloseConfidenceScoreMaxThreshold: 0.95,
       connectorId: 'connector-xyz',
       createConversation: false,
+      tagPrefix: 'alert-analysis',
     };
 
     it('persists settings without reinstalling the workflow', async () => {
@@ -192,6 +196,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
         [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID]: settings.connectorId,
         [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION]:
           settings.createConversation,
+        [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX]: settings.tagPrefix,
       });
       // The globally-installed workflow reads settings from uiSettings on its next run, so saving
       // never reinstalls or rewrites the workflow document.
@@ -262,7 +267,8 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
         .mockResolvedValueOnce(0.85) // autoCloseConfidenceScoreMinThreshold
         .mockResolvedValueOnce(1) // autoCloseConfidenceScoreMaxThreshold
         .mockResolvedValueOnce('connector-abc') // connectorId
-        .mockResolvedValueOnce(true); // createConversation
+        .mockResolvedValueOnce(true) // createConversation
+        .mockResolvedValueOnce('alert-analysis'); // tagPrefix
     };
 
     const getHandler = () =>
@@ -284,6 +290,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
           autoCloseConfidenceScoreMaxThreshold: 1,
           connectorId: 'connector-abc',
           createConversation: true,
+          tagPrefix: 'alert-analysis',
         },
       });
     });

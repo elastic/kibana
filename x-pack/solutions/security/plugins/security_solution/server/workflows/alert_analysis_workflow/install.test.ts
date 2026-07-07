@@ -35,7 +35,7 @@ describe('alert analysis workflow install', () => {
   });
 
   describe('readSecurityAlertAnalysisWorkflowSettings', () => {
-    it('reads the six settings from the given uiSettings client', async () => {
+    it('reads the settings from the given uiSettings client', async () => {
       const uiSettingsClient = {
         get: jest
           .fn()
@@ -44,7 +44,8 @@ describe('alert analysis workflow install', () => {
           .mockResolvedValueOnce(0.8)
           .mockResolvedValueOnce(0.95)
           .mockResolvedValueOnce('connector-abc')
-          .mockResolvedValueOnce(false),
+          .mockResolvedValueOnce(false)
+          .mockResolvedValueOnce('alert-analysis'),
       };
 
       const result = await readSecurityAlertAnalysisWorkflowSettings(uiSettingsClient);
@@ -56,6 +57,7 @@ describe('alert analysis workflow install', () => {
         autoCloseConfidenceScoreMaxThreshold: 0.95,
         connectorId: 'connector-abc',
         createConversation: false,
+        tagPrefix: 'alert-analysis',
       });
     });
   });
