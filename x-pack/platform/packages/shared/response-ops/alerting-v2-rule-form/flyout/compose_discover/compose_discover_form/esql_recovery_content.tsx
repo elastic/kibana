@@ -60,7 +60,8 @@ export const EsqlRecoveryContent: React.FC<CustomRecoveryRenderProps> = ({ state
         <EuiFlexItem grow={false}>
           <EuiButton
             size="s"
-            iconType="editorCodeBlock"
+            color="text"
+            iconType="chevronLimitLeft"
             isDisabled={state.childOpen}
             onClick={() =>
               dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert: true })
