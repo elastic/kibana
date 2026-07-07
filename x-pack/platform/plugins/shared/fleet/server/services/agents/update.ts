@@ -7,6 +7,8 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
+import { escapeQuotes } from '@kbn/es-query';
+
 import { AGENTS_PREFIX } from '../../constants';
 
 import { getAgentsByKuery } from './crud';
@@ -21,7 +23,7 @@ export async function unenrollForAgentPolicyId(
   let page = 1;
   while (hasMore) {
     const { agents } = await getAgentsByKuery(esClient, soClient, {
-      kuery: `${AGENTS_PREFIX}.policy_id:"${policyId}"`,
+      kuery: `${AGENTS_PREFIX}.policy_id:"${escapeQuotes(policyId)}"`,
       page: page++,
       perPage: 1000,
       showInactive: false,

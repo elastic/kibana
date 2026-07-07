@@ -77,6 +77,7 @@ export const registerSyntheticsStatusCheckRule = (
         scopedClusterClient.asCurrentUser,
         {
           heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
+          uiSettingsClient,
         }
       );
 

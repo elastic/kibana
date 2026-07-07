@@ -56,17 +56,18 @@ export const registerPutPluginStateRoute = (router: IRouter) => {
       },
       validate: {
         body: schema.object({
-          status: schema.maybe(schema.string()),
+          status: schema.maybe(schema.string({ maxLength: 1000 })),
           guide: schema.maybe(
             schema.object({
-              status: schema.string(),
-              guideId: schema.string(),
+              status: schema.string({ maxLength: 1000 }),
+              guideId: schema.string({ maxLength: 1000 }),
               isActive: schema.boolean(),
               steps: schema.arrayOf(
                 schema.object({
-                  status: schema.string(),
-                  id: schema.string(),
-                })
+                  status: schema.string({ maxLength: 1000 }),
+                  id: schema.string({ maxLength: 1000 }),
+                }),
+                { maxSize: 1000 }
               ),
               // params are dynamic values
               params: schema.maybe(schema.object({}, { unknowns: 'allow' })),

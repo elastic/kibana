@@ -27,7 +27,10 @@ const createCacheMock = () => {
   const mock: jest.Mocked<ITagsCache> = {
     getState: jest.fn(),
     getState$: jest.fn(),
+    isInitialized: jest.fn(),
   };
+
+  mock.isInitialized.mockReturnValue(false);
 
   return mock;
 };

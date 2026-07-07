@@ -6,6 +6,7 @@
  */
 
 export * from './routes';
+export { validateFleetSavedObjectId } from './validate_fleet_id';
 export * as AgentStatusKueryHelper from './agent_status';
 export * from './package_helpers';
 export {
@@ -34,6 +35,7 @@ export {
   isIntegrationPolicyTemplate,
   getNormalizedInputs,
   getNormalizedDataStreams,
+  getPolicyTemplateDataStreamPaths,
   filterPolicyTemplatesTiles,
 } from './policy_template';
 export { doesPackageHaveIntegrations } from './packages_with_integrations';
@@ -94,3 +96,6 @@ export {
 } from './check_fleet_server_versions';
 
 export { removeSOAttributes, getSortConfig, checkTargetVersionsValidity } from './agent_utils';
+
+export type { YamlModule } from './yaml_utils';
+export { createYamlKeysSorter, toYaml } from './yaml_utils';

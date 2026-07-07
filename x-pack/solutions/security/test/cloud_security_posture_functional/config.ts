@@ -33,6 +33,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...xpackFunctionalConfig.getAll(),
+    security: {
+      ...xpackFunctionalConfig.get('security'),
+      cookieLogin: false, // tests rely on localStorage column state between steps; loginByCookie clears it
+    },
     services: {
       ...xpackFunctionalConfig.get('services'),
       ...services,

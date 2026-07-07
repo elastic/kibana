@@ -142,6 +142,24 @@ export async function createCookieSessionStorageFactory<T extends object>(
           definition.isSameSite = 'None;Partitioned';
         }
       },
+      // Override @hapi/iron's defaults so cookie sealing works under FIPS-mode OpenSSL.
+      // Iron's default is iterations=1, which OpenSSL's FIPS provider rejects with
+      // "Deriving bits failed". 1000 is the SP 800-132 minimum and is sufficient given
+      // encryptionKey is already required to be a 32+ char high-entropy value.
+      iron: {
+        encryption: {
+          saltBits: 256,
+          algorithm: 'aes-256-cbc',
+          iterations: 1000,
+          minPasswordlength: 32,
+        },
+        integrity: {
+          saltBits: 256,
+          algorithm: 'sha256',
+          iterations: 1000,
+          minPasswordlength: 32,
+        },
+      },
     },
     validate: async (req: Request, session: T | T[]) => {
       const result = cookieOptions.validate(session);

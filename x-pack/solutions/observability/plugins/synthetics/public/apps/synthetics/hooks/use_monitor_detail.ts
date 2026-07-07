@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { useEsSearch } from '@kbn/observability-shared-plugin/public';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { useSyntheticsEsSearch } from './use_synthetics_es_search';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
-import { Ping } from '../../../../common/runtime_types';
+import type { Ping } from '../../../../common/runtime_types';
 
 export const useMonitorDetail = (
   configId: string,
@@ -42,13 +42,12 @@ export const useMonitorDetail = (
       sort: [{ '@timestamp': 'desc' }],
     },
   };
-  const { data: result, loading } = useEsSearch<Ping & { '@timestamp': string }, SearchRequest>(
-    params,
-    [configId, location],
-    {
-      name: 'getMonitorStatusByLocation',
-    }
-  );
+  const { data: result, loading } = useSyntheticsEsSearch<
+    Ping & { '@timestamp': string },
+    SearchRequest
+  >(params, [configId, location], {
+    name: 'getMonitorStatusByLocation',
+  });
 
   if (!result || result.hits.hits.length !== 1) return { data: undefined, loading };
   return {

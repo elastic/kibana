@@ -8,7 +8,6 @@ import React, { useCallback, useState, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { dump, load } from 'js-yaml';
 
 import {
   sendPostFleetProxy,
@@ -18,6 +17,7 @@ import {
   useStartServices,
   validateInputs,
 } from '../../../../hooks';
+import { useYaml } from '../../../../../../services';
 
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
 import type { FleetProxy } from '../../../../types';
@@ -55,16 +55,25 @@ function validateUrl(value: string) {
   }
 }
 
-function validateProxyHeaders(value: string) {
+const createValidateProxyHeaders = (parse: (s: string) => unknown) => (value: string) => {
   if (value && value !== '') {
-    const res = load(value);
-    if (
-      typeof res !== 'object' ||
-      Object.values(res).some((val) => {
-        const valType = typeof val;
-        return valType !== 'string' && valType !== 'number' && valType !== 'boolean';
-      })
-    ) {
+    try {
+      const res = parse(value);
+      if (
+        typeof res !== 'object' ||
+        res === null ||
+        Object.values(res).some((val) => {
+          const valType = typeof val;
+          return valType !== 'string' && valType !== 'number' && valType !== 'boolean';
+        })
+      ) {
+        return [
+          i18n.translate('xpack.fleet.settings.fleetProxy.proxyHeadersErrorMessage', {
+            defaultMessage: 'Proxy headers is not a valid key: value object.',
+          }),
+        ];
+      }
+    } catch {
       return [
         i18n.translate('xpack.fleet.settings.fleetProxy.proxyHeadersErrorMessage', {
           defaultMessage: 'Proxy headers is not a valid key: value object.',
@@ -72,7 +81,7 @@ function validateProxyHeaders(value: string) {
       ];
     }
   }
-}
+};
 
 export function validateName(value: string) {
   if (!value || value === '') {
@@ -86,16 +95,25 @@ export function validateName(value: string) {
 
 export function useFleetProxyForm(fleetProxy: FleetProxy | undefined, onSuccess: () => void) {
   const [isLoading, setIsLoading] = useState(false);
+  const yaml = useYaml();
   const authz = useAuthz();
   const { notifications } = useStartServices();
   const { confirm } = useConfirmModal();
   const isEditDisabled = (!authz.fleet.allSettings || fleetProxy?.is_preconfigured) ?? false;
 
+  const validateProxyHeadersFn = yaml ? createValidateProxyHeaders(yaml.parse) : () => undefined;
+  const proxyHeadersInitialValue =
+    yaml && fleetProxy?.proxy_headers
+      ? yaml.stringify(fleetProxy.proxy_headers)
+      : fleetProxy?.proxy_headers
+      ? JSON.stringify(fleetProxy.proxy_headers)
+      : '';
+
   const nameInput = useInput(fleetProxy?.name ?? '', validateName, isEditDisabled);
   const urlInput = useInput(fleetProxy?.url ?? '', validateUrl, isEditDisabled);
   const proxyHeadersInput = useInput(
-    fleetProxy?.proxy_headers ? dump(fleetProxy.proxy_headers) : '',
-    validateProxyHeaders,
+    proxyHeadersInitialValue,
+    validateProxyHeadersFn,
     isEditDisabled
   );
   const certificateAuthoritiesInput = useInput(
@@ -143,7 +161,8 @@ export function useFleetProxyForm(fleetProxy: FleetProxy | undefined, onSuccess:
       const data = {
         name: nameInput.value,
         url: urlInput.value,
-        proxy_headers: proxyHeadersInput.value === '' ? undefined : load(proxyHeadersInput.value),
+        proxy_headers:
+          proxyHeadersInput.value === '' || !yaml ? undefined : yaml.parse(proxyHeadersInput.value),
         certificate_authorities: certificateAuthoritiesInput.value,
         certificate: certificateInput.value,
         certificate_key: certificateKeyInput.value,
@@ -184,6 +203,7 @@ export function useFleetProxyForm(fleetProxy: FleetProxy | undefined, onSuccess:
     certificateKeyInput.value,
     validate,
     notifications,
+    yaml,
     confirm,
     onSuccess,
   ]);

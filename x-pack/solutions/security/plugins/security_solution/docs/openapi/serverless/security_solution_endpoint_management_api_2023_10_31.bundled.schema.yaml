@@ -255,8 +255,7 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/isolate:
     post:
-      description: >-
-        Isolate an endpoint from the network. The endpoint remains isolated
+      description: Isolate an endpoint from the network. The endpoint remains isolated
         until it's released.
       operationId: EndpointIsolateAction
       requestBody:
@@ -272,8 +271,7 @@ paths:
                     - bc0e4f0c-3bca-4633-9fee-156c0b505d16
                     - fa89271b-b9d4-43f2-a684-307cffddeb5a
               single_endpoint:
-                summary: >-
-                  Isolates a single host with an endpoint_id value of
+                summary: Isolates a single host with an endpoint_id value of
                   ed518850-681a-4d60-bb98-e22640cae2a8
                 value:
                   endpoint_ids:
@@ -397,8 +395,7 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/state:
     get:
-      description: >-
-        Get a response actions state, which reports whether encryption is
+      description: Get a response actions state, which reports whether encryption is
         enabled.
       operationId: EndpointGetActionsState
       responses:
@@ -448,8 +445,7 @@ paths:
                     - bc0e4f0c-3bca-4633-9fee-156c0b505d16
                     - fa89271b-b9d4-43f2-a684-307cffddeb5a
               singleHost:
-                summary: >-
-                  Releases a single host with an endpoint_id value of
+                summary: Releases a single host with an endpoint_id value of
                   ed518850-681a-4d60-bb98-e22640cae2a8
                 value:
                   endpoint_ids:
@@ -876,9 +872,8 @@ components:
           '@timestamp': '2023-07-04T15:48:57.3609346Z'
           agent:
             build:
-              original: >-
-                version: 7.16.0, compiled: Tue Nov 16 17:00:00 2021, branch:
-                7.16, commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab
+              original: 'version: 7.16.0, compiled: Tue Nov 16 17:00:00 2021, branch: 7.16,
+                commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab'
             id: abb8a826-6812-448c-a571-6d8269b51449
             type: endpoint
             version: 7.16.0
@@ -928,7 +923,7 @@ components:
               - 10.0.2.15
               - fe80::21a6:63d3:d70e:e3ad
               - 127.0.0.1
-              - '::1'
+              - ::1
             mac:
               - 08:00:27:b1:1d:5a
             name: WinDev2104Eval
@@ -1310,9 +1305,8 @@ components:
                 - type: object
                   properties:
                     process_name:
-                      description: >-
-                        The name of the process to terminate. Valid for
-                        SentinelOne agent type only.
+                      description: The name of the process to terminate. Valid for SentinelOne agent
+                        type only.
                       example: Elastic
                       minLength: 1
                       type: string
@@ -1351,7 +1345,7 @@ components:
       properties: {}
     Kuery:
       description: A KQL string.
-      example: 'united.endpoint.host.os.name : ''Windows'''
+      example: "united.endpoint.host.os.name : 'Windows'"
       type: string
     MetadataListResponse:
       example:
@@ -1362,9 +1356,8 @@ components:
               '@timestamp': '2023-07-04T15:47:57.432173535Z'
               agent:
                 build:
-                  original: >-
-                    version: 7.16.0, compiled: Tue Nov 16 16:00:00 2021, branch:
-                    7.16, commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab
+                  original: 'version: 7.16.0, compiled: Tue Nov 16 16:00:00 2021, branch: 7.16,
+                    commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab'
                 id: 285297c6-3bff-4b83-9a07-f3e749801123
                 type: endpoint
                 version: 7.16.0
@@ -1412,7 +1405,7 @@ components:
                 id: 0cfead88e2024bd8a27476352b5ab264
                 ip:
                   - 127.0.0.1
-                  - '::1'
+                  - ::1
                   - 10.0.2.15
                   - fe80::2ac7:8e15:b957:2fa1
                 mac:
@@ -1423,9 +1416,7 @@ components:
                     variant: Ubuntu
                   family: ubuntu
                   full: Ubuntu 20.04.2
-                  kernel: >-
-                    5.8.0-59-generic #66~20.04.1-Ubuntu SMP Thu Jun 17 11:14:10
-                    UTC 2021
+                  kernel: '5.8.0-59-generic #66~20.04.1-Ubuntu SMP Thu Jun 17 11:14:10 UTC 2021'
                   name: Linux
                   platform: ubuntu
                   type: linux
@@ -1448,9 +1439,8 @@ components:
               '@timestamp': '2023-07-04T15:44:31.4917849Z'
               agent:
                 build:
-                  original: >-
-                    version: 7.16.0, compiled: Tue Nov 16 17:00:00 2021, branch:
-                    7.16, commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab
+                  original: 'version: 7.16.0, compiled: Tue Nov 16 17:00:00 2021, branch: 7.16,
+                    commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab'
                 id: abb8a826-6812-448c-a571-6d8269b51449
                 type: endpoint
                 version: 7.16.0
@@ -1500,7 +1490,7 @@ components:
                   - 10.0.2.15
                   - fe80::21a6:63d3:d70e:e3ad
                   - 127.0.0.1
-                  - '::1'
+                  - ::1
                 mac:
                   - 08:00:27:b1:1d:5a
                 name: WinDev2104Eval
@@ -1606,8 +1596,7 @@ components:
       type: object
       properties:
         parameters:
-          description: >-
-            Exactly one of 'Raw', 'HostPath', or 'CloudFile' must be provided.
+          description: Exactly one of 'Raw', 'HostPath', or 'CloudFile' must be provided.
             CommandLine and Timeout are optional for all.
           oneOf:
             - $ref: '#/components/schemas/RawScriptParameters'
@@ -1905,8 +1894,7 @@ components:
         - minLength: 1
           type: string
     WithOutputs:
-      description: >-
-        A list of action IDs that should include the complete output of the
+      description: A list of action IDs that should include the complete output of the
         action.
       example:
         - action-id-1

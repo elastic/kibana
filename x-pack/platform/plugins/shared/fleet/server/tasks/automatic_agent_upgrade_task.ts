@@ -17,6 +17,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { escapeQuotes } from '@kbn/es-query';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
@@ -224,7 +225,9 @@ export class AutomaticAgentUpgradeTask {
     const totalActiveAgents = await this.getAgentCount(
       esClient,
       soClient,
-      `policy_id:${agentPolicy.id} AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}`
+      `policy_id:"${escapeQuotes(
+        agentPolicy.id
+      )}" AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}`
     );
     if (totalActiveAgents === 0) {
       this.logger.debug(
@@ -267,7 +270,7 @@ export class AutomaticAgentUpgradeTask {
       const totalOnOrUpdatingToTargetVersionAgents = await this.getAgentCount(
         esClient,
         soClient,
-        `((policy_id:${agentPolicy.id} AND agent.version:${
+        `((policy_id:"${escapeQuotes(agentPolicy.id)}" AND agent.version:${
           requiredVersion.version
         }) OR ${updatingToKuery}) AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}`
       );
@@ -390,7 +393,9 @@ export class AutomaticAgentUpgradeTask {
     const oldStuckInUpdatingKuery = `(NOT upgrade_details:* AND status:updating AND NOT upgraded_at:* AND upgrade_started_at < now-2h)`; // agents pre 8.12.0 (without upgrade_details)
     const newStuckInUpdatingKuery = `(upgrade_details.target_version:${requiredVersion.version} AND upgrade_details.state:UPG_FAILED)`;
     const agentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
-      kuery: `policy_id:${agentPolicy.id} AND (NOT upgrade_attempts:*) AND (${statusKuery} OR ${oldStuckInUpdatingKuery} OR ${newStuckInUpdatingKuery})`,
+      kuery: `policy_id:"${escapeQuotes(
+        agentPolicy.id
+      )}" AND (NOT upgrade_attempts:*) AND (${statusKuery} OR ${oldStuckInUpdatingKuery} OR ${newStuckInUpdatingKuery})`,
       perPage: AGENTS_BATCHSIZE,
       sortField: 'agent.version',
       sortOrder: 'asc',
@@ -438,7 +443,9 @@ export class AutomaticAgentUpgradeTask {
     let retriedAgentsCounter = 0;
 
     const retryingAgentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
-      kuery: `policy_id:${agentPolicy.id} AND upgrade_details.target_version:${version} AND upgrade_details.state:UPG_FAILED AND upgrade_attempts:*`,
+      kuery: `policy_id:"${escapeQuotes(
+        agentPolicy.id
+      )}" AND upgrade_details.target_version:${version} AND upgrade_details.state:UPG_FAILED AND upgrade_attempts:*`,
       perPage: AGENTS_BATCHSIZE,
       sortField: 'agent.version',
       sortOrder: 'asc',

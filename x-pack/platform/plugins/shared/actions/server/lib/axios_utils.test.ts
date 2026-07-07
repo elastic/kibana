@@ -8,7 +8,7 @@
 import type { AxiosInstance } from 'axios';
 import axios, { AxiosError } from 'axios';
 import { Agent as HttpsAgent } from 'https';
-import HttpProxyAgent from 'http-proxy-agent';
+import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import type { Logger } from '@kbn/core/server';
 import {
@@ -21,7 +21,6 @@ import {
 } from './axios_utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
-import { getCustomAgents } from './get_custom_agents';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
 
 const TestUrl = 'https://elastic.co/foo/bar/baz';
@@ -165,7 +164,6 @@ describe('request', () => {
       proxyBypassHosts: undefined,
       proxyOnlyHosts: undefined,
     });
-    const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger, TestUrl);
 
     const res = await request({
       axios,
@@ -173,6 +171,8 @@ describe('request', () => {
       logger,
       configurationUtilities,
     });
+
+    const { httpAgent, httpsAgent } = axiosMock.mock.calls[0][1];
 
     expect(axiosMock).toHaveBeenCalledWith(TestUrl, {
       method: 'get',

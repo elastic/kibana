@@ -34,6 +34,7 @@ import {
   getRequestStartLineNumber,
   getUrlParamsCompletionItems,
   getUrlPathCompletionItems,
+  isRequestLineStart,
   replaceRequestVariables,
   SELECTED_REQUESTS_CLASSNAME,
   shouldTriggerSuggestions,
@@ -113,6 +114,10 @@ export class MonacoEditorActionsProvider {
       }
       if (this.isDevMode && event.keyCode === monaco.KeyCode.F1) {
         this.editor.trigger(INSPECT_TOKENS_LABEL, INSPECT_TOKENS_HANDLER_ID, {});
+      }
+      // trigger autocomplete on dot (period) for nested field suggestions
+      if (event.keyCode === monaco.KeyCode.Period) {
+        debouncedTriggerSuggestions();
       }
     });
   }
@@ -493,9 +498,16 @@ export class MonacoEditorActionsProvider {
     const currentRequests = await this.getRequestsBetweenLines(model, lineNumber, lineNumber);
     const currentRequest = currentRequests.at(0);
 
-    // if there is no request, suggest method
+    // if there is no request, only suggest method when the line could plausibly
+    // be the start of a new request (empty or starting with letters). A line
+    // that starts with `"`, `{`, `[`, etc. is body-like content and must not
+    // trigger method suggestions.
+    // https://github.com/elastic/kibana/issues/186767
     if (!currentRequest) {
-      return AutocompleteType.METHOD;
+      if (isRequestLineStart(model.getLineContent(lineNumber))) {
+        return AutocompleteType.METHOD;
+      }
+      return null;
     }
 
     // if on the 1st line of the request, suggest method, url or url_params depending on the content
@@ -508,9 +520,17 @@ export class MonacoEditorActionsProvider {
         endLineNumber: lineNumber,
         endColumn: column,
       });
+      const fullLineContent = model.getLineContent(lineNumber);
       const lineTokens = getLineTokens(lineContent);
-      // if there is 1 or fewer tokens, suggest method
+      // if there is 1 or fewer tokens, suggest method — but only when the
+      // full line could plausibly start a request. The parser produces a
+      // partial request (`startOffset` only) on lines that begin with `"`, `{`,
+      // `[`, etc., so this branch is reached even for body-like content.
+      // https://github.com/elastic/kibana/issues/186767
       if (lineTokens.length <= 1) {
+        if (!isRequestLineStart(fullLineContent)) {
+          return null;
+        }
         return AutocompleteType.METHOD;
       }
       // if there are 2 tokens, look at the 2nd one and suggest path or url_params

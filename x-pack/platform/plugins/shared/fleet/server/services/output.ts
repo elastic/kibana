@@ -5,8 +5,9 @@
  * 2.0.
  */
 import { v5 as uuidv5 } from 'uuid';
+import { escapeQuotes } from '@kbn/es-query';
 import { omit } from 'lodash';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import deepEqual from 'fast-deep-equal';
 import { indexBy } from 'lodash/fp';
 
@@ -58,7 +59,7 @@ import {
   FLEET_SERVER_PACKAGE,
 } from '../../common/constants';
 import type { ValueOf } from '../../common/types';
-import { normalizeHostsForAgents } from '../../common/services';
+import { normalizeHostsForAgents, validateFleetSavedObjectId } from '../../common/services';
 import {
   FleetEncryptedSavedObjectEncryptionKeyRequired,
   OutputInvalidError,
@@ -144,12 +145,19 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   const internalSoClientWithoutSpaceExtension =
     appContextService.getInternalUserSOClientWithoutSpaceExtension();
   let agentPoliciesKuery: string;
-  const packagePoliciesKuery: string = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${outputId}"`;
+  let packagePoliciesKuery: string | undefined;
   if (outputId) {
+    packagePoliciesKuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${escapeQuotes(
+      outputId
+    )}"`;
     if (isDefault) {
-      agentPoliciesKuery = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}" or not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
+      agentPoliciesKuery = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${escapeQuotes(
+        outputId
+      )}" or not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
     } else {
-      agentPoliciesKuery = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}"`;
+      agentPoliciesKuery = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${escapeQuotes(
+        outputId
+      )}"`;
     }
   } else {
     if (isDefault) {
@@ -170,11 +178,13 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   // Get package policies using output and derive agent policies from that which
   // are not already identfied above. The IDs cannot be used as part of the kuery
   // above since the underlying saved object client .find() only filters on attributes
-  const packagePolicySOs = await packagePolicyService.list(internalSoClientWithoutSpaceExtension, {
-    kuery: packagePoliciesKuery,
-    perPage: SO_SEARCH_LIMIT,
-    spaceId: '*',
-  });
+  const packagePolicySOs = packagePoliciesKuery
+    ? await packagePolicyService.list(internalSoClientWithoutSpaceExtension, {
+        kuery: packagePoliciesKuery,
+        perPage: SO_SEARCH_LIMIT,
+        spaceId: '*',
+      })
+    : undefined;
   const agentPolicyIdsFromPackagePolicies = [
     ...new Set(
       packagePolicySOs?.items.reduce((acc: string[], packagePolicy) => {
@@ -464,17 +474,21 @@ class OutputService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient
   ) {
-    const outputs = await this.list(soClient);
+    // Query the default outputs directly to avoid decrypting every output in the cluster.
+    const [defaultDataOutputs, defaultMonitoringOutputs] = await Promise.all([
+      this._getDefaultDataOutputsSO(),
+      this._getDefaultMonitoringOutputsSO(soClient),
+    ]);
 
-    const defaultOutput = outputs.items.find((o) => o.is_default);
-    const defaultMonitoringOutput = outputs.items.find((o) => o.is_default_monitoring);
+    const defaultOutput = defaultDataOutputs.saved_objects[0];
+    const hasDefaultMonitoringOutput = defaultMonitoringOutputs.saved_objects.length > 0;
 
     if (!defaultOutput) {
       const newDefaultOutput = {
         ...DEFAULT_OUTPUT,
         hosts: this.getDefaultESHosts(),
         ca_sha256: appContextService.getConfig()!.agents.elasticsearch.ca_sha256,
-        is_default_monitoring: !defaultMonitoringOutput,
+        is_default_monitoring: !hasDefaultMonitoringOutput,
       } as NewOutput;
 
       return await this.create(soClient, esClient, newDefaultOutput, {
@@ -483,7 +497,7 @@ class OutputService {
       });
     }
 
-    return defaultOutput;
+    return outputSavedObjectToOutput(defaultOutput);
   }
 
   public getDefaultESHosts(): string[] {
@@ -533,12 +547,14 @@ class OutputService {
     const logger = appContextService.getLogger();
     logger.debug(`Creating new output`);
 
+    validateFleetSavedObjectId(options?.id);
+
     const data: OutputSOAttributes = { ...omit(output, ['ssl', 'secrets']) };
 
     if (outputTypeSupportPresets(data.type)) {
       if (
         data.preset === 'balanced' &&
-        outputYmlIncludesReservedPerformanceKey(output.config_yaml ?? '', load)
+        outputYmlIncludesReservedPerformanceKey(output.config_yaml ?? '', parse)
       ) {
         throw new OutputInvalidError(
           `preset cannot be balanced when config_yaml contains one of ${RESERVED_CONFIG_YML_KEYS.join(
@@ -614,12 +630,12 @@ class OutputService {
       data.shipper = null;
     }
 
-    if (!data.preset && data.type === outputType.Elasticsearch) {
-      data.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', load);
+    if (!data.preset && outputTypeSupportPresets(data.type)) {
+      data.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', parse);
     }
 
     if (output.config_yaml) {
-      const configJs = load(output.config_yaml);
+      const configJs = parse(output.config_yaml);
       const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
 
       if (isShipperDisabled && output.shipper) {
@@ -899,7 +915,7 @@ class OutputService {
     if (updateData.type && outputTypeSupportPresets(updateData.type)) {
       if (
         updateData.preset === 'balanced' &&
-        outputYmlIncludesReservedPerformanceKey(updateData.config_yaml ?? '', load)
+        outputYmlIncludesReservedPerformanceKey(updateData.config_yaml ?? '', parse)
       ) {
         throw new OutputInvalidError(
           `preset cannot be balanced when config_yaml contains one of ${RESERVED_CONFIG_YML_KEYS.join(
@@ -1086,8 +1102,8 @@ class OutputService {
       }
     }
 
-    if (!data.preset && data.type === outputType.Elasticsearch) {
-      updateData.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', load);
+    if (!data.preset && data.type && outputTypeSupportPresets(data.type)) {
+      updateData.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', parse);
     }
 
     // Remove the shipper data if the shipper is not enabled from the yaml config
@@ -1095,7 +1111,7 @@ class OutputService {
       updateData.shipper = null;
     }
     if (data.config_yaml) {
-      const configJs = load(data.config_yaml);
+      const configJs = parse(data.config_yaml);
       const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
 
       if (isShipperDisabled && data.shipper) {
@@ -1168,12 +1184,33 @@ class OutputService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient
   ) {
-    const outputs = await this.list(soClient);
+    // Only ES/remote-ES outputs missing a preset need backfilling. Query for just those to avoid
+    // decrypting every output, and bail out early when there are none.
+    const outputsWithoutPreset = await this.encryptedSoClient.find<OutputSOAttributes>({
+      type: OUTPUT_SAVED_OBJECT_TYPE,
+      perPage: SO_SEARCH_LIMIT,
+      filter:
+        `(${OUTPUT_SAVED_OBJECT_TYPE}.attributes.type:${outputType.Elasticsearch} or ` +
+        `${OUTPUT_SAVED_OBJECT_TYPE}.attributes.type:${outputType.RemoteElasticsearch}) and ` +
+        `not ${OUTPUT_SAVED_OBJECT_TYPE}.attributes.preset:*`,
+    });
+
+    if (!outputsWithoutPreset.saved_objects.length) {
+      return;
+    }
+
+    for (const output of outputsWithoutPreset.saved_objects) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'get',
+        id: output.id,
+        savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+      });
+    }
 
     await pMap(
-      outputs.items.filter((output) => outputTypeSupportPresets(output.type) && !output.preset),
+      outputsWithoutPreset.saved_objects.map<Output>(outputSavedObjectToOutput),
       async (output) => {
-        const preset = getDefaultPresetForEsOutput(output.config_yaml ?? '', load);
+        const preset = getDefaultPresetForEsOutput(output.config_yaml ?? '', parse);
 
         await outputService.update(
           soClient,

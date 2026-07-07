@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { sha256 } from 'js-sha256';
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
+import { createHash } from 'crypto';
 import type { MonitorUpdateEvent } from '../../telemetry/types';
 
 import { TelemetryEventsSender } from '../../telemetry/sender';
@@ -102,7 +102,7 @@ export function formatTelemetryEvent({
             },
           }))
         : undefined,
-    configId: sha256.create().update(monitor.id).hex(),
+    configId: createHash('sha256').update(monitor.id).digest('hex'),
     revision: attributes[ConfigKey.REVISION],
   };
 }
