@@ -52,6 +52,9 @@ export function useRelayAppConnection(): UseRelayAppConnection {
     retry: false,
     refetchInterval: (data) => {
       const stillInProgress = data?.status === RELAY_APP_CONNECTION_STATUS.oauthInProgress;
+      if (stillInProgress && !pollDeadlineRef.current) {
+        pollDeadlineRef.current = Date.now() + POLL_TIMEOUT_MS;
+      }
       return stillInProgress && Date.now() < pollDeadlineRef.current ? POLL_INTERVAL_MS : false;
     },
   });
