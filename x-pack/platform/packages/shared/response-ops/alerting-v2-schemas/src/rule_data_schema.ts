@@ -110,7 +110,12 @@ export const recoveryStrategySchema = z.enum(['no_breach', 'query', 'none']);
 export const recoveryStrategy = recoveryStrategySchema.enum;
 export type RecoveryStrategy = z.infer<typeof recoveryStrategySchema>;
 
-/** No-data strategy. */
+/**
+ * No-data strategy.
+ *
+ * Note: `'emit'` is a valid stored/engine value but is temporarily rejected as
+ * write-API input (create/update).
+ */
 export const noDataStrategySchema = z.enum(['last_known_status', 'emit', 'recover', 'none']);
 export const noDataStrategy = noDataStrategySchema.enum;
 export type NoDataStrategy = z.infer<typeof noDataStrategySchema>;
@@ -453,6 +458,11 @@ export const isNoDataQueryProvidedForStrategy = (data: {
   return data.query?.no_data != null;
 };
 
+/** `no_data_strategy: 'emit'` is temporarily not accepted (see `noDataStrategySchema`). */
+export const isNoDataStrategyNotEmit = (data: {
+  no_data_strategy?: NoDataStrategy | null;
+}): boolean => data.no_data_strategy !== noDataStrategy.emit;
+
 export const createRuleDataSchema = createRuleDataBaseSchema
   .refine(isStateTransitionAllowed, {
     message: 'state_transition is only allowed when kind is "alert".',
@@ -482,6 +492,10 @@ export const createRuleDataSchema = createRuleDataBaseSchema
     message:
       'query.no_data is required when no_data_strategy is not "none" for standalone-format rules.',
     path: ['query', 'no_data'],
+  })
+  .refine(isNoDataStrategyNotEmit, {
+    message: 'no_data_strategy "emit" is not currently supported.',
+    path: ['no_data_strategy'],
   });
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
@@ -519,7 +533,13 @@ export const updateRuleDataSchema = z
     schedule: scheduleSchema.partial().optional().nullable(),
     query: querySchema.optional(),
     recovery_strategy: recoveryStrategySchema.optional().nullable(),
-    no_data_strategy: noDataStrategySchema.optional().nullable(),
+    // `'emit'` is temporarily rejected (see `noDataStrategySchema`).
+    no_data_strategy: noDataStrategySchema
+      .refine((value) => value !== noDataStrategy.emit, {
+        message: 'no_data_strategy "emit" is not currently supported.',
+      })
+      .optional()
+      .nullable(),
     state_transition: stateTransitionSchema.nullable(),
     grouping: groupingSchema.optional().nullable(),
     artifacts: z.array(artifactSchema).max(100).optional().nullable(),

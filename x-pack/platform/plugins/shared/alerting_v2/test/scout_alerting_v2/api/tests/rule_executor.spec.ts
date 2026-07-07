@@ -1231,7 +1231,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         buildCreateRuleData({
           metadata: { name: 'executor-query-gap' },
           recovery_strategy: 'query',
-          no_data_strategy: 'emit',
+          no_data_strategy: 'last_known_status',
           query: {
             format: 'standalone',
             breach: {
@@ -1333,7 +1333,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         buildCreateRuleData({
           metadata: { name: 'executor-no-breach-data-presence' },
           recovery_strategy: 'no_breach',
-          no_data_strategy: 'emit',
+          no_data_strategy: 'last_known_status',
           query: {
             format: 'standalone',
             breach: {
@@ -1427,7 +1427,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         buildCreateRuleData({
           metadata: { name: 'executor-query-no-data' },
           recovery_strategy: 'query',
-          no_data_strategy: 'emit',
+          no_data_strategy: 'last_known_status',
           query: {
             format: 'standalone',
             breach: {
@@ -2052,63 +2052,8 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     }
   );
 
-  apiTest("no_data_strategy 'emit' writes a no_data rule event", async ({ apiServices }) => {
-    const HOST = 'host-no-data-emit';
-
-    await apiServices.alertingV2.sourceIndex.indexDocs({
-      index: SOURCE_INDEX,
-      docs: [
-        {
-          '@timestamp': new Date().toISOString(),
-          'host.name': HOST,
-          severity: 'high',
-          value: 1,
-        },
-      ],
-    });
-
-    const rule = await apiServices.alertingV2.rules.create(
-      buildCreateRuleData({
-        metadata: { name: 'executor-no-data-emit' },
-        query: {
-          format: 'standalone',
-          breach: {
-            query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-          },
-          no_data: {
-            query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name`,
-          },
-        },
-        // Use recovery_strategy 'none' so the recovery step never fires.
-        recovery_strategy: 'none',
-        no_data_strategy: 'emit',
-      })
-    );
-
-    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
-
-    const breachedEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
-      status: 'breached',
-    });
-    const breachedHash = breachedEvents[0].group_hash;
-
-    await apiServices.alertingV2.sourceIndex.deleteDocs({
-      index: SOURCE_INDEX,
-      query: { term: { 'host.name': HOST } },
-    });
-
-    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'no_data' });
-
-    const noDataEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
-      status: 'no_data',
-    });
-
-    expect(noDataEvents.length).toBeGreaterThanOrEqual(1);
-    expect(noDataEvents[0].group_hash).toBe(breachedHash);
-  });
-
   apiTest(
-    "no_data_strategy 'last_known_status' emits the same no_data rule event as 'emit'",
+    "no_data_strategy 'last_known_status' writes a no_data rule event",
     async ({ apiServices }) => {
       const HOST = 'host-no-data-last-known';
 
