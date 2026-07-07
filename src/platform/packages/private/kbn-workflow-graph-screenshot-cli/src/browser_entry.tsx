@@ -19,8 +19,7 @@ import type { GraphConfig } from './page_template';
 // Data injected by the server's HTML template via custom-element `data` attributes
 // (see page_template.ts). Reading from attributes (rather than inline script globals)
 // is safe even when YAML content contains `</script>` literals.
-const yamlString: string =
-  document.querySelector('kbn-workflow-yaml')?.getAttribute('data') ?? '';
+const yamlString: string = document.querySelector('kbn-workflow-yaml')?.getAttribute('data') ?? '';
 
 const graphConfig: GraphConfig = JSON.parse(
   document.querySelector('kbn-graph-config')?.getAttribute('data') ?? '{"transparent":false}'
