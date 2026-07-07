@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlyoutHeader } from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
@@ -45,9 +45,9 @@ export const AnomalyInsights = memo(
             iconType={ICON_TYPE[entityType]}
           />
         </EuiFlyoutHeader>
-        <div className="eui-yScroll" data-test-subj={ANOMALY_INSIGHTS_TOOL_TEST_ID}>
+        <EuiFlyoutBody data-test-subj={ANOMALY_INSIGHTS_TOOL_TEST_ID}>
           <AnomaliesTab entityId={entityId ?? ''} entityType={entityType} />
-        </div>
+        </EuiFlyoutBody>
       </>
     );
   }
