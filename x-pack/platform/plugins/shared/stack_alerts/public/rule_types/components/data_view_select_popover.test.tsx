@@ -39,12 +39,12 @@ const selectedDataView = {
   getName: () => 'kibana_sample_data_logs',
 } as unknown as DataView;
 
-const dataViewIds = [
-  'mock-data-logs-id',
-  'mock-ecommerce-id',
-  'mock-test-id',
-  'mock-ad-hoc-id',
-  'mock-ad-hoc-esql-id',
+const dataViewListItems = [
+  { id: 'mock-data-logs-id', title: 'kibana_sample_data_logs' },
+  { id: 'mock-ecommerce-id', title: 'kibana_sample_data_ecommerce' },
+  { id: 'mock-test-id', title: 'test' },
+  { id: 'mock-ad-hoc-id', title: 'ad-hoc data view' },
+  { id: 'mock-ad-hoc-esql-id', title: 'ad-hoc data view esql', type: ESQL_TYPE },
 ];
 
 const dataViewOptions = [
@@ -98,7 +98,9 @@ const dataViewOptions = [
 
 const mount = () => {
   const dataViewsMock = dataViewPluginMocks.createStartContract();
-  dataViewsMock.getIds = jest.fn().mockImplementation(() => Promise.resolve(dataViewIds));
+  dataViewsMock.getIdsWithTitle = jest
+    .fn()
+    .mockImplementation(() => Promise.resolve(dataViewListItems));
   dataViewsMock.get = jest
     .fn()
     .mockImplementation((id: string) =>
@@ -123,20 +125,23 @@ describe('DataViewSelectPopover', () => {
     const { dataViewsMock } = mount();
 
     await waitFor(() => {
-      expect(dataViewsMock.getIds).toHaveBeenCalled();
+      expect(dataViewsMock.getIdsWithTitle).toHaveBeenCalled();
     });
 
     expect(screen.getByTestId('selectDataViewExpression')).toBeInTheDocument();
 
-    const getIdsResult = await dataViewsMock.getIds.mock.results[0].value;
-    expect(getIdsResult).toBe(dataViewIds);
+    // Only the lightweight id/title listing should be used to populate the
+    // picker — it must not hydrate every data view via `get()`.
+    const getIdsWithTitleResult = await dataViewsMock.getIdsWithTitle.mock.results[0].value;
+    expect(getIdsWithTitleResult).toBe(dataViewListItems);
+    expect(dataViewsMock.get).not.toHaveBeenCalled();
   });
 
   test('should open a popover on click and display loaded data views', async () => {
     const { dataViewsMock } = mount();
 
     await waitFor(() => {
-      expect(dataViewsMock.getIds).toHaveBeenCalled();
+      expect(dataViewsMock.getIdsWithTitle).toHaveBeenCalled();
     });
 
     await userEvent.click(screen.getByTestId('selectDataViewExpression'));
@@ -144,7 +149,7 @@ describe('DataViewSelectPopover', () => {
     await screen.findByTestId('chooseDataViewPopoverContent');
 
     // Verify the DataViewSelector received the correct filtered data views
-    // (excludes flights which isn't in dataViewIds)
+    // (excludes flights which isn't in dataViewListItems)
     const lastCall = MockedDataViewSelector.mock.calls.at(-1)![0];
     const dataViewTitles = lastCall.dataViewsList.map((dv: { title: string }) => dv.title);
     expect(dataViewTitles).toEqual([

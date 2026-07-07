@@ -103,10 +103,12 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   const loadPersistedDataViews = useCallback(async () => {
     setLoadingDataViews(true);
     try {
-      // Calling getIds with refresh = true to make sure we don't get stale data
-      const ids = await dataViews.getIds(true);
-      const dataViewsList = await Promise.all(ids.map((id) => dataViews.get(id)));
-      setDataViewsItems(dataViewsList.map(toDataViewListItem));
+      // Calling with refresh = true to make sure we don't get stale data. This only
+      // fetches id/title metadata, it does not hydrate every data view's fields
+      // (see https://github.com/elastic/kibana/issues/276539) — full hydration
+      // happens on demand for the data view actually selected, in onChangeDataView.
+      const dataViewsList = await dataViews.getIdsWithTitle(true);
+      setDataViewsItems(dataViewsList);
     } catch (e) {
       // Error fetching data views
     }
