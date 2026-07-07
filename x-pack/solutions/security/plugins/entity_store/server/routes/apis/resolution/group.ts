@@ -67,6 +67,10 @@ export function registerResolutionGroup(router: EntityStorePluginRouter) {
       description: 'Get the resolution group for a given entity, returning all linked entities.',
       options: {
         tags: ['oas-tag:Security entity store'],
+        availability: {
+          since: '9.4.0',
+          stability: 'stable',
+        },
       },
       security: {
         authz: RESOLUTION_ENTITY_STORE_PERMISSIONS,

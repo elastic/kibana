@@ -23,6 +23,10 @@ export function registerResolutionRulesList(router: EntityStorePluginRouter) {
         'List managed entity resolution rules and their effective enabled state for this space.',
       options: {
         tags: ['oas-tag:Security entity store'],
+        availability: {
+          since: '9.5.0',
+          stability: 'stable',
+        },
       },
       security: {
         authz: RESOLUTION_ENTITY_STORE_PERMISSIONS,

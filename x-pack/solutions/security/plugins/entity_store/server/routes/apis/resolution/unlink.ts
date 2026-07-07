@@ -73,6 +73,10 @@ export function registerResolutionUnlink(router: EntityStorePluginRouter) {
         'visible on subsequent reads after the next index refresh (typically <1s).',
       options: {
         tags: ['oas-tag:Security entity store'],
+        availability: {
+          since: '9.4.0',
+          stability: 'stable',
+        },
       },
       security: {
         authz: RESOLUTION_ENTITY_STORE_PERMISSIONS,

@@ -25,6 +25,10 @@ export function registerResolutionRulesEnable(router: EntityStorePluginRouter) {
       description: 'Enable a managed entity resolution rule in this space.',
       options: {
         tags: ['oas-tag:Security entity store'],
+        availability: {
+          since: '9.5.0',
+          stability: 'stable',
+        },
       },
       security: {
         authz: RESOLUTION_ENTITY_STORE_PERMISSIONS,
