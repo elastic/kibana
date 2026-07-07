@@ -240,9 +240,10 @@ const getDataStreams = (client: IScopedClusterClient, name = '*') => {
 };
 
 const getDataStreamLifecycle = (client: IScopedClusterClient, name: string) => {
-  return client.asCurrentUser.indices.getDataLifecycle({
-    name,
-  });
+  // Only used to surface the cluster-wide max retention (`global_retention.max_retention`).
+  // Degrade to "no global retention" on missing privileges/older ES rather than failing the
+  // whole data streams request.
+  return client.asCurrentUser.indices.getDataLifecycle({ name }).catch(() => undefined);
 };
 
 const getDataStreamsStats = (client: IScopedClusterClient, name = '*') => {
