@@ -226,7 +226,11 @@ export const Main: FunctionComponent<MainProps> = ({
   const handleDataSourceSave = useCallback(
     async (dataSource: DataSourceWithSecrets): Promise<string | null> => {
       try {
-        await dataClient.add(dataSource);
+        if (dataSourceFlyout.kind === 'edit') {
+          await dataClient.update(dataSource);
+        } else {
+          await dataClient.add(dataSource);
+        }
         setItems(await dataClient.get());
         setDataSourceFlyout({ kind: 'closed' });
         return null;
@@ -234,7 +238,7 @@ export const Main: FunctionComponent<MainProps> = ({
         return getFlyoutSaveErrorMessage(e);
       }
     },
-    [dataClient]
+    [dataClient, dataSourceFlyout.kind]
   );
 
   const handleEditDataSource = useCallback((item: DataSource) => {

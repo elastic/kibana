@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPageTemplate } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { Redirect } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -20,6 +20,10 @@ import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/us
 
 const libraryPageTitle = i18n.translate('workflowsManagement.libraryPage.pageTitle', {
   defaultMessage: 'Library',
+});
+
+const experimentalBadgeLabel = i18n.translate('workflowsManagement.libraryPage.experimentalBadge', {
+  defaultMessage: 'Experimental',
 });
 
 /**
@@ -57,7 +61,23 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
       data-test-subj="workflowLibraryCatalogBrowserPage"
       restrictWidth={false}
     >
-      <EuiPageTemplate.Header bottomBorder pageTitle={libraryPageTitle} />
+      <EuiPageTemplate.Header
+        bottomBorder
+        pageTitle={
+          <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="flexStart">
+            <EuiFlexItem grow={false}>{libraryPageTitle}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge
+                color="hollow"
+                iconType="flask"
+                data-test-subj="workflowLibraryExperimentalBadge"
+              >
+                {experimentalBadgeLabel}
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      />
       <EuiPageTemplate.Section paddingSize="m" grow>
         <CatalogBrowser onSelect={handleSelect} />
       </EuiPageTemplate.Section>
