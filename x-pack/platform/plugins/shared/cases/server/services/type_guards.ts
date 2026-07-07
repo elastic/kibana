@@ -67,7 +67,15 @@ export const isUnifiedAttachmentWithSoReference = (
 export const isUnifiedOnlyAttachment = (
   attributes: Partial<AttachmentAttributesV2> | Record<string, unknown>
 ): boolean => {
-  const type = getAttachmentTypeFromAttributes(attributes);
+  let type: string;
+  try {
+    type = getAttachmentTypeFromAttributes(attributes);
+  } catch {
+    // Type can't be resolved (e.g. a malformed request missing `type`). Such payloads
+    // are rejected downstream with a 400, so they are not unified-only here — this runs
+    // on the raw request body before decode, so it must not throw.
+    return false;
+  }
   const owner = (attributes as { owner?: string }).owner ?? '';
   if (isUnifiedOnlyAttachmentType(type, owner)) {
     return true;

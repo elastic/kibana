@@ -265,6 +265,20 @@ describe('isUnifiedOnlyAttachment', () => {
     expect(isUnifiedOnlyAttachment(createByReferenceLens())).toBe(true);
     expect(isUnifiedOnlyAttachment(createByReferenceLens(true))).toBe(true);
   });
+
+  // Runs on the raw request body (before decode), so a payload whose type can't be
+  // resolved must return false rather than throw — otherwise the route 500s instead of
+  // letting validation reject it with a 400.
+  it.each([
+    ['missing type', { owner: 'cases' }],
+    ['non-object', 'not-an-object'],
+    ['null', null],
+  ])('is false and does not throw for a malformed payload (%s)', (_desc, payload) => {
+    expect(() =>
+      isUnifiedOnlyAttachment(payload as unknown as Record<string, unknown>)
+    ).not.toThrow();
+    expect(isUnifiedOnlyAttachment(payload as unknown as Record<string, unknown>)).toBe(false);
+  });
 });
 
 describe('assertLegacyWriteableAttachmentType', () => {
