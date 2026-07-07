@@ -111,6 +111,10 @@ export const EditConnector = React.memo(
 
     const isOutlined = actionsVariant === 'outlined';
     const showEditAction = !isLoading && !isEdit && hasPushPermissions && canUseConnectors;
+    // In the outlined (side panel) presentation there's no preview content to edit
+    // when no connector has been selected yet, so the edit action is hidden until
+    // one is chosen (e.g. via the settings popover's "Add connector" action).
+    const showOutlinedEditAction = showEditAction && isValidConnector;
     const showPushAction =
       !hasErrorMessages && !isLoading && !isEdit && hasPushPermissions && canUseConnectors;
     // Nothing renders in the header row when there's no header and the edit action has
@@ -181,14 +185,14 @@ export const EditConnector = React.memo(
             />
           )}
           {isOutlined
-            ? (showEditAction || showPushAction) && (
+            ? (showOutlinedEditAction || showPushAction) && (
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup
                     gutterSize="s"
                     responsive={false}
                     data-test-subj="connector-outlined-actions"
                   >
-                    {showEditAction ? (
+                    {showOutlinedEditAction ? (
                       <EuiFlexItem grow={false}>
                         <EuiButton
                           data-test-subj="connector-edit-button"

@@ -35,7 +35,10 @@ const usePushToServiceMockRes: ReturnUsePushToService = {
 };
 
 const defaultProps: ConnectorFieldProps = {
-  caseData: basicCase,
+  caseData: {
+    ...basicCase,
+    connector: { ...basicCase.connector, id: 'servicenow-1' },
+  },
   caseConnectors,
   supportedActionConnectors: connectorsMock,
   isLoading: false,
@@ -144,6 +147,12 @@ describe('ConnectorField', () => {
     await user.click(screen.getByTestId('edit-connectors-cancel'));
 
     expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('does not show the edit button when no connector is selected', () => {
+    renderWithTestingProviders(<ConnectorField {...defaultProps} caseData={basicCase} />);
+
+    expect(screen.queryByTestId('connector-edit-button')).not.toBeInTheDocument();
   });
 
   it('shows the actions permission message when the user does not have access to case connectors', () => {
