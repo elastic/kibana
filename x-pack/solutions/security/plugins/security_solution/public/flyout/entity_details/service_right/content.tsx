@@ -12,10 +12,11 @@ import type { Entity } from '../../../../common/api/entity_analytics';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
+import type { EntityRiskScoresState } from '../../../entity_analytics/api/hooks/use_entity_risk_scores';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { SERVICE_PANEL_RISK_SCORE_QUERY_ID } from '.';
-import { ObservedEntity } from '../shared/components/observed_entity';
-import type { ObservedEntityData } from '../shared/components/observed_entity/types';
+import { ObservedEntity } from '../../../flyout_v2/entity/shared/components/observed_entity';
+import type { ObservedEntityData } from '../../../flyout_v2/entity/shared/components/observed_entity/types';
 import { useObservedServiceItems } from './hooks/use_observed_service_items';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { VisualizationsSection } from '../shared/components/right/visualizations_section';
@@ -28,6 +29,7 @@ interface ServicePanelContentProps {
   serviceName: string;
   observedService: ObservedEntityData<ServiceItem>;
   riskScoreState: RiskScoreState<EntityType.service>;
+  entityRiskScores: EntityRiskScoresState<EntityType.service>;
   recalculatingScore: boolean;
   contextID: string;
   scopeId: string;
@@ -45,6 +47,7 @@ export const ServicePanelContent = ({
   entityRecord,
   observedService,
   riskScoreState,
+  entityRiskScores,
   recalculatingScore,
   contextID,
   scopeId,
@@ -63,12 +66,13 @@ export const ServicePanelContent = ({
         <>
           <FlyoutRiskSummary
             riskScoreData={riskScoreState}
+            entityRiskScores={entityRiskScores}
             recalculatingScore={recalculatingScore}
             queryId={SERVICE_PANEL_RISK_SCORE_QUERY_ID}
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={isPreviewMode}
             entityType={EntityType.service}
-            entityId={entityRecord?.entity.id}
+            entityId={entityRecord?.entity?.id}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
           />
           <EuiHorizontalRule />
@@ -103,7 +107,7 @@ export const ServicePanelContent = ({
         />
       )}
       <ObservedEntity
-        observedData={{ ...observedService, entityId: entityRecord?.entity.id }}
+        observedData={{ ...observedService, entityId: entityRecord?.entity?.id }}
         contextID={contextID}
         scopeId={scopeId}
         observedFields={observedFields}

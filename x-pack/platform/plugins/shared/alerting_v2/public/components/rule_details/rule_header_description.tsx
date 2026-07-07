@@ -8,29 +8,10 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { RULE_KIND_ICONS, RULE_KIND_LABELS, RULE_KIND_TOOLTIPS } from '@kbn/alerting-v2-constants';
 import { useRule } from './rule_context';
+import type { RuleApiResponse } from '../../services/rules_api';
 
-const KIND_LABELS: Record<string, string> = {
-  signal: i18n.translate('xpack.alertingV2.ruleDetails.kindSignal', {
-    defaultMessage: 'Signal',
-  }),
-  alert: i18n.translate('xpack.alertingV2.ruleDetails.kindAlert', {
-    defaultMessage: 'Alert',
-  }),
-};
-
-const KIND_ICONS: Record<string, string> = {
-  signal: 'radar',
-  alert: 'bell',
-};
-
-const KIND_BADGE_TOOLTIP = i18n.translate('xpack.alertingV2.ruleDetails.kindBadgeTooltip', {
-  defaultMessage: 'Mode can be changed in the rule edit form',
-});
-
-/**
- * Renders the description and tags row below the page title.
- */
 export const RuleHeaderDescription: React.FC = () => {
   const rule = useRule();
   const { description, tags } = rule.metadata;
@@ -64,6 +45,28 @@ export const RuleHeaderDescription: React.FC = () => {
   );
 };
 
+export interface RuleKindBadgeProps {
+  kind: RuleApiResponse['kind'];
+}
+
+/**
+ * Hollow badge showing the rule kind, with its icon and a descriptive tooltip.
+ * Shared between the inline/summary title and the rule details app header.
+ */
+export const RuleKindBadge: React.FC<RuleKindBadgeProps> = ({ kind }) => (
+  <EuiToolTip content={RULE_KIND_TOOLTIPS[kind]}>
+    <EuiBadge
+      color="hollow"
+      iconType={RULE_KIND_ICONS[kind] ?? 'dot'}
+      iconSide="left"
+      tabIndex={0}
+      data-test-subj="kindBadge"
+    >
+      {RULE_KIND_LABELS[kind] ?? kind}
+    </EuiBadge>
+  </EuiToolTip>
+);
+
 export interface RuleTitleWithBadgesProps {
   /**
    * `'full'` (default) renders the rule name, kind, and status inline,
@@ -81,19 +84,7 @@ export const RuleTitleWithBadges: React.FC<RuleTitleWithBadgesProps> = ({ varian
   const rule = useRule();
   const isSummary = variant === 'summary';
 
-  const kindBadge = (
-    <EuiToolTip content={KIND_BADGE_TOOLTIP}>
-      <EuiBadge
-        color="hollow"
-        iconType={KIND_ICONS[rule.kind] ?? 'dot'}
-        iconSide="left"
-        tabIndex={0}
-        data-test-subj="kindBadge"
-      >
-        {KIND_LABELS[rule.kind] ?? rule.kind}
-      </EuiBadge>
-    </EuiToolTip>
-  );
+  const kindBadge = <RuleKindBadge kind={rule.kind} />;
 
   const statusBadge = rule.enabled ? (
     <EuiBadge color="success" data-test-subj="enabledBadge">
