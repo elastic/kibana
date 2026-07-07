@@ -21283,7 +21283,6 @@
     "xpack.fleet.integrations.packageUninstallErrorTitle": "Das Paket {title} konnte nicht deinstalliert werden",
     "xpack.fleet.integrations.packageUninstallSuccessDescription": "{title} wurde erfolgreich deinstalliert",
     "xpack.fleet.integrations.packageUninstallSuccessTitle": "Deinstalliert {title}",
-    "xpack.fleet.integrations.packageUpdateSuccessDescription": "{title} erfolgreich aktualisiert und Richtlinien aktualisiert",
     "xpack.fleet.integrations.packageUpdateSuccessTitle": "Aktualisierte {title} und aufgerüstete Richtlinien",
     "xpack.fleet.integrations.packageUpgradeSuccessDescription": "Erfolgreich aktualisiert {title}.",
     "xpack.fleet.integrations.packageUpgradeSuccessTitle": "Aktualisiert {title}",

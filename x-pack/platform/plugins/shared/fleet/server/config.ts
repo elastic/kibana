@@ -197,7 +197,7 @@ export const config: PluginConfigDescriptor = {
       ) {
         addDeprecation({
           configPath: 'xpack.fleet.experimentalFeatures.enableAgentlessPoliciesUI',
-          message: `Disabling [enableAgentlessPoliciesUI] while [disableAgentlessLegacyAPI] is enabled will cause agentless policy operations from the Fleet UI to be rejected by the server.`,
+          message: `When [enableAgentlessPoliciesUI] is disabled and [disableAgentlessLegacyAPI] is enabled, the server rejects agentless policy operations from the Fleet UI.`,
           correctiveActions: {
             manualSteps: [
               `Re-enable [xpack.fleet.experimentalFeatures.enableAgentlessPoliciesUI] or disable [xpack.fleet.experimentalFeatures.disableAgentlessLegacyAPI].`,

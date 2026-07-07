@@ -251,7 +251,7 @@ describe('Config schema', () => {
 
       expect(res.messages).toMatchInlineSnapshot(`
         Array [
-          "Disabling [enableAgentlessPoliciesUI] while [disableAgentlessLegacyAPI] is enabled will cause agentless policy operations from the Fleet UI to be rejected by the server.",
+          "When [enableAgentlessPoliciesUI] is disabled and [disableAgentlessLegacyAPI] is enabled, the server rejects agentless policy operations from the Fleet UI.",
         ]
       `);
     });

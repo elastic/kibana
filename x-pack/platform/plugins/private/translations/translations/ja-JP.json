@@ -21354,7 +21354,6 @@
     "xpack.fleet.integrations.packageUninstallErrorTitle": "{title}パッケージをアンインストールできませんでした",
     "xpack.fleet.integrations.packageUninstallSuccessDescription": "正常に{title}をアンインストールしました",
     "xpack.fleet.integrations.packageUninstallSuccessTitle": "{title}をアンインストールしました",
-    "xpack.fleet.integrations.packageUpdateSuccessDescription": "{title}の更新とポリシーのアップグレードが正常に実行されました",
     "xpack.fleet.integrations.packageUpdateSuccessTitle": "{title}の更新とポリシーのアップグレード",
     "xpack.fleet.integrations.packageUpgradeSuccessDescription": "正常にアップグレードされました{title}",
     "xpack.fleet.integrations.packageUpgradeSuccessTitle": "{title}がアップグレードされました",

@@ -21357,7 +21357,6 @@
     "xpack.fleet.integrations.packageUninstallErrorTitle": "无法卸载 {title} 软件包",
     "xpack.fleet.integrations.packageUninstallSuccessDescription": "已成功卸载 {title}",
     "xpack.fleet.integrations.packageUninstallSuccessTitle": "已卸载 {title}",
-    "xpack.fleet.integrations.packageUpdateSuccessDescription": "已成功更新 {title} 并升级了策略",
     "xpack.fleet.integrations.packageUpdateSuccessTitle": "已更新 {title} 并升级了策略",
     "xpack.fleet.integrations.packageUpgradeSuccessDescription": "已成功升级 {title}",
     "xpack.fleet.integrations.packageUpgradeSuccessTitle": "已升级 {title}",

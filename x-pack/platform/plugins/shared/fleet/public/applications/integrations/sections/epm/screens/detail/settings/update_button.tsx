@@ -223,7 +223,10 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
               'Fleet could not check {skippedNames} for upgrade. Upgrade {skippedCount, plural, one {it} other {them}} manually.',
             values: {
               skippedCount: agentlessGuardFailures.length,
-              skippedNames: agentlessGuardFailures.map((item) => item.name ?? item.id).join(', '),
+              skippedNames: i18n.formatList(
+                'conjunction',
+                agentlessGuardFailures.map((item) => item.name ?? item.id)
+              ),
             },
           }
         ),
@@ -256,8 +259,8 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
           text: toMountPoint(
             <FormattedMessage
               id="xpack.fleet.integrations.packageUpdateSuccessDescription"
-              defaultMessage="Successfully updated {title} and upgraded agent-based policies"
-              values={{ title }}
+              defaultMessage="Fleet upgraded {agentBasedPolicyCount, plural, one {# agent-based policy} other {# agent-based policies}}."
+              values={{ agentBasedPolicyCount: packagePolicyIdsToUpdate.length }}
             />,
             startServices
           ),
@@ -267,14 +270,13 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
           title: i18n.translate(
             'xpack.fleet.integrations.settings.errorUpdatingPoliciesToast.title',
             {
-              defaultMessage: 'Error updating agent-based policies',
+              defaultMessage: 'Error upgrading agent-based policies',
             }
           ),
           toastMessage: i18n.translate(
             'xpack.fleet.integrations.settings.errorUpdatingPoliciesToast.message',
             {
-              defaultMessage:
-                'Agent-based integration policies need to be manually updated. \n Error: {error}',
+              defaultMessage: 'Upgrade agent-based integration policies manually.\nError: {error}',
               values: {
                 error: error.message,
               },
@@ -309,7 +311,10 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
                   'Fleet could not upgrade {failedNames}. Upgrade {failedCount, plural, one {it} other {them}} manually.{errorMessage}',
                 values: {
                   failedCount: failed.length,
-                  failedNames: failed.map((result) => result.name ?? result.id).join(', '),
+                  failedNames: i18n.formatList(
+                    'conjunction',
+                    failed.map((result) => result.name ?? result.id)
+                  ),
                   errorMessage: firstErrorMessage ? `\nError: ${firstErrorMessage}` : '',
                 },
               }
@@ -330,8 +335,8 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
           text: toMountPoint(
             <FormattedMessage
               id="xpack.fleet.integrations.agentlessPackageUpdateSuccessDescription"
-              defaultMessage="Successfully updated {title} and upgraded agentless policies"
-              values={{ title }}
+              defaultMessage="Fleet upgraded {agentlessPolicyCount, plural, one {# agentless policy} other {# agentless policies}}."
+              values={{ agentlessPolicyCount: agentlessIdsToUpgrade.length }}
             />,
             startServices
           ),
@@ -347,8 +352,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
           toastMessage: i18n.translate(
             'xpack.fleet.integrations.settings.errorUpdatingAgentlessPoliciesToast.exceptionMessage',
             {
-              defaultMessage:
-                'Agentless integration policies need to be manually updated. \n Error: {error}',
+              defaultMessage: 'Upgrade agentless integration policies manually.\nError: {error}',
               values: {
                 error: error.message,
               },
@@ -468,7 +472,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
             <EuiSpacer size="m" />
             <FormattedMessage
               id="xpack.fleet.integrations.settings.confirmUpdateModal.policyTypeBreakdown"
-              defaultMessage="This includes {agentBasedCountText} and {agentlessCountText}."
+              defaultMessage="These policies include {agentBasedCountText} and {agentlessCountText}."
               values={{
                 agentBasedCountText: (
                   <strong>

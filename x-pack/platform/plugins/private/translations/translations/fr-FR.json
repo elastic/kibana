@@ -21234,7 +21234,6 @@
     "xpack.fleet.integrations.packageUninstallErrorTitle": "Échec de la désinstallation du package {title}",
     "xpack.fleet.integrations.packageUninstallSuccessDescription": "Désinstallation de {title} terminée",
     "xpack.fleet.integrations.packageUninstallSuccessTitle": "{title} désinstallé",
-    "xpack.fleet.integrations.packageUpdateSuccessDescription": "Mise à jour de {title} et mise à niveau des politiques réussies",
     "xpack.fleet.integrations.packageUpdateSuccessTitle": "{title} mis à jour et politiques mises à niveau",
     "xpack.fleet.integrations.packageUpgradeSuccessDescription": "Mise à niveau de {title} réussie",
     "xpack.fleet.integrations.packageUpgradeSuccessTitle": "{title} mis à niveau",
