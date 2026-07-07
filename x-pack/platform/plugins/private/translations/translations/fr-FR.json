@@ -42786,7 +42786,6 @@
     "xpack.securitySolution.entityAnalytics.threatHunting.leads.generatingDescription": "Analyse des entités, des scores de risque et des alertes afin de faire émerger des pistes de chasse…",
     "xpack.securitySolution.entityAnalytics.threatHunting.leads.loading": "Chargement…",
     "xpack.securitySolution.entityAnalytics.threatHunting.leads.noDataDescription": "Aucune entité, score de risque ou alerte n'a été trouvée pour générer des pistes de recherche. Assurez-vous que le stockage d'entités et le moteur de risque sont activés avec des données disponibles.",
-    "xpack.securitySolution.entityAnalytics.threatHunting.leads.noDataTitle": "Aucune donnée trouvée",
     "xpack.securitySolution.entityAnalytics.threatHunting.leads.scheduleUpdateError": "Impossible de mettre à jour le calendrier",
     "xpack.securitySolution.entityAnalytics.threatHunting.leads.searchPlaceholder": "Recherche de pistes…",
     "xpack.securitySolution.entityAnalytics.threatHunting.leads.staleness.expired": "Expiré",

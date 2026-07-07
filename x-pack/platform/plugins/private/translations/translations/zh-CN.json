@@ -43076,7 +43076,6 @@
     "xpack.securitySolution.entityAnalytics.threatHunting.leads.generatingDescription": "分析实体、风险评分和告警，以发现威胁猎捕线索……",
     "xpack.securitySolution.entityAnalytics.threatHunting.leads.loading": "正在加载……",
     "xpack.securitySolution.entityAnalytics.threatHunting.leads.noDataDescription": "未发现实体、风险评分或告警能产生威胁猎捕线索。确保实体存储和风险引擎已启用且数据可用。",
-    "xpack.securitySolution.entityAnalytics.threatHunting.leads.noDataTitle": "未找到数据",
     "xpack.securitySolution.entityAnalytics.threatHunting.leads.scheduleUpdateError": "未能更新计划",
     "xpack.securitySolution.entityAnalytics.threatHunting.leads.searchPlaceholder": "搜索线索...",
     "xpack.securitySolution.entityAnalytics.threatHunting.leads.staleness.expired": "已过期",
