@@ -145,6 +145,7 @@ export const Content = ({
             entityId={entityStoreEntityId}
             isPreviewMode={isPreviewMode}
             openDetailsPanel={openDetailsPanel}
+            hideHeaderIcons={hideHeaderIcons}
           />
         </>
       )}
