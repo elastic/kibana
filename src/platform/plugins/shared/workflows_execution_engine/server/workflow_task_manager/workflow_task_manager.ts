@@ -23,6 +23,14 @@ export { getWorkflowRunTaskId } from './get_workflow_run_task_id';
 export const getWorkflowGlobalTimeoutResumeTaskId = (workflowExecutionId: string): string =>
   `workflow-global-timeout-${workflowExecutionId}`;
 
+/**
+ * Stable task id / deduplication key for any immediate `workflow:resume` (no runAt).
+ * Using a deterministic id makes scheduleImmediateResume idempotent (removeIfExists + schedule)
+ * so concurrent callers cannot create two resume tasks for the same execution.
+ */
+export const getWorkflowImmediateResumeTaskId = (workflowExecutionId: string): string =>
+  `workflow-immediate-resume-${workflowExecutionId}`;
+
 export class WorkflowTaskManager {
   constructor(private taskManager: TaskManagerStartContract) {}
 
@@ -185,6 +193,12 @@ export class WorkflowTaskManager {
     );
   }
 
+  /**
+   * Schedules an immediate `workflow:resume` for the given execution using a stable,
+   * deterministic task id. Calls `removeIfExists` before scheduling so concurrent
+   * callers cannot create two resume tasks for the same execution: the last writer wins
+   * and there is always exactly one immediate-resume task outstanding per execution.
+   */
   async scheduleImmediateResume({
     executionId,
     spaceId,
@@ -194,9 +208,13 @@ export class WorkflowTaskManager {
     spaceId: string;
     fakeRequest?: KibanaRequest;
   }): Promise<{ taskId: string }> {
+    const taskId = getWorkflowImmediateResumeTaskId(executionId);
+
+    await this.taskManager.removeIfExists(taskId);
+
     const task = await this.taskManager.schedule(
       {
-        id: v4(),
+        id: taskId,
         taskType: WORKFLOW_RESUME_TASK_TYPE,
         params: {
           workflowRunId: executionId,
@@ -211,6 +229,25 @@ export class WorkflowTaskManager {
     return {
       taskId: task.id,
     };
+  }
+
+  /**
+   * Schedules an immediate `workflow:resume` and nudges Task Manager to claim it
+   * right away via `runSoon`. Every call site that wants a deterministic, immediate
+   * parent resume should use this instead of calling `scheduleImmediateResume` +
+   * `runSoon` separately — keeping them together prevents callers from forgetting the nudge.
+   */
+  async scheduleAndRunImmediateResume({
+    executionId,
+    spaceId,
+    fakeRequest,
+  }: {
+    executionId: string;
+    spaceId: string;
+    fakeRequest?: KibanaRequest;
+  }): Promise<void> {
+    const { taskId } = await this.scheduleImmediateResume({ executionId, spaceId, fakeRequest });
+    await this.taskManager.runSoon(taskId);
   }
 
   async forceRunIdleTasks(
@@ -268,12 +305,11 @@ export class WorkflowTaskManager {
     }
 
     if (options?.spaceId) {
-      const { taskId } = await this.scheduleImmediateResume({
+      await this.scheduleAndRunImmediateResume({
         executionId: workflowExecutionId,
         spaceId: options.spaceId,
         fakeRequest: options.fakeRequest,
       });
-      await this.taskManager.runSoon(taskId);
     }
   }
 }
