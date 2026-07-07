@@ -39,7 +39,7 @@ interface VegaLoader {
 }
 type ViewCtor = new (
   runtime: object,
-  opts: { renderer: 'none'; logger: unknown; loader: VegaLoader }
+  opts: { renderer: 'none'; logger: unknown; loader: VegaLoader; expr: unknown }
 ) => VegaView;
 
 interface ValidationRequest {
@@ -50,6 +50,12 @@ interface VegaLibs {
   compile: CompileFn;
   parse: ParseFn;
   View: ViewCtor;
+  /**
+   * `vega-interpreter`'s AST interpreter, passed to the `View` as `expr` so
+   * spec expressions are evaluated by the interpreter instead of Vega's default
+   * `new Function()` codegen — see the security note on `validate` below.
+   */
+  expressionInterpreter: unknown;
 }
 
 let libs: Promise<VegaLibs> | undefined;
@@ -57,11 +63,21 @@ let libs: Promise<VegaLibs> | undefined;
 const loadLibs = () => {
   if (!libs) {
     libs = (async () => {
-      const [vegaLite, vega] = (await Promise.all([
+      const [vegaLite, vega, vegaInterpreter] = (await Promise.all([
         dynamicImport('vega-lite'),
         dynamicImport('vega'),
-      ])) as [{ compile: CompileFn }, { parse: ParseFn; View: ViewCtor }];
-      return { compile: vegaLite.compile, parse: vega.parse, View: vega.View };
+        dynamicImport('vega-interpreter'),
+      ])) as [
+        { compile: CompileFn },
+        { parse: ParseFn; View: ViewCtor },
+        { expressionInterpreter: unknown }
+      ];
+      return {
+        compile: vegaLite.compile,
+        parse: vega.parse,
+        View: vega.View,
+        expressionInterpreter: vegaInterpreter.expressionInterpreter,
+      };
     })();
   }
   return libs;
@@ -121,7 +137,7 @@ const createCollectingLogger = (warnings: string[]) => ({
 });
 
 const validate = async (
-  { compile, parse, View }: VegaLibs,
+  { compile, parse, View, expressionInterpreter }: VegaLibs,
   spec: Record<string, unknown>
 ): Promise<string[]> => {
   const warnings: string[] = [];
@@ -130,10 +146,20 @@ const validate = async (
   // Vega-Lite compile: catches invalid marks/encodings/transforms/scales.
   const { spec: vegaSpec } = compile(inlineData(spec), { logger });
 
-  // Vega render (headless, AST interpreter so no eval/CSP concerns): catches
-  // render-time errors compilation cannot, e.g. bad expressions or transforms.
+  // Vega render (headless): catches render-time errors compilation cannot, e.g.
+  // bad expressions or transforms. `{ ast: true }` alone only stores expressions
+  // as an AST — Vega still evaluates them via `new Function()` codegen unless the
+  // `View` is also given `expr: expressionInterpreter`. Since these specs are
+  // LLM-authored from (untrusted, prompt-injectable) user input and this runs on
+  // the Kibana server, we pass the interpreter so spec expressions never reach
+  // codegen — matching the Vega plugin's `vega_base_view.js` CSP-safe config.
   const runtime = parse(vegaSpec, undefined, { ast: true });
-  const view = new View(runtime, { renderer: 'none', logger, loader: createRejectingLoader() });
+  const view = new View(runtime, {
+    renderer: 'none',
+    logger,
+    loader: createRejectingLoader(),
+    expr: expressionInterpreter,
+  });
   await view.runAsync();
   view.finalize();
 

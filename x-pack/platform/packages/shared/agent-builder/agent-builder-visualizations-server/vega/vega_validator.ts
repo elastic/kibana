@@ -32,6 +32,15 @@ interface WorkerResponse {
  */
 const WORKER_PATH = require.resolve('./vega_validator_wrapper.js');
 const VALIDATION_TIMEOUT_MS = 10_000;
+/**
+ * Cap the worker's JS heap. A crafted spec (e.g. a huge `sequence` data
+ * generator plus a `window` transform) can otherwise balloon to Node's
+ * multi-GB default before the timeout fires — the timeout bounds CPU time, not
+ * allocation. At 128 MB such a spec is killed fast and only the worker dies
+ * (`exit`/`error` fail open), instead of letting aggregate RSS grow until the
+ * OS OOM-killer takes the whole Kibana process.
+ */
+const WORKER_MAX_OLD_GEN_MB = 128;
 
 /**
  * Compile a Vega-Lite spec to Vega and run it headless in a worker thread to
@@ -53,7 +62,9 @@ export const validateVegaSpec = async ({
 }): Promise<VegaValidationResult> => {
   let worker: Worker;
   try {
-    worker = new Worker(WORKER_PATH);
+    worker = new Worker(WORKER_PATH, {
+      resourceLimits: { maxOldGenerationSizeMb: WORKER_MAX_OLD_GEN_MB },
+    });
   } catch (error) {
     logger.warn(
       `Could not start Vega validator worker: ${error instanceof Error ? error.message : error}`

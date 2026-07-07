@@ -89,6 +89,18 @@ describe('validateVegaSpec', () => {
     expect(mockWorkerInstances).toHaveLength(2);
   });
 
+  it('caps the worker heap so a memory-bomb spec cannot exhaust the host', async () => {
+    const promise = validateVegaSpec({ spec: { mark: 'bar' }, logger });
+    lastWorker().emit('message', { ok: true, warnings: [] });
+    await promise;
+
+    const { Worker } = jest.requireMock('node:worker_threads');
+    expect(Worker).toHaveBeenLastCalledWith(
+      expect.any(String),
+      expect.objectContaining({ resourceLimits: { maxOldGenerationSizeMb: 128 } })
+    );
+  });
+
   it('fails open and terminates the worker when validation times out', async () => {
     jest.useFakeTimers();
     try {
