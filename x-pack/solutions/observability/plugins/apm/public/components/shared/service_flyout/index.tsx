@@ -61,7 +61,6 @@ export function ServiceFlyout({
   share,
   lens,
   dataViews,
-  plugins,
   onView,
   onClose,
 }: ServiceFlyoutProps) {
@@ -109,13 +108,7 @@ export function ServiceFlyout({
 
   return (
     <EuiPortal>
-      <ServiceFlyoutContextProvider
-        core={core}
-        share={share}
-        lens={lens}
-        dataViews={dataViews}
-        plugins={plugins}
-      >
+      <ServiceFlyoutContextProvider core={core} share={share} lens={lens} dataViews={dataViews}>
         <ResponsiveFlyout
           data-test-subj="serviceFlyout"
           flyoutMenuDisplayMode="always"

@@ -101,7 +101,7 @@ const service: ServiceNodeData = {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const contextProps = { core: {} as any, share: {} as any, lens: {} as any, dataViews: {} as any, plugins: {} as any };
+const contextProps = { core: {} as any, share: {} as any, lens: {} as any, dataViews: {} as any };
 
 beforeEach(() => {
   jest.clearAllMocks();

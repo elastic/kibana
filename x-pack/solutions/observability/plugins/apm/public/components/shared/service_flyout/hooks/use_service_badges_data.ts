@@ -8,7 +8,6 @@
 import type { ServiceAnomalyScoreResponse } from '../../../../../server/routes/services/get_services/get_service_anomaly_score_for_service';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { Environment } from '../../../../../common/environment_rt';
-import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { useServiceFlyoutContext } from '../service_flyout_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
@@ -30,9 +29,12 @@ export function useServiceBadgesData({
   rangeFrom,
   rangeTo,
 }: ServiceBadgesDataParams): ServiceBadgesData {
-  const { core, plugins } = useServiceFlyoutContext();
+  const { core } = useServiceFlyoutContext();
   const { capabilities } = core.application;
-  const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(plugins, capabilities);
+  const isAlertingPluginAvailable = !!capabilities.alerting;
+  const canReadAlerts = !!capabilities.apm['alerting:show'];
+  const isAlertingAvailable =
+    isAlertingPluginAvailable && (canReadAlerts || !!capabilities.apm['alerting:save']);
   const { start = '', end = '' } = useTimeRange({ rangeFrom, rangeTo });
   const canReadMlJobs = !!capabilities.ml?.canGetJobs;
 
