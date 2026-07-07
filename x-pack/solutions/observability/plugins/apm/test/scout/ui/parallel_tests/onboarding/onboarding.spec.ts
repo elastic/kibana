@@ -12,15 +12,20 @@ import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 const AGENTS = ['Node.js', 'Django', 'Flask', 'Ruby on Rails', 'Rack', 'Go', 'Java', '.NET', 'PHP'];
 
-const AGENT_SNIPPETS: Array<{ agent: string; snippet: string }> = [
-  { agent: 'Django', snippet: 'pip install elastic-apm' },
-  { agent: 'Flask', snippet: 'pip install elastic-apm[flask]' },
-  { agent: 'Ruby on Rails', snippet: "gem 'elastic-apm'" },
-  { agent: 'Rack', snippet: "gem 'elastic-apm'" },
-  { agent: 'Go', snippet: 'go get go.elastic.co/apm' },
-  { agent: 'Java', snippet: '-javaagent' },
-  { agent: '.NET', snippet: 'Elastic.Apm.NetCoreAll' },
-  { agent: 'PHP', snippet: 'apk add --allow-untrusted <package-file>.apk' },
+const AGENT_SNIPPETS: Array<{ agent: string; role: string; snippet: string; exact: boolean }> = [
+  { agent: 'Django', role: 'text', snippet: 'pip install elastic-apm', exact: false },
+  { agent: 'Flask', role: 'text', snippet: 'pip install elastic-apm[flask]', exact: false },
+  { agent: 'Ruby on Rails', role: 'text', snippet: "gem 'elastic-apm'", exact: false },
+  { agent: 'Rack', role: 'text', snippet: "gem 'elastic-apm'", exact: false },
+  { agent: 'Go', role: 'text', snippet: 'go get go.elastic.co/apm', exact: false },
+  { agent: 'Java', role: 'text', snippet: '-javaagent', exact: true },
+  { agent: '.NET', role: 'link', snippet: 'Elastic.Apm.NetCoreAll', exact: false },
+  {
+    agent: 'PHP',
+    role: 'text',
+    snippet: 'apk add --allow-untrusted <package-file>.apk',
+    exact: false,
+  },
 ];
 
 test.describe('APM Onboarding', { tag: tags.stateful.classic }, () => {
@@ -46,12 +51,19 @@ test.describe('APM Onboarding', { tag: tags.stateful.classic }, () => {
     await browserAuth.loginAsPrivilegedUser();
     await onboardingPage.goto();
 
-    for (const { agent, snippet } of AGENT_SNIPPETS) {
+    for (const { agent, role, snippet, exact } of AGENT_SNIPPETS) {
       await test.step(`shows the ${agent} snippet`, async () => {
         await onboardingPage.selectAgent(agent);
-        await expect(page.getByText(snippet)).toBeVisible({
-          timeout: EXTENDED_TIMEOUT,
-        });
+
+        if (role === 'text') {
+          await expect(page.getByText(snippet, { exact: exact })).toBeVisible({
+            timeout: EXTENDED_TIMEOUT,
+          });
+        } else {
+          await expect(page.getByRole(role as any, { name: snippet, exact: exact })).toBeVisible({
+            timeout: EXTENDED_TIMEOUT,
+          });
+        }
       });
     }
   });
