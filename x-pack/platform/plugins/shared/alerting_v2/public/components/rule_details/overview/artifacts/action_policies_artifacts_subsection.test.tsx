@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { ActionPoliciesArtifactsSubsection } from './action_policies_artifacts_subsection';
 import { RuleProvider } from '../../rule_context';
 import type { RuleApiResponse } from '../../../../services/rules_api';
@@ -17,28 +16,6 @@ const mockUseLinkedActionPolicies = jest.fn();
 
 jest.mock('./use_linked_action_policies', () => ({
   useLinkedActionPolicies: (...args: unknown[]) => mockUseLinkedActionPolicies(...args),
-}));
-
-jest.mock('../../../action_policy/action_policy_destinations_summary', () => ({
-  ActionPolicyDestinationsSummary: () => (
-    <div data-test-subj="actionPolicyDestinationsSummaryMock">destinations</div>
-  ),
-}));
-
-jest.mock('../../../action_policy/details_flyout/action_policy_details_flyout_container', () => ({
-  ActionPolicyDetailsFlyoutContainer: ({
-    policyId,
-    onClose,
-  }: {
-    policyId: string;
-    onClose: () => void;
-  }) => (
-    <div data-test-subj={`actionPolicyDetailsFlyout-${policyId}`}>
-      <button type="button" onClick={onClose}>
-        Close flyout
-      </button>
-    </div>
-  ),
 }));
 
 const mockHttpService = {
@@ -71,27 +48,6 @@ const baseRule: RuleApiResponse = {
   updatedAt: '2026-03-04T12:00:00.000Z',
 };
 
-const buildPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse =>
-  ({
-    id: 'policy-1',
-    name: 'Notify on breach',
-    description: '',
-    enabled: true,
-    destinations: [{ type: 'workflow', id: 'workflow-1' }],
-    matcher: 'rule.id: "rule-1"',
-    groupBy: null,
-    tags: null,
-    groupingMode: 'per_episode',
-    throttle: null,
-    snoozedUntil: null,
-    auth: { owner: 'user', createdByUser: true },
-    createdBy: 'user',
-    createdAt: '2026-01-01T00:00:00.000Z',
-    updatedBy: 'user',
-    updatedAt: '2026-01-01T00:00:00.000Z',
-    ...overrides,
-  } as ActionPolicyResponse);
-
 const renderSubsection = (rule: RuleApiResponse = baseRule) =>
   render(
     <I18nProvider>
@@ -105,7 +61,6 @@ describe('ActionPoliciesArtifactsSubsection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseLinkedActionPolicies.mockReturnValue({
-      policies: [],
       totalCount: 0,
       catchAllCount: 0,
       matchingCriteriaCount: 0,
@@ -120,9 +75,8 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     expect(mockUseLinkedActionPolicies).toHaveBeenCalledWith('rule-1');
   });
 
-  it('renders loading state', () => {
+  it('renders loading state on the stat', () => {
     mockUseLinkedActionPolicies.mockReturnValue({
-      policies: [],
       totalCount: 0,
       catchAllCount: 0,
       matchingCriteriaCount: 0,
@@ -132,12 +86,11 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     });
 
     renderSubsection();
-    expect(screen.getByTestId('ruleActionPoliciesArtifactsLoading')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleActionPoliciesArtifactsStat')).toBeInTheDocument();
   });
 
-  it('renders error state', () => {
+  it('hides the stat when loading fails', () => {
     mockUseLinkedActionPolicies.mockReturnValue({
-      policies: [],
       totalCount: 0,
       catchAllCount: 0,
       matchingCriteriaCount: 0,
@@ -147,25 +100,19 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     });
 
     renderSubsection();
+    expect(screen.queryByTestId('ruleActionPoliciesArtifactsStat')).not.toBeInTheDocument();
     expect(screen.getByTestId('ruleActionPoliciesArtifactsError')).toBeInTheDocument();
   });
 
-  it('renders empty state when no policies are linked', () => {
+  it('renders zero count without a separate empty prompt', () => {
     renderSubsection();
-    expect(screen.getByTestId('ruleActionPoliciesArtifactsEmpty')).toBeInTheDocument();
-    expect(screen.getByText('No action policies linked to this rule')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleActionPoliciesArtifactsStat')).toHaveTextContent('0');
+    expect(screen.queryByTestId('ruleActionPoliciesArtifactsEmpty')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ruleActionPoliciesArtifactsSummary')).not.toBeInTheDocument();
   });
 
-  it('renders stat, summary, manage link, and policy rows', () => {
+  it('renders stat, summary, and open link without listing individual policies', () => {
     mockUseLinkedActionPolicies.mockReturnValue({
-      policies: [
-        buildPolicy({ id: 'policy-1', name: 'Catch all policy' }),
-        buildPolicy({
-          id: 'policy-2',
-          name: 'Filtered policy',
-          enabled: false,
-        }),
-      ],
       totalCount: 2,
       catchAllCount: 1,
       matchingCriteriaCount: 1,
@@ -180,56 +127,19 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     expect(screen.getByTestId('ruleActionPoliciesArtifactsSummary')).toHaveTextContent(
       '1 is matching criteria and 1 is catch-all'
     );
-    expect(screen.getByTestId('ruleActionPoliciesArtifactsManageLink')).toHaveAttribute(
+    expect(screen.getByTestId('ruleActionPoliciesArtifactsOpenLink')).toHaveAttribute(
       'href',
       '/app/management/alertingV2/action_policies'
     );
-    expect(screen.getByTestId('ruleActionPolicyArtifactName-policy-1')).toHaveTextContent(
-      'Catch all policy'
+    expect(screen.getByTestId('ruleActionPoliciesArtifactsOpenLink')).toHaveAttribute(
+      'target',
+      '_blank'
     );
-    expect(screen.getByTestId('ruleActionPolicyArtifactStatus-policy-2')).toHaveTextContent(
-      'Disabled'
+    expect(screen.getByTestId('ruleActionPoliciesArtifactsOpenLink')).toHaveAttribute(
+      'rel',
+      'noopener noreferrer'
     );
-    expect(screen.getByTestId('ruleActionPoliciesArtifactsHelp')).toBeInTheDocument();
-  });
-
-  it('renders snoozed status for enabled snoozed policies', () => {
-    mockUseLinkedActionPolicies.mockReturnValue({
-      policies: [
-        buildPolicy({
-          id: 'policy-snoozed',
-          snoozedUntil: '2099-01-01T00:00:00.000Z',
-        }),
-      ],
-      totalCount: 1,
-      catchAllCount: 1,
-      matchingCriteriaCount: 0,
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
-    renderSubsection();
-
-    expect(screen.getByTestId('ruleActionPolicyArtifactStatus-policy-snoozed')).toHaveTextContent(
-      'Snoozed'
-    );
-  });
-
-  it('opens the policy details flyout when a policy name is clicked', () => {
-    mockUseLinkedActionPolicies.mockReturnValue({
-      policies: [buildPolicy()],
-      totalCount: 1,
-      catchAllCount: 1,
-      matchingCriteriaCount: 0,
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
-    renderSubsection();
-
-    fireEvent.click(screen.getByTestId('ruleActionPolicyArtifactName-policy-1'));
-    expect(screen.getByTestId('actionPolicyDetailsFlyout-policy-1')).toBeInTheDocument();
+    expect(screen.getByText('Open notification policies')).toBeInTheDocument();
+    expect(screen.queryByTestId('ruleActionPolicyArtifactRow-policy-1')).not.toBeInTheDocument();
   });
 });

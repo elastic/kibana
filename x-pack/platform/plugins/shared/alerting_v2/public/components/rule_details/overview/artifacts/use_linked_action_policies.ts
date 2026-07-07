@@ -8,7 +8,6 @@
 import { useQuery } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
 import { summarizeExplicitlyLinkedActionPolicies } from '@kbn/alerting-v2-rule-form';
-import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { ActionPoliciesApi } from '../../../../services/action_policies_api';
 import { actionPolicyKeys } from '../../../../hooks/query_key_factory';
 
@@ -16,7 +15,6 @@ import { actionPolicyKeys } from '../../../../hooks/query_key_factory';
 const LINKED_ACTION_POLICIES_LIST_PER_PAGE = 100;
 
 export interface UseLinkedActionPoliciesResult {
-  policies: ActionPolicyResponse[];
   totalCount: number;
   catchAllCount: number;
   matchingCriteriaCount: number;
@@ -42,7 +40,6 @@ export const useLinkedActionPolicies = (ruleId: string): UseLinkedActionPolicies
   });
 
   return {
-    policies: data?.policies ?? [],
     totalCount: data?.totalCount ?? 0,
     catchAllCount: data?.catchAllCount ?? 0,
     matchingCriteriaCount: data?.matchingCriteriaCount ?? 0,

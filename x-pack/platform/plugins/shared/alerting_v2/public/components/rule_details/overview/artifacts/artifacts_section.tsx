@@ -30,7 +30,7 @@ export const ArtifactsSection: React.FC = () => {
       paddingSize="m"
       initialIsOpen
     >
-      <EuiFlexGroup gutterSize="l" responsive={false} data-test-subj="ruleArtifactsSubsectionsRow">
+      <EuiFlexGroup gutterSize="l" responsive={true} data-test-subj="ruleArtifactsSubsectionsRow">
         <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
           <DashboardArtifactsSubsection />
         </EuiFlexItem>

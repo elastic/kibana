@@ -48,7 +48,11 @@ const isRuleIdEqualsNode = (node: KueryNode, ruleId: string): boolean => {
   return parsed?.field === RULE_ID_FIELD && parsed.value === ruleId;
 };
 
-const containsPositiveRuleIdMatch = (node: KueryNode, ruleId: string, negated: boolean): boolean => {
+const containsPositiveRuleIdMatch = (
+  node: KueryNode,
+  ruleId: string,
+  negated: boolean
+): boolean => {
   if (node.type !== 'function') {
     return false;
   }

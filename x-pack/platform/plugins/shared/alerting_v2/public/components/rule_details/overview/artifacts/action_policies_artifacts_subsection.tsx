@@ -5,124 +5,61 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import {
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiIconTip,
   EuiLink,
-  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiStat,
   EuiText,
 } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
-import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
-import { ActionPolicyDestinationsSummary } from '../../../action_policy/action_policy_destinations_summary';
-import { ActionPolicyDetailsFlyoutContainer } from '../../../action_policy/details_flyout/action_policy_details_flyout_container';
-import { ActionPolicyStateBadge } from '../../../action_policy/action_policy_state_badge';
-import { isSnoozed } from '../../../action_policy/is_snoozed';
 import { paths } from '../../../../constants';
 import { useRule } from '../../rule_context';
 import { useLinkedActionPolicies } from './use_linked_action_policies';
 
-const LinkedActionPolicyStatusBadge = ({ policy }: { policy: ActionPolicyResponse }) => {
-  if (!policy.enabled) {
-    return <ActionPolicyStateBadge policy={policy} isLoading={false} />;
-  }
-
-  if (isSnoozed(policy.snoozedUntil)) {
-    return (
-      <EuiBadge color="hollow" iconType="bellSlash">
-        {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.actionPolicies.statusSnoozed', {
-          defaultMessage: 'Snoozed',
-        })}
-      </EuiBadge>
-    );
-  }
-
-  return <ActionPolicyStateBadge policy={policy} isLoading={false} />;
-};
-
-const ActionPolicyRow = ({
-  policy,
-  onViewPolicy,
-}: {
-  policy: ActionPolicyResponse;
-  onViewPolicy: (policyId: string) => void;
-}) => (
-  <EuiPanel hasBorder paddingSize="s" data-test-subj={`ruleActionPolicyArtifactRow-${policy.id}`}>
-    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-      <EuiFlexItem grow={2}>
-        <EuiLink
-          onClick={() => onViewPolicy(policy.id)}
-          data-test-subj={`ruleActionPolicyArtifactName-${policy.id}`}
-        >
-          {policy.name}
-        </EuiLink>
-      </EuiFlexItem>
-      <EuiFlexItem grow={2}>
-        <ActionPolicyDestinationsSummary destinations={policy.destinations} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <span data-test-subj={`ruleActionPolicyArtifactStatus-${policy.id}`}>
-          <LinkedActionPolicyStatusBadge policy={policy} />
-        </span>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiPanel>
+const openLinkLabel = i18n.translate(
+  'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.openLink',
+  { defaultMessage: 'Open notification policies' }
 );
 
-const ActionPoliciesSubsectionHeader = () => (
-  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-    <EuiFlexItem grow={false}>
+const ActionPoliciesSubsectionHeader = ({ openHref }: { openHref: string }) => (
+  <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
+    <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="bell" size="m" aria-hidden={true} />
+          <EuiIcon type="reporter" size="m" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s">
             <strong>
-              {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.actionPolicies.title', {
-                defaultMessage: 'Action policies',
+              {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.title', {
+                defaultMessage: 'Notification policies',
               })}
             </strong>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <span data-test-subj="ruleActionPoliciesArtifactsHelp">
-            <EuiIconTip
-              type="questionInCircle"
-              color="subdued"
-              content={i18n.translate(
-                'xpack.alertingV2.ruleDetails.artifacts.actionPolicies.helpTooltip',
-                {
-                  defaultMessage:
-                    "Only action policies whose matcher explicitly filters on this rule's ID are shown. Policies that might match based on tags or other fields are not included.",
-                }
-              )}
-            />
-          </span>
-        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiButtonIcon
-        iconType="boxesHorizontal"
-        color="text"
-        aria-label={i18n.translate(
-          'xpack.alertingV2.ruleDetails.artifacts.actionPolicies.overflowMenuAriaLabel',
-          { defaultMessage: 'Action policies section menu' }
-        )}
-        data-test-subj="ruleActionPoliciesArtifactsOverflowButton"
-      />
+    <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
+      <EuiText size="xs">
+        <EuiLink
+          color="text"
+          href={openHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          external={false}
+          style={{ fontWeight: 'normal', whiteSpace: 'nowrap' }}
+          data-test-subj="ruleActionPoliciesArtifactsOpenLink"
+        >
+          {openLinkLabel}
+        </EuiLink>
+      </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
 );
@@ -130,76 +67,56 @@ const ActionPoliciesSubsectionHeader = () => (
 export const ActionPoliciesArtifactsSubsection: React.FC = () => {
   const rule = useRule();
   const http = useService(CoreStart('http'));
-  const { policies, totalCount, catchAllCount, matchingCriteriaCount, isLoading, isError } =
+  const { totalCount, catchAllCount, matchingCriteriaCount, isLoading, isError } =
     useLinkedActionPolicies(rule.id);
-  const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
 
-  const manageActionPoliciesHref = useMemo(
-    () => http.basePath.prepend(paths.actionPolicyList),
-    [http.basePath]
-  );
+  const openNotificationPoliciesHref = http.basePath.prepend(paths.actionPolicyList);
 
-  const summaryText = useMemo(() => {
-    if (totalCount === 0) {
-      return null;
-    }
+  const summaryText =
+    totalCount > 0
+      ? i18n.translate('xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.summary', {
+          defaultMessage:
+            '{matchingCriteriaCount, plural, one {# is matching criteria} other {# are matching criteria}} and {catchAllCount, plural, one {# is catch-all} other {# are catch-all}}',
+          values: { matchingCriteriaCount, catchAllCount },
+        })
+      : null;
 
-    return i18n.translate('xpack.alertingV2.ruleDetails.artifacts.actionPolicies.summary', {
-      defaultMessage:
-        '{matchingCriteriaCount, plural, one {# is matching criteria} other {# are matching criteria}} and {catchAllCount, plural, one {# is catch-all} other {# are catch-all}}',
-      values: { matchingCriteriaCount, catchAllCount },
-    });
-  }, [catchAllCount, matchingCriteriaCount, totalCount]);
+  const showStat = isLoading || !isError;
 
   return (
-    <>
-      <EuiPanel hasBorder paddingSize="m" data-test-subj="ruleActionPoliciesArtifactsSection">
-        <ActionPoliciesSubsectionHeader />
-        <EuiSpacer size="s" />
-        <EuiButtonEmpty
-          size="s"
-          iconType="popout"
-          iconSide="right"
-          href={manageActionPoliciesHref}
-          data-test-subj="ruleActionPoliciesArtifactsManageLink"
-        >
-          {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.actionPolicies.manageLink', {
-            defaultMessage: 'Manage action policies',
-          })}
-        </EuiButtonEmpty>
-        <EuiSpacer size="m" />
+    <EuiPanel hasBorder paddingSize="m" data-test-subj="ruleActionPoliciesArtifactsSection">
+      <ActionPoliciesSubsectionHeader openHref={openNotificationPoliciesHref} />
+      <EuiSpacer size="m" />
 
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiStat
-              title={totalCount}
-              description={i18n.translate(
-                'xpack.alertingV2.ruleDetails.artifacts.actionPolicies.statDescription',
-                { defaultMessage: 'Action policies' }
-              )}
-              titleSize="l"
-              textAlign="left"
-              reverse
-              isLoading={isLoading}
-              data-test-subj="ruleActionPoliciesArtifactsStat"
-            />
-          </EuiFlexItem>
+      {showStat ? (
+        <>
+          <EuiStat
+            title={totalCount}
+            description={i18n.translate(
+              'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.statDescription',
+              { defaultMessage: 'Notification policies' }
+            )}
+            titleSize="l"
+            textAlign="left"
+            reverse
+            isLoading={isLoading}
+            data-test-subj="ruleActionPoliciesArtifactsStat"
+          />
+
           {summaryText ? (
-            <EuiFlexItem grow>
+            <>
+              <EuiSpacer size="s" />
               <EuiText size="s" color="subdued" data-test-subj="ruleActionPoliciesArtifactsSummary">
                 {summaryText}
               </EuiText>
-            </EuiFlexItem>
+            </>
           ) : null}
-        </EuiFlexGroup>
+        </>
+      ) : null}
 
-        <EuiSpacer size="m" />
-
-        {isLoading ? (
-          <EuiLoadingSpinner size="m" data-test-subj="ruleActionPoliciesArtifactsLoading" />
-        ) : null}
-
-        {!isLoading && isError ? (
+      {!isLoading && isError ? (
+        <>
+          <EuiSpacer size="m" />
           <EuiEmptyPrompt
             color="danger"
             iconType="warning"
@@ -207,66 +124,26 @@ export const ActionPoliciesArtifactsSubsection: React.FC = () => {
             title={
               <h4>
                 {i18n.translate(
-                  'xpack.alertingV2.ruleDetails.artifacts.actionPolicies.errorTitle',
+                  'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.errorTitle',
                   {
-                    defaultMessage: 'Could not load action policies',
+                    defaultMessage: 'Could not load notification policies',
                   }
                 )}
               </h4>
             }
             body={
               <EuiText size="s">
-                {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.actionPolicies.errorBody', {
-                  defaultMessage: 'Try refreshing the page.',
-                })}
-              </EuiText>
-            }
-          />
-        ) : null}
-
-        {!isLoading && !isError && totalCount === 0 ? (
-          <EuiEmptyPrompt
-            iconType="bell"
-            data-test-subj="ruleActionPoliciesArtifactsEmpty"
-            title={
-              <h4>
                 {i18n.translate(
-                  'xpack.alertingV2.ruleDetails.artifacts.actionPolicies.emptyTitle',
+                  'xpack.alertingV2.ruleDetails.artifacts.notificationPolicies.errorBody',
                   {
-                    defaultMessage: 'No action policies linked to this rule',
+                    defaultMessage: 'Try refreshing the page.',
                   }
                 )}
-              </h4>
-            }
-            body={
-              <EuiText size="s">
-                {i18n.translate('xpack.alertingV2.ruleDetails.artifacts.actionPolicies.emptyBody', {
-                  defaultMessage:
-                    "Create or edit an action policy with a matcher that filters on this rule's ID.",
-                })}
               </EuiText>
             }
           />
-        ) : null}
-
-        {!isLoading && !isError && policies.length > 0 ? (
-          <>
-            {policies.map((policy) => (
-              <React.Fragment key={policy.id}>
-                <ActionPolicyRow policy={policy} onViewPolicy={setPolicyToViewId} />
-                <EuiSpacer size="s" />
-              </React.Fragment>
-            ))}
-          </>
-        ) : null}
-      </EuiPanel>
-
-      {policyToViewId ? (
-        <ActionPolicyDetailsFlyoutContainer
-          policyId={policyToViewId}
-          onClose={() => setPolicyToViewId(null)}
-        />
+        </>
       ) : null}
-    </>
+    </EuiPanel>
   );
 };

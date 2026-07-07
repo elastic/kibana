@@ -34,7 +34,7 @@ const buildPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolic
     updatedBy: 'user',
     updatedAt: '2026-01-01T00:00:00.000Z',
     ...overrides,
-  }) as ActionPolicyResponse;
+  } as ActionPolicyResponse);
 
 describe('isExplicitlyLinkedToRule', () => {
   it('returns true for the simple-action rule.id matcher', () => {
@@ -43,15 +43,15 @@ describe('isExplicitlyLinkedToRule', () => {
 
   it('returns true for spaced KQL syntax and compound matchers', () => {
     expect(isExplicitlyLinkedToRule(`rule.id : "${RULE_ID}"`, RULE_ID)).toBe(true);
-    expect(
-      isExplicitlyLinkedToRule(`rule.id: "${RULE_ID}" and severity: "high"`, RULE_ID)
-    ).toBe(true);
+    expect(isExplicitlyLinkedToRule(`rule.id: "${RULE_ID}" and severity: "high"`, RULE_ID)).toBe(
+      true
+    );
   });
 
   it('returns true when the rule.id clause appears inside an OR branch', () => {
-    expect(
-      isExplicitlyLinkedToRule(`rule.id: "${RULE_ID}" or severity: "high"`, RULE_ID)
-    ).toBe(true);
+    expect(isExplicitlyLinkedToRule(`rule.id: "${RULE_ID}" or severity: "high"`, RULE_ID)).toBe(
+      true
+    );
   });
 
   it('returns false for null, empty, or malformed matchers', () => {
@@ -82,9 +82,9 @@ describe('isRuleScopedCatchAllMatcher', () => {
   });
 
   it('returns false when additional matching criteria are present', () => {
-    expect(
-      isRuleScopedCatchAllMatcher(`rule.id: "${RULE_ID}" and severity: "high"`, RULE_ID)
-    ).toBe(false);
+    expect(isRuleScopedCatchAllMatcher(`rule.id: "${RULE_ID}" and severity: "high"`, RULE_ID)).toBe(
+      false
+    );
   });
 
   it('returns false when the matcher is not explicitly linked', () => {

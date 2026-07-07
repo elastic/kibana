@@ -138,10 +138,6 @@ describe('useLinkedActionPolicies', () => {
     expect(result.current.totalCount).toBe(2);
     expect(result.current.catchAllCount).toBe(1);
     expect(result.current.matchingCriteriaCount).toBe(1);
-    expect(result.current.policies.map((policy) => policy.id)).toEqual([
-      'linked-catch-all',
-      'linked-filtered',
-    ]);
     expect(result.current.isError).toBe(false);
     expect(result.current.error).toBeNull();
   });
@@ -159,7 +155,6 @@ describe('useLinkedActionPolicies', () => {
     await waitFor(() => expect(result.current.isError).toBe(true));
 
     expect(result.current.error?.message).toBe('network error');
-    expect(result.current.policies).toEqual([]);
     expect(result.current.totalCount).toBe(0);
   });
 });
