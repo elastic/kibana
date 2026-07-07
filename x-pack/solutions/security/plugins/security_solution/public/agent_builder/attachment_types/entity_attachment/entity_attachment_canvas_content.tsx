@@ -61,6 +61,7 @@ export const EntityAttachmentCanvasContent: React.FC<EntityAttachmentCanvasConte
   const parsed = normaliseEntityAttachment(attachment);
   const watchlistsEnabled = experimentalFeatures.entityAnalyticsWatchlistEnabled;
   const privmonModifierEnabled = experimentalFeatures.enableRiskScorePrivmonModifier;
+  const anomalyDetailsEnabled = experimentalFeatures.entityAnalyticsAnomalyDetails;
 
   if (!parsed || !parsed.isSingle) {
     return (
@@ -73,6 +74,7 @@ export const EntityAttachmentCanvasContent: React.FC<EntityAttachmentCanvasConte
               resolutionRiskStats={parsed.resolutionRiskStats}
               watchlistsEnabled={watchlistsEnabled}
               privmonModifierEnabled={privmonModifierEnabled}
+              anomalyDetailsEnabled={anomalyDetailsEnabled}
             />
           ) : null}
         </QueryClientProvider>
@@ -91,6 +93,7 @@ export const EntityAttachmentCanvasContent: React.FC<EntityAttachmentCanvasConte
             resolutionRiskStats={parsed.resolutionRiskStats}
             watchlistsEnabled={watchlistsEnabled}
             privmonModifierEnabled={privmonModifierEnabled}
+            anomalyDetailsEnabled={anomalyDetailsEnabled}
           />
         </QueryClientProvider>
       </EuiPanel>

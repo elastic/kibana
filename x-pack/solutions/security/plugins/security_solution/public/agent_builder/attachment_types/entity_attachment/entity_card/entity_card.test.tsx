@@ -41,6 +41,16 @@ jest.mock('./entity_summary_grid', () => ({
   ),
 }));
 
+jest.mock('./anomalies_mini', () => ({
+  AnomaliesMini: (props: Record<string, unknown>) => (
+    <div
+      data-test-subj="anomaliesMiniMock"
+      data-anomaly-details-enabled={String(props.anomalyDetailsEnabled)}
+      data-has-entity-id={String(Boolean(props.entityStoreEntityId))}
+    />
+  ),
+}));
+
 jest.mock('./risk_summary_mini', () => ({
   RiskSummaryMini: (props: Record<string, unknown>) => {
     const riskStats = props.riskStats as Record<string, unknown> | undefined;
@@ -99,6 +109,7 @@ const renderCard = (props: Partial<React.ComponentProps<typeof EntityCard>> = {}
     identifier: { identifierType: 'user', identifier: 'bob' },
     watchlistsEnabled: true,
     privmonModifierEnabled: true,
+    anomalyDetailsEnabled: true,
   };
   return render(
     <I18nProvider>
@@ -161,8 +172,27 @@ describe('EntityCard', () => {
     expect(screen.getByTestId('entityAttachmentRiskLevelBadge')).toBeInTheDocument();
     expect(screen.getByTestId('entitySummaryGridMock')).toBeInTheDocument();
     expect(screen.getByTestId('riskSummaryMiniMock')).toBeInTheDocument();
+    expect(screen.getByTestId('anomaliesMiniMock')).toBeInTheDocument();
     expect(screen.getByTestId('resolutionMiniMock')).toBeInTheDocument();
     expect(screen.getByTestId('entityAttachmentCardActions')).toBeInTheDocument();
+  });
+
+  it('omits the anomalies section when the feature flag is disabled', () => {
+    mockedUseEntityForAttachment.mockReturnValue({
+      isLoading: false,
+      data: baseEntity(),
+    });
+    renderCard({ anomalyDetailsEnabled: false });
+    expect(screen.queryByTestId('anomaliesMiniMock')).not.toBeInTheDocument();
+  });
+
+  it('omits the anomalies section when there is no entity id', () => {
+    mockedUseEntityForAttachment.mockReturnValue({
+      isLoading: false,
+      data: baseEntity({ entityId: undefined }),
+    });
+    renderCard();
+    expect(screen.queryByTestId('anomaliesMiniMock')).not.toBeInTheDocument();
   });
 
   it('does not render the rich sections when the entity is not in the store', () => {
@@ -181,6 +211,7 @@ describe('EntityCard', () => {
     expect(screen.getByTestId('entityAttachmentIdentityHeader')).toBeInTheDocument();
     expect(screen.queryByTestId('entitySummaryGridMock')).not.toBeInTheDocument();
     expect(screen.queryByTestId('riskSummaryMiniMock')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('anomaliesMiniMock')).not.toBeInTheDocument();
     expect(screen.queryByTestId('resolutionMiniMock')).not.toBeInTheDocument();
   });
 

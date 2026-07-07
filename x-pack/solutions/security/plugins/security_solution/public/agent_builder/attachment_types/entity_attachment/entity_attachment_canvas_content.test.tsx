@@ -52,6 +52,7 @@ jest.mock('./entity_card/entity_card', () => ({
 const experimentalFeatures = {
   entityAnalyticsWatchlistEnabled: false,
   enableRiskScorePrivmonModifier: false,
+  entityAnalyticsAnomalyDetails: false,
 } as unknown as ExperimentalFeatures;
 
 const applicationStub = { navigateToApp: jest.fn() } as unknown as ApplicationStart;

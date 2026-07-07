@@ -17,6 +17,7 @@ import { IdentityHeader } from './identity_header';
 import { EntitySummaryGridMini } from './entity_summary_grid';
 import { RiskSummaryMini } from './risk_summary_mini';
 import { ResolutionMini } from './resolution_mini';
+import { AnomaliesMini } from './anomalies_mini';
 import { EntityCardActions } from './entity_card_actions';
 
 interface EntityCardProps {
@@ -36,6 +37,11 @@ interface EntityCardProps {
   resolutionRiskStats?: EntityAttachmentRiskStats;
   watchlistsEnabled: boolean;
   privmonModifierEnabled: boolean;
+  /**
+   * Gates the "Anomalies" section behind the `entityAnalyticsAnomalyDetails`
+   * experimental feature flag, mirroring the flyout's `Content` component.
+   */
+  anomalyDetailsEnabled: boolean;
 }
 
 /**
@@ -84,6 +90,7 @@ export const EntityCard: React.FC<EntityCardProps> = ({
   resolutionRiskStats: attachmentResolutionRiskStats,
   watchlistsEnabled,
   privmonModifierEnabled,
+  anomalyDetailsEnabled,
 }) => {
   const { isLoading, error, data } = useEntityForAttachment(identifier);
   const { canNavigate } = useEntityAnalyticsAgentNavigation();
@@ -220,6 +227,16 @@ export const EntityCard: React.FC<EntityCardProps> = ({
                 resolutionRiskStats={effectiveResolutionRiskStats}
                 privmonModifierEnabled={privmonModifierEnabled}
                 watchlistEnabled={watchlistsEnabled}
+              />
+            </>
+          )}
+          {anomalyDetailsEnabled && resolved.entityId && (
+            <>
+              <EuiSpacer size="m" />
+              <AnomaliesMini
+                identifier={identifier}
+                entityStoreEntityId={resolved.entityId}
+                anomalyDetailsEnabled={anomalyDetailsEnabled}
               />
             </>
           )}
