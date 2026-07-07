@@ -127,6 +127,9 @@ export const useAgentBuilderRuleCreation = ({
   const hasWarnedSyncFailureRef = useRef(false);
   // Saved-rule id the sync targets (see resolveSyncRuleId). Present ⇔ the sync is an update.
   const syncRuleIdRef = useRef<string | undefined>(pageRuleId);
+  // Last conversation id seen below, to tell a real conversation switch apart from an update
+  // within the same conversation (e.g. our own draft gaining an origin once saved).
+  const lastConversationIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     return () => {
@@ -155,22 +158,34 @@ export const useAgentBuilderRuleCreation = ({
       const attachments = (change?.conversation?.attachments ?? []) as ConversationAttachment[];
       const boundId = aiRuleCreation.getBoundAttachmentId();
       const ruleAttachment = findRuleAttachment(attachments, boundId);
-      const cardRuleId = resolveSyncRuleId(ruleAttachment, pageRuleId);
-      syncRuleIdRef.current = cardRuleId;
-
-      // Bind alignment only applies on an edit page with a card linked to a saved rule.
-      if (!ruleAttachment || !cardRuleId || !pageRuleId) {
+      if (!ruleAttachment) {
         return;
       }
-      if (cardRuleId !== pageRuleId) {
-        // Different rule's attachment — don't sync this form into it.
+      const cardRuleId = resolveSyncRuleId(ruleAttachment, pageRuleId);
+
+      if (pageRuleId) {
+        // Edit page: identity is fixed to the URL's rule.
+        syncRuleIdRef.current = cardRuleId;
+        if (cardRuleId !== pageRuleId) {
+          aiRuleCreation.deactivateFormSync();
+          aiRuleCreation.releaseBind();
+        } else if (boundId === null) {
+          aiRuleCreation.setBoundAttachment(ruleAttachment.id);
+          aiRuleCreation.activateFormSync();
+        }
+        return;
+      }
+
+      // Create page: identity is only known once our own draft is saved and gains an origin.
+      // Only compare on an actual conversation switch, so our own draft being saved isn't
+      // mistaken for landing on a different conversation's rule card.
+      const conversationChanged = change?.id !== lastConversationIdRef.current;
+      lastConversationIdRef.current = change?.id;
+      if (conversationChanged && cardRuleId !== syncRuleIdRef.current) {
         aiRuleCreation.deactivateFormSync();
         aiRuleCreation.releaseBind();
-      } else if (boundId === null) {
-        // This rule's card, not yet bound (e.g. reached the form without going through the card).
-        aiRuleCreation.setBoundAttachment(ruleAttachment.id);
-        aiRuleCreation.activateFormSync();
       }
+      syncRuleIdRef.current = cardRuleId;
     });
     return () => subscription.unsubscribe();
     // pageRuleId comes from the URL and is fixed for the page's lifetime.
