@@ -484,6 +484,26 @@ describe('RulesListTable', () => {
       expect(screen.queryByTestId('ruleEnabledSwitch-rule-1')).not.toBeInTheDocument();
       expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeInTheDocument();
     });
+
+    it('disables the other switches while a toggle is in flight, so a second toggle cannot be dispatched', () => {
+      renderTable({ togglingRuleId: 'rule-1' });
+
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeDisabled();
+    });
+
+    it('does not disable switches when no toggle is in flight', () => {
+      renderTable();
+
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-1')).toBeEnabled();
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeEnabled();
+    });
+
+    it('disables all switches while a bulk enable/disable mutation is in flight', () => {
+      renderTable({ isBulkTogglingEnabled: true });
+
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-1')).toBeDisabled();
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeDisabled();
+    });
   });
 
   describe('rule name link', () => {

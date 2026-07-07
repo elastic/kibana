@@ -155,6 +155,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         togglingRuleId={
           toggleEnabledMutation.isLoading ? toggleEnabledMutation.variables?.id : undefined
         }
+        isBulkTogglingEnabled={bulkEnableMutation.isLoading || bulkDisableMutation.isLoading}
         onTableChange={onTableChange}
       />
       {expandedRule ? (

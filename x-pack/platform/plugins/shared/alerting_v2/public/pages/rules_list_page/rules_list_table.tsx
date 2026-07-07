@@ -103,6 +103,8 @@ export interface RulesListTableProps {
   onToggleEnabled: (rule: RuleApiResponse) => void;
   /** Id of the rule whose enabled state is currently being toggled, if any. */
   togglingRuleId?: string;
+  /** True while a bulk enable/disable mutation is in flight, so individual switches don't race it. */
+  isBulkTogglingEnabled?: boolean;
 
   /** Pagination callback */
   onTableChange: (criteria: Criteria<RuleApiResponse>) => void;
@@ -137,6 +139,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onDelete,
   onToggleEnabled,
   togglingRuleId,
+  isBulkTogglingEnabled,
   onTableChange,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -339,9 +342,11 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
               compressed
               showLabel={false}
               label={i18n.translate('xpack.alertingV2.rulesList.column.enabled.switchLabel', {
-                defaultMessage: 'Enabled',
+                defaultMessage: 'Enabled: {ruleName}',
+                values: { ruleName: rule.metadata?.name ?? rule.id },
               })}
               checked={enabled}
+              disabled={Boolean(togglingRuleId) || Boolean(isBulkTogglingEnabled)}
               onChange={() => onToggleEnabled(rule)}
               data-test-subj={`ruleEnabledSwitch-${rule.id}`}
             />
@@ -401,6 +406,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
       onDelete,
       onToggleEnabled,
       togglingRuleId,
+      isBulkTogglingEnabled,
     ]
   );
 
