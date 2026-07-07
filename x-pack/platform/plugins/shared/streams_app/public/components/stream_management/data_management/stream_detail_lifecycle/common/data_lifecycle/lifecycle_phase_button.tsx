@@ -74,6 +74,7 @@ export const LifecyclePhaseButton = ({
         backgroundColor: phaseColor ?? euiTheme.colors.backgroundBaseSubdued,
         isPopoverOpen: isPopoverOpen || isBeingEdited,
         minHeight: '48px',
+        fullSize: true,
         ...(isDelete
           ? {
               minWidth: '50px',
@@ -89,7 +90,7 @@ export const LifecyclePhaseButton = ({
           justifyContent="center"
           alignItems="center"
           responsive={false}
-          style={{ width: '100%', height: '100%' }}
+          css={{ width: '100%', height: '100%' }}
         >
           <EuiFlexItem grow={false}>
             <EuiIcon
@@ -129,7 +130,7 @@ export const LifecyclePhaseButton = ({
                 size="xs"
                 color={euiTheme.colors.plainDark}
                 data-test-subj={`${prefix}lifecyclePhase-${label}-name`}
-                style={{
+                css={{
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
@@ -144,7 +145,7 @@ export const LifecyclePhaseButton = ({
                 color={euiTheme.colors.plainDark}
                 data-test-subj={showSize ? `${prefix}lifecyclePhase-${label}-size` : undefined}
                 title={showSize ? size : undefined}
-                style={{
+                css={{
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',

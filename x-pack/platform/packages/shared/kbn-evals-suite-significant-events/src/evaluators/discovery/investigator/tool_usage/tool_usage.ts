@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { platformCoreTools, platformStreamsSigEventsTools } from '@kbn/agent-builder-common';
+import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common';
 import { extractToolCallIds } from '../../utils/tool_usage';
 
 const { executeEsql: TOOL_ID_EXECUTE_ESQL } = platformCoreTools;
-const { searchKnowledgeIndicators: TOOL_ID_KI_SEARCH } = platformStreamsSigEventsTools;
+const { searchKnowledgeIndicators: TOOL_ID_KI_SEARCH } = platformSignificantEventsTools;
 import type { InvestigatorEvaluator } from '../../types';
 
 export const createInvestigatorToolUsageEvaluator = (): InvestigatorEvaluator => ({
