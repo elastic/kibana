@@ -11,11 +11,15 @@ module.exports = {
   roots: [
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/timelines/components',
   ],
+  testPathIgnorePatterns: [
+    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/',
+  ],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/security/plugins/security_solution/public/timelines/components',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/timelines/components/**/*.{ts,tsx}',
+    '!<rootDir>/x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/**/*.{ts,tsx}',
   ],
   moduleNameMapper: require('../../../server/__mocks__/module_name_map'),
 };
