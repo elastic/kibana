@@ -21,7 +21,6 @@ import { take } from 'rxjs';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { SortDirection } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ESSearchResponse, SearchHit } from '@kbn/es-types';
@@ -40,6 +39,7 @@ import {
   getWorkflowExecutionsFetchErrorMessage,
   isWorkflowExecutionsIndexNotFoundError,
 } from './workflow_executions_search_query';
+import { buildWorkflowExecutionsTableRecords } from './workflow_executions_table_records';
 import { useKibana } from '../../hooks/use_kibana';
 
 const DEFAULT_COLUMNS = ['workflowId', 'status', 'id', 'triggeredBy', 'executedBy'] as const;
@@ -204,7 +204,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
     }, []);
 
     const rows = useMemo<DataTableRecord[]>(
-      () => buildDataTableRecordList({ records: hits, dataView }),
+      () => buildWorkflowExecutionsTableRecords({ records: hits, dataView }),
       [hits, dataView]
     );
 

@@ -119,7 +119,8 @@
     "@kbn/controls-plugin",
     "@kbn/controls-schemas",
     "@kbn/control-group-renderer",
-    "@kbn/controls-constants"
+    "@kbn/controls-constants",
+    "@kbn/data-service"
   ],
   "exclude": ["target/**/*"]
 }

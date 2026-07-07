@@ -122,6 +122,7 @@ dependsOn:
   - '@kbn/controls-schemas'
   - '@kbn/control-group-renderer'
   - '@kbn/controls-constants'
+  - '@kbn/data-service'
 tags:
   - plugin
   - prod
