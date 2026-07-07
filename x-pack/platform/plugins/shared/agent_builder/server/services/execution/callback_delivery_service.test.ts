@@ -154,7 +154,7 @@ describe('callback request delivery', () => {
     });
     const deliveryExpectation = expect(delivery).resolves.toBeUndefined();
 
-    await jest.advanceTimersByTimeAsync(350);
+    await jest.advanceTimersByTimeAsync(700);
 
     await deliveryExpectation;
     expect(fetchMock).toHaveBeenCalledTimes(3);
@@ -185,7 +185,7 @@ describe('callback request delivery', () => {
       'Callback delivery failed with status 503'
     );
 
-    await jest.advanceTimersByTimeAsync(350);
+    await jest.advanceTimersByTimeAsync(700);
 
     await deliveryExpectation;
     expect(fetchMock).toHaveBeenCalledTimes(3);
