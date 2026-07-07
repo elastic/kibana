@@ -499,7 +499,7 @@ function enrichConfigurationWithVisualizationProperties(
       // only an absolute-ranged palette (`rangeType: 'number'`) is acceptable; otherwise the
       // coloring is dropped entirely (the palette falls back to AUTO).
       const isPercentagePalette = visualization.palette.params?.rangeType === 'percent';
-      const isSingleValue = !Boolean(state.breakdown_by) && !Boolean(visualization.maxAccessor);
+      const isSingleValue = !state.breakdown_by && !visualization.maxAccessor;
       const hasInvalidRangeType = isPercentagePalette && isSingleValue;
 
       primaryMetric.color = colorByValue && !hasInvalidRangeType ? colorByValue : AUTO_COLOR;
