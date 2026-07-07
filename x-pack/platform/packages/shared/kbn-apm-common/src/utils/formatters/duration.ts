@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { memoize } from 'lodash';
 import type { Maybe } from '@kbn/apm-types-shared';
-import { NOT_AVAILABLE_LABEL } from '@kbn/apm-common';
+import { NOT_AVAILABLE_LABEL } from '../i18n';
 import { asDecimalOrInteger, asInteger, asDecimal } from './formatters';
 import type { TimeUnit } from './datetime';
 import { isFiniteNumber } from '../is_finite_number';

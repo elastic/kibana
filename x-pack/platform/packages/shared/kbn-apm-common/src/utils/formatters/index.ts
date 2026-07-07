@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { isFiniteNumber } from '@kbn/apm-common';
+export * from './formatters';
+export * from './datetime';
+export * from './duration';
+export * from './size';

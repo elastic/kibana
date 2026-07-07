@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { asPercent as obltAsPercent } from '@kbn/observability-plugin/common';
 import numeral from '@elastic/numeral';
 import type { Maybe } from '@kbn/apm-types-shared';
-import { NOT_AVAILABLE_LABEL } from '../../i18n';
+import { NOT_AVAILABLE_LABEL } from '../i18n';
 import { isFiniteNumber } from '../is_finite_number';
 
 export function asDecimal(value?: number | null) {
@@ -89,5 +88,5 @@ export function asBigNumber(value: number): string {
 }
 
 export const yLabelAsPercent = (y?: number | null) => {
-  return obltAsPercent(y || 0, 1);
+  return asPercent(y || 0, 1);
 };
