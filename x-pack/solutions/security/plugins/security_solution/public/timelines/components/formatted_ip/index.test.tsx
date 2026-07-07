@@ -34,6 +34,7 @@ jest.mock('../../../common/lib/kibana/kibana_react', () => ({
       },
     },
   }),
+  useUiSetting: jest.fn().mockReturnValue(false),
 }));
 
 jest.mock('../../store');

@@ -78,6 +78,12 @@ export interface QuerySandboxProps {
    */
   helpText?: React.ReactNode;
   /**
+   * Optional actions rendered right-aligned in the ES|QL query header row, just before
+   * the Search button. Use for header-level controls such as Split / Merge buttons.
+   * Absent or `undefined` → nothing is rendered.
+   */
+  headerActions?: React.ReactNode;
+  /**
    * When provided, the editor panel renders `ComposeDiscoverTabs` with a tab
    * bar instead of a single `CodeEditor`. Absent or `[]` → single editor.
    */
@@ -95,6 +101,12 @@ export interface QuerySandboxProps {
     onRecoveryEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
     readOnly?: boolean;
   };
+  /**
+   * Static validation error messages for the active tab's query — e.g. from a
+   * blocked Apply. Rendered next to the editor, independent of `hasRun`/`isError`
+   * (which only reflect query *execution*, not static validation).
+   */
+  validationError?: string[];
 }
 
 const VISIBLE_ROWS = 10;
@@ -117,6 +129,8 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
   isTimeFieldResolved: isTimeFieldResolvedProp,
   helpText,
   tabProps,
+  headerActions,
+  validationError,
 }) => {
   const services = useRuleFormServices();
   const isReadOnly = !onQueryChange;
@@ -172,6 +186,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     timeField,
     timeRange,
     data: services.data,
+    tab: tabProps?.activeTab,
   });
 
   const hasAutoRunRef = useRef(false);
@@ -281,6 +296,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
             width="full"
           />
         </EuiFlexItem>
+        {headerActions && <EuiFlexItem grow={false}>{headerActions}</EuiFlexItem>}
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.searchTooltip', {
@@ -366,6 +382,28 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
       </EuiPanel>
       <EuiSpacer size="s" />
 
+      {validationError && validationError.length > 0 && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            iconType="error"
+            data-test-subj="querySandboxValidationError"
+            title={i18n.translate(
+              'xpack.alertingV2.composeDiscover.querySandbox.validationErrorTitle',
+              { defaultMessage: 'Resolve query errors before applying changes' }
+            )}
+          >
+            <ul>
+              {validationError.map((message, index) => (
+                <li key={index}>{message}</li>
+              ))}
+            </ul>
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
+
       {hasRun && !isLoading && !isError && (
         <EuiText size="xs" color="subdued">
           {i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.resultCountLabel', {
@@ -377,7 +415,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
 
       <EuiSpacer size="m" />
 
-      {!hasRun && (
+      {!isLoading && !hasRun && (
         <EuiEmptyPrompt
           iconType="playFilled"
           title={
@@ -403,7 +441,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         />
       )}
 
-      {hasRun && isLoading && (
+      {isLoading && (
         <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="l" />
@@ -411,7 +449,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         </EuiFlexGroup>
       )}
 
-      {hasRun && isError && (
+      {isError && !validationError?.length && (
         <EuiCallOut
           announceOnMount
           color="danger"

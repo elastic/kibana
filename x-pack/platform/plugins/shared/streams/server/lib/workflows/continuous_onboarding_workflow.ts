@@ -9,7 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-import { STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
 import type { StreamsKIsOnboardingClient } from './onboarding_workflow_client';
 import { pollUntil } from './poll_until';
@@ -100,14 +100,14 @@ export const createContinuousKiOnboardingWorkflowService = ({
     request: KibanaRequest;
   }) => {
     const existing = await managementApi.getWorkflow(
-      STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+      SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
       MANAGED_WORKFLOW_SPACE_ID
     );
 
     if (!existing) {
       if (enabled) {
         throw new Error(
-          `Managed continuous onboarding workflow ${STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID} is not installed yet`
+          `Managed continuous onboarding workflow ${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID} is not installed yet`
         );
       }
       return;
@@ -118,7 +118,7 @@ export const createContinuousKiOnboardingWorkflowService = ({
     }
 
     await managementApi.updateWorkflow(
-      STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+      SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
       { enabled },
       MANAGED_WORKFLOW_SPACE_ID,
       request
@@ -177,7 +177,7 @@ export const createContinuousKiOnboardingWorkflowService = ({
       await setManagedEnabled({ enabled: false, request });
 
       await cancelAndAwaitTermination({
-        workflowId: STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+        workflowId: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
         spaceId: MANAGED_WORKFLOW_SPACE_ID,
         request,
       }).catch((err) =>
