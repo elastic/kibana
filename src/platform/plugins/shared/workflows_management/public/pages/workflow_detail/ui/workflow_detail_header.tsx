@@ -88,7 +88,7 @@ export const WorkflowDetailHeader = React.memo(
       canReadManagedWorkflowExecution,
     } = useWorkflowsCapabilities();
 
-    const { tab: activeTab, setActiveTab } = useWorkflowUrlState();
+    const { activeTab, setActiveTab } = useWorkflowUrlState();
     const isExecutionsTab = activeTab === 'executions';
 
     const workflow = useSelector(selectWorkflow);

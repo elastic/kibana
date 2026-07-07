@@ -27,9 +27,9 @@ const LOADING_STATE_TYPE_PREFIXES: Record<LoadingStateKeys, string> = {
 
 // Export initial loading state and reducer builder function
 
-export const initialLoadingState: LoadingStates = (
-  Object.keys(LOADING_STATE_TYPE_PREFIXES) as LoadingStateKeys[]
-).reduce((acc, key) => ({ ...acc, [key]: false }), {} as LoadingStates);
+export const initialLoadingState: LoadingStates = {
+  isSavingYaml: false,
+};
 
 // Add loading reducers for each thunk in the map
 export const addLoadingStateReducers = (builder: ActionReducerMapBuilder<WorkflowDetailState>) => {
