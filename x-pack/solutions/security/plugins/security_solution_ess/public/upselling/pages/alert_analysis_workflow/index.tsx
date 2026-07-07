@@ -77,7 +77,8 @@ const AlertAnalysisWorkflowUpsellingPageESSComponent: React.FC = () => {
   );
 };
 
-AlertAnalysisWorkflowUpsellingPageESSComponent.displayName = 'AlertAnalysisWorkflowUpsellingPageESS';
+AlertAnalysisWorkflowUpsellingPageESSComponent.displayName =
+  'AlertAnalysisWorkflowUpsellingPageESS';
 
 export const AlertAnalysisWorkflowUpsellingPageESS = React.memo(
   AlertAnalysisWorkflowUpsellingPageESSComponent
