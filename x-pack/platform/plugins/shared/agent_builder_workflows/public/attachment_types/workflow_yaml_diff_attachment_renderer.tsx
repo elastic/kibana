@@ -6,16 +6,27 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiButtonEmpty, EuiText, transparentize } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  transparentize,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { Change } from 'diff';
-import { diffLines } from 'diff';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/code-editor';
-import { useWorkflowsMonacoTheme, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
+import {
+  computeWorkflowYamlDiffStats,
+  useWorkflowsMonacoTheme,
+  WORKFLOWS_MONACO_EDITOR_THEME,
+  type WorkflowYamlDiffStats,
+} from '@kbn/workflows-ui';
 
 interface WorkflowYamlDiffData {
   beforeYaml: string;
@@ -89,7 +100,8 @@ const estimateContentHeight = (
 const MonacoDiffViewer: React.FC<{
   beforeYaml: string;
   afterYaml: string;
-}> = ({ beforeYaml, afterYaml }) => {
+  parts: Change[];
+}> = ({ beforeYaml, afterYaml, parts }) => {
   const styles = useMemoCss(componentStyles);
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<monaco.editor.IDiffEditor | null>(null);
@@ -100,10 +112,10 @@ const MonacoDiffViewer: React.FC<{
   const contextLineCount = 3;
   const minimumLineCount = 3;
 
-  const estimatedHeight = useMemo(() => {
-    const parts = diffLines(beforeYaml, afterYaml);
-    return estimateContentHeight(parts, contextLineCount, minimumLineCount);
-  }, [beforeYaml, afterYaml]);
+  const estimatedHeight = useMemo(
+    () => estimateContentHeight(parts, contextLineCount, minimumLineCount),
+    [parts]
+  );
 
   const contentHeight = measuredHeight ?? estimatedHeight;
   const collapsedHeight = Math.min(contentHeight, COLLAPSED_HEIGHT);
@@ -133,6 +145,7 @@ const MonacoDiffViewer: React.FC<{
       minimap: { enabled: false },
       scrollBeyondLastLine: false,
       lineNumbers: 'off',
+      lineNumbersMinChars: 0,
       folding: false,
       glyphMargin: false,
       overviewRulerLanes: 0,
@@ -235,19 +248,23 @@ const MonacoDiffViewer: React.FC<{
       />
       {needsExpansion && !isExpanded && (
         <div css={styles.expandBar}>
-          <EuiButtonEmpty size="xs" iconType="arrowDown" color="primary" onClick={handleExpand}>
-            {i18n.translate('workflowsManagement.attachmentRenderers.diff.showAll', {
-              defaultMessage: 'Show all',
-            })}
+          <EuiButtonEmpty size="xs" color="primary" onClick={handleExpand}>
+            <EuiBadge iconType="arrowDown" color="primary">
+              {i18n.translate('workflowsManagement.attachmentRenderers.diff.showAll', {
+                defaultMessage: 'Show all',
+              })}
+            </EuiBadge>
           </EuiButtonEmpty>
         </div>
       )}
       {needsExpansion && isExpanded && (
         <div css={styles.collapseBar}>
-          <EuiButtonEmpty size="xs" iconType="arrowUp" color="primary" onClick={handleCollapse}>
-            {i18n.translate('workflowsManagement.attachmentRenderers.diff.collapse', {
-              defaultMessage: 'Collapse',
-            })}
+          <EuiButtonEmpty size="xs" color="primary" onClick={handleCollapse}>
+            <EuiBadge iconType="arrowUp" color="primary">
+              {i18n.translate('workflowsManagement.attachmentRenderers.diff.collapse', {
+                defaultMessage: 'Collapse',
+              })}
+            </EuiBadge>
           </EuiButtonEmpty>
         </div>
       )}
@@ -259,7 +276,19 @@ const DiffInlineContent: React.FC<{
   attachment: WorkflowYamlDiffAttachment;
 }> = ({ attachment }) => {
   const styles = useMemoCss(componentStyles);
-  const { beforeYaml, afterYaml } = attachment.data;
+  const { beforeYaml, afterYaml, name } = attachment.data;
+
+  const stats: WorkflowYamlDiffStats = useMemo(
+    () => computeWorkflowYamlDiffStats(beforeYaml, afterYaml),
+    [beforeYaml, afterYaml]
+  );
+  const { parts, added, removed } = stats;
+
+  const displayName =
+    name ??
+    i18n.translate('workflowsManagement.attachmentRenderers.diff.defaultName', {
+      defaultMessage: 'Workflow',
+    });
 
   if (beforeYaml === afterYaml) {
     return (
@@ -271,66 +300,115 @@ const DiffInlineContent: React.FC<{
     );
   }
 
-  return <MonacoDiffViewer beforeYaml={beforeYaml} afterYaml={afterYaml} />;
+  return (
+    <div>
+      <div css={styles.header}>
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          gutterSize="s"
+          responsive={false}
+        >
+          <EuiFlexItem grow={true}>
+            <EuiText size="s" css={styles.headerName}>
+              <strong>{displayName}</strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <span css={styles.added}>+{added}</span>
+              <span css={styles.removed}>−{removed}</span>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+      <MonacoDiffViewer beforeYaml={beforeYaml} afterYaml={afterYaml} parts={parts} />
+    </div>
+  );
 };
 
 const componentStyles = {
   wrapper: ({ euiTheme }: UseEuiTheme) =>
     css({
       position: 'relative',
-      padding: '10px 0',
       '.diff-hidden-lines .center': {
         gap: euiTheme.size.s,
       },
     }),
   expandBar: ({ euiTheme }: UseEuiTheme) =>
     css({
-      transition: 'opacity 0.15s ease-out',
-      opacity: 0.7,
-      '&:hover': {
-        opacity: 1,
-      },
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: 48,
+
       '.euiButtonEmpty': {
         width: '100%',
         height: '100%',
         borderTopLeftRadius: 0,
         borderTopRightRadius: 0,
       },
+
+      '&:before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        transition: 'opacity 0.15s ease-out',
+        opacity: 0.7,
+        '&:hover': {
+          opacity: 1,
+        },
+
+        background: `linear-gradient(
+          to bottom,
+          ${transparentize(euiTheme.colors.backgroundBasePlain, 0)} 0%,
+          ${transparentize(euiTheme.colors.backgroundBasePlain, 0.6)} 40%,
+          ${euiTheme.colors.backgroundBasePlain} 100%
+        )`,
+      },
+    }),
+  collapseBar: () =>
+    css({
       position: 'absolute',
       bottom: 0,
       left: 0,
       right: 0,
       height: 48,
-      background: `linear-gradient(
-        to bottom,
-        ${transparentize(euiTheme.colors.backgroundBasePlain, 0)} 0%,
-        ${transparentize(euiTheme.colors.backgroundBasePlain, 0.6)} 40%,
-        ${euiTheme.colors.backgroundBasePlain} 100%
-      )`,
-    }),
-  collapseBar: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      transition: 'opacity 0.15s ease-out',
-      opacity: 0.7,
-      '&:hover': {
-        opacity: 1,
-      },
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'transparent',
       '.euiButtonEmpty': {
         width: '100%',
+        height: '100%',
         borderTopLeftRadius: 0,
         borderTopRightRadius: 0,
       },
-      background: `linear-gradient(
-        to top,
-        ${transparentize(euiTheme.colors.backgroundBasePlain, 0)} 0%,
-        ${transparentize(euiTheme.colors.backgroundBasePlain, 0.6)} 40%,
-        ${euiTheme.colors.backgroundBasePlain} 100%
-      )`,
     }),
   header: ({ euiTheme }: UseEuiTheme) =>
     css({
-      padding: euiTheme.size.s,
+      padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
       borderBottom: euiTheme.border.thin,
+    }),
+  headerName: css({
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  }),
+  added: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      color: euiTheme.colors.textSuccess,
+      fontFamily: euiTheme.font.familyCode,
+      marginRight: euiTheme.size.xs,
+    }),
+  removed: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      color: euiTheme.colors.textDanger,
+      fontFamily: euiTheme.font.familyCode,
     }),
   noChanges: ({ euiTheme }: UseEuiTheme) =>
     css({
