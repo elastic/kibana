@@ -9,6 +9,7 @@ import React from 'react';
 import { ChangeHistoryProvider } from '../provider/change_history_provider';
 import type { ChangeHistoryScope } from '../types/change_history_scope';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
+import type { ChangeHistoryFeatures } from '../types/change_history_features';
 import {
   TEST_CHANGE_HISTORY_SCOPE,
   TEST_OBJECT_ID,
@@ -20,10 +21,12 @@ export const createChangeHistoryHookWrapper = ({
   adapter,
   objectId = TEST_OBJECT_ID,
   scope = TEST_CHANGE_HISTORY_SCOPE,
+  features,
 }: {
   adapter: ChangeHistoryAdapter;
   objectId?: string;
   scope?: ChangeHistoryScope;
+  features?: ChangeHistoryFeatures;
 }) => {
   const { wrapper: QueryClientWrapper, queryClient } = createQueryClientWrapper();
 
@@ -35,6 +38,7 @@ export const createChangeHistoryHookWrapper = ({
         labels={{ previewTitle: TEST_OBJECT_TITLE }}
         renderPreview={() => null}
         scope={scope}
+        features={features}
       >
         {children}
       </ChangeHistoryProvider>

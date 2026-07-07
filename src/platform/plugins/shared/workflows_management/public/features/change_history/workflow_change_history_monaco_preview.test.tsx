@@ -16,8 +16,8 @@ import { WorkflowChangeHistoryMonacoPreview } from './workflow_change_history_mo
 import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
 
 jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
   useDefineWorkflowsMonacoTheme: jest.fn(),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
 }));
 
 let mockValidationResults: YamlValidationResult[] = [];
@@ -342,7 +342,7 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
 
     expect(screen.getByTestId('workflowChangeHistoryCompareSplitPaneLabels')).toBeInTheDocument();
     expect(screen.getByText('Previous version:')).toBeInTheDocument();
-    expect(screen.getByText('Current version:')).toBeInTheDocument();
+    expect(screen.getByText('Selected version:')).toBeInTheDocument();
     expect(screen.getByTestId('workflowChangeHistoryCompareSplitBaselineBadge')).toHaveTextContent(
       'v5'
     );
@@ -350,6 +350,27 @@ describe('WorkflowChangeHistoryMonacoPreview', () => {
       'v8'
     );
     expect(screen.queryByTestId('workflowChangeHistoryCompareIndicator')).not.toBeInTheDocument();
+  });
+
+  it('shows the unsaved changes badge for the selected pane when there is no version', () => {
+    jest.useFakeTimers();
+    renderPreview({
+      targetYaml: 'name: draft\n',
+      baselineYaml: 'name: original\n',
+      compareIndicator: {
+        baselineVersion: 2,
+        currentBadgeLabel: 'Unsaved changes',
+        currentBadgeColor: 'warning',
+      },
+    });
+
+    fireEvent.click(screen.getByTestId('workflowChangeHistoryPreviewSettingsButton'));
+    fireEvent.click(screen.getByTestId('workflowChangeHistoryCompareSplit'));
+
+    expect(screen.getByTestId('workflowChangeHistoryCompareSplitCurrentBadge')).toHaveTextContent(
+      'Unsaved changes'
+    );
+    expect(screen.getByText('Selected version:')).toBeInTheDocument();
   });
 
   it('scrolls to the first diff when diff computation completes', () => {

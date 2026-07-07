@@ -19,6 +19,7 @@ import {
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX,
 } from '@kbn/management-settings-ids';
 import {
   ALERT_ANALYSIS_WORKFLOW_API_VERSION,
@@ -77,6 +78,7 @@ const toWorkflowSettings = ({
   connectorId,
   workflowEnabled,
   createConversation,
+  tagPrefix,
 }: AlertAnalysisWorkflowSettingsWithConnectorRequestBodyType): SecurityAlertAnalysisWorkflowSettings => ({
   autoCloseEnabled,
   autoCloseConfidenceScoreMinThreshold,
@@ -84,6 +86,7 @@ const toWorkflowSettings = ({
   connectorId: connectorId ?? '',
   workflowEnabled,
   createConversation,
+  tagPrefix,
 });
 
 export const registerAlertAnalysisWorkflowSettingsRoutes = (
@@ -235,6 +238,7 @@ export const registerAlertAnalysisWorkflowSettingsRoutes = (
             [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID]: settings.connectorId,
             [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION]:
               settings.createConversation,
+            [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX]: settings.tagPrefix,
           });
 
           securitySolution.getAuditLogger()?.log({

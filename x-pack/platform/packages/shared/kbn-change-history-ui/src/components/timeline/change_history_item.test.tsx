@@ -67,7 +67,7 @@ const renderItem = (
 describe('ChangeHistoryItem', () => {
   beforeEach(() => {
     mockUseChangeHistoryConfig.mockReturnValue({
-      supports: { compare: true, restore: false },
+      supports: { compare: true, restore: false, unsavedChanges: false },
       renderBadge: ({ item }: { item: ChangeHistoryListItem }) => (
         <EuiBadge color="hollow">
           {item.isCurrent
@@ -98,7 +98,7 @@ describe('ChangeHistoryItem', () => {
 
   it('renders changes without tooltip when renderChangesSummary is omitted', () => {
     mockUseChangeHistoryConfig.mockReturnValue({
-      supports: { compare: true, restore: false },
+      supports: { compare: true, restore: false, unsavedChanges: false },
       renderBadge: ({ item }: { item: ChangeHistoryListItem }) => (
         <EuiBadge color="hollow">v{String(item.metadata?.version ?? '')}</EuiBadge>
       ),
@@ -152,7 +152,7 @@ describe('ChangeHistoryItem', () => {
 
   it('omits compare row action when supports.compare is false', () => {
     mockUseChangeHistoryConfig.mockReturnValue({
-      supports: { compare: false, restore: true },
+      supports: { compare: false, restore: true, unsavedChanges: false },
       renderBadge: ({ item }: { item: ChangeHistoryListItem }) => (
         <EuiBadge color="hollow">v{String(item.metadata?.version ?? '')}</EuiBadge>
       ),
