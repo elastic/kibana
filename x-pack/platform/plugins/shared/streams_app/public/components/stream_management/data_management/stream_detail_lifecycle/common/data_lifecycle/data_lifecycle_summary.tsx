@@ -45,6 +45,14 @@ export interface FrozenPhaseCallouts {
   showDefaultRepositoryCallout?: boolean;
   /** Navigate directly to the create-repository page instead of opening a modal. */
   createDefaultRepositoryHref?: string;
+  /**
+   * URL to the Snapshot and Restore repositories list. When the user already has repositories
+   * configured (see `hasExistingRepositories`) the callout directs them here to pick one as the
+   * default instead of creating a new repository.
+   */
+  manageRepositoriesUrl?: string;
+  /** Whether the user already has at least one snapshot repository configured. */
+  hasExistingRepositories?: boolean;
   onRefreshDefaultRepository?: () => void;
   isRefreshingDefaultRepository?: boolean;
 }
@@ -67,6 +75,8 @@ export interface DataLifecycleSummaryUiState {
   editedPhaseName?: string;
   editedDownsampleStepIndex?: number;
   isEditLifecycleFlyoutOpen?: boolean;
+  /** While true, all click interactions are disabled: no popover opens and no navigation occurs. */
+  disableInteractions?: boolean;
   invalidPhases?: PhaseName[];
   invalidStepIndices?: number[];
 }
@@ -102,6 +112,7 @@ export const DataLifecycleSummary = ({
     editedPhaseName,
     editedDownsampleStepIndex,
     isEditLifecycleFlyoutOpen = false,
+    disableInteractions = false,
     invalidPhases,
     invalidStepIndices,
   } = uiState ?? {};
@@ -179,6 +190,7 @@ export const DataLifecycleSummary = ({
                   testSubjPrefix={testSubjPrefix}
                   canManageLifecycle={canManageLifecycle}
                   isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
+                  disableInteractions={disableInteractions}
                   frozenPhaseCallouts={frozenPhaseCallouts}
                 />
                 {showDownsampling && downsamplingSegments && (
@@ -191,6 +203,7 @@ export const DataLifecycleSummary = ({
                     editedDownsampleStepIndex={editedDownsampleStepIndex}
                     canManageLifecycle={canManageLifecycle}
                     isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
+                    disableInteractions={disableInteractions}
                   />
                 )}
                 <EuiSpacer size="xs" />
