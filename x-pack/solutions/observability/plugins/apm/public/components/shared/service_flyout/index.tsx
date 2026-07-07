@@ -16,6 +16,7 @@ import { ResponsiveFlyout } from '../responsive_flyout';
 import { ServiceFlyoutFooter } from './footer';
 import { ServiceFlyoutHeader } from './header';
 import { ServiceFlyoutOverview } from './overview';
+import { ServiceFlyoutContextProvider } from './service_flyout_context';
 
 export const SERVICE_FLYOUT_TAB_IDS = {
   overview: 'overview',
@@ -106,40 +107,40 @@ export function ServiceFlyout({
 
   return (
     <EuiPortal>
-      <ResponsiveFlyout
-        data-test-subj="serviceFlyout"
-        flyoutMenuDisplayMode="always"
-        onClose={onClose}
-        ownFocus={false}
-        size="m"
-        paddingSize="m"
-        resizable
-        session="start"
-        flyoutMenuProps={{ title }}
-        aria-labelledby={titleId}
-      >
-        <ServiceFlyoutHeader
-          service={service}
-          title={title}
-          titleId={titleId}
-          environment={flyoutEnvironment}
-          kuery={kuery}
-          rangeFrom={flyoutRange.rangeFrom}
-          rangeTo={flyoutRange.rangeTo}
-          selectedTabId={selectedTabId}
-          onSelectedTabIdChange={setSelectedTabId}
-        />
-        <EuiFlyoutBody>{renderTabContent()}</EuiFlyoutBody>
-        <ServiceFlyoutFooter
-          serviceName={service.id}
-          environment={flyoutEnvironment}
-          rangeFrom={flyoutRange.rangeFrom}
-          rangeTo={flyoutRange.rangeTo}
-          transactionType={transactionType}
-          core={core}
-          share={share}
-        />
-      </ResponsiveFlyout>
+      <ServiceFlyoutContextProvider core={core} share={share}>
+        <ResponsiveFlyout
+          data-test-subj="serviceFlyout"
+          flyoutMenuDisplayMode="always"
+          onClose={onClose}
+          ownFocus={false}
+          size="m"
+          paddingSize="m"
+          resizable
+          session="start"
+          flyoutMenuProps={{ title }}
+          aria-labelledby={titleId}
+        >
+          <ServiceFlyoutHeader
+            service={service}
+            title={title}
+            titleId={titleId}
+            environment={flyoutEnvironment}
+            kuery={kuery}
+            rangeFrom={flyoutRange.rangeFrom}
+            rangeTo={flyoutRange.rangeTo}
+            selectedTabId={selectedTabId}
+            onSelectedTabIdChange={setSelectedTabId}
+          />
+          <EuiFlyoutBody>{renderTabContent()}</EuiFlyoutBody>
+          <ServiceFlyoutFooter
+            serviceName={service.id}
+            environment={flyoutEnvironment}
+            rangeFrom={flyoutRange.rangeFrom}
+            rangeTo={flyoutRange.rangeTo}
+            transactionType={transactionType}
+          />
+        </ResponsiveFlyout>
+      </ServiceFlyoutContextProvider>
     </EuiPortal>
   );
 }

@@ -8,6 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ServiceFlyoutContextProvider } from '../service_flyout_context';
 import { ServiceFlyoutFooter } from '.';
 
 const mockUseDiscoverHref = jest.fn();
@@ -28,18 +29,18 @@ const mockCore = {
   http: { basePath: { prepend: (path: string) => path } },
 } as any;
 
-function renderFooter() {
+function renderFooter(core = mockCore, share = mockShare) {
   return render(
     <IntlProvider locale="en">
-      <ServiceFlyoutFooter
-        serviceName="opbeans-java"
-        environment="production"
-        rangeFrom="now-15m"
-        rangeTo="now"
-        transactionType="request"
-        core={mockCore}
-        share={mockShare}
-      />
+      <ServiceFlyoutContextProvider core={core} share={share}>
+        <ServiceFlyoutFooter
+          serviceName="opbeans-java"
+          environment="production"
+          rangeFrom="now-15m"
+          rangeTo="now"
+          transactionType="request"
+        />
+      </ServiceFlyoutContextProvider>
     </IntlProvider>
   );
 }
@@ -64,15 +65,15 @@ describe('ServiceFlyoutFooter', () => {
     setupAllHrefs();
     render(
       <IntlProvider locale="en">
-        <ServiceFlyoutFooter
-          serviceName="opbeans-java"
-          environment="production"
-          rangeFrom="now-15m"
-          rangeTo="now"
-          transactionType=""
-          core={mockCore}
-          share={mockShare}
-        />
+        <ServiceFlyoutContextProvider core={mockCore} share={mockShare}>
+          <ServiceFlyoutFooter
+            serviceName="opbeans-java"
+            environment="production"
+            rangeFrom="now-15m"
+            rangeTo="now"
+            transactionType=""
+          />
+        </ServiceFlyoutContextProvider>
       </IntlProvider>
     );
 
@@ -169,19 +170,7 @@ describe('ServiceFlyoutFooter', () => {
   it('disables the actions button when no actions are available', () => {
     mockUseDiscoverHref.mockReturnValue(undefined);
     mockGetManageSlosUrl.mockReturnValue(undefined);
-    render(
-      <IntlProvider locale="en">
-        <ServiceFlyoutFooter
-          serviceName="opbeans-java"
-          environment="production"
-          rangeFrom="now-15m"
-          rangeTo="now"
-          transactionType="request"
-          core={{ http: { basePath: { prepend: () => undefined } } } as any}
-          share={mockShare}
-        />
-      </IntlProvider>
-    );
+    renderFooter({ http: { basePath: { prepend: () => undefined } } } as any, mockShare);
 
     expect(screen.getByTestId('serviceFlyoutActionsButton')).toBeDisabled();
   });
