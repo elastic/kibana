@@ -6,7 +6,6 @@
  */
 
 import { AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID } from '@kbn/management-settings-ids';
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   createOAuthClient,
@@ -18,7 +17,7 @@ import { test } from '../fixtures';
 
 test.describe(
   '[NON-MKI] Agent Builder — MCP Clients management',
-  { tag: [...tags.serverless.search] },
+  { tag: ['@local-serverless-search'] },
   () => {
     let authHeaders: Record<string, string>;
     const createdClientIds: string[] = [];

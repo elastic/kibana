@@ -7,7 +7,6 @@
 
 import { AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID } from '@kbn/management-settings-ids';
 import { deleteTestOAuthConnection, seedTestOAuthConnection } from '@kbn/mock-idp-utils';
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { test } from '../fixtures';
@@ -22,7 +21,7 @@ const MCP_RESOURCE = 'http://localhost:5620/api/agent_builder/mcp';
 
 test.describe(
   '[NON-MKI] Security — Application Connections management',
-  { tag: [...tags.serverless.security.complete] },
+  { tag: ['@local-serverless-security_complete'] },
   () => {
     let authHeaders: Record<string, string>;
     let clientId: string;

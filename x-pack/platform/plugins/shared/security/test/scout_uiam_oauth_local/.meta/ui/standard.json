@@ -1,17 +1,16 @@
 {
-  "sha1": "758efe8fb9d4d77992f702882593f66963918550",
+  "sha1": "494b4ceee5efce568fe97077741564ad2c7b206e",
   "tests": [
     {
       "id": "adc95c83352db02-9a16baae7c78495",
       "title": "[NON-MKI] Security — Application Connections management shows connections in grouped and list views",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
-        "line": 85,
+        "line": 84,
         "column": 9
       }
     },
@@ -20,12 +19,11 @@
       "title": "[NON-MKI] Security — Application Connections management edits a connection name inline and persists it",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
-        "line": 105,
+        "line": 104,
         "column": 9
       }
     },
@@ -34,12 +32,11 @@
       "title": "[NON-MKI] Security — Application Connections management revokes an individual connection",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
-        "line": 120,
+        "line": 119,
         "column": 9
       }
     },
@@ -48,12 +45,11 @@
       "title": "[NON-MKI] Security — Application Connections management bulk revokes multiple selected connections",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
-        "line": 136,
+        "line": 135,
         "column": 9
       }
     }
