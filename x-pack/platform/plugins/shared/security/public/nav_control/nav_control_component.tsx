@@ -9,14 +9,13 @@ import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import {
   EuiContextMenu,
   EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiHeaderSectionItemButton,
   EuiIcon,
   EuiLoadingSpinner,
   EuiPopover,
 } from '@elastic/eui';
 import type { FunctionComponent, MouseEvent, ReactNode } from 'react';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useCallback, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
@@ -41,35 +40,41 @@ interface ContextMenuProps {
 const ContextMenuContent = ({ items, closePopover }: ContextMenuProps) => {
   return (
     <>
-      <EuiContextMenuPanel>
-        {items.map((item, i) => {
-          if (item.content) {
-            return (
-              <Fragment key={i}>
-                {typeof item.content === 'function' ? item.content({ closePopover }) : item.content}
-              </Fragment>
-            );
-          }
+      {items.map((item, i) => {
+        if (item.content) {
           return (
-            <EuiContextMenuItem
-              key={i}
-              icon={item.icon}
-              href={item.href}
-              onClick={item.onClick}
-              data-test-subj={item['data-test-subj']}
-            >
-              {item.name}
-            </EuiContextMenuItem>
+            <Fragment key={i}>
+              {typeof item.content === 'function' ? item.content({ closePopover }) : item.content}
+            </Fragment>
           );
-        })}
-      </EuiContextMenuPanel>
+        }
+        return (
+          <EuiContextMenuItem
+            key={i}
+            icon={item.icon}
+            href={item.href}
+            onClick={item.onClick}
+            data-test-subj={item['data-test-subj']}
+          >
+            {item.name}
+          </EuiContextMenuItem>
+        );
+      })}
     </>
   );
 };
 
+export interface SecurityNavControlRenderButtonProps {
+  isOpen: boolean;
+  toggleMenu: () => void;
+  avatar: ReactNode;
+}
+
 interface SecurityNavControlProps {
+  avatarSize?: 's' | 'm' | 'l';
   editProfileUrl: string;
   logoutUrl: string;
+  renderButton?: (props: SecurityNavControlRenderButtonProps) => NonNullable<ReactNode>;
   userMenuLinks$: Observable<UserMenuLink[]>;
 }
 
@@ -77,6 +82,8 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   editProfileUrl,
   logoutUrl,
   userMenuLinks$,
+  renderButton,
+  avatarSize = 's',
 }) => {
   const userMenuLinks = useObservable(userMenuLinks$, []);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -86,29 +93,38 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
 
   const displayName = currentUser.value ? getUserDisplayName(currentUser.value) : '';
 
-  const button = (
+  const toggleMenu = useCallback(
+    () => setIsPopoverOpen((value) => (currentUser.value ? !value : false)),
+    [currentUser.value]
+  );
+
+  const avatar = userProfile.value ? (
+    <UserAvatar
+      user={userProfile.value.user}
+      avatar={userProfile.value.data.avatar}
+      size={avatarSize}
+      data-test-subj="userMenuAvatar"
+    />
+  ) : currentUser.value && userProfile.error ? (
+    <UserAvatar user={currentUser.value} size={avatarSize} data-test-subj="userMenuAvatar" />
+  ) : (
+    <EuiLoadingSpinner size="m" />
+  );
+
+  const button = renderButton ? (
+    renderButton({ isOpen: isPopoverOpen, toggleMenu, avatar })
+  ) : (
     <EuiHeaderSectionItemButton
       aria-expanded={isPopoverOpen}
       aria-haspopup="true"
       aria-label={i18n.translate('xpack.security.navControlComponent.accountMenuAriaLabel', {
         defaultMessage: 'Account menu',
       })}
-      onClick={() => setIsPopoverOpen((value) => (currentUser.value ? !value : false))}
+      onClick={toggleMenu}
       data-test-subj="userMenuButton"
       style={{ lineHeight: 'normal' }}
     >
-      {userProfile.value ? (
-        <UserAvatar
-          user={userProfile.value.user}
-          avatar={userProfile.value.data.avatar}
-          size="s"
-          data-test-subj="userMenuAvatar"
-        />
-      ) : currentUser.value && userProfile.error ? (
-        <UserAvatar user={currentUser.value} size="s" data-test-subj="userMenuAvatar" />
-      ) : (
-        <EuiLoadingSpinner size="m" />
-      )}
+      {avatar}
     </EuiHeaderSectionItemButton>
   );
 

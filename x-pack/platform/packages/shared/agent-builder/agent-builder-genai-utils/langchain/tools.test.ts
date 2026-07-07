@@ -45,6 +45,23 @@ describe('toolToLangchain', () => {
     expect(langchainTool.responseFormat).toEqual('content_and_artifact');
 
     const toolKeys = Object.keys((langchainTool.schema as any).shape);
+    expect(toolKeys.sort()).toEqual(['foo']);
+  });
+
+  it('adds reasoning param when specified', async () => {
+    const tool = createTool('toolA', {
+      description: 'desc',
+      getSchema: () => z.object({ foo: z.string() }),
+    });
+
+    const langchainTool = await toolToLangchain({
+      tool,
+      toolId: tool.id,
+      logger,
+      addReasoningParam: true,
+    });
+
+    const toolKeys = Object.keys((langchainTool.schema as any).shape);
     expect(toolKeys.sort()).toEqual(['_reasoning', 'foo']);
   });
 

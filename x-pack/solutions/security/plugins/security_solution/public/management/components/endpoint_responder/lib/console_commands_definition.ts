@@ -692,12 +692,22 @@ export const getEndpointConsoleCommands = ({
           mustHaveValue: 'truthy',
           SelectorComponent: CancelablePendingActionsSelector,
         },
+        ...(agentType === 'endpoint'
+          ? {
+              force: {
+                required: false,
+                allowMultiples: false,
+                about: CONSOLE_COMMANDS.cancel.forceArgInfo,
+                mustHaveValue: false,
+              },
+            }
+          : {}),
         ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 10,
-      helpDisabled: !isSupported,
+      helpDisabled: !isSupported || !doesEndpointSupportCommand('cancel'),
       helpHidden: !isSupported,
       validate: capabilitiesAndPrivilegesValidator(agentType),
     });

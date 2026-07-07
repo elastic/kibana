@@ -7,6 +7,7 @@
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiFilterButton, EuiFilterGroup, EuiPopover, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { PolicySelectorProps } from './policy_selector';
@@ -82,6 +83,10 @@ export const PolicySelectorMenuButton = memo<PolicySelectorMenuButtonProps>((pro
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
+        aria-label={i18n.translate(
+          'xpack.securitySolution.management.policiesSelector.popover.ariaLabel',
+          { defaultMessage: 'Policies selector' }
+        )}
       >
         <PolicySelector {...props} onFetch={onFetch} data-test-subj={getTestId('policySelector')} />
       </EuiPopover>

@@ -8,7 +8,7 @@
 import React from 'react';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import { merge } from 'rxjs';
 import { LENS_EMBEDDABLE_TYPE, type LensRuntimeState } from '@kbn/lens-common';
 import type { LensApi, LensWireAPIConfig } from '@kbn/lens-common-2';
@@ -139,7 +139,7 @@ export const createLensEmbeddableFactory = (
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<LensWireAPIConfig>({
+      const stateApi = initializeStateApi<LensWireAPIConfig>({
         uuid,
         parentApi,
         serializeState: () => {
@@ -173,13 +173,12 @@ export const createLensEmbeddableFactory = (
           }
           return comparators;
         },
-        onReset: async (lastSaved) => {
-          actionsConfig.reinitializeState(lastSaved);
-          dashboardConfig.reinitializeState(lastSaved);
-          searchContextConfig.reinitializeState(lastSaved);
-          if (!lastSaved) return;
-          const lastSavedRuntimeState = await deserializeState(services, lastSaved);
-          stateConfig.reinitializeRuntimeState(lastSavedRuntimeState);
+        applySerializedState: async (nextState) => {
+          actionsConfig.reinitializeState(nextState);
+          dashboardConfig.reinitializeState(nextState);
+          searchContextConfig.reinitializeState(nextState);
+          const nextRuntimeState = await deserializeState(services, nextState);
+          stateConfig.reinitializeRuntimeState(nextRuntimeState);
         },
       });
 
@@ -192,7 +191,7 @@ export const createLensEmbeddableFactory = (
         // dashboardConfig who owns the savedObjectId after the
         // stateConfig one who owns the inline editing
         {
-          ...unsavedChangesApi,
+          ...stateApi,
           ...editConfig.api,
           ...inspectorConfig.api,
           ...searchContextConfig.api,

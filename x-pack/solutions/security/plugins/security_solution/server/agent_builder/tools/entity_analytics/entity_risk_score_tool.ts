@@ -16,9 +16,10 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugi
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import { createGetRiskScores } from '../../../lib/entity_analytics/risk_score/get_risk_score';
 import type { EntityType } from '../../../../common/entity_analytics/types';
-import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../../common/constants';
+import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { getRiskIndex } from '../../../../common/search_strategy/security_solution/risk_score/common';
 import { securityTool } from '../constants';
+import { getAlertsById } from '../get_alerts_by_id';
 
 const entityRiskScoreSchema = z.object({
   identifierType: z
@@ -86,43 +87,6 @@ const queryRiskIndexForWildcard = async ({
   return response.hits.hits
     .map((hit) => (hit._source ? hit._source[entityType]?.risk : undefined))
     .filter((risk): risk is EntityRiskScoreRecord => risk !== undefined);
-};
-
-/**
- * Fetches alerts by their IDs, returning only essential fields for risk score context
- */
-const getAlertsById = async ({
-  esClient,
-  index,
-  ids,
-}: {
-  esClient: ElasticsearchClient;
-  index: string;
-  ids: string[];
-}): Promise<Record<string, unknown>> => {
-  if (ids.length === 0) {
-    return {};
-  }
-
-  const response = await esClient.search({
-    index,
-    ignore_unavailable: true,
-    allow_no_indices: true,
-    size: ids.length,
-    _source: ESSENTIAL_ALERT_FIELDS,
-    query: {
-      bool: {
-        filter: [{ terms: { _id: ids } }],
-      },
-    },
-  });
-
-  return response.hits.hits.reduce<Record<string, unknown>>((acc, hit) => {
-    if (hit._source && hit._id) {
-      acc[hit._id] = hit._source;
-    }
-    return acc;
-  }, {});
 };
 
 export const entityRiskScoreTool = (

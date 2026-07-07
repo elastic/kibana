@@ -159,6 +159,13 @@ test('supports unsplittable key syntax on nested list with splittable subkeys', 
   `);
 });
 
+test('parses unquoted ISO dates as strings, not Date objects', () => {
+  const config = getConfigFromFiles([fixtureFile('date_scalar.yml')]);
+
+  expect(config.expiry).toBe('2024-12-31');
+  expect(typeof config.expiry).toBe('string');
+});
+
 test('supports var:default syntax', () => {
   process.env.KBN_ENV_VAR1 = 'val1';
 

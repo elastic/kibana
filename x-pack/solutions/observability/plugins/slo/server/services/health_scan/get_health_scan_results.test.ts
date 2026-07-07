@@ -127,7 +127,7 @@ describe('getHealthScanResults', () => {
 
       expect(result.results).toHaveLength(size);
       expect(result.total).toBe(30);
-      expect(result.searchAfter).toEqual(cursor);
+      expect(result.searchAfter).toBe(Buffer.from(JSON.stringify(cursor)).toString('base64'));
     });
 
     it('returns undefined nextSearchAfter when partial page is returned', async () => {
@@ -174,7 +174,7 @@ describe('getHealthScanResults', () => {
           size: 25,
           problematic: true,
           allSpaces: true,
-          searchAfter: JSON.stringify(searchAfter),
+          searchAfter: Buffer.from(JSON.stringify(searchAfter)).toString('base64'),
         },
         deps
       );

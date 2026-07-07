@@ -7,52 +7,24 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { ID_MAX_LENGTH } from '@kbn/alerting-v2-schemas';
+import { ID_MAX_LENGTH, MAX_BULK_ITEMS } from '@kbn/alerting-v2-schemas';
 import {
-  ALL_ROLE,
+  ALERTING_V2_RULES_ALL_ROLE,
+  ALERTING_V2_RULES_READ_ROLE,
   apiTest,
   buildCreateRuleData,
   NO_ACCESS_ROLE,
-  READ_ROLE,
   testData,
+  getBulkRulesUrl,
 } from '../../../fixtures';
 
-const BULK_URL = `${testData.RULE_API_PATH}/_bulk`;
-
-/**
- * The route's Zod schema declares `ids.array.max(1000)`, but that validation
- * rule is unreachable via HTTP: Hapi parses query strings with `qs`, whose
- * default `parameterLimit` is also 1000. Repeated query params beyond that
- * limit are silently dropped before validation runs, so the server never sees
- * more than 1000 ids.
- *
- * See https://github.com/ljharb/qs/issues/376 and the upstream Express thread
- * https://github.com/expressjs/express/issues/5878.
- */
-const QS_PARAMETER_LIMIT = 1000;
-
-/**
- * Build a `?ids=…&ids=…` query string using URLSearchParams so each id is
- * URL-encoded correctly and repeated params (the array form) are produced
- * without manual string concatenation.
- */
-const getBulkUrl = (ids: string[] | string): string => {
-  const search = new URLSearchParams();
-  const list = Array.isArray(ids) ? ids : [ids];
-  for (const id of list) {
-    search.append('ids', id);
-  }
-  const qs = search.toString();
-  return qs ? `${BULK_URL}?${qs}` : BULK_URL;
-};
-
-apiTest.describe('Get rules bulk API', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('Bulk get rules API', { tag: '@local-stateful-classic' }, () => {
   let readerCredentials: RoleApiCredentials;
   let readerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
-    readerHeaders = { ...readerCredentials.apiKeyHeader };
+    readerCredentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_RULES_READ_ROLE);
+    readerHeaders = { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader };
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
@@ -64,7 +36,7 @@ apiTest.describe('Get rules bulk API', { tag: '@local-stateful-classic' }, () =>
   });
 
   apiTest(
-    'bulk: should return the requested rules when given multiple ids',
+    'bulk-get: should return the requested rules when given multiple ids',
     async ({ apiClient, apiServices }) => {
       const ruleA = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'rule-a' } })
@@ -77,105 +49,140 @@ apiTest.describe('Get rules bulk API', { tag: '@local-stateful-classic' }, () =>
       await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'rule-c' } })
       );
-      const response = await apiClient.get(getBulkUrl([ruleA.id, ruleB.id]), {
+
+      const response = await apiClient.post(getBulkRulesUrl(), {
         headers: readerHeaders,
+        body: { ids: [ruleA.id, ruleB.id] },
       });
+
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toMatchObject({
-        total: 2,
-        page: 1,
-        perPage: 2,
-      });
-      const returnedIds = response.body.items.map((rule: { id: string }) => rule.id);
-      expect(returnedIds.sort()).toStrictEqual([ruleA.id, ruleB.id].sort());
+      expect(response.body.rules.map((rule: { id: string }) => rule.id)).toStrictEqual([
+        ruleA.id,
+        ruleB.id,
+      ]);
     }
   );
 
   apiTest(
-    'bulk: should return a single rule when given a single id',
+    'bulk-get: should return rules in the exact order of the requested ids',
+    async ({ apiClient, apiServices }) => {
+      // Create rules in alphabetical order, then request them in reverse so we
+      // can prove the response order tracks the request, not creation order.
+      const ruleA = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-a' } })
+      );
+      const ruleB = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-b' } })
+      );
+      const ruleC = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-c' } })
+      );
+
+      const requestedOrder = [ruleC.id, ruleA.id, ruleB.id];
+
+      const response = await apiClient.post(getBulkRulesUrl(), {
+        headers: readerHeaders,
+        body: { ids: requestedOrder },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.rules.map((rule: { id: string }) => rule.id)).toStrictEqual(
+        requestedOrder
+      );
+    }
+  );
+
+  apiTest(
+    'bulk-get: should return a single rule when given a single id',
     async ({ apiClient, apiServices }) => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'single-rule' } })
       );
-      const response = await apiClient.get(getBulkUrl(rule.id), {
+
+      const response = await apiClient.post(getBulkRulesUrl(), {
         headers: readerHeaders,
+        body: { ids: [rule.id] },
       });
+
       expect(response).toHaveStatusCode(200);
-      expect(response.body.total).toBe(1);
-      expect(response.body.items).toHaveLength(1);
-      expect(response.body.items[0].id).toBe(rule.id);
+      expect(response.body.rules).toHaveLength(1);
+      expect(response.body.rules[0].id).toBe(rule.id);
     }
   );
 
   apiTest(
-    'bulk: should silently drop ids that do not exist',
+    'bulk-get: should return 404 when one or more requested ids are missing',
     async ({ apiClient, apiServices }) => {
       const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'existing-rule' } })
+        buildCreateRuleData({ metadata: { name: 'present-rule' } })
       );
-      const response = await apiClient.get(getBulkUrl([rule.id, 'does-not-exist']), {
+
+      const response = await apiClient.post(getBulkRulesUrl(), {
         headers: readerHeaders,
+        body: { ids: [rule.id, 'does-not-exist'] },
       });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.total).toBe(1);
-      expect(response.body.items.map((r: { id: string }) => r.id)).toStrictEqual([rule.id]);
+
+      expect(response).toHaveStatusCode(404);
     }
   );
 
   apiTest(
-    'bulk: should return an empty result set when none of the ids exist',
+    'bulk-get: should return 404 when all requested ids are missing',
     async ({ apiClient }) => {
-      const response = await apiClient.get(getBulkUrl(['missing-1', 'missing-2']), {
+      const response = await apiClient.post(getBulkRulesUrl(), {
         headers: readerHeaders,
+        body: { ids: ['missing-1', 'missing-2'] },
       });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body).toMatchObject({
-        total: 0,
-        page: 1,
-        perPage: 0,
-      });
-      expect(response.body.items).toStrictEqual([]);
+
+      expect(response).toHaveStatusCode(404);
     }
   );
 
-  apiTest(
-    'bulk: should treat a missing ids query param as an empty request',
-    async ({ apiClient }) => {
-      const response = await apiClient.get(BULK_URL, {
-        headers: readerHeaders,
-      });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body).toMatchObject({
-        total: 0,
-        page: 1,
-        perPage: 0,
-      });
-      expect(response.body.items).toStrictEqual([]);
-    }
-  );
+  apiTest('validation: should reject an empty ids array', async ({ apiClient }) => {
+    const response = await apiClient.post(getBulkRulesUrl(), {
+      headers: readerHeaders,
+      body: { ids: [] },
+    });
+    expect(response).toHaveStatusCode(400);
+  });
+
+  apiTest('validation: should reject more than MAX_BULK_ITEMS ids', async ({ apiClient }) => {
+    const ids = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => `id-${i}`);
+    const response = await apiClient.post(getBulkRulesUrl(), {
+      headers: readerHeaders,
+      body: { ids },
+    });
+    expect(response).toHaveStatusCode(400);
+  });
 
   apiTest('validation: should reject ids longer than ID_MAX_LENGTH', async ({ apiClient }) => {
     const tooLongId = 'a'.repeat(ID_MAX_LENGTH + 1);
-    const response = await apiClient.get(getBulkUrl([tooLongId]), {
+    const response = await apiClient.post(getBulkRulesUrl(), {
       headers: readerHeaders,
+      body: { ids: [tooLongId] },
+    });
+    expect(response).toHaveStatusCode(400);
+  });
+
+  apiTest('validation: should reject an empty body', async ({ apiClient }) => {
+    const response = await apiClient.post(getBulkRulesUrl(), {
+      headers: readerHeaders,
+      body: {},
     });
     expect(response).toHaveStatusCode(400);
   });
 
   apiTest(
-    'bulk: documents that ids past the qs parameter limit are silently dropped',
-    async ({ apiClient }) => {
-      // We send `QS_PARAMETER_LIMIT + 1` ids that resolve to no rules (the
-      // index is empty thanks to cleanUp). The route would return 400 if Zod's
-      // .max(1000) was actually reached, but qs truncates first, so we
-      // observe 200 with an empty items array and total === 0.
-      const ids = Array.from({ length: QS_PARAMETER_LIMIT + 1 }, (_, i) => `id-${i}`);
-      const response = await apiClient.get(getBulkUrl(ids), {
+    'validation: should reject unknown top-level body fields (strict)',
+    async ({ apiClient, apiServices }) => {
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'strict-rule' } })
+      );
+      const response = await apiClient.post(getBulkRulesUrl(), {
         headers: readerHeaders,
+        body: { ids: [rule.id], foo: 'bar' },
       });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.items).toStrictEqual([]);
-      expect(response.body.total).toBe(0);
+      expect(response).toHaveStatusCode(400);
     }
   );
 
@@ -185,11 +192,12 @@ apiTest.describe('Get rules bulk API', { tag: '@local-stateful-classic' }, () =>
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'visible-to-readers' } })
       );
-      const response = await apiClient.get(getBulkUrl(rule.id), {
+      const response = await apiClient.post(getBulkRulesUrl(), {
         headers: readerHeaders,
+        body: { ids: [rule.id] },
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body.items[0].id).toBe(rule.id);
+      expect(response.body.rules[0].id).toBe(rule.id);
     }
   );
 
@@ -199,12 +207,15 @@ apiTest.describe('Get rules bulk API', { tag: '@local-stateful-classic' }, () =>
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'visible-to-writers' } })
       );
-      const writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
-      const response = await apiClient.get(getBulkUrl(rule.id), {
-        headers: writerCredentials.apiKeyHeader,
+      const writerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_RULES_ALL_ROLE
+      );
+      const response = await apiClient.post(getBulkRulesUrl(), {
+        headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader },
+        body: { ids: [rule.id] },
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body.items[0].id).toBe(rule.id);
+      expect(response.body.rules[0].id).toBe(rule.id);
     }
   );
 
@@ -215,8 +226,9 @@ apiTest.describe('Get rules bulk API', { tag: '@local-stateful-classic' }, () =>
         buildCreateRuleData({ metadata: { name: 'hidden-rule' } })
       );
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
-      const response = await apiClient.get(getBulkUrl(rule.id), {
-        headers: noAccessCredentials.apiKeyHeader,
+      const response = await apiClient.post(getBulkRulesUrl(), {
+        headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
+        body: { ids: [rule.id] },
       });
       expect(response).toHaveStatusCode(403);
     }

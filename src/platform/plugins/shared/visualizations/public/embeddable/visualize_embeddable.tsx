@@ -15,7 +15,7 @@ import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
-import { apiPublishesSettings, initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { apiPublishesSettings, initializeStateApi } from '@kbn/presentation-publishing';
 import {
   apiHasDisableTriggers,
   apiHasExecutionContext,
@@ -190,7 +190,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       });
     };
 
-    const unsavedChangesApi = initializeUnsavedChanges<VisualizeEmbeddableState>({
+    const stateApi = initializeStateApi<VisualizeEmbeddableState>({
       uuid,
       parentApi,
       serializeState: () => {
@@ -237,14 +237,13 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
               },
         };
       },
-      onReset: async (lastSaved) => {
-        drilldownsManager.reinitializeState(lastSaved ?? {});
-        timeRangeManager.reinitializeState(lastSaved);
-        titleManager.reinitializeState(lastSaved);
+      applySerializedState: async (nextState) => {
+        drilldownsManager.reinitializeState(nextState);
+        timeRangeManager.reinitializeState(nextState);
+        titleManager.reinitializeState(nextState);
 
-        if (!lastSaved) return;
-        const lastSavedRuntimeState = await deserializeState(lastSaved);
-        serializedVis$.next(lastSavedRuntimeState.serializedVis);
+        const nextRuntimeState = await deserializeState(nextState);
+        serializedVis$.next(nextRuntimeState.serializedVis);
       },
     });
 
@@ -252,7 +251,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       ...timeRangeManager.api,
       ...titleManager.api,
       ...drilldownsManager.api,
-      ...unsavedChangesApi,
+      ...stateApi,
       defaultTitle$,
       dataLoading$,
       dataViews$: new BehaviorSubject<DataView[] | undefined>(initialDataViews),

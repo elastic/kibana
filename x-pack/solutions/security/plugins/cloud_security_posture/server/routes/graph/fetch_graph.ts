@@ -7,14 +7,26 @@
 
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
+import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { fetchEvents } from './fetch_events_graph';
 import { fetchEntities, fetchEntityRelationships } from './fetch_entity_relationships_graph';
+import {
+  regroupEvents,
+  enrichEventDocData,
+  regroupRelationships,
+  enrichRelationshipDocData,
+  enrichEntityRecords,
+} from './parse_records';
+import { fetchEntityEnrichment, type EntityEnrichmentFields } from './fetch_entity_enrichment';
+import { checkIfEntitiesIndexExists, addValuesToSet } from './utils';
 import type {
   EsQuery,
   EntityId,
   OriginEventId,
   EventEdge,
+  EventEsqlRow,
   RelationshipEdge,
+  RelationshipEsqlRow,
   EntityRecord,
 } from './types';
 
@@ -30,6 +42,7 @@ export interface FetchGraphParams {
   esQuery?: EsQuery;
   entityIds?: EntityId[];
   pinnedIds?: string[];
+  projectRouting?: ProjectRouting;
 }
 
 export interface FetchGraphResult {
@@ -38,13 +51,15 @@ export interface FetchGraphResult {
   entities: EntityRecord[];
 }
 
-const emptyEventsResult: EsqlToRecords<EventEdge> = { columns: [], records: [] };
-const emptyRelationshipsResult: EsqlToRecords<RelationshipEdge> = { columns: [], records: [] };
+const emptyEventsResult: EsqlToRecords<EventEsqlRow> = { columns: [], records: [] };
+const emptyRelationshipsResult: EsqlToRecords<RelationshipEsqlRow> = { columns: [], records: [] };
 const emptyEntitiesResult: EsqlToRecords<EntityRecord> = { columns: [], records: [] };
 
 /**
  * Fetches graph data including both events and entity relationships.
  * Orchestrates parallel fetching of events from logs/alerts and relationships from entity store.
+ * After fetching, performs a single consolidated enrichment query and re-groups results
+ * by type/subtype, restoring the previous LOOKUP JOIN behavior in a CPS-safe way.
  */
 export const fetchGraph = async ({
   esClient,
@@ -58,6 +73,7 @@ export const fetchGraph = async ({
   esQuery,
   entityIds,
   pinnedIds,
+  projectRouting,
 }: FetchGraphParams): Promise<FetchGraphResult> => {
   // Only fetch events when originEventIds or esQuery are provided
   const hasOriginEventIds = originEventIds.length > 0;
@@ -67,7 +83,12 @@ export const fetchGraph = async ({
     !!esQuery?.bool.should?.length ||
     !!esQuery?.bool.must_not?.length;
 
-  const eventsPromise =
+  const hasEntityIds = entityIds && entityIds.length > 0;
+
+  // Single existence check upfront, reused by all entity-store-backed fetches and the
+  // downstream enrichment query. Runs in parallel with the events fetch since events
+  // hit logs/alerts indices and don't depend on the result.
+  const [eventsResult, entityStoreIndexExists] = await Promise.all([
     hasOriginEventIds || hasEsQuery
       ? fetchEvents({
           esClient,
@@ -80,21 +101,24 @@ export const fetchGraph = async ({
           spaceId,
           esQuery,
           pinnedIds,
+          projectRouting,
         }).catch((error) => {
           logger.error(`Failed to fetch events: ${error.message}`);
           throw error;
         })
-      : Promise.resolve(emptyEventsResult);
+      : Promise.resolve(emptyEventsResult),
+    checkIfEntitiesIndexExists(esClient, logger, spaceId),
+  ]);
 
-  // Optionally fetch relationships in parallel when entityIds are provided
-  const hasEntityIds = entityIds && entityIds.length > 0;
-
+  // Relationships and pinned entities both require the entity store index.
   const relationshipsPromise = hasEntityIds
     ? fetchEntityRelationships({
         esClient,
         logger,
         entityIds,
         spaceId,
+        entityStoreIndexExists,
+        pinnedIds,
       }).catch((error) => {
         logger.error(`Failed to fetch entity relationships: ${error.message}`);
         throw error;
@@ -109,15 +133,14 @@ export const fetchGraph = async ({
         logger,
         entityIds,
         spaceId,
+        entityStoreIndexExists,
       }).catch((error) => {
         logger.error(`Failed to fetch entities: ${error.message}`);
         throw error;
       })
     : Promise.resolve(emptyEntitiesResult);
 
-  // Wait for all in parallel
-  const [eventsResult, relationshipsResult, entitiesResult] = await Promise.all([
-    eventsPromise,
+  const [relationshipsResult, entitiesResult] = await Promise.all([
     relationshipsPromise,
     entitiesPromise,
   ]);
@@ -126,9 +149,42 @@ export const fetchGraph = async ({
     `Fetched [events: ${eventsResult.records.length}] [relationships: ${relationshipsResult.records.length}]`
   );
 
+  // Collect all entity IDs for a single consolidated enrichment query
+  const allEntityIds = new Set<string>();
+  for (const r of eventsResult.records) {
+    addValuesToSet(allEntityIds, r.actorEntityId, { dropEmpty: true });
+    addValuesToSet(allEntityIds, r.targetEntityId, { dropEmpty: true });
+  }
+  for (const r of relationshipsResult.records) {
+    // actorIds / targetIds are the multi-value sets of same-type actors/targets merged in the
+    // ES|QL STATS (targetId is no longer a STATS group key — see fetch_entity_relationships_graph).
+    addValuesToSet(allEntityIds, r.actorIds, { dropEmpty: true });
+    addValuesToSet(allEntityIds, r.targetIds, { dropEmpty: true });
+  }
+  for (const r of entitiesResult.records) {
+    if (r.id) allEntityIds.add(r.id);
+  }
+
+  const enrichmentMap =
+    allEntityIds.size > 0
+      ? await fetchEntityEnrichment({
+          esClient,
+          logger,
+          entityIds: [...allEntityIds],
+          spaceId,
+          entityStoreIndexExists,
+        }).catch((error) => {
+          logger.error(`Failed to enrich entities: ${error.message}`);
+          throw error;
+        })
+      : new Map<string, EntityEnrichmentFields>();
+
   return {
-    events: eventsResult.records,
-    relationships: relationshipsResult.records,
-    entities: entitiesResult.records,
+    events: enrichEventDocData(regroupEvents(eventsResult.records, enrichmentMap), enrichmentMap),
+    relationships: enrichRelationshipDocData(
+      regroupRelationships(relationshipsResult.records, enrichmentMap),
+      enrichmentMap
+    ),
+    entities: enrichEntityRecords(entitiesResult.records, enrichmentMap),
   };
 };

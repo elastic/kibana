@@ -50,7 +50,6 @@ const EndpointEventLink = ({ target, actionText, remainingTargets }: EndpointEve
   return (
     <>
       {actionText}
-      {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
       <EuiLink
         onClick={onLinkClick}
         href={linkHref}

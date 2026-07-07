@@ -29,6 +29,12 @@ export const workflowsExecutionEngineMock = {
       isEnabled: true,
       isLogEventsEnabled: true,
       maxEventChainDepth: 10,
+      searchTriggerEventLog: jest.fn().mockResolvedValue({
+        hits: [],
+        total: 0,
+        page: 1,
+        size: 10,
+      }),
     },
     config: {
       maxWorkflowDepth: 10,

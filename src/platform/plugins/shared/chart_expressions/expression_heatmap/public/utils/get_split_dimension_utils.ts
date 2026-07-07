@@ -28,7 +28,7 @@ export const getSplitDimensionAccessor = (
       return;
     }
 
-    const f = formatter.convert(v);
+    const f = formatter.convertToText(v);
     return f;
   };
 
@@ -46,7 +46,7 @@ export function createSplitPoint(
 
   const formatter = formatFactory(splitChartColumn.meta?.params);
   const splitPointRowIndex = table.rows.findIndex((row) => {
-    return formatter.convert(row[accessor]) === value;
+    return formatter.convertToText(row[accessor]) === value;
   });
   if (splitPointRowIndex !== -1) {
     return {

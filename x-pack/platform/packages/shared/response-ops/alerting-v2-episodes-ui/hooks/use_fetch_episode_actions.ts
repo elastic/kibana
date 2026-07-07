@@ -10,6 +10,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { EpisodeActionState } from '../types/action';
 import { fetchEpisodeActions } from '../apis/fetch_episode_actions';
+import { QUERY_STALE_TIME } from '../constants';
 import { queryKeys } from '../query_keys';
 import { useSpaceId } from './use_space_id';
 
@@ -27,6 +28,7 @@ export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisode
       fetchEpisodeActions({ spaceId, episodeIds, abortSignal: signal, expressions }),
     enabled: episodeIds.length > 0,
     keepPreviousData: true,
+    staleTime: QUERY_STALE_TIME,
     select: (rows) => {
       const map = new Map<string, EpisodeActionState>();
       for (const row of rows) {

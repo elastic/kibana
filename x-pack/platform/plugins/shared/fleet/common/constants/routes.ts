@@ -64,6 +64,7 @@ export const EPM_API_ROUTES = {
   BULK_ROLLBACK_AVAILABLE_CHECK_PATTERN: `${INTERNAL_ROOT}/epm/packages/_bulk_rollback/available_check`,
   REAUTHORIZE_TRANSFORMS: `${EPM_PACKAGES_ONE}/transforms/authorize`,
   REVIEW_UPGRADE_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/review_upgrade`,
+  ILM_POLICIES_PATTERN: `${INTERNAL_ROOT}/epm/ilm_policies`,
 };
 
 // Data stream API routes
@@ -217,8 +218,14 @@ export const AGENT_API_ROUTES = {
 
 export const AGENTLESS_POLICIES_ROUTES = {
   CREATE_PATTERN: `${API_ROOT}/agentless_policies`,
+  LIST_PATTERN: `${API_ROOT}/agentless_policies`,
+  GET_PATTERN: `${API_ROOT}/agentless_policies/{policyId}`,
+  UPDATE_PATTERN: `${API_ROOT}/agentless_policies/{policyId}`,
   DELETE_PATTERN: `${API_ROOT}/agentless_policies/{policyId}`,
+  UPGRADE_PATTERN: `${API_ROOT}/agentless_policies/_upgrade`,
+  UPGRADE_DRYRUN_PATTERN: `${API_ROOT}/agentless_policies/_upgrade/dryrun`,
   SYNC_PATTERN: `${INTERNAL_ROOT}/agentless_policies/_sync`,
+  BULK_THROUGHPUT_PATTERN: `${INTERNAL_ROOT}/agentless_policies/bulk_throughput`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {
@@ -270,6 +277,7 @@ export const REMOTE_SYNCED_INTEGRATIONS_API_ROUTES = {
 };
 
 export const CREATE_STANDALONE_AGENT_API_KEY_ROUTE = `${INTERNAL_ROOT}/create_standalone_agent_api_key`;
+export const CREATE_MANAGED_OTLP_API_KEY_ROUTE = `${INTERNAL_ROOT}/create_managed_otlp_api_key`;
 
 // Fleet debug routes
 export const FLEET_DEBUG_ROUTES = {

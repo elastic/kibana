@@ -119,14 +119,16 @@ export const SessionViewDisplayOptions = ({
 
   const OptionButton = (
     <EuiFlexItem grow={false}>
-      <EuiButtonIcon
-        iconType="eye"
-        display={displayOptions.verboseMode || displayOptions.timestamp ? 'fill' : 'empty'}
-        onClick={toggleOptionButton}
-        size="m"
-        aria-label="Session view display option"
-        data-test-subj="sessionView:sessionViewOptionButton"
-      />
+      <EuiToolTip content="Session view display option" disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType="eye"
+          display={displayOptions.verboseMode || displayOptions.timestamp ? 'fill' : 'empty'}
+          onClick={toggleOptionButton}
+          size="m"
+          aria-label="Session view display option"
+          data-test-subj="sessionView:sessionViewOptionButton"
+        />
+      </EuiToolTip>
     </EuiFlexItem>
   );
 

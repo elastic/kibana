@@ -86,7 +86,9 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       if (
         !selectedStepExecutionId &&
         executionId === workflowExecution?.id &&
-        (workflowExecution?.stepExecutions?.length || isTerminalStatus(workflowExecution?.status))
+        (workflowExecution?.stepExecutions?.length ||
+          isTerminalStatus(workflowExecution?.status) ||
+          workflowExecution?.status === ExecutionStatus.QUEUED)
       ) {
         setSelectedStepExecution(PSEUDO_STEP_OVERVIEW);
       }
@@ -282,6 +284,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               workflowExecutionId={executionId}
               stepExecution={selectedStepExecution}
               workflowExecutionDuration={workflowExecution?.duration ?? undefined}
+              workflowExecutionUsage={workflowExecution?.usage}
               isLoadingStepData={isLoadingStepData && !isPseudoStep}
               workflowExecutionStatus={workflowExecution?.status}
               resumeMessage={resumeMessage}

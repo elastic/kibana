@@ -759,7 +759,6 @@ describe('is spec connector', () => {
 
   const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
     actionConnectorFields: lazy(() => import('../connector_mock')),
-    source: 'spec',
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
       return Promise.resolve(validationResult);
@@ -770,26 +769,15 @@ describe('is spec connector', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    actionTypeRegistry.has.mockReturnValue(true);
+    // Spec connectors are not registered client-side; the spec fetch path is irrelevant
+    // for this test since it only asserts tab rendering, which is gated on registry lookup.
+    actionTypeRegistry.has.mockReturnValue(false);
     actionTypeRegistry.get.mockReturnValue(actionTypeModel);
     appMockRenderer = createAppMockRenderer();
     appMockRenderer.coreStart.application.capabilities = {
       ...appMockRenderer.coreStart.application.capabilities,
       actions: { save: true, show: true, execute: true },
     };
-    appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue([
-      {
-        id: '.test',
-        name: 'Test',
-        enabled: true,
-        enabled_in_config: true,
-        enabled_in_license: true,
-        supported_feature_ids: [],
-        minimum_license_required: 'basic',
-        is_system_action_type: false,
-        is_deprecated: false,
-      },
-    ]);
     appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue(updateConnectorResponse);
     appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue(executeConnectorResponse);
   });

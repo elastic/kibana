@@ -24,6 +24,7 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -186,17 +187,25 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
             readOnly
             fullWidth
             prepend={
-              <EuiButtonIcon
-                data-test-subj="searchInferenceEndpointsAddEndpointModalCopyModelIdButton"
-                iconType="copyClipboard"
-                size="xs"
-                color="text"
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.searchInferenceEndpoints.addEndpointModal.copyModelIdAriaLabel',
                   { defaultMessage: 'Copy model ID' }
                 )}
-                onClick={handleCopyModelId}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="searchInferenceEndpointsAddEndpointModalCopyModelIdButton"
+                  iconType="copyClipboard"
+                  size="xs"
+                  color="text"
+                  aria-label={i18n.translate(
+                    'xpack.searchInferenceEndpoints.addEndpointModal.copyModelIdAriaLabel',
+                    { defaultMessage: 'Copy model ID' }
+                  )}
+                  onClick={handleCopyModelId}
+                />
+              </EuiToolTip>
             }
           />
         </EuiFormRow>
@@ -281,17 +290,25 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
             fullWidth
             data-test-subj="addEndpointIdField"
             prepend={
-              <EuiButtonIcon
-                data-test-subj="searchInferenceEndpointsAddEndpointModalCopyEndpointIdButton"
-                iconType="copyClipboard"
-                size="xs"
-                color="text"
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.searchInferenceEndpoints.addEndpointModal.copyEndpointIdAriaLabel',
                   { defaultMessage: 'Copy endpoint ID' }
                 )}
-                onClick={handleCopyEndpointId}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="searchInferenceEndpointsAddEndpointModalCopyEndpointIdButton"
+                  iconType="copyClipboard"
+                  size="xs"
+                  color="text"
+                  aria-label={i18n.translate(
+                    'xpack.searchInferenceEndpoints.addEndpointModal.copyEndpointIdAriaLabel',
+                    { defaultMessage: 'Copy endpoint ID' }
+                  )}
+                  onClick={handleCopyEndpointId}
+                />
+              </EuiToolTip>
             }
           />
         </EuiFormRow>

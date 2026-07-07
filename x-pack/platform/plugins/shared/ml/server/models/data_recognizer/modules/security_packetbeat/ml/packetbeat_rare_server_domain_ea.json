@@ -1,9 +1,6 @@
 {
   "description": "Security: Packetbeat - Looks for unusual HTTP or TLS destination domain activity that could indicate execution, persistence, command-and-control or data exfiltration activity.",
-  "groups": [
-    "security",
-    "packetbeat"
-  ],
+  "groups": ["security", "packetbeat"],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
@@ -13,13 +10,7 @@
         "by_field_name": "server.domain"
       }
     ],
-    "influencers": [
-      "host.name",
-      "host.id",
-      "destination.ip",
-      "source.ip",
-      "server.domain"
-    ]
+    "influencers": ["host.name", "host.id", "destination.ip", "source.ip", "server.domain"]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
@@ -32,6 +23,8 @@
     "created_by": "ml-module-security-packetbeat",
     "security_app_display_name": "Unusual Network Destination Domain Name",
     "managed": true,
-    "job_revision": 4
+    "job_revision": 4,
+    "threat_tactics": ["TA0001", "TA0003", "TA0011", "TA0010"],
+    "threat_techniques": ["T1566", "T1566.001", "T1566.002", "T1071", "T1071.001", "T1071.004", "T1105", "T1041"]
   }
 }

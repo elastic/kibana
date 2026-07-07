@@ -102,3 +102,35 @@ export const EpmPackagesSchemaV9 = EpmPackagesSchemaV8.extends({
     )
   ),
 });
+
+export const EpmPackagesSchemaV10 = EpmPackagesSchemaV9.extends({
+  installed_es: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        id: schema.string(),
+        type: schema.string(),
+        version: schema.maybe(schema.string()),
+        deferred: schema.maybe(schema.boolean()),
+        customDataStreamOriginDataset: schema.maybe(schema.string()),
+        customDataStreamOriginType: schema.maybe(schema.string()),
+      }),
+      { maxSize: 10000 }
+    )
+  ),
+});
+
+export const EpmPackagesSchemaV11 = EpmPackagesSchemaV10.extends({
+  namespace_customization_settings: schema.maybe(
+    schema.recordOf(
+      schema.string({ maxLength: 100 }),
+      // `unknowns: 'allow'` keeps this forward-compatible: future namespace-scoped settings can
+      // be added without older Kibana nodes rejecting documents that carry them.
+      schema.object(
+        {
+          ilm_policy: schema.maybe(schema.string({ maxLength: 1024 })),
+        },
+        { unknowns: 'allow' }
+      )
+    )
+  ),
+});

@@ -41,8 +41,6 @@ const dataStreamLabel = i18n.translate('workflows.indexSelection.kindDataStream'
 });
 
 function getKindFromTags(item: MatchedItem): string {
-  // Tag keys produced by `responseToItemArray` in @kbn/data-views-plugin:
-  // 'index' | 'alias' | 'data_stream' (+ optional 'frozen', 'rollup').
   const primary = item.tags.find(
     (tag) => tag.key === 'index' || tag.key === 'alias' || tag.key === 'data_stream'
   );

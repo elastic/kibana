@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import type { UserIdAndName } from '@kbn/agent-builder-common';
+import type { CurrentUser } from '@kbn/agent-builder-common';
 import { APPLICATION_PREFIX } from '@kbn/security-plugin/common/constants';
 import { apiPrivileges } from '../../common/features';
 
@@ -20,9 +20,14 @@ const KIBANA_APPLICATION = `${APPLICATION_PREFIX}.kibana`;
  * For real HTTP requests, `security.authc.getCurrentUser` returns the authenticated user
  * (including profile_uid and username).
  *
- * For fake requests (e.g. from Task Manager using an API key), `getCurrentUser` returns null.
- * In that case, we fall back to the ES `_security/_authenticate` API, which works with API keys
- * and returns the username of the API key owner.
+ * For fake requests (e.g. from Task Manager using an API key), `getCurrentUser` returns the
+ * originating user's identity when the request was enriched at schedule time (profile_uid and
+ * username persisted on the task's userScope). This is required for Cross-Project Search, where
+ * the API key owner's username does not match the originating user.
+ *
+ * For un-enriched fake requests (e.g. tasks scheduled before enrichment was available), we fall
+ * back to the ES `_security/_authenticate` API, which works with API keys and returns the
+ * username of the API key owner.
  */
 export const getUserFromRequest = async ({
   request,
@@ -32,17 +37,22 @@ export const getUserFromRequest = async ({
   request: KibanaRequest;
   security: SecurityServiceStart;
   esClient: ElasticsearchClient;
-}): Promise<UserIdAndName> => {
-  if (!request.isFakeRequest) {
-    const authUser = security.authc.getCurrentUser(request);
-    if (authUser) {
-      return { id: authUser.profile_uid!, username: authUser.username };
-    }
+}): Promise<CurrentUser> => {
+  const authUser = security.authc.getCurrentUser(request);
+  if (authUser?.username) {
+    return {
+      id: authUser.profile_uid,
+      username: authUser.username,
+    };
   }
 
-  // Fallback for fake requests (e.g. Task Manager execution): call ES _security/_authenticate
+  // Fallback for un-enriched fake requests (e.g. Task Manager execution of a
+  // task scheduled before enrichment): call ES _security/_authenticate
   const authResponse = await esClient.security.authenticate();
-  return { username: authResponse.username };
+  return {
+    id: authUser?.profile_uid,
+    username: authResponse.username,
+  };
 };
 
 const ADMIN_PRIVILEGE = 'agent_builder:admin'; // intentionally unregistered privilege
@@ -84,7 +94,10 @@ export const getAgentApiAccessFromRequest = async ({
 }: {
   esClient: ElasticsearchClient;
   space: string;
-}): Promise<{ canReadAgents: boolean; canManageAgents: boolean }> => {
+}): Promise<{
+  canReadAgents: boolean;
+  canManageAgents: boolean;
+}> => {
   const resource = `space:${space}`;
   const response = await esClient.security.hasPrivileges({
     application: [

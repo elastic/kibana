@@ -11,3 +11,8 @@ export const LOOKUPS_DATA_INPUT_FILE_UPLOAD_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.lookups.lookupsFileUpload.title',
   { defaultMessage: 'Update your lookups export' }
 );
+
+export const WATCHLIST_DATA_INPUT_FILE_UPLOAD_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.lookups.watchlistsFileUpload.title',
+  { defaultMessage: 'Upload your watchlists export' }
+);

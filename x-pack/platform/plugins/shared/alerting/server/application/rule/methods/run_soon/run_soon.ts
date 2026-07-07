@@ -60,13 +60,23 @@ export async function runSoon(context: RulesClientContext, params: RunSoonParams
   }
 
   try {
-    const { forced } = await context.taskManager.runSoon(
+    const { forced, conflict } = await context.taskManager.runSoon(
       attributes.scheduledTaskId ? attributes.scheduledTaskId : id,
       force
     );
 
     if (forced) {
       context.logger.info(`Rule ${id} was forced to run soon despite being in "running" status.`);
+    }
+
+    if (conflict) {
+      // The task store update raced with another concurrent update and was
+      // rejected with a 409 — the task was not actually rescheduled. Surface
+      // this to callers as a soft failure so they can retry.
+      // See https://github.com/elastic/kibana/issues/259686.
+      return i18n.translate('xpack.alerting.rulesClient.runSoon.taskUpdateConflict', {
+        defaultMessage: 'Error running rule: task scheduling conflicted, please retry',
+      });
     }
   } catch (err) {
     if (err instanceof TaskAlreadyRunningError) {

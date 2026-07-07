@@ -14,6 +14,4 @@
 export interface GlobalSearchConfig {
   /** Called when the search button in the global header is clicked. */
   onClick: () => void;
-  /** The keyboard shortcut key (combined with Cmd/Ctrl) to trigger global search. */
-  shortcutKey?: string;
 }

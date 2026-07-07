@@ -108,11 +108,21 @@ export const MIGRATION_SOURCE_DROPDOWN = getDataTestSubjectSelector('migrationSo
 export const MIGRATION_SOURCE_QRADAR_OPTION = getDataTestSubjectSelector(
   'migrationSourceOption-qradar'
 );
+export const MIGRATION_SOURCE_SENTINEL_OPTION = getDataTestSubjectSelector(
+  'migrationSourceOption-microsoft-sentinel'
+);
 
 export const REFERENCE_SETS_UPLOAD_STEP = {
   STEP_NUMBER: getDataTestSubjectSelector('referenceSetsUploadStepNumber'),
   TITLE: getDataTestSubjectSelector('referenceSetsUploadTitle'),
 };
+
+export const WATCHLISTS_UPLOAD_STEP = {
+  STEP_NUMBER: getDataTestSubjectSelector('watchlistsUploadStepNumber'),
+  TITLE: getDataTestSubjectSelector('watchlistsUploadTitle'),
+};
+
+export const WATCHLISTS_FILE_PICKER = getDataTestSubjectSelector('lookupsFilePicker');
 
 export const MIGRATION_VENDOR_BADGE = getDataTestSubjectSelector('migrationVendorBadge');
 

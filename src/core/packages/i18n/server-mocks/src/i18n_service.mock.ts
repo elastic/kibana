@@ -19,7 +19,7 @@ const MOCK_AVAILABLE_LOCALES: ReadonlyArray<{ id: string; label: string }> = [
 ];
 
 const createSetupContractMock = () => {
-  const mock: jest.Mocked<I18nServiceSetup> = lazyObject({
+  const base = lazyObject({
     getLocale: jest.fn().mockReturnValue('en'),
     getLocales: jest.fn().mockReturnValue(MOCK_LOCALES),
     getAvailableLocales: jest.fn().mockReturnValue(MOCK_AVAILABLE_LOCALES),
@@ -28,15 +28,17 @@ const createSetupContractMock = () => {
     getTranslationHashes: jest.fn().mockReturnValue(MOCK_TRANSLATION_HASHES),
   });
 
-  return mock;
+  return { ...base, allowLocaleCookie: true } as jest.Mocked<I18nServiceSetup>;
 };
 
 const createInternalPrebootMock = () => {
-  const mock: jest.Mocked<InternalI18nServicePreboot> = lazyObject({
+  const base = lazyObject({
     getTranslationHash: jest.fn(),
     getTranslationHashes: jest.fn(),
     getAvailableLocales: jest.fn(),
   });
+
+  const mock = { ...base, allowLocaleCookie: true } as jest.Mocked<InternalI18nServicePreboot>;
 
   mock.getTranslationHash.mockReturnValue('MOCK_HASH');
   mock.getTranslationHashes.mockReturnValue(MOCK_TRANSLATION_HASHES);

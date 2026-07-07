@@ -34,7 +34,6 @@ const fakeRawRequest: FakeRawRequest = {
   headers: {
     authorization: `ApiKey skdjtq4u543yt3rhewrh`,
   },
-  path: '/',
 };
 
 describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {

@@ -25,11 +25,14 @@ import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { createCallApmApiV2 } from '@kbn/apm-api-shared/src/create_call_apm_api';
 import type { ConfigSchema } from '../..';
 import { apmRouter } from '../../components/routing/apm_route_config';
+import { mockTelemetryClient } from '../../services/telemetry/__mocks__/telemetry_client_mock';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
 import type { ApmPluginContextValue } from './apm_plugin_context';
 import { ApmPluginContext } from './apm_plugin_context';
+import { setApmInternalServices } from '../../plugin';
 
 const coreStart = coreMock.createStart({ basePath: '/basepath' });
 
@@ -150,6 +153,7 @@ const mockCore = merge({}, coreStart, {
     ruleTypeRegistry: { has: () => false, get: () => null, list: () => [] },
     actionTypeRegistry: { has: () => false, get: () => null, list: () => [] },
   },
+  telemetry: mockTelemetryClient,
 });
 
 const mockConfig: ConfigSchema = {
@@ -278,6 +282,8 @@ export function MockApmPluginContextWrapper({
   if (contextValue.core) {
     createCallApmApi(contextValue.core);
   }
+  const callApmApi = createCallApmApiV2(contextValue.core, { cpsManager: undefined });
+  setApmInternalServices({ callApmApi });
 
   performance.mark = jest.fn();
   performance.clearMeasures = jest.fn();

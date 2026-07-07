@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -23,9 +21,7 @@ import type { IconType } from '@elastic/eui';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 
 import { i18n } from '@kbn/i18n';
-import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
-import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
-import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
+import { getConnectorCompatibility, getConnectorFeatureName } from '@kbn/actions-plugin/common';
 import { isLLMConnectorTypeId } from '@kbn/response-ops-rule-form/src/constants';
 import {
   DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE,
@@ -39,12 +35,10 @@ import type {
   ActionTypeIndex,
   ActionTypeRegistryContract,
 } from '../../../../types';
-import { hasSaveActionsCapability } from '../../../lib/capabilities';
-import { useKibana } from '../../../../common/lib/kibana';
 import { ActionTypeMenu } from '../action_type_menu';
-import { useCreateConnector } from '../../../hooks/use_create_connector';
-import type { ConnectorFormState, ResetForm } from '../connector_form';
+import type { ResetForm } from '../connector_form';
 import { ConnectorForm } from '../connector_form';
+import { useConnectorCreateForm } from '../use_connector_create_form';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
 import { UpgradeLicenseCallOut } from './upgrade_license_callout';
@@ -69,30 +63,33 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   initialConnector,
   icon,
 }) => {
-  const {
-    application: { capabilities },
-    http,
-    uiSettings,
-  } = useKibana().services;
-  const { isLoading: isSavingConnector, createConnector } = useCreateConnector();
-
-  const isMounted = useRef(false);
   const [allActionTypes, setAllActionTypes] = useState<ActionTypeIndex | undefined>(undefined);
   const [actionType, setActionType] = useState<ActionType | null>(null);
   const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
-  const canSave = hasSaveActionsCapability(capabilities);
-  const [showFormErrors, setShowFormErrors] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>('');
+  const [selectedFeatureIds, setSelectedFeatureIds] = useState<string[]>(
+    featureId ? [featureId] : []
+  );
 
-  const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
-    useState<ReactNode>(null);
-
-  const [formState, setFormState] = useState<ConnectorFormState>({
-    isSubmitted: false,
-    isSubmitting: false,
-    isValid: undefined,
-    submit: async () => ({ isValid: false, data: {} as ConnectorFormSchema }),
-    preSubmitValidator: null,
+  const {
+    actionTypeModel,
+    isLoadingActionTypeModel,
+    actionTypeModelError,
+    refetchConnectorSpec,
+    showLoadingSpinner,
+    setFormState,
+    defaultConnector,
+    isSaving,
+    isSubmitDisabled: disabled,
+    showFormErrors,
+    setShowFormErrors,
+    preSubmitValidationErrorMessage,
+    createConnectorError,
+    validateAndCreateConnector,
+  } = useConnectorCreateForm({
+    actionTypeRegistry,
+    actionTypeId: actionType?.id,
+    initialConnector,
   });
 
   useEffect(() => {
@@ -104,48 +101,10 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     }
   }, [initialConnector, allActionTypes, actionType]);
 
-  const defaultConnector = useMemo(() => {
-    const empty = {
-      actionTypeId: actionType?.id ?? '',
-      isDeprecated: false,
-      config: {},
-      secrets: {},
-      isMissingSecrets: false,
-      isConnectorTypeDeprecated: false,
-    };
-    return initialConnector ? { ...empty, ...initialConnector } : empty;
-  }, [actionType?.id, initialConnector]);
-
-  const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
-
-  const {
-    actionTypeModel,
-    isLoading: isLoadingActionTypeModel,
-    error: actionTypeModelError,
-    refetch: refetchConnectorSpec,
-  } = useActionTypeModel({
-    actionTypeRegistry,
-    actionTypeId: actionType?.id,
-    source: actionType?.source,
-    http,
-    uiSettings,
-  });
-
-  // Delay the spinner so quick spec loads don't flash a loading state.
-  const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);
-  useDebounce(() => setShowLoadingSpinner(isLoadingActionTypeModel), 300, [
-    isLoadingActionTypeModel,
-  ]);
-
-  const hasErrors = isFormValid === false;
-  const isSaving = isSavingConnector || isSubmitting;
   const isUsingInitialConnector = Boolean(initialConnector);
   const hasConnectorTypeSelected = actionType != null;
-  const disabled =
-    hasErrors || !canSave || isLoadingActionTypeModel || !!actionTypeModelError || !actionTypeModel;
   // Only stack connectors (not spec-based) support the test tab
-  const isTestable =
-    !actionTypeModel?.source || actionTypeModel?.source === ACTION_TYPE_SOURCES.stack;
+  const isTestable = !actionType?.source || actionType.source === ACTION_TYPE_SOURCES.stack;
 
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
     actionTypeModel && actionTypeModel.subtype
@@ -173,10 +132,13 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const resetConnectorForm = useRef<ResetForm | undefined>();
 
-  const setResetForm = useCallback((reset: ResetForm) => {
-    resetConnectorForm.current = reset;
-    setShowFormErrors(false);
-  }, []);
+  const setResetForm = useCallback(
+    (reset: ResetForm) => {
+      resetConnectorForm.current = reset;
+      setShowFormErrors(false);
+    },
+    [setShowFormErrors]
+  );
 
   const onChangeGroupAction = (id: string) => {
     if (allActionTypes && allActionTypes[id]) {
@@ -194,46 +156,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       }
     }
   };
-
-  const validateAndCreateConnector = useCallback(async () => {
-    setPreSubmitValidationErrorMessage(null);
-    setShowFormErrors(false);
-
-    const { isValid, data } = await submit();
-    if (!isMounted.current) {
-      // User has closed the flyout meanwhile submitting the form
-      return;
-    }
-
-    if (isValid) {
-      if (preSubmitValidator) {
-        const validatorRes = await preSubmitValidator();
-
-        if (validatorRes) {
-          setPreSubmitValidationErrorMessage(validatorRes.message);
-          return;
-        }
-      }
-
-      /**
-       * At this point the form is valid
-       * and there are no pre submit error messages.
-       */
-      const { actionTypeId, name, config, secrets, id } = data;
-      const validConnector = {
-        actionTypeId,
-        name: name ?? '',
-        config: config ?? {},
-        secrets: secrets ?? {},
-        id: id ?? '',
-      };
-
-      const createdConnector = await createConnector(validConnector);
-      return createdConnector;
-    } else {
-      setShowFormErrors(true);
-    }
-  }, [submit, preSubmitValidator, createConnector]);
 
   const resetActionType = useCallback(() => setActionType(null), []);
 
@@ -268,13 +190,25 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     setSearchValue(newValue);
   }, []);
 
-  useEffect(() => {
-    isMounted.current = true;
-
-    return () => {
-      isMounted.current = false;
-    };
+  const handleSelectedFeatureIdsChange = useCallback((ids: string[]) => {
+    setSelectedFeatureIds(ids);
   }, []);
+
+  const featureFilterOptions = useMemo(() => {
+    if (!allActionTypes) {
+      return [];
+    }
+    const uniqueFeatureIds = new Set<string>();
+    for (const actionTypeItem of Object.values(allActionTypes)) {
+      for (const supportedFeatureId of actionTypeItem.supportedFeatureIds ?? []) {
+        uniqueFeatureIds.add(supportedFeatureId);
+      }
+    }
+    return Array.from(uniqueFeatureIds)
+      .map((id) => ({ value: id, label: getConnectorFeatureName(id) }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [allActionTypes]);
+
   const [flyoutHeaderName, setFlyoutHeaderName] = useState<string>('Select a connector');
   useEffect(() => {
     if (actionType) {
@@ -316,6 +250,10 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             <CreateConnectorFilter
               searchValue={searchValue}
               onSearchValueChange={handleSearchValueChange}
+              selectedFeatureIds={selectedFeatureIds}
+              onSelectedFeatureIdsChange={handleSelectedFeatureIdsChange}
+              featureOptions={featureFilterOptions}
+              featureFilterDisabled={Boolean(featureId)}
             />
             <EuiSpacer size="m" />
           </>
@@ -444,6 +382,22 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
               </>
             )}
 
+            {createConnectorError && (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  size="s"
+                  color="danger"
+                  iconType="error"
+                  data-test-subj="create-connector-api-error"
+                  title={createConnectorError.title}
+                >
+                  <p>{createConnectorError.message}</p>
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            )}
+
             {!isLoadingActionTypeModel &&
               !showLoadingSpinner &&
               !actionTypeModelError &&
@@ -468,6 +422,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             setAllActionTypes={setAllActionTypes}
             actionTypeRegistry={actionTypeRegistry}
             searchValue={searchValue}
+            selectedFeatureIds={selectedFeatureIds}
           />
         )}
       </EuiFlyoutBody>

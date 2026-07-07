@@ -10,8 +10,13 @@
 import { parse } from 'yaml';
 import { z } from '@kbn/zod/v4';
 import { managedWorkflowDefinitions } from '.';
-import type { ManagedWorkflowTemplateValuesById, TemplatedManagedWorkflowId } from '.';
-import { EXAMPLE_MANAGED_WORKFLOW_ID } from './definitions';
+import type { ManagedWorkflowTemplateValuesById } from '.';
+import {
+  EXAMPLE_MANAGED_WORKFLOW_ID,
+  SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+} from './definitions';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
 
@@ -20,11 +25,13 @@ const ManagedWorkflowSchema = WorkflowSchemaBase.extend({
 });
 
 type RegistryManagedWorkflowDefinition = (typeof managedWorkflowDefinitions)[number];
-type TemplateManagedWorkflowDefinition = RegistryManagedWorkflowDefinition extends {
+type TemplateManagedWorkflowDefinition<TDefinition> = TDefinition extends {
   yamlTemplate: (values: infer _TValues) => string;
 }
-  ? RegistryManagedWorkflowDefinition
+  ? TDefinition
   : never;
+type RegistryTemplateManagedWorkflowDefinition =
+  TemplateManagedWorkflowDefinition<RegistryManagedWorkflowDefinition>;
 type YamlTemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
   yamlTemplate: (values: ManagedWorkflowTemplateValues) => string;
 };
@@ -32,6 +39,15 @@ type YamlTemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
 const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
+  },
+  [SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID]: {
+    detectionIntervalMinutes: 30,
+  },
+  [SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID]: {
+    reviewIntervalMinutes: 10,
+    discoveryBatchSize: 3,
+    triageBatchSize: 5,
+    maxReviewPasses: 3,
   },
 };
 
@@ -42,9 +58,9 @@ const templateValuesLookup = templateRepresentativeValuesById as Record<
 
 const managedDefinitionsById: Array<[string, RegistryManagedWorkflowDefinition]> =
   managedWorkflowDefinitions.map((definition) => [definition.id, definition]);
-const managedTemplateDefinitionsById: Array<[string, TemplateManagedWorkflowDefinition]> =
+const managedTemplateDefinitionsById: Array<[string, RegistryTemplateManagedWorkflowDefinition]> =
   managedDefinitionsById.filter(
-    (definitionEntry): definitionEntry is [string, TemplateManagedWorkflowDefinition] =>
+    (definitionEntry): definitionEntry is [string, RegistryTemplateManagedWorkflowDefinition] =>
       hasYamlTemplate(definitionEntry[1])
   );
 
@@ -107,6 +123,11 @@ describe('managedWorkflowDefinitions', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
+  it('contains the Security alert analysis workflow', () => {
+    const ids = managedWorkflowDefinitions.map(({ id }) => id);
+    expect(ids).toContain(SECURITY_ALERT_ANALYSIS_WORKFLOW_ID);
+  });
+
   it.each(managedDefinitionsById)('%s uses the reserved system- id prefix', (id) => {
     expect(id.startsWith('system-')).toBe(true);
   });
@@ -124,6 +145,10 @@ describe('managedWorkflowDefinitions', () => {
       expect(definition.version).toBeGreaterThanOrEqual(1);
     }
   );
+
+  it.each(managedDefinitionsById)('%s declares whether it is billable', (_id, definition) => {
+    expect(typeof definition.billable).toBe('boolean');
+  });
 
   it.each(managedDefinitionsById)(
     '%s defines exactly one source field: yaml xor yamlTemplate',
@@ -154,9 +179,7 @@ describe('managedWorkflowDefinitions', () => {
   it.each(managedTemplateDefinitionsById)(
     '%s yamlTemplate renders cleanly with representative values',
     (id, definition) => {
-      const representativeValues =
-        templateRepresentativeValuesById[id as TemplatedManagedWorkflowId];
-      const renderedYaml = definition.yamlTemplate(representativeValues);
+      const renderedYaml = renderWorkflowYaml(definition);
 
       expect(typeof renderedYaml).toBe('string');
       expect(renderedYaml.trim()).not.toHaveLength(0);

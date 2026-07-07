@@ -43,6 +43,7 @@ jest.mock('../../../../../hooks/use_conversation', () => ({
   useConversation: () => ({
     conversation: null,
   }),
+  useAgentId: () => 'agent-1',
 }));
 
 jest.mock('../../../../../hooks/use_agent_builder_service', () => ({
@@ -61,6 +62,25 @@ describe('CanvasFlyout', () => {
     jest.clearAllMocks();
     mockConversationId = 'conversation-1';
     mockCanvasState = null;
+  });
+
+  it('shows a fallback instead of crashing when renderCanvasContent throws', () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    mockAttachmentsService.getAttachmentUiDefinition.mockReturnValue({
+      getLabel: () => 'Test attachment',
+      renderCanvasContent: () => {
+        throw new Error('boom');
+      },
+    });
+    mockCanvasState = {
+      attachment: { id: 'attachment-1', type: 'test', data: {} },
+      isSidebar: false,
+    };
+
+    render(<CanvasFlyout attachmentsService={mockAttachmentsService} />);
+
+    expect(screen.getByText("Couldn't render this attachment")).not.toBeNull();
   });
 
   it('closes canvas when conversation ID changes', () => {

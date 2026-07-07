@@ -130,6 +130,39 @@ If the process is aborted between sub-windows, recovery resumes from the last pe
 
 ---
 
+## Lag cutoff circuit breaker
+
+When queries are consistently slow (e.g., large index, high ingest rate, under-sized ES cluster), each run may process less wall-clock data than real-time advances. The engine falls progressively further behind `now - delay`. Sub-window capping bounds per-query cost but does not help catchup — it just slices an ever-growing backlog into fixed-size pieces.
+
+The lag cutoff is a circuit breaker applied **before** the sub-window loop begins. If the computed `fromDateISO` is more than `1.5 × lookbackPeriod` before `effectiveWindowEnd`, the engine is so far behind that it cannot catch up. Rather than continuing to work through stale data, the window start is reset to `effectiveWindowEnd - frequency` — a single, frequency-sized slice of recent data.
+
+| Condition | Action |
+|-----------|--------|
+| `lag ≤ 1.5 × lookbackPeriod` | Normal operation; window unchanged. |
+| `lag > 1.5 × lookbackPeriod` | `fromDateISO` reset to `effectiveWindowEnd - frequency`; skipped range dropped; WARN logged. |
+
+After the cycle, the checkpoint is persisted at or near the frequency-sized window's end. The next run starts from there, naturally within the real-time window.
+
+The WARN log includes: original `from`, new `from`, `effectiveEnd`, `lagMs`, and `droppedMs` for observability.
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant ES as Elasticsearch
+    Note over C: fromDateISO=T0 (far in the past), effectiveEnd=T_end
+    Note over C: lag = T_end - T0 > 1.5 × lookbackPeriod
+    Note over C: WARN logged — resetting fromDateISO to T_end - frequency
+    Note over C: fromDateISO = T_end - frequency (recent slice)
+    C->>ES: probe(from=T_end-freq, to=T_end) → slice end, then extract + ingest
+    Note over C: checkpoint persisted near T_end — next run is current
+```
+
+**What is dropped**: all data between the original `fromDateISO` and `effectiveWindowEnd - frequency`. This is an explicit trade-off: maintaining real-time coverage is preferred over eventually processing old backlog data that would never catch up anyway.
+
+**Manual override runs are exempt**: `specificWindow` / `windowOverride` calls supply explicit bounds and bypass the cutoff entirely (same as the sub-window cap).
+
+---
+
 ## Recovery
 
 A crash mid-entity-page leaves the following state on disk:
