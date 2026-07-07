@@ -103,7 +103,16 @@ const buildSlackExecutorSuccessResponse = <T extends SlackAPiResponse>({
   }
 
   if (!slackApiResponseData.ok) {
-    return serviceErrorResult(CONNECTOR_ID, slackApiResponseData.error);
+    // `error` is typed as a string, but Slack's API can return an object/array at
+    // runtime, which would serialize to `[object Object]` without this coercion.
+    const rawError: unknown = slackApiResponseData.error;
+    const serviceMessage =
+      typeof rawError === 'string'
+        ? rawError
+        : rawError != null
+        ? JSON.stringify(rawError)
+        : undefined;
+    return serviceErrorResult(CONNECTOR_ID, serviceMessage);
   }
   return successResult<T>(CONNECTOR_ID, slackApiResponseData);
 };
