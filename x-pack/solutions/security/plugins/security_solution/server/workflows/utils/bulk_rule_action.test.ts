@@ -124,7 +124,21 @@ describe('bulk_rule_action', () => {
       });
     });
 
-    it('throws when every rule failed (succeeded === 0)', () => {
+    it('recovers a 500 where no rule succeeded but at least one was skipped', () => {
+      const errors = [errorFor('rule-1')];
+      const error = new KibanaApiCallError({
+        status: 500,
+        headers: {},
+        body: body({ succeeded: 0, failed: 1, skipped: 1, total: 2 }, errors),
+        message: 'HTTP 500: bulk action partially failed',
+      });
+
+      expect(handleBulkRuleActionError(error, 'enable rules')).toEqual({
+        output: { succeeded: 0, failed: 1, skipped: 1, total: 2, errors },
+      });
+    });
+
+    it('throws when every rule failed (nothing succeeded or skipped)', () => {
       const error = new KibanaApiCallError({
         status: 500,
         headers: {},

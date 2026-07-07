@@ -18,7 +18,7 @@ export const enableRuleStepDefinition = createServerStepDefinition({
       const { body } = await context.contextManager.callKibanaApi<BulkEditActionResponse>({
         method: 'POST',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,
-        body: { action: 'enable', ...context.input },
+        body: { ...context.input, action: 'enable' },
       });
 
       return toBulkRuleActionOutput(body);

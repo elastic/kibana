@@ -25,7 +25,7 @@ export const enableRuleStepCommonDefinition: BaseStepDefinition<
   }),
   description: i18n.translate('xpack.securitySolution.workflows.steps.enableRule.description', {
     defaultMessage:
-      'Enable one or more detection rules. Succeeds when at least one selected rule is enabled, reporting any per-rule failures in `errors`; fails only when every selected rule fails (including "not found"). To handle outcomes per rule, use foreach over a search result.',
+      'Enable one or more detection rules. Succeeds when at least one selected rule is enabled or skipped (already enabled), reporting any per-rule failures in `errors`; fails only when every selected rule fails (including "not found"). To handle outcomes per rule, use foreach over a search result.',
   }),
   category: StepCategory.KibanaSecurity,
   inputSchema: enableRuleInputSchema,

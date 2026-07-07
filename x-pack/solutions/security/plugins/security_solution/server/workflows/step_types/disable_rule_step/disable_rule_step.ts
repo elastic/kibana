@@ -18,7 +18,7 @@ export const disableRuleStepDefinition = createServerStepDefinition({
       const { body } = await context.contextManager.callKibanaApi<BulkEditActionResponse>({
         method: 'POST',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,
-        body: { action: 'disable', ...context.input },
+        body: { ...context.input, action: 'disable' },
       });
 
       return toBulkRuleActionOutput(body);

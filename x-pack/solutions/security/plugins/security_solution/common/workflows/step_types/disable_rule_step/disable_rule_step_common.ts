@@ -25,7 +25,7 @@ export const disableRuleStepCommonDefinition: BaseStepDefinition<
   }),
   description: i18n.translate('xpack.securitySolution.workflows.steps.disableRule.description', {
     defaultMessage:
-      'Disable one or more detection rules. Succeeds when at least one selected rule is disabled, reporting any per-rule failures in `errors`; fails only when every selected rule fails (including "not found"). To handle outcomes per rule, use foreach over a search result.',
+      'Disable one or more detection rules. Succeeds when at least one selected rule is disabled or skipped (already disabled), reporting any per-rule failures in `errors`; fails only when every selected rule fails (including "not found"). To handle outcomes per rule, use foreach over a search result.',
   }),
   category: StepCategory.KibanaSecurity,
   inputSchema: disableRuleInputSchema,

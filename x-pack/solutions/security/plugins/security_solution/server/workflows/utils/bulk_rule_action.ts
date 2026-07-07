@@ -29,25 +29,30 @@ const bulkRuleActionResponseSchema = z.object({
     errors: z.array(NormalizedRuleError).optional(),
   }),
 });
-type BulkRuleActionResponse = z.infer<typeof bulkRuleActionResponseSchema>;
-
-const toBulkRuleSummaryOutput = ({ attributes }: BulkRuleActionResponse): BulkRuleSummaryOutput => {
-  const { summary, errors } = attributes;
-  return {
-    succeeded: summary.succeeded,
-    failed: summary.failed,
-    skipped: summary.skipped,
-    total: summary.total,
-    ...(errors && errors.length > 0 ? { errors } : {}),
-  };
-};
 
 /**
  * Builds the step output for a successful (2xx) bulk-action response.
  */
-export const toBulkRuleActionOutput = (
-  body: BulkRuleActionResponse
-): { output: BulkRuleSummaryOutput } => ({ output: toBulkRuleSummaryOutput(body) });
+export const toBulkRuleActionOutput = (body: unknown): { output: BulkRuleSummaryOutput } => {
+  const parsed = bulkRuleActionResponseSchema.safeParse(body);
+  if (!parsed.success) {
+    throw toApiExecutionError(
+      new Error('Unexpected bulk action response shape'),
+      'bulk rule action'
+    );
+  }
+
+  const { summary, errors } = parsed.data.attributes;
+  return {
+    output: {
+      succeeded: summary.succeeded,
+      failed: summary.failed,
+      skipped: summary.skipped,
+      total: summary.total,
+      ...(errors && errors.length > 0 ? { errors } : {}),
+    },
+  };
+};
 
 /**
  * Handles an error thrown by the bulk-action call.
@@ -55,12 +60,12 @@ export const toBulkRuleActionOutput = (
  * `_bulk_action` responds with HTTP 500 whenever *any* selected rule fails —
  * even when others succeeded — and `callKibanaApi` surfaces that as a
  * `KibanaApiCallError` carrying the untruncated response body. The step is
- * treated as successful as long as at least one rule was changed: a
- * partial-success `500` whose summary reports `succeeded > 0` is recovered into
- * a normal output (forwarding any per-rule `errors`). If every selected rule
- * failed (`succeeded === 0`) — or the error is anything other than a
- * recoverable partial response — a normalized `ExecutionError` is thrown so the
- * whole step fails.
+ * treated as successful as long as at least one rule was changed or skipped
+ * (already in the desired state): a partial `500` whose summary reports
+ * `succeeded + skipped > 0` is recovered into a normal output (forwarding any
+ * per-rule `errors`). If every selected rule failed — or the error is anything
+ * other than a recoverable partial response — a normalized `ExecutionError` is
+ * thrown so the whole step fails.
  *
  * @param error  The caught error.
  * @param action Short verb phrase for the failure message, e.g. `enable rules`.
@@ -71,8 +76,11 @@ export const handleBulkRuleActionError = (
 ): { output: BulkRuleSummaryOutput } => {
   if (error instanceof KibanaApiCallError && error.status === 500) {
     const parsed = bulkRuleActionResponseSchema.safeParse(error.body);
-    if (parsed.success && parsed.data.attributes.summary.succeeded > 0) {
-      return toBulkRuleActionOutput(parsed.data);
+    if (parsed.success) {
+      const { succeeded, skipped } = parsed.data.attributes.summary;
+      if (succeeded + skipped > 0) {
+        return toBulkRuleActionOutput(parsed.data);
+      }
     }
   }
   throw toApiExecutionError(error, action);
