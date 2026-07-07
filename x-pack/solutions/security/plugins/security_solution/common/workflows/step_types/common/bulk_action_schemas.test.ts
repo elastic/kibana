@@ -33,7 +33,7 @@ describe('bulkRuleSelectorSchema', () => {
   it('should reject an empty query, which would select every rule', () => {
     const result = bulkRuleSelectorSchema.safeParse({ query: '' });
     expect(result.success).toBe(false);
-    expect(result.error?.issues[0]?.message).toBe('Query cannot be an empty string');
+    expect(result.error?.issues[0]?.message).toBe('query cannot be an empty string');
   });
 
   it('should reject an empty ids array', () => {
