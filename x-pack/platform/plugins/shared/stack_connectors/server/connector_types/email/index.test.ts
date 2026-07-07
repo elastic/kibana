@@ -17,10 +17,12 @@ import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/a
 import { getActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { configSchema as actionsConfigSchema } from '@kbn/actions-plugin/server/config';
 import {
+  NOTIFICATIONS_REQUESTER_ID,
   validateConfig,
   validateConnector,
   validateParams,
   validateSecrets,
+  WORKFLOWS_NOTIFICATION_REQUESTER_ID,
 } from '@kbn/actions-plugin/server/lib';
 
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
@@ -1204,7 +1206,7 @@ describe('execute()', () => {
       ...executorOptions,
       source: {
         type: ActionExecutionSourceType.NOTIFICATION,
-        source: { requesterId: 'notifications', connectorId: actionId },
+        source: { requesterId: NOTIFICATIONS_REQUESTER_ID, connectorId: actionId },
       },
       params: {
         ...executorOptions.params,
@@ -1414,7 +1416,7 @@ describe('execute()', () => {
       ...executorOptions,
       source: {
         type: ActionExecutionSourceType.NOTIFICATION,
-        source: { requesterId: 'workflows', connectorId: actionId },
+        source: { requesterId: WORKFLOWS_NOTIFICATION_REQUESTER_ID, connectorId: actionId },
       },
       params: {
         ...executorOptions.params,
@@ -1431,6 +1433,39 @@ describe('execute()', () => {
         "status": "error",
       }
     `);
+  });
+
+  test('ensure parameters are as expected with workflows notification source when connector allows HTML', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTML = {
+      ...executorOptions,
+      config: {
+        ...executorOptions.config,
+        allowHtml: true,
+      },
+      source: {
+        type: ActionExecutionSourceType.NOTIFICATION,
+        source: { requesterId: WORKFLOWS_NOTIFICATION_REQUESTER_ID, connectorId: actionId },
+      },
+      params: {
+        ...executorOptions.params,
+        messageHTML: '<html><body><span>My HTML message</span></body></html>',
+      },
+    };
+
+    const result = await connectorType.executor(executorOptionsWithHTML);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "data": undefined,
+        "status": "ok",
+      }
+    `);
+    expect(sendEmailMock).toHaveBeenCalledTimes(1);
+    expect(sendEmailMock.mock.calls[0][1].content.messageHTML).toBe(
+      '<html><body><span>My HTML message</span></body></html>'
+    );
   });
 
   test('ensure parameters are as expected with attachments with source NOTIFICATION', async () => {

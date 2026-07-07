@@ -38,10 +38,13 @@ import {
 } from '@kbn/actions-plugin/common';
 import { withoutMustacheTemplate } from '@kbn/actions-plugin/common';
 import {
+  isNotificationExecutionSource,
+  NOTIFICATIONS_REQUESTER_ID,
+} from '@kbn/actions-plugin/server';
+import {
   renderMustacheObject,
   renderMustacheString,
 } from '@kbn/actions-plugin/server/lib/mustache_renderer';
-import { isNotificationExecutionSource } from '@kbn/actions-plugin/server/lib';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
@@ -73,7 +76,6 @@ export const ELASTIC_CLOUD_SERVICE: SMTPConnection.Options = {
 };
 
 const EMAIL_FOOTER_DIVIDER = '\n\n---\n\n';
-const NOTIFICATIONS_REQUESTER_ID = 'notifications';
 
 const NO_RECIPIENTS_ERROR_MESSAGE = i18n.translate(
   'xpack.stackConnectors.email.noRecipientsErrorMessage',
@@ -314,6 +316,8 @@ function isTrustedNotificationHtmlSource(
     return false;
   }
 
+  // Async notification tasks are rebuilt with asEmptySource(NOTIFICATION), which strips requesterId.
+  // Trust null requesterId here so enqueued notification HTML emails continue to run.
   return (
     source.source?.requesterId == null || source.source.requesterId === NOTIFICATIONS_REQUESTER_ID
   );
