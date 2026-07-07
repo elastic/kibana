@@ -25,6 +25,11 @@ export function createSetStateToKbnUrl(createHash: <State>(rawState: State) => s
   ): string => {
     const replacer = storeInHashQuery ? replaceUrlHashQuery : replaceUrlQuery;
     return replacer(rawUrl, (query) => {
+      if (state === undefined) {
+        const { [key]: _discarded, ...nextQuery } = query;
+        return nextQuery;
+      }
+
       const encoded = encodeState(state, useHash, createHash);
       return {
         ...query,
