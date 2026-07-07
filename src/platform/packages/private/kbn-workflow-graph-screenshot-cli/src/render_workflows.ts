@@ -28,6 +28,7 @@ const SYSTEM_CHROME_PATHS: readonly string[] = [
 export interface RenderOptions {
   readonly files: readonly string[];
   readonly outputDir: string;
+  readonly outputInPlace: boolean;
   readonly width: number;
   readonly height: number;
   readonly transparent: boolean;
@@ -69,6 +70,7 @@ export const renderWorkflows = async (options: RenderOptions): Promise<void> => 
   const {
     files,
     outputDir,
+    outputInPlace,
     width,
     height,
     transparent,
@@ -80,6 +82,7 @@ export const renderWorkflows = async (options: RenderOptions): Promise<void> => 
     log,
   } = options;
 
+  // In in-place mode the per-file dirs already exist; we still need outputDir for manifest.json.
   await fs.mkdir(outputDir, { recursive: true });
 
   // ── 1. Build browser bundle ────────────────────────────────────────────────
@@ -211,14 +214,17 @@ export const renderWorkflows = async (options: RenderOptions): Promise<void> => 
               }
 
               const screenshotFileName = `${slugify(name)}.png`;
-              const screenshotPath = path.join(outputDir, screenshotFileName);
+              const screenshotDir = outputInPlace ? path.dirname(file) : outputDir;
+              const screenshotPath = path.join(screenshotDir, screenshotFileName);
               await page.screenshot({ type: 'png', path: screenshotPath });
 
-              log.success(`[${idx + 1}/${files.length}] ${name} → ${screenshotFileName}`);
+              log.success(`[${idx + 1}/${files.length}] ${name} → ${screenshotPath}`);
               results[idx] = {
                 name,
                 yamlPath: file,
-                screenshotPath: path.relative(outputDir, screenshotPath),
+                screenshotPath: outputInPlace
+                  ? screenshotPath
+                  : path.relative(outputDir, screenshotPath),
                 status: 'ok',
               };
             } catch (err: unknown) {
@@ -250,7 +256,7 @@ export const renderWorkflows = async (options: RenderOptions): Promise<void> => 
     const ok = results.filter((r) => r.status === 'ok').length;
     const failed = results.filter((r) => r.status === 'error').length;
     log.info(
-      `Done. ${ok} PNG(s) written to ${outputDir}${
+      `Done. ${ok} PNG(s) written ${outputInPlace ? 'alongside their YAML files' : `to ${outputDir}`}${
         failed > 0 ? `, ${failed} error(s) — check manifest.json` : ''
       }`
     );

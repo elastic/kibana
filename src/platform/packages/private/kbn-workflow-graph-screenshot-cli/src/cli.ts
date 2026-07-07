@@ -93,9 +93,18 @@ export const runCli = (): void => {
         );
       }
 
-      const outputDir = path.resolve(
-        (flags['output-dir'] as string | undefined) ?? './workflow-graph-screenshots'
-      );
+      const outputDirFlag = flags['output-dir'] as string | undefined;
+      const outputInPlace = Boolean(flags['output-in-place']);
+
+      if (outputInPlace && outputDirFlag !== undefined) {
+        throw createFlagError(
+          '--output-in-place and --output-dir are mutually exclusive. ' +
+            'Use one or the other, not both.'
+        );
+      }
+
+      // In in-place mode outputDir is only used for manifest.json (cwd-relative).
+      const outputDir = path.resolve(outputDirFlag ?? './workflow-graph-screenshots');
       const width = Number((flags.width as string | undefined) ?? 1600);
       const height = Number((flags.height as string | undefined) ?? 1000);
       const transparent = Boolean(flags.transparent);
@@ -121,6 +130,7 @@ export const runCli = (): void => {
       await renderWorkflows({
         files,
         outputDir,
+        outputInPlace,
         width,
         height,
         transparent,
@@ -148,9 +158,8 @@ export const runCli = (): void => {
           'headless',
           'chrome-executable',
         ],
-        boolean: ['transparent', 'serve'],
+        boolean: ['transparent', 'serve', 'output-in-place'],
         default: {
-          'output-dir': './workflow-graph-screenshots',
           width: '1600',
           height: '1000',
           theme: 'light',
@@ -165,6 +174,8 @@ export const runCli = (): void => {
                           Pass multiple times to include several sources.
   --output-dir <dir>      Directory for output PNGs and manifest.json.
                           (default: ./workflow-graph-screenshots)
+  --output-in-place       Write each PNG alongside its source YAML file.
+                          Incompatible with --output-dir.
   --width <px>            Browser viewport width in pixels. (default: 1600)
   --height <px>           Browser viewport height in pixels. (default: 1000)
   --theme <name>          Colour theme to render. Only "light" is supported. (default: light)

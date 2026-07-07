@@ -40,7 +40,8 @@ a `manifest.json` summarising the run.
 | Flag | Default | Description |
 |------|---------|-------------|
 | `--input <path>` | *(required)* | File, directory, or glob. Repeatable. |
-| `--output-dir <dir>` | `./workflow-graph-screenshots` | Directory for PNGs and `manifest.json`. |
+| `--output-dir <dir>` | `./workflow-graph-screenshots` | Directory for PNGs and `manifest.json`. Incompatible with `--output-in-place`. |
+| `--output-in-place` | false | Write each PNG alongside its source YAML file. Incompatible with `--output-dir`. |
 | `--width <px>` | `1600` | Browser viewport width. |
 | `--height <px>` | `1000` | Browser viewport height. |
 | `--theme <name>` | `light` | Colour theme (`light` only for now). |
