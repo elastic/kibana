@@ -245,7 +245,7 @@ export function getRangeValue(value?: number | null): number | null {
  * Lens state -> API for color by value; inverse of {@link fromColorByValueAPIToLensState}.
  * - A named (non-custom) palette becomes a `dynamic_palette`: per-band stops are dropped and
  *   `continuity` is re-expressed as `open_above`/`open_below` bounds.
- * - A customs palette becomes a `dynamic` config, rematerializing each stop as a
+ * - A custom palette becomes a `dynamic` config, rematerializing each stop as a
  *   `{ gte, lt | lte, color }` step and applying `reverse` to the stop colors first.
  */
 export function fromColorByValueLensStateToAPI(
