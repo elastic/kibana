@@ -56,9 +56,10 @@ else
   # import/export syntax untouched. ts-node hands that straight to Node, which
   # can't parse it as CommonJS and falls back to strict ESM resolution —
   # breaking @kbn/moon's extensionless relative imports. tsx resolves imports
-  # itself (esbuild, bundler-style) so it isn't affected; bootstrap above
-  # already installs it into node_modules.
-  affected="$(node_modules/.bin/tsx src/platform/kbn-ui/_tooling/affected_packages.ts "$base_ref" HEAD)"
+  # itself (esbuild, bundler-style) so it isn't affected. Declared as a
+  # devDependency in .buildkite/package.json, installed by
+  # setup_buildkite_deps.sh's `npm ci` before this script runs.
+  affected="$(.buildkite/node_modules/.bin/tsx src/platform/kbn-ui/_tooling/affected_packages.ts "$base_ref" HEAD)"
 fi
 
 if [[ -z "$affected" ]]; then
