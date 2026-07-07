@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -15,8 +16,8 @@ import { getUserFromRequest } from './get_user_from_request';
 import type { MemoryToolsOptions } from './types';
 
 const memoryDeleteSchema = z.object({
-  id: z.string().optional().describe('Delete page by UUID.'),
-  name: z.string().optional().describe('Delete page by unique name.'),
+  id: z.string().max(MAX_ID_LENGTH).optional().describe('Delete page by UUID.'),
+  name: z.string().max(MAX_ID_LENGTH).optional().describe('Delete page by unique name.'),
 });
 
 export const createMemoryDeleteTool = ({

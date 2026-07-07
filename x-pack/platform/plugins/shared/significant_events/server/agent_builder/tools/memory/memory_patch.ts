@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_ID_LENGTH, MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -18,23 +19,31 @@ const patchOperationSchema = z
   .object({
     old_text: z
       .string()
+      .max(MAX_TEXT_LENGTH)
       .optional()
       .describe(
         'Exact text to find in the document (must be unique). Omit new_text to delete this text.'
       ),
-    new_text: z.string().optional().describe('Replacement text. Only used with old_text.'),
+    new_text: z
+      .string()
+      .max(MAX_TEXT_LENGTH)
+      .optional()
+      .describe('Replacement text. Only used with old_text.'),
     heading: z
       .string()
+      .max(MAX_TITLE_LENGTH)
       .optional()
       .describe(
         'Target a specific markdown heading. Used with "content" to replace the section, or with "append" to add under it.'
       ),
     content: z
       .string()
+      .max(MAX_TEXT_LENGTH)
       .optional()
       .describe('Replace the entire content under the specified heading with this text.'),
     append: z
       .string()
+      .max(MAX_TEXT_LENGTH)
       .optional()
       .describe('Append this text to the end of the document, or under the specified heading.'),
   })
@@ -47,14 +56,17 @@ const patchOperationSchema = z
   );
 
 const memoryPatchSchema = z.object({
-  id: z.string().optional().describe('Target page by UUID.'),
-  name: z.string().optional().describe('Target page by unique name.'),
+  id: z.string().max(MAX_ID_LENGTH).optional().describe('Target page by UUID.'),
+  name: z.string().max(MAX_ID_LENGTH).optional().describe('Target page by unique name.'),
   operations: z
     .array(patchOperationSchema)
     .min(1)
     .max(20)
     .describe('List of patch operations to apply in order.'),
-  change_summary: z.string().describe('Human-readable description of what was changed (required).'),
+  change_summary: z
+    .string()
+    .max(MAX_TEXT_LENGTH)
+    .describe('Human-readable description of what was changed (required).'),
 });
 
 const applySearchReplace = (

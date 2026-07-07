@@ -14,7 +14,10 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS,
 } from '@kbn/management-settings-ids';
 import { parseIndexPatterns } from '@kbn/streams-schema';
-import { SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID } from '@kbn/significant-events-schema';
+import {
+  MAX_TEXT_LENGTH,
+  SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+} from '@kbn/significant-events-schema';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import {
@@ -85,7 +88,7 @@ const eligibleStreamsRoute = createServerRoute({
         maxScheduledStreams: NumberFromString.pipe(z.number().positive().optional()),
         extractionIntervalHours: NumberFromString.pipe(z.number().min(0).optional()),
         lookbackHours: NumberFromString.pipe(z.number().positive().optional()),
-        excludedStreamPatterns: z.string().optional(),
+        excludedStreamPatterns: z.string().max(MAX_TEXT_LENGTH).optional(),
       })
       .optional(),
   }),

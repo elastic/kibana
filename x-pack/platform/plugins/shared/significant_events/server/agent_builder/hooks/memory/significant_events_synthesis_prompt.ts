@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_ID_LENGTH, MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { createPrompt } from '@kbn/inference-common';
 import systemPromptTemplate from './significant_events_synthesis_system_prompt.text';
 import taskPromptTemplate from './significant_events_synthesis_task_prompt.text';
@@ -14,9 +15,9 @@ export const SigeventsSynthesisPrompt = createPrompt({
   name: 'sigevents_synthesis',
   description: 'Synthesize knowledge indicators from streams into focused wiki pages',
   input: z.object({
-    streamName: z.string(),
-    indicators: z.string(),
-    existingPages: z.string(),
+    streamName: z.string().max(MAX_ID_LENGTH),
+    indicators: z.string().max(MAX_TEXT_LENGTH),
+    existingPages: z.string().max(MAX_TEXT_LENGTH),
   }),
 })
   .version({

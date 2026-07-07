@@ -6,6 +6,7 @@
  */
 import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import type { StreamQuery } from '@kbn/significant-events-schema';
+import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { deriveQueryType } from '@kbn/streams-schema';
 import {
   bulkStreamQueryInputSchema,
@@ -83,7 +84,7 @@ const listQueriesRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string().describe('The name of the stream.'),
+      name: z.string().max(MAX_ID_LENGTH).describe('The name of the stream.'),
     }),
   }),
   security: {
@@ -152,8 +153,8 @@ const upsertQueryRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string().describe('The name of the stream.'),
-      queryId: z.string().describe('The identifier of the query.'),
+      name: z.string().max(MAX_ID_LENGTH).describe('The name of the stream.'),
+      queryId: z.string().max(MAX_ID_LENGTH).describe('The identifier of the query.'),
     }),
     body: upsertStreamQueryRequestSchema,
   }),
@@ -231,8 +232,8 @@ const deleteQueryRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string().describe('The name of the stream.'),
-      queryId: z.string().describe('The identifier of the query to remove.'),
+      name: z.string().max(MAX_ID_LENGTH).describe('The name of the stream.'),
+      queryId: z.string().max(MAX_ID_LENGTH).describe('The identifier of the query to remove.'),
     }),
   }),
   handler: async ({
@@ -310,7 +311,7 @@ const bulkQueriesRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string().describe('The name of the stream.'),
+      name: z.string().max(MAX_ID_LENGTH).describe('The name of the stream.'),
     }),
     body: z.object({
       operations: z.array(
@@ -319,7 +320,7 @@ const bulkQueriesRoute = createServerRoute({
             index: bulkStreamQueryInputSchema,
           }),
           z.object({
-            delete: z.object({ id: z.string() }),
+            delete: z.object({ id: z.string().max(MAX_ID_LENGTH) }),
           }),
         ])
       ),

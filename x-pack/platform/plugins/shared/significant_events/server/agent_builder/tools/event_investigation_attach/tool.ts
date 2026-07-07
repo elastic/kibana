@@ -10,7 +10,10 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { significantEventInvestigationStatusSchema } from '@kbn/significant-events-schema';
+import {
+  MAX_ID_LENGTH,
+  significantEventInvestigationStatusSchema,
+} from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
@@ -24,23 +27,29 @@ export const SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID =
   platformSignificantEventsTools.attachInvestigation;
 
 const eventInvestigationAttachSchema = z.object({
-  event_id: z.string().describe(
-    i18n.translate(
-      'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.eventId',
-      {
-        defaultMessage: 'Identifier of the significant event to attach the investigation to.',
-      }
-    )
-  ),
-  workflow_execution_id: z.string().describe(
-    i18n.translate(
-      'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.workflowExecutionId',
-      {
-        defaultMessage:
-          'The investigation workflow execution id returned by execute_workflow. Used to fetch detailed RCA data.',
-      }
-    )
-  ),
+  event_id: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .describe(
+      i18n.translate(
+        'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.eventId',
+        {
+          defaultMessage: 'Identifier of the significant event to attach the investigation to.',
+        }
+      )
+    ),
+  workflow_execution_id: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .describe(
+      i18n.translate(
+        'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.workflowExecutionId',
+        {
+          defaultMessage:
+            'The investigation workflow execution id returned by execute_workflow. Used to fetch detailed RCA data.',
+        }
+      )
+    ),
   status: significantEventInvestigationStatusSchema.describe(
     i18n.translate(
       'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.status',

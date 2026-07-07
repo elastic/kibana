@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { detectionSchema, type Detection } from '@kbn/significant-events-schema';
+import {
+  MAX_ID_LENGTH,
+  MAX_RULE_NAME_LENGTH,
+  detectionSchema,
+  type Detection,
+} from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
@@ -31,9 +36,15 @@ const detectionsSearchRoute = createServerRoute({
       page: z.coerce.number().int().min(1).optional(),
       perPage: z.coerce.number().int().min(1).max(1000).optional(),
       rule_uuid: z
-        .union([z.string().transform((value) => [value]), z.array(z.string())])
+        .union([
+          z
+            .string()
+            .max(MAX_ID_LENGTH)
+            .transform((value) => [value]),
+          z.array(z.string().max(MAX_ID_LENGTH)),
+        ])
         .optional(),
-      rule_name: z.string().optional(),
+      rule_name: z.string().max(MAX_RULE_NAME_LENGTH).optional(),
     }),
   }),
   handler: async ({

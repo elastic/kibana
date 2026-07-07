@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import { getStreamSamplingSource, getStreamTypeFromDefinition } from '@kbn/streams-schema';
 import {
+  MAX_ID_LENGTH,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
 } from '@kbn/significant-events-schema';
@@ -45,13 +46,13 @@ const identifyInferredFeaturesRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ streamName: z.string() }),
+    path: z.object({ streamName: z.string().max(MAX_ID_LENGTH) }),
     body: z
       .object({
-        connectorId: z.string().optional(),
+        connectorId: z.string().max(MAX_ID_LENGTH).optional(),
         start: z.number().optional(),
         end: z.number().optional(),
-        runId: z.string().optional(),
+        runId: z.string().max(MAX_ID_LENGTH).optional(),
         iteration: z.number().optional(),
         sampleSize: z.number().optional(),
         entityFilteredRatio: z.number().min(0).max(1).optional(),
@@ -204,12 +205,12 @@ const identifyComputedFeaturesRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ streamName: z.string() }),
+    path: z.object({ streamName: z.string().max(MAX_ID_LENGTH) }),
     body: z
       .object({
         start: z.number().optional(),
         end: z.number().optional(),
-        runId: z.string().optional(),
+        runId: z.string().max(MAX_ID_LENGTH).optional(),
       })
       .nullable()
       .optional(),
@@ -283,7 +284,7 @@ const shouldIdentifyRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ streamName: z.string() }),
+    path: z.object({ streamName: z.string().max(MAX_ID_LENGTH) }),
     query: z.object({
       thresholdHours: z.coerce.number().min(0),
     }),

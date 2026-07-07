@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
@@ -20,7 +21,7 @@ export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID
   'platform.sig_events.ki_identification_start';
 
 const onboardingStartSchema = z.object({
-  stream_name: z.string().describe('Target stream name, e.g. "logs.ecs.nginx".'),
+  stream_name: z.string().max(MAX_ID_LENGTH).describe('Target stream name, e.g. "logs.ecs.nginx".'),
   steps: z
     .array(z.enum(KIsOnboardingStep))
     .optional()
@@ -28,8 +29,8 @@ const onboardingStartSchema = z.object({
     .describe('Optional ordered KI identification steps for the background task.'),
   connectors: z
     .object({
-      features: z.string().optional(),
-      queries: z.string().optional(),
+      features: z.string().max(MAX_ID_LENGTH).optional(),
+      queries: z.string().max(MAX_ID_LENGTH).optional(),
     })
     .optional(),
 });

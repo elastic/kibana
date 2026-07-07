@@ -10,7 +10,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { significantEventStatusSchema } from '@kbn/significant-events-schema';
+import { MAX_ID_LENGTH, significantEventStatusSchema } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
@@ -24,11 +24,17 @@ export const SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID =
   platformSignificantEventsTools.updateEventStatus;
 
 const eventStatusUpdateSchema = z.object({
-  event_id: z.string().describe(
-    i18n.translate('xpack.significantEvents.agentBuilder.tools.eventStatusUpdate.schema.eventId', {
-      defaultMessage: 'Identifier of the significant event to update.',
-    })
-  ),
+  event_id: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .describe(
+      i18n.translate(
+        'xpack.significantEvents.agentBuilder.tools.eventStatusUpdate.schema.eventId',
+        {
+          defaultMessage: 'Identifier of the significant event to update.',
+        }
+      )
+    ),
   status: significantEventStatusSchema.describe(
     i18n.translate('xpack.significantEvents.agentBuilder.tools.eventStatusUpdate.schema.status', {
       defaultMessage: 'Target status value to set.',

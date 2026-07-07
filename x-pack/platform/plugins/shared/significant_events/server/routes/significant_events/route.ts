@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import type { QueryOccurrencesResponse } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
@@ -26,7 +27,7 @@ const makeDateFromString = (description: string) =>
 const readSignificantEventsKIQueryOccurrenceStatsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/significant_events 2023-10-31',
   params: z.object({
-    path: z.object({ name: z.string().describe('The name of the stream.') }),
+    path: z.object({ name: z.string().max(MAX_ID_LENGTH).describe('The name of the stream.') }),
     query: z.object({
       from: makeDateFromString('Start of the time range as an ISO 8601 date string.'),
       to: makeDateFromString('End of the time range as an ISO 8601 date string.'),

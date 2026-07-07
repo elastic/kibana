@@ -15,7 +15,7 @@ import type {
 } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { getStreamTypeFromDefinition, type StreamType } from '@kbn/streams-schema';
-import { upsertStreamQueryRequestSchema } from '@kbn/significant-events-schema';
+import { MAX_ID_LENGTH, upsertStreamQueryRequestSchema } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -27,7 +27,7 @@ export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_QUERY_TOOL_ID =
   platformSignificantEventsTools.createQueryKnowledgeIndicator;
 
 const queryInputSchema = upsertStreamQueryRequestSchema.extend({
-  id: z.string().optional(),
+  id: z.string().max(MAX_ID_LENGTH).optional(),
   expires_at: z.iso
     .datetime()
     .optional()
@@ -39,7 +39,10 @@ const queryInputSchema = upsertStreamQueryRequestSchema.extend({
 
 const createQueryKnowledgeIndicatorSchema = z
   .object({
-    stream_name: z.string().describe('Target stream name where this query KI should be saved.'),
+    stream_name: z
+      .string()
+      .max(MAX_ID_LENGTH)
+      .describe('Target stream name where this query KI should be saved.'),
   })
   .extend(queryInputSchema.shape);
 

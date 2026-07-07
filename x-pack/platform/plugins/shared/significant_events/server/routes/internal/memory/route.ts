@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_ID_LENGTH, MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import { i18n } from '@kbn/i18n';
 import type { ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -67,12 +68,12 @@ const createEntryRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      name: z.string(),
-      title: z.string(),
-      content: z.string(),
-      categories: z.array(z.string()).optional(),
-      references: z.array(z.string()).optional(),
-      tags: z.array(z.string()).optional(),
+      name: z.string().max(MAX_ID_LENGTH),
+      title: z.string().max(MAX_TITLE_LENGTH),
+      content: z.string().max(MAX_TEXT_LENGTH),
+      categories: z.array(z.string().max(MAX_ID_LENGTH)).optional(),
+      references: z.array(z.string().max(MAX_ID_LENGTH)).optional(),
+      tags: z.array(z.string().max(MAX_ID_LENGTH)).optional(),
     }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
@@ -107,7 +108,7 @@ const getEntryRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ id: z.string() }),
+    path: z.object({ id: z.string().max(MAX_ID_LENGTH) }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
     const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
@@ -132,7 +133,7 @@ const getEntryByNameRoute = createServerRoute({
     },
   },
   params: z.object({
-    query: z.object({ name: z.string() }),
+    query: z.object({ name: z.string().max(MAX_ID_LENGTH) }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
     const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
@@ -161,15 +162,15 @@ const updateEntryRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ id: z.string() }),
+    path: z.object({ id: z.string().max(MAX_ID_LENGTH) }),
     body: z.object({
-      title: z.string().optional(),
-      content: z.string().optional(),
-      name: z.string().optional(),
-      categories: z.array(z.string()).optional(),
-      references: z.array(z.string()).optional(),
-      tags: z.array(z.string()).optional(),
-      change_summary: z.string().optional(),
+      title: z.string().max(MAX_TITLE_LENGTH).optional(),
+      content: z.string().max(MAX_TEXT_LENGTH).optional(),
+      name: z.string().max(MAX_ID_LENGTH).optional(),
+      categories: z.array(z.string().max(MAX_ID_LENGTH)).optional(),
+      references: z.array(z.string().max(MAX_ID_LENGTH)).optional(),
+      tags: z.array(z.string().max(MAX_ID_LENGTH)).optional(),
+      change_summary: z.string().max(MAX_TEXT_LENGTH).optional(),
     }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
@@ -203,7 +204,7 @@ const deleteEntryRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ id: z.string() }),
+    path: z.object({ id: z.string().max(MAX_ID_LENGTH) }),
   }),
   handler: async ({
     params,
@@ -238,8 +239,8 @@ const renameEntryRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ id: z.string() }),
-    body: z.object({ new_name: z.string() }),
+    path: z.object({ id: z.string().max(MAX_ID_LENGTH) }),
+    body: z.object({ new_name: z.string().max(MAX_ID_LENGTH) }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
     const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
@@ -272,10 +273,10 @@ const searchRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      query: z.string(),
-      tags: z.array(z.string()).optional(),
-      categories: z.array(z.string()).optional(),
-      references: z.array(z.string()).optional(),
+      query: z.string().max(MAX_TEXT_LENGTH),
+      tags: z.array(z.string().max(MAX_ID_LENGTH)).optional(),
+      categories: z.array(z.string().max(MAX_ID_LENGTH)).optional(),
+      references: z.array(z.string().max(MAX_ID_LENGTH)).optional(),
       size: z.number().min(1).max(50).optional(),
     }),
   }),
@@ -346,7 +347,7 @@ const getHistoryRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ id: z.string() }),
+    path: z.object({ id: z.string().max(MAX_ID_LENGTH) }),
     query: z
       .object({
         size: z.coerce.number().min(1).max(100).optional(),
@@ -388,7 +389,7 @@ const getVersionRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      id: z.string(),
+      id: z.string().max(MAX_ID_LENGTH),
       version: z.coerce.number(),
     }),
   }),

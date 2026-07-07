@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_ID_LENGTH, MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -17,23 +18,28 @@ import type { MemoryToolsOptions } from './types';
 const memoryWriteSchema = z.object({
   name: z
     .string()
+    .max(MAX_ID_LENGTH)
     .describe(
       'Unique name for the page (e.g. "nginx-overview"). Creates a new page or overwrites the existing one with this name.'
     ),
-  title: z.string().describe('Human-readable title for the page.'),
-  content: z.string().describe('Full markdown content for the page.'),
+  title: z.string().max(MAX_TITLE_LENGTH).describe('Human-readable title for the page.'),
+  content: z.string().max(MAX_TEXT_LENGTH).describe('Full markdown content for the page.'),
   categories: z
-    .array(z.string())
+    .array(z.string().max(MAX_ID_LENGTH))
     .optional()
     .describe(
       'Categories this page belongs to (e.g. ["services", "streams/logs-otel"]). A page can belong to multiple categories.'
     ),
   references: z
-    .array(z.string())
+    .array(z.string().max(MAX_ID_LENGTH))
     .optional()
     .describe('IDs of other memory pages referenced from this content.'),
-  tags: z.array(z.string()).optional().describe('Optional classification tags.'),
-  change_summary: z.string().optional().describe('Human-readable description of what was changed.'),
+  tags: z.array(z.string().max(MAX_ID_LENGTH)).optional().describe('Optional classification tags.'),
+  change_summary: z
+    .string()
+    .max(MAX_TEXT_LENGTH)
+    .optional()
+    .describe('Human-readable description of what was changed.'),
 });
 
 export const createMemoryWriteTool = ({

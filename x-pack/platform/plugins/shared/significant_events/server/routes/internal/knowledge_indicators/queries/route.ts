@@ -11,7 +11,11 @@ import type {
   QueriesOccurrencesGetResponse,
   SignificantEventsQueriesGenerationResult,
 } from '@kbn/significant-events-schema';
-import { generatedSignificantEventQuerySchema } from '@kbn/significant-events-schema';
+import {
+  MAX_ID_LENGTH,
+  MAX_TEXT_LENGTH,
+  generatedSignificantEventQuerySchema,
+} from '@kbn/significant-events-schema';
 import { sortQueryLinksForTable } from '../../../../lib/significant_events/utils';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { generateKIQueries } from '../../../../lib/significant_events/ki_queries_generation_service';
@@ -31,7 +35,10 @@ import { searchModeSchema } from '../../../utils/search_mode';
 import type { PersistQueriesResult } from '../../../../lib/significant_events/persist_queries';
 import { persistQueries } from '../../../../lib/significant_events/persist_queries';
 
-const dateFromString = z.string().transform((input) => new Date(input));
+const dateFromString = z
+  .string()
+  .max(MAX_ID_LENGTH)
+  .transform((input) => new Date(input));
 
 const baseRequestParamsSchema = z.object({
   from: dateFromString.describe('Start of the time range'),
@@ -40,9 +47,16 @@ const baseRequestParamsSchema = z.object({
     .string()
     .regex(BUCKET_SIZE_PATTERN)
     .describe('Size of time buckets for aggregation'),
-  query: z.string().optional().describe('Query string to filter significant events queries'),
+  query: z
+    .string()
+    .max(MAX_TEXT_LENGTH)
+    .optional()
+    .describe('Query string to filter significant events queries'),
   streamNames: z
-    .preprocess((val) => (typeof val === 'string' ? [val] : val), z.array(z.string()))
+    .preprocess(
+      (val) => (typeof val === 'string' ? [val] : val),
+      z.array(z.string().max(MAX_ID_LENGTH))
+    )
     .optional()
     .describe('Stream names to filter significant events'),
 });
@@ -72,7 +86,7 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
   params: z.object({
     body: z
       .object({
-        queryIds: z.array(z.string()).optional(),
+        queryIds: z.array(z.string().max(MAX_ID_LENGTH)).optional(),
         minSeverityScore: z.number().int().min(0).max(100).optional(),
       })
       .nullish(),
@@ -116,7 +130,7 @@ export const demoteBackedQueriesRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      queryIds: z.array(z.string()).min(1),
+      queryIds: z.array(z.string().max(MAX_ID_LENGTH)).min(1),
     }),
   }),
   handler: async ({
@@ -185,7 +199,7 @@ export const bulkDeleteQueriesRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      queryIds: z.array(z.string()).min(1),
+      queryIds: z.array(z.string().max(MAX_ID_LENGTH)).min(1),
     }),
   }),
   handler: async ({
@@ -423,7 +437,7 @@ const generateQueriesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{streamName}/queries/_generate',
   params: z.object({
     path: z.object({
-      streamName: z.string().describe('The name of the stream'),
+      streamName: z.string().max(MAX_ID_LENGTH).describe('The name of the stream'),
     }),
     body: z
       .object({
@@ -506,7 +520,7 @@ const persistQueriesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{streamName}/queries/_persist',
   params: z.object({
     path: z.object({
-      streamName: z.string().describe('The name of the stream'),
+      streamName: z.string().max(MAX_ID_LENGTH).describe('The name of the stream'),
     }),
     body: z.object({
       queries: z.array(generatedSignificantEventQuerySchema),

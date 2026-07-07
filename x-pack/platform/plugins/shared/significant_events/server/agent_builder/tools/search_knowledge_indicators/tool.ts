@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_ID_LENGTH, MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
@@ -25,11 +26,12 @@ export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID =
 
 const searchKnowledgeIndicatorsSchema = z.object({
   stream_names: z
-    .array(z.string())
+    .array(z.string().max(MAX_ID_LENGTH))
     .optional()
     .describe('Optional. If omitted, search across all accessible streams.'),
   search_text: z
     .string()
+    .max(MAX_TEXT_LENGTH)
     .optional()
     .describe(
       'Optional. Natural-language search with semantic ranking (hybrid keyword + vector). Descriptive phrases work better than single keywords.'

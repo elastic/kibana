@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_ID_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -14,10 +15,15 @@ import { platformStreamsMemoryTools } from './tool_ids';
 import type { MemoryToolsOptions } from './types';
 
 const memoryReadSchema = z.object({
-  name: z.string().optional().describe('Read page by its unique name (e.g. "nginx-overview").'),
-  id: z.string().optional().describe('Read page by its UUID.'),
+  name: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .optional()
+    .describe('Read page by its unique name (e.g. "nginx-overview").'),
+  id: z.string().max(MAX_ID_LENGTH).optional().describe('Read page by its UUID.'),
   heading: z
     .string()
+    .max(MAX_TITLE_LENGTH)
     .optional()
     .describe(
       'Only return content under this markdown heading (e.g. "## Key Behaviors"). Case-insensitive.'

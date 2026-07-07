@@ -8,6 +8,8 @@
 import { z } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import {
+  MAX_ID_LENGTH,
+  MAX_TEXT_LENGTH,
   baseFeatureSchema,
   featureUpsertSchema,
   type Feature,
@@ -34,7 +36,7 @@ export const upsertFeatureRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().max(MAX_ID_LENGTH) }),
     body: baseFeatureSchema.and(z.object({ expires_at: z.iso.datetime().optional() })),
   }),
   handler: async ({
@@ -95,7 +97,7 @@ export const deleteFeatureRoute = createServerRoute({
   params: z.object({
     path: z.object({
       name: z.string().max(MAX_INPUT_STRING_LENGTH),
-      id: z.string().max(MAX_INPUT_STRING_LENGTH),
+      id: z.string().max(MAX_INPUT_STRING_LENGTH).max(MAX_INPUT_STRING_LENGTH),
     }),
   }),
   handler: async ({
@@ -133,7 +135,7 @@ export const listFeaturesRoute = createServerRoute({
     path: z.object({ name: z.string().max(MAX_INPUT_STRING_LENGTH) }),
     query: z.optional(
       z.object({
-        query: z.string().optional(),
+        query: z.string().max(MAX_TEXT_LENGTH).optional(),
         search_mode: searchModeSchema.optional(),
         include_excluded: BooleanFromString.optional(),
       })
@@ -180,7 +182,11 @@ export const listAllFeaturesRoute = createServerRoute({
   params: z.object({
     query: z
       .object({
-        query: z.string().optional().describe('Free-text query for semantic/keyword search'),
+        query: z
+          .string()
+          .max(MAX_TEXT_LENGTH)
+          .optional()
+          .describe('Free-text query for semantic/keyword search'),
         search_mode: searchModeSchema.optional(),
         include_excluded: BooleanFromString.optional(),
       })
@@ -232,7 +238,7 @@ export const bulkFeaturesRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().max(MAX_ID_LENGTH) }),
     body: z.object({
       operations: z.array(
         z.union([
@@ -243,17 +249,17 @@ export const bulkFeaturesRoute = createServerRoute({
           }),
           z.object({
             delete: z.object({
-              id: z.string(),
+              id: z.string().max(MAX_INPUT_STRING_LENGTH),
             }),
           }),
           z.object({
             exclude: z.object({
-              id: z.string(),
+              id: z.string().max(MAX_INPUT_STRING_LENGTH),
             }),
           }),
           z.object({
             restore: z.object({
-              id: z.string(),
+              id: z.string().max(MAX_INPUT_STRING_LENGTH),
             }),
           }),
         ])
@@ -308,9 +314,9 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
       operations: z
         .array(
           z.union([
-            z.object({ delete: z.object({ id: z.string() }) }),
-            z.object({ exclude: z.object({ id: z.string() }) }),
-            z.object({ restore: z.object({ id: z.string() }) }),
+            z.object({ delete: z.object({ id: z.string().max(MAX_INPUT_STRING_LENGTH) }) }),
+            z.object({ exclude: z.object({ id: z.string().max(MAX_INPUT_STRING_LENGTH) }) }),
+            z.object({ restore: z.object({ id: z.string().max(MAX_INPUT_STRING_LENGTH) }) }),
           ])
         )
         .min(1),

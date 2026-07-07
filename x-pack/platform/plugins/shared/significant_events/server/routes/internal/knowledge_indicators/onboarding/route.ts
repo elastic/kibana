@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import {
+  MAX_ID_LENGTH,
   KIsOnboardingStep,
   SignificantEventsWorkflowStatus,
   type KIsOnboardingStatusResult,
@@ -22,7 +23,10 @@ import {
   type SignificantEventsKIsOnboardingInputs,
 } from '../../../../lib/workflows/onboarding_workflow_client';
 
-const timestampFromString = z.string().transform((input) => new Date(input).getTime());
+const timestampFromString = z
+  .string()
+  .max(MAX_ID_LENGTH)
+  .transform((input) => new Date(input).getTime());
 
 const mapStepsToSkipFlags = (
   steps: KIsOnboardingStep[]
@@ -45,7 +49,7 @@ export const onboardingExecuteRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ streamName: z.string() }),
+    path: z.object({ streamName: z.string().max(MAX_ID_LENGTH) }),
     body: z.discriminatedUnion('action', [
       z.object({
         action: z.literal('schedule').describe('Schedule a new onboarding workflow run'),
@@ -145,7 +149,7 @@ export const onboardingStatusRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ streamName: z.string() }),
+    path: z.object({ streamName: z.string().max(MAX_ID_LENGTH) }),
   }),
   handler: async ({
     params,
