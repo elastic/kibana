@@ -75,4 +75,41 @@ describe('CreateDataSourceFlyout', () => {
       expect(getByTestId('createDataSourceFlyoutSubmit')).not.toBeDisabled();
     });
   });
+
+  it('shows the S3 region field without expanding connection settings, and requires it on create', async () => {
+    const toasts = createToastsMock();
+    const client = createClientMock();
+    const onSave = jest.fn().mockResolvedValue(null);
+
+    const { getByTestId, queryByText } = render(
+      <EuiProvider>
+        <CreateDataSourceFlyout
+          dataSourcesClient={client}
+          toasts={toasts}
+          onClose={jest.fn()}
+          onSave={onSave}
+          existingDataSourceNames={[]}
+        />
+      </EuiProvider>
+    );
+
+    // Region is visible up front, without expanding "Show connection settings".
+    expect(getByTestId('createDataSourceFlyoutS3Region')).toBeInTheDocument();
+
+    fireEvent.change(getByTestId('createDataSourceFlyoutName'), { target: { value: 'my-ds' } });
+    fireEvent.click(getByTestId('createDataSourceFlyoutSubmit'));
+
+    await waitFor(() => {
+      expect(queryByText('Region is required.')).toBeInTheDocument();
+    });
+    expect(onSave).not.toHaveBeenCalled();
+
+    fireEvent.change(getByTestId('createDataSourceFlyoutS3Region'), {
+      target: { value: 'us-east-1' },
+    });
+
+    await waitFor(() => {
+      expect(queryByText('Region is required.')).not.toBeInTheDocument();
+    });
+  });
 });
