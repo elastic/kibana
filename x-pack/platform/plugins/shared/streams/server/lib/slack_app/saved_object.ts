@@ -54,10 +54,10 @@ export const getRelayAppConnectionSavedObjectType = (): SavedObjectsType => ({
   mappings: {
     dynamic: false,
     properties: {
-      status: { type: 'keyword' },
-      apiKeyId: { type: 'keyword' },
-      surface: { type: 'keyword' },
-      tenantKey: { type: 'keyword' },
+      status: { type: 'keyword', ignore_above: 1024 },
+      apiKeyId: { type: 'keyword', ignore_above: 1024 },
+      surface: { type: 'keyword', ignore_above: 1024 },
+      tenantKey: { type: 'keyword', ignore_above: 1024 },
     },
   },
   management: {
