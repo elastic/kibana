@@ -14,7 +14,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiTitle,
-  EuiText,
   EuiSpacer,
   EuiFormRow,
   EuiSuperSelect,
@@ -23,6 +22,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiAccordion,
+  EuiIconTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -55,6 +55,14 @@ export const GridSettingsFlyout = ({
     prefix: 'metricsGridSettingsAggregationAccordion',
   });
 
+  const aggregationGroupDescription = i18n.translate(
+    'metricsExperience.gridSettingsFlyout.aggregationGroupDescription',
+    {
+      defaultMessage:
+        'Set how values are aggregated for each metric type. Changes apply to every metric of that type in this view.',
+    }
+  );
+
   const [draftSettings, setDraftSettings] = useState<MetricsGridSettings>(gridSettings);
 
   const pendingUpdate = useMemo(
@@ -79,6 +87,7 @@ export const GridSettingsFlyout = ({
     <EuiFlyout
       onClose={onClose}
       size="s"
+      type="push"
       ownFocus
       data-test-subj="metricsExperienceGridSettingsFlyout"
       aria-labelledby={titleId}
@@ -98,23 +107,27 @@ export const GridSettingsFlyout = ({
           initialIsOpen
           data-test-subj="metricsExperienceGridSettingsAggregationAccordion"
           buttonContent={
-            <EuiTitle size="xs">
-              <h3>
-                {i18n.translate('metricsExperience.gridSettingsFlyout.aggregationGroupLabel', {
-                  defaultMessage: 'Aggregation',
-                })}
-              </h3>
-            </EuiTitle>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h5>
+                    {i18n.translate('metricsExperience.gridSettingsFlyout.aggregationGroupLabel', {
+                      defaultMessage: 'Aggregations',
+                    })}
+                  </h5>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  type="info"
+                  color="subdued"
+                  aria-label={aggregationGroupDescription}
+                  content={aggregationGroupDescription}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           }
         >
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>
-              {i18n.translate('metricsExperience.gridSettingsFlyout.subtitle', {
-                defaultMessage: 'These aggregation settings apply to all metrics in this view.',
-              })}
-            </p>
-          </EuiText>
           <EuiSpacer size="m" />
           <EuiFormRow
             label={i18n.translate('metricsExperience.gridSettingsFlyout.counterLabel', {
