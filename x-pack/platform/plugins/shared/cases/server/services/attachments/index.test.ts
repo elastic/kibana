@@ -1196,18 +1196,59 @@ describe('AttachmentService', () => {
     });
 
     describe('bulkDelete mirror', () => {
-      it('only mirrors ids whose SO delete succeeded across both source types', async () => {
+      it('mirrors an id even when its sibling source-type delete 404s (the SO existed as exactly one type)', async () => {
         const writer = makeMirrorWriter();
         const svc = makeService(writer);
-        // id-1: both source-type deletes succeeded. id-2: the unified delete
-        // failed → the SO may survive → its analytics doc must NOT be dropped
-        // (reconciliation can't recover a doc whose `updated_at` never changed).
+        // A real attachment exists as exactly ONE source type, so the OTHER
+        // type's delete always comes back `success: false` with a 404
+        // (`not_found`). That 404 means "already gone" and must NOT block the
+        // mirror — otherwise every normal delete would leave an orphan doc.
         unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
           statuses: [
-            { id: 'id-1', type: CASE_ATTACHMENT_SAVED_OBJECT, success: true },
+            {
+              id: 'id-1',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
             { id: 'id-1', type: CASE_COMMENT_SAVED_OBJECT, success: true },
-            { id: 'id-2', type: CASE_ATTACHMENT_SAVED_OBJECT, success: false },
-            { id: 'id-2', type: CASE_COMMENT_SAVED_OBJECT, success: true },
+          ],
+        });
+
+        await svc.bulkDelete({ savedObjectIds: ['id-1'], refresh: false });
+
+        expect(writer.bulkDeleteAttachments).toHaveBeenCalledTimes(1);
+        expect(writer.bulkDeleteAttachments.mock.calls[0][0]).toEqual(['id-1']);
+      });
+
+      it('does NOT mirror an id whose SO delete failed with a non-404 error (the SO may survive)', async () => {
+        const writer = makeMirrorWriter();
+        const svc = makeService(writer);
+        // id-1: legacy delete succeeded (unified 404s as expected) → mirror it.
+        // id-2: legacy delete failed with a 409 (unified 404s as expected) →
+        //   the SO may still exist, so its analytics doc must NOT be dropped
+        //   (reconciliation can't recover a doc whose `updated_at` never changed).
+        unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+          statuses: [
+            {
+              id: 'id-1',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
+            { id: 'id-1', type: CASE_COMMENT_SAVED_OBJECT, success: true },
+            {
+              id: 'id-2',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
+            {
+              id: 'id-2',
+              type: CASE_COMMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 409, error: 'Conflict', message: 'version conflict' },
+            },
           ],
         });
 
@@ -1268,7 +1309,12 @@ describe('AttachmentService', () => {
         const svc = makeService(writer);
         unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
           statuses: [
-            { id: 'id-1', type: CASE_ATTACHMENT_SAVED_OBJECT, success: true },
+            {
+              id: 'id-1',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
             { id: 'id-1', type: CASE_COMMENT_SAVED_OBJECT, success: true },
           ],
         });

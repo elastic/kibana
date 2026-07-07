@@ -410,17 +410,20 @@ export class AttachmentService {
       // delete is the source of truth. One bulk-delete by id covers both
       // source types (id is unique across them).
       //
-      // Drop the analytics doc ONLY for ids whose SO delete succeeded —
+      // Each id issues two delete requests (unified + legacy), but a real
+      // attachment exists as only ONE of them, so the other request always
+      // comes back `success: false` with a 404 (`not_found`) — core
       // `bulkDelete` reports partial failure via `statuses[]` rather than
-      // throwing. Dropping the doc for a surviving SO is unrecoverable:
-      // its `updated_at` didn't change, so reconciliation never re-emits it
-      // (permanent undercount until `/reset`). Same guard as
-      // `CasesService.bulkDeleteCaseEntities`. `success` covers 200 and 404
-      // (both mean "SO gone"); each id has two requests (unified + legacy),
-      // so exclude it if EITHER failed.
+      // throwing. A 404 means the SO is already gone, which is exactly the
+      // post-state we want, so it must NOT block the mirror. Only a NON-404
+      // failure means the SO may have survived; dropping its analytics doc
+      // then would be unrecoverable — its `updated_at` didn't change, so
+      // reconciliation never re-emits it (permanent undercount until
+      // `/reset`). So exclude an id only when a delete failed with a status
+      // other than 404.
       const failedIds = new Set<string>();
       for (const status of statuses) {
-        if (!status.success) {
+        if (!status.success && status.error?.statusCode !== 404) {
           failedIds.add(status.id);
         }
       }
@@ -981,6 +984,24 @@ export class AttachmentService {
   }
 
   /**
+   * Dispatch a best-effort analytics mirror so a throwing writer can NEVER
+   * fail the primary create / bulkCreate / delete that already persisted the
+   * SO. The throw is swallowed with a WARN; reconciliation re-emits next tick.
+   * (The update path guards itself via `mirrorUpdatedAttachments`' `.catch()`.)
+   */
+  private mirrorSafely(dispatch: () => void): void {
+    try {
+      dispatch();
+    } catch (error) {
+      this.context.log.warn(
+        `cases-analyticsV2: attachments mirror dispatch threw (non-fatal, reconciliation will repair): ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
+  /**
    * Mirror updated attachment SOs to the `.cases-attachments` analytics
    * index by re-reading their full persisted shape.
    *
@@ -1003,24 +1024,6 @@ export class AttachmentService {
    * swallowed here rather than in the writer because the read, not the
    * write, is what can throw.
    */
-  /**
-   * Dispatch a best-effort analytics mirror so a throwing writer can NEVER
-   * fail the primary create / bulkCreate / delete that already persisted the
-   * SO. The throw is swallowed with a WARN; reconciliation re-emits next tick.
-   * (The update path guards itself via `mirrorUpdatedAttachments`' `.catch()`.)
-   */
-  private mirrorSafely(dispatch: () => void): void {
-    try {
-      dispatch();
-    } catch (error) {
-      this.context.log.warn(
-        `cases-analyticsV2: attachments mirror dispatch threw (non-fatal, reconciliation will repair): ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-    }
-  }
-
   private mirrorUpdatedAttachments(refs: Array<{ type: string; id: string }>): void {
     if (refs.length === 0) {
       return;
