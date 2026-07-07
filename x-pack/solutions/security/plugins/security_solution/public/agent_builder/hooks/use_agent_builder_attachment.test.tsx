@@ -119,6 +119,27 @@ describe('useAgentBuilderAttachment', () => {
     );
   });
 
+  it('forwards origin onto the attachment', () => {
+    const { result } = renderHook(
+      () =>
+        useAgentBuilderAttachment({
+          ...defaultParams,
+          origin: 'rule-so-id',
+        }),
+      { wrapper: createWrapper(mockAgentBuilderService) }
+    );
+
+    act(() => {
+      result.current.openAgentBuilderFlyout();
+    });
+
+    expect(mockOpenAgentBuilderChat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: [expect.objectContaining({ origin: 'rule-so-id' })],
+      })
+    );
+  });
+
   it('opens flyout with correct sessionTag', () => {
     const { result } = renderHook(() => useAgentBuilderAttachment(defaultParams), {
       wrapper: createWrapper(mockAgentBuilderService),
