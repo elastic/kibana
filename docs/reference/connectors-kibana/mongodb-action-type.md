@@ -45,7 +45,7 @@ Aggregate
 :   Run a MongoDB aggregation pipeline on a collection. Available to AI agents and workflow authors.
     - `collection` (required): Name of the MongoDB collection.
     - `database` (optional): Database name. If omitted, uses the connector default database.
-    - `pipeline` (required): Aggregation pipeline as an array of stage objects, such as `[{ "$match": { "status": "active" } }, { "$group": { "_id": "$category", "total": { "$sum": 1 } } }]`. Must contain at least one stage.
+    - `pipeline` (required): Aggregation pipeline as an array of stage objects, such as `[{ "$match": { "status": "active" } }, { "$group": { "_id": "$category", "total": { "$sum": 1 } } }]`. Must contain at least one stage. `$out` and `$merge` stages are rejected because they write to a collection.
     - `limit` (optional): Cap on documents returned after the pipeline completes (1–1000). Prefer adding a `$limit` stage to the pipeline instead.
 
 List collections
@@ -80,7 +80,7 @@ Use *List collections* to discover what collections exist in a database before w
 
 The connector splits write operations from read operations across two groups with different exposure:
 
-- *Find*, *Aggregate*, and *List collections* are available to AI agents and workflow authors. These actions do not modify data.
+- *Find*, *Aggregate*, and *List collections* are available to AI agents and workflow authors. These actions do not modify data — *Aggregate* rejects pipelines containing `$out` or `$merge`, since those stages write to a collection.
 - *Insert one*, *Update one*, and *Delete one* are available only to workflow authors and direct API callers. AI agents cannot invoke them. Use these actions when you deliberately want a workflow to modify documents.
 
 For defense in depth, create a dedicated MongoDB user for the connector with only the privileges required for the intended use case. A read-only user paired with the agent-facing read actions keeps agents within query-only access even if workflow authors have write-capable credentials.

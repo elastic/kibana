@@ -69,6 +69,22 @@ const resolveDb = (
   );
 };
 
+/** Pipeline stages that write to a collection rather than just shaping query results. */
+const MUTATING_STAGE_KEYS = ['$out', '$merge'];
+
+/** aggregate is an agent-facing read tool; reject stages that can write data. */
+const assertNoMutatingStages = (pipeline: Array<Record<string, unknown>>): void => {
+  for (const stage of pipeline) {
+    const mutatingKey = MUTATING_STAGE_KEYS.find((key) => key in stage);
+    if (mutatingKey) {
+      throw new Error(
+        `aggregate does not permit the ${mutatingKey} stage — it can write to a collection. ` +
+          'Use insertOne, updateOne, or deleteOne to modify data.'
+      );
+    }
+  }
+};
+
 export const MongoDBConnector: ConnectorSpec = {
   metadata: {
     id: '.mongodb',
@@ -129,10 +145,11 @@ export const MongoDBConnector: ConnectorSpec = {
     aggregate: {
       isTool: true,
       description:
-        'Run a MongoDB aggregation pipeline on a collection. Use $match, $group, $sort, $project, and other stages to transform and summarise data.',
+        'Run a MongoDB aggregation pipeline on a collection. Use $match, $group, $sort, $project, and other stages to transform and summarise data. This is a read-only action — $out and $merge stages, which write to a collection, are not permitted.',
       input: AggregateInputSchema,
       handler: async (ctx, input) => {
         const { collection, database, pipeline, limit } = input as AggregateInput;
+        assertNoMutatingStages(pipeline);
         const mongoClient = await ctx.getClient('mongodb');
         const db = mongoClient.db(resolveDb(database, ctx.config));
         let cursor = db.collection(collection).aggregate(pipeline);

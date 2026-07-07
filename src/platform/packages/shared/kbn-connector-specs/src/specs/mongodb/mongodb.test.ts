@@ -182,6 +182,36 @@ describe('MongoDBConnector', () => {
 
       expect(cursorMock.limit).toHaveBeenCalledWith(5);
     });
+
+    it('rejects a pipeline containing $out', async () => {
+      const collectionMock = makeCollection();
+      const ctx = makeCtx({
+        getClient: jest.fn().mockResolvedValue(makeMongoClient(makeDb(collectionMock))),
+      });
+
+      await expect(
+        MongoDBConnector.actions.aggregate.handler(ctx, {
+          collection: 'users',
+          pipeline: [{ $match: {} }, { $out: 'other_collection' }],
+        })
+      ).rejects.toThrow('aggregate does not permit the $out stage');
+      expect(collectionMock.aggregate).not.toHaveBeenCalled();
+    });
+
+    it('rejects a pipeline containing $merge', async () => {
+      const collectionMock = makeCollection();
+      const ctx = makeCtx({
+        getClient: jest.fn().mockResolvedValue(makeMongoClient(makeDb(collectionMock))),
+      });
+
+      await expect(
+        MongoDBConnector.actions.aggregate.handler(ctx, {
+          collection: 'users',
+          pipeline: [{ $match: {} }, { $merge: { into: 'other_collection' } }],
+        })
+      ).rejects.toThrow('aggregate does not permit the $merge stage');
+      expect(collectionMock.aggregate).not.toHaveBeenCalled();
+    });
   });
 
   describe('listCollections action', () => {
