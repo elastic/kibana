@@ -15,7 +15,7 @@ import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import {
   MATCH_LOOKBACK_MINUTES,
   MAX_ALERTS_PER_EXECUTION,
-} from '../../../../significant_events/rules/esql/common';
+} from '../../../significant_events/rules/esql/common';
 import {
   STREAMS_RULE_CONSUMER,
   STREAMS_ESQL_RULE_TYPE_ID,
