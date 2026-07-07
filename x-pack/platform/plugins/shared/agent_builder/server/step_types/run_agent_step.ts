@@ -31,7 +31,13 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
     handler: async (context) => {
       // Accumulate token usage outside the try/catch so partial counts are
       // preserved even if the event stream errors mid-execution.
-      const usage = { inputTokens: 0, outputTokens: 0, totalTokens: 0 };
+      const usage: {
+        connectorId?: string;
+        inputTokens: number;
+        outputTokens: number;
+        cachedTokens: number;
+        totalTokens: number;
+      } = { inputTokens: 0, outputTokens: 0, cachedTokens: 0, totalTokens: 0 };
 
       try {
         const { schema, message, conversation_id: conversationId, attachments } = context.input;
@@ -96,8 +102,15 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
               if (isRoundCompleteEvent(event)) {
                 const { model_usage: modelUsage } = event.data.round;
                 if (modelUsage) {
+                  // 'unknown' is the sentinel for a round that made no LLM call
+                  // (see add_round_complete_event.ts). A step uses one connector
+                  // today, so the last real value is the step's connector.
+                  if (modelUsage.connector_id && modelUsage.connector_id !== 'unknown') {
+                    usage.connectorId = modelUsage.connector_id;
+                  }
                   usage.inputTokens += modelUsage.input_tokens;
                   usage.outputTokens += modelUsage.output_tokens;
+                  usage.cachedTokens += modelUsage.cached_input_tokens ?? 0;
                   usage.totalTokens += modelUsage.input_tokens + modelUsage.output_tokens;
                 }
               }
