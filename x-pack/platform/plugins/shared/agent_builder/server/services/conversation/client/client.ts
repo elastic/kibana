@@ -166,13 +166,13 @@ class ConversationClientImpl implements ConversationClient {
     });
 
     const hit = response.hits.hits[0] as Document | undefined;
-    if (!hit) {
+    if (!hit || !hit._id) {
       return undefined;
     }
 
     try {
       return fromEs(
-        await this.getDocumentWithAccess({ conversationId: hit._id!, access: 'converse' })
+        await this.getDocumentWithAccess({ conversationId: hit._id, access: 'converse' })
       );
     } catch (error) {
       if (isConversationNotFoundError(error)) {
