@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiSplitButton,
   EuiFlexGroup,
@@ -175,7 +176,11 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(() => {
     const items: NonNullable<EuiContextMenuPanelDescriptor['items']> = [];
 
-    if (dataStream?.privileges?.manage_data_stream_lifecycle) {
+    // Editing the lifecycle can touch the failure store (`putDataStreamOptions`) and, on
+    // stateful, index/data-stream settings. Both require the `manage` index privilege on every
+    // deployment (including Serverless), while the DSL lifecycle put needs
+    // `manage_data_stream_lifecycle`. Require both so the combined save can never partially fail.
+    if (dataStream?.privileges?.manage && dataStream?.privileges?.manage_data_stream_lifecycle) {
       items.push({
         key: 'editDataLifecycle',
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.managePanelEditDataLifecycle', {
@@ -213,9 +218,17 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
     ];
   }, [
     dataStream?.privileges?.delete_index,
+    dataStream?.privileges?.manage,
     dataStream?.privileges?.manage_data_stream_lifecycle,
     openEditFlyout,
   ]);
+
+  const hasActions = !isLoading && !error && Boolean(panels[0].items?.length);
+
+  const viewInDiscoverLabel = i18n.translate(
+    'xpack.idxMgmt.dataStreamDetailPanel.viewInDiscoverButton',
+    { defaultMessage: 'View in Discover' }
+  );
 
   const viewInDiscover = useCallback(async () => {
     if (!discoverLocator) {
@@ -281,56 +294,58 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <EuiPopover
-                aria-label={i18n.translate(
-                  'xpack.idxMgmt.dataStreamDetailPanel.actionsMenuAriaLabel',
-                  { defaultMessage: 'Data stream actions menu' }
-                )}
-                button={
-                  <EuiSplitButton size="m">
-                    <EuiSplitButton.ActionPrimary
-                      iconType="discoverApp"
-                      onClick={viewInDiscover}
-                      isDisabled={!discoverLocator}
-                      data-test-subj="viewInDiscoverButton"
-                    >
-                      {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.viewInDiscoverButton', {
-                        defaultMessage: 'View in Discover',
-                      })}
-                    </EuiSplitButton.ActionPrimary>
+              {hasActions ? (
+                <EuiPopover
+                  aria-label={i18n.translate(
+                    'xpack.idxMgmt.dataStreamDetailPanel.actionsMenuAriaLabel',
+                    { defaultMessage: 'Data stream actions menu' }
+                  )}
+                  button={
+                    <EuiSplitButton size="m">
+                      <EuiSplitButton.ActionPrimary
+                        iconType="discoverApp"
+                        onClick={viewInDiscover}
+                        isDisabled={!discoverLocator}
+                        data-test-subj="viewInDiscoverButton"
+                      >
+                        {viewInDiscoverLabel}
+                      </EuiSplitButton.ActionPrimary>
 
-                    <EuiSplitButton.ActionSecondary
-                      iconType="gear"
-                      tooltipProps={{
-                        content: i18n.translate(
-                          'xpack.idxMgmt.dataStreamDetailPanel.actionsButtonToolTip',
-                          { defaultMessage: 'Actions' }
-                        ),
-                        disableScreenReaderOutput: true,
-                      }}
-                      aria-label={i18n.translate(
-                        'xpack.idxMgmt.dataStreamDetailPanel.actionsButtonAriaLabel',
-                        { defaultMessage: 'Open data stream actions menu' }
-                      )}
-                      isDisabled={isLoading || Boolean(error) || !panels[0].items?.length}
-                      onClick={() => setActionsPopOverOpen((open) => !open)}
-                      data-test-subj={
-                        !isLoading && !error && panels[0].items?.length
-                          ? 'manageDataStreamButton'
-                          : undefined
-                      }
-                    />
-                  </EuiSplitButton>
-                }
-                isOpen={
-                  !isLoading && !error && Boolean(panels[0].items?.length) && isActionsPopOverOpen
-                }
-                closePopover={closePopover}
-                panelPaddingSize="none"
-                anchorPosition="upLeft"
-              >
-                <EuiContextMenu initialPanelId={0} panels={panels} />
-              </EuiPopover>
+                      <EuiSplitButton.ActionSecondary
+                        iconType="gear"
+                        tooltipProps={{
+                          content: i18n.translate(
+                            'xpack.idxMgmt.dataStreamDetailPanel.actionsButtonToolTip',
+                            { defaultMessage: 'Actions' }
+                          ),
+                          disableScreenReaderOutput: true,
+                        }}
+                        aria-label={i18n.translate(
+                          'xpack.idxMgmt.dataStreamDetailPanel.actionsButtonAriaLabel',
+                          { defaultMessage: 'Open data stream actions menu' }
+                        )}
+                        onClick={() => setActionsPopOverOpen((open) => !open)}
+                        data-test-subj="manageDataStreamButton"
+                      />
+                    </EuiSplitButton>
+                  }
+                  isOpen={isActionsPopOverOpen}
+                  closePopover={closePopover}
+                  panelPaddingSize="none"
+                  anchorPosition="upLeft"
+                >
+                  <EuiContextMenu initialPanelId={0} panels={panels} />
+                </EuiPopover>
+              ) : (
+                <EuiButton
+                  iconType="discoverApp"
+                  onClick={viewInDiscover}
+                  isDisabled={!discoverLocator}
+                  data-test-subj="viewInDiscoverButton"
+                >
+                  {viewInDiscoverLabel}
+                </EuiButton>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
