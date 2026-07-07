@@ -30,7 +30,7 @@ import {
 } from '../internal_state';
 import {
   createTabRuntimeState,
-  selectDataSourceProfileState,
+  selectUrlProfileStateDefinition,
   selectTabRuntimeState,
   selectInitialUnifiedHistogramLayoutPropsMap,
   selectTabRuntimeInternalState,
@@ -265,7 +265,7 @@ export const updateTabs: InternalStateThunkActionCreator<
       if (nextTab && nextTabDataStateContainer) {
         const { timeRange, refreshInterval, filters: globalFilters } = nextTab.globalState;
         const { filters: appFilters, query } = nextTab.appState;
-        const profileStateDefinition = selectDataSourceProfileState(
+        const profileStateDefinition = selectUrlProfileStateDefinition(
           runtimeStateManager,
           nextTab.id
         );

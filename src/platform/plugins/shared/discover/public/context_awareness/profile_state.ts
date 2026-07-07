@@ -126,7 +126,7 @@ export class ProfileStateRegistry {
   }
 
   /**
-   * Returns the subset of registered profile state fields matching the requested lifetime type.
+   * Returns the subset of registered profile state fields matching the requested lifetime type(s).
    */
   public pickStateByType({
     profileState,
@@ -134,9 +134,10 @@ export class ProfileStateRegistry {
     shouldMergeDefaults = false,
   }: {
     profileState: Record<string, object | undefined> | undefined;
-    stateType: ProfileStateType;
+    stateType: ProfileStateType | ProfileStateType[];
     shouldMergeDefaults?: boolean;
   }): Record<string, object | undefined> {
+    const stateTypes = new Set(Array.isArray(stateType) ? stateType : [stateType]);
     const filteredProfileState: Record<string, object | undefined> = {};
 
     if (!profileState) {
@@ -157,7 +158,7 @@ export class ProfileStateRegistry {
       const filteredState: Record<string, unknown> = {};
 
       for (const [field, value] of Object.entries(state)) {
-        if (definition.descriptor[field]?.type === stateType) {
+        if (stateTypes.has(definition.descriptor[field]?.type)) {
           filteredState[field] = value;
         }
       }

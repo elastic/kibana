@@ -21,7 +21,7 @@ import {
   type InternalStateDependencies,
 } from '../redux';
 import { internalStateSlice } from '../redux/internal_state';
-import { selectDataSourceProfileState } from '../redux/runtime_state';
+import { selectUrlProfileStateDefinition } from '../redux/runtime_state';
 import { createTabAppStateObservable } from './create_tab_app_state_observable';
 import {
   getProfileStateWithUrlState,
@@ -109,16 +109,8 @@ export const createUrlSyncObservables = ({
     state$: globalState$,
   };
 
-  const getActiveProfileStateDefinition = () => {
-    if (!runtimeStateManager.tabs.byId[tabId]) {
-      return;
-    }
-
-    return selectDataSourceProfileState(runtimeStateManager, tabId);
-  };
-
   const getCurrentProfileUrlState = (): ProfileUrlState => {
-    const profileStateDefinition = getActiveProfileStateDefinition();
+    const profileStateDefinition = selectUrlProfileStateDefinition(runtimeStateManager, tabId);
 
     return (
       getProfileUrlState({
@@ -130,7 +122,11 @@ export const createUrlSyncObservables = ({
   };
 
   const profileState$ = internalState$.pipe(
-    map(() => (getActiveProfileStateDefinition() ? getCurrentProfileUrlState() : undefined)),
+    map(() =>
+      selectUrlProfileStateDefinition(runtimeStateManager, tabId)
+        ? getCurrentProfileUrlState()
+        : undefined
+    ),
     filter((profileUrlState): profileUrlState is ProfileUrlState => profileUrlState !== undefined),
     distinctUntilChanged((a, b) => isEqual(a, b)),
     skip(1)
@@ -139,7 +135,7 @@ export const createUrlSyncObservables = ({
   const profileStateContainer: INullableBaseStateContainer<ProfileUrlState> = {
     get: () => getCurrentProfileUrlState(),
     set: (profileUrlState) => {
-      const profileStateDefinition = getActiveProfileStateDefinition();
+      const profileStateDefinition = selectUrlProfileStateDefinition(runtimeStateManager, tabId);
 
       if (!profileStateDefinition) {
         return;
@@ -165,7 +161,6 @@ export const createUrlSyncObservables = ({
           tabId,
           key: profileStateDefinition.key,
           profileState: nextProfileState,
-          isSystemTriggered: true,
         })
       );
     },

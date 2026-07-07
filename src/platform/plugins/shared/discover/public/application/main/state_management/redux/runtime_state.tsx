@@ -130,7 +130,7 @@ export const selectDataSourceProfileId = (
     .getContexts().dataSourceContext.profileId;
 };
 
-export const selectDataSourceProfileState = (
+export const selectUrlProfileStateDefinition = (
   runtimeStateManager: RuntimeStateManager,
   tabId: string
 ) => {

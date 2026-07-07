@@ -338,15 +338,7 @@ export const internalStateSlice = createSlice({
         syncProfileStateSnapshot(tab, action.payload.profileId, action.payload.appState);
       }),
 
-    setProfileState: (
-      state,
-      action: TabAction<{
-        key: string;
-        profileState: object;
-        historyMethod?: 'push' | 'replace';
-        isSystemTriggered?: boolean;
-      }>
-    ) =>
+    setProfileState: (state, action: TabAction<{ key: string; profileState: object }>) =>
       withTab(state, action.payload, (tab) => {
         tab.profileState[action.payload.key] = action.payload.profileState;
       }),
