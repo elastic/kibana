@@ -10,7 +10,11 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import type { ChromeLayoutConfig } from '@kbn/ui-chrome-layout';
-import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/ui-chrome-layout';
+import {
+  ChromeLayout,
+  ChromeLayoutConfigProvider,
+  DesignExplorationChromeGlobalStyles,
+} from '@kbn/ui-chrome-layout';
 import {
   ChromeComponentsProvider,
   ClassicHeader,
@@ -33,7 +37,7 @@ import {
   useSidebarWidth,
   useSideNavWidth,
 } from '@kbn/core-chrome-browser-hooks';
-import { isNextChrome } from '@kbn/core-chrome-feature-flags';
+import { isDesignExploration, isNextChrome } from '@kbn/core-chrome-feature-flags';
 import { useGlobalFooter, useHasHeaderBanner } from '@kbn/core-chrome-browser-hooks/internal';
 import type { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
 import { AppWrapper } from '../../app_containers';
@@ -95,6 +99,8 @@ export class GridLayout implements LayoutService {
     const appComponent = application.getComponent();
     const appBannerComponent = overlays.banners.getComponent();
     const nextChrome = isNextChrome(featureFlags);
+    const designExplorationEnabled =
+      isDesignExploration(featureFlags) && isNextChrome(featureFlags);
 
     const componentDeps: ChromeComponentsDeps = {
       application,
@@ -153,6 +159,7 @@ export class GridLayout implements LayoutService {
       return (
         <>
           <KibanaGridLayoutGlobalStyles appearance={layoutConfig.appearance ?? 'plain'} />
+          {designExplorationEnabled && <DesignExplorationChromeGlobalStyles />}
           <ChromeLayoutConfigProvider value={layoutConfig}>
             <ChromeLayout
               header={header}

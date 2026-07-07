@@ -12,6 +12,8 @@ import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 export const NEXT_CHROME_FEATURE_FLAG_KEY = 'core.chrome.next';
 export const NEXT_CHROME_SESSION_STORAGE_KEY = 'dev.core.chrome.next';
 
+export const DESIGN_EXPLORATION_FEATURE_FLAG_KEY = 'core.chrome.designExploration';
+
 type FeatureFlagsBooleanReader = Pick<FeatureFlagsStart, 'getBooleanValue'>;
 
 const isNextChromeFeatureFlagEnabled = (featureFlags: FeatureFlagsBooleanReader): boolean =>
@@ -39,3 +41,11 @@ export const toggleNextChrome = (featureFlags: FeatureFlagsBooleanReader): void 
   sessionStorage.setItem(NEXT_CHROME_SESSION_STORAGE_KEY, String(next));
   window.location.reload();
 };
+
+/**
+ * POC: visual design exploration chrome overrides (throwaway, not intended for merge).
+ * Enable via `feature_flags.overrides.core.chrome.designExploration: true` in kibana.dev.yml.
+ * Requires Chrome Next — see grid layout gating.
+ */
+export const isDesignExploration = (featureFlags: FeatureFlagsBooleanReader): boolean =>
+  featureFlags.getBooleanValue(DESIGN_EXPLORATION_FEATURE_FLAG_KEY, false);
