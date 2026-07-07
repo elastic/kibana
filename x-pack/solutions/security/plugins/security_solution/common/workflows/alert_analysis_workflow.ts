@@ -30,6 +30,9 @@ export const AlertAnalysisWorkflowSettings = z.object({
   autoCloseEnabled: z.boolean(),
   autoCloseConfidenceScoreMinThreshold: z.number().min(0).max(1),
   autoCloseConfidenceScoreMaxThreshold: z.number().min(0).max(1),
+  // Prefix for the workflow tags written to (and matched on) each analyzed alert. Non-empty so the
+  // dedup gate and tag replacement always have a real namespace to match against.
+  tagPrefix: z.string().min(1).max(256),
 });
 
 export type AlertAnalysisWorkflowSettings = z.infer<typeof AlertAnalysisWorkflowSettings>;
@@ -48,7 +51,7 @@ export type AlertAnalysisWorkflowSettingsRequestBody = z.infer<
 >;
 
 export const AlertAnalysisWorkflowRuleAttachmentListRequestQuery = z.object({
-  search: z.string().optional().default(''),
+  search: z.string().max(1000).optional().default(''),
   page: z.coerce.number().int().min(1).optional().default(1),
   per_page: z.coerce.number().int().min(1).max(100).optional().default(20),
 });
@@ -58,7 +61,7 @@ export type AlertAnalysisWorkflowRuleAttachmentListRequestQuery = z.infer<
 >;
 
 export const AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery = z.object({
-  search: z.string().optional().default(''),
+  search: z.string().max(1000).optional().default(''),
 });
 
 export type AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery = z.infer<

@@ -3726,7 +3726,6 @@
     "expressions.execution.functionNotFound": "関数 {fnName} が見つかりませんでした。",
     "expressions.functions.createTable.args.idsHelpText": "位置順序で生成する列ID。IDは行のキーを表します。",
     "expressions.functions.createTable.args.nameHelpText": "位置順序で生成する列名。名前は一意でなくてもかまいません。指定しない場合は、デフォルトでIDが使用されます。",
-    "expressions.functions.createTable.args.rowCountText": "後から値を割り当てられる、テーブルに追加する空の行数。",
     "expressions.functions.createTableHelpText": "データテーブルと、列のリスト、1つ以上の空の行を作成します。行を入力するには、{mapColumnFn}または{mathColumnFn}を使用します。",
     "expressions.functions.cumulativeSum.args.byHelpText": "累積和計算を分割する列",
     "expressions.functions.cumulativeSum.args.inputColumnIdHelpText": "累積和を計算する列",
