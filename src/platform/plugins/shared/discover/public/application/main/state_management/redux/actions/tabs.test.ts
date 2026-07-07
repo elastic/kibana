@@ -8,6 +8,7 @@
  */
 
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../../context_awareness/toolkit';
+import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
@@ -17,6 +18,7 @@ import { createTabItem } from '../utils';
 import {
   createRuntimeStateManager,
   selectAllTabs,
+  selectTab,
   internalStateActions,
   DEFAULT_TAB_STATE,
 } from '..';
@@ -25,6 +27,7 @@ import * as contextAwarenessToolkitModule from '../context_awareness_toolkit';
 
 const setup = async () => {
   const services = createDiscoverServicesMock();
+  services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
   const runtimeStateManager = createRuntimeStateManager();
   const toolkit = getDiscoverInternalStateMock({
     services,
@@ -108,6 +111,110 @@ describe('tabs actions', () => {
       );
 
       expect(runtimeStateManager.tabs.byId[newTab.id]).toBeDefined();
+    });
+  });
+
+  describe('updateTabs', () => {
+    it('copies profile state when duplicating a tab', async () => {
+      const { internalState, getCurrentTab } = await setup();
+      const currentTab = getCurrentTab();
+      const allTabs = selectAllTabs(internalState.getState());
+      const profileState = {
+        ...TEST_PROFILE_STATE_DEF.defaultState,
+        uiValue: 'primary',
+      };
+
+      internalState.dispatch(
+        internalStateActions.setProfileState({
+          tabId: currentTab.id,
+          key: 'testProfileState',
+          profileState,
+        })
+      );
+
+      const duplicatedTab = {
+        ...createTabItem(allTabs),
+        duplicatedFromId: currentTab.id,
+      };
+
+      await internalState.dispatch(
+        internalStateActions.updateTabs({
+          items: [...allTabs, duplicatedTab],
+          selectedItem: duplicatedTab,
+        })
+      );
+
+      expect(selectTab(internalState.getState(), duplicatedTab.id).profileState).toEqual({
+        testProfileState: profileState,
+      });
+    });
+
+    it('starts fresh tabs with empty profile state', async () => {
+      const { internalState } = await setup();
+      const allTabs = selectAllTabs(internalState.getState());
+      const newTab = createTabItem(allTabs);
+
+      await internalState.dispatch(
+        internalStateActions.updateTabs({
+          items: [...allTabs, newTab],
+          selectedItem: newTab,
+        })
+      );
+
+      expect(selectTab(internalState.getState(), newTab.id).profileState).toEqual({});
+    });
+
+    it('restores only persistent profile state when restoring a recently closed tab', async () => {
+      const { internalState, getCurrentTab } = await setup();
+      const currentTab = getCurrentTab();
+      const allTabs = selectAllTabs(internalState.getState());
+      const remainingTab = {
+        ...DEFAULT_TAB_STATE,
+        ...createTabItem(allTabs),
+      };
+
+      internalState.dispatch(
+        internalStateActions.setTabs({
+          allTabs: [...allTabs, remainingTab],
+          selectedTabId: currentTab.id,
+          recentlyClosedTabs: [],
+        })
+      );
+      internalState.dispatch(
+        internalStateActions.setProfileState({
+          tabId: currentTab.id,
+          key: 'testProfileState',
+          profileState: { uiValue: 'ui', persistentValue: 'persistent' },
+        })
+      );
+      internalState.dispatch(
+        internalStateActions.setTabs({
+          allTabs: [remainingTab],
+          selectedTabId: remainingTab.id,
+          recentlyClosedTabs: [],
+        })
+      );
+
+      const restoredTab = {
+        ...createTabItem([remainingTab]),
+        restoredFromId: currentTab.id,
+      };
+
+      await internalState.dispatch(
+        internalStateActions.updateTabs({
+          items: [remainingTab, restoredTab],
+          selectedItem: restoredTab,
+        })
+      );
+
+      expect(selectTab(internalState.getState(), restoredTab.id).profileState).toEqual({
+        testProfileState: {
+          uiValue: 'defaultUi',
+          urlValue: 'defaultUrl',
+          persistentValue: 'persistent',
+          nestedValue: { count: 0 },
+        },
+      });
     });
   });
 });
