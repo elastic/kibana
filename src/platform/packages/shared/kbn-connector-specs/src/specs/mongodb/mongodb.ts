@@ -27,6 +27,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
+import { ConnectionString } from 'mongodb-connection-string-url';
 import type { ConnectorSpec } from '../../connector_spec';
 import {
   FindInputSchema,
@@ -55,8 +56,8 @@ const resolveDb = (
   const uri = config?.uri as string | undefined;
   if (uri) {
     try {
-      const { pathname } = new URL(uri.replace(/^mongodb(\+srv)?:\/\//, 'http://'));
-      const dbFromUri = pathname.slice(1).split('?')[0];
+      const { pathname } = new ConnectionString(uri);
+      const dbFromUri = pathname.slice(1);
       if (dbFromUri) return dbFromUri;
     } catch {
       // fall through

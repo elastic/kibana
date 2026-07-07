@@ -102,6 +102,34 @@ describe('mongodbClientType', () => {
       );
     });
 
+    it('validates every host in a multi-host (replica set) URI', async () => {
+      const ctx = makeBuildContext({
+        config: {
+          uri: 'mongodb://host1.example.com:27017,host2.example.com:27017,host3.example.com:27017/mydb',
+        },
+      });
+      await mongodbClientType.build(ctx);
+
+      expect(ctx.network.ensureHostnameAllowed).toHaveBeenCalledWith('host1.example.com');
+      expect(ctx.network.ensureHostnameAllowed).toHaveBeenCalledWith('host2.example.com');
+      expect(ctx.network.ensureHostnameAllowed).toHaveBeenCalledWith('host3.example.com');
+      expect(ctx.network.ensureHostnameAllowed).toHaveBeenCalledTimes(3);
+    });
+
+    it('rejects before creating a client when the network guard denies a non-first host', async () => {
+      const ctx = makeBuildContext({
+        config: { uri: 'mongodb://allowed.example.com:27017,denied.example.com:27017/mydb' },
+      });
+      (ctx.network.ensureHostnameAllowed as jest.Mock).mockImplementation((hostname: string) => {
+        if (hostname === 'denied.example.com') {
+          throw new Error('host "denied.example.com" is not in the allowedHosts list');
+        }
+      });
+
+      await expect(mongodbClientType.build(ctx)).rejects.toThrow('is not in the allowedHosts list');
+      expect(MockMongoClient).not.toHaveBeenCalled();
+    });
+
     it('correctly decodes credentials containing colons in the password', async () => {
       const ctx = makeBuildContext({
         credential: {

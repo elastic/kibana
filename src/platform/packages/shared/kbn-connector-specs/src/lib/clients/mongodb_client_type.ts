@@ -8,6 +8,7 @@
  */
 
 import type { MongoClient } from 'mongodb';
+import { ConnectionString } from 'mongodb-connection-string-url';
 import type { ClientTypeSpec } from './client_type_spec';
 import { parseBasicAuthHeader } from './parse_basic_auth_header';
 
@@ -20,9 +21,13 @@ export const mongodbClientType: ClientTypeSpec<MongoClient> = {
       throw new Error('config.uri is required');
     }
 
-    // Replace the mongodb scheme so the URL constructor can parse host/port.
-    const { hostname } = new URL(uri.replace(/^mongodb(\+srv)?:\/\//, 'http://'));
-    ctx.network.ensureHostnameAllowed(hostname);
+    // mongodb:// URIs may list multiple hosts (replica sets, sharded clusters); the
+    // driver will connect to all of them, so every one must clear the network guard.
+    const { hosts } = new ConnectionString(uri);
+    for (const hostPort of hosts) {
+      const { hostname } = new URL(`http://${hostPort}`);
+      ctx.network.ensureHostnameAllowed(hostname);
+    }
 
     const authHeaders = await ctx.credential.getAuthHeaders();
     const credentials = parseBasicAuthHeader(authHeaders.Authorization ?? '');

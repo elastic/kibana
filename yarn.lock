@@ -10520,14 +10520,6 @@
   dependencies:
     sparse-bitfield "^3.0.3"
 
-"@mongodb-js/zstd@^7.0.0":
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/@mongodb-js/zstd/-/zstd-7.0.0.tgz#4877d89c2efda0b204ac9b68bd259f3267118363"
-  integrity sha512-mQ2s0pYYiav+tzCDR05Zptem8Ey2v8s11lri5RKGhTtL4COVCvVCk5vtyRYNT+9L8qSfyOqqefF9UtnW8mC5jA==
-  dependencies:
-    node-addon-api "^8.5.0"
-    prebuild-install "^7.1.3"
-
 "@moonrepo/cli@2.1.0":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@moonrepo/cli/-/cli-2.1.0.tgz#d0dec3344fd1e8f062508351e2f3da6a7b7bf623"
@@ -28417,7 +28409,7 @@ monaco-yaml@5.1.0:
     vscode-uri "^3.0.0"
     yaml "^2.0.0"
 
-mongodb-connection-string-url@^3.0.2:
+mongodb-connection-string-url@3.0.2, mongodb-connection-string-url@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/mongodb-connection-string-url/-/mongodb-connection-string-url-3.0.2.tgz#e223089dfa0a5fa9bf505f8aedcbc67b077b33e7"
   integrity sha512-rMO7CGo/9BFwyZABcKAWL8UJwH/Kc2x0g72uhDWzG48URRax5TCIcJ7Rc3RZqffZzO/Gwff/jyKwCU9TN8gehA==

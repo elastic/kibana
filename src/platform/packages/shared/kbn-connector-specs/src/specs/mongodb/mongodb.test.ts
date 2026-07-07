@@ -119,6 +119,19 @@ describe('MongoDBConnector', () => {
       expect(mongoClient.db).toHaveBeenCalledWith('mydb');
     });
 
+    it('resolves the database from a multi-host (replica set) URI', async () => {
+      const dbMock = makeDb();
+      const mongoClient = makeMongoClient(dbMock);
+      const ctx = makeCtx({
+        config: { uri: 'mongodb://host1.example.com:27017,host2.example.com:27017/mydb' },
+        getClient: jest.fn().mockResolvedValue(mongoClient),
+      });
+
+      await MongoDBConnector.actions.find.handler(ctx, { collection: 'users' });
+
+      expect(mongoClient.db).toHaveBeenCalledWith('mydb');
+    });
+
     it('throws when no database is resolvable', async () => {
       const ctx = makeCtx({
         config: { uri: 'mongodb://localhost:27017' },
