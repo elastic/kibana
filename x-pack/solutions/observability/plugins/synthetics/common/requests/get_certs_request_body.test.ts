@@ -130,7 +130,7 @@ describe('getCertsRequestBody', () => {
       const withParty = getCertsRequestBody({
         ...ruleParams,
         includeBrowserCerts: true,
-        party: [FIRST_PARTY],
+        certOrigin: [FIRST_PARTY],
       }) as estypes.SearchRequest;
       expect(withParty.runtime_mappings).toEqual(PARTY_RUNTIME_MAPPINGS);
     });
