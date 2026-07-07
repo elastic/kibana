@@ -29,6 +29,8 @@ const makeReverseMap = (overrides: Partial<ReverseMapResult> = {}): ReverseMapRe
   tacticTotals: new Map(),
   mlRules: [],
   ruleRequiredFields: new Map(),
+  ruleQueryIndices: new Map(),
+  ruleNames: new Map(),
   errors: { pipelineMap: false, categoryMap: false, rulesPartial: false },
   ...overrides,
 });

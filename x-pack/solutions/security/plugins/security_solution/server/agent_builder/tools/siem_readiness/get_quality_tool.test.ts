@@ -54,6 +54,8 @@ const mockSharedContext = {
     tacticTotals: new Map(),
     mlRules: [],
     ruleRequiredFields: new Map(),
+    ruleQueryIndices: new Map(),
+    ruleNames: new Map(),
     errors: { pipelineMap: false, categoryMap: false, rulesPartial: false },
   },
   categoriesResult: mockCategories,

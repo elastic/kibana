@@ -105,11 +105,11 @@ export const getQuality = async ({
    * clients. */
   reverseMapResult: ReverseMapResult;
 }): Promise<QualityPayload> => {
-  const { indexToRules, ruleRequiredFields, errors } = reverseMapResult;
+  const { ruleQueryIndices, ruleNames, ruleRequiredFields, errors } = reverseMapResult;
 
   const [qualityResults, missingFieldsByRule] = await Promise.all([
     fetchDataQualityResults({ esClient, logger }),
-    fetchRuleFieldCaps({ esClient, indexToRules, ruleRequiredFields }),
+    fetchRuleFieldCaps({ esClient, ruleQueryIndices, ruleNames, ruleRequiredFields }),
   ]);
 
   const ecsFindings: ActionableFinding[] = qualityResults

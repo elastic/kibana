@@ -6,12 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type {
-  IndexToRulesMap,
-  MissingFieldDetail,
-  MissingFieldsEntry,
-  RequiredField,
-} from '@kbn/siem-readiness';
+import type { MissingFieldDetail, MissingFieldsEntry, RequiredField } from '@kbn/siem-readiness';
 
 type FieldMappingStatus = 'mapped' | 'partial' | 'missing';
 
@@ -86,7 +81,8 @@ const fetchFieldMappingStatus = async (
 
 /**
  * For each enabled rule that declares `required_fields`, checks whether those fields
- * are mapped in every index the rule queries.
+ * are mapped in every query/event index the rule uses (from ruleQueryIndices — not indexToRules,
+ * which also includes auxiliary sources such as threat_match indicator indices).
  *
  * Uses fieldCaps with include_unmapped so a field mapped in only some queried indices
  * is flagged as partial (the rule matches partially). Fields unmapped in all queried
@@ -101,35 +97,16 @@ const fetchFieldMappingStatus = async (
  */
 export const fetchRuleFieldCaps = async ({
   esClient,
-  indexToRules,
+  ruleQueryIndices,
+  ruleNames,
   ruleRequiredFields,
 }: {
   esClient: ElasticsearchClient;
-  indexToRules: IndexToRulesMap;
+  /** ruleId → query/event indices whose schema required_fields describe. */
+  ruleQueryIndices: Map<string, string[]>;
+  ruleNames: Map<string, string>;
   ruleRequiredFields: Map<string, RequiredField[]>;
 }): Promise<MissingFieldsEntry[]> => {
-  // Build reverse lookup: ruleId → index names
-  const ruleToIndices = new Map<string, string[]>();
-  for (const [indexName, rules] of indexToRules.entries()) {
-    for (const rule of rules) {
-      const existing = ruleToIndices.get(rule.id) ?? [];
-      if (!existing.includes(indexName)) {
-        existing.push(indexName);
-      }
-      ruleToIndices.set(rule.id, existing);
-    }
-  }
-
-  // Build ruleId → ruleName lookup from indexToRules
-  const ruleNames = new Map<string, string>();
-  for (const rules of indexToRules.values()) {
-    for (const rule of rules) {
-      if (!ruleNames.has(rule.id)) {
-        ruleNames.set(rule.id, rule.name);
-      }
-    }
-  }
-
   // Group rules by cache key: sortedIndices|sortedFieldNames
   // Rules sharing the same (indices, fields) share one fieldCaps call.
   interface Group {
@@ -140,7 +117,7 @@ export const fetchRuleFieldCaps = async ({
   const groups = new Map<string, Group>();
 
   for (const [ruleId, requiredFields] of ruleRequiredFields.entries()) {
-    const indices = ruleToIndices.get(ruleId);
+    const indices = ruleQueryIndices.get(ruleId);
 
     // Skip rules with no declared required fields or no resolved indices.
     if (requiredFields.length > 0 && indices && indices.length > 0) {

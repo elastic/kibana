@@ -47,5 +47,14 @@ export interface ReverseMapResult {
   mlRules: MachineLearningRuleIndex;
   /** Maps ruleId → the fields the rule declares it requires (from required_fields in rule params). */
   ruleRequiredFields: Map<string, RequiredField[]>;
+  /**
+   * Maps ruleId → the indices whose schema the rule's required_fields describe (its query/event
+   * indices). Excludes auxiliary sources such as threat_match indicator indices (threatIndex),
+   * whose schema required_fields do NOT describe. Use this — not indexToRules — for any
+   * "are the required fields mapped?" check.
+   */
+  ruleQueryIndices: Map<string, string[]>;
+  /** Maps ruleId → rule display name. Used by required-field coverage checks. */
+  ruleNames: Map<string, string>;
   errors: ReverseMapErrors;
 }
