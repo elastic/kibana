@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
-import type { ServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { registerWorkflowSteps } from './register_workflow_steps';
@@ -20,34 +18,23 @@ import { assignAttackStepDefinition } from './assign_attack_step/assign_attack_s
 import { setAttackStatusStepDefinition } from './set_attack_status_step/set_attack_status_step';
 import { enableRuleStepDefinition } from './enable_rule_step/enable_rule_step';
 import { disableRuleStepDefinition } from './disable_rule_step/disable_rule_step';
-import {
-  REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
-  REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT,
-} from '../../../common/constants';
-
-type StepLoader = () => Promise<ServerStepDefinition | undefined>;
 
 const createWorkflowsExtensionsMock = workflowsExtensionsMock.createSetup;
 
 describe('registerWorkflowSteps (server)', () => {
-  const buildCoreMock = (featureFlagEnabled: boolean) => {
-    const core = coreMock.createSetup();
-    const coreStart = coreMock.createStart();
-    coreStart.featureFlags.getBooleanValue.mockResolvedValue(featureFlagEnabled);
-    core.getStartServices.mockResolvedValue([coreStart, {}, {}]);
-    return { core, coreStart };
-  };
-
-  it('calls registerStepDefinition synchronously for all steps (attacks disabled)', () => {
-    const { core } = buildCoreMock(true);
+  it('registers all steps when publicAttacksApiEnabled is true', () => {
     const workflowsExtensions = createWorkflowsExtensionsMock();
 
-    registerWorkflowSteps(workflowsExtensions, core, {
-      publicAttacksApiEnabled: false,
+    registerWorkflowSteps(workflowsExtensions, {
+      publicAttacksApiEnabled: true,
     } as ExperimentalFeatures);
 
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(10);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
-      assignAlertStepDefinition
+      renderAlertNarrativeStepDefinition
+    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      buildAlertEntityGraphStepDefinition
     );
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       setAlertStatusStepDefinition
@@ -56,97 +43,29 @@ describe('registerWorkflowSteps (server)', () => {
       setAlertTagsStepDefinition
     );
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      assignAlertStepDefinition
+    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      assignAttackStepDefinition
+    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      setAttackStatusStepDefinition
+    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      setAttackTagsStepDefinition
+    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       enableRuleStepDefinition
     );
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       disableRuleStepDefinition
     );
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(7);
-    // getStartServices is called once eagerly to create the shared memoized promise
-    expect(core.getStartServices).toHaveBeenCalledTimes(1);
   });
 
-  it('calls registerStepDefinition synchronously for all steps (attacks enabled)', () => {
-    const { core } = buildCoreMock(true);
+  it('does not register the attack steps when publicAttacksApiEnabled is false', () => {
     const workflowsExtensions = createWorkflowsExtensionsMock();
 
-    registerWorkflowSteps(workflowsExtensions, core, {
-      publicAttacksApiEnabled: true,
-    } as ExperimentalFeatures);
-
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(10);
-  });
-
-  it('async loader returns step definitions when feature flag is enabled', async () => {
-    const { core } = buildCoreMock(true);
-    const workflowsExtensions = createWorkflowsExtensionsMock();
-
-    registerWorkflowSteps(workflowsExtensions, core, {
-      publicAttacksApiEnabled: true,
-    } as ExperimentalFeatures);
-
-    const [loader1, loader2, step3, step4, step5, step6, step7, step8, step9, step10] =
-      workflowsExtensions.registerStepDefinition.mock.calls.map(([arg]) => arg);
-
-    await expect((loader1 as StepLoader)()).resolves.toBe(renderAlertNarrativeStepDefinition);
-    await expect((loader2 as StepLoader)()).resolves.toBe(buildAlertEntityGraphStepDefinition);
-    expect(step3).toBe(assignAlertStepDefinition);
-    expect(step4).toBe(setAlertStatusStepDefinition);
-    expect(step5).toBe(setAlertTagsStepDefinition);
-    expect(step6).toBe(assignAttackStepDefinition);
-    expect(step7).toBe(setAttackStatusStepDefinition);
-    expect(step8).toBe(setAttackTagsStepDefinition);
-    expect(step9).toBe(enableRuleStepDefinition);
-    expect(step10).toBe(disableRuleStepDefinition);
-  });
-
-  it('async loader returns undefined when feature flag is disabled', async () => {
-    const { core } = buildCoreMock(false);
-    const workflowsExtensions = createWorkflowsExtensionsMock();
-
-    registerWorkflowSteps(workflowsExtensions, core, {
-      publicAttacksApiEnabled: true,
-    } as ExperimentalFeatures);
-
-    const [loader1, loader2, step3, step4, step5, step6, step7, step8, step9, step10] =
-      workflowsExtensions.registerStepDefinition.mock.calls.map(([arg]) => arg);
-
-    await expect((loader1 as StepLoader)()).resolves.toBeUndefined();
-    await expect((loader2 as StepLoader)()).resolves.toBeUndefined();
-    expect(step3).toBe(assignAlertStepDefinition);
-    expect(step4).toBe(setAlertStatusStepDefinition);
-    expect(step5).toBe(setAlertTagsStepDefinition);
-    expect(step6).toBe(assignAttackStepDefinition);
-    expect(step7).toBe(setAttackStatusStepDefinition);
-    expect(step8).toBe(setAttackTagsStepDefinition);
-    expect(step9).toBe(enableRuleStepDefinition);
-    expect(step10).toBe(disableRuleStepDefinition);
-  });
-
-  it('checks the feature flag exactly once even when both loaders resolve', async () => {
-    const { core, coreStart } = buildCoreMock(true);
-    const workflowsExtensions = createWorkflowsExtensionsMock();
-
-    registerWorkflowSteps(workflowsExtensions, core, {} as ExperimentalFeatures);
-
-    const loaders = workflowsExtensions.registerStepDefinition.mock.calls
-      .map(([arg]) => arg)
-      .filter((arg) => typeof arg === 'function') as StepLoader[];
-
-    await Promise.all([loaders[0](), loaders[1]()]);
-
-    expect(coreStart.featureFlags.getBooleanValue).toHaveBeenCalledTimes(1);
-    expect(coreStart.featureFlags.getBooleanValue).toHaveBeenCalledWith(
-      REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
-      REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT
-    );
-  });
-
-  it('does not register assignAttackStepDefinition when publicAttacksApiEnabled is false', () => {
-    const { core } = buildCoreMock(true);
-    const workflowsExtensions = createWorkflowsExtensionsMock();
-
-    registerWorkflowSteps(workflowsExtensions, core, {
+    registerWorkflowSteps(workflowsExtensions, {
       publicAttacksApiEnabled: false,
     } as ExperimentalFeatures);
 
@@ -155,5 +74,7 @@ describe('registerWorkflowSteps (server)', () => {
       ([arg]) => arg
     );
     expect(registeredSteps).not.toContain(assignAttackStepDefinition);
+    expect(registeredSteps).not.toContain(setAttackStatusStepDefinition);
+    expect(registeredSteps).not.toContain(setAttackTagsStepDefinition);
   });
 });
