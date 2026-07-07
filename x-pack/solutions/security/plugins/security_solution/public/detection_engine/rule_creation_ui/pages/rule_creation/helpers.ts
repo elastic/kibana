@@ -101,6 +101,8 @@ export interface RuleFields {
   threatQueryBar?: unknown;
   threatMapping?: unknown;
   threatLanguage?: unknown;
+  concurrentSearches?: unknown;
+  itemsPerSearch?: unknown;
   eqlOptions: unknown;
   newTermsFields?: unknown;
   historyWindowSize?: unknown;
@@ -114,6 +116,8 @@ type QueryRuleFields<T> = Omit<
   | 'threatIndex'
   | 'threatQueryBar'
   | 'threatMapping'
+  | 'concurrentSearches'
+  | 'itemsPerSearch'
   | 'eqlOptions'
   | 'newTermsFields'
   | 'historyWindowSize'
@@ -126,6 +130,8 @@ type EqlQueryRuleFields<T> = Omit<
   | 'threatIndex'
   | 'threatQueryBar'
   | 'threatMapping'
+  | 'concurrentSearches'
+  | 'itemsPerSearch'
   | 'newTermsFields'
   | 'historyWindowSize'
 >;
@@ -136,6 +142,8 @@ type ThresholdRuleFields<T> = Omit<
   | 'threatIndex'
   | 'threatQueryBar'
   | 'threatMapping'
+  | 'concurrentSearches'
+  | 'itemsPerSearch'
   | 'eqlOptions'
   | 'newTermsFields'
   | 'historyWindowSize'
@@ -148,6 +156,8 @@ type MlRuleFields<T> = Omit<
   | 'threatIndex'
   | 'threatQueryBar'
   | 'threatMapping'
+  | 'concurrentSearches'
+  | 'itemsPerSearch'
   | 'eqlOptions'
   | 'newTermsFields'
   | 'historyWindowSize'
@@ -169,6 +179,8 @@ type NewTermsRuleFields<T> = Omit<
   | 'threatIndex'
   | 'threatQueryBar'
   | 'threatMapping'
+  | 'concurrentSearches'
+  | 'itemsPerSearch'
   | 'eqlOptions'
 >;
 type EsqlRuleFields<T> = Omit<
@@ -179,6 +191,8 @@ type EsqlRuleFields<T> = Omit<
   | 'threatIndex'
   | 'threatQueryBar'
   | 'threatMapping'
+  | 'concurrentSearches'
+  | 'itemsPerSearch'
   | 'eqlOptions'
   | 'index'
   | 'newTermsFields'
@@ -272,6 +286,8 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         'threatIndex',
         'threatQueryBar',
         'threatMapping',
+        'concurrentSearches',
+        'itemsPerSearch',
         'eqlOptions',
         'newTermsFields',
         'historyWindowSize',
@@ -283,6 +299,8 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         'threatIndex',
         'threatQueryBar',
         'threatMapping',
+        'concurrentSearches',
+        'itemsPerSearch',
         'eqlOptions',
         'newTermsFields',
         'historyWindowSize',
@@ -305,6 +323,8 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         'threatIndex',
         'threatQueryBar',
         'threatMapping',
+        'concurrentSearches',
+        'itemsPerSearch',
         'eqlOptions',
         'newTermsFields',
         'historyWindowSize',
@@ -317,6 +337,8 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         'threatIndex',
         'threatQueryBar',
         'threatMapping',
+        'concurrentSearches',
+        'itemsPerSearch',
         'newTermsFields',
         'historyWindowSize',
       ]);
@@ -328,6 +350,8 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         'threatIndex',
         'threatQueryBar',
         'threatMapping',
+        'concurrentSearches',
+        'itemsPerSearch',
         'eqlOptions',
       ]);
     case 'esql':
@@ -338,6 +362,8 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         'threatIndex',
         'threatQueryBar',
         'threatMapping',
+        'concurrentSearches',
+        'itemsPerSearch',
         'newTermsFields',
         'historyWindowSize',
         'eqlOptions',
@@ -489,6 +515,8 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         threat_filters: ruleFields.threatQueryBar?.filters,
         threat_mapping: ruleFields.threatMapping,
         threat_language: ruleFields.threatQueryBar?.query?.language,
+        concurrent_searches: ruleFields.concurrentSearches,
+        items_per_search: ruleFields.itemsPerSearch,
         ...alertSuppressionFields,
       }
     : isEqlFields(ruleFields)

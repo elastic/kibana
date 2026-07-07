@@ -514,6 +514,8 @@ describe('helpers', () => {
           saved_id: null,
         },
         threatMapping,
+        concurrentSearches: 4,
+        itemsPerSearch: 2500,
       };
       const result = formatDefineStepData(mockStepData);
 
@@ -531,6 +533,8 @@ describe('helpers', () => {
         threat_index: mockStepData.threatIndex,
         index: mockStepData.index,
         threat_filters: threatFilters,
+        concurrent_searches: 4,
+        items_per_search: 2500,
         related_integrations: [
           {
             package: 'aws',

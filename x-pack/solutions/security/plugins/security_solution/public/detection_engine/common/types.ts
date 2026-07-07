@@ -164,6 +164,8 @@ export interface DefineStepRule {
   threatIndex: ThreatIndex;
   threatQueryBar: FieldValueQueryBar;
   threatMapping: ThreatMapping;
+  concurrentSearches?: number;
+  itemsPerSearch?: number;
   eqlOptions: EqlOptions;
   dataSourceType: DataSourceType;
   newTermsFields: string[];
@@ -228,6 +230,8 @@ export interface DefineStepRuleJson {
   threat_language?: string;
   threat_index?: string[];
   threat_filters?: Filter[];
+  concurrent_searches?: number;
+  items_per_search?: number;
   timeline_id?: string;
   timeline_title?: string;
   type: Type;
