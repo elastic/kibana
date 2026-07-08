@@ -295,12 +295,17 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
       transform: 'translateX(-50%)',
       zIndex: 2,
     }),
-    // Editor fills the panel; 8px inset on top/right/bottom, left keeps Monaco's gutter.
     editorInset: css({
       flexGrow: 1,
       minHeight: 0,
       overflow: 'hidden',
+    }),
+    // 0 left keeps Monaco's gutter flush against the panel edge.
+    yamlInset: css({
       padding: `${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.s} 0`,
+    }),
+    graphInset: css({
+      padding: 0,
     }),
   };
 
@@ -435,7 +440,13 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
         </div>
 
         <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
-          <EuiFlexItem grow css={styles.editorInset}>
+          <EuiFlexItem
+            grow
+            css={[
+              styles.editorInset,
+              activePreviewView === 'graph' ? styles.graphInset : styles.yamlInset,
+            ]}
+          >
             {activePreviewView === 'graph' ? (
               <ReactFlowProvider>
                 <WorkflowGraphCanvasWithoutProvider

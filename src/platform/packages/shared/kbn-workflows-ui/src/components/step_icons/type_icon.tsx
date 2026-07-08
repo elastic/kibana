@@ -54,7 +54,7 @@ export interface TypeIconProps extends Omit<EuiIconProps, 'type'> {
  * {@link useWorkflowsUiServices}, so consumers must be wrapped in a
  * `WorkflowsUiServicesProvider`. The tooltip shows the raw `type`.
  */
-export const TypeIcon = React.memo<TypeIconProps>(({ type, kind, title, ...rest }) => {
+export const TypeIcon = React.memo<TypeIconProps>(({ type, kind, title, color, ...rest }) => {
   const { euiTheme } = useEuiTheme();
   const { workflowsExtensions, triggersActionsUi } = useWorkflowsUiServices();
 
@@ -76,22 +76,23 @@ export const TypeIcon = React.memo<TypeIconProps>(({ type, kind, title, ...rest 
       <span
         css={css`
           display: inline-block;
+          vertical-align: middle;
           width: 16px;
           height: 16px;
           mask-image: url('${iconType}');
           mask-size: contain;
           mask-repeat: no-repeat;
           mask-position: center;
-          background-color: ${euiTheme.colors.textParagraph};
+          background-color: ${color ?? euiTheme.colors.textParagraph};
         `}
         aria-hidden={true}
         data-test-subj="workflowTypeIconDataUrl"
       />
     ) : typeof iconType === 'string' ? (
-      <EuiIcon type={iconType} size="m" {...rest} />
+      <EuiIcon type={iconType} size="m" color={color} {...rest} />
     ) : (
       <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-        <EuiIcon type={iconType} size="m" {...rest} />
+        <EuiIcon type={iconType} size="m" color={color} {...rest} />
       </Suspense>
     );
 

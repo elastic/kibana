@@ -89,7 +89,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
   const STEP_OUTER_BORDER = colors.backgroundLightPrimary; // #d8e6ff
   const STEP_ICON_AREA_BG = colors.backgroundLightPrimary; // ~#e3edff
   const STEP_INNER_BOX_BORDER = colors.borderBaseSubdued; // ~#e4e7f1
-  const STEP_ICON_COLOR = colors.primary; // ~#61a2ff (light primary #0b64dd)
+  const STEP_ICON_COLOR = colors.vis.euiColorVis2; // #61a2ff (blue step icon token)
   const STEP_LABEL_COLOR = colors.textHeading; // #111c2c
   const RUNNING_BORDER = colors.primary; // ~#bfdbff
   const SUCCESS_BG = colors.backgroundBaseSuccess; // ~#d0f3f2
@@ -97,7 +97,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
   const TRIGGER_OUTER_BORDER = colors.backgroundLightAccent; // #ffdbe8
   const TRIGGER_ICON_AREA_BG = colors.backgroundBaseAccent; // ~#fff3f9
   const TRIGGER_INNER_BOX_BORDER = colors.borderBaseAccent; // #ffc7db
-  const TRIGGER_ICON_COLOR = colors.accent; // ~#ee72a6 (light accent #bc1e70)
+  const TRIGGER_ICON_COLOR = colors.vis.euiColorVis4; // #ee72a6 (trigger icon token)
   const STEP_SELECTED_BORDER = colors.primary; // ~#a3c4ff
   const TRIGGER_SELECTED_BORDER = colors.accent; // ~#ffddea
 
