@@ -122,7 +122,9 @@ const resolveLayoutConfig = (config?: LayoutConfigType): LayoutConfigType => {
 const toAttributes = (
   record: LogRecord,
   includeLogMeta: boolean,
-  fieldRenames?: Record<string, string | string[]>
+  fieldRenames?: Record<string, string | string[]>,
+  fieldDrops?: string[],
+  fieldDefaults?: Record<string, string | string[]>
 ): Attributes => {
   const attrs: Attributes = {
     'log.logger': record.context,
@@ -185,6 +187,20 @@ const toAttributes = (
     }
   }
 
+  if (fieldDrops) {
+    for (const key of fieldDrops) {
+      delete attrs[key];
+    }
+  }
+
+  if (fieldDefaults) {
+    for (const [key, value] of Object.entries(fieldDefaults)) {
+      if (!(key in attrs)) {
+        attrs[key] = value;
+      }
+    }
+  }
+
   return attrs;
 };
 
@@ -212,6 +228,13 @@ export class OtelAppender implements DisposableAppender {
     // Optional: user-provided attributes override the service attributes derived from APM config.
     attributes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
     fieldRenames: schema.maybe(
+      schema.recordOf(
+        schema.string(),
+        schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+      )
+    ),
+    fieldDrops: schema.maybe(schema.arrayOf(schema.string())),
+    fieldDefaults: schema.maybe(
       schema.recordOf(
         schema.string(),
         schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
@@ -258,6 +281,8 @@ export class OtelAppender implements DisposableAppender {
   /** True when using JSON layout: the full LogRecord is sent as `body.structured`. */
   private readonly useStructuredBody: boolean;
   private readonly fieldRenames?: Record<string, string | string[]>;
+  private readonly fieldDrops?: string[];
+  private readonly fieldDefaults?: Record<string, string | string[]>;
 
   constructor(config: OtelAppenderConfig) {
     const exporter = createExporter(config);
@@ -266,9 +291,19 @@ export class OtelAppender implements DisposableAppender {
     //   2. Derived: service.name / service.version / deployment.environment from the
     //      APM config singleton (mirrors how initTelemetry builds trace resources)
     //   3. User overrides: explicit attributes from kibana.yml (optional)
-    const resource = buildOtelResources().merge(
+    const baseResource = buildOtelResources().merge(
       resources.resourceFromAttributes(config.attributes ?? {})
     );
+    const resource =
+      config.fieldDrops?.length
+        ? resources.resourceFromAttributes(
+            Object.fromEntries(
+              Object.entries(baseResource.attributes).filter(
+                ([k]) => !config.fieldDrops!.includes(k)
+              )
+            )
+          )
+        : baseResource;
     this.loggerProvider = new LoggerProvider({
       processors: [new BatchLogRecordProcessor(exporter)],
       resource,
@@ -283,6 +318,8 @@ export class OtelAppender implements DisposableAppender {
     // Pattern layout → formatted string → indexed as body.text (aliased to `message`).
     this.useStructuredBody = layoutConfig.type !== 'pattern';
     this.fieldRenames = config.fieldRenames;
+    this.fieldDrops = config.fieldDrops;
+    this.fieldDefaults = config.fieldDefaults;
   }
 
   public append(record: LogRecord): void {
@@ -304,7 +341,7 @@ export class OtelAppender implements DisposableAppender {
       context: toTraceContext(record),
       // log.meta is omitted from attributes when using JSON layout because it
       // is already part of the structured body.
-      attributes: toAttributes(record, !this.useStructuredBody, this.fieldRenames),
+      attributes: toAttributes(record, !this.useStructuredBody, this.fieldRenames, this.fieldDrops, this.fieldDefaults),
     });
   }
 

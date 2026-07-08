@@ -18,6 +18,8 @@ import { asSpaceId } from '@kbn/core-spaces-common';
 import type { AuditEvent } from '@kbn/security-plugin-types-server';
 
 import {
+  AUDIT_OTEL_FIELD_DEFAULTS,
+  AUDIT_OTEL_FIELD_DROPS,
   AUDIT_OTEL_FIELD_RENAMES,
   AuditService,
   createLoggingConfig,
@@ -652,6 +654,122 @@ describe('#createLoggingConfig', () => {
       'custom.field': 'custom.new_field',
       'kibana.space_id': 'kibana.space.id', // audit rename wins
     });
+  });
+
+  test('injects audit fieldDrops when using an OTel appender', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig({
+          enabled: true,
+          include_saved_object_names: false,
+          appender: {
+            type: 'otel',
+            protocol: 'http',
+            url: 'http://collector:4318/v1/logs',
+          },
+        })
+      )
+    );
+
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    expect((appenders.auditTrailAppender as OtelAppenderConfig).fieldDrops).toEqual(
+      AUDIT_OTEL_FIELD_DROPS
+    );
+  });
+
+  test('merges user-provided fieldDrops with audit drops', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig({
+          enabled: true,
+          include_saved_object_names: false,
+          appender: {
+            type: 'otel',
+            protocol: 'http',
+            url: 'http://collector:4318/v1/logs',
+            fieldDrops: ['custom.field'],
+          },
+        })
+      )
+    );
+
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    expect((appenders.auditTrailAppender as OtelAppenderConfig).fieldDrops).toEqual([
+      'custom.field',
+      ...AUDIT_OTEL_FIELD_DROPS,
+    ]);
+  });
+
+  test('injects audit fieldDefaults when using an OTel appender', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig({
+          enabled: true,
+          include_saved_object_names: false,
+          appender: {
+            type: 'otel',
+            protocol: 'http',
+            url: 'http://collector:4318/v1/logs',
+          },
+        })
+      )
+    );
+
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    expect((appenders.auditTrailAppender as OtelAppenderConfig).fieldDefaults).toEqual(
+      AUDIT_OTEL_FIELD_DEFAULTS
+    );
+  });
+
+  test('user-provided fieldDefaults take precedence over audit defaults', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig({
+          enabled: true,
+          include_saved_object_names: false,
+          appender: {
+            type: 'otel',
+            protocol: 'http',
+            url: 'http://collector:4318/v1/logs',
+            fieldDefaults: { 'event.type': ['change'] },
+          },
+        })
+      )
+    );
+
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    expect((appenders.auditTrailAppender as OtelAppenderConfig).fieldDefaults).toMatchObject({
+      'event.type': ['change'], // user wins
+    });
+  });
+
+  test('does not inject fieldDrops or fieldDefaults for non-OTel appenders', async () => {
+    const features$ = of({ allowAuditLogging: true });
+
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
+        createLoggingConfig({
+          enabled: true,
+          include_saved_object_names: false,
+          appender: {
+            type: 'console',
+            layout: { type: 'pattern' },
+          },
+        })
+      )
+    );
+
+    const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
+    expect(appenders.auditTrailAppender).not.toHaveProperty('fieldDrops');
+    expect(appenders.auditTrailAppender).not.toHaveProperty('fieldDefaults');
   });
 });
 

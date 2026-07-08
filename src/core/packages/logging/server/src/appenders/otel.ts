@@ -119,4 +119,17 @@ export interface OtelAppenderConfig {
    * (meta fields are part of the structured body for JSON layout and are not repeated in attributes).
    */
   fieldRenames?: Record<string, string | string[]>;
+  /**
+   * Optional list of attribute keys to remove from the OTLP output. Applied to both log record
+   * attributes and resource attributes. Keys absent from the output are silently skipped.
+   * Injected programmatically (e.g. by the audit service to satisfy Serverless field exclusions).
+   */
+  fieldDrops?: string[];
+  /**
+   * Optional default attribute values written only when the key is not already present in the log
+   * record attributes. Applied after `fieldRenames`. Use to satisfy RFC requirements for fields that
+   * are absent from some event types (e.g. `event.type` on authentication events).
+   * Values may be a string or an array of strings.
+   */
+  fieldDefaults?: Record<string, string | string[]>;
 }

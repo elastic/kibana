@@ -25,10 +25,10 @@ import type { SecurityPluginSetup } from '../plugin';
 export const ECS_VERSION = '1.6.0';
 export const RECORD_USAGE_INTERVAL = 60 * 60 * 1000; // 1 hour
 
-// Field renames applied at the OTel output layer when the audit appender is of type 'otel'.
-// These translate legacy underscore-separated ECS field names to their OTel-native dot-separated
-// equivalents, and resolve collisions (e.g. trace.id vs OTel TraceId).
-// The AuditEvent type is intentionally left unchanged to avoid breaking non-OTel consumers.
+// OTel-only overrides injected into the appender config when the audit appender is of type 'otel'.
+// These translations/suppressions/defaults bring the output into alignment with the Serverless
+// Audit Log Field Reference RFC without touching the upstream AuditEvent type or any non-OTel path.
+
 export const AUDIT_OTEL_FIELD_RENAMES: Record<string, string | string[]> = {
   'kibana.space_id': 'kibana.space.id',
   'kibana.session_id': 'kibana.session.id',
@@ -36,6 +36,17 @@ export const AUDIT_OTEL_FIELD_RENAMES: Record<string, string | string[]> = {
   'kibana.authentication_type': 'authentication.type',
   'client.ip': ['source.address', 'source.ip'],
   'trace.id': 'request.id',
+  // OTel semconv: singular 'header' with per-key attributes (not plural 'headers' object)
+  'http.request.headers.x-forwarded-for': 'http.request.header.x-forwarded-for',
+};
+
+// RFC excludes both fields on Serverless; stripped from log record and resource attributes.
+export const AUDIT_OTEL_FIELD_DROPS: string[] = ['service.version', 'host.name'];
+
+// RFC requires event.type on every audit log. Authentication events omit it; default to 'access'.
+// SO/Space events already carry a specific type (e.g. 'creation', 'deletion') so are unaffected.
+export const AUDIT_OTEL_FIELD_DEFAULTS: Record<string, string | string[]> = {
+  'event.type': ['access'],
 };
 
 const normalize = <T>(value: T | T[]): T[] => (Array.isArray(value) ? value : [value]);
@@ -195,6 +206,8 @@ export const createLoggingConfig = (config: ConfigType['audit']) =>
         ? {
             ...baseAppender,
             fieldRenames: { ...baseAppender.fieldRenames, ...AUDIT_OTEL_FIELD_RENAMES },
+            fieldDrops: [...(baseAppender.fieldDrops ?? []), ...AUDIT_OTEL_FIELD_DROPS],
+            fieldDefaults: { ...AUDIT_OTEL_FIELD_DEFAULTS, ...baseAppender.fieldDefaults },
           }
         : baseAppender;
 

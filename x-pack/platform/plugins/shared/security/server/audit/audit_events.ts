@@ -32,7 +32,7 @@ export function httpRequestEvent({ request }: HttpRequestParams): AuditEvent {
     },
     http: {
       request: {
-        method: request.route.method,
+        method: request.route.method.toUpperCase(),
       },
     },
     url: {

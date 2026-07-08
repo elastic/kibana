@@ -8,6 +8,7 @@
  */
 
 import {
+  makeMockResource,
   mockBatchLogRecordProcessor,
   mockDetectResources,
   mockEmit,
@@ -128,6 +129,31 @@ describe('OtelAppender', () => {
         url: 'http://collector:4318/v1/logs',
       });
       expect(result.fieldRenames).toBeUndefined();
+    });
+
+    it('fieldDrops and fieldDefaults are optional and absent by default', () => {
+      const result = OtelAppender.configSchema.validate({
+        type: 'otel',
+        url: 'http://collector:4318/v1/logs',
+      });
+      expect(result.fieldDrops).toBeUndefined();
+      expect(result.fieldDefaults).toBeUndefined();
+    });
+
+    it('accepts fieldDrops as an array of strings', () => {
+      const result = OtelAppender.configSchema.validate({
+        ...validConfig,
+        fieldDrops: ['service.version', 'host.name'],
+      });
+      expect(result.fieldDrops).toEqual(['service.version', 'host.name']);
+    });
+
+    it('accepts fieldDefaults with string and array values', () => {
+      const result = OtelAppender.configSchema.validate({
+        ...validConfig,
+        fieldDefaults: { 'event.type': ['access'], 'event.kind': 'event' },
+      });
+      expect(result.fieldDefaults).toEqual({ 'event.type': ['access'], 'event.kind': 'event' });
     });
 
     it('rejects config without url', () => {
@@ -674,6 +700,7 @@ describe('OtelAppender', () => {
             'kibana.authentication_type': 'authentication.type',
             'client.ip': ['source.address', 'source.ip'],
             'trace.id': 'request.id',
+            'http.request.headers.x-forwarded-for': 'http.request.header.x-forwarded-for',
           },
         });
         appender.append(
@@ -687,6 +714,7 @@ describe('OtelAppender', () => {
               },
               client: { ip: '1.2.3.4' },
               trace: { id: 'req-xyz' },
+              http: { request: { headers: { 'x-forwarded-for': '10.0.0.1' } } },
             },
           })
         );
@@ -700,6 +728,7 @@ describe('OtelAppender', () => {
         expect(attributes).toHaveProperty(['source.address'], '1.2.3.4');
         expect(attributes).toHaveProperty(['source.ip'], '1.2.3.4');
         expect(attributes).toHaveProperty(['request.id'], 'req-xyz');
+        expect(attributes).toHaveProperty(['http.request.header.x-forwarded-for'], '10.0.0.1');
         // Original keys removed
         expect(attributes).not.toHaveProperty(['kibana.space_id']);
         expect(attributes).not.toHaveProperty(['kibana.session_id']);
@@ -707,9 +736,132 @@ describe('OtelAppender', () => {
         expect(attributes).not.toHaveProperty(['kibana.authentication_type']);
         expect(attributes).not.toHaveProperty(['client.ip']);
         expect(attributes).not.toHaveProperty(['trace.id']);
+        expect(attributes).not.toHaveProperty(['http.request.headers.x-forwarded-for']);
       });
     });
   });
+
+    describe('fieldDrops', () => {
+      it('removes specified keys from log record attributes', () => {
+        const appender = new OtelAppender({
+          ...validConfig,
+          fieldDrops: ['service.version', 'kibana.space_id'],
+        });
+        appender.append(
+          makeRecord({ meta: { kibana: { space_id: 'default' }, service: { version: '9.0.0' } } })
+        );
+
+        const { attributes } = mockEmit.mock.calls[0][0];
+        expect(attributes).not.toHaveProperty(['service.version']);
+        expect(attributes).not.toHaveProperty(['kibana.space_id']);
+      });
+
+      it('is a no-op when the key is absent from the record', () => {
+        const appender = new OtelAppender({
+          ...validConfig,
+          fieldDrops: ['nonexistent.key'],
+        });
+        appender.append(makeRecord({ meta: { kibana: { space_id: 'default' } } }));
+
+        const { attributes } = mockEmit.mock.calls[0][0];
+        expect(attributes).toHaveProperty(['kibana.space_id'], 'default');
+      });
+
+      it('leaves attributes unchanged when fieldDrops is not configured', () => {
+        const appender = new OtelAppender(validConfig);
+        appender.append(makeRecord({ meta: { service: { version: '9.0.0' } } }));
+
+        const { attributes } = mockEmit.mock.calls[0][0];
+        expect(attributes).toHaveProperty(['service.version'], '9.0.0');
+      });
+
+      it('drops specified keys from resource attributes', () => {
+        // Make the inner .merge() return a resource with concrete attributes so the
+        // fieldDrops filtering code can iterate over them.
+        const baseResource = makeMockResource('base', {
+          'service.version': '9.0.0',
+          'host.name': 'kibana-1',
+          'service.name': 'kibana',
+        });
+        const innerResource = makeMockResource('inner');
+        innerResource.merge.mockReturnValue(baseResource);
+        mockMergeResource.mockReturnValueOnce(innerResource);
+
+        new OtelAppender({ ...validConfig, fieldDrops: ['service.version', 'host.name'] });
+
+        // The last resourceFromAttributes call is the filtered resource rebuild.
+        const calls = mockResourceFromAttributes.mock.calls;
+        const filteredAttrs = calls[calls.length - 1][0];
+        expect(filteredAttrs).not.toHaveProperty(['service.version']);
+        expect(filteredAttrs).not.toHaveProperty(['host.name']);
+        expect(filteredAttrs).toHaveProperty(['service.name'], 'kibana');
+      });
+    });
+
+    describe('fieldDefaults', () => {
+      it('fills in a missing key with the default value', () => {
+        const appender = new OtelAppender({
+          ...validConfig,
+          fieldDefaults: { 'event.type': ['access'] },
+        });
+        appender.append(makeRecord({ meta: { event: { action: 'user_login' } } }));
+
+        const { attributes } = mockEmit.mock.calls[0][0];
+        expect(attributes).toHaveProperty(['event.type'], ['access']);
+      });
+
+      it('does not override an existing value', () => {
+        const appender = new OtelAppender({
+          ...validConfig,
+          fieldDefaults: { 'event.type': ['access'] },
+        });
+        appender.append(
+          makeRecord({ meta: { event: { type: ['creation'], action: 'saved_object_create' } } })
+        );
+
+        const { attributes } = mockEmit.mock.calls[0][0];
+        expect(attributes).toHaveProperty(['event.type'], ['creation']);
+      });
+
+      it('leaves attributes unchanged when fieldDefaults is not configured', () => {
+        const appender = new OtelAppender(validConfig);
+        appender.append(makeRecord({ meta: { event: { action: 'user_login' } } }));
+
+        const { attributes } = mockEmit.mock.calls[0][0];
+        expect(attributes).not.toHaveProperty(['event.type']);
+      });
+    });
+
+    describe('ordering: rename → drop → defaults', () => {
+      it('drop is a no-op when the key was already renamed away', () => {
+        // fieldRenames runs before fieldDrops: the old key is gone before the drop runs.
+        const appender = new OtelAppender({
+          ...validConfig,
+          fieldRenames: { 'kibana.space_id': 'kibana.space.id' },
+          fieldDrops: ['kibana.space_id'],
+        });
+        appender.append(makeRecord({ meta: { kibana: { space_id: 'default' } } }));
+
+        const { attributes } = mockEmit.mock.calls[0][0];
+        // Rename succeeded; drop had no target left.
+        expect(attributes).toHaveProperty(['kibana.space.id'], 'default');
+        expect(attributes).not.toHaveProperty(['kibana.space_id']);
+      });
+
+      it('default fills in a key that was dropped', () => {
+        // fieldDrops runs before fieldDefaults: drop removes the key, default re-adds it.
+        const appender = new OtelAppender({
+          ...validConfig,
+          fieldDrops: ['event.type'],
+          fieldDefaults: { 'event.type': ['access'] },
+        });
+        appender.append(makeRecord({ meta: { event: { type: ['creation'] } } }));
+
+        const { attributes } = mockEmit.mock.calls[0][0];
+        // Original value was dropped; default filled in the gap.
+        expect(attributes).toHaveProperty(['event.type'], ['access']);
+      });
+    });
 
   describe('dispose()', () => {
     it('shuts down the logger provider', async () => {
