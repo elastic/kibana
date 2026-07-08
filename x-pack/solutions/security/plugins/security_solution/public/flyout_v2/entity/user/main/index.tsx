@@ -41,8 +41,12 @@ import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_histo
 import { RiskInputs } from '../../shared/tools/risk_inputs';
 import { MisconfigurationInsights } from '../../shared/tools/misconfiguration_insights';
 import { AlertsInsights } from '../../shared/tools/alerts_insights';
+import { AnomalyInsights } from '../../shared/tools/anomaly_insights';
 import { OktaInsights } from '../tools/okta_insights';
 import { EntraInsights } from '../tools/entra_insights';
+import { GraphView } from '../../shared/tools/graph_view';
+import { Resolution } from '../../shared/tools/resolution';
+import { renderEntityDetails } from '../../shared/render_entity_details';
 import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
@@ -292,6 +296,29 @@ export const User: FC<UserProps> = memo(function User({
     defaultDocumentFlyoutProperties,
   ]);
 
+  const onShowRelatedEntity = useCallback(
+    (params: {
+      engineType: string | undefined;
+      entityId: string;
+      entityName: string | undefined;
+    }) =>
+      overlays.openSystemFlyout(
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: renderEntityDetails({ ...params, scopeId }),
+        }),
+        {
+          ...defaultDocumentFlyoutProperties,
+          title: params.entityName ?? params.entityId,
+          historyKey,
+          session: 'inherit',
+        }
+      ),
+    [overlays, services, store, history, scopeId, historyKey, defaultDocumentFlyoutProperties]
+  );
+
   const openDetailsPanel = useCallback(
     (path: EntityDetailsPath) => {
       const common = {
@@ -311,6 +338,15 @@ export const User: FC<UserProps> = memo(function User({
               entityName={userName}
               entityId={entityStoreEntityId}
               onShowEntity={onOpenUser}
+            />
+          );
+        case EntityDetailsLeftPanelTab.ANOMALIES:
+          return wrap(
+            <AnomalyInsights
+              entityType={EntityType.user}
+              value={userName}
+              entityId={entityStoreEntityId}
+              onOpenEntity={onOpenUser}
             />
           );
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
@@ -335,6 +371,29 @@ export const User: FC<UserProps> = memo(function User({
               );
           }
           break;
+        case EntityDetailsLeftPanelTab.GRAPH_VIEW:
+          if (!entityStoreEntityId) return;
+          return wrap(
+            <GraphView
+              entityId={entityStoreEntityId}
+              scopeId={scopeId}
+              entityName={userName}
+              onShowEntity={onShowRelatedEntity}
+              onShowOriginatingEntity={onOpenUser}
+            />
+          );
+        case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
+          if (!entityStoreEntityId) return;
+          return wrap(
+            <Resolution
+              entityId={entityStoreEntityId}
+              entityType="user"
+              entityName={userName}
+              scopeId={scopeId}
+              onShowEntity={onOpenUser}
+              onShowRelatedEntity={onShowRelatedEntity}
+            />
+          );
         // TODO: currently dead (v1 accessed through left pane tabs, need to perhaps add preview?)
         case EntityDetailsLeftPanelTab.OKTA: {
           const oktaManagedUser = managedUser.data?.[ManagedUserDatasetKey.OKTA];
@@ -371,10 +430,12 @@ export const User: FC<UserProps> = memo(function User({
       history,
       historyKey,
       userName,
+      scopeId,
       panelDisplayEntityId,
       entityStoreEntityId,
       managedUser,
       onOpenUser,
+      onShowRelatedEntity,
     ]
   );
 
@@ -423,7 +484,7 @@ export const User: FC<UserProps> = memo(function User({
             entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
-            enableGraphAndResolutionNavigation={false}
+            onShowEntity={onShowRelatedEntity}
             hideHeaderIcons
           />
         )}

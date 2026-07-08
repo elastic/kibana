@@ -21,7 +21,11 @@ export interface HuntingLead {
   title: string;
   byline: string;
   description: string;
-  entities: Array<{ type: string; name: string }>;
+  /**
+   * `id`, when present, is the Entity Store EUID (e.g. `"host:8c67cb16-..."`),
+   * used to open the correct entity flyout by id rather than by display name.
+   */
+  entities: Array<{ type: string; name: string; id?: string }>;
   tags: string[];
   priority: number;
   chatRecommendations: string[];
