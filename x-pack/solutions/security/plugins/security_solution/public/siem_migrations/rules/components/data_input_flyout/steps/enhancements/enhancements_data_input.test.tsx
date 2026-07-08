@@ -232,6 +232,56 @@ describe('EnhancementsDataInput', () => {
     expect(getByTestId('enhancementTypeSelect')).toBeDisabled();
   });
 
+  it('should hide the error once the user uploads a valid file after an invalid one', async () => {
+    const { getByTestId, getByText, queryByText } = render(
+      <EnhancementsDataInput {...defaultProps} />
+    );
+
+    const filePicker = getByTestId('enhancementFilePicker');
+
+    await act(async () => {
+      fireEvent.change(filePicker, {
+        target: { files: [new File(['not valid json {{{'], 'invalid.json')] },
+      });
+    });
+    await waitFor(() => {
+      expect(getByText('The file does not contain valid JSON')).toBeVisible();
+    });
+
+    await act(async () => {
+      fireEvent.change(filePicker, {
+        target: { files: [new File([JSON.stringify({ mappings: [] })], 'valid.json')] },
+      });
+    });
+    await waitFor(() => {
+      expect(queryByText('The file does not contain valid JSON')).toBeNull();
+    });
+  });
+
+  it('should hide the error when the user clears the file selection', async () => {
+    const { getByTestId, getByText, queryByText } = render(
+      <EnhancementsDataInput {...defaultProps} />
+    );
+
+    const filePicker = getByTestId('enhancementFilePicker');
+
+    await act(async () => {
+      fireEvent.change(filePicker, {
+        target: { files: [new File(['not valid json {{{'], 'invalid.json')] },
+      });
+    });
+    await waitFor(() => {
+      expect(getByText('The file does not contain valid JSON')).toBeVisible();
+    });
+
+    await act(async () => {
+      fireEvent.change(filePicker, { target: { files: [] } });
+    });
+    await waitFor(() => {
+      expect(queryByText('The file does not contain valid JSON')).toBeNull();
+    });
+  });
+
   it('should display inline error when JSON parsing fails', async () => {
     const { getByTestId, getByText } = render(<EnhancementsDataInput {...defaultProps} />);
 

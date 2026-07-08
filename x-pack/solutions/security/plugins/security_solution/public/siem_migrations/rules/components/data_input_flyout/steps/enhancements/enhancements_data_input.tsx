@@ -104,6 +104,7 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
     const onFileChange = useCallback(
       (files: FileList | null) => {
         setParsedData(null);
+        parseFile(files);
 
         if (!files || files.length === 0) {
           setSelectedFile(null);
@@ -111,7 +112,6 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
         }
 
         setSelectedFile(files[0]);
-        parseFile(files);
       },
       [parseFile]
     );
