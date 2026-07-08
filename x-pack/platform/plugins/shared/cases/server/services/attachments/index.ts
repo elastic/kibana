@@ -399,9 +399,38 @@ export class AttachmentService {
         { id, type: CASE_ATTACHMENT_SAVED_OBJECT },
         { id, type: CASE_COMMENT_SAVED_OBJECT },
       ]);
-      await this.context.unsecuredSavedObjectsClient.bulkDelete(deleteRequests, {
-        refresh,
-      });
+      const { statuses } = await this.context.unsecuredSavedObjectsClient.bulkDelete(
+        deleteRequests,
+        {
+          refresh,
+        }
+      );
+
+      // analyticsV2 mirror to `.cases-attachments`. Fire-and-forget; the SO
+      // delete is the source of truth. One bulk-delete by id covers both
+      // source types (id is unique across them).
+      //
+      // Each id issues two delete requests (unified + legacy), but a real
+      // attachment exists as only ONE of them, so the other request always
+      // comes back `success: false` with a 404 (`not_found`) — core
+      // `bulkDelete` reports partial failure via `statuses[]` rather than
+      // throwing. A 404 means the SO is already gone, which is exactly the
+      // post-state we want, so it must NOT block the mirror. Only a NON-404
+      // failure means the SO may have survived; dropping its analytics doc
+      // then would be unrecoverable — its `updated_at` didn't change, so
+      // reconciliation never re-emits it (permanent undercount until
+      // `/reset`). So exclude an id only when a delete failed with a status
+      // other than 404.
+      const failedIds = new Set<string>();
+      for (const status of statuses) {
+        if (!status.success && status.error?.statusCode !== 404) {
+          failedIds.add(status.id);
+        }
+      }
+      const idsToMirror = savedObjectIds.filter((id) => !failedIds.has(id));
+      this.mirrorSafely(() =>
+        this.context.analyticsV2AttachmentsWriter.bulkDeleteAttachments(idsToMirror)
+      );
     } catch (error) {
       this.context.log.error(`Error on DELETE attachments ${savedObjectIds}: ${error}`);
       throw error;
@@ -448,6 +477,14 @@ export class AttachmentService {
         const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
           injectedAttachment.attributes
         );
+        // analyticsV2 mirror to `.cases-attachments`. Fire-and-forget and
+        // guarded (`mirrorSafely`) so it can't fail the create that already
+        // persisted the SO; reconciliation backstops any failure.
+        this.mirrorSafely(() =>
+          this.context.analyticsV2AttachmentsWriter.upsertAttachment(
+            unifiedAttachment as unknown as SavedObject<UnifiedAttachmentAttributes>
+          )
+        );
         return Object.assign(injectedAttachment, {
           attributes: validatedAttributes,
         }) as unknown as UnifiedAttachmentSavedObjectTransformed;
@@ -474,6 +511,12 @@ export class AttachmentService {
 
       const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
         transformedAttachment.attributes
+      );
+
+      // analyticsV2 mirror — same writer for both source types; see the
+      // unified branch above.
+      this.mirrorSafely(() =>
+        this.context.analyticsV2AttachmentsWriter.upsertAttachment(attachment)
       );
 
       return Object.assign(transformedAttachment, { attributes: validatedAttributes });
@@ -564,11 +607,16 @@ export class AttachmentService {
       | UnifiedAttachmentSavedObjectTransformed
       | AttachmentSavedObjectTransformedV2
     > = [];
+    // Only successes get mirrored — a per-entry error means there's no SO.
+    const successesToMirror: Array<
+      SavedObject<AttachmentPersistedAttributes | UnifiedAttachmentAttributes>
+    > = [];
 
     for (const so of res.saved_objects) {
       if (isSOError(so)) {
         validatedAttachments.push(so as AttachmentSavedObjectTransformed);
       } else if (so.type === CASE_ATTACHMENT_SAVED_OBJECT) {
+        successesToMirror.push(so);
         // Restore `attachmentId` for savedObject-backed unified rows; no-op
         // for other unified types.
         const injectedAttachment = injectAttachmentSOAttributesFromRefs(
@@ -584,6 +632,7 @@ export class AttachmentService {
             | UnifiedAttachmentSavedObjectTransformed
         );
       } else if (so.type === CASE_COMMENT_SAVED_OBJECT) {
+        successesToMirror.push(so);
         const legacySo = so as SavedObject<AttachmentPersistedAttributes>;
         const transformedAttachment = injectAttachmentSOAttributesFromRefs(legacySo);
 
@@ -595,6 +644,14 @@ export class AttachmentService {
           Object.assign(transformedAttachment, { attributes: validatedAttributes })
         );
       }
+    }
+
+    // analyticsV2 mirror to `.cases-attachments` — one guarded, fire-and-
+    // forget bulk request for the successes; reconciliation backstops the rest.
+    if (successesToMirror.length > 0) {
+      this.mirrorSafely(() =>
+        this.context.analyticsV2AttachmentsWriter.bulkUpsertAttachments(successesToMirror)
+      );
     }
 
     return Object.assign(res, { saved_objects: validatedAttachments });
@@ -633,6 +690,11 @@ export class AttachmentService {
             unifiedAttributes,
             { ...options }
           );
+        // analyticsV2 mirror via a full re-read — see `mirrorUpdatedAttachments`.
+        // Mirroring the partial `update` response directly would drop the
+        // immutable creation fields (`created_at` → `@timestamp`) and flicker
+        // the edited attachment off time-filtered views until reconciliation.
+        this.mirrorUpdatedAttachments([{ type: CASE_ATTACHMENT_SAVED_OBJECT, id: savedObjectId }]);
         return Object.assign(res, { attributes: decodedAttributes });
       }
 
@@ -673,6 +735,10 @@ export class AttachmentService {
       const validatedAttributes = decodeOrThrow(AttachmentPartialAttributesRt)(
         transformedAttachment.attributes
       );
+
+      // analyticsV2 mirror via a full re-read — same reason as the unified
+      // branch above (`mirrorUpdatedAttachments`).
+      this.mirrorUpdatedAttachments([{ type: CASE_COMMENT_SAVED_OBJECT, id: savedObjectId }]);
 
       return Object.assign(transformedAttachment, { attributes: validatedAttributes });
     } catch (error) {
@@ -849,6 +915,13 @@ export class AttachmentService {
     const validatedAttachments: Array<
       SavedObjectsUpdateResponse<AttachmentTransformedAttributesV2>
     > = [];
+    // Collect the `{type, id}` of each successful entry so analytics can
+    // mirror via a full re-read. SO bulkUpdate returns a per-entry partial
+    // response (only the patched fields), so mirroring it directly would
+    // drop the immutable creation fields — same degradation as the single
+    // `update` paths. `mirrorUpdatedAttachments` re-reads the persisted
+    // SOs so the analytics docs carry `@timestamp` / `created_*`.
+    const successRefsToMirror: Array<{ type: string; id: string }> = [];
 
     for (let i = 0; i < res.saved_objects.length; i++) {
       const attachment = res.saved_objects[i];
@@ -864,6 +937,7 @@ export class AttachmentService {
         const validatedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
           comments[i].updatedAttributes
         );
+        successRefsToMirror.push({ type: attachment.type, id: attachment.id });
         validatedAttachments.push(Object.assign(attachment, { attributes: validatedAttributes }));
       } else {
         const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
@@ -883,13 +957,88 @@ export class AttachmentService {
           transformedAttachment.attributes
         );
 
+        successRefsToMirror.push({ type: attachment.type, id: attachment.id });
         validatedAttachments.push(
           Object.assign(transformedAttachment, { attributes: validatedAttributes })
         );
       }
     }
 
+    // analyticsV2 mirror — single re-read + bulk upsert regardless of how
+    // many entries succeeded. See `mirrorUpdatedAttachments`.
+    this.mirrorUpdatedAttachments(successRefsToMirror);
+
     return Object.assign(res, { saved_objects: validatedAttachments });
+  }
+
+  /**
+   * Dispatch a best-effort analytics mirror so a throwing writer can NEVER
+   * fail the primary create / bulkCreate / delete that already persisted the
+   * SO. The throw is swallowed with a WARN; reconciliation re-emits next tick.
+   * (The update path guards itself via `mirrorUpdatedAttachments`' `.catch()`.)
+   */
+  private mirrorSafely(dispatch: () => void): void {
+    try {
+      dispatch();
+    } catch (error) {
+      this.context.log.warn(
+        `cases-analyticsV2: attachments mirror dispatch threw (non-fatal, reconciliation will repair): ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
+  /**
+   * Mirror updated attachment SOs to the `.cases-attachments` analytics
+   * index by re-reading their full persisted shape.
+   *
+   * WHY re-read instead of mirroring the update response: the SO
+   * `update` / `bulkUpdate` response is a partial patch — it carries
+   * only the fields the caller changed. Mirroring it directly writes an
+   * analytics doc missing the immutable creation fields, most importantly
+   * `created_at` (which the doc-builder maps to `@timestamp`) and
+   * `created_by`. A doc without `@timestamp` silently drops out of every
+   * time-filtered Discover / Lens view, so an edited attachment would
+   * flicker off the timeline until the next reconciliation tick repaired
+   * it. Re-reading gives the mirror the same full SO shape the create
+   * path already has.
+   *
+   * Fire-and-forget: the re-read runs off the user-facing update path
+   * (never awaited) so analytics never adds latency to — or fails — the
+   * attachment edit. A failed re-read (or a stale read under
+   * `refresh: false`) is backstopped by reconciliation, which re-emits
+   * the full shape every tick, so we log at WARN and move on. Errors are
+   * swallowed here rather than in the writer because the read, not the
+   * write, is what can throw.
+   */
+  private mirrorUpdatedAttachments(refs: Array<{ type: string; id: string }>): void {
+    if (refs.length === 0) {
+      return;
+    }
+
+    void this.context.unsecuredSavedObjectsClient
+      .bulkGet<UnifiedAttachmentAttributes | AttachmentPersistedAttributes>(refs)
+      .then(({ saved_objects: savedObjects }) => {
+        const sos = savedObjects.filter(
+          (so): so is SavedObject<UnifiedAttachmentAttributes | AttachmentPersistedAttributes> =>
+            !isSOError(so)
+        );
+        if (sos.length === 1) {
+          this.context.analyticsV2AttachmentsWriter.upsertAttachment(sos[0]);
+        } else if (sos.length > 1) {
+          this.context.analyticsV2AttachmentsWriter.bulkUpsertAttachments(sos);
+        }
+      })
+      .catch((error) => {
+        this.context.log.warn(
+          `cases-analyticsV2: attachments update-mirror re-read failed [ids=${refs
+            .map((ref) => ref.id)
+            .join(',')}]: ${
+            error?.message ?? error
+          }. Reconciliation will re-emit the full shape on the next tick.`
+        );
+      });
   }
 
   public async find({

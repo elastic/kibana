@@ -15,5 +15,5 @@ export interface EntityHighlightItem {
 
 export interface EntityHighlightsResponse {
   highlights: EntityHighlightItem[];
-  recommendedActions: string[] | null;
+  recommended_actions: string[] | null;
 }

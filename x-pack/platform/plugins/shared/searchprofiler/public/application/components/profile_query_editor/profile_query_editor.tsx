@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useRef, memo, useCallback } from 'react';
+import React, { useRef, memo, useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { debounce } from 'lodash';
 import {
   EuiForm,
   EuiFieldText,
@@ -24,14 +25,35 @@ import { useHasIndices, useRequestProfile } from '../../hooks';
 import { useAppContext } from '../../contexts/app_context';
 import { useProfilerActionContext } from '../../contexts/profiler_context';
 import { Editor, type EditorProps } from './editor';
+import {
+  getInitialSearchProfilerIndex,
+  getInitialSearchProfilerQuery,
+  readSearchProfilerState,
+  updateSearchProfilerQueryState,
+  updateSearchProfilerState,
+} from '../../lib';
 
 const DEFAULT_INDEX_VALUE = '_all';
+const UPDATE_LOCAL_STORAGE_DEBOUNCE_DELAY = 500;
 
 const INITIAL_EDITOR_VALUE = `{
   "query":{
     "match_all" : {}
   }
 }`;
+
+const SEARCH_PROFILER_ROUTE = '/searchprofiler';
+
+const getSearchProfilerQuery = (searchProfilerQueryURI: string | null): string | null => {
+  if (searchProfilerQueryURI === null) {
+    return null;
+  }
+
+  return (
+    decompressFromEncodedURIComponent(searchProfilerQueryURI.replace(/^data:text\/plain,/, '')) ??
+    ''
+  );
+};
 
 const styles = {
   container: css`
@@ -53,21 +75,81 @@ export const ProfileQueryEditor = memo(() => {
 
   const dispatch = useProfilerActionContext();
 
-  const { getLicenseStatus, notifications, location } = useAppContext();
+  const { getLicenseStatus, history, notifications, location } = useAppContext();
 
   const { data: indicesData, isLoading, error: indicesDataError } = useHasIndices();
 
   const queryParams = new URLSearchParams(location.search);
   const indexName = queryParams.get('index');
   const searchProfilerQueryURI = queryParams.get('load_from');
+  const storedState = useMemo(() => readSearchProfilerState(), []);
 
-  const searchProfilerQuery =
-    searchProfilerQueryURI &&
-    decompressFromEncodedURIComponent(searchProfilerQueryURI.replace(/^data:text\/plain,/, ''));
+  const searchProfilerQuery = getSearchProfilerQuery(searchProfilerQueryURI);
 
-  const editorValue = useRef(searchProfilerQuery || INITIAL_EDITOR_VALUE);
+  const initialIndexValue = getInitialSearchProfilerIndex({
+    defaultIndex: DEFAULT_INDEX_VALUE,
+    indexFromUrl: indexName,
+    storedIndex: storedState.index,
+  });
+  const initialEditorValue = getInitialSearchProfilerQuery({
+    defaultQuery: INITIAL_EDITOR_VALUE,
+    queryFromUrl: searchProfilerQuery,
+    storedQuery: storedState.query,
+  });
+  const editorValue = useRef(initialEditorValue);
 
   const requestProfile = useRequestProfile();
+  const debouncedUpdateQueryStorage = useMemo(
+    () =>
+      debounce((query: string) => {
+        updateSearchProfilerQueryState(query);
+      }, UPDATE_LOCAL_STORAGE_DEBOUNCE_DELAY),
+    []
+  );
+
+  useEffect(() => {
+    updateSearchProfilerState({ index: initialIndexValue });
+    updateSearchProfilerQueryState(editorValue.current);
+
+    return () => {
+      debouncedUpdateQueryStorage.flush();
+      debouncedUpdateQueryStorage.cancel();
+    };
+  }, [debouncedUpdateQueryStorage, initialIndexValue]);
+
+  const applyUrlParams = useCallback((params: URLSearchParams) => {
+    const nextStoredState = readSearchProfilerState();
+    const nextIndexValue = getInitialSearchProfilerIndex({
+      defaultIndex: DEFAULT_INDEX_VALUE,
+      indexFromUrl: params.get('index'),
+      storedIndex: nextStoredState.index,
+    });
+    const nextEditorValue = getInitialSearchProfilerQuery({
+      defaultQuery: INITIAL_EDITOR_VALUE,
+      queryFromUrl: getSearchProfilerQuery(params.get('load_from')),
+      storedQuery: nextStoredState.query,
+    });
+
+    editorValue.current = nextEditorValue;
+    if (indexInputRef.current) {
+      indexInputRef.current.value = nextIndexValue;
+    }
+    editorPropsRef.current?.setValue(nextEditorValue);
+    updateSearchProfilerState({ index: nextIndexValue });
+    updateSearchProfilerQueryState(nextEditorValue);
+  }, []);
+
+  useEffect(() => {
+    const unlisten = history.listen((nextLocation) => {
+      if (nextLocation.pathname !== SEARCH_PROFILER_ROUTE) {
+        return;
+      }
+
+      applyUrlParams(new URLSearchParams(nextLocation.search));
+    });
+
+    return unlisten;
+  }, [applyUrlParams, history]);
 
   const handleProfileClick = async () => {
     dispatch({ type: 'setProfiling', value: true });
@@ -136,9 +218,12 @@ export const ProfileQueryEditor = memo(() => {
                   inputRef={(ref) => {
                     if (ref) {
                       indexInputRef.current = ref;
-                      ref.value = indexName ? indexName : DEFAULT_INDEX_VALUE;
+                      ref.value = initialIndexValue;
                     }
                   }}
+                  onChange={(event) =>
+                    updateSearchProfilerState({ index: event.currentTarget.value })
+                  }
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -165,7 +250,10 @@ export const ProfileQueryEditor = memo(() => {
       <EuiFlexItem grow={1} css={styles.editorContainer}>
         <Editor
           onEditorReady={onEditorReady}
-          setEditorValue={(val) => (editorValue.current = val)}
+          setEditorValue={(val) => {
+            editorValue.current = val;
+            debouncedUpdateQueryStorage(val);
+          }}
           editorValue={editorValue.current}
           licenseEnabled={licenseEnabled}
         />
