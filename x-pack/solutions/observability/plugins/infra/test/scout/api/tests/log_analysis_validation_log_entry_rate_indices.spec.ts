@@ -23,7 +23,7 @@ const TIMESTAMP_FIELD = {
 
 apiTest.describe(
   'API /infra/log_analysis/validation/log_entry_rate_indices',
-  { tag: tags.deploymentAgnostic },
+  { tag: tags.stateful.all },
   () => {
     let viewerApiCredentials: RoleApiCredentials;
 
