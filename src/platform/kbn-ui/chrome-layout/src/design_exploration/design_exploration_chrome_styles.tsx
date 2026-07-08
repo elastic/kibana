@@ -214,6 +214,17 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
       font-weight: 500 !important;
     }
 
+    ${scope} [data-test-subj='appHeader'] [class*='css-'][class*='-euiButtonDisplay'][class*='app_menu_action_button--buttonCss'] {
+      background-color: transparent !important;
+    }
+
+    ${scope} [data-test-subj='appHeader'] [data-test-subj^='app-menu-action-button-']:hover
+      [class*='app_menu_action_button--buttonCss'],
+    ${scope} [data-test-subj='appHeader'] [data-test-subj^='app-menu-action-button-']:focus
+      [class*='app_menu_action_button--buttonCss'] {
+      background-color: transparent !important;
+    }
+
     ${scope} .kbnChromeLayoutApplication:has([data-test-subj='appHeader']) {
       --kbn-application--top-bar-height: ${DESIGN_EXPLORATION_TOP_BAR_HEIGHT}px !important;
     }
@@ -259,7 +270,7 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
       top: ${DESIGN_EXPLORATION_TOP_BAR_HEIGHT}px !important;
-      width: calc(100% - ${DESIGN_EXPLORATION_PADDING}px) !important;
+      width: calc(100% - 20px) !important;
       background: transparent !important;
       background-color: transparent !important;
       backdrop-filter: none !important;
