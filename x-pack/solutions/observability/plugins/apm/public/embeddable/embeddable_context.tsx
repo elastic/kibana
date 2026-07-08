@@ -4,28 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo, useRef } from 'react';
+import { createCallApmApiV2 } from '@kbn/apm-api-shared';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RouterProvider } from '@kbn/typed-react-router-config';
+import type { MemoryHistory } from 'history';
+import { createMemoryHistory } from 'history';
+import React, { useEffect, useMemo, useRef } from 'react';
 import {
   UNSAFE_LocationContext as ReactRouterLocationContext,
   UNSAFE_NavigationContext as ReactRouterNavigationContext,
   UNSAFE_RouteContext as ReactRouterRouteContext,
 } from 'react-router-dom-v5-compat';
-import type { MemoryHistory } from 'history';
-import { createMemoryHistory } from 'history';
+import {
+  OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+} from '../../common/cps_feature_flag';
+import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
+import { apmRouter } from '../components/routing/apm_route_config';
+import { ApmIndexSettingsContextProvider } from '../context/apm_index_settings/apm_index_settings_context';
 import type { ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_context';
 import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
-import { apmRouter } from '../components/routing/apm_route_config';
-import { getDateRange } from '../context/url_params_context/helpers';
-import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import { ChartPointerEventContextProvider } from '../context/chart_pointer_event/chart_pointer_event_context';
-import type { EmbeddableDeps } from './types';
 import { LicenseProvider } from '../context/license/license_context';
 import { TimeRangeMetadataContextProvider } from '../context/time_range_metadata/time_range_metadata_context';
-import { ApmIndexSettingsContextProvider } from '../context/apm_index_settings/apm_index_settings_context';
-import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
+import { getDateRange } from '../context/url_params_context/helpers';
+import { setApmInternalServices } from '../plugin';
+import { createCallApmApi } from '../services/rest/create_call_apm_api';
+import type { EmbeddableDeps } from './types';
 
 /**
  * Resets the React Router v6 context so that nested `<Router>` components
@@ -121,6 +127,15 @@ export function ApmEmbeddableContext({
   } as ApmPluginContextValue;
 
   createCallApmApi(deps.coreStart);
+  const isCpsEnabled = deps.coreStart.featureFlags.getBooleanValue(
+    OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+    OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
+  );
+  useMemo(() => {
+    const cpsManager = isCpsEnabled ? deps.pluginsStart.cps?.cpsManager : undefined;
+    const callApmApi = createCallApmApiV2(deps.coreStart, { cpsManager });
+    setApmInternalServices({ callApmApi, cpsManager });
+  }, [deps.coreStart, deps.pluginsStart.cps?.cpsManager, isCpsEnabled]);
 
   return (
     <I18nProvider>

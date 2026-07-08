@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -32,6 +33,7 @@ import { useStartServices } from '../../../../../hooks';
 interface Props {
   savedNamespaces: string[];
   allowedNamespacePrefixes: string[];
+  namespaceCustomizationSettings?: { [namespace: string]: { ilm_policy?: string } };
   disabled?: boolean;
   isSubmitting?: boolean;
   onSave: (next: string[]) => void;
@@ -46,6 +48,7 @@ const setsEqual = (a: string[], b: string[]): boolean => {
 export const NamespaceCustomizationSection: React.FC<Props> = ({
   savedNamespaces,
   allowedNamespacePrefixes,
+  namespaceCustomizationSettings,
   disabled = false,
   isSubmitting = false,
   onSave,
@@ -66,6 +69,15 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
     () => !setsEqual(draftNamespaces, savedNamespaces),
     [draftNamespaces, savedNamespaces]
   );
+
+  // Namespaces being removed that have an ILM policy — warn the user those policies will be cleared.
+  const removedNamespacesWithIlm = useMemo(() => {
+    if (!namespaceCustomizationSettings || !isDirty) return [];
+    const draftSet = new Set(draftNamespaces);
+    return savedNamespaces.filter(
+      (ns) => !draftSet.has(ns) && !!namespaceCustomizationSettings[ns]?.ilm_policy
+    );
+  }, [draftNamespaces, savedNamespaces, namespaceCustomizationSettings, isDirty]);
 
   const selectedOptions = useMemo(
     () =>
@@ -186,6 +198,30 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
           onChange={handleChange}
         />
       </EuiFormRow>
+      {removedNamespacesWithIlm.length > 0 && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            size="s"
+            iconType="warning"
+            color="warning"
+            title={i18n.translate(
+              'xpack.fleet.integrations.settings.namespaceCustomization.ilmWillBeRemovedTitle',
+              { defaultMessage: 'ILM policy will be removed' }
+            )}
+          >
+            <FormattedMessage
+              id="xpack.fleet.integrations.settings.namespaceCustomization.ilmWillBeRemovedBody"
+              defaultMessage="Removing {namespaces} will also clear the ILM policy assigned to {count, plural, one {that namespace} other {those namespaces}}."
+              values={{
+                namespaces: <strong>{removedNamespacesWithIlm.join(', ')}</strong>,
+                count: removedNamespacesWithIlm.length,
+              }}
+            />
+          </EuiCallOut>
+        </>
+      )}
+
       {(isDirty || isSubmitting) && (
         <>
           <EuiSpacer size="s" />
