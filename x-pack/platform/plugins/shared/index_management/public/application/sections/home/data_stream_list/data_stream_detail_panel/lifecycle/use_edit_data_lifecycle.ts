@@ -808,6 +808,10 @@ export const useEditDataLifecycle = ({
       indexTemplateHref: inheritIndexTemplateHref,
       dlm: {
         defaultValue: successfulDlmDefaultValue,
+        // The cluster-wide maximum retention only constrains DLM retention in Serverless.
+        maximumRetentionPeriod: config.isServerless
+          ? dataStream?.lifecycle?.globalMaxRetention
+          : undefined,
         hasEnterpriseLicense,
         hasDefaultSnapshotRepository: defaultSnapshotRepository !== null,
         defaultSnapshotRepository: defaultSnapshotRepository ?? undefined,
@@ -848,6 +852,7 @@ export const useEditDataLifecycle = ({
     [
       config.isServerless,
       core,
+      dataStream?.lifecycle?.globalMaxRetention,
       defaultSnapshotRepository,
       handleInheritSuccessfulLifecycleChange,
       hasEnterpriseLicense,
