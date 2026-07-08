@@ -6,11 +6,17 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import rison from '@kbn/rison';
 import {
   ENVIRONMENT_ALL_VALUE,
   ENVIRONMENT_NOT_DEFINED_VALUE,
 } from '../../../../../../common/environment_filter_values';
 import { useAlertsHref } from './use_alerts_href';
+
+function getKuery(href: string | undefined): string {
+  const encoded = href?.split('?_a=')[1];
+  return (rison.decode(encoded ?? '') as any).kuery;
+}
 
 const mockCore = {
   http: { basePath: { prepend: (path: string) => path } },
@@ -37,32 +43,34 @@ describe('useAlertsHref', () => {
     expect(href).toBeUndefined();
   });
 
-  it('includes the alerts path and service name', () => {
+  it('includes the alerts base path', () => {
     const href = renderAlertsHref();
     expect(href).toContain('/app/observability/alerts');
-    expect(href).toContain('opbeans-java');
   });
 
-  it('omits the environment clause when environment is ENVIRONMENT_ALL', () => {
+  it('builds the kuery with only the service name when environment is ENVIRONMENT_ALL', () => {
     const href = renderAlertsHref({ environment: ENVIRONMENT_ALL_VALUE });
-    expect(href).not.toContain('service.environment');
+    expect(getKuery(href)).toEqual('service.name: "opbeans-java"');
   });
 
-  it('includes the environment clause for a specific environment', () => {
+  it('builds the kuery with a quoted environment clause for a specific environment', () => {
     const href = renderAlertsHref({ environment: 'production' });
-    expect(href).toContain('service.environment');
-    expect(href).toContain('production');
+    expect(getKuery(href)).toEqual(
+      'service.name: "opbeans-java" AND service.environment: "production"'
+    );
   });
 
-  it('includes ENVIRONMENT_NOT_DEFINED in the kuery for the not-defined sentinel', () => {
+  it('builds the kuery with the OR clause for the not-defined sentinel', () => {
     const href = renderAlertsHref({ environment: ENVIRONMENT_NOT_DEFINED_VALUE });
-    expect(href).toContain('service.environment');
-    expect(href).toContain('ENVIRONMENT_NOT_DEFINED');
+    expect(getKuery(href)).toEqual(
+      'service.name: "opbeans-java" AND (service.environment: "ENVIRONMENT_NOT_DEFINED" OR NOT service.environment: *)'
+    );
   });
 
   it('wires rangeFrom and rangeTo into the encoded state', () => {
     const href = renderAlertsHref({ rangeFrom: 'now-1h', rangeTo: 'now' });
-    expect(href).toContain('now-1h');
-    expect(href).toContain('now');
+    const state = rison.decode(href!.split('?_a=')[1]) as any;
+    expect(state.rangeFrom).toEqual('now-1h');
+    expect(state.rangeTo).toEqual('now');
   });
 });

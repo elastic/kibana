@@ -7,10 +7,15 @@
 
 import { useMemo } from 'react';
 import type { CoreStart } from '@kbn/core/public';
+import { escapeQuotes } from '@kbn/es-query';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import rison from '@kbn/rison';
 import type { Environment } from '../../../../../../common/environment_rt';
-import { getEnvironmentKuery } from '../../../../../../common/environment_filter_values';
+import {
+  isEnvironmentDefined,
+  ENVIRONMENT_NOT_DEFINED,
+} from '../../../../../../common/environment_filter_values';
+import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '../../../../../../common/es_fields/apm';
 
 interface UseAlertsHrefParams {
   core: CoreStart;
@@ -30,8 +35,13 @@ export function useAlertsHref({
   return useMemo(() => {
     const base = core.http.basePath.prepend(observabilityPaths.alerts);
     if (!base) return undefined;
-    const envKuery = getEnvironmentKuery(environment);
-    const kuery = [`service.name: "${serviceName}"`, envKuery].filter(Boolean).join(' AND ');
+    const envKuery =
+      environment === ENVIRONMENT_NOT_DEFINED.value
+        ? `(${SERVICE_ENVIRONMENT}: "${ENVIRONMENT_NOT_DEFINED.value}" OR NOT ${SERVICE_ENVIRONMENT}: *)`
+        : isEnvironmentDefined(environment)
+        ? `${SERVICE_ENVIRONMENT}: "${escapeQuotes(environment)}"`
+        : null;
+    const kuery = [`${SERVICE_NAME}: "${serviceName}"`, envKuery].filter(Boolean).join(' AND ');
     return `${base}?_a=${rison.encode({ kuery, rangeFrom, rangeTo, status: 'all' })}`;
   }, [core.http.basePath, environment, serviceName, rangeFrom, rangeTo]);
 }
