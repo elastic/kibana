@@ -7,7 +7,7 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createDashboard, LOGSTASH_TIME_RANGE, testData } from '../fixtures';
+import { createDashboard, testData } from '../fixtures';
 
 spaceTest.describe(
   'Lens metric trendline on dashboard (DSL)',
@@ -47,7 +47,7 @@ spaceTest.describe(
       async ({ browserAuth, kbnClient, page, pageObjects, scoutSpace }) => {
         const body = {
           title: 'Metric trendline spec',
-          time_range: LOGSTASH_TIME_RANGE,
+          time_range: testData.LOGSTASH_IN_RANGE_DATES,
           panels: [
             {
               type: 'vis',
@@ -89,7 +89,7 @@ spaceTest.describe(
 
         const body = {
           title: 'Metric trendline ref',
-          time_range: LOGSTASH_TIME_RANGE,
+          time_range: testData.LOGSTASH_IN_RANGE_DATES,
           panels: [
             {
               type: 'vis',

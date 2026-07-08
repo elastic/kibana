@@ -13,10 +13,6 @@ import { testData } from '../fixtures';
 const DASHBOARD_API_PATH = '/api/dashboards';
 const DASHBOARD_API_VERSION = '2023-10-31';
 
-const LOGSTASH_TIME_RANGE = {
-  from: '2015-09-19T06:31:44.000Z',
-  to: '2015-09-23T18:31:44.000Z',
-};
 
 function withSpace(path: string, spaceId: string): string {
   return `/s/${spaceId}${path}`;
@@ -87,7 +83,7 @@ spaceTest.describe(
           kbnClient,
           {
             title: 'Metric progress bar vertical',
-            time_range: LOGSTASH_TIME_RANGE,
+            time_range: testData.LOGSTASH_IN_RANGE_DATES,
             panels: [
               {
                 type: 'vis',
@@ -140,7 +136,7 @@ spaceTest.describe(
           kbnClient,
           {
             title: 'Metric progress bar horizontal',
-            time_range: LOGSTASH_TIME_RANGE,
+            time_range: testData.LOGSTASH_IN_RANGE_DATES,
             panels: [
               {
                 type: 'vis',
@@ -194,7 +190,7 @@ spaceTest.describe(
           kbnClient,
           {
             title: 'Metric without progress bar',
-            time_range: LOGSTASH_TIME_RANGE,
+            time_range: testData.LOGSTASH_IN_RANGE_DATES,
             panels: [
               {
                 type: 'vis',

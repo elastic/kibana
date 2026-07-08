@@ -10,11 +10,6 @@ import type { KbnClient } from '@kbn/scout';
 const DASHBOARD_API_PATH = '/api/dashboards';
 const DASHBOARD_API_VERSION = '2023-10-31';
 
-export const LOGSTASH_TIME_RANGE = {
-  from: '2015-09-19T06:31:44.000Z',
-  to: '2015-09-23T18:31:44.000Z',
-};
-
 export const withSpace = (path: string, spaceId: string): string => `/s/${spaceId}${path}`;
 
 /**

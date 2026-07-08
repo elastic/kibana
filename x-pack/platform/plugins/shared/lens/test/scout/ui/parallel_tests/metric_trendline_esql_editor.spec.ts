@@ -10,7 +10,6 @@ import { expect } from '@kbn/scout/ui';
 import {
   applyLensInlineEditorAndWaitClosed,
   createDashboardWithPanelId,
-  LOGSTASH_TIME_RANGE,
   openDimensionEditorAndWaitForFlyout,
   openInlineEditorAndWaitVisible,
   testData,
@@ -35,7 +34,7 @@ spaceTest.describe(
 
       const body = {
         title: 'ESQL metric trendline editor test',
-        time_range: LOGSTASH_TIME_RANGE,
+        time_range: testData.LOGSTASH_IN_RANGE_DATES,
         panels: [
           {
             type: 'vis',

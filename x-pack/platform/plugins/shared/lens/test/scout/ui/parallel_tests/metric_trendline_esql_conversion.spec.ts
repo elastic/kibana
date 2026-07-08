@@ -11,7 +11,6 @@ import {
   applyLensInlineEditorAndWaitClosed,
   convertToEsqlViaModal,
   createDashboardWithPanelId,
-  LOGSTASH_TIME_RANGE,
   openInlineEditorAndWaitVisible,
   testData,
 } from '../fixtures';
@@ -41,7 +40,7 @@ spaceTest.describe(
 
       const body = {
         title: 'Metric trendline conversion test',
-        time_range: LOGSTASH_TIME_RANGE,
+        time_range: testData.LOGSTASH_IN_RANGE_DATES,
         panels: [
           {
             type: 'vis',
