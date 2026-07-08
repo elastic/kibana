@@ -9,4 +9,4 @@ export {
   distractorExamples,
   happyPathExamples,
   securitySkillsExamples,
-} from './security_skills_examples';
+} from './security_skills_dataset';

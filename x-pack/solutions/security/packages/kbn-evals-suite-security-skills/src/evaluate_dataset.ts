@@ -167,7 +167,13 @@ const createExpectedToolCalledEvaluator = (): Evaluator<
   kind: 'CODE',
   evaluate: async ({ output, metadata }) => {
     const expectedToolId = getStringMeta(metadata, 'expectedToolId');
-    if (!expectedToolId) return { score: 1 };
+    if (!expectedToolId) {
+      return {
+        score: null,
+        label: 'N/A',
+        explanation: 'No expectedToolId annotation — skipping ExpectedToolCalled check.',
+      };
+    }
 
     const toolCalls = getToolCallSteps(output as TaskOutput);
     if (toolCalls.length === 0) {
@@ -189,7 +195,13 @@ const createToolUsageOnlyEvaluator = (): Evaluator<SecuritySkillsDatasetExample,
   kind: 'CODE',
   evaluate: async ({ output, metadata }) => {
     const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
-    if (!expectedOnlyToolId) return { score: 1 };
+    if (!expectedOnlyToolId) {
+      return {
+        score: null,
+        label: 'N/A',
+        explanation: 'No expectedOnlyToolId annotation — skipping ToolUsageOnly check.',
+      };
+    }
 
     const toolCalls = getToolCallSteps(output as TaskOutput);
     const domainToolCalls = toolCalls.filter((t) => t.tool_id && !isInternalTool(t.tool_id));
@@ -263,7 +275,12 @@ export const buildSecuritySkillsEvaluators = ({
                 (expected as SecuritySkillsDatasetExpected | undefined)?.shouldNotActivateSkill ??
                 getStringMeta(metadata, 'shouldNotActivateSkill');
               if (!shouldNotActivate) {
-                return { score: 1 };
+                return {
+                  score: null,
+                  label: 'N/A',
+                  explanation:
+                    'No shouldNotActivateSkill annotation — skipping ExpectedSkillInvocation check.',
+                };
               }
               if (!/^[a-zA-Z0-9_-]+$/.test(shouldNotActivate)) {
                 return {
