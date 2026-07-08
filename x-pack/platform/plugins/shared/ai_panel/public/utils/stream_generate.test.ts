@@ -30,9 +30,7 @@ function makeHttp(reader: ReadableStreamDefaultReader<Uint8Array>): HttpStart {
 
 describe('streamNdjson', () => {
   it('collects tokens from newline-delimited events', async () => {
-    const reader = makeReader([
-      '{"token":"hello"}\n{"token":" world"}\n',
-    ]);
+    const reader = makeReader(['{"token":"hello"}\n{"token":" world"}\n']);
     const onToken = jest.fn();
     await streamNdjson(makeHttp(reader), '/test', {}, onToken, new AbortController().signal);
     expect(onToken).toHaveBeenCalledWith('hello');
@@ -41,10 +39,7 @@ describe('streamNdjson', () => {
   });
 
   it('handles tokens split across chunk boundaries', async () => {
-    const reader = makeReader([
-      '{"token":"hel',
-      'lo"}\n{"token":"world"}\n',
-    ]);
+    const reader = makeReader(['{"token":"hel', 'lo"}\n{"token":"world"}\n']);
     const onToken = jest.fn();
     await streamNdjson(makeHttp(reader), '/test', {}, onToken, new AbortController().signal);
     expect(onToken).toHaveBeenCalledWith('hello');
