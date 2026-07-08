@@ -91,7 +91,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   // Clear dynamic buttons when the canvas attachment changes
   useEffect(() => {
     setDynamicButtons([]);
-  }, [canvasState?.attachment.id, canvasState?.attachment.version]);
+  }, [canvasState?.attachment.id, canvasState?.attachment.versionData?.version]);
 
   const registerActionButtons = useCallback((buttons: ActionButton[]) => {
     setDynamicButtons(buttons);
@@ -162,7 +162,9 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
         previewBadgeState="preview_available"
       />
       <EuiFlyoutBody css={flyoutBodyStyles}>
-        <AttachmentRenderErrorBoundary key={`${attachment.id}:${attachment.version ?? 'latest'}`}>
+        <AttachmentRenderErrorBoundary
+          key={`${attachment.id}:${attachment.versionData?.version ?? 'latest'}`}
+        >
           {() =>
             renderCanvasContent(
               {
