@@ -50624,8 +50624,6 @@
     "xpack.streams.editIlmPhasesFlyout.downsamplePreviousIntervalWarmPhaseError": "必须大于热阶段值 ({value}) 并且是其倍数",
     "xpack.streams.editIlmPhasesFlyout.downsamplingIntervalAriaLabel": "下采样间隔值",
     "xpack.streams.editIlmPhasesFlyout.downsamplingIntervalLabel": "时间间隔",
-    "xpack.streams.editIlmPhasesFlyout.downsamplingLearnMoreLink": "了解详情",
-    "xpack.streams.editIlmPhasesFlyout.downsamplingNotSupportedBody": "下采样仅适用于时间序列流。配置这些设置不会影响该流的数据存储方式。{learnMoreLink}",
     "xpack.streams.editIlmPhasesFlyout.downsamplingNotSupportedTitle": "此流无法使用下采样。",
     "xpack.streams.editIlmPhasesFlyout.downsamplingTitle": "下采样",
     "xpack.streams.editIlmPhasesFlyout.downsamplingUnitAria": "下采样间隔单位",

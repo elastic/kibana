@@ -7,16 +7,15 @@
 
 import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  EuiText,
   EuiTitle,
   EuiCallOut,
   useGeneratedHtmlId,
-  EuiLink,
 } from '@elastic/eui';
 import { useFormContext, useWatch, type FieldPath } from 'react-hook-form';
 import type { DownsamplePhase, IlmPhasesFlyoutFormInternal } from '../form';
@@ -28,7 +27,6 @@ import {
   type PreservedTimeUnit,
 } from '../../shared';
 import { TIME_UNIT_OPTIONS } from '../constants';
-import { useKibana } from '../../../../../../../hooks/use_kibana';
 
 export interface DownsampleFieldSectionProps {
   phaseName: DownsamplePhase;
@@ -71,10 +69,6 @@ export const DownsampleFieldSection = ({
       resetReadonly();
     }
   }, [isEnabled, isReadonlyEnabled, resetReadonly]);
-
-  const {
-    core: { docLinks },
-  } = useKibana();
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -173,28 +167,17 @@ export const DownsampleFieldSection = ({
         <EuiCallOut
           announceOnMount
           size="s"
-          iconType="info"
           data-test-subj={`${dataTestSubj}DownsamplingNotSupportedCallout-${phaseName}`}
           title={i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingNotSupportedTitle', {
-            defaultMessage: 'Downsampling is unavailable for this stream',
+            defaultMessage: 'Downsampling requires a time series stream',
           })}
         >
-          <FormattedMessage
-            id="xpack.streams.editIlmPhasesFlyout.downsamplingNotSupportedBody"
-            defaultMessage="Downsampling only works for time series streams. Configuring these settings won't effect how this stream's data is stored. {learnMoreLink}"
-            values={{
-              learnMoreLink: (
-                <EuiLink
-                  href={docLinks?.links?.observability?.downsamplingConcepts}
-                  target="_blank"
-                >
-                  {i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingLearnMoreLink', {
-                    defaultMessage: 'Learn more',
-                  })}
-                </EuiLink>
-              ),
-            }}
-          />
+          <EuiText size="s">
+            {i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingNotSupportedBody', {
+              defaultMessage:
+                'As this stream is not a time series, downsampling steps from this ILM policy will be excluded.',
+            })}
+          </EuiText>
         </EuiCallOut>
       )}
 

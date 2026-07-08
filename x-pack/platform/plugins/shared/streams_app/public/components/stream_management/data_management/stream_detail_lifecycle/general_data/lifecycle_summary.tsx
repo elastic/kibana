@@ -265,10 +265,11 @@ const IlmLifecycleSummary = ({
   isMetricsStream,
   stats,
   refreshDefinition,
+  onEditSuccessfulLifecycle,
   isExternalFlyoutOpen = false,
+  isDataPhaseFlyoutOpen = false,
   onDataPhaseFlyoutOpenChange,
   previewHeader,
-  editLifecycleMethodButton,
 }: InternalLifecycleSummaryProps) => {
   const {
     isActive: isPreviewActive,
@@ -288,6 +289,15 @@ const IlmLifecycleSummary = ({
 
   const isEditLifecycleFlyoutOpen = ilmSummary.isEditLifecycleFlyoutOpen;
   const invalidPhases = ilmSummary.flyoutInvalidPhases;
+
+  // The edit-lifecycle-method button is disabled while the ILM edit-phases flyout is open so the
+  // two flyouts can't be opened simultaneously. That flyout's open state is internal to this
+  // component, so the button is rebuilt here rather than reusing the one built by the parent.
+  const editLifecycleMethodButton = getEditLifecycleMethodButton({
+    onEditSuccessfulLifecycle,
+    canManageLifecycle: Boolean(definition.privileges.lifecycle),
+    isDisabled: isExternalFlyoutOpen || isDataPhaseFlyoutOpen || isEditLifecycleFlyoutOpen,
+  });
 
   useEditFlyoutPreviewSync({
     isFlyoutOpen: isEditLifecycleFlyoutOpen,

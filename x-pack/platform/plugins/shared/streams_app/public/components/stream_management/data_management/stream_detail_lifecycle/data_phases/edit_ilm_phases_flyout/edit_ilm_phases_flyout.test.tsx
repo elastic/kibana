@@ -505,9 +505,14 @@ describe('EditIlmPhasesFlyout', () => {
       const warmPanel = withinPhase('warm');
       fireEvent.click(warmPanel.getByTestId(`${DATA_TEST_SUBJ}DownsamplingSwitch`));
 
-      expect(
-        await screen.findByTestId(`${DATA_TEST_SUBJ}DownsamplingNotSupportedCallout-warm`)
-      ).toBeInTheDocument();
+      const callout = await screen.findByTestId(
+        `${DATA_TEST_SUBJ}DownsamplingNotSupportedCallout-warm`
+      );
+      expect(callout).toBeInTheDocument();
+      expect(callout).toHaveTextContent('Downsampling requires a time series stream');
+      expect(callout).toHaveTextContent(
+        'As this stream is not a time series, downsampling steps from this ILM policy will be excluded.'
+      );
     });
 
     it('defaults warm downsample interval to 2x the previous enabled downsample interval', async () => {

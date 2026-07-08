@@ -50276,8 +50276,6 @@
     "xpack.streams.editIlmPhasesFlyout.downsamplePreviousIntervalWarmPhaseError": "Doit être supérieure à la valeur de phase \"hot\" ({value}) et un multiple de cette valeur",
     "xpack.streams.editIlmPhasesFlyout.downsamplingIntervalAriaLabel": "Valeur de l'intervalle de sous-échantillonnage",
     "xpack.streams.editIlmPhasesFlyout.downsamplingIntervalLabel": "Intervalle",
-    "xpack.streams.editIlmPhasesFlyout.downsamplingLearnMoreLink": "En savoir plus",
-    "xpack.streams.editIlmPhasesFlyout.downsamplingNotSupportedBody": "Le sous-échantillonnage ne fonctionne que pour les flux de séries temporelles. La configuration de ces paramètres n'aura aucune incidence sur la manière dont les données de ce flux sont stockées. {learnMoreLink}",
     "xpack.streams.editIlmPhasesFlyout.downsamplingNotSupportedTitle": "Le sous-échantillonnage n'est pas disponible pour ce flux",
     "xpack.streams.editIlmPhasesFlyout.downsamplingTitle": "Sous-échantillonnage",
     "xpack.streams.editIlmPhasesFlyout.downsamplingUnitAria": "Unité d'intervalle de sous-échantillonnage",
