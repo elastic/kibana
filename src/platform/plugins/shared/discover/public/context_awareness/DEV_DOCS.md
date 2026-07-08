@@ -207,10 +207,10 @@ Definitions live near the providers that use them and are registered from `profi
 
 ### State types and lifetime
 
-`ProfileStateType` is a field-level lifetime preference: `Ui` for ephemeral UI state, `Url` for Discover URL sync, and `Persistent` for local tab storage.
+`ProfileStateType` is a field-level lifetime preference: `Ui` for ephemeral UI state, `Url` for Discover URL sync and local tab storage, and `Persistent` for local tab storage without URL sync.
 
-- Main Discover stores state in `TabState.profileState`, scoped to a tab. Fresh tabs start with raw `profileState: {}`, duplicated tabs copy full profile state, and restored or locally reloaded tabs hydrate only `Persistent` fields from local tab storage merged over the definition `defaultState`.
-- Main Discover syncs `Url` fields to the `_p` URL parameter for the definition exposed by the active data source profile context (`context.profileState`). Default-equivalent URL fields are omitted from `_p`, and clearing `_p` resets URL fields to definition defaults.
+- Main Discover stores state in `TabState.profileState`, scoped to a tab. Fresh tabs start with raw `profileState: {}`, duplicated tabs copy full profile state, and restored or locally reloaded tabs hydrate registered `Persistent` and `Url` fields from local tab storage merged over the definition `defaultState`. Stored `Ui` fields are ignored and come from defaults on restore.
+- Main Discover syncs `Url` fields to the `_p` URL parameter for the definition exposed by the active data source profile context (`context.profileState`). Clearing `_p` resets URL fields to definition defaults.
 - Simplified hosts (document route, surrounding documents page, embeddables) use `createInMemoryContextAwarenessToolkit()`, storing all profile state in memory for that scoped host instance. `Url` and `Persistent` fields are accepted there but do not change the lifetime.
 - Adapters return `definition.defaultState` until state has been written.
 

@@ -303,7 +303,9 @@ state. Profile state is accessed through the host-provided toolkit and is scoped
 main Discover app it is scoped to the current tab; in simplified hosts like the document route, surrounding documents
 page, and embeddables it is kept in memory for the lifetime of that host instance.
 Fields marked as `ProfileStateType.Url` are synced to the `_p` URL parameter in the main Discover app when their
-definition is exposed by the active data source profile context.
+definition is exposed by the active data source profile context. Main Discover also persists registered
+`ProfileStateType.Persistent` and `ProfileStateType.Url` fields in local tab storage; `ProfileStateType.Ui` fields are
+runtime-only and are restored from defaults.
 
 Define a `ProfileStateDefinition<TState>` near the profile provider that uses it:
 
@@ -360,8 +362,7 @@ resolve: () => ({
 });
 ```
 
-Only the active data source profile's URL fields are read from and written to `_p`. Default-equivalent URL fields are
-omitted from `_p`, and removing `_p` resets those fields to their definition defaults.
+Only the active data source profile's URL fields are read from and written to `_p`. Removing `_p` resets those fields to their definition defaults.
 
 Use `toolkit.getStateAdapter()` inside extension point implementations to read, observe, and update the state:
 
