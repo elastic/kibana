@@ -20,6 +20,7 @@ import {
 } from '@kbn/alerting-v2-rule-form';
 import { ActionPoliciesApi } from '../services/action_policies_api';
 import type { RuleApiResponse } from '../services/rules_api';
+import { actionPolicyKeys } from './query_key_factory';
 
 export interface SetupRuleNotificationsParams {
   rule: RuleApiResponse;
@@ -203,6 +204,7 @@ export const useSetupRuleNotifications = () => {
       // Drop the caches unconditionally after any reconcile attempt
       queryClient.removeQueries({ queryKey: getRuleNotificationDraftsQueryKey(rule.id) });
       queryClient.removeQueries({ queryKey: ['matchedActionPolicies', rule.id] });
+      queryClient.invalidateQueries({ queryKey: actionPolicyKeys.lists(), exact: false });
     },
   });
 };

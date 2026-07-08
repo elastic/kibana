@@ -290,6 +290,12 @@ export type LensApiConfigByType = {
   [K in LensApiConfig['type']]: Extract<LensApiConfig, { type: K }>;
 };
 
+export { durationFormatSchema, legacyDurationFormatSchema } from './duration_units';
+export {
+  gaDurationInputUnitToLegacyApi,
+  gaDurationOutputUnitToLegacyApi,
+} from '../transforms/columns/duration_units';
+
 export {
   // Combined schemas
   metricConfigSchema,
