@@ -19,6 +19,7 @@ import {
   type EntityMaintainerTaskMethod,
 } from './types';
 import { CRUDClient, type EntityUpdateClient } from '../../domain/crud';
+import { ResolutionRulesClient } from '../../domain/resolution/rules';
 import { EntityMetadataClient } from '../../domain/entity_metadata';
 import type { TelemetryReporter } from '../../telemetry/events';
 import { ENTITY_MAINTAINER_EVENT } from '../../telemetry/events';
@@ -139,6 +140,7 @@ export async function executeMaintainerRun({
   const cpsEsClient = coreStart.elasticsearch.client.asScoped(request, {
     projectRouting: 'space',
   }).asCurrentUser;
+  const soClient = coreStart.savedObjects.getScopedClient(request);
   const emitWorkflowTriggerEvent = createWorkflowTriggerEmitter({
     getWorkflowsClient: () => workflowsExtensions.getClient(request),
     logger,
@@ -182,6 +184,11 @@ export async function executeMaintainerRun({
         esClient,
         cpsEsClient,
         crudClient,
+        resolutionRulesClient: new ResolutionRulesClient(
+          soClient,
+          maintainerStatus.metadata.namespace,
+          taskLogger
+        ),
         entityMetadataClient,
         id,
         analytics,
@@ -214,6 +221,7 @@ export async function runEntityMaintainerTask({
   esClient,
   cpsEsClient,
   crudClient,
+  resolutionRulesClient,
   entityMetadataClient,
   id,
   analytics,
@@ -228,6 +236,7 @@ export async function runEntityMaintainerTask({
   esClient: ElasticsearchClient;
   cpsEsClient: ElasticsearchClient;
   crudClient: EntityUpdateClient;
+  resolutionRulesClient: ResolutionRulesClient;
   entityMetadataClient: EntityMetadataClient;
   id: string;
   analytics: TelemetryReporter;
@@ -260,6 +269,7 @@ export async function runEntityMaintainerTask({
         esClient,
         cpsEsClient,
         crudClient,
+        resolutionRulesClient,
         entityMetadataClient,
         telemetry: telemetryClient,
       });
@@ -278,6 +288,7 @@ export async function runEntityMaintainerTask({
       esClient,
       cpsEsClient,
       crudClient,
+      resolutionRulesClient,
       entityMetadataClient,
       telemetry: telemetryClient,
     });

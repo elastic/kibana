@@ -15,8 +15,10 @@ import {
   ResizableLayoutOrder,
 } from '@kbn/resizable-layout';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
+import type { TemplateSettings } from '../../../../common/types/domain/template/v1';
 import { TemplateYamlEditor } from './template_form';
-import { TemplatePreview } from './template_preview';
+import { TemplateRenderPanel } from './template_render_panel';
 import { componentStyles } from './template_form_layout.styles';
 import { MIN_EDITOR_WIDTH, MIN_PREVIEW_WIDTH } from '../constants';
 
@@ -30,6 +32,11 @@ interface TemplateEditorLayoutProps {
   previewWidth: number;
   onPreviewWidthChange: (width: number) => void;
   savedValue?: string;
+  settings?: TemplateSettings;
+  connector?: CaseConnectorWithoutName;
+  onSettingsChange: (settings: TemplateSettings) => void;
+  onConnectorChange: (connector: CaseConnectorWithoutName) => void;
+  formResetKey?: number;
 }
 
 export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
@@ -42,6 +49,11 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
   previewWidth,
   onPreviewWidthChange,
   savedValue,
+  settings,
+  connector,
+  onSettingsChange,
+  onConnectorChange,
+  formResetKey,
 }) => {
   const styles = useMemoCss(componentStyles);
 
@@ -69,8 +81,15 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
       }
       minFlexPanelSize={MIN_EDITOR_WIDTH}
       fixedPanel={
-        <div css={styles.previewPanel}>
-          <TemplatePreview onFieldDefaultChange={onFieldDefaultChange} />
+        <div css={styles.previewPanel} data-test-subj="templatePreviewPanel">
+          <TemplateRenderPanel
+            settings={settings}
+            connector={connector}
+            onSettingsChange={onSettingsChange}
+            onConnectorChange={onConnectorChange}
+            onFieldDefaultChange={onFieldDefaultChange}
+            formResetKey={formResetKey}
+          />
         </div>
       }
       fixedPanelSize={previewWidth}

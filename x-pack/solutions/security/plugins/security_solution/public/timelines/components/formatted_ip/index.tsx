@@ -15,8 +15,7 @@ import { useStore } from 'react-redux';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
-import { useKibana, useUiSetting } from '../../../common/lib/kibana';
-import { ENABLE_NEW_FLYOUT_SETTING } from '../../../../common/constants';
+import { useKibana } from '../../../common/lib/kibana';
 import { NetworkDetailsLink } from '../../../common/components/links';
 import { NetworkPanelKey } from '../../../flyout/network_details';
 import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
@@ -24,6 +23,7 @@ import { OpenFlyoutLink } from '../../../flyout_v2/shared/components/open_flyout
 import { Network } from '../../../flyout_v2/network/main';
 import { flyoutProviders } from '../../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 
 const tryStringify = (value: string | object | null | undefined): string => {
   try {
@@ -66,7 +66,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   const { overlays } = services;
   const store = useStore();
   const history = useHistory();
-  const enableNewFlyout = useUiSetting<boolean>(ENABLE_NEW_FLYOUT_SETTING, false);
+  const enableNewFlyout = useIsNewFlyoutEnabled();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const eventContext = useContext(StatefulEventContext);
