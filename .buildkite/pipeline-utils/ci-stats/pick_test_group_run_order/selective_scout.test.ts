@@ -95,7 +95,7 @@ describe('isScoutTestsOnlyDiff', () => {
 
   it('returns false when the diff is noise-only (no Scout signal)', () => {
     expect(
-      isScoutTestsOnlyDiff(['README.md', 'docs/extend/testing/scout-best-practices.md.md'])
+      isScoutTestsOnlyDiff(['README.md', 'docs/extend/testing/scout-best-practices.md'])
     ).toBe(false);
   });
 
