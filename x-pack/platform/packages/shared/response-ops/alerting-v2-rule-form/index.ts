@@ -18,6 +18,17 @@ export type { ResolvedSteps } from './flyout/compose_discover';
 export { RULE_BUILDER_REGISTRY } from './flyout/compose_discover/rule_builder';
 export type { BuilderState } from './flyout/compose_discover/rule_builder';
 
+// Builder state — callers own this via ComposeDiscoverBuilderStateHost, wrapping
+// ComposeDiscoverFlyout from the outside, instead of the flyout owning it internally.
+export {
+  ComposeDiscoverBuilderStateHost,
+  resolveInitialBuilderState,
+} from './flyout/compose_discover/rule_builder';
+export type {
+  ComposeDiscoverBuilderStateHostProps,
+  ResolvedBuilderState,
+} from './flyout/compose_discover/rule_builder';
+
 // Compose Discover sandbox — embeddable ES|QL editor + results panel (props-only)
 export { QuerySandboxFlyout } from './flyout/compose_discover';
 export type { QuerySandboxFlyoutProps, QueryTab } from './flyout/compose_discover';

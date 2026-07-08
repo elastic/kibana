@@ -24,6 +24,7 @@ import { createTestQueryClient } from '../../test_utils';
 import { ComposeDiscoverFlyout } from './compose_discover_flyout';
 import type { ComposeDiscoverFlyoutProps } from './compose_discover_flyout';
 import type { ComposeDiscoverForm } from './compose_discover_form';
+import { ComposeDiscoverBuilderStateHost } from './rule_builder';
 
 type FormProps = React.ComponentProps<typeof ComposeDiscoverForm>;
 
@@ -223,9 +224,33 @@ const createMockServices = (): RuleFormServices => ({
 
 const testQueryClient = createTestQueryClient();
 
-const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+/*
+ * Wraps children with the real ComposeDiscoverBuilderStateHost (not a mock) so tests
+ * exercise the actual builder-state resolution + Provider wiring the production callers
+ * use — builderType/initialQuery/esqlVariables here drive what gets resolved, exactly as
+ * they would from a real caller.
+ */
+const TestWrapper = ({
+  builderType,
+  initialQuery,
+  esqlVariables,
+  children,
+}: {
+  builderType?: string;
+  initialQuery?: string;
+  esqlVariables?: ESQLControlVariable[];
+  children: (builderParsedFromDiscover: boolean) => React.ReactNode;
+}) => (
   <IntlProvider locale="en">
-    <QueryClientProvider client={testQueryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={testQueryClient}>
+      <ComposeDiscoverBuilderStateHost
+        builderType={builderType}
+        initialQuery={initialQuery}
+        esqlVariables={esqlVariables}
+      >
+        {children}
+      </ComposeDiscoverBuilderStateHost>
+    </QueryClientProvider>
   </IntlProvider>
 );
 
@@ -237,12 +262,20 @@ const defaultProps: ComposeDiscoverFlyoutProps = {
   onCreateRule: jest.fn(),
 };
 
-const renderFlyout = (overrides: Partial<ComposeDiscoverFlyoutProps> = {}) =>
-  render(
-    <TestWrapper>
-      <ComposeDiscoverFlyout {...defaultProps} {...overrides} />
+const renderFlyout = (overrides: Partial<ComposeDiscoverFlyoutProps> = {}) => {
+  const props = { ...defaultProps, ...overrides };
+  return render(
+    <TestWrapper
+      builderType={props.builderType}
+      initialQuery={props.initialQuery}
+      esqlVariables={props.esqlVariables}
+    >
+      {(builderParsedFromDiscover) => (
+        <ComposeDiscoverFlyout {...props} builderParsedFromDiscover={builderParsedFromDiscover} />
+      )}
     </TestWrapper>
   );
+};
 
 const getEditModeButton = (mode: 'form' | 'yaml') => {
   const buttons = screen.getByTestId('composeDiscoverEditModeToggle').querySelectorAll('button');
@@ -576,19 +609,19 @@ describe('ComposeDiscoverFlyout', () => {
         esqlVariables: [] as ESQLControlVariable[],
       };
       const { rerender } = render(
-        <TestWrapper>
-          <ComposeDiscoverFlyout {...props} />
-        </TestWrapper>
+        <TestWrapper>{() => <ComposeDiscoverFlyout {...props} />}</TestWrapper>
       );
 
       expect(screen.queryByTestId('ruleV2FlyoutValidationErrors')).not.toBeInTheDocument();
 
       rerender(
         <TestWrapper>
-          <ComposeDiscoverFlyout
-            {...props}
-            initialQuery="FROM logs-* | WHERE host == ?host | LIMIT 5"
-          />
+          {() => (
+            <ComposeDiscoverFlyout
+              {...props}
+              initialQuery="FROM logs-* | WHERE host == ?host | LIMIT 5"
+            />
+          )}
         </TestWrapper>
       );
 
@@ -602,16 +635,14 @@ describe('ComposeDiscoverFlyout', () => {
         esqlVariables: [] as ESQLControlVariable[],
       };
       const { rerender } = render(
-        <TestWrapper>
-          <ComposeDiscoverFlyout {...props} />
-        </TestWrapper>
+        <TestWrapper>{() => <ComposeDiscoverFlyout {...props} />}</TestWrapper>
       );
 
       fireEvent.click(screen.getByTestId('mockMakeDirty'));
 
       rerender(
         <TestWrapper>
-          <ComposeDiscoverFlyout {...props} initialQuery="FROM metrics-* | LIMIT 5" />
+          {() => <ComposeDiscoverFlyout {...props} initialQuery="FROM metrics-* | LIMIT 5" />}
         </TestWrapper>
       );
 

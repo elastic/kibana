@@ -85,6 +85,12 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
       Compose Discover flyout
     </button>
   ),
+  // Pass-through: this test doesn't exercise real builder-state resolution.
+  ComposeDiscoverBuilderStateHost: ({
+    children,
+  }: {
+    children: (parsedFromDiscover: boolean) => React.ReactNode;
+  }) => children(false),
 }));
 
 const mockUseFetchRules = jest.fn();

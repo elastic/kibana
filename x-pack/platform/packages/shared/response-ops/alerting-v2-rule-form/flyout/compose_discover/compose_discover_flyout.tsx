@@ -49,12 +49,7 @@ import {
 import { HorizontalMinimalStepper, type MinimalStep } from './horizontal_minimal_stepper';
 import { QuerySandboxFlyout } from './query_sandbox_flyout';
 import { isAlertTabDisabled } from './compose_discover_tabs';
-import {
-  RULE_BUILDER_REGISTRY,
-  BuilderStateProvider,
-  parseDiscoverQueryForBuilder,
-  type BuilderState,
-} from './rule_builder';
+import { RULE_BUILDER_REGISTRY, useBuilderState, type BuilderState } from './rule_builder';
 import type {
   ComposeDiscoverAction,
   ComposeDiscoverMode,
@@ -170,8 +165,19 @@ export interface ComposeDiscoverFlyoutProps {
   onUpdateRule?: (id: string, payload: ReturnType<typeof composeFormToUpdateRequest>) => void;
   /** True while a create/update mutation is in flight. */
   isSaving?: boolean;
+  /**
+   * Still needed here for payload construction (compose_mappers.ts) and RULE_BUILDER_REGISTRY
+   * lookups (submit-time validation) — unrelated to builder *state* ownership, which now lives
+   * entirely with the caller (see ComposeDiscoverBuilderStateHost).
+   */
   builderType?: string;
-  initialBuilderState?: BuilderState;
+  /**
+   * Whether builderType's initial state was successfully derived from a Discover-seeded query.
+   * Resolved by the caller (via resolveInitialBuilderState/ComposeDiscoverBuilderStateHost) —
+   * the flyout needs only this one fact, not the parsing logic itself, to decide whether the
+   * raw ES|QL query should also seed the RHF form. Ignored outside create mode.
+   */
+  builderParsedFromDiscover?: boolean;
   /** Pre-populated ES|QL query (e.g. from Discover). Seeds the base query in create mode. */
   initialQuery?: string;
   /** ES|QL control variables from Discover — inlined into initialQuery when provided. */
@@ -236,7 +242,7 @@ export function ComposeDiscoverFlyout({
   onUpdateRule,
   isSaving = false,
   builderType,
-  initialBuilderState,
+  builderParsedFromDiscover = false,
   initialQuery,
   esqlVariables,
   resolveSteps,
@@ -313,20 +319,12 @@ export function ComposeDiscoverFlyout({
   // Registered once here so providers persist across Sandbox open/close cycles.
   useEsqlAutocomplete(baseServices);
 
-  const [initialParsedState] = useState<BuilderState | null>(() => {
-    if (!builderType || initialBuilderState !== undefined || !inlineResult.query) return null;
-    return parseDiscoverQueryForBuilder(inlineResult.query);
-  });
-
-  const builderParsedFromDiscover = initialParsedState !== null;
-
-  const [builderState, setBuilderState] = useState<BuilderState>(() => {
-    if (!builderType) return undefined;
-    if (initialBuilderState !== undefined) return initialBuilderState;
-    if (initialParsedState) return initialParsedState;
-    const definition = RULE_BUILDER_REGISTRY[builderType];
-    return definition ? definition.createDefaultState() : undefined;
-  });
+  /*
+   * builderState's initial value and its "was it Discover-seeded" fact (builderParsedFromDiscover,
+   * a prop above) are both resolved by the caller now — see ComposeDiscoverBuilderStateHost. This
+   * only reads the live value from the context the caller wraps this component in.
+   */
+  const { state: builderState, setState: setBuilderState } = useBuilderState<BuilderState>();
 
   const validationErrors = inlineResult.unresolved;
   const hasValidationErrors = validationErrors.length > 0;
@@ -748,6 +746,7 @@ export function ComposeDiscoverFlyout({
       isBuilderMode,
       sandboxConfig.isEditable,
       builderState,
+      setBuilderState,
       uiState.queryCommitted,
       uiState.childOpen,
       uiState.yamlMode,
@@ -1257,26 +1256,21 @@ export function ComposeDiscoverFlyout({
               ) : (
                 <>
                   {validationCallout}
-                  <BuilderStateProvider
-                    builderState={builderState}
-                    setBuilderState={setBuilderState}
-                  >
-                    <ComposeDiscoverForm
-                      state={uiState}
-                      dispatch={dispatch}
-                      services={baseServices}
-                      onRecoveryTypeChange={handleRecoveryTypeChange}
-                      onKindChange={handleKindChange}
-                      isEditing={isEditing}
-                      ruleId={ruleId}
-                      builderType={builderType}
-                      currentStep={currentStep}
-                      renderCustomRecovery={renderCustomRecovery}
-                      onManualSplit={
-                        supportsUnifiedEditorToggle ? handleManualSplitFromForm : undefined
-                      }
-                    />
-                  </BuilderStateProvider>
+                  <ComposeDiscoverForm
+                    state={uiState}
+                    dispatch={dispatch}
+                    services={baseServices}
+                    onRecoveryTypeChange={handleRecoveryTypeChange}
+                    onKindChange={handleKindChange}
+                    isEditing={isEditing}
+                    ruleId={ruleId}
+                    builderType={builderType}
+                    currentStep={currentStep}
+                    renderCustomRecovery={renderCustomRecovery}
+                    onManualSplit={
+                      supportsUnifiedEditorToggle ? handleManualSplitFromForm : undefined
+                    }
+                  />
                 </>
               )}
             </EuiFlyoutBody>

@@ -75,6 +75,13 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
     capturedComposeProps = props;
     return <div data-test-subj="mockComposeDiscoverFlyout" />;
   },
+  // Pass-through: this test only asserts on props ComposeDiscoverFlyout receives, not
+  // on real builder-state resolution (that's covered in the package's own tests).
+  ComposeDiscoverBuilderStateHost: ({
+    children,
+  }: {
+    children: (parsedFromDiscover: boolean) => React.ReactNode;
+  }) => children(false),
 }));
 
 // Collects all pending resolvers from untilPluginStartServicesReady calls so the test

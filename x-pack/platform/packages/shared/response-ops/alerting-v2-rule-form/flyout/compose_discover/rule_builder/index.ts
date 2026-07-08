@@ -8,6 +8,13 @@
 export type { RuleBuilderDefinition, RuleBuilderStepProps, BuilderState } from './types';
 export { RULE_BUILDER_REGISTRY } from './registry';
 export { BuilderStateProvider, useBuilderState } from './builder_state_context';
+export { resolveInitialBuilderState } from './resolve_initial_state';
+export type {
+  ResolvedBuilderState,
+  ResolveInitialBuilderStateParams,
+} from './resolve_initial_state';
+export { ComposeDiscoverBuilderStateHost } from './builder_state_host';
+export type { ComposeDiscoverBuilderStateHostProps } from './builder_state_host';
 export { RuleBuilderAlertConditionStep } from './threshold/alert_condition_step';
 export { buildThresholdEsql } from './threshold/build_esql';
 export { parseThresholdEsql, parseDiscoverQueryForBuilder } from './threshold/parse_esql';

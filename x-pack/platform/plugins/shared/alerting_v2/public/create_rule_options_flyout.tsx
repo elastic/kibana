@@ -21,7 +21,11 @@ import type { History } from 'history';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
-import type { ComposeDiscoverFlyoutProps, ResolvedSteps } from '@kbn/alerting-v2-rule-form';
+import type {
+  ComposeDiscoverBuilderStateHostProps,
+  ComposeDiscoverFlyoutProps,
+  ResolvedSteps,
+} from '@kbn/alerting-v2-rule-form';
 import { Context } from '@kbn/core-di-browser';
 import { untilPluginStartServicesReady, type AlertingV2KibanaServices } from './kibana_services';
 import { RuleCreateOptionsFlyout } from './components/rule_create_options/rule_create_options_flyout';
@@ -64,6 +68,7 @@ interface LoadedModules {
   services: AlertingV2KibanaServices;
   ComposeDiscoverFlyout: React.ComponentType<ComposeDiscoverFlyoutProps>;
   getSteps: (isAlert: boolean, builderType?: string) => ResolvedSteps;
+  ComposeDiscoverBuilderStateHost: React.ComponentType<ComposeDiscoverBuilderStateHostProps>;
 }
 
 const noopSubscribe = () => () => {};
@@ -124,6 +129,7 @@ const CreateRuleOptionsFlyoutInner = ({
       services,
       ComposeDiscoverFlyout: mod.ComposeDiscoverFlyout,
       getSteps: mod.getSteps,
+      ComposeDiscoverBuilderStateHost: mod.ComposeDiscoverBuilderStateHost,
     };
   }, []);
 
@@ -238,7 +244,7 @@ const CreateRuleOptionsFlyoutInner = ({
     );
   }
 
-  const { services, ComposeDiscoverFlyout, getSteps } = value;
+  const { services, ComposeDiscoverFlyout, getSteps, ComposeDiscoverBuilderStateHost } = value;
 
   const isRuleManagementABSkillAvailable = getIsRuleManagementABSkillAvailable(
     services.application,
@@ -248,17 +254,21 @@ const CreateRuleOptionsFlyoutInner = ({
   if (step.type === 'esql') {
     return (
       <Context.Provider value={services.container}>
-        <ComposeDiscoverFlyout
-          historyKey={historyKey}
-          mode="create"
-          onClose={onClose}
-          services={services}
-          onCreateRule={handleCreateRule}
-          isSaving={isSaving}
-          initialQuery={query}
-          esqlVariables={esqlVariables}
-          resolveSteps={(isAlert) => getSteps(isAlert)}
-        />
+        <ComposeDiscoverBuilderStateHost>
+          {() => (
+            <ComposeDiscoverFlyout
+              historyKey={historyKey}
+              mode="create"
+              onClose={onClose}
+              services={services}
+              onCreateRule={handleCreateRule}
+              isSaving={isSaving}
+              initialQuery={query}
+              esqlVariables={esqlVariables}
+              resolveSteps={(isAlert) => getSteps(isAlert)}
+            />
+          )}
+        </ComposeDiscoverBuilderStateHost>
       </Context.Provider>
     );
   }
@@ -266,18 +276,27 @@ const CreateRuleOptionsFlyoutInner = ({
   if (step.type === 'threshold') {
     return (
       <Context.Provider value={services.container}>
-        <ComposeDiscoverFlyout
-          historyKey={historyKey}
-          mode="create"
-          onClose={onClose}
-          services={services}
+        <ComposeDiscoverBuilderStateHost
           builderType="threshold"
-          onCreateRule={handleCreateRule}
-          isSaving={isSaving}
           initialQuery={query}
           esqlVariables={esqlVariables}
-          resolveSteps={(isAlert) => getSteps(isAlert, 'threshold')}
-        />
+        >
+          {(builderParsedFromDiscover) => (
+            <ComposeDiscoverFlyout
+              historyKey={historyKey}
+              mode="create"
+              onClose={onClose}
+              services={services}
+              builderType="threshold"
+              builderParsedFromDiscover={builderParsedFromDiscover}
+              onCreateRule={handleCreateRule}
+              isSaving={isSaving}
+              initialQuery={query}
+              esqlVariables={esqlVariables}
+              resolveSteps={(isAlert) => getSteps(isAlert, 'threshold')}
+            />
+          )}
+        </ComposeDiscoverBuilderStateHost>
       </Context.Provider>
     );
   }

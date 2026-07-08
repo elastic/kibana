@@ -10,7 +10,12 @@ import type {
   ComposeDiscoverMode,
   RuleFormServices,
 } from '@kbn/alerting-v2-rule-form';
-import { ComposeDiscoverFlyout, getSteps, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
+import {
+  ComposeDiscoverBuilderStateHost,
+  ComposeDiscoverFlyout,
+  getSteps,
+  RULE_BUILDER_REGISTRY,
+} from '@kbn/alerting-v2-rule-form';
 import { getBreachEsqlQuery, getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -186,45 +191,52 @@ export const useComposeDiscoverFlyout = ({
   );
 
   const flyout = flyoutOpen ? (
-    <ComposeDiscoverFlyout
-      historyKey={historyKey}
-      mode={flyoutMode}
-      rule={targetRule ?? undefined}
-      ruleId={flyoutMode === 'edit' ? targetRule?.id : undefined}
-      onClose={closeFlyout}
-      services={ruleFormServices}
+    <ComposeDiscoverBuilderStateHost
       builderType={builderType ?? undefined}
       initialBuilderState={initialBuilderState}
-      resolveSteps={resolveSteps}
-      onCreateRule={(payload, ruleNotifications) =>
-        createRuleMutation.mutate(payload, {
-          onSuccess: (rule) => {
-            const actions = ruleNotifications?.workflows ?? [];
-            if (actions.length > 0) {
-              setupNotificationsMutation.mutate(
-                { rule, actions },
-                { onSuccess: closeAndRedirect, onError: closeAndRedirect }
-              );
-            } else {
-              closeAndRedirect();
-            }
-          },
-        })
-      }
-      onUpdateRule={(id, payload) =>
-        updateRuleMutation.mutate(
-          { id, payload },
-          {
-            onSuccess: closeFlyout,
+    >
+      {(builderParsedFromDiscover) => (
+        <ComposeDiscoverFlyout
+          historyKey={historyKey}
+          mode={flyoutMode}
+          rule={targetRule ?? undefined}
+          ruleId={flyoutMode === 'edit' ? targetRule?.id : undefined}
+          onClose={closeFlyout}
+          services={ruleFormServices}
+          builderType={builderType ?? undefined}
+          builderParsedFromDiscover={builderParsedFromDiscover}
+          resolveSteps={resolveSteps}
+          onCreateRule={(payload, ruleNotifications) =>
+            createRuleMutation.mutate(payload, {
+              onSuccess: (rule) => {
+                const actions = ruleNotifications?.workflows ?? [];
+                if (actions.length > 0) {
+                  setupNotificationsMutation.mutate(
+                    { rule, actions },
+                    { onSuccess: closeAndRedirect, onError: closeAndRedirect }
+                  );
+                } else {
+                  closeAndRedirect();
+                }
+              },
+            })
           }
-        )
-      }
-      isSaving={
-        createRuleMutation.isLoading ||
-        setupNotificationsMutation.isLoading ||
-        updateRuleMutation.isLoading
-      }
-    />
+          onUpdateRule={(id, payload) =>
+            updateRuleMutation.mutate(
+              { id, payload },
+              {
+                onSuccess: closeFlyout,
+              }
+            )
+          }
+          isSaving={
+            createRuleMutation.isLoading ||
+            setupNotificationsMutation.isLoading ||
+            updateRuleMutation.isLoading
+          }
+        />
+      )}
+    </ComposeDiscoverBuilderStateHost>
   ) : null;
 
   return {
