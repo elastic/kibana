@@ -289,7 +289,7 @@ export const updateTabs: InternalStateThunkActionCreator<
               profileState: nextTab.profileState,
               profileStateDefinition,
               profileStateRegistry: services.profileStateRegistry,
-            }) ?? null,
+            }),
             { replace: true }
           ),
         ]);
@@ -327,9 +327,9 @@ export const updateTabs: InternalStateThunkActionCreator<
         }
       } else {
         await Promise.all([
-          urlStateStorage.set(GLOBAL_STATE_URL_KEY, null, { replace: true }),
-          urlStateStorage.set(APP_STATE_URL_KEY, null, { replace: true }),
-          urlStateStorage.set(PROFILE_STATE_URL_KEY, null, { replace: true }),
+          urlStateStorage.set(GLOBAL_STATE_URL_KEY, undefined, { replace: true }),
+          urlStateStorage.set(APP_STATE_URL_KEY, undefined, { replace: true }),
+          urlStateStorage.set(PROFILE_STATE_URL_KEY, undefined, { replace: true }),
         ]);
         searchSessionManager.removeSearchSessionIdFromURL({ replace: true });
         services.data.search.session.reset();
