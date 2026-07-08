@@ -46,6 +46,7 @@ import {
   TableId,
 } from '@kbn/securitysolution-data-table';
 import { PageScope } from '../../../../data_view_manager/constants';
+import { DataViewPicker } from '../../../../data_view_manager/components/data_view_picker';
 import { RuleCustomizationsContextProvider } from '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
@@ -831,6 +832,12 @@ export const RuleDetailsPage = connector(
                   staticItems={headerStaticItems}
                   actionsParams={headerActionsParams}
                 />
+                <EuiSpacer size="m" />
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <DataViewPicker scope={PageScope.alerts} disabled />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
                 {ruleError}
                 <LegacyUrlConflictCallOut rule={rule} spacesApi={spacesApi} />
               </Display>
@@ -916,7 +923,7 @@ export const RuleDetailsPage = connector(
                   {canReadAlerts && (
                     <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                       <>
-                        <FiltersGlobal>
+                        <FiltersGlobal inline>
                           <SiemSearchBar
                             dataView={dataView}
                             pollForSignalIndex={pollForSignalIndex}

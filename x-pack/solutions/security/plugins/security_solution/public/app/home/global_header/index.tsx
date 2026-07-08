@@ -57,8 +57,9 @@ export const GlobalHeader = React.memo(() => {
   const canAddData = canReadFleet && !hasSearchAILakeConfigurations;
   const { pathname } = useLocation();
 
-  // The rules page renders its own inline app header (ML job settings, Add integrations), so the
-  // global header versions are hidden there to avoid duplication.
+  // The rules page renders its own inline app header (ML job settings, Add integrations) and, on
+  // the rule details page, its own data view picker below that header — so the global header
+  // versions are hidden there to avoid duplication.
   const isRulesPage = isRulesPath(pathname);
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -75,7 +76,7 @@ export const GlobalHeader = React.memo(() => {
 
   const showMlPopover = isDetectionsPath(pathname) && !isRulesPage;
   const showAddData = canAddData && !isRulesPage;
-  const showDataViewPickerButton = showDataViewPicker && !showTimeline;
+  const showDataViewPickerButton = showDataViewPicker && !showTimeline && !isRulesPage;
   // Avoid mounting an empty global header action menu bar when there is nothing to render.
   const hasGlobalHeaderContent = showMlPopover || showAddData || showDataViewPickerButton;
 

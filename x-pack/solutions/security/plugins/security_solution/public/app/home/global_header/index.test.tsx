@@ -121,26 +121,29 @@ describe('global header', () => {
     expect(link?.getAttribute('href')).toBe(ADD_THREAT_INTELLIGENCE_DATA_PATH);
   });
 
-  it.each(dataViewPickerPaths)('shows data view manager on %s page', (pathname) => {
-    (useLocation as jest.Mock).mockReturnValue({ pathname });
+  it.each(dataViewPickerPaths.filter((pathname) => !pathname.includes('/rules/')))(
+    'shows data view manager on %s page',
+    (pathname) => {
+      (useLocation as jest.Mock).mockReturnValue({ pathname });
 
-    const { getByTestId } = render(
+      const { getByTestId } = render(
+        <TestProviders store={store}>
+          <GlobalHeader />
+        </TestProviders>
+      );
+      expect(getByTestId(DATA_VIEW_PICKER_TEST_ID)).toBeInTheDocument();
+    }
+  );
+
+  it('does not show data view manager on rule details page (rendered on the page instead)', () => {
+    (useLocation as jest.Mock).mockReturnValue({ pathname: '/rules/id/rule-1' });
+
+    const { queryByTestId } = render(
       <TestProviders store={store}>
         <GlobalHeader />
       </TestProviders>
     );
-    expect(getByTestId(DATA_VIEW_PICKER_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('shows data view manager on rule details page', () => {
-    (useLocation as jest.Mock).mockReturnValue({ pathname: dataViewPickerPaths[2] });
-
-    const { getByTestId } = render(
-      <TestProviders store={store}>
-        <GlobalHeader />
-      </TestProviders>
-    );
-    expect(getByTestId(DATA_VIEW_PICKER_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(DATA_VIEW_PICKER_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('shows no data view manager if timeline is open', () => {
@@ -158,7 +161,7 @@ describe('global header', () => {
     };
     const mockStore = createMockStore(mockstate);
 
-    (useLocation as jest.Mock).mockReturnValue({ pathname: dataViewPickerPaths[2] });
+    (useLocation as jest.Mock).mockReturnValue({ pathname: dataViewPickerPaths[0] });
 
     const { queryByTestId } = render(
       <TestProviders store={mockStore}>
