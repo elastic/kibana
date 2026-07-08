@@ -12,12 +12,6 @@
 //   node scripts/knip --workspace src/platform/packages/shared/kbn-safer-lodash-set --include unlisted
 {
   "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
-  // Disable the Playwright and Cypress plugins for every workspace (top-level plugin config
-  // is applied to all workspaces as a default). Knip's config loader tries to import each
-  // `playwright.config.ts` / `cypress.config.ts`, which transitively pulls in `*.text`
-  // mustache templates from @kbn/evals (Node can't load the `.text` extension without our
-  // runtime require hook) and hits a colorette bundling issue in the cypress configs. We
-  // don't need these config files for dependency analysis, so we skip loading them.
   "playwright": false,
   "cypress": false,
   // @kbn/* and @elastic/* are internal linked packages managed outside of knip.
@@ -37,15 +31,14 @@
     "geckodriver",
     // these are used as Cypress reporters via reporter_config.json; knip can't trace the
     // cypress-multi-reporters -> configFile -> reporterEnabled chain.
-    "buildkite-test-collector",
     "cypress-multi-reporters",
+    "buildkite-test-collector",
+    // This provides the moon binary used by @kbn/moon; knip can't trace this.
+    "@moonrepo/cli",
     "marge",
     "mocha-junit-reporter",
     "mocha-multi-reporters",
     "mochawesome",
-    // used by APM's Cypress e2e support files (ftr_e2e/); with the cypress plugin disabled
-    // (see above) knip no longer traces it through the cypress config/support chain.
-    "@frsource/cypress-plugin-visual-regression-diff",
     // oxlint is invoked as a binary via procRunner in @kbn/lint-cli;
     // knip can't trace dynamic cmd invocations.
     "oxlint"
@@ -56,6 +49,11 @@
         "**/node_modules/**",
         "**/target/**",
         "**/build/**"
+      ],
+      "entry": [
+        "scripts/**/*.{js,ts}",
+        "src/**/*.{js,ts,tsx}",
+        "x-pack/**/*.{js,ts,tsx}"
       ],
       "storybook": {
         "config": [
@@ -103,7 +101,24 @@
     "src/platform/packages/shared/kbn-test": {
       // Jest setup/polyfill/serializer files referenced from jest-preset.js via `<rootDir>/...`.
       // knip can't resolve `<rootDir>` inside a shared preset.
-      "entry": ["src/jest/setup/*.{js,ts}"]
+      "entry": ["**/*.{js,ts}"]
+    },
+    "x-pack/platform/test": {
+      "entry": ["**/*.{js,ts,tsx}"]
+    },
+    "src/platform/packages/private/kbn-scout-reporting": {
+      "entry": ["**/*.{js,ts}"]
+    },
+    // The cypress plugin for knip is disabled because it cannot parse the JSX syntax that our config files transitively include.
+    // These entries allow knip to follow the cypress config files without parsing the JSX.
+    "x-pack/platform/plugins/shared/fleet/cypress": {
+      "entry": ["**/*.ts"]
+    },
+    "x-pack/solutions/observability/plugins/apm/ftr_e2e": {
+      "entry": ["**/*.ts"]
+    },
+    "x-pack/solutions/security/plugins/security_solution": {
+      "entry": ["public/management/cypress/**/*.{ts,tsx}"]
     }
   }
 }
