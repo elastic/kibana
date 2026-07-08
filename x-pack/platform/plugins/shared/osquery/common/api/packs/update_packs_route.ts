@@ -18,6 +18,8 @@ export const updatePacksRequestBodySchema = t.type({
     t.record(
       t.string,
       t.type({
+        // Existing stored id — lets a rename edit preserve the query's schedule_id.
+        id: t.union([t.string, t.undefined]),
         query: t.string,
         interval: t.union([toNumberRt, t.undefined]),
         snapshot: t.union([t.boolean, t.undefined]),

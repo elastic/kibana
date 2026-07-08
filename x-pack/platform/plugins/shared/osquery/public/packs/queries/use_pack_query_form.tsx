@@ -36,6 +36,9 @@ export type PackQuerySOECSMapping = Array<{ field: string; value: string }>;
 
 export interface PackQueryFormData {
   id: string;
+  // Stored id captured at deserialize time, kept stable across a rename so
+  // edit-save can preserve the original schedule_id.
+  originalId?: string;
   description?: string;
   query: string;
   interval: number;

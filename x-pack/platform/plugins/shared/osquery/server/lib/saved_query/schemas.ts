@@ -32,6 +32,8 @@ export const savedQuerySchemaV2 = savedQuerySchemaV1.extends({
   updated_by_profile_uid: schema.maybe(schema.nullable(schema.string())),
 });
 
+// `unknowns: 'allow'` is load-bearing — `schedule_id`/`start_date` round-trip
+// through this without an explicit schema field (see packSchemaV3 below).
 const packQuerySchema = schema.object(
   {
     id: schema.maybe(schema.string()),
@@ -77,3 +79,8 @@ export const packSchemaV2 = packSchemaV1.extends({
   created_by_profile_uid: schema.maybe(schema.nullable(schema.string())),
   updated_by_profile_uid: schema.maybe(schema.nullable(schema.string())),
 });
+
+// V3 backfills `schedule_id`/`start_date`/`id` onto pack queries lacking
+// them. Adds no new schema surface — the new fields live under `queries`,
+// already `unknowns: 'allow'`.
+export const packSchemaV3 = packSchemaV2;

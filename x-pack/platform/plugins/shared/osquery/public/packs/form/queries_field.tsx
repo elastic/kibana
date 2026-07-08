@@ -79,10 +79,17 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
     (updatedQuery: any) =>
       new Promise<void>((resolve) => {
         if (showEditQueryFlyout >= 0) {
+          // The stored identity claim must survive an edit even though the
+          // flyout replaces the draft wholesale and `id` may be renamed.
+          const originalId = fieldValue?.[showEditQueryFlyout]?.originalId;
           update(
             showEditQueryFlyout,
             produce({}, (draft: PackQueryFormData) => {
               draft.id = updatedQuery.id;
+              if (originalId !== undefined) {
+                draft.originalId = originalId;
+              }
+
               draft.interval = updatedQuery.interval;
               draft.query = updatedQuery.query;
               draft.timeout = updatedQuery.timeout;
@@ -110,7 +117,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
         handleHideEditFlyout();
         resolve();
       }),
-    [handleHideEditFlyout, update, showEditQueryFlyout]
+    [handleHideEditFlyout, update, showEditQueryFlyout, fieldValue]
   );
 
   const handleAddQuery = useCallback(
