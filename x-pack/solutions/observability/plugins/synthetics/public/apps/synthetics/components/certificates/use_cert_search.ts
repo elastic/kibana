@@ -25,10 +25,11 @@ export const useCertSearch = ({
   direction = DEFAULT_DIRECTION,
   monitorTypes,
   browserResourceTypes,
-  party,
+  certOrigin,
   tags,
   issuers,
   notValidAfter,
+  remoteNames,
 }: GetCertsParams): CertResult & { isLoading?: boolean } => {
   const { lastRefresh } = useContext(SyntheticsRefreshContext);
 
@@ -44,10 +45,11 @@ export const useCertSearch = ({
         direction,
         monitorTypes,
         browserResourceTypes,
-        party,
+        certOrigin,
         tags,
         issuers,
         notValidAfter,
+        remoteNames,
       })
     );
   }, [
@@ -60,10 +62,11 @@ export const useCertSearch = ({
     sortBy,
     monitorTypes,
     browserResourceTypes,
-    party,
+    certOrigin,
     tags,
     issuers,
     notValidAfter,
+    remoteNames,
   ]);
 
   const { data, isLoading } = useSelector(selectCertsListState);

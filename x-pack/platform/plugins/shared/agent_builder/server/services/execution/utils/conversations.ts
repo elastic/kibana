@@ -10,9 +10,12 @@ import type { Observable } from 'rxjs';
 import { of, forkJoin, switchMap } from 'rxjs';
 import type {
   Conversation,
+  ConversationAccessControl,
+  ConversationSource,
   RoundCompleteEvent,
   ConversationAction,
 } from '@kbn/agent-builder-common';
+import { getDefaultConversationAccessControl } from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 
@@ -20,15 +23,13 @@ import { createConversationUpdatedEvent, createConversationCreatedEvent } from '
  * Persist a new conversation and emit the corresponding event
  */
 export const createConversation$ = ({
-  agentId,
+  conversation,
   conversationClient,
-  conversationId,
   title$,
   roundCompletedEvents$,
 }: {
-  agentId: string;
+  conversation: Pick<Conversation, 'id' | 'agent_id' | 'access_control' | 'source'>;
   conversationClient: ConversationClient;
-  conversationId?: string;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
 }) => {
@@ -38,9 +39,11 @@ export const createConversation$ = ({
   }).pipe(
     switchMap(({ title, roundCompletedEvent }) => {
       return conversationClient.create({
-        id: conversationId,
+        id: conversation.id,
         title,
-        agent_id: agentId,
+        agent_id: conversation.agent_id,
+        access_control: conversation.access_control,
+        source: conversation.source,
         state: roundCompletedEvent.data.conversation_state,
         status: roundCompletedEvent.data.round.status,
         read: false,
@@ -93,18 +96,21 @@ export const updateConversation$ = ({
           ? roundCompletedEvent.data.workspace_id
           : undefined;
 
-      return conversationClient.update({
-        id: conversation.id,
-        title,
-        rounds: updatedRound,
-        state: conversation_state,
-        status: round.status,
-        read: false,
-        ...(roundCompletedEvent.data.attachments !== undefined
-          ? { attachments: roundCompletedEvent.data.attachments }
-          : {}),
-        ...(newWorkspaceId ? { workspace_id: newWorkspaceId } : {}),
-      });
+      return conversationClient.update(
+        {
+          id: conversation.id,
+          title,
+          rounds: updatedRound,
+          state: conversation_state,
+          status: round.status,
+          read: false,
+          ...(roundCompletedEvent.data.attachments !== undefined
+            ? { attachments: roundCompletedEvent.data.attachments }
+            : {}),
+          ...(newWorkspaceId ? { workspace_id: newWorkspaceId } : {}),
+        },
+        { access: 'converse' }
+      );
     }),
     switchMap((updatedConversation) => {
       return of(createConversationUpdatedEvent(updatedConversation));
@@ -130,8 +136,11 @@ export type ConversationOperation = 'CREATE' | 'UPDATE';
 export type ConversationWithOperation = Conversation & { operation: ConversationOperation };
 
 /**
- * Get a conversation by ID, or create a placeholder for new conversations.
- * Determines the operation type (CREATE or UPDATE) based on conversationId presence.
+ * Resolves the conversation to update, or returns a placeholder for one to create.
+ * conversationId takes precedence over source. When no conversationId is provided,
+ * source is used to find an existing conversation before creating a new placeholder.
+ * autoCreateConversationWithId only applies when conversationId is provided: missing
+ * conversations are created with that ID when enabled, and rejected by get() otherwise.
  * Note: Validation and manipulation for regenerate is handled in runDefaultAgentMode.
  */
 export const getConversation = async ({
@@ -139,16 +148,29 @@ export const getConversation = async ({
   conversationId,
   autoCreateConversationWithId = false,
   conversationClient,
+  accessControl,
+  source,
 }: {
   agentId: string;
   conversationId: string | undefined;
   autoCreateConversationWithId?: boolean;
   conversationClient: ConversationClient;
+  accessControl?: ConversationAccessControl;
+  source?: ConversationSource;
 }): Promise<ConversationWithOperation> => {
   // Case 1: No conversation ID - create new with placeholder
   if (!conversationId) {
+    const conversation = source ? await conversationClient.getBySource(source) : undefined;
+
+    if (conversation) {
+      return {
+        ...conversation,
+        operation: 'UPDATE',
+      };
+    }
+
     return {
-      ...placeholderConversation({ agentId }),
+      ...placeholderConversation({ agentId, accessControl, source }),
       operation: 'CREATE',
     };
   }
@@ -170,7 +192,7 @@ export const getConversation = async ({
     };
   } else {
     return {
-      ...placeholderConversation({ conversationId, agentId }),
+      ...placeholderConversation({ conversationId, agentId, accessControl, source }),
       operation: 'CREATE',
     };
   }
@@ -179,15 +201,21 @@ export const getConversation = async ({
 export const placeholderConversation = ({
   agentId,
   conversationId,
+  accessControl,
+  source,
 }: {
   agentId: string;
   conversationId?: string;
+  accessControl?: ConversationAccessControl;
+  source?: ConversationSource;
 }): Conversation => {
   return {
     id: conversationId ?? uuidv4(),
     title: 'New conversation',
     agent_id: agentId,
+    access_control: accessControl ?? getDefaultConversationAccessControl(),
     rounds: [],
+    ...(source ? { source } : {}),
     updated_at: new Date().toISOString(),
     created_at: new Date().toISOString(),
     user: {

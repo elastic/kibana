@@ -67,10 +67,16 @@ interface PhaseAccordionProps {
 
 export const PhaseAccordion = ({ phase, phases }: PhaseAccordionProps) => {
   const { euiTheme } = useEuiTheme();
+  const [isOpen, setIsOpen] = React.useState(false);
   const minAge = phases[phase]?.min_age;
   const content = buildPhaseContent(phase, phases);
   const accordionContentStyles = css`
     padding: 0 ${euiTheme.size.l} ${euiTheme.size.base} ${euiTheme.size.xxxl};
+  `;
+
+  const toggleIconCss = css`
+    transform: ${isOpen ? 'rotate(180deg)' : 'rotate(0deg)'};
+    transition: transform 150ms ease-in-out;
   `;
 
   const buttonContent = (
@@ -93,6 +99,16 @@ export const PhaseAccordion = ({ phase, phases }: PhaseAccordionProps) => {
           <EuiBadge data-test-subj={`ilmInspectPhaseMinAgeBadge-${phase}`}>{minAge}</EuiBadge>
         </EuiFlexItem>
       )}
+      <EuiFlexItem />
+      <EuiFlexItem grow={false}>
+        <EuiIcon
+          type="arrowDown"
+          size="m"
+          aria-hidden
+          css={toggleIconCss}
+          data-test-subj={`ilmInspectPhaseAccordionToggleIcon-${phase}`}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 
@@ -102,12 +118,11 @@ export const PhaseAccordion = ({ phase, phases }: PhaseAccordionProps) => {
         id={`ilm-inspect-phase-${phase}`}
         data-test-subj={`ilmInspectPhaseAccordion-${phase}`}
         buttonContent={buttonContent}
-        initialIsOpen={false}
+        forceState={isOpen ? 'open' : 'closed'}
+        onToggle={setIsOpen}
         paddingSize="none"
-        arrowDisplay="right"
+        arrowDisplay="none"
         buttonProps={{ paddingSize: 'l' }}
-        // Needed so the line doesn't get cut off
-        css={{ '.euiAccordion__triggerWrapper': { paddingRight: euiTheme.size.l } }}
       >
         {content.length > 0 && (
           <EuiFlexGroup

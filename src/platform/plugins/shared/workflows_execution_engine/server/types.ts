@@ -102,26 +102,30 @@ export type ExecuteWorkflowStep = (
 export type CancelWorkflowExecution = (
   workflowExecutionId: string,
   spaceId: string,
-  schedulingRequest?: KibanaRequest
+  schedulingRequest: KibanaRequest
 ) => Promise<void>;
 
 export type CancelAllActiveWorkflowExecutions = (params: {
   spaceId: string;
   workflowId: string;
+  schedulingRequest: KibanaRequest;
 }) => Promise<void>;
 
 export type ResumeWorkflowExecution = (
   executionId: string,
   spaceId: string,
   input: Record<string, unknown>,
-  request: KibanaRequest
+  request?: KibanaRequest,
+  options?: {
+    resumedBy?: string;
+  }
 ) => Promise<ResumeWorkflowExecutionResponse>;
 
 export type InternalResumeWorkflowExecution = (
   executionId: string,
   spaceId: string,
   context: Record<string, unknown> | undefined,
-  request: KibanaRequest
+  request?: KibanaRequest
 ) => Promise<void>;
 
 export type ScheduleWorkflow = (

@@ -132,9 +132,9 @@ describe('AssetManagerClient', () => {
         mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
       globalStateClient:
         mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
-      ccsLogExtractionStateClient: {
+      remoteLogExtractionStateClient: {
         delete: jest.fn().mockResolvedValue(undefined),
-      } as unknown as import('../saved_objects/ccs_log_extraction_state').CcsLogExtractionStateClient,
+      } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
       namespace,
       isServerless: false,
       logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
@@ -183,9 +183,9 @@ describe('AssetManagerClient', () => {
           mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
         globalStateClient:
           mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
-        ccsLogExtractionStateClient: {
+        remoteLogExtractionStateClient: {
           delete: jest.fn().mockResolvedValue(undefined),
-        } as unknown as import('../saved_objects/ccs_log_extraction_state').CcsLogExtractionStateClient,
+        } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
         namespace,
         isServerless: false,
         logsExtractionClient: {
@@ -228,6 +228,59 @@ describe('AssetManagerClient', () => {
       expect(indexKeys).toContain('.entities.entities-default');
       expect(indexKeys).not.toContain('-logs-cloud_security_posture.*');
       expect(indexKeys).not.toContain('-logs-excluded-*');
+    });
+  });
+
+  describe('uninstall', () => {
+    // getAll is called twice in uninstall: once via getStatus (before delete) and once
+    // to compute remainingEngines (after delete). Sequence the mock accordingly.
+    it('keeps shared assets when other engines remain (see: https://github.com/elastic/security-team/issues/18143)', async () => {
+      mockEngineDescriptorClient.getAll
+        .mockResolvedValueOnce([
+          { type: 'host', status: 'started' },
+          { type: 'user', status: 'started' },
+        ])
+        .mockResolvedValueOnce([{ type: 'user', status: 'started' }]);
+
+      const result = await client.uninstall('host');
+
+      expect(result).toBe(true);
+      expect(mockEngineDescriptorClient.delete).toHaveBeenCalledWith('host');
+      // Shared, per-namespace / cluster assets must survive.
+      expect(mockUninstallElasticsearchAssets).not.toHaveBeenCalled();
+      expect(mockDeleteEuidStoredScripts).not.toHaveBeenCalled();
+      expect(mockGlobalStateClient.delete).not.toHaveBeenCalled();
+      expect(mockStopStatusReportTask).not.toHaveBeenCalled();
+      expect(mockStopHistorySnapshotTask).not.toHaveBeenCalled();
+    });
+
+    it('deletes shared assets when the last engine is uninstalled', async () => {
+      mockEngineDescriptorClient.getAll
+        .mockResolvedValueOnce([{ type: 'host', status: 'started' }])
+        .mockResolvedValueOnce([]);
+
+      const result = await client.uninstall('host');
+
+      expect(result).toBe(true);
+      expect(mockEngineDescriptorClient.delete).toHaveBeenCalledWith('host');
+      expect(mockUninstallElasticsearchAssets).toHaveBeenCalledTimes(1);
+      expect(mockDeleteEuidStoredScripts).toHaveBeenCalledTimes(1);
+      expect(mockGlobalStateClient.delete).toHaveBeenCalledTimes(1);
+      expect(mockStopStatusReportTask).toHaveBeenCalledTimes(1);
+      expect(mockStopHistorySnapshotTask).toHaveBeenCalledTimes(1);
+    });
+
+    it('is a no-op when the type is not installed', async () => {
+      mockEngineDescriptorClient.getAll.mockResolvedValueOnce([
+        { type: 'user', status: 'started' },
+      ]);
+
+      const result = await client.uninstall('host');
+
+      expect(result).toBe(false);
+      expect(mockEngineDescriptorClient.delete).not.toHaveBeenCalled();
+      expect(mockUninstallElasticsearchAssets).not.toHaveBeenCalled();
+      expect(mockDeleteEuidStoredScripts).not.toHaveBeenCalled();
     });
   });
 

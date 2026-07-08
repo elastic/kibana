@@ -6,6 +6,7 @@
  */
 import * as t from 'io-ts';
 import { environmentRt } from '@kbn/apm-types';
+import type { Maybe } from '@kbn/apm-types-shared';
 import { defineRoute } from '../types';
 import { kueryRt, rangeRt, offsetRt } from '../../default_api_types';
 
@@ -14,12 +15,22 @@ type Timeseries = Array<{ x: number; y: number }>;
 interface LocationStats {
   mostSessions: {
     location?: string;
-    value: number | null | undefined;
+    value: Maybe<number>;
     timeseries: Timeseries;
   };
   mostRequests: {
     location?: string;
-    value: number | null | undefined;
+    value: Maybe<number>;
+    timeseries: Timeseries;
+  };
+  mostCrashes: {
+    location?: string;
+    value: Maybe<number>;
+    timeseries: Timeseries;
+  };
+  mostLaunches: {
+    location?: string;
+    value: Maybe<number>;
     timeseries: Timeseries;
   };
 }
