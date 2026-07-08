@@ -23,10 +23,7 @@ import {
   mockRuleWithEverything,
 } from '../rule_management_ui/components/rules_table/__mocks__/mock';
 import { FilterStateStore } from '@kbn/es-query';
-import type {
-  RuleAction,
-  RuleResponse,
-} from '../../../common/api/detection_engine/model/rule_schema';
+import type { RuleAction } from '../../../common/api/detection_engine/model/rule_schema';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../common/api/detection_engine/model/rule_schema';
 
 import type { Rule } from '../rule_management/logic';
@@ -303,27 +300,6 @@ describe('rule helpers', () => {
 
       expect(result.timeline.id).toBeNull();
       expect(result.timeline.title).toBeNull();
-    });
-
-    test('returns concurrentSearches and itemsPerSearch if they exist on rule', () => {
-      const result: DefineStepRule = getDefineStepsData({
-        ...mockRule('test-id'),
-        concurrent_searches: 4,
-        items_per_search: 2500,
-      } as RuleResponse);
-      const expected = expect.objectContaining({
-        concurrentSearches: 4,
-        itemsPerSearch: 2500,
-      });
-
-      expect(result).toEqual(expected);
-    });
-
-    test('returns concurrentSearches and itemsPerSearch as undefined if they do not exist on rule', () => {
-      const result: DefineStepRule = getDefineStepsData(mockRule('test-id'));
-
-      expect(result.concurrentSearches).toBeUndefined();
-      expect(result.itemsPerSearch).toBeUndefined();
     });
 
     describe('suppression on missing fields', () => {

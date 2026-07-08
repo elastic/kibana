@@ -53,6 +53,7 @@ import type {
 import { DataSourceType, AlertSuppressionDurationType } from '../../../common/types';
 import type {
   RuleCreateProps,
+  RuleResponse,
   AlertSuppression,
   RequiredFieldInput,
   SeverityMapping,
@@ -101,8 +102,6 @@ export interface RuleFields {
   threatQueryBar?: unknown;
   threatMapping?: unknown;
   threatLanguage?: unknown;
-  concurrentSearches?: unknown;
-  itemsPerSearch?: unknown;
   eqlOptions: unknown;
   newTermsFields?: unknown;
   historyWindowSize?: unknown;
@@ -116,8 +115,6 @@ type QueryRuleFields<T> = Omit<
   | 'threatIndex'
   | 'threatQueryBar'
   | 'threatMapping'
-  | 'concurrentSearches'
-  | 'itemsPerSearch'
   | 'eqlOptions'
   | 'newTermsFields'
   | 'historyWindowSize'
@@ -130,8 +127,6 @@ type EqlQueryRuleFields<T> = Omit<
   | 'threatIndex'
   | 'threatQueryBar'
   | 'threatMapping'
-  | 'concurrentSearches'
-  | 'itemsPerSearch'
   | 'newTermsFields'
   | 'historyWindowSize'
 >;
@@ -142,8 +137,6 @@ type ThresholdRuleFields<T> = Omit<
   | 'threatIndex'
   | 'threatQueryBar'
   | 'threatMapping'
-  | 'concurrentSearches'
-  | 'itemsPerSearch'
   | 'eqlOptions'
   | 'newTermsFields'
   | 'historyWindowSize'
@@ -156,8 +149,6 @@ type MlRuleFields<T> = Omit<
   | 'threatIndex'
   | 'threatQueryBar'
   | 'threatMapping'
-  | 'concurrentSearches'
-  | 'itemsPerSearch'
   | 'eqlOptions'
   | 'newTermsFields'
   | 'historyWindowSize'
@@ -179,8 +170,6 @@ type NewTermsRuleFields<T> = Omit<
   | 'threatIndex'
   | 'threatQueryBar'
   | 'threatMapping'
-  | 'concurrentSearches'
-  | 'itemsPerSearch'
   | 'eqlOptions'
 >;
 type EsqlRuleFields<T> = Omit<
@@ -191,8 +180,6 @@ type EsqlRuleFields<T> = Omit<
   | 'threatIndex'
   | 'threatQueryBar'
   | 'threatMapping'
-  | 'concurrentSearches'
-  | 'itemsPerSearch'
   | 'eqlOptions'
   | 'index'
   | 'newTermsFields'
@@ -286,8 +273,6 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         'threatIndex',
         'threatQueryBar',
         'threatMapping',
-        'concurrentSearches',
-        'itemsPerSearch',
         'eqlOptions',
         'newTermsFields',
         'historyWindowSize',
@@ -299,8 +284,6 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         'threatIndex',
         'threatQueryBar',
         'threatMapping',
-        'concurrentSearches',
-        'itemsPerSearch',
         'eqlOptions',
         'newTermsFields',
         'historyWindowSize',
@@ -323,8 +306,6 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         'threatIndex',
         'threatQueryBar',
         'threatMapping',
-        'concurrentSearches',
-        'itemsPerSearch',
         'eqlOptions',
         'newTermsFields',
         'historyWindowSize',
@@ -337,8 +318,6 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         'threatIndex',
         'threatQueryBar',
         'threatMapping',
-        'concurrentSearches',
-        'itemsPerSearch',
         'newTermsFields',
         'historyWindowSize',
       ]);
@@ -350,8 +329,6 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         'threatIndex',
         'threatQueryBar',
         'threatMapping',
-        'concurrentSearches',
-        'itemsPerSearch',
         'eqlOptions',
       ]);
     case 'esql':
@@ -362,8 +339,6 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         'threatIndex',
         'threatQueryBar',
         'threatMapping',
-        'concurrentSearches',
-        'itemsPerSearch',
         'newTermsFields',
         'historyWindowSize',
         'eqlOptions',
@@ -515,12 +490,6 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         threat_filters: ruleFields.threatQueryBar?.filters,
         threat_mapping: ruleFields.threatMapping,
         threat_language: ruleFields.threatQueryBar?.query?.language,
-        // UseField falls back to '' when no default value is found anywhere (this
-        // form library's behavior, not ours) -- these API-only fields have no UI
-        // and thus no meaningful default for most rules, so normalize back to
-        // undefined rather than sending an empty string to the number field on save.
-        concurrent_searches: ruleFields.concurrentSearches || undefined,
-        items_per_search: ruleFields.itemsPerSearch || undefined,
         ...alertSuppressionFields,
       }
     : isEqlFields(ruleFields)
@@ -725,6 +694,20 @@ export const formatRule = <T>(
     formatScheduleStepData(scheduleData),
     formatActionsStepData(actionsData, actionTypeRegistry),
   ]) as unknown as T;
+
+/**
+ * concurrent_searches/items_per_search are API-only fields with no UI controls
+ * (see #276203), so they never round-trip through the define step form. On
+ * rule edit, merge them back in directly from the previously loaded rule
+ * rather than routing them through form state, since the edit form saves via
+ * a full-replace PUT.
+ */
+export const getApiOnlyThreatMatchFields = (
+  rule: RuleResponse
+): { concurrent_searches?: number; items_per_search?: number } =>
+  rule.type === 'threat_match'
+    ? { concurrent_searches: rule.concurrent_searches, items_per_search: rule.items_per_search }
+    : {};
 
 export const formatPreviewRule = ({
   defineRuleData,

@@ -121,8 +121,6 @@ export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
     saved_id: null,
   },
   threatMapping: ('threat_mapping' in rule && rule.threat_mapping) || [],
-  concurrentSearches: ('concurrent_searches' in rule && rule.concurrent_searches) || undefined,
-  itemsPerSearch: ('items_per_search' in rule && rule.items_per_search) || undefined,
   queryBar: {
     query: {
       query: ('query' in rule && rule.query) || '',
