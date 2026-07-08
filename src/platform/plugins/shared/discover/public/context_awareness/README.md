@@ -388,7 +388,7 @@ const getCellRenderers = (prev, { toolkit }) => {
 `ProfileStateAdapter<TState>` provides `getState()`, `getState$()`, `setState()`, and shallow `updateState()`. Treat the
 state as immutable: replace it with `setState()` or update it with `updateState()` rather than mutating returned objects
 in place. `setState()` and `updateState()` accept `{ historyMethod: 'push' | 'replace' }` for URL-backed hosts; use
-`replace` for high-frequency UI controls that should not create browser history entries. Host lifetime details should
+`replace` for state updates that should not create browser history entries. Host lifetime details should
 stay out of profile code; the adapter decides whether the state is tab-backed, URL-backed, persistent, or in-memory for
 the current host.
 
