@@ -15,6 +15,7 @@ import type {
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  type Agent,
   type PackagePolicy,
   type AgentPolicy,
 } from '@kbn/fleet-plugin/common';
@@ -104,6 +105,74 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
     private readonly logger: Logger
   ) {}
 
+  /**
+   * Wraps the Fleet Agent client in order to handle recently introduced backwards incopatible
+   * changes to the `policy_id` value of the agent record.
+   * @param agentClient
+   */
+  private wrapFleetAgentClient = (agentClient: AgentClient) => {
+    const logger = this.logger.get('FleetAgentClientWrapper');
+
+    // Note that this function will possibly mutate the Agent object
+    const adjustAgentData = (data: Agent | Agent[], methodName: string): void => {
+      const agentsData = Array.isArray(data) ? data : [data];
+      const updatesDone: string[] = [];
+
+      for (const agentRecord of agentsData) {
+        // Remove version suffix from `policy_id` field
+        // Issue caused by: https://github.com/elastic/package-spec/issues/165
+        if (agentRecord.policy_id && /#.*$/.test(agentRecord.policy_id)) {
+          const updatedPolicyId = agentRecord.policy_id.replace(/#.*$/i, '');
+
+          updatesDone.push(
+            `Agent [${agentRecord.id}][${agentRecord.local_metadata?.host?.hostname}]: adjusted 'policy_id' property value from [${agentRecord.policy_id}] to [${updatedPolicyId}]`
+          );
+
+          agentRecord.policy_id = updatedPolicyId;
+        }
+      }
+
+      if (updatesDone.length) {
+        logger
+          .get(methodName)
+          .debug(`Adjusted ${updatesDone.length} agent records:\n${updatesDone.join('\n')}`);
+      }
+    };
+
+    const getAgentInterceptor: AgentClient['getAgent'] = async (agentId) => {
+      const agent = await agentClient.getAgent(agentId);
+      adjustAgentData(agent, 'getAgent');
+      return agent;
+    };
+
+    const getByIdsInterceptor: AgentClient['getByIds'] = async (agentIds, options) => {
+      const agents = await agentClient.getByIds(agentIds, options);
+      adjustAgentData(agents, 'getByIds');
+      return agents;
+    };
+
+    const listAgentsInterceptor: AgentClient['listAgents'] = async (options) => {
+      const agents = await agentClient.listAgents(options);
+      adjustAgentData(agents.agents, 'listAgents');
+      return agents;
+    };
+
+    return new Proxy(agentClient, {
+      get: (target, prop, receiver) => {
+        switch (prop) {
+          case 'getAgent':
+            return getAgentInterceptor;
+          case 'getByIds':
+            return getByIdsInterceptor;
+          case 'listAgents':
+            return listAgentsInterceptor;
+        }
+
+        return Reflect.get(target, prop, receiver);
+      },
+    });
+  };
+
   asInternalUser(
     spaceId?: string,
     unscoped: boolean = false
@@ -124,9 +193,9 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       agentService,
       packageService,
     } = this.fleetDependencies;
-    const agent = spaceId
-      ? agentService.asInternalScopedUser(spaceId)
-      : agentService.asInternalUser;
+    const agent = this.wrapFleetAgentClient(
+      spaceId ? agentService.asInternalScopedUser(spaceId) : agentService.asInternalUser
+    );
 
     // Lazily Initialized at the time it is needed
     let _soClient: SavedObjectsClientContract;

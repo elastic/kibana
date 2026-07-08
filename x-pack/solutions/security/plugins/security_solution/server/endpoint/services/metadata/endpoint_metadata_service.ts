@@ -130,7 +130,7 @@ export class EndpointMetadataService {
       this.logger
         .get('adjustUnitedIndexSearchResultHits')
         .debug(
-          () => `Made ${recordsAltered.length} data adjustments:\n${recordsAltered.join(', ')}`
+          () => `Made ${recordsAltered.length} data adjustments:\n${recordsAltered.join('\n')}`
         );
     }
 
