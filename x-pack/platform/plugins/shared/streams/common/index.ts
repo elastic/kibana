@@ -42,11 +42,3 @@ export {
 
 export type { StreamSummary } from './stream_summary';
 export type { PaginatedResponse } from './pagination';
-
-export { RELAY_APP_CONNECTION_STATUS } from './slack_app/types';
-export type {
-  RelayAppConnectionStatus,
-  SlackAppConnectResponse,
-  SlackAppStatusResponse,
-  SlackAppDisconnectResponse,
-} from './slack_app/types';

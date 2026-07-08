@@ -21,7 +21,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RELAY_APP_CONNECTION_STATUS } from '@kbn/streams-plugin/common';
+import { RELAY_APP_CONNECTION_STATUS } from '@kbn/significant-events-plugin/common';
 import { useRelayAppConnection } from './use_relay_app_connection';
 
 interface AppsSectionProps {
@@ -34,7 +34,7 @@ interface AppsSectionProps {
  * external apps (GitHub, Teams) in the future. Only rendered by the caller (`tab.tsx`)
  * when the `streams.significantEventsAppsEnabled` feature flag is on; additionally
  * renders nothing here when the Slack App is not available on this deployment
- * (`xpack.streams.relayService` unset, or Agent Builder absent).
+ * (`xpack.significant_events.relayService` unset, or Agent Builder absent).
  */
 export function AppsSection({ canEdit }: AppsSectionProps) {
   const { isLoading, available, status, error, isMutating, connect, disconnect } =

@@ -7,8 +7,8 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { RELAY_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
-import type { StreamsServer } from '../../types';
 import { SlackAppService } from './service';
 import { SlackAppUnavailableError } from './errors';
 import { RelayRequestError } from './relay_error';

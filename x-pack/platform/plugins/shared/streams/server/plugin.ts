@@ -25,7 +25,6 @@ import { isNotFoundError } from '@kbn/es-errors';
 import type { Subscription } from 'rxjs';
 import type { KnowledgeIndicatorClientContract } from '@kbn/significant-events-schema';
 import type { StreamsClient } from './lib/streams/client';
-import { RelayClient } from './lib/slack_app/relay_client';
 import type { StreamsConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,
@@ -60,7 +59,6 @@ import { createStreamsSettingsStorageClient } from './lib/streams/storage/stream
 import { registerSuggestionsInferenceFeatures } from './register_suggestions_inference_features';
 import type { AttachmentClient } from './lib/streams/attachments/attachment_client';
 import { getStreamsPromptsSavedObject } from './lib/prompts/prompts_config';
-import { getRelayAppConnectionSavedObjectType } from './lib/slack_app/saved_object';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 
@@ -126,7 +124,6 @@ export class StreamsPlugin
     );
 
     core.savedObjects.registerType(getStreamsPromptsSavedObject());
-    core.savedObjects.registerType(getRelayAppConnectionSavedObjectType());
 
     this.ebtTelemetryService.setup(core.analytics);
     this.statsTelemetryService.setup(
@@ -521,17 +518,6 @@ export class StreamsPlugin
       this.server.spaces = plugins.spaces;
       this.server.workflowsExtensions = plugins.workflowsExtensions;
       this.server.agentBuilder = plugins.agentBuilder;
-
-      // Built once here rather than per-request: reads TLS cert/key/CA files from disk
-      // and keeps its own connection pool (see RelayClient's class doc).
-      const relayService = this.config.relayService;
-      if (relayService) {
-        this.server.relayClient = new RelayClient({
-          baseUrl: relayService.url,
-          tls: relayService.tls,
-          logger: this.logger.get('relay-client'),
-        });
-      }
     }
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);

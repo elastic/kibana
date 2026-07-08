@@ -7,18 +7,18 @@
 
 import { z } from '@kbn/zod/v4';
 import { badGateway } from '@hapi/boom';
-import { createServerRoute } from '../../../../create_server_route';
-import { STREAMS_API_PRIVILEGES } from '../../../../../../common/constants';
+import { createServerRoute } from '../../../create_server_route';
+import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type {
   SlackAppConnectResponse,
   SlackAppDisconnectResponse,
   SlackAppStatusResponse,
-} from '../../../../../../common/slack_app/types';
-import { SlackAppService } from '../../../../../lib/slack_app/service';
-import { RelayRequestError } from '../../../../../lib/slack_app/relay_error';
+} from '../../../../../common/slack_app/types';
+import { SlackAppService } from '../../../../lib/slack_app/service';
+import { RelayRequestError } from '../../../../lib/slack_app/relay_error';
 
 const connectSlackAppRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/_significant_events/apps/slack/connect',
+  endpoint: 'POST /internal/significant_events/apps/slack/connect',
   options: {
     access: 'internal',
     summary: 'Start the Elastic Slack App install',
@@ -47,7 +47,7 @@ const connectSlackAppRoute = createServerRoute({
 });
 
 const statusSlackAppRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/_significant_events/apps/slack/status',
+  endpoint: 'GET /internal/significant_events/apps/slack/status',
   options: {
     access: 'internal',
     summary: 'Get Elastic Slack App connection status',
@@ -66,7 +66,7 @@ const statusSlackAppRoute = createServerRoute({
 });
 
 const disconnectSlackAppRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/_significant_events/apps/slack/disconnect',
+  endpoint: 'POST /internal/significant_events/apps/slack/disconnect',
   options: {
     access: 'internal',
     summary: 'Disconnect the Elastic Slack App',

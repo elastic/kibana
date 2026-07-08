@@ -11,7 +11,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
   RELAY_APP_CONNECTION_STATUS,
   type SlackAppStatusResponse,
-} from '@kbn/streams-plugin/common';
+} from '@kbn/significant-events-plugin/common';
 import {
   useRelayAppConnection,
   RELAY_APP_CONNECTION_STATUS_QUERY_KEY,

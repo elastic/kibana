@@ -14,12 +14,12 @@ import {
   type RelayAppConnectionStatus,
   type SlackAppDisconnectResponse,
   type SlackAppStatusResponse,
-} from '@kbn/streams-plugin/common';
+} from '@kbn/significant-events-plugin/common';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 
-const STATUS_ROUTE = '/internal/streams/_significant_events/apps/slack/status';
-const CONNECT_ROUTE = '/internal/streams/_significant_events/apps/slack/connect';
-const DISCONNECT_ROUTE = '/internal/streams/_significant_events/apps/slack/disconnect';
+const STATUS_ROUTE = '/internal/significant_events/apps/slack/status';
+const CONNECT_ROUTE = '/internal/significant_events/apps/slack/connect';
+const DISCONNECT_ROUTE = '/internal/significant_events/apps/slack/disconnect';
 const POLL_INTERVAL_MS = 3_000;
 const POLL_TIMEOUT_MS = 2 * 60 * 1_000;
 

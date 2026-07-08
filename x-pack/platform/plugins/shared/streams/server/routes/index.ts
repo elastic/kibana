@@ -25,7 +25,6 @@ import { attachmentRoutes } from './attachments/route';
 import { internalAttachmentRoutes } from './internal/attachments/route';
 import { internalDescriptionGenerationRoutes } from './internal/description_generation/route';
 import { internalTasksRoutes } from './internal/streams/tasks/route';
-import { internalSlackAppRoutes } from './internal/significant_events/apps/slack/route';
 import { timeSeriesRoutes } from './internal/streams/time_series/route';
 
 export const streamsRouteRepository = {
@@ -42,7 +41,6 @@ export const streamsRouteRepository = {
   ...internalAttachmentRoutes,
   ...internalDescriptionGenerationRoutes,
   ...internalTasksRoutes,
-  ...internalSlackAppRoutes,
   ...storageStatsRoutes,
   // public APIs
   ...docCountsRoutes,

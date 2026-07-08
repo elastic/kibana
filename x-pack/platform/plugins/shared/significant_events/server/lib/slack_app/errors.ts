@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { StatusError } from '../streams/errors/status_error';
+import { StatusError } from '../errors/status_error';
 
 /**
  * Thrown when the Slack App surface is not configured/available on this deployment.
  * Extends the shared `StatusError` so `createServerRoute` maps it to a 400 response
- * automatically, the same way every other Streams route error is handled.
+ * automatically, the same way every other Significant Events route error is handled.
  */
 export class SlackAppUnavailableError extends StatusError {
   constructor(message: string) {

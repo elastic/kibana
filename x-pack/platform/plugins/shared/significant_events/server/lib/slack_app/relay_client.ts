@@ -9,6 +9,11 @@ import { readFileSync } from 'fs';
 import { Agent } from 'undici';
 import type { Logger } from '@kbn/core/server';
 import { getNodeSSLOptions } from '@kbn/actions-utils';
+import type {
+  RelayClaimResponse,
+  RelayInstallRequest,
+  RelayInstallResponse,
+} from '@kbn/significant-events-schema';
 import type { RelayServiceTlsConfig } from '../../../common/config';
 import { RelayRequestError } from './relay_error';
 
@@ -26,30 +31,6 @@ export interface RelayClientOptions {
 interface FetchInit extends RequestInit {
   dispatcher?: Agent;
 }
-
-/**
- * Request/response contracts mirror relay-service `src/contracts/http/slack.ts`
- * (see relay-service#78). Deployment identity is asserted at the transport layer
- * (mTLS proxy, XFCC header) and is never part of the request body.
- */
-export interface RelayInstallRequest {
-  /**
-   * The Kibana-minted managed ES API key (base64 `id:api_key`, min 32 chars) the
-   * Relay stores and presents to Agent Builder. The caller owns this credential;
-   * the Relay never mints one. Field name per the merged contract (relay-service
-   * commit ff5d067, `StartInstallRequest`).
-   */
-  kibana_api_key: string;
-  /** Optional audit marker for who initiated the install. */
-  created_by_user_key?: string;
-}
-
-export interface RelayInstallResponse {
-  authorize_url: string;
-  claim_id: string;
-}
-
-export type RelayClaimResponse = { status: 'pending' } | { status: 'complete'; tenant_key: string };
 
 /**
  * Thin HTTP client for the Nightshift Relay service. Kibana -> Relay transport runs
