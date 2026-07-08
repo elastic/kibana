@@ -779,8 +779,7 @@ describe('Workflow routes', () => {
       // Validates the fix for elastic/security-team#18145 and #18049:
       // the stored yaml (with correct enabled + user comments) must be preferred
       // over re-serialising the parsed definition object.
-      const storedYaml =
-        '# user comment\nname: Annotated Workflow\nenabled: true\nsteps: []';
+      const storedYaml = '# user comment\nname: Annotated Workflow\nenabled: true\nsteps: []';
       mockApi.getWorkflowsByIds.mockResolvedValue([
         {
           id: 'w-annotated',

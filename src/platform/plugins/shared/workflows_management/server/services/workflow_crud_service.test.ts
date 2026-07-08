@@ -2183,7 +2183,12 @@ describe('WorkflowCrudService', () => {
 
       const service = new WorkflowCrudService(deps);
       // Field-only update: no yaml key, just enabled: true
-      await service.updateWorkflow('wf-1', { enabled: true } satisfies Partial<EsWorkflow>, 'default', request);
+      await service.updateWorkflow(
+        'wf-1',
+        { enabled: true } satisfies Partial<EsWorkflow>,
+        'default',
+        request
+      );
 
       expect(client.index).toHaveBeenCalledWith(
         expect.objectContaining({
