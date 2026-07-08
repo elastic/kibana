@@ -333,6 +333,13 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     for (const agent of agents) {
       if (agent.policy_id) {
+        if (!agentPolicyToIntegrationPolicyMap[agent.policy_id]) {
+          throw new ResponseActionsClientError(
+            `Data inconsistency detected. Agent [${agent.id}][${agent.local_metadata?.host?.hostname}] has agent policy_id [${agent.policy_id}] but no integration policy was found associated with that agent policy id.`,
+            400
+          );
+        }
+
         policyInfo.push({
           agentId: agent.id,
           elasticAgentId: agent.id,
@@ -585,6 +592,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     try {
       await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids);
     } catch (err) {
+      this.log.debug(`Error retrieving agent policy info: ${err.message}`, { error: err });
       return { isValid: false, error: err };
     }
 
