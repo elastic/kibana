@@ -21,6 +21,50 @@ export const ENABLE_RULE = i18n.translate(
   }
 );
 
+export const CREATED_BY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.createdByLabel',
+  {
+    defaultMessage: 'Created by',
+  }
+);
+
+export const UPDATED_BY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.updatedByLabel',
+  {
+    defaultMessage: 'Updated by',
+  }
+);
+
+export const CREATED_UPDATED_BY_VALUE = (by: string | undefined, date: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.ruleDetails.createdUpdatedByValue', {
+    defaultMessage: '{by} on {date}',
+    values: {
+      by: by ?? UNKNOWN,
+      date,
+    },
+  });
+
+export const MODIFIED_RULE_BADGE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.modifiedRuleBadgeLabel',
+  {
+    defaultMessage: 'Modified',
+  }
+);
+
+export const RULE_VERSION_BADGE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleVersionBadgeLabel',
+  {
+    defaultMessage: 'Version',
+  }
+);
+
+export const RULE_REVISION_BADGE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleRevisionBadgeLabel',
+  {
+    defaultMessage: 'Revision',
+  }
+);
+
 export const UNKNOWN = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.unknownDescription',
   {

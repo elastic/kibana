@@ -10,19 +10,24 @@
 
 import type { EuiResizeObserverProps } from '@elastic/eui';
 import {
-  EuiButtonIcon,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiResizeObserver,
   EuiSpacer,
-  EuiToolTip,
   EuiWindowEvent,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { Route, Routes } from '@kbn/shared-ux-router';
+import moment from 'moment';
+import type {
+  AppHeaderBadge,
+  AppHeaderMetadataItem,
+  AppHeaderMetadataItems,
+} from '@kbn/app-header';
+import type { AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 
 import { noop } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -54,7 +59,6 @@ import { AlertsTable } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import {
   useDeepEqualSelector,
@@ -65,6 +69,8 @@ import type { UpdateDateRange } from '../../../../common/components/charts/commo
 import {
   getDetectionEngineUrl,
   getRuleDetailsTabUrl,
+  getRulesUrl,
+  getEditRuleUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
@@ -80,23 +86,18 @@ import {
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../../../detections/components/alerts_table/default_config';
-import { RuleSwitch } from '../../../common/components/rule_switch';
 import { StepPanel } from '../../../rule_creation/components/step_panel';
 import {
   getMachineLearningJobId,
   getStepsData,
   redirectToDetections,
 } from '../../../common/helpers';
-import {
-  CreatedBy,
-  UpdatedBy,
-  RuleVersion,
-  RuleRevision,
-} from '../../../../detections/components/rules/rule_info';
+import { RuleVersion, RuleRevision } from '../../../../detections/components/rules/rule_info';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
-import { RuleActionsOverflow } from './rule_actions_overflow';
+import { RuleDetailsAppHeader } from './rule_details_app_header';
+import type { UseRuleActionsMenuItemsParams } from './rule_actions_overflow/use_rule_actions_menu_items';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
@@ -114,11 +115,11 @@ import {
   explainLackOfPermission,
   isBoolean,
 } from '../../../../common/utils/privileges';
+import { RuleStatusFailedCallOut } from '../../../common/components/rule_execution_status';
 import {
-  RuleStatus,
-  RuleStatusFailedCallOut,
-  ruleStatusI18n,
-} from '../../../common/components/rule_execution_status';
+  getStatusColor,
+  getStatusText,
+} from '../../../common/components/rule_execution_status/utils';
 import { ExecutionResultsTable } from './execution_results/execution_results_table';
 import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_info';
 import { RuleGaps } from '../../../rule_gaps/components/rule_gaps';
@@ -129,30 +130,29 @@ import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { MissingDetectionsPrivilegesCallOut } from '../../../../detections/components/callouts/missing_detections_privileges_callout';
 import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_with_fallback';
-import type { BadgeOptions } from '../../../../common/components/header_page/types';
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
 import { type RuleResponse, type Status } from '../../../../../common/api/detection_engine';
+import { isCustomizedPrebuiltRule } from '../../../../../common/api/detection_engine';
 import { AlertsTableFilterGroup } from '../../../../detections/components/alerts_table/alerts_filter_group';
 import { useSignalHelpers } from '../../../../sourcerer/containers/use_signal_helpers';
-import { HeaderPage } from '../../../../common/components/header_page';
 import { ExceptionsViewer } from '../../../rule_exceptions/components/all_exception_items_table';
-import { EditRuleSettingButtonLink } from './edit_rule_settings_button_link/edit_rule_settings_button_link';
+import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation';
 import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/bulk_duplicate_exceptions_confirmation';
 import { useAsyncConfirmation } from '../../../rule_management_ui/components/rules_table/rules_table/use_async_confirmation';
-import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { RuleDefinitionSection } from '../../../rule_management/components/rule_details/rule_definition_section';
 import { RuleScheduleSection } from '../../../rule_management/components/rule_details/rule_schedule_section';
 import { ModifiedRuleBadge } from '../../../rule_management/components/rule_details/modified_rule_badge';
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
-import { AddRuleAttachmentToChatButton } from '../../../rule_creation_ui/components/add_rule_attachment_to_chat_button';
-import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
 // eslint-disable-next-line no-restricted-imports
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
+import { useRuleDetailsHeaderTabs } from './use_rule_details_header_tabs';
+import { useRuleEnabledSwitch } from './use_rule_enabled_switch';
+import { useAddRuleToChatAction } from './use_add_rule_to_chat_action';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 import { useDeprecatedRuleDetailsCallout } from '../../../rule_management/components/rule_deprecation';
@@ -348,7 +348,6 @@ export const RuleDetailsPage = connector(
     const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
     // TODO: Refactor license check + hasMlAdminPermissions to common check
     const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
-    const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
 
     const hasActionsPrivileges = useMemo(() => {
       if (rule?.actions != null && rule?.actions.length > 0 && isBoolean(actions.show)) {
@@ -378,46 +377,94 @@ export const RuleDetailsPage = connector(
       [status, isAlertsLoading, loading]
     );
 
-    const title = useMemo(
-      () => (
-        <>
-          {rule?.name} {ruleLoading && <EuiLoadingSpinner size="m" />}
-        </>
-      ),
-      [rule, ruleLoading]
-    );
-    const badgeOptions = useMemo<BadgeOptions | undefined>(
-      () =>
-        !ruleLoading && !isExistingRule
-          ? {
-              text: i18n.DELETED_RULE,
-              color: 'default',
-            }
-          : undefined,
-      [isExistingRule, ruleLoading]
-    );
-    const subTitle = useMemo(
-      () =>
-        rule ? (
-          [
-            <CreatedBy createdBy={rule.created_by} createdAt={rule.created_at} />,
-            rule.updated_by != null ? (
-              <UpdatedBy updatedBy={rule.updated_by} updatedAt={rule.updated_at} />
-            ) : (
-              ''
-            ),
-            isRuleChangesHistoryEnabled && rule.rule_source.type === 'external' ? (
-              <RuleVersion version={rule.version} />
-            ) : (
-              ''
-            ),
-            isRuleChangesHistoryEnabled ? <RuleRevision revision={rule.revision} /> : '',
-          ].filter(Boolean)
-        ) : ruleLoading ? (
-          <EuiLoadingSpinner size="m" />
-        ) : null,
-      [rule, ruleLoading, isRuleChangesHistoryEnabled]
-    );
+    const [dateFormat] = useUiSetting$<string>('dateFormat');
+
+    const lastExecution = rule?.execution_summary?.last_execution;
+    const lastExecutionStatus = lastExecution?.status;
+    const lastExecutionDate = lastExecution?.date ?? '';
+    const lastExecutionMessage = lastExecution?.message ?? '';
+
+    const headerTitle = rule?.name ?? '';
+
+    const isRuleCustomizedPrebuilt = rule != null && isCustomizedPrebuiltRule(rule);
+
+    const headerBadges = useMemo<AppHeaderBadge[]>(() => {
+      const badges: AppHeaderBadge[] = [];
+
+      if (!ruleLoading && !isExistingRule) {
+        badges.push({
+          label: i18n.DELETED_RULE,
+          color: 'default',
+          'data-test-subj': 'rule-details-deleted-badge',
+        });
+      }
+
+      if (isRuleCustomizedPrebuilt) {
+        badges.push({
+          label: i18n.MODIFIED_RULE_BADGE_LABEL,
+          renderCustomBadge: () => <ModifiedRuleBadge rule={rule} />,
+        });
+      }
+
+      if (rule != null) {
+        if (isRuleChangesHistoryEnabled) {
+          if (rule.rule_source.type === 'external') {
+            badges.push({
+              label: `${i18n.RULE_VERSION_BADGE_LABEL} ${rule.version}`,
+              renderCustomBadge: () => <RuleVersion version={rule.version} />,
+            });
+          }
+          badges.push({
+            label: `${i18n.RULE_REVISION_BADGE_LABEL} ${rule.revision}`,
+            renderCustomBadge: () => <RuleRevision revision={rule.revision} />,
+          });
+        }
+      }
+
+      return badges;
+    }, [ruleLoading, isExistingRule, isRuleCustomizedPrebuilt, rule, isRuleChangesHistoryEnabled]);
+
+    const headerMetadata = useMemo<AppHeaderMetadataItems | undefined>(() => {
+      if (rule == null) {
+        return undefined;
+      }
+
+      const items: AppHeaderMetadataItem[] = [
+        {
+          type: 'text',
+          label: i18n.CREATED_BY_LABEL,
+          value: i18n.CREATED_UPDATED_BY_VALUE(
+            rule.created_by,
+            moment(rule.created_at).format(dateFormat)
+          ),
+          'data-test-subj': 'rule-details-created-by',
+        },
+      ];
+
+      if (rule.updated_by != null) {
+        items.push({
+          type: 'text',
+          label: i18n.UPDATED_BY_LABEL,
+          value: i18n.CREATED_UPDATED_BY_VALUE(
+            rule.updated_by,
+            moment(rule.updated_at).format(dateFormat)
+          ),
+          'data-test-subj': 'rule-details-updated-by',
+        });
+      }
+
+      const statusText = getStatusText(lastExecutionStatus);
+      if (statusText != null && items.length < 3) {
+        items.push({
+          type: 'health',
+          label: statusText,
+          color: getStatusColor(lastExecutionStatus),
+          'data-test-subj': 'ruleStatus',
+        });
+      }
+
+      return items.slice(0, 3) as unknown as AppHeaderMetadataItems;
+    }, [rule, dateFormat, lastExecutionStatus]);
 
     // Callback for when open/closed filter changes
     const onFilterGroupChangedCallback = useCallback(
@@ -453,44 +500,11 @@ export const RuleDetailsPage = connector(
       [alertDefaultFilters, filters]
     );
 
-    const lastExecution = rule?.execution_summary?.last_execution;
-    const lastExecutionStatus = lastExecution?.status;
-    const lastExecutionDate = lastExecution?.date ?? '';
-    const lastExecutionMessage = lastExecution?.message ?? '';
-
     const upgradeCallout = useRuleUpdateCallout({
       rule,
       message: ruleI18n.HAS_RULE_UPDATE_DETAILS_CALLOUT_MESSAGE,
       onUpgrade: refreshRule,
     });
-
-    const ruleStatusInfo = useMemo(() => {
-      return (
-        <>
-          {ruleLoading ? (
-            <EuiFlexItem>
-              <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
-            </EuiFlexItem>
-          ) : (
-            <RuleStatus status={lastExecutionStatus} date={lastExecutionDate}>
-              <EuiToolTip content={ruleI18n.REFRESH} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  data-test-subj="ruleLastExecutionStatusRefreshButton"
-                  color="primary"
-                  onClick={refreshRule}
-                  iconType="refresh"
-                  aria-label={ruleI18n.REFRESH}
-                  isDisabled={!isExistingRule}
-                />
-              </EuiToolTip>
-            </RuleStatus>
-          )}
-          <EuiFlexItem grow={false}>
-            <RuleSnoozeBadge ruleId={ruleId} showTooltipInline />
-          </EuiFlexItem>
-        </>
-      );
-    }, [ruleId, lastExecutionStatus, lastExecutionDate, ruleLoading, isExistingRule, refreshRule]);
 
     // Extract rule index if available on rule type
     let ruleIndex: string[] | undefined;
@@ -629,6 +643,121 @@ export const RuleDetailsPage = connector(
       []
     );
 
+    const isRuleEnabled = isExistingRule && (rule?.enabled ?? false);
+
+    const isRuleEditButtonEnabled =
+      canEditRules || canEditCustomHighlightedFields || canEditInvestigationGuides;
+
+    const isRuleEditDisabled =
+      !isExistingRule || !isRuleEditButtonEnabled || (isMlRule(rule?.type) && !hasMlPermissions);
+
+    const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
+    const { onClick: onBackToRulesClick, href: backToRulesHref } = getSecuritySolutionLinkProps({
+      deepLinkId: SecurityPageName.rules,
+      path: getRulesUrl(),
+    });
+
+    const headerTabs = useRuleDetailsHeaderTabs(pageTabs);
+
+    const ruleEnabledSwitch = useRuleEnabledSwitch({
+      id: rule?.id ?? '-1',
+      enabled: isRuleEnabled,
+      label: i18n.ENABLE_RULE,
+      isDisabled:
+        !rule ||
+        !isExistingRule ||
+        !canEditRuleWithActions(rule, hasActionsPrivileges) ||
+        !canEnableDisableRules ||
+        (isMlRule(rule?.type) && !hasMlPermissions),
+      tooltipContent: explainLackOfPermission(
+        rule,
+        hasMlPermissions,
+        hasActionsPrivileges,
+        canEnableDisableRules
+      ),
+      startMlJobsIfNeeded,
+      onEnabledChanged: handleOnChangeEnabledRule,
+    });
+
+    const addToChatAction = useAddRuleToChatAction(rule);
+
+    const headerStaticItems = useMemo<AppMenuItemType[]>(
+      () => [
+        {
+          id: 'editRuleSettings',
+          label: ruleI18n.EDIT_RULE_SETTINGS,
+          iconType: 'controls',
+          order: 10,
+          testId: 'editRuleSettingsLink',
+          disableButton: isRuleEditDisabled,
+          tooltipContent: explainLackOfPermission(
+            rule,
+            hasMlPermissions,
+            hasActionsPrivileges,
+            isRuleEditButtonEnabled
+          ),
+          run: () => {
+            navigateToApp(APP_UI_ID, {
+              deepLinkId: SecurityPageName.rules,
+              path: getEditRuleUrl(ruleId ?? ''),
+            });
+          },
+        },
+        {
+          id: 'refreshRule',
+          label: ruleI18n.REFRESH,
+          iconType: 'refresh',
+          order: 20,
+          testId: 'ruleLastExecutionStatusRefreshButton',
+          disableButton: !isExistingRule,
+          run: () => {
+            refreshRule();
+          },
+        },
+      ],
+      [
+        isRuleEditDisabled,
+        rule,
+        hasMlPermissions,
+        hasActionsPrivileges,
+        isRuleEditButtonEnabled,
+        navigateToApp,
+        ruleId,
+        isExistingRule,
+        refreshRule,
+      ]
+    );
+
+    const headerActionsParams = useMemo<UseRuleActionsMenuItemsParams>(
+      () => ({
+        rule,
+        ruleId,
+        isDisabled: !isExistingRule,
+        canDuplicateRuleWithActions: canEditRuleWithActions(rule, hasActionsPrivileges),
+        showBulkDuplicateExceptionsConfirmation: showBulkDuplicateConfirmation,
+        showManualRuleRunConfirmation,
+        confirmDeletion,
+      }),
+      [
+        rule,
+        ruleId,
+        isExistingRule,
+        hasActionsPrivileges,
+        showBulkDuplicateConfirmation,
+        showManualRuleRunConfirmation,
+        confirmDeletion,
+      ]
+    );
+
+    const headerBack = useMemo(
+      () => ({
+        href: backToRulesHref,
+        onClick: onBackToRulesClick,
+        label: ruleI18n.PAGE_TITLE,
+      }),
+      [backToRulesHref, onBackToRulesClick]
+    );
+
     if (
       redirectToDetections(
         isSignalIndexExists,
@@ -650,11 +779,6 @@ export const RuleDetailsPage = connector(
     const hasResponseActions =
       ruleActionsData != null && (ruleActionsData.responseActions || []).length > 0;
     const hasActions = hasNotificationActions || hasResponseActions;
-
-    const isRuleEnabled = isExistingRule && (rule?.enabled ?? false);
-
-    const isRuleEditButtonEnabled =
-      canEditRules || canEditCustomHighlightedFields || canEditInvestigationGuides;
 
     return (
       <>
@@ -695,96 +819,17 @@ export const RuleDetailsPage = connector(
           <RuleCustomizationsContextProvider rule={rule}>
             <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
               <Display show={!globalFullScreen}>
-                <HeaderPage
-                  border
-                  subtitle={subTitle}
-                  subtitle2={
-                    <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="flexStart">
-                      <ModifiedRuleBadge rule={rule} />
-                      <EuiFlexGroup alignItems="center" gutterSize="xs">
-                        <EuiFlexItem grow={false}>
-                          {ruleStatusI18n.STATUS}
-                          {':'}
-                        </EuiFlexItem>
-                        {ruleStatusInfo}
-                      </EuiFlexGroup>
-                    </EuiFlexGroup>
-                  }
-                  title={title}
-                  badgeOptions={badgeOptions}
-                >
-                  <EuiFlexGroup alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip
-                        position="top"
-                        content={explainLackOfPermission(
-                          rule,
-                          hasMlPermissions,
-                          hasActionsPrivileges,
-                          canEnableDisableRules
-                        )}
-                      >
-                        <EuiFlexGroup>
-                          <RuleSwitch
-                            id={rule?.id ?? '-1'}
-                            isDisabled={
-                              !rule ||
-                              !isExistingRule ||
-                              !canEditRuleWithActions(rule, hasActionsPrivileges) ||
-                              !canEnableDisableRules ||
-                              (isMlRule(rule?.type) && !hasMlPermissions)
-                            }
-                            enabled={isRuleEnabled}
-                            startMlJobsIfNeeded={startMlJobsIfNeeded}
-                            onChange={handleOnChangeEnabledRule}
-                            ruleName={rule?.name}
-                          />
-                          <EuiFlexItem>{i18n.ENABLE_RULE}</EuiFlexItem>
-                        </EuiFlexGroup>
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                        {isAgentChatExperienceEnabled && rule != null ? (
-                          <EuiFlexItem grow={false}>
-                            <AddRuleAttachmentToChatButton rule={rule} pathway="rule_details" />
-                          </EuiFlexItem>
-                        ) : null}
-                        <EuiFlexItem grow={false}>
-                          <EditRuleSettingButtonLink
-                            ruleId={ruleId}
-                            disabled={
-                              !isExistingRule ||
-                              !isRuleEditButtonEnabled ||
-                              (isMlRule(rule?.type) && !hasMlPermissions)
-                            }
-                            disabledReason={explainLackOfPermission(
-                              rule,
-                              hasMlPermissions,
-                              hasActionsPrivileges,
-                              isRuleEditButtonEnabled
-                            )}
-                          />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <RuleActionsOverflow
-                            rule={rule}
-                            ruleId={ruleId}
-                            isDisabled={!isExistingRule}
-                            canDuplicateRuleWithActions={canEditRuleWithActions(
-                              rule,
-                              hasActionsPrivileges
-                            )}
-                            showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
-                            showManualRuleRunConfirmation={showManualRuleRunConfirmation}
-                            confirmDeletion={confirmDeletion}
-                          />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </HeaderPage>
-                <TabNavigation navTabs={pageTabs} />
+                <RuleDetailsAppHeader
+                  title={headerTitle}
+                  back={headerBack}
+                  badges={headerBadges}
+                  metadata={headerMetadata}
+                  tabs={headerTabs}
+                  switchConfig={ruleEnabledSwitch}
+                  primaryActionItem={addToChatAction}
+                  staticItems={headerStaticItems}
+                  actionsParams={headerActionsParams}
+                />
                 {ruleError}
                 <LegacyUrlConflictCallOut rule={rule} spacesApi={spacesApi} />
               </Display>
