@@ -11,8 +11,7 @@
     "server/**/*",
     "public/**/*",
     "types/**/*",
-    "test/**/*",
-    "../significant_events/server/lib/knowledge_indicators/code_intelligence"
+    "test/**/*"
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [

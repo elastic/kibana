@@ -23,6 +23,16 @@ export interface RepoClassification {
   languages: LanguageCount[];
 }
 
+/**
+ * A source-code citation the `scs.code_researcher` agent used to identify a
+ * service — the file (and optionally line/snippet) that supports the decision.
+ */
+export interface CodeEvidenceCitation {
+  path: string;
+  line?: number;
+  snippet?: string;
+}
+
 export interface ServiceNameCandidate {
   /** The candidate service name as found in code/config. */
   value: string;
@@ -103,4 +113,10 @@ export interface CodeRepositoryReader {
    * Deterministic enumeration — no semantic ranking.
    */
   getLoggingChunks(repository: string, limit?: number): Promise<LoggingChunk[]>;
+  /**
+   * Discovers the service directories in a (mono)repo by leveraging the
+   * installed SCS `scs.discover_directories` tool, returning derived service
+   * names (e.g. `src/checkout` -> `checkout`). Empty when SCS finds none.
+   */
+  discoverServices(repository: string): Promise<string[]>;
 }

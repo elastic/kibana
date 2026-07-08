@@ -81,8 +81,8 @@ export const SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW = {
 
 export const SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID,
-  pluginId: 'streams',
-  version: 1,
+  pluginId: 'significant_events',
+  version: 5,
   billable: false,
   yaml: CODE_EXTRACTION_YAML,
   management: SIGNIFICANT_EVENTS_KI_WORKFLOW_MANAGEMENT,

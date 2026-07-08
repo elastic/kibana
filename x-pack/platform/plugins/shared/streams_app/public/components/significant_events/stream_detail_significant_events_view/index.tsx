@@ -183,6 +183,16 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     streamName: definition.stream.name,
   });
 
+  // "Generate" runs the log-based KI onboarding and, when the stream's code has
+  // been ingested via Semantic Code Search, also kicks off code-driven KI
+  // generation for the stream.
+  const handleGenerate = useCallback(() => {
+    scheduleKnowledgeIndicatorsOnboarding();
+    if (isCodeIntelligenceAvailable) {
+      generateFromCode();
+    }
+  }, [scheduleKnowledgeIndicatorsOnboarding, isCodeIntelligenceAvailable, generateFromCode]);
+
   useInterval(
     refetch,
     knowledgeIndicatorsOnboardingState?.status === SignificantEventsWorkflowStatus.InProgress
@@ -263,7 +273,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             isGenerating={isKnowledgeIndicatorsGenerationPending}
             isCanceling={isKnowledgeIndicatorsGenerationCanceling}
             isGenerateDisabled={isGenerateButtonDisabled}
-            onGenerateSuggestionsClick={scheduleKnowledgeIndicatorsOnboarding}
+            onGenerateSuggestionsClick={handleGenerate}
             onCancelGenerationClick={cancelKnowledgeIndicatorsOnboarding}
           />
         </EuiFlexItem>
@@ -349,7 +359,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                     isCanceling={isKnowledgeIndicatorsGenerationCanceling}
                     isGenerateDisabled={isGenerateButtonDisabled}
                     isGeneratingFromCode={isGeneratingFromCode}
-                    onGenerateSuggestionsClick={scheduleKnowledgeIndicatorsOnboarding}
+                    onGenerateSuggestionsClick={handleGenerate}
                     onGenerateFromCodeClick={generateFromCode}
                     onCancelGenerationClick={cancelKnowledgeIndicatorsOnboarding}
                   />

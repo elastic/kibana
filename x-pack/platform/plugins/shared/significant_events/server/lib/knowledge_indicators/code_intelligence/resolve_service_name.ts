@@ -234,3 +234,82 @@ export async function resolveServiceName({
   });
   return rankServiceName(candidates, observedServiceNames);
 }
+
+/** Cap on distinct services enumerated from a single repository. */
+export const MAX_SERVICES_PER_REPOSITORY = 50;
+
+// Signals that reliably denote a distinct service identity. Deployment-identity
+// `name:` matches are too noisy to spawn a service on their own (a monorepo has
+// many `name:` fields), so they only contribute evidence to a service already
+// established by a primary signal.
+const PRIMARY_SERVICE_SIGNALS: ReadonlySet<ServiceNameSignal> = new Set([
+  'env_injection',
+  'sdk_config',
+]);
+
+/**
+ * Groups candidates by normalized service value and produces one resolution per
+ * distinct service — for monorepos that deploy many services from one repo. Only
+ * groups anchored by a primary signal (env injection / SDK config) become a
+ * service; lower-signal matches (e.g. k8s `name:`) only enrich those.
+ */
+export function rankServiceNames(
+  candidates: ServiceNameCandidate[],
+  observedServiceNames: string[]
+): ServiceNameResolution[] {
+  const groups = new Map<string, ServiceNameCandidate[]>();
+  for (const candidate of candidates) {
+    const key = normalizeServiceName(candidate.value);
+    if (key.length === 0) {
+      continue;
+    }
+    const group = groups.get(key) ?? [];
+    group.push(candidate);
+    groups.set(key, group);
+  }
+
+  const resolutions: ServiceNameResolution[] = [];
+  const seenValues = new Set<string>();
+  for (const group of groups.values()) {
+    if (!group.some((candidate) => PRIMARY_SERVICE_SIGNALS.has(candidate.signal))) {
+      continue;
+    }
+    const resolution = rankServiceName(group, observedServiceNames);
+    if (!resolution) {
+      continue;
+    }
+    const dedupeKey = resolution.value.trim().toLowerCase();
+    if (seenValues.has(dedupeKey)) {
+      continue;
+    }
+    seenValues.add(dedupeKey);
+    resolutions.push(resolution);
+  }
+
+  return resolutions
+    .sort((a, b) => b.confidence - a.confidence)
+    .slice(0, MAX_SERVICES_PER_REPOSITORY);
+}
+
+/**
+ * End-to-end multi-service resolution for a repository: collect code candidates
+ * and return one resolution per distinct detected service.
+ */
+export async function resolveServiceNames({
+  repository,
+  fingerprint,
+  searchCode,
+  observedServiceNames,
+}: {
+  repository: string;
+  fingerprint: string | undefined;
+  searchCode: (repository: string, query: string) => Promise<CodeHit[]>;
+  observedServiceNames: string[];
+}): Promise<ServiceNameResolution[]> {
+  const candidates = await collectServiceNameCandidatesFromCode({
+    repository,
+    fingerprint,
+    searchCode,
+  });
+  return rankServiceNames(candidates, observedServiceNames);
+}

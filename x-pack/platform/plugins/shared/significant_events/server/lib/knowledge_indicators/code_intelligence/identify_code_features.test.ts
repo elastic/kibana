@@ -18,7 +18,7 @@ import {
   CODE_FEATURE_SUBTYPE_REPO_TYPE,
   CODE_FEATURE_SUBTYPE_SERVICE_NAME,
 } from './constants';
-import { identifyCodeFeatures } from './identify_code_features';
+import { identifyCodeFeatures, identifyCodeFeaturesForRepository } from './identify_code_features';
 import type { CodeHit, CodeRepositoryReader } from './types';
 
 const STREAM = 'logs.checkout';
@@ -54,6 +54,7 @@ const createReader = (overrides: Partial<CodeRepositoryReader> = {}): CodeReposi
         : []
   ),
   getLoggingChunks: jest.fn(async () => []),
+  discoverServices: jest.fn(async () => []),
   ...overrides,
 });
 
@@ -146,5 +147,111 @@ describe('identifyCodeFeatures', () => {
     // Code features are persisted as durable KIs (no expiry).
     expect(operations[0].index.feature.expires_at).toBeUndefined();
     expect(operations[0].index.feature.run_id).toBe('run-42');
+  });
+});
+
+describe('identifyCodeFeaturesForRepository (code-first, no logs)', () => {
+  it('resolves a predicted service name from code and keys the KIs by it', async () => {
+    const { kiClient, bulk } = createKiClient([]);
+    const result = await identifyCodeFeaturesForRepository({
+      repository: REPO,
+      kiClient,
+      // No observed service names available (no logs) -> predicted.
+      reader: createReader({ getObservedServiceNames: jest.fn(async () => []) }),
+      logger: loggerMock.create(),
+      runId: 'run-code-first',
+    });
+
+    expect(result.status).toBe('updated');
+    expect(result.services).toHaveLength(1);
+    const [service] = result.services;
+    expect(service.streamName).toBe('checkoutservice');
+
+    const serviceName = service.features?.find(
+      (f) => f.subtype === CODE_FEATURE_SUBTYPE_SERVICE_NAME
+    );
+    expect(serviceName?.properties.service_name).toBe('checkoutservice');
+    expect(serviceName?.properties.predicted).toBe(true);
+
+    // KIs are written to the resolved service.name stream key, not the repo.
+    expect(bulk).toHaveBeenCalledTimes(1);
+    expect(bulk.mock.calls[0][0]).toBe('checkoutservice');
+  });
+
+  it('resolves one service per distinct service in a monorepo', async () => {
+    const { kiClient, bulk } = createKiClient([]);
+    const result = await identifyCodeFeaturesForRepository({
+      repository: REPO,
+      kiClient,
+      reader: createReader({
+        getObservedServiceNames: jest.fn(async () => []),
+        searchCode: jest.fn(
+          async (_repo: string, query: string): Promise<CodeHit[]> =>
+            query.includes('OTEL_SERVICE_NAME')
+              ? [
+                  {
+                    file: 'checkout/deploy.tf',
+                    line: 1,
+                    snippet: 'OTEL_SERVICE_NAME=checkoutservice',
+                  },
+                  { file: 'cart/deploy.tf', line: 2, snippet: 'OTEL_SERVICE_NAME=cartservice' },
+                ]
+              : []
+        ),
+      }),
+      logger: loggerMock.create(),
+      runId: 'run-monorepo',
+    });
+
+    expect(result.status).toBe('updated');
+    expect(result.services.map((s) => s.streamName).sort()).toEqual([
+      'cartservice',
+      'checkoutservice',
+    ]);
+    // One bulk write per service, keyed by that service name.
+    expect(bulk).toHaveBeenCalledTimes(2);
+    expect(bulk.mock.calls.map((call) => call[0]).sort()).toEqual([
+      'cartservice',
+      'checkoutservice',
+    ]);
+  });
+
+  it('enumerates services via SCS directory discovery (monorepo, no env strings)', async () => {
+    const { kiClient, bulk } = createKiClient([]);
+    const result = await identifyCodeFeaturesForRepository({
+      repository: REPO,
+      kiClient,
+      reader: createReader({
+        // No env-injection strings found, but SCS discovers service directories.
+        searchCode: jest.fn(async () => []),
+        discoverServices: jest.fn(async () => ['checkout', 'cart', 'frontend']),
+      }),
+      logger: loggerMock.create(),
+      runId: 'run-discovery',
+    });
+
+    expect(result.status).toBe('updated');
+    expect(result.services.map((s) => s.streamName).sort()).toEqual([
+      'cart',
+      'checkout',
+      'frontend',
+    ]);
+    expect(bulk).toHaveBeenCalledTimes(3);
+    expect(bulk.mock.calls.map((call) => call[0]).sort()).toEqual(['cart', 'checkout', 'frontend']);
+  });
+
+  it('skips the repository when no service name can be resolved from code', async () => {
+    const { kiClient, bulk } = createKiClient([]);
+    const result = await identifyCodeFeaturesForRepository({
+      repository: REPO,
+      kiClient,
+      reader: createReader({ searchCode: jest.fn(async () => []) }),
+      logger: loggerMock.create(),
+      runId: 'run-code-first',
+    });
+
+    expect(result.status).toBe('no_service');
+    expect(result.services).toEqual([]);
+    expect(bulk).not.toHaveBeenCalled();
   });
 });

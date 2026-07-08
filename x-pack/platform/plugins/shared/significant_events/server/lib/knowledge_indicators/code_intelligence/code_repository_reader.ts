@@ -16,10 +16,64 @@ import { resolveIndexForRepository as resolveCodeIndex } from '../../semantic_co
 import { LOGGING_CHUNK_TAG } from './constants';
 import type { CodeHit, CodeRepositoryReader, LanguageCount, LoggingChunk } from './types';
 
+/** SCS directory-discovery workflow tool installed via `scs install-agentic-interfaces`. */
+const SCS_DISCOVER_DIRECTORIES_TOOL_ID = 'scs.discover_directories';
+
 const MAX_LANGUAGES = 50;
 const MAX_SERVICE_NAMES = 50;
 const MAX_SNIPPET_LENGTH = 400;
 const MAX_LOGGING_CHUNKS = 500;
+const MAX_DISCOVERED_DIRECTORIES = 200;
+
+// Common monorepo source roots whose immediate child directory is the service.
+const SERVICE_ROOT_SEGMENTS: ReadonlySet<string> = new Set([
+  'src',
+  'services',
+  'service',
+  'apps',
+  'app',
+  'packages',
+  'cmd',
+]);
+
+// `scs.discover_directories` renders each directory as a Markdown `## <path>` header.
+const DIRECTORY_HEADER_RE = /^##\s+(.+?)\s*$/gm;
+
+// A plausible service directory name: alphanumerics, dashes, dots, underscores.
+// Excludes markdown/table artifacts that can leak from the tool's rendered output.
+const SERVICE_NAME_RE = /^[a-zA-Z0-9][\w.-]*$/;
+
+/**
+ * Derives a service name from a directory path. Services live under a known
+ * source root (`src/checkout` -> `checkout`); nested paths collapse to that
+ * immediate child (`src/checkout/internal` -> `checkout`). Paths not under a
+ * recognized root (top-level `.github`, `test`, `tools`, …) are ignored, as are
+ * anything that doesn't look like a directory name.
+ */
+const serviceNameFromDirectory = (directoryPath: string): string | undefined => {
+  const segments = directoryPath
+    .split('/')
+    .map((segment) => segment.trim())
+    .filter((segment) => segment.length > 0 && segment !== '.');
+  if (segments.length < 2 || !SERVICE_ROOT_SEGMENTS.has(segments[0].toLowerCase())) {
+    return undefined;
+  }
+  const serviceName = segments[1];
+  return SERVICE_NAME_RE.test(serviceName) ? serviceName : undefined;
+};
+
+const parseServiceDirectories = (markdown: string): string[] => {
+  const services = new Set<string>();
+  let match: RegExpExecArray | null;
+  DIRECTORY_HEADER_RE.lastIndex = 0;
+  while ((match = DIRECTORY_HEADER_RE.exec(markdown)) !== null) {
+    const serviceName = serviceNameFromDirectory(match[1]);
+    if (serviceName) {
+      services.add(serviceName);
+    }
+  }
+  return [...services];
+};
 
 const asRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
@@ -176,22 +230,26 @@ export function createCodeRepositoryReader({
     },
 
     async getLoggingChunks(repository, limit = MAX_LOGGING_CHUNKS) {
-      const index = await resolveIndex(repository);
-      if (!index) {
-        return [];
-      }
       try {
-        const response = await esClient.search<{ content?: string; language?: string }>({
-          index,
-          size: limit,
-          track_total_hits: false,
-          _source: ['content', 'language'],
-          query: {
-            bool: {
-              filter: [{ term: { tags: LOGGING_CHUNK_TAG } }, { term: { repository } }],
+        // Query the `code-*` wildcard rather than a single resolved index: SCS
+        // spreads a repository across several indices (`_chunks`, `_locations`,
+        // `_commits`, …) and only the chunk index carries `content` + `tags`. The
+        // `repository` + `tags: logging` filters already scope the result to this
+        // repository's logging chunks, so the wildcard is both safe and reliable.
+        const response = await esClient.search<{ content?: string; language?: string }>(
+          {
+            index: 'code-*',
+            size: limit,
+            track_total_hits: false,
+            _source: ['content', 'language'],
+            query: {
+              bool: {
+                filter: [{ term: { tags: LOGGING_CHUNK_TAG } }, { term: { repository } }],
+              },
             },
           },
-        });
+          { ignore: [404] }
+        );
         return response.hits.hits.flatMap<LoggingChunk>((hit) => {
           const content = hit._source?.content;
           if (typeof content !== 'string' || content.length === 0) {
@@ -202,6 +260,29 @@ export function createCodeRepositoryReader({
       } catch (error) {
         logger.debug(
           `code_features: logging chunk read failed for "${repository}": ${errorMessage(error)}`
+        );
+        return [];
+      }
+    },
+
+    async discoverServices(repository) {
+      try {
+        const { results } = await agentBuilderTools.execute({
+          toolId: SCS_DISCOVER_DIRECTORIES_TOOL_ID,
+          toolParams: {
+            // Broad query so the semantic-scoped aggregation surfaces the
+            // service directories rather than a single concept's area.
+            query: 'service application component',
+            repository,
+            min_files: 1,
+            max_results: MAX_DISCOVERED_DIRECTORIES,
+          },
+          request,
+        });
+        return parseServiceDirectories(getOutputText(formatToolResults(results)));
+      } catch (error) {
+        logger.debug(
+          `code_features: service discovery failed for "${repository}": ${errorMessage(error)}`
         );
         return [];
       }

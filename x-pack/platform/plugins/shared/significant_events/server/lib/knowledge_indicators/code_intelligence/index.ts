@@ -11,7 +11,13 @@ export {
   CODE_FEATURE_SUBTYPE_SERVICE_NAME,
 } from './constants';
 export { classifyRepository } from './classify_repository';
-export { resolveServiceName, rankServiceName, normalizeServiceName } from './resolve_service_name';
+export {
+  resolveServiceName,
+  resolveServiceNames,
+  rankServiceName,
+  rankServiceNames,
+  normalizeServiceName,
+} from './resolve_service_name';
 export { reconcileCodeFeatures } from './reconcile_code_features';
 export {
   readCodeChangeState,
@@ -22,10 +28,25 @@ export {
 export { createCodeRepositoryReader } from './code_repository_reader';
 export {
   identifyCodeFeatures,
+  identifyCodeFeaturesForRepository,
+  identifyCodeFeaturesForService,
   type IdentifyCodeFeaturesOptions,
   type IdentifyCodeFeaturesResult,
   type IdentifyCodeFeaturesStatus,
+  type IdentifyCodeForRepositoryOptions,
+  type IdentifyCodeForRepositoryResult,
+  type IdentifyCodeForRepositoryStatus,
+  type IdentifyCodeForServiceOptions,
+  type IdentifyCodeForServiceResult,
+  type RepositoryServiceResult,
 } from './identify_code_features';
+export {
+  linkServiceEntities,
+  resolveIngestingStreams,
+  resolveLogBearingStreams,
+  type StreamSamplingSource,
+  type LogStreamBinding,
+} from './link_ingesting_streams';
 export { extractLogSignatures, staticPrefixOf } from './extract_log_signatures';
 export {
   generatePredictiveQueries,
@@ -49,6 +70,7 @@ export {
   type ReconcileQueriesResult,
 } from './reconcile_query_kis';
 export type {
+  CodeEvidenceCitation,
   CodeRepositoryReader,
   RepoClassification,
   RepoType,

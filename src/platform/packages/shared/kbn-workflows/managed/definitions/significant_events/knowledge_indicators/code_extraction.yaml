@@ -1,17 +1,24 @@
-# Continuous code-driven KI (Knowledge Indicator) extraction workflow.
+# Code-driven KI (Knowledge Indicator) extraction workflow.
 #
-# Runs on a schedule and, for each candidate stream linked to a Semantic Code
-# Search (SCS) indexed repository, derives Stage 1 code Feature KIs (repo type,
-# language, service name) from the source code. The per-stream endpoint no-ops
-# when the repository is unchanged since the last run (fingerprint check), so
-# re-running on every tick is cheap.
+# Code-first: derives KIs from source code with no logs required. An `ai.agent`
+# step runs the Semantic Code Search (SCS) "Code Researcher" agent, which reasons
+# over every SCS-indexed repository (list repos, discover directories, inspect
+# entrypoints and SDK/telemetry config) and returns the deployable services it
+# finds. The workflow then fans out one call per service to the per-service
+# `_identify_service` endpoint, which writes Stage 1 Feature KIs (repo type,
+# language, predicted service name), Stage 2 predictive Query KIs from logger
+# call sites, and reconciles them with any log-derived KIs.
 #
-# This is a managed workflow installed by the streams plugin. It is created
-# disabled; installation is gated by the code KI extraction feature flag.
+# The per-service endpoint no-ops when the repository is unchanged since the last
+# run (fingerprint check), so re-running is cheap.
+#
+# Runs on demand (manual trigger) from the discovery Code Intelligence tab
+# ("Identify features & queries" button) via the code extraction workflow client.
+# This is a managed workflow installed by the significant_events plugin.
 
 version: '1'
-name: 'Continuous Code KI Extraction'
-enabled: false
+name: 'Code KI Extraction'
+enabled: true
 description: 'This workflow is used by the system and should not be modified.'
 tags:
   - observability
@@ -19,90 +26,123 @@ tags:
   - significant-events
   - knowledge-indicators
   - code-extraction
-consts:
-  maxScheduledStreams: 25
 settings:
-  # Timeout is 1 minute shorter than the schedule to avoid overlapping runs.
-  timeout: '59m'
-  # Only one instance of this workflow runs at a time; overlapping triggers are dropped.
+  timeout: '30m'
+  # Only one instance runs at a time; overlapping triggers are dropped.
   concurrency:
-    key: significant-events-continuous-code-ki-extraction
+    key: significant-events-code-ki-extraction
     strategy: drop
     max: 1
 triggers:
-  - type: scheduled
-    with:
-      every: '60m'
   - type: manual
     inputs:
-      - name: maxScheduledStreams
-        type: number
-        default: 25
-        description: 'Max streams to process per run; remaining eligible streams are skipped.'
+      - name: agentConnectorId
+        type: string
+        default: '.openai-gpt-5.2-chat_completion'
+        required: false
+        description: 'Connector ID for the SCS Code Researcher agent.'
 steps:
-  # Step 1: Fetch eligible streams from the classification endpoint.
-  - name: get_eligible
-    type: kibana.request
+  # Step 1: Let the SCS Code Researcher agent enumerate the deployable services
+  # across every indexed repository. The agent owns service discovery (it reasons
+  # over repo layout, entrypoints, and SDK config) instead of us parsing paths.
+  - name: identify_services
+    type: ai.agent
+    agent-id: scs.code_researcher
+    connector-id: '${{ inputs.agentConnectorId }}'
+    plugin-id: 'significant_events'
+    aggregate-by: 'significant_events'
     with:
-      method: GET
-      path: '/internal/streams/_extraction/_eligible?maxScheduledStreams={{ inputs.maxScheduledStreams | default: consts.maxScheduledStreams }}'
-      headers:
-        x-elastic-internal-origin: 'kibana'
-    on-failure:
-      retry:
-        max-attempts: 3
-        delay: '5s'
-        strategy: exponential
+      message: |
+        Identify every deployable service across all repositories indexed in Semantic Code Search.
 
-  # Step 2: Only proceed if there are candidates to process.
-  - name: has_candidates
+        Use your tools to do this rigorously:
+        1. List every indexed repository.
+        2. For each repository, discover its directory layout and inspect service roots
+           (e.g. `src/<service>`, `services/<service>`), entrypoints, Dockerfiles, and any
+           OpenTelemetry / logging SDK configuration.
+
+        A "service" is an independently deployable application — it has its own entrypoint,
+        build target, or container. Do NOT include libraries, shared packages, test folders,
+        example apps, or config-only directories.
+
+        For each service, report:
+          - repository: the repository it belongs to (verbatim).
+          - name: the `service.name` this service will emit in its logs and telemetry
+            (prefer the value configured in code, e.g. OTEL_SERVICE_NAME / resource
+            attributes; otherwise the conventional service/directory name).
+          - language: the primary implementation language of that service.
+          - evidence: the specific source file(s) that made you conclude this is a
+            deployable service — its entrypoint, Dockerfile, build manifest, or the
+            OTEL_SERVICE_NAME / resource-attribute configuration. Cite the exact file
+            path and, when known, the line number and a short snippet. Use only real
+            paths and lines returned by your tools — never invent them.
+
+        Return the complete de-duplicated list.
+      schema:
+        type: object
+        properties:
+          services:
+            type: array
+            items:
+              type: object
+              properties:
+                repository:
+                  type: string
+                  description: 'The repository this service belongs to (verbatim, e.g. "open-telemetry/opentelemetry-demo").'
+                name:
+                  type: string
+                  description: 'The service.name this service will emit in logs and telemetry.'
+                language:
+                  type: string
+                  description: 'Primary implementation language of the service.'
+                evidence:
+                  type: array
+                  description: 'Source files that identify this service. Use only real paths/lines returned by your tools.'
+                  items:
+                    type: object
+                    properties:
+                      path:
+                        type: string
+                        description: 'Repository-relative file path (e.g. "src/kafka/Dockerfile").'
+                      line:
+                        type: integer
+                        description: 'Line number of the identifying code, when known.'
+                      snippet:
+                        type: string
+                        description: 'Short snippet of the identifying line, when known.'
+                    required: [path]
+              required: [repository, name]
+        required: [services]
+    timeout: 600s
+    on-failure:
+      continue: false
+
+  # Step 2: Only proceed when the agent returned at least one service.
+  - name: has_services
     type: if
-    condition: 'steps.get_eligible.output.candidates[0].streamName:*'
+    condition: '${{ steps.identify_services.error == null and steps.identify_services.output.structured_output.services != null }}'
     steps:
-      # Identify code features per stream. The endpoint no-ops internally when
-      # the repository is unchanged, so iterating all candidates is safe.
-      - name: identify_all
+      - name: process_services
         type: foreach
-        foreach: '${{ steps.get_eligible.output.candidates }}'
+        foreach: '${{ steps.identify_services.output.structured_output.services }}'
         iteration-on-failure:
           continue: true
         steps:
-          # Stage 1: derive code Feature KIs (repo type, language, service name).
-          - name: identify_code_features
+          # Stage 1 + Stage 2 + reconcile for one agent-resolved service. The
+          # endpoint no-ops internally when the repository is unchanged.
+          - name: identify_service
             type: kibana.request
             with:
               method: POST
-              path: '/internal/streams/{{ foreach.item.streamName }}/code_features/_identify'
+              path: '/internal/streams/code_intelligence/_identify_service'
               headers:
                 x-elastic-internal-origin: 'kibana'
-            on-failure:
-              retry:
-                max-attempts: 2
-                delay: '5s'
-                strategy: exponential
-          # Stage 2: generate predictive Query KIs from logger call sites. Runs
-          # after Stage 1 so the resolved service_name feature is available.
-          - name: generate_code_queries
-            type: kibana.request
-            with:
-              method: POST
-              path: '/internal/streams/{{ foreach.item.streamName }}/code_features/_generate_queries'
-              headers:
-                x-elastic-internal-origin: 'kibana'
-            on-failure:
-              retry:
-                max-attempts: 2
-                delay: '5s'
-                strategy: exponential
-          # Reconcile: merge code- and log-derived Query KIs that are semantic
-          # duplicates into one canonical KI carrying both evidences.
-          - name: reconcile_code_queries
-            type: kibana.request
-            with:
-              method: POST
-              path: '/internal/streams/{{ foreach.item.streamName }}/code_features/_reconcile_queries'
-              headers:
-                x-elastic-internal-origin: 'kibana'
+              body:
+                repository: '{{ foreach.item.repository }}'
+                service:
+                  name: '{{ foreach.item.name }}'
+                  language: '{{ foreach.item.language }}'
+                  evidence: '${{ foreach.item.evidence }}'
             on-failure:
               retry:
                 max-attempts: 2

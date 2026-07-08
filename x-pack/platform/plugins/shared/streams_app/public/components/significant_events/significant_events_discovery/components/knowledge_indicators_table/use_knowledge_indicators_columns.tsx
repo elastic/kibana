@@ -20,8 +20,10 @@ import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import React, { useMemo } from 'react';
 import { SparkPlot } from '../../../../spark_plot';
 import { KnowledgeIndicatorActionsCell } from '../../../stream_detail_significant_events_view/knowledge_indicator_actions_cell';
+import { KnowledgeIndicatorSourceBadge } from '../../../stream_detail_significant_events_view/knowledge_indicator_source_badge';
 import { getKnowledgeIndicatorItemId } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_item_id';
 import { getKnowledgeIndicatorStreamName } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_stream_name';
+import { getKnowledgeIndicatorSource } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_source';
 import { getKnowledgeIndicatorTitle } from './use_knowledge_indicators_table';
 import {
   TITLE_COLUMN_LABEL,
@@ -30,6 +32,7 @@ import {
   MATCH_QUERY_TYPE_LABEL,
   STATS_QUERY_TYPE_LABEL,
   STREAM_COLUMN_LABEL,
+  SOURCE_COLUMN_LABEL,
   ACTIONS_COLUMN_LABEL,
   VIEW_DETAILS_ARIA_LABEL,
   MINIMIZE_DETAILS_ARIA_LABEL,
@@ -127,6 +130,13 @@ export const useKnowledgeIndicatorsColumns = ({
             </EuiBadge>
           );
         },
+      },
+      {
+        name: SOURCE_COLUMN_LABEL,
+        width: '130px',
+        render: (ki: KnowledgeIndicator) => (
+          <KnowledgeIndicatorSourceBadge source={getKnowledgeIndicatorSource(ki)} />
+        ),
       },
       {
         name: STREAM_COLUMN_LABEL,

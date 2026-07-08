@@ -23,22 +23,31 @@ const signature = (overrides: Partial<LogSignature> = {}): LogSignature => ({
 });
 
 describe('buildPredictiveEsql', () => {
-  it('scopes to the service and matches the static prefix, with METADATA', () => {
+  it('matches the static prefix on a keyword message field with LIKE, with METADATA', () => {
     const esql = buildPredictiveEsql({
       samplingSource: 'logs.checkout',
-      serviceName: 'checkoutservice',
       staticPrefix: 'Payment failed for order',
     });
     expect(esql).toContain('FROM logs.checkout METADATA _id, _source');
-    expect(esql).toContain('service.name == "checkoutservice"');
     expect(esql).toContain('message LIKE "*Payment failed for order*"');
+    expect(esql).not.toContain('service.name');
+    expect(isValidEsqlSyntax(esql)).toBe(true);
+  });
+
+  it('uses MATCH_PHRASE on a text message field (e.g. OTel body.text)', () => {
+    const esql = buildPredictiveEsql({
+      samplingSource: 'logs.otel',
+      staticPrefix: 'Tracking ID Created',
+      messageField: 'body.text',
+      messageIsText: true,
+    });
+    expect(esql).toContain('MATCH_PHRASE(body.text, "Tracking ID Created")');
     expect(isValidEsqlSyntax(esql)).toBe(true);
   });
 
   it('neutralizes wildcards/quotes in the prefix and stays valid ES|QL', () => {
     const esql = buildPredictiveEsql({
       samplingSource: 'logs.checkout',
-      serviceName: 'svc',
       staticPrefix: 'weird * "quoted"',
     });
     // Special chars are collapsed to spaces, so no raw wildcard/quote leaks in.

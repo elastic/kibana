@@ -33,23 +33,30 @@ const toTitle = (staticPrefix: string): string =>
 
 /**
  * Builds a predictive match query: it matches the log line the code emits, even
- * though it may not have occurred in the data yet. Scoped to the resolved
- * `service.name`. Includes `METADATA _id, _source` as required for match queries.
+ * though it may not have occurred in the data yet. Mirrors how the log-derived
+ * KI pipeline queries (message-based, no service field — log streams here have no
+ * queryable service field; the message content is the signal). Includes
+ * `METADATA _id, _source` as required for match queries.
+ *
+ * Field-aware `messageField` (default `message`): `text` fields use
+ * `MATCH_PHRASE` (same operator the log pipeline uses on OTel `body.text`);
+ * keyword fields use `LIKE "*prefix*"` (`LIKE` is invalid on `text`).
  */
 export function buildPredictiveEsql({
   samplingSource,
-  serviceName,
   staticPrefix,
+  messageField = 'message',
+  messageIsText = false,
 }: {
   samplingSource: string;
-  serviceName: string;
   staticPrefix: string;
+  messageField?: string;
+  messageIsText?: boolean;
 }): string {
-  return (
-    `FROM ${samplingSource} METADATA _id, _source ` +
-    `| WHERE service.name == "${escapeQuotes(serviceName)}" ` +
-    `AND message LIKE "*${sanitizeForLike(staticPrefix)}*"`
-  );
+  const messageClause = messageIsText
+    ? `MATCH_PHRASE(${messageField}, "${escapeQuotes(sanitizeForLike(staticPrefix))}")`
+    : `${messageField} LIKE "*${sanitizeForLike(staticPrefix)}*"`;
+  return `FROM ${samplingSource} METADATA _id, _source | WHERE ${messageClause}`;
 }
 
 /**
@@ -81,12 +88,16 @@ export function generatePredictiveQueries({
   signatures,
   repository,
   fingerprint,
+  messageField,
+  messageIsText,
 }: {
   serviceName: string;
   samplingSource: string;
   signatures: LogSignature[];
   repository: string;
   fingerprint?: string;
+  messageField?: string;
+  messageIsText?: boolean;
 }): StreamQuery[] {
   const ref = fingerprint ? `${repository}@${fingerprint}` : repository;
   const seenEsql = new Set<string>();
@@ -95,8 +106,9 @@ export function generatePredictiveQueries({
   for (const signature of signatures) {
     const esql = buildPredictiveEsql({
       samplingSource,
-      serviceName,
       staticPrefix: signature.staticPrefix,
+      messageField,
+      messageIsText,
     });
 
     if (!isValidEsqlSyntax(esql)) {
