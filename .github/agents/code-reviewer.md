@@ -22,7 +22,7 @@ Prioritize findings such as:
 - logic bugs, broken edge cases, or clear regressions
 - missing or weakened authn/authz, privilege checks, or validation
 - missing current-user scoping, space isolation, user or tenant scoping, saved object security, or data-leak protections
-- unsafe API, migration, config, or persistence changes that can break upgrades, compatibility, or rollback safety
+- unsafe API, migration, config, or persistence changes in the changed files and their direct imports that can break upgrades, compatibility, or rollback safety
 - public contract or deprecation changes that can break backward compatibility
 - missing regression coverage for bug fixes
 - missing or obviously weak automated coverage for behavior changes
@@ -30,7 +30,7 @@ Prioritize findings such as:
 - user-facing UI changes with clear accessibility, loading, empty-state, or error-handling gaps
 - missing docs when a PR changes a public API, operator workflow, or user-visible behavior in a way that would leave users or operators behind
 
-Ground architectural and maintainability findings in local code and clear behavioral risk, not personal preference.
+Ground architectural and maintainability findings in the changed files and their direct imports, and in clear behavioral risk, not personal preference.
 
 ## Do not report
 
@@ -43,8 +43,8 @@ Ground architectural and maintainability findings in local code and clear behavi
 
 1. Start with workflow-provided PR context artifacts under `/tmp/gh-aw/agent/`: read `pr-metadata.json` and `pr-files.json` first to understand scope before reading any diff content.
 2. Walk the changed files in the order listed in `pr-files.json`, skipping generated or output-only files. Review each non-generated changed file once unless later context makes a second look necessary.
-3. For the current file, use `pr-files.json` to build the exact diff header (`diff --git a/${previous_filename ?? filename} b/${filename}`), then search `pr-diff.txt` for that section and inspect it. Do not read `pr-diff.txt` from top to bottom or create derived full-diff dumps.
-4. Use source files, tests, and nearby implementation context as needed to verify concrete concerns. Avoid repo-wide searches unless you need to answer a specific question raised by the current file's diff.
+3. For the current file, use `pr-files.json` to build the exact diff header (`diff --git a/${previous_filename ?? filename} b/${filename}`), then search `pr-diff.txt` for that section and inspect it. Do not read `pr-diff.txt` from top to bottom, create derived full-diff dumps, or run `git show origin/main:` (or similar) to reconstruct pre-change versions — `pr-diff.txt` is the source of old-vs-new content.
+4. Limit verification to the changed files and the files they directly import; do not run repo-wide `grep`/`Grep`, open files outside that set, or chase investigations beyond it.
 5. Do not print generated files, snapshots, OpenAPI specs, full diffs, or repo-wide search output back into context.
 6. Do not run local validation or setup commands, including tests, type checks, lint, bootstrap, package installs, builds, or repo scripts. Review from static source, prefetched artifacts, and GitHub data only.
 7. If artifacts are missing or insufficient, use GitHub tools to gather only the extra pull request or repository context needed for a specific question. Using `.github/scripts/prefetch_pr_context.js` as an example on how to retrieve the missing artifacts.
