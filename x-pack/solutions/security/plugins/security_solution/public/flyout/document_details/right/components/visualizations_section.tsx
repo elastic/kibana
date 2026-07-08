@@ -91,8 +91,7 @@ export const VisualizationsSection = memo(() => {
           <EuiSpacer />
           <GraphPreviewContainer
             hit={hit}
-            onShowGraph={navigateToGraphVisualization}
-            disableNavigation={isRulePreview}
+            onShowGraph={isRulePreview ? undefined : navigateToGraphVisualization}
             showIcon={!isPreviewMode}
           />
         </>

@@ -114,6 +114,43 @@ describe('LeadDataClient', () => {
       );
     });
 
+    it('preserves the entity EUID (`entities[].id`) when persisting, so the correct entity flyout can be opened by id', async () => {
+      esClient.bulk.mockResolvedValueOnce({ errors: false, items: [], took: 1 });
+      esClient.deleteByQuery.mockResolvedValueOnce({
+        deleted: 0,
+        failures: [],
+        timed_out: false,
+        took: 1,
+        total: 0,
+      });
+
+      const lead = makeTestLead({
+        entities: [
+          {
+            type: 'host',
+            name: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
+            id: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
+          },
+        ],
+      });
+      await client.createLeads({
+        leads: [lead],
+        executionId: 'exec-euid',
+        sourceType: 'adhoc',
+      });
+
+      const [bulkCall] = esClient.bulk.mock.calls;
+      const body = bulkCall[0].body as unknown[];
+      const doc = body[1] as Record<string, unknown>;
+      expect(doc.entities).toEqual([
+        {
+          type: 'host',
+          name: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
+          id: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
+        },
+      ]);
+    });
+
     it('uses the scheduled index when sourceType is scheduled', async () => {
       esClient.bulk.mockResolvedValueOnce({ errors: false, items: [], took: 1 });
       esClient.deleteByQuery.mockResolvedValueOnce({
@@ -246,6 +283,48 @@ describe('LeadDataClient', () => {
       expect(lead.sourceType).toBe('adhoc');
       expect(lead.observations[0].entityId).toBe('user:admin');
       expect(lead.observations[0].moduleId).toBe('risk_analysis');
+    });
+
+    it('reads the entity EUID (`entities[].id`) back from the stored document', async () => {
+      const esDoc = {
+        id: 'lead-euid',
+        title: 'Test Lead',
+        byline: 'Entity X',
+        description: 'Details',
+        entities: [
+          {
+            type: 'host',
+            name: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
+            id: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
+          },
+        ],
+        tags: [],
+        priority: 8,
+        chat_recommendations: [],
+        timestamp: new Date().toISOString(),
+        staleness: 'fresh',
+        status: 'active',
+        observations: [],
+        execution_uuid: 'exec-uuid',
+        source_type: 'adhoc',
+      };
+
+      esClient.search.mockResolvedValueOnce({
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          hits: [{ _source: esDoc, _id: 'lead-euid', _index: adhocIndex }],
+        },
+      } as never);
+
+      const result = await client.findLeads({ page: 1, perPage: 10 });
+
+      expect(result.leads[0].entities).toEqual([
+        {
+          type: 'host',
+          name: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
+          id: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
+        },
+      ]);
     });
 
     it('applies status filter when provided', async () => {
