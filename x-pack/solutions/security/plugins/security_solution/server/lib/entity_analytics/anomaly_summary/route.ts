@@ -24,7 +24,7 @@ import {
 } from '../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../types';
 import { withMinimumLicense } from '../utils/with_minimum_license';
-import { checkEntityExists } from '../utils/check_entity_exists';
+import { checkEntityExists, EntityStoreAccessError } from '../utils/check_entity_exists';
 import { getEntityAnomalies } from './get_anomaly_details';
 import { DEFAULT_OVERVIEW_LOOKBACK_MS, getEntityAnomalyOverview } from './get_anomaly_overview';
 import { _formatPrivileges, hasReadWritePermissions } from '../utils/check_and_format_privileges';
@@ -182,7 +182,8 @@ export const registerAnomalySummaryRoutes = ({
 
           if (
             err instanceof InsufficientMLCapabilities ||
-            err instanceof MLPrivilegesUninitialized
+            err instanceof MLPrivilegesUninitialized ||
+            err instanceof EntityStoreAccessError
           ) {
             return siemResponse.error({ statusCode: 403, body: err.message });
           }
@@ -310,7 +311,8 @@ export const registerAnomalySummaryRoutes = ({
 
           if (
             err instanceof InsufficientMLCapabilities ||
-            err instanceof MLPrivilegesUninitialized
+            err instanceof MLPrivilegesUninitialized ||
+            err instanceof EntityStoreAccessError
           ) {
             return siemResponse.error({ statusCode: 403, body: err.message });
           }

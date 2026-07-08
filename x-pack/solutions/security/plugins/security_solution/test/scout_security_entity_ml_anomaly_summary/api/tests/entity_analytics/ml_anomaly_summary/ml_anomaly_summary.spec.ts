@@ -7,6 +7,7 @@
 
 import { apiTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
+import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/common';
 import type {
   AnomalyOverviewResponse,
   AnomalySummaryResponse,
@@ -56,8 +57,8 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     let defaultHeaders: Record<string, string>;
-    let noPrivsHeaders: Record<string, string>;
     let noMlPrivsHeaders: Record<string, string>;
+    let noEntityStorePrivsHeaders: Record<string, string>;
     let agentPolicyId = '';
     let packagePolicyId = '';
 
@@ -66,17 +67,30 @@ apiTest.describe(
       const credentials = await samlAuth.asInteractiveUser('admin');
       defaultHeaders = { ...credentials.cookieHeader, ...INTERNAL_HEADERS };
 
-      const noPrivsCredentials = await samlAuth.asInteractiveUser({
-        elasticsearch: { cluster: [] },
-        kibana: [{ base: [], feature: { discover: ['all'] }, spaces: ['*'] }],
-      });
-      noPrivsHeaders = { ...noPrivsCredentials.cookieHeader, ...INTERNAL_HEADERS };
-
       const noMlPrivsCredentials = await samlAuth.asInteractiveUser({
-        elasticsearch: { cluster: [] },
+        elasticsearch: {
+          cluster: [],
+          indices: [{ names: [ENTITY_STORE_LATEST_ALIAS], privileges: ['read'] }],
+        },
         kibana: [{ base: [], feature: { siem: ['all'] }, spaces: ['*'] }],
       });
       noMlPrivsHeaders = { ...noMlPrivsCredentials.cookieHeader, ...INTERNAL_HEADERS };
+
+      const noEntityStorePrivsCredentials = await samlAuth.asInteractiveUser({
+        elasticsearch: { cluster: [] },
+        kibana: [{ base: [], feature: { siem: ['all'] }, spaces: ['*'] }],
+      });
+      noEntityStorePrivsHeaders = {
+        ...noEntityStorePrivsCredentials.cookieHeader,
+        ...INTERNAL_HEADERS,
+      };
+
+      log.debug(`Installing entity store...`);
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: { ...defaultHeaders, 'elastic-api-version': '2023-10-31' },
+        responseType: 'json',
+        body: {},
+      });
 
       const startMs = Date.now() - 30 * 24 * 60 * 60 * 1000;
 
@@ -225,17 +239,12 @@ apiTest.describe(
       await esClient.indices
         .delete({ index: ML_ANOMALIES_SHARED_INDEX, ignore_unavailable: true })
         .catch(() => {});
-      // Clean up the entity store documents seeded for these tests.
-      await esClient
-        .deleteByQuery({
-          index: ENTITY_STORE_LATEST_ALIAS,
-          query: {
-            terms: {
-              'entity.id': [CAROL_EUID, DAVID_EUID, WIN_APP01_EUID, NO_BEHAVIORS_EUID],
-            },
-          },
-          refresh: true,
-          ignore_unavailable: true,
+      // Uninstall the entity store
+      await apiClient
+        .post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+          headers: { ...defaultHeaders, 'elastic-api-version': '2023-10-31' },
+          responseType: 'json',
+          body: {},
         })
         .catch(() => {});
     });
@@ -819,10 +828,10 @@ apiTest.describe(
     );
 
     apiTest(
-      'Anomaly summary API: returns error for user without .ml-anomlies* access',
+      'Anomaly summary API: returns error for user without ML read access',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
-          headers: { ...noPrivsHeaders, 'elastic-api-version': '1' },
+          headers: { ...noMlPrivsHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
           body: {},
         });
@@ -833,10 +842,38 @@ apiTest.describe(
     );
 
     apiTest(
-      'Anomaly overview API: returns error for user without .ml-anomlies* access',
+      'Anomaly overview API: returns error for user without ML read access',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
-          headers: { ...noPrivsHeaders, 'elastic-api-version': '1' },
+          headers: { ...noMlPrivsHeaders, 'elastic-api-version': '1' },
+          responseType: 'json',
+          body: {},
+        });
+
+        expect(response).toHaveStatusCode(403);
+        expect(response.body.message).toBe('Insufficient privileges to access feature');
+      }
+    );
+
+    apiTest(
+      'Anomaly summary API: returns error for user without entity store access',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
+          headers: { ...noEntityStorePrivsHeaders, 'elastic-api-version': '1' },
+          responseType: 'json',
+          body: {},
+        });
+
+        expect(response).toHaveStatusCode(403);
+        expect(response.body.message).toBe('Insufficient privileges to access feature');
+      }
+    );
+
+    apiTest(
+      'Anomaly overview API: returns error for user without entity store access',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
+          headers: { ...noEntityStorePrivsHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
           body: {},
         });
@@ -850,7 +887,7 @@ apiTest.describe(
       'Anomaly privileges API: returns has_all_required false for user without .ml-anomlies* access',
       async ({ apiClient }) => {
         const response = await apiClient.get(ENTITY_ANOMALY_PRIVILEGES_INTERNAL_URL, {
-          headers: { ...noPrivsHeaders, 'elastic-api-version': '1' },
+          headers: { ...noMlPrivsHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
         });
 

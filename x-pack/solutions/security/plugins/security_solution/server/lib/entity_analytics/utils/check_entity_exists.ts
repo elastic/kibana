@@ -13,6 +13,12 @@ interface CheckEntityExistsParams {
   entityId: string;
   entityType: EntityType;
 }
+export class EntityStoreAccessError extends Error {
+  constructor(message = 'Insufficient privileges to access feature') {
+    super(message);
+    this.name = 'EntityStoreAccessError';
+  }
+}
 
 /**
  * Returns whether an entity with the given EUID (`entity.id`) and type exists
@@ -25,14 +31,21 @@ export const checkEntityExists = async ({
   entityId,
   entityType,
 }: CheckEntityExistsParams): Promise<boolean> => {
-  const { entities } = await crudClient.listEntities({
-    filter: [
-      { term: { 'entity.id': entityId } },
-      { term: { 'entity.EngineMetadata.Type': entityType } },
-    ],
-    size: 1,
-    source: ['entity.id'],
-  });
+  try {
+    const { entities } = await crudClient.listEntities({
+      filter: [
+        { term: { 'entity.id': entityId } },
+        { term: { 'entity.EngineMetadata.Type': entityType } },
+      ],
+      size: 1,
+      source: ['entity.id'],
+    });
 
-  return entities.length > 0;
+    return entities.length > 0;
+  } catch (err) {
+    if (err?.statusCode === 403) {
+      throw new EntityStoreAccessError();
+    }
+    throw err;
+  }
 };

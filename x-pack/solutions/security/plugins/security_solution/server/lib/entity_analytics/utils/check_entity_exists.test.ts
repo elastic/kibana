@@ -6,7 +6,7 @@
  */
 
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
-import { checkEntityExists } from './check_entity_exists';
+import { checkEntityExists, EntityStoreAccessError } from './check_entity_exists';
 
 describe('checkEntityExists', () => {
   const listEntities = jest.fn();
@@ -53,5 +53,24 @@ describe('checkEntityExists', () => {
         ],
       })
     );
+  });
+
+  it('throws EntityStoreAccessError when Elasticsearch denies the lookup', async () => {
+    listEntities.mockRejectedValue(
+      Object.assign(new Error('security_exception: unauthorized'), { statusCode: 403 })
+    );
+
+    await expect(
+      checkEntityExists({ crudClient, entityId: 'host:abc123', entityType: 'host' })
+    ).rejects.toThrow(EntityStoreAccessError);
+  });
+
+  it('rethrows other errors unchanged', async () => {
+    const error = new Error('index_not_found_exception');
+    listEntities.mockRejectedValue(error);
+
+    await expect(
+      checkEntityExists({ crudClient, entityId: 'host:abc123', entityType: 'host' })
+    ).rejects.toThrow(error);
   });
 });
