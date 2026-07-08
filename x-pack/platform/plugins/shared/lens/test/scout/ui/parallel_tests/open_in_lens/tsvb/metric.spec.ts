@@ -100,11 +100,10 @@ spaceTest.describe('TSVB Metric - Open in Lens', { tag: tags.deploymentAgnostic 
     await lens.openPalettePanelFlyout();
     const colorStops = await lens.getPaletteColorStops(2);
     // Converted color rule from TSVB background_color_rules
-    expect(colorStops[0].stop).toBe('10');
-    expect(colorStops[0].color).toBeDefined();
-    // Sentinel (end-of-range marker)
-    expect(colorStops[1].stop).toBe('');
-    expect(colorStops[1].color).toBeUndefined();
+    expect(colorStops).toStrictEqual([
+      { stop: '10', color: 'rgba(84, 179, 153, 1)' },
+      { stop: '', color: undefined },
+    ]);
     await lens.closePalettePanelFlyout();
     await lens.closeDimensionEditorPanel();
   });

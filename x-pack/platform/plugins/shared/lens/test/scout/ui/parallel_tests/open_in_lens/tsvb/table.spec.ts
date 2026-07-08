@@ -177,12 +177,11 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
     await dimensions.locator('nth=0').click();
     await lens.openPalettePanelFlyout();
     const colorStops = await lens.getPaletteColorStops(3);
-    expect(colorStops[0].stop).toBe('10');
-    expect(colorStops[0].color).toBeDefined();
-    expect(colorStops[1].stop).toBe('100');
-    expect(colorStops[1].color).toBeDefined();
-    expect(colorStops[2].stop).toBe('');
-    expect(colorStops[2].color).toBeUndefined();
+    expect(colorStops).toStrictEqual([
+      { stop: '10', color: 'rgba(84, 179, 153, 1)' },
+      { stop: '100', color: 'rgba(84, 160, 0, 1)' },
+      { stop: '', color: undefined },
+    ]);
     await lens.closePalettePanelFlyout();
     await lens.closeDimensionEditorPanel();
   });

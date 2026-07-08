@@ -92,17 +92,13 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
     await dimensions.locator('nth=0').click();
     await lens.openPalettePanelFlyout();
     const colorStops = await lens.getPaletteColorStops(4);
-    // First entry: default series color with no minimum
-    expect(colorStops[0].stop).toBe('');
-    expect(colorStops[0].color).toBeDefined();
-    // Converted color rules from the TSVB gauge_color_rules
-    expect(colorStops[1].stop).toBe('10');
-    expect(colorStops[1].color).toBeDefined();
-    expect(colorStops[2].stop).toBe('100');
-    expect(colorStops[2].color).toBeDefined();
-    // Sentinel (end-of-range marker)
-    expect(colorStops[3].stop).toBe('');
-    expect(colorStops[3].color).toBeUndefined();
+    // First entry: default series color with no minimum, followed by converted TSVB gauge_color_rules
+    expect(colorStops).toStrictEqual([
+      { stop: '', color: 'rgba(104, 188, 0, 1)' },
+      { stop: '10', color: 'rgba(84, 179, 153, 1)' },
+      { stop: '100', color: 'rgba(84, 160, 0, 1)' },
+      { stop: '', color: undefined },
+    ]);
     await lens.closePalettePanelFlyout();
     await lens.closeDimensionEditorPanel();
   });
