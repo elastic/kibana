@@ -10,4 +10,3 @@ export const COMMAND_BADGE_ATTRIBUTE = 'data-command-badge';
 export const COMMAND_BADGE_LABEL_ATTRIBUTE = 'data-command-badge-label';
 export const COMMAND_ID_ATTRIBUTE = 'data-command-id';
 export const COMMAND_METADATA_ATTRIBUTE = 'data-command-metadata';
-export const COMMAND_BADGE_MATCHED_ATTRIBUTE = 'data-command-badge-matched';

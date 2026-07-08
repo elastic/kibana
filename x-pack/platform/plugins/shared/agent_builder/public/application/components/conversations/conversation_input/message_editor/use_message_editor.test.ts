@@ -49,7 +49,10 @@ describe('useMessageEditor handleCommandSelect', () => {
     document.body.removeChild(div);
   });
 
-  it('with consumedLength, only replaces the matched prefix, leaving the rest of a pasted sentence untouched', () => {
+  it('leaves an active mention alone once its query contains a space, so text after it stays untouched', () => {
+    // A "type/name" SML mention can never contain a space, so matchCommand
+    // ends it as soon as one appears — there's no longer a badge to commit
+    // partway through a sentence like this.
     const { result } = renderHook(() => useMessageEditor());
     attachRef(result.current.messageEditor, div);
 
@@ -60,70 +63,11 @@ describe('useMessageEditor handleCommandSelect', () => {
       result.current.messageEditor.onChange();
     });
 
-    const activeCommand = result.current.messageEditor.commandMatch.activeCommand;
-    expect(activeCommand?.command.id).toBe(CommandId.Sml);
-    expect(activeCommand?.query).toBe('connector/workday is the best');
-
-    act(() => {
-      result.current.messageEditor.handleCommandSelect({
-        commandId: CommandId.Sml,
-        label: 'connector/workday',
-        id: '',
-        metadata: {},
-        matched: false,
-        consumedLength: 'connector/workday'.length,
-      });
-    });
-
-    const badge = div.querySelector('[data-command-badge]');
-    expect(badge).not.toBeNull();
-    expect(badge!.textContent).toBe('@connector/workday');
-    expect(badge!.getAttribute('data-command-badge-matched')).toBe('false');
-    // The leftover text is untouched, not swallowed into the badge or
-    // duplicated with an extra inserted space.
+    expect(result.current.messageEditor.commandMatch.isActive).toBe(false);
     expect(div.textContent).toBe('look in @connector/workday is the best');
-    expect(badge!.nextSibling?.textContent?.startsWith(' is the best')).toBe(true);
   });
 
-  it('with consumedLength, places the cursor at the end of the leftover text rather than jumping it backward', () => {
-    // e.g. pasting "look in @connector/no-match thing for" and hitting
-    // Space should leave the cursor at the end of "for", not snap back
-    // before "thing for".
-    const { result } = renderHook(() => useMessageEditor());
-    attachRef(result.current.messageEditor, div);
-
-    div.textContent = 'look in @connector/no-match thing for';
-    setCursorAtEnd(div);
-
-    act(() => {
-      result.current.messageEditor.onChange();
-    });
-
-    const activeCommand = result.current.messageEditor.commandMatch.activeCommand;
-    expect(activeCommand?.command.id).toBe(CommandId.Sml);
-    expect(activeCommand?.query).toBe('connector/no-match thing for');
-
-    act(() => {
-      result.current.messageEditor.handleCommandSelect({
-        commandId: CommandId.Sml,
-        label: 'connector/no-match',
-        id: '',
-        metadata: {},
-        matched: false,
-        consumedLength: 'connector/no-match'.length,
-      });
-    });
-
-    const badge = div.querySelector('[data-command-badge]');
-    expect(badge).not.toBeNull();
-    expect(badge!.nextSibling?.textContent).toBe(' thing for');
-
-    const range = window.getSelection()!.getRangeAt(0);
-    expect(range.startContainer).toBe(badge!.nextSibling);
-    expect(range.startOffset).toBe(' thing for'.length);
-  });
-
-  it('without consumedLength, consumes the full query and inserts a trailing space', () => {
+  it('consumes the full query and inserts a trailing space', () => {
     const { result } = renderHook(() => useMessageEditor());
     attachRef(result.current.messageEditor, div);
 
@@ -150,7 +94,6 @@ describe('useMessageEditor handleCommandSelect', () => {
     const badge = div.querySelector('[data-command-badge]');
     expect(badge).not.toBeNull();
     expect(badge!.textContent).toBe('@connector/workday');
-    expect(badge!.hasAttribute('data-command-badge-matched')).toBe(false);
     // Nothing left over: the full query was consumed, so a fresh
     // non-breaking space is appended so typing can continue after the badge.
     expect(stripZeroWidthSpaces(div.textContent ?? '')).toBe(`@connector/workday${NBSP}`);

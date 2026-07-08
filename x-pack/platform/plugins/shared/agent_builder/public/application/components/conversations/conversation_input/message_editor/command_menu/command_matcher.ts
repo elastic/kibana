@@ -56,10 +56,20 @@ export const matchCommand = (
       continue;
     }
 
+    const query = textBeforeCursor.substring(lastIndex + sequence.length);
+
+    // A value like an SML "type/name" mention can never contain whitespace,
+    // so once a space shows up the mention is done — without this, an
+    // unresolved mention silently keeps growing to swallow everything typed
+    // after it instead of ending like a normal word would.
+    if (!command.allowsSpaceInQuery && /\s/.test(query)) {
+      continue;
+    }
+
     const candidate: ActiveCommand = {
       command,
       commandStartOffset: lastIndex,
-      query: textBeforeCursor.substring(lastIndex + sequence.length),
+      query,
     };
 
     if (command.id === activeCommandId) {

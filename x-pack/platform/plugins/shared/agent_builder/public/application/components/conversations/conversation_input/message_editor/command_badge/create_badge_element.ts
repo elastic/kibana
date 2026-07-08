@@ -8,7 +8,6 @@
 import {
   COMMAND_BADGE_ATTRIBUTE,
   COMMAND_BADGE_LABEL_ATTRIBUTE,
-  COMMAND_BADGE_MATCHED_ATTRIBUTE,
   COMMAND_ID_ATTRIBUTE,
   COMMAND_METADATA_ATTRIBUTE,
 } from './attributes';
@@ -24,9 +23,6 @@ export const createCommandBadgeElement = (data: CommandBadgeData): HTMLSpanEleme
   span.setAttribute(COMMAND_BADGE_ATTRIBUTE, 'true');
   span.setAttribute(COMMAND_ID_ATTRIBUTE, data.commandId);
   span.setAttribute(COMMAND_METADATA_ATTRIBUTE, JSON.stringify({ id: data.id, ...data.metadata }));
-  if (data.matched === false) {
-    span.setAttribute(COMMAND_BADGE_MATCHED_ATTRIBUTE, 'false');
-  }
 
   const sequence = getCommandDefinition(data.commandId)?.sequence ?? '';
   const displayText = `${sequence}${data.label}`;

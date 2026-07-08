@@ -7,11 +7,7 @@
 
 import type { CommandBadgeData } from './types';
 import { getCommandDefinition } from '../command_menu';
-import {
-  COMMAND_BADGE_MATCHED_ATTRIBUTE,
-  COMMAND_ID_ATTRIBUTE,
-  COMMAND_METADATA_ATTRIBUTE,
-} from './attributes';
+import { COMMAND_ID_ATTRIBUTE, COMMAND_METADATA_ATTRIBUTE } from './attributes';
 import { getCommandDefinitionByScheme } from '../command_menu/command_definitions';
 
 interface TextSegment {
@@ -39,12 +35,6 @@ export const serializeCommandBadge = (element: HTMLElement): string => {
   }
   const { scheme } = commandDefinition;
   const displayText = element.textContent ?? '';
-
-  // No resolved entity to reference — send the plain typed text, as if the
-  // mention system had never gotten involved.
-  if (element.getAttribute(COMMAND_BADGE_MATCHED_ATTRIBUTE) === 'false') {
-    return displayText;
-  }
 
   const metadataRaw = element.getAttribute(COMMAND_METADATA_ATTRIBUTE);
   let id = '';

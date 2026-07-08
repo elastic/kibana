@@ -175,7 +175,10 @@ describe('Sml', () => {
       expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(false);
     });
 
-    it('commits a no-match badge on Space when there are zero candidates at all', () => {
+    it('does not claim Space when there are zero candidates at all — it types through and the mention just ends', () => {
+      // matchCommand ends the mention as soon as its query contains a space
+      // (an SML "type/name" can never contain one), so there's no longer any
+      // need to intercept Space here for the no-match case.
       mockUseSmlAutocompleteReturn = {
         results: [],
         total: 0,
@@ -185,58 +188,12 @@ describe('Sml', () => {
       };
 
       const ref = createRef<CommandMenuHandle>();
-      const onSelect = jest.fn();
-      renderWithProvider(<Sml ref={ref} query="visualization/nosuchthing" onSelect={onSelect} />);
+      renderWithProvider(<Sml ref={ref} query="visualization/nosuchthing" onSelect={jest.fn()} />);
 
-      expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(true);
-
-      act(() => {
-        ref.current!.handleKeyDown({ key: ' ' } as React.KeyboardEvent);
-      });
-
-      expect(onSelect).toHaveBeenCalledWith({
-        commandId: CommandId.Sml,
-        label: 'visualization/nosuchthing',
-        id: '',
-        metadata: {},
-        matched: false,
-        consumedLength: 'visualization/nosuchthing'.length,
-      });
+      expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(false);
     });
 
-    it('caps the no-match badge at the first space, leaving pasted sentence text alone', () => {
-      // e.g. pasting "look in @connector/workday is the best" — only
-      // "connector/workday" should become the badge; " is the best" must
-      // stay as plain, untouched text rather than getting swallowed too.
-      mockUseSmlAutocompleteReturn = {
-        results: [],
-        total: 0,
-        isLoading: false,
-        isError: false,
-        error: null,
-      };
-
-      const ref = createRef<CommandMenuHandle>();
-      const onSelect = jest.fn();
-      renderWithProvider(
-        <Sml ref={ref} query="connector/workday is the best" onSelect={onSelect} />
-      );
-
-      act(() => {
-        ref.current!.handleKeyDown({ key: ' ' } as React.KeyboardEvent);
-      });
-
-      expect(onSelect).toHaveBeenCalledWith({
-        commandId: CommandId.Sml,
-        label: 'connector/workday',
-        id: '',
-        metadata: {},
-        matched: false,
-        consumedLength: 'connector/workday'.length,
-      });
-    });
-
-    it('does not commit a no-match badge while the very first fetch is still loading', () => {
+    it('does not claim Space while the very first fetch is still loading', () => {
       mockUseSmlAutocompleteReturn = {
         results: [],
         total: 0,

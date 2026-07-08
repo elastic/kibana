@@ -126,22 +126,6 @@ describe('serializeEditorContent', () => {
 
     expect(serializeEditorContent(div)).toBe('[@visualization/Pacific Sales](sml://chunk-1)');
   });
-
-  it('serializes an unmatched badge as plain text, not a badge link', () => {
-    // There's no resolved entity to reference, so it should read exactly as
-    // if the user had typed this text without the mention system involved.
-    const div = document.createElement('div');
-    const badge = createCommandBadgeElement({
-      commandId: CommandId.Sml,
-      label: 'connector/nosuchthing',
-      id: '',
-      metadata: {},
-      matched: false,
-    });
-    div.appendChild(badge);
-
-    expect(serializeEditorContent(div)).toBe('@connector/nosuchthing');
-  });
 });
 
 describe('deserializeBadgeContent', () => {

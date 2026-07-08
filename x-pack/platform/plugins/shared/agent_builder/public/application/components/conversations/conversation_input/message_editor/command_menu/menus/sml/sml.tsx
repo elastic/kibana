@@ -15,7 +15,6 @@ import type { CommandMenuComponentProps, CommandMenuHandle } from '../../types';
 import { CommandId } from '../../types';
 import { getSmlMenuHighlightSearchStrings } from '../../utils/sml_command_menu_highlight';
 import { buildSmlScopingFromAgent } from '../../utils/sml_filters';
-import { capAtFirstSpace, buildNoMatchSelection } from '../../utils/no_match_badge';
 import { CommandMenuList } from '../components/command_menu_list';
 import type { CommandMenuListOption } from '../components/command_menu_list';
 
@@ -64,7 +63,6 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
       [results, title, canSelectOnSpace]
     );
     const spaceSelection = hasExactMatch;
-    const noMatch = canSelectOnSpace && results.length === 0 && !isLoading;
 
     const smlMenuLabelStyles = useMemo(
       () => ({
@@ -117,14 +115,6 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
       [onSelect]
     );
 
-    const handleCommitNoMatch = useCallback(() => {
-      // A real name can't contain a space, so capping there separates it
-      // from any trailing sentence text (e.g. accidentally pasted) instead
-      // of swallowing that text into the badge too.
-      const consumedQuery = capAtFirstSpace(query, query.indexOf('/') + 1);
-      onSelect(buildNoMatchSelection(CommandId.Sml, consumedQuery));
-    }, [onSelect, query]);
-
     return (
       <CommandMenuList
         ref={ref}
@@ -132,7 +122,6 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
         isLoading={isLoading}
         onSelect={handleSelect}
         spaceSelection={spaceSelection}
-        onSpaceNoMatch={noMatch ? handleCommitNoMatch : undefined}
         data-test-subj="smlMenu"
       />
     );

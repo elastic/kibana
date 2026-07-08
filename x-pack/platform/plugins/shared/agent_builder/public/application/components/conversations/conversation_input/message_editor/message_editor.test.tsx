@@ -11,7 +11,6 @@ import { MessageEditor } from './message_editor';
 import { createTextFragment } from './utils';
 import type { MessageEditorController, MessageEditorInstance } from './use_message_editor';
 import { CommandId } from './command_menu';
-import { createCommandBadgeElement } from './command_badge';
 import type {
   CommandMenuComponentProps,
   CommandMenuHandle,
@@ -68,7 +67,6 @@ const createMockMessageEditor = (): {
       commandMatch: { isActive: false, activeCommand: null },
       dismissActionMenu: jest.fn(),
       handleCommandSelect: jest.fn(),
-      unwrapUnmatchedBadge: jest.fn(),
     },
     controller: {
       clear: jest.fn(),
@@ -395,72 +393,5 @@ describe('MessageEditor', () => {
     fireEvent.click(screen.getByTestId('menuOption'));
 
     expect(messageEditor.handleCommandSelect).toHaveBeenCalledWith(mockBadgeData);
-  });
-
-  it('unwraps a no-match badge into editable text when clicked', () => {
-    const { messageEditor } = createMockMessageEditor();
-    render(
-      <MessageEditor
-        messageEditor={messageEditor}
-        onSubmit={mockOnSubmit}
-        data-test-subj="messageEditor"
-      />
-    );
-
-    const editor = screen.getByTestId('messageEditor');
-    const badge = createCommandBadgeElement({
-      commandId: CommandId.Sml,
-      label: 'connector/nosuchthing',
-      id: '',
-      metadata: {},
-      matched: false,
-    });
-    editor.appendChild(badge);
-
-    fireEvent.click(badge);
-
-    expect(messageEditor.unwrapUnmatchedBadge).toHaveBeenCalledWith(badge);
-  });
-
-  it('does not unwrap a normal (matched) badge when clicked', () => {
-    const { messageEditor } = createMockMessageEditor();
-    render(
-      <MessageEditor
-        messageEditor={messageEditor}
-        onSubmit={mockOnSubmit}
-        data-test-subj="messageEditor"
-      />
-    );
-
-    const editor = screen.getByTestId('messageEditor');
-    const badge = createCommandBadgeElement({
-      commandId: CommandId.Sml,
-      label: 'connector/s3',
-      id: 'chunk-1',
-      metadata: {},
-    });
-    editor.appendChild(badge);
-
-    fireEvent.click(badge);
-
-    expect(messageEditor.unwrapUnmatchedBadge).not.toHaveBeenCalled();
-  });
-
-  it('does not unwrap anything when clicking plain text', () => {
-    const { messageEditor } = createMockMessageEditor();
-    render(
-      <MessageEditor
-        messageEditor={messageEditor}
-        onSubmit={mockOnSubmit}
-        data-test-subj="messageEditor"
-      />
-    );
-
-    const editor = screen.getByTestId('messageEditor');
-    editor.appendChild(document.createTextNode('hello world'));
-
-    fireEvent.click(editor);
-
-    expect(messageEditor.unwrapUnmatchedBadge).not.toHaveBeenCalled();
   });
 });

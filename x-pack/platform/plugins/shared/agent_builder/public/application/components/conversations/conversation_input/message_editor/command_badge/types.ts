@@ -13,8 +13,4 @@ export interface CommandBadgeData {
   readonly id: string;
   // Metadata must not include `id` property
   readonly metadata: Record<string, string> & { id?: never };
-  /** False for a badge committed with no resolved match (e.g. a typo'd connector name). Defaults to true. */
-  readonly matched?: boolean;
-  /** Only consume this many chars of the active query into the badge, leaving the rest as plain text. Defaults to the full query. */
-  readonly consumedLength?: number;
 }

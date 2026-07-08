@@ -35,19 +35,15 @@ export const createTextFragment = (text: string): DocumentFragment => {
 
 /**
  * Creates a DOM Range spanning the command text (sequence + query) within
- * the editor, e.g. the range covering "/summ" in "hello /summ". Pass
- * `consumedLength` to only span a prefix of `query` (e.g. a no-match badge
- * that only claims up to the first space), leaving the rest as plain text.
- * Defaults to the full query.
+ * the editor, e.g. the range covering "/summ" in "hello /summ".
  */
 export const createCommandRange = (
   messageEditorElement: HTMLElement,
-  activeCommand: ActiveCommand,
-  consumedLength?: number
+  activeCommand: ActiveCommand
 ): Range => {
   const { commandStartOffset, query, command } = activeCommand;
   const startPos = charOffsetToDomPosition(messageEditorElement, commandStartOffset);
-  const endOffset = commandStartOffset + command.sequence.length + (consumedLength ?? query.length);
+  const endOffset = commandStartOffset + command.sequence.length + query.length;
   const endPos = charOffsetToDomPosition(messageEditorElement, endOffset);
 
   const range = document.createRange();
@@ -84,34 +80,6 @@ export const placeCursorAfter = (node: Node, sel: Selection): void => {
   range.collapse(true);
   sel.removeAllRanges();
   sel.addRange(range);
-};
-
-/**
- * Collapses the selection to a cursor position at `offset` within `node`,
- * instead of always jumping to the node's end (e.g. when more was typed
- * after a since-invalidated mention and must stay past the cursor).
- */
-export const placeCursorInText = (node: Text, offset: number, sel: Selection): void => {
-  const range = document.createRange();
-  range.setStart(node, offset);
-  range.collapse(true);
-  sel.removeAllRanges();
-  sel.addRange(range);
-};
-
-/**
- * Replaces a badge element with a plain text node holding its display text,
- * and places the cursor at the end of the restored text. Used to let the
- * user click a no-match badge and correct it back into a live, editable
- * mention instead of retyping it from scratch.
- */
-export const unwrapBadge = (badge: HTMLElement): void => {
-  const textNode = document.createTextNode(badge.textContent ?? '');
-  badge.replaceWith(textNode);
-  const sel = window.getSelection();
-  if (sel) {
-    placeCursorAfter(textNode, sel);
-  }
 };
 
 export const placeCursorAtEnd = (editorElement: HTMLDivElement) => {

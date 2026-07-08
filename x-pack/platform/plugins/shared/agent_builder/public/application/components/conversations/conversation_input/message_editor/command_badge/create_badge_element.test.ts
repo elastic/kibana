@@ -9,7 +9,6 @@ import { CommandId } from '../command_menu/types';
 import {
   COMMAND_BADGE_ATTRIBUTE,
   COMMAND_BADGE_LABEL_ATTRIBUTE,
-  COMMAND_BADGE_MATCHED_ATTRIBUTE,
   COMMAND_ID_ATTRIBUTE,
   COMMAND_METADATA_ATTRIBUTE,
 } from './attributes';
@@ -122,33 +121,5 @@ describe('createBadgeElement', () => {
     expect(badge.firstElementChild?.textContent).toBe('@dashboard/My chart');
     expect(badge.getAttribute('aria-label')).toBe('@dashboard/My chart');
     expect(badge.title).toBe('@dashboard/My chart');
-  });
-
-  describe('unmatched badges', () => {
-    it('sets data-command-badge-matched to false when matched is false', () => {
-      const badge = createCommandBadgeElement({
-        commandId: CommandId.Sml,
-        label: 'connector/nosuchthing',
-        id: '',
-        metadata: {},
-        matched: false,
-      });
-
-      expect(badge.getAttribute(COMMAND_BADGE_MATCHED_ATTRIBUTE)).toBe('false');
-      expect(badge.getAttribute(COMMAND_BADGE_ATTRIBUTE)).toBe('true');
-      expect(badge.contentEditable).toBe('false');
-      expect(badge.textContent).toBe('@connector/nosuchthing');
-    });
-
-    it('omits data-command-badge-matched for a normal (matched) badge', () => {
-      const badge = createCommandBadgeElement({
-        commandId: CommandId.Sml,
-        label: 'connector/s3',
-        id: 'chunk-1',
-        metadata: {},
-      });
-
-      expect(badge.hasAttribute(COMMAND_BADGE_MATCHED_ATTRIBUTE)).toBe(false);
-    });
   });
 });
