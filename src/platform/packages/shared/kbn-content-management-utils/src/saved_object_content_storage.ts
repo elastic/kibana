@@ -22,6 +22,7 @@ import type {
   SavedObjectsUpdateOptions,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
+import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import { pick } from 'lodash';
 import type {
@@ -244,6 +245,10 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       alias_target_id: aliasTargetId,
       outcome,
     } = await soClient.resolve<Types['Attributes']>(this.savedObjectType, id);
+
+    if (isSavedObjectErrorResult(savedObject)) {
+      throw Boom.notFound(savedObject.error.message);
+    }
 
     const response: Types['GetOut'] = {
       item: this.savedObjectToItem(savedObject),

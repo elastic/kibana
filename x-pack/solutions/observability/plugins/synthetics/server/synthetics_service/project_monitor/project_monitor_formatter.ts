@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { SavedObjectsUpdateResponse, SavedObjectsClientContract } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { syntheticsMonitorSavedObjectType } from '../../../common/types/saved_objects';
 import { getSavedObjectKqlFilter } from '../../routes/common';
@@ -280,23 +281,25 @@ export class ProjectMonitorFormatter {
 
         if (newMonitors.length > 0) {
           newMonitors.forEach((monitor) => {
-            const journeyId = monitor.attributes[ConfigKey.JOURNEY_ID];
-            if (journeyId && !monitor.error) {
-              this.createdMonitors.push(journeyId);
-            } else if (monitor.error) {
+            if (isSavedObjectErrorResult(monitor)) {
               this.failedMonitors.push({
                 reason: i18n.translate(
                   'xpack.synthetics.service.projectMonitors.failedToCreateMonitors',
                   {
                     defaultMessage: 'Failed to create monitor: {journeyId}',
                     values: {
-                      journeyId,
+                      journeyId: undefined,
                     },
                   }
                 ),
                 details: monitor.error.message,
                 payload: monitor,
               });
+              return;
+            }
+            const journeyId = monitor.attributes[ConfigKey.JOURNEY_ID];
+            if (journeyId) {
+              this.createdMonitors.push(journeyId);
             }
           });
         }
@@ -434,7 +437,11 @@ export class ProjectMonitorFormatter {
 
       return {
         errors: [],
-        editedMonitors: editedMonitors ?? [],
+        editedMonitors:
+          editedMonitors?.filter(
+            (m): m is SavedObjectsUpdateResponse<EncryptedSyntheticsMonitorAttributes> =>
+              !isSavedObjectErrorResult(m)
+          ) ?? [],
         updatedCount: monitorsToUpdate.length,
       };
     } catch (e) {

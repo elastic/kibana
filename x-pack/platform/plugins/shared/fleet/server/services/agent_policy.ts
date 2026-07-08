@@ -18,6 +18,7 @@ import type {
   SavedObjectsBulkUpdateResponse,
   SavedObjectsClientContract,
   SavedObject,
+  SavedObjectErrorResult,
   SavedObjectsUpdateResponse,
   SavedObjectsFindOptions,
   Logger,
@@ -2426,7 +2427,9 @@ class AgentPolicyService {
       kuery: `${savedObjectType}.is_protected: true`,
     });
 
-    const updatedAgentPolicies: Array<SavedObjectsUpdateResponse<AgentPolicySOAttributes>> = [];
+    const updatedAgentPolicies: Array<
+      SavedObjectsUpdateResponse<AgentPolicySOAttributes> | SavedObjectErrorResult
+    > = [];
 
     for await (const agentPolicyPageResults of agentPolicyFetcher) {
       const { saved_objects: bulkUpdateSavedObjects } = await soClient

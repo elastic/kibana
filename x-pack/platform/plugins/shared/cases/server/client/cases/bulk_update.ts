@@ -14,6 +14,7 @@ import type {
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 
 import { nodeBuilder } from '@kbn/es-query';
@@ -729,7 +730,7 @@ export const bulkUpdate = async (
       (flattenCases, updatedCase) => {
         const originalCase = casesMap.get(updatedCase.id);
 
-        if (!originalCase) {
+        if (!originalCase || isSavedObjectErrorResult(updatedCase)) {
           return flattenCases;
         }
 
@@ -979,7 +980,7 @@ const getCasesAndAssigneesToNotifyForAssignment = (
   >((acc, updatedCase) => {
     const originalCaseSO = casesMap.get(updatedCase.id);
 
-    if (!originalCaseSO) {
+    if (!originalCaseSO || isSavedObjectErrorResult(updatedCase)) {
       return acc;
     }
 

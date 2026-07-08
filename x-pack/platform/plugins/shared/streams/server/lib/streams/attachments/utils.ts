@@ -8,6 +8,7 @@
 import objectHash from 'object-hash';
 import type {
   SavedObject,
+  SavedObjectBulkResult,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
 } from '@kbn/core/server';
@@ -47,10 +48,13 @@ export const getAttachmentDocument = (attachment: {
 };
 
 const processDashboardResults = (
-  savedObjects: Array<SavedObject<DashboardSOAttributes>>
+  savedObjects: Array<SavedObjectBulkResult<DashboardSOAttributes>>
 ): AttachmentData[] => {
   return savedObjects
-    .filter((savedObject) => !isSavedObjectErrorResult(savedObject))
+    .filter(
+      (savedObject): savedObject is SavedObject<DashboardSOAttributes> =>
+        !isSavedObjectErrorResult(savedObject)
+    )
     .map((savedObject) => ({
       id: savedObject.id,
       redirectId: savedObject.id,
@@ -63,9 +67,14 @@ const processDashboardResults = (
     }));
 };
 
-const processSloResults = (savedObjects: Array<SavedObject<SloSOAttributes>>): AttachmentData[] => {
+const processSloResults = (
+  savedObjects: Array<SavedObjectBulkResult<SloSOAttributes>>
+): AttachmentData[] => {
   return savedObjects
-    .filter((savedObject) => !isSavedObjectErrorResult(savedObject))
+    .filter(
+      (savedObject): savedObject is SavedObject<SloSOAttributes> =>
+        !isSavedObjectErrorResult(savedObject)
+    )
     .map((savedObject) => ({
       id: savedObject.id,
       redirectId: savedObject.attributes.id,

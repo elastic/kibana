@@ -14,6 +14,7 @@ import type {
   SavedObjectReference,
   SavedObjectsFindOptions,
 } from '@kbn/core-saved-objects-api-server';
+import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-api-server';
 import Boom from '@hapi/boom';
 import type {
   CreateResult,
@@ -84,6 +85,10 @@ export class LinksStorage {
       alias_target_id: aliasTargetId,
       outcome,
     } = await soClient.resolve<StoredLinksState>(LINKS_SAVED_OBJECT_TYPE, id);
+
+    if (isSavedObjectErrorResult(savedObject)) {
+      throw Boom.badRequest(`Invalid response. ${savedObject.error.message}`);
+    }
 
     const item = savedObjectToItem(savedObject);
     const response = { item, meta: { aliasPurpose, aliasTargetId, outcome } };

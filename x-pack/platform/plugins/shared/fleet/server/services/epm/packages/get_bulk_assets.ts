@@ -65,6 +65,14 @@ export async function getBulkAssets(
         displayedAssetTypesLookup.has(savedObject.type)
     )
     .map((obj) => {
+      if (isSavedObjectErrorResult(obj)) {
+        return {
+          id: obj.id,
+          type: obj.type as unknown as ElasticsearchAssetType | KibanaSavedObjectType,
+          attributes: {},
+          appLink: '',
+        };
+      }
       // Kibana SOs are registered with an app URL getter, so try to use that
       // for retrieving links to assets whenever possible
       if (!types[obj.type]) {

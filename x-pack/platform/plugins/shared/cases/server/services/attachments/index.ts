@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import type {
   SavedObject,
+  SavedObjectErrorResult,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateResponse,
@@ -15,6 +16,7 @@ import type {
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
@@ -613,7 +615,7 @@ export class AttachmentService {
     > = [];
 
     for (const so of res.saved_objects) {
-      if (isSOError(so)) {
+      if (isSavedObjectErrorResult(so)) {
         validatedAttachments.push(so as AttachmentSavedObjectTransformed);
       } else if (so.type === CASE_ATTACHMENT_SAVED_OBJECT) {
         successesToMirror.push(so);
@@ -831,9 +833,10 @@ export class AttachmentService {
       }
 
       const mergedSavedObjects: Array<
-        SavedObjectsUpdateResponse<
-          AttachmentPersistedAttributes | UnifiedAttachmentPersistedAttributes
-        >
+        | SavedObjectsUpdateResponse<
+            AttachmentPersistedAttributes | UnifiedAttachmentPersistedAttributes
+          >
+        | SavedObjectErrorResult
       > = new Array(comments.length);
 
       // Issue the two bulkUpdate calls in parallel for the mixed-bucket path.
@@ -926,7 +929,7 @@ export class AttachmentService {
     for (let i = 0; i < res.saved_objects.length; i++) {
       const attachment = res.saved_objects[i];
 
-      if (isSOError(attachment)) {
+      if (isSavedObjectErrorResult(attachment)) {
         // Forcing the type here even though it is an error. The client is responsible for
         // determining what to do with the errors
         // TODO: we should fix the return type of this function so that it can return errors

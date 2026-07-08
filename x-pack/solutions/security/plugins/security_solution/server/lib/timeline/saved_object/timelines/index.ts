@@ -780,6 +780,10 @@ const resolveBasicSavedTimeline = async (request: FrameworkRequest, timelineId: 
       timelineId
     );
 
+  if (isSavedObjectErrorResult(savedObject)) {
+    throw new Error(savedObject.error.message);
+  }
+
   const populatedTimeline = timelineFieldsMigrator.populateFieldsFromReferences(savedObject);
 
   return {

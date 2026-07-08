@@ -10,6 +10,7 @@ import type {
   SavedObjectsFindResponse,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type {
   AttachmentAttributes,
   AttachmentTotals,
@@ -301,6 +302,10 @@ export const resolve = async (
     }: SavedObjectsResolveResponse<CaseAttributes> = await caseService.getResolveCase({
       id,
     });
+
+    if (isSavedObjectErrorResult(resolvedSavedObject)) {
+      throw new Error(resolvedSavedObject.error.message);
+    }
 
     await authorization.ensureAuthorized({
       operation: Operations.resolveCase,
