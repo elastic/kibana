@@ -34,6 +34,13 @@ export interface BuildActionPolicyEventsQueryParams {
   outcome?: PolicyExecutionOutcome;
   policyIds?: string[];
   ruleIds?: string[];
+  /**
+   * Explicit rule filter. Applied as an AND clause: the event must reference
+   * at least one of these rule ids (nested saved-object ref or dispatcher
+   * rule-id spillover). Independent from `ruleIds`, which is OR-combined with
+   * `policyIds` for free-text search discovery.
+   */
+  mandatoryRuleIds?: string[];
 }
 
 /**
@@ -112,6 +119,10 @@ const buildBaseActionPolicyEventsQuery = (
     filters.push(idFilter);
   }
 
+  if (params.mandatoryRuleIds && params.mandatoryRuleIds.length > 0) {
+    filters.push(buildMandatoryRuleClause(params.mandatoryRuleIds));
+  }
+
   return {
     query: { bool: { filter: filters } },
     sort: [{ '@timestamp': { order: 'desc' } }],
@@ -167,6 +178,16 @@ const buildIdFilter = (
 
   return { bool: { should, minimum_should_match: 1 } };
 };
+
+const buildMandatoryRuleClause = (ruleIds: string[]): QueryDslQueryContainer => ({
+  bool: {
+    should: [
+      buildNestedSavedObjectClause(RULE_SAVED_OBJECT_TYPE, ruleIds),
+      { terms: { 'kibana.alerting_v2.dispatcher.rule_ids': ruleIds } },
+    ],
+    minimum_should_match: 1,
+  },
+});
 
 const buildNestedSavedObjectClause = (type: string, ids: string[]): QueryDslQueryContainer => ({
   nested: {
