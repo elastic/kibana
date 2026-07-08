@@ -35,7 +35,7 @@ export interface ScoutPlaywrightOptions extends Pick<PlaywrightTestConfig, 'test
   runGlobalSetup?: boolean;
   metadata?: {
     scout?: {
-      test_channels?: ScoutTestChannel[];
+      testChannels?: ScoutTestChannel[];
     };
     [key: string]: unknown;
   };
