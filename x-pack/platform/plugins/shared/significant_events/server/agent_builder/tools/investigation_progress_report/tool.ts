@@ -19,13 +19,16 @@ export const SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID =
   platformSignificantEventsTools.reportInvestigationProgress;
 
 const toolDescription = dedent`
-  ${i18n.translate('xpack.streams.agentBuilder.tools.investigationProgressReport.description', {
-    defaultMessage:
-      'Report the full current state of the investigation, so the user can see live progress before the investigation finishes. This is a snapshot, not a diff: every call must include every hypothesis considered so far, each with its own confidence and status — not just what changed since the last call.',
-  })}
+  ${i18n.translate(
+    'xpack.significantEvents.agentBuilder.tools.investigationProgressReport.description',
+    {
+      defaultMessage:
+        'Report the full current state of the investigation, so the user can see live progress before the investigation finishes. This is a snapshot, not a diff: every call must include every hypothesis considered so far, each with its own confidence and status — not just what changed since the last call.',
+    }
+  )}
 
   ${i18n.translate(
-    'xpack.streams.agentBuilder.tools.investigationProgressReport.description.rules',
+    'xpack.significantEvents.agentBuilder.tools.investigationProgressReport.description.rules',
     {
       defaultMessage:
         'Call this whenever a hypothesis is added, its confidence changes, or its status changes (investigating, dismissed, confirmed). Keep "summary" short (one or two sentences) describing what is happening right now. This tool does not end the investigation — keep working after calling it.',
