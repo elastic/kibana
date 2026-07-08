@@ -8,7 +8,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { parse } from 'hjson';
 
 import { DefaultEditorSize } from '@kbn/vis-default-editor-plugin/public';
 import type { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
@@ -17,6 +16,8 @@ import { VIS_EVENT_TO_TRIGGER, VisGroups } from '@kbn/visualizations-plugin/publ
 import { getDefaultSpec } from './default_spec';
 import { extractIndexPatternsFromSpec } from './lib/extract_index_pattern';
 import { extractProjectRoutingOverrides } from './lib/extract_project_routing_overrides';
+import { parseVegaSpec } from './lib/parse_spec';
+import { specUsesEsql } from './lib/spec_uses_esql';
 import { createInspectorAdapters } from './vega_inspector';
 import { toExpressionAst } from './to_ast';
 import { getInfoMessage } from './components/vega_info_message';
@@ -54,24 +55,16 @@ export const vegaVisType: VisTypeDefinition<VisParams> = {
     return [VIS_EVENT_TO_TRIGGER.applyFilter];
   },
   getUsedIndexPattern: async (visParams) => {
-    try {
-      const spec = parse(visParams.spec, { legacyRoot: false, keepWsc: true });
-
-      return extractIndexPatternsFromSpec(spec);
-    } catch (e) {
-      // spec is invalid
-    }
-    return [];
+    const spec = parseVegaSpec(visParams.spec);
+    return spec ? extractIndexPatternsFromSpec(spec) : [];
   },
   getProjectRoutingOverrides: async (visParams) => {
-    try {
-      const spec = parse(visParams.spec, { legacyRoot: false, keepWsc: true });
-
-      return extractProjectRoutingOverrides(spec);
-    } catch (e) {
-      // spec is invalid
-    }
-    return undefined;
+    const spec = parseVegaSpec(visParams.spec);
+    return spec ? extractProjectRoutingOverrides(spec) : undefined;
+  },
+  usesEsql: (visParams) => {
+    const spec = parseVegaSpec(visParams.spec);
+    return spec ? specUsesEsql(spec) : false;
   },
   inspectorAdapters: createInspectorAdapters,
   /**
