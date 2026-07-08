@@ -1,10 +1,74 @@
 {
-  "sha1": "075b74ef45ecd6c81851c4f77f5fbcb36f1272ab",
+  "sha1": "ebc43539294f11ef3e7f332b1ac33b32b6d03f97",
   "tests": [
+    {
+      "id": "8a7a94441188b62-53d61478147c06c",
+      "title": "Observability onboarding flow ownership hides flow saved objects from generic saved object find",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/onboarding_flow_ownership.spec.ts",
+        "line": 18,
+        "column": 12
+      }
+    },
+    {
+      "id": "8a7a94441188b62-8efa5c4ce07f5ec",
+      "title": "Observability onboarding flow ownership returns 404 when a different user reads or updates a flow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/onboarding_flow_ownership.spec.ts",
+        "line": 46,
+        "column": 12
+      }
+    },
+    {
+      "id": "8a7a94441188b62-337eecfcb573a16",
+      "title": "Observability onboarding flow ownership allows the returned install API key to update its owner flow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/onboarding_flow_ownership.spec.ts",
+        "line": 113,
+        "column": 12
+      }
+    },
+    {
+      "id": "8a7a94441188b62-6c261845326ef7e",
+      "title": "Observability onboarding flow ownership returns with incomplete status for malformed payloads",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/onboarding_flow_ownership.spec.ts",
+        "line": 147,
+        "column": 12
+      }
+    },
     {
       "id": "080cf4b5224e163-fcfad600a32652d",
       "title": "Observability onboarding GET flow progress returns 404 when onboardingId does not exist",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -13,14 +77,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/onboarding_flow_progress.spec.ts",
-        "line": 51,
+        "line": 50,
         "column": 12
       }
     },
     {
       "id": "080cf4b5224e163-31970d2d16833ca",
       "title": "Observability onboarding GET flow progress returns 404 for user without access to the onboarding session",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -29,14 +93,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/onboarding_flow_progress.spec.ts",
-        "line": 65,
+        "line": 64,
         "column": 12
       }
     },
     {
       "id": "080cf4b5224e163-864a078fde699f4",
       "title": "Observability onboarding GET flow progress logs-ingest progress after ea-status complete",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -45,7 +109,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/onboarding_flow_progress.spec.ts",
-        "line": 86,
+        "line": 85,
         "column": 12
       }
     },
@@ -77,7 +141,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/tests/onboarding_flow_update_progress_updates.spec.ts",
-        "line": 30,
+        "line": 17,
         "column": 12
       }
     }
