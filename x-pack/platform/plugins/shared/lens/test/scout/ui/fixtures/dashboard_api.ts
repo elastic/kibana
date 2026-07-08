@@ -10,7 +10,7 @@ import type { KbnClient } from '@kbn/scout';
 const DASHBOARD_API_PATH = '/api/dashboards';
 const DASHBOARD_API_VERSION = '2023-10-31';
 
-export const withSpace = (path: string, spaceId: string): string => `/s/${spaceId}${path}`;
+const withSpace = (path: string, spaceId: string): string => `/s/${spaceId}${path}`;
 
 /**
  * Create a dashboard via the API and return its id.
