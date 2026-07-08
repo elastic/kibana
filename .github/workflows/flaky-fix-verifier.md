@@ -139,18 +139,14 @@ steps:
       const path = require('path');
       const dir = process.env.PR_CONTEXT_DIR;
       const comments = JSON.parse(fs.readFileSync(path.join(dir, 'pr-issue-comments.json'), 'utf8'));
-      const triggers = comments.filter(
+      const triggeredByBot = comments.filter(
         (comment) =>
           comment?.user?.login === 'kibanamachine' &&
           typeof comment.body === 'string' &&
           comment.body.startsWith('/flaky ')
-      );
-      const value = {
-        triggeredByBot: triggers.length,
-        triggerCommentUrls: triggers.map((comment) => comment.html_url),
-      };
-      fs.writeFileSync(path.join(dir, 'flaky-run-count.json'), `${JSON.stringify(value, null, 2)}\n`);
-      console.log(`Flaky runs already triggered by kibanamachine: ${triggers.length}`);
+      ).length;
+      fs.writeFileSync(path.join(dir, 'flaky-run-count.json'), `${JSON.stringify({ triggeredByBot })}\n`);
+      console.log(`Flaky runs already triggered by kibanamachine: ${triggeredByBot}`);
       NODE
   - name: Install Buildkite CLI and export BUILDKITE_API_TOKEN
     env:
