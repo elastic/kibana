@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import { getStreamSamplingSource } from '@kbn/streams-schema';
+import { CODE_ANALYSIS_FEATURE_TYPE } from '@kbn/significant-events-schema';
 import { STREAMS_API_PRIVILEGES } from '@kbn/streams-plugin/common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
@@ -16,7 +17,25 @@ import {
   identifyCodeFeatures,
   identifyCodeQueries,
   reconcileCodeAndLogQueries,
+  CODE_FEATURE_SUBTYPE_LANGUAGE,
+  CODE_FEATURE_SUBTYPE_REPO_TYPE,
+  CODE_FEATURE_SUBTYPE_SERVICE_NAME,
 } from '../../../../lib/knowledge_indicators/code_intelligence';
+
+export interface CodeIntelligenceRepository {
+  repository: string;
+  /** Whether the repository currently has an SCS code index in the cluster. */
+  indexed: boolean;
+  repo_type?: string;
+  language?: string;
+  service_name?: string;
+  service_predicted?: boolean;
+  /** The stream whose code features describe this repository, if any. */
+  stream_name?: string;
+}
+
+const asString = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.length > 0 ? value : undefined;
 
 // ---------------------------------------------------------------------------
 // Identify code-driven Feature KIs for a single stream (Stage 1).
@@ -235,9 +254,122 @@ const codeIntelligenceAvailabilityRoute = createServerRoute({
   },
 });
 
-export const internalSignificantEventsKICodeFeaturesRoutes = {
+// ---------------------------------------------------------------------------
+// Code Intelligence repositories overview (cross-stream): lists SCS-indexed
+// repositories joined with the code features (repo type, language, service name)
+// derived from them, plus the stream each maps to. Powers the discovery hub tab.
+// ---------------------------------------------------------------------------
+
+const listCodeRepositoriesRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/code_intelligence/_repositories',
+  options: {
+    access: 'internal',
+    summary: 'List Semantic Code Search repositories with their derived code intelligence',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({}),
+  handler: async ({
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<{ repositories: CodeIntelligenceRepository[] }> => {
+    const scopedClients = await getScopedClients({ request });
+    const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const esClient = scopedClusterClient.asCurrentUser;
+
+    // 1. Distinct repositories indexed by Semantic Code Search.
+    const indexedRepositories = new Set<string>();
+    try {
+      const response = await esClient.search(
+        {
+          index: 'code-*',
+          size: 0,
+          track_total_hits: false,
+          aggs: { repositories: { terms: { field: 'repository', size: 1000 } } },
+        },
+        { ignore: [404] }
+      );
+      const buckets =
+        (response.aggregations?.repositories as { buckets?: Array<{ key: string }> })?.buckets ??
+        [];
+      for (const bucket of buckets) {
+        if (typeof bucket.key === 'string' && bucket.key.length > 0) {
+          indexedRepositories.add(bucket.key);
+        }
+      }
+    } catch (error) {
+      logger.debug(
+        `code_intelligence: repository listing failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+
+    // 2. Join with code features derived across all streams.
+    const byRepository = new Map<string, CodeIntelligenceRepository>();
+    try {
+      const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+      const streamNames = await kiClient.getStreamNamesWithKnowledgeIndicators();
+      if (streamNames.length > 0) {
+        const { hits } = await kiClient.getFeatures(streamNames, {
+          type: [CODE_ANALYSIS_FEATURE_TYPE],
+        });
+        for (const feature of hits) {
+          const repository = asString(feature.properties?.repository);
+          if (!repository) {
+            continue;
+          }
+          const row = byRepository.get(repository) ?? {
+            repository,
+            indexed: indexedRepositories.has(repository),
+          };
+          row.stream_name = row.stream_name ?? feature.stream_name;
+          if (feature.subtype === CODE_FEATURE_SUBTYPE_REPO_TYPE) {
+            row.repo_type = asString(feature.properties?.repo_type);
+          } else if (feature.subtype === CODE_FEATURE_SUBTYPE_LANGUAGE) {
+            row.language = asString(feature.properties?.language);
+          } else if (feature.subtype === CODE_FEATURE_SUBTYPE_SERVICE_NAME) {
+            row.service_name = asString(feature.properties?.service_name);
+            row.service_predicted = feature.properties?.predicted === true;
+          }
+          byRepository.set(repository, row);
+        }
+      }
+    } catch (error) {
+      logger.debug(
+        `code_intelligence: code feature join failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+
+    // 3. Surface indexed repositories that have not been analyzed into a stream yet.
+    for (const repository of indexedRepositories) {
+      if (!byRepository.has(repository)) {
+        byRepository.set(repository, { repository, indexed: true });
+      }
+    }
+
+    const repositories = [...byRepository.values()].sort((a, b) =>
+      a.repository.localeCompare(b.repository)
+    );
+
+    return { repositories };
+  },
+});
+
+export const internalKICodeFeaturesRoutes = {
   ...identifyCodeFeaturesRoute,
   ...generateCodeQueriesRoute,
   ...reconcileCodeQueriesRoute,
   ...codeIntelligenceAvailabilityRoute,
+  ...listCodeRepositoriesRoute,
 };
