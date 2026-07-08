@@ -175,8 +175,6 @@ describe('useChartLayers', () => {
       })
     );
 
-    expect(createMetricAggregation).toHaveBeenCalledWith(
-      expect.objectContaining({ gridSettings })
-    );
+    expect(createMetricAggregation).toHaveBeenCalledWith(expect.objectContaining({ gridSettings }));
   });
 });
