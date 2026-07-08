@@ -880,12 +880,9 @@ export const labels = {
       fileNameHelp: i18n.translate('xpack.agentBuilder.skills.referencedFileCard.fileNameHelp', {
         defaultMessage: 'Do not include .md — it is added automatically.',
       }),
-      advancedLabel: i18n.translate(
-        'xpack.agentBuilder.skills.referencedFileCard.advancedLabel',
-        {
-          defaultMessage: 'Advanced: folder path (default: skill root)',
-        }
-      ),
+      advancedLabel: i18n.translate('xpack.agentBuilder.skills.referencedFileCard.advancedLabel', {
+        defaultMessage: 'Advanced: folder path (default: skill root)',
+      }),
       folderPathLabel: i18n.translate(
         'xpack.agentBuilder.skills.referencedFileCard.folderPathLabel',
         {
@@ -912,11 +909,6 @@ export const labels = {
           defaultMessage: 'Referenced file markdown content',
         }
       ),
-      estimatedTokens: (count: number) =>
-        i18n.translate('xpack.agentBuilder.skills.referencedFileCard.estimatedTokens', {
-          defaultMessage: 'Estimated tokens: {count}',
-          values: { count },
-        }),
     },
     referencedFileSection: {
       description: i18n.translate('xpack.agentBuilder.skills.referencedFileSection.descriptionV2', {
@@ -958,6 +950,35 @@ export const labels = {
         'xpack.agentBuilder.skills.referencedFileSection.removeFileAriaLabel',
         {
           defaultMessage: 'Remove this additional file',
+        }
+      ),
+      editFileAriaLabel: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileSection.editFileAriaLabel',
+        {
+          defaultMessage: 'Edit file',
+        }
+      ),
+      doneButton: i18n.translate('xpack.agentBuilder.skills.referencedFileSection.doneButton', {
+        defaultMessage: 'Done',
+      }),
+      cancelButton: i18n.translate('xpack.agentBuilder.skills.referencedFileSection.cancelButton', {
+        defaultMessage: 'Cancel',
+      }),
+      savedIndicator: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileSection.savedIndicator',
+        {
+          defaultMessage: 'Saved',
+        }
+      ),
+      compactTokenCount: (count: number) =>
+        i18n.translate('xpack.agentBuilder.skills.referencedFileSection.compactTokenCount', {
+          defaultMessage: '~{count} tokens',
+          values: { count },
+        }),
+      unnamedFilePlaceholder: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileSection.unnamedFilePlaceholder',
+        {
+          defaultMessage: '(unnamed)',
         }
       ),
       emptyReadOnly: i18n.translate(
