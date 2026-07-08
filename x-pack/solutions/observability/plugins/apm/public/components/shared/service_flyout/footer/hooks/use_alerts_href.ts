@@ -32,9 +32,15 @@ export function useAlertsHref({
   rangeFrom,
   rangeTo,
 }: UseAlertsHrefParams): string | undefined {
+  const canReadAlerts =
+    !!core.application.capabilities.alerting &&
+    !!core.application.capabilities.apm?.['alerting:show'];
   return useMemo(() => {
+    if (!canReadAlerts) return undefined;
     const base = core.http.basePath.prepend(observabilityPaths.alerts);
-    if (!base) return undefined;
+    // ENVIRONMENT_NOT_DEFINED must be checked before isEnvironmentDefined: the sentinel value
+    // satisfies isEnvironmentDefined and would produce a plain field match instead of the
+    // compound clause that also covers documents where service.environment is absent.
     const envKuery =
       environment === ENVIRONMENT_NOT_DEFINED.value
         ? `(${SERVICE_ENVIRONMENT}: "${ENVIRONMENT_NOT_DEFINED.value}" OR NOT ${SERVICE_ENVIRONMENT}: *)`
@@ -44,6 +50,6 @@ export function useAlertsHref({
     const kuery = [`${SERVICE_NAME}: "${escapeQuotes(serviceName)}"`, envKuery]
       .filter(Boolean)
       .join(' AND ');
-    return `${base}?_a=${rison.encode({ kuery, rangeFrom, rangeTo, status: 'all' })}`;
-  }, [core.http.basePath, environment, serviceName, rangeFrom, rangeTo]);
+    return `${base}?_a=${rison.encode({ kuery, rangeFrom, rangeTo })}`;
+  }, [canReadAlerts, core.http.basePath, environment, serviceName, rangeFrom, rangeTo]);
 }

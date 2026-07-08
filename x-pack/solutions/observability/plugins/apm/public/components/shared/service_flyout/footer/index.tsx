@@ -35,8 +35,6 @@ export function ServiceFlyoutFooter({
     discover: { traces: tracesDiscoverHref, logs: logsDiscoverHref },
   } = useServiceFlyoutLinks({ serviceName, environment, rangeFrom, rangeTo, transactionType });
 
-  const hasAnyActions = tracesDiscoverHref || logsDiscoverHref || alertsHref || slosHref;
-
   const actionGroups = useMemo(() => {
     const groups: ActionGroups = [];
 
@@ -137,7 +135,7 @@ export function ServiceFlyoutFooter({
                 size="s"
                 iconType="chevronSingleDown"
                 iconSide="right"
-                disabled={!hasAnyActions}
+                disabled={actionGroups.length === 0}
                 data-test-subj="serviceFlyoutActionsButton"
               >
                 {i18n.translate('xpack.apm.serviceFlyout.actionsButtonLabel', {

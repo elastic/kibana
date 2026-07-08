@@ -13,13 +13,14 @@ import {
 } from '../../../../../../common/environment_filter_values';
 import { useAlertsHref } from './use_alerts_href';
 
-function getKuery(href: string | undefined): string {
-  const encoded = href?.split('?_a=')[1];
-  return (rison.decode(encoded ?? '') as any).kuery;
+function getKuery(href: string): string {
+  const encoded = href.split('?_a=')[1];
+  return (rison.decode(encoded) as any).kuery;
 }
 
 const mockCore = {
   http: { basePath: { prepend: (path: string) => path } },
+  application: { capabilities: { alerting: true, apm: { 'alerting:show': true } } },
 } as any;
 
 function renderAlertsHref(overrides: Partial<Parameters<typeof useAlertsHref>[0]> = {}) {
@@ -36,9 +37,22 @@ function renderAlertsHref(overrides: Partial<Parameters<typeof useAlertsHref>[0]
 }
 
 describe('useAlertsHref', () => {
-  it('returns undefined when basePath.prepend returns falsy', () => {
+  it('returns undefined when the user lacks the alerting:show capability', () => {
     const href = renderAlertsHref({
-      core: { http: { basePath: { prepend: () => undefined } } } as any,
+      core: {
+        ...mockCore,
+        application: { capabilities: { alerting: true, apm: { 'alerting:show': false } } },
+      },
+    });
+    expect(href).toBeUndefined();
+  });
+
+  it('returns undefined when the alerting plugin is not available', () => {
+    const href = renderAlertsHref({
+      core: {
+        ...mockCore,
+        application: { capabilities: { alerting: false, apm: { 'alerting:show': true } } },
+      },
     });
     expect(href).toBeUndefined();
   });
@@ -50,26 +64,26 @@ describe('useAlertsHref', () => {
 
   it('builds the kuery with only the service name when environment is ENVIRONMENT_ALL', () => {
     const href = renderAlertsHref({ environment: ENVIRONMENT_ALL_VALUE });
-    expect(getKuery(href)).toEqual('service.name: "opbeans-java"');
+    expect(getKuery(href!)).toEqual('service.name: "opbeans-java"');
   });
 
   it('builds the kuery with a quoted environment clause for a specific environment', () => {
     const href = renderAlertsHref({ environment: 'production' });
-    expect(getKuery(href)).toEqual(
+    expect(getKuery(href!)).toEqual(
       'service.name: "opbeans-java" AND service.environment: "production"'
     );
   });
 
   it('builds the kuery with the OR clause for the not-defined sentinel', () => {
     const href = renderAlertsHref({ environment: ENVIRONMENT_NOT_DEFINED_VALUE });
-    expect(getKuery(href)).toEqual(
+    expect(getKuery(href!)).toEqual(
       'service.name: "opbeans-java" AND (service.environment: "ENVIRONMENT_NOT_DEFINED" OR NOT service.environment: *)'
     );
   });
 
   it('escapes double-quotes and backslashes in the service name', () => {
     const href = renderAlertsHref({ serviceName: 'my"service\\path' });
-    expect(getKuery(href)).toEqual(
+    expect(getKuery(href!)).toEqual(
       'service.name: "my\\"service\\\\path" AND service.environment: "production"'
     );
   });

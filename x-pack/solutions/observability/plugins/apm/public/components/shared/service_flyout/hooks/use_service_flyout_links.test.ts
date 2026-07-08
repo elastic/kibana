@@ -33,6 +33,7 @@ const mockLocatorsGet = jest.fn(() => ({ getRedirectUrl: mockGetRedirectUrl }));
 
 jest.mock('../service_flyout_context', () => ({
   useServiceFlyoutContext: () => ({
+    core: {},
     share: { url: { locators: { get: mockLocatorsGet } } },
   }),
 }));

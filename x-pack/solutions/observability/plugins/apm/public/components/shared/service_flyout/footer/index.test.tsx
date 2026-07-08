@@ -21,6 +21,11 @@ jest.mock('../../../../hooks/use_manage_slos_url', () => ({
   getManageSlosUrl: (...args: unknown[]) => mockGetManageSlosUrl(...args),
 }));
 
+const mockUseAlertsHref = jest.fn();
+jest.mock('./hooks/use_alerts_href', () => ({
+  useAlertsHref: (...args: unknown[]) => mockUseAlertsHref(...args),
+}));
+
 const mockShare = {
   url: { locators: { get: jest.fn() } },
 } as any;
@@ -67,6 +72,9 @@ describe('ServiceFlyoutFooter', () => {
       indexType === 'traces' ? '/app/discover/traces' : '/app/discover/logs'
     );
     mockGetManageSlosUrl.mockReturnValue('/app/slos');
+    mockUseAlertsHref.mockReturnValue(
+      '/app/observability/alerts?_a=(kuery:\'service.name: "opbeans-java" AND service.environment: "production"\',rangeFrom:now-15m,rangeTo:now)'
+    );
   }
 
   it('passes empty string transactionType to the traces Discover link before the type resolves', () => {
@@ -180,12 +188,17 @@ describe('ServiceFlyoutFooter', () => {
     expect(screen.getByTestId('serviceFlyoutActionsMenuGroup-slos')).toBeInTheDocument();
   });
 
-  it('disables the actions button when no actions are available', () => {
-    mockUseDiscoverHref.mockReturnValue(undefined);
-    mockGetManageSlosUrl.mockReturnValue(undefined);
-    renderFooter({ http: { basePath: { prepend: () => undefined } } } as any, mockShare);
+  it('omits the alerts action when the alerts href is not available', () => {
+    setupAllHrefs();
+    mockUseAlertsHref.mockReturnValue(undefined);
+    renderFooter();
 
-    expect(screen.getByTestId('serviceFlyoutActionsButton')).toBeDisabled();
+    openActionsMenu();
+
+    expect(screen.queryByTestId('serviceFlyoutActionsMenuItem-openAlerts')).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId('serviceFlyoutActionsMenuItem-openTracesInDiscover')
+    ).toBeInTheDocument();
   });
 
   it('omits the Discover actions when no Discover hrefs resolve', () => {
