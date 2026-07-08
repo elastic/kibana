@@ -181,7 +181,7 @@ function GraphInner({
 }: GraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { telemetry } = services;
-  const { core, share } = useApmPluginContext();
+  const { core, share, lens, dataViews } = useApmPluginContext();
   const { euiTheme } = useEuiTheme();
   const { fitView, zoomIn, zoomOut, setCenter, getNodes, getNodesBounds } =
     useReactFlow<ServiceMapNode>();
@@ -933,6 +933,8 @@ function GraphInner({
               initialTransactionType={flyoutOptions?.initialTransactionType}
               core={core}
               share={share}
+              lens={lens}
+              dataViews={dataViews}
               onView={handleServiceFlyoutView}
               onClose={handlePopoverClose}
             />
