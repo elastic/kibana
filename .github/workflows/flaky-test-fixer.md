@@ -107,12 +107,12 @@ safe-outputs:
     # transport makes the shallow safe_outputs checkout run `git fetch --unshallow`,
     # which on a repo Kibana's size cannot finish within the 15m job timeout.
     patch-format: am
-  # Links the outcome comment's heading to the fix PR and adds a live PR-state badge.
-  # The agent can't do this itself: it doesn't know the PR number while it runs
+  # Appends the fix PR link to the outcome heading and a live PR-state badge at the
+  # bottom. The agent can't do this itself: it doesn't know the PR number while it runs
   # (safe_outputs creates the PR afterwards), so this job runs after safe_outputs.
   jobs:
     link-fix-pr:
-      description: 'Link the outcome comment''s heading to the newly-opened fix PR and add a live PR-state badge. Call this exactly once, and only after you have opened a draft PR.'
+      description: 'Append the newly-opened fix PR link to the outcome comment''s heading and a live PR-state badge at the bottom. Call this exactly once, and only after you have opened a draft PR.'
       runs-on: ubuntu-latest
       needs: safe_outputs
       if: needs.safe_outputs.outputs.created_pr_url != '' && needs.safe_outputs.outputs.comment_id != ''
@@ -155,13 +155,15 @@ safe-outputs:
               }
               // Live PR-state badge (open/draft/merged/closed) linking to the fix PR.
               const badge = `[<img src="https://img.shields.io/github/pulls/detail/state/${owner}/${repo}/${prNumber}">](${prUrl})`;
-              // Link the outcome heading text to the PR and drop the badge right beneath it.
-              let updated = body.replace(/^(###\s+\S+\s+)(.+)$/m, (_match, prefix, text) => `${prefix}[${text}](${prUrl})\n\n${badge}`);
-              if (updated === body) {
-                updated = `${body.trimEnd()}\n\n${badge}`;
+              // Append the PR link to the outcome heading, and the badge at the bottom.
+              const lines = body.split('\n');
+              const headingIndex = lines.findIndex(line => line.startsWith('### '));
+              if (headingIndex !== -1) {
+                lines[headingIndex] = `${lines[headingIndex].trimEnd()}: ${prUrl}`;
               }
+              const updated = `${lines.join('\n').trimEnd()}\n\n${badge}`;
               await github.rest.issues.updateComment({ owner, repo, comment_id: commentId, body: updated });
-              core.info(`Linked heading and added PR-state badge for #${prNumber} to comment ${commentId}.`);
+              core.info(`Appended PR link and state badge for #${prNumber} to comment ${commentId}.`);
 
 strict: false
 timeout-minutes: 90
@@ -188,7 +190,7 @@ Kibana is already bootstrapped for you.
 5. Open the PR (see "PR format" below).
 6. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 7. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
-8. **Only if you opened a PR in step 5**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and links your outcome heading to the new PR, adding a live PR-state badge. You cannot know the PR number while running (the PR is created afterwards), so never write the URL, number, or badge into the comment yourself — this tool is how the link gets there.
+8. **Only if you opened a PR in step 5**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and appends the new PR's link to your outcome heading, plus a live PR-state badge at the bottom. You cannot know the PR number while running (the PR is created afterwards), so never write the URL, number, or badge into the comment yourself — this tool is how the link gets there.
 
 ## PR format
 
@@ -238,7 +240,7 @@ Follow this format:
 
   <one very concise sentence on what the PR changes>. cc @<github-handle-here>
   ```
-  Keep the heading text exactly as shown — the `link_fix_pr` tool turns it into a link to the PR and adds a live PR-state badge beneath it. Never write the PR URL, number, or badge yourself.
+  Keep the heading text exactly as shown — the `link_fix_pr` tool appends the PR link to it (`...ready for review: <pr link>`) and adds a live PR-state badge at the bottom. Never write the PR URL, number, or badge yourself.
   
 - **Existing PR already covers it**:
   ```markdown
