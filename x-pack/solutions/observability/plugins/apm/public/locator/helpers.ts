@@ -13,13 +13,21 @@ import { apmRouter } from '../components/routing/apm_route_config';
 import type { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
 
 const SERVICE_OVERVIEW_TAB_PATHS = {
-  alerts: '/services/{serviceName}/alerts',
-  logs: '/services/{serviceName}/logs',
-  metrics: '/services/{serviceName}/metrics',
-  traces: '/services/{serviceName}/transactions',
-  transactions: '/services/{serviceName}/transactions/view',
-  errors: '/services/{serviceName}/errors',
-  default: '/services/{serviceName}/overview',
+  alerts: {
+    regular: '/services/{serviceName}/alerts',
+    mobile: '/mobile-services/{serviceName}/alerts',
+  },
+  logs: {
+    regular: '/services/{serviceName}/logs',
+    mobile: '/mobile-services/{serviceName}/logs',
+  },
+  metrics: { regular: '/services/{serviceName}/metrics' },
+  traces: {
+    regular: '/services/{serviceName}/transactions',
+    mobile: '/mobile-services/{serviceName}/transactions',
+  },
+  transactions: { regular: '/services/{serviceName}/transactions/view' },
+  errors: { regular: '/services/{serviceName}/errors' },
 } as const;
 
 export const APMLocatorPayloadValidator = t.union([
@@ -35,6 +43,7 @@ export const APMLocatorPayloadValidator = t.union([
     }),
     t.partial({ dashboardId: t.undefined }),
     t.partial({
+      isMobileAgentName: t.boolean,
       serviceOverviewTab: t.keyof({
         alerts: null,
         traces: null,
@@ -48,7 +57,14 @@ export const APMLocatorPayloadValidator = t.union([
     t.type({
       query: t.intersection([
         environmentRt,
-        t.partial({ kuery: t.string, rangeFrom: t.string, rangeTo: t.string }),
+        t.partial({
+          kuery: t.string,
+          rangeFrom: t.string,
+          rangeTo: t.string,
+          comparisonEnabled: t.boolean,
+          offset: t.string,
+          anomalyThreshold: t.string,
+        }),
       ]),
     }),
   ]),
@@ -107,6 +123,21 @@ export function getPathForServiceDetail(
     ...payload.query,
   };
 
+  // Handle overview first with explicit path literals (mobile vs regular) so the
+  // typed router sees a specific route rather than a union when validating the query.
+  if (!payload.serviceOverviewTab) {
+    if (payload.isMobileAgentName) {
+      return apmRouter.link('/mobile-services/{serviceName}/overview', {
+        path: { serviceName: payload.serviceName },
+        query,
+      });
+    }
+    return apmRouter.link('/services/{serviceName}/overview', {
+      path: { serviceName: payload.serviceName },
+      query,
+    });
+  }
+
   if (payload.serviceOverviewTab === 'errors' && payload.errorGroupId) {
     return apmRouter.link('/services/{serviceName}/errors/{groupId}', {
       path: {
@@ -117,7 +148,9 @@ export function getPathForServiceDetail(
     });
   }
 
-  const apmPath = SERVICE_OVERVIEW_TAB_PATHS[payload.serviceOverviewTab || 'default'];
+  const tabPaths = SERVICE_OVERVIEW_TAB_PATHS[payload.serviceOverviewTab];
+  const apmPath =
+    payload.isMobileAgentName && 'mobile' in tabPaths ? tabPaths.mobile : tabPaths.regular;
 
   return apmRouter.link(apmPath, {
     path: { serviceName: payload.serviceName },

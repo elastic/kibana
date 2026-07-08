@@ -13,14 +13,16 @@ import type { AnomalyDetectorType, Environment } from '@kbn/apm-types';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isMobileAgentName } from '../../../../../common/agent_name';
 import {
   getApmMlDetectorLabel,
   getSeverity,
   getSeverityColor,
 } from '../../../../../common/anomaly_detection';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
+import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 import type { ApmRoutes } from '../../../routing/apm_route_config';
+import type { ApmPluginStartDeps } from '../../../../plugin';
 
 function getI18nLabel(severity: ML_ANOMALY_SEVERITY): string {
   switch (severity) {
@@ -105,26 +107,23 @@ interface AnomaliesBadgeProps {
 }
 
 export function AnomaliesBadge({ score, detectorType, navigationProps }: AnomaliesBadgeProps) {
-  const apmRouter = useApmRouter();
+  const { services } = useKibana<ApmPluginStartDeps>();
+  const locator = services.share?.url.locators.get(APM_APP_LOCATOR_ID);
 
   const severity = getSeverity(score);
   const text = formatLabelWithScore(getI18nLabel(severity), score);
 
   const href =
     navigationProps && score !== undefined
-      ? apmRouter.link(
-          isMobileAgentName(navigationProps.agentName)
-            ? '/mobile-services/{serviceName}/overview'
-            : '/services/{serviceName}/overview',
-          {
-            path: { serviceName: navigationProps.serviceName },
-            query: toAnomalyOverviewQuery(
-              navigationProps.query,
-              severity,
-              navigationProps.anomalyEnvironment
-            ),
-          }
-        )
+      ? locator?.getRedirectUrl({
+          serviceName: navigationProps.serviceName,
+          isMobileAgentName: isMobileAgentName(navigationProps.agentName),
+          query: toAnomalyOverviewQuery(
+            navigationProps.query,
+            severity,
+            navigationProps.anomalyEnvironment
+          ),
+        })
       : undefined;
 
   const tooltipContent =

@@ -68,6 +68,7 @@ describe('getPathForServiceDetail', () => {
     const baseQuery = { environment: 'prod' as Environment };
 
     it.each([
+      ['alerts', '/services/svc/alerts'],
       ['logs', '/services/svc/logs'],
       ['metrics', '/services/svc/metrics'],
       ['traces', '/services/svc/transactions'],
@@ -151,6 +152,87 @@ describe('getPathForServiceDetail', () => {
       );
 
       expect(splitPath(path).query.get('errorGroupId')).toBeNull();
+    });
+  });
+
+  describe('isMobileAgentName routing', () => {
+    const baseQuery = { environment: 'prod' as Environment };
+
+    it('routes to the mobile overview when no tab is provided', () => {
+      const path = getPathForServiceDetail(
+        { serviceName: 'svc', isMobileAgentName: true, query: baseQuery },
+        defaultOptions
+      );
+
+      expect(splitPath(path).pathname).toBe('/mobile-services/svc/overview');
+    });
+
+    it.each([
+      ['alerts', '/mobile-services/svc/alerts'],
+      ['logs', '/mobile-services/svc/logs'],
+      ['traces', '/mobile-services/svc/transactions'],
+    ] as const)('routes the %s tab to the mobile path', (serviceOverviewTab, expectedPath) => {
+      const path = getPathForServiceDetail(
+        { serviceName: 'svc', isMobileAgentName: true, serviceOverviewTab, query: baseQuery },
+        defaultOptions
+      );
+
+      expect(splitPath(path).pathname).toBe(expectedPath);
+    });
+
+    it('falls back to the regular path for tabs without a mobile equivalent', () => {
+      const path = getPathForServiceDetail(
+        {
+          serviceName: 'svc',
+          isMobileAgentName: true,
+          serviceOverviewTab: 'metrics',
+          query: baseQuery,
+        },
+        defaultOptions
+      );
+
+      expect(splitPath(path).pathname).toBe('/services/svc/metrics');
+    });
+  });
+
+  describe('anomaly param forwarding', () => {
+    it('forwards offset and anomalyThreshold to the overview URL', () => {
+      const path = getPathForServiceDetail(
+        {
+          serviceName: 'svc',
+          query: {
+            environment: 'prod' as Environment,
+            offset: 'expected_bounds',
+            anomalyThreshold: 'critical',
+          },
+        },
+        defaultOptions
+      );
+      const { pathname, query } = splitPath(path);
+
+      expect(pathname).toBe('/services/svc/overview');
+      expect(query.get('offset')).toBe('expected_bounds');
+      expect(query.get('anomalyThreshold')).toBe('critical');
+    });
+
+    it('forwards offset and anomalyThreshold to the mobile overview URL', () => {
+      const path = getPathForServiceDetail(
+        {
+          serviceName: 'svc',
+          isMobileAgentName: true,
+          query: {
+            environment: 'prod' as Environment,
+            offset: 'expected_bounds',
+            anomalyThreshold: 'major',
+          },
+        },
+        defaultOptions
+      );
+      const { pathname, query } = splitPath(path);
+
+      expect(pathname).toBe('/mobile-services/svc/overview');
+      expect(query.get('offset')).toBe('expected_bounds');
+      expect(query.get('anomalyThreshold')).toBe('major');
     });
   });
 

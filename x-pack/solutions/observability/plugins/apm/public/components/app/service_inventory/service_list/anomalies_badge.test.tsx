@@ -12,6 +12,23 @@ import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock
 import type { AnomaliesBadgeNavigationProps } from './anomalies_badge';
 import { AnomaliesBadge } from './anomalies_badge';
 
+const mockGetRedirectUrl = jest.fn((payload: any) => {
+  const { serviceName, isMobileAgentName: isMobile, query } = payload;
+  const path = isMobile
+    ? `/mobile-services/${serviceName}/overview`
+    : `/services/${serviceName}/overview`;
+  return `${path}?${new URLSearchParams(query)}`;
+});
+
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+  useKibana: () => ({
+    services: {
+      share: { url: { locators: { get: () => ({ getRedirectUrl: mockGetRedirectUrl }) } } },
+    },
+  }),
+}));
+
 const baseQuery = {
   environment: 'ENVIRONMENT_ALL',
   kuery: '',
@@ -55,6 +72,10 @@ async function getTooltipText(): Promise<string | null | undefined> {
 }
 
 describe('AnomaliesBadge', () => {
+  beforeEach(() => {
+    mockGetRedirectUrl.mockClear();
+  });
+
   it('names the anomalous detector in the tooltip when a detectorType is provided', async () => {
     renderBadge(
       <AnomaliesBadge score={CRITICAL_SEVERITY} detectorType={AnomalyDetectorType.txFailureRate} />
