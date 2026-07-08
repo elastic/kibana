@@ -7,13 +7,19 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { InferenceConnector } from '@kbn/inference-common';
-import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import type {
+  InferenceFeatureConfig,
+  SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
 import { resolveConnectorIdByFeature } from './resolve_connector_id_by_feature';
 
 const createSearchInferenceEndpointsMock = (
-  endpoints: InferenceConnector[] = []
+  endpoints: InferenceConnector[] = [],
+  feature?: InferenceFeatureConfig
 ): SearchInferenceEndpointsPluginStart => ({
-  features: {} as any,
+  features: {
+    get: jest.fn().mockReturnValue(feature),
+  } as any,
   endpoints: {
     getForFeature: jest.fn().mockResolvedValue({ endpoints, warnings: [], soEntryFound: false }),
   },
@@ -51,5 +57,38 @@ describe('resolveConnectorIdByFeature', () => {
         searchInferenceEndpoints,
       })
     ).rejects.toThrow('No connector available for feature "unknown_feature".');
+  });
+
+  it('resolves a registered feature whose task type is chat_completion', async () => {
+    const searchInferenceEndpoints = createSearchInferenceEndpointsMock(
+      [{ connectorId: 'feature-connector-1' } as InferenceConnector],
+      { taskType: 'chat_completion' } as InferenceFeatureConfig
+    );
+
+    const result = await resolveConnectorIdByFeature({
+      featureId: 'agent_builder',
+      request,
+      searchInferenceEndpoints,
+    });
+
+    expect(result).toBe('feature-connector-1');
+  });
+
+  it('throws before resolving when the registered feature is not a chat_completion feature', async () => {
+    const searchInferenceEndpoints = createSearchInferenceEndpointsMock(
+      [{ connectorId: 'feature-connector-1' } as InferenceConnector],
+      { taskType: 'text_embedding' } as InferenceFeatureConfig
+    );
+
+    await expect(
+      resolveConnectorIdByFeature({
+        featureId: 'knowledge_base_embeddings',
+        request,
+        searchInferenceEndpoints,
+      })
+    ).rejects.toThrow(
+      'Feature "knowledge_base_embeddings" is not a chat completion feature (task type "text_embedding"). connector-id-by-feature requires a feature with task type "chat_completion".'
+    );
+    expect(searchInferenceEndpoints.endpoints.getForFeature).not.toHaveBeenCalled();
   });
 });

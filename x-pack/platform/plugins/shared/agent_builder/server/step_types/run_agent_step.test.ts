@@ -399,8 +399,14 @@ describe('ai.agent workflow step (Agent Builder)', () => {
   });
 
   describe('connector-id-by-feature', () => {
-    const createFeatureServicesMock = (endpoints: Array<{ connectorId: string }> = []) => ({
+    const createFeatureServicesMock = (
+      endpoints: Array<{ connectorId: string }> = [],
+      feature?: { taskType: string }
+    ) => ({
       searchInferenceEndpoints: {
+        features: {
+          get: jest.fn().mockReturnValue(feature),
+        },
         endpoints: {
           getForFeature: jest
             .fn()
@@ -497,6 +503,30 @@ describe('ai.agent workflow step (Agent Builder)', () => {
 
       expect(execution.executeAgent).not.toHaveBeenCalled();
       expect(res.error?.message).toBe('No connector available for feature "unknown_feature".');
+    });
+
+    it('surfaces an error when the feature is not a chat completion feature', async () => {
+      const execution = createExecutionMock(of());
+      const featureServices = createFeatureServicesMock([{ connectorId: 'feature-connector' }], {
+        taskType: 'text_embedding',
+      });
+      const serviceManager = { internalStart: { execution, ...featureServices } } as any;
+
+      const step = getRunAgentStepDefinition(serviceManager);
+      const res = await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: { 'connector-id-by-feature': 'knowledge_base_embeddings' },
+        })
+      );
+
+      expect(
+        featureServices.searchInferenceEndpoints.endpoints.getForFeature
+      ).not.toHaveBeenCalled();
+      expect(execution.executeAgent).not.toHaveBeenCalled();
+      expect(res.error?.message).toBe(
+        'Feature "knowledge_base_embeddings" is not a chat completion feature (task type "text_embedding"). connector-id-by-feature requires a feature with task type "chat_completion".'
+      );
     });
   });
 
