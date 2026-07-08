@@ -84,6 +84,7 @@ export const sourceSchema = schema.object({
     schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
   ]),
   query: schema.maybe(schema.recordOf(schema.string({ maxLength: 1000 }), schema.any())),
+  project_routing: schema.maybe(schema.string({ maxLength: 1000 })),
 });
 
 export const syncSchema = schema.object({
