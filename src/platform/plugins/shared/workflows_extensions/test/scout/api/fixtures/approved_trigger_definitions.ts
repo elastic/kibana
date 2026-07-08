@@ -81,7 +81,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'alerting.ruleSignalsWritten',
-    schemaHash: '7915d3db51bd460805a70fd71bf4692e6fad734f7af6a94d0f28024b16cb9750',
+    schemaHash: '42a45d44daa29f873b1752bd625a938344297dd4f6979e4b08720dfb60445723',
   },
   {
     id: 'alerting.ruleUpdated',

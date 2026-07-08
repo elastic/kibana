@@ -22,10 +22,13 @@ import type { RuleExecutorEventPublisher } from '../../events/rule_executor_even
 describe('PublishRuleExecutionEventsStep', () => {
   let step: PublishRuleExecutionEventsStep;
   let mockPublisher: jest.Mocked<Pick<RuleExecutorEventPublisher, 'emitSignalsWritten'>>;
+  let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
   let request: KibanaRequest;
 
   beforeEach(() => {
-    const { loggerService } = createLoggerService();
+    const loggerMocks = createLoggerService();
+    const { loggerService } = loggerMocks;
+    mockLogger = loggerMocks.mockLogger;
     mockPublisher = {
       emitSignalsWritten: jest.fn(),
     };
@@ -73,9 +76,38 @@ describe('PublishRuleExecutionEventsStep', () => {
     expect(mockPublisher.emitSignalsWritten).toHaveBeenCalledWith(request, {
       rule,
       spaceId: input.spaceId,
-      scheduledAt: input.scheduledAt,
       signalEventCount: 3,
     });
+  });
+
+  it('logs and swallows publisher failures after passing through stream results', async () => {
+    const rule = createRuleResponse({ kind: 'signal', id: 'signal-rule-1' });
+    mockPublisher.emitSignalsWritten.mockImplementation(() => {
+      throw new Error('publisher failed');
+    });
+
+    const stream = step.executeStream(
+      createPipelineStream([
+        createRulePipelineState({
+          rule,
+          alertEventsBatch: [createAlertEvent({ type: 'signal', group_hash: 'hash-1' })],
+        }),
+      ])
+    );
+
+    const results = await collectStreamResults(stream);
+
+    expect(results).toHaveLength(1);
+    expect(mockPublisher.emitSignalsWritten).toHaveBeenCalledTimes(1);
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'publisher failed',
+      expect.objectContaining({
+        error: expect.objectContaining({
+          code: 'RULE_EXECUTOR_EVENT_PUBLISHER_FAILURE',
+          type: 'PublishRuleExecutionEventsStep:publish_rule_execution_events',
+        }),
+      })
+    );
   });
 
   it('does not emit when no signal events were written', async () => {

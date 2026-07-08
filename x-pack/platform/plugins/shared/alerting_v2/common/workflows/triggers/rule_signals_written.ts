@@ -12,33 +12,48 @@ import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 
 export const RULE_SIGNALS_WRITTEN_TRIGGER_ID = 'alerting.ruleSignalsWritten' as const;
 
+const MAX_RULE_SNAPSHOT_FIELD_LENGTH = 1024;
+const MAX_RULE_QUERY_LENGTH = 100_000;
+
 export const ruleExecutionSnapshotSchema = z
   .object({
-    ruleId: z.string().describe(
-      i18n.translate('xpack.alertingVTwo.triggers.ruleSignalsWritten.schema.ruleId', {
-        defaultMessage: 'Identifier of the alerting rule that produced signal events.',
-      })
-    ),
-    spaceId: z.string().describe(
-      i18n.translate('xpack.alertingVTwo.triggers.ruleSignalsWritten.schema.spaceId', {
-        defaultMessage: 'Kibana space the rule lives in.',
-      })
-    ),
-    name: z.string().describe(
-      i18n.translate('xpack.alertingVTwo.triggers.ruleSignalsWritten.schema.name', {
-        defaultMessage: 'Rule display name.',
-      })
-    ),
+    ruleId: z
+      .string()
+      .max(MAX_RULE_SNAPSHOT_FIELD_LENGTH)
+      .describe(
+        i18n.translate('xpack.alertingVTwo.triggers.ruleSignalsWritten.schema.ruleId', {
+          defaultMessage: 'Identifier of the alerting rule that produced signal events.',
+        })
+      ),
+    spaceId: z
+      .string()
+      .max(MAX_RULE_SNAPSHOT_FIELD_LENGTH)
+      .describe(
+        i18n.translate('xpack.alertingVTwo.triggers.ruleSignalsWritten.schema.spaceId', {
+          defaultMessage: 'Kibana space the rule lives in.',
+        })
+      ),
+    name: z
+      .string()
+      .max(MAX_RULE_SNAPSHOT_FIELD_LENGTH)
+      .describe(
+        i18n.translate('xpack.alertingVTwo.triggers.ruleSignalsWritten.schema.name', {
+          defaultMessage: 'Rule display name.',
+        })
+      ),
     kind: ruleKindSchema.describe(
       i18n.translate('xpack.alertingVTwo.triggers.ruleSignalsWritten.schema.kind', {
         defaultMessage: 'Rule kind: alert or signal.',
       })
     ),
-    query: z.string().describe(
-      i18n.translate('xpack.alertingVTwo.triggers.ruleSignalsWritten.schema.query', {
-        defaultMessage: 'ES|QL detection query (evaluation.query.base).',
-      })
-    ),
+    query: z
+      .string()
+      .max(MAX_RULE_QUERY_LENGTH)
+      .describe(
+        i18n.translate('xpack.alertingVTwo.triggers.ruleSignalsWritten.schema.query', {
+          defaultMessage: 'ES|QL detection query (evaluation.query.base).',
+        })
+      ),
     tags: tagsSchema.describe(
       i18n.translate('xpack.alertingVTwo.triggers.ruleSignalsWritten.schema.tags', {
         defaultMessage: 'Rule tags for categorization and workflow trigger filtering.',
@@ -92,7 +107,7 @@ export const ruleSignalsWrittenTriggerCommonDefinition: CommonTriggerDefinition<
       'xpack.alertingVTwo.workflowTriggers.ruleSignalsWritten.documentation.details',
       {
         defaultMessage:
-          'Emitted once per completed rule execution when signal events were persisted. The payload includes event.rule (ruleId, spaceId, name, kind, query, tags), event.scheduledAt, and event.signalEventCount for trigger conditions.',
+          'Emitted once per completed rule execution when signal events were persisted. The payload includes event.rule (ruleId, spaceId, name, kind, query, tags), event.occurredAt, and event.signalEventCount for trigger conditions.',
       }
     ),
     examples: [

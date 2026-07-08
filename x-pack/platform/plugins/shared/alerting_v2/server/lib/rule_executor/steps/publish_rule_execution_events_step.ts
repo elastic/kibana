@@ -74,12 +74,19 @@ export class PublishRuleExecutionEventsStep implements RuleExecutionStep {
             `[${step.name}] Emitting signalsWritten for rule ${lastState.input.ruleId} (${totalSignalEventCount} signal events)`,
         });
 
-        step.eventPublisher.emitSignalsWritten(step.request, {
-          rule: lastState.rule,
-          spaceId: lastState.input.spaceId,
-          scheduledAt: lastState.input.scheduledAt,
-          signalEventCount: totalSignalEventCount,
-        });
+        try {
+          step.eventPublisher.emitSignalsWritten(step.request, {
+            rule: lastState.rule,
+            spaceId: lastState.input.spaceId,
+            signalEventCount: totalSignalEventCount,
+          });
+        } catch (error) {
+          step.logger.error({
+            error: error instanceof Error ? error : new Error(String(error)),
+            code: 'RULE_EXECUTOR_EVENT_PUBLISHER_FAILURE',
+            type: `PublishRuleExecutionEventsStep:${step.name}`,
+          });
+        }
       }
     })();
   }

@@ -23,7 +23,6 @@ import {
 export interface EmitSignalsWrittenInput {
   readonly rule: RuleResponse;
   readonly spaceId: string;
-  readonly scheduledAt: string;
   readonly signalEventCount: number;
 }
 
