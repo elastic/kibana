@@ -55,6 +55,14 @@ export const restoreRuleFromHistory = async (
   const { rulesClient, ruleId, changeId, currentRuleRevision } = params;
 
   const existingRule = await getRuleById({ rulesClient, id: ruleId });
+
+  if (existingRule != null && existingRule.revision !== currentRuleRevision) {
+    throw new RuleConcurrencyError(
+      'Someone has updated the rule already. Please provide the latest rule revision.',
+      existingRule.revision
+    );
+  }
+
   // `from` is intentionally omitted: the event.id term-filter makes the target
   // document the first (and only) hit; ES default of 0 is correct here.
   const historyResult = await rulesClient.getHistory({
@@ -64,26 +72,19 @@ export const restoreRuleFromHistory = async (
     filters: [{ term: { 'event.id': changeId } }],
   });
 
-  if (!existingRule && historyResult.items.length === 0) {
-    throw new ClientError(`ruleId: "${ruleId}" not found`, 404);
-  }
+  if (existingRule == null) {
+    if (historyResult.items.length === 0) {
+      throw new ClientError(`ruleId: "${ruleId}" not found`, 404);
+    }
 
-  if (existingRule && historyResult.items.length === 0) {
+    if (currentRuleRevision != null) {
+      throw new ClientError(
+        'Someone has restored this deleted rule already. Please provide the latest rule revision.',
+        409
+      );
+    }
+  } else if (historyResult.items.length === 0) {
     throw new ClientError(`changeId: "${changeId}" not found`, 404);
-  }
-
-  if (existingRule == null && currentRuleRevision != null) {
-    throw new ClientError(
-      'Someone has restored this deleted rule already. Please provide the latest rule revision.',
-      409
-    );
-  }
-
-  if (existingRule != null && existingRule.revision !== currentRuleRevision) {
-    throw new RuleConcurrencyError(
-      'Someone has updated the rule already. Please provide the latest rule revision.',
-      existingRule.revision
-    );
   }
 
   const item = historyResult.items[0];

@@ -260,9 +260,10 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
     ).resolves.not.toThrow();
   });
 
-  it('throws 409 when ruleRevision is provided but the rule no longer exists', async () => {
+  it('throws 409 when ruleRevision is provided but the rule was already deleted and restored', async () => {
     const notFoundError = Object.assign(new Error('Not Found'), { output: { statusCode: 404 } });
     rulesClient.resolve.mockRejectedValue(notFoundError);
+    rulesClient.getHistory.mockResolvedValue(buildHistoryResult(snapshotAlertingRule, CHANGE_ID));
 
     await expect(
       detectionRulesClient.restoreRuleFromHistory({
@@ -272,7 +273,23 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
       })
     ).rejects.toMatchObject({ statusCode: 409 });
 
-    expect(rulesClient.getHistory).not.toHaveBeenCalled();
+    expect(rulesClient.getHistory).toHaveBeenCalled();
+    expect(rulesClient.create).not.toHaveBeenCalled();
+  });
+
+  it('throws 404 when ruleRevision is provided but the rule never existed', async () => {
+    const notFoundError = Object.assign(new Error('Not Found'), { output: { statusCode: 404 } });
+    rulesClient.resolve.mockRejectedValue(notFoundError);
+    rulesClient.getHistory.mockResolvedValue({ total: 0, items: [] });
+
+    await expect(
+      detectionRulesClient.restoreRuleFromHistory({
+        ruleId: RULE_ID,
+        changeId: CHANGE_ID,
+        currentRuleRevision: 1,
+      })
+    ).rejects.toMatchObject({ statusCode: 404 });
+
     expect(rulesClient.create).not.toHaveBeenCalled();
   });
 
