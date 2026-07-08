@@ -310,7 +310,9 @@ describe('useExternalMonitor', () => {
       useEsSearchMock.mockReturnValue({
         data: {
           hits: {
-            hits: [{ _source: { monitor: { id: 'k8s-monitor', name: 'n', type: 'http' }, tags: [] } }],
+            hits: [
+              { _source: { monitor: { id: 'k8s-monitor', name: 'n', type: 'http' }, tags: [] } },
+            ],
           },
           aggregations: {
             locations: {
