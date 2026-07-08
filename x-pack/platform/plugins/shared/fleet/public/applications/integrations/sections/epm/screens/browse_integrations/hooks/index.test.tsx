@@ -407,6 +407,37 @@ describe('useBrowseIntegrationHook', () => {
     });
   });
 
+  describe('Multi-category (AND) filter', () => {
+    it('shows only cards that belong to ALL selected default categories (intersection)', () => {
+      const cards = [
+        {
+          id: '1',
+          name: 'both',
+          title: 'Both',
+          categories: ['observability', 'opentelemetry'],
+        },
+        { id: '2', name: 'obs-only', title: 'Obs only', categories: ['observability'] },
+        { id: '3', name: 'otel-only', title: 'OTel only', categories: ['opentelemetry'] },
+      ];
+
+      mockUseAvailablePackages(cards as IntegrationCardItem[]);
+      (useUrlDefaultCategories as jest.Mock).mockReturnValue(['observability', 'opentelemetry']);
+      (useUrlFilters as jest.Mock).mockReturnValue({
+        q: undefined,
+        sort: undefined,
+        status: undefined,
+      });
+
+      const { result } = renderHook(() =>
+        useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+      );
+
+      // Only the card present in BOTH categories should remain
+      expect(result.current.filteredCards).toHaveLength(1);
+      expect(result.current.filteredCards[0].name).toBe('both');
+    });
+  });
+
   describe('Combined filters', () => {
     it('applies deprecated filter and sorting together', () => {
       const cards = [

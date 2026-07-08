@@ -3,7 +3,7 @@
   "id": "@kbn/synthtrace",
   "owner": [
     "@elastic/obs-presentation-team",
-    "@elastic/obs-onboarding-team",
+    "@elastic/streams-ui",
     "@elastic/obs-exploration-team",
     "@elastic/nightshift-context-and-research-team"
   ],

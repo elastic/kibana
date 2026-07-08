@@ -13,16 +13,15 @@ export {
   ChangeHistoryModal,
   ChangeHistoryTrigger,
   ChangeHistoryListGroupItem,
-  ChangeHistoryPreviewPanel,
   ChangeHistoryRestoreButton,
   ChangeHistoryDefaultPreviewHeaderActions,
 } from './src/components/modal';
 export type {
   ChangeHistoryRestoreButtonProps,
   ChangeHistoryDefaultPreviewHeaderActionsProps,
-  ChangeHistoryPreviewPanelProps,
 } from './src/components/modal';
 export {
+  ChangeHistoryModalContext,
   ChangeHistoryProvider,
   useChangeHistoryConfig,
   useChangeHistoryModal,
@@ -70,6 +69,7 @@ export {
 export type {
   ChangeHistoryCompareMode,
   ChangeHistoryComparisonType,
+  ChangeHistoryDiffNavigationSource,
   ChangeHistoryFilterType,
   ChangeHistoryScope,
   ChangeHistorySelectionSource,
@@ -80,6 +80,7 @@ export type {
   ChangeHistoryTelemetryScopeFields,
   CreateChangeHistoryTelemetryReporterOptions,
   ReportChangeHistoryChangeSelectedActionParams,
+  ReportChangeHistoryDiffChangeNavigatedActionParams,
   ReportChangeHistoryDiffViewedActionParams,
   ReportChangeHistoryFilterAppliedActionParams,
   ReportChangeHistoryOpenedActionParams,

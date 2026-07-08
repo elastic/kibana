@@ -14,7 +14,7 @@ import * as i18n from './translations';
 const INLINE_FILTER_POPOVER_MIN_WIDTH = 220;
 
 interface InlineFilterPopoverProps {
-  options: Array<{ label: string; value: string }>;
+  options: Array<{ label: string; value: string; prepend?: React.ReactNode }>;
   selectedValues: string[];
   singleSelect: boolean;
   onSelectionChange: (values: string[]) => void;
@@ -45,6 +45,7 @@ export function InlineFilterPopover({
       options.map((o) => ({
         key: o.value,
         label: o.label,
+        prepend: o.prepend,
         checked: selectedValues.includes(o.value) ? ('on' as const) : undefined,
         'data-test-subj': `${dataTestSubj}-option-${o.value}`,
       })),
