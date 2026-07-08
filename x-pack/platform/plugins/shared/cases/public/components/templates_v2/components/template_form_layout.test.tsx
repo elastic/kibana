@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useForm } from 'react-hook-form';
 import type { YamlEditorFormValues } from './template_form';
@@ -23,14 +23,20 @@ jest.mock('./template_preview', () => ({
 
 const capturedEditorLayoutProps: {
   onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
+  onSettingsChange?: (settings: unknown) => void;
+  onConnectorChange?: (connector: unknown) => void;
 } = {};
 
 jest.mock('./template_editor_layout', () => ({
   TemplateEditorLayout: (props: {
     onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
+    onSettingsChange?: (settings: unknown) => void;
+    onConnectorChange?: (connector: unknown) => void;
     [key: string]: unknown;
   }) => {
     capturedEditorLayoutProps.onFieldDefaultChange = props.onFieldDefaultChange;
+    capturedEditorLayoutProps.onSettingsChange = props.onSettingsChange;
+    capturedEditorLayoutProps.onConnectorChange = props.onConnectorChange;
     return (
       <>
         <div data-test-subj="template-yaml-editor" />
@@ -46,8 +52,11 @@ jest.mock('../../../common/navigation', () => ({
   }),
 }));
 
+const mockUseCasesLocalStorage = jest.fn(
+  (..._args: unknown[]): [unknown, (value: unknown) => void] => [undefined, jest.fn()]
+);
 jest.mock('../../../common/use_cases_local_storage', () => ({
-  useCasesLocalStorage: () => [undefined, jest.fn()],
+  useCasesLocalStorage: (...args: unknown[]) => mockUseCasesLocalStorage(...args),
 }));
 
 const mockUseDebouncedYamlEdit = jest.fn();
@@ -88,14 +97,17 @@ const TestWrapper = ({
 describe('TemplateFormLayout', () => {
   const mockOnCreate = jest.fn();
   const mockHandleReset = jest.fn();
+  const mockSetStoredFormState = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockOnCreate.mockResolvedValue(undefined);
+    mockUseCasesLocalStorage.mockReturnValue([undefined, mockSetStoredFormState]);
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: 'name: Test',
       onChange: jest.fn(),
       handleReset: mockHandleReset,
+      clearDraft: jest.fn(),
       isSaving: false,
       isSaved: false,
     });
@@ -159,6 +171,76 @@ describe('TemplateFormLayout', () => {
 
     expect(screen.getByTestId('resetTemplateButton')).toBeInTheDocument();
     expect(screen.getByText('Unsaved changes')).toBeInTheDocument();
+  });
+
+  it('renders reset button when only the Settings tab has changes', () => {
+    // YAML buffer is unchanged (matches initialValue), but a persisted Settings-tab draft differs
+    // from the template's defaults — this should still count as unsaved changes.
+    mockUseCasesLocalStorage.mockReturnValue([
+      { templateId: undefined, settings: { syncAlerts: false }, connector: undefined },
+      jest.fn(),
+    ]);
+
+    render(<TestWrapper onCreate={mockOnCreate} />);
+
+    expect(screen.getByTestId('resetTemplateButton')).toBeInTheDocument();
+    expect(screen.getByText('Unsaved changes')).toBeInTheDocument();
+  });
+
+  it('persists Settings-tab changes to the draft', () => {
+    render(<TestWrapper onCreate={mockOnCreate} />);
+
+    act(() => {
+      capturedEditorLayoutProps.onSettingsChange?.({ syncAlerts: false });
+    });
+
+    expect(mockSetStoredFormState).toHaveBeenCalledWith({
+      templateId: undefined,
+      settings: { syncAlerts: false },
+      connector: undefined,
+    });
+  });
+
+  it('reverts the Settings-tab draft when reset is confirmed', async () => {
+    // A differing persisted draft makes the reset button available.
+    mockUseCasesLocalStorage.mockReturnValue([
+      { templateId: undefined, settings: { syncAlerts: false }, connector: undefined },
+      mockSetStoredFormState,
+    ]);
+
+    render(<TestWrapper onCreate={mockOnCreate} />);
+
+    await userEvent.click(screen.getByTestId('resetTemplateButton'));
+    await userEvent.click(screen.getByText(i18n.REVERT_MODAL_CONFIRM));
+
+    expect(mockHandleReset).toHaveBeenCalled();
+    expect(mockSetStoredFormState).toHaveBeenCalledWith({
+      templateId: undefined,
+      settings: undefined,
+      connector: undefined,
+    });
+  });
+
+  it('resets the Settings-tab draft on successful create', async () => {
+    mockUseDebouncedYamlEdit.mockReturnValue({
+      value: 'name: Test\nfields: []',
+      onChange: jest.fn(),
+      handleReset: mockHandleReset,
+      clearDraft: jest.fn(),
+      isSaving: false,
+      isSaved: false,
+    });
+
+    render(<TestWrapper onCreate={mockOnCreate} />);
+
+    await userEvent.click(screen.getByTestId('saveTemplateHeaderButton'));
+
+    await waitFor(() => expect(mockOnCreate).toHaveBeenCalled());
+    expect(mockSetStoredFormState).toHaveBeenCalledWith({
+      templateId: undefined,
+      settings: undefined,
+      connector: undefined,
+    });
   });
 
   it('shows correct tooltip for reset button in create mode', async () => {

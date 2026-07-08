@@ -198,6 +198,7 @@ export interface UsageStats {
   'observability:enableDiagnosticMode': boolean;
   'observability:streamsEnableSignificantEvents': boolean;
   'observability:streamsEnableSignificantEventsDiscovery': boolean;
+  'observability:streamsEnableSignificantEventsAlertingV2': boolean;
   'genAiSettings:defaultAIConnector': string;
   'genAiSettings:defaultAIConnectorOnly': boolean;
   'agentBuilder:prePromptWorkflowIds': string[];
@@ -214,6 +215,14 @@ export interface UsageStats {
   'observability:streamsSigEventsScheduledDiscoveryTriageBatchSize': number;
   'observability:streamsSigEventsScheduledDiscoveryMaxReviewPasses': number;
   'securitySolution:entityStoreEnableV2': boolean;
+  'securitySolution:alertAnalysisWorkflowEnabled': boolean;
+  'securitySolution:alertAnalysisWorkflowAutoCloseEnabled': boolean;
+  'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMinThreshold': number;
+  'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMaxThreshold': number;
+  'securitySolution:alertAnalysisWorkflowConnectorId': string;
+  'securitySolution:alertAnalysisWorkflowAgentId': string;
+  'securitySolution:alertAnalysisWorkflowCreateConversation': boolean;
+  'securitySolution:alertAnalysisWorkflowTagPrefix': string;
   'elasticRamen:enabled': boolean;
   'query_activity:minRunningTime': number;
   'genAiSettings:tokenUsageTracking': boolean;
