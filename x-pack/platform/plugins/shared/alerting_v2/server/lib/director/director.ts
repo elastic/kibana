@@ -174,10 +174,21 @@ export class DirectorService {
    * hold the episode in `active`. `deactivate` or the absence of
    * any lifecycle action releases the strategy to decide.
    *
-   * We require `last_episode_id` to be present so the forced-active
-   * emit has an episode to pin to. In practice this is always true
-   * whenever `last_lifecycle_action_type === 'activate'` (the action
-   * client refuses to create an activate audit doc without a
+   * Episode correlation is enforced upstream in
+   * `getLatestAlertEventStateQuery`: `last_lifecycle_action_type` is
+   * only populated when the latest audit doc's `episode_id` matches
+   * `last_episode_id`. When they diverge (concurrent bulk actions on
+   * different episodes of the same group, or a partial `_bulk` write
+   * where only one of the audit / synthetic rule-event docs landed),
+   * the query returns `null` here — which we treat as "no lock" and
+   * hand control back to the strategy. That query-level guard is why
+   * this method can safely trust `last_lifecycle_action_type` to
+   * describe the same episode as `last_episode_id`.
+   *
+   * We still require `last_episode_id` to be present so the
+   * forced-active emit has an episode to pin to; in practice this is
+   * always true when `last_lifecycle_action_type === 'activate'` (the
+   * action client refuses to create an activate audit doc without a
    * pre-existing `.rule-events` row), but the guard keeps the
    * director defensive against an edge where the rule-events stream
    * has been pruned but the audit stream has not.

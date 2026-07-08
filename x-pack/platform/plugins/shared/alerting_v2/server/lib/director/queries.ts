@@ -60,6 +60,28 @@ export interface LatestAlertEventState {
  *   the rule-events aggregations to their own stream, and the
  *   `action_type IN (...)` filter naturally scopes the audit aggregation
  *   to lifecycle actions.
+ *
+ * Episode-scoped lock correlation:
+ *   `last_lifecycle_action_type` and `last_episode_id` come from independent
+ *   `LAST(..., @timestamp)` aggregations against two different streams. On
+ *   the happy path they describe the same episode (activate/deactivate write
+ *   the audit doc and the synthetic rule-event doc atomically with the same
+ *   `episode_id` and `@timestamp`), but nothing in the raw aggregations
+ *   *enforces* that invariant. Two failure modes can make them diverge:
+ *     1. Concurrent bulk actions targeting different episodes of the same
+ *        group (bulk activate/deactivate accepts an explicit `episode_id`,
+ *        so a caller can act on a non-current episode).
+ *     2. Item-level `_bulk` write failures where the audit doc lands but
+ *        the synthetic rule-event doc does not (or vice versa).
+ *
+ *   In either case, blindly reporting the raw audit `action_type` would let
+ *   the director apply an `activate` lock to the wrong episode. The
+ *   post-STATS `EVAL` gates the reported action type on
+ *   `last_action_episode_id == last_episode_id`. When the two streams
+ *   describe the same episode we report the audit action. When they
+ *   diverge we return `NULL`, which the director interprets as "no lock"
+ *   and hands control back to the strategy. This is the safest possible
+ *   degradation.
  */
 export const getLatestAlertEventStateQuery = ({
   ruleId,
@@ -81,8 +103,11 @@ export const getLatestAlertEventStateQuery = ({
       last_episode_status = LAST(episode.status, @timestamp) WHERE type == "alert" AND episode.status IS NOT NULL,
       last_episode_status_count = LAST(episode.status_count, @timestamp) WHERE type == "alert" AND episode.status IS NOT NULL,
       last_episode_timestamp = MAX(@timestamp) WHERE type == "alert" AND episode.status IS NOT NULL,
-      last_lifecycle_action_type = LAST(action_type, @timestamp) WHERE action_type IN (${ALERT_EPISODE_ACTION_TYPE.ACTIVATE}, ${ALERT_EPISODE_ACTION_TYPE.DEACTIVATE})
+      last_action_episode_id = LAST(episode_id, @timestamp) WHERE action_type IN (${ALERT_EPISODE_ACTION_TYPE.ACTIVATE}, ${ALERT_EPISODE_ACTION_TYPE.DEACTIVATE}),
+      last_action_type = LAST(action_type, @timestamp) WHERE action_type IN (${ALERT_EPISODE_ACTION_TYPE.ACTIVATE}, ${ALERT_EPISODE_ACTION_TYPE.DEACTIVATE})
     BY group_hash`;
+
+  query = query.pipe`EVAL last_lifecycle_action_type = CASE(last_action_episode_id == last_episode_id, last_action_type, NULL)`;
 
   query = query.keep(
     'last_status',

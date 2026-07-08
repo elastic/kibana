@@ -40,10 +40,49 @@ describe('getLatestAlertEventStateQuery', () => {
     );
 
     expect(printed).toMatch(
-      /last_lifecycle_action_type = LAST\(action_type, @timestamp\) WHERE\s+action_type IN\s*\(\s*"activate", "deactivate"\s*\)/
+      /last_action_episode_id = LAST\(episode_id, @timestamp\) WHERE\s+action_type IN\s*\(\s*"activate", "deactivate"\s*\)/
+    );
+    expect(printed).toMatch(
+      /last_action_type = LAST\(action_type, @timestamp\) WHERE\s+action_type IN\s*\(\s*"activate", "deactivate"\s*\)/
     );
     expect(printed).toContain('BY group_hash');
     expect(printed).toContain('KEEP');
+  });
+
+  it('correlates the audit action_type with the rule-events episode via a post-STATS EVAL', () => {
+    const query = getLatestAlertEventStateQuery({
+      ruleId: 'rule-1',
+      groupHashes: ['hash-a'],
+    });
+
+    const printed = query.print();
+
+    // The `last_lifecycle_action_type` reported to the director must be
+    // gated on the audit doc's `episode_id` matching the current
+    // rule-events `last_episode_id`. Any divergence (concurrent bulk
+    // actions targeting different episodes of the same group, or partial
+    // `_bulk` writes) must resolve to NULL, which the director reads as
+    // "no lock".
+    expect(printed).toMatch(
+      /EVAL\s+last_lifecycle_action_type\s*=\s*CASE\(\s*last_action_episode_id == last_episode_id\s*,\s*last_action_type\s*,\s*NULL\s*\)/
+    );
+  });
+
+  it('does not leak the intermediate correlation columns through KEEP', () => {
+    const query = getLatestAlertEventStateQuery({
+      ruleId: 'rule-1',
+      groupHashes: ['hash-a'],
+    });
+
+    const printed = query.print();
+
+    const keepMatch = printed.match(/KEEP\s+([\s\S]*?)$/);
+    expect(keepMatch).not.toBeNull();
+
+    const keepClause = keepMatch![1];
+    expect(keepClause).not.toContain('last_action_episode_id');
+    expect(keepClause).not.toContain('last_action_type,');
+    expect(keepClause).not.toMatch(/last_action_type\s*$/m);
   });
 
   it('binds both `rule.id` and `rule_id` occurrences to the same ruleId value and inlines groupHashes', () => {
