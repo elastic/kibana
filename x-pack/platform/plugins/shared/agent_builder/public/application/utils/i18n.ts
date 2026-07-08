@@ -880,6 +880,12 @@ export const labels = {
       fileNameHelp: i18n.translate('xpack.agentBuilder.skills.referencedFileCard.fileNameHelp', {
         defaultMessage: 'Do not include .md — it is added automatically.',
       }),
+      advancedLabel: i18n.translate(
+        'xpack.agentBuilder.skills.referencedFileCard.advancedLabel',
+        {
+          defaultMessage: 'Advanced: folder path (default: skill root)',
+        }
+      ),
       folderPathLabel: i18n.translate(
         'xpack.agentBuilder.skills.referencedFileCard.folderPathLabel',
         {

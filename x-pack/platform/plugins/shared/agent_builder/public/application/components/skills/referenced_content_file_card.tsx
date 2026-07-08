@@ -7,12 +7,14 @@
 
 import React, { useMemo } from 'react';
 import {
+  EuiAccordion,
   EuiFieldText,
   EuiFormRow,
   EuiMarkdownEditor,
   EuiPanel,
   EuiSpacer,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { estimateTokens } from '@kbn/agent-builder-common/attachments';
 import { useDebouncedValue } from '@kbn/react-hooks';
@@ -52,6 +54,7 @@ export const ReferencedContentFileCard: React.FC<ReferencedContentFileCardProps>
   contentError,
   readOnly = false,
 }) => {
+  const accordionId = useGeneratedHtmlId({ prefix: 'agentBuilderSkillReferencedContentAdvanced' });
   const debouncedContent = useDebouncedValue(content, 300);
   const tokenCount = useMemo(() => estimateTokens(debouncedContent), [debouncedContent]);
 
@@ -85,33 +88,38 @@ export const ReferencedContentFileCard: React.FC<ReferencedContentFileCardProps>
 
       <EuiSpacer size="m" />
 
-      <EuiFormRow
-        label={labels.skills.referencedFileCard.folderPathLabel}
-        helpText={labels.skills.referencedFileCard.folderPathHelp}
-        isInvalid={Boolean(relativePathError)}
-        error={relativePathError}
-        fullWidth
+      <EuiAccordion
+        id={accordionId}
+        buttonContent={labels.skills.referencedFileCard.advancedLabel}
+        forceState={relativePathError ? 'open' : undefined}
       >
-        <EuiFieldText
-          value={relativePath}
-          onChange={(e) => onRelativePathChange(e.target.value)}
-          onBlur={onRelativePathBlur}
-          fullWidth
+        <EuiSpacer size="s" />
+        <EuiFormRow
+          label={labels.skills.referencedFileCard.folderPathLabel}
+          helpText={labels.skills.referencedFileCard.folderPathHelp}
           isInvalid={Boolean(relativePathError)}
-          disabled={readOnly}
-          data-test-subj="agentBuilderSkillReferencedContentRelativePath"
-        />
-      </EuiFormRow>
-
-      <EuiSpacer size="s" />
-
-      <EuiText
-        size="xs"
-        color="subdued"
-        data-test-subj="agentBuilderSkillReferencedContentPathPreview"
-      >
-        {labels.skills.referencedFileCard.fullPathPreview(fullPathPreview)}
-      </EuiText>
+          error={relativePathError}
+          fullWidth
+        >
+          <EuiFieldText
+            value={relativePath}
+            onChange={(e) => onRelativePathChange(e.target.value)}
+            onBlur={onRelativePathBlur}
+            fullWidth
+            isInvalid={Boolean(relativePathError)}
+            disabled={readOnly}
+            data-test-subj="agentBuilderSkillReferencedContentRelativePath"
+          />
+        </EuiFormRow>
+        <EuiSpacer size="s" />
+        <EuiText
+          size="xs"
+          color="subdued"
+          data-test-subj="agentBuilderSkillReferencedContentPathPreview"
+        >
+          {labels.skills.referencedFileCard.fullPathPreview(fullPathPreview)}
+        </EuiText>
+      </EuiAccordion>
 
       <EuiSpacer size="m" />
 
