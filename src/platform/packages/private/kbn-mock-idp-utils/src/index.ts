@@ -55,3 +55,9 @@ export {
   createUiamOAuthAccessToken,
   projectTypeToAlias,
 } from './utils';
+
+export {
+  seedTestOAuthConnection,
+  updateTestOAuthConnection,
+  deleteTestOAuthConnection,
+} from './cosmos_db_seeder';
