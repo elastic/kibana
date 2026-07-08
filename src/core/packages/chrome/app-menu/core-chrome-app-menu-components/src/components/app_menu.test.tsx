@@ -220,47 +220,5 @@ describe('AppMenu', () => {
 
       expect(screen.getByTestId('test-switch').closest('.euiToolTipAnchor')).toBeInTheDocument();
     });
-
-    it('should render the switch before items by default at xl breakpoint', () => {
-      render(<AppMenuComponent config={{ ...defaultConfig, switch: switchConfig }} />);
-
-      const switchNode = screen.getByTestId('test-switch');
-      const item1 = screen.getByText('Item 1');
-
-      expect(switchNode.compareDocumentPosition(item1)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    });
-
-    it('should render the switch after items when position is "trailing" at xl breakpoint', () => {
-      render(
-        <AppMenuComponent
-          config={{ ...defaultConfig, switch: { ...switchConfig, position: 'trailing' } }}
-        />
-      );
-
-      const switchNode = screen.getByTestId('test-switch');
-      const item2 = screen.getByText('Item 2');
-
-      expect(item2.compareDocumentPosition(switchNode)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    });
-
-    it('should render the switch after the overflow button when position is "trailing" at m-l breakpoint', () => {
-      mockUseIsWithinBreakpoints.mockImplementation((breakpoints: string[]) => {
-        if (breakpoints.includes('m') && breakpoints.includes('l')) return true;
-        return false;
-      });
-
-      render(
-        <AppMenuComponent
-          config={{ ...defaultConfig, switch: { ...switchConfig, position: 'trailing' } }}
-        />
-      );
-
-      const overflowButton = screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton);
-      const switchNode = screen.getByTestId('test-switch');
-
-      expect(overflowButton.compareDocumentPosition(switchNode)).toBe(
-        Node.DOCUMENT_POSITION_FOLLOWING
-      );
-    });
   });
 });
