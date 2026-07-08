@@ -270,7 +270,9 @@ describe('useWorkflowActions – import mutations', () => {
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
       act(() => {
-        result.current.preflightImportWorkflows.mutate({ file: createFile('test.yml', 'name: Test') });
+        result.current.preflightImportWorkflows.mutate({
+          file: createFile('test.yml', 'name: Test'),
+        });
       });
 
       await waitFor(() => expect(result.current.preflightImportWorkflows.isSuccess).toBe(true));
@@ -293,7 +295,9 @@ describe('useWorkflowActions – import mutations', () => {
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
       act(() => {
-        result.current.preflightImportWorkflows.mutate({ file: createFile('test.yml', 'name: Test') });
+        result.current.preflightImportWorkflows.mutate({
+          file: createFile('test.yml', 'name: Test'),
+        });
       });
 
       await waitFor(() => expect(result.current.preflightImportWorkflows.isSuccess).toBe(true));
