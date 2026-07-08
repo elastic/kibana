@@ -48,7 +48,7 @@ export const CopyExportedSentinelQuery = React.memo(() => {
           }
           size="s"
           iconType="pin"
-         />
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
