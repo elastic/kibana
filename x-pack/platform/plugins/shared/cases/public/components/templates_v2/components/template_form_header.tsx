@@ -10,10 +10,10 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSkeletonTitle,
+  EuiSpacer,
   EuiSwitch,
   EuiTitle,
   EuiToolTip,
@@ -66,13 +66,8 @@ export const TemplateFormHeader: React.FC<TemplateFormHeaderProps> = ({
       >
         {i18n.BACK_TO_TEMPLATES}
       </EuiButtonEmpty>
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="s"
-        css={css`
-          margin-bottom: ${euiTheme.size.l};
-        `}
-      >
+      <EuiSpacer size="s" />
+      <EuiFlexGroup alignItems="center" gutterSize="m">
         <EuiFlexItem
           css={css`
             overflow: hidden;
@@ -95,24 +90,38 @@ export const TemplateFormHeader: React.FC<TemplateFormHeaderProps> = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="m">
             {hasChanges && (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={isEdit ? i18n.REVERT_TO_LAST_SAVED : i18n.REVERT_TO_DEFAULT}
-                  disableScreenReaderOutput
-                >
-                  <EuiButtonIcon
-                    iconType="refresh"
-                    onClick={onReset}
-                    disabled={isLoading || isSaving}
-                    aria-label={isEdit ? i18n.REVERT_TO_LAST_SAVED : i18n.REVERT_TO_DEFAULT}
-                    data-test-subj="resetTemplateButton"
-                    display="base"
-                    size="s"
+              <>
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={isEdit ? i18n.REVERT_TO_LAST_SAVED : i18n.REVERT_TO_DEFAULT}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonEmpty
+                      iconType="editorUndo"
+                      onClick={onReset}
+                      disabled={isLoading || isSaving}
+                      aria-label={isEdit ? i18n.REVERT_TO_LAST_SAVED : i18n.REVERT_TO_DEFAULT}
+                      data-test-subj="resetTemplateButton"
+                      size="s"
+                      color="text"
+                    >
+                      {i18n.RESET}
+                    </EuiButtonEmpty>
+                  </EuiToolTip>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <div
+                    aria-hidden="true"
+                    css={css`
+                      width: 1px;
+                      height: ${euiTheme.size.l};
+                      background-color: ${euiTheme.colors.borderBasePlain};
+                    `}
                   />
-                </EuiToolTip>
-              </EuiFlexItem>
+                </EuiFlexItem>
+              </>
             )}
             <EuiFlexItem grow={false}>
               <EuiToolTip

@@ -69,11 +69,20 @@ describe('CreateTemplatePreview', () => {
     );
   });
 
-  it('renders nothing when YAML is invalid (no last valid template)', () => {
+  it('shows an actionable error state when the YAML is invalid', () => {
     renderPreview('name: [');
 
-    // Component returns null when there's no valid template
+    expect(screen.getByTestId('templatePreviewError')).toBeInTheDocument();
+    expect(screen.getByText("Can't preview this template")).toBeInTheDocument();
     expect(screen.queryByTestId('template-field-renderer')).not.toBeInTheDocument();
+    expect(TemplateFieldRenderer).not.toHaveBeenCalled();
+  });
+
+  it('shows a neutral empty state when the definition is empty', () => {
+    renderPreview('   ');
+
+    expect(screen.getByTestId('templatePreviewEmpty')).toBeInTheDocument();
+    expect(screen.queryByTestId('templatePreviewError')).not.toBeInTheDocument();
     expect(TemplateFieldRenderer).not.toHaveBeenCalled();
   });
 });
