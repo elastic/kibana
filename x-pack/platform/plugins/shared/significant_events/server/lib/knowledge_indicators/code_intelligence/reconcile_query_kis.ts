@@ -8,9 +8,9 @@
 import type { Logger } from '@kbn/logging';
 import { uniq } from 'lodash';
 import type { QueryLink } from '@kbn/significant-events-schema';
-import type { KnowledgeIndicatorClient, KIBulkOperation } from '../../streams/ki';
-import { queryFromLink } from '../../streams/ki/knowledge_indicator_client/serializers';
-import { KI_TYPE_QUERY } from '../../streams/ki/fields';
+import type { KnowledgeIndicatorClient, KIBulkOperation } from '../knowledge_indicator_client';
+import { queryFromLink } from '../knowledge_indicator_client/serializers';
+import { KI_TYPE_QUERY } from '../fields';
 
 /**
  * A merge action: enrich `canonical` with the unioned evidence/severity of the

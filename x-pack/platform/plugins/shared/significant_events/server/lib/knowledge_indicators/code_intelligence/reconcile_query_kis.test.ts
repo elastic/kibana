@@ -7,7 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { QueryLink } from '@kbn/significant-events-schema';
-import type { KnowledgeIndicatorClient, KIBulkOperation } from '../../streams/ki';
+import type { KnowledgeIndicatorClient, KIBulkOperation } from '../knowledge_indicator_client';
 import {
   buildQueryReconcilePlan,
   computeClusters,

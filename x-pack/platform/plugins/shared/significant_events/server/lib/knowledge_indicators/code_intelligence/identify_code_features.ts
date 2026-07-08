@@ -11,7 +11,7 @@ import {
   type Feature,
   type FeatureUpsert,
 } from '@kbn/significant-events-schema';
-import type { KnowledgeIndicatorClient } from '../../streams/ki';
+import type { KnowledgeIndicatorClient } from '../knowledge_indicator_client';
 import {
   CODE_FEATURE_SUBTYPE_LANGUAGE,
   CODE_FEATURE_SUBTYPE_REPO_TYPE,

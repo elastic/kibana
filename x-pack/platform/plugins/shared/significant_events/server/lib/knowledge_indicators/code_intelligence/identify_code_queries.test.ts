@@ -14,7 +14,7 @@ import {
   type StreamQuery,
 } from '@kbn/significant-events-schema';
 import type { Streams } from '@kbn/streams-schema';
-import type { KnowledgeIndicatorClient } from '../../streams/ki';
+import type { KnowledgeIndicatorClient } from '../knowledge_indicator_client';
 import { CODE_FEATURE_SUBTYPE_SERVICE_NAME } from './constants';
 import { identifyCodeQueries } from './identify_code_queries';
 import type { CodeRepositoryReader, LoggingChunk } from './types';
