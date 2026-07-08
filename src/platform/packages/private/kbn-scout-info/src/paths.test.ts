@@ -148,13 +148,13 @@ describe('Scout path globs', () => {
     ];
 
     it.each(shouldMatch)('matches: %s', (testPath) => {
-      expect(picomatch.isMatch(testPath, [...SCOUT_TESTS_ONLY_EXCLUDE_GLOBS], { dot: true })).toBe(
+      expect(mm.isMatch(testPath, [...SCOUT_TESTS_ONLY_EXCLUDE_GLOBS], { dot: true })).toBe(
         true
       );
     });
 
     it.each(shouldNotMatch)('does not match: %s', (testPath) => {
-      expect(picomatch.isMatch(testPath, [...SCOUT_TESTS_ONLY_EXCLUDE_GLOBS], { dot: true })).toBe(
+      expect(mm.isMatch(testPath, [...SCOUT_TESTS_ONLY_EXCLUDE_GLOBS], { dot: true })).toBe(
         false
       );
     });
