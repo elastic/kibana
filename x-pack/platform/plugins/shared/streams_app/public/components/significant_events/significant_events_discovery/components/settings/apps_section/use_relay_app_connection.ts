@@ -15,7 +15,7 @@ import {
   type SlackAppDisconnectResponse,
   type SlackAppStatusResponse,
 } from '@kbn/streams-plugin/common';
-import { useKibana } from '../../../../../hooks/use_kibana';
+import { useKibana } from '../../../../../../hooks/use_kibana';
 
 const STATUS_ROUTE = '/internal/streams/_significant_events/apps/slack/status';
 const CONNECT_ROUTE = '/internal/streams/_significant_events/apps/slack/connect';
