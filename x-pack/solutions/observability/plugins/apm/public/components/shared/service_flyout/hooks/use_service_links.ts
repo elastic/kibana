@@ -6,8 +6,11 @@
  */
 
 import { useMemo } from 'react';
+import type { SloListLocatorParams } from '@kbn/deeplinks-observability';
+import { sloListLocatorID } from '@kbn/deeplinks-observability';
 import type { Environment } from '../../../../../common/environment_rt';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
+import { getManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
 import { useServiceFlyoutContext } from '../service_flyout_context';
 
 interface ServiceLinksParams {
@@ -41,6 +44,11 @@ export function useServiceLinks({
       query: { environment, rangeFrom, rangeTo },
     });
 
-    return { overviewHref, alertsHref };
+    const slosHref = getManageSlosUrl(
+      share.url.locators.get<SloListLocatorParams>(sloListLocatorID),
+      { serviceName, environment }
+    );
+
+    return { overviewHref, alertsHref, slosHref };
   }, [share, serviceName, environment, rangeFrom, rangeTo, kuery]);
 }

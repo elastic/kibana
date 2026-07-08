@@ -13,7 +13,6 @@ import type { Environment } from '../../../../../common/environment_rt';
 import type { ServiceNodeData } from '../../../../../common/service_map';
 import { AnomaliesBadge } from '../../../app/service_inventory/service_list/anomalies_badge';
 import { useServiceFlyoutContext } from '../service_flyout_context';
-import { useManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
 import { AlertsBadge } from '../../badge/alerts_badge';
 import { SloStatusBadge } from '../../slo_status_badge';
 import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
@@ -47,7 +46,7 @@ export function ServiceBadges({
   const { capabilities, navigateToUrl } = core.application;
   const canReadSlos = !!capabilities.slo?.read;
 
-  const { alertsHref } = useServiceLinks({
+  const { alertsHref, slosHref } = useServiceLinks({
     serviceName: service.id,
     rangeFrom,
     rangeTo,
@@ -55,7 +54,6 @@ export function ServiceBadges({
     kuery,
   });
 
-  const slosHref = useManageSlosUrl({ serviceName: service.id, environment });
 
   const { alertsCount, anomalyData } = useServiceBadgesData({
     serviceName: service.id,
@@ -87,8 +85,10 @@ export function ServiceBadges({
               element: SERVICE_FLYOUT_EBT_ELEMENTS.ALERTS_BADGE,
             }}
             onClick={(event) => {
-              event.preventDefault();
-              navigateToUrl(alertsHref);
+              if (alertsHref) {
+                event.preventDefault();
+                navigateToUrl(alertsHref);
+              }
             }}
           />
         </EuiFlexItem>

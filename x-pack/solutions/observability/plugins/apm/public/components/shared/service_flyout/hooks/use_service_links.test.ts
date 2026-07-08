@@ -10,6 +10,10 @@ import type { Environment } from '../../../../../common/environment_rt';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 import { useServiceLinks } from './use_service_links';
 
+jest.mock('../../../../hooks/use_manage_slos_url', () => ({
+  getManageSlosUrl: jest.fn(() => '/app/slos?serviceName=opbeans-java'),
+}));
+
 const mockGetRedirectUrl = jest.fn(
   (payload: { serviceName: string; serviceOverviewTab?: string }) => {
     const tab = payload.serviceOverviewTab ?? 'overview';
@@ -67,10 +71,11 @@ describe('useServiceLinks', () => {
     });
   });
 
-  it('returns both hrefs', () => {
+  it('returns overview, alerts, and slos hrefs', () => {
     const { result } = renderHook(() => useServiceLinks(baseParams));
 
     expect(result.current.overviewHref).toContain('/app/apm/services/opbeans-java/overview');
     expect(result.current.alertsHref).toContain('/app/apm/services/opbeans-java/alerts');
+    expect(result.current.slosHref).toContain('/app/slos?serviceName=opbeans-java');
   });
 });
