@@ -20,6 +20,7 @@ import {
   EuiSuperSelect,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { EuiFilePickerClass } from '@elastic/eui/src/components/form/file_picker/file_picker';
 import type { MigrationStepProps } from '../../../../../common/types';
@@ -83,6 +84,7 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
     const [parsedData, setParsedData] = useState<QRadarMitreMappingsData | null>(null);
     const [addedEnhancements, setAddedEnhancements] = useState<AddedEnhancement[]>([]);
     const filePickerRef = React.useRef<EuiFilePickerClass>(null);
+    const { euiTheme } = useEuiTheme();
 
     const { enhanceRules, isLoading } = useEnhanceRules();
 
@@ -168,7 +170,7 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup direction="row" gutterSize="m" alignItems="flexEnd">
+          <EuiFlexGroup direction="row" gutterSize="m" alignItems="flexStart">
             <EuiFlexItem grow={2}>
               <EuiFormRow label={i18n.ENHANCEMENT_TYPE_LABEL} fullWidth>
                 <EuiSuperSelect
@@ -204,6 +206,7 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                css={{ marginTop: `calc(${euiTheme.size.base} + ${euiTheme.size.xs})` }}
                 onClick={onAddEnhancement}
                 disabled={isAddDisabled}
                 isLoading={isLoading}
