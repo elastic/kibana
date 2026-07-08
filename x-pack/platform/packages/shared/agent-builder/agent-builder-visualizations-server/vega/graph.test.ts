@@ -105,7 +105,9 @@ describe('createVegaGraph', () => {
     expect(state.error).toBeNull();
     const spec = JSON.parse(state.spec!);
     expect(spec.$schema).toBe(VEGA_LITE_SCHEMA);
-    expect(spec.data).toEqual({ url: { '%type%': 'esql', query: GENERATED_ESQL } });
+    expect(spec.data).toEqual({
+      url: { '%type%': 'esql', '%context%': true, query: GENERATED_ESQL },
+    });
     expect(spec.mark).toBe('bar');
     expect(state.esqlQuery).toBe(GENERATED_ESQL);
   });
