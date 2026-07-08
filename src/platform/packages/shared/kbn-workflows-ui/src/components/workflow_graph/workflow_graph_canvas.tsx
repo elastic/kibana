@@ -40,7 +40,6 @@ import type {
 } from '@kbn/workflows';
 import { TRIGGER_STEP_TYPES } from '@kbn/workflows';
 import '@xyflow/react/dist/style.css';
-import { findGraphFocusNode } from './find_graph_focus_node';
 import { useWorkflowLayout } from './use_workflow_layout';
 import { type RenderStepIcon, WorkflowGraphActionsContext } from './workflow_graph_actions_context';
 import { WorkflowGraphBypassLaneNode } from './workflow_graph_bypass_lane_node';
@@ -125,7 +124,13 @@ const getResetViewTarget = (
     ? { x: bounds.minX + wrapperWidth / 2 - TOP_PADDING, y: bounds.centerY }
     : { x: bounds.centerX, y: bounds.minY + wrapperHeight / 2 - TOP_PADDING };
 
-function CanvasZoomControls({ onResetView }: { onResetView: () => void }) {
+function CanvasZoomControls({
+  onResetView,
+  onFitView,
+}: {
+  onResetView: () => void;
+  onFitView: () => void;
+}) {
   const { euiTheme } = useEuiTheme();
   const { zoomIn, zoomOut } = useReactFlow();
 
@@ -137,6 +142,9 @@ function CanvasZoomControls({ onResetView }: { onResetView: () => void }) {
   });
   const resetZoomLabel = i18n.translate('workflowsUi.graph.resetZoom', {
     defaultMessage: 'Reset zoom',
+  });
+  const fitViewLabel = i18n.translate('workflowsUi.graph.fitView', {
+    defaultMessage: 'Fit to view',
   });
 
   const handleZoomOut = useCallback(() => zoomOut({ duration: 200 }), [zoomOut]);
@@ -185,6 +193,16 @@ function CanvasZoomControls({ onResetView }: { onResetView: () => void }) {
             data-test-subj="workflowCanvas-reset-zoom"
           />
         </EuiToolTip>
+        <EuiToolTip content={fitViewLabel} position="left" disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="fullScreen"
+            aria-label={fitViewLabel}
+            color="text"
+            size="s"
+            onClick={onFitView}
+            data-test-subj="workflowCanvas-fit-view"
+          />
+        </EuiToolTip>
       </div>
     </Panel>
   );
@@ -204,13 +222,6 @@ export interface WorkflowGraphCanvasProps {
   readonly onLayoutFailed?: (reason: string) => void;
   readonly onPerfMark?: (name: 'transform_ms' | 'layout_ms' | 'first_paint_ms', ms: number) => void;
   readonly colorMode?: ColorMode;
-  /**
-   * When the canvas mounts (e.g. user switched from YAML to graph view),
-   * centers on the node whose id or `data.label` matches, or on the first
-   * trigger when this is `WORKFLOW_GRAPH_FOCUS_TRIGGER`. Falls back to
-   * top-center of the graph if no match.
-   */
-  readonly focusStepId?: string | null;
   /** Triggered by the hover "Run step" icon on a node. */
   readonly onStepRun?: (stepName: string) => void;
   /** Disables the per-node Run action when false. */
@@ -283,7 +294,6 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     onLayoutFailed,
     onPerfMark,
     colorMode,
-    focusStepId,
     onStepRun,
     canRunSteps,
     renderStepIcon,
@@ -411,60 +421,44 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
   const hasCenteredInitialViewRef = useRef(false);
   const [instanceReady, setInstanceReady] = useState(false);
 
-  // Position the viewport on the focused step or the graph's top row (same as onInit).
-  const resetViewportToInitialView = useCallback(
-    (instance: ReactFlowInstance, duration = 0) => {
-      if (fitViewProp) {
-        void instance.fitView({
-          padding: fitViewOptionsProp?.padding ?? 0.08,
-          minZoom: fitViewOptionsProp?.minZoom ?? 0.2,
-          maxZoom: fitViewOptionsProp?.maxZoom ?? 2,
-          duration,
-        });
-        return;
-      }
-
-      if (nodes.length === 0) {
-        return;
-      }
-
-      const widthOf = (n: (typeof nodes)[number]) => (typeof n.width === 'number' ? n.width : 200);
-      const heightOf = (n: (typeof nodes)[number]) =>
-        typeof n.height === 'number' ? n.height : 64;
-
-      if (focusStepId) {
-        const focusNode = findGraphFocusNode(nodes, focusStepId);
-        if (focusNode) {
-          instance.setCenter(
-            focusNode.position.x + widthOf(focusNode) / 2,
-            focusNode.position.y + heightOf(focusNode) / 2,
-            { zoom: INITIAL_ZOOM, duration }
-          );
-          return;
-        }
-      }
-
+  // Single home-viewport implementation shared by initial centering, direction
+  // changes, and the Reset zoom button. The leading-edge anchor is direction-
+  // aware: trigger node near top for TB, near left for LR (see getResetViewTarget).
+  const applyHomeViewport = useCallback(
+    (instance: ReactFlowInstance, duration: number) => {
+      if (nodes.length === 0) return;
       const wrapperWidth = wrapperRef.current?.clientWidth ?? 0;
       const wrapperHeight = wrapperRef.current?.clientHeight ?? 0;
       const target = getResetViewTarget(direction, graphBounds, wrapperWidth, wrapperHeight);
       instance.setCenter(target.x, target.y, { zoom: INITIAL_ZOOM, duration });
     },
-    [nodes, graphBounds, fitViewProp, fitViewOptionsProp, focusStepId, direction]
+    [nodes.length, graphBounds, direction]
   );
 
-  // Returns the camera to the trigger-row / trigger-column view at the initial
-  // zoom. Always ignores focusStepId so the button reliably gives a consistent
-  // "home" regardless of which step the user last focused. The leading-edge
-  // anchor is direction-aware: top for TB, left for LR (see getResetViewTarget).
   const handleResetView = useCallback(() => {
+    const instance = flowInstanceRef.current;
+    if (!instance) return;
+    applyHomeViewport(instance, 200);
+  }, [applyHomeViewport]);
+
+  // Scales and pans the viewport to show every node. Uses fitBounds (direct
+  // panZoom.setViewport call) rather than fitView (queued through BatchProvider +
+  // React re-render cycle) so the viewport updates synchronously without any
+  // interference from the outer ReactFlowProvider context.
+  const handleFitView = useCallback(() => {
     const instance = flowInstanceRef.current;
     if (!instance || nodes.length === 0) return;
 
-    const wrapperWidth = wrapperRef.current?.clientWidth ?? 0;
-    const wrapperHeight = wrapperRef.current?.clientHeight ?? 0;
-    const target = getResetViewTarget(direction, graphBounds, wrapperWidth, wrapperHeight);
-    instance.setCenter(target.x, target.y, { zoom: INITIAL_ZOOM, duration: 200 });
-  }, [nodes.length, graphBounds, direction]);
+    instance.fitBounds(
+      {
+        x: graphBounds.minX,
+        y: graphBounds.minY,
+        width: graphBounds.maxX - graphBounds.minX,
+        height: graphBounds.maxY - graphBounds.minY,
+      },
+      { duration: 200, padding: 0.08 }
+    );
+  }, [nodes.length, graphBounds]);
 
   // Record the instance and decide who owns the initial viewport. The default
   // centering is deferred to the measurement-gated effect below, because
@@ -517,7 +511,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
       return;
     }
     hasCenteredInitialViewRef.current = true;
-    resetViewportToInitialView(instance, 0);
+    applyHomeViewport(instance, 0);
     onReady?.();
   }, [
     instanceReady,
@@ -525,7 +519,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     measuredHeight,
     nodesInitialized,
     nodes.length,
-    resetViewportToInitialView,
+    applyHomeViewport,
     onReady,
   ]);
 
@@ -545,7 +539,16 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     let raf2: number | undefined;
     const raf1 = requestAnimationFrame(() => {
       raf2 = requestAnimationFrame(() => {
-        resetViewportToInitialView(instance, 200);
+        if (fitViewProp) {
+          void instance.fitView({
+            padding: fitViewOptionsProp?.padding ?? 0.08,
+            minZoom: fitViewOptionsProp?.minZoom ?? 0.2,
+            maxZoom: fitViewOptionsProp?.maxZoom ?? 2,
+            duration: 200,
+          });
+        } else {
+          applyHomeViewport(instance, 200);
+        }
       });
     });
 
@@ -555,7 +558,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
         cancelAnimationFrame(raf2);
       }
     };
-  }, [direction, nodes.length, resetViewportToInitialView]);
+  }, [direction, nodes.length, fitViewProp, fitViewOptionsProp, applyHomeViewport]);
 
   const minimapNodeColor = useCallback(
     (n: { type?: string; data?: unknown }) => {
@@ -664,6 +667,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
               zoomOnPinch={true}
               zoomOnDoubleClick={false}
               translateExtent={translateExtent}
+              minZoom={0.1}
             >
               {showBackground && (
                 <Background
@@ -672,7 +676,9 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
                 />
               )}
               {toolbar}
-              {showZoomControls && <CanvasZoomControls onResetView={handleResetView} />}
+              {showZoomControls && (
+                <CanvasZoomControls onResetView={handleResetView} onFitView={handleFitView} />
+              )}
               {showMinimap && (
                 <MiniMap
                   pannable

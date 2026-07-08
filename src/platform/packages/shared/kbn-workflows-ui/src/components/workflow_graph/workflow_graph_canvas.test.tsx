@@ -58,7 +58,7 @@ jest.mock('@xyflow/react', () => ({
   useNodesInitialized: () => mockNodesInitialized,
 }));
 
-const makeInstance = () => ({ setCenter: jest.fn(), fitView: jest.fn() });
+const makeInstance = () => ({ setCenter: jest.fn(), fitView: jest.fn(), fitBounds: jest.fn() });
 
 const baseProps = {
   workflow: undefined,
@@ -174,6 +174,67 @@ describe('WorkflowGraphCanvas initial centering', () => {
 //                                 = setCenter(100, -80, …)
 // LR formula (horizontal, the fix): setCenter(minX + 0/2 - 80, centerY, …)
 //                                  = setCenter(-80, 107, …)
+// ─── Unified viewport contract ────────────────────────────────────────────────
+// The first time the graph is shown (initial centering) and clicking "Reset zoom"
+// must land on exactly the same (x, y) position. Only the animation duration
+// differs: 0 ms for the instant initial placement, 200 ms for the button.
+describe('WorkflowGraphCanvas initial centering and Reset zoom are equivalent', () => {
+  beforeEach(() => {
+    mockStoreWidth = 0;
+    mockStoreHeight = 0;
+    mockNodesInitialized = false;
+    mockCapturedOnInit = undefined;
+  });
+
+  it('TB layout: first open and Reset zoom call setCenter with the same (x, y)', () => {
+    const instance = makeInstance();
+    measureCanvas();
+    const { rerender } = render(
+      <WorkflowGraphCanvasWithoutProvider {...baseProps} showZoomControls />
+    );
+    act(() => mockCapturedOnInit!(instance));
+    rerender(<WorkflowGraphCanvasWithoutProvider {...baseProps} showZoomControls />);
+
+    expect(instance.setCenter).toHaveBeenCalledTimes(1);
+    const [initialX, initialY] = instance.setCenter.mock.calls[0];
+
+    instance.setCenter.mockClear();
+
+    fireEvent.click(screen.getByTestId('workflowCanvas-reset-zoom'));
+
+    expect(instance.setCenter).toHaveBeenCalledTimes(1);
+    const [resetX, resetY] = instance.setCenter.mock.calls[0];
+
+    expect(resetX).toBe(initialX);
+    expect(resetY).toBe(initialY);
+  });
+
+  it('LR layout: first open and Reset zoom call setCenter with the same (x, y)', () => {
+    const instance = makeInstance();
+    measureCanvas();
+    const { rerender } = render(
+      <WorkflowGraphCanvasWithoutProvider {...baseProps} showZoomControls direction="LR" />
+    );
+    act(() => mockCapturedOnInit!(instance));
+    rerender(
+      <WorkflowGraphCanvasWithoutProvider {...baseProps} showZoomControls direction="LR" />
+    );
+
+    expect(instance.setCenter).toHaveBeenCalledTimes(1);
+    const [initialX, initialY] = instance.setCenter.mock.calls[0];
+
+    instance.setCenter.mockClear();
+
+    fireEvent.click(screen.getByTestId('workflowCanvas-reset-zoom'));
+
+    expect(instance.setCenter).toHaveBeenCalledTimes(1);
+    const [resetX, resetY] = instance.setCenter.mock.calls[0];
+
+    expect(resetX).toBe(initialX);
+    expect(resetY).toBe(initialY);
+  });
+});
+
 describe('WorkflowGraphCanvas Reset zoom button', () => {
   beforeEach(() => {
     mockStoreWidth = 0;
@@ -207,5 +268,28 @@ describe('WorkflowGraphCanvas Reset zoom button', () => {
     // x: minX + wrapperWidth/2 − TOP_PADDING = 0 + 0 − 80 = −80 (trigger anchored left)
     // y: centerY = (minY + maxY) / 2 = (0 + 214) / 2 = 107 (graph centred vertically)
     expect(instance.setCenter).toHaveBeenCalledWith(-80, 107, { zoom: 1, duration: 200 });
+  });
+});
+
+describe('WorkflowGraphCanvas Fit to view button', () => {
+  beforeEach(() => {
+    mockStoreWidth = 0;
+    mockStoreHeight = 0;
+    mockNodesInitialized = false;
+    mockCapturedOnInit = undefined;
+  });
+
+  it('calls fitBounds with graph bounds when the fit-to-view button is clicked', () => {
+    const instance = makeInstance();
+    render(<WorkflowGraphCanvasWithoutProvider {...baseProps} showZoomControls />);
+    act(() => mockCapturedOnInit!(instance));
+
+    fireEvent.click(screen.getByTestId('workflowCanvas-fit-view'));
+
+    expect(instance.fitBounds).toHaveBeenCalledTimes(1);
+    expect(instance.fitBounds).toHaveBeenCalledWith(
+      { x: 0, y: 0, width: 200, height: 214 },
+      { duration: 200, padding: 0.08 }
+    );
   });
 });
