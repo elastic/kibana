@@ -323,7 +323,8 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             title={title}
             back={{
               href: getCasesTemplatesUrl(),
-              label: i18n.BACK_TO_TEMPLATES,
+              // `AppHeader` renders this as "Back to {label}", so pass just the destination name.
+              label: i18n.TEMPLATE_TITLE,
               onClick: navigateToCasesTemplates,
             }}
             badges={templateFormBadges}

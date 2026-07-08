@@ -27,10 +27,6 @@ export const EDIT_TEMPLATE_TITLE = i18n.translate('xpack.cases.templates.editTem
   defaultMessage: 'Edit template',
 });
 
-export const BACK_TO_TEMPLATES = i18n.translate('xpack.cases.templates.backToTemplates', {
-  defaultMessage: 'Back to Templates',
-});
-
 export const TEMPLATE_FIELDS_LABEL = i18n.translate('xpack.cases.templates.templateFieldsLabel', {
   defaultMessage: 'Fields',
 });

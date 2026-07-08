@@ -29,6 +29,7 @@ import { useUpdateFieldDefinition } from '../hooks/use_update_field_definition';
 import { useDeleteFieldDefinition } from '../hooks/use_delete_field_definition';
 import { FieldDefinitionFlyout } from '../components/field_definition_flyout';
 import * as i18n from '../translations';
+import * as templatesI18n from '../../templates_v2/translations';
 
 export type AllFieldDefinitionsPageProps = Record<string, never>;
 
@@ -182,7 +183,8 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
         title={i18n.FIELD_LIBRARY_TITLE}
         back={{
           href: getCasesTemplatesUrl(),
-          label: i18n.BACK_TO_TEMPLATES,
+          // `AppHeader` renders this as "Back to {label}", so pass just the destination name.
+          label: templatesI18n.TEMPLATE_TITLE,
           onClick: navigateToCasesTemplates,
         }}
         menu={fieldLibraryMenu}
