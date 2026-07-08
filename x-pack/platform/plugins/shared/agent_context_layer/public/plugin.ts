@@ -6,11 +6,9 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 
-export interface AgentContextLayerPublicPluginSetupDeps {
-  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface AgentContextLayerPublicPluginSetupDeps {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentContextLayerPublicPluginStartDeps {}
