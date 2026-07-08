@@ -7,7 +7,6 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type {
   AgentContextLayerPluginSetup,
   AgentContextLayerPluginStart,
@@ -29,7 +28,6 @@ import {
 } from './services/sml/sml_task_definitions';
 import { resolveSmlAttachItems } from './services/sml/execute_sml_attach_items';
 import type { SmlService } from './services/sml/types';
-import { registerAgentContextLayerWorkflowSteps } from './workflow_steps';
 import { corpusEntrySmlType } from './sml_types/corpus_entry';
 import { buildIndexAttachment, buildDeleteAttachment } from './start_contract';
 
@@ -45,10 +43,6 @@ export class AgentContextLayerPlugin
   private logger: Logger;
   private smlServiceInstance: SmlServiceInstance;
   private smlService?: SmlService;
-  private startContract?: AgentContextLayerPluginStart;
-  private spaces?: AgentContextLayerStartDependencies['spaces'];
-  private security?: AgentContextLayerStartDependencies['security'];
-  private coreStart?: CoreStart;
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
@@ -111,33 +105,6 @@ export class AgentContextLayerPlugin
       getSmlService,
     });
 
-    if (setupDeps.workflowsExtensions) {
-      registerAgentContextLayerWorkflowSteps({
-        workflowsExtensions: setupDeps.workflowsExtensions,
-        getStartContract: () => {
-          if (!this.startContract) {
-            throw new Error(
-              'Agent Context Layer start contract is not available — plugin has not started'
-            );
-          }
-          return this.startContract;
-        },
-        getSpaces: () => this.spaces,
-        getSecurity: () => this.security,
-        isFeatureEnabled: async (request) => {
-          // Mirrors `withSmlFeatureFlag` (HTTP routes) and the per-run
-          // check inside the SML crawler task. Request-scoped so per-space
-          // overrides of the Context Engine setting are honored.
-          if (!this.coreStart) {
-            throw new Error('Agent Context Layer feature-flag check called before plugin start');
-          }
-          const soClient = this.coreStart.savedObjects.getScopedClient(request);
-          const uiSettingsClient = this.coreStart.uiSettings.asScopedToClient(soClient);
-          return uiSettingsClient.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID);
-        },
-      });
-    }
-
     return {
       registerType: smlSetup.registerType,
     };
@@ -153,9 +120,6 @@ export class AgentContextLayerPlugin
       logger: this.logger.get('sml'),
       securityAuthz: security?.authz,
     });
-    this.spaces = spaces;
-    this.security = security;
-    this.coreStart = coreStart;
 
     const smlService = this.smlService;
 
@@ -213,8 +177,6 @@ export class AgentContextLayerPlugin
         logger: this.logger.get('sml'),
       }),
     };
-
-    this.startContract = startContract;
 
     return startContract;
   }

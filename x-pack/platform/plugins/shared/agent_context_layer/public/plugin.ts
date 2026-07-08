@@ -7,7 +7,6 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
-import { registerAgentContextLayerWorkflowSteps } from './workflow_steps';
 
 export interface AgentContextLayerPublicPluginSetupDeps {
   workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
@@ -22,14 +21,6 @@ export interface AgentContextLayerPublicPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentContextLayerPublicPluginStart {}
 
-/**
- * Browser-side plugin for the Agent Context Layer.
- *
- * Currently only used to surface workflow step editor metadata (label,
- * description, icon, schemas) to the Workflows Extensions registry so the
- * `contextEngine.addEntry` step can be added from the workflow editor. The
- * runtime handler lives on the server.
- */
 export class AgentContextLayerPublicPlugin
   implements
     Plugin<
@@ -43,11 +34,8 @@ export class AgentContextLayerPublicPlugin
 
   public setup(
     _core: CoreSetup<AgentContextLayerPublicPluginStartDeps, AgentContextLayerPublicPluginStart>,
-    deps: AgentContextLayerPublicPluginSetupDeps
+    _deps: AgentContextLayerPublicPluginSetupDeps
   ): AgentContextLayerPublicPluginSetup {
-    if (deps.workflowsExtensions) {
-      registerAgentContextLayerWorkflowSteps(deps.workflowsExtensions);
-    }
     return {};
   }
 
