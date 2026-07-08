@@ -18,14 +18,39 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 Amazon DynamoDB connectors have the following configuration properties:
 
-AWS Access Key ID
-:   The AWS Access Key ID for the IAM user with DynamoDB permissions.
-
-AWS Secret Access Key
-:   The AWS Secret Access Key for the IAM user.
-
 AWS Region
 :   The AWS Region where your DynamoDB tables are located (for example, `us-east-1`).
+
+Authentication type
+:   The method used to authenticate with AWS. Choose one of:
+
+    - **AWS Credentials** — authenticate with a long-lived IAM user access key and secret. Use this for simple setups where a dedicated IAM user is acceptable.
+    - **AWS IAM Role** — authenticate by assuming an IAM role via AWS STS. Use this for cross-account access or when your security policy requires role-based, short-lived credentials.
+
+#### AWS Credentials fields
+
+AWS Access Key ID
+:   The Access Key ID for the IAM user.
+
+AWS Secret Access Key
+:   The Secret Access Key for the IAM user.
+
+#### AWS IAM Role fields
+
+AWS Access Key ID
+:   The Access Key ID of the IAM user whose credentials are used to call AWS STS `AssumeRole`.
+
+AWS Secret Access Key
+:   The Secret Access Key of the IAM user.
+
+Role ARN
+:   The Amazon Resource Name (ARN) of the IAM role to assume (for example, `arn:aws:iam::123456789012:role/MyDynamoDBRole`).
+
+External ID
+:   (Optional) An external ID required by the role's trust policy. Needed when the role enforces a `sts:ExternalId` condition for cross-account access.
+
+Session name
+:   (Optional) A name for the assumed-role session that appears in AWS CloudTrail logs. Defaults to `kibana-connector`.
 
 ## Test connectors [amazon-dynamodb-action-configuration]
 
@@ -92,7 +117,9 @@ Delete item
 
 ## Get API credentials [amazon-dynamodb-api-credentials]
 
-To use the Amazon DynamoDB connector, you need AWS credentials for an IAM user with DynamoDB permissions. Follow these steps to create credentials:
+The steps to obtain credentials depend on which authentication type you choose.
+
+### AWS Credentials [amazon-dynamodb-credentials-static]
 
 1. Sign in to the [AWS Management Console](https://console.aws.amazon.com/).
 2. Navigate to **IAM > Users** and select or create an IAM user.
@@ -111,7 +138,51 @@ To use the Amazon DynamoDB connector, you need AWS credentials for an IAM user w
 
 4. In the IAM user's **Security credentials** tab, select **Create access key** and select the **Application running outside AWS** use case.
 5. Download the `.csv` file or copy the **Access Key ID** and **Secret Access Key** immediately. The secret key is only shown once.
-6. For the **AWS Region**, use the region where your DynamoDB tables are located (for example, `us-east-1` or `eu-west-1`).
+
+### AWS IAM Role [amazon-dynamodb-credentials-iam-role]
+
+This option uses AWS STS `AssumeRole` to obtain short-lived credentials. You need two things: an IAM user whose credentials Kibana uses to call STS, and a role that Kibana assumes to access DynamoDB.
+
+**Set up the IAM user (base credentials):**
+
+1. Create or select an IAM user and attach a policy that allows it to assume the target role:
+
+   ```json
+   {
+     "Effect": "Allow",
+     "Action": "sts:AssumeRole",
+     "Resource": "arn:aws:iam::<account-id>:role/<role-name>"
+   }
+   ```
+
+2. Create an access key for this user and note the **Access Key ID** and **Secret Access Key**.
+
+**Set up the IAM role:**
+
+1. Create an IAM role with a trust policy that allows the IAM user to assume it:
+
+   ```json
+   {
+     "Effect": "Allow",
+     "Principal": { "AWS": "arn:aws:iam::<account-id>:user/<username>" },
+     "Action": "sts:AssumeRole"
+   }
+   ```
+
+2. Attach a policy to the role granting the required DynamoDB permissions:
+   - `dynamodb:ListTables`
+   - `dynamodb:DescribeTable`
+   - `dynamodb:GetItem`
+   - `dynamodb:Query`
+   - `dynamodb:Scan`
+   - `dynamodb:PutItem`
+   - `dynamodb:DeleteItem`
+
+3. Note the role's **ARN** — you will enter this as the **Role ARN** in the connector configuration.
+
+:::{tip}
+To restrict access to specific tables, scope the DynamoDB permissions to a table ARN (for example, `arn:aws:dynamodb:<region>:<account-id>:table/my-table`) instead of `*`. Note that `dynamodb:ListTables` always requires `*` as the resource.
+:::
 
 :::{note}
 DynamoDB is region-specific. Each connector instance targets a single region. Create separate connector instances for tables in different regions.
