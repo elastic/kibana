@@ -241,5 +241,6 @@ export function transformRuleSoAttributesToRuleApiResponse(
     createdAt: attrs.createdAt,
     updatedBy: attrs.updatedBy,
     updatedAt: attrs.updatedAt,
+    changeHistorySequence: attrs.change_history_sequence,
   };
 }

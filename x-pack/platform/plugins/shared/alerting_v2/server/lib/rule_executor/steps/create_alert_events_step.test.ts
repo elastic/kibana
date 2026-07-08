@@ -59,6 +59,17 @@ describe('CreateAlertEventsStep', () => {
     });
   });
 
+  it('captures rule.version from the rule changeHistorySequence', async () => {
+    const input = createRuleExecutionInput();
+    const rule = createRuleResponse({ changeHistorySequence: 5 });
+    const esqlRowBatch = [{ 'host.name': 'host-a' }];
+
+    const state = createRulePipelineState({ input, rule, esqlRowBatch });
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(result.state.alertEventsBatch?.[0].rule).toEqual({ id: rule.id, version: 5 });
+  });
+
   it('yields multiple batches when receiving multiple input batches', async () => {
     const input = createRuleExecutionInput();
     const rule = createRuleResponse();

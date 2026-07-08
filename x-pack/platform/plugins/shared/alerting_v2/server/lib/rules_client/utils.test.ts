@@ -301,6 +301,20 @@ describe('utils', () => {
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
       expect(result.version).toBeUndefined();
     });
+
+    it('exposes change_history_sequence as changeHistorySequence', () => {
+      const attrs = createRuleSoAttributes({ change_history_sequence: 7 });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+      expect(result.changeHistorySequence).toBe(7);
+    });
+
+    it('leaves changeHistorySequence undefined when the rule has no sequence yet', () => {
+      const attrs = createRuleSoAttributes({});
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+      expect(result.changeHistorySequence).toBeUndefined();
+    });
   });
 
   describe('assertImmutableUnchanged', () => {

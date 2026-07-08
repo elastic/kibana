@@ -244,6 +244,35 @@ describe('CreateRecoveryEventsStep', () => {
       expect(alertEvents).toHaveLength(2);
       expect(alertEvents.every((e: AlertEvent) => e.status === 'recovered')).toBe(true);
     });
+
+    it('stamps rule.version on recovery events from the rule changeHistorySequence', async () => {
+      const { step, internalEsClient } = createStep();
+
+      internalEsClient.esql.query.mockResolvedValue(
+        createActiveGroupHashesResponse(['hash-1', 'hash-2'])
+      );
+
+      const state = createRulePipelineState({
+        rule: createRuleResponse({
+          kind: 'alert',
+          recovery_strategy: 'no_breach',
+          changeHistorySequence: 9,
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 10' },
+          },
+        }),
+        alertEventsBatch: [],
+      });
+
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
+
+      const alertEvents = result.state.alertEventsBatch!;
+      expect(alertEvents).toHaveLength(2);
+      expect(alertEvents.every((e: AlertEvent) => e.rule.version === 9)).toBe(true);
+    });
   });
 
   describe('composed format', () => {

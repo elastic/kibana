@@ -514,6 +514,12 @@ export const ruleResponseSchema = createRuleDataBaseSchema.extend({
     .string()
     .optional()
     .describe('The version of the rule, used for optimistic concurrency control'),
+  changeHistorySequence: z
+    .number()
+    .optional()
+    .describe(
+      'Strictly increasing version of the rule configuration, incremented on every change. Used on generated rule events as `rule.version`.'
+    ),
 });
 
 export type RuleResponse = z.infer<typeof ruleResponseSchema>;
