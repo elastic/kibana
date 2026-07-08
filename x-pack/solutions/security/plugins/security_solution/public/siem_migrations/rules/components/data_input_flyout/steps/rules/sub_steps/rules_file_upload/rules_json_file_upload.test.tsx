@@ -145,7 +145,33 @@ describe('SentinelRulesJsonFileUpload', () => {
     });
 
     await waitFor(() => {
-      expect(getByText('The file does not contain valid Sentinel rule resources')).toBeVisible();
+      expect(
+        getByText(
+          'The file does not contain valid Sentinel rules. Rules file must conform to ARM templates exported by Sentinel'
+        )
+      ).toBeVisible();
+    });
+
+    expect(getByTestId('uploadFileButton')).toBeDisabled();
+  });
+
+  it('should display inline error when JSON has an unrecognized Sentinel format', async () => {
+    const unrecognizedFormat = JSON.stringify({ foo: 'bar' }); // valid JSON, wrong shape
+    const file = new File([unrecognizedFormat], 'bad_shape.json', { type: 'application/json' });
+
+    const { getByTestId, getByText } = renderTestComponent();
+
+    const filePicker = getByTestId('rulesFilePicker');
+    await act(async () => {
+      fireEvent.change(filePicker, { target: { files: [file] } });
+    });
+
+    await waitFor(() => {
+      expect(
+        getByText(
+          'The file does not contain valid Sentinel rules. Rules file must conform to ARM templates exported by Sentinel'
+        )
+      ).toBeVisible();
     });
 
     expect(getByTestId('uploadFileButton')).toBeDisabled();

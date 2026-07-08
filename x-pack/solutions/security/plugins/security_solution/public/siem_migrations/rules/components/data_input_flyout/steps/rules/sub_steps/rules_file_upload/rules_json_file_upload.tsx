@@ -58,9 +58,7 @@ const extractResources = (parsed: unknown): SentinelArmResource[] => {
   ) {
     return (parsed as { resources: SentinelArmResource[] }).resources;
   }
-  throw new Error(
-    'Unrecognized Sentinel export format. Expected an ARM template with a "resources" array or a direct array of rule objects.'
-  );
+  throw new Error(FILE_UPLOAD_ERROR.INVALID_SENTINEL_RESOURCES);
 };
 
 export const SentinelRulesJsonFileUpload = React.memo<SentinelRulesJsonFileUploadProps>(

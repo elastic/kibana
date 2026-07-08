@@ -50,6 +50,9 @@ export const FILE_UPLOAD_ERROR = {
   ),
   INVALID_SENTINEL_RESOURCES: i18n.translate(
     'xpack.securitySolution.siemMigrations.common.dataInputFlyout.fileUploadError.invalidSentinelResources',
-    { defaultMessage: 'The file does not contain valid Sentinel rule resources' }
+    {
+      defaultMessage:
+        'The file does not contain valid Sentinel rules. Rules file must conform to ARM templates exported by Sentinel',
+    }
   ),
 };
