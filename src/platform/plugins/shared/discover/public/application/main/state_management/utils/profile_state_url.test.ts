@@ -11,7 +11,7 @@ import {
   createRegisteredTestProfileStateRegistry,
   TEST_PROFILE_STATE_DEF,
 } from '../../../../context_awareness/__mocks__/profile_state';
-import { getProfileStateWithUrlState, getProfileUrlState } from './profile_state_url';
+import { getProfileUrlState } from './profile_state_url';
 
 const getProfileState = () => ({
   [TEST_PROFILE_STATE_DEF.key]: {
@@ -73,83 +73,6 @@ describe('profile state URL helpers', () => {
         getProfileUrlState({
           profileState: getProfileState(),
           profileStateDefinition: undefined,
-          profileStateRegistry,
-        })
-      ).toBeUndefined();
-    });
-  });
-
-  describe('getProfileStateWithUrlState', () => {
-    it('merges URL fields into the current profile state', () => {
-      const { profileStateRegistry, profileStateDefinition } = setup();
-
-      expect(
-        getProfileStateWithUrlState({
-          profileState: getProfileState(),
-          profileUrlState: {
-            [TEST_PROFILE_STATE_DEF.key]: {
-              uiValue: 'ignoredUi',
-              urlValue: 'nextUrl',
-              persistentValue: 'ignoredPersistent',
-            },
-          },
-          profileStateDefinition,
-          profileStateRegistry,
-        })
-      ).toEqual({
-        uiValue: 'ui',
-        urlValue: 'nextUrl',
-        persistentValue: 'persistent',
-        nestedValue: { count: 1 },
-      });
-    });
-
-    it('resets URL fields to defaults when the URL state is missing', () => {
-      const { profileStateRegistry, profileStateDefinition } = setup();
-
-      expect(
-        getProfileStateWithUrlState({
-          profileState: getProfileState(),
-          profileUrlState: undefined,
-          profileStateDefinition,
-          profileStateRegistry,
-        })
-      ).toEqual({
-        uiValue: 'ui',
-        urlValue: TEST_PROFILE_STATE_DEF.defaultState.urlValue,
-        persistentValue: 'persistent',
-        nestedValue: { count: 1 },
-      });
-    });
-
-    it('uses defaults when URL state initializes an unwritten profile state', () => {
-      const { profileStateRegistry, profileStateDefinition } = setup();
-
-      expect(
-        getProfileStateWithUrlState({
-          profileState: {},
-          profileUrlState: {
-            [TEST_PROFILE_STATE_DEF.key]: {
-              urlValue: 'nextUrl',
-            },
-          },
-          profileStateDefinition,
-          profileStateRegistry,
-        })
-      ).toEqual({
-        ...TEST_PROFILE_STATE_DEF.defaultState,
-        urlValue: 'nextUrl',
-      });
-    });
-
-    it('returns undefined without current state or URL state', () => {
-      const { profileStateRegistry, profileStateDefinition } = setup();
-
-      expect(
-        getProfileStateWithUrlState({
-          profileState: {},
-          profileUrlState: undefined,
-          profileStateDefinition,
           profileStateRegistry,
         })
       ).toBeUndefined();

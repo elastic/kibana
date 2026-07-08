@@ -23,11 +23,8 @@ import {
 import { internalStateSlice } from '../redux/internal_state';
 import { selectUrlProfileStateDefinition } from '../redux/runtime_state';
 import { createTabAppStateObservable } from './create_tab_app_state_observable';
-import {
-  getProfileStateWithUrlState,
-  getProfileUrlState,
-  type ProfileUrlState,
-} from './profile_state_url';
+import { getProfileUrlState, type ProfileUrlState } from './profile_state_url';
+import { ProfileStateType } from '../../../../context_awareness';
 
 const EMPTY_PROFILE_URL_STATE: ProfileUrlState = {};
 
@@ -109,31 +106,25 @@ export const createUrlSyncObservables = ({
     state$: globalState$,
   };
 
-  const getCurrentProfileUrlState = (): ProfileUrlState => {
+  const getCurrentProfileUrlState = () => {
     const profileStateDefinition = selectUrlProfileStateDefinition(runtimeStateManager, tabId);
 
-    return (
-      getProfileUrlState({
-        profileState: selectTab(getState(), tabId).profileState,
-        profileStateDefinition,
-        profileStateRegistry: services.profileStateRegistry,
-      }) ?? EMPTY_PROFILE_URL_STATE
-    );
+    return getProfileUrlState({
+      profileState: selectTab(getState(), tabId).profileState,
+      profileStateDefinition,
+      profileStateRegistry: services.profileStateRegistry,
+    });
   };
 
   const profileState$ = internalState$.pipe(
-    map(() =>
-      selectUrlProfileStateDefinition(runtimeStateManager, tabId)
-        ? getCurrentProfileUrlState()
-        : undefined
-    ),
-    filter((profileUrlState): profileUrlState is ProfileUrlState => profileUrlState !== undefined),
+    map(() => getCurrentProfileUrlState()),
+    filter((profileUrlState) => profileUrlState !== undefined),
     distinctUntilChanged((a, b) => isEqual(a, b)),
     skip(1)
   );
 
   const profileStateContainer: INullableBaseStateContainer<ProfileUrlState> = {
-    get: () => getCurrentProfileUrlState(),
+    get: () => getCurrentProfileUrlState() ?? EMPTY_PROFILE_URL_STATE,
     set: (profileUrlState) => {
       const profileStateDefinition = selectUrlProfileStateDefinition(runtimeStateManager, tabId);
 
@@ -141,18 +132,25 @@ export const createUrlSyncObservables = ({
         return;
       }
 
-      const currentProfileState = selectTab(getState(), tabId).profileState;
-      const nextProfileState = getProfileStateWithUrlState({
-        profileState: currentProfileState,
-        profileUrlState: profileUrlState ?? undefined,
+      const currentProfileState = selectTab(getState(), tabId).profileState[
+        profileStateDefinition.key
+      ];
+      const nonUrlState = services.profileStateRegistry.pickStateByType({
+        profileState: { [profileStateDefinition.key]: currentProfileState },
+        stateType: [ProfileStateType.Ui, ProfileStateType.Persistent],
+      })[profileStateDefinition.key];
+      const urlState = getProfileUrlState({
+        profileState: profileUrlState ?? EMPTY_PROFILE_URL_STATE,
         profileStateDefinition,
         profileStateRegistry: services.profileStateRegistry,
-      });
+      })?.[profileStateDefinition.key];
+      const nextProfileState = {
+        ...profileStateDefinition.defaultState,
+        ...nonUrlState,
+        ...urlState,
+      };
 
-      if (
-        !nextProfileState ||
-        isEqual(currentProfileState[profileStateDefinition.key], nextProfileState)
-      ) {
+      if (isEqual(currentProfileState, nextProfileState)) {
         return;
       }
 

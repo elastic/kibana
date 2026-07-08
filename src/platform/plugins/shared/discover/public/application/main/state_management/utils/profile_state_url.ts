@@ -8,8 +8,6 @@
  */
 
 import { isEqual } from 'lodash';
-import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { PROFILE_STATE_URL_KEY } from '../../../../../common/constants';
 import {
   ProfileStateType,
   type ProfileStateDefinition,
@@ -18,9 +16,6 @@ import {
 import type { TabState } from '../redux';
 
 export type ProfileUrlState = Record<string, object | undefined>;
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const getDefinedState = <TState extends object>(state: TState): TState | undefined => {
   return Object.keys(state).length ? state : undefined;
@@ -84,24 +79,6 @@ const omitDefaultUrlFields = ({
   return getDefinedState(nextUrlState);
 };
 
-export const getProfileUrlStateFromUrl = (urlStateStorage: IKbnUrlStateStorage) => {
-  const rawProfileUrlState = urlStateStorage.get<unknown>(PROFILE_STATE_URL_KEY);
-
-  if (!isRecord(rawProfileUrlState)) {
-    return undefined;
-  }
-
-  const profileUrlState: ProfileUrlState = {};
-
-  for (const [key, value] of Object.entries(rawProfileUrlState)) {
-    if (isRecord(value)) {
-      profileUrlState[key] = value;
-    }
-  }
-
-  return getDefinedState(profileUrlState);
-};
-
 export const getProfileUrlState = ({
   profileState,
   profileStateDefinition,
@@ -135,39 +112,4 @@ export const getProfileUrlState = ({
   }
 
   return { [profileStateDefinition.key]: prunedProfileUrlState };
-};
-
-export const getProfileStateWithUrlState = ({
-  profileState,
-  profileUrlState,
-  profileStateDefinition,
-  profileStateRegistry,
-}: {
-  profileState: TabState['profileState'];
-  profileUrlState: ProfileUrlState | undefined;
-  profileStateDefinition: ProfileStateDefinition<object> | undefined;
-  profileStateRegistry: ProfileStateRegistry;
-}) => {
-  if (!profileStateDefinition) {
-    return undefined;
-  }
-
-  const defaultUrlState = getDefaultUrlState({ profileStateDefinition, profileStateRegistry });
-  const profileUrlStateForDefinition =
-    getUrlStateForDefinition({
-      profileState: profileUrlState,
-      profileStateDefinition,
-      profileStateRegistry,
-    }) ?? {};
-  const currentProfileState = profileState[profileStateDefinition.key];
-
-  if (!currentProfileState && !Object.keys(profileUrlStateForDefinition).length) {
-    return undefined;
-  }
-
-  return {
-    ...(currentProfileState ?? profileStateDefinition.defaultState),
-    ...defaultUrlState,
-    ...profileUrlStateForDefinition,
-  };
 };
