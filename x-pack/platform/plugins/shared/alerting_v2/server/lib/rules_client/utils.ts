@@ -99,6 +99,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     createdAt: string;
     updatedBy: string | null;
     updatedAt: string;
+    change_history_sequence: number;
   }
 ): RuleSavedObjectAttributes {
   return {
@@ -166,7 +167,7 @@ function resolveBuilderType(
 export function buildUpdateRuleAttributes(
   existingAttrs: RuleSavedObjectAttributes,
   updateData: UpdateRuleData,
-  serverFields: { updatedBy: string | null; updatedAt: string }
+  serverFields: { updatedBy: string | null; updatedAt: string; change_history_sequence: number }
 ): RuleSavedObjectAttributes {
   return {
     ...existingAttrs,

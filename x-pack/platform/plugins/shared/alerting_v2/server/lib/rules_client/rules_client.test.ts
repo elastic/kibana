@@ -19,7 +19,10 @@ import { createRulesSavedObjectService } from '../services/rules_saved_object_se
 import type { UserService } from '../services/user_service/user_service';
 import { createUserService } from '../services/user_service/user_service.mock';
 import { createRuleSoAttributes } from '../test_utils';
-import type { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
+import type {
+  EventRule,
+  RuleEventPublisher,
+} from '../events/rule_event_publisher/rule_event_publisher';
 import { createRuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher.mock';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { RulesClient } from './rules_client';
@@ -2521,7 +2524,7 @@ describe('RulesClient', () => {
         await client.createRule({ data: workflowCreateData, options: { id: 'rule-id-wf-1' } });
 
         expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(request, [
-          { id: 'rule-id-wf-1', spaceId: 'space-1' },
+          expect.objectContaining({ id: 'rule-id-wf-1', spaceId: 'space-1' }),
         ]);
       });
     });
@@ -2537,7 +2540,7 @@ describe('RulesClient', () => {
         });
 
         expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
-          { id: 'rule-id-wf-2', spaceId: 'space-1' },
+          expect.objectContaining({ id: 'rule-id-wf-2', spaceId: 'space-1' }),
         ]);
         expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
         expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
@@ -2550,7 +2553,7 @@ describe('RulesClient', () => {
         await client.updateRule({ id: 'rule-id-wf-3', data: { enabled: true } });
 
         expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
-          { id: 'rule-id-wf-3', spaceId: 'space-1' },
+          expect.objectContaining({ id: 'rule-id-wf-3', spaceId: 'space-1' }),
         ]);
         expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
         expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
@@ -2563,7 +2566,7 @@ describe('RulesClient', () => {
         await client.updateRule({ id: 'rule-id-wf-3b', data: { enabled: false } });
 
         expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
-          { id: 'rule-id-wf-3b', spaceId: 'space-1' },
+          expect.objectContaining({ id: 'rule-id-wf-3b', spaceId: 'space-1' }),
         ]);
         expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
         expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
@@ -2579,7 +2582,7 @@ describe('RulesClient', () => {
         });
 
         expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
-          { id: 'rule-id-wf-3c', spaceId: 'space-1' },
+          expect.objectContaining({ id: 'rule-id-wf-3c', spaceId: 'space-1' }),
         ]);
         expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
         expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
@@ -2595,7 +2598,7 @@ describe('RulesClient', () => {
         });
 
         expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
-          { id: 'rule-id-wf-3d', spaceId: 'space-1' },
+          expect.objectContaining({ id: 'rule-id-wf-3d', spaceId: 'space-1' }),
         ]);
         expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
         expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
@@ -2621,7 +2624,7 @@ describe('RulesClient', () => {
         await client.upsertRule({ id: 'rule-id-wf-upsert-create', data: workflowCreateData });
 
         expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(request, [
-          { id: 'rule-id-wf-upsert-create', spaceId: 'space-1' },
+          expect.objectContaining({ id: 'rule-id-wf-upsert-create', spaceId: 'space-1' }),
         ]);
       });
 
@@ -2654,7 +2657,7 @@ describe('RulesClient', () => {
         });
 
         expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
-          { id: 'rule-id-wf-upsert-replace', spaceId: 'space-1' },
+          expect.objectContaining({ id: 'rule-id-wf-upsert-replace', spaceId: 'space-1' }),
         ]);
       });
     });
@@ -2667,7 +2670,7 @@ describe('RulesClient', () => {
         await client.deleteRule({ id: 'rule-id-wf-4' });
 
         expect(ruleEventPublisher.emitRuleDeleted).toHaveBeenCalledWith(request, [
-          { id: 'rule-id-wf-4', spaceId: 'space-1' },
+          expect.objectContaining({ id: 'rule-id-wf-4', spaceId: 'space-1' }),
         ]);
       });
     });
@@ -2680,7 +2683,7 @@ describe('RulesClient', () => {
         await client.enableRule({ id: 'rule-id-wf-enable' });
 
         expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith(request, [
-          { id: 'rule-id-wf-enable', spaceId: 'space-1' },
+          expect.objectContaining({ id: 'rule-id-wf-enable', spaceId: 'space-1' }),
         ]);
       });
 
@@ -2695,7 +2698,7 @@ describe('RulesClient', () => {
         expect(mockSavedObjectsClient.update).toHaveBeenCalled();
         expect(ensureRuleExecutorTaskScheduledMock).toHaveBeenCalled();
         expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith(request, [
-          { id: 'rule-id-wf-enable-noop', spaceId: 'space-1' },
+          expect.objectContaining({ id: 'rule-id-wf-enable-noop', spaceId: 'space-1' }),
         ]);
       });
     });
@@ -2708,7 +2711,7 @@ describe('RulesClient', () => {
         await client.disableRule({ id: 'rule-id-wf-disable' });
 
         expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(request, [
-          { id: 'rule-id-wf-disable', spaceId: 'space-1' },
+          expect.objectContaining({ id: 'rule-id-wf-disable', spaceId: 'space-1' }),
         ]);
       });
 
@@ -2723,7 +2726,7 @@ describe('RulesClient', () => {
         expect(mockSavedObjectsClient.update).toHaveBeenCalled();
         expect(taskManager.removeIfExists).toHaveBeenCalled();
         expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(request, [
-          { id: 'rule-id-wf-5', spaceId: 'space-1' },
+          expect.objectContaining({ id: 'rule-id-wf-5', spaceId: 'space-1' }),
         ]);
       });
     });
@@ -2763,10 +2766,12 @@ describe('RulesClient', () => {
         await client.bulkEnableRules({ ids: ['rule-ok', 'rule-missing'] });
 
         expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith(request, [
-          { id: 'rule-ok', spaceId: 'space-1' },
+          expect.objectContaining({ id: 'rule-ok', spaceId: 'space-1' }),
         ]);
         const enabledIds = (ruleEventPublisher.emitRuleEnabled as jest.Mock).mock.calls[0][1];
-        expect(enabledIds).toEqual([{ id: 'rule-ok', spaceId: 'space-1' }]);
+        expect(enabledIds).toEqual([
+          expect.objectContaining({ id: 'rule-ok', spaceId: 'space-1' }),
+        ]);
       });
 
       it('does not publish when all requested rules are already enabled', async () => {
@@ -2824,10 +2829,12 @@ describe('RulesClient', () => {
         await client.bulkDisableRules({ ids: ['rule-ok', 'rule-missing'] });
 
         expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(request, [
-          { id: 'rule-ok', spaceId: 'space-1' },
+          expect.objectContaining({ id: 'rule-ok', spaceId: 'space-1' }),
         ]);
         const disabledIds = (ruleEventPublisher.emitRuleDisabled as jest.Mock).mock.calls[0][1];
-        expect(disabledIds).toEqual([{ id: 'rule-ok', spaceId: 'space-1' }]);
+        expect(disabledIds).toEqual([
+          expect.objectContaining({ id: 'rule-ok', spaceId: 'space-1' }),
+        ]);
       });
 
       it('publishes no event (empty array) when all requested rules are already disabled', async () => {
@@ -2891,6 +2898,189 @@ describe('RulesClient', () => {
           { id: 'rule-1', spaceId: 'space-1' },
         ]);
       });
+    });
+  });
+
+  describe('change history enrichment', () => {
+    const firstEmit = (spy: jest.Mock): EventRule[] => spy.mock.calls[0][1] as EventRule[];
+
+    it('enriches ruleCreated with sequence 1, the resolved author and the full snapshot', async () => {
+      const client = createClient();
+      mockSavedObjectsClient.create.mockResolvedValueOnce({
+        id: 'rule-ch-create',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: baseSoAttrs,
+        references: [],
+      });
+
+      await client.createRule({ data: baseCreateData, options: { id: 'rule-ch-create' } });
+
+      expect(firstEmit(ruleEventPublisher.emitRuleCreated as jest.Mock)).toEqual([
+        expect.objectContaining({
+          id: 'rule-ch-create',
+          spaceId: 'space-1',
+          sequence: 1,
+          author: { uid: 'elastic_profile_uid', username: 'elastic' },
+          snapshot: {
+            references: [],
+            attributes: expect.objectContaining({
+              change_history_sequence: 1,
+              metadata: expect.objectContaining({ name: 'rule-1' }),
+            }),
+          },
+        }),
+      ]);
+    });
+
+    it('increments the sequence from the existing rule on update', async () => {
+      const client = createClient();
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'rule-ch-update',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: { ...baseSoAttrs, change_history_sequence: 4 },
+        version: 'v1',
+        references: [],
+      });
+
+      await client.updateRule({ id: 'rule-ch-update', data: { metadata: { name: 'renamed' } } });
+
+      const [event] = firstEmit(ruleEventPublisher.emitRuleUpdated as jest.Mock);
+      expect(event.sequence).toBe(5);
+      expect(event.snapshot?.attributes.change_history_sequence).toBe(5);
+      expect(event.author).toEqual({ uid: 'elastic_profile_uid', username: 'elastic' });
+    });
+
+    it('logs a metadata-only snapshot and a sequence for deletions', async () => {
+      const client = createClient();
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'rule-ch-delete',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: { ...baseSoAttrs, change_history_sequence: 7 },
+        version: 'v1',
+        references: [],
+      });
+
+      await client.deleteRule({ id: 'rule-ch-delete' });
+
+      const [event] = firstEmit(ruleEventPublisher.emitRuleDeleted as jest.Mock);
+      expect(event.sequence).toBe(8);
+      expect(event.snapshot).toEqual({
+        references: [],
+        attributes: { metadata: baseSoAttrs.metadata },
+      });
+      // Metadata-only: the persisted query/kind are not carried in the snapshot.
+      expect(event.snapshot?.attributes).not.toHaveProperty('query');
+      expect(event.snapshot?.attributes).not.toHaveProperty('kind');
+    });
+
+    it('shares a single correlationId across a bulk delete and keeps snapshots metadata-only', async () => {
+      const client = createClient();
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'bulk-del-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: { ...baseSoAttrs, change_history_sequence: 1 },
+            references: [],
+          },
+          {
+            id: 'bulk-del-2',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: { ...baseSoAttrs, change_history_sequence: 2 },
+            references: [],
+          },
+        ],
+      });
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          { id: 'bulk-del-1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+          { id: 'bulk-del-2', type: RULE_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await client.bulkDeleteRules({ ids: ['bulk-del-1', 'bulk-del-2'] });
+
+      const events = firstEmit(ruleEventPublisher.emitRuleDeleted as jest.Mock);
+      expect(events).toHaveLength(2);
+      const correlationIds = events.map((e) => e.correlationId);
+      expect(correlationIds[0]).toBeDefined();
+      expect(new Set(correlationIds).size).toBe(1);
+      expect(events[0].sequence).toBe(2);
+      expect(events[1].sequence).toBe(3);
+      expect(events[0].snapshot).toEqual({
+        references: [],
+        attributes: { metadata: baseSoAttrs.metadata },
+      });
+    });
+
+    it('shares a single correlationId across a bulk enable and carries full snapshots', async () => {
+      const client = createClient();
+      const disabledAttrs = createRuleSoAttributes({
+        metadata: { name: 'disabled-rule' },
+        enabled: false,
+      });
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'bulk-en-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: disabledAttrs,
+            version: 'v1',
+            references: [],
+          },
+          {
+            id: 'bulk-en-2',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: disabledAttrs,
+            version: 'v1',
+            references: [],
+          },
+        ],
+      });
+      mockSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'bulk-en-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: { ...disabledAttrs, enabled: true },
+            references: [],
+          },
+          {
+            id: 'bulk-en-2',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: { ...disabledAttrs, enabled: true },
+            references: [],
+          },
+        ],
+      });
+
+      await client.bulkEnableRules({ ids: ['bulk-en-1', 'bulk-en-2'] });
+
+      const events = firstEmit(ruleEventPublisher.emitRuleEnabled as jest.Mock);
+      expect(events).toHaveLength(2);
+      expect(new Set(events.map((e) => e.correlationId)).size).toBe(1);
+      expect(events[0].correlationId).toBeDefined();
+      expect(events[0].sequence).toBe(1);
+      expect(events[0].snapshot?.attributes).toEqual(
+        expect.objectContaining({ enabled: true, change_history_sequence: 1 })
+      );
+    });
+
+    it('persists the incremented change_history_sequence on the saved object', async () => {
+      const client = createClient();
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'rule-ch-seq',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: { ...baseSoAttrs, change_history_sequence: 2 },
+        version: 'v1',
+        references: [],
+      });
+
+      await client.updateRule({ id: 'rule-ch-seq', data: { metadata: { name: 'renamed' } } });
+
+      const savedAttrs = mockSavedObjectsClient.update.mock
+        .calls[0][2] as RuleSavedObjectAttributes;
+      expect(savedAttrs.change_history_sequence).toBe(3);
     });
   });
 
