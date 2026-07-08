@@ -14,6 +14,53 @@ import { logAnalysisValidationV1 } from '../../../../common/http_api';
 
 const { MAX_CONCURRENT_INDEX_QUERIES } = logAnalysisValidationV1;
 
+interface DeduplicateFieldsSuccess {
+  type: 'success';
+  fields: logAnalysisValidationV1.ValidationIndicesFieldSpecification[];
+}
+
+interface DeduplicateFieldsConflict {
+  type: 'conflict';
+  conflictingFieldName: string;
+}
+
+type DeduplicateFieldsResult = DeduplicateFieldsSuccess | DeduplicateFieldsConflict;
+
+// Deduplicate the user-provided field specifications by name. Duplicate names
+// with identical `validTypes` collapse to a single specification, while
+// duplicate names with conflicting `validTypes` are reported so the request can
+// fail loudly instead of silently changing validation semantics.
+const deduplicateFields = (
+  fields: logAnalysisValidationV1.ValidationIndicesFieldSpecification[]
+): DeduplicateFieldsResult => {
+  const fieldsByName = new Map<
+    string,
+    logAnalysisValidationV1.ValidationIndicesFieldSpecification
+  >();
+
+  for (const field of fields) {
+    const existingField = fieldsByName.get(field.name);
+
+    if (existingField === undefined) {
+      fieldsByName.set(field.name, field);
+      continue;
+    }
+
+    const existingValidTypes = [...existingField.validTypes].sort();
+    const currentValidTypes = [...field.validTypes].sort();
+
+    const hasConflictingValidTypes =
+      existingValidTypes.length !== currentValidTypes.length ||
+      existingValidTypes.some((validType, index) => validType !== currentValidTypes[index]);
+
+    if (hasConflictingValidTypes) {
+      return { type: 'conflict', conflictingFieldName: field.name };
+    }
+  }
+
+  return { type: 'success', fields: [...fieldsByName.values()] };
+};
+
 export const initValidateLogAnalysisIndicesRoute = ({ framework }: InfraBackendLibs) => {
   framework
     .registerVersionedRoute({
@@ -41,7 +88,17 @@ export const initValidateLogAnalysisIndicesRoute = ({ framework }: InfraBackendL
 
         // Deduplicate the user-provided indices and fields to avoid redundant queries.
         const uniqueIndices = [...new Set(indices)];
-        const uniqueFields = [...new Map(fields.map((field) => [field.name, field])).values()];
+        const deduplicatedFields = deduplicateFields(fields);
+
+        if (deduplicatedFields.type === 'conflict') {
+          return response.badRequest({
+            body: {
+              message: `The field "${deduplicatedFields.conflictingFieldName}" was specified multiple times with conflicting valid types.`,
+            },
+          });
+        }
+
+        const uniqueFields = deduplicatedFields.fields;
 
         // Query each pattern individually, to map correctly the errors
         await asyncMapWithLimit(uniqueIndices, MAX_CONCURRENT_INDEX_QUERIES, async (index) => {

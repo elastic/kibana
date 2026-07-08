@@ -57,6 +57,59 @@ apiTest.describe(
       expect(errors).toStrictEqual([]);
     });
 
+    apiTest(
+      'deduplicates fields with identical specifications without multiplying errors',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(LOG_ANALYSIS_VALIDATE_INDICES_PATH, {
+          headers: {
+            ...viewerApiCredentials.apiKeyHeader,
+            ...testData.INTERNAL_HEADERS,
+          },
+          responseType: 'json',
+          body: validationIndicesRequestPayloadRT.encode({
+            data: {
+              fields: [TIMESTAMP_FIELD, TIMESTAMP_FIELD],
+              indices: ['filebeat-*'],
+              runtimeMappings: {},
+            },
+          }),
+        });
+
+        expect(response).toHaveStatusCode(200);
+
+        const {
+          data: { errors },
+        } = decodeOrThrow(validationIndicesResponsePayloadRT)(response.body);
+
+        expect(errors).toStrictEqual([]);
+      }
+    );
+
+    apiTest(
+      'rejects requests with duplicate field names that have conflicting specifications',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(LOG_ANALYSIS_VALIDATE_INDICES_PATH, {
+          headers: {
+            ...viewerApiCredentials.apiKeyHeader,
+            ...testData.INTERNAL_HEADERS,
+          },
+          responseType: 'json',
+          body: validationIndicesRequestPayloadRT.encode({
+            data: {
+              fields: [
+                { name: '@timestamp', validTypes: ['date'] },
+                { name: '@timestamp', validTypes: ['date_nanos'] },
+              ],
+              indices: ['filebeat-*'],
+              runtimeMappings: {},
+            },
+          }),
+        });
+
+        expect(response).toHaveStatusCode(400);
+      }
+    );
+
     apiTest('rejects requests with too many indices', async ({ apiClient }) => {
       const indices = Array.from({ length: 1001 }, (_, index) => `filebeat-${index}-*`);
 
