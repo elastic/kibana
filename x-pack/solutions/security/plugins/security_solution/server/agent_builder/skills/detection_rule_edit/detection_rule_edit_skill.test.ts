@@ -9,7 +9,7 @@ import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import { getDetectionRuleEditSkill } from '.';
 
 describe('detectionRuleEditSkill', () => {
-  const skill = getDetectionRuleEditSkill();
+  const skill = getDetectionRuleEditSkill({ rulePreviewEnabled: false });
 
   it('has stable metadata', () => {
     expect(skill.id).toBe('detection-rule-edit');
