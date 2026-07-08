@@ -442,5 +442,25 @@ describe('ConversationClient', () => {
 
       expect(mockEsClient.delete).not.toHaveBeenCalled();
     });
+
+    it('returns true when the document was already deleted (404)', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+      const notFoundError = Object.assign(new Error('not found'), { statusCode: 404 });
+      mockEsClient.delete.mockRejectedValue(notFoundError);
+
+      await expect(client.delete('conversation-1')).resolves.toBe(true);
+    });
+
+    it('rethrows non-404 errors from the delete call', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+      const serverError = Object.assign(new Error('internal server error'), { statusCode: 500 });
+      mockEsClient.delete.mockRejectedValue(serverError);
+
+      await expect(client.delete('conversation-1')).rejects.toBe(serverError);
+    });
   });
 });
