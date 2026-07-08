@@ -14,15 +14,15 @@ import { useKibana } from '../../hooks/use_kibana';
 import { INFERENCE_PREFERENCES_FEATURE_FLAG_ID } from '../../../common/constants';
 
 jest.mock('../../hooks/use_kibana');
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+  useUiSetting: jest.fn((key: string, defaultValue?: unknown) => defaultValue),
+}));
 
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+
+const mockUseUiSetting = useUiSetting as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
-
-const mockUiSettings = (inferencePreferencesEnabled: boolean = false) => ({
-  get: jest.fn((key: string, defaultValue?: unknown) => {
-    if (key === INFERENCE_PREFERENCES_FEATURE_FLAG_ID) return inferencePreferencesEnabled;
-    return defaultValue;
-  }),
-});
 
 const MODEL_ID = 'test-model';
 
@@ -42,7 +42,11 @@ describe('ModelDetailFlyout', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseKibana.mockReturnValue({ services: { uiSettings: mockUiSettings() } });
+    mockUseUiSetting.mockImplementation((key: string, defaultValue?: unknown) => {
+      if (key === INFERENCE_PREFERENCES_FEATURE_FLAG_ID) return false;
+      return defaultValue;
+    });
+    mockUseKibana.mockReturnValue({ services: {} });
   });
 
   const renderFlyout = (
@@ -184,7 +188,10 @@ describe('ModelDetailFlyout', () => {
     } as unknown as EisInferenceEndpoint;
 
     it('renders region badges when FF is enabled and endpoint has region metadata', () => {
-      mockUseKibana.mockReturnValue({ services: { uiSettings: mockUiSettings(true) } });
+      mockUseUiSetting.mockImplementation((key: string, defaultValue?: unknown) => {
+        if (key === INFERENCE_PREFERENCES_FEATURE_FLAG_ID) return true;
+        return defaultValue;
+      });
       renderFlyout(MODEL_ID, [endpointWithRegions]);
 
       expect(screen.getByTestId('flyoutRegionBadges')).toBeInTheDocument();
