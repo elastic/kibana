@@ -1170,7 +1170,7 @@ const MANAGE_ENTITY_LIST_VIEW_EVENT: AgentBuilderTelemetryEvent = {
     entity_type: {
       type: 'keyword',
       _meta: {
-        description: 'Type of entity on the list page (tool|plugin|skill)',
+        description: 'Type of entity on the list page (tool|plugin|skill|mcp_client)',
         optional: false,
       },
     },

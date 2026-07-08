@@ -23,24 +23,56 @@ import { convertAlertingRuleToSchedule } from '../../../../routes/attack_discove
 import type { AttackDiscoveryScheduleFindOptions } from '../types';
 import { convertScheduleActionsToAlertingActions } from './utils/transform_actions';
 
+export interface FilterTags {
+  /** Only include schedules whose tags contain ALL of these values */
+  includeTags?: string[];
+  /** Exclude schedules whose tags contain ANY of these values */
+  excludeTags?: string[];
+}
+
 /**
  * Params for when creating AttackDiscoveryScheduleDataClient in Request Context Factory. Useful if needing to modify
  * configuration after initial plugin start
  */
 export interface CreateAttackDiscoveryScheduleDataClientParams {
   actionsClient: ActionsClient;
+  filterTags?: FilterTags;
   logger: Logger;
   rulesClient: RulesClient;
 }
 
 export interface AttackDiscoveryScheduleDataClientParams {
   actionsClient: ActionsClient;
+  filterTags?: FilterTags;
   logger: Logger;
   rulesClient: RulesClient;
 }
 
 export class AttackDiscoveryScheduleDataClient {
   constructor(public readonly options: AttackDiscoveryScheduleDataClientParams) {}
+
+  private buildTagFilter(): string | undefined {
+    const { filterTags } = this.options;
+    if (filterTags == null) {
+      return undefined;
+    }
+
+    const parts: string[] = [];
+
+    if (filterTags.includeTags != null && filterTags.includeTags.length > 0) {
+      const includeFilters = filterTags.includeTags.map((tag) => `alert.attributes.tags: "${tag}"`);
+      parts.push(...includeFilters);
+    }
+
+    if (filterTags.excludeTags != null && filterTags.excludeTags.length > 0) {
+      const excludeFilters = filterTags.excludeTags.map(
+        (tag) => `NOT alert.attributes.tags: "${tag}"`
+      );
+      parts.push(...excludeFilters);
+    }
+
+    return parts.length > 0 ? parts.join(' AND ') : undefined;
+  }
 
   private transformBulkActionResult = ({
     errors,
@@ -61,9 +93,9 @@ export class AttackDiscoveryScheduleDataClient {
     perPage,
     sort: sortParam = {},
   }: AttackDiscoveryScheduleFindOptions = {}) => {
-    // TODO: add filtering
     const results = await this.options.rulesClient.find<AttackDiscoveryScheduleParams>({
       options: {
+        filter: this.buildTagFilter(),
         page: page + 1,
         perPage,
         sortField: sortParam.sortField,
