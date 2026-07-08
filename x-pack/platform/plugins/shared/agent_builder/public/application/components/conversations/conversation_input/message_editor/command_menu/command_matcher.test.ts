@@ -109,13 +109,11 @@ describe('matchCommand', () => {
   });
 
   describe('active command stickiness', () => {
-    it('drops a sticky "@" command once its query contains a space, falling back to "/"', () => {
-      // Unlike "/", an "@" (SML) query can never legitimately contain a
-      // space, so stickiness gives up and normal matching resumes.
+    it('keeps the active "@" command active even when "/" appears closer to the cursor', () => {
       const result = matchCommand('@foo /bar', allCommands, CommandId.Sml);
       expect(result.isActive).toBe(true);
-      expect(result.activeCommand?.command.id).toBe(CommandId.Skill);
-      expect(result.activeCommand?.query).toBe('bar');
+      expect(result.activeCommand?.command.id).toBe(CommandId.Sml);
+      expect(result.activeCommand?.query).toBe('foo /bar');
     });
 
     it('keeps the active "/" command active even when "@" appears closer to the cursor', () => {
@@ -136,30 +134,6 @@ describe('matchCommand', () => {
       const result = matchCommand('@foo /bar', allCommands);
       expect(result.activeCommand?.command.id).toBe(CommandId.Skill);
       expect(result.activeCommand?.query).toBe('bar');
-    });
-  });
-
-  describe('commands that disallow spaces in the query (e.g. "@")', () => {
-    it('stays active while the query has no space', () => {
-      const result = matchCommand('@connector/no_match', allCommands);
-      expect(result.isActive).toBe(true);
-      expect(result.activeCommand?.command.id).toBe(CommandId.Sml);
-      expect(result.activeCommand?.query).toBe('connector/no_match');
-    });
-
-    it('deactivates once a trailing space is typed', () => {
-      const result = matchCommand('@connector/no_match ', allCommands);
-      expect(result.isActive).toBe(false);
-    });
-
-    it('deactivates once more text follows the trailing space', () => {
-      const result = matchCommand('@connector/no_match and more', allCommands);
-      expect(result.isActive).toBe(false);
-    });
-
-    it('stays deactivated even when the command was previously active (sticky)', () => {
-      const result = matchCommand('@connector/no_match ', allCommands, CommandId.Sml);
-      expect(result.isActive).toBe(false);
     });
   });
 

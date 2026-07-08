@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, screen } from '@testing-library/react';
+import React, { useEffect } from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { CommandMenuPopover } from './command_menu_popover';
 import type { CommandMatchResult, CommandMenuHandle, CommandMenuComponentProps } from './types';
 import { CommandId } from './types';
@@ -16,6 +16,33 @@ const MockMenuComponent = React.forwardRef<CommandMenuHandle, CommandMenuCompone
     return <div data-test-subj="mockMenu">Mock menu: {query}</div>;
   }
 );
+
+/** Reports content presence based on whether `query` is non-empty, like a real menu would report on results. */
+const MockContentAwareMenuComponent = React.forwardRef<
+  CommandMenuHandle,
+  CommandMenuComponentProps
+>(({ query, onContentChange }, ref) => {
+  const hasContent = query.length > 0;
+  useEffect(() => {
+    onContentChange?.(hasContent);
+  }, [hasContent, onContentChange]);
+  return <div data-test-subj="mockMenu">Mock menu: {query}</div>;
+});
+
+const buildActiveMatch = (query: string, commandStartOffset = 0): CommandMatchResult => ({
+  isActive: true,
+  activeCommand: {
+    command: {
+      id: CommandId.Attachment,
+      sequence: '@',
+      name: 'Attachment',
+      scheme: 'attachment',
+      menuComponent: MockContentAwareMenuComponent,
+    },
+    commandStartOffset,
+    query,
+  },
+});
 
 const inactiveMatch: CommandMatchResult = {
   isActive: false,
@@ -119,5 +146,64 @@ describe('CommandMenuPopover', () => {
     );
 
     expect(screen.getByTestId('mockMenu')).toHaveTextContent('Mock menu: joh');
+  });
+
+  describe('content-driven visibility', () => {
+    it('stays closed once the menu reports it has nothing to show', async () => {
+      // The popover assumes content on first mount (so a new mention isn't
+      // hidden before its data arrives); it only closes once the mounted
+      // menu's effect reports otherwise, so this settles asynchronously.
+      render(
+        <CommandMenuPopover
+          commandMatch={buildActiveMatch('')}
+          anchorPosition={{ left: 10, top: 20 }}
+          data-test-subj="testPopover"
+          {...defaultProps}
+        />
+      );
+
+      await waitFor(() =>
+        expect(screen.queryByTestId('testPopover-content')).not.toBeInTheDocument()
+      );
+    });
+
+    it('opens once the menu reports it has content', async () => {
+      render(
+        <CommandMenuPopover
+          commandMatch={buildActiveMatch('joh')}
+          anchorPosition={{ left: 10, top: 20 }}
+          data-test-subj="testPopover"
+          {...defaultProps}
+        />
+      );
+
+      await waitFor(() => expect(screen.getByTestId('testPopover-content')).toBeInTheDocument());
+    });
+
+    it('re-opens for a distinct new mention even if the previous one had no content', async () => {
+      const { rerender } = render(
+        <CommandMenuPopover
+          commandMatch={buildActiveMatch('', 0)}
+          anchorPosition={{ left: 10, top: 20 }}
+          data-test-subj="testPopover"
+          {...defaultProps}
+        />
+      );
+      await waitFor(() =>
+        expect(screen.queryByTestId('testPopover-content')).not.toBeInTheDocument()
+      );
+
+      // A new mention starting at a different offset resets the assumption
+      // to "has content" until the freshly-mounted menu reports otherwise.
+      rerender(
+        <CommandMenuPopover
+          commandMatch={buildActiveMatch('', 10)}
+          anchorPosition={{ left: 10, top: 20 }}
+          data-test-subj="testPopover"
+          {...defaultProps}
+        />
+      );
+      await waitFor(() => expect(screen.getByTestId('testPopover-content')).toBeInTheDocument());
+    });
   });
 });

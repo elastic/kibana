@@ -22,6 +22,13 @@ export enum CommandId {
 export interface CommandMenuComponentProps {
   readonly query: string;
   readonly onSelect: (selection: CommandBadgeData) => void;
+  /**
+   * Reports whether this menu currently has anything worth showing (loading,
+   * or at least one option) — lets the popover stay closed instead of
+   * displaying an empty "No matching results" panel while the user keeps
+   * typing past a mention that will never resolve.
+   */
+  readonly onContentChange?: (hasContent: boolean) => void;
 }
 
 /**
@@ -56,12 +63,6 @@ export interface CommandDefinition {
   >;
   /** When true, this command is only available when experimental features are enabled */
   readonly experimental?: boolean;
-  /**
-   * When true, a space in the query keeps the command active (e.g. Skills'
-   * free-text search). Defaults to false: a space ends the command, since a
-   * value like an SML "type/name" mention can never contain one.
-   */
-  readonly allowsSpaceInQuery?: boolean;
 }
 
 /**

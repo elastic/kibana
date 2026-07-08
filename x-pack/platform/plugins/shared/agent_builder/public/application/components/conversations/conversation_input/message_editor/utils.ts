@@ -34,8 +34,8 @@ export const createTextFragment = (text: string): DocumentFragment => {
 };
 
 /**
- * Creates a DOM Range spanning the command text (sequence + query) within
- * the editor, e.g. the range covering "/summ" in "hello /summ".
+ * Creates a DOM Range spanning the full command text (sequence + query)
+ * within the editor, e.g. the range covering "/summ" in "hello /summ".
  */
 export const createCommandRange = (
   messageEditorElement: HTMLElement,

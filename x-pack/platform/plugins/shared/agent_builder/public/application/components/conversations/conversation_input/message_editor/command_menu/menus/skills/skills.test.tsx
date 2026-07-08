@@ -77,4 +77,48 @@ describe('Skills', () => {
 
     useAgentSkillsMock.useAgentSkills = originalImpl;
   });
+
+  describe('reporting content presence via onContentChange', () => {
+    it('reports content when there are matching skills', () => {
+      const onContentChange = jest.fn();
+      renderWithProvider(
+        <Skills query="" onSelect={jest.fn()} onContentChange={onContentChange} />
+      );
+
+      expect(onContentChange).toHaveBeenCalledWith(true);
+    });
+
+    it('reports no content once the query matches nothing', () => {
+      const onContentChange = jest.fn();
+      renderWithProvider(
+        <Skills query="nosuchskill" onSelect={jest.fn()} onContentChange={onContentChange} />
+      );
+
+      expect(onContentChange).toHaveBeenCalledWith(false);
+    });
+
+    it('reports content while loading, even with zero skills so far', () => {
+      const useAgentSkillsMock = jest.requireMock(
+        '../../../../../../../hooks/skills/use_agent_skills'
+      ) as {
+        useAgentSkills: () => unknown;
+      };
+      const originalImpl = useAgentSkillsMock.useAgentSkills;
+      useAgentSkillsMock.useAgentSkills = () => ({
+        skills: [],
+        isLoading: true,
+        error: null,
+        isError: false,
+      });
+
+      const onContentChange = jest.fn();
+      renderWithProvider(
+        <Skills query="nosuchskill" onSelect={jest.fn()} onContentChange={onContentChange} />
+      );
+
+      expect(onContentChange).toHaveBeenCalledWith(true);
+
+      useAgentSkillsMock.useAgentSkills = originalImpl;
+    });
+  });
 });

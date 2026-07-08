@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { forwardRef, useCallback, useMemo } from 'react';
+import React, { forwardRef, useCallback, useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiHighlight, useEuiTheme } from '@elastic/eui';
+import type { SmlAutocompleteHttpResultItem } from '@kbn/agent-context-layer-plugin/public';
 import { useSmlAutocomplete } from '../../../../../../../hooks/sml/use_sml_autocomplete';
 import { useAgentId } from '../../../../../../../hooks/use_conversation';
 import { useAgentBuilderAgentById } from '../../../../../../../hooks/agents/use_agent_by_id';
@@ -18,16 +19,16 @@ import { buildSmlScopingFromAgent } from '../../utils/sml_filters';
 import { CommandMenuList } from '../components/command_menu_list';
 import type { CommandMenuListOption } from '../components/command_menu_list';
 
-interface ResultsPreferExactMatch<T> {
-  readonly results: readonly T[];
+interface ResultsPreferExactMatch {
+  readonly results: readonly SmlAutocompleteHttpResultItem[];
   readonly hasExactMatch: boolean;
 }
 
 /** Reorders `results` so an exact (case-insensitive) `title` match is first. */
-const getResultsPreferExactMatch = <T extends { title: string }>(
-  results: readonly T[],
+const getResultsPreferExactMatch = (
+  results: readonly SmlAutocompleteHttpResultItem[],
   title: string
-): ResultsPreferExactMatch<T> => {
+): ResultsPreferExactMatch => {
   const lowerTitle = title.toLowerCase();
   const exactIndex = results.findIndex((item) => item.title.toLowerCase() === lowerTitle);
   if (exactIndex <= 0) {
@@ -44,7 +45,7 @@ const getResultsPreferExactMatch = <T extends { title: string }>(
 };
 
 export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
-  ({ query, onSelect }, ref) => {
+  ({ query, onSelect, onContentChange }, ref) => {
     const agentId = useAgentId();
     const { agent } = useAgentBuilderAgentById(agentId);
     const constraints = useMemo(() => buildSmlScopingFromAgent(agent), [agent]);
@@ -63,6 +64,14 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
       [results, title, canSelectOnSpace]
     );
     const spaceSelection = hasExactMatch;
+
+    // Lets the popover stay closed once it's clear there's nothing to show,
+    // instead of leaving a "No matching results" panel open indefinitely as
+    // the user keeps typing past an unresolved mention.
+    const hasVisibleContent = isLoading || orderedResults.length > 0;
+    useEffect(() => {
+      onContentChange?.(hasVisibleContent);
+    }, [hasVisibleContent, onContentChange]);
 
     const smlMenuLabelStyles = useMemo(
       () => ({

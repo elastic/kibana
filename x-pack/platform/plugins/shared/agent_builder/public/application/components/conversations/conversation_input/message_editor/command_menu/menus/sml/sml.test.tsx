@@ -145,6 +145,47 @@ describe('Sml', () => {
     expect(mockUseSmlAutocomplete).toHaveBeenCalledWith('git', { constraints: undefined });
   });
 
+  describe('reporting content presence via onContentChange', () => {
+    it('reports content when there are results', () => {
+      const onContentChange = jest.fn();
+      renderWithProvider(<Sml query="" onSelect={jest.fn()} onContentChange={onContentChange} />);
+
+      expect(onContentChange).toHaveBeenCalledWith(true);
+    });
+
+    it('reports content while still loading, even with zero results so far', () => {
+      mockUseSmlAutocompleteReturn = {
+        results: [],
+        total: 0,
+        isLoading: true,
+        isError: false,
+        error: null,
+      };
+      const onContentChange = jest.fn();
+      renderWithProvider(
+        <Sml query="nosuchthing" onSelect={jest.fn()} onContentChange={onContentChange} />
+      );
+
+      expect(onContentChange).toHaveBeenCalledWith(true);
+    });
+
+    it('reports no content once results are confirmed empty', () => {
+      mockUseSmlAutocompleteReturn = {
+        results: [],
+        total: 0,
+        isLoading: false,
+        isError: false,
+        error: null,
+      };
+      const onContentChange = jest.fn();
+      renderWithProvider(
+        <Sml query="nosuchthing" onSelect={jest.fn()} onContentChange={onContentChange} />
+      );
+
+      expect(onContentChange).toHaveBeenCalledWith(false);
+    });
+  });
+
   describe('select on space for "type/name" queries', () => {
     it('selects the match on Space once the exact name is typed', () => {
       const ref = createRef<CommandMenuHandle>();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiPopover, EuiScreenReaderLive, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -45,7 +45,25 @@ export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
   'data-test-subj': dataTestSubj = 'commandMenuPopover',
 }) => {
   const { activeCommand, isActive } = commandMatch;
-  const isOpen = isActive && activeCommand !== null && anchorPosition !== null;
+
+  // Reset to "assume there's content" whenever a distinct mention starts,
+  // so a stale `false` from a just-unmounted menu can't keep the new one
+  // from opening for a render. See https://react.dev/reference/react/useState#storing-information-from-previous-renders
+  const mentionKey = activeCommand
+    ? `${activeCommand.command.id}:${activeCommand.commandStartOffset}`
+    : null;
+  const [contentState, setContentState] = useState({ mentionKey, hasVisibleContent: true });
+  if (contentState.mentionKey !== mentionKey) {
+    setContentState({ mentionKey, hasVisibleContent: true });
+  }
+  // Stable across renders — the child's effect depends on this reference,
+  // so a fresh function every render would re-fire it and loop forever.
+  const handleContentChange = useCallback((hasVisibleContent: boolean) => {
+    setContentState((prev) => ({ ...prev, hasVisibleContent }));
+  }, []);
+
+  const isOpen =
+    isActive && activeCommand !== null && anchorPosition !== null && contentState.hasVisibleContent;
   let announcementText = '';
   let panelAriaLabel = '';
   if (activeCommand) {
@@ -91,6 +109,7 @@ export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
               ref={commandMenuRef}
               query={activeCommand.query}
               onSelect={onSelect}
+              onContentChange={handleContentChange}
             />
           </div>
         )}
