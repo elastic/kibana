@@ -31,20 +31,21 @@ const MarkdownLinkComponent: React.FC<MarkdownLinkProps> = ({
   const {
     services: { http },
   } = useKibana();
+  const basePath = http?.basePath;
 
   const resolvedHref = useMemo(() => {
-    if (!isAppInternalHref(href)) {
+    if (!isAppInternalHref(href) || !basePath) {
       return href;
     }
 
     // Guard against double-prepending when the href already carries the base path.
-    const serverBasePath = http.basePath.get();
+    const serverBasePath = basePath.get();
     if (serverBasePath && href.startsWith(`${serverBasePath}/`)) {
       return href;
     }
 
-    return http.basePath.prepend(href);
-  }, [href, http.basePath]);
+    return basePath.prepend(href);
+  }, [href, basePath]);
 
   return (
     <EuiToolTip content={resolvedHref}>
