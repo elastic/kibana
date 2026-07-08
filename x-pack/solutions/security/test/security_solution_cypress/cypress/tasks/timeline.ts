@@ -313,33 +313,45 @@ export const closeTimeline = () => {
 export const createNewTimeline = () => {
   recurse(
     () => {
-      cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
-      return cy.get(CREATE_NEW_TIMELINE);
+      return cy.get(TIMELINE_WRAPPER).then(($wrapper) => {
+        if ($wrapper.hasClass('timeline-portal-overlay-mask--hidden')) {
+          cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
+          cy.get(CREATE_NEW_TIMELINE).should('be.visible').click();
+        }
+        return cy.get(TIMELINE_WRAPPER);
+      });
     },
-    (sub) => sub.is(':visible'),
-    { post: () => cy.get(CREATE_NEW_TIMELINE).click() }
+    ($wrapper) => !$wrapper.hasClass('timeline-portal-overlay-mask--hidden')
   );
 };
 
 export const createTimelineFromBottomBar = () => {
   recurse(
     () => {
-      cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
-      return cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE);
+      return cy.get(TIMELINE_WRAPPER).then(($wrapper) => {
+        if ($wrapper.hasClass('timeline-portal-overlay-mask--hidden')) {
+          cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
+          cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE).should('be.visible').click();
+        }
+        return cy.get(TIMELINE_WRAPPER);
+      });
     },
-    (sub) => sub.is(':visible'),
-    { post: () => cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE).click() }
+    ($wrapper) => !$wrapper.hasClass('timeline-portal-overlay-mask--hidden')
   );
 };
 
 export const createTimelineTemplateFromBottomBar = () => {
   recurse(
     () => {
-      cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
-      return cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0);
+      return cy.get(TIMELINE_WRAPPER).then(($wrapper) => {
+        if ($wrapper.hasClass('timeline-portal-overlay-mask--hidden')) {
+          cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
+          cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0).should('be.visible').click();
+        }
+        return cy.get(TIMELINE_WRAPPER);
+      });
     },
-    (sub) => sub.is(':visible'),
-    { post: () => cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0).click() }
+    ($wrapper) => !$wrapper.hasClass('timeline-portal-overlay-mask--hidden')
   );
 };
 
