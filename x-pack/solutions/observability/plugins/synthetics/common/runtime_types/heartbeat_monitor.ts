@@ -27,6 +27,19 @@ export const MonitorOriginCodec = t.literal('heartbeat');
 export type MonitorOrigin = t.TypeOf<typeof MonitorOriginCodec>;
 
 /**
+ * Fallback location for Heartbeat / Agent autodiscovery pings that carry no
+ * `observer.name`. Lightweight Agent synthetics inputs (notably Kubernetes/
+ * Docker autodiscovery) don't set a location, so these pings have no
+ * `observer.name`. The overview groups pings by a composite `(monitor.id,
+ * observer.name)` and the detail page aggregates locations on `observer.name`;
+ * both silently drop docs missing the field. Synthesizing a placeholder
+ * location keeps location-less autodiscovery monitors visible instead of
+ * disappearing.
+ */
+export const HEARTBEAT_UNMAPPED_LOCATION_ID = 'heartbeat';
+export const HEARTBEAT_UNMAPPED_LOCATION_LABEL = 'Heartbeat';
+
+/**
  * Read-only projection of a monitor that is run by Heartbeat / Elastic Agent
  * and has NO Synthetics saved object. Derived purely from local ping data in
  * `synthetics-*`.

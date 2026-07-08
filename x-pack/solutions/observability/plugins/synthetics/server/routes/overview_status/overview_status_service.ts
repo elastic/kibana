@@ -24,6 +24,10 @@ import type {
   OverviewStalePriorRun,
   OverviewStatusMetaData,
 } from '../../../common/runtime_types';
+import {
+  HEARTBEAT_UNMAPPED_LOCATION_ID,
+  HEARTBEAT_UNMAPPED_LOCATION_LABEL,
+} from '../../../common/runtime_types';
 import { isRunStale } from '../../../common/lib';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
 import {
@@ -563,7 +567,14 @@ export class OverviewStatusService {
                     {
                       locationId: {
                         terms: {
+                          // Heartbeat / Agent autodiscovery pings can lack
+                          // `observer.name` (no location configured). Without
+                          // `missing_bucket` the composite source drops them, so
+                          // location-less monitors would never bucket and never
+                          // surface. The null key is mapped to a placeholder
+                          // location below.
                           field: 'observer.name',
+                          missing_bucket: true,
                         },
                       },
                     },
@@ -651,7 +662,12 @@ export class OverviewStatusService {
         data?.buckets.forEach((bucket) => {
           const { status: statusAgg, key: bKey, ...rest } = bucket;
           const monitorId = String(bKey.monitorId);
-          const locationId = String(bKey.locationId);
+          // `missing_bucket` yields a null key for pings with no `observer.name`
+          // (location-less Heartbeat / Agent monitors) — map it to a placeholder.
+          const locationId =
+            bKey.locationId == null
+              ? HEARTBEAT_UNMAPPED_LOCATION_ID
+              : String(bKey.locationId);
           const metrics = statusAgg.top?.[0].metrics;
           const status = String(metrics?.['monitor.status']);
           const rawMonitorUrl = metrics?.['url.full.keyword'];
@@ -696,7 +712,9 @@ export class OverviewStatusService {
           const indexNameAgg = ccsEnabled ? (rest as any).index_name : undefined;
           const indexName = indexNameAgg?.buckets?.[0]?.key;
           const locationNameAgg = (rest as any).location_name;
-          const locationLabel = locationNameAgg?.buckets?.[0]?.key;
+          const locationLabel =
+            locationNameAgg?.buckets?.[0]?.key ??
+            (bKey.locationId == null ? HEARTBEAT_UNMAPPED_LOCATION_LABEL : undefined);
           const kibanaUrl = ccsEnabled ? metrics?.kibanaUrl : undefined;
           const monitorName = metrics?.['monitor.name'];
           const monitorType = metrics?.['monitor.type'];

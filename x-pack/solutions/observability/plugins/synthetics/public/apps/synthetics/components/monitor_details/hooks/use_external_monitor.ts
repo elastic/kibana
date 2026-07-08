@@ -10,6 +10,8 @@ import { useSyntheticsEsSearch } from '../../../hooks/use_synthetics_es_search';
 import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 import {
   ConfigKey,
+  HEARTBEAT_UNMAPPED_LOCATION_ID,
+  HEARTBEAT_UNMAPPED_LOCATION_LABEL,
   type ExternalSyntheticsMonitor,
   type MonitorOrigin,
   type MonitorTypeEnum,
@@ -117,6 +119,10 @@ export const useExternalMonitor = ({
             // via a terms sub-agg because it is a wildcard-typed field).
             field: 'observer.name',
             size: 100,
+            // Location-less Heartbeat / Agent pings have no observer.name;
+            // bucket them under a placeholder so the detail page still renders
+            // a location instead of an empty set.
+            missing: HEARTBEAT_UNMAPPED_LOCATION_ID,
           },
           aggs: {
             label: {
@@ -142,9 +148,12 @@ export const useExternalMonitor = ({
     const buckets = data.aggregations?.locations?.buckets ?? [];
     const locations = buckets.map((bucket) => {
       const labelKey = bucket.label?.buckets?.[0]?.key;
+      const id = String(bucket.key);
+      const fallbackLabel =
+        id === HEARTBEAT_UNMAPPED_LOCATION_ID ? HEARTBEAT_UNMAPPED_LOCATION_LABEL : id;
       return {
-        id: String(bucket.key),
-        label: labelKey != null ? String(labelKey) : String(bucket.key),
+        id,
+        label: labelKey != null ? String(labelKey) : fallbackLabel,
       };
     });
 
