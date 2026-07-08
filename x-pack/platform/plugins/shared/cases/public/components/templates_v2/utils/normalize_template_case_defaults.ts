@@ -10,16 +10,19 @@ import { isMap, parse as yamlParse, parseDocument } from 'yaml';
 
 const TOP_LEVEL_CASE_TITLE_KEY = 'name';
 
-const LEGACY_CASE_DEFAULT_KEYS = [
-  'title',
-] as const;
+const LEGACY_CASE_DEFAULT_KEYS = ['title'] as const;
 
 const isPlainRecord = (value: unknown): value is Record<string, unknown> =>
   value != null && typeof value === 'object' && !Array.isArray(value);
 
-const normalizeCaseDefaultsObject = (definition: Record<string, unknown>): Record<string, unknown> => {
+const normalizeCaseDefaultsObject = (
+  definition: Record<string, unknown>
+): Record<string, unknown> => {
   const normalized = { ...definition };
-  if (typeof normalized[TOP_LEVEL_CASE_TITLE_KEY] !== 'string' && typeof normalized.title === 'string') {
+  if (
+    typeof normalized[TOP_LEVEL_CASE_TITLE_KEY] !== 'string' &&
+    typeof normalized.title === 'string'
+  ) {
     normalized[TOP_LEVEL_CASE_TITLE_KEY] = normalized.title;
   }
   delete normalized.title;

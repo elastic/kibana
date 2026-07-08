@@ -27,34 +27,40 @@ const ImportedDefinitionSchema = z.object({
   ),
 });
 
-const ImportedTemplateSchema = z.object({
-  templateId: z.string().optional(),
-  template_name: z.string().min(1).optional(),
-  // Legacy support for early preview builds before the snake_case convention.
-  templateName: z.string().min(1).optional(),
-  name: z.string().min(1).optional(),
-  template_description: z.string().optional(),
-  templateDescription: z.string().optional(),
-  template_tags: z.array(z.string()).nullable().optional(),
-  templateTags: z.array(z.string()).nullable().optional(),
-  title: z.string().optional(),
-  owner: z.string().optional(),
-  description: z.string().optional(),
-  tags: z.array(z.string()).nullable().optional(),
-  // Legacy top-level import shape support.
-  severity: CaseSeveritySchema.optional(),
-  category: z.string().nullable().optional(),
-  assignees: CaseAssigneesSchema.optional(),
-  connector: CaseConnectorWithoutNameSchema.optional(),
-  settings: TemplateSettingsSchema.optional(),
-  author: z.string().optional(),
-  templateVersion: z.number().optional(),
-  isDefault: z.boolean().optional(),
-  definition: ImportedDefinitionSchema.optional(),
-}).refine((template) => template.template_name != null || template.templateName != null || template.name != null, {
-  message: 'Either template_name or name is required',
-  path: ['template_name'],
-});
+const ImportedTemplateSchema = z
+  .object({
+    templateId: z.string().optional(),
+    template_name: z.string().min(1).optional(),
+    // Legacy support for early preview builds before the snake_case convention.
+    templateName: z.string().min(1).optional(),
+    name: z.string().min(1).optional(),
+    template_description: z.string().optional(),
+    templateDescription: z.string().optional(),
+    template_tags: z.array(z.string()).nullable().optional(),
+    templateTags: z.array(z.string()).nullable().optional(),
+    title: z.string().optional(),
+    owner: z.string().optional(),
+    description: z.string().optional(),
+    tags: z.array(z.string()).nullable().optional(),
+    // Legacy top-level import shape support.
+    severity: CaseSeveritySchema.optional(),
+    category: z.string().nullable().optional(),
+    assignees: CaseAssigneesSchema.optional(),
+    connector: CaseConnectorWithoutNameSchema.optional(),
+    settings: TemplateSettingsSchema.optional(),
+    author: z.string().optional(),
+    templateVersion: z.number().optional(),
+    isDefault: z.boolean().optional(),
+    definition: ImportedDefinitionSchema.optional(),
+  })
+  .refine(
+    (template) =>
+      template.template_name != null || template.templateName != null || template.name != null,
+    {
+      message: 'Either template_name or name is required',
+      path: ['template_name'],
+    }
+  );
 
 type ImportedTemplate = z.infer<typeof ImportedTemplateSchema>;
 

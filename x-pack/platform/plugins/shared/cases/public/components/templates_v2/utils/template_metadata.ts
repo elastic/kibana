@@ -29,7 +29,9 @@ export interface TemplateMetadataErrors {
 export const normalizeTemplateMetadata = (metadata: TemplateMetadata): TemplateMetadata => {
   const normalizedName = metadata.name.trim();
   const normalizedDescription = metadata.description.trim();
-  const normalizedTags = uniq(metadata.tags.map((tag) => tag.trim()).filter((tag) => tag.length > 0));
+  const normalizedTags = uniq(
+    metadata.tags.map((tag) => tag.trim()).filter((tag) => tag.length > 0)
+  );
 
   return {
     name: normalizedName,

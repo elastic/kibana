@@ -92,11 +92,13 @@ type EditableCaseDefaultField =
 const ASSIGNEES_YAML_KEY = 'assignees';
 const SETTINGS_YAML_KEY = 'settings';
 const TIMELINE_BOTTOM_BAR_SELECTOR = '[data-test-subj="timeline-bottom-bar-container"]';
-// The Security Solution app header row ("Add integrations" / breadcrumbs) is rendered in-flow inside
-// the scrollable content area but is NOT subtracted from `--kbn-application--content-height`. Reserve
-// its height (standard 48px EUI header) so the full-height editor fills the viewport exactly instead
-// of overflowing by one header row.
-const APP_HEADER_OFFSET = '48px';
+// Full-height offset for the editor wrapper. Two in-flow bits of chrome affect the fit:
+//  - the Security Solution app header row (~48px "Add integrations"/breadcrumbs) is NOT subtracted
+//    from `--kbn-application--content-height`, so it must be reserved; and
+//  - the surrounding EuiPageSection adds 24px of bottom padding, which we bleed away (see the
+//    wrapper style's negative marginBottom) so the split runs to the page bottom.
+// Net reserved height = 48px (app header) − 24px (reclaimed bottom padding) = 24px.
+const APP_HEADER_OFFSET = '24px';
 const LEGACY_SETTINGS_GUIDANCE_COMMENT =
   '# Case settings (sync alerts, extract observables) and the default connector are configured in the\n' +
   '# Settings tab of the preview panel, not here.';

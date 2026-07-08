@@ -149,10 +149,7 @@ function buildTemplateBody(template: TemplateInput): TemplateBuildResult {
     delete definitionObj.name;
     delete definitionObj.description;
     delete definitionObj.tags;
-    const mergedTags = dedupe([
-      ...(template.tags ?? []),
-      AUTO_GENERATED_TAG,
-    ]);
+    const mergedTags = dedupe([...(template.tags ?? []), AUTO_GENERATED_TAG]);
     return {
       definitionYaml: yamlStringify(definitionObj),
       tags: mergedTags,

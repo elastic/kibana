@@ -6,10 +6,7 @@
  */
 
 import { parse as yamlParse } from 'yaml';
-import {
-  getTemplateMetadataFromYaml,
-  setTemplateMetadataInYaml,
-} from './template_metadata_yaml';
+import { getTemplateMetadataFromYaml, setTemplateMetadataInYaml } from './template_metadata_yaml';
 
 describe('template_metadata_yaml', () => {
   it('writes template-prefixed metadata keys into YAML', () => {

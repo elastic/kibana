@@ -30,34 +30,25 @@ export interface TemplateMetadataPreviewProps {
   showCaseDefaults?: boolean;
 }
 
-export const TemplateMetadataPreview: FC<TemplateMetadataPreviewProps> = ({
+// Case-default rows (title, description, severity, category, tags, assignees). Extracted so the
+// parent gates them with a single `showCaseDefaults` check and each function stays within the
+// complexity budget.
+const CaseDefaultsPreviewRows: FC<{ parsedTemplate: ParsedTemplateDefinition }> = ({
   parsedTemplate,
-  showCaseDefaults = true,
 }) => {
-  const styles = useMemoCss(componentStyles);
-  const {
-    name,
-    title,
-    description,
-    tags,
-    severity,
-    category,
-    assignees,
-    settings,
-    connector,
-  } = parsedTemplate;
   const { euiTheme } = useEuiTheme();
-  // Hidden where alert syncing is not a feature (e.g. Observability), matching the editor form.
-  const { isSyncAlertsEnabled } = useCasesFeatures();
+  const { name, title, description, tags, severity, category, assignees } = parsedTemplate;
+  const caseTitle = title ?? name;
+
   return (
-    <dl css={styles.list}>
-      {showCaseDefaults && (title ?? name) && (
+    <>
+      {caseTitle && (
         <MetadataRow label={i18n.CASE_DEFAULT_TITLE}>
-          <EuiText size="s">{title ?? name}</EuiText>
+          <EuiText size="s">{caseTitle}</EuiText>
         </MetadataRow>
       )}
 
-      {showCaseDefaults && description && (
+      {description && (
         <MetadataRow label={commonI18n.DESCRIPTION}>
           <EuiText size="s" color="subdued">
             {description}
@@ -65,19 +56,19 @@ export const TemplateMetadataPreview: FC<TemplateMetadataPreviewProps> = ({
         </MetadataRow>
       )}
 
-      {showCaseDefaults && severity && (
+      {severity && (
         <MetadataRow label={SEVERITY_TITLE}>
           <SeverityHealth severity={severity as CaseSeverity} />
         </MetadataRow>
       )}
 
-      {showCaseDefaults && category && (
+      {category && (
         <MetadataRow label={commonI18n.CATEGORY}>
           <EuiText size="s">{category}</EuiText>
         </MetadataRow>
       )}
 
-      {showCaseDefaults && tags && tags.length > 0 && (
+      {tags && tags.length > 0 && (
         <MetadataRow label={commonI18n.TAGS}>
           <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
             {tags.map((tag, i) => (
@@ -97,13 +88,31 @@ export const TemplateMetadataPreview: FC<TemplateMetadataPreviewProps> = ({
         </MetadataRow>
       )}
 
-      {showCaseDefaults && assignees && assignees.length > 0 && (
+      {assignees && assignees.length > 0 && (
         <MetadataRow label={i18n.CASE_DEFAULT_ASSIGNEES}>
           <EuiText size="s" color="subdued">
             {assignees.map((assignee) => assignee.uid).join(', ')}
           </EuiText>
         </MetadataRow>
       )}
+    </>
+  );
+};
+
+CaseDefaultsPreviewRows.displayName = 'CaseDefaultsPreviewRows';
+
+export const TemplateMetadataPreview: FC<TemplateMetadataPreviewProps> = ({
+  parsedTemplate,
+  showCaseDefaults = true,
+}) => {
+  const styles = useMemoCss(componentStyles);
+  const { settings, connector } = parsedTemplate;
+  // Hidden where alert syncing is not a feature (e.g. Observability), matching the editor form.
+  const { isSyncAlertsEnabled } = useCasesFeatures();
+
+  return (
+    <dl css={styles.list}>
+      {showCaseDefaults && <CaseDefaultsPreviewRows parsedTemplate={parsedTemplate} />}
 
       {isSyncAlertsEnabled && settings?.syncAlerts !== undefined && (
         <MetadataRow label={commonI18n.SYNC_ALERTS}>

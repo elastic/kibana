@@ -153,7 +153,10 @@ describe('useTemplateFormSync', () => {
 
   it('populates form fields from top-level definition defaults', () => {
     mockUseFormData.mockReturnValue([{ templateId: 'template-3' }]);
-    mockUseGetTemplate.mockReturnValue({ data: mockTemplateWithTopLevelDefaults, isLoading: false });
+    mockUseGetTemplate.mockReturnValue({
+      data: mockTemplateWithTopLevelDefaults,
+      isLoading: false,
+    });
 
     renderHook(() => useTemplateFormSync(innerForm, new Set()));
 

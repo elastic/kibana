@@ -9,11 +9,13 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const componentStyles = {
-  wrapper: () =>
+  wrapper: ({ euiTheme }: UseEuiTheme) =>
     css({
-      // Keep the section's native block spacing so the app header and split editor aren't clipped
-      // when chrome/breadcrumb heights change.
-      marginBottom: 0,
+      // Bleed the surrounding EuiPageSection's bottom padding so the editor/preview split (and the
+      // vertical divider between them) runs all the way to the bottom of the page instead of stopping
+      // short. Paired with the reduced full-height offset (see APP_HEADER_OFFSET) to keep the page
+      // filling the viewport exactly (no scroll).
+      marginBottom: `-${euiTheme.size.l}`,
     }),
   editorWrapper: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -22,6 +24,10 @@ export const componentStyles = {
       marginInline: `-${euiTheme.size.l}`,
       overflow: 'hidden',
       minHeight: 0,
+      // The resizable panels sit flush under the AppHeader and paint over its 1px bottom border,
+      // so the separation reads as missing on the subdued editor surface. Draw the divider on this
+      // wrapper (above the panels) so it stays visible across the full-bleed editor/preview split.
+      borderTop: `1px solid ${euiTheme.colors.borderBasePlain}`,
     }),
   pageTemplate: css({
     flexGrow: 0,
