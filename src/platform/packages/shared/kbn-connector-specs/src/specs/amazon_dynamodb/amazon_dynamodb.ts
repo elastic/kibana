@@ -15,9 +15,9 @@
  * - Get, query, and scan items
  * - Put and delete items
  *
- * Authentication uses the aws_credentials auth type which stores
- * Access Key ID and Secret Access Key as encrypted secrets and
- * signs requests automatically via an Axios SigV4 interceptor.
+ * Supports two auth types: aws_credentials (long-lived IAM user key) and
+ * aws_iam_role (STS AssumeRole with short-lived credentials). Both sign
+ * requests automatically via an Axios SigV4 interceptor.
  */
 
 import { i18n } from '@kbn/i18n';

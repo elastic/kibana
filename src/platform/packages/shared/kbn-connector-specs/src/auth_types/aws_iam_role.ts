@@ -210,7 +210,6 @@ export const AwsIamRoleAuth: AuthTypeSpec<AuthSchemaType> = {
     secret: AuthSchemaType
   ): Promise<AxiosInstance> => {
     const { accessKeyId, secretAccessKey, roleArn, externalId, roleSessionName } = secret;
-    const sessionName = roleSessionName ?? 'kibana-connector';
 
     // Create a separate client for STS AssumeRole calls, inheriting the platform's
     // configured defaults (timeouts, base headers, etc.) but without our signing
@@ -242,7 +241,7 @@ export const AwsIamRoleAuth: AuthTypeSpec<AuthSchemaType> = {
           accessKeyId,
           secretAccessKey,
           roleArn,
-          sessionName,
+          roleSessionName,
           externalId
         );
 
