@@ -57,6 +57,7 @@ import { ErrorCallout } from '../../../common/components/error_callout';
 import { useOverviewStatusState } from '../../hooks/use_overview_status';
 import { useMonitorAttachmentConfigWithMonitor } from '../../../monitor_details/hooks/use_monitor_attachment_config';
 import { getSyntheticsCcsIndex } from '../../../../../../../common/get_synthetics_indices';
+import { getLocationSeriesConfig } from './exploratory_view_location';
 import type { OverviewStatusMetaData } from '../types';
 import { ConfigKey } from '../types';
 import { ActionsPopover } from './actions_popover';
@@ -115,24 +116,28 @@ function DetailFlyoutDurationChart({
 
   const attributes = useMemo(() => {
     if (showAllLocations) {
-      return allLocations.map((loc, idx) => ({
-        seriesType: 'line' as const,
-        color: euiTheme.colors.vis[VIS_COLORS[idx % VIS_COLORS.length]],
-        time: {
-          from: DEFAULT_DURATION_CHART_FROM,
-          to: DEFAULT_CURRENT_DURATION_CHART_TO,
-        },
-        reportDefinitions: {
-          'monitor.id': [id],
-          'observer.geo.name': [loc.label],
-        },
-        filters: [{ field: 'observer.geo.name', values: [loc.label] }],
-        dataType: 'synthetics' as const,
-        selectedMetricField: 'monitor.duration.us',
-        name: loc.label,
-        operationType: 'average' as const,
-      }));
+      return allLocations.map((loc, idx) => {
+        const { reportDefinition, filters } = getLocationSeriesConfig(loc.label);
+        return {
+          seriesType: 'line' as const,
+          color: euiTheme.colors.vis[VIS_COLORS[idx % VIS_COLORS.length]],
+          time: {
+            from: DEFAULT_DURATION_CHART_FROM,
+            to: DEFAULT_CURRENT_DURATION_CHART_TO,
+          },
+          reportDefinitions: {
+            'monitor.id': [id],
+            ...reportDefinition,
+          },
+          filters,
+          dataType: 'synthetics' as const,
+          selectedMetricField: 'monitor.duration.us',
+          name: loc.label,
+          operationType: 'average' as const,
+        };
+      });
     }
+    const { reportDefinition, filters } = getLocationSeriesConfig(location);
     return [
       {
         seriesType: 'area' as const,
@@ -143,9 +148,9 @@ function DetailFlyoutDurationChart({
         },
         reportDefinitions: {
           'monitor.id': [id],
-          'observer.geo.name': [location],
+          ...reportDefinition,
         },
-        filters: [{ field: 'observer.geo.name', values: [location] }],
+        filters,
         dataType: 'synthetics' as const,
         selectedMetricField: 'monitor.duration.us',
         name: DURATION_SERIES_NAME,
@@ -160,9 +165,9 @@ function DetailFlyoutDurationChart({
         },
         reportDefinitions: {
           'monitor.id': [id],
-          'observer.geo.name': [location],
+          ...reportDefinition,
         },
-        filters: [{ field: 'observer.geo.name', values: [location] }],
+        filters,
         dataType: 'synthetics' as const,
         selectedMetricField: 'monitor.duration.us',
         name: PREVIOUS_PERIOD_SERIES_NAME,
