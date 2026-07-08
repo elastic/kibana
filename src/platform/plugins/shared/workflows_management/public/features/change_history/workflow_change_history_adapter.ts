@@ -12,6 +12,7 @@ import type {
   ChangeHistoryDetail,
   ChangeHistoryListItem,
   ChangeHistoryListItemChanges,
+  ChangeHistoryPendingChange,
 } from '@kbn/change-history-ui';
 import type { HttpSetup } from '@kbn/core/public';
 import { WorkflowApi } from '@kbn/workflows-ui';
@@ -98,11 +99,12 @@ const yieldToNextFrame = (signal?: AbortSignal): Promise<void> =>
 
 export interface CreateWorkflowChangeHistoryAdapterOptions {
   onWorkflowRestored?: (objectId: string) => Promise<void>;
+  getPendingChange?: () => ChangeHistoryPendingChange | undefined;
 }
 
 export const createWorkflowChangeHistoryAdapter = (
   http: HttpSetup,
-  { onWorkflowRestored }: CreateWorkflowChangeHistoryAdapterOptions = {}
+  { onWorkflowRestored, getPendingChange }: CreateWorkflowChangeHistoryAdapterOptions = {}
 ): ChangeHistoryAdapter => {
   const changeCache = new Map<string, ChangeHistoryDetail>();
   const pageTailByKey = new Map<string, WorkflowHistoryItem>();
@@ -204,5 +206,6 @@ export const createWorkflowChangeHistoryAdapter = (
         throw mapWorkflowRestoreHttpError(error);
       }
     },
+    ...(getPendingChange ? { getPendingChange } : {}),
   };
 };
