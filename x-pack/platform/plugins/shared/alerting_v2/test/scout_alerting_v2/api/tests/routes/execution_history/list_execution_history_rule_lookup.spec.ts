@@ -18,10 +18,7 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import type {
-  ListPolicyExecutionHistoryResponse,
-  PolicyExecutionHistoryItem,
-} from '@kbn/alerting-v2-schemas';
+import type { ListPolicyExecutionHistoryResponse } from '@kbn/alerting-v2-schemas';
 import type { AlertEvent } from '../../../../../../server/resources/datastreams/alert_events';
 import {
   apiTest,
@@ -125,7 +122,9 @@ apiTest.describe(
             headers: readerHeaders,
           });
           const ids = new Set(
-            (response.body as ListPolicyExecutionHistoryResponse).items.map((it) => it.rule.id)
+            (response.body as ListPolicyExecutionHistoryResponse).items.flatMap((it) =>
+              it.rules.map((r) => r.id)
+            )
           );
           return ids.has(RULE_ID_KEPT) && ids.has(RULE_ID_DELETED);
         };
@@ -140,20 +139,19 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
 
         const body = response.body as ListPolicyExecutionHistoryResponse;
-        const itemsByRule = (id: string): PolicyExecutionHistoryItem[] =>
-          body.items.filter((it) => it.rule.id === id);
 
-        const itemsOfRuleKept = itemsByRule(RULE_ID_KEPT);
-        const itemsOfRuleDeleted = itemsByRule(RULE_ID_DELETED);
+        const rulesRefs = body.items.flatMap((it) => it.rules);
+        const keptRuleRefs = rulesRefs.filter((r) => r.id === RULE_ID_KEPT);
+        const deletedRuleRefs = rulesRefs.filter((r) => r.id === RULE_ID_DELETED);
 
-        expect(itemsOfRuleKept.length).toBeGreaterThanOrEqual(1);
-        expect(itemsOfRuleDeleted.length).toBeGreaterThanOrEqual(1);
+        expect(keptRuleRefs.length).toBeGreaterThan(0);
+        expect(deletedRuleRefs.length).toBeGreaterThan(0);
 
-        for (const item of itemsOfRuleKept) {
-          expect(item.rule).toStrictEqual({ id: RULE_ID_KEPT, name: RULE_KEPT_NAME });
+        for (const rule of keptRuleRefs) {
+          expect(rule).toStrictEqual({ id: RULE_ID_KEPT, name: RULE_KEPT_NAME });
         }
-        for (const item of itemsOfRuleDeleted) {
-          expect(item.rule).toStrictEqual({ id: RULE_ID_DELETED, name: null });
+        for (const rule of deletedRuleRefs) {
+          expect(rule).toStrictEqual({ id: RULE_ID_DELETED, name: null });
         }
       }
     );

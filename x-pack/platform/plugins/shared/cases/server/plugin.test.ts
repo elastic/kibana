@@ -32,9 +32,17 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
     stack: { enabled: true },
     incrementalId: { enabled: true, taskIntervalMinutes: 10, taskStartDelayMinutes: 10 },
     analytics: { index: { enabled: true } },
+    analyticsV2: {
+      enabled: false,
+      reconciliationIntervalMinutes: 30,
+      enableAdminRoutes: false,
+      resetTaskTimeoutMinutes: 60,
+      resetPageDelayMs: 0,
+    },
     templates: { enabled: true },
     casesRedesign: { list: false, details: false, settings: false },
     attachments: { enabled: true },
+    chat: { enabled: false },
     ...overrides,
   };
 }
@@ -82,6 +90,13 @@ describe('Cases Plugin', () => {
       notifications: notificationsMock.createStart(),
       ruleRegistry: { getRacClientWithRequest: jest.fn(), alerting: alertsMock.createStart() },
       taskManager: taskManagerMock.createStart(),
+      // Cases-analyticsV2 needs the dataViews plugin at start to manage the
+      // Cases data view + runtime fields. The flag is off in the test
+      // fixture so this mock is never actually called.
+      dataViews: {
+        dataViewsServiceFactory: jest.fn(),
+        getScriptedFieldsEnabled: jest.fn().mockReturnValue(false),
+      } as unknown as CasesServerStartDependencies['dataViews'],
     };
   });
 
@@ -113,49 +128,14 @@ describe('Cases Plugin', () => {
       expect(pluginsSetup.features.registerKibanaFeature).not.toHaveBeenCalled();
     });
 
-    it('should register cases-attachments SO when attachments.enabled is true', async () => {
-      context = coreMock.createPluginInitializerContext<ConfigType>(
-        getConfig({ attachments: { enabled: true } })
-      );
-      const pluginWithAttachmentsEnabled = new CasePlugin(context);
-
-      pluginWithAttachmentsEnabled.setup(coreSetup, pluginsSetup);
+    it('should always register cases-attachments SO', async () => {
+      plugin.setup(coreSetup, pluginsSetup);
 
       const registerTypeCalls = coreSetup.savedObjects.registerType.mock.calls;
       const attachmentSOCall = registerTypeCalls.find(
         (call) => call[0]?.name === CASE_ATTACHMENT_SAVED_OBJECT
       );
       expect(attachmentSOCall).toBeDefined();
-    });
-
-    it('should not register cases-attachments SO when attachments.enabled is false', async () => {
-      context = coreMock.createPluginInitializerContext<ConfigType>(
-        getConfig({ attachments: { enabled: false } })
-      );
-      const pluginWithAttachmentsDisabled = new CasePlugin(context);
-
-      pluginWithAttachmentsDisabled.setup(coreSetup, pluginsSetup);
-
-      const registerTypeCalls = coreSetup.savedObjects.registerType.mock.calls;
-      const attachmentSOCall = registerTypeCalls.find(
-        (call) => call[0]?.name === 'cases-attachments'
-      );
-      expect(attachmentSOCall).toBeUndefined();
-    });
-
-    it('should not register cases-attachments SO when attachments is undefined', async () => {
-      context = coreMock.createPluginInitializerContext<ConfigType>(
-        getConfig({ attachments: undefined } as Partial<ConfigType>)
-      );
-      const pluginWithAttachmentsUndefined = new CasePlugin(context);
-
-      pluginWithAttachmentsUndefined.setup(coreSetup, pluginsSetup);
-
-      const registerTypeCalls = coreSetup.savedObjects.registerType.mock.calls;
-      const attachmentSOCall = registerTypeCalls.find(
-        (call) => call[0]?.name === 'cases-attachments'
-      );
-      expect(attachmentSOCall).toBeUndefined();
     });
   });
 
@@ -173,6 +153,13 @@ describe('Cases Plugin', () => {
                 "enabled": true,
               },
             },
+            "analyticsV2": Object {
+              "enableAdminRoutes": false,
+              "enabled": false,
+              "reconciliationIntervalMinutes": 30,
+              "resetPageDelayMs": 0,
+              "resetTaskTimeoutMinutes": 60,
+            },
             "attachments": Object {
               "enabled": true,
             },
@@ -180,6 +167,9 @@ describe('Cases Plugin', () => {
               "details": false,
               "list": false,
               "settings": false,
+            },
+            "chat": Object {
+              "enabled": false,
             },
             "enabled": true,
             "files": Object {

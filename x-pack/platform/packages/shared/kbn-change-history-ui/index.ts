@@ -13,16 +13,15 @@ export {
   ChangeHistoryModal,
   ChangeHistoryTrigger,
   ChangeHistoryListGroupItem,
-  ChangeHistoryPreviewPanel,
   ChangeHistoryRestoreButton,
   ChangeHistoryDefaultPreviewHeaderActions,
 } from './src/components/modal';
 export type {
   ChangeHistoryRestoreButtonProps,
   ChangeHistoryDefaultPreviewHeaderActionsProps,
-  ChangeHistoryPreviewPanelProps,
 } from './src/components/modal';
 export {
+  ChangeHistoryModalContext,
   ChangeHistoryProvider,
   useChangeHistoryConfig,
   useChangeHistoryModal,
@@ -39,11 +38,10 @@ export {
   useInvalidateChangeHistory,
   useChangeHistoryAutoSelection,
   CHANGE_HISTORY_QUERY_KEY,
-  CHANGE_HISTORY_LIST_QUERY_KEY,
   changeHistoryObjectQueryKeyPrefix,
   changeHistoryListQueryKey,
   changeHistoryDetailQueryKey,
-  changeHistoryListQueryKeyPrefix,
+  changeHistoryScopeQueryKeyPrefix,
 } from './src/hooks';
 export {
   getChangeHistoryErrorCode,
@@ -60,3 +58,33 @@ export type {
   UseChangeHistoryAutoSelectionArgs,
   UseChangeHistoryAutoSelectionResult,
 } from './src/hooks';
+export {
+  changeHistoryTelemetryEvents,
+  changeHistoryTelemetryEventNames,
+  changeHistoryTelemetryEventSchemas,
+  ChangeHistoryTelemetryEventTypes,
+  createChangeHistoryTelemetryReporter,
+  registerChangeHistoryTelemetryEvents,
+} from './src/telemetry';
+export type {
+  ChangeHistoryCompareMode,
+  ChangeHistoryComparisonType,
+  ChangeHistoryDiffNavigationSource,
+  ChangeHistoryFilterType,
+  ChangeHistoryScope,
+  ChangeHistorySelectionSource,
+  ChangeHistoryTelemetryEvent,
+  ChangeHistoryTelemetryEventType,
+  ChangeHistoryTelemetryEventsMap,
+  ChangeHistoryTelemetryReporter,
+  ChangeHistoryTelemetryScopeFields,
+  CreateChangeHistoryTelemetryReporterOptions,
+  ReportChangeHistoryChangeSelectedActionParams,
+  ReportChangeHistoryDiffChangeNavigatedActionParams,
+  ReportChangeHistoryDiffViewedActionParams,
+  ReportChangeHistoryFilterAppliedActionParams,
+  ReportChangeHistoryOpenedActionParams,
+  ReportChangeHistoryRestoreCompletedActionParams,
+  ReportChangeHistoryRestoreConfirmedActionParams,
+  ReportChangeHistoryRestoreFailedActionParams,
+} from './src/telemetry';

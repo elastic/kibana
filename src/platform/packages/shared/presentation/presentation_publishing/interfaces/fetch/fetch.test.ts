@@ -82,6 +82,7 @@ describe('onFetchContextChanged', () => {
       const fetchContext = onFetchMock.mock.calls[0][0];
       expect(fetchContext).toEqual({
         filters: [],
+        isApproximate: false,
         isReload: false,
         query: {
           language: 'kquery',
@@ -184,6 +185,7 @@ describe('onFetchContextChanged', () => {
       const fetchContext = onFetchMock.mock.calls[0][0];
       expect(fetchContext).toEqual({
         filters: [],
+        isApproximate: false,
         isReload: true,
         query: {
           language: 'kquery',
@@ -234,6 +236,7 @@ describe('onFetchContextChanged', () => {
       const fetchContext = onFetchMock.mock.calls[0][0];
       expect(fetchContext).toEqual({
         filters: [],
+        isApproximate: false,
         isReload: false,
         query: {
           language: 'kquery',
@@ -375,6 +378,45 @@ describe('onFetchContextChanged', () => {
         });
         subscription.unsubscribe();
       });
+    });
+  });
+
+  describe('isApproximate', () => {
+    test('propagates isApproximate from parent API', async () => {
+      const api = {
+        parentApi: {
+          ...parentApi,
+          isApproximate$: new BehaviorSubject<boolean>(true),
+        },
+      };
+      const subscription = fetch$(api).subscribe(onFetchMock);
+      await waitFor(() => {
+        expect(onFetchMock).toHaveBeenCalledTimes(1);
+      });
+      const fetchContext = onFetchMock.mock.calls[0][0];
+      expect(fetchContext.isApproximate).toBe(true);
+      subscription.unsubscribe();
+    });
+
+    test('isApproximate is false when parent API does not publish it', async () => {
+      const subscription = fetch$({ parentApi }).subscribe(onFetchMock);
+      await waitFor(() => {
+        expect(onFetchMock).toHaveBeenCalledTimes(1);
+      });
+      const fetchContext = onFetchMock.mock.calls[0][0];
+      expect(fetchContext.isApproximate).toBe(false);
+      subscription.unsubscribe();
+    });
+
+    test('emits a new fetch context when isApproximate toggles', async () => {
+      const isApproximate$ = new BehaviorSubject<boolean>(false);
+      const api = { parentApi: { ...parentApi, isApproximate$ } };
+      const subscription = fetch$(api).subscribe(onFetchMock);
+      await waitFor(() => expect(onFetchMock).toHaveBeenCalledTimes(1));
+      isApproximate$.next(true);
+      await waitFor(() => expect(onFetchMock).toHaveBeenCalledTimes(2));
+      expect(onFetchMock.mock.calls[1][0].isApproximate).toBe(true);
+      subscription.unsubscribe();
     });
   });
 

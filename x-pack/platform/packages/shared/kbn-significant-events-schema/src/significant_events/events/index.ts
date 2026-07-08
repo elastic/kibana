@@ -25,6 +25,21 @@ export const SIGNIFICANT_EVENT_STATUS_OPTIONS = [
 export const significantEventStatusSchema = z.enum(SIGNIFICANT_EVENT_STATUS_OPTIONS);
 export type SignificantEventStatus = z.infer<typeof significantEventStatusSchema>;
 
+/**
+ * One investigation run attached to this significant event.
+ * `workflow_execution_id` is the investigation workflow execution id, used to fetch the full
+ * investigation state (hypotheses, conclusion, etc.) from the corresponding workflow execution —
+ * that workflow execution document is the single source of truth for the investigation's content,
+ * so this entry intentionally carries no status of its own. The investigation is running while
+ * `completed_at` is absent.
+ */
+export const significantEventInvestigationSchema = z.object({
+  workflow_execution_id: z.string().max(MAX_ID_LENGTH),
+  started_at: z.iso.datetime({ offset: true }),
+  completed_at: z.iso.datetime({ offset: true }).optional(),
+});
+export type SignificantEventInvestigation = z.infer<typeof significantEventInvestigationSchema>;
+
 export const significantEventSchema = z.object({
   '@timestamp': z.iso.datetime({ offset: true }),
   created_at: z.iso.datetime({ offset: true }),
@@ -47,6 +62,7 @@ export const significantEventSchema = z.object({
   cause_kis: z.array(causeKiSchema).optional(),
   evidences: z.array(evidenceSchema).optional(),
   assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
+  investigations: z.array(significantEventInvestigationSchema).max(100).optional(),
 });
 
 export type SignificantEvent = z.infer<typeof significantEventSchema>;
