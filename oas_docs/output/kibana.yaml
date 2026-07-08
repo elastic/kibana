@@ -337,6 +337,7 @@ tags:
   - description: Manage Kibana short URLs.
     name: short url
     x-displayName: Short URLs
+  - name: significant_events
   - description: SLO APIs enable you to define, manage and track service-level objectives
     name: slo
     x-displayName: Service level objectives
@@ -31951,13 +31952,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -32796,6 +32805,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 enrollment_token:
                   type: string
                 settings:
@@ -32850,13 +32861,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -32936,6 +32955,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 user_info:
                   additionalProperties: false
                   type: object
@@ -32957,13 +32978,21 @@ paths:
                   value:
                     actionId: actionId
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: 'OK: A successful request.'
         '400':
           content:
@@ -33041,6 +33070,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 includeInactive:
                   default: false
                   type: boolean
@@ -33059,13 +33090,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -33144,6 +33183,8 @@ paths:
                       type: array
                     - description: KQL query string. Leave empty to target all collectors
                       type: string
+                dryRun:
+                  type: boolean
                 includeInactive:
                   description: When passing collectors by KQL query, also removes inactive collectors
                   type: boolean
@@ -33159,13 +33200,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -33254,6 +33303,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
               required:
                 - agents
       responses:
@@ -33266,13 +33317,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -33352,6 +33411,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 includeInactive:
                   default: false
                   type: boolean
@@ -33368,16 +33429,25 @@ paths:
                       - actionId1
                       - actionId2
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionIds:
-                    items:
-                      type: string
-                    maxItems: 10000
-                    type: array
-                required:
-                  - actionIds
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionIds:
+                        items:
+                          maxLength: 36
+                          type: string
+                        maxItems: 10000
+                        type: array
+                    required:
+                      - actionIds
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: 'OK: A successful request.'
         '400':
           content:
@@ -33457,6 +33527,8 @@ paths:
                       type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 force:
                   description: Unenrolls hosted agents too
                   type: boolean
@@ -33478,13 +33550,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -33567,6 +33647,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 includeInactive:
                   default: false
                   type: boolean
@@ -33592,13 +33674,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -33679,6 +33769,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 force:
                   type: boolean
                 includeInactive:
@@ -33708,13 +33800,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -54375,7 +54475,8 @@ paths:
                     records: []
                     total: 0
                 pageModeExample:
-                  description: A paginated list of host entities sorted by timestamp in descending order, including query inspection data.
+                  description: |
+                    A paginated list of host entities sorted by timestamp in descending order, including query inspection data.
                   summary: Page mode response with host entities
                   value:
                     inspect:
@@ -54417,7 +54518,8 @@ paths:
                             type: linux
                     total: 1
                 searchAfterModeExample:
-                  description: A cursor-based response with entities and a search_after token for the next page.
+                  description: |
+                    A cursor-based response with entities and a search_after token for the next page.
                   summary: Search-after mode response
                   value:
                     entities:
@@ -61917,7 +62019,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get the resolution group for a given entity, returning all linked entities. Requires an enterprise license.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+        Get the resolution group for a given entity, returning all linked entities.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
       operationId: get-security-entity-store-resolution-group
       parameters:
         - description: The entity identifier to look up the resolution group for.
@@ -61994,6 +62096,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/security/entity_store/resolution/group?entity_id=user:jane.doe@example.com
+      x-state: Generally available; added in 9.4.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -62006,7 +62109,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Link one or more entities to a target entity, creating a resolution group. Changes become visible on subsequent reads after the next index refresh (typically <1s). Requires an enterprise license.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+        Link one or more entities to a target entity, creating a resolution group. Changes become visible on subsequent reads after the next index refresh (typically <1s).<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
       operationId: post-security-entity-store-resolution-link
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -62104,6 +62207,163 @@ paths:
               "target_id": "user:jane.doe@example.com",
               "entity_ids": ["user:jdoe@example.com"]
             }
+      x-state: Generally available; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/security/entity_store/resolution/rules:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/resolution/rules</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        List managed entity resolution rules and their effective enabled state for this space.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+      operationId: get-security-entity-store-resolution-rules
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                rulesListExample:
+                  description: Lists the managed resolution rules and their enabled state in the current space.
+                  summary: Managed resolution rules
+                  value:
+                    rules:
+                      - enabled: false
+                        id: related_user_alias_resolution
+                        kind: related_user_alias_resolution
+                        managed: true
+                      - enabled: true
+                        id: email_exact_match
+                        kind: email_exact_match
+                        managed: true
+          description: Entity resolution rules.
+      summary: List entity resolution rules
+      tags:
+        - Security entity store
+      x-state: Generally available; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/security/entity_store/resolution/rules/{id}/disable:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/resolution/rules/{id}/disable</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Disable a managed entity resolution rule in this space.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+      operationId: put-security-entity-store-resolution-rules-id-disable
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The stable identifier of the entity resolution rule.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 100
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                ruleDisabledExample:
+                  description: The related user alias resolution rule was disabled in the current space.
+                  summary: Rule disabled
+                  value:
+                    enabled: false
+                    id: related_user_alias_resolution
+                    kind: related_user_alias_resolution
+                    managed: true
+          description: Updated entity resolution rule.
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: The requested entity resolution rule does not exist.
+                  summary: Unknown rule
+                  value:
+                    error: Not Found
+                    message: Saved object [entity-resolution-rule/unknown] not found
+                    statusCode: 404
+          description: Unknown entity resolution rule.
+      summary: Disable an entity resolution rule
+      tags:
+        - Security entity store
+      x-state: Generally available; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/security/entity_store/resolution/rules/{id}/enable:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/resolution/rules/{id}/enable</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Enable a managed entity resolution rule in this space.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+      operationId: put-security-entity-store-resolution-rules-id-enable
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The stable identifier of the entity resolution rule.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 100
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                ruleEnabledExample:
+                  description: The related user alias resolution rule was enabled in the current space.
+                  summary: Rule enabled
+                  value:
+                    enabled: true
+                    id: related_user_alias_resolution
+                    kind: related_user_alias_resolution
+                    managed: true
+          description: Updated entity resolution rule.
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: The requested entity resolution rule does not exist.
+                  summary: Unknown rule
+                  value:
+                    error: Not Found
+                    message: Saved object [entity-resolution-rule/unknown] not found
+                    statusCode: 404
+          description: Unknown entity resolution rule.
+      summary: Enable an entity resolution rule
+      tags:
+        - Security entity store
+      x-state: Generally available; added in 9.5.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -62116,7 +62376,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Remove one or more entities from their resolution group. Changes become visible on subsequent reads after the next index refresh (typically <1s). Requires an enterprise license.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+        Remove one or more entities from their resolution group. Changes become visible on subsequent reads after the next index refresh (typically <1s).<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
       operationId: post-security-entity-store-resolution-unlink
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -62200,6 +62460,7 @@ paths:
             {
               "entity_ids": ["user:jdoe@example.com"]
             }
+      x-state: Generally available; added in 9.4.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -65131,6 +65392,7 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -65168,7 +65430,7 @@ paths:
           description: List of queries linked to the stream.
       summary: Get stream queries
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -65198,6 +65460,7 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -65228,16 +65491,19 @@ paths:
                             properties:
                               description:
                                 default: ''
+                                maxLength: 10000
                                 type: string
                               esql:
                                 type: object
                                 properties:
                                   query:
+                                    maxLength: 10000
                                     type: string
                                 required:
                                   - query
                               evidence:
                                 items:
+                                  maxLength: 10000
                                   type: string
                                 type: array
                               expires_at:
@@ -65266,6 +65532,7 @@ paths:
                             type: object
                             properties:
                               id:
+                                maxLength: 255
                                 type: string
                             required:
                               - id
@@ -65279,7 +65546,7 @@ paths:
           description: Bulk operation completed successfully.
       summary: Bulk update queries
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -65309,12 +65576,14 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: The identifier of the query to remove.
           in: path
           name: queryId
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -65332,7 +65601,7 @@ paths:
           description: The query was removed successfully.
       summary: Remove a query from a stream
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -65361,12 +65630,14 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: The identifier of the query.
           in: path
           name: queryId
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -65384,17 +65655,20 @@ paths:
               properties:
                 description:
                   default: ''
+                  maxLength: 10000
                   type: string
                 esql:
                   additionalProperties: false
                   type: object
                   properties:
                     query:
+                      maxLength: 10000
                       type: string
                   required:
                     - query
                 evidence:
                   items:
+                    maxLength: 10000
                     type: string
                   type: array
                 expires_at:
@@ -65415,7 +65689,7 @@ paths:
           description: The query was added or updated successfully.
       summary: Upsert a query to a stream
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -65438,24 +65712,28 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Start of the time range as an ISO 8601 date string.
           in: query
           name: from
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: End of the time range as an ISO 8601 date string.
           in: query
           name: to
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: The bucket size for aggregating events (e.g. "1m", "1h").
           in: query
           name: bucketSize
           required: true
           schema:
+            maxLength: 255
             pattern: ^(\d+)([smhd])$
             type: string
         - description: Query string to filter significant events on metadata fields
@@ -65463,6 +65741,7 @@ paths:
           name: query
           required: false
           schema:
+            maxLength: 10000
             type: string
         - description: 'Search mode: keyword (BM25), semantic (vector), or hybrid (RRF). When omitted, defaults to hybrid with a silent keyword fallback on failure. When set explicitly, failures propagate as errors.'
           in: query
@@ -65524,7 +65803,7 @@ paths:
           description: Significant events for the stream.
       summary: Read the significant events
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -70027,8 +70306,10 @@ paths:
                       message: Approve change to production?
                     isTestRun: false
                     output:
-                      approved: true
-                      reason: looks good
+                      respondedBy: alice
+                      response:
+                        approved: true
+                        reason: looks good
                     scopeStack: []
                     spaceId: default
                     startedAt: '2025-11-20T12:00:01.000Z'
@@ -70053,6 +70334,210 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/workflows/executions/{executionId}/step/{stepExecutionId}
+      x-state: Generally available; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/workflows/executions/{executionId}/steps/{stepId}/resume/external:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/executions/{executionId}/steps/{stepId}/resume/external</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Resume a paused `waitForApproval` step (pauses the workflow and waits for a human to approve/decline before execution continues) or `waitForInput` step (passes the expected input values as query parameters in the URL). Returns an HTML confirmation page.
+      operationId: get-workflows-executions-executionid-steps-stepid-resume-external
+      parameters:
+        - description: Workflow execution ID
+          in: path
+          name: executionId
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+        - description: Workflow step execution ID
+          in: path
+          name: stepId
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+        - description: The token created when the workflow execution was paused. Authenticates the request to resume execution.
+          in: query
+          name: token
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+        - description: Indicates whether a human reviewer approved the paused step. Required for `waitForApproval` when resuming an approval step.
+          in: query
+          name: approved
+          required: false
+          schema:
+            anyOf:
+              - type: boolean
+              - enum:
+                  - 'true'
+                type: string
+              - enum:
+                  - 'false'
+                type: string
+      responses:
+        '200':
+          content:
+            text/html:
+              examples:
+                externalResumeSuccessExample:
+                  description: Success page confirming the response was received
+                  value: <!DOCTYPE html><html><body><h1>Thank you</h1><p>Your response was received. You can close this window.</p></body></html>
+              schema:
+                type: string
+          description: An HTML confirmation page confirming that the response was received and the workflow execution was resumed.
+      summary: Resume a workflow execution from an external link
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/steps/{stepId}/resume/external?token=${RESUME_TOKEN}&approved=true"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/executions/{executionId}/steps/{stepId}/resume/external?token={resumeToken}&approved=true
+      x-state: Generally available; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/executions/{executionId}/steps/{stepId}/resume/external</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Resume a workflow execution that is paused and waiting for external input. Submit input values as a JSON request body, authenticated with a token query parameter. Returns an HTML confirmation page.
+      operationId: post-workflows-executions-executionid-steps-stepid-resume-external
+      parameters:
+        - description: Workflow execution ID
+          in: path
+          name: executionId
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+        - description: Workflow step execution ID
+          in: path
+          name: stepId
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+        - description: The resume token authenticating this request.
+          in: query
+          name: token
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              externalResumeInputRequestExample:
+                description: Example external input payload for a waitForInput step
+                value:
+                  description: Escalated from Slack triage
+                  severity: high
+            schema: {}
+      responses:
+        '200':
+          content:
+            text/html:
+              examples:
+                externalResumeInputSuccessExample:
+                  description: Success page confirming the input was received
+                  value: <!DOCTYPE html><html><body><h1>Thank you</h1><p>Your response was received. You can close this window.</p></body></html>
+              schema:
+                type: string
+          description: An HTML confirmation page confirming that the input was received and the workflow execution was resumed.
+      summary: Submit external input for a paused workflow execution
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/workflows/executions/{executionId}/steps/{stepId}/resume/external?token=${RESUME_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d '{"severity":"high"}'
+        - lang: Console
+          source: |
+            POST kbn://api/workflows/executions/{executionId}/steps/{stepId}/resume/external?token={resumeToken}
+            Content-Type: application/json
+
+            {"severity":"high"}
+      x-state: Generally available; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns an HTML form for submitting external input to a paused waitForInput step. Does not resume the execution.
+      operationId: get-workflows-executions-executionid-steps-stepid-resume-external-form
+      parameters:
+        - description: Workflow execution ID
+          in: path
+          name: executionId
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+        - description: Workflow step execution ID
+          in: path
+          name: stepId
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+        - description: The resume token authenticating this request.
+          in: query
+          name: token
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+      responses:
+        '200':
+          content:
+            text/html:
+              examples:
+                externalResumeFormExample:
+                  description: Form page for external input submission
+                  value: <!DOCTYPE html><html><body><h1>Submit your response</h1><form method="POST"><button type="submit">Submit</button></form></body></html>
+              schema:
+                type: string
+          description: HTML form page for submitting external input to a paused waitForInput step
+      summary: Get the external input form for a paused workflow execution
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form?token=${RESUME_TOKEN}"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form?token={resumeToken}
       x-state: Generally available; added in 9.4.0
       x-metaTags:
         - content: Kibana
@@ -71609,7 +72094,9 @@ paths:
                           message: Approve change to production?
                         isTestRun: false
                         output:
-                          approved: true
+                          respondedBy: alice
+                          response:
+                            approved: true
                         scopeStack: []
                         spaceId: default
                         startedAt: '2025-11-20T12:00:02.000Z'
@@ -87813,13 +88300,36 @@ components:
       description: Duration format between time units.
       properties:
         from:
-          description: Source time unit for conversion, for example `milliseconds`, `seconds`, `minutes`, `hours`, or `days`.
+          description: Source time unit of the raw field value, including fine-grained units (`ps`, `ns`, `us`) in addition to standard units. This describes how the stored data is encoded, not a query duration literal.
+          enum:
+            - ps
+            - ns
+            - us
+            - ms
+            - s
+            - min
+            - h
+            - d
+            - w
+            - mo
+            - 'y'
           type: string
         suffix:
           description: Suffix appended to the formatted value.
           type: string
         to:
-          description: Display time unit after conversion, for example `seconds`, `minutes`, `hours`, or `days`.
+          description: 'Display time unit: `auto` (precise), `auto-approximate`, or a fixed conversion unit.'
+          enum:
+            - auto
+            - auto-approximate
+            - ms
+            - s
+            - min
+            - h
+            - d
+            - w
+            - mo
+            - 'y'
           type: string
         type:
           enum:
@@ -88541,6 +89051,7 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_numericFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_byteFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_durationFormat'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyDurationFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_customFormat'
       description: Number display format for the dimension value.
       title: Format Type
@@ -95905,6 +96416,29 @@ components:
         - shift
       title: Legacy color by value (absolute)
       type: object
+    Kibana_HTTP_APIs_legacyDurationFormat:
+      additionalProperties: false
+      description: Legacy duration format used when the `asCode.useGASchemas` feature flag is disabled. Accepts free-form unit strings (no enum validation) to preserve pre-GA behavior.
+      properties:
+        from:
+          description: Source time unit for conversion, for example `milliseconds`, `seconds`, `minutes`, `hours`, or `days`.
+          type: string
+        suffix:
+          description: Suffix appended to the formatted value.
+          type: string
+        to:
+          description: Display time unit after conversion, for example `seconds`, `minutes`, `hours`, or `days`.
+          type: string
+        type:
+          enum:
+            - duration
+          type: string
+      required:
+        - type
+        - from
+        - to
+      title: Duration Format (Legacy)
+      type: object
     Kibana_HTTP_APIs_legacyMetricCountMetric:
       additionalProperties: false
       properties:
@@ -99747,6 +100281,12 @@ components:
       additionalProperties: false
       description: Visual chart styling options
       properties:
+        density:
+          description: Density preset for the metric chart layout. Use `compact` for a compact layout, or `default` for increased padding, element spacing, and font size.
+          enum:
+            - compact
+            - default
+          type: string
         icon:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_metricIconConfig'
         primary:
@@ -109148,10 +109688,12 @@ components:
             properties:
               slo_id:
                 description: SLO ID
+                maxLength: 64
                 type: string
               slo_instance_id:
                 default: '*'
                 description: SLO instance ID
+                maxLength: 512
                 type: string
             required:
               - slo_id
@@ -109202,6 +109744,7 @@ components:
           type: array
         duration:
           description: Duration for the burn rate chart in the format [value][unit], e.g. 5m, 3h, or 6d
+          maxLength: 32
           type: string
         hide_border:
           type: boolean
@@ -109209,10 +109752,12 @@ components:
           type: boolean
         slo_id:
           description: The ID of the SLO to display the burn rate for
+          maxLength: 64
           type: string
         slo_instance_id:
           default: '*'
           description: ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).
+          maxLength: 512
           type: string
         title:
           type: string
@@ -109266,10 +109811,12 @@ components:
           type: boolean
         slo_id:
           description: The ID of the SLO to display the error budget for
+          maxLength: 64
           type: string
         slo_instance_id:
           default: '*'
           description: ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).
+          maxLength: 512
           type: string
         title:
           type: string
@@ -109342,10 +109889,12 @@ components:
               type: string
             groups:
               items:
+                maxLength: 256
                 type: string
               maxItems: 100
               type: array
             kql_query:
+              maxLength: 2048
               type: string
         hide_border:
           type: boolean
@@ -109577,13 +110126,16 @@ components:
           type: string
         remote_name:
           description: The name of the remote SLO
+          maxLength: 256
           type: string
         slo_id:
           description: The ID of the SLO
+          maxLength: 64
           type: string
         slo_instance_id:
           default: '*'
           description: ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).
+          maxLength: 512
           type: string
         title:
           type: string
@@ -123557,6 +124109,12 @@ components:
           type: object
         reason:
           $ref: '#/components/schemas/Security_Detections_API_Reason'
+        runtime_fields:
+          additionalProperties:
+            $ref: '#/components/schemas/Security_Detections_API_RuntimeFieldType'
+          description: Optional map of field name to runtime field type. For each entry, the server defines a runtime field of the given type that reads its value from `_source[fieldName]` and attaches it to the underlying `_update_by_query` as `runtime_mappings`. Allows the `query` to reference non-ECS fields stored on the alert `_source` but not in the alerts index mapping — for example, runtime fields the rule's source index defined at the time the alerts were created. Limited to 100 entries per request; larger maps are rejected.
+          maxProperties: 100
+          type: object
         status:
           enum:
             - closed
@@ -127194,6 +127752,17 @@ components:
               $ref: '#/components/schemas/Security_Detections_API_RunScriptOsConfigValues'
       required:
         - command
+    Security_Detections_API_RuntimeFieldType:
+      description: The data type for the runtime field type. Determines how the field value is indexed and queried.
+      enum:
+        - keyword
+        - long
+        - double
+        - date
+        - ip
+        - boolean
+        - geo_point
+      type: string
     Security_Detections_API_SavedObjectResolveAliasPurpose:
       enum:
         - savedObjectConversion
@@ -127751,6 +128320,12 @@ components:
           type: string
         query:
           additionalProperties: true
+          type: object
+        runtime_fields:
+          additionalProperties:
+            $ref: '#/components/schemas/Security_Detections_API_RuntimeFieldType'
+          description: Optional map of field name to runtime field type. For each entry, a runtime field of the specified type is created reading its value from `_source[fieldName]` and included in the query as `runtime_mappings`. Use this to reference fields stored on the alert `_source` that are not part of the Elastic Common Schema (ECS) of the alerts index mapping, for example, custom fields that the rule's source index defined when the alerts were created.
+          maxProperties: 100
           type: object
         status:
           $ref: '#/components/schemas/Security_Detections_API_AlertStatusExceptClosed'
@@ -139234,6 +139809,11 @@ components:
         - from
       type: object
       properties:
+        allowHtml:
+          description: |
+            When `true`, the connector can send emails with HTML-formatted content in the body. Defaults to `false`. This option is unavailable when `service` is `elastic_cloud`.
+          default: false
+          type: boolean
         clientId:
           description: |
             The client identifier, which is a part of OAuth 2.0 client credentials authentication, in GUID format. If `service` is `exchange_server`, this property is required.
