@@ -81,7 +81,7 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
       }
       minFlexPanelSize={MIN_EDITOR_WIDTH}
       fixedPanel={
-        <div css={styles.previewPanel}>
+        <div css={styles.previewPanel} data-test-subj="templatePreviewPanel">
           <TemplateRenderPanel
             settings={settings}
             connector={connector}

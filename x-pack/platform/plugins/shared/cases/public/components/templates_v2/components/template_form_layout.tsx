@@ -281,9 +281,13 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       <EuiFlexGroup
         direction="column"
         gutterSize="none"
-        css={[kbnFullBodyHeightCss(), styles.wrapper]}
+        // The wrapper cancels the page-section padding via negative margins, so the only
+        // extra vertical space to reserve is the Security Solution timeline bottom bar
+        // (57px, the same value used by the validation accordion). This makes the page
+        // fill the viewport exactly and never scroll the header under the sticky top bar.
+        css={[kbnFullBodyHeightCss('57px'), styles.wrapper]}
       >
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} css={styles.header}>
           <TemplateFormHeader
             title={title}
             isLoading={isLoading}
