@@ -10,6 +10,7 @@ import moment from 'moment';
 import { unflattenObject } from '@kbn/object-utils';
 import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
+import { isResponseError, type ElasticsearchErrorDetails } from '@kbn/es-errors';
 import { entityStoreMetrics } from '../../../monitor/metrics';
 import type { Entity } from '../../../../common/domain/definitions/entity.gen';
 import {
@@ -33,14 +34,16 @@ import {
 } from '../log_pagination_probe_query_builder';
 import { executeEsqlQuery } from '../../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../../infra/elasticsearch/ingest';
+import { resolveClosedIndexAdjustments } from '../../../infra/elasticsearch/resolve_closed_indices';
 import { getUpdatesEntitiesDataStreamName } from '../../asset_manager/updates_data_stream';
 import {
   applyMaxLagCutoff,
   capExtractionWindowEnd,
   resolveRemoteExtractionWindow,
 } from '../extraction_window';
-import { capAtMaxLogsPerWindow } from '../effective_page_limits';
+import { capAtMaxLogsPerWindow, pickSampleProbability } from '../effective_page_limits';
 import type { RemoteExtractionStrategy } from './strategies';
+import { getErrorMessage } from '../../../../common';
 
 interface RemoteExtractToUpdatesParams {
   type: EntityType;
@@ -68,6 +71,20 @@ interface RemoteExtractToUpdatesResult {
   logsCapApplied?: boolean;
 }
 
+const getEsErrorType = (error: unknown): string | undefined =>
+  isResponseError(error) ? (error.body as ElasticsearchErrorDetails)?.error?.type : undefined;
+
+// CPS is not enabled, so '_origin' can't be resolved
+const isNoSuchRemoteClusterError = (type?: string) => type === 'no_such_remote_cluster_exception';
+
+// no linked projects, so '-_origin:*' resolves to an empty scope, ESQL throws 500
+const isNoSuchElementError = (type?: string) => type === 'no_such_element_exception';
+
+const isRemoteUnavailableError = (error: unknown): boolean => {
+  const type = getEsErrorType(error);
+  return isNoSuchElementError(type) || isNoSuchRemoteClusterError(type);
+};
+
 export class RemoteLogsExtractionClient {
   private readonly logger: Logger;
 
@@ -85,8 +102,15 @@ export class RemoteLogsExtractionClient {
     try {
       return await this.doExtractToUpdates(params);
     } catch (error) {
+      const message = getErrorMessage(error);
+      if (this.strategy.id === 'cps' && isRemoteUnavailableError(error)) {
+        this.logger.warn(
+          `remote extraction unavailable (no linked projects or CPS disabled): ${message}. Returning empty result.`
+        );
+        return { count: 0, pages: 0 };
+      }
       const wrappedError = new Error(
-        `Failed to extract to updates from remote indices: ${error.message}`
+        `Failed to extract to updates from remote indices: ${message}`
       );
       this.logger.error(wrappedError);
       return { count: 0, pages: 0, error: wrappedError };
@@ -111,6 +135,16 @@ export class RemoteLogsExtractionClient {
     if (remoteIndexPatterns.length === 0) {
       return { count: 0, pages: 0 };
     }
+
+    const { openBackingIndices, negations: closedNegations } = await resolveClosedIndexAdjustments(
+      this.strategy.client,
+      remoteIndexPatterns,
+      this.logger
+    );
+    const effectiveRemoteIndexPatterns =
+      openBackingIndices.length > 0 || closedNegations.length > 0
+        ? [...remoteIndexPatterns, ...openBackingIndices, ...closedNegations]
+        : remoteIndexPatterns;
 
     const state =
       windowOverride != null
@@ -150,7 +184,7 @@ export class RemoteLogsExtractionClient {
       // Manual windowOverride runs as a single pass without persisting checkpoint.
       const result = await this.runLogsPaginationOuterLoop({
         type,
-        remoteIndexPatterns,
+        remoteIndexPatterns: effectiveRemoteIndexPatterns,
         toDateISO: effectiveWindowEnd,
         docsLimit,
         maxLogsPerPage,
@@ -211,7 +245,7 @@ export class RemoteLogsExtractionClient {
       const remainingCap = maxLogsPerWindow > 0 ? maxLogsPerWindow - totalLogs : 0;
       const subResult = await this.runLogsPaginationOuterLoop({
         type,
-        remoteIndexPatterns,
+        remoteIndexPatterns: effectiveRemoteIndexPatterns,
         toDateISO: subWindowEnd,
         docsLimit,
         maxLogsPerPage,
@@ -311,6 +345,11 @@ export class RemoteLogsExtractionClient {
   }): Promise<RemoteExtractToUpdatesResult> {
     const effectiveMaxLogsPerPage = capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow);
     const effectiveDocsLimit = capAtMaxLogsPerWindow(docsLimit, maxLogsPerWindow);
+    // Escalates above the target probability (up to an exact, unsampled probe) once
+    // maxLogsPerPage is too small for the sampling estimator to be accurate — see
+    // pickSampleProbability. Computed once per loop invocation: effectiveMaxLogsPerPage is
+    // fixed for the whole loop.
+    const effectiveSampleProbability = pickSampleProbability(effectiveMaxLogsPerPage);
     let totalCount = 0;
     let totalPages = 0;
     let totalLogs = 0;
@@ -341,20 +380,34 @@ export class RemoteLogsExtractionClient {
         toDateISO,
         sliceStart,
         maxLogsPerPage: effectiveMaxLogsPerPage,
+        sampleProbability: effectiveSampleProbability,
         abortController,
       });
 
-      if (!logPaginationCursor.hasLogsToProcess) {
+      if (!logPaginationCursor.hasLogsToProcess && effectiveSampleProbability >= 1) {
+        // Sampling wasn't active for this probe (maxLogsPerPage was too small — see
+        // pickSampleProbability), so an empty, exact result is definitive: no real docs
+        // remain. Stop immediately rather than running a redundant sweep extraction.
         break;
       }
 
-      let { logsPaginationCursor: sliceEnd } = logPaginationCursor;
+      // A saturated probe (the scaled LIMIT was filled) means ~maxLogsPerPage+ real docs likely
+      // remain: more pages follow, bounded by the sampled boundary. Otherwise — the sample fell
+      // short of the limit, or retained zero rows at all (hasLogsToProcess: false) — fewer real
+      // docs remain than maxLogsPerPage, so this is the last page. It is swept all the way to
+      // the window top (not the undershooting/absent sampled boundary) so nothing past it is
+      // silently dropped: a probe with zero sampled rows does not prove zero real docs remain
+      // (e.g. a couple of docs, ~90% chance neither gets sampled at the default p=0.1).
       isLastLogsPage = logPaginationCursor.isLastLogsPage;
+      let sliceEnd: LogSlicePaginationParams =
+        logPaginationCursor.hasLogsToProcess && !logPaginationCursor.isLastLogsPage
+          ? logPaginationCursor.logsPaginationCursor
+          : { timestampCursor: toDateISO };
 
       const bumpedSliceEnd = this.detectLogSliceStall(
         sliceStart,
         sliceEnd,
-        logPaginationCursor.sliceLogCount,
+        !isLastLogsPage,
         effectiveMaxLogsPerPage
       );
       if (bumpedSliceEnd) {
@@ -436,6 +489,7 @@ export class RemoteLogsExtractionClient {
     toDateISO,
     sliceStart,
     maxLogsPerPage,
+    sampleProbability,
     abortController,
   }: {
     remoteIndexPatterns: string[];
@@ -444,6 +498,7 @@ export class RemoteLogsExtractionClient {
     toDateISO: string;
     sliceStart: LogSlicePaginationParams | undefined;
     maxLogsPerPage: number;
+    sampleProbability: number;
     abortController?: AbortController;
   }): Promise<LogPaginationCursor> {
     const probeQuery = buildLogPaginationCursorProbeEsql({
@@ -453,6 +508,7 @@ export class RemoteLogsExtractionClient {
       toDateISO,
       logsPageCursorStart: sliceStart,
       maxLogsPerPage,
+      sampleProbability,
     });
 
     this.logger.info(
@@ -466,6 +522,11 @@ export class RemoteLogsExtractionClient {
       esClient: this.strategy.client,
       query: probeQuery,
       abortController,
+      telemetry: {
+        name: 'remote_probe_query',
+        namespace: this.namespace,
+        type,
+      },
     });
     entityStoreMetrics.extractionProbeQueryDurationMs.record(Date.now() - probeStart, {
       entity_type: type,
@@ -475,7 +536,8 @@ export class RemoteLogsExtractionClient {
 
     return interpretLogPaginationCursorRows(
       parseLogPaginationCursorRow(probeResponse),
-      maxLogsPerPage
+      maxLogsPerPage,
+      sampleProbability
     );
   }
 
@@ -553,6 +615,11 @@ export class RemoteLogsExtractionClient {
         esClient: this.strategy.client,
         query,
         abortController,
+        telemetry: {
+          name: 'remote_extraction_query',
+          namespace: this.namespace,
+          type,
+        },
       });
       entityStoreMetrics.extractionQueryDurationMs.record(Date.now() - queryStart, {
         entity_type: type,
@@ -605,23 +672,23 @@ export class RemoteLogsExtractionClient {
     return { count, pages };
   }
 
-  /** Returns the bumped slice-end cursor when a stall is detected, null otherwise. Logs a warning on stall. */
+  /**
+   * Returns the bumped slice-end cursor when a stall is detected, null otherwise. Logs a
+   * warning on stall. `isFullPage` is `true` when the (possibly sampled) probe saturated its
+   * limit — i.e. this iteration was not resolved as the last page.
+   */
   private detectLogSliceStall(
     sliceStart: LogSlicePaginationParams | undefined,
     sliceEnd: LogSlicePaginationParams,
-    sliceLogCount: number,
-    maxLogsPerPage: number
+    isFullPage: boolean,
+    effectiveMaxLogsPerPage: number
   ): LogSlicePaginationParams | null {
-    if (
-      sliceStart &&
-      sliceStart.timestampCursor === sliceEnd.timestampCursor &&
-      sliceLogCount >= maxLogsPerPage
-    ) {
+    if (sliceStart && sliceStart.timestampCursor === sliceEnd.timestampCursor && isFullPage) {
       const bumpedTs = moment(sliceEnd.timestampCursor).add(1, 'ms').toISOString();
       this.logger.warn(
         `${this.strategy.id.toUpperCase()} log-slice probe stalled at ${
           sliceEnd.timestampCursor
-        } with a full page (${sliceLogCount} docs); advancing cursor by 1ms. Docs sharing this timestamp beyond maxLogsPerPage will be dropped.`
+        } with a saturated page; advancing cursor by 1ms. Docs sharing this timestamp beyond the configured per-page limit (${effectiveMaxLogsPerPage}) will be dropped.`
       );
       return { timestampCursor: bumpedTs };
     }

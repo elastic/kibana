@@ -38,14 +38,14 @@ export function registerCases(
     defineAttachment({
       id: AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE,
       icon: 'machineLearningApp',
-      displayName: i18n.translate('xpack.aiops.changePointDetection.cases.attachmentName', {
-        defaultMessage: 'Change point chart',
+      displayName: i18n.translate('xpack.aiops.changePointDetection.cases.displayName', {
+        defaultMessage: 'Change point charts',
       }),
       getAttachmentViewObject: () => ({
         event: (
           <FormattedMessage
             id="xpack.aiops.changePointDetection.cases.attachmentEvent"
-            defaultMessage="added change point chart"
+            defaultMessage="added change point charts"
           />
         ),
         timelineAvatar: 'machineLearningApp',
@@ -66,6 +66,9 @@ export function registerCases(
         ),
       }),
       schema: ChangePointChartAttachmentPayloadSchema,
+      // `data.state` is the AIOps embeddable input bag produced by the change
+      // point detection "Add to case" flow — not authorable in YAML.
+      workflowSchema: false,
     })
   );
 
@@ -75,8 +78,8 @@ export function registerCases(
     defineAttachment({
       id: AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE,
       icon: 'machineLearningApp',
-      displayName: i18n.translate('xpack.aiops.logPatternAnalysis.cases.attachmentName', {
-        defaultMessage: 'Log pattern analysis',
+      displayName: i18n.translate('xpack.aiops.cases.logPatternAnalysis.displayName', {
+        defaultMessage: 'Log pattern analyses',
       }),
       getAttachmentViewObject: () => ({
         event: (
@@ -103,6 +106,9 @@ export function registerCases(
         ),
       }),
       schema: PatternAnalysisAttachmentPayloadSchema,
+      // `data.state` is the AIOps embeddable input bag produced by the log
+      // pattern analysis "Add to case" flow — not authorable in YAML.
+      workflowSchema: false,
     })
   );
 
@@ -115,8 +121,8 @@ export function registerCases(
     defineAttachment({
       id: AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE,
       icon: 'machineLearningApp',
-      displayName: i18n.translate('xpack.aiops.logRateAnalysis.cases.attachmentName', {
-        defaultMessage: 'Log rate analysis',
+      displayName: i18n.translate('xpack.aiops.cases.logRateAnalysis.displayName', {
+        defaultMessage: 'Log rate analyses',
       }),
       getAttachmentViewObject: () => ({
         event: (
@@ -146,6 +152,9 @@ export function registerCases(
         ),
       }),
       schema: LogRateAnalysisAttachmentPayloadSchema,
+      // `data.state` is the AIOps embeddable input bag produced by the log
+      // rate analysis "Add to case" flow — not authorable in YAML.
+      workflowSchema: false,
     })
   );
 }

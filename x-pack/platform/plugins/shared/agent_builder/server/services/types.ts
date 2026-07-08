@@ -27,7 +27,9 @@ import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
 import type { RunnerFactory } from './execution/runner';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
 import type { ConversationService } from './conversation';
+import type { WorkspaceService } from './workspaces';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachments';
+import type { RendererServiceSetup, RendererServiceStart } from './renderers';
 import type { SkillServiceSetup, SkillServiceStart } from './skills';
 import type { TrackingService } from '../telemetry/tracking_service';
 import type { AnalyticsService } from '../telemetry';
@@ -40,6 +42,7 @@ export interface InternalSetupServices {
   tools: ToolsServiceSetup;
   agents: AgentsServiceSetup;
   attachments: AttachmentServiceSetup;
+  renderers: RendererServiceSetup;
   hooks: HooksServiceSetup;
   skills: SkillServiceSetup;
   plugins: PluginsServiceSetup;
@@ -50,8 +53,10 @@ export interface InternalStartServices {
   tools: ToolsServiceStart;
   agents: AgentsServiceStart;
   attachments: AttachmentServiceStart;
+  renderers: RendererServiceStart;
   skills: SkillServiceStart;
   conversations: ConversationService;
+  workspaces: WorkspaceService;
   runnerFactory: RunnerFactory;
   hooks: HooksServiceStart;
   auditLogService: AuditLogService;
