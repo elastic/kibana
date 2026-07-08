@@ -65,6 +65,7 @@ import { runWithCache } from '../../services/epm/packages/cache';
 
 import {
   alignInputsAndStreams,
+  haveAgentlessAgentPolicies,
   isSimplifiedCreatePackagePolicyRequest,
   removeFieldsFromInputSchema,
   renameAgentlessAgentPolicy,
@@ -274,19 +275,14 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         );
       }
     }
-    const parentPolicyIds = deduplicateIds([
+    const parentPolicyIds = [
       ...(newPolicy.policy_ids ?? []),
       ...(newPolicy.policy_id ? [newPolicy.policy_id] : []),
-    ]);
-    if (parentPolicyIds.length > 0) {
-      const parentAgentPolicies = await agentPolicyService.getByIds(soClient, parentPolicyIds, {
-        ignoreMissing: true,
-      });
-      if (parentAgentPolicies.some((agentPolicy) => agentPolicy.supports_agentless)) {
-        throw new FleetError(
-          'To add integrations to an agentless agent policy, use the agentless policies API.'
-        );
-      }
+    ];
+    if (await haveAgentlessAgentPolicies(soClient, parentPolicyIds)) {
+      throw new FleetError(
+        'To add integrations to an agentless agent policy, use the agentless policies API.'
+      );
     }
   }
 
@@ -442,37 +438,18 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
   // The parent-agent-policy detections need extra SO lookups, so they stay flag-gated to avoid
   // adding cost to normal (flag-off) traffic.
   if (legacyAgentlessApiDisabled) {
-    const targetParentPolicyIds = deduplicateIds([
+    const targetParentPolicyIds = [
       ...(request.body.policy_ids ?? []),
       ...(request.body.policy_id ? [request.body.policy_id] : []),
-    ]);
-    if (targetParentPolicyIds.length > 0) {
-      const targetParentAgentPolicies = await agentPolicyService.getByIds(
-        soClient,
-        targetParentPolicyIds,
-        { ignoreMissing: true }
+    ];
+    if (await haveAgentlessAgentPolicies(soClient, targetParentPolicyIds)) {
+      throw new FleetError(
+        'To add integrations to an agentless agent policy, use the agentless policies API.'
       );
-      if (targetParentAgentPolicies.some((agentPolicy) => agentPolicy.supports_agentless)) {
-        throw new FleetError(
-          'To add integrations to an agentless agent policy, use the agentless policies API.'
-        );
-      }
     }
 
-    if ((packagePolicy.policy_ids ?? []).length > 0) {
-      const parentAgentPolicies = await agentPolicyService.getByIds(
-        soClient,
-        packagePolicy.policy_ids ?? [],
-        { ignoreMissing: true }
-      );
-      const isParentPolicyAgentless = parentAgentPolicies.some(
-        (agentPolicy) => agentPolicy.supports_agentless
-      );
-      if (isParentPolicyAgentless) {
-        throw new FleetError(
-          'To update agentless package policies, use the agentless policies API.'
-        );
-      }
+    if (await haveAgentlessAgentPolicies(soClient, packagePolicy.policy_ids ?? [])) {
+      throw new FleetError('To update agentless package policies, use the agentless policies API.');
     }
   }
 
@@ -669,15 +646,8 @@ const throwIfTargetsAgentlessPolicies = async (
   let hasAgentless = packagePolicies.some((packagePolicy) => packagePolicy.supports_agentless);
   if (!hasAgentless) {
     // Older agentless package policies may not carry the flag themselves — check parents.
-    const parentPolicyIds = deduplicateIds(
-      packagePolicies.flatMap((packagePolicy) => packagePolicy.policy_ids)
-    );
-    if (parentPolicyIds.length > 0) {
-      const parentAgentPolicies = await agentPolicyService.getByIds(soClient, parentPolicyIds, {
-        ignoreMissing: true,
-      });
-      hasAgentless = parentAgentPolicies.some((agentPolicy) => agentPolicy.supports_agentless);
-    }
+    const parentPolicyIds = packagePolicies.flatMap((packagePolicy) => packagePolicy.policy_ids);
+    hasAgentless = await haveAgentlessAgentPolicies(soClient, parentPolicyIds);
   }
   if (hasAgentless) {
     throw new FleetError(`To upgrade agentless package policies, use the agentless policies API.`);
