@@ -48,11 +48,6 @@ export const useTabs = (
   const { data: anomalyPrivilegesData } = useAnomalyPrivileges(isAnomalyDetailsEnabled);
   const hasAnomalyPrivileges = anomalyPrivilegesData?.has_all_required ?? false;
   const loadAnomalies = isAnomalyDetailsEnabled && hasAnomalyPrivileges && !!entityStoreEntityId;
-  const hasAnomalies = useHasAnomalies({
-    entityId: entityStoreEntityId ?? '',
-    entityType: EntityType.user,
-    enabled: loadAnomalies,
-  });
 
   return useMemo(() => {
     const tabs: LeftPanelTabsType = [];
