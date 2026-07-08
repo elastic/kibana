@@ -181,7 +181,22 @@ Use the value of `$SESSION_STARTED_AT` for the `session_started_at` field below.
 If `.exploratory-session/config.json` already exists — ask the user: **"An existing session config was found. Reuse it (r) or start fresh (f)?"** Wait for their answer.
 
 - **Reuse (r):** Trust `config.json` as-is. Skip remaining Phase 0 steps and all of Phase 1. Jump to Phase 2. Existing `findings-flow-<N>.md` files are included in Phase 3.
-- **Start fresh (f):** `rm -f .exploratory-session/findings-flow-*.md`. Overwrite `config.json` and continue.
+- **Start fresh (f):** never delete or overwrite prior session data in place — archive it first. `.exploratory-session/` is a fixed, reused path, so anything not moved out of the way (findings, `report.md`, `screenshots/`, `videos/`) either gets silently deleted or, worse, gets mixed into the new session's output.
+
+  1. Read the old `area_slug` from the existing `config.json` (fall back to `"session"` if unreadable).
+  2. Archive everything currently in `.exploratory-session/` — except prior `archive-*` folders — into a new dated, named subfolder:
+     ```bash
+     OLD_AREA_SLUG=$(python3 -c "import json; print(json.load(open('.exploratory-session/config.json')).get('area_slug','session'))" 2>/dev/null || echo "session")
+     ARCHIVE_DATE=$(date -u +"%Y-%m-%d")
+     BASE_DIR=".exploratory-session/archive-${ARCHIVE_DATE}-${OLD_AREA_SLUG}"
+     ARCHIVE_DIR="$BASE_DIR"
+     i=2
+     while [ -e "$ARCHIVE_DIR" ]; do ARCHIVE_DIR="${BASE_DIR}-${i}"; i=$((i+1)); done
+     mkdir -p "$ARCHIVE_DIR"
+     find .exploratory-session -maxdepth 1 -mindepth 1 ! -name 'archive-*' -exec mv {} "$ARCHIVE_DIR/" \;
+     ```
+  3. Tell the user where the prior session was archived (`$ARCHIVE_DIR`) before continuing.
+  4. Write the new `config.json` into the now-empty `.exploratory-session/` and continue Phase 0 normally.
 
 Write `.exploratory-session/config.json`:
 ```json
