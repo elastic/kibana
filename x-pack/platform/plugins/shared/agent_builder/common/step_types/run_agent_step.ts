@@ -11,9 +11,11 @@ import { StepCategory } from '@kbn/workflows';
 import { JsonModelSchema } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { i18n } from '@kbn/i18n';
 import {
+  CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
   CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
   normalizeOptionalConnectorOrInferenceParam,
 } from '../resolve_connector_or_inference_id';
+import { normalizeOptionalStringParam } from '../normalize_optional_string_param';
 
 /**
  * Step type ID for the agentBuilder run agent step.
@@ -167,6 +169,16 @@ export const ConfigSchema = z
         'The inference endpoint ID to use. Mutually exclusive with `connector-id`; defaults apply when both are omitted.'
       ),
     /**
+     * Model Management > Feature settings feature id to resolve the connector from.
+     * Mutually exclusive with `connector-id` and `inference-id`.
+     */
+    'connector-id-by-feature': z
+      .string()
+      .optional()
+      .describe(
+        'The Model Management feature id whose configured connector should be used. Mutually exclusive with `connector-id` and `inference-id`.'
+      ),
+    /**
      * When true, create/persist a conversation and associate it with the executing user.
      * If conversation_id is provided, this can auto-create the conversation with that id if it does not exist.
      */
@@ -201,11 +213,19 @@ export const ConfigSchema = z
   .superRefine((cfg, ctx) => {
     const connector = normalizeOptionalConnectorOrInferenceParam(cfg['connector-id']);
     const inference = normalizeOptionalConnectorOrInferenceParam(cfg['inference-id']);
+    const connectorByFeature = normalizeOptionalStringParam(cfg['connector-id-by-feature']);
     if (connector !== undefined && inference !== undefined) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
         path: ['connector-id'],
+      });
+    }
+    if (connectorByFeature !== undefined && (connector !== undefined || inference !== undefined)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
+        path: ['connector-id-by-feature'],
       });
     }
     if (cfg['aggregate-by'] !== undefined && cfg['plugin-id'] === undefined) {
@@ -270,6 +290,16 @@ export const runAgentStepCommonDefinition: CommonStepDefinition<
   inference-id: "my-inference-endpoint-id"
   with:
     message: "Summarize the findings."
+\`\`\``,
+
+      `## Use the connector configured for a Model Management feature (mutually exclusive with connector-id / inference-id)
+\`\`\`yaml
+- name: investigate
+  type: ${RunAgentStepTypeId}
+  agent-id: "platform.sig_events.investigation"
+  connector-id-by-feature: "significant_events_investigation"
+  with:
+    message: "Investigate the significant events in this stream."
 \`\`\``,
 
       `## Create a conversation and reuse it in a follow-up step

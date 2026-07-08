@@ -157,7 +157,7 @@ export const EditDataLifecycleFlyout = ({
     const nextValue = mergeDefaultValue(successfulData.dlm.defaultValue);
     setDlmValue(nextValue);
     dlmSerializedRef.current = serializeDlmPhases(nextValue);
-    setIsDlmValid(validateDurations(nextValue).isValid);
+    setIsDlmValid(validateDurations(nextValue, successfulData.dlm.maximumRetentionPeriod).isValid);
   }, [dlmDefaultValueKey, successfulData.dlm]);
 
   const failedDeletePhaseDefaultValueKey = useMemo(
