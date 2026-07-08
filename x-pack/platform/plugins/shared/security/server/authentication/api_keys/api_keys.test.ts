@@ -442,7 +442,7 @@ describe('API Keys', () => {
       });
     });
 
-    it('forwards `certificate_identity` and `expiration` when updating a cross-cluster API key', async () => {
+    it('forwards `certificate_identity` when updating a cross-cluster API key', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
 
       mockScopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
@@ -453,7 +453,6 @@ describe('API Keys', () => {
         id: '123',
         access: {},
         metadata: {},
-        expiration: '30d',
         certificate_identity: 'CN=host,OU=engineering,DC=example,DC=com',
       });
       expect(mockScopedClusterClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
@@ -462,29 +461,8 @@ describe('API Keys', () => {
         body: {
           access: {},
           metadata: {},
-          expiration: '30d',
           certificate_identity: 'CN=host,OU=engineering,DC=example,DC=com',
         },
-      });
-    });
-
-    it('forwards `expiration` when updating a REST API key', async () => {
-      mockLicense.isEnabled.mockReturnValue(true);
-
-      mockScopedClusterClient.asCurrentUser.security.updateApiKey.mockResponseOnce({
-        updated: true,
-      });
-      await apiKeys.update(httpServerMock.createKibanaRequest(), {
-        id: 'test_id',
-        role_descriptors: roleDescriptors,
-        metadata: {},
-        expiration: '30d',
-      });
-      expect(mockScopedClusterClient.asCurrentUser.security.updateApiKey).toHaveBeenCalledWith({
-        id: 'test_id',
-        expiration: '30d',
-        role_descriptors: { foo: true },
-        metadata: {},
       });
     });
   });
