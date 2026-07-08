@@ -13,6 +13,7 @@ export type {
   EntityStoreCRUDClient,
 } from './types';
 export type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
+export { EntityMaintainerTaskStatus } from './tasks/entity_maintainers/types';
 export type { EntityUpdateClient, BulkObject, BulkObjectResponse } from './domain/crud';
 export type { EntityMetadataClient } from './domain/entity_metadata';
 export type { ResolutionClient } from './domain/resolution';
