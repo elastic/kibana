@@ -26,6 +26,7 @@ import {
   EntityAlreadyExistsError,
   EntityStoreNotInstalledError,
 } from '../errors';
+import { buildEntityListSourceFilter } from '../../../common/domain/definitions/entity_list_source';
 import { validateAndTransformDoc } from './utils';
 import { runWithSpan } from '../../telemetry/traces';
 import {
@@ -489,7 +490,9 @@ export class CRUDClient {
       sort: [{ '@timestamp': 'desc' }, { _shard_doc: 'desc' }],
       search_after: searchAfter,
       ...(fields && fields.length > 0 ? { fields } : {}),
-      ...(source && source.length > 0 ? { _source: source } : {}),
+      ...buildEntityListSourceFilter({
+        sourceIncludes: source,
+      }),
     });
 
     const hits = resp.hits.hits;
