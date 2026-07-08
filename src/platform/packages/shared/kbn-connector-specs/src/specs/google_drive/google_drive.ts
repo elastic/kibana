@@ -108,7 +108,19 @@ export const GoogleDriveConnector: ConnectorSpec = {
 
   auth: {
     types: [
-      'bearer',
+      {
+        type: 'ears',
+        isRecommended: true,
+        isExperimental: true,
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+        defaults: {
+          provider: 'google',
+          scope:
+            'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.metadata.readonly',
+        },
+      },
       {
         type: 'oauth_authorization_code',
         overrides: {
@@ -125,18 +137,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
             'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.metadata.readonly',
         },
       },
-      {
-        type: 'ears',
-        isExperimental: true,
-        overrides: {
-          meta: { scope: { disabled: true } },
-        },
-        defaults: {
-          provider: 'google',
-          scope:
-            'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.metadata.readonly',
-        },
-      },
+      { type: 'bearer', isLegacy: true, defaults: {} },
     ],
     headers: {
       Accept: 'application/json',

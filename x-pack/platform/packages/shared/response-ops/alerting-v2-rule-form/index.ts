@@ -59,8 +59,43 @@ export type {
   RuleKind,
 } from './form';
 
-export { buildInlineWorkflowYaml } from './actions_form';
-export type { ActionDraft } from './actions_form';
+export {
+  buildInlineWorkflowYaml,
+  InlineWorkflowEditor,
+  INLINE_ACTION_STEP_DEFINITIONS,
+  getInlineActionStepDefinition,
+  getDefaultInlineActionStepDefinition,
+  isActionValid,
+  buildRuleScopedMatcher,
+  selectRuleSimpleActionPolicies,
+  isExplicitlyLinkedToRule,
+  isRuleScopedCatchAllMatcher,
+  summarizeExplicitlyLinkedActionPolicies,
+} from './actions_form';
+export type {
+  ActionDraft,
+  ActionDraftOrigin,
+  RuleScopedSimpleActionPolicy,
+  LinkedActionPolicySummary,
+  InlineActionStepDefinition,
+  InlineActionStepType,
+  InlineWorkflowActionDraft,
+} from './actions_form';
+export { getRuleNotificationDraftsQueryKey } from './flyout/compose_discover/compose_discover_form/use_rule_notification_drafts';
+
+// Threshold rule-builder ES|QL parser + types — consumed by the episode trend chart
+export { parseThresholdEsql } from './flyout/compose_discover/rule_builder/threshold/parse_esql';
+export {
+  Aggregation,
+  Comparator,
+} from './flyout/compose_discover/rule_builder/threshold/form_types';
+export type {
+  ThresholdFormValues,
+  StatDefinition,
+  EvaluationDefinition,
+  AlertCondition,
+  ConditionOperator,
+} from './flyout/compose_discover/rule_builder/threshold/form_types';
 
 export { resolveDashboardsByIds } from './form/field_groups/search_related_dashboards';
 export type {

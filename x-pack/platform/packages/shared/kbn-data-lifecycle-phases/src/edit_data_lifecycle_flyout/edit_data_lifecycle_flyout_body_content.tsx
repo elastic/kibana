@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { RefObject } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,9 +14,9 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { RetentionSelector } from '../retention_selector';
 import type { RetentionOption } from '../retention_selector/types';
 import { editDataLifecycleFlyoutStrings as strings } from './strings';
@@ -50,22 +51,28 @@ interface InternalIlmArgs {
 
 export interface EditDataLifecycleFlyoutBodyContentProps {
   inheritLifecycle: boolean;
+  ilmReadOnly?: boolean;
+  ilmCardDisabled?: boolean;
   lifecycleMethod: DataLifecycleMethod;
   showLifecycleMethodPicker: boolean;
   inherit?: InternalInheritArgs;
   method?: InternalMethodArgs;
   ilm?: InternalIlmArgs;
   dataStreamLifecycleContent?: React.ReactNode;
+  flyoutScrollContainerRef?: RefObject<HTMLElement | null>;
 }
 
 export const EditDataLifecycleFlyoutBodyContent = ({
   inheritLifecycle,
+  ilmReadOnly = inheritLifecycle,
+  ilmCardDisabled = false,
   lifecycleMethod,
   showLifecycleMethodPicker,
   inherit,
   method,
   ilm,
   dataStreamLifecycleContent,
+  flyoutScrollContainerRef,
 }: EditDataLifecycleFlyoutBodyContentProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -75,8 +82,14 @@ export const EditDataLifecycleFlyoutBodyContent = ({
     lifecycleMethod,
   });
 
+  const lifecycleMethodLabelCss = css`
+    margin: 0;
+    margin-bottom: ${euiTheme.size.xs};
+    font-weight: ${euiTheme.font.weight.semiBold};
+  `;
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" responsive={false} css={styles.container}>
+    <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
       <EuiFlexItem grow={false} css={styles.headerSection}>
         {inherit && (
           <>
@@ -101,11 +114,9 @@ export const EditDataLifecycleFlyoutBodyContent = ({
 
         {method && (
           <>
-            <EuiTitle size="xxs">
-              <h3>{strings.lifecycleMethodTitle}</h3>
-            </EuiTitle>
-
-            <EuiSpacer size="s" />
+            <EuiText size="xs" css={lifecycleMethodLabelCss}>
+              {strings.lifecycleMethodTitle}
+            </EuiText>
 
             <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
               <LifecycleMethodCard
@@ -118,7 +129,12 @@ export const EditDataLifecycleFlyoutBodyContent = ({
               <LifecycleMethodCard
                 method="ilm"
                 selectedMethod={lifecycleMethod}
-                disabled={inheritLifecycle}
+                disabled={inheritLifecycle || ilmCardDisabled}
+                disabledTooltipContent={
+                  !inheritLifecycle && ilmCardDisabled
+                    ? strings.ilmNoManagePrivilegeTooltip
+                    : undefined
+                }
                 onChange={method.onChange}
               />
             </EuiFlexGroup>
@@ -136,7 +152,7 @@ export const EditDataLifecycleFlyoutBodyContent = ({
       </EuiFlexItem>
 
       {showLifecycleMethodPicker && lifecycleMethod === 'ilm' && (
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           {!ilm ? (
             <EuiPanel
               hasBorder
@@ -186,11 +202,12 @@ export const EditDataLifecycleFlyoutBodyContent = ({
               selectedOptionName={ilm.selectedPolicyName}
               onSelectOption={ilm.onSelect}
               onInspect={ilm.onInspect}
-              isDisabled={inheritLifecycle}
+              isDisabled={ilmReadOnly}
               height="full"
-              showSearch={!inheritLifecycle}
-              listStyle={inheritLifecycle ? 'panel' : 'plain'}
-              showRowActions={!inheritLifecycle}
+              flyoutScrollContainerRef={flyoutScrollContainerRef}
+              showSearch={!ilmReadOnly}
+              listStyle={ilmReadOnly ? 'panel' : 'plain'}
+              showRowActions={!ilmReadOnly}
               searchPlaceholder={strings.ilmSearchPlaceholder}
               inspectButtonLabel={strings.inspectPolicyAriaLabel}
             />

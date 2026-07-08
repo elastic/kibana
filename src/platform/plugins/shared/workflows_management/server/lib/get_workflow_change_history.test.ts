@@ -9,12 +9,15 @@
 
 import type { ChangeHistoryDocument } from '@kbn/change-history';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 
 import {
   assertWorkflowChangeHistoryEnabled,
+  assertWorkflowHistoryPaginationWithinWindow,
   getHistoryForWorkflow,
 } from './get_workflow_change_history';
 import { WorkflowChangeHistoryDisabledError } from './workflow_change_history_disabled_error';
+import { WorkflowHistoryPaginationError } from './workflow_history_pagination_error';
 import type { IWorkflowChangeHistoryService } from '../services/workflow_change_history_types';
 
 const createHistoryDocument = (eventId: string, sequence: number): ChangeHistoryDocument => ({
@@ -33,7 +36,7 @@ const createHistoryDocument = (eventId: string, sequence: number): ChangeHistory
     type: 'workflow',
     hash: 'abc',
     sequence,
-    fields: { hashed: [] },
+    fields: { hashed: [], redacted: [] },
     snapshot: {
       name: 'My workflow',
       enabled: true,
@@ -58,16 +61,15 @@ describe('get_workflow_change_history', () => {
     definition: null,
     yaml: 'name: My workflow',
     valid: true,
+    spaceId: 'default',
   };
 
   const createDeps = ({
     initialized = true,
-    versioningEnabled = true,
     historyResult = { total: 0, items: [] as ChangeHistoryDocument[] },
     workflowResult = workflow,
   }: {
     initialized?: boolean;
-    versioningEnabled?: boolean;
     historyResult?: { total: number; items: ChangeHistoryDocument[] };
     workflowResult?: typeof workflow | null;
   } = {}) => {
@@ -79,8 +81,7 @@ describe('get_workflow_change_history', () => {
     return {
       deps: {
         changeHistoryService,
-        getWorkflow: jest.fn().mockResolvedValue(workflowResult),
-        workflowVersioningEnabled: versioningEnabled,
+        getWorkflowSource: jest.fn().mockResolvedValue(workflowResult),
       },
       changeHistoryService,
     };
@@ -90,27 +91,32 @@ describe('get_workflow_change_history', () => {
     it('throws when change history is not initialized', () => {
       const { deps } = createDeps({ initialized: false });
 
-      expect(() =>
-        assertWorkflowChangeHistoryEnabled(
-          deps.changeHistoryService,
-          deps.workflowVersioningEnabled
-        )
-      ).toThrow(WorkflowChangeHistoryDisabledError);
+      expect(() => assertWorkflowChangeHistoryEnabled(deps.changeHistoryService)).toThrow(
+        new WorkflowChangeHistoryDisabledError()
+      );
+    });
+  });
+
+  describe('assertWorkflowHistoryPaginationWithinWindow', () => {
+    it('allows pagination at the Elasticsearch max result window boundary', () => {
+      expect(() => assertWorkflowHistoryPaginationWithinWindow(100, 100)).not.toThrow();
     });
 
-    it('throws when versioning uiSetting is disabled', () => {
-      const { deps } = createDeps({ versioningEnabled: false });
-
-      expect(() =>
-        assertWorkflowChangeHistoryEnabled(
-          deps.changeHistoryService,
-          deps.workflowVersioningEnabled
-        )
-      ).toThrow(WorkflowChangeHistoryDisabledError);
+    it('throws when pagination exceeds the Elasticsearch max result window', () => {
+      expect(() => assertWorkflowHistoryPaginationWithinWindow(101, 100)).toThrow(
+        new WorkflowHistoryPaginationError()
+      );
     });
   });
 
   describe('getHistoryForWorkflow', () => {
+    it('throws when change history is not initialized', async () => {
+      const { deps } = createDeps({ initialized: false });
+
+      await expect(
+        getHistoryForWorkflow(deps, { workflowId: 'wf-1', spaceId: 'default' })
+      ).rejects.toThrow(new WorkflowChangeHistoryDisabledError());
+    });
     it('returns mapped history entries with page/perPage and matching version', async () => {
       const historyDocument = createHistoryDocument('event-1', 2);
       const { deps, changeHistoryService } = createDeps({
@@ -156,6 +162,29 @@ describe('get_workflow_change_history', () => {
       });
     });
 
+    it('queries global history for a global workflow visible from the request space', async () => {
+      const { deps, changeHistoryService } = createDeps({
+        workflowResult: {
+          ...workflow,
+          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+        },
+      });
+
+      await getHistoryForWorkflow(deps, {
+        workflowId: 'wf-1',
+        spaceId: 'default',
+      });
+
+      expect(changeHistoryService.getHistory).toHaveBeenCalledWith(
+        GLOBAL_WORKFLOW_SPACE_ID,
+        'wf-1',
+        {
+          from: 0,
+          size: 20,
+        }
+      );
+    });
+
     it('throws WorkflowNotFoundError when workflow does not exist', async () => {
       const { deps } = createDeps({ workflowResult: null });
 
@@ -164,12 +193,73 @@ describe('get_workflow_change_history', () => {
       ).rejects.toBeInstanceOf(WorkflowNotFoundError);
     });
 
-    it('throws WorkflowChangeHistoryDisabledError when versioning is disabled', async () => {
-      const { deps } = createDeps({ versioningEnabled: false });
+    it('returns history when the workflow source exists (including soft-deleted tombstones)', async () => {
+      const historyDocument = createHistoryDocument('event-1', 2);
+      const { deps, changeHistoryService } = createDeps({
+        workflowResult: {
+          ...workflow,
+          spaceId: 'default',
+        },
+        historyResult: { total: 1, items: [historyDocument] },
+      });
+
+      const result = await getHistoryForWorkflow(deps, {
+        workflowId: 'wf-1',
+        spaceId: 'default',
+      });
+
+      expect(deps.getWorkflowSource).toHaveBeenCalledWith('wf-1', 'default');
+      expect(result.total).toBe(1);
+      expect(result.items).toHaveLength(1);
+      expect(changeHistoryService.getHistory).toHaveBeenCalled();
+    });
+
+    it('throws WorkflowHistoryPaginationError before querying when page exceeds the result window', async () => {
+      const { deps, changeHistoryService } = createDeps();
 
       await expect(
-        getHistoryForWorkflow(deps, { workflowId: 'wf-1', spaceId: 'default' })
-      ).rejects.toBeInstanceOf(WorkflowChangeHistoryDisabledError);
+        getHistoryForWorkflow(deps, {
+          workflowId: 'wf-1',
+          spaceId: 'default',
+          page: 101,
+          perPage: 100,
+        })
+      ).rejects.toThrow(new WorkflowHistoryPaginationError());
+
+      expect(deps.getWorkflowSource).not.toHaveBeenCalled();
+      expect(changeHistoryService.getHistory).not.toHaveBeenCalled();
+    });
+
+    it('allows pagination at the Elasticsearch max result window boundary', async () => {
+      const { deps, changeHistoryService } = createDeps();
+
+      await getHistoryForWorkflow(deps, {
+        workflowId: 'wf-1',
+        spaceId: 'default',
+        page: 100,
+        perPage: 100,
+      });
+
+      expect(deps.getWorkflowSource).toHaveBeenCalledWith('wf-1', 'default');
+      expect(changeHistoryService.getHistory).toHaveBeenCalledWith('default', 'wf-1', {
+        from: 9_900,
+        size: 100,
+      });
+    });
+
+    it('throws WorkflowHistoryPaginationError when from plus size exceeds the window', async () => {
+      const { deps, changeHistoryService } = createDeps();
+
+      await expect(
+        getHistoryForWorkflow(deps, {
+          workflowId: 'wf-1',
+          spaceId: 'default',
+          page: 1,
+          perPage: 10_001,
+        })
+      ).rejects.toThrow(new WorkflowHistoryPaginationError());
+
+      expect(changeHistoryService.getHistory).not.toHaveBeenCalled();
     });
 
     it('returns empty list when no history exists', async () => {

@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getWorkflowYamlFromSnapshot } from './get_workflow_yaml_from_snapshot';
 import {
   mapWorkflowHistoryItemToDetail,
   mapWorkflowHistoryItemToListItem,
+  toWorkflowChangeHistorySnapshot,
 } from './map_workflow_history_item';
 import {
   WORKFLOW_CHANGE_HISTORY_SYSTEM_USER,
@@ -55,17 +57,62 @@ describe('mapWorkflowHistoryItem', () => {
     });
   });
 
+  it('passes through changes when provided', () => {
+    const summary = [{ title: 'Steps:', lines: ['2 added', '1 removed', '1 updated'] }];
+
+    expect(
+      mapWorkflowHistoryItemToListItem(currentHistoryItem, {
+        isCurrent: true,
+        changes: {
+          count: 4,
+          summary,
+        },
+      })
+    ).toEqual(
+      expect.objectContaining({
+        changes: {
+          count: 4,
+          summary,
+        },
+      })
+    );
+  });
+
+  it('omits changes when not provided', () => {
+    expect(
+      mapWorkflowHistoryItemToListItem(currentHistoryItem, { isCurrent: true })
+    ).not.toHaveProperty('changes');
+  });
+
+  it('maps restore rows with comment on the timeline', () => {
+    expect(
+      mapWorkflowHistoryItemToListItem({
+        ...currentHistoryItem,
+        action: WorkflowChangeHistoryAction.workflowRestore,
+        comment: 'Restored from v3',
+      })
+    ).toEqual(
+      expect.objectContaining({
+        action: WorkflowChangeHistoryAction.workflowRestore,
+        comment: 'Restored from v3',
+      })
+    );
+  });
+
   it('maps detail with workflow yaml snapshot', () => {
     const detail = mapWorkflowHistoryItemToDetail(currentHistoryItem, {
       isCurrent: true,
     });
 
-    expect(detail.snapshot).toEqual({
-      workflow: {
-        yaml: 'name: current\n',
-      },
-    });
+    expect(detail.snapshot).toEqual(toWorkflowChangeHistorySnapshot('name: current\n'));
+    expect(getWorkflowYamlFromSnapshot(detail.snapshot)).toBe('name: current\n');
     expect(detail.action).toBe(WorkflowChangeHistoryAction.workflowUpdate);
+  });
+
+  it('returns an empty string for invalid workflow snapshots', () => {
+    expect(getWorkflowYamlFromSnapshot(undefined)).toBe('');
+    expect(getWorkflowYamlFromSnapshot({})).toBe('');
+    expect(getWorkflowYamlFromSnapshot({ workflow: { yaml: 42 } })).toBe('');
   });
 
   it('passes through unknown action values', () => {
