@@ -11,6 +11,7 @@ const baseSettings = {
   autoCloseEnabled: true,
   autoCloseConfidenceScoreMinThreshold: 0.85,
   autoCloseConfidenceScoreMaxThreshold: 1,
+  agentId: 'elastic-ai-agent',
   tagPrefix: 'alert-analysis',
 };
 
