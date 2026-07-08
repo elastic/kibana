@@ -21,6 +21,13 @@ export const ENABLE_RULE = i18n.translate(
   }
 );
 
+export const DISABLE_RULE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.disableRuleLabel',
+  {
+    defaultMessage: 'Disable',
+  }
+);
+
 export const CREATED_BY_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.createdByLabel',
   {

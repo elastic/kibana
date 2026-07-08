@@ -65,7 +65,7 @@ export const useRuleEnabledSwitch = ({
   return {
     id: 'ruleEnabledSwitch',
     label,
-    labelProps: { style: { display: 'none' } },
+    labelProps: { 'data-test-subj': 'ruleSwitchLabel' },
     checked: enabled,
     disabled: isDisabled,
     onChange,

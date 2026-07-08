@@ -662,7 +662,7 @@ export const RuleDetailsPage = connector(
     const ruleEnabledSwitch = useRuleEnabledSwitch({
       id: rule?.id ?? '-1',
       enabled: isRuleEnabled,
-      label: i18n.ENABLE_RULE,
+      label: isRuleEnabled ? i18n.DISABLE_RULE : i18n.ENABLE_RULE,
       isDisabled:
         !rule ||
         !isExistingRule ||
@@ -688,6 +688,7 @@ export const RuleDetailsPage = connector(
           label: ruleI18n.EDIT_RULE_SETTINGS,
           iconType: 'controls',
           order: 10,
+          overflow: true,
           testId: 'editRuleSettingsLink',
           disableButton: isRuleEditDisabled,
           tooltipContent: explainLackOfPermission(
