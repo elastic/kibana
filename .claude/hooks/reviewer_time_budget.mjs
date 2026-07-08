@@ -5,7 +5,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 const OVERALL_LIMIT_MINUTES = 20;
 const OVERALL_LIMIT_MS = OVERALL_LIMIT_MINUTES * 60 * 1000;
 const STOP_WORK_PERCENT = 85;
-const MILESTONE_PERCENTS = [25, 50, 75];
+const MILESTONE_PERCENTS = [5, 10, 75];
 const START_FILE = process.env.REVIEWER_TIME_BUDGET_START_FILE || '/tmp/gh-aw/agent_cli_start_ms.txt';
 const STATE_FILE =
   process.env.REVIEWER_TIME_BUDGET_STATE_FILE ||
