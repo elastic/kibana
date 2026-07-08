@@ -209,14 +209,14 @@ export const colorByValuePaletteSchema = schema.object(
       defaultValue: false,
       meta: {
         description:
-          "When `true`, values below the palette's lowest range use its lowest color instead of being left uncolored. Defaults to `false`.",
+          "Defines whether values below the colored value range use the palette's lowest color instead of being left uncolored. Defaults to `false`.",
       },
     }),
     open_above: schema.boolean({
       defaultValue: true,
       meta: {
         description:
-          "When `true`, values above the palette's highest range use its highest color instead of being left uncolored. Defaults to `true`.",
+          "Defines whether values above the colored value range use the palette's highest color instead of being left uncolored. Defaults to `true`.",
       },
     }),
   },
@@ -224,7 +224,7 @@ export const colorByValuePaletteSchema = schema.object(
     meta: {
       id: 'colorByValuePalette',
       title: 'Color By Value (Palette)',
-      description: 'Color by value using a named palette applied across the value range.',
+      description: 'Color by value using a named palette applied relative to the value range.',
     },
   }
 );
