@@ -90,7 +90,7 @@ export async function handlePostExecutionLoop({
       );
       if (workflowTaskManager) {
         try {
-          await workflowTaskManager.scheduleImmediateResume({
+          await workflowTaskManager.scheduleAndRunImmediateResume({
             executionId: parentExecId,
             spaceId,
             fakeRequest,
@@ -102,7 +102,7 @@ export async function handlePostExecutionLoop({
           const scheduleReason =
             scheduleErr instanceof Error ? scheduleErr.message : String(scheduleErr);
           logger.warn(
-            `Fallback scheduleImmediateResume also failed (parent=${parentExecId}): ${scheduleReason}`
+            `Fallback scheduleAndRunImmediateResume also failed (parent=${parentExecId}): ${scheduleReason}`
           );
         }
       }

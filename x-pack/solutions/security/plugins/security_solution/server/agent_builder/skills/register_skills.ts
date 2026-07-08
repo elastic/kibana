@@ -16,6 +16,7 @@ import { manageWatchlistsSkill } from './manage_watchlists';
 import { pciComplianceSkill } from './pci_compliance';
 import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
+import { alertTriageSkill } from './alert_triage';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
 import { findSecurityMlJobsSkill } from './find_security_ml_jobs';
 import { createFindRulesSkill } from './find_rules';
@@ -79,6 +80,7 @@ export const registerSkills = async ({
 
   await agentBuilder.skills.register(threatHuntingSkill);
   await agentBuilder.skills.register(alertAnalysisSkill);
+  await agentBuilder.skills.register(alertTriageSkill);
   if (experimentalFeatures.dexAiSkillFindRules) {
     await agentBuilder.skills.register(createFindRulesSkill({ getStartServices, logger }));
   }

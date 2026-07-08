@@ -64,7 +64,7 @@ interface PackFormProps {
   defaultValue?: PackItem;
   editMode?: boolean;
   isReadOnly?: boolean;
-  packId?: string;
+  isPrebuilt?: boolean;
   onDirtyStateChange?: (isDirty: boolean) => void;
 }
 
@@ -72,7 +72,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   defaultValue,
   editMode = false,
   isReadOnly = false,
-  packId,
+  isPrebuilt = false,
   onDirtyStateChange,
 }) => {
   const [shardsToggleState, setShardsToggleState] =
@@ -90,9 +90,9 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const { data: { agentPoliciesById } = {} } = useAgentPolicies();
 
-  const cancelButtonProps = useRouterNavigate(
-    `packs/${editMode ? packId ?? defaultValue?.id : ''}`
-  );
+  // Cancel returns to the Packs list. The read-only Pack details page was
+  // removed, so edit mode no longer navigates back to `packs/:packId`.
+  const cancelButtonProps = useRouterNavigate('packs');
 
   const { mutateAsync: createAsync } = useCreatePack({
     withRedirect: true,
@@ -109,10 +109,8 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       (policyId) => payload.shards?.[policyId] == null
     );
 
-    // Flag-off leak fix: strip the rrule-era schedule fields off the
-    // spread so a flag-off form never carries `schedule_type` / pack-level
-    // `interval` / `rrule_schedule` into state — and therefore never re-emits
-    // them on submit. Flag-off is byte-identical to the pre-rrule contract.
+    // Strip rrule-era fields before spreading so a flag-off form never
+    // carries them into state or re-emits them on submit.
     const {
       schedule_type: payloadScheduleType,
       interval: payloadInterval,
@@ -231,10 +229,8 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const onSubmit = useCallback(
     async (values: PackFormData) => {
-      // Submit-boundary gate: a controlled ScheduleSection object
-      // doesn't `register` cleanly with RHF, so the inline field errors are not
-      // enough to block submit. Re-validate the whole schedule here and abort
-      // when it fails — the inline errors already do the visual work.
+      // RHF field errors alone don't block submit for the controlled
+      // ScheduleSection object; re-validate here before allowing submit.
       if (isRruleSchedulingEnabled && values.schedule) {
         const submitScheduleErrors = validateScheduleFormData(values.schedule, {
           originalStartDate,
@@ -272,7 +268,8 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         return {
           ...restPayload,
           policy_ids: policies ?? [],
-          queries: convertSOQueriesToPack(payloadQueries),
+          // On edit, round-trip each query's id so the server preserves schedule_id.
+          queries: convertSOQueriesToPack(payloadQueries, { includeId: editMode }),
           shards: getShards() ?? {},
           ...scheduleFields,
         };
@@ -345,7 +342,14 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     await handleSubmitForm();
   }, [handleSubmitForm]);
 
-  const euiFieldProps = useMemo(() => ({ isDisabled: isReadOnly }), [isReadOnly]);
+  // Pack content (name, description, queries) is immutable for both read-only
+  // (readPacks-only) users and prebuilt Elastic packs.
+  const isContentDisabled = isReadOnly || isPrebuilt;
+  const euiFieldProps = useMemo(() => ({ isDisabled: isContentDisabled }), [isContentDisabled]);
+  // Scheduled agent policies / shards / Type stay editable for prebuilt packs
+  // (a writePacks user may re-target them) — only a fully read-only user is
+  // blocked. Matches the prebuiltPackModeDescription callout.
+  const policyFieldProps = useMemo(() => ({ isDisabled: isReadOnly }), [isReadOnly]);
 
   const changePackType = useCallback(
     (type: 'global' | 'policy' | 'shards') => {
@@ -390,7 +394,11 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         <EuiSpacer size="m" />
 
         <EuiFlexGroup>
-          <PackTypeSelectable packType={packType} setPackType={changePackType} />
+          <PackTypeSelectable
+            packType={packType}
+            setPackType={changePackType}
+            isDisabled={isReadOnly}
+          />
         </EuiFlexGroup>
         <EuiSpacer size="m" />
 
@@ -398,7 +406,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           <>
             <EuiFlexGroup>
               <EuiFlexItem css={overflowCss}>
-                <PolicyIdComboBoxField options={availableOptions} />
+                <PolicyIdComboBoxField
+                  options={availableOptions}
+                  euiFieldProps={policyFieldProps}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />
@@ -413,7 +424,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                   buttonContent="Partial deployment (shards)"
                 >
                   <EuiSpacer size="xs" />
-                  <PackShardsField options={availableOptions} />
+                  <PackShardsField options={availableOptions} isDisabled={isReadOnly} />
                 </EuiAccordion>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -428,7 +439,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                 <ScheduleSection
                   value={schedule}
                   onChange={handleScheduleChange}
-                  disabled={isReadOnly}
+                  disabled={isContentDisabled}
                   showErrors={showScheduleErrors || scheduleErrors.length > 0}
                 />
               </EuiFlexItem>
@@ -461,6 +472,9 @@ const PackFormComponent: React.FC<PackFormProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiButton
                   isLoading={isSubmitting}
+                  // Prebuilt packs keep an enabled save so writePacks users can
+                  // persist scheduled-policy/shards changes; only a read-only
+                  // (readPacks-only) user has saving disabled.
                   isDisabled={isReadOnly}
                   color="primary"
                   fill

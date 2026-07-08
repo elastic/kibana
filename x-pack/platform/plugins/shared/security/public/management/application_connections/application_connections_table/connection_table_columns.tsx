@@ -41,6 +41,7 @@ export const useConnectionTableColumns = ({
       field: 'connection.name',
       name: labels.connectionColumns.connectionName,
       sortable: ({ connection: { name, id } }) => name ?? id,
+      truncateText: true,
       render: (_, applicationConnection: ApplicationConnection) => {
         const { client, connection } = applicationConnection;
         const displayName = connection.name ?? connection.id;
@@ -63,6 +64,7 @@ export const useConnectionTableColumns = ({
       field: 'client.client_name',
       name: labels.connectionColumns.clientName,
       sortable: ({ client: { client_name, id } }) => client_name ?? id,
+      truncateText: true,
       render: (_, { client }: ApplicationConnection) => {
         const displayName = client.client_name ?? client.id;
         return (
@@ -83,6 +85,7 @@ export const useConnectionTableColumns = ({
     const authorizationDateColumn: EuiTableFieldDataColumnType<ApplicationConnection> = {
       field: 'connection.creation',
       name: labels.connectionColumns.authorizationDate,
+      width: '160px',
       sortable: ({ connection }) =>
         connection.creation ? new Date(connection.creation).getTime() : 0,
       render: (_value: string | undefined, { connection }: ApplicationConnection) =>
@@ -96,6 +99,7 @@ export const useConnectionTableColumns = ({
     const connectedByColumn: EuiTableComputedColumnType<ApplicationConnection> = {
       name: labels.connectionColumns.connectedBy,
       sortable: ({ connection }) => connection.user_id ?? '',
+      truncateText: true,
       render: ({ connection }: ApplicationConnection) => {
         const dataTestSubj = `applicationConnectionConnectedBy-${connection.id}`;
         if (!connection.user_id) {
@@ -119,10 +123,11 @@ export const useConnectionTableColumns = ({
 
     const statusColumn: EuiTableComputedColumnType<ApplicationConnection> = {
       name: labels.connectionColumns.status,
+      width: '120px',
       sortable: (applicationConnection) => (isConnectionActive(applicationConnection) ? 0 : 1),
       render: (applicationConnection) =>
         isConnectionActive(applicationConnection) ? (
-          <EuiToolTip content={labels.status.connectedTooltip} position="top">
+          <EuiToolTip content={labels.status.connectedTooltip} position="top" display="flex">
             <EuiHealth color="success">{labels.status.connected}</EuiHealth>
           </EuiToolTip>
         ) : (
