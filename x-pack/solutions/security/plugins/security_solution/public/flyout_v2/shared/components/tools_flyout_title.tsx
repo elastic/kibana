@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
+import type { IconType } from '@elastic/eui';
 import { EuiButtonEmpty, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { TOOLS_FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
 
@@ -22,7 +23,7 @@ export interface ToolsFlyoutTitleProps {
   /**
    * EUI icon type rendered next to the label.
    */
-  iconType: string;
+  iconType: IconType;
 }
 
 /**

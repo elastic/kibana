@@ -122,6 +122,7 @@ export const EntityInsight = <T,>({
           entityRecord={entityRecord}
           isPreviewMode={isPreviewMode}
           openDetailsPanel={openDetailsPanel}
+          hideHeaderIcons={hideHeaderIcons}
         />
         <EuiSpacer size="s" />
       </>
