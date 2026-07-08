@@ -145,6 +145,10 @@ const applyModelContentChanges = (
   }, prevValue);
 };
 
+const normalizeEndOfLine = (value: string, eol: string): string => {
+  return value.replace(/\r\n|\r|\n/g, eol);
+};
+
 // initialize supported languages
 initializeSupportedLanguages();
 
@@ -197,7 +201,8 @@ export function MonacoEditor({
   const lastKnownValueRef = useRef<string>(value ?? defaultValue);
   useEffect(() => {
     if (typeof value === 'string') {
-      lastKnownValueRef.current = value;
+      const modelEol = editor.current?.getModel()?.getEOL();
+      lastKnownValueRef.current = modelEol ? normalizeEndOfLine(value, modelEol) : value;
     }
   }, [value]);
 
@@ -281,6 +286,7 @@ export function MonacoEditor({
       const finalOptions = { ...options, ...handleEditorWillMount() };
 
       const model = monaco.editor.createModel(finalValue!, language);
+      lastKnownValueRef.current = normalizeEndOfLine(finalValue!, model.getEOL());
 
       editor.current = monaco.editor.create(containerElement.current, {
         model,
@@ -331,20 +337,29 @@ export function MonacoEditor({
     if (editor.current) {
       // In controlled mode, `value` changes on every keystroke. Avoid calling `editor.getValue()`
       // (which materializes the full model) by comparing against our shadow copy first.
-      if (typeof value !== 'string' || value === lastKnownValueRef.current) {
+      if (typeof value !== 'string') {
         return;
       }
 
       const model = editor.current.getModel();
+      if (!model) {
+        return;
+      }
+
+      const valueInModelEol = normalizeEndOfLine(value, model.getEOL());
+      if (valueInModelEol === lastKnownValueRef.current) {
+        return;
+      }
+
       __preventTriggerChangeEvent.current = true;
       editor.current.pushUndoStop();
       // pushEditOperations says it expects a cursorComputer, but doesn't seem to need one.
-      model!.pushEditOperations(
+      model.pushEditOperations(
         [],
         [
           {
-            range: model!.getFullModelRange(),
-            text: value!,
+            range: model.getFullModelRange(),
+            text: valueInModelEol,
           },
         ],
         // @ts-expect-error
@@ -354,7 +369,7 @@ export function MonacoEditor({
       __preventTriggerChangeEvent.current = false;
 
       // Keep shadow state in sync for programmatic updates where we suppress onDidChangeModelContent.
-      lastKnownValueRef.current = value;
+      lastKnownValueRef.current = valueInModelEol;
     }
   }, [value]);
 

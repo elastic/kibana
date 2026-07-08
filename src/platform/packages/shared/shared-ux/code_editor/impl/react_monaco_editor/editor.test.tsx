@@ -260,6 +260,78 @@ describe('react monaco editor onChange performance', () => {
     cleanup();
   });
 
+  describe('WHEN the Monaco model uses CRLF and the controlled value uses LF', () => {
+    it('SHOULD apply Monaco change offsets to a CRLF-normalized shadow value', async () => {
+      let createdModel: monaco.editor.ITextModel | undefined;
+
+      const editorPushUndoStop = jest.fn();
+      const { cleanup } = setupMonacoEditorHarness({
+        onDidChangeModelContent: (cb) => {
+          lastOnDidChangeModelContentCb = cb;
+        },
+        onPushUndoStop: editorPushUndoStop,
+        onCreateModel: (model) => {
+          createdModel = model;
+        },
+      });
+
+      const onChange = jest.fn<void, [string, monaco.editor.IModelContentChangedEvent]>();
+      const { rerender } = render(<MonacoEditor value="" onChange={onChange} options={{}} />);
+
+      await screen.findByTestId(OVERFLOW_WIDGETS_TEST_ID);
+      expect(createdModel).toBeDefined();
+      expect(typeof lastOnDidChangeModelContentCb).toBe('function');
+
+      createdModel!.setEOL(monaco.editor.EndOfLineSequence.CRLF);
+      rerender(<MonacoEditor value={'A\nB'} onChange={onChange} options={{}} />);
+      onChange.mockClear();
+
+      const range = createRange();
+      const event = createEvent([{ range, rangeOffset: 3, rangeLength: 1, text: 'X' }]);
+      lastOnDidChangeModelContentCb!(event);
+
+      expect(onChange).toHaveBeenCalledWith('A\r\nX', event);
+
+      cleanup();
+    });
+  });
+
+  describe('WHEN the Monaco model uses LF and the controlled value uses CRLF', () => {
+    it('SHOULD apply Monaco change offsets to an LF-normalized shadow value', async () => {
+      let createdModel: monaco.editor.ITextModel | undefined;
+
+      const editorPushUndoStop = jest.fn();
+      const { cleanup } = setupMonacoEditorHarness({
+        onDidChangeModelContent: (cb) => {
+          lastOnDidChangeModelContentCb = cb;
+        },
+        onPushUndoStop: editorPushUndoStop,
+        onCreateModel: (model) => {
+          createdModel = model;
+        },
+      });
+
+      const onChange = jest.fn<void, [string, monaco.editor.IModelContentChangedEvent]>();
+      const { rerender } = render(<MonacoEditor value="" onChange={onChange} options={{}} />);
+
+      await screen.findByTestId(OVERFLOW_WIDGETS_TEST_ID);
+      expect(createdModel).toBeDefined();
+      expect(typeof lastOnDidChangeModelContentCb).toBe('function');
+
+      createdModel!.setEOL(monaco.editor.EndOfLineSequence.LF);
+      rerender(<MonacoEditor value={'A\r\nB'} onChange={onChange} options={{}} />);
+      onChange.mockClear();
+
+      const range = createRange();
+      const event = createEvent([{ range, rangeOffset: 2, rangeLength: 1, text: 'X' }]);
+      lastOnDidChangeModelContentCb!(event);
+
+      expect(onChange).toHaveBeenCalledWith('A\nX', event);
+
+      cleanup();
+    });
+  });
+
   it('pushes a full replace when controlled value changes externally', async () => {
     const originalCreateModel = monaco.editor.createModel.bind(monaco.editor);
     let pushEditOperationsSpy: jest.SpyInstance | undefined;
