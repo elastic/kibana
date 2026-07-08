@@ -127,7 +127,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
   );
 
   spaceTest('should convert aggregate by to split row dimension', async ({ page, pageObjects }) => {
-    const { dashboard } = pageObjects;
+    const { dashboard, lens } = pageObjects;
     await dashboard.clickPanelAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Table - Agg by'
@@ -141,6 +141,9 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
       'Top 10 values of machine.os.raw',
       'Top 10 values of clientip',
     ]);
+
+    await lens.openDimensionEditor('lnsDatatable_rows > lns-dimensionTrigger', 0, 1);
+    await expect(page.testSubj.locator('indexPattern-collapse-by')).toHaveValue('sum');
   });
 
   spaceTest('should convert group by field with custom label', async ({ page, pageObjects }) => {
