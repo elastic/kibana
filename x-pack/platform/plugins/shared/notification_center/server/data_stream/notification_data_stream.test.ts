@@ -74,9 +74,9 @@ describe('registerNotificationDataStream', () => {
   });
 
   describe('getNotificationDataStreamClient', () => {
-    it('initializes the client for the notification data stream', () => {
+    it('initializes the client for the notification data stream', async () => {
       const dataStreams = dataStreamServiceMock.createStartContract();
-      getNotificationDataStreamClient(dataStreams);
+      await getNotificationDataStreamClient(dataStreams);
       expect(dataStreams.initializeClient).toHaveBeenCalledWith(NOTIFICATION_DATA_STREAM_NAME);
     });
 
