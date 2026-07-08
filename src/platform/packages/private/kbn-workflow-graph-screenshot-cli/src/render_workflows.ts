@@ -53,13 +53,57 @@ export interface Manifest {
   readonly entries: readonly ManifestEntry[];
 }
 
-const slugify = (s: string): string =>
+export const slugify = (s: string): string =>
   s
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/^_+|_+$/, '')
     .slice(0, 120) || 'workflow';
+
+/**
+ * Computes the PNG filename for each entry, disambiguating workflows that would
+ * otherwise collide because they land in the same directory with the same
+ * slugified name (e.g. two files titled "My Workflow" in different source
+ * folders, both writing to a shared --output-dir). Disambiguation folds the
+ * source file's parent directory into the name; a numeric suffix is added as a
+ * last resort if that still collides. Computed once up-front (rather than
+ * during the concurrent screenshot loop) so the result is deterministic
+ * regardless of processing order.
+ */
+export const computeScreenshotFilenames = (
+  entries: readonly { readonly name: string; readonly yamlPath: string }[],
+  screenshotDirs: readonly string[]
+): string[] => {
+  const baseNames = entries.map((e) => slugify(e.name));
+
+  const groups = new Map<string, number[]>();
+  entries.forEach((_, i) => {
+    const key = `${screenshotDirs[i]}::${baseNames[i]}`;
+    const group = groups.get(key) ?? [];
+    group.push(i);
+    groups.set(key, group);
+  });
+
+  const filenames = new Array<string>(entries.length);
+  for (const indices of groups.values()) {
+    if (indices.length === 1) {
+      filenames[indices[0]] = `${baseNames[indices[0]]}.png`;
+      continue;
+    }
+
+    const seen = new Map<string, number>();
+    for (const i of indices) {
+      const dirSlug = slugify(path.basename(path.dirname(entries[i].yamlPath)));
+      const candidateBase = `${baseNames[i]}__${dirSlug}`;
+      const count = seen.get(candidateBase) ?? 0;
+      seen.set(candidateBase, count + 1);
+      filenames[i] = count === 0 ? `${candidateBase}.png` : `${candidateBase}_${count + 1}.png`;
+    }
+  }
+
+  return filenames;
+};
 
 /**
  * Full pipeline: build bundle → start server → drive puppeteer → write PNGs.
@@ -177,6 +221,11 @@ export const renderWorkflows = async (options: RenderOptions): Promise<void> => 
 
     const results: ManifestEntry[] = new Array(files.length);
 
+    // Precomputed once, up-front, so filenames are deterministic regardless of
+    // the order in which the concurrent workers below process the queue.
+    const screenshotDirs = files.map((file) => (outputInPlace ? path.dirname(file) : outputDir));
+    const screenshotFilenames = computeScreenshotFilenames(entries, screenshotDirs);
+
     try {
       // Open concurrency-many pages upfront; each worker drains a shared queue.
       const pages = await Promise.all(
@@ -213,9 +262,8 @@ export const renderWorkflows = async (options: RenderOptions): Promise<void> => 
                 await new Promise((r) => setTimeout(r, settleMs));
               }
 
-              const screenshotFileName = `${slugify(name)}.png`;
-              const screenshotDir = outputInPlace ? path.dirname(file) : outputDir;
-              const screenshotPath = path.join(screenshotDir, screenshotFileName);
+              const screenshotDir = screenshotDirs[idx];
+              const screenshotPath = path.join(screenshotDir, screenshotFilenames[idx]);
               await page.screenshot({ type: 'png', path: screenshotPath });
 
               log.success(`[${idx + 1}/${files.length}] ${name} → ${screenshotPath}`);

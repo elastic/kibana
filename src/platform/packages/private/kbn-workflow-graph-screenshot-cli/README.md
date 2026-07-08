@@ -33,7 +33,13 @@ node scripts/workflow_graph_screenshot.js \
 ```
 
 Output PNGs are written to `./workflow-graph-screenshots/` by default, alongside
-a `manifest.json` summarising the run.
+a `manifest.json` summarising the run. If two source YAML files share the same
+title and would otherwise write the same PNG filename into that shared output
+directory, the colliding files are disambiguated by folding their source folder
+name into the filename (e.g. `my_workflow__folder_a.png`,
+`my_workflow__folder_b.png`) instead of one silently overwriting the other.
+`--output-in-place` is never affected by this, since each PNG is written next to
+its own source file.
 
 ## Options
 

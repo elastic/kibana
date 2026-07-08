@@ -12,6 +12,7 @@ import { transformWorkflowToGraph } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import { resolveYamlInputs } from './cli';
+import { computeScreenshotFilenames } from './render_workflows';
 
 // Local fixture YAMLs — self-contained so the test has no cross-package deps.
 const FIXTURES_DIR = path.resolve(__dirname, '__fixtures__');
@@ -96,5 +97,57 @@ describe('resolveYamlInputs', () => {
     const singleFile = path.join(FIXTURES_DIR, 'automated_triaging.yaml');
     const files = await resolveYamlInputs([singleFile, singleFile]);
     expect(files).toHaveLength(1);
+  });
+});
+
+// ── Screenshot filename collision handling ─────────────────────────────────────
+
+describe('computeScreenshotFilenames', () => {
+  it('keeps the plain slugified name when there is no collision', () => {
+    const entries = [
+      { name: 'My Workflow', yamlPath: '/a/my_workflow.yaml' },
+      { name: 'Other Workflow', yamlPath: '/b/other_workflow.yaml' },
+    ];
+    const dirs = ['/out', '/out'];
+    expect(computeScreenshotFilenames(entries, dirs)).toEqual([
+      'my_workflow.png',
+      'other_workflow.png',
+    ]);
+  });
+
+  it('disambiguates same-titled workflows from different folders sharing an output dir', () => {
+    const entries = [
+      { name: 'My Workflow', yamlPath: '/folder_a/my_workflow.yaml' },
+      { name: 'My Workflow', yamlPath: '/folder_b/my_workflow.yaml' },
+    ];
+    const dirs = ['/out', '/out'];
+    const filenames = computeScreenshotFilenames(entries, dirs);
+    expect(new Set(filenames).size).toBe(2);
+    expect(filenames).toEqual(['my_workflow__folder_a.png', 'my_workflow__folder_b.png']);
+  });
+
+  it('falls back to a numeric suffix when the folded directory name still collides', () => {
+    const entries = [
+      { name: 'My Workflow', yamlPath: '/shared/nested/my_workflow.yaml' },
+      { name: 'My Workflow', yamlPath: '/other/nested/my_workflow.yaml' },
+    ];
+    const dirs = ['/out', '/out'];
+    const filenames = computeScreenshotFilenames(entries, dirs);
+    expect(new Set(filenames).size).toBe(2);
+    expect(filenames).toEqual(['my_workflow__nested.png', 'my_workflow__nested_2.png']);
+  });
+
+  it('does not disambiguate identically-named workflows headed to different directories', () => {
+    // --output-in-place: same title in two distinct source folders never collides
+    // because each screenshot lands next to its own YAML file.
+    const entries = [
+      { name: 'My Workflow', yamlPath: '/folder_a/my_workflow.yaml' },
+      { name: 'My Workflow', yamlPath: '/folder_b/my_workflow.yaml' },
+    ];
+    const dirs = ['/folder_a', '/folder_b'];
+    expect(computeScreenshotFilenames(entries, dirs)).toEqual([
+      'my_workflow.png',
+      'my_workflow.png',
+    ]);
   });
 });
