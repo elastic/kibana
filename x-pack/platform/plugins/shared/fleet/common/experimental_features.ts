@@ -22,6 +22,7 @@ const _allowedExperimentalValues = {
   enableFleetPolicyRevisionsCleanupTask: true,
   enableAgentRollback: true, // When enabled, agent upgrade rollback will be available in the API and UI.
   disableAgentlessLegacyAPI: false, // When enabled, it will disable creating agentless policies via agent or package policies API.
+  enableAgentlessPoliciesUI: true, // When enabled, the UI reads/writes agentless integration policies through the agentless policies API. Disable as a kill switch to fall back to the legacy package-policy/agent-policy APIs.
   enableEsqlViewInstall: false,
   enableSloTemplates: true,
   newBrowseIntegrationUx: true, // When enabled integrations, browse integrations page will use the new UX.

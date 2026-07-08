@@ -132,7 +132,8 @@ describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
 });
 
 // In serverless it is not possible to use the navigation menu without closing the timeline
-describe('[serverless] Save Timeline Prompts', { tags: ['@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/276802
+describe.skip('[serverless] Save Timeline Prompts', { tags: ['@serverless'] }, () => {
   beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));
