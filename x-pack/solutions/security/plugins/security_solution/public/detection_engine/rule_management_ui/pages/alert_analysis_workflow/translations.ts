@@ -24,7 +24,8 @@ export const THRESHOLD_RANGE_ERROR = i18n.translate(
 export const TAG_PREFIX_ERROR = i18n.translate(
   'xpack.securitySolution.alertAnalysisWorkflow.tagPrefixErrorMessage',
   {
-    defaultMessage: 'Tag prefix is required.',
+    defaultMessage:
+      'Tag prefix may only contain letters, numbers, dots, dashes, and underscores, and must include at least one letter or number.',
   }
 );
 
@@ -60,6 +61,20 @@ export const CONNECTOR_LABEL = i18n.translate(
   'xpack.securitySolution.alertAnalysisWorkflow.connectorLabel',
   {
     defaultMessage: 'Connector',
+  }
+);
+
+export const AGENT_LABEL = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.agentLabel',
+  {
+    defaultMessage: 'Agent',
+  }
+);
+
+export const AGENT_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.agentAriaLabel',
+  {
+    defaultMessage: 'Agent used by the alert analysis workflow',
   }
 );
 

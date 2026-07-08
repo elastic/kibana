@@ -421,7 +421,9 @@ describe('resumeWorkflow', () => {
           new Error('fetch failed')
         );
 
-        await expect(resumeWorkflowWithDefaults({ meteringService })).resolves.toBeUndefined();
+        await expect(resumeWorkflowWithDefaults({ meteringService })).resolves.toEqual({
+          idleTimeoutResumeAt: undefined,
+        });
 
         expect(logger.warn).toHaveBeenCalledWith(
           expect.stringContaining(

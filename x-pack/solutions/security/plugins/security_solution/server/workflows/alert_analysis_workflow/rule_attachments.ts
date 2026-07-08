@@ -12,6 +12,7 @@ import { systemConnectorActionRefPrefix } from '@kbn/alerting-plugin/common';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import type {
   AlertAnalysisWorkflowRuleAttachmentService,
+  RuleAttachmentFilter,
   RuleAttachmentSelection,
   RuleAttachmentSummary,
 } from '../../../common/workflows/alert_analysis_workflow';
@@ -20,6 +21,7 @@ import {
   type BulkActionEditPayload,
   type NormalizedRuleAction,
 } from '../../../common/api/detection_engine/rule_management';
+import { convertRuleSearchTermToKQL } from '../../../common/detection_engine/rule_management/rule_filtering';
 import type { DetectionRulesAuthz } from '../../../common/detection_engine/rule_management/authz';
 import type { PrebuiltRulesCustomizationStatus } from '../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import type { MlAuthz } from '../../lib/machine_learning/authz';
@@ -34,9 +36,9 @@ import type { IPrebuiltRuleAssetsClient } from '../../lib/detection_engine/prebu
 export const ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID = 'system-connector-.workflows';
 const ALERT_ANALYSIS_WORKFLOW_ACTION_SUB_ACTION = 'run';
 const MAX_RULES_TO_ATTACH = 2000;
-// Detach needs one bulkEdit call per rule (each rule keeps a different remaining action
-// list), so this bounds how many of those run at once instead of firing up to
-// MAX_RULES_TO_ATTACH concurrently.
+// Detach runs one bulkEdit per distinct remaining-action group (see updateRuleAttachments). When
+// rules have varied leftover action lists that degrades toward one call per rule, so this bounds
+// how many run at once instead of firing up to MAX_RULES_TO_ATTACH concurrently.
 const DETACH_CONCURRENCY = 10;
 
 interface WorkflowRuleActionParams {
@@ -81,6 +83,45 @@ const normalizeSearch = (search: string): string | undefined => {
 // shared `.workflows` system connector is not counted as attached to this one.
 const buildAttachedRulesFilter = (workflowId: string): string =>
   `alert.attributes.actions:{ actionRef: "${systemConnectorActionRefPrefix}${ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID}" and params.subActionParams.workflowId: "${workflowId}" }`;
+
+// Match the Rules page: a single search term becomes a `name.keyword: *term*` substring filter
+// (plus the MITRE/index attributes), so `Endpoin`/`Sec`/`Def` match like they do there. The plain
+// `search`/`searchFields` used before only matched whole words/prefixes.
+const buildSearchClause = (search: string): string | undefined => {
+  const normalizedSearch = normalizeSearch(search);
+  return normalizedSearch ? convertRuleSearchTermToKQL(normalizedSearch) : undefined;
+};
+
+// Translates the attachment filter into a KQL clause so the narrowing happens server-side (via the
+// count-only + paginated read paths) instead of pulling every matching rule into memory to filter.
+const buildAttachmentFilterClause = (
+  workflowId: string,
+  attachmentFilter: RuleAttachmentFilter
+): string | undefined => {
+  const attachedFilter = buildAttachedRulesFilter(workflowId);
+
+  if (attachmentFilter === 'attached') {
+    return attachedFilter;
+  }
+
+  if (attachmentFilter === 'not_attached') {
+    return `not (${attachedFilter})`;
+  }
+
+  return undefined;
+};
+
+// ANDs the provided KQL clauses (dropping empty ones), parenthesizing each so their internal `and`/
+// `or`/`not` operators don't bleed across clause boundaries.
+const combineFilters = (clauses: Array<string | undefined>): string | undefined => {
+  const presentClauses = clauses.filter((clause): clause is string => Boolean(clause));
+
+  if (presentClauses.length === 0) {
+    return undefined;
+  }
+
+  return presentClauses.map((clause) => `(${clause})`).join(' and ');
+};
 
 const getRuleActions = (
   rule: Pick<RuleAlertType, 'actions' | 'systemActions'>
@@ -132,16 +173,17 @@ const createAddWorkflowActionEdit = (workflowId: string): BulkActionEditPayload 
   },
 });
 
-const createSetWorkflowActionsEdit = (
+const getActionsWithoutWorkflow = (
   rule: RuleAlertType,
   workflowId: string
-): BulkActionEditPayload => ({
+): NormalizedRuleAction[] =>
+  getRuleActions(rule)
+    .filter((action) => !isAlertAnalysisWorkflowAction(action, workflowId))
+    .map(toNormalizedRuleAction);
+
+const createSetActionsEdit = (actions: NormalizedRuleAction[]): BulkActionEditPayload => ({
   type: BulkActionEditTypeEnum.set_rule_actions,
-  value: {
-    actions: getRuleActions(rule)
-      .filter((action) => !isAlertAnalysisWorkflowAction(action, workflowId))
-      .map(toNormalizedRuleAction),
-  },
+  value: { actions },
 });
 
 const toRuleAttachmentSummary = (
@@ -155,18 +197,15 @@ const toRuleAttachmentSummary = (
 });
 
 // Count-only find (no hits fetched) so the preview scales to any number of matching rules instead
-// of throwing once more than MAX_RULES_TO_ATTACH match. An optional `filter` narrows the count, e.g.
-// to rules that already have the workflow action attached.
+// of throwing once more than MAX_RULES_TO_ATTACH match. The `filter` narrows the count, e.g. to
+// rules matching the search term, the attachment filter, or that already have the workflow attached.
 const countMatchingRules = async ({
   rulesClient,
-  search,
   filter,
 }: {
   rulesClient: RulesClient;
-  search: string;
   filter?: string;
 }): Promise<number> => {
-  const normalizedSearch = normalizeSearch(search);
   const { total } = await findRules({
     rulesClient,
     filter,
@@ -175,8 +214,8 @@ const countMatchingRules = async ({
     perPage: 0,
     sortField: undefined,
     sortOrder: undefined,
-    search: normalizedSearch,
-    searchFields: normalizedSearch ? ['name'] : undefined,
+    search: undefined,
+    searchFields: undefined,
   });
 
   return total;
@@ -186,26 +225,25 @@ const countMatchingRules = async ({
 // order is stable across pages without pulling every matching rule into memory.
 const fetchMatchingRules = async ({
   rulesClient,
-  search,
+  filter,
   page,
   perPage,
 }: {
   rulesClient: RulesClient;
-  search: string;
+  filter?: string;
   page: number;
   perPage: number;
 }): Promise<MatchingRulesResult> => {
-  const normalizedSearch = normalizeSearch(search);
   const { data, total } = await findRules({
     rulesClient,
-    filter: undefined,
+    filter,
     fields: undefined,
     page,
     perPage,
     sortField: 'name',
     sortOrder: 'asc',
-    search: normalizedSearch,
-    searchFields: normalizedSearch ? ['name'] : undefined,
+    search: undefined,
+    searchFields: undefined,
   });
 
   return { total, rules: data };
@@ -272,19 +310,41 @@ export const createAlertAnalysisWorkflowRuleAttachmentService = (
   const { rulesClient, workflowId, bulkEditRulesFn = bulkEditRules } = dependencies;
 
   return {
-    async getRuleAttachmentStats({ search }) {
+    async getRuleAttachmentStats({ search, attachmentFilter }) {
+      const searchClause = buildSearchClause(search);
+      const attachmentClause = buildAttachmentFilterClause(workflowId, attachmentFilter);
+      const attachedClause = buildAttachedRulesFilter(workflowId);
+
       const [total, attached] = await Promise.all([
-        countMatchingRules({ rulesClient, search }),
-        countMatchingRules({ rulesClient, search, filter: buildAttachedRulesFilter(workflowId) }),
+        countMatchingRules({
+          rulesClient,
+          filter: combineFilters([searchClause, attachmentClause]),
+        }),
+        countMatchingRules({
+          rulesClient,
+          filter: combineFilters([searchClause, attachmentClause, attachedClause]),
+        }),
       ]);
 
       return { total, attached };
     },
 
-    async getRuleAttachments({ search, page, perPage }) {
+    async getRuleAttachments({ search, attachmentFilter, page, perPage }) {
+      const searchClause = buildSearchClause(search);
+      const attachmentClause = buildAttachmentFilterClause(workflowId, attachmentFilter);
+      const attachedClause = buildAttachedRulesFilter(workflowId);
+
       const [{ total, rules }, attached] = await Promise.all([
-        fetchMatchingRules({ rulesClient, search, page, perPage }),
-        countMatchingRules({ rulesClient, search, filter: buildAttachedRulesFilter(workflowId) }),
+        fetchMatchingRules({
+          rulesClient,
+          filter: combineFilters([searchClause, attachmentClause]),
+          page,
+          perPage,
+        }),
+        countMatchingRules({
+          rulesClient,
+          filter: combineFilters([searchClause, attachmentClause, attachedClause]),
+        }),
       ]);
 
       return {
@@ -296,14 +356,20 @@ export const createAlertAnalysisWorkflowRuleAttachmentService = (
       };
     },
 
-    async getRuleAttachmentSelection({ search }): Promise<RuleAttachmentSelection> {
+    async getRuleAttachmentSelection({
+      search,
+      attachmentFilter,
+    }): Promise<RuleAttachmentSelection> {
       // Bulk attach/detach is bounded platform-wide (the rules client turns ids into KQL OR clauses,
       // capped by ES maxClauseCount), so selection enumerates at most MAX_RULES_TO_ATTACH matching
       // rules by name order rather than every match. Browsing/preview stays uncapped via the
       // count-only + paginated read paths above.
+      const searchClause = buildSearchClause(search);
+      const attachmentClause = buildAttachmentFilterClause(workflowId, attachmentFilter);
+
       const { total, rules } = await fetchMatchingRules({
         rulesClient,
-        search,
+        filter: combineFilters([searchClause, attachmentClause]),
         page: 1,
         perPage: MAX_RULES_TO_ATTACH,
       });
@@ -372,16 +438,40 @@ export const createAlertAnalysisWorkflowRuleAttachmentService = (
         }
       };
 
-      // Attach shares one bulkEdit for all rules (identical added action); detach needs one call
-      // per rule because it rewrites each rule's full action list, so it's bounded by pMap.
+      // Detach rewrites each rule's action list to drop the workflow action, so rules can't share
+      // the single bulkEdit that attach uses. But rules that end up with the *same* remaining
+      // action list can: group by that list and run one bulkEdit per distinct group. In the common
+      // case (rules the UI bulk-attached, which only carry the workflow action) every rule collapses
+      // to the same empty list and detach becomes a single bulkEdit instead of one call per rule,
+      // which is what made large detaches hang. Unique leftover lists still fall back to their own
+      // call, bounded by pMap the same way the per-rule path was.
+      const detachGroups = new Map<
+        string,
+        { edit: BulkActionEditPayload; rules: RuleAlertType[] }
+      >();
+      for (const rule of rulesToDetach) {
+        const remainingActions = getActionsWithoutWorkflow(rule, workflowId);
+        const key = JSON.stringify(remainingActions);
+        const group = detachGroups.get(key);
+        if (group) {
+          group.rules.push(rule);
+        } else {
+          detachGroups.set(key, { edit: createSetActionsEdit(remainingActions), rules: [rule] });
+        }
+      }
+
+      // Attach shares one bulkEdit for all rules (identical added action); detach runs one bulkEdit
+      // per distinct remaining-action group, bounded by pMap.
       const [attachOutcome, detachOutcomes] = await Promise.all([
         rulesToAttach.length > 0
           ? runBulkEdit(rulesToAttach, [createAddWorkflowActionEdit(workflowId)])
           : Promise.resolve({ updated: 0, errors: 0 }),
         pMap(
-          rulesToDetach,
-          (rule) => runBulkEdit([rule], [createSetWorkflowActionsEdit(rule, workflowId)]),
-          { concurrency: DETACH_CONCURRENCY }
+          [...detachGroups.values()],
+          ({ edit, rules: groupRules }) => runBulkEdit(groupRules, [edit]),
+          {
+            concurrency: DETACH_CONCURRENCY,
+          }
         ),
       ]);
       const outcomes = [attachOutcome, ...detachOutcomes];
