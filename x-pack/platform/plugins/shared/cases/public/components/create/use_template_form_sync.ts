@@ -8,21 +8,16 @@
 import { useEffect, useRef } from 'react';
 import type { MutableRefObject } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
-import { parse as parseYaml } from 'yaml';
 import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ParsedTemplate } from '../../../common/types/domain/template/v1';
 import { CASE_EXTENDED_FIELDS, NONE_CONNECTOR_ID } from '../../../common/constants';
 import { ConnectorTypes } from '../../../common/types/domain';
 import type { CaseConnectorWithoutName } from '../../../common/types/domain_zod/connector/v1';
 import { useGetTemplate } from '../templates_v2/hooks/use_get_template';
-import { getFieldSnakeKey } from '../../../common/utils';
-import { getYamlDefaultAsString } from '../templates_v2/utils';
 import {
-  FieldSchema,
-  isInlineField,
-  isRefField,
-} from '../../../common/types/domain/template/fields';
-import type { InlineField } from '../../../common/types/domain/template/fields';
+  buildExtendedFieldsDefaults,
+  resolveTemplateFields,
+} from '../../../common/utils/template_fields';
 import { useGetFieldDefinitions } from '../field_library/hooks/use_get_field_definitions';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 
@@ -153,42 +148,6 @@ const syncTemplateConnector = (
   }
 };
 
-/**
- * Resolves a template's fields (inline fields pass through, `$ref` fields are looked up in the
- * library) into a `{ snakeKey: yamlDefault }` map for the inner form.
- */
-const resolveExtendedFieldDefaults = (
-  fields: TemplateDefinition['fields'],
-  libraryDefs: Array<{ name: string; definition: string }>
-): Record<string, string> => {
-  const resolvedFields = (fields ?? []).flatMap((field): InlineField[] => {
-    if (isInlineField(field)) return [field];
-    const fd = libraryDefs.find((d) => d.name === field.$ref);
-    if (!fd) return [];
-    try {
-      const parsed = parseYaml(fd.definition);
-      const result = FieldSchema.safeParse(parsed);
-      if (!result.success || isRefField(result.data)) return [];
-      const inlineField = result.data as InlineField;
-      return [
-        field.name && field.name !== inlineField.name
-          ? { ...inlineField, name: field.name }
-          : inlineField,
-      ];
-    } catch {
-      return [];
-    }
-  });
-
-  const nextExtended: Record<string, string> = {};
-  for (const field of resolvedFields) {
-    nextExtended[getFieldSnakeKey(field.name, field.type)] = getYamlDefaultAsString(
-      field.metadata?.default
-    );
-  }
-  return nextExtended;
-};
-
 interface UseTemplateFormSyncReturn {
   template: ParsedTemplate | undefined;
   isLoading: boolean;
@@ -279,17 +238,12 @@ export const useTemplateFormSync = (
     // Do NOT set appliedRef.current yet — the effect must re-run once both are available.
     if (isLoadingFieldDefs || isLoadingConnectors) return;
 
-    syncTemplateConnector(
-      definition.connector,
-      connectors,
-      updateFieldValues,
-      didApplyConnectorRef
-    );
+    syncTemplateConnector(definition.connector, connectors, updateFieldValues, didApplyConnectorRef);
 
-    const nextExtended = resolveExtendedFieldDefaults(
-      definition.fields,
-      fieldDefsData?.fieldDefinitions ?? []
-    );
+    // Resolve all fields — inline fields pass through, ref fields are looked up in the library
+    const libraryDefs = fieldDefsData?.fieldDefinitions ?? [];
+    const resolvedFields = resolveTemplateFields(definition.fields ?? [], libraryDefs);
+    const nextExtended = buildExtendedFieldsDefaults(resolvedFields);
     // Preserve current values for global fields when template changes.
     innerForm.reset({
       [CASE_EXTENDED_FIELDS]: {

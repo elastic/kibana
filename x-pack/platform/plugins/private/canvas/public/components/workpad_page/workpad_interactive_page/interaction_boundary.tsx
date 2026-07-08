@@ -7,7 +7,6 @@
 
 import type { CSSProperties } from 'react';
 import React, { PureComponent } from 'react';
-import $ from 'jquery';
 import { WORKPAD_CONTAINER_ID } from '../../workpad_app';
 
 interface State {
