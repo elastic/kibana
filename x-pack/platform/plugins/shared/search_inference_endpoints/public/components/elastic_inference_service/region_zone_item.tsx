@@ -97,7 +97,7 @@ export const RegionZoneItem: React.FC<RegionZoneItemProps> = ({
                 <EuiCheckbox
                   key={key}
                   id={`region-${key}`}
-                  label={REGION_DISPLAY_NAMES[key] ?? r.region}
+                  label={`${REGION_DISPLAY_NAMES[key] ?? r.region} - ${r.csp.toUpperCase()}`}
                   checked={checkedKeys.has(key)}
                   onChange={() => onToggleRegion(key)}
                   data-test-subj={`manageRegionsCheckbox-${key}`}
