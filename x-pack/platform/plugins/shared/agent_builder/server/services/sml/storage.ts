@@ -9,9 +9,13 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import type { SmlDocument } from '@kbn/agent-builder-server';
-import { chatSystemIndex } from '@kbn/agent-builder-server';
 
-export const smlIndexName = chatSystemIndex('sml-data');
+/**
+ * `agent_builder` owns this index outright: it is a plain (non-system) index,
+ * not a shared contract with `agent_context_layer`, and its mapping may
+ * diverge freely from any Context Engine-suggested schema.
+ */
+export const smlIndexName = '.ab-sml-data';
 
 const SEMANTIC_MULTI_FIELD = {
   semantic: types.semantic_text({}),

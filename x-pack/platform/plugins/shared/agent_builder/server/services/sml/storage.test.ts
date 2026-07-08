@@ -8,7 +8,7 @@
 import { smlIndexName } from './storage';
 
 describe('SML storage', () => {
-  it('exposes the shared index name', () => {
-    expect(smlIndexName).toBe('.chat-sml-data');
+  it('exposes the agent_builder-owned index name', () => {
+    expect(smlIndexName).toBe('.ab-sml-data');
   });
 });
