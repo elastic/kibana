@@ -63,6 +63,20 @@ export const CONNECTOR_LABEL = i18n.translate(
   }
 );
 
+export const AGENT_LABEL = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.agentLabel',
+  {
+    defaultMessage: 'Agent',
+  }
+);
+
+export const AGENT_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.agentAriaLabel',
+  {
+    defaultMessage: 'Agent used by the alert analysis workflow',
+  }
+);
+
 export const CREATE_CONVERSATION_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.alertAnalysisWorkflow.createConversationAriaLabel',
   {
