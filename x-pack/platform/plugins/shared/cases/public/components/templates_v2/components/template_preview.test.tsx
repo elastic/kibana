@@ -35,10 +35,7 @@ jest.mock('../../../common/use_cases_features', () => ({
 describe('CreateTemplatePreview', () => {
   const renderPreview = (
     definition: string,
-    onCaseDefaultChange?: (
-      field: string,
-      value: string | string[] | Array<{ uid: string }>
-    ) => void
+    onCaseDefaultChange?: (field: string, value: string | string[] | Array<{ uid: string }>) => void
   ) => {
     const Wrapper = () => {
       const form = useForm({
@@ -85,7 +82,10 @@ describe('CreateTemplatePreview', () => {
 
   it('passes the case-default edit handler to the case defaults form', () => {
     const onCaseDefaultChange = jest.fn();
-    renderPreview(`name: Preview\nfields:\n  - control: INPUT_TEXT\n    name: field_one\n    type: keyword`, onCaseDefaultChange);
+    renderPreview(
+      `name: Preview\nfields:\n  - control: INPUT_TEXT\n    name: field_one\n    type: keyword`,
+      onCaseDefaultChange
+    );
 
     expect(mockCaseDefaultsForm).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -93,7 +93,6 @@ describe('CreateTemplatePreview', () => {
       })
     );
   });
-
   it('shows an actionable error state when the YAML is invalid', () => {
     renderPreview('name: [');
 
@@ -110,7 +109,6 @@ describe('CreateTemplatePreview', () => {
     expect(screen.queryByTestId('templatePreviewError')).not.toBeInTheDocument();
     expect(TemplateFieldRenderer).not.toHaveBeenCalled();
   });
-
   it('keeps top-level case defaults in the preview model', () => {
     renderPreview(
       `name: Legacy title\ndescription: Legacy description\nseverity: low\nfields:\n  - control: INPUT_TEXT\n    name: field_one\n    type: keyword`
@@ -127,5 +125,4 @@ describe('CreateTemplatePreview', () => {
       expect.any(Object)
     );
   });
-
 });

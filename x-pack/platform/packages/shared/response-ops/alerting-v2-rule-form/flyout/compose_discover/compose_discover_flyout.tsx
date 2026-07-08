@@ -128,6 +128,15 @@ const EDIT_MODE_OPTIONS = [
   { id: 'yaml', label: YAML_VIEW_LABEL, iconType: 'editorCodeBlock' },
 ];
 
+const getQuerySandboxTitle = (isBuilderMode: boolean) =>
+  isBuilderMode
+    ? i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.builderContextualTitle', {
+        defaultMessage: 'Query sandbox: Preview results',
+      })
+    : i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.editorContextualTitle', {
+        defaultMessage: 'Query sandbox: Edit queries',
+      });
+
 const getFlyoutTitle = (mode: ComposeDiscoverMode): string => {
   if (mode === 'clone') return CLONE_TITLE;
   if (mode === 'edit') return EDIT_TITLE;
@@ -211,6 +220,7 @@ const EMPTY_FORM_VALUES: FormValues = {
   schedule: { every: '1m', lookback: '5m' },
   query: { format: 'composed', base: '', breach: { segment: '' } },
   grouping: undefined,
+  noDataStrategy: 'last_known_status',
   stateTransition: undefined,
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
@@ -590,6 +600,7 @@ export function ComposeDiscoverFlyout({
         const alertQuery = splitResultToRuleQuery(full).query;
         setSandboxQuery(alertQuery);
         methods.setValue('query', alertQuery, { shouldDirty: true });
+        methods.setValue('noDataStrategy', 'last_known_status', { shouldDirty: true });
       } else {
         // Assemble from committed query — discards any unapplied sandbox edits cleanly.
         const assembled = getBreachQuery(methods.getValues('query'));
@@ -599,6 +610,7 @@ export function ComposeDiscoverFlyout({
         };
         setSandboxQuery(standalone);
         methods.setValue('query', standalone, { shouldDirty: true });
+        methods.setValue('noDataStrategy', undefined, { shouldDirty: true });
       }
       methods.setValue('kind', kind, { shouldDirty: true });
       dispatch({ type: 'KIND_CHANGE', kind });
@@ -1303,6 +1315,7 @@ export function ComposeDiscoverFlyout({
                 helpText={sandboxHelpText}
                 headerActions={sandboxHeaderActions}
                 onApply={isBuilderMode ? undefined : handleSandboxApply}
+                title={getQuerySandboxTitle(isBuilderMode)}
               />
             )}
           </EuiFlyout>

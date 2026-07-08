@@ -102,7 +102,6 @@ export const TEMPLATE_TAGS_MAX_COUNT = (max: number) =>
     defaultMessage: 'A template can have up to {max} tags.',
     values: { max },
   });
-
 export const TEMPLATE_FIELDS_LABEL = i18n.translate('xpack.cases.templates.templateFieldsLabel', {
   defaultMessage: 'Fields',
 });
@@ -478,7 +477,6 @@ export const PREVIEW_TEMPLATE_DESCRIPTION = i18n.translate(
       'See how this template appears and set default field values when creating a case.',
   }
 );
-
 export const PREVIEW_UNAVAILABLE_TITLE = i18n.translate(
   'xpack.cases.templates.previewUnavailableTitle',
   {

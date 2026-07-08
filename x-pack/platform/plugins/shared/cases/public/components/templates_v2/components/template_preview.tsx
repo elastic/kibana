@@ -28,7 +28,6 @@ type EditableCaseDefaultField =
   | 'category'
   | 'tags'
   | 'assignees';
-
 interface TemplatePreviewProps {
   settings?: TemplateSettings;
   connector?: CaseConnectorWithoutName;
