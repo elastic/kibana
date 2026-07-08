@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isEqual } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -14,7 +14,7 @@ import { FormProvider } from 'react-hook-form';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { isMap, parseDocument, type YAMLMap } from 'yaml';
+import { isMap, parse as parseYaml, parseDocument, type YAMLMap } from 'yaml';
 import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
 import type { YamlEditorFormValues } from './template_form';
 import { useCasesTemplatesNavigation } from '../../../common/navigation';
@@ -44,7 +44,10 @@ import {
 import { normalizeTemplateCaseDefaultsYaml } from '../utils/normalize_template_case_defaults';
 import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
 import type { CaseAssignees } from '../../../../common/types/domain_zod/user/v1';
-import type { TemplateSettings } from '../../../../common/types/domain/template/v1';
+import {
+  type TemplateSettings,
+  TemplateSettingsSchema,
+} from '../../../../common/types/domain/template/v1';
 import {
   type TemplateMetadata,
   type TemplateMetadataErrors,
@@ -87,6 +90,13 @@ type EditableCaseDefaultField =
   | 'tags'
   | 'assignees';
 const ASSIGNEES_YAML_KEY = 'assignees';
+const SETTINGS_YAML_KEY = 'settings';
+const TIMELINE_BOTTOM_BAR_SELECTOR = '[data-test-subj="timeline-bottom-bar-container"]';
+const LEGACY_SETTINGS_GUIDANCE_COMMENT =
+  '# Case settings (sync alerts, extract observables) and the default connector are configured in the\n' +
+  '# Settings tab of the preview panel, not here.';
+const CURRENT_SETTINGS_GUIDANCE_COMMENT =
+  '# Optional case settings and connector blocks can also be authored in this YAML.';
 
 const getExplicitSettings = (settings?: TemplateSettings): TemplateSettings => ({
   syncAlerts: settings?.syncAlerts ?? false,
@@ -110,6 +120,67 @@ const ensureAssigneesVisibleInYaml = (definitionYaml: string): string => {
   } catch {
     return definitionYaml;
   }
+};
+
+const ensureSettingsVisibleInYaml = (definitionYaml: string): string => {
+  try {
+    const parsedDefinition = parseYaml(definitionYaml ?? '');
+    const parsedRecord =
+      parsedDefinition != null &&
+      typeof parsedDefinition === 'object' &&
+      !Array.isArray(parsedDefinition)
+        ? (parsedDefinition as Record<string, unknown>)
+        : undefined;
+    const parsedSettings = TemplateSettingsSchema.safeParse(parsedRecord?.[SETTINGS_YAML_KEY]);
+    const existingSettings = parsedSettings.success ? parsedSettings.data : undefined;
+
+    if (
+      existingSettings?.syncAlerts !== undefined &&
+      existingSettings.extractObservables !== undefined
+    ) {
+      return definitionYaml;
+    }
+
+    const doc = parseDocument(definitionYaml ?? '');
+    if (!isMap(doc.contents)) {
+      return definitionYaml;
+    }
+
+    const root = doc.contents as YAMLMap<unknown, unknown>;
+
+    root.set(SETTINGS_YAML_KEY, doc.createNode(getExplicitSettings(existingSettings)));
+    return doc.toString();
+  } catch {
+    return definitionYaml;
+  }
+};
+
+const normalizeLegacyTemplateYamlComments = (definitionYaml: string): string =>
+  (definitionYaml ?? '').replace(
+    LEGACY_SETTINGS_GUIDANCE_COMMENT,
+    CURRENT_SETTINGS_GUIDANCE_COMMENT
+  );
+
+const normalizeSettingsGuidanceCommentPlacement = (definitionYaml: string): string => {
+  const lines = (definitionYaml ?? '').split('\n');
+  const withoutComment = lines.filter((line) => line !== CURRENT_SETTINGS_GUIDANCE_COMMENT);
+  const settingsIndex = withoutComment.findIndex((line) =>
+    line.trimStart().startsWith('settings:')
+  );
+
+  if (settingsIndex === -1) {
+    return withoutComment.join('\n');
+  }
+
+  withoutComment.splice(settingsIndex, 0, CURRENT_SETTINGS_GUIDANCE_COMMENT);
+  return withoutComment.join('\n');
+};
+
+const normalizeTemplateDefinitionYaml = (definitionYaml: string): string => {
+  const normalizedComments = normalizeLegacyTemplateYamlComments(definitionYaml);
+  const withAssignees = ensureAssigneesVisibleInYaml(normalizedComments);
+  const withSettings = ensureSettingsVisibleInYaml(withAssignees);
+  return normalizeSettingsGuidanceCommentPlacement(withSettings);
 };
 
 const updateYamlCaseDefault = (
@@ -164,6 +235,32 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
 }) => {
   const styles = useMemoCss(componentStyles);
   const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
+  useEffect(() => {
+    let timelineBottomBar: HTMLElement | null = null;
+    let previousDisplayValue: string | null = null;
+    const timeoutId = window.setTimeout(() => {
+      timelineBottomBar = document.querySelector<HTMLElement>(TIMELINE_BOTTOM_BAR_SELECTOR);
+      if (!timelineBottomBar) {
+        return;
+      }
+
+      previousDisplayValue = timelineBottomBar.style.display;
+      timelineBottomBar.style.display = 'none';
+    });
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      if (!timelineBottomBar || previousDisplayValue == null) {
+        return;
+      }
+
+      if (previousDisplayValue.length > 0) {
+        timelineBottomBar.style.display = previousDisplayValue;
+      } else {
+        timelineBottomBar.style.removeProperty('display');
+      }
+    };
+  }, []);
 
   const defaultPreviewWidth = Math.floor(window.innerWidth * 0.3);
   const [previewWidth = defaultPreviewWidth, setPreviewWidth] = useLocalStorage(
@@ -179,7 +276,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   const [formResetKey, setFormResetKey] = useState(0);
 
   const initialDefinitionYaml = useMemo(
-    () => ensureAssigneesVisibleInYaml(setTemplateMetadataInYaml(initialValue, initialMetadata)),
+    () => normalizeTemplateDefinitionYaml(setTemplateMetadataInYaml(initialValue, initialMetadata)),
     [initialValue, initialMetadata]
   );
   const initialMetadataFromYaml = useMemo(
@@ -231,9 +328,13 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     (newValue) => form.setValue('definition', newValue),
     templateId
   );
-  const definitionState = useMemo(
-    () => getTemplateSettingsAndConnectorFromYaml(yamlValue ?? ''),
+  const normalizedYamlValue = useMemo(
+    () => normalizeTemplateDefinitionYaml(yamlValue ?? ''),
     [yamlValue]
+  );
+  const definitionState = useMemo(
+    () => getTemplateSettingsAndConnectorFromYaml(normalizedYamlValue),
+    [normalizedYamlValue]
   );
   const settings = definitionState.settings;
   const connector = definitionState.connector;
@@ -247,24 +348,24 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     const yamlChanged =
       computeChangedLines(
         normalizeYamlString(initialDefinitionYaml),
-        normalizeYamlString(yamlValue)
+        normalizeYamlString(normalizedYamlValue)
       ).length > 0;
     const metadataChanged = !isEqual(
       normalizeTemplateMetadata(metadata),
       normalizeTemplateMetadata(initialMetadataFromYaml)
     );
     return yamlChanged || metadataChanged;
-  }, [initialDefinitionYaml, yamlValue, metadata, initialMetadataFromYaml]);
+  }, [initialDefinitionYaml, normalizedYamlValue, metadata, initialMetadataFromYaml]);
 
   const hasValidationErrors = useMemo(
     () =>
-      !validateTemplateDefinitionYaml(yamlValue ?? '').success ||
+      !validateTemplateDefinitionYaml(normalizedYamlValue).success ||
       hasTemplateMetadataErrors(metadataErrors),
-    [yamlValue, metadataErrors]
+    [normalizedYamlValue, metadataErrors]
   );
 
-  const yamlValueRef = useRef(yamlValue);
-  yamlValueRef.current = yamlValue;
+  const yamlValueRef = useRef(normalizedYamlValue);
+  yamlValueRef.current = normalizedYamlValue;
 
   const syncMetadataFromYaml = useCallback(
     (nextYaml: string) => {
@@ -278,9 +379,9 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
 
   const handleYamlChange = useCallback(
     (nextYaml: string) => {
-      const nextYamlWithAssignees = ensureAssigneesVisibleInYaml(nextYaml);
-      onYamlChange(nextYamlWithAssignees);
-      syncMetadataFromYaml(nextYamlWithAssignees);
+      const normalizedNextYaml = normalizeTemplateDefinitionYaml(nextYaml);
+      onYamlChange(normalizedNextYaml);
+      syncMetadataFromYaml(normalizedNextYaml);
     },
     [onYamlChange, syncMetadataFromYaml]
   );
@@ -315,7 +416,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     (next: TemplateMetadata) => {
       setStoredMetadataState({ ...next, templateId });
 
-      const updatedYaml = ensureAssigneesVisibleInYaml(
+      const updatedYaml = normalizeTemplateDefinitionYaml(
         setTemplateMetadataInYaml(yamlValueRef.current, next)
       );
       if (updatedYaml !== yamlValueRef.current) {
@@ -398,10 +499,10 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     // Canonicalize legacy top-level defaults (for example `title`) into the current top-level shape
     // so users can edit naturally while persisted templates stay in one stable shape.
     const normalizedMetadataFromYaml = normalizeTemplateMetadata(
-      getTemplateMetadataFromYaml(yamlValue ?? '', metadata)
+      getTemplateMetadataFromYaml(normalizedYamlValue, metadata)
     );
     const mergedDefinition = normalizeTemplateCaseDefaultsYaml(
-      setTemplateMetadataInYaml(yamlValue ?? '', normalizedMetadataFromYaml)
+      setTemplateMetadataInYaml(normalizedYamlValue, normalizedMetadataFromYaml)
     );
 
     const validationResult = validateTemplateDefinitionYaml(mergedDefinition);
@@ -433,7 +534,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     isEnabled,
     isEdit,
     clearDraft,
-    yamlValue,
+    normalizedYamlValue,
     metadata,
     metadataErrors,
     setStoredMetadataState,
@@ -450,11 +551,9 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       <EuiFlexGroup
         direction="column"
         gutterSize="none"
-        // The wrapper cancels the page-section padding via negative margins, so the only
-        // extra vertical space to reserve is the Security Solution timeline bottom bar
-        // (57px, the same value used by the validation accordion). This makes the page
-        // fill the viewport exactly and never scroll the header under the sticky top bar.
-        css={[kbnFullBodyHeightCss('57px'), styles.wrapper]}
+        // The templates editor hides the Security Solution timeline bottom bar on this page,
+        // so no bottom offset is needed here.
+        css={[kbnFullBodyHeightCss('0px'), styles.wrapper]}
       >
         <EuiFlexItem grow={false} css={styles.header}>
           <TemplateFormHeader
@@ -476,7 +575,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
         <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
           <TemplateEditorLayout
             isLoading={isLoading}
-            yamlValue={yamlValue}
+            yamlValue={normalizedYamlValue}
             onYamlChange={handleYamlChange}
             onFieldDefaultChange={handleFieldDefaultChange}
             onCaseDefaultChange={handleCaseDefaultChange}

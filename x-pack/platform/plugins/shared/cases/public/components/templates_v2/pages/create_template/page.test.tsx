@@ -12,15 +12,13 @@ import { CreateTemplatePage } from './page';
 import { TestProviders } from '../../../../common/mock';
 import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
 import { exampleTemplateDefinition } from '../../field_types/constants';
-import {
-  getTemplateMetadataFromYaml,
-  setTemplateMetadataInYaml,
-} from '../../utils/template_metadata_yaml';
+import { setTemplateMetadataInYaml } from '../../utils/template_metadata_yaml';
+import { mergeTemplateDefinition } from '../../utils/template_settings_yaml';
 import * as i18n from '../../translations';
 
-const createPageInitialEditorYaml = setTemplateMetadataInYaml(
-  exampleTemplateDefinition,
-  getTemplateMetadataFromYaml(exampleTemplateDefinition, { name: '', description: '', tags: [] })
+const createPageInitialEditorYaml = mergeTemplateDefinition(
+  setTemplateMetadataInYaml(exampleTemplateDefinition, { name: '', description: '', tags: [] }),
+  { settings: { syncAlerts: false, extractObservables: false } }
 );
 
 jest.mock('../../components/template_form', () => ({

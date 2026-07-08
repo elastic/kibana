@@ -170,6 +170,36 @@ describe('TemplateFormLayout', () => {
     });
   });
 
+  it('normalizes stale settings guidance comments in persisted YAML drafts', () => {
+    const mockYamlOnChange = jest.fn();
+    const yamlWithLegacyComment = `template_name: Template metadata
+# Case settings (sync alerts, extract observables) and the default connector are configured in the
+# Settings tab of the preview panel, not here.
+fields: []`;
+    mockUseDebouncedYamlEdit.mockReturnValue({
+      value: yamlWithLegacyComment,
+      onChange: mockYamlOnChange,
+      handleReset: mockHandleReset,
+      clearDraft: jest.fn(),
+      isSaving: false,
+      isSaved: false,
+    });
+
+    render(<TestWrapper onCreate={mockOnCreate} />);
+
+    expect(capturedEditorLayoutProps.yamlValue).toContain(
+      '# Optional case settings and connector blocks can also be authored in this YAML.'
+    );
+    expect(capturedEditorLayoutProps.yamlValue).toContain(
+      '# Optional case settings and connector blocks can also be authored in this YAML.\nsettings:'
+    );
+    expect(capturedEditorLayoutProps.yamlValue).not.toContain(
+      '# Settings tab of the preview panel, not here.'
+    );
+
+    expect(mockYamlOnChange).not.toHaveBeenCalled();
+  });
+
   it('mirrors metadata edits into template-prefixed YAML keys', () => {
     const mockYamlOnChange = jest.fn();
     mockUseDebouncedYamlEdit.mockReturnValue({
@@ -225,6 +255,12 @@ fields: []`}
     expect(capturedEditorLayoutProps.yamlValue).toContain('template_name: Template metadata');
     expect(capturedEditorLayoutProps.yamlValue).toContain('name: Existing title');
     expect(capturedEditorLayoutProps.yamlValue).toContain('assignees: []');
+    expect(capturedEditorLayoutProps.yamlValue).toContain('settings:');
+    expect(capturedEditorLayoutProps.yamlValue).toContain('syncAlerts: false');
+    expect(capturedEditorLayoutProps.yamlValue).toContain('extractObservables: false');
+    expect(capturedEditorLayoutProps.yamlValue).toContain(
+      '# Optional case settings and connector blocks can also be authored in this YAML.\nsettings:'
+    );
     expect(capturedEditorLayoutProps.yamlValue).not.toContain('case:');
   });
 
@@ -288,9 +324,9 @@ fields: []`}
       capturedEditorLayoutProps.onCaseDefaultChange?.('assignees', []);
     });
 
-    expect(mockYamlOnChange).toHaveBeenCalledTimes(1);
-    const nextYaml = mockYamlOnChange.mock.calls[0][0] as string;
-    const parsed = yamlParse(nextYaml) as Record<string, unknown>;
+    // No-op edit because assignees is already initialized to [] in the buffer.
+    expect(mockYamlOnChange).not.toHaveBeenCalled();
+    const parsed = yamlParse(capturedEditorLayoutProps.yamlValue ?? '') as Record<string, unknown>;
     expect(parsed.assignees).toEqual([]);
   });
 
@@ -349,13 +385,13 @@ fields: []`}
     render(<TestWrapper onCreate={mockOnCreate} />);
 
     act(() => {
-      capturedEditorLayoutProps.onSettingsChange?.({ syncAlerts: false });
+      capturedEditorLayoutProps.onSettingsChange?.({ syncAlerts: true });
     });
 
     expect(mockYamlOnChange).toHaveBeenCalledTimes(1);
     const nextYaml = mockYamlOnChange.mock.calls[0][0] as string;
     const parsed = yamlParse(nextYaml) as Record<string, unknown>;
-    expect(parsed.settings).toEqual({ syncAlerts: false, extractObservables: false });
+    expect(parsed.settings).toEqual({ syncAlerts: true, extractObservables: false });
   });
 
   it('keeps settings keys in YAML when toggled from true to false', () => {

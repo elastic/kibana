@@ -25,7 +25,6 @@ category: General
 tags:
   - example
 assignees: []
-# Optional case settings and connector blocks can also be authored in this YAML.
 fields:
   - name: start_date
     control: DATE_PICKER
@@ -256,4 +255,8 @@ fields:
       required_when:
         field: reviewers
         operator: not_empty
+# Optional case settings and connector blocks can also be authored in this YAML.
+settings:
+  syncAlerts: false
+  extractObservables: false
 `.trimStart();
