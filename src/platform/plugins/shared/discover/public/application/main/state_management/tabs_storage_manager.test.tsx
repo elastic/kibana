@@ -237,7 +237,7 @@ describe('TabsStorageManager', () => {
     });
   });
 
-  it('should persist only persistent profile state to local storage', async () => {
+  it('should persist persistent and url profile state to local storage', async () => {
     const {
       services: { storage },
       tabsStorageManager,
@@ -256,6 +256,7 @@ describe('TabsStorageManager', () => {
       profileState: {
         testProfileState: {
           uiValue: 'ui',
+          urlValue: 'url',
           persistentValue: 'persistent',
         },
         unregisteredProfileState: {
@@ -279,6 +280,7 @@ describe('TabsStorageManager', () => {
 
     const expectedProfileState = {
       testProfileState: {
+        urlValue: 'url',
         persistentValue: 'persistent',
       },
     };
@@ -342,7 +344,7 @@ describe('TabsStorageManager', () => {
     expect(storage.set).not.toHaveBeenCalled();
   });
 
-  it('should restore persistent profile state from local storage merged with defaults', () => {
+  it('should restore persistent and url profile state from local storage merged with defaults', () => {
     const {
       tabsStorageManager,
       urlStateStorage,
@@ -351,6 +353,7 @@ describe('TabsStorageManager', () => {
     const storedProfileState = {
       testProfileState: {
         uiValue: 'ignoredUi',
+        urlValue: 'restoredUrl',
         persistentValue: 'restoredPersistent',
       },
       unregisteredProfileState: {
@@ -388,7 +391,7 @@ describe('TabsStorageManager', () => {
     expect(loadedProps.allTabs[0].profileState).toEqual({
       testProfileState: {
         uiValue: 'defaultUi',
-        urlValue: 'defaultUrl',
+        urlValue: 'restoredUrl',
         persistentValue: 'restoredPersistent',
         nestedValue: { count: 0 },
       },
@@ -396,7 +399,7 @@ describe('TabsStorageManager', () => {
     expect(loadedProps.recentlyClosedTabs[0].profileState).toEqual({
       testProfileState: {
         uiValue: 'defaultUi',
-        urlValue: 'defaultUrl',
+        urlValue: 'restoredUrl',
         persistentValue: 'restoredPersistent',
         nestedValue: { count: 0 },
       },
@@ -774,7 +777,7 @@ describe('TabsStorageManager', () => {
     });
   });
 
-  it('should update persistent profile state in local storage', () => {
+  it('should update persistent and url profile state in local storage', () => {
     const {
       tabsStorageManager,
       services: { storage },
@@ -788,6 +791,7 @@ describe('TabsStorageManager', () => {
           ...toStoredTab(mockTab1),
           profileState: {
             testProfileState: {
+              urlValue: 'staleUrl',
               persistentValue: 'stalePersistent',
             },
           },
@@ -806,6 +810,7 @@ describe('TabsStorageManager', () => {
       profileState: {
         testProfileState: {
           uiValue: 'ui',
+          urlValue: 'updatedUrl',
           persistentValue: 'updatedPersistent',
         },
       },
@@ -821,6 +826,7 @@ describe('TabsStorageManager', () => {
           internalState: undefined,
           profileState: {
             testProfileState: {
+              urlValue: 'updatedUrl',
               persistentValue: 'updatedPersistent',
             },
           },
@@ -830,7 +836,7 @@ describe('TabsStorageManager', () => {
     });
   });
 
-  it('should clear stale persistent profile state in local storage', () => {
+  it('should clear stale persisted profile state in local storage', () => {
     const {
       tabsStorageManager,
       services: { storage },
@@ -844,6 +850,7 @@ describe('TabsStorageManager', () => {
           ...toStoredTab(mockTab1),
           profileState: {
             testProfileState: {
+              urlValue: 'staleUrl',
               persistentValue: 'stalePersistent',
             },
           },

@@ -217,7 +217,7 @@ export const updateTabs: InternalStateThunkActionCreator<
         tab.globalState = cloneDeep(recentlyClosedTabToRestore.globalState);
         tab.profileState = services.profileStateRegistry.pickStateByType({
           profileStateMap: recentlyClosedTabToRestore.profileState,
-          stateTypes: [ProfileStateType.Persistent],
+          stateTypes: [ProfileStateType.Persistent, ProfileStateType.Url],
           shouldMergeDefaults: true,
         });
       } else if (!('appState' in item)) {

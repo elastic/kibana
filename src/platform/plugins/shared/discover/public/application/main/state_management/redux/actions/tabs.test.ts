@@ -211,7 +211,7 @@ describe('tabs actions', () => {
       expect(selectTab(internalState.getState(), newTab.id).profileState).toEqual({});
     });
 
-    it('restores only persistent profile state when restoring a recently closed tab', async () => {
+    it('restores persistent and url profile state when restoring a recently closed tab', async () => {
       const { internalState, getCurrentTab } = await setup();
       const currentTab = getCurrentTab();
       const allTabs = selectAllTabs(internalState.getState());
@@ -234,6 +234,7 @@ describe('tabs actions', () => {
           profileState: {
             ...TEST_PROFILE_STATE_DEF.defaultState,
             uiValue: 'ui',
+            urlValue: 'url',
             persistentValue: 'persistent',
           },
         })
@@ -261,7 +262,7 @@ describe('tabs actions', () => {
       expect(selectTab(internalState.getState(), restoredTab.id).profileState).toEqual({
         testProfileState: {
           uiValue: 'defaultUi',
-          urlValue: 'defaultUrl',
+          urlValue: 'url',
           persistentValue: 'persistent',
           nestedValue: { count: 0 },
         },
