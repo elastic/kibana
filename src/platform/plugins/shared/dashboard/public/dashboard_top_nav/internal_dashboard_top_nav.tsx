@@ -96,12 +96,11 @@ export function InternalDashboardTopNav({
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
   const chromeStyle = useChromeStyle();
-  // The header (title, app menu, badges, favorite) is rendered in one of three modes:
-  //  - `inline`: standalone under the next chrome -> the page renders `AppHeader` itself.
-  //  - `registered`: embedded in a host that owns the layout (e.g. Security Solution) under the next
-  //    chrome -> the content is registered so chrome renders it in the app-header top-bar slot.
-  //  - `legacy`: classic chrome, or the next chrome disabled -> content is pushed through the
-  //    imperative chrome APIs (`setAppMenu`, `setBreadcrumbsBadges`, `setBreadcrumbsAppendExtension`).
+  // Header rendering mode:
+  //  - `inline`: next chrome, standalone -> we render `AppHeader`.
+  //  - `registered`: next chrome, embedded in a host that owns the layout (e.g. Security) -> register
+  //    the content so chrome renders it in the app-header slot.
+  //  - `legacy`: classic chrome or next chrome disabled -> push through the imperative chrome APIs.
   const isEmbedded = Boolean(embedSettings || setCustomHeaderActionMenu);
   const isAppHeaderActive = useIsNextChrome() && chromeStyle === 'project';
   const headerMode = !isAppHeaderActive ? 'legacy' : isEmbedded ? 'registered' : 'inline';
@@ -417,8 +416,14 @@ export function InternalDashboardTopNav({
     return viewMode === 'edit' ? editModeTopNavConfig : viewModeTopNavConfig;
   }, [visibilityProps.showTopNavMenu, viewMode, editModeTopNavConfig, viewModeTopNavConfig]);
 
-  // In `inline`/`registered` modes badges and the favorite button are passed to the header
-  // component directly (see render below). Only `legacy` mode pushes them through the chrome APIs.
+  // Stable identity so `ChromeAppHeaderRegistration` doesn't re-register on every top-nav re-render.
+  const favoriteButton = useMemo(
+    () => <DashboardFavoriteButton dashboardId={lastSavedId} />,
+    [lastSavedId]
+  );
+
+  // `inline`/`registered` modes pass badges and favorite to the header component directly (see render);
+  // only `legacy` mode pushes them through the chrome APIs.
   useEffect(() => {
     if (headerMode !== 'legacy') {
       return;
@@ -452,7 +457,7 @@ export function InternalDashboardTopNav({
           title={dashboardTitle}
           menu={appMenuConfig}
           badges={appHeaderBadges}
-          favorite={<DashboardFavoriteButton dashboardId={lastSavedId} />}
+          favorite={favoriteButton}
         />
       )}
       {headerMode === 'registered' && (
@@ -460,7 +465,7 @@ export function InternalDashboardTopNav({
           title={dashboardTitle}
           menu={appMenuConfig}
           badges={appHeaderBadges}
-          favorite={<DashboardFavoriteButton dashboardId={lastSavedId} />}
+          favorite={favoriteButton}
         />
       )}
       {headerMode === 'legacy' && (
