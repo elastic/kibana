@@ -26685,6 +26685,7 @@
     "xpack.lens.config.cancelFlyoutAriaLabel": "取消应用的更改",
     "xpack.lens.config.cancelFlyoutLabel": "取消",
     "xpack.lens.config.cannotConvertSavedToLibraryTooltip": "无法转换为 ES|QL：保存到库中的图表将在即将发布的更新中获得支持。",
+    "xpack.lens.config.cannotConvertToEsqlDropPartialsTooltip": "无法转换为 ES|QL：即将推出的更新将支持“删除部分分桶”。",
     "xpack.lens.config.cannotConvertToEsqlFormulaTooltip": "无法转换为 ES|QL：即将发布的更新将支持公式操作。",
     "xpack.lens.config.cannotConvertToEsqlIncludeEmptyRowsTooltip": "无法转换为 ES|QL：“包含空行”将在即将推出的更新中支持。",
     "xpack.lens.config.cannotConvertToEsqlMultiLayerTooltip": "无法转换为 ES|QL：即将发布的更新将支持多层可视化。",

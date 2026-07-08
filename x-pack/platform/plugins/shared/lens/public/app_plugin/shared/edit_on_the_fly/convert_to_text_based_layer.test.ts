@@ -257,7 +257,6 @@ describe('convertFormBasedToTextBasedLayer', () => {
         fieldName: '@timestamp',
         label: '@timestamp',
         meta: { type: 'date' },
-        params: { dropPartials: false },
       },
     ]);
   });
