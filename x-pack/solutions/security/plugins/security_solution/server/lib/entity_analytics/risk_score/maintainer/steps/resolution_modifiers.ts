@@ -38,29 +38,25 @@ export const buildResolutionModifierEntity = ({
   ];
 
   let maxCriticality: AssetCriticalityLevel | null | undefined;
+  let contributorEUID: string | undefined;
   const watchlists = new Set<string>();
 
   for (const memberId of memberIds) {
     const entity = memberEntities.get(memberId);
-    maxCriticality = getHigherCriticality(maxCriticality, entity?.asset?.criticality);
+    const raised = getHigherCriticality(maxCriticality, entity?.asset?.criticality);
+    // Attribute the level to the member that raised it, so score documents can
+    // report which entity drove the criticality modifier. Ties keep the earlier
+    // member (`getHigherCriticality` returns the left operand on equal rank).
+    if (raised && raised !== maxCriticality) {
+      contributorEUID = memberId;
+    }
+    maxCriticality = raised;
 
     const memberWatchlists = entity?.entity?.attributes?.watchlists ?? [];
     for (const watchlistId of memberWatchlists) {
       watchlists.add(watchlistId);
     }
   }
-
-  // Attribute the aggregated level to every member that holds it (ties included),
-  // so score documents can report which entities drove the criticality modifier.
-  const criticalityContributors = maxCriticality
-    ? [
-        ...new Set(
-          memberIds.filter(
-            (memberId) => memberEntities.get(memberId)?.asset?.criticality === maxCriticality
-          )
-        ),
-      ]
-    : [];
 
   return {
     entity: {
@@ -72,6 +68,6 @@ export const buildResolutionModifierEntity = ({
     asset: {
       criticality: maxCriticality,
     },
-    ...(criticalityContributors.length > 0 && { criticalityContributors }),
+    ...(contributorEUID !== undefined && { criticalityContributorEUID: contributorEUID }),
   };
 };

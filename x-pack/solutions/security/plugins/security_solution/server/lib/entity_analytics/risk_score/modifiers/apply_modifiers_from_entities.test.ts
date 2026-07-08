@@ -91,19 +91,19 @@ describe('extractModifiersFromEntity', () => {
       expect(crit?.modifier_value).toBe(0.75); // 1.5 * 0.5
     });
 
-    it('records contributing entity ids in metadata when the entity carries attribution', () => {
+    it('records the contributor EUID in metadata when the entity carries attribution', () => {
       const entity: RiskScoreModifierEntity = {
         ...buildTestEntity({ id: 'user:target-1', criticality: 'high_impact' }),
-        criticalityContributors: ['user:alias-1', 'user:alias-2'],
+        criticalityContributorEUID: 'user:alias-1',
       };
       const [crit] = extractModifiersFromEntity(entity);
       expect(crit?.metadata).toEqual({
         criticality_level: 'high_impact',
-        contributing_entity_ids: ['user:alias-1', 'user:alias-2'],
+        contributorEUID: 'user:alias-1',
       });
     });
 
-    it('omits contributing entity ids from metadata when attribution is absent', () => {
+    it('omits the contributor EUID from metadata when attribution is absent', () => {
       const entity = buildTestEntity({ id: 'host:h1', criticality: 'high_impact' });
       const [crit] = extractModifiersFromEntity(entity);
       expect(crit?.metadata).toEqual({ criticality_level: 'high_impact' });

@@ -13,11 +13,11 @@ interface ModifierTypeMap {
     metadata: {
       criticality_level: AssetCriticalityRecord['criticality_level'] | null | undefined;
       /**
-       * EUIDs of the entities whose criticality set `criticality_level`. Only
+       * EUID of the entity whose criticality set `criticality_level`. Only
        * present on resolution scores, where the level is aggregated across
        * group members and is otherwise unattributable from the score document.
        */
-      contributing_entity_ids?: string[];
+      contributorEUID?: string;
     };
   };
   watchlist: {

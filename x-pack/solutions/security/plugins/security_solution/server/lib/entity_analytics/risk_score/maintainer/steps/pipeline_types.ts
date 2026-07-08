@@ -27,12 +27,13 @@ export interface RiskScoreModifierEntity {
     criticality?: AssetCriticalityLevel | null;
   };
   /**
-   * EUIDs of the group members whose criticality set `asset.criticality`.
-   * Only set by the resolution-group aggregation, where the level is the max
-   * across members and would otherwise be unattributable; store entities
-   * never carry it (the scored entity is its own criticality holder).
+   * EUID of the group member whose criticality set `asset.criticality` (the
+   * first member holding the max level, on ties). Only set by the
+   * resolution-group aggregation, where the level is the max across members
+   * and would otherwise be unattributable; store entities never carry it
+   * (the scored entity is its own criticality holder).
    */
-  criticalityContributors?: string[];
+  criticalityContributorEUID?: string;
 }
 
 /**
