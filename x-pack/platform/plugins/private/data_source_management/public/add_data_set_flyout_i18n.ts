@@ -19,10 +19,15 @@ export const addDataSetFlyoutStrings = {
       defaultMessage: 'Add dataset',
     }),
 
-  titleEdit: (dataSource: string, dataSetId: string) =>
+  titleEdit: (dataSetId: string) =>
     i18n.translate('dataSourceManagement.addDataSetFlyout.titleEdit', {
-      defaultMessage: 'Edit "{dataSetId}" ({dataSource})',
-      values: { dataSource, dataSetId },
+      defaultMessage: 'Edit dataset: {dataSetId}',
+      values: { dataSetId },
+    }),
+
+  createDescription: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.createDescription', {
+      defaultMessage: 'Select the data within a connected data source you want to query with ES|QL.',
     }),
 
   sourceLabel: () =>
@@ -32,7 +37,7 @@ export const addDataSetFlyoutStrings = {
 
   sourceHelp: () =>
     i18n.translate('dataSourceManagement.addDataSetFlyout.sourceHelp', {
-      defaultMessage: 'Select the external connection this data set belongs to.',
+      defaultMessage: 'Select the external data source this dataset belongs to.',
     }),
 
   sourcePlaceholder: () =>
@@ -55,14 +60,14 @@ export const addDataSetFlyoutStrings = {
       defaultMessage: 'Select a data source.',
     }),
 
-  datasetIdLabel: () =>
-    i18n.translate('dataSourceManagement.addDataSetFlyout.datasetIdLabel', {
-      defaultMessage: 'Dataset ID',
+  nameLabel: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.nameLabel', {
+      defaultMessage: 'Name',
     }),
 
-  datasetIdHelp: () =>
-    i18n.translate('dataSourceManagement.addDataSetFlyout.datasetIdHelp', {
-      defaultMessage: 'Unique name for this data set within the source (e.g. access_logs).',
+  nameHelp: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.nameHelp', {
+      defaultMessage: 'Unique name for use in queries',
     }),
 
   resourceLabel: () =>
@@ -72,8 +77,7 @@ export const addDataSetFlyoutStrings = {
 
   resourceHelp: () =>
     i18n.translate('dataSourceManagement.addDataSetFlyout.resourceHelp', {
-      defaultMessage:
-        'URI, glob pattern, table name, or SQL query that identifies the data (e.g. s3://logs-bucket/access/**/*.parquet).',
+      defaultMessage: 'Path or identifier for the dataset resource.',
     }),
 
   descriptionLabel: () =>
@@ -81,14 +85,14 @@ export const addDataSetFlyoutStrings = {
       defaultMessage: 'Description',
     }),
 
-  descriptionHelp: () =>
-    i18n.translate('dataSourceManagement.addDataSetFlyout.descriptionHelp', {
-      defaultMessage: 'Optional human-readable summary for people browsing catalog objects.',
+  advancedSettingsShow: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.advancedSettingsShow', {
+      defaultMessage: 'Show advanced settings',
     }),
 
-  settingsPanelTitle: () =>
-    i18n.translate('dataSourceManagement.addDataSetFlyout.settingsPanelTitle', {
-      defaultMessage: 'Advanced settings',
+  advancedSettingsHide: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.advancedSettingsHide', {
+      defaultMessage: 'Hide advanced settings',
     }),
 
   partitionDetectionLabel: () =>
@@ -96,9 +100,19 @@ export const addDataSetFlyoutStrings = {
       defaultMessage: 'Partition detection',
     }),
 
-  partitionDetectionHelp: () =>
-    i18n.translate('dataSourceManagement.addDataSetFlyout.partitionDetectionHelp', {
-      defaultMessage: 'How directory layout is interpreted when discovering partitions.',
+  partitionOptionDefault: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.partitionOptionDefault', {
+      defaultMessage: 'Default',
+    }),
+
+  partitionOptionAuto: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.partitionOptionAuto', {
+      defaultMessage: 'Auto',
+    }),
+
+  partitionOptionTemplate: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.partitionOptionTemplate', {
+      defaultMessage: 'Template',
     }),
 
   partitionOptionNone: () =>
@@ -111,24 +125,229 @@ export const addDataSetFlyoutStrings = {
       defaultMessage: 'Hive',
     }),
 
+  formatLabel: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.formatLabel', {
+      defaultMessage: 'Format',
+    }),
+
+  formatParquet: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.formatParquet', {
+      defaultMessage: 'Parquet',
+    }),
+
+  formatCsv: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.formatCsv', {
+      defaultMessage: 'CSV',
+    }),
+
+  formatTsv: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.formatTsv', {
+      defaultMessage: 'TSV',
+    }),
+
+  formatNdjson: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.formatNdjson', {
+      defaultMessage: 'NDJSON',
+    }),
+
+  formatOrc: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.formatOrc', {
+      defaultMessage: 'ORC',
+    }),
+
+  formatDefault: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.formatDefault', {
+      defaultMessage: 'Select a format',
+    }),
+
+  delimiterLabel: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.delimiterLabel', {
+      defaultMessage: 'Delimiter',
+    }),
+
+  modeLabel: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.modeLabel', {
+      defaultMessage: 'Mode',
+    }),
+
+  modeQuoted: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.modeQuoted', {
+      defaultMessage: 'Quoted',
+    }),
+
+  modeEscaped: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.modeEscaped', {
+      defaultMessage: 'Escaped',
+    }),
+
+  modePlain: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.modePlain', {
+      defaultMessage: 'Plain',
+    }),
+
+  headerRowLabel: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.headerRowLabel', {
+      defaultMessage: 'Header row',
+    }),
+
+  headerRowYes: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.headerRowYes', {
+      defaultMessage: 'Yes',
+    }),
+
+  headerRowNo: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.headerRowNo', {
+      defaultMessage: 'No',
+    }),
+
+  headerRowDefault: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.headerRowDefault', {
+      defaultMessage: 'Default',
+    }),
+
+  nullValueLabel: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.nullValueLabel', {
+      defaultMessage: 'Null value',
+    }),
+
+  encodingLabel: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.encodingLabel', {
+      defaultMessage: 'Encoding',
+    }),
+
+  errorModeLabel: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.errorModeLabel', {
+      defaultMessage: 'Error mode',
+    }),
+
+  errorModeFailFast: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.errorModeFailFast', {
+      defaultMessage: 'Fail fast',
+    }),
+
+  errorModeSkipRow: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.errorModeSkipRow', {
+      defaultMessage: 'Skip row',
+    }),
+
+  errorModeNullField: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.errorModeNullField', {
+      defaultMessage: 'Null field',
+    }),
+
+  maxErrorsLabel: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.maxErrorsLabel', {
+      defaultMessage: 'Max errors',
+    }),
+
+  maxErrorRatioLabel: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.maxErrorRatioLabel', {
+      defaultMessage: 'Max error ratio',
+    }),
+
+  quoteLabel: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.quoteLabel', {
+      defaultMessage: 'Quote character',
+    }),
+
+  escapeLabel: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.escapeLabel', {
+      defaultMessage: 'Escape character',
+    }),
+
+  commentLabel: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.commentLabel', {
+      defaultMessage: 'Comment prefix',
+    }),
+
+  columnPrefixLabel: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.columnPrefixLabel', {
+      defaultMessage: 'Column prefix',
+    }),
+
+  datetimeFormatLabel: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.datetimeFormatLabel', {
+      defaultMessage: 'Datetime format',
+    }),
+
+  multiValueSyntaxLabel: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.multiValueSyntaxLabel', {
+      defaultMessage: 'Multi-value syntax',
+    }),
+
+  multiValueNone: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.multiValueNone', {
+      defaultMessage: 'None',
+    }),
+
+  multiValueBrackets: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.multiValueBrackets', {
+      defaultMessage: 'Brackets',
+    }),
+
+  maxFieldSizeLabel: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.maxFieldSizeLabel', {
+      defaultMessage: 'Max field size',
+    }),
+
+  schemaSampleSizeLabel: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.schemaSampleSizeLabel', {
+      defaultMessage: 'Schema sample size',
+    }),
+
+  segmentSizeLabel: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.segmentSizeLabel', {
+      defaultMessage: 'Segment size',
+    }),
+
+  optimizedReaderLabel: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.optimizedReaderLabel', {
+      defaultMessage: 'Optimized reader',
+    }),
+
+  lateMaterializationLabel: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.lateMaterializationLabel', {
+      defaultMessage: 'Late materialization',
+    }),
+
+  booleanTrue: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.booleanTrue', {
+      defaultMessage: 'True',
+    }),
+
+  booleanFalse: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.booleanFalse', {
+      defaultMessage: 'False',
+    }),
+
+  booleanDefault: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.booleanDefault', {
+      defaultMessage: 'Default',
+    }),
+
   saveButton: () =>
     i18n.translate('dataSourceManagement.addDataSetFlyout.saveButton', {
-      defaultMessage: 'Add dataset',
+      defaultMessage: 'Add',
     }),
 
   editSaveButton: () =>
     i18n.translate('dataSourceManagement.addDataSetFlyout.editSaveButton', {
-      defaultMessage: 'Save changes',
+      defaultMessage: 'Save',
     }),
 
-  deleteDataSetButton: () =>
-    i18n.translate('dataSourceManagement.addDataSetFlyout.deleteDataSetButton', {
-      defaultMessage: 'Delete data set',
+  cancelButton: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.cancelButton', {
+      defaultMessage: 'Cancel',
     }),
 
-  datasetIdRequired: () =>
-    i18n.translate('dataSourceManagement.addDataSetFlyout.datasetIdRequired', {
-      defaultMessage: 'Dataset ID is required.',
+  nameRequired: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.nameRequired', {
+      defaultMessage: 'Name is required.',
+    }),
+
+  nameAlreadyExists: () =>
+    i18n.translate('dataSourceManagement.addDataSetFlyout.nameAlreadyExists', {
+      defaultMessage: 'A dataset with this name already exists.',
     }),
 
   resourceRequired: () =>

@@ -38,7 +38,7 @@ import type {
 } from '../common/sample_data_sources_client';
 import type { SampleDataSetsClient } from '../common/sample_data_sets_client';
 import type { SampleDataSourcesClient } from '../common/sample_data_sources_client';
-import type { DataSetListItem } from '../common/sample_data_sets_client';
+import type { DataSetListItem, DataSetPartitionDetection } from '../common/sample_data_sets_client';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
 import { CreateCloudSourceFlyout } from './create_cloud_source_flyout';
 import { EditDataSourceFlyout } from './edit_data_source_flyout';
@@ -644,6 +644,10 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
     setNewSourceNameForDataSet(undefined);
   }, []);
 
+  const mapPartitionDetection = useCallback((value: string): DataSetPartitionDetection => {
+    return value === 'hive' ? 'hive' : 'none';
+  }, []);
+
   const handleAddDataSetSave = useCallback(
     async (values: AddDataSetFlyoutPayload) => {
       if (!values.editingSetId && addDataSetFlyout.mode === 'preset') {
@@ -651,12 +655,13 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
           return 'Unknown error';
         }
       }
+      const partitionDetection = mapPartitionDetection(values.settings.partition_detection);
       try {
         if (values.editingSetId) {
           await dataSetsClient.update(values.editingSetId, {
             resource: values.resource,
             description: values.description,
-            partitionDetection: values.partitionDetection,
+            partitionDetection,
           });
         } else {
           await dataSetsClient.add({
@@ -664,7 +669,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
             datasetId: values.datasetId,
             resource: values.resource,
             description: values.description,
-            partitionDetection: values.partitionDetection,
+            partitionDetection,
           });
         }
         void refreshSourcesAndSets();
@@ -674,7 +679,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         return e instanceof Error ? e.message : 'Unknown error';
       }
     },
-    [addDataSetFlyout, dataSetsClient, refreshSourcesAndSets]
+    [addDataSetFlyout, dataSetsClient, mapPartitionDetection, refreshSourcesAndSets]
   );
 
   const openEditDataSourceFlyoutFromSourceRow = useCallback((record: DataSourceListItem) => {
@@ -1345,6 +1350,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         <CreateCloudSourceFlyout
           onClose={handleCloudSourceFlyoutClose}
           onSave={handleCloudSourceSave}
+          existingDataSourceNames={items.map((ds) => ds.name)}
         />
       ) : null}
       {modificationsAllowed && editDataSource ? (
@@ -1376,9 +1382,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
           }
           sourcesForPicker={addDataSetFlyout.mode === 'chooseSource' ? items : undefined}
           existingEditSet={addDataSetFlyout.mode === 'edit' ? addDataSetFlyout.record : undefined}
-          onDeleteExistingSet={
-            addDataSetFlyout.mode === 'edit' ? handleDeleteDataSetFromEditFlyout : undefined
-          }
+          existingDataSetNames={dataSets.map((dataSet) => dataSet.name)}
           onClose={handleCloseAddDataSetFlyout}
           onSave={handleAddDataSetSave}
           onAddNewSource={

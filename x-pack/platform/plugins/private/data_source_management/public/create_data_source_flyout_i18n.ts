@@ -14,9 +14,20 @@ export const createDataSourceFlyoutStrings = {
       defaultMessage: 'Connect external data source',
     }),
 
+  createDescription: () =>
+    i18n.translate('dataSourceManagement.createFlyout.createDescription', {
+      defaultMessage:
+        'Define where your external data is stored and how Elasticsearch connects to it.',
+    }),
+
   nameRequired: () =>
     i18n.translate('dataSourceManagement.createFlyout.nameRequired', {
       defaultMessage: 'Name is required.',
+    }),
+
+  nameAlreadyExists: () =>
+    i18n.translate('dataSourceManagement.createFlyout.nameAlreadyExists', {
+      defaultMessage: 'A data source with this name already exists.',
     }),
 
   typeLabel: () =>
@@ -44,9 +55,69 @@ export const createDataSourceFlyoutStrings = {
       defaultMessage: 'Close',
     }),
 
+  cancelButton: () =>
+    i18n.translate('dataSourceManagement.createFlyout.cancelButton', {
+      defaultMessage: 'Cancel',
+    }),
+
   saveButton: () =>
     i18n.translate('dataSourceManagement.createFlyout.saveButton', {
       defaultMessage: 'Save',
+    }),
+
+  connectButton: () =>
+    i18n.translate('dataSourceManagement.createFlyout.connectButton', {
+      defaultMessage: 'Connect',
+    }),
+
+  connectionSettingsShow: () =>
+    i18n.translate('dataSourceManagement.createFlyout.connectionSettingsShow', {
+      defaultMessage: 'Show connection settings',
+    }),
+
+  connectionSettingsHide: () =>
+    i18n.translate('dataSourceManagement.createFlyout.connectionSettingsHide', {
+      defaultMessage: 'Hide connection settings',
+    }),
+
+  regionLabel: () =>
+    i18n.translate('dataSourceManagement.createFlyout.regionLabel', {
+      defaultMessage: 'Region',
+    }),
+
+  endpointLabel: () =>
+    i18n.translate('dataSourceManagement.createFlyout.endpointLabel', {
+      defaultMessage: 'Endpoint',
+    }),
+
+  projectIdLabel: () =>
+    i18n.translate('dataSourceManagement.createFlyout.projectIdLabel', {
+      defaultMessage: 'Project ID',
+    }),
+
+  tokenUriLabel: () =>
+    i18n.translate('dataSourceManagement.createFlyout.tokenUriLabel', {
+      defaultMessage: 'Token URI',
+    }),
+
+  accountLabel: () =>
+    i18n.translate('dataSourceManagement.createFlyout.accountLabel', {
+      defaultMessage: 'Account',
+    }),
+
+  keyLabel: () =>
+    i18n.translate('dataSourceManagement.createFlyout.keyLabel', {
+      defaultMessage: 'Key',
+    }),
+
+  authMethodLabel: () =>
+    i18n.translate('dataSourceManagement.createFlyout.authMethodLabel', {
+      defaultMessage: 'Preferred method',
+    }),
+
+  credentialsLabel: () =>
+    i18n.translate('dataSourceManagement.createFlyout.credentialsLabel', {
+      defaultMessage: 'Credentials',
     }),
 
   /** Full-page connect flow uses Cancel; flyout keeps Close. */
