@@ -149,3 +149,5 @@ export type {
   ConversationsStart,
 } from './plugin_contract';
 export { describeZodSchema, formatSchemaForLlm } from './tools';
+export { SmlSearchFilterType } from './sml/http_api';
+export type { SmlSearchFilters, SmlSearchConstraints } from './sml/http_api';
