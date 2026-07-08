@@ -9,7 +9,12 @@
 
 import { Parser } from '@elastic/esql';
 import type { ESQLMap } from '@elastic/esql/types';
-import { getMapEntryByStringKey, MAP_PARAMS_REGEX, parseMapParams } from './maps';
+import {
+  getMapEntryByStringKeyFromAst,
+  getMapStringListValuesFromAst,
+  MAP_PARAMS_REGEX,
+  parseMapParams,
+} from './maps';
 
 const mapExpression = (query: string): ESQLMap => {
   const { root } = Parser.parse(query);
@@ -23,13 +28,35 @@ describe('getMapEntryByStringKey', () => {
       'FROM a | IP_LOCATION geo = ipField WITH { "properties": ["city_name"] }'
     );
 
-    expect(getMapEntryByStringKey(map, 'properties')?.key.text).toBe('"properties"');
+    expect(getMapEntryByStringKeyFromAst(map, 'properties')?.key.text).toBe('"properties"');
   });
 
   it('returns undefined when the key is missing', () => {
     const map = mapExpression('FROM a | IP_LOCATION geo = ipField WITH { "first_only": true }');
 
-    expect(getMapEntryByStringKey(map, 'properties')).toBeUndefined();
+    expect(getMapEntryByStringKeyFromAst(map, 'properties')).toBeUndefined();
+  });
+});
+
+describe('getMapStringListValues', () => {
+  it('returns string values from a list entry', () => {
+    const map = mapExpression(
+      'FROM a | IP_LOCATION geo = ipField WITH { "properties": ["city_name", "country_name"] }'
+    );
+
+    expect(getMapStringListValuesFromAst(map, 'properties')).toEqual(['city_name', 'country_name']);
+  });
+
+  it('returns undefined when the key is missing', () => {
+    const map = mapExpression('FROM a | IP_LOCATION geo = ipField WITH { "first_only": true }');
+
+    expect(getMapStringListValuesFromAst(map, 'properties')).toBeUndefined();
+  });
+
+  it('returns undefined for an empty list literal (parser produces an unknown node)', () => {
+    const map = mapExpression('FROM a | IP_LOCATION geo = ipField WITH { "properties": [] }');
+
+    expect(getMapStringListValuesFromAst(map, 'properties')).toBeUndefined();
   });
 });
 

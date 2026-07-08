@@ -8,9 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isStringLiteral } from '@elastic/esql';
 import type { ESQLAstAllCommands, ESQLAstIpLocationCommand } from '@elastic/esql/types';
+import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
+import { getMapStringListValuesFromAst } from '../../definitions/utils/maps';
 import { suggestForExpression } from '../../definitions/utils';
 import { ESQL_STRING_TYPES } from '../../definitions/types';
 import {
@@ -23,38 +24,7 @@ import {
 } from '../complete_items';
 import type { ICommandCallbacks, ICommandContext, ISuggestionItem } from '../types';
 import { Location } from '../types';
-import {
-  getPosition,
-  getPropertiesList,
-  getPropertyNamesForDatabase,
-  IpLocationPosition,
-} from './utils';
-
-const getDatabaseFileMapParameter = () => ({
-  type: 'string' as const,
-  description: i18n.translate(
-    'kbn-esql-language.commands.ipLocation.autocomplete.databaseFileDescription',
-    { defaultMessage: 'IP location database file name' }
-  ),
-});
-
-const getPropertiesMapParameter = () => ({
-  type: 'array' as const,
-  description: i18n.translate(
-    'kbn-esql-language.commands.ipLocation.autocomplete.propertiesDescription',
-    { defaultMessage: 'List of properties to extract' }
-  ),
-  suggestions: [buildMapValueCompleteItem('[ $0 ]', '[]')],
-});
-
-const getFirstOnlyMapParameter = () => ({
-  type: 'boolean' as const,
-  description: i18n.translate(
-    'kbn-esql-language.commands.ipLocation.autocomplete.firstOnlyDescription',
-    { defaultMessage: 'Use only the first value from multi-value IP input' }
-  ),
-  suggestions: [buildMapValueCompleteItem('true'), buildMapValueCompleteItem('false')],
-});
+import { getPosition, getPropertyNamesForDatabase, IpLocationPosition } from './utils';
 
 export async function autocomplete(
   query: string,
@@ -98,17 +68,38 @@ export async function autocomplete(
     case IpLocationPosition.AFTER_WITH_KEYWORD:
       return [buildAddValuePlaceholder('config')];
 
-    case IpLocationPosition.WITHIN_OPTIONS:
-      return getCommandMapExpressionSuggestions(innerText, {
-        database_file: getDatabaseFileMapParameter(),
-        properties: getPropertiesMapParameter(),
-        first_only: getFirstOnlyMapParameter(),
-      });
+    case IpLocationPosition.WITHIN_OPTIONS: {
+      const availableParameters: MapParameters = {
+        database_file: {
+          type: 'string',
+          description: i18n.translate(
+            'kbn-esql-language.commands.ipLocation.autocomplete.databaseFileDescription',
+            { defaultMessage: 'IP location database file name' }
+          ),
+        },
+        properties: {
+          type: 'array',
+          description: i18n.translate(
+            'kbn-esql-language.commands.ipLocation.autocomplete.propertiesDescription',
+            { defaultMessage: 'List of properties to extract' }
+          ),
+          suggestions: [buildMapValueCompleteItem('[ $0 ]', '[]')],
+        },
+        first_only: {
+          type: 'boolean',
+          description: i18n.translate(
+            'kbn-esql-language.commands.ipLocation.autocomplete.firstOnlyDescription',
+            { defaultMessage: 'Use only the first value from multi-value IP input' }
+          ),
+          suggestions: [buildMapValueCompleteItem('true'), buildMapValueCompleteItem('false')],
+        },
+      };
+      return getCommandMapExpressionSuggestions(innerText, availableParameters);
+    }
 
     case IpLocationPosition.WITHIN_PROPERTIES_ARRAY: {
-      const propertiesList = getPropertiesList(ipLocationCommand);
       const usedValues = new Set(
-        propertiesList?.values.filter(isStringLiteral).map((value) => value.valueUnquoted) ?? []
+        getMapStringListValuesFromAst(ipLocationCommand.namedParameters, 'properties') ?? []
       );
 
       return getPropertyNamesForDatabase(ipLocationCommand)

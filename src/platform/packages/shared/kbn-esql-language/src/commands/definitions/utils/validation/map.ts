@@ -13,7 +13,7 @@ import type { ESQLMessage, SupportedDataType } from '../../..';
 import { UnmappedFieldsStrategy, type ESQLColumnData } from '../../../registry/types';
 import { getExpressionType } from '../expressions';
 import { getMessageFromId } from '../errors';
-import { getMapEntryByStringKey, parseMapParams } from '../maps';
+import { getMapEntryByStringKeyFromAst, parseMapParams } from '../maps';
 
 // the setting 'approximation' uses 'map_param' as a type,
 // whereas the expression type in the AST is 'function_named_parameters'.
@@ -69,7 +69,7 @@ export const validateMapListParameter = (
   columns?: Map<string, ESQLColumnData>,
   unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.DEFAULT
 ): ESQLMessage | null => {
-  const entry = getMapEntryByStringKey(mapValue, paramName);
+  const entry = getMapEntryByStringKeyFromAst(mapValue, paramName);
 
   if (!entry || entry.incomplete || isList(entry.value)) {
     return null;

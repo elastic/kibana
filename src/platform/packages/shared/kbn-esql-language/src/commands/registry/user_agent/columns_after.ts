@@ -10,8 +10,8 @@
 import { isBooleanLiteral, isStringLiteral, LeafPrinter } from '@elastic/esql';
 import type { ESQLAstUserAgentCommand, ESQLCommand } from '@elastic/esql/types';
 import type { SupportedDataType } from '../../definitions/types';
+import { getMapStringListValuesFromAst } from '../../definitions/utils/maps';
 import type { ESQLColumnData } from '../types';
-import { getPropertiesList } from './utils';
 
 type PropertyGroup = 'name' | 'version' | 'os' | 'device';
 
@@ -45,13 +45,15 @@ export const columnsAfter = (
   const prefix = LeafPrinter.column(targetField);
 
   // Determine which property groups are active
-  const propertiesList = getPropertiesList(userAgentCommand);
+  const selectedProperties = getMapStringListValuesFromAst(
+    userAgentCommand.namedParameters,
+    'properties'
+  );
   let activeProperties: PropertyGroup[];
-  if (propertiesList) {
-    activeProperties = propertiesList.values
-      .filter(isStringLiteral)
-      .map((v) => v.valueUnquoted as PropertyGroup)
-      .filter((v): v is PropertyGroup => DEFAULT_PROPERTIES.includes(v));
+  if (selectedProperties !== undefined) {
+    activeProperties = selectedProperties.filter((v): v is PropertyGroup =>
+      DEFAULT_PROPERTIES.includes(v as PropertyGroup)
+    );
   } else {
     activeProperties = DEFAULT_PROPERTIES;
   }

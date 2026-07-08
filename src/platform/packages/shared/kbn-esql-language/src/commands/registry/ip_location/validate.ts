@@ -24,7 +24,6 @@ const IP_LOCATION_MAP_DEFINITION =
   "{name='properties', description='List of properties to extract', type=[keyword]}";
 
 const ACCEPTED_EXPRESSION_TYPES = ['ip', 'keyword', 'text', 'param', 'unknown'] as const;
-const PROPERTIES_PARAMETER = 'properties';
 
 export const validate = (
   command: ESQLAstAllCommands,
@@ -46,10 +45,10 @@ export const validate = (
     })
   );
 
-  if (namedParameters && !Array.isArray(namedParameters) && isMap(namedParameters)) {
+  if (isMap(namedParameters)) {
     const listParameterError = validateMapListParameter(
       namedParameters,
-      PROPERTIES_PARAMETER,
+      'properties',
       context?.columns,
       context?.unmappedFieldsStrategy
     );

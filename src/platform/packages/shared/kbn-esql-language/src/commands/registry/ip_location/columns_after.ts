@@ -9,12 +9,12 @@
 
 import type { ESQLAstIpLocationCommand, ESQLCommand } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../types';
+import { getMapStringListValuesFromAst } from '../../definitions/utils/maps';
 import {
   getDefaultPropertyNames,
   getIpLocationTargetPrefix,
   getIpLocationVariant,
   getPropertyTypeFromAnyVariant,
-  getSelectedProperties,
 } from './utils';
 
 export const columnsAfter = (
@@ -29,7 +29,10 @@ export const columnsAfter = (
   }
 
   const variant = getIpLocationVariant(ipLocationCommand);
-  const selectedProperties = getSelectedProperties(ipLocationCommand);
+  const selectedProperties = getMapStringListValuesFromAst(
+    ipLocationCommand.namedParameters,
+    'properties'
+  );
   const propertyNames = selectedProperties ?? (variant ? getDefaultPropertyNames(variant) : []);
 
   const newColumns: ESQLColumnData[] = propertyNames.flatMap((property) => {

@@ -34,8 +34,8 @@ export const ipLocationCommand = {
     }),
     declaration: 'IP_LOCATION prefix = expression [WITH { option = value [, ...] }]',
     examples: [
-      '... | IP_LOCATION geo = client.ip',
-      '... | IP_LOCATION geo = client.ip WITH { "properties": ["country_iso_code", "country_name", "location"] }',
+      '… | IP_LOCATION geo = client.ip',
+      '… | IP_LOCATION geo = client.ip WITH { "properties": ["country_iso_code", "country_name", "location"] }',
     ],
   },
 };

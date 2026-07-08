@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isAssignment, isList, isMap, isStringLiteral, LeafPrinter } from '@elastic/esql';
-import type { ESQLAstIpLocationCommand, ESQLList } from '@elastic/esql/types';
+import { isAssignment, isMap, isStringLiteral, LeafPrinter } from '@elastic/esql';
+import type { ESQLAstIpLocationCommand } from '@elastic/esql/types';
 import { commandsMetadata } from '../../definitions/generated/commands/commands';
 import { Commands } from '../../definitions/keywords';
-import { getMapEntryByStringKey } from '../../definitions/utils/maps';
+import { getMapEntryByStringKeyFromAst } from '../../definitions/utils/maps';
 import {
   endsWithAssignment,
   endsWithWhitespace,
@@ -75,22 +75,17 @@ export const getIpLocationVariant = (
     return undefined;
   }
 
-  const databaseFileEntry = getMapEntryByStringKey(command.namedParameters, 'database_file');
+  const databaseFileEntry = getMapEntryByStringKeyFromAst(command.namedParameters, 'database_file');
   if (!databaseFileEntry) {
     return output.variants[IP_LOCATION_DEFAULT_OUTPUT_VARIANT];
   }
 
-  const databaseFile = getDatabaseFile(command);
-  if (!databaseFile) {
+  const { value } = databaseFileEntry;
+  if (!isStringLiteral(value)) {
     return undefined;
   }
 
-  const exactVariant = output.variants[databaseFile];
-  if (exactVariant) {
-    return exactVariant;
-  }
-
-  const normalizedDatabaseFile = databaseFile.toLowerCase();
+  const normalizedDatabaseFile = value.valueUnquoted.toLowerCase();
 
   return Object.entries(output.variants).find(([pattern]) =>
     matchesWildcardPattern(pattern.toLowerCase(), normalizedDatabaseFile)
@@ -117,28 +112,6 @@ export const getIpLocationTargetPrefix = (
   return LeafPrinter.column(targetField);
 };
 
-/** Returns the raw properties list so callers can inspect literals and cursor ranges. */
-export const getPropertiesList = (command: ESQLAstIpLocationCommand): ESQLList | undefined => {
-  const propertiesEntry = getMapEntryByStringKey(command.namedParameters, 'properties');
-
-  if (!propertiesEntry) {
-    return undefined;
-  }
-
-  return isList(propertiesEntry.value) ? propertiesEntry.value : undefined;
-};
-
-/** Extracts string property names selected by the user. */
-export const getSelectedProperties = (command: ESQLAstIpLocationCommand): string[] | undefined => {
-  const propertiesList = getPropertiesList(command);
-
-  if (!propertiesList) {
-    return undefined;
-  }
-
-  return propertiesList.values.filter(isStringLiteral).map(({ valueUnquoted }) => valueUnquoted);
-};
-
 /** Maps the cursor location to the autocomplete state for IP_LOCATION syntax. */
 export function getPosition(
   command: ESQLAstIpLocationCommand,
@@ -159,7 +132,7 @@ export function getPosition(
 
     if (!isWithinMap) return IpLocationPosition.AFTER_COMMAND;
 
-    const propertiesEntry = getMapEntryByStringKey(command.namedParameters, 'properties');
+    const propertiesEntry = getMapEntryByStringKeyFromAst(command.namedParameters, 'properties');
     if (
       propertiesEntry &&
       cursorPosition >= propertiesEntry.value.location.min &&
@@ -217,17 +190,4 @@ const getAllKnownProperties = (): string[] => {
   return Array.from(
     new Set(Object.values(output.variants).flatMap((variant) => Object.keys(variant)))
   ).sort();
-};
-
-/** Reads a literal database_file value without applying ES defaults. */
-const getDatabaseFile = (command: ESQLAstIpLocationCommand): string | undefined => {
-  const databaseFileEntry = getMapEntryByStringKey(command.namedParameters, 'database_file');
-
-  if (!databaseFileEntry) {
-    return undefined;
-  }
-
-  return isStringLiteral(databaseFileEntry.value)
-    ? databaseFileEntry.value.valueUnquoted
-    : undefined;
 };
