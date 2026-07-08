@@ -40,7 +40,6 @@ import { BackgroundSearchRestoredCallout } from '@kbn/background-search';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { type ESQLQueryStats } from '@kbn/esql-types';
-import { ESQLEditorTelemetryService } from '@kbn/esql/public';
 import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
 import type { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
@@ -211,7 +210,6 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
 
   private services = this.props.kibana.services;
   private savedQueryService = this.services.data.query.savedQueries;
-  private esqlTelemetryService = new ESQLEditorTelemetryService(this.services.analytics);
   private queryBarMenuRef = createRef<EuiContextMenuClass>();
 
   public static getDerivedStateFromProps(
@@ -502,14 +500,18 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     );
   };
 
-  private trackESQLQuerySubmitted(
+  private async trackESQLQuerySubmitted(
     query: Query | AggregateQuery | undefined,
     metadata?: QuerySubmitMetadata
   ) {
     const telemetry = getESQLQuerySubmittedTelemetry(query, metadata);
-    if (telemetry) {
-      this.esqlTelemetryService.trackQuerySubmitted(telemetry);
+    if (!telemetry) {
+      return;
     }
+    // The telemetry service (and its `@elastic/esql` parser dependency) is loaded lazily from the
+    // esql plugin so it stays out of the page-load bundle; tracking is fire-and-forget.
+    const telemetryService = await this.services.esql?.getTelemetryService();
+    telemetryService?.trackQuerySubmitted(telemetry);
   }
 
   public onQueryBarSubmit = (
@@ -538,7 +540,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
             this.isDirty()
           );
         }
-        this.trackESQLQuerySubmitted(this.state.query, metadata);
+        void this.trackESQLQuerySubmitted(this.state.query, metadata);
         this.services.usageCollection?.reportUiCounter(
           this.services.appName,
           METRIC_TYPE.CLICK,
