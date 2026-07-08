@@ -49,8 +49,8 @@ export const useSearchAttacks = (query: SearchAttacksRequestBody) => {
 
 /**
  * We should use this hook to refresh attacks page search after mutations.
- * Invalidates React Query caches and refetches active global queries used by
- * `useQueryAlerts` on the attacks page.
+ * Invalidates React Query caches and refetches global queries registered via
+ * `useInspectButton` (attacks table grouping and KPI hooks).
  *
  * @returns A callback to refresh attacks search data
  */

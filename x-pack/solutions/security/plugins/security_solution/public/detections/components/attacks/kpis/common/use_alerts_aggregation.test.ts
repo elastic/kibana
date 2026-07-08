@@ -18,11 +18,13 @@ import {
   fetchQueryUnifiedAlerts,
 } from '../../../../containers/detection_engine/alerts/api';
 import { useAttacksPageFetchMethod } from '../../../../hooks/attacks/use_attacks_page_fetch_method';
+import { useInspectButton } from '../../../alerts_kpis/common/hooks';
 
 jest.mock('../../../../containers/detection_engine/alerts/use_query');
 jest.mock('../../../../../common/containers/use_global_time');
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../hooks/attacks/use_attacks_page_fetch_method');
+jest.mock('../../../alerts_kpis/common/hooks');
 
 const mockUseAttacksPageFetchMethod = useAttacksPageFetchMethod as jest.Mock;
 
@@ -33,18 +35,27 @@ describe('useAlertsAggregation', () => {
     get: jest.fn().mockReturnValue(true),
   };
   const mockRefetch = jest.fn();
-  const mockSetQuery = jest.fn();
+  const mockSetAlertsQuery = jest.fn();
+  const mockDeleteQuery = jest.fn();
+  const mockSetGlobalQuery = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseAttacksPageFetchMethod.mockReturnValue(fetchQueryUnifiedAlerts);
-    (useGlobalTime as jest.Mock).mockReturnValue({ from: mockFrom, to: mockTo });
+    (useGlobalTime as jest.Mock).mockReturnValue({
+      from: mockFrom,
+      to: mockTo,
+      deleteQuery: mockDeleteQuery,
+      setQuery: mockSetGlobalQuery,
+    });
     (useKibana as jest.Mock).mockReturnValue({ services: { uiSettings: mockUiSettings } });
     (useQueryAlerts as jest.Mock).mockReturnValue({
       data: undefined,
       loading: false,
       refetch: mockRefetch,
-      setQuery: mockSetQuery,
+      request: 'request',
+      response: 'response',
+      setQuery: mockSetAlertsQuery,
     });
   });
 
@@ -103,11 +114,11 @@ describe('useAlertsAggregation', () => {
       }
     );
 
-    expect(mockSetQuery).toHaveBeenCalledWith(expect.objectContaining({ size: 0 }));
+    expect(mockSetAlertsQuery).toHaveBeenCalledWith(expect.objectContaining({ size: 0 }));
 
     rerender({ size: 10 });
 
-    expect(mockSetQuery).toHaveBeenCalledWith(expect.objectContaining({ size: 10 }));
+    expect(mockSetAlertsQuery).toHaveBeenCalledWith(expect.objectContaining({ size: 10 }));
   });
 
   it('returns data, loading, and refetch from useQueryAlerts', () => {
@@ -116,7 +127,9 @@ describe('useAlertsAggregation', () => {
       data: mockData,
       loading: true,
       refetch: mockRefetch,
-      setQuery: mockSetQuery,
+      request: 'request',
+      response: 'response',
+      setQuery: mockSetAlertsQuery,
     });
 
     const { result } = renderHook(() =>
@@ -128,7 +141,25 @@ describe('useAlertsAggregation', () => {
 
     expect(result.current.data).toBe(mockData);
     expect(result.current.loading).toBe(true);
-    expect(result.current.refetch).toBe(mockRefetch);
+    result.current.refetch();
+    expect(mockRefetch).toHaveBeenCalled();
+  });
+
+  it('registers the query for global refetch after mutations', () => {
+    renderHook(() =>
+      useAlertsAggregation({
+        aggs: {},
+        queryName: ALERTS_QUERY_NAMES.COUNT_ATTACKS_IDS,
+      })
+    );
+
+    expect(useInspectButton).toHaveBeenCalledWith(
+      expect.objectContaining({
+        deleteQuery: mockDeleteQuery,
+        setQuery: mockSetGlobalQuery,
+        uniqueQueryId: ALERTS_QUERY_NAMES.COUNT_ATTACKS_IDS,
+      })
+    );
   });
 
   it('uses fetchQueryAttacks when publicAttacksApiEnabled is on', () => {
