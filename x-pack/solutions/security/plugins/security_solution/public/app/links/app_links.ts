@@ -83,7 +83,14 @@ export const getFilteredLinks = async (
     // the appLinks array so that SecurityRoutePageWrapper still considers the route
     // authorized/available, allowing our custom redirect logic in routes.tsx to execute.
     ...(enableAlertsAndAttacksAlignment
-      ? [{ ...attackDiscoveryLinks, sideNavDisabled: true, globalNavPosition: undefined }]
+      ? [
+          {
+            ...attackDiscoveryLinks,
+            sideNavDisabled: true,
+            globalNavPosition: undefined,
+            globalSearchDisabled: true,
+          },
+        ]
       : [attackDiscoveryLinks]),
     findingsLinks,
     casesLinks,
