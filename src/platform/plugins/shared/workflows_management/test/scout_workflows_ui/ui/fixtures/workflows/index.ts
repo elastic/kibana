@@ -25,6 +25,8 @@ export {
   getWorkflowWithCommentedVariablesYaml,
   getScrollTestWorkflowYaml,
   getLongRunningCancellationWorkflowYaml,
+  getMultiStepGraphWorkflowYaml,
+  getBrokenGraphWorkflowYaml,
 } from './console_workflows';
 export {
   TEST_ALERTS_INDEX,
@@ -38,6 +40,10 @@ export {
   getDataMapWithInvalidVariable,
 } from './data_map_validation_workflows';
 export { getLargePerfWorkflowYaml } from './large_perf_workflow';
+export {
+  getStaticBranchesParallelWorkflowYaml,
+  getForeachFanOutParallelWorkflowYaml,
+} from './parallel_workflows';
 export { getInfosecDemoWorkflowYaml } from './infosec_demo_workflow';
 export {
   getAssignAfterUseSameLine,

@@ -11,6 +11,7 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { type ESQLControlVariable, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { act } from 'react-dom/test-utils';
+import { dataViewMock } from '../__mocks__/data_view';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import { useUnifiedHistogram } from './use_unified_histogram';
@@ -112,6 +113,50 @@ describe('useUnifiedHistogram', () => {
     expect(fetchSpy).toHaveBeenCalledWith({
       fetchParams: result.current.chartProps?.fetchParams,
       lensVisServiceState: result.current.chartProps?.lensVisServiceState,
+    });
+  });
+
+  describe('clearing the lens request adapter when the chart becomes unavailable', () => {
+    const fetchParamsExternal: UnifiedHistogramFetchParamsExternal = {
+      dataView: dataViewWithTimefieldMock,
+      filters: [],
+      query: { language: 'kuery', query: '' },
+      requestAdapter: new RequestAdapter(),
+      searchSessionId: '123',
+      relativeTimeRange: { from: 'now-15m', to: 'now' },
+    };
+
+    it('should clear it when a subsequent query has no compatible chart, e.g. a non-time-based data view', async () => {
+      const { result } = renderHook(() =>
+        useUnifiedHistogram({
+          services: unifiedHistogramServicesMock,
+          initialState: {},
+        })
+      );
+
+      act(() => {
+        result.current.api.fetch(fetchParamsExternal);
+      });
+      await waitFor(() => {
+        expect(result.current.isInitialized).toBe(true);
+      });
+
+      act(() => {
+        result.current.api.setLensRequestAdapter(new RequestAdapter());
+      });
+      expect(result.current.api.state$.getValue().lensRequestAdapter).toBeDefined();
+
+      act(() => {
+        result.current.api.fetch({
+          ...fetchParamsExternal,
+          dataView: dataViewMock,
+          searchSessionId: '124',
+        });
+      });
+
+      await waitFor(() => {
+        expect(result.current.api.state$.getValue().lensRequestAdapter).toBeUndefined();
+      });
     });
   });
 });

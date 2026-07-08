@@ -58,9 +58,13 @@ export const VisualizationsSection = memo(
           >
             <EntityGraphPreviewContainer
               entityId={entityId}
-              showIcon={!isPreviewMode}
-              disableNavigation={isPreviewMode || scopeId === TableId.rulePreview}
-              onShowGraph={handleOpenGraphViewTab}
+              // header link + arrow only shown when navigation is wired up (onShowGraph set)
+              showIcon={!isPreviewMode && openDetailsPanel != null}
+              onShowGraph={
+                isPreviewMode || scopeId === TableId.rulePreview
+                  ? undefined
+                  : handleOpenGraphViewTab
+              }
             />
           </ExpandableSection>
         )}
