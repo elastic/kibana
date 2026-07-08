@@ -90,6 +90,7 @@ export const initializeStateManager = <StateType extends object>(
    */
   const reinitializeState = (newState?: Partial<StateType>) => {
     const latestState = comparators ? getLatestState() : undefined;
+    console.log('reinitializeState', { latestState, newState });
     for (const [key, subject] of Object.entries<SubjectOf<StateType>>(
       keyToSubjectMap as { [key: string]: SubjectOf<StateType> }
     )) {
@@ -102,6 +103,7 @@ export const initializeStateManager = <StateType extends object>(
             newState?.[key as keyof StateType] ?? defaultState[key as keyof StateType]
           ) // reset CHANGED keys when comparators are provided
         : true; // reset ALL keys when comparators are not provided
+      console.log({ key, shouldReset, latestState, newState });
 
       if (shouldReset) {
         subject.next(newState?.[key as keyof StateType] ?? defaultState[key as keyof StateType]);

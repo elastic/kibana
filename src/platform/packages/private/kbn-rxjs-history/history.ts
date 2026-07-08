@@ -9,6 +9,8 @@
 
 import deepEqual from 'fast-deep-equal';
 import * as jsondiffpatch from 'jsondiffpatch';
+import { cloneDeep } from 'lodash';
+
 import { BehaviorSubject, pairwise, distinctUntilChanged, skip, map } from 'rxjs';
 
 export function startTrackingHistory<T extends object = {}>({
@@ -72,7 +74,10 @@ export function startTrackingHistory<T extends object = {}>({
 
         const reversedPatch = jsondiffpatch.reverse(history[pointer]); // must undo the **current** patch
         undoOrRedoAction = true;
-        currentState$.next(jsondiffpatch.patch(state$.getValue(), reversedPatch) as T);
+        // jsondiffpatch.patch mutates its first argument in place, so clone before patching -
+        // otherwise it corrupts any state still referenced live elsewhere (e.g. an embeddable's
+        // own state manager, which may hold the exact same nested object/array by reference).
+        currentState$.next(jsondiffpatch.patch(cloneDeep(state$.getValue()), reversedPatch) as T);
         pointer$.next(pointer - 1);
         console.log('UNDO - after', { pointer: pointer$.getValue(), history: [...history] });
       },
@@ -80,7 +85,7 @@ export function startTrackingHistory<T extends object = {}>({
         const pointer = pointer$.getValue();
         const patch = history[pointer + 1]; // must apply the **next** patch
         undoOrRedoAction = true;
-        currentState$.next(jsondiffpatch.patch(state$.getValue(), patch) as T);
+        currentState$.next(jsondiffpatch.patch(cloneDeep(state$.getValue()), patch) as T);
         pointer$.next(pointer + 1);
         console.log('REDO - after', { pointer: pointer$.getValue(), history: [...history] });
       },

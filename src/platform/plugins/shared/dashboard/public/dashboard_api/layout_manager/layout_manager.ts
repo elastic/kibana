@@ -170,6 +170,7 @@ export function initializeLayoutManager(
         const child = currentChildren[uuid];
         const nextChildState = childStateToApply[uuid];
         if (apiHasSerializableState(child)) {
+          console.log({ nextChildState });
           child.applySerializedState(nextChildState);
         }
       } else {

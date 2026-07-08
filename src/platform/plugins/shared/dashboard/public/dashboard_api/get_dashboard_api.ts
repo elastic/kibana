@@ -9,7 +9,7 @@
 
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, concatMap, merge, of, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatestWith, concatMap, map, merge, of, Subject, tap } from 'rxjs';
 import { v4 } from 'uuid';
 import type { EuiFlyoutProps } from '@elastic/eui';
 
@@ -192,6 +192,7 @@ export function getDashboardApi({
     lastSavedState,
     setState,
     getState,
+    dataLoadingManager,
   });
 
   const unsavedChangesManager = initializeUnsavedChangesManager({

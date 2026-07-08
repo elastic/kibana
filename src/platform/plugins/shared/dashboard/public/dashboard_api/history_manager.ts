@@ -7,22 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, debounceTime, type Observable } from 'rxjs';
+import {
+  BehaviorSubject,
+  debounceTime,
+  finalize,
+  first,
+  firstValueFrom,
+  skipWhile,
+  switchMap,
+  type Observable,
+} from 'rxjs';
 
 import { startTrackingHistory } from '@kbn/rxjs-history';
 
 import type { DashboardState } from '../../common';
+import type { initializeDataLoadingManager } from './data_loading_manager';
 
 export function initializeHistoryManager({
   anyStateChange$,
   lastSavedState,
   setState,
   getState,
+  dataLoadingManager: {
+    api: { dataLoading$ },
+  },
 }: {
   anyStateChange$: Observable<void>;
   lastSavedState: DashboardState;
   getState: () => DashboardState;
   setState: (state: DashboardState) => void;
+  dataLoadingManager: ReturnType<typeof initializeDataLoadingManager>;
 }): {
   api: ReturnType<typeof startTrackingHistory<DashboardState>>['api'];
   cleanup: () => void;
@@ -47,12 +61,27 @@ export function initializeHistoryManager({
   );
 
   // when state changes, update full dashboard state so that we can store it in the history
-  const onAnyStateChangeSubscription = anyStateChange$.pipe(debounceTime(0)).subscribe(() => {
-    dashboardState$.next(getState());
-  });
+  const onAnyStateChangeSubscription = anyStateChange$
+    .pipe(
+      debounceTime(300), // wait until state updates stabilize before updating history
+      switchMap(async () => {
+        // wait for panels to load before updating history
+        const waitForPanelsToLoad$ = dataLoading$.pipe(
+          skipWhile((isLoading: boolean | undefined) => Boolean(isLoading))
+        );
+        console.log('BEFORE');
+        const result = await firstValueFrom(waitForPanelsToLoad$);
+        console.log({ result });
+      })
+    )
+    .subscribe(() => {
+      console.log('anyStateChange$');
+      dashboardState$.next(getState());
+    });
 
   // when the history's current state updates, respond by setting state on the Dashboard
   const historyStateSubscription = historyApi.currentState$.subscribe((newState) => {
+    console.log('currentState$', { newState });
     setState(newState);
   });
 
