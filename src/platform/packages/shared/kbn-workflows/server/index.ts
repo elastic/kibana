@@ -26,6 +26,53 @@ export {
 export { WorkflowRepository } from './repositories/workflow_repository';
 export { GLOBAL_WORKFLOW_SPACE_ID } from './constants';
 
+export {
+  WORKFLOWS_EXECUTIONS_INDEX,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX,
+  WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
+  TOKEN_USAGE_MAPPING,
+  createOrUpdateIndex,
+  createIndexWithMappings,
+  createWorkflowExecutionsDataAccess,
+  createStepExecutionsDataAccess,
+  executeIndexBulkUpsert,
+  normalizeUpsertDocuments,
+  assertUpsertDocumentsHaveIds,
+  throwBulkUpsertError,
+  assertBulkUpsertSuccess,
+  EMPTY_BULK_UPSERT_RESPONSE,
+  toBulkUpsertResponseFromBulk,
+  toBulkUpsertResponseFromUpdate,
+  validateCreateWorkflowExecutionsDataAccessParams,
+  validateCreateStepExecutionsDataAccessParams,
+} from './data_access_layer';
+export type {
+  ExecutionsDataAccess,
+  WorkflowExecutionsDataAccess,
+  StepExecutionsDataAccess,
+  ExecutionStorageSource,
+  ExecutionDataStreamClient,
+  ExecutionsSearchRequest,
+  GetExecutionsByIdsOptions,
+  ExecutionSourceProjectionField,
+  WorkflowExecutionsSearchRequest,
+  StepExecutionsSearchRequest,
+  BulkUpsertIndexResolver,
+  BulkUpsertResponse,
+  BulkUpsertItemResponse,
+  UpsertDocument,
+  WorkflowExecutionUpsertDocument,
+  StepExecutionUpsertDocument,
+  CreateWorkflowExecutionsDataAccessDeps,
+  CreateStepExecutionsDataAccessDeps,
+  GetExecutionsByIdsOptions,
+  GetStepExecutionsByIdsOptions,
+  GetWorkflowExecutionsByIdsOptions,
+  StepExecutionSourceProjectionField,
+  WorkflowExecutionSourceProjectionField,
+} from './data_access_layer';
+
 export type {
   GetManagedWorkflowStatusOptions,
   ManagedWorkflowStatus,
