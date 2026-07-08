@@ -159,7 +159,7 @@ describe('DatatableUtilitiesService', () => {
       });
     });
 
-    it('should return meta for a bucketed ES|QL column (non-esaggs source)', () => {
+    it('falls back to used_interval for an ES|QL column without bucket metadata', () => {
       const column = {
         id: 'test',
         name: 'test',
@@ -197,22 +197,26 @@ describe('DatatableUtilitiesService', () => {
       expect(datatableUtilitiesService.getDateHistogramMeta(column)).toBeUndefined();
     });
 
-    it('surfaces the precomputed domain from sourceParams for an ES|QL column', () => {
+    it('returns interval, timeRange, dropPartials and domain for an ES|QL bucket column', () => {
       const column = {
         id: 'test',
         name: 'test',
         meta: {
           type: 'date',
           esMeta: { bucket: { interval: 1, unit: 'day' } },
-          sourceParams: { computedDomain: { min: 1000, max: 5000 } },
+          sourceParams: {
+            appliedTimeRange: { from: '2026-07-01', to: '2026-07-02' },
+            params: { drop_partials: false },
+            computedDomain: { min: 1000, max: 5000 },
+          },
         },
       } as unknown as DatatableColumn;
 
       expect(datatableUtilitiesService.getDateHistogramMeta(column, { timeZone: 'UTC' })).toEqual({
         interval: '1d',
         timeZone: 'UTC',
-        timeRange: undefined,
-        dropPartials: undefined,
+        timeRange: { from: '2026-07-01', to: '2026-07-02' },
+        dropPartials: false,
         domain: { min: 1000, max: 5000 },
       });
     });
@@ -226,7 +230,7 @@ describe('DatatableUtilitiesService', () => {
           esMeta: { bucket: { interval: 1, unit: 'day' } },
           sourceParams: { computedDomain: { min: 1000 } },
         },
-      } as unknown as DatatableColumn;
+      } satisfies DatatableColumn;
 
       expect(datatableUtilitiesService.getDateHistogramMeta(column, { timeZone: 'UTC' })).toEqual({
         interval: '1d',

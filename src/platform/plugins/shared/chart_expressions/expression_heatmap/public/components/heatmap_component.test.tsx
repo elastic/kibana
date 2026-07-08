@@ -794,6 +794,38 @@ describe('HeatmapComponent', function () {
 
       expect(xScale).toEqual({ type: 'ordinal' });
     });
+
+    it('brushes a time range filter even when no bucket metadata is available', async () => {
+      const onSelectRange = jest.fn();
+      const onClickValue = jest.fn();
+      const component = mountWithIntl(
+        <HeatmapComponent
+          {...wrapperProps}
+          data={buildTimeData([
+            { timestamp: '2024-01-01T00:00:00.000Z', category: 'A', value: 10 },
+            { timestamp: '2024-01-01T00:05:00.000Z', category: 'A', value: 20 },
+            { timestamp: '2024-01-01T00:10:00.000Z', category: 'B', value: 15 },
+          ])}
+          args={timeArgs}
+          onSelectRange={onSelectRange}
+          onClickValue={onClickValue}
+        />
+      );
+      await act(async () => {
+        await component.update();
+      });
+
+      const onBrushEnd = component.find(Settings).first().prop('onBrushEnd') as (e: {
+        x: number[];
+        y: unknown[];
+      }) => void;
+      const range = [1704067200000, 1704067800000];
+      onBrushEnd({ x: range, y: [] });
+
+      expect(onSelectRange).toHaveBeenCalledTimes(1);
+      expect(onClickValue).not.toHaveBeenCalled();
+      expect(onSelectRange.mock.calls[0][0]).toEqual(expect.objectContaining({ range }));
+    });
   });
 
   describe('getDateFormatPattern', () => {

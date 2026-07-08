@@ -459,6 +459,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       search.aggs.parseEsInterval,
       search.aggs.parseInterval
     );
+
+    const isTimeScaleXAxis = xAxisMeta?.type === 'date' && xScale.type === ScaleType.Time;
     const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
       datatables: [formattedTable.table],
     });
@@ -600,7 +602,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       (e: HeatmapBrushEvent) => {
         const { x, y } = e;
 
-        if (isTimeBasedSwimLane) {
+        if (isTimeScaleXAxis) {
           const isEsql = table.meta?.type === ESQL_TABLE_TYPE;
           const context: BrushEvent['data'] = {
             range: x as number[],
@@ -658,7 +660,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       },
       [
         formattedTable.formattedColumns,
-        isTimeBasedSwimLane,
+        isTimeScaleXAxis,
         onClickValue,
         onSelectRange,
         table,
