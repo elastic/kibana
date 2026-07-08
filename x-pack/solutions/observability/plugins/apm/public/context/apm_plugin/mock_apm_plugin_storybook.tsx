@@ -31,9 +31,32 @@ import { APMServiceContext } from '../apm_service/apm_service_context';
 import { ChartPointerEventContextProvider } from '../chart_pointer_event/chart_pointer_event_context';
 import { MockTimeRangeContextProvider } from '../time_range_metadata/mock_time_range_metadata_context_provider';
 import { ApmTimeRangeMetadataContextProvider } from '../time_range_metadata/time_range_metadata_context';
+import type { ConfigSchema } from '../..';
 import type { ApmPluginContextValue } from './apm_plugin_context';
 import { ApmPluginContext } from './apm_plugin_context';
-import { mockApmPluginContextValue } from './mock_apm_plugin_context';
+
+const mockConfig: ConfigSchema = {
+  serviceMapEnabled: true,
+  ui: {
+    enabled: false,
+  },
+  latestAgentVersionsUrl: '',
+  serverlessOnboarding: false,
+  managedServiceUrl: '',
+  featureFlags: {
+    agentConfigurationAvailable: true,
+    configurableIndicesAvailable: true,
+    infrastructureTabAvailable: true,
+    infraUiAvailable: true,
+    migrationToFleetAvailable: true,
+    sourcemapApiAvailable: true,
+    storageExplorerAvailable: true,
+    // to be removed in https://github.com/elastic/kibana/issues/221904
+    profilingIntegrationAvailable: false,
+    ruleFormV2Enabled: false,
+  },
+  serverless: { enabled: false },
+};
 
 const mockPerformanceApi = {
   onPageReady: () => {},
@@ -202,7 +225,7 @@ const mockUnifiedSearchBar = {
 export const mockApmPluginContext = {
   core: mockCore,
   plugins: mockPlugin,
-  config: mockApmPluginContextValue.config,
+  config: mockConfig,
   unifiedSearch: mockUnifiedSearchBar,
   observabilityAIAssistant: {
     service: { setScreenContext: () => noop },
