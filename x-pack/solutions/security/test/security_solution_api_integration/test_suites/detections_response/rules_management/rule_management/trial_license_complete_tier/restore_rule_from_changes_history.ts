@@ -253,17 +253,34 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(statuses.every((s: number) => s === 200 || s === 409)).toBe(true);
     });
 
+    it('returns 404 when the rule does not exist and it has no history', async () => {
+      const missingRuleId = uuidv4();
+
+      const { body } = await detectionsApi
+        .restoreRuleFromHistory({
+          params: { ruleId: missingRuleId, changeId: uuidv4() },
+          body: {},
+        })
+        .expect(404);
+
+      expect(body.message).toContain(`ruleId: "${missingRuleId}" not found`);
+    });
+
     it('returns 404 when the changeId does not exist for a valid rule', async () => {
       const { body: rule } = await detectionsApi
         .createRule({ body: getCustomQueryRuleParams() })
         .expect(200);
 
-      await detectionsApi
+      const missingChangeId = uuidv4();
+
+      const { body } = await detectionsApi
         .restoreRuleFromHistory({
-          params: { ruleId: rule.id, changeId: uuidv4() },
+          params: { ruleId: rule.id, changeId: missingChangeId },
           body: { revision: rule.revision },
         })
         .expect(404);
+
+      expect(body.message).toContain(`changeId: "${missingChangeId}" not found`);
     });
 
     it('make zero side effect when restoring the state equals to the current state', async () => {

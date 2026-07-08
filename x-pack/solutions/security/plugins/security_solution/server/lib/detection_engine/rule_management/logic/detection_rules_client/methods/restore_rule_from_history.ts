@@ -55,6 +55,22 @@ export const restoreRuleFromHistory = async (
   const { rulesClient, ruleId, changeId, currentRuleRevision } = params;
 
   const existingRule = await getRuleById({ rulesClient, id: ruleId });
+  // `from` is intentionally omitted: the event.id term-filter makes the target
+  // document the first (and only) hit; ES default of 0 is correct here.
+  const historyResult = await rulesClient.getHistory({
+    module: 'security',
+    ruleId,
+    size: 1,
+    filters: [{ term: { 'event.id': changeId } }],
+  });
+
+  if (!existingRule && historyResult.items.length === 0) {
+    throw new ClientError(`ruleId: "${ruleId}" not found`, 404);
+  }
+
+  if (existingRule && historyResult.items.length === 0) {
+    throw new ClientError(`changeId: "${changeId}" not found`, 404);
+  }
 
   if (existingRule == null && currentRuleRevision != null) {
     throw new ClientError(
@@ -68,19 +84,6 @@ export const restoreRuleFromHistory = async (
       'Someone has updated the rule already. Please provide the latest rule revision.',
       existingRule.revision
     );
-  }
-
-  // `from` is intentionally omitted: the event.id term-filter makes the target
-  // document the first (and only) hit; ES default of 0 is correct here.
-  const historyResult = await rulesClient.getHistory({
-    module: 'security',
-    ruleId,
-    size: 1,
-    filters: [{ term: { 'event.id': changeId } }],
-  });
-
-  if (historyResult.items.length === 0) {
-    throw new ClientError(`changeId: "${changeId}" not found`, 404);
   }
 
   const item = historyResult.items[0];
