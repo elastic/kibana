@@ -12,13 +12,16 @@ import { CreateTemplatePage } from './page';
 import { TestProviders } from '../../../../common/mock';
 import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
 import { exampleTemplateDefinition } from '../../field_types/constants';
-import { splitTemplateDefinition } from '../../utils/template_settings_yaml';
+import {
+  getTemplateMetadataFromYaml,
+  setTemplateMetadataInYaml,
+} from '../../utils/template_metadata_yaml';
 import * as i18n from '../../translations';
 
-// The editor buffer only holds the fields YAML; connector/settings are managed in the Settings
-// form and split out of the definition. The draft that gets persisted/reset is therefore the
-// fields-only version of the example template.
-const exampleFieldsYaml = splitTemplateDefinition(exampleTemplateDefinition).fieldsYaml;
+const createPageInitialEditorYaml = setTemplateMetadataInYaml(
+  exampleTemplateDefinition,
+  getTemplateMetadataFromYaml(exampleTemplateDefinition, { name: '', description: '', tags: [] })
+);
 
 jest.mock('../../components/template_form', () => ({
   TemplateYamlEditor: () => <div data-test-subj="template-yaml-editor" />,
@@ -82,6 +85,7 @@ describe('CreateTemplatePage', () => {
     expect(localStorage.getItem(storageKey)).toBe(JSON.stringify(modifiedTemplate));
 
     // Click the save button
+    await userEvent.type(screen.getByTestId('templateMetadataNameInput'), 'My template');
     const saveButton = screen.getByTestId('saveTemplateHeaderButton');
     await userEvent.click(saveButton);
 
@@ -90,9 +94,9 @@ describe('CreateTemplatePage', () => {
       expect(mockMutateAsync).toHaveBeenCalledTimes(1);
     });
 
-    // Verify localStorage was reset to the default template (fields-only buffer)
+    // Verify localStorage was reset to the default editor template buffer.
     await waitFor(() => {
-      expect(localStorage.getItem(storageKey)).toBe(JSON.stringify(exampleFieldsYaml));
+      expect(localStorage.getItem(storageKey)).toBe(JSON.stringify(createPageInitialEditorYaml));
     });
 
     // Verify navigation was called
@@ -113,6 +117,7 @@ describe('CreateTemplatePage', () => {
       </TestProviders>
     );
 
+    await userEvent.type(screen.getByTestId('templateMetadataNameInput'), 'My template');
     const saveButton = screen.getByTestId('saveTemplateHeaderButton');
     await userEvent.click(saveButton);
 
@@ -136,6 +141,7 @@ describe('CreateTemplatePage', () => {
       </TestProviders>
     );
 
+    await userEvent.type(screen.getByTestId('templateMetadataNameInput'), 'My template');
     const saveButton = screen.getByTestId('saveTemplateHeaderButton');
     await userEvent.click(saveButton);
 
@@ -143,8 +149,8 @@ describe('CreateTemplatePage', () => {
       expect(mockMutateAsync).toHaveBeenCalledTimes(1);
     });
 
-    // Verify the localStorage value is the default example template (fields-only buffer)
+    // Verify the localStorage value is the default example template.
     const storedValue = localStorage.getItem(storageKey);
-    expect(storedValue).toBe(JSON.stringify(exampleFieldsYaml));
+    expect(storedValue).toBe(JSON.stringify(createPageInitialEditorYaml));
   });
 });

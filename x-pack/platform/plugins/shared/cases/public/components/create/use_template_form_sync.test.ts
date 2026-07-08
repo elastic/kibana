@@ -49,6 +49,7 @@ const mockTemplate = {
     tags: ['security', 'network'],
     severity: 'high',
     category: 'general',
+    assignees: [{ uid: 'analyst-1' }],
     fields: [],
   },
 };
@@ -87,6 +88,20 @@ const mockTemplateWithExtendedFields = {
         control: 'TEXTAREA',
       },
     ],
+  },
+};
+
+const mockTemplateWithTopLevelDefaults = {
+  templateId: 'template-3',
+  templateVersion: 1,
+  definition: {
+    name: 'Top-level title',
+    description: 'Top-level description',
+    tags: ['ops'],
+    severity: 'medium',
+    category: 'triage',
+    assignees: [{ uid: 'analyst-top' }],
+    fields: [],
   },
 };
 
@@ -133,6 +148,21 @@ describe('useTemplateFormSync', () => {
     expect(mockSetFieldValue).toHaveBeenCalledWith('tags', ['security', 'network']);
     expect(mockSetFieldValue).toHaveBeenCalledWith('severity', 'high');
     expect(mockSetFieldValue).toHaveBeenCalledWith('category', 'general');
+    expect(mockSetFieldValue).toHaveBeenCalledWith('assignees', [{ uid: 'analyst-1' }]);
+  });
+
+  it('populates form fields from top-level definition defaults', () => {
+    mockUseFormData.mockReturnValue([{ templateId: 'template-3' }]);
+    mockUseGetTemplate.mockReturnValue({ data: mockTemplateWithTopLevelDefaults, isLoading: false });
+
+    renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+    expect(mockSetFieldValue).toHaveBeenCalledWith('title', 'Top-level title');
+    expect(mockSetFieldValue).toHaveBeenCalledWith('description', 'Top-level description');
+    expect(mockSetFieldValue).toHaveBeenCalledWith('tags', ['ops']);
+    expect(mockSetFieldValue).toHaveBeenCalledWith('severity', 'medium');
+    expect(mockSetFieldValue).toHaveBeenCalledWith('category', 'triage');
+    expect(mockSetFieldValue).toHaveBeenCalledWith('assignees', [{ uid: 'analyst-top' }]);
   });
 
   it('resets parent form fields when templateId is cleared after a template was applied', () => {
@@ -153,6 +183,7 @@ describe('useTemplateFormSync', () => {
     expect(mockSetFieldValue).toHaveBeenCalledWith('tags', []);
     expect(mockSetFieldValue).toHaveBeenCalledWith('severity', 'low');
     expect(mockSetFieldValue).toHaveBeenCalledWith('category', null);
+    expect(mockSetFieldValue).toHaveBeenCalledWith('assignees', []);
     expect(innerForm.reset).toHaveBeenCalledWith({ [CASE_EXTENDED_FIELDS]: {} });
   });
 

@@ -22,11 +22,12 @@ interface ParsedField {
 }
 
 interface ParsedTemplate {
-  name: string;
+  name?: string;
   description?: string;
   tags?: string[];
   severity?: string;
   category?: string | null;
+  assignees?: Array<{ uid: string }>;
   connector?: { type: string; id: string; fields: Record<string, unknown> | null };
   settings?: { syncAlerts: boolean; extractObservables?: boolean };
   fields: ParsedField[];
@@ -37,9 +38,11 @@ const parse = (input: string) => parseYaml(input) as ParsedTemplate;
 const makeRef = (key: string): Map<string, string> => new Map([[key, key]]);
 
 describe('buildTemplateYaml', () => {
-  it('includes the template name', () => {
+  it('uses legacy template name as top-level case title fallback', () => {
     const yaml = buildTemplateYaml({ key: 'k', name: 'My Template', caseFields: null }, new Map());
-    expect(parse(yaml).name).toBe('My Template');
+    expect(parse(yaml)).toHaveProperty('name', 'My Template');
+    expect(parse(yaml)).not.toHaveProperty('description');
+    expect(parse(yaml)).not.toHaveProperty('tags');
   });
 
   it('produces an empty fields array when there are no caseFields', () => {
@@ -47,85 +50,46 @@ describe('buildTemplateYaml', () => {
     expect(parse(yaml).fields).toEqual([]);
   });
 
-  describe('description', () => {
-    it('uses template-level description when present', () => {
+  describe('case defaults', () => {
+    it('includes case title, description, tags, severity, category, and assignees as top-level defaults', () => {
       const yaml = buildTemplateYaml(
         {
           key: 'k',
           name: 'T',
-          description: 'top-level',
-          caseFields: { description: 'case-level' },
+          caseFields: {
+            title: 'Case title',
+            description: 'case-level',
+            tags: ['triage', 'security'],
+            severity: 'high',
+            category: null,
+            assignees: [{ uid: 'analyst-1' }],
+          },
         },
         new Map()
       );
-      expect(parse(yaml).description).toBe('top-level');
+      expect(parse(yaml)).toMatchObject({
+        name: 'Case title',
+        description: 'case-level',
+        tags: ['triage', 'security'],
+        severity: 'high',
+        category: null,
+        assignees: [{ uid: 'analyst-1' }],
+      });
     });
 
-    it('falls back to caseFields.description', () => {
+    it('keeps an explicit empty assignees list in YAML', () => {
       const yaml = buildTemplateYaml(
-        { key: 'k', name: 'T', caseFields: { description: 'case-level' } },
+        {
+          key: 'k',
+          name: 'T',
+          caseFields: {
+            assignees: [],
+          },
+        },
         new Map()
       );
-      expect(parse(yaml).description).toBe('case-level');
-    });
 
-    it('omits description when neither is present', () => {
-      const yaml = buildTemplateYaml({ key: 'k', name: 'T', caseFields: null }, new Map());
-      expect(parse(yaml)).not.toHaveProperty('description');
-    });
-  });
-
-  describe('tags', () => {
-    it('uses template-level tags when present', () => {
-      const yaml = buildTemplateYaml(
-        { key: 'k', name: 'T', tags: ['a', 'b'], caseFields: { tags: ['c'] } },
-        new Map()
-      );
-      expect(parse(yaml).tags).toEqual(['a', 'b']);
-    });
-
-    it('falls back to caseFields.tags', () => {
-      const yaml = buildTemplateYaml(
-        { key: 'k', name: 'T', caseFields: { tags: ['c'] } },
-        new Map()
-      );
-      expect(parse(yaml).tags).toEqual(['c']);
-    });
-
-    it('omits tags when neither is present', () => {
-      const yaml = buildTemplateYaml({ key: 'k', name: 'T', caseFields: null }, new Map());
-      expect(parse(yaml)).not.toHaveProperty('tags');
-    });
-  });
-
-  describe('severity', () => {
-    it('includes severity from caseFields', () => {
-      const yaml = buildTemplateYaml(
-        { key: 'k', name: 'T', caseFields: { severity: 'high' } },
-        new Map()
-      );
-      expect(parse(yaml).severity).toBe('high');
-    });
-
-    it('omits severity when absent', () => {
-      const yaml = buildTemplateYaml({ key: 'k', name: 'T', caseFields: null }, new Map());
-      expect(parse(yaml)).not.toHaveProperty('severity');
-    });
-  });
-
-  describe('category', () => {
-    it('includes category including null', () => {
-      const yaml = buildTemplateYaml(
-        { key: 'k', name: 'T', caseFields: { category: null } },
-        new Map()
-      );
-      expect(parse(yaml)).toHaveProperty('category');
-      expect(parse(yaml).category).toBeNull();
-    });
-
-    it('omits category when absent', () => {
-      const yaml = buildTemplateYaml({ key: 'k', name: 'T', caseFields: null }, new Map());
-      expect(parse(yaml)).not.toHaveProperty('category');
+      expect(parse(yaml).assignees).toEqual([]);
     });
   });
 
@@ -243,6 +207,7 @@ describe('buildTemplateYaml', () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
+        expect(result.data.severity).toEqual('high');
         expect(result.data.connector).toEqual({
           type: '.jira',
           id: 'jira-1',

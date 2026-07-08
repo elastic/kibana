@@ -94,15 +94,26 @@ const buildLegacyCustomField = (
   defaultValue,
 });
 
-const buildLegacyTemplate = (name: string, customFieldKeys: string[] = []) => ({
+const buildLegacyTemplate = (
+  name: string,
+  customFieldKeys: string[] = [],
+  overrides: Partial<{
+    description: string;
+    tags: string[];
+    caseFields: Record<string, unknown>;
+  }> = {}
+) => ({
   key: `key-${name}`,
   name,
+  description: overrides.description,
+  tags: overrides.tags,
   caseFields: {
     customFields: customFieldKeys.map((k) => ({
       key: k,
       type: CustomFieldTypes.TEXT,
       value: null,
     })),
+    ...(overrides.caseFields ?? {}),
   },
 });
 
@@ -322,6 +333,63 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(toggleDef.metadata?.default).toBe('true');
     });
 
+    it('preserves template metadata while keeping case defaults as top-level definition keys', async () => {
+      const configSO = buildConfigureSO({
+        templates: [
+          buildLegacyTemplate('Template metadata name', [], {
+            description: 'Template metadata description',
+            tags: ['metadata-tag'],
+            caseFields: {
+              title: 'Case default title',
+              description: 'Case default description',
+              tags: ['case-tag'],
+              severity: 'critical',
+              category: 'malware',
+              assignees: [{ uid: 'analyst-1' }],
+            },
+          }),
+        ],
+      });
+
+      repo.find
+        .mockResolvedValueOnce({ saved_objects: [configSO], total: 1 })
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 });
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      const templateCreateCall = repo.create.mock.calls.find(
+        (c) => c[0] === CASE_TEMPLATE_SAVED_OBJECT
+      );
+      expect(templateCreateCall).toBeDefined();
+      const templateAttributes = templateCreateCall?.[1] as {
+        name: string;
+        description?: string;
+        tags?: string[];
+        definition: string;
+      };
+
+      expect(templateAttributes.name).toBe('Template metadata name');
+      expect(templateAttributes.description).toBe('Template metadata description');
+      expect(templateAttributes.tags).toEqual(['metadata-tag']);
+
+      const parsedDefinition = parseYaml(templateAttributes.definition) as {
+        name?: string;
+        description?: string;
+        tags?: string[];
+        severity?: string;
+        category?: string | null;
+        assignees?: Array<{ uid: string }>;
+      };
+      expect(parsedDefinition.name).toEqual('Case default title');
+      expect(parsedDefinition.description).toEqual('Case default description');
+      expect(parsedDefinition.tags).toEqual(['case-tag']);
+      expect(parsedDefinition.severity).toEqual('critical');
+      expect(parsedDefinition.category).toEqual('malware');
+      expect(parsedDefinition.assignees).toEqual([{ uid: 'analyst-1' }]);
+      expect(parsedDefinition).not.toHaveProperty('case');
+    });
+
     it('emits a single aggregate summary log line instead of one per configure SO', async () => {
       // Regression guard for the "overly verbose logging" concern. Three spaces are migrated but
       // only ONE summary INFO line should be produced for the run; per-SO detail is at debug.
@@ -497,16 +565,11 @@ describe('TemplatesMigrationTaskManager', () => {
     });
 
     it('rejects a template with an invalid YAML definition and logs the error', async () => {
-      // buildTemplateYaml always emits valid YAML, but ParsedTemplateDefinitionSchema
-      // validation can fail if the emitted structure is missing required fields.
-      // Simulate this by pointing to a template whose name resolves to an empty string,
-      // which would fail the min(1) validation — we test the safeParse error path by
-      // monkeypatching after construction. Use the simplest proxy: a template whose
-      // name passes buildTemplateYaml but whose YAML would fail schema validation.
-      // The easiest approach: mock repo.create to confirm the error was logged.
+      // buildTemplateYaml always emits syntactically valid YAML, but ParsedTemplateDefinitionSchema
+      // can still reject semantically invalid values. Use an unsupported severity value to exercise
+      // the safeParse error path.
       const configSO = buildConfigureSO({
-        // Empty name would fail ParsedTemplateDefinitionSchema (name must be min length 1)
-        templates: [{ key: 'k', name: '', caseFields: {} }],
+        templates: [{ key: 'k', name: 'T', caseFields: { severity: 'urgent' } }],
       });
 
       repo.find

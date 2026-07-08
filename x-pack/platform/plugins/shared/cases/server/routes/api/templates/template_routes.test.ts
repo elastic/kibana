@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
+import { stringify as yamlStringify } from 'yaml';
 import type { Template } from '../../../../common/types/domain/template/v1';
 import { mockTemplates } from './mock_data';
 import { getTemplatesRoute } from './get_templates_route';
@@ -113,13 +113,10 @@ const createMockCasesClient = () => ({
 
       return toSavedObject(latest);
     }),
-    createTemplate: jest.fn(async (input: { name?: string; owner: string; definition: string }) => {
-      const parsedDefinition = yamlParse(input.definition) as { name: string };
-      const templateName = input.name ?? parsedDefinition.name;
-
+    createTemplate: jest.fn(async (input: { name: string; owner: string; definition: string }) => {
       const newTemplate: Template = {
         templateId: `template-${Date.now()}`,
-        name: templateName,
+        name: input.name,
         owner: input.owner,
         definition: input.definition,
         templateVersion: 1,
@@ -132,7 +129,7 @@ const createMockCasesClient = () => ({
       return toSavedObject(newTemplate);
     }),
     updateTemplate: jest.fn(
-      async (templateId: string, input: { name?: string; owner: string; definition: string }) => {
+      async (templateId: string, input: { name: string; owner: string; definition: string }) => {
         const candidates = mockTemplates.filter(
           (template) => template.templateId === templateId && template.deletedAt === null
         );
@@ -142,12 +139,9 @@ const createMockCasesClient = () => ({
         }
 
         const latestVersion = Math.max(...candidates.map((template) => template.templateVersion));
-        const parsedDefinition = yamlParse(input.definition) as { name: string };
-        const templateName = input.name ?? parsedDefinition.name;
-
         const updatedTemplate: Template = {
           templateId,
-          name: templateName,
+          name: input.name,
           owner: input.owner,
           definition: input.definition,
           templateVersion: latestVersion + 1,
@@ -530,6 +524,7 @@ describe('Template Routes', () => {
       const context = createMockContext();
       const request = {
         body: {
+          name: 'New Template',
           owner: 'securitySolution',
           definition: buildDefinition('New Template'),
         },
@@ -556,6 +551,7 @@ describe('Template Routes', () => {
       const context = createMockContext();
       const request = {
         body: {
+          name: 'New Template',
           owner: 'securitySolution',
           definition: buildDefinition('New Template'),
         },
@@ -585,6 +581,7 @@ describe('Template Routes', () => {
       const request = {
         params: { template_id: 'template-1' },
         body: {
+          name: 'Updated Template',
           owner: 'observability',
           definition: buildDefinition('Updated Template'),
         },
@@ -611,6 +608,7 @@ describe('Template Routes', () => {
       const request = {
         params: { template_id: 'non-existent' },
         body: {
+          name: 'Updated',
           owner: 'securitySolution',
           definition: buildDefinition('Updated'),
         },
@@ -630,6 +628,7 @@ describe('Template Routes', () => {
       const request = {
         params: { template_id: 'template-3' },
         body: {
+          name: 'Updated',
           owner: 'securitySolution',
           definition: buildDefinition('Updated'),
         },
@@ -661,7 +660,7 @@ describe('Template Routes', () => {
         expect.objectContaining({
           body: expect.objectContaining({
             templateId: 'template-1',
-            name: 'Patched Template',
+            name: 'Template One',
             owner: 'securitySolution',
             templateVersion: 2,
           }),

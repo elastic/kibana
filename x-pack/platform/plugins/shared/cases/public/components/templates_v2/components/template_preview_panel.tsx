@@ -79,11 +79,12 @@ export const TemplatePreviewPanel: React.FC<TemplatePreviewPanelProps> = ({
       return null;
     }
     return {
-      name: template.name,
-      description: template.description,
-      tags: template.tags ?? undefined,
-      severity: template.severity as 'low' | 'medium' | 'high' | 'critical' | undefined,
-      category: template.category ?? undefined,
+      name: template.caseDefaults?.title,
+      description: template.caseDefaults?.description,
+      tags: template.caseDefaults?.tags,
+      severity: template.caseDefaults?.severity,
+      category: template.caseDefaults?.category,
+      assignees: template.caseDefaults?.assignees,
       fields: template.definition.fields,
     };
   }, [template]);

@@ -23,21 +23,35 @@ interface ImportResult {
 }
 
 const buildDefinitionYaml = (template: ParsedTemplateEntry): string => {
-  const definition: Record<string, unknown> = {
-    name: template.name,
-  };
+  const definition: Record<string, unknown> = {};
 
+  definition.template_name = template.name;
   if (template.description) {
-    definition.description = template.description;
+    definition.template_description = template.description;
   }
   if (template.tags && template.tags.length > 0) {
-    definition.tags = template.tags;
+    definition.template_tags = template.tags;
   }
-  if (template.severity) {
-    definition.severity = template.severity;
-  }
-  if (template.category != null) {
-    definition.category = template.category;
+
+  if (template.caseDefaults) {
+    if (template.caseDefaults.title) {
+      definition.name = template.caseDefaults.title;
+    }
+    if (template.caseDefaults.description) {
+      definition.description = template.caseDefaults.description;
+    }
+    if (template.caseDefaults.tags && template.caseDefaults.tags.length > 0) {
+      definition.tags = template.caseDefaults.tags;
+    }
+    if (template.caseDefaults.severity) {
+      definition.severity = template.caseDefaults.severity;
+    }
+    if (template.caseDefaults.category !== undefined) {
+      definition.category = template.caseDefaults.category;
+    }
+    if (template.caseDefaults.assignees !== undefined) {
+      definition.assignees = template.caseDefaults.assignees;
+    }
   }
   if (template.connector) {
     definition.connector = template.connector;
@@ -72,6 +86,7 @@ export const useImportTemplates = () => {
             return patchTemplate({
               templateId: template.templateId,
               template: {
+                name: template.name,
                 definition: definitionYaml,
                 owner: template.owner,
                 description: template.description,
@@ -83,6 +98,7 @@ export const useImportTemplates = () => {
 
           return postTemplate({
             template: {
+              name: template.name,
               definition: definitionYaml,
               owner: template.owner ?? 'securitySolution',
               description: template.description,

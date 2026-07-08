@@ -33,22 +33,12 @@ function applySchemaOverrides(ctx: OverrideCtx) {
 }
 
 /**
- * `connector` and `settings` are edited in the Settings tab and merged into the definition on save,
- * not authored in the YAML buffer. Omit them so the Monaco editor doesn't suggest (and then silently
- * drop) blocks the buffer never persists.
- */
-const EditorTemplateDefinitionSchema = ParsedTemplateDefinitionSchema.omit({
-  connector: true,
-  settings: true,
-});
-
-/**
- * Generates the Monaco editor JSON Schema from the Zod definition schema (fields only), keeping
+ * Generates the Monaco editor JSON Schema from the Zod definition schema, keeping
  * editor validation in sync with Zod. Based on workflows' get_workflow_json_schema.ts.
  */
 export function getTemplateDefinitionJsonSchema(): z.core.JSONSchema.JSONSchema | null {
   try {
-    return z.toJSONSchema(EditorTemplateDefinitionSchema, {
+    return z.toJSONSchema(ParsedTemplateDefinitionSchema, {
       target: 'draft-7',
       unrepresentable: 'any',
       reused: 'inline',

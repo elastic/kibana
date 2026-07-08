@@ -5,73 +5,140 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
+import React from 'react';
+import { EuiAccordion, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
+import type { CaseAssignees } from '../../../../common/types/domain_zod/user/v1';
 import type { TemplateSettings } from '../../../../common/types/domain/template/v1';
+import type { TemplateMetadata, TemplateMetadataErrors } from '../utils/template_metadata';
 import { TemplatePreview } from './template_preview';
+import { TemplateMetadataForm } from './template_metadata_form';
 import { TemplateSettingsForm } from './template_settings_form';
 import * as i18n from '../translations';
 
-type TabId = 'fields' | 'settings';
+type EditableCaseDefaultField =
+  | 'name'
+  | 'description'
+  | 'severity'
+  | 'category'
+  | 'tags'
+  | 'assignees';
+type EditableCaseDefaultValue = string | string[] | CaseAssignees;
 
 interface TemplateRenderPanelProps {
   settings?: TemplateSettings;
   connector?: CaseConnectorWithoutName;
   onSettingsChange: (settings: TemplateSettings) => void;
   onConnectorChange: (connector: CaseConnectorWithoutName) => void;
+  metadata: TemplateMetadata;
+  metadataErrors: TemplateMetadataErrors;
+  onMetadataChange: (metadata: TemplateMetadata) => void;
   onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
+  onCaseDefaultChange?: (field: EditableCaseDefaultField, value: EditableCaseDefaultValue) => void;
   formResetKey?: number;
 }
 
-/**
- * Right-hand render panel with two tabs: "Fields" previews the YAML-authored fields; "Settings"
- * edits the template's case settings and default connector, which are managed here (not in the YAML
- * buffer) and merged into the definition on save.
- */
+/** Right-hand render panel with accordion sections for metadata, fields/defaults, and settings. */
 export const TemplateRenderPanel: React.FC<TemplateRenderPanelProps> = ({
   settings,
   connector,
   onSettingsChange,
   onConnectorChange,
+  metadata,
+  metadataErrors,
+  onMetadataChange,
   onFieldDefaultChange,
+  onCaseDefaultChange,
   formResetKey,
 }) => {
-  const [selectedTab, setSelectedTab] = useState<TabId>('fields');
+  const { euiTheme } = useEuiTheme();
 
   return (
     <div>
-      <EuiTabs data-test-subj="templateRenderPanelTabs">
-        <EuiTab
-          isSelected={selectedTab === 'fields'}
-          onClick={() => setSelectedTab('fields')}
-          data-test-subj="templateRenderPanelTab-fields"
-        >
-          {i18n.FIELDS_TAB_LABEL}
-        </EuiTab>
-        <EuiTab
-          isSelected={selectedTab === 'settings'}
-          onClick={() => setSelectedTab('settings')}
-          data-test-subj="templateRenderPanelTab-settings"
-        >
-          {i18n.SETTINGS_TAB_LABEL}
-        </EuiTab>
-      </EuiTabs>
+      <EuiAccordion
+        id="templateRenderMetadataAccordion"
+        buttonContent={
+          <span
+            css={css`
+              font-weight: ${euiTheme.font.weight.medium};
+            `}
+          >
+            {i18n.TEMPLATE_METADATA_SECTION_TITLE}
+          </span>
+        }
+        initialIsOpen={true}
+        data-test-subj="templateRenderMetadataAccordion"
+      >
+        <EuiSpacer size="s" />
+        <EuiText size="xs" color="subdued">
+          <p>{i18n.TEMPLATE_METADATA_SECTION_DESCRIPTION}</p>
+        </EuiText>
+        <EuiSpacer size="m" />
+        <TemplateMetadataForm
+          metadata={metadata}
+          errors={metadataErrors}
+          onChange={onMetadataChange}
+          compact
+        />
+      </EuiAccordion>
 
       <EuiSpacer size="m" />
 
-      {selectedTab === 'fields' ? (
-        <TemplatePreview onFieldDefaultChange={onFieldDefaultChange} />
-      ) : (
+      <EuiAccordion
+        id="templateRenderFieldsAccordion"
+        buttonContent={
+          <span
+            css={css`
+              font-weight: ${euiTheme.font.weight.medium};
+            `}
+          >
+            {i18n.FIELDS_TAB_LABEL}
+          </span>
+        }
+        initialIsOpen={true}
+        data-test-subj="templateRenderFieldsAccordion"
+      >
+        <EuiSpacer size="s" />
+        <EuiText size="xs" color="subdued" data-test-subj="templateFieldsTabDescription">
+          {i18n.PREVIEW_TEMPLATE_DESCRIPTION}
+        </EuiText>
+        <EuiSpacer size="m" />
+        <TemplatePreview
+          settings={settings}
+          connector={connector}
+          onFieldDefaultChange={onFieldDefaultChange}
+          onCaseDefaultChange={onCaseDefaultChange}
+        />
+      </EuiAccordion>
+
+      <EuiSpacer size="m" />
+
+      <EuiAccordion
+        id="templateRenderSettingsAccordion"
+        buttonContent={
+          <span
+            css={css`
+              font-weight: ${euiTheme.font.weight.medium};
+            `}
+          >
+            {i18n.SETTINGS_TAB_LABEL}
+          </span>
+        }
+        initialIsOpen={true}
+        data-test-subj="templateRenderSettingsAccordion"
+      >
+        <EuiSpacer size="s" />
         <TemplateSettingsForm
           settings={settings}
           connector={connector}
           onSettingsChange={onSettingsChange}
           onConnectorChange={onConnectorChange}
           formResetKey={formResetKey}
+          compact
         />
-      )}
+      </EuiAccordion>
     </div>
   );
 };

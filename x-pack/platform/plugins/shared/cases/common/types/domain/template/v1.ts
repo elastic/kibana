@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { FieldSchema, isRefField } from './fields';
 import { CaseConnectorWithoutNameSchema } from '../../domain_zod/connector/v1';
+import { CaseAssigneesSchema } from '../../domain_zod/user/v1';
 
 /** Default case settings a template applies when creating a case; both optional and independent. */
 export const TemplateSettingsSchema = z.object({
@@ -116,11 +117,23 @@ export type Template = z.infer<typeof TemplateSchema>;
  * Parsed template definition
  */
 export const ParsedTemplateDefinitionSchema = z.object({
-  name: z.string().min(1).max(100),
+  /**
+   * Template metadata mirrored in YAML so exported/imported templates keep template identity
+   * separate from case defaults.
+   */
+  template_name: z.string().optional(),
+  template_description: z.string().optional(),
+  template_tags: z.array(z.string()).optional(),
+  /**
+   * Top-level case defaults applied when creating a case from this template.
+   */
+  name: z.string().optional(),
+  title: z.string().optional(),
   description: z.string().optional(),
   tags: z.array(z.string()).optional(),
   severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
   category: z.string().nullable().optional(),
+  assignees: CaseAssigneesSchema.optional(),
   /**
    * Default connector pre-selected when creating a case from this template (`name` resolved from
    * `id` at create time). A first-class case concept, separate from the `fields` system.
@@ -138,6 +151,8 @@ export const ParsedTemplateDefinitionSchema = z.object({
     { message: 'Field names must be unique.' }
   ),
 });
+
+export type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
 
 /**
  * Parsed template schema with parsed definition
@@ -167,7 +182,6 @@ export const CreateTemplateInputSchema = TemplateSchema.omit({
   templateId: true,
   templateVersion: true,
   deletedAt: true,
-  name: true,
 });
 
 export type CreateTemplateInput = z.infer<typeof CreateTemplateInputSchema>;
@@ -179,7 +193,6 @@ export const UpdateTemplateInputSchema = TemplateSchema.omit({
   templateId: true,
   templateVersion: true,
   deletedAt: true,
-  name: true,
 });
 
 export type UpdateTemplateInput = z.infer<typeof UpdateTemplateInputSchema>;

@@ -31,9 +31,103 @@ export const BACK_TO_TEMPLATES = i18n.translate('xpack.cases.templates.backToTem
   defaultMessage: 'Back to Templates',
 });
 
+export const TEMPLATE_METADATA_SECTION_TITLE = i18n.translate(
+  'xpack.cases.templates.templateMetadataSectionTitle',
+  {
+    defaultMessage: 'Template details',
+  }
+);
+
+export const TEMPLATE_METADATA_SECTION_DESCRIPTION = i18n.translate(
+  'xpack.cases.templates.templateMetadataSectionDescription',
+  {
+    defaultMessage:
+      'How this template appears in the templates list. These values do not change case defaults.',
+  }
+);
+
+export const TEMPLATE_NAME_LABEL = i18n.translate('xpack.cases.templates.templateNameLabel', {
+  defaultMessage: 'Template name',
+});
+
+export const TEMPLATE_DESCRIPTION_LABEL = i18n.translate(
+  'xpack.cases.templates.templateDescriptionLabel',
+  {
+    defaultMessage: 'Template description',
+  }
+);
+
+export const TEMPLATE_TAGS_LABEL = i18n.translate('xpack.cases.templates.templateTagsLabel', {
+  defaultMessage: 'Template tags',
+});
+
+export const TEMPLATE_TAGS_HELP_TEXT = i18n.translate(
+  'xpack.cases.templates.templateTagsHelpText',
+  {
+    defaultMessage: 'Used for filtering and discovery in the templates list.',
+  }
+);
+
+export const TEMPLATE_OPTIONAL_METADATA_SECTION_TITLE = i18n.translate(
+  'xpack.cases.templates.templateOptionalMetadataSectionTitle',
+  {
+    defaultMessage: 'Optional list details',
+  }
+);
+
+export const TEMPLATE_NAME_REQUIRED = i18n.translate('xpack.cases.templates.templateNameRequired', {
+  defaultMessage: 'Template name is required.',
+});
+
+export const TEMPLATE_NAME_MAX_LENGTH = (max: number) =>
+  i18n.translate('xpack.cases.templates.templateNameMaxLength', {
+    defaultMessage: 'Template name must be {max} characters or fewer.',
+    values: { max },
+  });
+
+export const TEMPLATE_DESCRIPTION_MAX_LENGTH = (max: number) =>
+  i18n.translate('xpack.cases.templates.templateDescriptionMaxLength', {
+    defaultMessage: 'Template description must be {max} characters or fewer.',
+    values: { max },
+  });
+
+export const TEMPLATE_TAG_MAX_LENGTH = (max: number) =>
+  i18n.translate('xpack.cases.templates.templateTagMaxLength', {
+    defaultMessage: 'Each tag must be {max} characters or fewer.',
+    values: { max },
+  });
+
+export const TEMPLATE_TAGS_MAX_COUNT = (max: number) =>
+  i18n.translate('xpack.cases.templates.templateTagsMaxCount', {
+    defaultMessage: 'A template can have up to {max} tags.',
+    values: { max },
+  });
+
 export const TEMPLATE_FIELDS_LABEL = i18n.translate('xpack.cases.templates.templateFieldsLabel', {
   defaultMessage: 'Fields',
 });
+
+export const CASE_DEFAULT_TITLE = i18n.translate('xpack.cases.templates.caseDefaultTitle', {
+  defaultMessage: 'Case title',
+});
+
+export const CASE_DEFAULT_ASSIGNEES = i18n.translate('xpack.cases.templates.caseDefaultAssignees', {
+  defaultMessage: 'Assignees',
+});
+
+export const CASE_DEFAULTS_SECTION_TITLE = i18n.translate(
+  'xpack.cases.templates.caseDefaultsSectionTitle',
+  {
+    defaultMessage: 'Case defaults',
+  }
+);
+
+export const CASE_DEFAULT_SEVERITY_NONE = i18n.translate(
+  'xpack.cases.templates.caseDefaultsSeverityNone',
+  {
+    defaultMessage: 'No default',
+  }
+);
 
 export const TEMPLATE_SAVED = i18n.translate('xpack.cases.templates.templateSaved', {
   defaultMessage: 'Saved',
@@ -376,6 +470,14 @@ export const EXPORT_TEMPLATE = i18n.translate('xpack.cases.templates.exportTempl
 export const PREVIEW_TEMPLATE = i18n.translate('xpack.cases.templates.previewTemplate', {
   defaultMessage: 'Preview',
 });
+
+export const PREVIEW_TEMPLATE_DESCRIPTION = i18n.translate(
+  'xpack.cases.templates.previewTemplateDescription',
+  {
+    defaultMessage:
+      'See how this template appears and set default field values when creating a case.',
+  }
+);
 
 export const PREVIEW_UNAVAILABLE_TITLE = i18n.translate(
   'xpack.cases.templates.previewUnavailableTitle',
@@ -782,7 +884,7 @@ export const SETTINGS_SECTION_DESCRIPTION = i18n.translate(
   'xpack.cases.templates.settings.sectionDescription',
   {
     defaultMessage:
-      'Defaults applied to cases created from this template. These are managed here, not in the YAML.',
+      'Defaults applied to cases created from this template. These values are also represented in YAML.',
   }
 );
 

@@ -15,6 +15,7 @@ import { useUpdateTemplate } from '../../hooks/use_update_template';
 import { TemplateFormLayout } from '../../components/template_form_layout';
 import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
 import { useCasesTemplatesBreadcrumbs } from '../../../use_breadcrumbs';
+import type { TemplateMetadata } from '../../utils/template_metadata';
 import * as i18n from '../../translations';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -40,15 +41,26 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
       definition: serverDefinition,
     },
   });
+  const initialMetadata = useMemo<TemplateMetadata>(
+    () => ({
+      name: template?.name ?? '',
+      description: template?.description ?? '',
+      tags: template?.tags ?? [],
+    }),
+    [template?.name, template?.description, template?.tags]
+  );
 
   const handleSave = useCallback(
-    async (data: YamlEditorFormValues, isEnabled: boolean) => {
+    async (data: YamlEditorFormValues, metadata: TemplateMetadata, isEnabled: boolean) => {
       if (!templateId) {
         return;
       }
       await mutateAsync({
         templateId,
         template: {
+          name: metadata.name,
+          description: metadata.description || undefined,
+          tags: metadata.tags.length > 0 ? metadata.tags : undefined,
           definition: data.definition,
           isEnabled,
         },
@@ -66,6 +78,7 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
     <TemplateFormLayout
       form={form}
       title={i18n.EDIT_TEMPLATE_TITLE}
+      initialMetadata={initialMetadata}
       isSaving={isSaving}
       onCreate={handleSave}
       isEdit

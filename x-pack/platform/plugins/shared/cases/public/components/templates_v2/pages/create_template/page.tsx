@@ -18,6 +18,7 @@ import { getOwnerDefaultValue } from '../../../create/utils';
 import { useCasesTemplatesNavigation } from '../../../../common/navigation';
 import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
 import { useCasesTemplatesBreadcrumbs } from '../../../use_breadcrumbs';
+import type { TemplateMetadata } from '../../utils/template_metadata';
 
 import * as i18n from '../../translations';
 
@@ -26,6 +27,11 @@ export interface CreateTemplatePageProps {}
 
 export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
   useCasesTemplatesBreadcrumbs(i18n.ADD_TEMPLATE_TITLE);
+  const initialMetadata: TemplateMetadata = {
+    name: '',
+    description: '',
+    tags: [],
+  };
 
   const form = useForm<YamlEditorFormValues>({
     defaultValues: {
@@ -39,9 +45,12 @@ export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
   const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
 
   const handleCreate = useCallback(
-    async (data: YamlEditorFormValues, isEnabled: boolean) => {
+    async (data: YamlEditorFormValues, metadata: TemplateMetadata, isEnabled: boolean) => {
       await mutateAsync({
         template: {
+          name: metadata.name,
+          description: metadata.description || undefined,
+          tags: metadata.tags.length > 0 ? metadata.tags : undefined,
           owner: defaultOwnerValue,
           definition: data.definition,
           isEnabled,
@@ -56,6 +65,7 @@ export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
     <TemplateFormLayout
       form={form}
       title={i18n.ADD_TEMPLATE_TITLE}
+      initialMetadata={initialMetadata}
       isSaving={isSaving}
       onCreate={handleCreate}
       storageKey={LOCAL_STORAGE_KEYS.templatesYamlEditorCreateState}

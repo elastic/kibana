@@ -14,6 +14,7 @@ import { FormProvider } from 'react-hook-form';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { isMap, parseDocument, type YAMLMap } from 'yaml';
 import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
 import type { YamlEditorFormValues } from './template_form';
 import { useCasesTemplatesNavigation } from '../../../common/navigation';
@@ -37,26 +38,40 @@ import {
 } from '../../../../common/types/domain/template/fields';
 import { normalizeYamlString } from '../utils/normalize_yaml_string';
 import {
-  splitTemplateDefinition,
+  getTemplateSettingsAndConnectorFromYaml,
   mergeTemplateDefinition,
-  normalizeTemplateSettings,
-  normalizeTemplateConnector,
 } from '../utils/template_settings_yaml';
+import { normalizeTemplateCaseDefaultsYaml } from '../utils/normalize_template_case_defaults';
 import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
+import type { CaseAssignees } from '../../../../common/types/domain_zod/user/v1';
 import type { TemplateSettings } from '../../../../common/types/domain/template/v1';
+import {
+  type TemplateMetadata,
+  type TemplateMetadataErrors,
+  normalizeTemplateMetadata,
+  validateTemplateMetadata,
+  hasTemplateMetadataErrors,
+} from '../utils/template_metadata';
+import {
+  getTemplateMetadataFromYaml,
+  setTemplateMetadataInYaml,
+} from '../utils/template_metadata_yaml';
 
-interface SettingsConnectorDraft {
+interface MetadataDraft extends TemplateMetadata {
   templateId?: string;
-  settings?: TemplateSettings;
-  connector?: CaseConnectorWithoutName;
 }
 
 interface TemplateFormLayoutProps {
   form: UseFormReturn<YamlEditorFormValues>;
   title: string;
+  initialMetadata: TemplateMetadata;
   isLoading?: boolean;
   isSaving?: boolean;
-  onCreate: (data: YamlEditorFormValues, isEnabled: boolean) => Promise<void>;
+  onCreate: (
+    data: YamlEditorFormValues,
+    metadata: TemplateMetadata,
+    isEnabled: boolean
+  ) => Promise<void>;
   isEdit?: boolean;
   storageKey: string;
   initialValue: string;
@@ -64,9 +79,80 @@ interface TemplateFormLayoutProps {
   initialIsEnabled?: boolean;
 }
 
+type EditableCaseDefaultField =
+  | 'name'
+  | 'description'
+  | 'severity'
+  | 'category'
+  | 'tags'
+  | 'assignees';
+const ASSIGNEES_YAML_KEY = 'assignees';
+
+const getExplicitSettings = (settings?: TemplateSettings): TemplateSettings => ({
+  syncAlerts: settings?.syncAlerts ?? false,
+  extractObservables: settings?.extractObservables ?? false,
+});
+
+const ensureAssigneesVisibleInYaml = (definitionYaml: string): string => {
+  try {
+    const doc = parseDocument(definitionYaml ?? '');
+    if (!isMap(doc.contents)) {
+      return definitionYaml;
+    }
+
+    const root = doc.contents as YAMLMap<unknown, unknown>;
+    if (!root.has(ASSIGNEES_YAML_KEY)) {
+      root.set(ASSIGNEES_YAML_KEY, doc.createNode([]));
+      return doc.toString();
+    }
+
+    return definitionYaml;
+  } catch {
+    return definitionYaml;
+  }
+};
+
+const updateYamlCaseDefault = (
+  definitionYaml: string,
+  field: EditableCaseDefaultField,
+  value: string | string[] | CaseAssignees
+) => {
+  try {
+    const doc = parseDocument(definitionYaml ?? '');
+    if (!isMap(doc.contents)) {
+      return definitionYaml;
+    }
+
+    const root = doc.contents as YAMLMap<unknown, unknown>;
+
+    if (field === 'assignees') {
+      root.set('assignees', doc.createNode(value as CaseAssignees));
+      return doc.toString();
+    }
+
+    if (field === 'tags') {
+      root.set('tags', doc.createNode(value as string[]));
+      return doc.toString();
+    }
+
+    const stringValue = value as string;
+
+    if ((field === 'severity' || field === 'category') && stringValue.length === 0) {
+      root.delete(field);
+      return doc.toString();
+    }
+
+    root.set(field, stringValue);
+    return doc.toString();
+  } catch {
+    return definitionYaml;
+  }
+};
+
 export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   form,
   title,
+  initialMetadata,
   isLoading,
   isSaving,
   onCreate,
@@ -88,50 +174,49 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isResetModalVisible, setIsResetModalVisible] = useState(false);
   const [isEnabled, setIsEnabled] = useState(initialIsEnabled);
-  // Bumped whenever we revert the Settings-tab state to its initial values (Reset). The connector
-  // picker runs its own hook_form_lib form that only seeds from `defaultValue` at mount, so it's
-  // remounted via this key to re-seed from the reverted connector. Keyed on a counter (not the
-  // connector object) so editing the connector fields never remounts and drops focus.
+  // Bumped whenever the YAML draft is reset. The connector picker reads default values at mount,
+  // so remounting guarantees it re-seeds from the restored YAML connector block.
   const [formResetKey, setFormResetKey] = useState(0);
 
-  // `connector` / `settings` are edited in the Settings tab, not the YAML buffer, so split them out
-  // of the initial definition (the editor shows fields only) and merge them back on save.
-  const {
-    fieldsYaml: initialFieldsYaml,
-    connector: initialConnector,
-    settings: initialSettings,
-  } = useMemo(() => splitTemplateDefinition(initialValue), [initialValue]);
+  const initialDefinitionYaml = useMemo(
+    () => ensureAssigneesVisibleInYaml(setTemplateMetadataInYaml(initialValue, initialMetadata)),
+    [initialValue, initialMetadata]
+  );
+  const initialMetadataFromYaml = useMemo(
+    () => getTemplateMetadataFromYaml(initialDefinitionYaml, initialMetadata),
+    [initialDefinitionYaml, initialMetadata]
+  );
+  // Template metadata is edited in the render panel and mirrored into YAML (`template_name`,
+  // `template_description`, `template_tags`). Keep the same draft semantics so refresh never drops
+  // unsaved template identity changes.
+  const initialMetadataState = useMemo<MetadataDraft>(
+    () => ({ ...initialMetadataFromYaml, templateId }),
+    [initialMetadataFromYaml, templateId]
+  );
+  const [storedMetadataState, setStoredMetadataState] = useCasesLocalStorage<MetadataDraft>(
+    `${storageKey}.metadata`,
+    initialMetadataState
+  );
+  const useStoredMetadataState =
+    storedMetadataState != null && storedMetadataState.templateId === templateId;
+  const metadata = useMemo<TemplateMetadata>(
+    () =>
+      useStoredMetadataState
+        ? {
+            name: storedMetadataState.name ?? '',
+            description: storedMetadataState.description ?? '',
+            tags: storedMetadataState.tags ?? [],
+          }
+        : initialMetadataFromYaml,
+    [useStoredMetadataState, storedMetadataState, initialMetadataFromYaml]
+  );
+  const metadataErrors = useMemo<TemplateMetadataErrors>(
+    () => validateTemplateMetadata(metadata),
+    [metadata]
+  );
 
-  // Settings-tab state isn't in the YAML buffer, so persist it alongside the YAML draft (keyed to
-  // the template) so edits survive a reload and count as unsaved changes.
-  const initialFormState = useMemo<SettingsConnectorDraft>(
-    () => ({ templateId, settings: initialSettings, connector: initialConnector }),
-    [templateId, initialSettings, initialConnector]
-  );
-  const [storedFormState, setStoredFormState] = useCasesLocalStorage<SettingsConnectorDraft>(
-    `${storageKey}.settingsConnector`,
-    initialFormState
-  );
-  // Only reuse a persisted draft that belongs to the current template (mirrors the YAML draft).
-  const useStoredFormState = storedFormState != null && storedFormState.templateId === templateId;
-  const settings = useStoredFormState ? storedFormState.settings : initialSettings;
-  const connector = useStoredFormState ? storedFormState.connector : initialConnector;
-
-  const settingsRef = useRef(settings);
-  settingsRef.current = settings;
-  const connectorRef = useRef(connector);
-  connectorRef.current = connector;
-
-  const handleSettingsChange = useCallback(
-    (next: TemplateSettings) =>
-      setStoredFormState({ templateId, settings: next, connector: connectorRef.current }),
-    [setStoredFormState, templateId]
-  );
-  const handleConnectorChange = useCallback(
-    (next: CaseConnectorWithoutName) =>
-      setStoredFormState({ templateId, settings: settingsRef.current, connector: next }),
-    [setStoredFormState, templateId]
-  );
+  const metadataRef = useRef(metadata);
+  metadataRef.current = metadata;
 
   const {
     value: yamlValue,
@@ -142,35 +227,103 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     isSaved: isYamlSaved,
   } = useDebouncedYamlEdit(
     storageKey,
-    initialFieldsYaml,
+    initialDefinitionYaml,
     (newValue) => form.setValue('definition', newValue),
     templateId
   );
+  const definitionState = useMemo(
+    () => getTemplateSettingsAndConnectorFromYaml(yamlValue ?? ''),
+    [yamlValue]
+  );
+  const settings = definitionState.settings;
+  const connector = definitionState.connector;
+
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
+  const connectorRef = useRef(connector);
+  connectorRef.current = connector;
+
   const hasChanges = useMemo(() => {
     const yamlChanged =
-      computeChangedLines(normalizeYamlString(initialFieldsYaml), normalizeYamlString(yamlValue))
-        .length > 0;
-    // Settings-tab edits (connector + case settings) count as unsaved changes too. Compare the
-    // normalized forms so the connector form's "no connector" shape (`.none`) and empty settings
-    // don't read as changes against the unset initial state.
-    const settingsChanged = !isEqual(
-      normalizeTemplateSettings(settings),
-      normalizeTemplateSettings(initialSettings)
+      computeChangedLines(
+        normalizeYamlString(initialDefinitionYaml),
+        normalizeYamlString(yamlValue)
+      ).length > 0;
+    const metadataChanged = !isEqual(
+      normalizeTemplateMetadata(metadata),
+      normalizeTemplateMetadata(initialMetadataFromYaml)
     );
-    const connectorChanged = !isEqual(
-      normalizeTemplateConnector(connector),
-      normalizeTemplateConnector(initialConnector)
-    );
-    return yamlChanged || settingsChanged || connectorChanged;
-  }, [initialFieldsYaml, yamlValue, settings, initialSettings, connector, initialConnector]);
+    return yamlChanged || metadataChanged;
+  }, [initialDefinitionYaml, yamlValue, metadata, initialMetadataFromYaml]);
 
   const hasValidationErrors = useMemo(
-    () => !validateTemplateDefinitionYaml(yamlValue ?? '').success,
-    [yamlValue]
+    () =>
+      !validateTemplateDefinitionYaml(yamlValue ?? '').success ||
+      hasTemplateMetadataErrors(metadataErrors),
+    [yamlValue, metadataErrors]
   );
 
   const yamlValueRef = useRef(yamlValue);
   yamlValueRef.current = yamlValue;
+
+  const syncMetadataFromYaml = useCallback(
+    (nextYaml: string) => {
+      const nextMetadata = getTemplateMetadataFromYaml(nextYaml, metadataRef.current);
+      if (!isEqual(nextMetadata, metadataRef.current)) {
+        setStoredMetadataState({ ...nextMetadata, templateId });
+      }
+    },
+    [setStoredMetadataState, templateId]
+  );
+
+  const handleYamlChange = useCallback(
+    (nextYaml: string) => {
+      const nextYamlWithAssignees = ensureAssigneesVisibleInYaml(nextYaml);
+      onYamlChange(nextYamlWithAssignees);
+      syncMetadataFromYaml(nextYamlWithAssignees);
+    },
+    [onYamlChange, syncMetadataFromYaml]
+  );
+
+  const handleSettingsChange = useCallback(
+    (next: TemplateSettings) => {
+      const updatedYaml = mergeTemplateDefinition(yamlValueRef.current, {
+        settings: getExplicitSettings(next),
+        connector: connectorRef.current,
+      });
+      if (updatedYaml !== yamlValueRef.current) {
+        handleYamlChange(updatedYaml);
+      }
+    },
+    [handleYamlChange]
+  );
+
+  const handleConnectorChange = useCallback(
+    (next: CaseConnectorWithoutName) => {
+      const updatedYaml = mergeTemplateDefinition(yamlValueRef.current, {
+        settings: settingsRef.current,
+        connector: next,
+      });
+      if (updatedYaml !== yamlValueRef.current) {
+        handleYamlChange(updatedYaml);
+      }
+    },
+    [handleYamlChange]
+  );
+
+  const handleMetadataChange = useCallback(
+    (next: TemplateMetadata) => {
+      setStoredMetadataState({ ...next, templateId });
+
+      const updatedYaml = ensureAssigneesVisibleInYaml(
+        setTemplateMetadataInYaml(yamlValueRef.current, next)
+      );
+      if (updatedYaml !== yamlValueRef.current) {
+        onYamlChange(updatedYaml);
+      }
+    },
+    [setStoredMetadataState, templateId, onYamlChange]
+  );
 
   const handleFieldDefaultChange = useCallback(
     (fieldName: string, value: string, control: string) => {
@@ -181,7 +334,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       if (isEmptyNumeric || isEmptyUserPicker) {
         const updatedYaml = removeYamlFieldDefault(yamlValueRef.current, fieldName);
         if (updatedYaml !== yamlValueRef.current) {
-          onYamlChange(updatedYaml);
+          handleYamlChange(updatedYaml);
         }
         return;
       }
@@ -207,10 +360,20 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       }
       const updatedYaml = updateYamlFieldDefault(yamlValueRef.current, fieldName, parsedValue);
       if (updatedYaml !== yamlValueRef.current) {
-        onYamlChange(updatedYaml);
+        handleYamlChange(updatedYaml);
       }
     },
-    [onYamlChange]
+    [handleYamlChange]
+  );
+
+  const handleCaseDefaultChange = useCallback(
+    (field: EditableCaseDefaultField, value: string | string[] | CaseAssignees) => {
+      const updatedYaml = updateYamlCaseDefault(yamlValueRef.current, field, value);
+      if (updatedYaml !== yamlValueRef.current) {
+        handleYamlChange(updatedYaml);
+      }
+    },
+    [handleYamlChange]
   );
 
   const handleResetClick = useCallback(() => {
@@ -219,11 +382,11 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
 
   const handleResetConfirm = useCallback(() => {
     handleReset();
-    setStoredFormState(initialFormState);
-    // Remount the connector picker so it re-seeds from the reverted connector (see formResetKey).
+    setStoredMetadataState(initialMetadataState);
+    // Remount the connector picker so it re-seeds from the restored YAML connector block.
     setFormResetKey((count) => count + 1);
     setIsResetModalVisible(false);
-  }, [handleReset, setStoredFormState, initialFormState]);
+  }, [handleReset, setStoredMetadataState, initialMetadataState]);
 
   const handleResetCancel = useCallback(() => {
     setIsResetModalVisible(false);
@@ -232,24 +395,30 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   const handleSave = useCallback(() => {
     setSubmitError(null);
 
-    // Merge the form-managed connector/settings back into the fields YAML, then validate the
-    // complete definition that will actually be persisted.
-    const mergedDefinition = mergeTemplateDefinition(yamlValue ?? '', { connector, settings });
+    // Canonicalize legacy top-level defaults (for example `title`) into the current top-level shape
+    // so users can edit naturally while persisted templates stay in one stable shape.
+    const normalizedMetadataFromYaml = normalizeTemplateMetadata(
+      getTemplateMetadataFromYaml(yamlValue ?? '', metadata)
+    );
+    const mergedDefinition = normalizeTemplateCaseDefaultsYaml(
+      setTemplateMetadataInYaml(yamlValue ?? '', normalizedMetadataFromYaml)
+    );
 
     const validationResult = validateTemplateDefinitionYaml(mergedDefinition);
-    if (!validationResult.success) {
+    if (!validationResult.success || hasTemplateMetadataErrors(metadataErrors)) {
       setSubmitError(i18n.FIX_VALIDATION_ERRORS);
       return;
     }
+    const normalizedMetadata = normalizedMetadataFromYaml;
 
     form.handleSubmit(
       async (data) => {
         try {
-          await onCreate({ ...data, definition: mergedDefinition }, isEnabled);
-          clearDraft(isEdit ? data.definition : undefined);
-          // Reset the persisted Settings-tab draft: keep the saved values when editing, revert to
-          // the template's defaults when creating (mirrors clearDraft's create/edit behavior).
-          setStoredFormState(isEdit ? { templateId, settings, connector } : initialFormState);
+          await onCreate({ ...data, definition: mergedDefinition }, normalizedMetadata, isEnabled);
+          clearDraft(isEdit ? mergedDefinition : undefined);
+          setStoredMetadataState(
+            isEdit ? { ...normalizedMetadata, templateId } : initialMetadataState
+          );
         } catch (e) {
           setSubmitError(e?.message ?? i18n.FAILED_TO_SAVE_TEMPLATE);
         }
@@ -265,11 +434,11 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     isEdit,
     clearDraft,
     yamlValue,
-    connector,
-    settings,
-    setStoredFormState,
+    metadata,
+    metadataErrors,
+    setStoredMetadataState,
     templateId,
-    initialFormState,
+    initialMetadataState,
   ]);
 
   const handleIsEnabledChange = useCallback((enabled: boolean) => {
@@ -308,17 +477,21 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
           <TemplateEditorLayout
             isLoading={isLoading}
             yamlValue={yamlValue}
-            onYamlChange={onYamlChange}
+            onYamlChange={handleYamlChange}
             onFieldDefaultChange={handleFieldDefaultChange}
+            onCaseDefaultChange={handleCaseDefaultChange}
             isYamlSaving={isYamlSaving}
             isYamlSaved={isYamlSaved}
             previewWidth={previewWidth}
             onPreviewWidthChange={setPreviewWidth}
-            savedValue={isEdit ? initialFieldsYaml : undefined}
+            savedValue={isEdit ? initialDefinitionYaml : undefined}
             settings={settings}
             connector={connector}
             onSettingsChange={handleSettingsChange}
             onConnectorChange={handleConnectorChange}
+            metadata={metadata}
+            metadataErrors={metadataErrors}
+            onMetadataChange={handleMetadataChange}
             formResetKey={formResetKey}
           />
         </EuiFlexItem>

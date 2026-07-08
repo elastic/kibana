@@ -35,15 +35,15 @@ jest.mock('./template_form', () => ({
   ),
 }));
 
-jest.mock('./template_preview', () => ({
-  TemplatePreview: () => <div data-test-subj="mockTemplatePreview">{PREVIEW_TEXT}</div>,
+jest.mock('./template_render_panel', () => ({
+  TemplateRenderPanel: () => <div data-test-subj="mockTemplatePreview">{PREVIEW_TEXT}</div>,
 }));
 
 describe('TemplateEditorLayout', () => {
   const user = userEvent.setup({ pointerEventsCheck: 0 });
   const defaultProps = {
     isLoading: false,
-    yamlValue: 'name: Test\nfields: []',
+    yamlValue: 'fields: []',
     onYamlChange: jest.fn(),
     isYamlSaving: false,
     isYamlSaved: false,
@@ -51,6 +51,9 @@ describe('TemplateEditorLayout', () => {
     onPreviewWidthChange: jest.fn(),
     onSettingsChange: jest.fn(),
     onConnectorChange: jest.fn(),
+    metadata: { name: 'Template', description: '', tags: [] },
+    metadataErrors: {},
+    onMetadataChange: jest.fn(),
   };
 
   beforeEach(() => {
@@ -83,7 +86,7 @@ describe('TemplateEditorLayout', () => {
     renderWithTestingProviders(<TemplateEditorLayout {...defaultProps} />);
 
     const textarea = screen.getByRole('textbox');
-    expect(textarea).toHaveValue('name: Test\nfields: []');
+    expect(textarea).toHaveValue('fields: []');
   });
 
   it('calls onYamlChange when editor value changes', async () => {

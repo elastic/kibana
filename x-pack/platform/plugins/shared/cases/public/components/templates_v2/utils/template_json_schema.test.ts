@@ -256,23 +256,28 @@ describe('getTemplateDefinitionJsonSchema', () => {
     expect(inputNumberEntry).toBeDefined();
   });
 
-  // `connector` and `settings` are edited in the Settings tab and merged into the definition on
-  // save, so the editor schema deliberately omits them — it must not suggest blocks the YAML buffer
-  // never persists.
-  describe('connector and settings (Settings-tab managed)', () => {
-    it('omits connector and settings from the editor schema', () => {
+  describe('connector and settings', () => {
+    it('includes connector and settings in the editor schema', () => {
       const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
       const props = schema.properties as JsonSchemaObject;
 
-      expect(props.connector).toBeUndefined();
-      expect(props.settings).toBeUndefined();
+      expect(props.connector).toBeDefined();
+      expect(props.settings).toBeDefined();
     });
 
-    it('still exposes the field properties (name and fields)', () => {
+    it('still exposes the editable top-level defaults and fields properties', () => {
       const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
       const props = schema.properties as JsonSchemaObject;
 
+      expect(props.template_name).toBeDefined();
+      expect(props.template_description).toBeDefined();
+      expect(props.template_tags).toBeDefined();
       expect(props.name).toBeDefined();
+      expect(props.description).toBeDefined();
+      expect(props.tags).toBeDefined();
+      expect(props.severity).toBeDefined();
+      expect(props.category).toBeDefined();
+      expect(props.assignees).toBeDefined();
       expect(props.fields).toBeDefined();
     });
   });

@@ -9,8 +9,11 @@ import React from 'react';
 import { render, screen, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useForm } from 'react-hook-form';
+import { parse as yamlParse } from 'yaml';
 import type { YamlEditorFormValues } from './template_form';
 import { TemplateFormLayout } from './template_form_layout';
+import type { TemplateMetadata } from '../utils/template_metadata';
+import type { CaseAssignees } from '../../../../common/types/domain_zod/user/v1';
 import * as i18n from '../translations';
 
 jest.mock('./template_form', () => ({
@@ -23,20 +26,36 @@ jest.mock('./template_preview', () => ({
 
 const capturedEditorLayoutProps: {
   onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
+  onCaseDefaultChange?: (
+    field: 'name' | 'description' | 'severity' | 'category' | 'tags' | 'assignees',
+    value: string | string[] | CaseAssignees
+  ) => void;
   onSettingsChange?: (settings: unknown) => void;
   onConnectorChange?: (connector: unknown) => void;
+  metadata?: TemplateMetadata;
+  onMetadataChange?: (metadata: TemplateMetadata) => void;
+  yamlValue?: string;
 } = {};
 
 jest.mock('./template_editor_layout', () => ({
   TemplateEditorLayout: (props: {
     onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
+    onCaseDefaultChange?: (
+      field: 'name' | 'description' | 'severity' | 'category' | 'tags' | 'assignees',
+      value: string | string[] | CaseAssignees
+    ) => void;
     onSettingsChange?: (settings: unknown) => void;
     onConnectorChange?: (connector: unknown) => void;
     [key: string]: unknown;
   }) => {
     capturedEditorLayoutProps.onFieldDefaultChange = props.onFieldDefaultChange;
+    capturedEditorLayoutProps.onCaseDefaultChange = props.onCaseDefaultChange;
     capturedEditorLayoutProps.onSettingsChange = props.onSettingsChange;
     capturedEditorLayoutProps.onConnectorChange = props.onConnectorChange;
+    capturedEditorLayoutProps.metadata = props.metadata as TemplateMetadata;
+    capturedEditorLayoutProps.onMetadataChange =
+      props.onMetadataChange as typeof capturedEditorLayoutProps.onMetadataChange;
+    capturedEditorLayoutProps.yamlValue = props.yamlValue as string;
     return (
       <>
         <div data-test-subj="template-yaml-editor" />
@@ -64,20 +83,29 @@ jest.mock('../hooks/use_debounced_yaml_edit', () => ({
   useDebouncedYamlEdit: (...args: unknown[]) => mockUseDebouncedYamlEdit(...args),
 }));
 
+const baseEditorYaml = `template_name: Template metadata
+fields: []`;
+
 const TestWrapper = ({
   onCreate,
   isEdit = false,
   isSaving = false,
   hasChanges = false,
+  initialValue = baseEditorYaml,
 }: {
-  onCreate: (data: YamlEditorFormValues) => Promise<void>;
+  onCreate: (
+    data: YamlEditorFormValues,
+    metadata: TemplateMetadata,
+    isEnabled: boolean
+  ) => Promise<void>;
   isEdit?: boolean;
   isSaving?: boolean;
   hasChanges?: boolean;
+  initialValue?: string;
 }) => {
   const form = useForm<YamlEditorFormValues>({
     defaultValues: {
-      definition: 'name: Test',
+      definition: baseEditorYaml,
     },
   });
 
@@ -89,7 +117,8 @@ const TestWrapper = ({
       isEdit={isEdit}
       isSaving={isSaving}
       storageKey="test-storage-key"
-      initialValue="name: Test"
+      initialValue={initialValue}
+      initialMetadata={{ name: 'Template metadata', description: '', tags: [] }}
     />
   );
 };
@@ -97,14 +126,14 @@ const TestWrapper = ({
 describe('TemplateFormLayout', () => {
   const mockOnCreate = jest.fn();
   const mockHandleReset = jest.fn();
-  const mockSetStoredFormState = jest.fn();
+  const mockSetStoredMetadataState = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockOnCreate.mockResolvedValue(undefined);
-    mockUseCasesLocalStorage.mockReturnValue([undefined, mockSetStoredFormState]);
+    mockUseCasesLocalStorage.mockReturnValue([undefined, mockSetStoredMetadataState]);
     mockUseDebouncedYamlEdit.mockReturnValue({
-      value: 'name: Test',
+      value: baseEditorYaml,
       onChange: jest.fn(),
       handleReset: mockHandleReset,
       clearDraft: jest.fn(),
@@ -131,6 +160,140 @@ describe('TemplateFormLayout', () => {
     expect(screen.getByTestId('template-preview')).toBeInTheDocument();
   });
 
+  it('passes template metadata to the render panel layout', () => {
+    render(<TestWrapper onCreate={mockOnCreate} />);
+
+    expect(capturedEditorLayoutProps.metadata).toEqual({
+      name: 'Template metadata',
+      description: '',
+      tags: [],
+    });
+  });
+
+  it('mirrors metadata edits into template-prefixed YAML keys', () => {
+    const mockYamlOnChange = jest.fn();
+    mockUseDebouncedYamlEdit.mockReturnValue({
+      value: baseEditorYaml,
+      onChange: mockYamlOnChange,
+      handleReset: mockHandleReset,
+      clearDraft: jest.fn(),
+      isSaving: false,
+      isSaved: false,
+    });
+    render(<TestWrapper onCreate={mockOnCreate} />);
+
+    act(() => {
+      capturedEditorLayoutProps.onMetadataChange?.({
+        name: 'Updated template name',
+        description: 'Updated template description',
+        tags: ['meta-tag'],
+      });
+    });
+
+    expect(mockSetStoredMetadataState).toHaveBeenCalledWith({
+      templateId: undefined,
+      name: 'Updated template name',
+      description: 'Updated template description',
+      tags: ['meta-tag'],
+    });
+    expect(mockYamlOnChange).toHaveBeenCalledTimes(1);
+    const nextYaml = mockYamlOnChange.mock.calls[0][0] as string;
+    const parsed = yamlParse(nextYaml) as Record<string, unknown>;
+    expect(parsed.template_name).toEqual('Updated template name');
+    expect(parsed.template_description).toEqual('Updated template description');
+    expect(parsed.template_tags).toEqual(['meta-tag']);
+  });
+
+  it('keeps top-level case defaults in the editor buffer', () => {
+    mockUseDebouncedYamlEdit.mockImplementation((_storageKey: string, initialYaml: string) => ({
+      value: initialYaml,
+      onChange: jest.fn(),
+      handleReset: mockHandleReset,
+      clearDraft: jest.fn(),
+      isSaving: false,
+      isSaved: false,
+    }));
+
+    render(
+      <TestWrapper
+        onCreate={mockOnCreate}
+        initialValue={`name: Existing title
+fields: []`}
+      />
+    );
+
+    expect(capturedEditorLayoutProps.yamlValue).toContain('template_name: Template metadata');
+    expect(capturedEditorLayoutProps.yamlValue).toContain('name: Existing title');
+    expect(capturedEditorLayoutProps.yamlValue).toContain('assignees: []');
+    expect(capturedEditorLayoutProps.yamlValue).not.toContain('case:');
+  });
+
+  it('mirrors case-default edits into top-level YAML keys', () => {
+    const mockYamlOnChange = jest.fn();
+    mockUseDebouncedYamlEdit.mockReturnValue({
+      value: baseEditorYaml,
+      onChange: mockYamlOnChange,
+      handleReset: mockHandleReset,
+      clearDraft: jest.fn(),
+      isSaving: false,
+      isSaved: false,
+    });
+    render(<TestWrapper onCreate={mockOnCreate} />);
+
+    act(() => {
+      capturedEditorLayoutProps.onCaseDefaultChange?.('name', 'Updated case title');
+    });
+
+    expect(mockYamlOnChange).toHaveBeenCalledTimes(1);
+    const nextYaml = mockYamlOnChange.mock.calls[0][0] as string;
+    const parsed = yamlParse(nextYaml) as Record<string, unknown>;
+    expect(parsed.name).toEqual('Updated case title');
+  });
+
+  it('mirrors case-default assignees edits into top-level YAML keys', () => {
+    const mockYamlOnChange = jest.fn();
+    mockUseDebouncedYamlEdit.mockReturnValue({
+      value: baseEditorYaml,
+      onChange: mockYamlOnChange,
+      handleReset: mockHandleReset,
+      clearDraft: jest.fn(),
+      isSaving: false,
+      isSaved: false,
+    });
+    render(<TestWrapper onCreate={mockOnCreate} />);
+
+    act(() => {
+      capturedEditorLayoutProps.onCaseDefaultChange?.('assignees', [{ uid: 'analyst-1' }]);
+    });
+
+    expect(mockYamlOnChange).toHaveBeenCalledTimes(1);
+    const nextYaml = mockYamlOnChange.mock.calls[0][0] as string;
+    const parsed = yamlParse(nextYaml) as Record<string, unknown>;
+    expect(parsed.assignees).toEqual([{ uid: 'analyst-1' }]);
+  });
+
+  it('keeps assignees key visible when assignees are cleared', () => {
+    const mockYamlOnChange = jest.fn();
+    mockUseDebouncedYamlEdit.mockReturnValue({
+      value: baseEditorYaml,
+      onChange: mockYamlOnChange,
+      handleReset: mockHandleReset,
+      clearDraft: jest.fn(),
+      isSaving: false,
+      isSaved: false,
+    });
+    render(<TestWrapper onCreate={mockOnCreate} />);
+
+    act(() => {
+      capturedEditorLayoutProps.onCaseDefaultChange?.('assignees', []);
+    });
+
+    expect(mockYamlOnChange).toHaveBeenCalledTimes(1);
+    const nextYaml = mockYamlOnChange.mock.calls[0][0] as string;
+    const parsed = yamlParse(nextYaml) as Record<string, unknown>;
+    expect(parsed.assignees).toEqual([]);
+  });
+
   it('renders create button for new template', () => {
     render(<TestWrapper onCreate={mockOnCreate} />);
 
@@ -145,7 +308,7 @@ describe('TemplateFormLayout', () => {
 
   it('does not render reset button when no changes', () => {
     mockUseDebouncedYamlEdit.mockReturnValue({
-      value: 'name: Test',
+      value: baseEditorYaml,
       onChange: jest.fn(),
       handleReset: mockHandleReset,
       isSaving: false,
@@ -173,57 +336,85 @@ describe('TemplateFormLayout', () => {
     expect(screen.getByText('Unsaved changes')).toBeInTheDocument();
   });
 
-  it('renders reset button when only the Settings tab has changes', () => {
-    // YAML buffer is unchanged (matches initialValue), but a persisted Settings-tab draft differs
-    // from the template's defaults — this should still count as unsaved changes.
-    mockUseCasesLocalStorage.mockReturnValue([
-      { templateId: undefined, settings: { syncAlerts: false }, connector: undefined },
-      jest.fn(),
-    ]);
-
-    render(<TestWrapper onCreate={mockOnCreate} />);
-
-    expect(screen.getByTestId('resetTemplateButton')).toBeInTheDocument();
-    expect(screen.getByText('Unsaved changes')).toBeInTheDocument();
-  });
-
-  it('persists Settings-tab changes to the draft', () => {
+  it('mirrors settings edits into YAML keys', () => {
+    const mockYamlOnChange = jest.fn();
+    mockUseDebouncedYamlEdit.mockReturnValue({
+      value: baseEditorYaml,
+      onChange: mockYamlOnChange,
+      handleReset: mockHandleReset,
+      clearDraft: jest.fn(),
+      isSaving: false,
+      isSaved: false,
+    });
     render(<TestWrapper onCreate={mockOnCreate} />);
 
     act(() => {
       capturedEditorLayoutProps.onSettingsChange?.({ syncAlerts: false });
     });
 
-    expect(mockSetStoredFormState).toHaveBeenCalledWith({
-      templateId: undefined,
-      settings: { syncAlerts: false },
-      connector: undefined,
-    });
+    expect(mockYamlOnChange).toHaveBeenCalledTimes(1);
+    const nextYaml = mockYamlOnChange.mock.calls[0][0] as string;
+    const parsed = yamlParse(nextYaml) as Record<string, unknown>;
+    expect(parsed.settings).toEqual({ syncAlerts: false, extractObservables: false });
   });
 
-  it('reverts the Settings-tab draft when reset is confirmed', async () => {
-    // A differing persisted draft makes the reset button available.
-    mockUseCasesLocalStorage.mockReturnValue([
-      { templateId: undefined, settings: { syncAlerts: false }, connector: undefined },
-      mockSetStoredFormState,
-    ]);
-
+  it('keeps settings keys in YAML when toggled from true to false', () => {
+    const mockYamlOnChange = jest.fn();
+    mockUseDebouncedYamlEdit.mockReturnValue({
+      value: `${baseEditorYaml}
+settings:
+  syncAlerts: true
+  extractObservables: true`,
+      onChange: mockYamlOnChange,
+      handleReset: mockHandleReset,
+      clearDraft: jest.fn(),
+      isSaving: false,
+      isSaved: false,
+    });
     render(<TestWrapper onCreate={mockOnCreate} />);
 
-    await userEvent.click(screen.getByTestId('resetTemplateButton'));
-    await userEvent.click(screen.getByText(i18n.REVERT_MODAL_CONFIRM));
-
-    expect(mockHandleReset).toHaveBeenCalled();
-    expect(mockSetStoredFormState).toHaveBeenCalledWith({
-      templateId: undefined,
-      settings: undefined,
-      connector: undefined,
+    act(() => {
+      capturedEditorLayoutProps.onSettingsChange?.({
+        syncAlerts: false,
+        extractObservables: false,
+      });
     });
+
+    expect(mockYamlOnChange).toHaveBeenCalledTimes(1);
+    const nextYaml = mockYamlOnChange.mock.calls[0][0] as string;
+    const parsed = yamlParse(nextYaml) as Record<string, unknown>;
+    expect(parsed.settings).toEqual({ syncAlerts: false, extractObservables: false });
   });
 
-  it('resets the Settings-tab draft on successful create', async () => {
+  it('mirrors connector edits into YAML keys', () => {
+    const mockYamlOnChange = jest.fn();
     mockUseDebouncedYamlEdit.mockReturnValue({
-      value: 'name: Test\nfields: []',
+      value: baseEditorYaml,
+      onChange: mockYamlOnChange,
+      handleReset: mockHandleReset,
+      clearDraft: jest.fn(),
+      isSaving: false,
+      isSaved: false,
+    });
+    render(<TestWrapper onCreate={mockOnCreate} />);
+
+    act(() => {
+      capturedEditorLayoutProps.onConnectorChange?.({
+        id: 'my-jira',
+        type: '.jira',
+        fields: null,
+      });
+    });
+
+    expect(mockYamlOnChange).toHaveBeenCalledTimes(1);
+    const nextYaml = mockYamlOnChange.mock.calls[0][0] as string;
+    const parsed = yamlParse(nextYaml) as Record<string, unknown>;
+    expect(parsed.connector).toEqual({ id: 'my-jira', type: '.jira', fields: null });
+  });
+
+  it('keeps legacy top-level case defaults at the top level before save', async () => {
+    mockUseDebouncedYamlEdit.mockReturnValue({
+      value: 'name: Legacy case title\nseverity: medium\nfields: []',
       onChange: jest.fn(),
       handleReset: mockHandleReset,
       clearDraft: jest.fn(),
@@ -236,11 +427,12 @@ describe('TemplateFormLayout', () => {
     await userEvent.click(screen.getByTestId('saveTemplateHeaderButton'));
 
     await waitFor(() => expect(mockOnCreate).toHaveBeenCalled());
-    expect(mockSetStoredFormState).toHaveBeenCalledWith({
-      templateId: undefined,
-      settings: undefined,
-      connector: undefined,
-    });
+    const submitted = mockOnCreate.mock.calls[0][0] as { definition: string };
+    const parsedDefinition = yamlParse(submitted.definition) as Record<string, unknown>;
+
+    expect(parsedDefinition.name).toEqual('Legacy case title');
+    expect(parsedDefinition.severity).toEqual('medium');
+    expect(parsedDefinition).not.toHaveProperty('case');
   });
 
   it('shows correct tooltip for reset button in create mode', async () => {

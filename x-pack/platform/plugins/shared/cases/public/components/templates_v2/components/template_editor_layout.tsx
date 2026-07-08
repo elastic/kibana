@@ -16,7 +16,9 @@ import {
 } from '@kbn/resizable-layout';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
+import type { CaseAssignees } from '../../../../common/types/domain_zod/user/v1';
 import type { TemplateSettings } from '../../../../common/types/domain/template/v1';
+import type { TemplateMetadata, TemplateMetadataErrors } from '../utils/template_metadata';
 import { TemplateYamlEditor } from './template_form';
 import { TemplateRenderPanel } from './template_render_panel';
 import { componentStyles } from './template_form_layout.styles';
@@ -27,6 +29,10 @@ interface TemplateEditorLayoutProps {
   yamlValue: string;
   onYamlChange: (value: string) => void;
   onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
+  onCaseDefaultChange?: (
+    field: 'name' | 'description' | 'severity' | 'category' | 'tags' | 'assignees',
+    value: string | string[] | CaseAssignees
+  ) => void;
   isYamlSaving: boolean;
   isYamlSaved: boolean;
   previewWidth: number;
@@ -36,6 +42,9 @@ interface TemplateEditorLayoutProps {
   connector?: CaseConnectorWithoutName;
   onSettingsChange: (settings: TemplateSettings) => void;
   onConnectorChange: (connector: CaseConnectorWithoutName) => void;
+  metadata: TemplateMetadata;
+  metadataErrors: TemplateMetadataErrors;
+  onMetadataChange: (metadata: TemplateMetadata) => void;
   formResetKey?: number;
 }
 
@@ -44,6 +53,7 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
   yamlValue,
   onYamlChange,
   onFieldDefaultChange,
+  onCaseDefaultChange,
   isYamlSaving,
   isYamlSaved,
   previewWidth,
@@ -53,6 +63,9 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
   connector,
   onSettingsChange,
   onConnectorChange,
+  metadata,
+  metadataErrors,
+  onMetadataChange,
   formResetKey,
 }) => {
   const styles = useMemoCss(componentStyles);
@@ -87,7 +100,11 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
             connector={connector}
             onSettingsChange={onSettingsChange}
             onConnectorChange={onConnectorChange}
+            metadata={metadata}
+            metadataErrors={metadataErrors}
+            onMetadataChange={onMetadataChange}
             onFieldDefaultChange={onFieldDefaultChange}
+            onCaseDefaultChange={onCaseDefaultChange}
             formResetKey={formResetKey}
           />
         </div>

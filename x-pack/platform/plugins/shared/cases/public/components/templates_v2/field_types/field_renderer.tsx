@@ -115,9 +115,8 @@ FieldsRenderer.displayName = 'FieldsRenderer';
 
 const TemplateFieldRendererInner: FC<{
   resolvedFields: InlineField[];
-  parsedTemplate: ParsedTemplateDefinition;
   onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
-}> = ({ resolvedFields, parsedTemplate, onFieldDefaultChange }) => {
+}> = ({ resolvedFields, onFieldDefaultChange }) => {
   const initialDefaultValues = React.useMemo(() => {
     const defaults: Record<string, Record<string, string>> = {
       [CASE_EXTENDED_FIELDS]: {},
@@ -137,7 +136,7 @@ const TemplateFieldRendererInner: FC<{
   useYamlFormSync(form, resolvedFields, onFieldDefaultChange);
 
   return (
-    <FormProvider key={parsedTemplate.name} {...form}>
+    <FormProvider {...form}>
       <FieldsRenderer resolvedFields={resolvedFields} />
     </FormProvider>
   );
@@ -181,7 +180,6 @@ export const TemplateFieldRenderer: FC<TemplateFieldRendererProps> = ({
     <TemplateFieldRendererInner
       key={fieldsKey}
       resolvedFields={stableResolvedFieldsRef.current}
-      parsedTemplate={parsedTemplate}
       onFieldDefaultChange={onFieldDefaultChange}
     />
   );

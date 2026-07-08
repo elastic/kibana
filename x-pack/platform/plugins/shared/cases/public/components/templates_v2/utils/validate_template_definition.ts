@@ -12,6 +12,7 @@ import {
   INVALID_YAML_NON_OBJECT,
   INVALID_YAML_DEFINITION,
 } from '../translations';
+import { normalizeTemplateCaseDefaultsForValidation } from './normalize_template_case_defaults';
 
 export type TemplateDefinitionValidationResult =
   | { success: true }
@@ -31,7 +32,8 @@ export const validateTemplateDefinitionYaml = (
       return { success: false, message: INVALID_YAML_NON_OBJECT };
     }
 
-    const result = ParsedTemplateDefinitionSchema.safeParse(parsedDefinition);
+    const normalizedDefinition = normalizeTemplateCaseDefaultsForValidation(parsedDefinition);
+    const result = ParsedTemplateDefinitionSchema.safeParse(normalizedDefinition);
     if (!result.success) {
       return { success: false, message: result.error.message };
     }

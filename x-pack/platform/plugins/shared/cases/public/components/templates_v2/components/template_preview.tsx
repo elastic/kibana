@@ -9,16 +9,42 @@ import React, { useMemo } from 'react';
 import { EuiEmptyPrompt, EuiHorizontalRule, EuiText, EuiSpacer } from '@elastic/eui';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { parse as parseYaml } from 'yaml';
+import type {
+  TemplateSettings,
+  ParsedTemplateDefinition,
+} from '../../../../common/types/domain/template/v1';
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
+import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
+import type { CaseAssignees } from '../../../../common/types/domain_zod/user/v1';
 import { TemplateFieldRenderer } from '../field_types/field_renderer';
-import { TemplateMetadataPreview } from './template_metadata_preview';
+import { TemplateCaseDefaultsForm } from './template_case_defaults_form';
 import * as i18n from '../translations';
+import { normalizeTemplateCaseDefaultsForValidation } from '../utils/normalize_template_case_defaults';
+
+type EditableCaseDefaultField =
+  | 'name'
+  | 'description'
+  | 'severity'
+  | 'category'
+  | 'tags'
+  | 'assignees';
 
 interface TemplatePreviewProps {
+  settings?: TemplateSettings;
+  connector?: CaseConnectorWithoutName;
   onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
+  onCaseDefaultChange?: (
+    field: EditableCaseDefaultField,
+    value: string | string[] | CaseAssignees
+  ) => void;
 }
 
-export const TemplatePreview: React.FC<TemplatePreviewProps> = ({ onFieldDefaultChange }) => {
+export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
+  settings,
+  connector,
+  onFieldDefaultChange,
+  onCaseDefaultChange,
+}) => {
   const { control } = useFormContext();
   const values = useWatch({ control, defaultValue: { definition: '' } });
 
@@ -48,7 +74,9 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({ onFieldDefault
         } as const;
       }
 
-      return ParsedTemplateDefinitionSchema.safeParse(parsedDefinition);
+      return ParsedTemplateDefinitionSchema.safeParse(
+        normalizeTemplateCaseDefaultsForValidation(parsedDefinition)
+      );
     } catch (error: unknown) {
       if (error instanceof Error) {
         return {
@@ -102,12 +130,21 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({ onFieldDefault
   }
 
   const parsedTemplateData = parsedTemplate.data;
+  const previewDefinition: ParsedTemplateDefinition = {
+    ...parsedTemplateData,
+    settings: settings ?? parsedTemplateData.settings,
+    connector: connector ?? parsedTemplateData.connector,
+  };
 
   return (
     <div>
-      <TemplateMetadataPreview parsedTemplate={parsedTemplateData} />
+      <EuiText size="xs" color="subdued">
+        <strong>{i18n.CASE_DEFAULTS_SECTION_TITLE}</strong>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <TemplateCaseDefaultsForm parsedTemplate={previewDefinition} onChange={onCaseDefaultChange} />
 
-      {parsedTemplateData.fields.length > 0 && (
+      {previewDefinition.fields.length > 0 && (
         <>
           <EuiHorizontalRule margin="m" />
           <EuiText size="xs" color="subdued">
@@ -115,7 +152,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({ onFieldDefault
           </EuiText>
           <EuiSpacer size="s" />
           <TemplateFieldRenderer
-            parsedTemplate={parsedTemplateData}
+            parsedTemplate={previewDefinition}
             onFieldDefaultChange={onFieldDefaultChange}
           />
         </>
