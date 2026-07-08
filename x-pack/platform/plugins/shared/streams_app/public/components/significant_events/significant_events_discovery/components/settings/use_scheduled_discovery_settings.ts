@@ -21,7 +21,7 @@ import {
   DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
   DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
   DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
-} from '@kbn/streams-plugin/common';
+} from '@kbn/significant-events-plugin/common';
 
 export interface ScheduledDiscoveryState {
   enabled: boolean;

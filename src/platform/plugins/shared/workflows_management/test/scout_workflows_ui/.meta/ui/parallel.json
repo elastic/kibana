@@ -1,5 +1,5 @@
 {
-  "sha1": "5f41fa4bd0b5e6ed1c06c7eb61a7fc90ecf445d3",
+  "sha1": "a92992666753012ea054ac885e8e5e2d2c0bd28f",
   "tests": [
     {
       "id": "a8dc0a71dd65d42-65fd9c357892a20",
@@ -604,6 +604,34 @@
       }
     },
     {
+      "id": "ebb05d38bebe0a6-32208d4a04dc870",
+      "title": "Workflow execution - Parallel step runs static branches concurrently and joins downstream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/parallel_step.spec.ts",
+        "line": 29,
+        "column": 7
+      }
+    },
+    {
+      "id": "ebb05d38bebe0a6-e2957eab786f150",
+      "title": "Workflow execution - Parallel step fans out a foreach body once per item and joins downstream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/parallel_step.spec.ts",
+        "line": 57,
+        "column": 7
+      }
+    },
+    {
       "id": "83eb75963c3c731-4a99ff2edf7a25b",
       "title": "Workflow execution - Test runs should run unsaved workflow as test run with isTestRun: true",
       "expectedStatus": "passed",
@@ -685,6 +713,24 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/test_run.spec.ts",
         "line": 188,
         "column": 7
+      }
+    },
+    {
+      "id": "0af2d564a14d824-c5780f797880878",
+      "title": "Workflow graph view recovery after YAML syntax error restores all graph nodes after fixing a YAML syntax error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_graph/workflow_graph_recovery.spec.ts",
+        "line": 47,
+        "column": 9
       }
     },
     {
@@ -1047,8 +1093,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 48,
-        "column": 7
+        "line": 50,
+        "column": 13
       }
     },
     {
@@ -1061,8 +1107,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 70,
-        "column": 7
+        "line": 73,
+        "column": 25
       }
     },
     {
@@ -1075,8 +1121,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 104,
-        "column": 7
+        "line": 108,
+        "column": 26
       }
     },
     {
@@ -1089,8 +1135,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 126,
-        "column": 7
+        "line": 130,
+        "column": 26
       }
     },
     {
@@ -1103,8 +1149,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 154,
-        "column": 7
+        "line": 158,
+        "column": 26
       }
     },
     {
@@ -1117,8 +1163,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 183,
-        "column": 7
+        "line": 185,
+        "column": 13
       }
     },
     {
@@ -1131,8 +1177,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 198,
-        "column": 7
+        "line": 202,
+        "column": 9
       }
     },
     {
@@ -1145,8 +1191,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 226,
-        "column": 7
+        "line": 228,
+        "column": 23
       }
     },
     {
@@ -1159,8 +1205,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 247,
-        "column": 7
+        "line": 251,
+        "column": 23
       }
     },
     {
