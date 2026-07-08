@@ -47004,6 +47004,7 @@ paths:
               properties:
                 description:
                   description: A description of the pipeline.
+                  maxLength: 1024
                   type: string
                 pipeline:
                   description: A definition for the pipeline.

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-declare module '@cypress/debugging-proxy';
+export { getPersistDiscoveriesStepDefinition } from './get_persist_discoveries_step_definition';
