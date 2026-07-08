@@ -49,7 +49,12 @@ export type TypeOrUndefined = t.TypeOf<typeof typeOrUndefined>;
 
 /**
  * Whether the value-list items UI may offer sorting on the list item "value" column for this ES type.
- * Disabled for analyzed text, binary blobs, and range fields where sort-by-value is not appropriate.
+ * The "value" column sorts server-side on the field named after the list type (see `find_list_item.ts`
+ * -> `getSortWithTieBreaker`, which emits a plain `{ [type]: order }` sort). Disabled for:
+ *  - analyzed text (`text`) and binary blobs (`binary`) where sort-by-value is not meaningful,
+ *  - range fields, which are not sortable by a plain field sort,
+ *  - geo/shape fields (`geo_point`, `geo_shape`, `shape`): `geo_shape`/`shape` are not sortable at all,
+ *    and `geo_point` requires a `_geo_distance` sort, so a plain field sort would return a 400 from ES.
  */
 const valueListItemValueSortableByType = {
   binary: false,
@@ -62,8 +67,8 @@ const valueListItemValueSortableByType = {
   double_range: false,
   float: true,
   float_range: false,
-  geo_point: true,
-  geo_shape: true,
+  geo_point: false,
+  geo_shape: false,
   half_float: true,
   integer: true,
   integer_range: false,
@@ -72,7 +77,7 @@ const valueListItemValueSortableByType = {
   keyword: true,
   long: true,
   long_range: false,
-  shape: true,
+  shape: false,
   short: true,
   text: false,
 } as const satisfies Record<Type, boolean>;

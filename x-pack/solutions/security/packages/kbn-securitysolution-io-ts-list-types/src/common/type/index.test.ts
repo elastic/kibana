@@ -49,6 +49,9 @@ describe('isValueListItemValueSortable', () => {
     'long_range',
     'double_range',
     'date_range',
+    'geo_point',
+    'geo_shape',
+    'shape',
   ];
 
   test.each(unsortableTypes)('returns false for %s', (listType) => {
