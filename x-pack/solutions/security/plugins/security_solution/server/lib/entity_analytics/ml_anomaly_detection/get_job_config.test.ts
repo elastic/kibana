@@ -167,6 +167,50 @@ describe('getJobConfig', () => {
     });
   });
 
+  it('sets hasThreatTactics to true when custom_settings.threat_tactics is present', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      jobs: [makeJob({ custom_settings: { threat_tactics: ['TA0006'] } })],
+    });
+
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
+
+    expect(result.get('test-job')?.hasThreatTactics).toBe(true);
+  });
+
+  it('sets hasThreatTactics to true when custom_settings.threat_tactics is an empty array', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      jobs: [makeJob({ custom_settings: { threat_tactics: [] } })],
+    });
+
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
+
+    expect(result.get('test-job')?.hasThreatTactics).toBe(true);
+  });
+
+  it('sets hasThreatTactics to false when custom_settings.threat_tactics is absent', async () => {
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
+
+    expect(result.get('test-job')?.hasThreatTactics).toBe(false);
+  });
+
   it('sets jobName to null when security_app_display_name is absent', async () => {
     const result = await getJobConfig({
       jobIds: ['test-job'],

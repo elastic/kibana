@@ -23,6 +23,7 @@ export interface JobConfig {
   jobName: string | null;
   threatTactics: string[];
   threatTechniques: string[];
+  hasThreatTactics: boolean;
 }
 
 interface JobCustomSettings {
@@ -101,6 +102,7 @@ export const getJobConfig = async ({
         threatTechniques: (customSettings.threat_techniques ?? []).map(
           (id) => techniqueNameById.get(id) ?? id
         ),
+        hasThreatTactics: customSettings.threat_tactics !== undefined,
       });
     }
   } catch (err) {

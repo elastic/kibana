@@ -17,6 +17,8 @@ export const ANOMALIES_SECTION_EXPANDABLE_PANEL_TEST_ID =
   'entity-anomalies-flyout-section-expandable-panel' as const;
 export const ANOMALIES_RECENT_TABLE_TEST_ID =
   'entity-anomalies-flyout-section-recent-table' as const;
+export const ANOMALIES_MISSING_THREAT_TACTICS_WARNING_TEST_ID =
+  'entity-anomalies-flyout-section-missing-threat-tactics-warning' as const;
 
 // AnomaliesTab — left panel tab container
 export const ANOMALIES_TAB_TEST_ID = 'entity-anomalies-tab' as const;

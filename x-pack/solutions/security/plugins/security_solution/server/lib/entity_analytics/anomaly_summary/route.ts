@@ -143,6 +143,7 @@ export const registerAnomalySummaryRoutes = ({
                 totalAnomaliesCount: 0,
                 from: from ?? now - DEFAULT_OVERVIEW_LOOKBACK_MS,
                 to: to ?? now,
+                hasJobsMissingThreatTactics: false,
               },
             });
           }
