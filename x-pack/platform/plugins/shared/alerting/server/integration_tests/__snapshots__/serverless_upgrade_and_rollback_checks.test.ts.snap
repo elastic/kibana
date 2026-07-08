@@ -3405,6 +3405,64 @@ Object {
               ],
               "type": "string",
             },
+            "warningComparator": Object {
+              "flags": Object {
+                "default": [Function],
+                "error": [Function],
+                "presence": "optional",
+              },
+              "metas": Array [
+                Object {
+                  "x-oas-optional": true,
+                },
+              ],
+              "rules": Array [
+                Object {
+                  "args": Object {
+                    "method": [Function],
+                  },
+                  "name": "custom",
+                },
+                Object {
+                  "args": Object {
+                    "method": [Function],
+                  },
+                  "name": "custom",
+                },
+              ],
+              "type": "string",
+            },
+            "warningThreshold": Object {
+              "flags": Object {
+                "default": [Function],
+                "error": [Function],
+                "presence": "optional",
+              },
+              "items": Array [
+                Object {
+                  "flags": Object {
+                    "description": "The threshold value that is used with the \`warningComparator\`. If the \`warningComparator\` is \`between\`, you must specify the boundary values.",
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "type": "number",
+                },
+              ],
+              "metas": Array [
+                Object {
+                  "x-oas-optional": true,
+                },
+              ],
+              "rules": Array [
+                Object {
+                  "args": Object {
+                    "limit": 2,
+                  },
+                  "name": "max",
+                },
+              ],
+              "type": "array",
+            },
           },
           "type": "object",
         },
