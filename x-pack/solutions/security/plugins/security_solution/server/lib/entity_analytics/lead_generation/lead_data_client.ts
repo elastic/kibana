@@ -115,7 +115,7 @@ interface EsLeadDoc {
   title: string;
   byline: string;
   description: string;
-  entities: Array<{ type: string; name: string }>;
+  entities: Array<{ type: string; name: string; id?: string }>;
   tags: string[];
   priority: number;
   chat_recommendations: string[];
@@ -136,7 +136,7 @@ const leadToEsDoc = (
   title: lead.title,
   byline: lead.byline,
   description: lead.description,
-  entities: lead.entities.map(({ type, name }) => ({ type, name })),
+  entities: lead.entities.map(({ type, name, id }) => ({ type, name, id })),
   tags: lead.tags,
   priority: lead.priority,
   chat_recommendations: lead.chatRecommendations,
@@ -166,7 +166,7 @@ const esDocToLead = (doc: Record<string, unknown>): Lead => {
     title: doc.title as string,
     byline: (doc.byline as string) ?? '',
     description: (doc.description as string) ?? '',
-    entities: (doc.entities as Array<{ type: string; name: string }>) ?? [],
+    entities: (doc.entities as Array<{ type: string; name: string; id?: string }>) ?? [],
     tags: (doc.tags as string[]) ?? [],
     priority: (doc.priority as number) ?? 1,
     chatRecommendations: (doc.chat_recommendations as string[]) ?? [],

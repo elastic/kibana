@@ -19,6 +19,12 @@ jest.mock('../../cases_context/use_cases_context', () => ({
   useCasesContext: () => ({ owner: ['securitySolution'] }),
 }));
 
+// TemplatePreview renders TemplateMetadataPreview, which calls useCasesFeatures (sync-alerts gate).
+// Mock it so the preview doesn't need the full cases features/permissions context.
+jest.mock('../../../common/use_cases_features', () => ({
+  useCasesFeatures: () => ({ isSyncAlertsEnabled: true }),
+}));
+
 describe('CreateTemplatePreview', () => {
   const renderPreview = (definition: string) => {
     const Wrapper = () => {

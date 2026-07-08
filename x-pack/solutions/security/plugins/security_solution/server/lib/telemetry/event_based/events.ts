@@ -2219,6 +2219,7 @@ export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT: EventTypeOpts<{
   autoCloseEnabled: boolean;
   createConversation: boolean;
   connectorConfigured: boolean;
+  customAgent: boolean;
   autoCloseConfidenceScoreMinThreshold: number;
   autoCloseConfidenceScoreMaxThreshold: number;
 }> = {
@@ -2243,6 +2244,12 @@ export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT: EventTypeOpts<{
     connectorConfigured: {
       type: 'boolean',
       _meta: { description: 'Whether an AI connector is configured for the workflow' },
+    },
+    customAgent: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether a non-default (custom) agent is configured for the workflow',
+      },
     },
     autoCloseConfidenceScoreMinThreshold: {
       type: 'float',
