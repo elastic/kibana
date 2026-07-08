@@ -79,6 +79,9 @@ describe('control panel transforms', () => {
       expect(() => transformControlPanelsOut('not-json')).toThrow(
         'controlGroupJson is not valid JSON'
       );
+    });
+
+    it('returns undefined when controlGroupJson is undefined', () => {
       expect(transformControlPanelsOut(undefined)).toBeUndefined();
     });
 

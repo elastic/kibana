@@ -14,13 +14,18 @@ import {
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import { toStoredTab } from '../../../common/embeddable/transform_utils';
-import type { DiscoverSessionApiData, DiscoverSessionApiTab } from '../schema';
+import type {
+  DiscoverSessionApiData,
+  DiscoverSessionApiEsqlTab,
+  DiscoverSessionApiTab,
+} from '../schema';
 import { transformControlPanelsIn } from './transform_control_panels';
 import { transformVisContextIn } from './transform_vis_context';
 
-const getVisContextRequestData = (tab: DiscoverSessionApiTab) => {
-  const isEsqlTab = tab.data_source.type === AS_CODE_ESQL_DATA_SOURCE_TYPE;
+const isEsqlTab = (tab: DiscoverSessionApiTab): tab is DiscoverSessionApiEsqlTab =>
+  tab.data_source.type === AS_CODE_ESQL_DATA_SOURCE_TYPE;
 
+const getVisContextRequestData = (tab: DiscoverSessionApiTab) => {
   const dataViewId =
     tab.data_source.type !== AS_CODE_DATA_VIEW_SPEC_TYPE && 'ref_id' in tab.data_source
       ? tab.data_source.ref_id
@@ -33,7 +38,8 @@ const getVisContextRequestData = (tab: DiscoverSessionApiTab) => {
   return {
     ...(dataViewId !== undefined && { dataViewId }),
     ...(timeField !== undefined && { timeField }),
-    ...(!isEsqlTab && tab.chart_interval !== undefined && { timeInterval: tab.chart_interval }),
+    ...(!isEsqlTab(tab) &&
+      tab.chart_interval !== undefined && { timeInterval: tab.chart_interval }),
     ...(tab.breakdown_field !== undefined && { breakdownField: tab.breakdown_field }),
   };
 };
