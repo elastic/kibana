@@ -8,9 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_EXCLUDED_GAP_REASONS, gapReasonType } from '@kbn/alerting-plugin/common';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 
 import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
 import {
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED,
@@ -825,6 +827,29 @@ export const getAlertAnalysisWorkflowSettings = (): SettingsConfig => ({
     category: [APP_ID],
     requiresPageReload: false,
     schema: schema.string(),
+    solutionViews: ['classic', 'security'],
+    technicalPreview: true,
+    readonly: true,
+  },
+  [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.alertAnalysisWorkflowAgentIdLabel', {
+      defaultMessage: 'Alert analysis workflow agent',
+    }),
+    // The agent id is redacted from telemetry (see `sensitive` below); we only report whether a
+    // non-default agent is configured, never which one.
+    sensitive: true,
+    value: agentBuilderDefaultAgentId,
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowAgentIdDescription',
+      {
+        defaultMessage:
+          'The Agent Builder agent used by the alert analysis workflow to classify alerts.',
+      }
+    ),
+    type: 'string',
+    category: [APP_ID],
+    requiresPageReload: false,
+    schema: schema.string({ minLength: 1, maxLength: 64 }),
     solutionViews: ['classic', 'security'],
     technicalPreview: true,
     readonly: true,
