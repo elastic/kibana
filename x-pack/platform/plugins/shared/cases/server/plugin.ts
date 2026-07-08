@@ -267,6 +267,7 @@ export class CasePlugin
       getSpaceId,
       serverlessProjectType,
       isCasesAttachmentsEnabled: this.caseConfig.attachments?.enabled === true,
+      isTemplatesEnabled: this.caseConfig.templates?.enabled === true,
     });
 
     registerCaseWorkflowSteps(
