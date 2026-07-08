@@ -43,6 +43,8 @@ interface BaseLifecyclePhaseProps {
   showDefaultRepositoryCallout?: boolean;
   onCreateDefaultRepository?: () => void;
   createDefaultRepositoryHref?: string;
+  manageRepositoriesUrl?: string;
+  hasExistingRepositories?: boolean;
   onRefreshDefaultRepository?: () => void;
   isRefreshingDefaultRepository?: boolean;
   /** Stable schema phase id (e.g. 'frozen'). Separate from `label` which is a localized string. */
@@ -95,6 +97,8 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
     showDefaultRepositoryCallout = false,
     onCreateDefaultRepository,
     createDefaultRepositoryHref,
+    manageRepositoriesUrl,
+    hasExistingRepositories,
     onRefreshDefaultRepository,
     isRefreshingDefaultRepository,
     name: nameProp,
@@ -401,10 +405,13 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
               <FrozenDefaultRepositoryRequiredCallout
                 onCreateDefaultRepository={onCreateDefaultRepository}
                 createDefaultRepositoryHref={createDefaultRepositoryHref}
+                manageRepositoriesUrl={manageRepositoriesUrl}
+                hasExistingRepositories={hasExistingRepositories}
                 onRefresh={onRefreshDefaultRepository}
                 isRefreshing={isRefreshingDefaultRepository}
                 calloutTestSubj={`${prefix}lifecyclePhase-${label}-defaultRepositoryRequiredCallout`}
                 createButtonTestSubj={`${prefix}lifecyclePhase-${label}-createDefaultRepositoryButton`}
+                manageRepositoriesButtonTestSubj={`${prefix}lifecyclePhase-${label}-manageRepositoriesButton`}
                 refreshButtonTestSubj={`${prefix}lifecyclePhase-${label}-refreshDefaultRepositoryButton`}
               />
             ) : (

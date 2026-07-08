@@ -19,6 +19,11 @@ import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import * as timelineActions from '../../../../store/actions';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+
+jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
+}));
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useLocation: jest.fn(() => ({
@@ -34,7 +39,6 @@ const onFetchMoreRecordsMock = jest.fn();
 const openFlyoutMock = jest.fn();
 const mockOpenSystemFlyout = jest.fn();
 const mockUiSettingsGet = jest.fn().mockReturnValue(false);
-const mockUseUiSetting = jest.fn().mockReturnValue(false);
 const mockDocumentFlyoutWrapper = jest.fn((_props?: unknown) => (
   <div>{'MockDocumentFlyoutWrapper'}</div>
 ));
@@ -73,7 +77,6 @@ jest.mock('../../../../../common/lib/kibana', () => {
         },
       },
     }),
-    useUiSetting: (...args: Parameters<typeof mockUseUiSetting>) => mockUseUiSetting(...args),
   };
 });
 
@@ -156,7 +159,7 @@ describe('unified data table', () => {
       closeFlyout: jest.fn(),
     });
     mockUiSettingsGet.mockReturnValue(false);
-    mockUseUiSetting.mockReturnValue(false);
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
   });
   afterEach(() => {
     updateSampleSizeSpy.mockClear();
@@ -198,7 +201,7 @@ describe('unified data table', () => {
   it(
     'opens DocumentFlyoutWrapper via system flyout when enableNewFlyout setting is enabled and row is not an attack',
     async () => {
-      mockUseUiSetting.mockReturnValue(true);
+      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
       render(<TestComponent />);
       expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
@@ -220,7 +223,7 @@ describe('unified data table', () => {
   it(
     'opens AttackFlyoutWrapper via system flyout when enableNewFlyout setting is enabled and row is an attack discovery alert',
     async () => {
-      mockUseUiSetting.mockReturnValue(true);
+      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
       render(<TestComponent events={mockAttackTimelineData} />);
       expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
