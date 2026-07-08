@@ -50,6 +50,8 @@ import {
   BEHAVIORAL_ANOMALIES_V3_TABLE_TEST_ID,
 } from '../test_ids';
 import { AnomalyExpandedRowV3 } from './anomaly_expanded_row';
+import { AnomaliesTableEmptyMessageV3 } from './anomalies_table_empty_message';
+import { AnomaliesTableLoadingSkeletonV3 } from './anomalies_table_loading_skeleton';
 import { AnomalyJobNameCellV3 } from './anomaly_job_name_cell';
 import { AnomalyScoreBadgeV3 } from './anomaly_score_badge';
 import { AnomalyRowActionsMenuV3 } from './anomaly_row_actions_menu';
@@ -74,6 +76,14 @@ const compactPaginationSpacerCss = css`
     block-size: 8px;
     height: 8px;
   }
+
+  .euiTableRow:has(.behavioralAnomaliesV3TableEmptyMessage) {
+    pointer-events: none;
+
+    &:hover {
+      background-color: transparent;
+    }
+  }
 `;
 
 interface AnomaliesTableSectionV3Props {
@@ -94,12 +104,20 @@ interface AnomaliesTableSectionV3Props {
    * shown. `undefined` = no filter (all buckets selected).
    */
   allowedSeverityThresholds?: ReadonlySet<number>;
+  /**
+   * Prototype empty state — zero anomalies with the in-table empty message.
+   */
+  isEmptyState?: boolean;
+  /** Prototype loading state — skeleton placeholders instead of the table. */
+  isLoadingState?: boolean;
 }
 
 export const AnomaliesTableSectionV3: React.FC<AnomaliesTableSectionV3Props> = ({
   selectedTactic,
   timeRangeMs,
   allowedSeverityThresholds,
+  isEmptyState = false,
+  isLoadingState = false,
 }) => {
   // Tracked locally only so the "Showing X-Y of Z" indicator stays in sync;
   // EuiInMemoryTable handles the actual paging/sorting internally.
@@ -114,6 +132,7 @@ export const AnomaliesTableSectionV3: React.FC<AnomaliesTableSectionV3Props> = (
   // selection. When no filter narrows the data we reuse the original array
   // reference so EuiInMemoryTable doesn't re-paginate or re-sort needlessly.
   const filteredRows = useMemo(() => {
+    if (isEmptyState) return [];
     const tacticPredicate = selectedTactic
       ? (row: BehavioralAnomalyV3TableRow) => row.mitreTactics.includes(selectedTactic)
       : null;
@@ -133,7 +152,7 @@ export const AnomaliesTableSectionV3: React.FC<AnomaliesTableSectionV3Props> = (
         (!timePredicate || timePredicate(row)) &&
         (!severityPredicate || severityPredicate(row))
     );
-  }, [selectedTactic, timeRangeMs, allowedSeverityThresholds]);
+  }, [isEmptyState, selectedTactic, timeRangeMs, allowedSeverityThresholds]);
   const toggleRowExpanded = useCallback((id: string) => {
     setExpandedRowIds((prev) => {
       const next = new Set(prev);
@@ -299,47 +318,54 @@ export const AnomaliesTableSectionV3: React.FC<AnomaliesTableSectionV3Props> = (
         }
       >
         <EuiSpacer size="m" />
-        <EuiText size="xs">
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.behavioralAnomaliesV3.table.showing"
-            defaultMessage="Showing {from}-{to} of {total} anomalies"
-            values={{
-              from: <strong>{from}</strong>,
-              to: <strong>{to}</strong>,
-              total: <strong>{filteredRows.length}</strong>,
-            }}
-          />
-        </EuiText>
-        <EuiSpacer size="s" />
-        {/* `key` is bound to the active filters (tactic + time range) so
+        {isLoadingState ? (
+          <AnomaliesTableLoadingSkeletonV3 />
+        ) : (
+          <>
+            <EuiText size="xs">
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.behavioralAnomaliesV3.table.showing"
+                defaultMessage="Showing {from}-{to} of {total} anomalies"
+                values={{
+                  from: <strong>{from}</strong>,
+                  to: <strong>{to}</strong>,
+                  total: <strong>{filteredRows.length}</strong>,
+                }}
+              />
+            </EuiText>
+            <EuiSpacer size="s" />
+            {/* `key` is bound to the active filters (tactic + time range) so
             EuiInMemoryTable remounts (and resets its internal pagination back
             to page 0) whenever the dataset shrinks/grows — otherwise
             switching from 80 rows to 5 can leave the table stranded on an
             empty page. Trade-off: sort state resets too, which is acceptable
             for a prototype. */}
-        {/* Wrapper exists only to scope the pagination-spacer override
+            {/* Wrapper exists only to scope the pagination-spacer override
             (see `compactPaginationSpacerCss`). */}
-        <div css={compactPaginationSpacerCss}>
-          <EuiInMemoryTable
-            key={`${selectedTactic ?? 'all-tactics'}|${timeRangeMs?.from ?? ''}|${
-              timeRangeMs?.to ?? ''
-            }|${
-              allowedSeverityThresholds
-                ? [...allowedSeverityThresholds].sort((a, b) => a - b).join(',')
-                : 'all-severities'
-            }`}
-            data-test-subj={BEHAVIORAL_ANOMALIES_V3_TABLE_TEST_ID}
-            items={filteredRows}
-            itemId="id"
-            columns={columns}
-            sorting={sorting}
-            pagination={pagination}
-            onTableChange={handleTableChange}
-            compressed
-            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-            isExpandable
-          />
-        </div>
+            <div css={compactPaginationSpacerCss}>
+              <EuiInMemoryTable
+                key={`${selectedTactic ?? 'all-tactics'}|${timeRangeMs?.from ?? ''}|${
+                  timeRangeMs?.to ?? ''
+                }|${
+                  allowedSeverityThresholds
+                    ? [...allowedSeverityThresholds].sort((a, b) => a - b).join(',')
+                    : 'all-severities'
+                }`}
+                data-test-subj={BEHAVIORAL_ANOMALIES_V3_TABLE_TEST_ID}
+                items={filteredRows}
+                itemId="id"
+                columns={columns}
+                sorting={sorting}
+                pagination={pagination}
+                onTableChange={handleTableChange}
+                compressed
+                itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+                isExpandable
+                noItemsMessage={<AnomaliesTableEmptyMessageV3 />}
+              />
+            </div>
+          </>
+        )}
       </EuiAccordion>
     </div>
   );

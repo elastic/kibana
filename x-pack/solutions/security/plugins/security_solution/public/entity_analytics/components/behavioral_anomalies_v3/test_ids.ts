@@ -15,6 +15,22 @@ import { PREFIX } from '../../../flyout/shared/test_ids';
 
 export const BEHAVIORAL_ANOMALIES_V3_TAB_CONTENT_TEST_ID =
   `${PREFIX}BehavioralAnomaliesV3TabContent` as const;
+export const BEHAVIORAL_ANOMALIES_V3_TAB_STATE_SELECTOR_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3TabStateSelector` as const;
+export const BEHAVIORAL_ANOMALIES_V3_TAB_STATE_LOADING_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3TabStateLoading` as const;
+export const BEHAVIORAL_ANOMALIES_V3_TAB_STATE_ERROR_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3TabStateError` as const;
+export const BEHAVIORAL_ANOMALIES_V3_TIMELINE_EMPTY_PLACEHOLDER_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3TimelineEmptyPlaceholder` as const;
+export const BEHAVIORAL_ANOMALIES_V3_ATTACK_CHAIN_LOADING_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3AttackChainLoading` as const;
+export const BEHAVIORAL_ANOMALIES_V3_TIMELINE_LOADING_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3TimelineLoading` as const;
+export const BEHAVIORAL_ANOMALIES_V3_TABLE_LOADING_SKELETON_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3TableLoadingSkeleton` as const;
+export const BEHAVIORAL_ANOMALIES_V3_TABLE_EMPTY_MESSAGE_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3TableEmptyMessage` as const;
 export const BEHAVIORAL_ANOMALIES_V3_ATTACK_CHAIN_SECTION_TEST_ID =
   `${PREFIX}BehavioralAnomaliesV3AttackChainSection` as const;
 export const BEHAVIORAL_ANOMALIES_V3_ATTACK_CHAIN_TEST_ID =

@@ -532,3 +532,15 @@ export const getTriggeredTacticsForRangeV3 = (timeRangeMs: {
 }): string[] => {
   return [...getAttackChainDataForRangeV3(timeRangeMs).triggeredTactics];
 };
+
+/**
+ * Prototype empty-state payload for the Attack chain — all tactics render as
+ * grey dots with a `0` hover-chip count. Cleanup: remove with the State selector.
+ */
+export const EMPTY_ATTACK_CHAIN_DATA_V3: {
+  triggeredTactics: readonly string[];
+  anomalyCountByTactic: Readonly<Record<string, number>>;
+} = {
+  triggeredTactics: [],
+  anomalyCountByTactic: Object.fromEntries(MITRE_TACTIC_NAMES.map((tactic) => [tactic, 0])),
+};

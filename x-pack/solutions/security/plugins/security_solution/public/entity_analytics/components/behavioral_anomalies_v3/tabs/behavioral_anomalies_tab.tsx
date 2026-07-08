@@ -21,6 +21,12 @@ import {
 import dateMath from '@kbn/datemath';
 import { ML_PAGES, useMlManagementHref } from '@kbn/ml-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';
+import { BehavioralAnomaliesV3StateContent } from '../../behavioral_anomalies/behavioral_anomalies_v3_state_content';
+import { BehavioralAnomaliesV3StateSelector } from '../../behavioral_anomalies/behavioral_anomalies_v3_state_selector';
+import {
+  DEFAULT_BEHAVIORAL_ANOMALIES_V3_CONTENT_STATE,
+  type BehavioralAnomaliesV3ContentState,
+} from '../../behavioral_anomalies/behavioral_anomalies_v3_content_state';
 import { AnomaliesTableSectionV3 } from '../components/anomalies_table_section';
 import { AnomalyTimelineSectionV3 } from '../components/anomaly_timeline_section';
 import { AttackChainSectionV3 } from '../components/attack_chain_section';
@@ -36,6 +42,7 @@ import {
   BEHAVIORAL_ANOMALIES_V3_DATE_PICKER_TEST_ID,
   BEHAVIORAL_ANOMALIES_V3_MANAGE_ML_JOBS_TEST_ID,
   BEHAVIORAL_ANOMALIES_V3_TAB_CONTENT_TEST_ID,
+  BEHAVIORAL_ANOMALIES_V3_TAB_STATE_SELECTOR_TEST_ID,
 } from '../test_ids';
 
 const resolveTimeMillis = (value: string, roundUp: boolean): number => {
@@ -67,6 +74,12 @@ const DEFAULT_SETTINGS_V3: DateRangePickerSettings = {
 };
 
 export const BehavioralAnomaliesV3Tab: React.FC = () => {
+  const [contentState, setContentState] = useState<BehavioralAnomaliesV3ContentState>(
+    DEFAULT_BEHAVIORAL_ANOMALIES_V3_CONTENT_STATE
+  );
+  const isEmptyState = contentState === 'empty';
+  const isLoadingState = contentState === 'loading';
+
   // The new Kibana date range picker is *controlled* via a single text value
   // (e.g. "last 30 days" or "now-7d to now"). We additionally keep the
   // resolved `start`/`end` date-math strings around so the swim lane and the
@@ -162,94 +175,93 @@ export const BehavioralAnomaliesV3Tab: React.FC = () => {
 
   return (
     <div data-test-subj={BEHAVIORAL_ANOMALIES_V3_TAB_CONTENT_TEST_ID}>
-      {/* Top tab bar: time picker + anomaly score filter on the left,
-          "Manage ML jobs" on the right. The inner flex group keeps the date
-          picker and the severity filter 8 px apart (`gutterSize="s"`). */}
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-        responsive={false}
-        gutterSize="s"
-      >
-        <EuiFlexItem grow={false}>
+      <BehavioralAnomaliesV3StateSelector
+        contentState={contentState}
+        onChange={setContentState}
+        data-test-subj={BEHAVIORAL_ANOMALIES_V3_TAB_STATE_SELECTOR_TEST_ID}
+      />
+      <EuiSpacer size="m" />
+      {contentState === 'error' ? (
+        <BehavioralAnomaliesV3StateContent state="error" />
+      ) : (
+        <>
           <EuiFlexGroup
             alignItems="center"
-            gutterSize="s"
+            justifyContent="spaceBetween"
             responsive={false}
-            wrap={false}
+            gutterSize="s"
           >
             <EuiFlexItem grow={false}>
-              {/* Latest Kibana date range picker (`@kbn/date-range-picker`) —
-                  the same component used by the modern Discover top nav.
-                  Drives the tab-level `timeRangeMs` that feeds the Attack
-                  chain, swim lane, and Anomalies table. */}
-              <DateRangePicker
-                value={pickerValue}
-                onChange={handlePickerChange}
-                settings={pickerSettings}
-                onSettingsChange={setPickerSettings}
-                presets={TIME_RANGE_PRESETS_V3}
-                recent={recentRanges}
-                width="auto"
-                compressed
-                data-test-subj={BEHAVIORAL_ANOMALIES_V3_DATE_PICKER_TEST_ID}
-              />
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+                responsive={false}
+                wrap={false}
+              >
+                <EuiFlexItem grow={false}>
+                  <DateRangePicker
+                    value={pickerValue}
+                    onChange={handlePickerChange}
+                    settings={pickerSettings}
+                    onSettingsChange={setPickerSettings}
+                    presets={TIME_RANGE_PRESETS_V3}
+                    recent={recentRanges}
+                    width="auto"
+                    compressed
+                    data-test-subj={BEHAVIORAL_ANOMALIES_V3_DATE_PICKER_TEST_ID}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <SeverityLegendControlV3
+                    allSeverityOptions={severityOptions}
+                    selectedSeverities={selectedSeverities}
+                    onChange={handleSeverityChange}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {/* Anomaly score filter — moved up from the timeline section so
-                  it lives next to the time picker at the tab level. */}
-              <SeverityLegendControlV3
-                allSeverityOptions={severityOptions}
-                selectedSeverities={selectedSeverities}
-                onChange={handleSeverityChange}
-              />
+              <EuiButtonEmpty
+                data-test-subj={BEHAVIORAL_ANOMALIES_V3_MANAGE_ML_JOBS_TEST_ID}
+                color="primary"
+                size="s"
+                iconType="external"
+                iconSide="right"
+                href={manageJobsHref}
+                target="_blank"
+                isDisabled={!manageJobsHref}
+              >
+                {ANOMALY_TIMELINE_V3_MANAGE_ML_JOBS}
+              </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            data-test-subj={BEHAVIORAL_ANOMALIES_V3_MANAGE_ML_JOBS_TEST_ID}
-            color="primary"
-            size="s"
-            iconType="external"
-            iconSide="right"
-            href={manageJobsHref}
-            target="_blank"
-            isDisabled={!manageJobsHref}
-          >
-            {ANOMALY_TIMELINE_V3_MANAGE_ML_JOBS}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="l" />
-      {/* New "Attack chain" section sits above the timeline per design v.2.
-          Cleanup: delete this block + `AttackChainSectionV3` import + the
-          `triggeredTactics` memo above if the chain is removed. */}
-      <AttackChainSectionV3
-        triggeredTactics={triggeredTactics}
-        anomalyCountByTactic={anomalyCountByTactic}
-        selectedTactic={selectedTactic}
-        onSelectTactic={handleSelectTactic}
-      />
-      <EuiSpacer size="l" />
-      {/* No separate "Filtered by" pill — the per-tactic hover chip in the
-          chain above doubles as the active-filter indicator and exposes
-          its own clear-filter cross icon (matches the alerts
-          DistributionBar pattern). */}
-      <AnomalyTimelineSectionV3
-        timeRangeMs={timeRangeMs}
-        selectedTactic={selectedTactic}
-        allowedSeverityThresholds={allowedSeverityThresholds}
-      />
-      <EuiSpacer size="l" />
-      {/* The Anomalies table is also bounded by the tab-level time range
-          AND the tab-level Anomaly score filter so every section of the
-          v.3 tab stays in sync with the toolbar controls. */}
-      <AnomaliesTableSectionV3
-        selectedTactic={selectedTactic}
-        timeRangeMs={timeRangeMs}
-        allowedSeverityThresholds={allowedSeverityThresholds}
-      />
+          <EuiSpacer size="l" />
+          <AttackChainSectionV3
+            triggeredTactics={triggeredTactics}
+            anomalyCountByTactic={anomalyCountByTactic}
+            selectedTactic={selectedTactic}
+            onSelectTactic={handleSelectTactic}
+            isEmptyState={isEmptyState}
+            isLoadingState={isLoadingState}
+          />
+          <EuiSpacer size="l" />
+          <AnomalyTimelineSectionV3
+            timeRangeMs={timeRangeMs}
+            selectedTactic={selectedTactic}
+            allowedSeverityThresholds={allowedSeverityThresholds}
+            isEmptyState={isEmptyState}
+            isLoadingState={isLoadingState}
+          />
+          <EuiSpacer size="l" />
+          <AnomaliesTableSectionV3
+            selectedTactic={selectedTactic}
+            timeRangeMs={timeRangeMs}
+            allowedSeverityThresholds={allowedSeverityThresholds}
+            isEmptyState={isEmptyState}
+            isLoadingState={isLoadingState}
+          />
+        </>
+      )}
     </div>
   );
 };

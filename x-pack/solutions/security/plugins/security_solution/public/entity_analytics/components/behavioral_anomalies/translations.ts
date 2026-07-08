@@ -80,6 +80,55 @@ export const BEHAVIORAL_ANOMALIES_V3_RECENT_HEADING = i18n.translate(
   { defaultMessage: 'Recent anomalies' }
 );
 
+/**
+ * Prototype empty-state copy for the right-panel Recent anomalies table when
+ * State = empty. Cleanup: remove with the State selector / overview empty wiring.
+ */
+export const BEHAVIORAL_ANOMALIES_V3_RECENT_EMPTY_MESSAGE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV3Overview.recentAnomaliesEmptyMessage',
+  { defaultMessage: 'No anomalies detected within last 30 days' }
+);
+
+/**
+ * Prototype-only v.3 section state views. Cleanup: remove with
+ * `behavioral_anomalies_v3_state_content.tsx` and the State selector.
+ */
+export const BEHAVIORAL_ANOMALIES_V3_STATE_LOADING_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV3Overview.stateLoadingLabel',
+  { defaultMessage: 'Loading behavioral anomalies' }
+);
+
+export const BEHAVIORAL_ANOMALIES_V3_STATE_EMPTY_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV3Overview.stateEmptyTitle',
+  { defaultMessage: 'No behavioral anomalies found' }
+);
+
+export const BEHAVIORAL_ANOMALIES_V3_STATE_EMPTY_BODY = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV3Overview.stateEmptyBody',
+  {
+    defaultMessage:
+      'We have not detected any behavioral anomalies for this entity in the last 30 days.',
+  }
+);
+
+export const BEHAVIORAL_ANOMALIES_V3_STATE_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV3Overview.stateErrorTitle',
+  { defaultMessage: 'Unable to load behavioral anomalies' }
+);
+
+export const BEHAVIORAL_ANOMALIES_V3_STATE_ERROR_BODY = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV3Overview.stateErrorBody',
+  {
+    defaultMessage:
+      'An error occurred while retrieving anomaly data. Try refreshing the page.',
+  }
+);
+
+export const BEHAVIORAL_ANOMALIES_V3_STATE_ERROR_REFRESH_BUTTON = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV3Overview.stateErrorRefreshButton',
+  { defaultMessage: 'Refresh page' }
+);
+
 export const BEHAVIORAL_ANOMALIES_TAB_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.behavioralAnomalies.tabLabel',
   { defaultMessage: 'BA-v.1' }

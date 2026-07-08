@@ -12,6 +12,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingChart,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
@@ -20,6 +21,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { IconChartHeatmap } from '@kbn/chart-icons';
 import { useAnomalyBands } from '../../recent_anomalies/anomaly_bands';
 import { BehavioralAnomaliesV3Swimlane } from '../behavioral_anomalies_swimlane';
 import { getTimelineHeatmapRecordsV3, getTimelineRowKeysV3 } from '../mock_tab_data';
@@ -39,10 +42,14 @@ import {
   BEHAVIORAL_ANOMALIES_V3_TIMELINE_INFO_BUTTON_TEST_ID,
   BEHAVIORAL_ANOMALIES_V3_TIMELINE_INFO_DOCS_LINK_TEST_ID,
   BEHAVIORAL_ANOMALIES_V3_TIMELINE_INFO_POPOVER_TEST_ID,
+  BEHAVIORAL_ANOMALIES_V3_TIMELINE_LOADING_TEST_ID,
   BEHAVIORAL_ANOMALIES_V3_TIMELINE_SECTION_TEST_ID,
   BEHAVIORAL_ANOMALIES_V3_TIMELINE_SWIMLANE_TEST_ID,
+  BEHAVIORAL_ANOMALIES_V3_TIMELINE_EMPTY_PLACEHOLDER_TEST_ID,
 } from '../test_ids';
 import { TimelineRowLabelsV3 } from './timeline_row_labels';
+import { BehavioralAnomaliesV3BorderedVizPanel } from './bordered_viz_panel';
+import { AttackChainVizHeightSizerV3 } from './attack_chain_viz_height_sizer';
 
 /**
  * Swim lane rows are always grouped by MITRE ATT&CK tactic in v.2 — fixed at
@@ -93,12 +100,21 @@ interface AnomalyTimelineSectionV3Props {
    * buckets are emitted. `undefined` = no filter (all buckets selected).
    */
   allowedSeverityThresholds?: ReadonlySet<number>;
+  /**
+   * Prototype empty state — bordered panel with chart `EmptyPlaceholder`
+   * (heatmap icon) instead of the swim lane.
+   */
+  isEmptyState?: boolean;
+  /** Prototype loading state — spinner inside the bordered viz panel. */
+  isLoadingState?: boolean;
 }
 
 export const AnomalyTimelineSectionV3: React.FC<AnomalyTimelineSectionV3Props> = ({
   timeRangeMs,
   selectedTactic,
   allowedSeverityThresholds,
+  isEmptyState = false,
+  isLoadingState = false,
 }) => {
   const { bands } = useAnomalyBands();
 
@@ -134,6 +150,8 @@ export const AnomalyTimelineSectionV3: React.FC<AnomalyTimelineSectionV3Props> =
       getTimelineHeatmapRecordsV3(rowKeys, FIXED_VIEW_BY, timeRangeMs, allowedSeverityThresholds),
     [rowKeys, timeRangeMs, allowedSeverityThresholds]
   );
+
+  const showPlaceholderPanel = isEmptyState || isLoadingState;
 
   // Title row rendered as `buttonContent`. The info trigger is an
   // EuiButtonIcon so the user sees the standard EUI icon-button hover
@@ -213,18 +231,36 @@ export const AnomalyTimelineSectionV3: React.FC<AnomalyTimelineSectionV3Props> =
         buttonContent={accordionButtonContent}
       >
         <EuiSpacer size="m" />
-        <EuiFlexGroup data-test-subj={BEHAVIORAL_ANOMALIES_V3_TIMELINE_SWIMLANE_TEST_ID}>
-          <TimelineRowLabelsV3 rows={rowLabels} compressed />
-          <BehavioralAnomaliesV3Swimlane
-            records={heatmapRecords}
-            anomalyBands={bands}
-            entityNames={rowKeys}
-            entityAccessor={FIXED_VIEW_BY}
-            heatmapId="entity-flyout-behavioral-anomalies-v3-detail-heatmap"
-            timeRangeMs={timeRangeMs}
-            ySortPredicate={tacticOrderComparator}
-          />
-        </EuiFlexGroup>
+        {showPlaceholderPanel ? (
+          <BehavioralAnomaliesV3BorderedVizPanel
+            data-test-subj={
+              isLoadingState
+                ? BEHAVIORAL_ANOMALIES_V3_TIMELINE_LOADING_TEST_ID
+                : BEHAVIORAL_ANOMALIES_V3_TIMELINE_EMPTY_PLACEHOLDER_TEST_ID
+            }
+          >
+            <AttackChainVizHeightSizerV3>
+              {isLoadingState ? (
+                <EuiLoadingChart size="l" />
+              ) : (
+                <EmptyPlaceholder icon={IconChartHeatmap} />
+              )}
+            </AttackChainVizHeightSizerV3>
+          </BehavioralAnomaliesV3BorderedVizPanel>
+        ) : (
+          <EuiFlexGroup data-test-subj={BEHAVIORAL_ANOMALIES_V3_TIMELINE_SWIMLANE_TEST_ID}>
+            <TimelineRowLabelsV3 rows={rowLabels} compressed />
+            <BehavioralAnomaliesV3Swimlane
+              records={heatmapRecords}
+              anomalyBands={bands}
+              entityNames={rowKeys}
+              entityAccessor={FIXED_VIEW_BY}
+              heatmapId="entity-flyout-behavioral-anomalies-v3-detail-heatmap"
+              timeRangeMs={timeRangeMs}
+              ySortPredicate={tacticOrderComparator}
+            />
+          </EuiFlexGroup>
+        )}
       </EuiAccordion>
     </div>
   );

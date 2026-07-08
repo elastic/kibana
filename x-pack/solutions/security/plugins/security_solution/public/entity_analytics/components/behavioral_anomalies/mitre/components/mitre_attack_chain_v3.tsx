@@ -42,6 +42,16 @@ interface MitreAttackChainV3Props {
   onSelectTactic?: (tactic: string) => void;
   /** Optional override for the canonical 15-tactic list (testing only). */
   tactics?: readonly string[];
+  /**
+   * When true, persistently shows the hover chip on the first tactic in
+   * kill-chain order even if its count is zero (BA-v.3 empty state).
+   */
+  showPersistentFirstTacticBadge?: boolean;
+  /**
+   * Right-panel compact chain — the last dot is anchored to the container's
+   * right padding edge instead of sitting at the left of an equal-width cell.
+   */
+  alignLastDotToEnd?: boolean;
   /** Forwarded to the outermost wrapper. */
   ['data-test-subj']?: string;
 }
@@ -53,6 +63,8 @@ export const MitreAttackChainV3: React.FC<MitreAttackChainV3Props> = ({
   selectedTactic,
   onSelectTactic,
   tactics = MITRE_TACTIC_NAMES,
+  showPersistentFirstTacticBadge = false,
+  alignLastDotToEnd = false,
   'data-test-subj': dataTestSubj,
 }) => {
   const triggeredSet = useMemo(() => new Set(triggeredTactics), [triggeredTactics]);
@@ -69,12 +81,15 @@ export const MitreAttackChainV3: React.FC<MitreAttackChainV3Props> = ({
   // has anomalies (right panel during empty states / time-range filter
   // that excludes everything) so no dot is marked persistent.
   const firstActiveTactic = useMemo<string | null>(() => {
+    if (showPersistentFirstTacticBadge && anomalyCountByTactic && tactics.length > 0) {
+      return tactics[0];
+    }
     if (!anomalyCountByTactic) return null;
     for (const t of tactics) {
       if ((anomalyCountByTactic[t] ?? 0) > 0) return t;
     }
     return null;
-  }, [tactics, anomalyCountByTactic]);
+  }, [tactics, anomalyCountByTactic, showPersistentFirstTacticBadge]);
 
   // Tracks which dot (if any) is currently hovered so we can suppress
   // the persistent chip while the user is pointing at a different
@@ -115,19 +130,28 @@ export const MitreAttackChainV3: React.FC<MitreAttackChainV3Props> = ({
         {tactics.map((tactic, index) => {
           const isDetected = triggeredSet.has(tactic);
           const isClickable = !!onSelectTactic && isDetected;
+          const isLastTactic = index === tactics.length - 1;
+          const alignDotToEnd = alignLastDotToEnd && isLastTactic;
           return (
             <EuiFlexItem
               key={tactic}
-              grow
+              grow={!alignDotToEnd}
               css={css`
                 min-width: 0;
+                ${alignDotToEnd
+                  ? `
+                  flex: 0 0 8px;
+                  min-width: 8px;
+                `
+                  : ''}
               `}
             >
               <MitreTacticDotV3
                 tactic={tactic}
                 detected={isDetected}
                 showLabel={showLabels}
-                isLast={index === tactics.length - 1}
+                isLast={isLastTactic}
+                alignDotToEnd={alignDotToEnd}
                 anomalyCount={anomalyCountByTactic?.[tactic]}
                 isSelected={selectedTactic === tactic}
                 isClickable={isClickable}

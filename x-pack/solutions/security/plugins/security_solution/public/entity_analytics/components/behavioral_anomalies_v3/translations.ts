@@ -79,6 +79,11 @@ export const ANOMALIES_TABLE_V3_TITLE = i18n.translate(
   { defaultMessage: 'Anomalies' }
 );
 
+export const ANOMALIES_TABLE_V3_EMPTY_MESSAGE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV3.anomaliesTableEmptyMessage',
+  { defaultMessage: 'No anomalies detected' }
+);
+
 export const ANOMALIES_TABLE_V3_JOB_COLUMN = i18n.translate(
   'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV3.table.jobColumn',
   { defaultMessage: 'ML job' }

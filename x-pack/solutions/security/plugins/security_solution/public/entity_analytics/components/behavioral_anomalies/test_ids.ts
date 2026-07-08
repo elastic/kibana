@@ -12,6 +12,18 @@ export const BEHAVIORAL_ANOMALIES_SECTION_TEST_ID = `${PREFIX}BehavioralAnomalie
 // content. Remove this test id along with the selector itself before hand-off.
 export const BEHAVIORAL_ANOMALIES_VERSION_SELECTOR_TEST_ID =
   `${PREFIX}BehavioralAnomaliesVersionSelector` as const;
+// Prototype-only State selector (full / empty / loading / error) shown when v.3
+// is selected. Remove with the State selector before hand-off.
+export const BEHAVIORAL_ANOMALIES_STATE_SELECTOR_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesStateSelector` as const;
+export const BEHAVIORAL_ANOMALIES_V3_STATE_LOADING_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3StateLoading` as const;
+export const BEHAVIORAL_ANOMALIES_V3_STATE_EMPTY_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3StateEmpty` as const;
+export const BEHAVIORAL_ANOMALIES_V3_STATE_ERROR_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3StateError` as const;
+export const BEHAVIORAL_ANOMALIES_V3_STATE_ERROR_REFRESH_BUTTON_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3StateErrorRefreshButton` as const;
 // Prototype-only "Last 1 year" badge rendered on the section title when the
 // v.2 overview is selected. Remove with the v.2 overview.
 export const BEHAVIORAL_ANOMALIES_V2_OVERVIEW_TIMEFRAME_TEST_ID =
@@ -42,6 +54,12 @@ export const BEHAVIORAL_ANOMALIES_V3_RECENT_HEADING_TEST_ID =
   `${PREFIX}BehavioralAnomaliesV3RecentHeading` as const;
 export const BEHAVIORAL_ANOMALIES_V3_RECENT_TABLE_TEST_ID =
   `${PREFIX}BehavioralAnomaliesV3RecentTable` as const;
+export const BEHAVIORAL_ANOMALIES_V3_RECENT_TABLE_EMPTY_MESSAGE_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3RecentTableEmptyMessage` as const;
+export const BEHAVIORAL_ANOMALIES_V3_OVERVIEW_CHAIN_LOADING_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3OverviewChainLoading` as const;
+export const BEHAVIORAL_ANOMALIES_V3_RECENT_TABLE_LOADING_SKELETON_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV3RecentTableLoadingSkeleton` as const;
 export const BEHAVIORAL_ANOMALIES_TAB_CONTENT_TEST_ID =
   `${PREFIX}BehavioralAnomaliesTabContent` as const;
 export const BEHAVIORAL_ANOMALIES_TIMELINE_SECTION_TEST_ID =

@@ -24,6 +24,11 @@ import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/co
 import { BehavioralAnomaliesOverview } from './behavioral_anomalies_overview';
 import { BehavioralAnomaliesOverviewV2 } from './behavioral_anomalies_overview_v2';
 import { BehavioralAnomaliesOverviewV3 } from './behavioral_anomalies_overview_v3';
+import { BehavioralAnomaliesV3StateSelector } from './behavioral_anomalies_v3_state_selector';
+import {
+  DEFAULT_BEHAVIORAL_ANOMALIES_V3_CONTENT_STATE,
+  type BehavioralAnomaliesV3ContentState,
+} from './behavioral_anomalies_v3_content_state';
 import {
   BEHAVIORAL_ANOMALIES_SECTION_TITLE,
   BEHAVIORAL_ANOMALIES_V2_OVERVIEW_TIMEFRAME,
@@ -34,6 +39,7 @@ import {
   BEHAVIORAL_ANOMALIES_V2_OVERVIEW_TIMEFRAME_TEST_ID,
   BEHAVIORAL_ANOMALIES_V3_OVERVIEW_TIMEFRAME_TEST_ID,
   BEHAVIORAL_ANOMALIES_VERSION_SELECTOR_TEST_ID,
+  BEHAVIORAL_ANOMALIES_STATE_SELECTOR_TEST_ID,
 } from './test_ids';
 
 /*
@@ -66,6 +72,11 @@ import {
  * EuiButtonGroup block, and inline the surviving overview directly. Then
  * remove `BEHAVIORAL_ANOMALIES_VERSION_SELECTOR_TEST_ID` from `./test_ids.ts`
  * and the two `prototypeVersionSelector*` i18n strings below.
+ *
+ * State selector (v.3 only): also delete `behavioral_anomalies_v3_state_content.tsx`,
+ * `CONTENT_STATE_OPTIONS`, `DEFAULT_CONTENT_STATE`, the `contentState` useState,
+ * the State EuiButtonGroup block, `BEHAVIORAL_ANOMALIES_STATE_SELECTOR_TEST_ID`,
+ * and the v.3 state i18n strings in `translations.ts`.
  */
 type OverviewVersion = 'v1' | 'v2' | 'v3';
 // v.3 is the active prototype design, so it leads the switcher and is
@@ -77,6 +88,10 @@ const VERSION_OPTIONS: Array<{ id: OverviewVersion; label: string }> = [
   { id: 'v2', label: 'v.2' },
   { id: 'v1', label: 'v.1' },
 ];
+
+// Prototype-only v.3 content state selector — visible when v.3 is selected.
+// Cleanup: remove together with `behavioral_anomalies_v3_state_content.tsx`.
+const DEFAULT_CONTENT_STATE = DEFAULT_BEHAVIORAL_ANOMALIES_V3_CONTENT_STATE;
 
 interface BehavioralAnomaliesSectionProps {
   entityId: string;
@@ -90,8 +105,10 @@ export const BehavioralAnomaliesSection: React.FC<BehavioralAnomaliesSectionProp
   openDetailsPanel,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const xsFontSize = useEuiFontSize('xs').fontSize;
+  const updatedAtFontSize = useEuiFontSize('xxs').fontSize;
   const [version, setVersion] = useState<OverviewVersion>(DEFAULT_OVERVIEW_VERSION);
+  const [contentState, setContentState] =
+    useState<BehavioralAnomaliesV3ContentState>(DEFAULT_CONTENT_STATE);
 
   const overviewProps = useMemo(
     () => ({ entityId, isPreviewMode, openDetailsPanel }),
@@ -103,7 +120,7 @@ export const BehavioralAnomaliesSection: React.FC<BehavioralAnomaliesSectionProp
   // v.3 = "Last 30 days", matching its left-tab date-picker default) and its
   // own test id, so the two prototypes stay independently deletable per the
   // file-level cleanup notes. Matches the "Updated {time}" pattern used by
-  // the Risk score / Observed attributes sections (xs font size, subdued).
+  // the Risk score / Observed attributes sections (`useEuiFontSize('xxs')` only).
   const timeframeBadgeProps = (() => {
     if (version === 'v2') {
       return {
@@ -123,8 +140,7 @@ export const BehavioralAnomaliesSection: React.FC<BehavioralAnomaliesSectionProp
     <span
       data-test-subj={timeframeBadgeProps.testSubj}
       css={css`
-        font-size: ${xsFontSize};
-        color: ${euiTheme.colors.textSubdued};
+        font-size: ${updatedAtFontSize};
       `}
     >
       {timeframeBadgeProps.label}
@@ -152,33 +168,53 @@ export const BehavioralAnomaliesSection: React.FC<BehavioralAnomaliesSectionProp
       >
         <EuiSpacer size="m" />
         {/* TODO(prototype): temporary version selector — see file-level note. */}
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              {i18n.translate(
-                'xpack.securitySolution.entityAnalytics.behavioralAnomalies.prototypeVersionSelectorLabel',
-                { defaultMessage: 'Prototype version:' }
-              )}
-            </EuiText>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate(
+                    'xpack.securitySolution.entityAnalytics.behavioralAnomalies.versionSelectorLabel',
+                    { defaultMessage: 'Version:' }
+                  )}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonGroup
+                  legend={i18n.translate(
+                    'xpack.securitySolution.entityAnalytics.behavioralAnomalies.versionSelectorLegend',
+                    { defaultMessage: 'Behavioral anomalies section version' }
+                  )}
+                  options={VERSION_OPTIONS}
+                  idSelected={version}
+                  onChange={(id) => setVersion(id as OverviewVersion)}
+                  buttonSize="compressed"
+                  data-test-subj={BEHAVIORAL_ANOMALIES_VERSION_SELECTOR_TEST_ID}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonGroup
-              legend={i18n.translate(
-                'xpack.securitySolution.entityAnalytics.behavioralAnomalies.prototypeVersionSelectorLegend',
-                { defaultMessage: 'Behavioral anomalies section prototype version' }
-              )}
-              options={VERSION_OPTIONS}
-              idSelected={version}
-              onChange={(id) => setVersion(id as OverviewVersion)}
-              buttonSize="compressed"
-              data-test-subj={BEHAVIORAL_ANOMALIES_VERSION_SELECTOR_TEST_ID}
-            />
-          </EuiFlexItem>
+          {version === 'v3' && (
+            <EuiFlexItem grow={false}>
+              <BehavioralAnomaliesV3StateSelector
+                contentState={contentState}
+                onChange={setContentState}
+                data-test-subj={BEHAVIORAL_ANOMALIES_STATE_SELECTOR_TEST_ID}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         {version === 'v1' && <BehavioralAnomaliesOverview {...overviewProps} />}
         {version === 'v2' && <BehavioralAnomaliesOverviewV2 {...overviewProps} />}
-        {version === 'v3' && <BehavioralAnomaliesOverviewV3 {...overviewProps} />}
+        {version === 'v3' && (
+          <BehavioralAnomaliesOverviewV3
+            {...overviewProps}
+            isEmptyState={contentState === 'empty'}
+            isLoadingState={contentState === 'loading'}
+            isErrorState={contentState === 'error'}
+          />
+        )}
       </EuiAccordion>
       <EuiHorizontalRule />
     </>

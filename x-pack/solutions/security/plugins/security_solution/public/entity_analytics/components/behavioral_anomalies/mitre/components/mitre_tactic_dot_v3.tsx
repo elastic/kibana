@@ -67,6 +67,11 @@ interface MitreTacticDotV3Props {
    */
   isLast?: boolean;
   /**
+   * Right-panel compact chain — anchors the dot to the right edge of its cell
+   * so the last tactic sits flush with the container's right padding.
+   */
+  alignDotToEnd?: boolean;
+  /**
    * When provided, the dot row is wrapped in a hover chip ([count][name])
    * matching the alerts DistributionBar styling. Pass `undefined` to
    * disable the chip entirely.
@@ -127,6 +132,7 @@ export const MitreTacticDotV3: React.FC<MitreTacticDotV3Props> = ({
   detected,
   showLabel,
   isLast = false,
+  alignDotToEnd = false,
   anomalyCount,
   isSelected = false,
   isClickable = false,
@@ -259,7 +265,6 @@ export const MitreTacticDotV3: React.FC<MitreTacticDotV3Props> = ({
         data-test-subj="mitreInnerCircle"
         css={css`
           position: absolute;
-          left: 0;
           top: 0;
           width: 8px;
           height: 8px;
@@ -267,6 +272,14 @@ export const MitreTacticDotV3: React.FC<MitreTacticDotV3Props> = ({
           border: 2px solid ${color};
           border-radius: 50%;
           z-index: 2;
+          ${alignDotToEnd
+            ? css`
+                right: 0;
+                left: auto;
+              `
+            : css`
+                left: 0;
+              `}
         `}
       />
       {/* Outer halo — full opacity + expanded when selected. */}
@@ -274,7 +287,6 @@ export const MitreTacticDotV3: React.FC<MitreTacticDotV3Props> = ({
         data-test-subj="mitreOuterCircle"
         css={css`
           position: absolute;
-          left: ${haloOffset}px;
           top: ${haloOffset}px;
           width: ${haloSize}px;
           height: ${haloSize}px;
@@ -284,21 +296,38 @@ export const MitreTacticDotV3: React.FC<MitreTacticDotV3Props> = ({
           opacity: ${haloOpacity};
           z-index: 1;
           transition: width 120ms ease, height 120ms ease, opacity 120ms ease, left 120ms ease,
-            top 120ms ease;
+            right 120ms ease, top 120ms ease;
+          ${alignDotToEnd
+            ? css`
+                right: ${haloOffset}px;
+                left: auto;
+              `
+            : css`
+                left: ${haloOffset}px;
+              `}
         `}
       />
       {/* Connector line — 4 px stub when last, full cell otherwise. */}
       <div
         css={
           isLast
-            ? css`
-                position: absolute;
-                left: 0;
-                width: 4px;
-                top: 3px;
-                border-bottom: 1px solid ${euiTheme.colors.lightShade};
-                height: 0;
-              `
+            ? alignDotToEnd
+              ? css`
+                  position: absolute;
+                  right: 4px;
+                  width: 4px;
+                  top: 3px;
+                  border-bottom: 1px solid ${euiTheme.colors.lightShade};
+                  height: 0;
+                `
+              : css`
+                  position: absolute;
+                  left: 0;
+                  width: 4px;
+                  top: 3px;
+                  border-bottom: 1px solid ${euiTheme.colors.lightShade};
+                  height: 0;
+                `
             : css`
                 position: absolute;
                 left: 0;
@@ -329,7 +358,6 @@ export const MitreTacticDotV3: React.FC<MitreTacticDotV3Props> = ({
         aria-hidden
         css={css`
           position: absolute;
-          left: 4px;
           bottom: 0;
           width: 1px;
           height: ${TICK_HEIGHT}px;
@@ -338,6 +366,14 @@ export const MitreTacticDotV3: React.FC<MitreTacticDotV3Props> = ({
           transition: opacity 120ms ease;
           z-index: 3;
           pointer-events: none;
+          ${alignDotToEnd
+            ? css`
+                right: 4px;
+                left: auto;
+              `
+            : css`
+                left: 4px;
+              `}
         `}
       />
       {/* The chip itself — by DEFAULT its LEFT edge sits at the dot center
@@ -359,7 +395,7 @@ export const MitreTacticDotV3: React.FC<MitreTacticDotV3Props> = ({
         }
         css={css`
           position: absolute;
-          ${flipToRight
+          ${alignDotToEnd || flipToRight
             ? css`
                 right: calc(100% - 4px);
                 left: auto;

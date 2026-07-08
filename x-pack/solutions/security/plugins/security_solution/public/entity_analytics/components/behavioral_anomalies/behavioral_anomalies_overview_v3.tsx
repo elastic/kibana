@@ -41,6 +41,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiLoadingChart,
+  EuiSkeletonRectangle,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -61,10 +63,15 @@ import {
   MOCK_ANOMALY_COUNT_BY_TACTIC_V3,
   MOCK_ANOMALY_V3_TABLE_ROWS,
   MOCK_TRIGGERED_TACTICS_V3,
+  EMPTY_ATTACK_CHAIN_DATA_V3,
 } from '../behavioral_anomalies_v3/mock_tab_data';
 import { MOCK_ANOMALY_V3_TOTAL_COUNT } from '../behavioral_anomalies_v3/mock_data';
 import { AnomalyJobNameCellV3 } from '../behavioral_anomalies_v3/components/anomaly_job_name_cell';
 import { TruncatedTextCellV3 } from '../behavioral_anomalies_v3/components/truncated_text_cell';
+import { AnomaliesTableEmptyMessageV3 } from '../behavioral_anomalies_v3/components/anomalies_table_empty_message';
+import { AnomaliesTableLoadingSkeletonV3 } from '../behavioral_anomalies_v3/components/anomalies_table_loading_skeleton';
+import { AttackChainVizHeightSizerV3 } from '../behavioral_anomalies_v3/components/attack_chain_viz_height_sizer';
+import { BehavioralAnomaliesV3ErrorPrompt } from './behavioral_anomalies_v3_error_prompt';
 import type { BehavioralAnomalyV3TableRow } from '../behavioral_anomalies_v3/types';
 import {
   ANOMALIES_TABLE_V3_ANOMALY_COLUMN,
@@ -76,10 +83,14 @@ import {
   BEHAVIORAL_ANOMALIES_ALL_LINK_TOOLTIP,
   BEHAVIORAL_ANOMALIES_COUNT_LABEL,
   BEHAVIORAL_ANOMALIES_V3_RECENT_HEADING,
+  BEHAVIORAL_ANOMALIES_V3_RECENT_EMPTY_MESSAGE,
 } from './translations';
 import {
   BEHAVIORAL_ANOMALIES_V3_OVERVIEW_TEST_ID,
+  BEHAVIORAL_ANOMALIES_V3_OVERVIEW_CHAIN_LOADING_TEST_ID,
   BEHAVIORAL_ANOMALIES_V3_RECENT_HEADING_TEST_ID,
+  BEHAVIORAL_ANOMALIES_V3_RECENT_TABLE_EMPTY_MESSAGE_TEST_ID,
+  BEHAVIORAL_ANOMALIES_V3_RECENT_TABLE_LOADING_SKELETON_TEST_ID,
   BEHAVIORAL_ANOMALIES_V3_RECENT_TABLE_TEST_ID,
   BEHAVIORAL_ANOMALIES_V3_TACTICS_CHAIN_TEST_ID,
   BEHAVIORAL_ANOMALIES_V3_TACTICS_COUNT_TEST_ID,
@@ -99,6 +110,12 @@ interface BehavioralAnomaliesOverviewV3Props {
   entityId: string;
   isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
+  /** Prototype empty state — mirrors BA-v.3 left-tab empty wiring. */
+  isEmptyState?: boolean;
+  /** Prototype loading state — per-section spinners and table skeleton. */
+  isLoadingState?: boolean;
+  /** Prototype error state — header panel with shared error empty prompt body. */
+  isErrorState?: boolean;
 }
 
 /**
@@ -137,6 +154,9 @@ export const BehavioralAnomaliesOverviewV3: React.FC<BehavioralAnomaliesOverview
   entityId: _entityId,
   isPreviewMode,
   openDetailsPanel,
+  isEmptyState = false,
+  isLoadingState = false,
+  isErrorState = false,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -160,11 +180,32 @@ export const BehavioralAnomaliesOverviewV3: React.FC<BehavioralAnomaliesOverview
   // full table.
   const recentAnomaliesV3 = useMemo<BehavioralAnomalyV3TableRow[]>(
     () =>
-      [...MOCK_ANOMALY_V3_TABLE_ROWS]
-        .sort((a, b) => b.timestamp - a.timestamp)
-        .slice(0, RECENT_ANOMALIES_V3_LIMIT),
-    []
+      isEmptyState
+        ? []
+        : [...MOCK_ANOMALY_V3_TABLE_ROWS]
+            .sort((a, b) => b.timestamp - a.timestamp)
+            .slice(0, RECENT_ANOMALIES_V3_LIMIT),
+    [isEmptyState]
   );
+
+  const anomalyTotal = isEmptyState ? 0 : MOCK_ANOMALY_V3_TOTAL_COUNT;
+  const chainTriggeredTactics = isEmptyState
+    ? EMPTY_ATTACK_CHAIN_DATA_V3.triggeredTactics
+    : MOCK_TRIGGERED_TACTICS_V3;
+  const chainAnomalyCountByTactic = isEmptyState
+    ? EMPTY_ATTACK_CHAIN_DATA_V3.anomalyCountByTactic
+    : MOCK_ANOMALY_COUNT_BY_TACTIC_V3;
+
+  const recentTableEmptyRowCss = css`
+    .euiTableRow:has(.behavioralAnomaliesV3RecentTableEmptyMessage) {
+      background-color: ${euiTheme.colors.backgroundBaseSubdued};
+      pointer-events: none;
+
+      &:hover {
+        background-color: ${euiTheme.colors.backgroundBaseSubdued};
+      }
+    }
+  `;
 
   // Column set mirrors the left-tab Anomalies table, minus the expander,
   // Tactic, Baseline, Anomaly score, and Actions columns — keeping only the
@@ -232,27 +273,42 @@ export const BehavioralAnomaliesOverviewV3: React.FC<BehavioralAnomaliesOverview
         link,
       }}
     >
-      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+      {isErrorState ? (
+        <BehavioralAnomaliesV3ErrorPrompt variant="rightOverview" />
+      ) : (
+        <>
+      <EuiFlexGroup gutterSize="l" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false} css={statCellCss}>
           {/* Stat now shows total anomalies (matches the Anomalies table in
               the BA-v.3 left tab) instead of the number of triggered
               tactics. */}
-          <StatBlock
-            total={MOCK_ANOMALY_V3_TOTAL_COUNT}
-            label={BEHAVIORAL_ANOMALIES_COUNT_LABEL}
-            countTestSubj={BEHAVIORAL_ANOMALIES_V3_TACTICS_COUNT_TEST_ID}
-          />
+          {isLoadingState ? (
+            <EuiSkeletonRectangle width={72} height={40} />
+          ) : (
+            <StatBlock
+              total={anomalyTotal}
+              label={BEHAVIORAL_ANOMALIES_COUNT_LABEL}
+              countTestSubj={BEHAVIORAL_ANOMALIES_V3_TACTICS_COUNT_TEST_ID}
+            />
+          )}
         </EuiFlexItem>
         <EuiFlexItem css={vizCellCss}>
-          {/* No `onSelectTactic` here on purpose — the right-panel chain is
-              read-only. The hover chip still appears per-tactic, matching
-              the alerts-distribution-bar pattern. */}
-          <MitreAttackChainV3
-            triggeredTactics={MOCK_TRIGGERED_TACTICS_V3}
-            anomalyCountByTactic={MOCK_ANOMALY_COUNT_BY_TACTIC_V3}
-            showLabels={false}
-            data-test-subj={BEHAVIORAL_ANOMALIES_V3_TACTICS_CHAIN_TEST_ID}
-          />
+          {isLoadingState ? (
+            <div data-test-subj={BEHAVIORAL_ANOMALIES_V3_OVERVIEW_CHAIN_LOADING_TEST_ID}>
+              <AttackChainVizHeightSizerV3 showLabels={false}>
+                <EuiLoadingChart size="l" />
+              </AttackChainVizHeightSizerV3>
+            </div>
+          ) : (
+            <MitreAttackChainV3
+              triggeredTactics={chainTriggeredTactics}
+              anomalyCountByTactic={chainAnomalyCountByTactic}
+              showPersistentFirstTacticBadge={isEmptyState}
+              showLabels={false}
+              alignLastDotToEnd
+              data-test-subj={BEHAVIORAL_ANOMALIES_V3_TACTICS_CHAIN_TEST_ID}
+            />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
       {/* Horizontal rule (16 px margin above + below) separates the tactics
@@ -270,13 +326,32 @@ export const BehavioralAnomaliesOverviewV3: React.FC<BehavioralAnomaliesOverview
         </h4>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiBasicTable
-        data-test-subj={BEHAVIORAL_ANOMALIES_V3_RECENT_TABLE_TEST_ID}
-        items={recentAnomaliesV3}
-        itemId="id"
-        columns={recentAnomaliesColumns}
-        compressed
-      />
+      {isLoadingState ? (
+        <AnomaliesTableLoadingSkeletonV3
+          data-test-subj={BEHAVIORAL_ANOMALIES_V3_RECENT_TABLE_LOADING_SKELETON_TEST_ID}
+        />
+      ) : (
+        <div css={isEmptyState ? recentTableEmptyRowCss : undefined}>
+          <EuiBasicTable
+            data-test-subj={BEHAVIORAL_ANOMALIES_V3_RECENT_TABLE_TEST_ID}
+            items={recentAnomaliesV3}
+            itemId="id"
+            columns={recentAnomaliesColumns}
+            compressed
+            noItemsMessage={
+              isEmptyState ? (
+                <AnomaliesTableEmptyMessageV3
+                  message={BEHAVIORAL_ANOMALIES_V3_RECENT_EMPTY_MESSAGE}
+                  testSubj={BEHAVIORAL_ANOMALIES_V3_RECENT_TABLE_EMPTY_MESSAGE_TEST_ID}
+                  className="behavioralAnomaliesV3RecentTableEmptyMessage"
+                />
+              ) : undefined
+            }
+          />
+        </div>
+      )}
+        </>
+      )}
     </ExpandablePanel>
   );
 };
