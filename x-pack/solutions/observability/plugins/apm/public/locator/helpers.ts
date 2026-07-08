@@ -13,6 +13,7 @@ import { apmRouter } from '../components/routing/apm_route_config';
 import type { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
 
 const SERVICE_OVERVIEW_TAB_PATHS = {
+  alerts: '/services/{serviceName}/alerts',
   logs: '/services/{serviceName}/logs',
   metrics: '/services/{serviceName}/metrics',
   traces: '/services/{serviceName}/transactions',
@@ -35,6 +36,7 @@ export const APMLocatorPayloadValidator = t.union([
     t.partial({ dashboardId: t.undefined }),
     t.partial({
       serviceOverviewTab: t.keyof({
+        alerts: null,
         traces: null,
         metrics: null,
         logs: null,

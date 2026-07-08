@@ -10,19 +10,13 @@ import type { Environment } from '../../../../../common/environment_rt';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 import { useServiceLinks } from './use_service_links';
 
-const mockLink = jest.fn(
-  (path: string, options: { path: Record<string, string>; query: Record<string, unknown> }) =>
-    `${path}|${JSON.stringify(options)}`
-);
-
 const mockGetRedirectUrl = jest.fn(
-  (payload: { serviceName: string }) => `/app/apm/services/${payload.serviceName}/overview`
+  (payload: { serviceName: string; serviceOverviewTab?: string }) => {
+    const tab = payload.serviceOverviewTab ?? 'overview';
+    return `/app/apm/services/${payload.serviceName}/${tab}`;
+  }
 );
 const mockLocatorsGet = jest.fn(() => ({ getRedirectUrl: mockGetRedirectUrl }));
-
-jest.mock('../../../../hooks/use_apm_router', () => ({
-  useApmRouter: () => ({ link: mockLink }),
-}));
 
 jest.mock('../service_flyout_context', () => ({
   useServiceFlyoutContext: () => ({
@@ -40,7 +34,6 @@ const baseParams = {
 
 describe('useServiceLinks', () => {
   beforeEach(() => {
-    mockLink.mockClear();
     mockLocatorsGet.mockClear();
     mockGetRedirectUrl.mockClear();
   });
@@ -60,15 +53,17 @@ describe('useServiceLinks', () => {
     });
   });
 
-  it('drops the kuery from the alerts link so it does not filter to a single service', () => {
+  it('builds the alerts link using the APM locator, dropping the kuery', () => {
     renderHook(() => useServiceLinks(baseParams));
 
-    expect(mockLink).toHaveBeenCalledWith('/services/{serviceName}/alerts', {
-      path: { serviceName: 'opbeans-java' },
-      query: expect.objectContaining({
+    expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+      serviceName: 'opbeans-java',
+      serviceOverviewTab: 'alerts',
+      query: {
         environment: 'production',
-        kuery: '',
-      }),
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+      },
     });
   });
 
@@ -76,6 +71,6 @@ describe('useServiceLinks', () => {
     const { result } = renderHook(() => useServiceLinks(baseParams));
 
     expect(result.current.overviewHref).toContain('/app/apm/services/opbeans-java/overview');
-    expect(result.current.alertsHref).toContain('/services/{serviceName}/alerts');
+    expect(result.current.alertsHref).toContain('/app/apm/services/opbeans-java/alerts');
   });
 });
