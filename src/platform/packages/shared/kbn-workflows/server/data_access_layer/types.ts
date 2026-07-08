@@ -27,6 +27,17 @@ export type ExecutionsSearchRequest = Omit<estypes.SearchRequest, 'index'>;
 /** Partial document with required id — same for single- and multi-document upserts. */
 export type UpsertDocument<TDoc extends { id: string }> = Partial<TDoc> & { id: string };
 
+/** Bulk-level options from ES Bulk API (index/operations omitted — DAL builds those). */
+export type BulkUpsertRequestOptions = Pick<
+  estypes.BulkRequest,
+  'refresh' | 'pipeline' | 'require_alias' | 'wait_for_active_shards'
+>;
+
+/** Unified upsert request: one or many documents, same contract. */
+export type BulkUpsertRequest<TDoc extends { id: string }> = BulkUpsertRequestOptions & {
+  documents: UpsertDocument<TDoc> | UpsertDocument<TDoc>[];
+};
+
 /** Static index name or per-document resolver for multi-index bulk upserts. */
 export type BulkUpsertIndexResolver<TDoc extends { id: string }> =
   | string
@@ -80,9 +91,7 @@ export interface ExecutionsDataAccess<TExecution extends { id: string }> {
   getByIds(ids: string[], options?: GetExecutionsByIdsOptions<TExecution>): Promise<TExecution[]>;
 
   /** @throws on any upsert failure */
-  bulkUpsert(
-    docs: UpsertDocument<TExecution> | UpsertDocument<TExecution>[]
-  ): Promise<BulkUpsertResponse>;
+  bulkUpsert(request: BulkUpsertRequest<TExecution>): Promise<BulkUpsertResponse>;
 }
 
 export type WorkflowExecutionsDataAccess = ExecutionsDataAccess<EsWorkflowExecution>;
@@ -93,6 +102,9 @@ export type StepExecutionsSearchRequest = ExecutionsSearchRequest;
 
 export type WorkflowExecutionUpsertDocument = UpsertDocument<EsWorkflowExecution>;
 export type StepExecutionUpsertDocument = UpsertDocument<EsWorkflowStepExecution>;
+
+export type WorkflowExecutionsBulkUpsertRequest = BulkUpsertRequest<EsWorkflowExecution>;
+export type StepExecutionsBulkUpsertRequest = BulkUpsertRequest<EsWorkflowStepExecution>;
 
 export type WorkflowExecutionSourceProjectionField =
   ExecutionSourceProjectionField<EsWorkflowExecution>;

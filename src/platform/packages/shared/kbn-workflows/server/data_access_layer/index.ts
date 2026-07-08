@@ -37,12 +37,15 @@ export {
   validateCreateStepExecutionsDataAccessParams,
   validateCreateWorkflowExecutionsDataAccessParams,
 } from './lib/validate_factory_params';
+export { getStepExecutionsByWorkflowExecution } from './lib/get_step_executions_by_workflow_execution';
+export type { GetStepExecutionsByWorkflowExecutionParams } from './lib/get_step_executions_by_workflow_execution';
 
 export type {
   ExecutionsDataAccess,
   WorkflowExecutionsDataAccess,
   StepExecutionsDataAccess,
 } from './types';
+export type { PlainIndexExecutionsDataAccessDeps } from './implementations/plain_index/plain_index_executions_data_access';
 export { PlainIndexExecutionsDataAccess } from './implementations/plain_index/plain_index_executions_data_access';
 export { normalizeStepExecutionOnGet } from './implementations/plain_index/normalize_step_execution_on_get';
 export { createWorkflowExecutionsDataAccess } from './implementations/create_workflow_executions_data_access';
@@ -51,6 +54,8 @@ export { createStepExecutionsDataAccess } from './implementations/create_step_ex
 export type {
   BulkUpsertIndexResolver,
   BulkUpsertItemResponse,
+  BulkUpsertRequest,
+  BulkUpsertRequestOptions,
   BulkUpsertResponse,
   CreateStepExecutionsDataAccessDeps,
   CreateWorkflowExecutionsDataAccessDeps,
@@ -63,9 +68,11 @@ export type {
   GetWorkflowExecutionsByIdsOptions,
   StepExecutionSourceProjectionField,
   StepExecutionUpsertDocument,
+  StepExecutionsBulkUpsertRequest,
   StepExecutionsSearchRequest,
   UpsertDocument,
   WorkflowExecutionSourceProjectionField,
   WorkflowExecutionUpsertDocument,
+  WorkflowExecutionsBulkUpsertRequest,
   WorkflowExecutionsSearchRequest,
 } from './types';

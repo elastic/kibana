@@ -19,14 +19,11 @@ export type {
 } from './lib/workflow_filters';
 export type { WorkflowsApiRequestHandlerContext, WorkflowsClient } from './types';
 
-export {
-  getStepExecutionsByIds,
-  getStepExecutionsByWorkflowExecution,
-} from './repositories/step_execution_repository';
 export { WorkflowRepository } from './repositories/workflow_repository';
 export { GLOBAL_WORKFLOW_SPACE_ID } from './constants';
 
 export {
+  getStepExecutionsByWorkflowExecution,
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
   WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
@@ -59,18 +56,23 @@ export type {
   WorkflowExecutionsSearchRequest,
   StepExecutionsSearchRequest,
   BulkUpsertIndexResolver,
+  BulkUpsertRequest,
+  BulkUpsertRequestOptions,
   BulkUpsertResponse,
   BulkUpsertItemResponse,
   UpsertDocument,
   WorkflowExecutionUpsertDocument,
   StepExecutionUpsertDocument,
+  WorkflowExecutionsBulkUpsertRequest,
+  StepExecutionsBulkUpsertRequest,
   CreateWorkflowExecutionsDataAccessDeps,
   CreateStepExecutionsDataAccessDeps,
-  GetExecutionsByIdsOptions,
   GetStepExecutionsByIdsOptions,
+  GetStepExecutionsByWorkflowExecutionParams,
   GetWorkflowExecutionsByIdsOptions,
   StepExecutionSourceProjectionField,
   WorkflowExecutionSourceProjectionField,
+  PlainIndexExecutionsDataAccessDeps,
 } from './data_access_layer';
 
 export type {

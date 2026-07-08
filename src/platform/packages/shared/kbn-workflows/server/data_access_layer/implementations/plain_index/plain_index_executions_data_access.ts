@@ -13,11 +13,11 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { createOrUpdateIndex } from '../../init/create_or_update_index';
 import type {
+  BulkUpsertRequest,
   BulkUpsertResponse,
   ExecutionsDataAccess,
   ExecutionsSearchRequest,
   GetExecutionsByIdsOptions,
-  UpsertDocument,
 } from '../../types';
 import { executeIndexBulkUpsert } from './execute_index_bulk_upsert';
 
@@ -86,13 +86,11 @@ export class PlainIndexExecutionsDataAccess<TExecution extends { id: string }>
     return executionDocs;
   }
 
-  public async bulkUpsert(
-    docs: UpsertDocument<TExecution> | UpsertDocument<TExecution>[]
-  ): Promise<BulkUpsertResponse> {
+  public async bulkUpsert(request: BulkUpsertRequest<TExecution>): Promise<BulkUpsertResponse> {
     return executeIndexBulkUpsert({
       esClient: this.deps.esClient,
       indexName: this.deps.indexName,
-      documents: docs,
+      request,
     });
   }
 }

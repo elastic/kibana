@@ -7,44 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EsWorkflowStepExecution } from '../../types/v1';
+import type { EsWorkflowStepExecution } from '../../../types/v1';
+import type { GetStepExecutionsByIdsOptions, StepExecutionsDataAccess } from '../types';
 
-/**
- * Fetches step executions by their IDs using mget (O(1) operation).
- * This is real-time (reads from translog) and doesn't require index refresh.
- */
-export const getStepExecutionsByIds = async (
-  esClient: ElasticsearchClient,
-  stepsExecutionIndex: string,
-  stepExecutionIds: string[],
-  sourceExcludes?: string[]
-): Promise<EsWorkflowStepExecution[]> => {
-  if (stepExecutionIds.length === 0) {
-    return [];
-  }
-
-  const mgetResponse = await esClient.mget<EsWorkflowStepExecution>({
-    index: stepsExecutionIndex,
-    ids: stepExecutionIds,
-    ...(sourceExcludes?.length ? { _source_excludes: sourceExcludes } : {}),
-  });
-
-  const steps: EsWorkflowStepExecution[] = [];
-  for (const doc of mgetResponse.docs) {
-    if ('found' in doc && doc.found && doc._source) {
-      steps.push(doc._source);
-    }
-  }
-  return steps;
-};
-
-interface GetStepExecutionsByWorkflowExecutionParams {
-  esClient: ElasticsearchClient;
-  stepsExecutionIndex: string;
+export interface GetStepExecutionsByWorkflowExecutionParams {
+  stepExecutionsDal: StepExecutionsDataAccess;
   workflowExecutionId: string;
   stepExecutionIds?: string[];
-  sourceExcludes?: string[];
+  sourceExcludes?: GetStepExecutionsByIdsOptions['sourceExcludes'];
 }
 
 /**
@@ -53,18 +23,16 @@ interface GetStepExecutionsByWorkflowExecutionParams {
  * falls back to search for backward compatibility with older executions.
  */
 export const getStepExecutionsByWorkflowExecution = async ({
-  esClient,
-  stepsExecutionIndex,
+  stepExecutionsDal,
   workflowExecutionId,
   stepExecutionIds,
   sourceExcludes,
 }: GetStepExecutionsByWorkflowExecutionParams): Promise<EsWorkflowStepExecution[]> => {
-  if (stepExecutionIds && stepExecutionIds.length > 0) {
-    return getStepExecutionsByIds(esClient, stepsExecutionIndex, stepExecutionIds, sourceExcludes);
+  if (stepExecutionIds?.length) {
+    return stepExecutionsDal.getByIds(stepExecutionIds, { sourceExcludes });
   }
 
-  const response = await esClient.search<EsWorkflowStepExecution>({
-    index: stepsExecutionIndex,
+  const response = await stepExecutionsDal.search({
     query: {
       match: { workflowRunId: workflowExecutionId },
     },

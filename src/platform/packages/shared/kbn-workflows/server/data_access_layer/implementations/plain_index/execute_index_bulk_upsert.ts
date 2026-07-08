@@ -21,12 +21,18 @@ import {
   assertUpsertDocumentsHaveIds,
   normalizeUpsertDocuments,
 } from '../../lib/normalize_upsert_documents';
-import type { BulkUpsertIndexResolver, BulkUpsertResponse, UpsertDocument } from '../../types';
+import type {
+  BulkUpsertIndexResolver,
+  BulkUpsertRequest,
+  BulkUpsertRequestOptions,
+  BulkUpsertResponse,
+  UpsertDocument,
+} from '../../types';
 
 interface ExecuteIndexBulkUpsertParams<TDoc extends { id: string }> {
   esClient: ElasticsearchClient;
   indexName: BulkUpsertIndexResolver<TDoc>;
-  documents: UpsertDocument<TDoc> | UpsertDocument<TDoc>[];
+  request: BulkUpsertRequest<TDoc>;
 }
 
 const resolveBulkUpsertIndexName = <TDoc extends { id: string }>(
@@ -54,12 +60,25 @@ const allDocumentsShareIndex = <TDoc extends { id: string }>(
   return firstIndex;
 };
 
+const extractBulkUpsertEsOptions = (
+  request: BulkUpsertRequestOptions
+): Pick<BulkUpsertRequestOptions, 'refresh' | 'pipeline' | 'require_alias' | 'wait_for_active_shards'> => {
+  const { refresh = false, pipeline, require_alias, wait_for_active_shards } = request;
+
+  return {
+    refresh,
+    ...(pipeline !== undefined ? { pipeline } : {}),
+    ...(require_alias !== undefined ? { require_alias } : {}),
+    ...(wait_for_active_shards !== undefined ? { wait_for_active_shards } : {}),
+  };
+};
+
 export const executeIndexBulkUpsert = async <TDoc extends { id: string }>({
   esClient,
   indexName,
-  documents,
+  request,
 }: ExecuteIndexBulkUpsertParams<TDoc>): Promise<BulkUpsertResponse> => {
-  const normalizedDocuments = normalizeUpsertDocuments(documents);
+  const normalizedDocuments = normalizeUpsertDocuments(request.documents);
 
   if (normalizedDocuments.length === 0) {
     return EMPTY_BULK_UPSERT_RESPONSE;
@@ -67,13 +86,15 @@ export const executeIndexBulkUpsert = async <TDoc extends { id: string }>({
 
   assertUpsertDocumentsHaveIds(normalizedDocuments);
 
+  const esOptions = extractBulkUpsertEsOptions(request);
+
   if (normalizedDocuments.length === 1) {
     const document = normalizedDocuments[0];
     const resolvedIndexName = resolveBulkUpsertIndexName(indexName, document);
     const updateResponse = await esClient.update<TDoc>({
       index: resolvedIndexName,
       id: document.id,
-      refresh: false,
+      ...esOptions,
       doc: document,
       doc_as_upsert: true,
     });
@@ -84,7 +105,7 @@ export const executeIndexBulkUpsert = async <TDoc extends { id: string }>({
   const sharedIndexName = allDocumentsShareIndex(normalizedDocuments, indexName);
 
   const bulkResponse = await esClient.bulk<TDoc>({
-    refresh: false,
+    ...esOptions,
     ...(sharedIndexName !== undefined ? { index: sharedIndexName } : {}),
     operations: normalizedDocuments.flatMap((document) => {
       const resolvedIndexName = resolveBulkUpsertIndexName(indexName, document);
