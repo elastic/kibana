@@ -258,6 +258,7 @@ export class FeatureFlagsService {
   private shouldReportValue(flagName: string, value: FeatureFlagValue): boolean {
     const type = getFeatureFlagValueType(value);
     const lastReportedValue = this.lastReportedValues.get(flagName);
+    // Object.is takes care string, number (incl. NaN), boolean comparison
     if (lastReportedValue?.type === type && Object.is(lastReportedValue.value, value)) {
       return false;
     }
