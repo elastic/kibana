@@ -100,6 +100,7 @@ export const EntityAttachmentInlineContent: React.FC<EntityAttachmentInlineConte
 
   const watchlistsEnabled = experimentalFeatures.entityAnalyticsWatchlistEnabled;
   const privmonModifierEnabled = experimentalFeatures.enableRiskScorePrivmonModifier;
+  const anomalyDetailsEnabled = experimentalFeatures.entityAnalyticsAnomalyDetails;
 
   return (
     <>
@@ -113,6 +114,7 @@ export const EntityAttachmentInlineContent: React.FC<EntityAttachmentInlineConte
               resolutionRiskStats={parsed.resolutionRiskStats}
               watchlistsEnabled={watchlistsEnabled}
               privmonModifierEnabled={privmonModifierEnabled}
+              anomalyDetailsEnabled={anomalyDetailsEnabled}
             />
           ) : (
             <EntityTable entities={parsed.entities} />
