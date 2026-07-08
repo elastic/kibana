@@ -90,8 +90,14 @@ export function RemoteMonitorDetailsPanel({ monitor, latestPing }: Props) {
           </>
         )}
 
-        <EuiDescriptionListTitle>{REMOTE_CLUSTER_LABEL}</EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>{monitor.remote?.remoteName}</EuiDescriptionListDescription>
+        {monitor.remote?.remoteName && (
+          <>
+            <EuiDescriptionListTitle>{REMOTE_CLUSTER_LABEL}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {monitor.remote.remoteName}
+            </EuiDescriptionListDescription>
+          </>
+        )}
       </EuiDescriptionList>
     </EuiPanel>
   );

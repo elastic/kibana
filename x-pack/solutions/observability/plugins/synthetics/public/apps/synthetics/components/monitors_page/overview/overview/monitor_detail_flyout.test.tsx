@@ -575,6 +575,31 @@ describe('Monitor Detail Flyout', () => {
       );
       expect(getMonitorCalls).toHaveLength(0);
     });
+
+    it('renders the read-only details panel (no remote cluster row, no spinner) on the Details tab', () => {
+      const { getByText, queryByText, queryByRole } = render(
+        <MonitorDetailFlyout
+          configId="hb-config-id"
+          id="hb-config-id"
+          location="US East"
+          locationId="us-east"
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />,
+        { state: heartbeatState }
+      );
+
+      fireEvent.click(getByText('Details'));
+
+      // Heartbeat monitors have no local saved object, so the flyout must render
+      // the ping-derived panel rather than spinning forever waiting on it.
+      expect(getByText('Monitor details')).toBeInTheDocument();
+      expect(getByText('hb-config-id')).toBeInTheDocument();
+      expect(queryByRole('progressbar')).not.toBeInTheDocument();
+      // The remote-cluster row is remote-only and must not appear for heartbeat.
+      expect(queryByText('Remote cluster')).not.toBeInTheDocument();
+    });
   });
 
   describe('agent builder attachment', () => {

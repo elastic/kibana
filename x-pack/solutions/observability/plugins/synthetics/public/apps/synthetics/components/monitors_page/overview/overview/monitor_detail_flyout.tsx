@@ -297,7 +297,12 @@ export function MonitorDetailFlyout(props: Props) {
   // space and don't 404. Reuses the helper that powers the locator-based links.
   const { spaceId: crossSpaceId } = getMonitorSpaceToAppend(space, spaces);
 
-  const monitorDetail = useMonitorDetail(configId, props.location, monitor?.remote?.remoteName);
+  const monitorDetail = useMonitorDetail(
+    configId,
+    props.location,
+    monitor?.remote?.remoteName,
+    monitor?.origin
+  );
 
   // The overview-status metadata only carries `remote.kibanaUrl` when the
   // remote heartbeat docs expose it via the `top_metrics` aggregation, which
@@ -535,7 +540,10 @@ export function MonitorDetailFlyout(props: Props) {
           />
         )}
         {selectedTab === 'details' &&
-          (isRemote && monitor ? (
+          // Read-only monitors (remote CCS and local Heartbeat / Agent) have no
+          // local saved object, so render the ping-derived details panel rather
+          // than waiting on `monitorObject`, which never resolves for them.
+          (isReadOnly && monitor ? (
             <RemoteMonitorDetailsPanel monitor={monitor} latestPing={monitorDetail.data} />
           ) : monitorObject ? (
             <MonitorDetailsPanel
