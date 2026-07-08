@@ -121,13 +121,6 @@ export const CASE_DEFAULTS_SECTION_TITLE = i18n.translate(
   }
 );
 
-export const CASE_DEFAULT_SEVERITY_NONE = i18n.translate(
-  'xpack.cases.templates.caseDefaultsSeverityNone',
-  {
-    defaultMessage: 'No default',
-  }
-);
-
 export const TEMPLATE_SAVED = i18n.translate('xpack.cases.templates.templateSaved', {
   defaultMessage: 'Saved',
 });

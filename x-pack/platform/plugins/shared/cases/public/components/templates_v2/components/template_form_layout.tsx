@@ -357,11 +357,15 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     return yamlChanged || metadataChanged;
   }, [initialDefinitionYaml, normalizedYamlValue, metadata, initialMetadataFromYaml]);
 
+  const yamlValidationResult = useMemo(
+    () => validateTemplateDefinitionYaml(normalizedYamlValue),
+    [normalizedYamlValue]
+  );
+  const isYamlDefinitionValid = yamlValidationResult.success;
+
   const hasValidationErrors = useMemo(
-    () =>
-      !validateTemplateDefinitionYaml(normalizedYamlValue).success ||
-      hasTemplateMetadataErrors(metadataErrors),
-    [normalizedYamlValue, metadataErrors]
+    () => !isYamlDefinitionValid || hasTemplateMetadataErrors(metadataErrors),
+    [isYamlDefinitionValid, metadataErrors]
   );
 
   const yamlValueRef = useRef(normalizedYamlValue);
@@ -634,6 +638,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             metadataErrors={metadataErrors}
             onMetadataChange={handleMetadataChange}
             formResetKey={formResetKey}
+            isYamlDefinitionValid={isYamlDefinitionValid}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

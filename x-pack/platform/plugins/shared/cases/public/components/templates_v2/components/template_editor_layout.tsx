@@ -46,6 +46,7 @@ interface TemplateEditorLayoutProps {
   metadataErrors: TemplateMetadataErrors;
   onMetadataChange: (metadata: TemplateMetadata) => void;
   formResetKey?: number;
+  isYamlDefinitionValid: boolean;
 }
 
 export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
@@ -67,6 +68,7 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
   metadataErrors,
   onMetadataChange,
   formResetKey,
+  isYamlDefinitionValid,
 }) => {
   const styles = useMemoCss(componentStyles);
 
@@ -106,6 +108,7 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
             onFieldDefaultChange={onFieldDefaultChange}
             onCaseDefaultChange={onCaseDefaultChange}
             formResetKey={formResetKey}
+            isYamlDefinitionValid={isYamlDefinitionValid}
           />
         </div>
       }

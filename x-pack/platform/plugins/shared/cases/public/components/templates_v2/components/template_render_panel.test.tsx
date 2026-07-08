@@ -30,6 +30,7 @@ describe('TemplateRenderPanel', () => {
     metadataErrors: {},
     onMetadataChange: jest.fn(),
     onCaseDefaultChange: jest.fn(),
+    isYamlDefinitionValid: true,
   };
 
   beforeEach(() => {
@@ -62,7 +63,10 @@ describe('TemplateRenderPanel', () => {
     render(<TemplateRenderPanel {...props} />);
 
     expect(screen.getByRole('button', { name: 'Fields' })).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByRole('button', { name: 'Settings' })).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('button', { name: 'Settings' })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    );
   });
 
   it('passes case-default change handler to the preview tab', () => {
@@ -73,5 +77,15 @@ describe('TemplateRenderPanel', () => {
         onCaseDefaultChange: props.onCaseDefaultChange,
       })
     );
+  });
+
+  it('renders a single error prompt when YAML is invalid', () => {
+    render(<TemplateRenderPanel {...props} isYamlDefinitionValid={false} />);
+
+    expect(screen.getByTestId('templateRenderPanelInvalidYaml')).toBeInTheDocument();
+    expect(screen.queryByTestId('templateRenderMetadataAccordion')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('templateRenderFieldsAccordion')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('templateRenderSettingsAccordion')).not.toBeInTheDocument();
+    expect(mockTemplatePreview).not.toHaveBeenCalled();
   });
 });

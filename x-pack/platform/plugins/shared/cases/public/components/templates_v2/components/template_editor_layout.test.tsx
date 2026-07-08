@@ -54,6 +54,7 @@ describe('TemplateEditorLayout', () => {
     metadata: { name: 'Template', description: '', tags: [] },
     metadataErrors: {},
     onMetadataChange: jest.fn(),
+    isYamlDefinitionValid: true,
   };
 
   beforeEach(() => {

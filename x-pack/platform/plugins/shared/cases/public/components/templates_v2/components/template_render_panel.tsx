@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiAccordion, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiAccordion, EuiEmptyPrompt, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
@@ -38,6 +38,7 @@ interface TemplateRenderPanelProps {
   onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
   onCaseDefaultChange?: (field: EditableCaseDefaultField, value: EditableCaseDefaultValue) => void;
   formResetKey?: number;
+  isYamlDefinitionValid: boolean;
 }
 
 /** Right-hand render panel with accordion sections for metadata, fields/defaults, and settings. */
@@ -52,8 +53,23 @@ export const TemplateRenderPanel: React.FC<TemplateRenderPanelProps> = ({
   onFieldDefaultChange,
   onCaseDefaultChange,
   formResetKey,
+  isYamlDefinitionValid,
 }) => {
   const { euiTheme } = useEuiTheme();
+
+  if (!isYamlDefinitionValid) {
+    return (
+      <EuiEmptyPrompt
+        data-test-subj="templateRenderPanelInvalidYaml"
+        iconType="warning"
+        color="warning"
+        paddingSize="m"
+        titleSize="xs"
+        title={<h3>{i18n.PREVIEW_UNAVAILABLE_TITLE}</h3>}
+        body={<p>{i18n.PREVIEW_UNAVAILABLE_BODY}</p>}
+      />
+    );
+  }
 
   return (
     <div>

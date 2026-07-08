@@ -8,23 +8,13 @@
 import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import {
-  EuiComboBox,
-  EuiFieldText,
-  EuiForm,
-  EuiFormRow,
-  EuiSelect,
-} from '@elastic/eui';
+import { EuiComboBox, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import type { ParsedTemplateDefinition } from '../../../../common/types/domain/template/v1';
 import type { CaseAssignees } from '../../../../common/types/domain_zod/user/v1';
-import {
-  CRITICAL,
-  HIGH,
-  LOW,
-  MEDIUM,
-  SEVERITY_TITLE,
-} from '../../severity/translations';
+import type { CaseSeverity } from '../../../../common/types/domain';
+import { severities } from '../../severity/config';
+import { SEVERITY_TITLE } from '../../severity/translations';
 import * as commonI18n from '../../../common/translations';
 import { useIsUserTyping } from '../../../common/use_is_user_typing';
 import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
@@ -49,11 +39,10 @@ interface TemplateCaseDefaultsFormProps {
 }
 
 const severityOptions = [
-  { value: '', text: i18n.CASE_DEFAULT_SEVERITY_NONE },
-  { value: 'low', text: LOW },
-  { value: 'medium', text: MEDIUM },
-  { value: 'high', text: HIGH },
-  { value: 'critical', text: CRITICAL },
+  ...(Object.keys(severities) as CaseSeverity[]).map((severity) => ({
+    value: severity,
+    text: severities[severity].label,
+  })),
 ];
 
 export const TemplateCaseDefaultsForm: React.FC<TemplateCaseDefaultsFormProps> = ({
@@ -64,12 +53,19 @@ export const TemplateCaseDefaultsForm: React.FC<TemplateCaseDefaultsFormProps> =
   const availableOwners = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
   const [searchTerm, setSearchTerm] = useState('');
   const { isUserTyping, onContentChange, onDebounce } = useIsUserTyping();
-  const { data: suggestedProfiles = [], isLoading, isFetching } = useSuggestUserProfiles({
+  const {
+    data: suggestedProfiles = [],
+    isLoading,
+    isFetching,
+  } = useSuggestUserProfiles({
     name: searchTerm,
     owners: owners.length > 0 ? owners : availableOwners,
     onDebounce,
   });
-  const selectedAssignees = parsedTemplate.assignees ?? [];
+  const selectedAssignees = useMemo(
+    () => parsedTemplate.assignees ?? [],
+    [parsedTemplate.assignees]
+  );
   const missingAssigneeUids = useMemo(
     () =>
       selectedAssignees
@@ -89,14 +85,16 @@ export const TemplateCaseDefaultsForm: React.FC<TemplateCaseDefaultsFormProps> =
   const assigneeOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
     () =>
       Array.from(
-        assigneeProfiles.reduce<Map<string, EuiComboBoxOptionOption<string>>>((acc, profile) => {
-          acc.set(profile.uid, {
-            label: getUserDisplayName(profile.user),
-            value: profile.uid,
-            key: profile.uid,
-          });
-          return acc;
-        }, new Map()).values()
+        assigneeProfiles
+          .reduce<Map<string, EuiComboBoxOptionOption<string>>>((acc, profile) => {
+            acc.set(profile.uid, {
+              label: getUserDisplayName(profile.user),
+              value: profile.uid,
+              key: profile.uid,
+            });
+            return acc;
+          }, new Map())
+          .values()
       ),
     [assigneeProfiles]
   );

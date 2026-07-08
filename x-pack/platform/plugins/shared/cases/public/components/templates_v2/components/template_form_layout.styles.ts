@@ -11,9 +11,8 @@ import { css } from '@emotion/react';
 export const componentStyles = {
   wrapper: ({ euiTheme }: UseEuiTheme) =>
     css({
-      // The header cancels the surrounding EuiPageSection's top/side padding itself (via
-      // `padding={{ bleed: 'l' }}`), so only the bottom margin needs cancelling here for the
-      // editor/preview split to reach the bottom edge with no wasted vertical space.
+      // Keep native top spacing so the page header stays fully visible, but reclaim the bottom
+      // section padding so the split editor can fill the viewport height.
       marginBottom: `-${euiTheme.size.l}`,
     }),
   editorWrapper: ({ euiTheme }: UseEuiTheme) =>
