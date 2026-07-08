@@ -99,7 +99,7 @@ export function registerExecutionFieldsRoute({ router }: RouteDependencies) {
               ? {}
               : { indexFilter: buildUnmanagedWorkflowExecutionsFilter() }),
             fieldTypes: parseFields(request.query.field_types),
-            allowHidden: request.query.allow_hidden,
+            allowHidden: request.query.allow_hidden ?? true,
             ...(parseFields(request.query.fields).length > 0
               ? { fields: parseFields(request.query.fields) }
               : {}),

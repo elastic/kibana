@@ -37,7 +37,10 @@ describe('createIndexes', () => {
     expect(createIndexWithMappings).not.toHaveBeenCalled();
 
     expect(createOrUpdateIndex).toHaveBeenCalledWith(
-      expect.objectContaining({ indexName: WORKFLOWS_EXECUTIONS_INDEX })
+      expect.objectContaining({
+        indexName: WORKFLOWS_EXECUTIONS_INDEX,
+        settings: { index: { hidden: true } },
+      })
     );
     expect(createOrUpdateIndex).toHaveBeenCalledWith(
       expect.objectContaining({ indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX })

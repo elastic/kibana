@@ -14,6 +14,7 @@ const createEsClientMock = () => ({
     exists: jest.fn(),
     create: jest.fn(),
     putMapping: jest.fn(),
+    putSettings: jest.fn(),
   },
 });
 
@@ -77,6 +78,27 @@ describe('createIndexWithMappings', () => {
     ).resolves.toBeUndefined();
   });
 
+  it('creates the index with settings when provided', async () => {
+    const esClient = createEsClientMock();
+    esClient.indices.exists.mockResolvedValue(false);
+    esClient.indices.create.mockResolvedValue({});
+    const logger = createLoggerMock();
+
+    await createIndexWithMappings({
+      esClient: esClient as any,
+      indexName: '.test-index',
+      mappings: { properties: {} },
+      settings: { index: { hidden: true } },
+      logger: logger as any,
+    });
+
+    expect(esClient.indices.create).toHaveBeenCalledWith({
+      index: '.test-index',
+      mappings: { properties: {} },
+      settings: { index: { hidden: true } },
+    });
+  });
+
   it('rethrows non-resource-exists errors', async () => {
     const esClient = createEsClientMock();
     esClient.indices.exists.mockResolvedValue(false);
@@ -129,7 +151,29 @@ describe('createOrUpdateIndex', () => {
       index: '.test-index',
       properties: { id: { type: 'keyword' } },
     });
+    expect(esClient.indices.putSettings).not.toHaveBeenCalled();
     expect(esClient.indices.create).not.toHaveBeenCalled();
+  });
+
+  it('updates settings when index already exists and settings are provided', async () => {
+    const esClient = createEsClientMock();
+    esClient.indices.exists.mockResolvedValue(true);
+    esClient.indices.putMapping.mockResolvedValue({});
+    esClient.indices.putSettings.mockResolvedValue({});
+    const logger = createLoggerMock();
+
+    await createOrUpdateIndex({
+      esClient: esClient as any,
+      indexName: '.test-index',
+      mappings: { properties: {} },
+      settings: { index: { hidden: true } },
+      logger: logger as any,
+    });
+
+    expect(esClient.indices.putSettings).toHaveBeenCalledWith({
+      index: '.test-index',
+      settings: { index: { hidden: true } },
+    });
   });
 
   it('continues if putMapping fails', async () => {

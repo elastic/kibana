@@ -7,13 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesIndexSettings,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 interface CreateIndexOptions {
   esClient: ElasticsearchClient;
   indexName: string;
   mappings: MappingTypeMapping;
+  settings?: IndicesIndexSettings;
   logger?: Logger;
 }
 
@@ -21,6 +25,7 @@ export const createIndexWithMappings = async ({
   esClient,
   indexName,
   mappings,
+  settings,
   logger,
 }: CreateIndexOptions): Promise<void> => {
   try {
@@ -40,6 +45,7 @@ export const createIndexWithMappings = async ({
     await esClient.indices.create({
       index: indexName,
       mappings,
+      ...(settings ? { settings } : {}),
     });
 
     logger?.debug(`Successfully created index ${indexName}`);
@@ -59,6 +65,7 @@ export const createOrUpdateIndex = async ({
   esClient,
   indexName,
   mappings,
+  settings,
   logger,
 }: CreateIndexOptions): Promise<void> => {
   try {
@@ -72,6 +79,7 @@ export const createOrUpdateIndex = async ({
         esClient,
         indexName,
         mappings,
+        settings,
         logger,
       });
     } else {
@@ -85,6 +93,14 @@ export const createOrUpdateIndex = async ({
       } catch (mappingError) {
         logger?.warn(`Failed to update mappings for index ${indexName}: ${mappingError.message}`);
         // Continue - the index exists and can be used
+      }
+
+      if (settings) {
+        await esClient.indices.putSettings({
+          index: indexName,
+          settings,
+        });
+        logger?.debug(`Updated settings for existing index ${indexName}`);
       }
     }
   } catch (error) {

@@ -267,6 +267,7 @@ describe('Internal Routes', () => {
       expect.objectContaining({
         pattern: WORKFLOWS_EXECUTIONS_INDEX,
         indexFilter: { bool: { must_not: [{ term: { managed: true } }] } },
+        allowHidden: true,
       })
     );
   });

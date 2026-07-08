@@ -67,6 +67,7 @@ export const WORKFLOW_EXECUTIONS_FIELD_SPECS: Record<string, FieldSpec> = {
 export const WORKFLOW_EXECUTIONS_DATA_VIEW_CREATE_SPEC: DataViewSpec = {
   ...WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC,
   allowNoIndex: true,
+  allowHidden: true,
   fields: WORKFLOW_EXECUTIONS_FIELD_SPECS,
 };
 

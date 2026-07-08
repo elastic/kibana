@@ -28,6 +28,11 @@ export async function createIndexes(options: CreateIndexesOptions): Promise<void
       esClient,
       indexName: WORKFLOWS_EXECUTIONS_INDEX,
       mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
+      settings: {
+        index: {
+          hidden: true,
+        },
+      },
       logger,
     }),
     createOrUpdateIndex({
