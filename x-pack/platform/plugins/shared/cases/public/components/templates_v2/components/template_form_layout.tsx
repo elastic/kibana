@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { isEqual } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { UseFormReturn } from 'react-hook-form';
@@ -13,6 +14,7 @@ import { FormProvider } from 'react-hook-form';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
 import type { YamlEditorFormValues } from './template_form';
 import { useCasesTemplatesNavigation } from '../../../common/navigation';
 import { useDebouncedYamlEdit } from '../hooks/use_debounced_yaml_edit';
@@ -34,6 +36,20 @@ import {
   UserPickerDefaultSchema,
 } from '../../../../common/types/domain/template/fields';
 import { normalizeYamlString } from '../utils/normalize_yaml_string';
+import {
+  splitTemplateDefinition,
+  mergeTemplateDefinition,
+  normalizeTemplateSettings,
+  normalizeTemplateConnector,
+} from '../utils/template_settings_yaml';
+import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
+import type { TemplateSettings } from '../../../../common/types/domain/template/v1';
+
+interface SettingsConnectorDraft {
+  templateId?: string;
+  settings?: TemplateSettings;
+  connector?: CaseConnectorWithoutName;
+}
 
 interface TemplateFormLayoutProps {
   form: UseFormReturn<YamlEditorFormValues>;
@@ -72,6 +88,50 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isResetModalVisible, setIsResetModalVisible] = useState(false);
   const [isEnabled, setIsEnabled] = useState(initialIsEnabled);
+  // Bumped whenever we revert the Settings-tab state to its initial values (Reset). The connector
+  // picker runs its own hook_form_lib form that only seeds from `defaultValue` at mount, so it's
+  // remounted via this key to re-seed from the reverted connector. Keyed on a counter (not the
+  // connector object) so editing the connector fields never remounts and drops focus.
+  const [formResetKey, setFormResetKey] = useState(0);
+
+  // `connector` / `settings` are edited in the Settings tab, not the YAML buffer, so split them out
+  // of the initial definition (the editor shows fields only) and merge them back on save.
+  const {
+    fieldsYaml: initialFieldsYaml,
+    connector: initialConnector,
+    settings: initialSettings,
+  } = useMemo(() => splitTemplateDefinition(initialValue), [initialValue]);
+
+  // Settings-tab state isn't in the YAML buffer, so persist it alongside the YAML draft (keyed to
+  // the template) so edits survive a reload and count as unsaved changes.
+  const initialFormState = useMemo<SettingsConnectorDraft>(
+    () => ({ templateId, settings: initialSettings, connector: initialConnector }),
+    [templateId, initialSettings, initialConnector]
+  );
+  const [storedFormState, setStoredFormState] = useCasesLocalStorage<SettingsConnectorDraft>(
+    `${storageKey}.settingsConnector`,
+    initialFormState
+  );
+  // Only reuse a persisted draft that belongs to the current template (mirrors the YAML draft).
+  const useStoredFormState = storedFormState != null && storedFormState.templateId === templateId;
+  const settings = useStoredFormState ? storedFormState.settings : initialSettings;
+  const connector = useStoredFormState ? storedFormState.connector : initialConnector;
+
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
+  const connectorRef = useRef(connector);
+  connectorRef.current = connector;
+
+  const handleSettingsChange = useCallback(
+    (next: TemplateSettings) =>
+      setStoredFormState({ templateId, settings: next, connector: connectorRef.current }),
+    [setStoredFormState, templateId]
+  );
+  const handleConnectorChange = useCallback(
+    (next: CaseConnectorWithoutName) =>
+      setStoredFormState({ templateId, settings: settingsRef.current, connector: next }),
+    [setStoredFormState, templateId]
+  );
 
   const {
     value: yamlValue,
@@ -82,16 +142,27 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     isSaved: isYamlSaved,
   } = useDebouncedYamlEdit(
     storageKey,
-    initialValue,
+    initialFieldsYaml,
     (newValue) => form.setValue('definition', newValue),
     templateId
   );
-  const hasChanges = useMemo(
-    () =>
-      computeChangedLines(normalizeYamlString(initialValue), normalizeYamlString(yamlValue))
-        .length > 0,
-    [initialValue, yamlValue]
-  );
+  const hasChanges = useMemo(() => {
+    const yamlChanged =
+      computeChangedLines(normalizeYamlString(initialFieldsYaml), normalizeYamlString(yamlValue))
+        .length > 0;
+    // Settings-tab edits (connector + case settings) count as unsaved changes too. Compare the
+    // normalized forms so the connector form's "no connector" shape (`.none`) and empty settings
+    // don't read as changes against the unset initial state.
+    const settingsChanged = !isEqual(
+      normalizeTemplateSettings(settings),
+      normalizeTemplateSettings(initialSettings)
+    );
+    const connectorChanged = !isEqual(
+      normalizeTemplateConnector(connector),
+      normalizeTemplateConnector(initialConnector)
+    );
+    return yamlChanged || settingsChanged || connectorChanged;
+  }, [initialFieldsYaml, yamlValue, settings, initialSettings, connector, initialConnector]);
 
   const hasValidationErrors = useMemo(
     () => !validateTemplateDefinitionYaml(yamlValue ?? '').success,
@@ -148,8 +219,11 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
 
   const handleResetConfirm = useCallback(() => {
     handleReset();
+    setStoredFormState(initialFormState);
+    // Remount the connector picker so it re-seeds from the reverted connector (see formResetKey).
+    setFormResetKey((count) => count + 1);
     setIsResetModalVisible(false);
-  }, [handleReset]);
+  }, [handleReset, setStoredFormState, initialFormState]);
 
   const handleResetCancel = useCallback(() => {
     setIsResetModalVisible(false);
@@ -158,7 +232,11 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   const handleSave = useCallback(() => {
     setSubmitError(null);
 
-    const validationResult = validateTemplateDefinitionYaml(yamlValue ?? '');
+    // Merge the form-managed connector/settings back into the fields YAML, then validate the
+    // complete definition that will actually be persisted.
+    const mergedDefinition = mergeTemplateDefinition(yamlValue ?? '', { connector, settings });
+
+    const validationResult = validateTemplateDefinitionYaml(mergedDefinition);
     if (!validationResult.success) {
       setSubmitError(i18n.FIX_VALIDATION_ERRORS);
       return;
@@ -167,8 +245,11 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     form.handleSubmit(
       async (data) => {
         try {
-          await onCreate(data, isEnabled);
+          await onCreate({ ...data, definition: mergedDefinition }, isEnabled);
           clearDraft(isEdit ? data.definition : undefined);
+          // Reset the persisted Settings-tab draft: keep the saved values when editing, revert to
+          // the template's defaults when creating (mirrors clearDraft's create/edit behavior).
+          setStoredFormState(isEdit ? { templateId, settings, connector } : initialFormState);
         } catch (e) {
           setSubmitError(e?.message ?? i18n.FAILED_TO_SAVE_TEMPLATE);
         }
@@ -177,7 +258,19 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
         setSubmitError(i18n.FIX_VALIDATION_ERRORS);
       }
     )();
-  }, [form, onCreate, isEnabled, isEdit, clearDraft, yamlValue]);
+  }, [
+    form,
+    onCreate,
+    isEnabled,
+    isEdit,
+    clearDraft,
+    yamlValue,
+    connector,
+    settings,
+    setStoredFormState,
+    templateId,
+    initialFormState,
+  ]);
 
   const handleIsEnabledChange = useCallback((enabled: boolean) => {
     setIsEnabled(enabled);
@@ -188,9 +281,13 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       <EuiFlexGroup
         direction="column"
         gutterSize="none"
-        css={[kbnFullBodyHeightCss(), styles.wrapper]}
+        // The wrapper cancels the page-section padding via negative margins, so the only
+        // extra vertical space to reserve is the Security Solution timeline bottom bar
+        // (57px, the same value used by the validation accordion). This makes the page
+        // fill the viewport exactly and never scroll the header under the sticky top bar.
+        css={[kbnFullBodyHeightCss('57px'), styles.wrapper]}
       >
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} css={styles.header}>
           <TemplateFormHeader
             title={title}
             isLoading={isLoading}
@@ -217,7 +314,12 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             isYamlSaved={isYamlSaved}
             previewWidth={previewWidth}
             onPreviewWidthChange={setPreviewWidth}
-            savedValue={isEdit ? initialValue : undefined}
+            savedValue={isEdit ? initialFieldsYaml : undefined}
+            settings={settings}
+            connector={connector}
+            onSettingsChange={handleSettingsChange}
+            onConnectorChange={handleConnectorChange}
+            formResetKey={formResetKey}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
