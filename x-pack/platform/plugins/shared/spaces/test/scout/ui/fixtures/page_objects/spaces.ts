@@ -81,6 +81,34 @@ export class SpacesPage {
     await this.page.gotoApp('management');
   }
 
+  /**
+   * The Stack Management landing page renders a different root element per
+   * deployment: `managementHome` (classic chrome), `managementHomeSolution`
+   * (project chrome), or `cards-navigation-page` (when cards navigation is
+   * enabled, e.g. serverless). Match any of them so callers stay
+   * deployment-agnostic.
+   */
+  managementLandingLocator() {
+    return this.page.locator(
+      [
+        '[data-test-subj="managementHome"]',
+        '[data-test-subj="managementHomeSolution"]',
+        '[data-test-subj="cards-navigation-page"]',
+      ].join(', ')
+    );
+  }
+
+  /**
+   * The Spaces entry on the management landing renders as a sidebar nav link
+   * (`spaces`) with the classic sidebar, or as a navigation card
+   * (`app-card-spaces`) when cards navigation is enabled.
+   */
+  managementSpacesEntryLocator() {
+    return this.page.locator(
+      ['[data-test-subj="spaces"]', '[data-test-subj="app-card-spaces"]'].join(', ')
+    );
+  }
+
   /** Counts the rows currently rendered in the spaces listing table. */
   async getSpaceRowCount() {
     return await this.page.locator('[data-test-subj*="spacesListTableRow-"]').count();

@@ -17,11 +17,11 @@ test.describe('Spaces feature controls: global all', { tag: tags.deploymentAgnos
     await browserAuth.loginAsAdmin();
   });
 
-  test('can access the Spaces management section', async ({ page, pageObjects }) => {
+  test('can access the Spaces management section', async ({ pageObjects }) => {
     await pageObjects.spaces.gotoManagement();
 
-    await expect(page.testSubj.locator('managementHome')).toBeVisible();
-    await expect(page.testSubj.locator('spaces')).toBeVisible();
+    await expect(pageObjects.spaces.managementLandingLocator()).toBeVisible();
+    await expect(pageObjects.spaces.managementSpacesEntryLocator()).toBeVisible();
   });
 
   test('can navigate to the spaces grid, create, and edit pages', async ({ page, pageObjects }) => {
