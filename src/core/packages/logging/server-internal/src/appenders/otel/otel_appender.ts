@@ -294,16 +294,13 @@ export class OtelAppender implements DisposableAppender {
     const baseResource = buildOtelResources().merge(
       resources.resourceFromAttributes(config.attributes ?? {})
     );
-    const resource =
-      config.fieldDrops?.length
-        ? resources.resourceFromAttributes(
-            Object.fromEntries(
-              Object.entries(baseResource.attributes).filter(
-                ([k]) => !config.fieldDrops!.includes(k)
-              )
-            )
+    const resource = config.fieldDrops?.length
+      ? resources.resourceFromAttributes(
+          Object.fromEntries(
+            Object.entries(baseResource.attributes).filter(([k]) => !config.fieldDrops!.includes(k))
           )
-        : baseResource;
+        )
+      : baseResource;
     this.loggerProvider = new LoggerProvider({
       processors: [new BatchLogRecordProcessor(exporter)],
       resource,
@@ -341,7 +338,13 @@ export class OtelAppender implements DisposableAppender {
       context: toTraceContext(record),
       // log.meta is omitted from attributes when using JSON layout because it
       // is already part of the structured body.
-      attributes: toAttributes(record, !this.useStructuredBody, this.fieldRenames, this.fieldDrops, this.fieldDefaults),
+      attributes: toAttributes(
+        record,
+        !this.useStructuredBody,
+        this.fieldRenames,
+        this.fieldDrops,
+        this.fieldDefaults
+      ),
     });
   }
 
