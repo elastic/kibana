@@ -7,7 +7,9 @@
 
 import type { Logger } from '@kbn/core/server';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import type { EntityAnalyticsRoutesDeps } from '../../../lib/entity_analytics/types';
+import { ENTITY_ANALYTICS_UI_NAVIGATION_CONTENT } from '../ui_navigation';
 import {
   getRiskScoreInlineTool,
   getRiskScoreEsqlTool,
@@ -131,6 +133,8 @@ Rules:
 - If they mean the **built-in Security → Entity Analytics** experience (same IA as the product **Entity Analytics** page): phrases like **show / open / view / display / bring up** the **Entity Analytics** **dashboard**, **home**, **overview**, or **landing** page → call \`attachments.add\` with \`security.entity_analytics_dashboard\`. This is a **snapshot of that product page** in chat Canvas — **not** composing a **new Kibana saved Dashboard** (Lens panels, \`dashboard-management\` skill). Do **not** wait for the user to say "create"; **show/open/view** that page is enough.
 - **Does not** apply when the user only says **show**/**tell me**/**what are** together with **risky**/**riskiest**/**top** **hosts**, **users**, **entities** without naming the **Entity Analytics** product page — those are list/ranking asks satisfied by the \`security.entity\` attachment that \`security.search_entities\` emits automatically.
 - Only use Kibana dashboard composition when they clearly want a **new or edited Kibana Dashboard** saved object (panels, Lens, \`manage_dashboard\`, etc.) — not merely the word "dashboard" next to "Entity Analytics".
+
+${ENTITY_ANALYTICS_UI_NAVIGATION_CONTENT}
 
 ## When to Use This Skill
 
@@ -656,6 +660,7 @@ ${ctx.isEntityStoreV2Enabled ? entityStoreV2Content : legacyContent}
         ? [
             SECURITY_GET_ENTITY_TOOL_ID,
             SECURITY_SEARCH_ENTITIES_TOOL_ID,
+            platformCoreTools.redirectUserTo,
             SECURITY_LIST_WATCHLISTS_TOOL_ID,
             SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
           ]

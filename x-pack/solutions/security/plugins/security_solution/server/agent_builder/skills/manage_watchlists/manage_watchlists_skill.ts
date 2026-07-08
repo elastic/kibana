@@ -6,6 +6,8 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import { platformCoreTools } from '@kbn/agent-builder-common';
+import { WATCHLISTS_UI_NAVIGATION_CONTENT } from '../ui_navigation';
 import {
   SECURITY_ADD_ENTITIES_TO_WATCHLIST_TOOL_ID,
   SECURITY_CREATE_WATCHLIST_TOOL_ID,
@@ -117,6 +119,8 @@ User: "Remove user:jsmith123 from the Privileged Users watchlist."
 1. Call \`security.list_watchlists\` with \`nameContains: "Privileged Users"\` to resolve the id.
 2. Call \`security.remove_entities_from_watchlist\` with \`{ watchlistId: "<id>", entityIds: ["user:jsmith123"] }\`. Confirm.
 3. On accept, report the result. If the entity is reported as \`not_found\` with the "Entity not manually assigned" message, explain that the entity is on the watchlist via an entity source and direct the user to the UI to reconfigure that source.
+
+${WATCHLISTS_UI_NAVIGATION_CONTENT}
 `;
 
 export const manageWatchlistsSkill = defineSkillType({
@@ -133,5 +137,6 @@ export const manageWatchlistsSkill = defineSkillType({
     SECURITY_DELETE_WATCHLIST_TOOL_ID,
     SECURITY_ADD_ENTITIES_TO_WATCHLIST_TOOL_ID,
     SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
+    platformCoreTools.redirectUserTo,
   ],
 });
