@@ -12,7 +12,11 @@ import type { ESQLAstIpLocationCommand, ESQLList } from '@elastic/esql/types';
 import { commandsMetadata } from '../../definitions/generated/commands/commands';
 import { Commands } from '../../definitions/keywords';
 import { getMapEntryByStringKey } from '../../definitions/utils/maps';
-import { matchesWildcardPattern } from '../../definitions/utils/regex';
+import {
+  endsWithAssignment,
+  endsWithWhitespace,
+  matchesWildcardPattern,
+} from '../../definitions/utils/regex';
 import type {
   ElasticsearchCommandDefinition,
   ElasticsearchCommandOutputDefinition,
@@ -36,65 +40,12 @@ export enum IpLocationPosition {
  * The generated command definition stores those output columns under this wildcard variant.
  */
 const IP_LOCATION_DEFAULT_OUTPUT_VARIANT = '*-City.mmdb';
-const MAXMIND_VARIANT_PATTERN = /^\*-(.+\.mmdb)$/;
-
-/** Reads IP_LOCATION metadata from the generated command definitions. */
-const getIpLocationDefinition = (): ElasticsearchCommandDefinition | undefined =>
-  (commandsMetadata as Record<string, ElasticsearchCommandDefinition>)[Commands.IP_LOCATION];
-
-/** Returns the generated output schema used to infer new columns. */
-export const getIpLocationOutputDefinition = (): ElasticsearchCommandOutputDefinition | undefined =>
-  getIpLocationDefinition()?.output;
-
-/** City, Country, and ASN are the GeoLite2 MaxMind files; the other MaxMind variants use GeoIP2. */
-const getMaxMindDatabasePrefix = (suffix: string): 'GeoLite2' | 'GeoIP2' =>
-  suffix === 'City.mmdb' || suffix === 'Country.mmdb' || suffix === 'ASN.mmdb'
-    ? 'GeoLite2'
-    : 'GeoIP2';
-
-/** Converts command definition output patterns into insertable MaxMind database filenames. */
-const getDatabaseFileSuggestionFromVariantPattern = (pattern: string): string | undefined => {
-  const suffix = pattern.match(MAXMIND_VARIANT_PATTERN)?.[1];
-
-  if (!suffix) {
-    return undefined;
-  }
-
-  return `${getMaxMindDatabasePrefix(suffix)}-${suffix}`;
-};
-
-/** Lists concrete database filenames that autocomplete can insert. */
-export const getDatabaseFileSuggestions = (): string[] => {
-  const output = getIpLocationOutputDefinition();
-
-  if (!output) {
-    return [];
-  }
-
-  return Object.keys(output.variants).flatMap((pattern) => {
-    const suggestion = getDatabaseFileSuggestionFromVariantPattern(pattern);
-    return suggestion ? [suggestion] : [];
-  });
-};
 
 /** Keeps only properties included by ES when the user does not pass properties. */
 export const getDefaultPropertyNames = (variant: ElasticsearchCommandOutputVariant): string[] =>
   Object.entries(variant)
     .filter(([, metadata]) => metadata.default !== false)
     .map(([property]) => property);
-
-/** Builds the property list used when the selected database file is unknown. */
-export const getAllKnownProperties = (): string[] => {
-  const output = getIpLocationOutputDefinition();
-
-  if (!output) {
-    return [];
-  }
-
-  return Array.from(
-    new Set(Object.values(output.variants).flatMap((variant) => Object.keys(variant)))
-  ).sort();
-};
 
 /** Resolves a property type when no concrete database variant is available. */
 export const getPropertyTypeFromAnyVariant = (property: string): SupportedDataType | undefined => {
@@ -188,19 +139,6 @@ export const getSelectedProperties = (command: ESQLAstIpLocationCommand): string
   return propertiesList.values.filter(isStringLiteral).map(({ valueUnquoted }) => valueUnquoted);
 };
 
-/** Reads a literal database_file value without applying ES defaults. */
-const getDatabaseFile = (command: ESQLAstIpLocationCommand): string | undefined => {
-  const databaseFileEntry = getMapEntryByStringKey(command.namedParameters, 'database_file');
-
-  if (!databaseFileEntry) {
-    return undefined;
-  }
-
-  return isStringLiteral(databaseFileEntry.value)
-    ? databaseFileEntry.value.valueUnquoted
-    : undefined;
-};
-
 /** Maps the cursor location to the autocomplete state for IP_LOCATION syntax. */
 export function getPosition(
   command: ESQLAstIpLocationCommand,
@@ -209,6 +147,7 @@ export function getPosition(
   const cursorPosition = innerText.length;
   const { targetField, expression, namedParameters } = command;
   const hasAssignment = command.args.some((arg) => !Array.isArray(arg) && isAssignment(arg));
+  const hasTargetFieldName = !!targetField?.name?.trim().length;
 
   if (namedParameters !== undefined) {
     const map = isMap(namedParameters) ? namedParameters : undefined;
@@ -232,20 +171,63 @@ export function getPosition(
     return IpLocationPosition.WITHIN_OPTIONS;
   }
 
-  if (expression !== undefined) {
-    if (expression.incomplete || cursorPosition <= expression.location.max + 1) {
-      return IpLocationPosition.AFTER_ASSIGN;
-    }
+  if (
+    hasAssignment &&
+    expression &&
+    !expression.incomplete &&
+    cursorPosition > expression.location.max &&
+    !endsWithAssignment(innerText)
+  ) {
     return IpLocationPosition.AFTER_EXPRESSION;
   }
 
-  if (hasAssignment) {
+  if (
+    hasAssignment &&
+    (endsWithAssignment(innerText) ||
+      !expression ||
+      expression.incomplete ||
+      cursorPosition <= expression.location.max)
+  ) {
     return IpLocationPosition.AFTER_ASSIGN;
   }
 
-  if (targetField && !targetField.incomplete) {
+  if (hasTargetFieldName && endsWithWhitespace(innerText)) {
     return IpLocationPosition.AFTER_TARGET_FIELD;
   }
 
   return IpLocationPosition.AFTER_IP_LOCATION_KEYWORD;
 }
+
+/** Reads IP_LOCATION metadata from the generated command definitions. */
+const getIpLocationDefinition = (): ElasticsearchCommandDefinition | undefined =>
+  (commandsMetadata as Record<string, ElasticsearchCommandDefinition>)[Commands.IP_LOCATION];
+
+/** Returns the generated output schema used to infer new columns. */
+const getIpLocationOutputDefinition = (): ElasticsearchCommandOutputDefinition | undefined =>
+  getIpLocationDefinition()?.output;
+
+/** Builds the property list used when the selected database file is unknown. */
+const getAllKnownProperties = (): string[] => {
+  const output = getIpLocationOutputDefinition();
+
+  if (!output) {
+    return [];
+  }
+
+  return Array.from(
+    new Set(Object.values(output.variants).flatMap((variant) => Object.keys(variant)))
+  ).sort();
+};
+
+/** Reads a literal database_file value without applying ES defaults. */
+const getDatabaseFile = (command: ESQLAstIpLocationCommand): string | undefined => {
+  const databaseFileEntry = getMapEntryByStringKey(command.namedParameters, 'database_file');
+
+  if (!databaseFileEntry) {
+    return undefined;
+  }
+
+  return isStringLiteral(databaseFileEntry.value)
+    ? databaseFileEntry.value.valueUnquoted
+    : undefined;
+};

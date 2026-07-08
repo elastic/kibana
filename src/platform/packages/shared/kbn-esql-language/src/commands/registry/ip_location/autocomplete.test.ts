@@ -52,6 +52,10 @@ describe('IP_LOCATION Autocomplete', () => {
     );
   });
 
+  it('suggests assignment operator after target field', async () => {
+    await expectIpLocationSuggestions('FROM a | IP_LOCATION geo ', { contains: ['= '] });
+  });
+
   it('suggests IP and string fields after the assignment operator', async () => {
     const mockCallbacks = getMockCallbacks();
     (mockCallbacks.getByType as jest.Mock).mockResolvedValue([
@@ -66,17 +70,16 @@ describe('IP_LOCATION Autocomplete', () => {
     );
   });
 
+  it('suggests WITH and pipe after a complete expression', async () => {
+    await expectIpLocationSuggestions('FROM a | IP_LOCATION geo = ipField', {
+      contains: ['WITH { $0 }', '| '],
+    });
+  });
+
   it('suggests map keys inside an empty options map', async () => {
     await expectIpLocationSuggestions('FROM a | IP_LOCATION geo = ipField WITH { ', {
       contains: ['"database_file": "$0"', '"first_only": ', '"properties": [ $0 ]'],
     });
-  });
-
-  it('suggests database file values', async () => {
-    await expectIpLocationSuggestions(
-      'FROM a | IP_LOCATION geo = ipField WITH { "database_file": "',
-      { contains: ['"GeoLite2-City.mmdb"', '"GeoIP2-Anonymous-IP.mmdb"'] }
-    );
   });
 
   it('suggests properties for the selected database file', async () => {

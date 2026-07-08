@@ -24,7 +24,6 @@ import {
 import type { ICommandCallbacks, ICommandContext, ISuggestionItem } from '../types';
 import { Location } from '../types';
 import {
-  getDatabaseFileSuggestions,
   getPosition,
   getPropertiesList,
   getPropertyNamesForDatabase,
@@ -36,9 +35,6 @@ const getDatabaseFileMapParameter = () => ({
   description: i18n.translate(
     'kbn-esql-language.commands.ipLocation.autocomplete.databaseFileDescription',
     { defaultMessage: 'IP location database file name' }
-  ),
-  suggestions: getDatabaseFileSuggestions().map((databaseFile) =>
-    buildMapValueCompleteItem(databaseFile)
   ),
 });
 
@@ -67,10 +63,6 @@ export async function autocomplete(
   context?: ICommandContext,
   cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
-  if (!callbacks?.getByType) {
-    return [];
-  }
-
   const innerText = query.substring(0, cursorPosition);
   const ipLocationCommand = command as ESQLAstIpLocationCommand;
   const position = getPosition(ipLocationCommand, innerText);
@@ -78,7 +70,7 @@ export async function autocomplete(
   switch (position) {
     case IpLocationPosition.AFTER_IP_LOCATION_KEYWORD:
       return [
-        getNewUserDefinedColumnSuggestion(callbacks.getSuggestedUserDefinedColumnName?.() || ''),
+        getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
       ];
 
     case IpLocationPosition.AFTER_TARGET_FIELD:
