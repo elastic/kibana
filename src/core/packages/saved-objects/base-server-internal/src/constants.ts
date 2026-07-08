@@ -10,6 +10,31 @@
 import type { IndexTypesMap } from './mappings';
 
 /**
+ * Write-heavy saved objects indices that should be sharded proportionally to
+ * the size of the cluster, keyed by the index's alias (e.g.
+ * `.kibana_task_manager`). The value is the *maximum* number of primary shards.
+ *
+ * By default every saved objects index is created with a single primary shard
+ * (see `INDEX_NUMBER_OF_SHARDS`). For write-heavy indices this concentrates all
+ * writes on a single primary/node, which caps write throughput regardless of
+ * cluster size and surfaces as `es_rejected_execution_exception` (429) on the
+ * Elasticsearch `write` thread pool.
+ *
+ * Rather than a fixed shard count (which over-provisions small clusters and
+ * under-provisions large ones), the migration derives the number of primary
+ * shards from the number of data nodes (see `calculateAdaptiveShardCount`) and
+ * splits the index up to that number, capped by the value below. This spreads
+ * writes across nodes and grows with the cluster without manual retuning.
+ *
+ * The cap must be a power of two: existing indices were created with
+ * Elasticsearch's default (power-of-two) `number_of_routing_shards`, and
+ * `_split` targets must divide it evenly.
+ */
+export const INDEX_MAX_SHARDS_OVERRIDES: Record<string, number> = {
+  '.kibana_task_manager': 32,
+};
+
+/**
  * This map holds the default breakdown of SO types per index (pre 8.8.0)
  */
 export const DEFAULT_INDEX_TYPES_MAP: IndexTypesMap = {
