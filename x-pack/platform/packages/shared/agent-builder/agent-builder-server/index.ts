@@ -157,7 +157,6 @@ export type { SmlSearchFilters, SmlSearchConstraints } from './sml/http_api';
 export type {
   DiscoveryLabel,
   SmlKibanaPrivilege,
-  SmlElasticsearchIndex,
   SmlPermissions,
   SmlEntry,
   SmlContext,
@@ -174,9 +173,6 @@ export type {
   SmlCrawler,
   SmlDeleteScope,
   SmlIndexAttachmentOriginMode,
-  SmlIndexAttachmentContentMode,
-  SmlIndexerOriginParams,
-  SmlIndexerContentParams,
   SmlIndexerParams,
   SmlIndexerDeleteAttachmentParams,
   SmlService,

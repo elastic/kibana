@@ -8,9 +8,8 @@
 import { SmlError } from './sml_error';
 
 /**
- * Thrown when an origin-mode write targets an unregistered `attachmentType`.
- * Content-mode writes and deletes intentionally do not throw this — content mode
- * stamps empty permissions and warns; deletes must work even when the registering
- * plugin is disabled.
+ * Thrown when a write targets an unregistered `attachmentType`. Deletes
+ * intentionally do not throw this (they must work even when the registering
+ * plugin is disabled).
  */
 export class SmlUnregisteredTypeError extends SmlError {}

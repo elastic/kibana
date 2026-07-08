@@ -39,23 +39,13 @@ export interface SmlKibanaPrivilege {
 }
 
 /**
- * A single concrete Elasticsearch index / alias / data stream name whose
- * data an entry's content depends on. Used by the search-time post-filter
- * to gate entries behind the user's ES `read` privilege on each name.
- */
-export interface SmlElasticsearchIndex {
-  name: string;
-}
-
-/**
- * Permissions required to access an entry, split by access boundary.
+ * Permissions required to access an entry.
  *
- * Both sub-objects are always present (with possibly-empty arrays) on
- * stored documents to keep the schema rigid and predictable.
+ * Always present on stored documents (with a possibly-empty array) to keep
+ * the schema rigid and predictable.
  */
 export interface SmlPermissions {
   kibana: { privileges: SmlKibanaPrivilege[] };
-  elasticsearch: { indices: SmlElasticsearchIndex[] };
 }
 
 /**
@@ -74,19 +64,10 @@ export interface SmlEntry {
   /** Free-form labels for filtering and discovery */
   tags?: string[];
   /**
-   * Categorical / nickname terms that make this record discoverable beyond `type`
-   * and `title`. Each label carries a `kind` so the UI can render it appropriately
-   * (e.g. as a tagline, nickname, category, or synonym). Indexed as a nested field;
-   * the autocomplete surface queries `discovery_labels.value` (SAYT) with
-   * `multi_match bool_prefix` and uses `inner_hits` to surface which entry
-   * matched.
-   *
-   * Example for a GitHub connector:
-   *   [
-   *     { value: 'github',          kind: 'tagline' },
-   *     { value: 'gh',              kind: 'nickname' },
-   *     { value: 'version control', kind: 'category' },
-   *   ]
+   * Categorical / nickname terms for autocomplete discovery beyond `type` and
+   * `title`. Each label carries a `kind` for UI rendering (e.g. 'tagline',
+   * 'nickname', 'category'). Indexed as a nested field; the autocomplete
+   * surface queries `discovery_labels.value` via `multi_match bool_prefix`.
    */
   discovery_labels?: DiscoveryLabel[];
   /**
@@ -97,13 +78,11 @@ export interface SmlEntry {
   extended_attrs?: Record<string, unknown>;
   /** Owner or last-modifier user id when known */
   user_id?: string;
-  /** Other SML entries this item references. Each entry carries a `uri` field; the object shape allows sub-fields (e.g. relationship kind) without a future migration. */
+  /** Other SML entries this item references. */
   references?: Array<{ uri: string }>;
   // permissions: intentionally absent. The {@link SmlTypeDefinition.getPermissions}
   // hook is the single source of truth for the permissions stamped on the
-  // indexed document — neither `getSmlEntry` nor content-mode callers (the
-  // `sml.index` workflow step, event-driven content-mode indexAttachment)
-  // can override it.
+  // indexed document — callers cannot override it.
 }
 
 /**
@@ -169,28 +148,10 @@ export interface SmlTypeDefinition {
   ) => Promise<AttachmentInput<string, unknown> | undefined>;
 
   /**
-   * Compute the {@link SmlPermissions} that gate access to chunks for the
-   * given `originId`. Called by the indexer for every chunk it stamps,
-   * regardless of which mode (crawler/origin vs. workflow/content) wrote
-   * the chunk — so a workflow step's content-mode write inherits the same
-   * gating as a crawler-driven write.
-   *
-   * Authoritative when defined. Callers (workflow step, `getSmlEntry`) cannot
-   * override or bypass it — `SmlEntry` does not carry a `permissions`
-   * field. Types that need permission shapes the built-in helpers do not
-   * cover should still implement this directly (returning a fully-shaped
-   * {@link SmlPermissions}).
-   *
-   * Omit when the type wraps a resource that is intentionally public within
-   * the space (e.g. taxonomy entries, public schema docs). The indexer then
-   * stamps an empty `SmlPermissions`, which the read-path security filter
-   * treats as "no privileges required". A type that wraps a sensitive
-   * resource MUST implement this hook — there is no other way to attach an
-   * access-control gate to its chunks.
-   *
-   * For Kibana saved-object-backed types, prefer the
-   * `kibanaSavedObjectPermissions` helper over hand-writing the privilege
-   * string.
+   * Compute the {@link SmlPermissions} that gate access to the entry for
+   * `originId`. Omit for publicly-readable entries; the indexer then stamps
+   * empty permissions. For saved-object-backed types, prefer the
+   * `kibanaSavedObjectPermissions` helper.
    */
   getPermissions?: (
     originId: string,
@@ -205,19 +166,15 @@ export interface SmlTypeDefinition {
 }
 
 /**
- * How a chunk was produced.
+ * How an entry was produced.
  *
- * - `'crawled'`: written by the SML crawler or by an event-driven `indexAttachment`
- *   origin-mode call (content fetched via `getSmlEntry`).
- * - `'manual'`: written explicitly by a user/admin — via the HTTP upsert route or via
- *   `indexAttachment` content-mode. Manual entries are protected from being overwritten
- *   by the crawler / origin-mode `indexAttachment` unless `force: true` is passed.
+ * - `'crawled'`: written by the crawler or event-driven `indexAttachment`.
+ * - `'manual'`: written via the HTTP upsert route. Protected from crawler
+ *   overwrite unless `force: true` is passed.
  */
 export type SmlIngestionMethod = 'manual' | 'crawled';
 
-/**
- * An SML document as stored in the system index.
- */
+/** An SML document as stored in the `.ab-sml-data` index. */
 export interface SmlDocument {
   /** Unique id of the chunk */
   id: string;
@@ -245,7 +202,7 @@ export interface SmlDocument {
   extended_attrs?: Record<string, unknown>;
   /** Owner or last-modifier user id */
   user_id?: string;
-  /** Other SML entries this item references. Each entry carries a `uri` field; the object shape allows sub-fields (e.g. relationship kind) without a future migration. */
+  /** Other SML entries this item references. */
   references?: Array<{ uri: string }>;
   /** Timestamp when first created */
   created_at: string;
@@ -253,27 +210,15 @@ export interface SmlDocument {
   updated_at: string;
   /** Space IDs this item belongs to */
   spaces: string[];
-  /**
-   * Permissions required to access the underlying element. Always present
-   * on stored documents; inner arrays may be empty.
-   */
+  /** Permissions required to access the underlying element. Always present on stored documents. */
   permissions: SmlPermissions;
   /** How this chunk was produced. */
   ingestion_method: SmlIngestionMethod;
 }
 
 /**
- * Compact SML search result — LLM-shaped. Drops the full `content` blob, the
- * full `extended_attrs`, and bookkeeping fields. Callers fetch full content via the
- * lookup tool (`sml_read`) when they need it.
- *
- * `permissions` is retained here so callers (route / tool wrapper) can apply
- * post-hoc authorization filtering; downstream consumers should not expose it
- * in their response shape.
- *
- * Optional fields (`content`, `description`, `tags`, `references`) are omitted
- * when the caller passes a `fields` array that excludes them. `spaces` and
- * `permissions` are internal pipeline details — not present in results.
+ * Compact SML search result for LLM consumption. `permissions` and `spaces`
+ * are internal pipeline fields; optional fields are controlled via `fields`.
  */
 export interface SmlSearchResult {
   id: string;
@@ -370,73 +315,30 @@ export interface SmlCrawler {
 export type { SmlSearchFilters, SmlSearchConstraints } from './http_api';
 
 /**
- * Scope selector for `deleteAttachment` and the `deleteAttachment` start
- * contract method.
- *
- * - `'crawled'` (default) — remove crawler output only; preserve curated manual
- *   entries. This matches the historical behavior of
- *   `indexAttachment({ action: 'delete' })` and the crawler's own semantic.
- * - `'manual'` — remove curated manual entries; preserve crawled output.
- * - `'all'` — remove every chunk for the `origin_id` regardless of how it was
- *   produced. Use when the caller "owns" the origin and is fully retiring it
- *   (e.g. a workflow that wrote chunks and is now cleaning up).
+ * Scope selector for `deleteAttachment`: `'crawled'` (default), `'manual'`,
+ * or `'all'` (remove every chunk regardless of ingestion method).
  */
 export type SmlDeleteScope = SmlIngestionMethod | 'all';
 
 /**
- * Mode discriminator for `indexAttachment`.
+ * Origin-mode mixin for `indexAttachment`.
  *
- * The two mixins below define the discriminated half of the parameter object.
- * They are combined with a layer-specific "base" (public vs internal) to form
- * the full unions: `SmlIndexAttachmentParams` (public, in `server/types.ts`)
- * and `SmlIndexerParams` (internal, below).
- *
- * Origin mode — content is produced by the registered type's `getSmlEntry`
- * hook. The resulting entry is tagged `ingestion_method: 'crawled'`. If the
- * target `origin_id` already has an `ingestion_method: 'manual'` entry, the
- * call is a no-op unless `force: true` is provided.
+ * Content is produced by the registered type's `getSmlEntry` hook. The
+ * resulting entry is tagged `ingestion_method: 'crawled'`. If the target
+ * `origin_id` already has an `ingestion_method: 'manual'` entry, the call
+ * is a no-op unless `force: true` is provided.
  */
 export interface SmlIndexAttachmentOriginMode {
   /** Override existing manual entries. Default: false. */
   force?: boolean;
-  content?: undefined;
 }
 
 /**
- * Content mode — caller supplies a pre-built entry directly; `getSmlEntry` is
- * not called. The resulting entry is tagged `ingestion_method: 'manual'`. Always
- * overwrites the existing entry for the `origin_id`.
+ * Internal `indexAttachment` params. By the time the call reaches the
+ * service or indexer, the public wrapper has already resolved a scoped
+ * saved-objects client, an internal ES client, and the space list.
  */
-export interface SmlIndexAttachmentContentMode {
-  /** Pre-built entry; skips getSmlEntry; marks `ingestion_method='manual'`. */
-  content: SmlEntry;
-  force?: undefined;
-  /**
-   * `created_at` to stamp on the written chunks. When provided (e.g. the
-   * HTTP PUT route passes the value from the existing chunk so updates
-   * preserve the original creation timestamp), the chunks are written with
-   * this value instead of the current time. Omit on first-write — the
-   * indexer will stamp `now`.
-   */
-  createdAt?: string;
-  /**
-   * Caller-supplied permissions to stamp on the written chunks, used only
-   * when `attachmentType` has no `getPermissions` hook. Conflicts with a
-   * hook-backed type — see {@link SmlPermissionsConflictError}.
-   */
-  permissions?: SmlPermissions;
-}
-
-/**
- * Common params shared by both modes of the internal `indexAttachment` flow
- * (`SmlService.indexAttachment` and `SmlIndexer.indexAttachment`).
- *
- * Unlike the public-contract `SmlIndexAttachmentParams` (`server/types.ts`), this
- * type has no `request` / `spaceId` — by the time the call reaches the service or
- * indexer, the public wrapper has already resolved a scoped saved-objects client,
- * an internal ES client, and the space list.
- */
-interface SmlIndexerBaseParams {
+export interface SmlIndexerParams {
   originId: string;
   attachmentType: string;
   action: SmlIndexAction;
@@ -444,44 +346,18 @@ interface SmlIndexerBaseParams {
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
   logger: Logger;
+  /** Override existing manual entries. Default: false. */
+  force?: boolean;
 }
 
-export type SmlIndexerOriginParams = SmlIndexerBaseParams & SmlIndexAttachmentOriginMode;
-export type SmlIndexerContentParams = SmlIndexerBaseParams & SmlIndexAttachmentContentMode;
-
 /**
- * Discriminated union for the internal `indexAttachment` flow. Shared between
- * `SmlService.indexAttachment` and `SmlIndexer.indexAttachment`.
- */
-export type SmlIndexerParams = SmlIndexerOriginParams | SmlIndexerContentParams;
-
-/**
- * Internal params for `SmlIndexer.deleteAttachment` and
- * `SmlService.deleteAttachment`. Shape mirrors `SmlIndexerBaseParams` minus
- * `action` (the method itself implies delete) and adds the `ingestionMethod`
- * scope selector that lets callers wipe more than just crawled chunks.
- *
- * @remarks
- * `spaces` controls which chunks are deleted: only chunks whose stored
- * `spaces` array contains at least one of the provided space IDs (or the
- * wildcard `'*'`) are removed. HTTP-path callers (PUT/DELETE routes) pass
- * `[spaceId]` so the delete is scoped to the caller's space and chunks
- * belonging to other spaces are left intact.
- *
- * Crawler origin-mode paths omit `spaces` (via `indexAttachment`) so
- * their deletes remain global — the crawler owns the full origin across
- * all spaces and must be able to wipe stale chunks regardless of which
- * space they were written from.
+ * Internal params for `deleteAttachment`. `spaces` scopes the delete to chunks
+ * visible in the provided space IDs (plus the wildcard `'*'`).
  */
 export interface SmlIndexerDeleteAttachmentParams {
   originId: string;
   attachmentType: string;
-  /**
-   * Space-isolation guard. `deleteEntry` filters by
-   * `{ terms: { spaces: [...spaces, '*'] } }` so only chunks whose stored
-   * `spaces` array contains one of the provided IDs (or the global wildcard
-   * `'*'`) are removed. See type-level `@remarks` for the full contract.
-   */
+  /** Space IDs to scope the delete to. Chunks in other spaces are preserved. */
   spaces: string[];
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
@@ -497,15 +373,8 @@ export interface SmlService {
   /** Get the crawler instance (for task manager integration) */
   getCrawler: () => SmlCrawler;
   /**
-   * Hybrid search the SML index (RRF over BM25 + semantic), filtering results
-   * by space, constraints, agent-supplied filters, and permissions.
-   *
-   * `constraints` and `filters` are kept as separate parameters so the trust
-   * boundary is visible at the API layer: `constraints` is runtime-imposed
-   * (wrapper-applied from caller context — agent SO `connector_ids`, future
-   * allowed-indices, RBAC) and the agent can't bypass it; `filters` is the
-   * agent-discoverable refinement (`types[]`, `tags[]`). Both are combined
-   * server-side; agent filters never widen the scope.
+   * Hybrid search the SML index (RRF over BM25 + semantic), filtering by
+   * space, constraints, agent filters, and Kibana privileges.
    */
   search: (params: {
     query: string;
@@ -579,14 +448,8 @@ export interface SmlService {
   deleteAttachment: (params: SmlIndexerDeleteAttachmentParams) => Promise<void>;
 
   /**
-   * Fetch SML documents by their chunk IDs, scoped to a space.
-   *
-   * **Internal use only — does NOT perform permission checks.** The public
-   * `AgentContextLayerPluginStart.getDocuments` wraps this with an access
-   * check and filters out unauthorized IDs before fetching. Direct callers
-   * MUST authorize IDs (via `checkItemsAccess`) before invoking this method,
-   * or use it only from system contexts where the user's privileges are
-   * irrelevant (e.g. crawler/indexer tasks).
+   * Fetch SML documents by chunk IDs, scoped to a space. Does NOT perform
+   * permission checks -- callers must authorize via `checkItemsAccess` first.
    */
   getDocuments: (params: {
     ids: string[];
@@ -606,26 +469,8 @@ export interface SmlService {
   }) => Promise<{ total: number; results: SmlDocument[] }>;
 
   /**
-   * Fetch every chunk written under the compound `(type, originId)`
-   * key that is visible in `spaceId`.
-   *
-   * Used by the HTTP GET route and other origin-scoped reads.
-   *
-   * The caller MUST pass both `type` and `originId`. The bare
-   * `originId` is not unique on its own (a `lens` chunk and a
-   * `dashboard` chunk may legitimately share an id), so the lookup
-   * keys against the canonical `origin.uri = ${type}://${originId}`.
-   *
-   * Resolves to an empty array when no visible chunks exist; callers
-   * that need the "exists in another space" distinction (for
-   * cross-space write guards) should use
-   * {@link SmlService.findByOriginAcrossSpaces}.
-   *
-   * **Does NOT perform per-user permission checks.** The caller is
-   * expected to have already authorized the user against the space.
-   * Direct callers from request-handling contexts should layer their own
-   * `checkItemsAccess` filter on top — or wait for the route helper that
-   * does this for them.
+   * Fetch visible chunks for `(type, originId)` in `spaceId`. Does NOT
+   * perform per-user permission checks. Returns `[]` when none exist.
    */
   findByOrigin: (params: {
     type: string;
@@ -635,13 +480,8 @@ export interface SmlService {
   }) => Promise<SmlDocument[]>;
 
   /**
-   * Fetch every chunk written under the compound `(type, originId)`
-   * key regardless of space.
-   *
-   * Used exclusively for the HTTP route's cross-space-overwrite guard:
-   * a write request from space A must be blocked when the origin is
-   * already owned by space B. Callers MUST NOT use this for read paths
-   * that surface data to users — it bypasses space isolation.
+   * Fetch chunks for `(type, originId)` regardless of space. Guard-only
+   * -- MUST NOT be used for read paths that surface data to users.
    */
   findByOriginAcrossSpaces: (params: {
     type: string;

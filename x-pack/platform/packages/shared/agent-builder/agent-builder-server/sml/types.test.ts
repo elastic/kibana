@@ -37,7 +37,6 @@ describe('SML type definitions', () => {
   it('SmlDocument requires the full stored-document shape', () => {
     const permissions: SmlPermissions = {
       kibana: { privileges: [] },
-      elasticsearch: { indices: [] },
     };
     const document: SmlDocument = {
       id: 'doc-1',
@@ -66,7 +65,7 @@ describe('SML type definitions', () => {
       type: 'test_type',
       title: 'Title',
       origin: { uri: 'test_type://doc-1' },
-      permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
+      permissions: { kibana: { privileges: [] } },
       spaces: ['default'],
     };
     expect(searchResult.id).toBe(autocompleteResult.id);

@@ -9,7 +9,6 @@ import { SmlError } from './sml_error';
 
 /**
  * Thrown when a list query asks for a window larger than the index's
- * `index.max_result_window` setting. Routes translate this to HTTP 400 so
- * callers see a clean error instead of a 500.
+ * `index.max_result_window` setting.
  */
 export class SmlResultWindowExceededError extends SmlError {}

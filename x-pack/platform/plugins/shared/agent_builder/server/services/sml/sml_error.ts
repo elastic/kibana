@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/** Base for typed SML errors — routes map subclasses to specific HTTP statuses. */
+/** Base class for typed SML errors. */
 export class SmlError extends Error {
   constructor(message: string) {
     super(message);

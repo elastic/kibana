@@ -16,22 +16,10 @@ export enum SmlSearchFilterType {
 /**
  * Runtime-imposed, per-type id-allowlist constraints for SML search.
  *
- * Applied transparently by call wrappers from the caller's context (e.g. agent
- * SO `connector_ids`, future allowed-indices, allowed-skills, RBAC). Not
- * exposed to the LLM — the agent can't bypass constraints by construction.
- *
- * Keys must be values of {@link SmlSearchFilterType}.
- *
- * **Cross-type semantics:** constraints compose with OR across types — a record
- * satisfies constraints if it passes the constraint for its own type (or has no
- * constraint for its type). Because a record has exactly one type, per-type
- * constraints are always mutually exclusive on any given hit; AND semantics
- * across types are not expressible and not needed.
- *
- * **Complexity limit:** this shape intentionally supports only id-allowlists.
- * More complex runtime constraints (capability-based, classification-based, etc.)
- * must be pre-computed into a flat list of allowed IDs before being passed here,
- * or handled as a separate named parameter on the service call.
+ * Applied by call wrappers (e.g. agent SO `connector_ids`), not exposed to the
+ * LLM. Keys must be values of {@link SmlSearchFilterType}. Per-type constraints
+ * compose with OR across types (a record passes if its type has no constraint
+ * or the record's origin id is in the allowlist).
  */
 export type SmlSearchConstraints = Partial<Record<SmlSearchFilterType, { ids?: string[] }>>;
 
