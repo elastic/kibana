@@ -26,9 +26,9 @@ const mockNavigateToCasesCreateTemplate = jest.fn();
 const mockNavigateToCasesEditTemplate = jest.fn();
 
 jest.mock('../../../common/navigation/hooks', () => ({
-  useConfigureCasesNavigation: () => ({
-    getConfigureCasesUrl: jest.fn().mockReturnValue('/configure'),
-    navigateToConfigureCases: jest.fn(),
+  useAllCasesNavigation: () => ({
+    getAllCasesUrl: jest.fn().mockReturnValue('/'),
+    navigateToAllCases: jest.fn(),
   }),
   useCasesCreateTemplateNavigation: () => ({
     getCasesCreateTemplateUrl: jest.fn().mockReturnValue('/templates/create'),
@@ -129,24 +129,6 @@ describe('AllTemplatesPage', () => {
 
     expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
     expect(screen.getByTestId('create-template-button')).toBeInTheDocument();
-  });
-
-  it('does not render its own header when the settings redesign is enabled', async () => {
-    const queryClient = createTestQueryClient();
-    jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
-      templates: { enabled: true },
-      casesRedesign: { settings: true },
-    } as ReturnType<typeof KibanaServices.getConfig>);
-
-    renderWithTestingProviders(<AllTemplatesPage />, {
-      wrapperProps: { queryClient },
-    });
-
-    await waitFor(() => {
-      expect(screen.getByTestId('templates-table')).toBeInTheDocument();
-    });
-
-    expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.root)).not.toBeInTheDocument();
   });
 
   it('renders the info panel', async () => {

@@ -9,16 +9,15 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { AppHeader } from '@kbn/app-header';
 import { EuiBasicTable, EuiSkeletonText } from '@elastic/eui';
 import type { TemplateListItem } from '../../../../common/types/api/template/v1';
+import { PAGE_TITLE } from '../../../common/translations';
 import {
-  useConfigureCasesNavigation,
+  useAllCasesNavigation,
   useCasesCreateTemplateNavigation,
   useCasesFieldLibraryNavigation,
 } from '../../../common/navigation/hooks';
 import { useCasesTemplatesBreadcrumbs } from '../../use_breadcrumbs';
 import { useCasesContext } from '../../cases_context/use_cases_context';
-import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from '../translations';
-import * as configureCasesI18n from '../../configure_cases/translations';
 import { useTemplatesColumns } from '../hooks/use_templates_columns';
 import { useTemplatesState } from '../hooks/use_templates_state';
 import { useTemplatesPagination } from '../hooks/use_templates_pagination';
@@ -37,11 +36,7 @@ import { DeleteConfirmationModal } from '../../configure_cases/delete_confirmati
 export const AllTemplatesPage: React.FC = () => {
   useCasesTemplatesBreadcrumbs();
   const { owner } = useCasesContext();
-  // The Settings redesign renders a single AppHeader (with General/Templates tabs) that
-  // covers this page, so the page-local header below is only needed as a legacy fallback.
-  // TODO: Remove along with the Settings redesign FF cleanup.
-  const isSettingsRedesignEnabled = KibanaServices.getConfig()?.casesRedesign?.settings ?? false;
-  const { getConfigureCasesUrl, navigateToConfigureCases } = useConfigureCasesNavigation();
+  const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
   const { getCasesCreateTemplateUrl, navigateToCasesCreateTemplate } =
     useCasesCreateTemplateNavigation();
   const { getCasesFieldLibraryUrl, navigateToCasesFieldLibrary } = useCasesFieldLibraryNavigation();
@@ -139,18 +134,16 @@ export const AllTemplatesPage: React.FC = () => {
 
   return (
     <>
-      {!isSettingsRedesignEnabled && (
-        <AppHeader
-          title={i18n.TEMPLATE_TITLE}
-          back={{
-            href: getConfigureCasesUrl(),
-            label: configureCasesI18n.CONFIGURE_CASES_PAGE_TITLE,
-            onClick: navigateToConfigureCases,
-          }}
-          menu={templatesListMenu}
-          sticky={false}
-        />
-      )}
+      <AppHeader
+        title={i18n.TEMPLATE_TITLE}
+        back={{
+          href: getAllCasesUrl(),
+          label: PAGE_TITLE,
+          onClick: navigateToAllCases,
+        }}
+        menu={templatesListMenu}
+        sticky={false}
+      />
       <TemplatesInfoPanel />
       <TemplatesTableFilters
         queryParams={queryParams}
