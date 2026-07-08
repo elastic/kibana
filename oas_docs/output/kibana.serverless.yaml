@@ -71337,8 +71337,9 @@ components:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePercentage'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValue'
-      description: Dynamic color mapping by numeric range, with support for absolute and percentage-based ranges.
+      description: Dynamic color mapping by numeric range, with support for absolute and percentage-based ranges and named palettes.
       title: Color By Value
     Kibana_HTTP_APIs_colorByValueAbsolute:
       additionalProperties: false
@@ -71383,6 +71384,30 @@ components:
         - range
         - steps
       title: Color By Value (Absolute)
+      type: object
+    Kibana_HTTP_APIs_colorByValuePalette:
+      additionalProperties: false
+      description: Color by value using a named palette applied across the value range.
+      properties:
+        open_above:
+          default: true
+          description: When `true`, values above the palette's highest range use its highest color instead of being left uncolored. Defaults to `true`.
+          type: boolean
+        open_below:
+          default: false
+          description: When `true`, values below the palette's lowest range use its lowest color instead of being left uncolored. Defaults to `false`.
+          type: boolean
+        palette:
+          description: The name of the palette to apply across the value range (for example, `status`, `temperature`).
+          type: string
+        type:
+          enum:
+            - dynamic_palette
+          type: string
+      required:
+        - type
+        - palette
+      title: Color By Value (Palette)
       type: object
     Kibana_HTTP_APIs_colorByValuePercentage:
       additionalProperties: false
@@ -83575,6 +83600,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -83657,6 +83683,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -83738,6 +83765,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -83978,6 +84006,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -84061,6 +84090,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -84144,6 +84174,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -84227,6 +84258,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -84310,6 +84342,7 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
