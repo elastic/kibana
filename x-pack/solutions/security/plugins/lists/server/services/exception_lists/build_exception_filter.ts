@@ -226,19 +226,16 @@ export const createOrClauses = async <
   return { orClauses: orClauses.flat(), unprocessableExceptionItems };
 };
 
-const isListTypeProcessable = (type: Type): boolean =>
-  type === 'keyword' ||
-  type === 'ip' ||
-  type === 'ip_range' ||
-  type === 'byte' ||
-  type === 'integer_range' ||
-  type === 'float_range' ||
-  type === 'long_range' ||
-  type === 'double_range' ||
-  type === 'date_range' ||
-  type === 'geo_point' ||
-  type === 'geo_shape' ||
-  type === 'shape';
+/**
+ * Whether a value list of this type can be inlined into the exception query via the
+ * "small list" path ({@link buildListClause}). Every value-list type is inlineable
+ * except:
+ *  - `text`: an analyzed field, so exact matching requires a `match` query rather than
+ *    the `terms` clause used here. Handled by the per-document large-list path instead.
+ *  - `binary`: not searchable in Elasticsearch.
+ * Non-inlineable types fall back to the per-document large-list path.
+ */
+const isListTypeProcessable = (type: Type): boolean => type !== 'text' && type !== 'binary';
 
 export const filterOutUnprocessableValueLists = async <
   T extends ExceptionListItemSchema | CreateExceptionListItemSchema
@@ -525,12 +522,13 @@ export const buildIpRangeClauses = (
 const buildSmallListBoolFilter = (
   clauses: estypes.QueryDslQueryContainer[],
   operator: string
-): BooleanFilter => ({
-  bool: {
-    [operator === 'excluded' ? 'must_not' : 'should']: clauses,
-    minimum_should_match: 1,
-  },
-});
+): BooleanFilter =>
+  // A `bool` with only `must_not` and an explicit `minimum_should_match: 1` matches
+  // zero documents (ES requires one of the nonexistent `should` clauses to match), so
+  // `minimum_should_match` is applied only on the `should` (included) path.
+  operator === 'excluded'
+    ? { bool: { must_not: clauses } }
+    : { bool: { minimum_should_match: 1, should: clauses } };
 
 const parseNumericRangeClause = (value: string, field: string): estypes.QueryDslQueryContainer => {
   // Numeric range list values use dash-separated notation: "{gte}-{lte}".
@@ -589,12 +587,7 @@ export const buildListClause = async (
         });
       });
     }
-    return {
-      bool: {
-        [operator === 'excluded' ? 'must_not' : 'should']: rangeClauses,
-        minimum_should_match: 1,
-      },
-    };
+    return buildSmallListBoolFilter(rangeClauses, operator);
   }
 
   if (['integer_range', 'float_range', 'long_range', 'double_range'].includes(type)) {

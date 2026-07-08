@@ -8,7 +8,10 @@
 import type { QueryFilterType } from './get_query_filter_from_type_value';
 import {
   getEmptyQuery,
+  getGeoClause,
+  getGeoQuery,
   getQueryFilterFromTypeValue,
+  getRangeQuery,
   getShouldQuery,
   getTermsQuery,
   getTextQuery,
@@ -825,6 +828,191 @@ describe('get_query_filter_from_type_value', () => {
                   should: [{ terms: { _name: '0.0', ip: ['127.0.0.1'] } }],
                 },
               },
+            ],
+          },
+        },
+      ];
+      expect(query).toEqual(expected);
+    });
+  });
+
+  describe('geo types via getQueryFilterFromTypeValue', () => {
+    test('it builds a geo_distance query for a geo_point value (GeoJSON from the fields API)', () => {
+      const query = getQueryFilterFromTypeValue({
+        listId: 'list-123',
+        type: 'geo_point',
+        value: [{ coordinates: [-74.006, 40.7128], type: 'Point' }],
+      });
+      const expected: QueryFilterType = [
+        { term: { list_id: 'list-123' } },
+        {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              { geo_distance: { _name: '0.0', distance: '1m', geo_point: [-74.006, 40.7128] } },
+            ],
+          },
+        },
+      ];
+      expect(query).toEqual(expected);
+    });
+
+    test('it builds a geo_shape intersects query for a geo_shape value', () => {
+      const shape = { coordinates: [-74.006, 40.7128], type: 'Point' };
+      const query = getQueryFilterFromTypeValue({
+        listId: 'list-123',
+        type: 'geo_shape',
+        value: [shape],
+      });
+      const expected: QueryFilterType = [
+        { term: { list_id: 'list-123' } },
+        {
+          bool: {
+            minimum_should_match: 1,
+            should: [{ geo_shape: { _name: '0.0', geo_shape: { relation: 'intersects', shape } } }],
+          },
+        },
+      ];
+      expect(query).toEqual(expected);
+    });
+
+    test('it builds a shape intersects query for a shape value', () => {
+      const shape = { coordinates: [100, 200], type: 'Point' };
+      const query = getQueryFilterFromTypeValue({
+        listId: 'list-123',
+        type: 'shape',
+        value: [shape],
+      });
+      const expected: QueryFilterType = [
+        { term: { list_id: 'list-123' } },
+        {
+          bool: {
+            minimum_should_match: 1,
+            should: [{ shape: { _name: '0.0', shape: { relation: 'intersects', shape } } }],
+          },
+        },
+      ];
+      expect(query).toEqual(expected);
+    });
+
+    test('it returns an empty query when all geo values are null', () => {
+      const query = getQueryFilterFromTypeValue({
+        listId: 'list-123',
+        type: 'geo_point',
+        value: [null, undefined],
+      });
+      expect(query).toEqual(getEmptyQuery({ listId: 'list-123' }));
+    });
+  });
+
+  describe('getGeoClause', () => {
+    test('it extracts coordinates from a GeoJSON geo_point', () => {
+      expect(
+        getGeoClause({
+          name: '2.0',
+          type: 'geo_point',
+          value: { coordinates: [-74.006, 40.7128], type: 'Point' },
+        })
+      ).toEqual({ geo_distance: { _name: '2.0', distance: '1m', geo_point: [-74.006, 40.7128] } });
+    });
+
+    test('it passes a string geo_point value through unchanged', () => {
+      expect(getGeoClause({ name: '0.0', type: 'geo_point', value: '40.7128,-74.006' })).toEqual({
+        geo_distance: { _name: '0.0', distance: '1m', geo_point: '40.7128,-74.006' },
+      });
+    });
+  });
+
+  describe('getGeoQuery', () => {
+    test('it names each value by its index and flattens multi-valued (array) event fields', () => {
+      const first = { coordinates: [0, 0], type: 'Point' };
+      const second = { coordinates: [1, 1], type: 'Point' };
+      const query = getGeoQuery({
+        listId: 'list-123',
+        type: 'geo_point',
+        value: [first, [second]],
+      });
+      const expected: QueryFilterType = [
+        { term: { list_id: 'list-123' } },
+        {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              { geo_distance: { _name: '0.0', distance: '1m', geo_point: [0, 0] } },
+              { geo_distance: { _name: '1.0', distance: '1m', geo_point: [1, 1] } },
+            ],
+          },
+        },
+      ];
+      expect(query).toEqual(expected);
+    });
+  });
+
+  describe('range types via getQueryFilterFromTypeValue', () => {
+    test('it builds a single term query for a scalar range-typed event value', () => {
+      const query = getQueryFilterFromTypeValue({
+        listId: 'list-123',
+        type: 'integer_range',
+        value: [8080],
+      });
+      const expected: QueryFilterType = [
+        { term: { list_id: 'list-123' } },
+        {
+          bool: {
+            minimum_should_match: 1,
+            should: [{ term: { integer_range: { _name: '0.0', value: 8080 } } }],
+          },
+        },
+      ];
+      expect(query).toEqual(expected);
+    });
+
+    test('it expands a multi-valued (array) event field into one term clause per value', () => {
+      const query = getQueryFilterFromTypeValue({
+        listId: 'list-123',
+        type: 'ip_range',
+        value: [['10.0.0.1', '10.0.0.2']],
+      });
+      const expected: QueryFilterType = [
+        { term: { list_id: 'list-123' } },
+        {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              { term: { ip_range: { _name: '0.0', value: '10.0.0.1' } } },
+              { term: { ip_range: { _name: '0.1', value: '10.0.0.2' } } },
+            ],
+          },
+        },
+      ];
+      expect(query).toEqual(expected);
+    });
+
+    test('it returns an empty query when all range values are null', () => {
+      const query = getQueryFilterFromTypeValue({
+        listId: 'list-123',
+        type: 'date_range',
+        value: [null, null],
+      });
+      expect(query).toEqual(getEmptyQuery({ listId: 'list-123' }));
+    });
+  });
+
+  describe('getRangeQuery', () => {
+    test('it names scalar and array values by their index and filters out null/object values', () => {
+      const query = getRangeQuery({
+        listId: 'list-123',
+        type: 'long_range',
+        value: [100, [null, 200, {}], null],
+      });
+      const expected: QueryFilterType = [
+        { term: { list_id: 'list-123' } },
+        {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              { term: { long_range: { _name: '0.0', value: 100 } } },
+              { term: { long_range: { _name: '1.0', value: 200 } } },
             ],
           },
         },

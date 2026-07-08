@@ -43,6 +43,7 @@ import {
   deleteAllExceptions,
   deleteListsIndex,
   importFile,
+  waitForListSize,
 } from '../../../../../lists_and_exception_lists/utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
@@ -866,6 +867,193 @@ export default ({ getService }: FtrProviderContext) => {
           it.skip('binary — ES binary fields are not indexed and cannot be queried with term/terms', () => {
             /* binary type stores base64-encoded data that is stored but never indexed;
                no standard ES query can match against it */
+          });
+        });
+
+        // A value list is evaluated inline (the "small list" path) only while it stays at or
+        // below MAXIMUM_SMALL_VALUE_LIST_SIZE (65536) items. Beyond that it is routed through the
+        // per-document "large list" path (filterEventsAgainstList -> searchListItemByValues),
+        // which builds its query via getQueryFilterFromTypeValue. These cases confirm the geo and
+        // range types round-trip correctly through that path, which requires spatial queries for
+        // geo values (a `terms` query is invalid on geo/range fields).
+        describe('query rule: large value list exception uses the per-document large-list path', function () {
+          this.timeout(600000);
+
+          const LARGE_INDEX = 'value-list-large-list-test';
+          const LARGE_HOST = 'value-list-large-list-host';
+          const LARGE_MULTI_HOST = 'value-list-large-list-multi-host';
+          // Enough items to cross MAXIMUM_SMALL_VALUE_LIST_SIZE (65536), with a little headroom.
+          const LARGE_LIST_SIZE = 65540;
+
+          const fillerLines = (make: (i: number) => string): string[] =>
+            Array.from({ length: LARGE_LIST_SIZE }, (_, i) => make(i));
+
+          before(async () => {
+            await es.indices.delete({ index: LARGE_INDEX }, { ignore: [404] });
+            await es.indices.create({
+              index: LARGE_INDEX,
+              mappings: {
+                properties: {
+                  host: { properties: { name: { type: 'keyword' } } },
+                  '@timestamp': { type: 'date' },
+                  source: { properties: { ip: { type: 'ip' }, port: { type: 'integer' } } },
+                  geo_location: { type: 'geo_point' },
+                  geo_shape_field: { type: 'geo_shape' },
+                  shape_field: { type: 'shape' },
+                },
+              },
+            });
+            // Single-valued document exercised by the geo and integer_range cases.
+            await es.index({
+              index: LARGE_INDEX,
+              id: 'single',
+              document: {
+                host: { name: LARGE_HOST },
+                '@timestamp': '2020-01-01T00:00:00.000Z',
+                source: { ip: '10.0.0.5', port: 100 },
+                geo_location: GEO_LAT_LON,
+                geo_shape_field: GEO_WKT,
+                shape_field: CARTESIAN_WKT,
+              },
+              refresh: 'wait_for',
+            });
+            // Multi-valued source.ip document: exercises the range term-per-value expansion
+            // (a `terms` query is not supported against range fields).
+            await es.index({
+              index: LARGE_INDEX,
+              id: 'multi',
+              document: {
+                host: { name: LARGE_MULTI_HOST },
+                '@timestamp': '2020-01-01T00:00:00.000Z',
+                source: { ip: ['10.0.0.5', '10.0.0.6'] },
+              },
+              refresh: 'wait_for',
+            });
+          });
+
+          after(async () => {
+            await es.indices.delete({ index: LARGE_INDEX });
+          });
+
+          const runLargeValueListFilterCase = async ({
+            listType,
+            field,
+            listLines,
+            ruleQuery,
+          }: {
+            listType: Type;
+            field: string;
+            listLines: string[];
+            ruleQuery: string;
+          }) => {
+            expect(listLines.length).toBeGreaterThan(65536);
+            const valueListId = `vl-large-${listType}-${uuidv4()}.txt`;
+            try {
+              // Skip per-item polling: geo/range values are stored in a form that differs from the
+              // imported string, so a value term query never matches. Wait on the total instead,
+              // which also covers the asynchronous indexing of a large import.
+              await importFile(supertest, log, listType, listLines, valueListId, []);
+              await waitForListSize(supertest, log, valueListId, listLines.length);
+              const rule: QueryRuleCreateProps = {
+                name: `Large value list ${listType}`,
+                description: 'Large value list exception uses the per-document large-list path',
+                enabled: true,
+                risk_score: 1,
+                rule_id: `rule-large-vl-${listType}-${uuidv4()}`,
+                severity: 'high',
+                index: [LARGE_INDEX],
+                type: 'query',
+                from: '1900-01-01T00:00:00.000Z',
+                query: ruleQuery,
+              };
+              const createdRule = await createRuleWithExceptionEntries(supertest, log, rule, [
+                [
+                  {
+                    field,
+                    operator: 'included',
+                    type: 'list',
+                    list: {
+                      id: valueListId,
+                      type: listType,
+                    },
+                  },
+                ],
+              ]);
+              // getOpenAlerts waits for the rule to reach "succeeded" before asserting, so a query
+              // ES rejects (e.g. a `terms` query on a range field) fails the test rather than
+              // silently producing zero alerts.
+              const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
+              expect(alertsOpen.hits.hits).toHaveLength(0);
+            } finally {
+              // Delete the list (and its 65k+ items) so successive cases do not accumulate
+              // hundreds of thousands of list items, which starves the test environment.
+              // ignoreReferences bypasses the rule still referencing the list at this point.
+              await supertest
+                .delete(`${LIST_URL}?id=${valueListId}&ignoreReferences=true`)
+                .set('kbn-xsrf', 'true')
+                .send();
+            }
+          };
+
+          it('geo_point', async () => {
+            await runLargeValueListFilterCase({
+              listType: 'geo_point',
+              field: 'geo_location',
+              // Filler points sit near (10, 10), well beyond the 1m match radius of the document
+              // point (GEO_LAT_LON); the final entry matches.
+              listLines: [...fillerLines((i) => `${(10 + i * 0.0001).toFixed(4)},10`), GEO_LAT_LON],
+              ruleQuery: `host.name: "${LARGE_HOST}"`,
+            });
+          });
+
+          it('geo_shape', async () => {
+            await runLargeValueListFilterCase({
+              listType: 'geo_shape',
+              field: 'geo_shape_field',
+              listLines: [
+                ...fillerLines((i) => `POINT (10 ${(10 + i * 0.0001).toFixed(4)})`),
+                GEO_WKT,
+              ],
+              ruleQuery: `host.name: "${LARGE_HOST}"`,
+            });
+          });
+
+          it('shape', async () => {
+            await runLargeValueListFilterCase({
+              listType: 'shape',
+              field: 'shape_field',
+              listLines: [...fillerLines((i) => `POINT (${i} 0)`), CARTESIAN_WKT],
+              ruleQuery: `host.name: "${LARGE_HOST}"`,
+            });
+          });
+
+          it('integer_range (single-valued field)', async () => {
+            await runLargeValueListFilterCase({
+              listType: 'integer_range',
+              field: 'source.port',
+              // Filler ranges are all well above the document value (100); the final range contains it.
+              listLines: [...fillerLines((i) => `${1000 + i}-${1000 + i}`), '90-110'],
+              ruleQuery: `host.name: "${LARGE_HOST}"`,
+            });
+          });
+
+          it('ip_range (multi-valued field expands to one term per value)', async () => {
+            await runLargeValueListFilterCase({
+              listType: 'ip_range',
+              field: 'source.ip',
+              // Filler ranges live in 11.0.0.0/8 (never overlapping the 10.0.0.x document values);
+              // the final range contains 10.0.0.5, one of the document's multi-valued source.ip entries.
+              listLines: [
+                ...fillerLines((i) => {
+                  const ip = `11.${Math.floor(i / 65536) % 256}.${Math.floor(i / 256) % 256}.${
+                    i % 256
+                  }`;
+                  return `${ip}-${ip}`;
+                }),
+                '10.0.0.5-10.0.0.5',
+              ],
+              ruleQuery: `host.name: "${LARGE_MULTI_HOST}"`,
+            });
           });
         });
 

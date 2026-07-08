@@ -1520,6 +1520,68 @@ describe('build_exceptions_filter', () => {
         },
       });
     });
+
+    test('it should build a must_not clause without minimum_should_match when ip_range operator is "excluded"', async () => {
+      const booleanFilter = await buildListClause(
+        {
+          ...getEntryListExcludedMock(),
+          list: { id: getEntryListMock().list.id, type: 'ip_range' },
+        },
+        listClient
+      );
+
+      expect(booleanFilter).toEqual({
+        bool: {
+          must_not: [
+            {
+              term: {
+                'host.name': '127.0.0.1',
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    test('it should build a must_not clause without minimum_should_match when integer_range operator is "excluded"', async () => {
+      const rangeListClient = getListClientMock();
+      rangeListClient.findAllListItems = jest
+        .fn()
+        .mockResolvedValue({ data: [{ value: '100-200' }], total: 1 });
+      const booleanFilter = await buildListClause(
+        {
+          ...getEntryListExcludedMock(),
+          list: { id: getEntryListMock().list.id, type: 'integer_range' },
+        },
+        rangeListClient
+      );
+
+      expect(booleanFilter).toEqual({
+        bool: {
+          must_not: [{ range: { 'host.name': { gte: '100', lte: '200' } } }],
+        },
+      });
+    });
+
+    test('it should build a must_not clause without minimum_should_match when geo_point operator is "excluded"', async () => {
+      const geoListClient = getListClientMock();
+      geoListClient.findAllListItems = jest
+        .fn()
+        .mockResolvedValue({ data: [{ value: '40.7128,-74.006' }], total: 1 });
+      const booleanFilter = await buildListClause(
+        {
+          ...getEntryListExcludedMock(),
+          list: { id: getEntryListMock().list.id, type: 'geo_point' },
+        },
+        geoListClient
+      );
+
+      expect(booleanFilter).toEqual({
+        bool: {
+          must_not: [{ geo_distance: { distance: '1m', 'host.name': '40.7128,-74.006' } }],
+        },
+      });
+    });
   });
 
   describe('filterOutUnprocessableValueLists', () => {
@@ -1537,19 +1599,39 @@ describe('build_exceptions_filter', () => {
       expect(unprocessableValueListExceptions).toEqual([]);
     });
 
-    test("it should filter out list types we don't support", async () => {
-      const listEntryItem: EntryList = {
-        ...getEntryListMock(),
-        list: { id: getEntryListMock().list.id, type: 'text' },
-      };
-      const listExceptionItem = getExceptionListItemSchemaMock({ entries: [listEntryItem] });
+    test.each(['integer', 'long', 'double', 'boolean', 'date'] as const)(
+      'it should filter in scalar list types we inline into the query (%s)',
+      async (type) => {
+        const listEntryItem: EntryList = {
+          ...getEntryListMock(),
+          list: { id: getEntryListMock().list.id, type },
+        };
+        const listExceptionItem = getExceptionListItemSchemaMock({ entries: [listEntryItem] });
 
-      const { filteredExceptions, unprocessableValueListExceptions } =
-        await filterOutUnprocessableValueLists([listExceptionItem], listClient);
+        const { filteredExceptions, unprocessableValueListExceptions } =
+          await filterOutUnprocessableValueLists([listExceptionItem], listClient);
 
-      expect(filteredExceptions).toEqual([]);
-      expect(unprocessableValueListExceptions).toEqual([listExceptionItem]);
-    });
+        expect(filteredExceptions).toEqual([listExceptionItem]);
+        expect(unprocessableValueListExceptions).toEqual([]);
+      }
+    );
+
+    test.each(['text', 'binary'] as const)(
+      'it should filter out list types we cannot inline into the query (%s)',
+      async (type) => {
+        const listEntryItem: EntryList = {
+          ...getEntryListMock(),
+          list: { id: getEntryListMock().list.id, type },
+        };
+        const listExceptionItem = getExceptionListItemSchemaMock({ entries: [listEntryItem] });
+
+        const { filteredExceptions, unprocessableValueListExceptions } =
+          await filterOutUnprocessableValueLists([listExceptionItem], listClient);
+
+        expect(filteredExceptions).toEqual([]);
+        expect(unprocessableValueListExceptions).toEqual([listExceptionItem]);
+      }
+    );
   });
 
   describe('removeExpiredExceptions', () => {
