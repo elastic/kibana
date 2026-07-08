@@ -117,7 +117,7 @@ export class EndpointMetadataService {
       // If `united.agent.policy_id` includes a suffix, remove it
       if (hit._source?.united?.agent?.policy_id?.match(/#.*$/i)) {
         const existingPolicyId = hit._source.united.agent.policy_id;
-        const adjustedPolicyId = existingPolicyId.replace(/\#.*$/i, '');
+        const adjustedPolicyId = existingPolicyId.replace(/#.*$/i, '');
         recordsAltered.push(
           `Agent [${hit._source?.united?.agent?.agent?.id}]: adjusted 'policy_id' property value from [${existingPolicyId}] to [${adjustedPolicyId}]`
         );
@@ -505,7 +505,7 @@ export class EndpointMetadataService {
     const ccsEnabled = await this.endpointContext.isCcsEnabled();
     const query = getESQueryHostMetadataByIDs(endpointIDs, ccsEnabled);
 
-    this.logger.get('getMetadataForEndpoints').debug(() => `with query: ${stringify(query)}`);
+    this.logger.get('getMetadataForEndpoints').debug(() => `with query: ${stringify(query, 15)}`);
 
     const searchResult = await this.esClient.search<HostMetadata>(query).catch(catchAndWrapError);
 
