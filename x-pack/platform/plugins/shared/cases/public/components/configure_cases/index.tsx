@@ -8,7 +8,6 @@
 /* eslint-disable complexity */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { AppHeader } from '@kbn/app-header';
 import { css } from '@emotion/react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -121,23 +120,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
 
   const { permissions } = useCasesContext();
-  const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
+  const { navigateToAllCases } = useAllCasesNavigation();
   const { triggersActionsUi, docLinks } = useKibana().services;
   const isTemplatesEnabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
-  const isSettingsRedesignEnabled = KibanaServices.getConfig()?.casesRedesign?.settings ?? false;
-  const settingsBack = useMemo(
-    () => ({
-      href: getAllCasesUrl(),
-      label: i18n.PAGE_TITLE,
-      // AppHeader's back button keeps its `href` on the rendered anchor, so the default
-      // navigation must be prevented here to avoid a full page reload alongside the SPA one.
-      onClick: (event: React.MouseEvent) => {
-        event.preventDefault();
-        navigateToAllCases();
-      },
-    }),
-    [getAllCasesUrl, navigateToAllCases]
-  );
   const license = useLicense();
   const hasMinimumLicensePermissions = license.isAtLeastGold();
   const hasMinimumLicensePermissionsForObservables = license.isAtLeastPlatinum();
@@ -645,27 +630,18 @@ export const ConfigureCases: React.FC = React.memo(() => {
 
   return (
     <EuiPageSection paddingSize="none">
-      {isSettingsRedesignEnabled ? (
-        <AppHeader title={i18n.CONFIGURE_CASES_PAGE_TITLE} back={settingsBack} sticky={false} />
-      ) : (
-        <>
-          {isTemplatesEnabled && (
-            <EuiButtonEmpty
-              iconType="sortLeft"
-              size="xs"
-              flush="left"
-              onClick={navigateToAllCases}
-              data-test-subj="configure-cases-back-to-cases"
-            >
-              {i18n.BACK_TO_ALL}
-            </EuiButtonEmpty>
-          )}
-          <HeaderPage
-            data-test-subj="case-configure-title"
-            title={i18n.CONFIGURE_CASES_PAGE_TITLE}
-          />
-        </>
+      {isTemplatesEnabled && (
+        <EuiButtonEmpty
+          iconType="sortLeft"
+          size="xs"
+          flush="left"
+          onClick={navigateToAllCases}
+          data-test-subj="configure-cases-back-to-cases"
+        >
+          {i18n.BACK_TO_ALL}
+        </EuiButtonEmpty>
       )}
+      <HeaderPage data-test-subj="case-configure-title" title={i18n.CONFIGURE_CASES_PAGE_TITLE} />
       <EuiPageBody restrictWidth={false}>
         <div css={getFormWrapperCss(euiTheme)}>
           {hasMinimumLicensePermissions && (

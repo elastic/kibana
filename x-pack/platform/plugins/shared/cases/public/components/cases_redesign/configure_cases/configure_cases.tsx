@@ -13,7 +13,6 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
-  EuiButtonEmpty,
   EuiCallOut,
   EuiHorizontalRule,
   EuiLink,
@@ -36,11 +35,9 @@ import { Connectors } from '../../configure_cases/connectors';
 import { normalizeActionConnector, normalizeCaseConnector } from '../../configure_cases/utils';
 import * as configureCasesI18n from '../../configure_cases/translations';
 import { getConnectorById } from '../../utils';
-import { HeaderPage } from '../../header_page';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesBreadcrumbs } from '../../use_breadcrumbs';
 import { CasesDeepLinkId } from '../../../common/navigation';
-import { useAllCasesNavigation } from '../../../common/navigation/hooks';
 import { CommonFlyout } from '../../configure_cases/flyout';
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
 import { usePersistConfiguration } from '../../../containers/configure/use_persist_configuration';
@@ -50,7 +47,7 @@ import { ObservableTypesForm } from '../../observable_types/form';
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { AutomaticClosureSwitch } from './automatic_closure_switch';
 import { SettingsSection } from './settings_section';
-import { CASE_SETTINGS_TITLE } from '../translations';
+import { ConfigureCasesAppHeader } from './components/configure_cases_app_header';
 import * as observableTypesI18n from '../../observable_types/translations';
 
 interface Flyout {
@@ -82,7 +79,6 @@ const incidentManagementDescription = configureCasesI18n.INCIDENT_MANAGEMENT_SYS
 
 export const ConfigureCasesRedesign: React.FC = React.memo(() => {
   const { permissions } = useCasesContext();
-  const { navigateToAllCases } = useAllCasesNavigation();
   const { triggersActionsUi, docLinks } = useKibana().services;
   const license = useLicense();
   const hasMinimumLicensePermissions = license.isAtLeastGold();
@@ -404,16 +400,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
   return (
     <EuiPageSection paddingSize="none">
       <ConfigureCasesBreadcrumbs />
-      <EuiButtonEmpty
-        iconType="sortLeft"
-        size="xs"
-        flush="left"
-        onClick={navigateToAllCases}
-        data-test-subj="configure-cases-back-to-cases"
-      >
-        {configureCasesI18n.BACK_TO_ALL}
-      </EuiButtonEmpty>
-      <HeaderPage data-test-subj="case-configure-title" title={CASE_SETTINGS_TITLE} />
+      <ConfigureCasesAppHeader />
       <EuiPageBody restrictWidth={false}>
         <div css={getFormWrapperCss(euiTheme)}>
           {showConnectorsSection && !connectorIsValid && (

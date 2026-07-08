@@ -8,6 +8,7 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
 import { ConfigureCasesRedesign } from './configure_cases';
 import {
@@ -89,12 +90,12 @@ describe('ConfigureCasesRedesign', () => {
     });
   });
 
-  it('renders the redesigned settings page title and back button', async () => {
+  it('renders the redesigned settings page with the app header title', async () => {
     renderWithTestingProviders(<ConfigureCasesRedesign />);
 
-    expect(await screen.findByTestId('case-configure-title')).toBeInTheDocument();
-    expect(screen.getByText(CASE_SETTINGS_TITLE)).toBeInTheDocument();
-    expect(screen.getByTestId('configure-cases-back-to-cases')).toBeInTheDocument();
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      CASE_SETTINGS_TITLE
+    );
   });
 
   it('renders the three settings sections in a single panel', async () => {
@@ -115,8 +116,6 @@ describe('ConfigureCasesRedesign', () => {
 
     expect(screen.queryByTestId('custom-fields-form-group')).not.toBeInTheDocument();
     expect(screen.queryByTestId('templates-form-group')).not.toBeInTheDocument();
-    expect(screen.queryByText(configureCasesI18n.SETTINGS_TAB_GENERAL)).not.toBeInTheDocument();
-    expect(screen.queryByText(configureCasesI18n.SETTINGS_TAB_TEMPLATES)).not.toBeInTheDocument();
   });
 
   it('renders connector and closure controls', async () => {
