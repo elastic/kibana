@@ -46,6 +46,7 @@ function getCacheKey(accessKeyId: string, roleArn: string): string {
  * Uses the global STS endpoint (us-east-1) which works for all accounts/regions.
  */
 async function callAssumeRole(
+  httpClient: AxiosInstance,
   accessKeyId: string,
   secretAccessKey: string,
   roleArn: string,
@@ -86,7 +87,7 @@ async function callAssumeRole(
     // no sessionToken — base credentials are long-lived
   );
 
-  const response = await axios.post(`https://${host}/`, body, {
+  const response = await httpClient.post(`https://${host}/`, body, {
     headers: {
       ...sigHeaders,
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -122,6 +123,7 @@ async function callAssumeRole(
  * Return cached temporary credentials, refreshing via AssumeRole if expired or near expiry.
  */
 async function getTemporaryCredentials(
+  httpClient: AxiosInstance,
   accessKeyId: string,
   secretAccessKey: string,
   roleArn: string,
@@ -136,6 +138,7 @@ async function getTemporaryCredentials(
   }
 
   const creds = await callAssumeRole(
+    httpClient,
     accessKeyId,
     secretAccessKey,
     roleArn,
@@ -209,6 +212,12 @@ export const AwsIamRoleAuth: AuthTypeSpec<AuthSchemaType> = {
     const { accessKeyId, secretAccessKey, roleArn, externalId, roleSessionName } = secret;
     const sessionName = roleSessionName ?? 'kibana-connector';
 
+    // Create a separate client for STS AssumeRole calls, inheriting the platform's
+    // configured defaults (timeouts, base headers, etc.) but without our signing
+    // interceptor — which would otherwise create a circular dependency since STS
+    // is also an *.amazonaws.com host.
+    const stsClient = axios.create(axiosInstance.defaults);
+
     axiosInstance.interceptors.request.use(
       async (config: InternalAxiosRequestConfig): Promise<InternalAxiosRequestConfig> => {
         const requestUrl = config.url;
@@ -229,6 +238,7 @@ export const AwsIamRoleAuth: AuthTypeSpec<AuthSchemaType> = {
 
         // Obtain (possibly cached) temporary credentials
         const tempCreds = await getTemporaryCredentials(
+          stsClient,
           accessKeyId,
           secretAccessKey,
           roleArn,
