@@ -360,7 +360,7 @@ export const createVegaGraph = async (
       logger.warn('ES|QL resolution failed; finalizing without authoring a Vega spec');
       return FINALIZE_NODE;
     }
-    return SELECT_EXAMPLES_NODE;
+    return AUTHOR_SPEC_NODE;
   };
 
   const shouldRetryRouter = (state: VegaState): string => {
@@ -382,23 +382,25 @@ export const createVegaGraph = async (
     return AUTHOR_SPEC_NODE;
   };
 
-  return new StateGraph(VegaStateAnnotation)
-    .addNode(GENERATE_ESQL_NODE, generateESQLNode)
-    .addNode(SELECT_EXAMPLES_NODE, selectExamplesNode)
-    .addNode(AUTHOR_SPEC_NODE, authorSpecNode)
-    .addNode(VALIDATE_SPEC_NODE, validateSpecNode)
-    .addNode(FINALIZE_NODE, finalizeNode)
-    .addEdge('__start__', GENERATE_ESQL_NODE)
-    .addConditionalEdges(GENERATE_ESQL_NODE, afterGenerateEsqlRouter, {
-      [SELECT_EXAMPLES_NODE]: SELECT_EXAMPLES_NODE,
-      [FINALIZE_NODE]: FINALIZE_NODE,
-    })
-    .addEdge(SELECT_EXAMPLES_NODE, AUTHOR_SPEC_NODE)
-    .addEdge(AUTHOR_SPEC_NODE, VALIDATE_SPEC_NODE)
-    .addConditionalEdges(VALIDATE_SPEC_NODE, shouldRetryRouter, {
-      [AUTHOR_SPEC_NODE]: AUTHOR_SPEC_NODE,
-      [FINALIZE_NODE]: FINALIZE_NODE,
-    })
-    .addEdge(FINALIZE_NODE, '__end__')
-    .compile();
+  return (
+    new StateGraph(VegaStateAnnotation)
+      .addNode(GENERATE_ESQL_NODE, generateESQLNode)
+      .addNode(SELECT_EXAMPLES_NODE, selectExamplesNode)
+      .addNode(AUTHOR_SPEC_NODE, authorSpecNode)
+      .addNode(VALIDATE_SPEC_NODE, validateSpecNode)
+      .addNode(FINALIZE_NODE, finalizeNode)
+      .addEdge('__start__', GENERATE_ESQL_NODE)
+      .addEdge('__start__', SELECT_EXAMPLES_NODE)
+      .addConditionalEdges(GENERATE_ESQL_NODE, afterGenerateEsqlRouter, {
+        [AUTHOR_SPEC_NODE]: AUTHOR_SPEC_NODE,
+        [FINALIZE_NODE]: FINALIZE_NODE,
+      })
+      .addEdge(AUTHOR_SPEC_NODE, VALIDATE_SPEC_NODE)
+      .addConditionalEdges(VALIDATE_SPEC_NODE, shouldRetryRouter, {
+        [AUTHOR_SPEC_NODE]: AUTHOR_SPEC_NODE,
+        [FINALIZE_NODE]: FINALIZE_NODE,
+      })
+      .addEdge(FINALIZE_NODE, '__end__')
+      .compile()
+  );
 };

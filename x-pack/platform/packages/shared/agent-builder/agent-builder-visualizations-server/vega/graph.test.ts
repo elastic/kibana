@@ -136,7 +136,7 @@ describe('createVegaGraph', () => {
     expect(selectInvoke).toHaveBeenCalledTimes(1);
   });
 
-  it('does not select reference examples when ES|QL resolution fails', async () => {
+  it('does not author a spec when ES|QL resolution fails, despite selecting examples in parallel', async () => {
     mockedGenerateEsql.mockResolvedValue({
       query: 'FROM logs-*',
       error: 'verification_exception: boom',
@@ -144,7 +144,7 @@ describe('createVegaGraph', () => {
 
     await run();
 
-    expect(selectInvoke).not.toHaveBeenCalled();
+    expect(selectInvoke).toHaveBeenCalledTimes(1);
     expect(invoke).not.toHaveBeenCalled();
   });
 
