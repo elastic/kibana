@@ -57,7 +57,7 @@ describe('TemplateCaseDefaultsForm', () => {
 
     const severitySelect = screen.getByTestId('caseDefaultsSeverityInput');
     const options = within(severitySelect).getAllByRole('option');
-    const optionValues = options.map((option) => option.value);
+    const optionValues = options.map((option) => option.getAttribute('value'));
 
     expect(optionValues).toEqual([
       CaseSeverity.LOW,
