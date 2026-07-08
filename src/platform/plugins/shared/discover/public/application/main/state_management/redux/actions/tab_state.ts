@@ -259,19 +259,20 @@ export const setProfileState = <TState extends object>(
       );
     }
 
-    const profileStateForRedux =
-      services.profileStateRegistry.pickStateByType({
-        profileState: { [payload.profileStateDefinition.key]: payload.profileState },
-        stateType: [ProfileStateType.Ui, ProfileStateType.Persistent],
-      })[payload.profileStateDefinition.key] ?? {};
+    const profileStateForRedux = services.profileStateRegistry.pickStateByType({
+      profileState: { [payload.profileStateDefinition.key]: payload.profileState },
+      stateType: [ProfileStateType.Ui, ProfileStateType.Persistent],
+    })[payload.profileStateDefinition.key];
 
-    dispatch(
-      internalStateSlice.actions.setProfileState({
-        tabId: payload.tabId,
-        key: payload.profileStateDefinition.key,
-        profileState: profileStateForRedux,
-      })
-    );
+    if (profileStateForRedux) {
+      dispatch(
+        internalStateSlice.actions.setProfileState({
+          tabId: payload.tabId,
+          key: payload.profileStateDefinition.key,
+          profileState: profileStateForRedux,
+        })
+      );
+    }
 
     const profileStateForUrl = getProfileUrlState({
       profileState: { [payload.profileStateDefinition.key]: payload.profileState },
