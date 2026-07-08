@@ -32,7 +32,9 @@ const mockUseSetUnifiedAlertsWorkflowStatus =
   useSetUnifiedAlertsWorkflowStatus as jest.MockedFunction<
     typeof useSetUnifiedAlertsWorkflowStatus
   >;
-const mockUseSetAttacksStatus = useSetAttacksStatus as jest.MockedFunction<typeof useSetAttacksStatus>;
+const mockUseSetAttacksStatus = useSetAttacksStatus as jest.MockedFunction<
+  typeof useSetAttacksStatus
+>;
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.MockedFunction<
   typeof useIsExperimentalFeatureEnabled
 >;

@@ -40,9 +40,7 @@ import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_que
 import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/constants';
 import { getAlertsGroupingQuery } from './grouping_settings';
 import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
-import {
-  fetchQueryAlerts,
-} from '../../containers/detection_engine/alerts/api';
+import { fetchQueryAlerts } from '../../containers/detection_engine/alerts/api';
 import { useAttacksPageFetchMethod } from '../../hooks/attacks/use_attacks_page_fetch_method';
 
 const ALERTS_GROUPING_ID = 'alerts-grouping';
