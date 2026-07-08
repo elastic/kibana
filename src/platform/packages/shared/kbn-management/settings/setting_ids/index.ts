@@ -243,6 +243,8 @@ export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCO
   'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMaxThreshold' as const;
 export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID =
   'securitySolution:alertAnalysisWorkflowConnectorId' as const;
+export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID =
+  'securitySolution:alertAnalysisWorkflowAgentId' as const;
 export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION =
   'securitySolution:alertAnalysisWorkflowCreateConversation' as const;
 export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED =

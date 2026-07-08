@@ -15,7 +15,7 @@ import type { SignificantEvent } from '@kbn/significant-events-schema';
 import {
   SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
   type PendingSignificantEventAttachment,
-} from '@kbn/streams-plugin/common';
+} from '@kbn/significant-events-plugin/common';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
 import type { FocusedSignificantEventService } from '../../../services/significant_events/focused_significant_event_service';
 

@@ -48,8 +48,14 @@ export const YAML_EDITOR_OPTIONS: monaco.editor.IStandaloneEditorConstructionOpt
   lineNumbersMinChars: 2,
   insertSpaces: true,
   fontSize: 14,
+  lineHeight: 23,
   renderWhitespace: 'all',
   wordWrapColumn: 80,
   wrappingIndent: 'indent',
   formatOnType: true,
+  // Breathing room at the top/bottom of the scroll area, matching the Workflows editor.
+  padding: {
+    top: 16,
+    bottom: 16,
+  },
 };

@@ -32,6 +32,14 @@ export interface ContentBodyProps {
    * Unique identifier for the graph instance, used to scope filter state.
    */
   scopeId: string;
+  /** Invoked to open the event/alert details preview for a clicked item. */
+  onShowDocument: (docId: string, indexName?: string, isEvent?: boolean) => void;
+  /** Invoked to open the entity details preview for a clicked item. */
+  onShowEntity: (params: {
+    engineType: string | undefined;
+    entityId: string;
+    entityName: string | undefined;
+  }) => void;
 }
 
 export const ContentBody: FC<ContentBodyProps> = ({
@@ -41,6 +49,8 @@ export const ContentBody: FC<ContentBodyProps> = ({
   groupedItemsType,
   pagination,
   scopeId,
+  onShowDocument,
+  onShowEntity,
 }) => {
   // Show pagination only when there are more items than fit on a single page with default size
   const shouldShowPagination = totalHits > DEFAULT_PAGE_SIZE;
@@ -57,7 +67,12 @@ export const ContentBody: FC<ContentBodyProps> = ({
           // previewed group mounted when switching between grouped nodes (issue
           // #275261). Suffix the index to guarantee a unique key per rendered item.
           <li key={'docId' in item ? item.docId : `${item.id}-${index}`}>
-            <GroupedItem item={item} scopeId={scopeId} />
+            <GroupedItem
+              item={item}
+              scopeId={scopeId}
+              onShowDocument={onShowDocument}
+              onShowEntity={onShowEntity}
+            />
           </li>
         ))}
       </List>

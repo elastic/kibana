@@ -214,6 +214,7 @@ export interface UsageStats {
   'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMinThreshold': number;
   'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMaxThreshold': number;
   'securitySolution:alertAnalysisWorkflowConnectorId': string;
+  'securitySolution:alertAnalysisWorkflowAgentId': string;
   'securitySolution:alertAnalysisWorkflowCreateConversation': boolean;
   'securitySolution:alertAnalysisWorkflowTagPrefix': string;
   'elasticRamen:enabled': boolean;
