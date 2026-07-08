@@ -75,15 +75,6 @@ const smlStorageSchemaProperties = {
           }),
         },
       }),
-      elasticsearch: types.object({
-        properties: {
-          indices: types.object({
-            properties: {
-              name: types.keyword({}),
-            },
-          }),
-        },
-      }),
     },
   }),
   ingestion_method: types.keyword({}),

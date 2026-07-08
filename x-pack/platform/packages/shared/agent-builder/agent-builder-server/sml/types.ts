@@ -43,6 +43,11 @@ export interface SmlKibanaPrivilege {
  *
  * Always present on stored documents (with a possibly-empty array) to keep
  * the schema rigid and predictable.
+ *
+ * Note: `agent_context_layer`'s own (still-unmigrated) SML types still carry
+ * an `elasticsearch: { indices: [] }` field on this shape, populated by the
+ * type owners that import from there directly (workflow, rule, action_policy,
+ * significant_event). Task 10A migrates those owners onto this type.
  */
 export interface SmlPermissions {
   kibana: { privileges: SmlKibanaPrivilege[] };
