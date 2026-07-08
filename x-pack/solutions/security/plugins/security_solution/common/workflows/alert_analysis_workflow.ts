@@ -30,6 +30,13 @@ export const AlertAnalysisWorkflowSettings = z.object({
   autoCloseEnabled: z.boolean(),
   autoCloseConfidenceScoreMinThreshold: z.number().min(0).max(1),
   autoCloseConfidenceScoreMaxThreshold: z.number().min(0).max(1),
+  // Agent Builder agent id the workflow's ai.agent step runs with. Non-empty (defaults to the
+  // platform default agent) so the workflow step always has a real agent to invoke. Max length
+  // matches Agent Builder's `agentIdMaxLength`.
+  agentId: z.string().min(1).max(64),
+  // Prefix for the workflow tags written to (and matched on) each analyzed alert. Non-empty so the
+  // dedup gate and tag replacement always have a real namespace to match against.
+  tagPrefix: z.string().min(1).max(256),
 });
 
 export type AlertAnalysisWorkflowSettings = z.infer<typeof AlertAnalysisWorkflowSettings>;
@@ -48,7 +55,7 @@ export type AlertAnalysisWorkflowSettingsRequestBody = z.infer<
 >;
 
 export const AlertAnalysisWorkflowRuleAttachmentListRequestQuery = z.object({
-  search: z.string().optional().default(''),
+  search: z.string().max(1000).optional().default(''),
   page: z.coerce.number().int().min(1).optional().default(1),
   per_page: z.coerce.number().int().min(1).max(100).optional().default(20),
 });
@@ -57,19 +64,19 @@ export type AlertAnalysisWorkflowRuleAttachmentListRequestQuery = z.infer<
   typeof AlertAnalysisWorkflowRuleAttachmentListRequestQuery
 >;
 
-export const AlertAnalysisWorkflowRuleAttachmentStatsRequestBody = z.object({
-  search: z.string().optional().default(''),
+export const AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery = z.object({
+  search: z.string().max(1000).optional().default(''),
 });
 
-export type AlertAnalysisWorkflowRuleAttachmentStatsRequestBody = z.infer<
-  typeof AlertAnalysisWorkflowRuleAttachmentStatsRequestBody
+export type AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery = z.infer<
+  typeof AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery
 >;
 
-export const AlertAnalysisWorkflowRuleAttachmentSelectionRequestBody =
-  AlertAnalysisWorkflowRuleAttachmentStatsRequestBody;
+export const AlertAnalysisWorkflowRuleAttachmentSelectionRequestQuery =
+  AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery;
 
-export type AlertAnalysisWorkflowRuleAttachmentSelectionRequestBody = z.infer<
-  typeof AlertAnalysisWorkflowRuleAttachmentSelectionRequestBody
+export type AlertAnalysisWorkflowRuleAttachmentSelectionRequestQuery = z.infer<
+  typeof AlertAnalysisWorkflowRuleAttachmentSelectionRequestQuery
 >;
 
 export const AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody = z

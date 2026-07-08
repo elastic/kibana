@@ -68,8 +68,4 @@ export const componentStyles = {
       backgroundColor: euiTheme.colors.backgroundBasePlain,
       borderLeft: `1px solid ${euiTheme.colors.borderBasePlain}`,
     }),
-  previewHeaderTitle: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      color: euiTheme.colors.textParagraph,
-    }),
 };

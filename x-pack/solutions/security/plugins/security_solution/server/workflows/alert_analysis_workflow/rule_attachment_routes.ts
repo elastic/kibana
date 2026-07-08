@@ -17,12 +17,12 @@ import {
   ALERT_ANALYSIS_WORKFLOW_RULE_UPDATE_ROUTE,
   ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE,
   AlertAnalysisWorkflowRuleAttachmentListRequestQuery,
-  AlertAnalysisWorkflowRuleAttachmentSelectionRequestBody,
-  AlertAnalysisWorkflowRuleAttachmentStatsRequestBody,
+  AlertAnalysisWorkflowRuleAttachmentSelectionRequestQuery,
+  AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery,
   AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody,
   type AlertAnalysisWorkflowRuleAttachmentListRequestQuery as AlertAnalysisWorkflowRuleAttachmentListRequestQueryType,
-  type AlertAnalysisWorkflowRuleAttachmentSelectionRequestBody as AlertAnalysisWorkflowRuleAttachmentSelectionRequestBodyType,
-  type AlertAnalysisWorkflowRuleAttachmentStatsRequestBody as AlertAnalysisWorkflowRuleAttachmentStatsRequestBodyType,
+  type AlertAnalysisWorkflowRuleAttachmentSelectionRequestQuery as AlertAnalysisWorkflowRuleAttachmentSelectionRequestQueryType,
+  type AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery as AlertAnalysisWorkflowRuleAttachmentStatsRequestQueryType,
   type AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody as AlertAnalysisWorkflowRuleAttachmentUpdateRequestBodyType,
 } from '../../../common/workflows/alert_analysis_workflow';
 import type {
@@ -133,7 +133,7 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
     );
 
   router.versioned
-    .post({
+    .get({
       path: ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE,
       access: 'internal',
       security: {
@@ -147,7 +147,9 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
         version: ALERT_ANALYSIS_WORKFLOW_API_VERSION,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(AlertAnalysisWorkflowRuleAttachmentStatsRequestBody),
+            query: buildRouteValidationWithZod(
+              AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery
+            ),
           },
         },
       },
@@ -160,7 +162,7 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
           }
 
           const { search } =
-            request.body as AlertAnalysisWorkflowRuleAttachmentStatsRequestBodyType;
+            request.query as AlertAnalysisWorkflowRuleAttachmentStatsRequestQueryType;
           const service = await createReadService(context);
           const body = await service.getRuleAttachmentStats({ search });
 
@@ -176,7 +178,7 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
     );
 
   router.versioned
-    .post({
+    .get({
       path: ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE,
       access: 'internal',
       security: {
@@ -190,8 +192,8 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
         version: ALERT_ANALYSIS_WORKFLOW_API_VERSION,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(
-              AlertAnalysisWorkflowRuleAttachmentSelectionRequestBody
+            query: buildRouteValidationWithZod(
+              AlertAnalysisWorkflowRuleAttachmentSelectionRequestQuery
             ),
           },
         },
@@ -205,7 +207,7 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
           }
 
           const { search } =
-            request.body as AlertAnalysisWorkflowRuleAttachmentSelectionRequestBodyType;
+            request.query as AlertAnalysisWorkflowRuleAttachmentSelectionRequestQueryType;
           const service = await createReadService(context);
           const body = await service.getRuleAttachmentSelection({ search });
 

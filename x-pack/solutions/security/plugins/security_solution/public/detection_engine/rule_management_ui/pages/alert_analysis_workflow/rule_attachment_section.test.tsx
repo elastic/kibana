@@ -331,8 +331,7 @@ describe('AlertAnalysisWorkflowRuleAttachmentSection', () => {
       }
 
       if (path === ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE) {
-        const body = options?.body ? JSON.parse(options.body) : {};
-        return body.search === 'malware'
+        return options?.query?.search === 'malware'
           ? { total: 1, attached: 0 }
           : { total: TOTAL_RULES, attached: ATTACHED_RULES };
       }

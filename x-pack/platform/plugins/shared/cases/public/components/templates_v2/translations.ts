@@ -401,14 +401,6 @@ export const PREVIEW_EMPTY_BODY = i18n.translate('xpack.cases.templates.previewE
     'Add a template definition in the editor to see how it will appear when creating a case.',
 });
 
-export const PREVIEW_TEMPLATE_DESCRIPTION = i18n.translate(
-  'xpack.cases.templates.previewTemplateDescription',
-  {
-    defaultMessage:
-      'See how this template appears and set default field values when creating a case.',
-  }
-);
-
 export const DELETE_TEMPLATE = i18n.translate('xpack.cases.templates.deleteTemplate', {
   defaultMessage: 'Delete',
 });
@@ -767,4 +759,42 @@ export const INVALID_YAML_NON_OBJECT = i18n.translate(
 export const INVALID_YAML_DEFINITION = i18n.translate(
   'xpack.cases.templates.invalidYamlDefinition',
   { defaultMessage: 'Invalid YAML definition' }
+);
+
+export const CONNECTOR_TITLE = i18n.translate('xpack.cases.templates.preview.connectorTitle', {
+  defaultMessage: 'Connector',
+});
+
+export const FIELDS_TAB_LABEL = i18n.translate('xpack.cases.templates.renderPanel.fieldsTab', {
+  defaultMessage: 'Fields',
+});
+
+export const SETTINGS_TAB_LABEL = i18n.translate('xpack.cases.templates.renderPanel.settingsTab', {
+  defaultMessage: 'Settings',
+});
+
+export const SETTINGS_SECTION_TITLE = i18n.translate(
+  'xpack.cases.templates.settings.sectionTitle',
+  { defaultMessage: 'Case settings' }
+);
+
+export const SETTINGS_SECTION_DESCRIPTION = i18n.translate(
+  'xpack.cases.templates.settings.sectionDescription',
+  {
+    defaultMessage:
+      'Defaults applied to cases created from this template. These are managed here, not in the YAML.',
+  }
+);
+
+export const CONNECTOR_SECTION_TITLE = i18n.translate(
+  'xpack.cases.templates.settings.connectorSectionTitle',
+  { defaultMessage: 'External connector' }
+);
+
+export const CONNECTOR_NOT_FOUND = i18n.translate(
+  'xpack.cases.templates.preview.connectorNotFound',
+  {
+    defaultMessage:
+      'Connector not found. Cases created from this template will fall back to no connector.',
+  }
 );

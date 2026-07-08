@@ -10,9 +10,9 @@ import { MemoryRouter } from 'react-router-dom';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { focusManager } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
-import { RULES_FEATURE_ID } from '../../../../../common/constants';
 import { TestProviders } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { ALERT_ANALYSIS_WORKFLOW_API_VERSION, ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE } from './api';
 import { AlertAnalysisWorkflowPage } from '.';
 
@@ -24,15 +24,21 @@ jest.mock('../../../../common/containers/use_full_screen', () => ({
 }));
 
 jest.mock('../../../../common/hooks/use_license');
+jest.mock('../../../../common/components/user_privileges');
+
+const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
 describe('AlertAnalysisWorkflowPage', () => {
   const coreStart = coreMock.createStart();
+
+  const listAgentsMock = jest.fn();
 
   const settingsGetResponse = (
     settings: Record<string, unknown> = {
       autoCloseEnabled: true,
       autoCloseConfidenceScoreMinThreshold: 0.85,
       autoCloseConfidenceScoreMaxThreshold: 1,
+      tagPrefix: 'alert-analysis',
     }
   ) => ({
     settings,
@@ -44,9 +50,12 @@ describe('AlertAnalysisWorkflowPage', () => {
       ...coreStart.application.capabilities,
       advancedSettings: { show: true, save: true },
       securitySolution: { show: true, crud: true },
-      [RULES_FEATURE_ID]: { read_rules: true, edit_rules: true },
       workflowsManagement: { updateWorkflow: true },
     };
+    // The page reads rules-edit via useUserPrivileges (not raw capabilities).
+    useUserPrivilegesMock.mockReturnValue({
+      rulesPrivileges: { rules: { read: true, edit: true } },
+    });
     coreStart.application.getUrlForApp.mockImplementation(
       (appId, options) => `/app/${appId}${options?.path ?? ''}`
     );
@@ -68,9 +77,17 @@ describe('AlertAnalysisWorkflowPage', () => {
       };
     });
 
+    const startServices = createStartServicesMock(coreStart);
     return render(
       <MemoryRouter>
-        <TestProviders startServices={createStartServicesMock(coreStart)}>
+        <TestProviders
+          startServices={
+            {
+              ...startServices,
+              agentBuilder: { agents: { list: listAgentsMock } },
+            } as unknown as typeof startServices
+          }
+        >
           <AlertAnalysisWorkflowPage />
         </TestProviders>
       </MemoryRouter>
@@ -79,6 +96,28 @@ describe('AlertAnalysisWorkflowPage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    listAgentsMock.mockResolvedValue([
+      { id: 'elastic-ai-agent', name: 'Elastic AI Agent', readonly: false },
+      { id: 'my-custom-agent', name: 'My Custom Agent', readonly: false },
+      { id: 'platform.builtin', name: 'Built-in Agent', readonly: true },
+    ]);
+  });
+
+  it('lists the user selectable agents excluding platform built-ins', async () => {
+    renderComponent();
+
+    fireEvent.click(await screen.findByTestId('alertAnalysisWorkflowAgentSelector'));
+
+    expect(await screen.findByText('My Custom Agent')).toBeInTheDocument();
+  });
+
+  it('excludes readonly built-in agents from the agent selector', async () => {
+    renderComponent();
+
+    fireEvent.click(await screen.findByTestId('alertAnalysisWorkflowAgentSelector'));
+
+    await screen.findByText('My Custom Agent');
+    expect(screen.queryByText('Built-in Agent')).not.toBeInTheDocument();
   });
 
   it('saves changed settings through the Security route', async () => {
@@ -104,6 +143,7 @@ describe('AlertAnalysisWorkflowPage', () => {
           autoCloseEnabled: false,
           autoCloseConfidenceScoreMinThreshold: 0.85,
           autoCloseConfidenceScoreMaxThreshold: 1,
+          tagPrefix: 'alert-analysis',
         }),
       });
     });
@@ -154,6 +194,22 @@ describe('AlertAnalysisWorkflowPage', () => {
 
     const minThresholdField = await screen.findByTestId('alertAnalysisWorkflowMinThreshold');
     fireEvent.change(minThresholdField, { target: { value: '' } });
+
+    const saveButton = await screen.findByTestId('alertAnalysisWorkflowSaveButton');
+    expect(saveButton).toBeDisabled();
+
+    fireEvent.click(saveButton);
+    expect(coreStart.http.fetch).not.toHaveBeenCalledWith(
+      ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE,
+      expect.objectContaining({ method: 'PUT' })
+    );
+  });
+
+  it('disables saving when the tag prefix is cleared', async () => {
+    renderComponent();
+
+    const tagPrefixField = await screen.findByTestId('alertAnalysisWorkflowTagPrefix');
+    fireEvent.change(tagPrefixField, { target: { value: '' } });
 
     const saveButton = await screen.findByTestId('alertAnalysisWorkflowSaveButton');
     expect(saveButton).toBeDisabled();
