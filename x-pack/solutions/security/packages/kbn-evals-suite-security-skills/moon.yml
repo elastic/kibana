@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/core'
   - '@kbn/evals'
+  - '@kbn/evals-extensions'
   - '@kbn/test'
   - '@kbn/tooling-log'
 tags:
