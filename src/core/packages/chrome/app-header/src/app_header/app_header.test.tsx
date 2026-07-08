@@ -78,7 +78,12 @@ describe('AppHeaderView', () => {
       <AppHeaderView
         metadata={[
           { type: 'health', label: 'Warning at llm 24', color: 'warning' },
-          { type: 'text', label: 'Created by: analyst', 'data-test-subj': 'createdByMetadata' },
+          {
+            type: 'text',
+            label: 'Created by',
+            value: 'elastic',
+            'data-test-subj': 'createdByMetadata',
+          },
           { type: 'button', label: 'Updated by: analyst', onClick: onInspect },
         ]}
       />
@@ -86,7 +91,7 @@ describe('AppHeaderView', () => {
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.metadata)).toBeInTheDocument();
     expect(screen.getByText('Warning at llm 24')).toBeInTheDocument();
-    expect(screen.getByTestId('createdByMetadata')).toHaveTextContent('Created by: analyst');
+    expect(screen.getByTestId('createdByMetadata')).toHaveTextContent('Created by elastic');
 
     fireEvent.click(screen.getByRole('button', { name: 'Updated by: analyst' }));
 
@@ -172,6 +177,66 @@ describe('AppHeaderView', () => {
 
     expect(screen.getByTestId('alertsTab')).toBeInTheDocument();
     expect(screen.getByText('3')).toBeInTheDocument();
+  });
+
+  it('renders tab actions in an ellipsis popover without triggering tab navigation', () => {
+    const onTabClick = jest.fn();
+    const onCopy = jest.fn();
+
+    renderAppHeader(
+      <AppHeaderView
+        tabs={[
+          {
+            id: 'lifecycle',
+            label: 'Data lifecycle',
+            'data-test-subj': 'lifecycleTab',
+            isSelected: true,
+            onClick: onTabClick,
+            actions: {
+              ariaLabel: 'Data lifecycle tab actions',
+              'data-test-subj': 'lifecycleTabActionsButton',
+              items: [
+                {
+                  id: 'copy',
+                  label: 'Copy API request',
+                  iconType: 'copy',
+                  onClick: onCopy,
+                  'data-test-subj': 'lifecycleTabCopy',
+                },
+              ],
+            },
+          },
+        ]}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('lifecycleTabActionsButton'));
+    expect(onTabClick).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId('lifecycleTabCopy'));
+    expect(onCopy).toHaveBeenCalledTimes(1);
+    expect(onTabClick).not.toHaveBeenCalled();
+  });
+
+  it('only renders tab actions for the selected tab', () => {
+    renderAppHeader(
+      <AppHeaderView
+        tabs={[
+          {
+            id: 'lifecycle',
+            label: 'Data lifecycle',
+            isSelected: false,
+            actions: {
+              ariaLabel: 'More actions',
+              'data-test-subj': 'lifecycleTabActionsButton',
+              items: [{ id: 'copy', label: 'Copy API request', onClick: jest.fn() }],
+            },
+          },
+        ]}
+      />
+    );
+
+    expect(screen.queryByTestId('lifecycleTabActionsButton')).not.toBeInTheDocument();
   });
 
   it('only treats exact base path prefixes as already prepended for back links', () => {

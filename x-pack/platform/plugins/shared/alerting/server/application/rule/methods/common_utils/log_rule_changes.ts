@@ -19,6 +19,13 @@ import type { RuleDomain } from '../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { transformRuleAttributesToRuleDomain } from '../../transforms';
 
+// Owned by the Security Solution plugin (`ENABLE_RULE_CHANGES_HISTORY_SETTING` in
+// `x-pack/solutions/security/plugins/security_solution/common/constants.ts`). Duplicated here
+// as a raw string because "alerting" is a platform/shared plugin and cannot depend on a
+// solution-private plugin. Only applies to rules whose `ruleType.solution === 'security'`.
+const SECURITY_SOLUTION_ENABLE_RULE_CHANGES_HISTORY_SETTING =
+  'securitySolution:enableRuleChangesHistory';
+
 interface EncryptedRuleFields {
   apiKey?: string | null;
   uiamApiKey?: string | null;
@@ -46,21 +53,34 @@ interface LogRuleChanges {
      */
     action: string;
     /**
-     * Original timestamp of the change
+     * Original timestamp of the change. Uses `ruleSO.updated_at` when omitted.
      */
-    timestamp: string | number | Date;
+    timestamp?: string | number | Date;
     /**
      * Change metadata object to be written to the each change history item
      */
     metadata?: RuleChangeTrackingMetadata;
+    /**
+     * Controls ES index refresh behavior. Pass `'wait_for'` when the history
+     * entry must be immediately searchable after the write.
+     */
+    refresh?: boolean | 'wait_for';
   };
 }
 
 export async function logRuleChanges({
   ruleSOs,
   encryptedFieldsMap,
-  rulesClientContext: { changeTrackingService, ruleTypeRegistry, logger, spaceId, isSystemAction },
-  changesContext: { action, timestamp, metadata },
+  rulesClientContext: {
+    changeTrackingService,
+    ruleTypeRegistry,
+    logger,
+    spaceId,
+    isSystemAction,
+    uiSettings,
+    unsecuredSavedObjectsClient,
+  },
+  changesContext: { action, timestamp, metadata, refresh },
 }: LogRuleChanges): Promise<void> {
   if (!changeTrackingService) {
     return;
@@ -70,6 +90,12 @@ export async function logRuleChanges({
     ? overlayEncryptedFields(ruleSOs, encryptedFieldsMap)
     : ruleSOs;
   const changes: RuleChange[] = [];
+  // Fallback timestamp is used when both timestamp and ruleSO.updated_at are missing.
+  // In practice it'll be almost never used.
+  const fallbackChangeTimestamp = new Date().toISOString();
+  // Lazily fetched and memoized: at most one ui settings read per logRuleChanges call,
+  // regardless of how many security solution rules are in effectiveRuleSOs.
+  let securityRuleChangesHistoryEnabled: boolean | undefined;
 
   for (const ruleSO of effectiveRuleSOs) {
     if (ruleSO.error) {
@@ -86,6 +112,28 @@ export async function logRuleChanges({
     //
     if (!ruleType?.trackChanges) {
       continue;
+    }
+
+    // Security Solution additionally gates rule changes history per-space via its
+    // "Enable rule changes history" advanced setting, on top of the static config flag above.
+    if (ruleType.solution === 'security') {
+      if (securityRuleChangesHistoryEnabled === undefined) {
+        try {
+          const uiSettingsClient = uiSettings.asScopedToClient(unsecuredSavedObjectsClient);
+          securityRuleChangesHistoryEnabled = await uiSettingsClient.get<boolean>(
+            SECURITY_SOLUTION_ENABLE_RULE_CHANGES_HISTORY_SETTING
+          );
+        } catch (e) {
+          logger.warn(
+            `Unable to read "${SECURITY_SOLUTION_ENABLE_RULE_CHANGES_HISTORY_SETTING}" advanced setting: ${e}`
+          );
+          securityRuleChangesHistoryEnabled = false;
+        }
+      }
+
+      if (!securityRuleChangesHistoryEnabled) {
+        continue;
+      }
     }
 
     try {
@@ -108,8 +156,13 @@ export async function logRuleChanges({
       );
       const ruleSnapshot = transformRuleDomainToRuleChangeHistorySnapshot(ruleDomain);
 
+      const changeTimestamp =
+        timestamp != null
+          ? new Date(timestamp).toISOString()
+          : ruleSO.updated_at ?? fallbackChangeTimestamp;
+
       changes.push({
-        timestamp: new Date(timestamp).toISOString(),
+        timestamp: changeTimestamp,
         objectId: ruleSO.id,
         objectType: RULE_SAVED_OBJECT_TYPE,
         module: ruleType.solution,
@@ -141,6 +194,7 @@ export async function logRuleChanges({
       action,
       spaceId,
       data,
+      refresh,
     });
   } catch (e) {
     logger.warn(`Unable to log bulk rule changes for action "${action}": ${e}`);

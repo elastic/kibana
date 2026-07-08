@@ -78,9 +78,9 @@ import {
   useEntityFromStore,
   type EntityStoreRecord,
 } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
-import { ObservedDataSection as UserObservedDataSection } from '../../../../flyout/entity_details/user_right/components/observed_data_section';
+import { ObservedDataSection as UserObservedDataSection } from '../../../../flyout_v2/entity/shared/components/observed_data_section';
 import { USER_PANEL_OBSERVED_USER_QUERY_ID } from '../../../../flyout/entity_details/user_right';
-import { useObservedUser } from '../../../../flyout/entity_details/user_right/hooks/use_observed_user';
+import { useObservedUser } from '../../../../flyout_v2/entity/user/main/hooks/use_observed_user';
 import { buildRiskScoreStateFromEntityRecord } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import { NO_CORRESPONDING_ENTITY_EXISTS } from '../../../../flyout/entity_details/shared/translations';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
@@ -399,9 +399,9 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                   />
                   <EuiSpacer size="m" />
                   <UserObservedDataSection
-                    userName={detailName}
+                    entityType={EntityType.user}
                     identityFields={resolvedIdentityFields}
-                    observedUser={observedUser}
+                    observedData={observedUser}
                     contextID={PageScope.explore}
                     scopeId={PageScope.explore}
                     queryId={USER_PANEL_OBSERVED_USER_QUERY_ID}

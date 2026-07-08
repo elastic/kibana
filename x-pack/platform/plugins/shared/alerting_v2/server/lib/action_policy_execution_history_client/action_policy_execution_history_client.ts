@@ -17,7 +17,13 @@ import {
   type RuleResponse,
   type PolicyExecutionOutcome,
   type PolicyExecutionOutcomeFilter,
+  type SearchMatchCounts,
 } from '@kbn/alerting-v2-schemas';
+
+// Cap the per-page name-lookup batch. Independent from the embedded rules cap
+// in the response — broad policies can reference thousands of ids in a single
+// event but we only need names for ids that will actually render.
+const MAX_RULES_PER_NAME_LOOKUP = 1000;
 import { ActionPolicyClient } from '../action_policy_client';
 import { RulesClient } from '../rules_client';
 import { WorkflowsManagementApiToken } from '../dispatcher/steps/dispatch_step_tokens';
@@ -29,16 +35,16 @@ import {
 } from '../services/logger_service/logger_service';
 import { ALERTING_V2_LOG_CODES, type AlertingV2LogCode } from '../errors/error_codes';
 import type { AlertingServerStartDependencies } from '../../types';
-import { collectIdsFromEvents, denormalizeEvent, type NameMaps } from './denormalize_event';
+import type { ResolvedSearchIds } from './build_execution_history_item';
+import {
+  collectIdsFromEvents,
+  buildExecutionHistoryItem,
+  type NameMaps,
+} from './build_execution_history_item';
 
 const TIME_WINDOW_HOURS = 24;
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = POLICY_EXECUTION_HISTORY_MAX_PER_PAGE;
-
-// Cap rule lookups per page to keep the KQL filter and SO `find` bounded —
-// a single broad Action Policy can emit one event referencing thousands of rules.
-// Rule IDs over this cap render as the raw ID in the UI.
-const MAX_RULES_PER_LOOKUP = 1000;
 
 const SEARCH_ID_CAP = 500;
 const DEFAULT_OUTCOME_FILTER: PolicyExecutionOutcomeFilter = 'all';
@@ -48,13 +54,8 @@ export interface ListExecutionHistoryParams {
   page?: number;
   perPage?: number;
   search?: string;
+  ruleIds?: string[];
   outcome?: PolicyExecutionOutcomeFilter;
-}
-
-export interface SearchMatchCounts {
-  policies: number;
-  rules: number;
-  cap: number;
 }
 
 export interface ListExecutionHistoryResult {
@@ -69,18 +70,12 @@ export interface CountNewEventsSinceParams {
   request: KibanaRequest;
   since: string;
   search?: string;
+  ruleIds?: string[];
   outcome?: PolicyExecutionOutcomeFilter;
 }
 
 export interface CountNewEventsSinceResult {
   count: number;
-}
-
-interface ResolvedSearchIds {
-  policyIds: string[];
-  ruleIds: string[];
-  hasMatches: boolean;
-  matches: SearchMatchCounts | null;
 }
 
 @injectable()
@@ -101,15 +96,17 @@ export class ActionPolicyExecutionHistoryClient {
     page = DEFAULT_PAGE,
     perPage = DEFAULT_PER_PAGE,
     search,
+    ruleIds,
     outcome = DEFAULT_OUTCOME_FILTER,
   }: ListExecutionHistoryParams): Promise<ListExecutionHistoryResult> {
     const startDate = new Date(Date.now() - TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
     const spaceId = this.spaces.spacesService.getSpaceId(request);
+    const searchIsActive = search !== undefined && search.trim() !== '';
 
-    const searchIds = await this.resolveSearchIds(search);
+    const matchingSearchIds = await this.resolveSearchIds(search);
 
-    if (search !== undefined && !searchIds.hasMatches) {
-      return { items: [], page, perPage, totalEvents: 0, searchMatches: searchIds.matches };
+    if (searchIsActive && !matchingSearchIds.hasMatches) {
+      return { items: [], page, perPage, totalEvents: 0, searchMatches: matchingSearchIds.matches };
     }
 
     const result = await this.eventLogService.findActionPolicyExecutionEvents({
@@ -118,19 +115,29 @@ export class ActionPolicyExecutionHistoryClient {
       page,
       perPage,
       outcome: toOutcomeForService(outcome),
-      policyIds: searchIds.policyIds,
-      ruleIds: searchIds.ruleIds,
+      policyIds: matchingSearchIds.policyIds,
+      ruleIds: matchingSearchIds.ruleIds,
+      mandatoryRuleIds: ruleIds,
     });
 
     const nameMaps = await this.resolveNames(result.events, spaceId);
-    const items = result.events.flatMap((event) => denormalizeEvent(event, nameMaps));
+    const items = result.events
+      .map((event) =>
+        buildExecutionHistoryItem(
+          event,
+          nameMaps,
+          searchIsActive ? matchingSearchIds : undefined,
+          ruleIds
+        )
+      )
+      .filter((item): item is PolicyExecutionHistoryItem => item !== null);
 
     return {
       items,
       page: result.page,
       perPage: result.perPage,
       totalEvents: result.total,
-      searchMatches: searchIds.matches,
+      searchMatches: matchingSearchIds.matches,
     };
   }
 
@@ -138,6 +145,7 @@ export class ActionPolicyExecutionHistoryClient {
     request,
     since,
     search,
+    ruleIds,
     outcome = DEFAULT_OUTCOME_FILTER,
   }: CountNewEventsSinceParams): Promise<CountNewEventsSinceResult> {
     const spaceId = this.spaces.spacesService.getSpaceId(request);
@@ -153,6 +161,7 @@ export class ActionPolicyExecutionHistoryClient {
       outcome: toOutcomeForService(outcome),
       policyIds: searchIds.policyIds,
       ruleIds: searchIds.ruleIds,
+      mandatoryRuleIds: ruleIds,
     });
   }
 
@@ -227,11 +236,11 @@ export class ActionPolicyExecutionHistoryClient {
   private async lookupRulesByIds(ruleIds: string[]): Promise<RuleResponse[]> {
     if (ruleIds.length === 0) return [];
 
-    const cappedRuleIds = ruleIds.slice(0, MAX_RULES_PER_LOOKUP);
+    const cappedRuleIds = ruleIds.slice(0, MAX_RULES_PER_NAME_LOOKUP);
 
     const response = await this.rulesClient.findRules({
       filter: this.buildRuleIdsFilter(cappedRuleIds),
-      perPage: MAX_RULES_PER_LOOKUP,
+      perPage: MAX_RULES_PER_NAME_LOOKUP,
     });
 
     return response.items;
