@@ -179,3 +179,5 @@ export type {
   SmlIndexerDeleteAttachmentParams,
   SmlService,
 } from './sml/types';
+export { createSmlTypeRegistry } from './sml/type_registry';
+export type { SmlTypeRegistry } from './sml/type_registry';
