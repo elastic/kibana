@@ -6,7 +6,10 @@
  */
 
 import type { SnoozeCondition, SnoozeConditionOperator } from '@kbn/alerting-v2-schemas';
-import type { AlertEventSeverity } from '../../resources/datastreams/alert_events';
+import type {
+  AlertEpisodeStatus,
+  AlertEventSeverity,
+} from '../../resources/datastreams/alert_events';
 
 export type RuleId = string;
 export type ActionPolicyId = string;
@@ -23,7 +26,7 @@ export interface AlertEpisode {
   rule_id: RuleId;
   group_hash: string;
   episode_id: string;
-  episode_status: 'inactive' | 'pending' | 'active' | 'recovering';
+  episode_status: AlertEpisodeStatus;
   severity?: AlertEventSeverity;
   data?: AlertEpisodeData;
 }
