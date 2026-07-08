@@ -311,8 +311,14 @@ export const closeTimeline = () => {
 };
 
 export const createNewTimeline = () => {
-  openCreateTimelineOptionsPopover();
-  cy.get(CREATE_NEW_TIMELINE).click();
+  recurse(
+    () => {
+      cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
+      return cy.get(CREATE_NEW_TIMELINE);
+    },
+    (sub) => sub.is(':visible'),
+    { post: () => cy.get(CREATE_NEW_TIMELINE).click() }
+  );
 };
 
 export const openCreateTimelineOptionsPopover = () => {

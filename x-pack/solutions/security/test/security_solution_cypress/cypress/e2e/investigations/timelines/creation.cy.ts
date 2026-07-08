@@ -9,13 +9,10 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { getTimeline } from '../../../objects/timeline';
 
 import {
-  // NOTES_TEXT,
-
   TIMELINE_FLYOUT_WRAPPER,
   TIMELINE_QUERY,
   TIMELINE_PANEL,
   TIMELINE_STATUS,
-  // TIMELINE_TAB_CONTENT_GRAPHS_NOTES,
   SAVE_TIMELINE_ACTION_BTN,
   SAVE_TIMELINE_TOOLTIP,
 } from '../../../screens/timeline';
@@ -32,7 +29,6 @@ import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import { selectCustomTemplates } from '../../../tasks/templates';
 import {
   addNameAndDescriptionToTimeline,
-  // addNotesToTimeline,
   clickingOnCreateTimelineFormTemplateBtn,
   closeTimeline,
   createNewTimeline,
