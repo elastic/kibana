@@ -92,6 +92,7 @@ function convertTreeToEuiTreeViewItems(
 
     return {
       id: item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
+      isExpanded: item.children.length > 0 && item.stepType !== 'foreach-iteration',
       css: [
         getStatusCss({ status, selected }, euiTheme),
         // Don't allow selecting skeleton steps using css, as we don't have a 'disabled' prop on the tree view item
@@ -344,7 +345,6 @@ export const WorkflowStepExecutionTree = ({
             <EuiTreeView
               data-test-subj="workflowStepExecutionTree"
               showExpansionArrows
-              expandByDefault
               items={regularItems}
               aria-label={i18n.translate(
                 'workflows.WorkflowStepExecutionTree.workflowStepExecutionTreeAriaLabel',
