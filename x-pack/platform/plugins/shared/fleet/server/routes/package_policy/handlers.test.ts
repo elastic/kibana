@@ -968,6 +968,25 @@ describe('When calling package policy', () => {
 
         expect(response.ok).toHaveBeenCalled();
       });
+
+      it('should resolve the agentless-only check with skipArchive to avoid a full archive download', async () => {
+        (getPackageInfo as jest.Mock).mockResolvedValue({
+          policy_templates: [mixedTemplate],
+        });
+        (
+          (await context.fleet).packagePolicyService
+            .asCurrentUser as jest.Mocked<PackagePolicyClient>
+        ).create.mockResolvedValue(testPackagePolicy);
+
+        const request = httpServerMock.createKibanaRequest({ body: testPackagePolicy });
+
+        await createPackagePolicyHandler(context, request, response);
+
+        // The pre-`try` agentless-only detection only needs deployment_modes, so it
+        // must resolve from the registry manifest (skipArchive) rather than pulling
+        // and verifying the full archive before any other validation.
+        expect(getPackageInfo).toHaveBeenCalledWith(expect.objectContaining({ skipArchive: true }));
+      });
     });
 
     it('should allow to create agentless package policies when disableAgentlessLegacyAPI is disabled', async () => {

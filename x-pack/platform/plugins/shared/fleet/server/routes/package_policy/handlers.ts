@@ -259,12 +259,14 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   // flag-gated to avoid adding cost to normal (flag-off) traffic.
   if (legacyAgentlessApiDisabled) {
     if (pkg) {
+      // skipArchive: only deployment_modes is needed here, avoid the archive download.
       const pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
         pkgName: pkg.name,
         pkgVersion: pkg.version,
         ignoreUnverified: force,
         prerelease: true,
+        skipArchive: true,
       });
       if (isOnlyAgentlessIntegration(pkgInfo)) {
         throw new FleetError(
