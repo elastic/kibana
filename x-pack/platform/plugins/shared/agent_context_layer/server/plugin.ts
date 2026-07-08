@@ -18,8 +18,6 @@ import { registerUISettings } from './ui_settings';
 import { registerSearchRoute } from './routes/search';
 import { registerGetRoute } from './routes/get';
 import { registerListRoute } from './routes/list';
-import { registerUpsertRoute } from './routes/upsert';
-import { registerDeleteRoute } from './routes/delete';
 import { registerAutocompleteRoute } from './routes/autocomplete';
 import { createSmlService, type SmlServiceInstance } from './services/sml/sml_service';
 import {
@@ -96,8 +94,6 @@ export class AgentContextLayerPlugin
     });
     registerGetRoute({ router, coreSetup, logger: this.logger, getSmlService });
     registerListRoute({ router, coreSetup, logger: this.logger, getSmlService });
-    registerUpsertRoute({ router, coreSetup, logger: this.logger, getSmlService });
-    registerDeleteRoute({ router, coreSetup, logger: this.logger, getSmlService });
     registerAutocompleteRoute({
       router,
       coreSetup,
