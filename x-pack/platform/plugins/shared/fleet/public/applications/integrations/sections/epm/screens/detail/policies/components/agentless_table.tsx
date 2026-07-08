@@ -178,7 +178,7 @@ export const AgentlessPackagePoliciesTable = ({
           title: i18n.translate(
             'xpack.fleet.epm.packageDetails.integrationList.agentlessStatusError',
             {
-              defaultMessage: 'Error fetching agentless status information',
+              defaultMessage: 'Error fetching managed integration status information',
             }
           ),
         });
@@ -435,7 +435,7 @@ export const AgentlessPackagePoliciesTable = ({
         tableCaption={i18n.translate(
           'xpack.fleet.epm.packageDetails.integrationList.agentlessPoliciesTableCaption',
           {
-            defaultMessage: 'Agentless integration policies',
+            defaultMessage: 'Managed integrations',
           }
         )}
         loading={isLoading}
@@ -467,7 +467,7 @@ export const AgentlessPackagePoliciesTable = ({
                 <h3>
                   <FormattedMessage
                     id="xpack.fleet.epm.packageDetails.integrationList.agentlessLoadErrorTitle"
-                    defaultMessage="Unable to load agentless integration policies"
+                    defaultMessage="Unable to load managed integrations"
                   />
                 </h3>
               }
@@ -489,7 +489,7 @@ export const AgentlessPackagePoliciesTable = ({
           ) : (
             <FormattedMessage
               id="xpack.fleet.epm.packageDetails.integrationList.noAgentlessPoliciesMessage"
-              defaultMessage="No agentless integration policies"
+              defaultMessage="No managed integrations"
             />
           )
         }
