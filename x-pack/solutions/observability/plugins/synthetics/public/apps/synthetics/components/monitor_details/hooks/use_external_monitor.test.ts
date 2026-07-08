@@ -9,7 +9,11 @@ import { renderHook } from '@testing-library/react';
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import { useExternalMonitor } from './use_external_monitor';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
-import { ConfigKey } from '../../../../../../common/runtime_types';
+import {
+  ConfigKey,
+  HEARTBEAT_UNMAPPED_LOCATION_ID,
+  HEARTBEAT_UNMAPPED_LOCATION_LABEL,
+} from '../../../../../../common/runtime_types';
 
 jest.mock('@kbn/observability-shared-plugin/public', () => ({
   useEsSearch: jest.fn().mockReturnValue({ data: undefined, loading: false, error: undefined }),
@@ -75,6 +79,13 @@ describe('useExternalMonitor', () => {
 
       const params = useEsSearchMock.mock.calls[0][0];
       expect(params.query.bool.filter).toEqual([{ term: { 'monitor.id': 'k8s-monitor' } }]);
+    });
+
+    it('buckets location-less pings under the placeholder id via the terms `missing` option', () => {
+      renderHook(() => useExternalMonitor({ configId: 'k8s-monitor', origin: 'heartbeat' }));
+
+      const params = useEsSearchMock.mock.calls[0][0];
+      expect(params.aggs.locations.terms.missing).toBe(HEARTBEAT_UNMAPPED_LOCATION_ID);
     });
   });
 
@@ -290,6 +301,36 @@ describe('useExternalMonitor', () => {
 
       expect(result.current.error).toBe(boom);
       expect(result.current.data).toBeUndefined();
+    });
+
+    it('labels the placeholder bucket with the Heartbeat fallback label', () => {
+      // Location-less pings land in the `missing` bucket keyed by the
+      // placeholder id; that key has no `observer.geo.name`, so the label must
+      // fall back to the human-readable placeholder rather than the raw id.
+      useEsSearchMock.mockReturnValue({
+        data: {
+          hits: {
+            hits: [{ _source: { monitor: { id: 'k8s-monitor', name: 'n', type: 'http' }, tags: [] } }],
+          },
+          aggregations: {
+            locations: {
+              buckets: [
+                { key: HEARTBEAT_UNMAPPED_LOCATION_ID, doc_count: 5, label: { buckets: [] } },
+              ],
+            },
+          },
+        },
+        loading: false,
+        error: undefined,
+      });
+
+      const { result } = renderHook(() =>
+        useExternalMonitor({ configId: 'k8s-monitor', origin: 'heartbeat' })
+      );
+
+      expect(result.current.data?.[ConfigKey.LOCATIONS]).toEqual([
+        { id: HEARTBEAT_UNMAPPED_LOCATION_ID, label: HEARTBEAT_UNMAPPED_LOCATION_LABEL },
+      ]);
     });
 
     it('uses the bucket key as the location label when the sub-aggregation has no observer.geo.name', () => {

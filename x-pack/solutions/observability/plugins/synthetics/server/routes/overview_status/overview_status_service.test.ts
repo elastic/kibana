@@ -6,6 +6,10 @@
  */
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import type { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
+import {
+  HEARTBEAT_UNMAPPED_LOCATION_ID,
+  HEARTBEAT_UNMAPPED_LOCATION_LABEL,
+} from '../../../common/runtime_types';
 import { getUptimeESMockClient } from '../../queries/test_helpers';
 
 import * as allLocationsFn from '../../synthetics_service/get_all_locations';
@@ -2555,6 +2559,86 @@ describe('current status route', () => {
       expect(entry.schedule).toBe('');
       expect(entry.tags).toEqual([]);
       expect(entry.locations[0].label).toBe(japanLoc.id);
+    });
+
+    it('surfaces a location-less autodiscovery monitor under the placeholder location', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      // Kubernetes/Docker autodiscovery pings carry no `observer.name`, so the
+      // composite `locationId` source (with `missing_bucket: true`) returns a
+      // null key and the `observer.geo.name` sub-agg is empty.
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'hb-no-loc', locationId: null },
+              status: {
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'up',
+                      'monitor.name': 'k8s autodiscovered monitor',
+                      'monitor.type': 'http',
+                    },
+                    sort: ['2025-05-28T10:00:00.000Z'],
+                  },
+                ],
+              },
+              location_name: { buckets: [] },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      const result = await service.getOverviewStatus();
+
+      const entry = result.upConfigs[`heartbeat-hb-no-loc-${HEARTBEAT_UNMAPPED_LOCATION_ID}`];
+      expect(entry).toBeDefined();
+      expect(entry.origin).toBe('heartbeat');
+      expect(entry.locations).toEqual([
+        {
+          id: HEARTBEAT_UNMAPPED_LOCATION_ID,
+          label: HEARTBEAT_UNMAPPED_LOCATION_LABEL,
+          status: 'up',
+        },
+      ]);
+      expect(result.up).toBe(1);
+    });
+
+    it('requests the observer.name composite source with missing_bucket enabled', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(getEsResponse({ buckets: [] }));
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      await service.getOverviewStatus();
+
+      const [[searchBody]] = esClient.search.mock.calls;
+      const sources = (searchBody as any).aggs.monitors.composite.sources;
+      const locationSource = sources.find((source: any) => source.locationId);
+      expect(locationSource.locationId.terms).toEqual({
+        field: 'observer.name',
+        missing_bucket: true,
+      });
     });
 
     it('does not surface monitors that already have a saved object', async () => {
