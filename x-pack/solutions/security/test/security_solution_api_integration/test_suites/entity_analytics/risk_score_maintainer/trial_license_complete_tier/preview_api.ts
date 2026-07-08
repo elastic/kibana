@@ -216,9 +216,16 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await setEntityStoreV2Setting(false);
 
-      const { scores } = await previewRiskScores({ body: { identifier_type: 'user' } });
-      // Legacy preview records do not include the v2-only score_type field.
-      expect(scores.user?.some((score) => score.score_type === undefined)).to.be(true);
+      // The preview route resolves securitySolution:entityStoreEnableV2 through the server-side
+      // uiSettings cache (getUserProvided, 10s TTL), so the disabled value can take up to that TTL
+      // to be observed. Settle for the legacy shape here rather than assuming the flip is instantly
+      // visible, and also require non-empty scores so an empty scores.user cannot mask the failure.
+      await retry.waitForWithTimeout('legacy preview path to be active', 30_000, async () => {
+        const { scores } = await previewRiskScores({ body: { identifier_type: 'user' } });
+        const userScores = scores.user ?? [];
+        // Legacy preview records do not include the v2-only score_type field.
+        return userScores.length > 0 && userScores.some((score) => score.score_type === undefined);
+      });
     });
   });
 };
