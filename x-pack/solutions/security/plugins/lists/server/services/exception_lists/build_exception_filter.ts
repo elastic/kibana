@@ -370,7 +370,10 @@ export const buildExceptionFilter = async <
       },
     },
   };
-  unprocessedExceptions.concat(unprocessableExceptionItems);
+  // `concat` returns a new array without mutating; push so exception items whose small-list clause
+  // could not be built (e.g. a range/geo list larger than the inline limit) fall through to the
+  // per-document large-list path instead of being silently dropped.
+  unprocessedExceptions.push(...unprocessableExceptionItems);
   return { filter: exceptionFilter, unprocessedExceptions };
 };
 
@@ -534,13 +537,22 @@ const parseNumericRangeClause = (value: string, field: string): estypes.QueryDsl
   // Numeric range list values use dash-separated notation: "{gte}-{lte}".
   // The regex handles negative numbers (e.g. "-50--20").
   const match = value.match(/^(-?[\d.eE+]+)-(-?[\d.eE+]+)$/);
-  const [gte, lte] = match ? [match[1], match[2]] : value.split('-');
-  return { range: { [field]: { gte, lte } } };
+  if (match) {
+    return { range: { [field]: { gte: match[1], lte: match[2] } } };
+  }
+  // No delimiter: the import serializer stores a single value as { gte: v, lte: v }, so treat a
+  // delimiter-less value the same way rather than emitting an open-ended (undefined lte) range.
+  return { range: { [field]: { gte: value, lte: value } } };
 };
 
 const parseDateRangeClause = (value: string, field: string): estypes.QueryDslQueryContainer => {
   // Date range list values use comma-separated ISO notation: "{gte},{lte}".
   const commaIdx = value.indexOf(',');
+  if (commaIdx === -1) {
+    // No delimiter: a single date value is stored/deserialized as gte === lte (see the import
+    // serializer), so match it exactly rather than trimming the last character off `gte`.
+    return { range: { [field]: { gte: value, lte: value } } };
+  }
   const gte = value.slice(0, commaIdx);
   const lte = value.slice(commaIdx + 1);
   return { range: { [field]: { gte, lte } } };

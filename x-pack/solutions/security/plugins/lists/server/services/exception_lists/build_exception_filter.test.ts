@@ -575,6 +575,38 @@ describe('build_exceptions_filter', () => {
         }
       `);
     });
+
+    test('it should route a small-list exception whose inline clause cannot be built to unprocessedExceptions', async () => {
+      // integer_range is processable (small-list path) and the list is under the small-list size
+      // limit, but it has more values than buildListClause will inline, so the clause comes back
+      // undefined. Such items must fall through to the per-document large-list path rather than be
+      // silently dropped.
+      const overInlineLimit = Array.from({ length: 201 }, (_, i) => ({ value: `${i}-${i}` }));
+      const rangeListClient = getListClientMock();
+      rangeListClient.findListItem = jest.fn().mockResolvedValue({ total: 201 });
+      rangeListClient.findAllListItems = jest
+        .fn()
+        .mockResolvedValue({ data: overInlineLimit, total: 201 });
+
+      const listEntryItem: EntryList = {
+        ...getEntryListMock(),
+        list: { id: getEntryListMock().list.id, type: 'integer_range' },
+      };
+      const listExceptionItem = getExceptionListItemSchemaMock({ entries: [listEntryItem] });
+
+      const { filter, unprocessedExceptions } = await buildExceptionFilter({
+        alias: null,
+        chunkSize: 1,
+        excludeExceptions: true,
+        listClient: rangeListClient,
+        lists: [listExceptionItem],
+        startedAt: new Date(),
+      });
+
+      expect(unprocessedExceptions).toEqual([listExceptionItem]);
+      // No inline clause could be built, so the exception filter should have no should clauses.
+      expect(filter?.query?.bool?.should).toEqual([]);
+    });
   });
 
   describe('createOrClauses', () => {
@@ -1380,6 +1412,23 @@ describe('build_exceptions_filter', () => {
       });
     });
 
+    test('it should match a delimiter-less numeric range value exactly (gte === lte)', async () => {
+      const rangeListClient = getListClientMock();
+      rangeListClient.findAllListItems = jest
+        .fn()
+        .mockResolvedValue({ data: [{ value: '100' }], total: 1 });
+      const booleanFilter = await buildListClause(
+        { ...getEntryListMock(), list: { id: getEntryListMock().list.id, type: 'integer_range' } },
+        rangeListClient
+      );
+      expect(booleanFilter).toEqual({
+        bool: {
+          minimum_should_match: 1,
+          should: [{ range: { 'host.name': { gte: '100', lte: '100' } } }],
+        },
+      });
+    });
+
     test('it should build range should clauses for float_range type', async () => {
       const rangeListClient = getListClientMock();
       rangeListClient.findAllListItems = jest
@@ -1450,6 +1499,33 @@ describe('build_exceptions_filter', () => {
                 'host.name': {
                   gte: '2020-01-01T00:00:00.000Z',
                   lte: '2021-01-01T00:00:00.000Z',
+                },
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    test('it should match a delimiter-less date_range value exactly (gte === lte)', async () => {
+      const rangeListClient = getListClientMock();
+      rangeListClient.findAllListItems = jest.fn().mockResolvedValue({
+        data: [{ value: '2025-04-01T00:00:00.000Z' }],
+        total: 1,
+      });
+      const booleanFilter = await buildListClause(
+        { ...getEntryListMock(), list: { id: getEntryListMock().list.id, type: 'date_range' } },
+        rangeListClient
+      );
+      expect(booleanFilter).toEqual({
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            {
+              range: {
+                'host.name': {
+                  gte: '2025-04-01T00:00:00.000Z',
+                  lte: '2025-04-01T00:00:00.000Z',
                 },
               },
             },
