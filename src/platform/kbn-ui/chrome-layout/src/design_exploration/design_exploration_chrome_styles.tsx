@@ -275,7 +275,7 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
       top: ${DESIGN_EXPLORATION_TOP_BAR_HEIGHT}px !important;
-      width: calc(100% - 20px) !important;
+      width: calc(100% - 16px) !important;
       background: transparent !important;
       background-color: transparent !important;
       backdrop-filter: none !important;
