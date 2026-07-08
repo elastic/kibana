@@ -28,10 +28,10 @@ import { GenericLinkButton } from '../../../../../common/components/links/helper
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { RulePanelKey } from '../../../../../flyout/rule_details/right';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { RuleDetails } from '../../../../../flyout_v2/rule/main';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 
 interface RenderRuleNameProps {
   children?: React.ReactNode;
@@ -64,7 +64,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   const store = useStore();
   const history = useHistory();
   const eventContext = useContext(StatefulEventContext);
-  const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+  const enableNewFlyout = useIsNewFlyoutEnabled();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const ruleName = `${value}`;
@@ -89,7 +89,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
         return;
       }
 
-      if (newFlyoutSystemEnabled && ruleId) {
+      if (enableNewFlyout && ruleId) {
         overlays.openSystemFlyout(
           flyoutProviders({
             services,
@@ -122,7 +122,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
       openFlyout,
       eventContext,
       isInTimelineContext,
-      newFlyoutSystemEnabled,
+      enableNewFlyout,
       overlays,
       services,
       store,
