@@ -8,6 +8,8 @@
 import { useMemo } from 'react';
 import type { AttackFlyoutApi } from './attack/use_attack_flyout_api';
 import { useAttackFlyoutApi } from './attack/use_attack_flyout_api';
+import type { IocFlyoutApi } from './ioc/use_ioc_flyout_api';
+import { useIocFlyoutApi } from './ioc/use_ioc_flyout_api';
 import type { NetworkFlyoutApi } from './network/use_network_flyout_api';
 import { useNetworkFlyoutApi } from './network/use_network_flyout_api';
 import type { RuleFlyoutApi } from './rule/use_rule_flyout_api';
@@ -33,19 +35,21 @@ import { useRuleFlyoutApi } from './rule/use_rule_flyout_api';
  *
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
-export type FlyoutApi = AttackFlyoutApi & NetworkFlyoutApi & RuleFlyoutApi;
+export type FlyoutApi = AttackFlyoutApi & IocFlyoutApi & NetworkFlyoutApi & RuleFlyoutApi;
 
 export const useFlyoutApi = (): FlyoutApi => {
   const attack = useAttackFlyoutApi();
+  const ioc = useIocFlyoutApi();
   const network = useNetworkFlyoutApi();
   const rule = useRuleFlyoutApi();
 
   return useMemo(
     () => ({
       ...attack,
+      ...ioc,
       ...network,
       ...rule,
     }),
-    [attack, network, rule]
+    [attack, ioc, network, rule]
   );
 };
