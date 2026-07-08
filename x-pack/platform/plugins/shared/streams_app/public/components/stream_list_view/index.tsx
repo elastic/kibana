@@ -181,6 +181,7 @@ export function StreamListView() {
         label: settingsLabel,
         iconType: 'gear',
         run: () => setIsSettingsFlyoutOpen(true),
+        overflow: true,
       },
     ];
 
