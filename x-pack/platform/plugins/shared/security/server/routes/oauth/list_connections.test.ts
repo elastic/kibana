@@ -200,6 +200,38 @@ describe('List OAuth Connections route', () => {
     });
   });
 
+  it('degrades gracefully when user resolution is skipped (returns null)', async () => {
+    oauthMock.listConnections.mockResolvedValue({
+      connections: [
+        {
+          id: 'conn1',
+          client_id: 'c1',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          user_id: 'user-1',
+        },
+      ],
+    });
+    oauthMock.resolveUsers.mockResolvedValue(null);
+
+    const response = await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({ query: {} }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual({
+      connections: [
+        {
+          id: 'conn1',
+          client_id: 'c1',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          user_id: 'user-1',
+        },
+      ],
+    });
+  });
+
   it('returns 404 when OAuth is not available', async () => {
     authc.oauth = null;
 

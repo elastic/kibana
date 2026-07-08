@@ -74,6 +74,11 @@ export function defineListOAuthConnectionsRoute({
           if (userIds.length > 0) {
             try {
               const resolved = await oauth.resolveUsers(request, userIds);
+              if (resolved === null) {
+                logger.warn(
+                  'Skipping user resolution for OAuth connections: security features are disabled in Elasticsearch.'
+                );
+              }
               users = resolved?.users ?? {};
             } catch (error) {
               logger.warn(
