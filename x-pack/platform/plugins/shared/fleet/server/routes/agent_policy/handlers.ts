@@ -647,9 +647,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       false
     );
     if (existingAgentPolicy?.supports_agentless || data.supports_agentless) {
-      throw new FleetError(
-        'To update agentless agent policies, use the managed integrations API.'
-      );
+      throw new FleetError('To update agentless agent policies, use the managed integrations API.');
     }
 
     const agentPolicy = await agentPolicyService.update(
