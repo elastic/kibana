@@ -4,7 +4,7 @@ requestBody:
       examples:
         updateAgentlessPolicyRequestExample:
           description: >-
-            Example request to update an agentless policy. `PUT` uses full-replace
+            Example request to update a managed integration. `PUT` uses full-replace
             semantics: the policy is rebuilt entirely from this body, so any
             omitted optional field is cleared or reset to its default rather than
             preserved. For example, omitting `description` clears it, omitting
@@ -42,7 +42,7 @@ requestBody:
                   ess_billing.credits:
                     enabled: true
         updateAgentlessPolicyVersionChangeRequestExample:
-          description: 'Example request to update an agentless policy to a different package version. The package name is immutable, but the version may change.'
+          description: 'Example request to update a managed integration to a different package version. The package name is immutable, but the version may change.'
           value:
             package:
               name: ess_billing
@@ -87,7 +87,7 @@ requestBody:
                     enabled: true
         updateAgentlessPolicyAttachAWSCloudConnectorRequestExample:
           description: >-
-            Example request to attach an AWS cloud connector to an agentless policy
+            Example request to attach an AWS cloud connector to a managed integration
             on update. Because `PUT` is full-replace, the `cloud_connector` block must
             be present on every subsequent update or the connector is detached.
           value:
@@ -125,7 +125,7 @@ requestBody:
               deployment: aws
         updateAgentlessPolicyReuseAWSCloudConnectorRequestExample:
           description: >-
-            Example request to update an agentless policy reusing an existing AWS
+            Example request to update a managed integration reusing an existing AWS
             cloud connector by ID instead of creating a new one.
           value:
             package:
@@ -169,7 +169,7 @@ responses:
       application/json:
         examples:
           updateAgentlessPolicyResponseExample:
-            description: 'Example response for updating an agentless policy'
+            description: 'Example response for updating a managed integration'
             value:
               item:
                 id: d52a7812-5736-4fdc-aed8-72152afa1ffa

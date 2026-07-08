@@ -138,7 +138,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expectLegacyBlock(
           res,
-          /To create agentless package policies, use the agentless policies API/
+          /To create agentless package policies, use the managed integrations API/
         );
       });
 
@@ -192,7 +192,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expectLegacyBlock(
           res,
-          /To update agentless package policies, use the agentless policies API/
+          /To update agentless package policies, use the managed integrations API/
         );
       });
 
@@ -217,7 +217,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expectLegacyBlock(
           res,
-          /To upgrade agentless package policies, use the agentless policies API/
+          /To upgrade agentless package policies, use the managed integrations API/
         );
       });
 
@@ -229,7 +229,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expectLegacyBlock(
           res,
-          /To upgrade agentless package policies, use the agentless policies API/
+          /To upgrade agentless package policies, use the managed integrations API/
         );
       });
 
@@ -241,7 +241,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expectLegacyBlock(
           res,
-          /To upgrade agentless package policies, use the agentless policies API/
+          /To upgrade agentless package policies, use the managed integrations API/
         );
       });
     });
@@ -259,7 +259,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expectLegacyBlock(
           res,
-          /To create agentless agent policies, use the agentless policies API/
+          /To create agentless agent policies, use the managed integrations API/
         );
       });
 
@@ -275,7 +275,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expectLegacyBlock(
           res,
-          /To update agentless agent policies, use the agentless policies API/
+          /To update agentless agent policies, use the managed integrations API/
         );
       });
 
@@ -293,12 +293,12 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('unaffected flows', () => {
-      it('should still allow managing agentless policies through the agentless policies API', async () => {
+      it('should still allow managing agentless policies through the managed integrations API', async () => {
         const updatedName = `test_agentless-updated-${Date.now()}`;
         const { item } = await apiClient.updateAgentlessPolicy(agentlessId, {
           package: { name: 'test_agentless', version: '1.0.0' },
           name: updatedName,
-          description: 'updated through the agentless API',
+          description: 'updated through the managed integrations API',
           namespace: 'default',
           inputs: {
             'sample-httpjson': {

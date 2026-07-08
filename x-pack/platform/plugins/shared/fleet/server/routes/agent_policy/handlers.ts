@@ -435,7 +435,9 @@ export const createAgentPolicyHandler: FleetRequestHandler<
     // flipped fleet-wide — the flip is what starts rejecting these callers.
     if (request.body.supports_agentless) {
       if (appContextService.getExperimentalFeatures().disableAgentlessLegacyAPI) {
-        throw new FleetError('To create agentless agent policies, use the agentless policies API.');
+        throw new FleetError(
+          'To create agentless agent policies, use the managed integrations API.'
+        );
       }
       logLegacyAgentlessWriteDeprecation('create agent policy');
     }
@@ -645,7 +647,9 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       false
     );
     if (existingAgentPolicy?.supports_agentless || data.supports_agentless) {
-      throw new FleetError('To update agentless agent policies, use the agentless policies API.');
+      throw new FleetError(
+        'To update agentless agent policies, use the managed integrations API.'
+      );
     }
 
     const agentPolicy = await agentPolicyService.update(
@@ -710,7 +714,7 @@ export const copyAgentPolicyHandler: RequestHandler<
       // A missing source falls through to `copy`, which reports the not-found error.
       if (sourceAgentPolicy?.supports_agentless) {
         throw new FleetError(
-          `Agentless agent policies cannot be copied. To create agentless deployments, use the agentless policies API. Source agent policy: ${request.params.agentPolicyId}.`
+          'Agentless agent policies cannot be copied. To create agentless deployments, use the managed integrations API. Source policy: ${request.params.agentPolicyId}.'
         );
       }
     }

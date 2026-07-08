@@ -3,7 +3,7 @@ requestBody:
     application/json:
       examples:
         upgradeAgentlessPoliciesRequestExample:
-          description: 'Bulk upgrade agentless policies to their installed package version'
+          description: 'Bulk upgrade managed integrations to their installed package version'
           value:
             policyIds:
               - d52a7812-5736-4fdc-aed8-72152afa1ffa
@@ -24,7 +24,7 @@ responses:
                 name: cspm-aws-policy
                 success: true
           upgradeAgentlessPoliciesPartialFailureResponseExample:
-            description: 'Example response where one policy upgraded and another id was missing or not an agentless policy (the batch still returns 200)'
+            description: 'Example response where one managed integration upgraded and another id was missing or not an agentless policy (the batch still returns 200)'
             value:
               - id: d52a7812-5736-4fdc-aed8-72152afa1ffa
                 name: ess_billing-1

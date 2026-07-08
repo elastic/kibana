@@ -877,7 +877,7 @@ describe('When calling package policy', () => {
       });
 
       await expect(createPackagePolicyHandler(context, request, response)).rejects.toThrow(
-        /To create agentless package policies, use the agentless policies API./
+        /To create agentless package policies, use the managed integrations API./
       );
     });
 

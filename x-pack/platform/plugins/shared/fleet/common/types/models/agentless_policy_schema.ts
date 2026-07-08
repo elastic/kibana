@@ -58,16 +58,16 @@ export const AgentlessPolicySchema = schema.object(
   {
     id: schema.string({
       maxLength: 255,
-      meta: { description: 'Agentless policy unique identifier.' },
+      meta: { description: 'Managed integration unique identifier.' },
     }),
     name: schema.string({
       maxLength: 255,
-      meta: { description: 'Agentless policy name.' },
+      meta: { description: 'Managed integration name.' },
     }),
     description: schema.maybe(
       schema.string({
         maxLength: 2048,
-        meta: { description: 'Agentless policy description.' },
+        meta: { description: 'Managed integration description.' },
       })
     ),
     namespace: schema.maybe(

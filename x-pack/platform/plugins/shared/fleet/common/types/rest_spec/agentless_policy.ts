@@ -21,7 +21,7 @@ import type { ListResult } from './common';
 export const CreateAgentlessPolicyRequestSchema = {
   body: SimplifiedCreatePackagePolicyRequestBodySchema.extends(
     {
-      // Remove all properties that are not relevant for agentless policies
+      // Remove all properties that are not relevant for managed integrations
       policy_id: undefined,
       policy_ids: undefined,
       supports_agentless: undefined,
@@ -32,11 +32,11 @@ export const CreateAgentlessPolicyRequestSchema = {
           maxLength: 256,
           meta: {
             description:
-              'The policy template to use for the agentless package policy. If not provided, the default policy template is used.',
+              'The policy template to use for the managed integration. If not provided, the default policy template is used.',
           },
         })
       ),
-      // Only available for agentless integration policies.
+      // Only available for managed integrations.
       // On standard package policies this field is rejected by server-side validation.
       global_data_tags: schema.maybe(
         schema.arrayOf(
@@ -135,7 +135,7 @@ export const UpdateAgentlessPolicyRequestSchema = {
     policyId: schema.string({
       maxLength: 256,
       meta: {
-        description: 'The ID of the agentless policy to update.',
+        description: 'The ID of the managed integration to update.',
       },
     }),
   }),
@@ -175,13 +175,13 @@ export const DeleteAgentlessPolicyResponseSchema = schema.object(
   {
     id: schema.string({
       meta: {
-        description: 'The ID of the deleted agentless package policy.',
+        description: 'The ID of the deleted managed integration.',
       },
     }),
   },
   {
     meta: {
-      description: 'Response for deleting an agentless package policy.',
+      description: 'Response for deleting a managed integration.',
     },
   }
 );
@@ -193,7 +193,7 @@ export interface CreateAgentlessPolicyRequest {
 }
 
 /**
- * Request body for creating an agentless policy.
+ * Request body for creating a managed integration.
  *
  * Derived from the route schema so it always reflects the accepted contract: a
  * `cloud_connector` may carry `name`/`target_csp` when creating a new connector
@@ -202,7 +202,7 @@ export interface CreateAgentlessPolicyRequest {
 export type NewAgentlessPolicy = CreateAgentlessPolicyRequest['body'];
 
 /**
- * Request for updating an agentless policy.
+ * Request for updating a managed integration.
  *
  * `body` reuses the create contract (full-replace PUT), so it stays in sync with
  * {@link NewAgentlessPolicy}. The response is the unified {@link AgentlessPolicy}
@@ -225,7 +225,7 @@ export interface DeleteAgentlessPolicyRequest {
 export const AgentlessPolicyThroughputSchema = schema.object({
   policyId: schema.string({
     maxLength: 256,
-    meta: { description: 'The ID of the agentless package policy.' },
+    meta: { description: 'The ID of the managed integration.' },
   }),
   averagePerSecond: schema.number({
     meta: { description: 'Average ingest rate over the observed span in events per second.' },
@@ -245,7 +245,7 @@ export const GetBulkAgentlessPolicyThroughputRequestSchema = {
   body: schema.object({
     policyIds: schema.arrayOf(schema.string({ maxLength: 500 }), {
       maxSize: SO_SEARCH_LIMIT,
-      meta: { description: 'IDs of the agentless package policies to query.' },
+      meta: { description: 'IDs of the managed integrations to query.' },
     }),
   }),
 };
@@ -274,7 +274,7 @@ export const GetAgentlessPolicyRequestSchema = {
     policyId: schema.string({
       maxLength: 256,
       meta: {
-        description: 'The ID of the agentless policy to retrieve.',
+        description: 'The ID of the managed integration to retrieve.',
       },
     }),
   }),
@@ -336,7 +336,7 @@ export const BulkUpgradeAgentlessPoliciesRequestSchema = {
         maxSize: 1000,
         meta: {
           description:
-            'IDs of the agentless policies to upgrade to their installed package version.',
+            'IDs of the managed integrations to upgrade to their installed package version.',
         },
       }),
     },
@@ -357,7 +357,7 @@ export const AgentlessPolicyUpgradeDryRunRequestSchema = {
       policyIds: schema.arrayOf(schema.string({ maxLength: 256 }), {
         maxSize: 1000,
         meta: {
-          description: 'IDs of the agentless policies to preview upgrading.',
+          description: 'IDs of the managed integrations to preview upgrading.',
         },
       }),
       pkgVersion: schema.maybe(
@@ -385,9 +385,15 @@ export const AgentlessPolicyUpgradeDryRunRequestSchema = {
  */
 export const BulkUpgradeAgentlessPolicyResultSchema = schema.object(
   {
-    id: schema.string({ maxLength: 256, meta: { description: 'The ID of the agentless policy.' } }),
+    id: schema.string({
+      maxLength: 256,
+      meta: { description: 'The ID of the managed integration.' },
+    }),
     name: schema.maybe(
-      schema.string({ maxLength: 256, meta: { description: 'The name of the agentless policy.' } })
+      schema.string({
+        maxLength: 256,
+        meta: { description: 'The name of the managed integration.' },
+      })
     ),
     success: schema.boolean({
       meta: {
@@ -427,9 +433,15 @@ export const BulkUpgradeAgentlessPoliciesResponseSchema = schema.arrayOf(
  */
 export const AgentlessPolicyUpgradeDryRunResultSchema = schema.object(
   {
-    id: schema.string({ maxLength: 256, meta: { description: 'The ID of the agentless policy.' } }),
+    id: schema.string({
+      maxLength: 256,
+      meta: { description: 'The ID of the managed integration.' },
+    }),
     name: schema.maybe(
-      schema.string({ maxLength: 256, meta: { description: 'The name of the agentless policy.' } })
+      schema.string({
+        maxLength: 256,
+        meta: { description: 'The name of the managed integration.' },
+      })
     ),
     hasErrors: schema.boolean({
       meta: { description: 'Whether the dry-run migration produced any errors.' },

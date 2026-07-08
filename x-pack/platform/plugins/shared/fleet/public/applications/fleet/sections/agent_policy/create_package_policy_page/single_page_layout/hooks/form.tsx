@@ -135,7 +135,7 @@ export const createAgentPolicyIfNeeded = async ({
       }
     }
 
-    // Skip policy creation for agentless as it's done through agentless_policies API
+    // Skip policy creation for agentless as it's done through the managed integrations API
     if (newAgentPolicy.supports_agentless) {
       return;
     }
@@ -155,7 +155,7 @@ async function savePackagePolicy(
 ): Promise<SavedPolicyResult> {
   const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(pkgPolicy);
 
-  // If agentless use agentless policies API
+  // If agentless, use the managed integrations API
   if (policy.supports_agentless) {
     // Pass `packageInfo` so the create write applies the same template-aware input allow-check as the
     // edit read path (`agentlessPolicyToPackagePolicy`), keeping create → GET → form → PUT idempotent.

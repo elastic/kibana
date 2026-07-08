@@ -3,7 +3,7 @@ requestBody:
     application/json:
       examples:
         upgradeAgentlessPoliciesDryRunRequestExample:
-          description: 'Preview the upgrade of agentless policies to their installed package version'
+          description: 'Preview the upgrade of managed integrations to their installed package version'
           value:
             policyIds:
               - d52a7812-5736-4fdc-aed8-72152afa1ffa
@@ -15,7 +15,7 @@ requestBody:
             pkgVersion: 1.6.0
 responses:
   200:
-    description: 'Indicates a successful response. Each clean item (`hasErrors: false`) previews the migrated policy as a consumable agentless policy (`proposedPolicy`); a missing or non-agentless id, or a migration error, is reported as a per-item failure (`hasErrors: true`, with `proposedPolicy` omitted) without failing the batch. Inspect every item.'
+    description: 'Indicates a successful response. Each clean item (`hasErrors: false`) previews the migrated policy as a consumable managed integration (`proposedPolicy`); a missing or non-agentless id, or a migration error, is reported as a per-item failure (`hasErrors: true`, with `proposedPolicy` omitted) without failing the batch. Inspect every item.'
     content:
       application/json:
         examples:
@@ -56,7 +56,7 @@ responses:
                 errors:
                   - message: 'Variable "organization_id" is required'
           upgradeAgentlessPoliciesDryRunMixedResponseExample:
-            description: 'Example dry-run response for a mixed batch: one policy previews cleanly while two ids are missing or not agentless. Missing / non-agentless ids are surfaced as per-item failures (`hasErrors: true` + `statusCode`) without failing the batch, and results stay in request order.'
+            description: 'Example dry-run response for a mixed batch: one managed integration previews cleanly while two ids are missing or not agentless. Missing / non-agentless ids are surfaced as per-item failures (`hasErrors: true` + `statusCode`) without failing the batch, and results stay in request order.'
             value:
               - id: 2e426392-f856-4ab2-bc31-92d4dbb8d134
                 name: agentless_hello_world-16

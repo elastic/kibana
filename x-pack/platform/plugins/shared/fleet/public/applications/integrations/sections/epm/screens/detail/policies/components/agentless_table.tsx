@@ -206,7 +206,7 @@ export const AgentlessPackagePoliciesTable = ({
     // The agentless save flow sets openEnrollmentFlyout=<packagePolicyId> via
     // appendOnSaveQueryParamsToPath (AgentlessPolicy has no policy_ids, so
     // policy.id is used). Match on packagePolicy.id accordingly. Rows are sourced from the
-    // agentless policies API (see `useAgentlessPolicies`) and mapped to this table's shape;
+    // managed integrations API (see `useAgentlessPolicies`) and mapped to this table's shape;
     // `packagePolicy.id` / `policy_ids[0]` both equal the agentless policy id.
     const flyoutPolicyIdFromQuery = queryParams.get('openEnrollmentFlyout');
     if (flyoutPolicyIdFromQuery) {

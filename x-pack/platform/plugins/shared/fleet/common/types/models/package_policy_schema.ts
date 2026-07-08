@@ -373,14 +373,14 @@ export const CreatePackagePolicyRequestBodySchema = schema.object(
         },
       })
     ),
-    // supports_agentless is deprecated for package policy creation in favor of agentless policies API
+    // supports_agentless is deprecated for package policy creation in favor of the managed integrations API
     supports_agentless: schema.maybe(
       schema.nullable(
         schema.boolean({
           defaultValue: false,
           meta: {
             description:
-              'Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet agentless policies API.',
+              'Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet managed integrations API.',
             deprecated: true,
           },
         })
@@ -604,14 +604,14 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema =
         })
       ),
       package: PackagePolicyPackageSchema,
-      // supports_agentless is deprecated for package policy creation in favor of agentless policies API
+      // supports_agentless is deprecated for package policy creation in favor of the managed integrations API
       supports_agentless: schema.maybe(
         schema.nullable(
           schema.boolean({
             defaultValue: false,
             meta: {
               description:
-                'Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet agentless policies API.',
+                'Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet managed integrations API.',
               deprecated: true,
             },
           })

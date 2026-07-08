@@ -46,8 +46,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       enableQueryVersion: true,
       path: AGENTLESS_POLICIES_ROUTES.SYNC_PATTERN,
-      summary: 'Sync agentless policies',
-      description: 'Sync agentless policies',
+      summary: 'Sync managed integrations',
+      description: 'Sync managed integrations',
       access: 'internal',
       security: {
         authz: {
@@ -97,10 +97,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     // @ts-ignore https://github.com/elastic/kibana/issues/203170
     .post({
       path: AGENTLESS_POLICIES_ROUTES.CREATE_PATTERN,
-      summary: 'Create an agentless policy',
-      description: 'Create an agentless policy',
+      summary: 'Create a managed integration',
+      description: 'Create a managed integration',
       options: {
-        tags: ['oas-tag:Fleet agentless policies'],
+        tags: ['oas-tag:Fleet managed integrations'],
         availability: {
           since: '9.3.0',
           stability: 'experimental',
@@ -142,10 +142,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     // @ts-ignore https://github.com/elastic/kibana/issues/203170
     .get({
       path: AGENTLESS_POLICIES_ROUTES.LIST_PATTERN,
-      summary: 'Get agentless policies',
-      description: 'List agentless policies',
+      summary: 'Get managed integrations',
+      description: 'List managed integrations',
       options: {
-        tags: ['oas-tag:Fleet agentless policies'],
+        tags: ['oas-tag:Fleet managed integrations'],
         availability: {
           since: '9.5.0',
           stability: 'experimental',
@@ -183,10 +183,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     // @ts-ignore https://github.com/elastic/kibana/issues/203170
     .get({
       path: AGENTLESS_POLICIES_ROUTES.GET_PATTERN,
-      summary: 'Get an agentless policy',
-      description: 'Get an agentless policy by ID',
+      summary: 'Get a managed integration',
+      description: 'Get a managed integration by ID',
       options: {
-        tags: ['oas-tag:Fleet agentless policies'],
+        tags: ['oas-tag:Fleet managed integrations'],
         availability: {
           since: '9.5.0',
           stability: 'experimental',
@@ -214,7 +214,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
               body: genericErrorResponse,
             },
             404: {
-              description: 'The agentless policy was not found.',
+              description: 'The managed integration was not found.',
               body: notFoundResponse,
             },
           },
@@ -228,11 +228,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     // @ts-ignore https://github.com/elastic/kibana/issues/203170
     .put({
       path: AGENTLESS_POLICIES_ROUTES.UPDATE_PATTERN,
-      summary: 'Update an agentless policy',
+      summary: 'Update a managed integration',
       description:
-        'Update an agentless policy by ID. Uses full-replace semantics: the policy is rebuilt entirely from the request body, so any omitted optional field (for example, `description`, `vars`, `global_data_tags`, `cloud_connector`) is cleared or reset to its default. The integration package name is immutable and the runtime-managed `cluster_id` is preserved from the existing policy.',
+        'Update a managed integration by ID. Uses full-replace semantics: the policy is rebuilt entirely from the request body, so any omitted optional field (for example, `description`, `vars`, `global_data_tags`, `cloud_connector`) is cleared or reset to its default. The integration package name is immutable and the runtime-managed `cluster_id` is preserved from the existing policy.',
       options: {
-        tags: ['oas-tag:Fleet agentless policies'],
+        tags: ['oas-tag:Fleet managed integrations'],
         availability: {
           since: '9.5.0',
           stability: 'experimental',
@@ -260,7 +260,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
               body: genericErrorResponse,
             },
             404: {
-              description: 'The agentless policy was not found.',
+              description: 'The managed integration was not found.',
               body: notFoundResponse,
             },
             409: {
@@ -279,10 +279,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     // @ts-ignore https://github.com/elastic/kibana/issues/203170
     .delete({
       path: AGENTLESS_POLICIES_ROUTES.DELETE_PATTERN,
-      summary: 'Delete an agentless policy',
-      description: 'Delete an agentless policy',
+      summary: 'Delete a managed integration',
+      description: 'Delete a managed integration',
       options: {
-        tags: ['oas-tag:Fleet agentless policies'],
+        tags: ['oas-tag:Fleet managed integrations'],
         availability: {
           since: '9.3.0',
           stability: 'experimental',
@@ -324,11 +324,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     // @ts-ignore https://github.com/elastic/kibana/issues/203170
     .post({
       path: AGENTLESS_POLICIES_ROUTES.UPGRADE_PATTERN,
-      summary: 'Bulk upgrade agentless policies',
+      summary: 'Bulk upgrade managed integrations',
       description:
-        "Upgrade multiple agentless policies to their installed package version, migrating each package policy's config onto the new schema. Always returns 200 with a per-policy result array; a missing or non-agentless id is reported as a per-item failure (`success: false` + `statusCode`) without failing the batch, so valid ids are still upgraded. A successful result means the policy's saved object was upgraded, while the agentless deployment is reconciled asynchronously in the background. Policies already at the installed version are a genuine no-op: they still report `success: true` (calls stay idempotent) but nothing is re-persisted or redeployed. Note: agent-policy-level agentless settings (resources, ownership tags) are not re-derived from the new package version — use the update (PUT) endpoint for those.",
+        "Upgrade multiple managed integrations to their installed package version, migrating each package policy's config onto the new schema. Always returns 200 with a per-policy result array; a missing or non-agentless id is reported as a per-item failure (`success: false` + `statusCode`) without failing the batch, so valid ids are still upgraded. A successful result means the policy's saved object was upgraded, while the agentless deployment is reconciled asynchronously in the background. Policies already at the installed version are a genuine no-op: they still report `success: true` (calls stay idempotent) but nothing is re-persisted or redeployed. Note: agent-policy-level agentless settings (resources, ownership tags) are not re-derived from the new package version — use the update (PUT) endpoint for those.",
       options: {
-        tags: ['oas-tag:Fleet agentless policies'],
+        tags: ['oas-tag:Fleet managed integrations'],
         availability: {
           since: '9.5.0',
           stability: 'experimental',
@@ -367,11 +367,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     // @ts-ignore https://github.com/elastic/kibana/issues/203170
     .post({
       path: AGENTLESS_POLICIES_ROUTES.UPGRADE_DRYRUN_PATTERN,
-      summary: 'Preview an agentless policies upgrade',
+      summary: 'Preview a managed integrations upgrade',
       description:
-        'Preview upgrading multiple agentless policies without applying any change. Targets the installed package version by default; pass `pkgVersion` to preview a specific (for example, not-yet-installed) version. Each result returns the current/proposed version and any migration errors, plus — only on a clean dry-run (`hasErrors: false`) — the migrated `proposedPolicy`. `proposedPolicy` is for the edit-and-upgrade flow (edit it, then save via the update (PUT) endpoint); to apply an upgrade as-is, use `_upgrade`.',
+        'Preview upgrading multiple managed integrations without applying any change. Targets the installed package version by default; pass `pkgVersion` to preview a specific (for example, not-yet-installed) version. Each result returns the current/proposed version and any migration errors, plus — only on a clean dry-run (`hasErrors: false`) — the migrated `proposedPolicy`. `proposedPolicy` is for the edit-and-upgrade flow (edit it, then save via the update (PUT) endpoint); to apply an upgrade as-is, use `_upgrade`.',
       options: {
-        tags: ['oas-tag:Fleet agentless policies'],
+        tags: ['oas-tag:Fleet managed integrations'],
         availability: {
           since: '9.5.0',
           stability: 'experimental',
@@ -410,7 +410,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: AGENTLESS_POLICIES_ROUTES.BULK_THROUGHPUT_PATTERN,
       access: 'internal',
-      summary: 'Get throughput for multiple agentless policies',
+      summary: 'Get throughput for multiple managed integrations',
       description: 'Get 24h throughput data for a batch of agentless integration policies.',
       security: {
         authz: {

@@ -3,7 +3,7 @@ requestBody:
     application/json:
       examples:
         createAgentlessPoliciesRequestExample:
-          description: 'Example request to create agentless policies'
+          description: 'Example request to create managed integrations'
           value:
             package:
               name: ess_billing
@@ -30,7 +30,7 @@ requestBody:
                   ess_billing.credits:
                     enabled: false
         createAgentlessPoliciesWithAWSCloudConnectorExample:
-          description: 'Example request to create agentless policy with AWS cloud connector'
+          description: 'Example request to create a managed integration with AWS cloud connector'
           value:
             package:
               name: cloud_security_posture
@@ -65,7 +65,7 @@ requestBody:
               posture: cspm
               deployment: aws
         createAgentlessPoliciesWithAzureCloudConnectorExample:
-          description: 'Example request to create agentless policy with Azure cloud connector'
+          description: 'Example request to create a managed integration with Azure cloud connector'
           value:
             package:
               name: cloud_security_posture
@@ -101,7 +101,7 @@ requestBody:
               posture: cspm
               deployment: azure
         createAgentlessPoliciesReuseAWSCloudConnectorExample:
-          description: 'Example request to create agentless policy reusing an existing AWS cloud connector'
+          description: 'Example request to create a managed integration reusing an existing AWS cloud connector'
           value:
             package:
               name: cloud_security_posture
@@ -144,7 +144,7 @@ responses:
       application/json:
         examples:
           createAgentlessPoliciesResponseExample:
-            description: 'Example response for creating an agentless policy'
+            description: 'Example response for creating a managed integration'
             value:
               item:
                 id: d52a7812-5736-4fdc-aed8-72152afa1ffa

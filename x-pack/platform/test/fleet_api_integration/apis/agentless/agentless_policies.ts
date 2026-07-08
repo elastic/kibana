@@ -37,6 +37,26 @@ export default function (providerContext: FtrProviderContext) {
     const apiClient = new SpaceTestApiClient(supertest);
 
     let mockApiServer: http.Server;
+    describe('Managed integrations route path', () => {
+      it('does not expose the old agentless_policies public collection path', async () => {
+        await supertest.get('/api/fleet/agentless_policies').set('kbn-xsrf', 'xxxx').expect(404);
+        await supertest
+          .post('/api/fleet/agentless_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({})
+          .expect(404);
+      });
+
+      it('does not expose the old agentless_policies internal sync path', async () => {
+        await supertest
+          .post('/internal/fleet/agentless_policies/_sync')
+          .set('kbn-xsrf', 'xxxx')
+          .set('elastic-api-version', '1')
+          .send({})
+          .expect(404);
+      });
+    });
+
     describe('Create Agentless Policy', () => {
       before(async () => {
         const mockAgentlessApiService = setupMockServer();
@@ -1423,7 +1443,7 @@ export default function (providerContext: FtrProviderContext) {
               namespace: 'default',
               description: 'tata',
             }),
-          /400 "Bad Request" To update agentless agent policies, use the agentless policies API./
+          /400 "Bad Request" To update agentless agent policies, use the managed integrations API./
         );
       });
     });
