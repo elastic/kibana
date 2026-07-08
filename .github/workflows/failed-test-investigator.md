@@ -126,7 +126,7 @@ safe-outputs:
       - failure:inconclusive
       - failure:ai-fixable
       - ai:fix-flaky
-    max: 7
+    max: 3
     target: *issue_number
 
 strict: false
