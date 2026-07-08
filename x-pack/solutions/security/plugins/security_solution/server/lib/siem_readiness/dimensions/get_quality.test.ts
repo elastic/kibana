@@ -170,14 +170,20 @@ describe('getQuality', () => {
 
     it('returns missingFieldsByRule verbatim from fetchRuleFieldCaps', async () => {
       mockSearchResponse([]);
-      mockFetchRuleFieldCaps.mockResolvedValueOnce({ entries: missingFieldsFixture, partial: false });
+      mockFetchRuleFieldCaps.mockResolvedValueOnce({
+        entries: missingFieldsFixture,
+        partial: false,
+      });
       const result = await getQuality({ esClient, logger, reverseMapResult: makeReverseMap() });
       expect(result.missingFieldsByRule).toEqual(missingFieldsFixture);
     });
 
     it('emits one WARNING missing_field finding per unmapped field, naming the rule and field', async () => {
       mockSearchResponse([]);
-      mockFetchRuleFieldCaps.mockResolvedValueOnce({ entries: missingFieldsFixture, partial: false });
+      mockFetchRuleFieldCaps.mockResolvedValueOnce({
+        entries: missingFieldsFixture,
+        partial: false,
+      });
       const result = await getQuality({ esClient, logger, reverseMapResult: makeReverseMap() });
 
       const missingFindings = result.actionableFindings.filter((f) => f.type === 'missing_field');
@@ -219,7 +225,10 @@ describe('getQuality', () => {
 
     it('includes both incompatible-field and missing-field counts in the summary', async () => {
       mockSearchResponse([makeSearchHit('logs-endpoint.events-default', 3)]);
-      mockFetchRuleFieldCaps.mockResolvedValueOnce({ entries: missingFieldsFixture, partial: false });
+      mockFetchRuleFieldCaps.mockResolvedValueOnce({
+        entries: missingFieldsFixture,
+        partial: false,
+      });
       const result = await getQuality({ esClient, logger, reverseMapResult: makeReverseMap() });
 
       expect(result.status).toBe('actionsRequired');
