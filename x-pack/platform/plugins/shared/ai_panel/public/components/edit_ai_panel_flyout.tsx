@@ -78,7 +78,7 @@ export const EditAiPanelFlyout = ({
   } = useEditFlyoutState({ prompt, esqlQuery, template, timeRange });
 
   return (
-    <EuiFlyout onClose={onClose} size="m" type="push" aria-labelledby="editAiPanelFlyoutTitle">
+    <EuiFlyout onClose={onClose} size="s" type="push" aria-labelledby="editAiPanelFlyoutTitle">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="editAiPanelFlyoutTitle">
