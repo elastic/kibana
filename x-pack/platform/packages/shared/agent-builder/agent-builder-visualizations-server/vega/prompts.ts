@@ -9,17 +9,7 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 
-/**
- * Vega-specific ES|QL guidance appended to the shared instructions when
- * generating the query for a Vega chart.
- *
- * Kibana's Vega ES|QL renderer only *filters* rows by the time picker when the
- * query filters on the raw source time field itself; binding `?_tstart`/`?_tend`
- * inside `BUCKET(...)` only sets the bucket extent and does NOT drop rows outside
- * the selected range (see issue #275519). So, unlike Lens (which applies the time
- * range for us), every time-based Vega query must filter its own rows and must do
- * so on the original source field — not a `RENAME`/`EVAL`-derived one.
- */
+// Vega-specific ES|QL guidance; see issue #275519 for the time-filtering quirk.
 export const vegaEsqlAdditionalInstructions = `
 ## Vega time-range filtering (required)
 
@@ -27,12 +17,14 @@ This query feeds a Vega chart, whose ES|QL data source only respects the time pi
 
 Therefore, for EVERY time-based chart — time series AND plain metrics/categorical:
 - Always add an explicit row filter on the raw source time field: \`WHERE <time field> >= ?_tstart AND <time field> < ?_tend\`.
-- Use the RAW source time field (e.g. \`@timestamp\`) directly in both that WHERE filter and any \`BUCKET(...)\`. Never filter or bucket on a field produced by \`RENAME\` or \`EVAL\`; the time filter must reference the original source field so Kibana can bind the range to it.`;
+- Use the RAW source time field (e.g. \`@timestamp\`) directly in both that WHERE filter and any \`BUCKET(...)\`. Never filter or bucket on a field produced by \`RENAME\` or \`EVAL\`; the time filter must reference the original source field so Kibana can bind the range to it.
 
-/**
- * Describe the result columns of the backing ES|QL query so the model binds
- * encodings to real field names and types instead of guessing.
- */
+## Field names for Vega
+
+Vega interprets a dot in a field name as a nested-object path, but ES|QL result columns are flat, so a column whose name contains a dot (e.g. \`host.name\`) is misread and renders as "undefined".
+- RENAME every such column to a readable, dotless alias in the query, e.g. \`RENAME host.name AS host\` or \`RENAME geo.dest AS destination\`, and reference the alias in the spec. Prefer this over leaving dotted names for the renderer to escape.
+- This applies to dimension/metric columns only. Do NOT rename the time field this way — keep filtering and bucketing on the raw source time field exactly as required above.`;
+
 const formatColumns = (columns: EsqlEsqlColumnInfo[] | undefined): string => {
   if (!columns || columns.length === 0) {
     return 'No column information is available; infer fields from the ES|QL query.';
@@ -47,6 +39,7 @@ export const createAuthorVegaSpecPrompt = ({
   columns,
   existingSpec,
   chartType,
+  referenceExamples,
   additionalContext,
 }: {
   nlQuery: string;
@@ -54,6 +47,8 @@ export const createAuthorVegaSpecPrompt = ({
   columns?: EsqlEsqlColumnInfo[];
   existingSpec?: string;
   chartType?: SupportedChartType;
+  /** Pre-selected, pre-loaded reference-example block (see `reference_examples`). */
+  referenceExamples?: string;
   additionalContext?: string;
 }): BaseMessageLike[] => {
   const esqlQueryJson = JSON.stringify(esqlQuery);
@@ -94,8 +89,16 @@ CHART CHOICE:
 - PIE/DONUT: do NOT use "arc" marks. Prefer a sorted horizontal bar chart (it is easier to read and compare); pre-sort the categories in the ES|QL query (SORT … DESC).
 - Keep the spec minimal: include only what is needed to render the requested chart. Do NOT add decorative text layers with a constant "value" (e.g. a center label that just repeats a word); a text layer must encode a real field.
 
+AXES:
+- Long category labels (common on horizontal bar charts) truncate by default; set "axis": { "labelLimit": 150 } on that axis so the labels stay readable.
+- Temporal axes: set "axis": { "labelAngle": 0, "tickCount": 8 } and let Vega auto-format the dates — do NOT rotate or hand-format date labels.
+- When the "title" already conveys what an axis represents, set "title": null on that axis to drop the redundant axis title.
+
 COLOR:
-- Use "color" only for a meaningful dimension, and do NOT hand-author a "domain"; let it derive from the data. For categorical fields prefer a built-in scheme; for quantitative fields a sequential "scheme" ("blues", "viridis") is fine.
+- Kibana applies a theme-aware Elastic palette and adapts chart colors to the active light/dark theme. Do NOT hardcode colors: no hex values, no "config" block setting mark/axis/text colors, and no "mark": { "color": … } — hardcoding overrides the theme and breaks dark mode.
+- Use the "color" ENCODING only to distinguish a meaningful categorical dimension, and leave its scale to the theme: do NOT set a "scheme", "range", or hand-authored "domain" for categorical color.
+- Only for a quantitative color encoding may you set a sequential "scheme" ("blues", "viridis"), since there is no themed default for continuous scales.
+- Single-series charts need no color at all — the theme supplies the default series color.
 
 LAYOUT & STYLE RULES:
 - DO NOT set top-level "width" or "height"; the system makes the chart fill its container. Do NOT set fixed mark sizes (e.g. arc "outerRadius") that prevent the chart from filling its panel.
@@ -111,7 +114,7 @@ FACETING / SMALL MULTIPLES:
 
 DOTS IN FIELD NAMES:
 - Vega treats an unescaped dot in a field name as nested-object access, but ES|QL columns are flat. For a column whose name contains a dot (e.g. "geo.dest"), backslash-escape every dot in "field" strings ("geo\\.dest") and use bracket access in expressions (datum['geo.dest']).
-
+${referenceExamples ?? ''}
 Your task is to author the visualization specification for the following request:
 
 <user_query>

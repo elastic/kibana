@@ -78,6 +78,19 @@ describe('ActionPoliciesApi', () => {
     });
   });
 
+  describe('matchActionPoliciesForRule', () => {
+    it('sends a POST request', async () => {
+      http.post.mockResolvedValue({ items: [] });
+
+      await api.matchActionPoliciesForRule('rule-1');
+
+      expect(http.post).toHaveBeenCalledWith(
+        `${ALERTING_V2_ACTION_POLICY_API_PATH}/_match_for_rule`,
+        { body: JSON.stringify({ rule: { id: 'rule-1' } }) }
+      );
+    });
+  });
+
   describe('fetchDataFields', () => {
     it('omits the query param entirely when no matcher is provided', async () => {
       http.get.mockResolvedValue([]);
