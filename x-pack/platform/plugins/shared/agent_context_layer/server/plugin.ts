@@ -26,7 +26,6 @@ import {
 } from './services/sml/sml_task_definitions';
 import { resolveSmlAttachItems } from './services/sml/execute_sml_attach_items';
 import type { SmlService } from './services/sml/types';
-import { corpusEntrySmlType } from './sml_types/corpus_entry';
 import { buildIndexAttachment, buildDeleteAttachment } from './start_contract';
 
 export class AgentContextLayerPlugin
@@ -55,11 +54,6 @@ export class AgentContextLayerPlugin
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
     const smlSetup = this.smlServiceInstance.setup({ logger: this.logger.get('sml') });
-
-    // Register the neutral 'corpus_entry' SML type so workflow authors can sink
-    // ad-hoc / eval documents via contextEngine.addEntry without reusing a
-    // solution-owned type.
-    smlSetup.registerType(corpusEntrySmlType);
 
     registerSmlCrawlerTaskDefinition({
       taskManager: setupDeps.taskManager,
