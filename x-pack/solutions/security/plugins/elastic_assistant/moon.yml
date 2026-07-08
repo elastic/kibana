@@ -111,6 +111,7 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/ai-assistant-common'
   - '@kbn/discoveries'
+  - '@kbn/attack-discovery-schedules-common'
 tags:
   - plugin
   - prod
