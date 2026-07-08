@@ -34,7 +34,7 @@ import {
 } from '../log_pagination_probe_query_builder';
 import { executeEsqlQuery } from '../../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../../infra/elasticsearch/ingest';
-import { resolveClosedIndexAdjustments } from '../../../infra/elasticsearch/resolve_closed_indices';
+import { resolveFrom } from '../../../infra/elasticsearch/resolve_esql_from_patterns';
 import { getUpdatesEntitiesDataStreamName } from '../../asset_manager/updates_data_stream';
 import {
   applyMaxLagCutoff,
@@ -136,15 +136,11 @@ export class RemoteLogsExtractionClient {
       return { count: 0, pages: 0 };
     }
 
-    const { openBackingIndices, negations: closedNegations } = await resolveClosedIndexAdjustments(
+    const effectiveRemoteIndexPatterns = await resolveFrom(
       this.strategy.client,
       remoteIndexPatterns,
       this.logger
     );
-    const effectiveRemoteIndexPatterns =
-      openBackingIndices.length > 0 || closedNegations.length > 0
-        ? [...remoteIndexPatterns, ...openBackingIndices, ...closedNegations]
-        : remoteIndexPatterns;
 
     const state =
       windowOverride != null

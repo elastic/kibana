@@ -9,7 +9,6 @@ import type { Logger } from '@kbn/logging';
 import moment from 'moment';
 import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
-import { isNonLocalIndexName } from '@kbn/es-query';
 import { entityStoreMetrics } from '../../monitor/metrics';
 import type {
   EntityType,
@@ -44,7 +43,7 @@ import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index'
 import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
-import { resolveClosedIndexAdjustments } from '../../infra/elasticsearch/resolve_closed_indices';
+import { resolveLocalAndRemoteFrom } from '../../infra/elasticsearch/resolve_esql_from_patterns';
 import {
   getAlertsIndexName,
   getSecuritySolutionDataViewName,
@@ -984,43 +983,12 @@ export class LogsExtractionClient {
     excludedIndexPatterns: string[] = []
   ): Promise<{ localIndexPatterns: string[]; remoteIndexPatterns: string[] }> {
     const all = await this.getAllIndexPatternsIncludingRemote(additionalIndexPatterns);
-    const alertsIndex = getAlertsIndexName(this.namespace);
-    const withoutAlerts = all.filter((index) => index !== alertsIndex);
-
-    const localIndexPatterns: string[] = [];
-    const remoteIndexPatterns: string[] = [];
-
-    withoutAlerts.forEach((index) => {
-      if (isNonLocalIndexName(index)) {
-        remoteIndexPatterns.push(index);
-      } else {
-        localIndexPatterns.push(index);
-      }
-    });
-
-    // Pre-flight: find data streams with closed backing indices and build adjustments.
-    // Open backing indices must be added as positives BEFORE any negations.
-    const { openBackingIndices, negations: closedNegations } = await resolveClosedIndexAdjustments(
+    const { local, remote } = await resolveLocalAndRemoteFrom(
       this.esClient,
-      localIndexPatterns,
+      { include: all, exclude: [getAlertsIndexName(this.namespace), ...excludedIndexPatterns] },
       this.logger
     );
-    localIndexPatterns.push(...openBackingIndices);
-
-    // Append after includes: ES negation only subtracts from earlier entries in the same expression.
-    // e.g. `logs-*,-logs-proxy-*` excludes proxy logs, but `-logs-proxy-*,logs-*` does not.
-    excludedIndexPatterns.forEach((pattern) => {
-      if (isNonLocalIndexName(pattern)) {
-        remoteIndexPatterns.push(`-${pattern}`);
-      } else {
-        localIndexPatterns.push(`-${pattern}`);
-      }
-    });
-
-    // Closed-index negations go last — after all positive includes and user exclusions.
-    localIndexPatterns.push(...closedNegations);
-
-    return { localIndexPatterns, remoteIndexPatterns };
+    return { localIndexPatterns: local, remoteIndexPatterns: remote };
   }
 
   public async getLocalIndexPatterns(

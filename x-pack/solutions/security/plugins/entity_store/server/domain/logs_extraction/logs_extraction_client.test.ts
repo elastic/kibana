@@ -182,7 +182,13 @@ describe('LogsExtractionClient', () => {
     mockLogger = loggerMock.create();
     mockEsClient = {
       indices: {
-        resolveIndex: jest.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
+        // By default, every requested pattern resolves to an existing open index, so the
+        // pre-flight keeps concrete names. Tests override this to simulate missing/closed indices.
+        resolveIndex: jest.fn().mockImplementation(async ({ name }: { name: string[] }) => ({
+          indices: name.map((indexName) => ({ name: indexName, attributes: ['open'] })),
+          aliases: [],
+          data_streams: [],
+        })),
       },
     } as unknown as jest.Mocked<ElasticsearchClient>;
     mockDataViewsService = {
@@ -1606,7 +1612,7 @@ describe('LogsExtractionClient', () => {
       expect(remoteIndexPatterns).not.toContain('metrics-*');
     });
 
-    it('should exclude alerts index from both local and remote', async () => {
+    it('excludes the alerts index by negating it', async () => {
       const mockDataView = {
         getIndexPattern: jest.fn().mockReturnValue('logs-*,.alerts-security.alerts-default'),
       };
@@ -1615,7 +1621,7 @@ describe('LogsExtractionClient', () => {
       const { localIndexPatterns, remoteIndexPatterns } =
         await client.getLocalAndRemoteIndexPatterns();
 
-      expect(localIndexPatterns).not.toContain('.alerts-security.alerts-default');
+      expect(localIndexPatterns).toContain('-.alerts-security.alerts-default');
       expect(remoteIndexPatterns).not.toContain('.alerts-security.alerts-default');
     });
 
@@ -1624,6 +1630,12 @@ describe('LogsExtractionClient', () => {
         getIndexPattern: jest.fn().mockReturnValue('logs-*,metrics-*'),
       };
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      // `metrics-debug` must resolve for its exclusion to be kept (a no-op exclusion is dropped).
+      (mockEsClient.indices.resolveIndex as jest.Mock).mockResolvedValue({
+        indices: [{ name: 'metrics-debug', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
 
       const { localIndexPatterns, remoteIndexPatterns } =
         await client.getLocalAndRemoteIndexPatterns([], ['logs-proxy-*', 'metrics-debug']);
