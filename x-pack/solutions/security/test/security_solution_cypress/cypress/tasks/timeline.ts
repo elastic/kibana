@@ -321,26 +321,15 @@ export const createNewTimeline = () => {
   );
 };
 
-export const openCreateTimelineOptionsPopover = () => {
-  recurse(
-    () => {
-      cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
-      return cy.get(CREATE_NEW_TIMELINE);
-    },
-    (sub) => sub.is(':visible')
-  );
-};
-
 export const createTimelineFromBottomBar = () => {
   recurse(
     () => {
       cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
       return cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE);
     },
-    (sub) => sub.is(':visible')
+    (sub) => sub.is(':visible'),
+    { post: () => cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE).click() }
   );
-
-  cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE).click();
 };
 
 export const createTimelineTemplateFromBottomBar = () => {
@@ -349,10 +338,9 @@ export const createTimelineTemplateFromBottomBar = () => {
       cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
       return cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0);
     },
-    (sub) => sub.is(':visible')
+    (sub) => sub.is(':visible'),
+    { post: () => cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0).click() }
   );
-
-  cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0).click();
 };
 
 export const executeTimelineKQL = (query: string) => {
