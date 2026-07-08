@@ -94,8 +94,7 @@ jest.mock('./footer', () => ({
 }));
 
 const service: ServiceFlyoutService = {
-  id: 'opbeans-java',
-  label: 'opbeans-java',
+  name: 'opbeans-java',
   agentName: 'java',
 };
 
@@ -253,7 +252,7 @@ describe('ServiceFlyout local filter state', () => {
     const { rerender } = render(
       <ServiceFlyout
         {...contextProps}
-        key={service.id}
+        key={service.name}
         service={service}
         environment="ENVIRONMENT_ALL"
         kuery=""
@@ -269,8 +268,7 @@ describe('ServiceFlyout local filter state', () => {
     // A different `key` (different service) remounts the flyout, re-seeding from the new props.
     const otherService: ServiceFlyoutService = {
       ...service,
-      id: 'opbeans-go',
-      label: 'opbeans-go',
+      name: 'opbeans-go',
     };
     rerender(
       <ServiceFlyout

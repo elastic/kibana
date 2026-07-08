@@ -925,7 +925,12 @@ function GraphInner({
           {selectedServiceNodeForFlyout && (
             <ServiceFlyout
               key={selectedServiceNodeForFlyout.data.id}
-              service={selectedServiceNodeForFlyout.data}
+              service={{
+                name: selectedServiceNodeForFlyout.data.id,
+                agentName: selectedServiceNodeForFlyout.data.agentName,
+                sloStatus: selectedServiceNodeForFlyout.data.sloStatus,
+                sloCount: selectedServiceNodeForFlyout.data.sloCount,
+              }}
               environment={environment}
               kuery={flyoutOptions?.kuery ?? kuery}
               initialRangeFrom={flyoutOptions?.rangeFrom ?? start}

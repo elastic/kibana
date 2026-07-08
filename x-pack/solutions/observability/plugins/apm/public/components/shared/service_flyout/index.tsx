@@ -42,8 +42,7 @@ export const SERVICE_FLYOUT_TABS = [
 ] as const;
 
 export interface ServiceFlyoutService {
-  id: string;
-  label?: string;
+  name: string;
   agentName?: string;
   sloStatus?: SloStatus | 'noSLOs';
   sloCount?: number;
@@ -74,7 +73,7 @@ export function ServiceFlyout({
   onView,
   onClose,
 }: ServiceFlyoutProps) {
-  const title = service.label ?? service.id;
+  const title = service.name;
   const titleId = useGeneratedHtmlId({ prefix: 'serviceFlyoutTitle' });
 
   const [flyoutEnvironment, setFlyoutEnvironment] = useState(environment);
@@ -156,7 +155,7 @@ export function ServiceFlyout({
             />
             <EuiFlyoutBody>{renderTabContent()}</EuiFlyoutBody>
             <ServiceFlyoutFooter
-              serviceName={service.id}
+              serviceName={service.name}
               environment={flyoutEnvironment}
               rangeFrom={flyoutRange.rangeFrom}
               rangeTo={flyoutRange.rangeTo}

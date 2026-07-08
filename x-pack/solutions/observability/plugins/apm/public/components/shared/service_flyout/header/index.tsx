@@ -39,7 +39,7 @@ export function ServiceFlyoutHeader({
   onSelectedTabIdChange,
 }: ServiceFlyoutHeaderProps) {
   const { overviewHref: serviceOverviewHref } = useServiceLinks({
-    serviceName: service.id,
+    serviceName: service.name,
     rangeFrom,
     rangeTo,
     environment,

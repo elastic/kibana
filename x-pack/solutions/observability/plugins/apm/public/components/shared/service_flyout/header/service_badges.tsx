@@ -47,7 +47,7 @@ export function ServiceBadges({
   const canReadSlos = !!capabilities.slo?.read;
 
   const { alertsHref, slosHref } = useServiceLinks({
-    serviceName: service.id,
+    serviceName: service.name,
     rangeFrom,
     rangeTo,
     environment,
@@ -55,7 +55,7 @@ export function ServiceBadges({
   });
 
   const { alertsCount, anomalyData } = useServiceBadgesData({
-    serviceName: service.id,
+    serviceName: service.name,
     environment,
     rangeFrom,
     rangeTo,
@@ -77,7 +77,7 @@ export function ServiceBadges({
         <EuiFlexItem grow={false}>
           <AlertsBadge
             count={alertsCount}
-            serviceName={service.id}
+            serviceName={service.name}
             data-test-subj="serviceFlyoutAlertsBadge"
             ebt={{
               action: EBT_CLICK_ACTIONS.VIEW_ALERTS,
@@ -97,7 +97,7 @@ export function ServiceBadges({
           <SloStatusBadge
             sloStatus={service.sloStatus ?? 'noSLOs'}
             sloCount={service.sloCount}
-            serviceName={service.id}
+            serviceName={service.name}
             {...(slosHref
               ? {
                   ebt: {
@@ -121,7 +121,7 @@ export function ServiceBadges({
             navigationProps={
               service.agentName && anomalyData.anomalyEnvironment
                 ? {
-                    serviceName: service.id,
+                    serviceName: service.name,
                     anomalyEnvironment: anomalyData.anomalyEnvironment,
                     agentName: service.agentName,
                     query: {

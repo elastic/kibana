@@ -52,8 +52,7 @@ jest.mock('./lens_chart', () => ({
 }));
 
 const service: ServiceFlyoutService = {
-  id: 'opbeans-java',
-  label: 'opbeans-java',
+  name: 'opbeans-java',
   agentName: 'java',
 };
 

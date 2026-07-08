@@ -39,8 +39,7 @@ jest.mock('../../../../hooks/use_manage_slos_url', () => ({
 }));
 
 const baseNodeData: ServiceFlyoutService = {
-  id: 'opbeans-java',
-  label: 'opbeans-java',
+  name: 'opbeans-java',
   agentName: 'java',
 };
 

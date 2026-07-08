@@ -30,8 +30,7 @@ jest.mock('./service_badges', () => ({
 }));
 
 const baseNodeData: ServiceFlyoutService = {
-  id: 'opbeans-java',
-  label: 'opbeans-java',
+  name: 'opbeans-java',
   agentName: 'java',
 };
 
@@ -48,7 +47,7 @@ function renderHeader({
     <IntlProvider locale="en">
       <ServiceFlyoutHeader
         service={nodeData}
-        title={nodeData.label ?? nodeData.id}
+        title={nodeData.name}
         titleId="title-id"
         environment="production"
         kuery=""

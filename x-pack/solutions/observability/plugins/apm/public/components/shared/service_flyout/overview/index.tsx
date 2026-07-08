@@ -146,7 +146,7 @@ export function ServiceFlyoutOverview({
   const { dataView } = useAdHocApmDataView();
   const indexes = dataView?.getIndexPattern();
   const { hasSystemMetrics, isLoading: isSystemMetricsLoading } = useServiceHasSystemMetrics({
-    serviceName: service.id,
+    serviceName: service.name,
     environment,
     rangeFrom,
     rangeTo,
@@ -156,7 +156,7 @@ export function ServiceFlyoutOverview({
     () =>
       getChartDefinitions({
         indexes,
-        serviceName: service.id,
+        serviceName: service.name,
         environment,
         kuery,
         transactionType,
@@ -168,7 +168,7 @@ export function ServiceFlyoutOverview({
           />
         ),
       }),
-    [environment, indexes, kuery, latencyAggregationType, service.id, transactionType]
+    [environment, indexes, kuery, latencyAggregationType, service.name, transactionType]
   );
 
   return (
@@ -179,7 +179,7 @@ export function ServiceFlyoutOverview({
         kuery={kuery}
         rangeFrom={rangeFrom}
         rangeTo={rangeTo}
-        serviceName={service.id}
+        serviceName={service.name}
         transactionType={transactionType}
         onEnvironmentChange={onEnvironmentChange}
         onRangeChange={onRangeChange}
@@ -223,7 +223,7 @@ export function ServiceFlyoutOverview({
             http={core.http}
             notifications={core.notifications}
             locators={share.url.locators}
-            serviceName={service.id}
+            serviceName={service.name}
             environment={environment}
             start={start}
             end={end}
