@@ -89,6 +89,66 @@ describe('RuleConditions', () => {
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('-');
   });
 
+  it('renders Custom recovery with the recovery condition snippet in its own row when recovery_strategy is query', () => {
+    renderConditions(alertRule);
+    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('Custom');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).not.toHaveAttribute('colspan');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryCondition')).toHaveAttribute(
+      'colspan',
+      '2'
+    );
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryConditionQuery')).toHaveTextContent(
+      'FROM metrics-* | WHERE avg(cpu) < 0.5'
+    );
+  });
+
+  it('renders only the recovery segment (not recomposed with base) for a composed query', () => {
+    renderConditions({
+      ...alertRule,
+      query: {
+        format: 'composed',
+        base: 'FROM metrics-* | STATS avg(cpu) BY host.name',
+        breach: { segment: 'WHERE avg(cpu) > 0.9' },
+        recovery: { segment: 'WHERE avg(cpu) < 0.5' },
+      },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryConditionQuery')).toHaveTextContent(
+      'WHERE avg(cpu) < 0.5'
+    );
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryConditionQuery')).not.toHaveTextContent(
+      'FROM metrics-*'
+    );
+  });
+
+  it('renders Default recovery with a dash for the condition row when recovery_strategy is not query', () => {
+    renderConditions({
+      ...alertRule,
+      recovery_strategy: 'no_breach',
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+      },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('Default');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryCondition')).toHaveTextContent('-');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryCondition')).not.toHaveAttribute(
+      'colspan'
+    );
+  });
+
+  it('renders Default recovery with a dash for the condition row when recovery_strategy is absent', () => {
+    renderConditions({
+      ...alertRule,
+      recovery_strategy: undefined,
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+      },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('Default');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryCondition')).toHaveTextContent('-');
+  });
+
   it('renders Immediate for alert and recovery delay when counts are zero', () => {
     renderConditions({
       ...alertRule,
@@ -167,7 +227,10 @@ describe('RuleConditions', () => {
       renderConditions(alertRule, 'summary');
       expect(screen.queryByTestId('alertingV2RuleDetailsAlertDelay')).not.toBeInTheDocument();
       expect(screen.queryByTestId('alertingV2RuleDetailsRecoveryDelay')).not.toBeInTheDocument();
-      // Recovery row has no test subj on the row itself; assert by its title text absence.
+      expect(screen.queryByTestId('alertingV2RuleDetailsRecovery')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('alertingV2RuleDetailsRecoveryCondition')
+      ).not.toBeInTheDocument();
       expect(screen.queryByText('Recovery')).not.toBeInTheDocument();
     });
 
