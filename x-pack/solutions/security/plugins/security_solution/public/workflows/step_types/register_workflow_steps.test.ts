@@ -17,6 +17,8 @@ import { setAlertTagsStepDefinition } from './set_alert_tags_step/set_alert_tags
 import { assignAttackStepDefinition } from './assign_attack_step/assign_attack_step';
 import { setAttackStatusStepDefinition } from './set_attack_status_step/set_attack_status_step';
 import { setAttackTagsStepDefinition } from './set_attack_tags_step/set_attack_tags_step';
+import { enableRuleStepDefinition } from './enable_rule_step/enable_rule_step';
+import { disableRuleStepDefinition } from './disable_rule_step/disable_rule_step';
 
 type StepLoader = () => Promise<PublicStepDefinition | undefined>;
 
@@ -30,7 +32,7 @@ describe('registerWorkflowSteps (public)', () => {
       publicAttacksApiEnabled: true,
     } as ExperimentalFeatures);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(8);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(10);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(expect.any(Function));
   });
 
@@ -41,7 +43,7 @@ describe('registerWorkflowSteps (public)', () => {
       publicAttacksApiEnabled: false,
     } as unknown as ExperimentalFeatures);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(5);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(7);
   });
 
   it('async loaders resolve to each step definition', async () => {
@@ -51,8 +53,18 @@ describe('registerWorkflowSteps (public)', () => {
       publicAttacksApiEnabled: true,
     } as ExperimentalFeatures);
 
-    const [loader1, loader2, loader3, loader4, loader5, loader6, loader7, loader8] =
-      workflowsExtensions.registerStepDefinition.mock.calls.map(([arg]) => arg as StepLoader);
+    const [
+      loader1,
+      loader2,
+      loader3,
+      loader4,
+      loader5,
+      loader6,
+      loader7,
+      loader8,
+      loader9,
+      loader10,
+    ] = workflowsExtensions.registerStepDefinition.mock.calls.map(([arg]) => arg as StepLoader);
 
     await expect(loader1()).resolves.toBe(renderAlertNarrativeStepDefinition);
     await expect(loader2()).resolves.toBe(buildAlertEntityGraphStepDefinition);
@@ -62,6 +74,8 @@ describe('registerWorkflowSteps (public)', () => {
     await expect(loader6()).resolves.toBe(assignAttackStepDefinition);
     await expect(loader7()).resolves.toBe(setAttackStatusStepDefinition);
     await expect(loader8()).resolves.toBe(setAttackTagsStepDefinition);
+    await expect(loader9()).resolves.toBe(enableRuleStepDefinition);
+    await expect(loader10()).resolves.toBe(disableRuleStepDefinition);
   });
 
   it('does not register the attack steps when publicAttacksApiEnabled is false', async () => {

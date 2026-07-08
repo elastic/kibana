@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiDescribedFormGroup,
@@ -17,14 +17,17 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiSuperSelect,
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
+import type { EuiSuperSelectOption } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEqual } from 'lodash';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
 import { AiIcon } from '@kbn/shared-ux-ai-components';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { WorkflowsManagementUiActions } from '@kbn/workflows';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -42,6 +45,7 @@ import {
   type AlertAnalysisWorkflowSettingsWithConnector,
 } from './api';
 import { AlertAnalysisWorkflowRuleAttachmentSection } from './rule_attachment_section';
+import { useAlertAnalysisWorkflowAgents } from './use_alert_analysis_workflow_agents';
 import * as translations from './translations';
 
 const ALERT_ANALYSIS_WORKFLOW_SETTINGS_QUERY_KEY = [
@@ -65,6 +69,7 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
   );
   const canAccessPage = isEnterprise && canEditAdvancedSettings;
   const { aiConnectors, isLoading: isLoadingConnectors } = useAIConnectors();
+  const { agents, isLoading: isLoadingAgents } = useAlertAnalysisWorkflowAgents(canAccessPage);
   const { data: savedSettingsResponse, isLoading } = useQuery({
     queryKey: ALERT_ANALYSIS_WORKFLOW_SETTINGS_QUERY_KEY,
     enabled: canAccessPage,
@@ -89,6 +94,16 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
     );
   const isTagPrefixInvalid =
     pageSettings !== undefined && (pageSettings.tagPrefix ?? '').trim() === '';
+  const selectedAgentId = pageSettings?.agentId ?? agentBuilderDefaultAgentId;
+  const agentOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
+    const options = agents.map((agent) => ({ value: agent.id, inputDisplay: agent.name }));
+    // Keep the currently selected agent visible even if it is missing from the fetched list (for
+    // example a custom agent that was deleted), so the selection is never silently lost.
+    if (selectedAgentId && !options.some((option) => option.value === selectedAgentId)) {
+      options.push({ value: selectedAgentId, inputDisplay: selectedAgentId });
+    }
+    return options;
+  }, [agents, selectedAgentId]);
   const saveSettingsMutation = useMutation({
     mutationFn: async (settingsToSave: AlertAnalysisWorkflowSettingsWithConnector) => {
       return saveAlertAnalysisWorkflowSettings({ http, settings: settingsToSave });
@@ -228,6 +243,39 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                   settings={settings}
                   onChange={(connectorId) =>
                     setPageSettings((prev) => (prev ? { ...prev, connectorId } : prev))
+                  }
+                />
+              </EuiFormRow>
+            </EuiDescribedFormGroup>
+            <EuiDescribedFormGroup
+              fullWidth
+              title={
+                <h4>
+                  <FormattedMessage
+                    id="xpack.securitySolution.alertAnalysisWorkflow.agentSectionTitle"
+                    defaultMessage="Agent"
+                  />
+                </h4>
+              }
+              description={
+                <p>
+                  <FormattedMessage
+                    id="xpack.securitySolution.alertAnalysisWorkflow.agentSectionDescription"
+                    defaultMessage="Select the Agent Builder agent used to analyze alerts. Choose the default agent or one of your custom agents."
+                  />
+                </p>
+              }
+            >
+              <EuiFormRow fullWidth label={translations.AGENT_LABEL}>
+                <EuiSuperSelect
+                  data-test-subj="alertAnalysisWorkflowAgentSelector"
+                  options={agentOptions}
+                  valueOfSelected={selectedAgentId}
+                  isLoading={isLoadingAgents}
+                  disabled={!canEditAdvancedSettings || !isWorkflowEnabled}
+                  aria-label={translations.AGENT_ARIA_LABEL}
+                  onChange={(agentId) =>
+                    setPageSettings((prev) => (prev ? { ...prev, agentId } : prev))
                   }
                 />
               </EuiFormRow>

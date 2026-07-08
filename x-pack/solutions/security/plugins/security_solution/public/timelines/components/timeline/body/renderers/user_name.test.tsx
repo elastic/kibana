@@ -15,12 +15,14 @@ import { StatefulEventContext } from '../../../../../common/components/events_vi
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 
 const mockOpenFlyout = jest.fn();
 
 jest.mock('@kbn/expandable-flyout');
-jest.mock('../../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
+}));
 
 jest.mock('../../../../../common/components/draggables', () => ({
   DefaultDraggable: () => <div data-test-subj="DefaultDraggable" />,
@@ -54,7 +56,7 @@ describe('UserName', () => {
       ...createExpandableFlyoutApiMock(),
       openFlyout: mockOpenFlyout,
     });
-    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
   });
   afterEach(() => {
     jest.clearAllMocks();
@@ -176,8 +178,8 @@ describe('UserName', () => {
     });
   });
 
-  test('should open system flyout when newFlyoutSystemEnabled is true', async () => {
-    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+  test('should open system flyout when enableNewFlyout is true', async () => {
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
@@ -199,8 +201,8 @@ describe('UserName', () => {
     });
   });
 
-  test('should not open system flyout when newFlyoutSystemEnabled is true but no timeline context', async () => {
-    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+  test('should not open system flyout when enableNewFlyout is true but no timeline context', async () => {
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
     const wrapper = mount(
       <TestProviders>
         <UserName {...props} />
