@@ -1188,6 +1188,7 @@ x-pack/platform/plugins/shared/agent_builder_workflows @elastic/workchat-eng @el
 x-pack/platform/plugins/shared/agent_context_layer @elastic/context-eng
 x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
+x-pack/platform/plugins/shared/ai_panel @elastic/kibana-presentation
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/plugins/shared/alerting @elastic/response-ops
 x-pack/platform/plugins/shared/alerting_v2 @elastic/rna-project-team
