@@ -113,6 +113,8 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
     }),
     minimumLicense: 'gold',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
+    // No dedicated docs page yet; link to the generic connectors docs.
+    docsUrl: `https://www.elastic.co/docs/reference/kibana/connectors-kibana`,
   },
 
   auth: {

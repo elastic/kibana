@@ -56,10 +56,12 @@ export async function fetchConnectorSpec(
 }
 
 /**
- * Derives the documentation URL for a spec-based connector.
- * Uses docsUrl from spec metadata if explicitly set; otherwise derives it from the connector id.
- * Derivation: strip leading '.', convert underscores/camelCase to kebab-case, append '-action-type'.
- * The base URL comes from the doc links service so it stays in sync if the docs structure changes.
+ * Resolves the documentation URL for a spec-based connector.
+ * Uses `docsUrl` from spec metadata when set; otherwise derives it from the connector id
+ * (strip leading '.', convert underscores/camelCase to kebab-case, append '-action-type').
+ * The derived base URL comes from the doc-links service so it stays in sync if the docs
+ * structure changes. Connectors without a dedicated page set `docsUrl` to the generic
+ * connectors docs.
  */
 function getDocsUrlFromSpec(spec: ConnectorSpecResponse, docLinks: DocLinksStart): string {
   if (spec.metadata.docsUrl) {
