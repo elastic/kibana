@@ -127,6 +127,11 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
       padding: 0 ${DESIGN_EXPLORATION_PADDING_COMPACT}px ${DESIGN_EXPLORATION_PADDING_COMPACT}px !important;
     }
 
+    ${scope} [class*='css-'][class*='react_expression_renderer--ReactExpressionRenderer']:has(.echMetricText),
+    ${scope} [class*='css-'][class*='visualization_container--VisualizationContainer']:has(.echMetricText) {
+      padding: 4px !important;
+    }
+
     ${scope} .euiFormControlLayout:not(.euiFormControlLayout--group):not(:focus-within):not(:has(:invalid, [aria-invalid='true'])):not(:has(:disabled)) {
       border: none !important;
       border-radius: calc(${DESIGN_EXPLORATION_RADIUS_CONTROL}px * 0.5) !important;
@@ -214,9 +219,14 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
       box-shadow: ${embeddablePanelShadow} !important;
     }
 
-    ${scope} [data-test-subj='appHeader'] [data-test-subj='appHeaderTitle'] {
+    ${scope} [data-test-subj='appHeader'] [data-test-subj='appHeaderTitle'],
+    ${scope} .echMetricText__title > span {
       font-size: 14px !important;
       font-weight: 500 !important;
+    }
+
+    ${scope} .echMetricText__title > span {
+      padding-left: 4px !important;
     }
 
     ${scope} [data-test-subj='appHeader'] [class*='css-'][class*='-euiButtonDisplay'][class*='app_menu_action_button--buttonCss'] {
@@ -262,7 +272,7 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} .kbnChromeLayoutApplication div:has(> [data-test-subj='appHeader']) {
-      width: calc(100% - ${DESIGN_EXPLORATION_PADDING * 1.5}px) !important;
+      width: calc(100% - ${DESIGN_EXPLORATION_PADDING * 1.25}px) !important;
       margin: ${DESIGN_EXPLORATION_PADDING_COMPACT}px !important;
       min-height: 48px !important;
     }
