@@ -115,16 +115,11 @@ safe-outputs:
     max: 2
     target: *issue_number
   # On a re-investigation (e.g. a reopened issue) the previous verdict's labels are
-  # stale. Allow removing this workflow's own labels, plus a lingering `ai:fix-flaky`
-  # fix request, so the fresh verdict can replace them.
+  # stale. Allow removing any `failure:*` label plus a lingering `ai:fix-flaky` fix
+  # request so the fresh verdict can replace them (`failure:*` also clears deprecated ones).
   remove-labels:
     allowed:
-      - failure:test-needs-update
-      - failure:test-environment
-      - failure:application
-      - failure:ci-environment
-      - failure:inconclusive
-      - failure:ai-fixable
+      - failure:*
       - ai:fix-flaky
     max: 3
     target: *issue_number
