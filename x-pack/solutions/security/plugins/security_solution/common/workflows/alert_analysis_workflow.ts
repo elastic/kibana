@@ -65,8 +65,15 @@ export const THRESHOLD_RANGE_REFINEMENT: { message: string; path: string[] } = {
   path: ['autoCloseConfidenceScoreMaxThreshold'],
 };
 
+// Narrows the rule list (and the counts/selection derived from it) to rules that already run the
+// workflow, rules that don't, or all matching rules. Lets the user do a reverse bulk action (e.g.
+// filter to `attached` then detach) without hand-picking rows out of a large mixed list.
+export const RULE_ATTACHMENT_FILTERS = ['all', 'attached', 'not_attached'] as const;
+export type RuleAttachmentFilter = (typeof RULE_ATTACHMENT_FILTERS)[number];
+
 export const AlertAnalysisWorkflowRuleAttachmentListRequestQuery = z.object({
   search: z.string().max(1000).optional().default(''),
+  attachment_filter: z.enum(RULE_ATTACHMENT_FILTERS).optional().default('all'),
   page: z.coerce.number().int().min(1).optional().default(1),
   per_page: z.coerce.number().int().min(1).max(100).optional().default(20),
 });
@@ -77,6 +84,7 @@ export type AlertAnalysisWorkflowRuleAttachmentListRequestQuery = z.infer<
 
 export const AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery = z.object({
   search: z.string().max(1000).optional().default(''),
+  attachment_filter: z.enum(RULE_ATTACHMENT_FILTERS).optional().default('all'),
 });
 
 export type AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery = z.infer<
@@ -106,6 +114,7 @@ export type AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody = z.infer<
 
 export interface RuleAttachmentQuery {
   search: string;
+  attachmentFilter: RuleAttachmentFilter;
 }
 
 export interface AlertAnalysisWorkflowRuleAttachmentService {
