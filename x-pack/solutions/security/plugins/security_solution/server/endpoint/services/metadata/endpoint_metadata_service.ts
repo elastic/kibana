@@ -102,6 +102,42 @@ export class EndpointMetadataService {
   }
 
   /**
+   * Mutate the `hits` included in a search response against the United metadata index to address
+   * known issue with data populated in the records
+   * @param data
+   * @private
+   */
+  private adjustUnitedIndexSearchResultHits(
+    data: SearchResponse<UnitedAgentMetadataPersistedData>
+  ): SearchResponse<UnitedAgentMetadataPersistedData> {
+    const hits = data.hits?.hits ?? [];
+    const recordsAltered: string[] = [];
+
+    for (const hit of hits) {
+      // If `united.agent.policy_id` includes a suffix, remove it
+      if (hit._source?.united?.agent?.policy_id?.match(/#.*$/i)) {
+        const existingPolicyId = hit._source.united.agent.policy_id;
+        const adjustedPolicyId = existingPolicyId.replace(/\#.*$/i, '');
+        recordsAltered.push(
+          `Agent [${hit._source?.united?.agent?.agent?.id}]: adjusted 'policy_id' property value from [${existingPolicyId}] to [${adjustedPolicyId}]`
+        );
+
+        (hit._source.united.agent.policy_id as string) = adjustedPolicyId;
+      }
+    }
+
+    if (recordsAltered.length > 0) {
+      this.logger
+        .get('adjustUnitedIndexSearchResultHits')
+        .debug(
+          () => `Made ${recordsAltered.length} data adjustments:\n${recordsAltered.join(', ')}`
+        );
+    }
+
+    return data;
+  }
+
+  /**
    * Retrieve a single endpoint host metadata. Note that the return endpoint document, if found,
    * could be associated with a Fleet Agent that is no longer active. If wanting to ensure the
    * endpoint is associated with an active Fleet Agent, then use `getEnrichedHostMetadata()` instead
@@ -381,9 +417,10 @@ export class EndpointMetadataService {
     logger.debug(() => `Executing query: ${stringify(unitedIndexQuery, 15)}`);
 
     try {
-      unitedMetadataQueryResponse = await this.esClient.search<UnitedAgentMetadataPersistedData>(
-        unitedIndexQuery
-      );
+      unitedMetadataQueryResponse = await this.esClient
+        .search<UnitedAgentMetadataPersistedData>(unitedIndexQuery)
+        .then(this.adjustUnitedIndexSearchResultHits.bind(this));
+
       // FYI: we don't need to run the ES search response through `this.ensureDataValidForSpace()` because
       // the query (`unitedIndexQuery`) above already included a filter with all of the valid policy ids
       // for the current space - thus data is already coped to the space
