@@ -32,7 +32,7 @@ import { updateYamlField } from '@kbn/workflows-yaml';
 import type { WorkflowCrudService } from './workflow_crud_service';
 import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
 import type { WorkflowManagementAuditLog } from '../api/routes/utils/workflow_audit_logging';
-import { maybeApplyWorkflowVersion } from '../lib/workflow_version';
+import { applyWorkflowVersion } from '../lib/workflow_version';
 import { isRetryableWorkflowWriteConflict } from '../lib/workflow_write_conflicts';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
@@ -210,8 +210,7 @@ export class ManagedWorkflowsService {
         spaceId,
         now,
       });
-      const versioningEnabled = this.deps.crudService.isWorkflowVersioningEnabled();
-      const documentWithVersion = maybeApplyWorkflowVersion(document, undefined, versioningEnabled);
+      const documentWithVersion = applyWorkflowVersion(document, undefined);
       const savedDocument = await this.deps.crudService.createWorkflowDocument(
         workflowDocumentId,
         spaceId,
@@ -267,8 +266,7 @@ export class ManagedWorkflowsService {
       enabled,
       createdAt: existing.created_at,
     });
-    const versioningEnabled = this.deps.crudService.isWorkflowVersioningEnabled();
-    const documentWithVersion = maybeApplyWorkflowVersion(document, existing, versioningEnabled);
+    const documentWithVersion = applyWorkflowVersion(document, existing);
     const savedDocument = await this.deps.crudService.writeWorkflowDocumentWithOcc(
       workflowDocumentId,
       spaceId,

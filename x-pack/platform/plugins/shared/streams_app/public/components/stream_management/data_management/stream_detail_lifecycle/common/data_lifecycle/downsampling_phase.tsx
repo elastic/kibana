@@ -37,6 +37,8 @@ interface DownsamplingPhaseProps {
   isBeingEdited?: boolean;
   canManageLifecycle: boolean;
   isEditLifecycleFlyoutOpen?: boolean;
+  /** While true, all click interactions are disabled: no popover opens and no navigation occurs. */
+  disableInteractions?: boolean;
 }
 
 export const DownsamplingPhase = ({
@@ -49,6 +51,7 @@ export const DownsamplingPhase = ({
   isBeingEdited = false,
   canManageLifecycle,
   isEditLifecycleFlyoutOpen = false,
+  disableInteractions = false,
 }: DownsamplingPhaseProps) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -68,6 +71,9 @@ export const DownsamplingPhase = ({
   };
 
   const handleClick = () => {
+    if (disableInteractions) {
+      return;
+    }
     if (isEditLifecycleFlyoutOpen) {
       // When the flyout is open, navigate to the phase tab instead of showing the popover
       onEditStep?.(stepNumber, phaseName);
@@ -132,7 +138,7 @@ export const DownsamplingPhase = ({
   return (
     <EuiPopover
       button={button}
-      isOpen={isPopoverOpen && !isEditLifecycleFlyoutOpen}
+      isOpen={isPopoverOpen && !isEditLifecycleFlyoutOpen && !disableInteractions}
       closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="upCenter"
       aria-label={i18n.translate(

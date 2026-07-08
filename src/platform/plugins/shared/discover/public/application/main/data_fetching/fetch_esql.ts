@@ -54,7 +54,7 @@ export interface FetchEsqlParams {
   esqlVariables?: ESQLControlVariable[];
   searchSessionId?: string;
   projectRouting?: ProjectRouting;
-  isApproximate?: boolean;
+  isApproximate: boolean;
   inspectorConfig?: {
     title: string;
     description: string;
