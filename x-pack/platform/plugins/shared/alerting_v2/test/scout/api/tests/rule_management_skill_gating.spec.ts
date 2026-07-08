@@ -24,10 +24,6 @@ const getSkillIds = (results: Array<{ id: string }>) => results.map((skill) => s
 // The alerting V2 `rule-management` skill is registered as a built-in Agent
 // Builder skill but gated behind the `alerting:v2:enabled` advanced setting.
 apiTest.describe('Agent Builder — alerting V2 rule-management skill gating', () => {
-  // Deployment-agnostic: with the generic (default) server config Alerting V2 is
-  // off everywhere — stateful keeps the plugin enabled but the advanced setting
-  // defaults to off, and serverless disables the plugin entirely. Either way the
-  // skill must not be exposed by the Agent Builder skills API.
   apiTest(
     'does not list the rule-management skill when alerting V2 is disabled',
     { tag: tags.deploymentAgnostic },
