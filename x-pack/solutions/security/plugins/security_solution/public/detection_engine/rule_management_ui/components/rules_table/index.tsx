@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { useSyncRulesTableSavedState } from './rules_table/use_sync_rules_table_saved_state';
 import { RulesTables } from './rules_tables';
-import { AllRulesTabs, RulesTableToolbar } from './rules_table_toolbar';
+import { AllRulesTabs } from './rules_table_toolbar';
 import { UpgradePrebuiltRulesTable } from './upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table';
 import { UpgradePrebuiltRulesTableContextProvider } from './upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
 import { RuleGapsCallout } from '../../../rule_gaps/components/rule_gaps_callout';
@@ -35,8 +34,6 @@ export const AllRules = React.memo(() => {
         <MitreVersionUpgradedCallout />
         {tabName !== AllRulesTabs.monitoring && <RuleGapsCallout />}
         <GapSchedulerErrorsCallout />
-        <RulesTableToolbar />
-        <EuiSpacer />
         <RulesTables selectedTab={tabName as AllRulesTabs} />
       </>
     );
@@ -44,8 +41,6 @@ export const AllRules = React.memo(() => {
     return (
       <UpgradePrebuiltRulesTableContextProvider>
         <MitreVersionUpgradedCallout />
-        <RulesTableToolbar />
-        <EuiSpacer />
         <UpgradePrebuiltRulesTable />
       </UpgradePrebuiltRulesTableContextProvider>
     );

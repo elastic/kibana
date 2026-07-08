@@ -16,6 +16,7 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { MemoryRouter } from 'react-router-dom';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { MockDiscoverInTimelineContext } from '../../../../../../../common/components/discover_in_timeline/mocks/discover_in_timeline_provider';
 import { createKibanaContextProviderMock } from '../../../../../../../common/lib/kibana/kibana_react.mock';
 import { createMockStore } from '../../../../../../../common/mock';
@@ -102,7 +103,9 @@ export function RuleUpgradeTestProviders({ children }: PropsWithChildren<{}>): J
                         <InitializationContext.Provider value={mockInitializationContextValue}>
                           <MockAssistantProviderComponent>
                             <MockDiscoverInTimelineContext>
-                              <EuiProvider highContrastMode={false}>{children}</EuiProvider>
+                              <EuiProvider highContrastMode={false}>
+                                <MockAppHeaderProvider>{children}</MockAppHeaderProvider>
+                              </EuiProvider>
                             </MockDiscoverInTimelineContext>
                           </MockAssistantProviderComponent>
                         </InitializationContext.Provider>
