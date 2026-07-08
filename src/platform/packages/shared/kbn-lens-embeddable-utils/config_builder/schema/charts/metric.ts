@@ -16,6 +16,7 @@ import {
   DEFAULT_PRIMARY_VALUE_ALIGNMENT,
   DEFAULT_PRIMARY_VALUE_SIZING,
   DEFAULT_PRIMARY_ICON_ALIGNMENT,
+  DEFAULT_DENSITY,
   DEFAULT_SECONDARY_LABEL_VISIBLE,
   DEFAULT_SECONDARY_LABEL_PLACEMENT,
   DEFAULT_SECONDARY_VALUE_ALIGNMENT,
@@ -156,6 +157,21 @@ const metricConfigBackgroundChartSchemaESQL = {
 
 const metricStylingSchema = schema.object(
   {
+    /**
+     * Density preset for metric elements.
+     * Possible values:
+     * - 'compact': Compact density (original implementation)
+     * - 'default': Default density with increased spacing, paddings, and sizing
+     */
+    density: schema.maybe(
+      schema.oneOf([schema.literal('compact'), schema.literal('default')], {
+        meta: {
+          description:
+            'Density preset for the metric chart layout. Use `compact` for a compact layout, or `default` for increased padding, element spacing, and font size.',
+        },
+        defaultValue: DEFAULT_DENSITY,
+      })
+    ),
     /**
      * Icon configuration
      */

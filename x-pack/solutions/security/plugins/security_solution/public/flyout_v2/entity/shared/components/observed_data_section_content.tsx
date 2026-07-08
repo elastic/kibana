@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { useEntityStoreEuidApi, type EntityStoreEuid } from '@kbn/entity-store/public';
+import { type EntityStoreEuid, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { getCriteriaFromUsersType } from '../../../../common/components/ml/criteria/get_criteria_from_users_type';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -24,7 +24,7 @@ import type { IdentityFields } from '../../../../flyout/document_details/shared/
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { UsersType } from '../../../../explore/users/store/model';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 
 export type ObservedData<T> = Omit<ObservedEntityData<T>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;
@@ -91,7 +91,7 @@ const resolveEntityAnomalyConfig = ({
 export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps) => {
   const { entityType, observedData, identityFields, entityRecord, contextID, scopeId } = props;
 
-  const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+  const newFlyoutSystemEnabled = useIsNewFlyoutEnabled();
 
   const { to, from, isInitializing } = useGlobalTime();
 

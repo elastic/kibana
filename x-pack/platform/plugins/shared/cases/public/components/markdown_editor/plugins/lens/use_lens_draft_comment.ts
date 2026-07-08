@@ -11,6 +11,7 @@ import { first } from 'rxjs';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DRAFT_COMMENT_STORAGE_ID } from './constants';
 import { VISUALIZATION } from './translations';
+import { getPendingLensAttach } from '../../../attachments/lens/lens_return/storage';
 import type { MarkdownEditorRef } from '../../types';
 
 interface DraftComment {
@@ -35,6 +36,15 @@ export const useLensDraftComment = () => {
       const currentAppId = await currentAppId$.pipe(first()).toPromise();
 
       if (!currentAppId) {
+        return;
+      }
+
+      // A pending SO-attach marker means the incoming Lens package belongs to
+      // the "Open in Lens -> Save and return -> auto attach" round trip, not
+      // the markdown editor. Ignore it here so the markdown flow doesn't claim
+      // the package (which would reopen the "Add visualization" modal and race
+      // the SO-attach consumer for the same package).
+      if (getPendingLensAttach(storage)) {
         return;
       }
 
