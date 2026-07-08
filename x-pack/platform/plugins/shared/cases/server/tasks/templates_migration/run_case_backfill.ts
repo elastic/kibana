@@ -172,10 +172,33 @@ const backfillCasesForSpace = async (
       const res = await repo.bulkUpdate<CasePersistedAttributes>(updates, { refresh: false });
       const failed = res.saved_objects.filter((s) => s.error != null);
       if (failed.length > 0) {
-        hadFailures = true;
-        log.error(
-          `[${executionId}] ${failed.length}/${updates.length} case extended_fields updates failed for owner "${owner}" (namespace: ${namespace}); the space will be retried on a later run`
-        );
+        // A 404 means the case can't be resolved for update — it was deleted between the scan and the
+        // update, or its stored id/namespace don't line up (e.g. synthetic data inserted straight
+        // into ES). Retrying never succeeds, so skip these rather than blocking the space forever.
+        const notRetryable = failed.filter((s) => s.error?.statusCode === 404);
+        const retryable = failed.filter((s) => s.error?.statusCode !== 404);
+        const distinctReasons = (list: typeof failed) =>
+          [...new Set(list.map((s) => s.error?.message ?? JSON.stringify(s.error)))].join('; ');
+
+        if (notRetryable.length > 0) {
+          log.warn(
+            `[${executionId}] ${notRetryable.length}/${
+              updates.length
+            } case extended_fields updates skipped (not found — won't retry) for owner "${owner}" (namespace: ${namespace}): ${distinctReasons(
+              notRetryable
+            )}`
+          );
+        }
+        if (retryable.length > 0) {
+          hadFailures = true;
+          log.error(
+            `[${executionId}] ${retryable.length}/${
+              updates.length
+            } case extended_fields updates failed for owner "${owner}" (namespace: ${namespace}); the space will be retried on a later run. Errors: ${distinctReasons(
+              retryable
+            )}`
+          );
+        }
       }
       backfilled += updates.length - failed.length;
     }
