@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IndicesResolveIndexResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
@@ -16,13 +17,6 @@ export interface IndexSelection {
   exclude: string[];
 }
 
-/** What those patterns actually resolve to in the cluster. */
-interface ResolvedIndices {
-  existing: ReadonlySet<string>;
-  closedStandaloneIndices: string[];
-  closedDataStreams: Array<{ name: string; openBackingIndices: string[] }>;
-}
-
 /** A pre-flight edit — the only three moves a FROM clause allows. */
 interface SelectionEdit {
   include?: string[]; // add as positives — read these too
@@ -30,8 +24,16 @@ interface SelectionEdit {
   drop?: string[]; // remove entirely — for names that must not appear in FROM at all
 }
 
-/** Given what was requested and what resolved, decide how to rewrite the selection. */
-type PreflightCase = (requested: IndexSelection, resolved: ResolvedIndices) => SelectionEdit;
+/** What every pre-flight case is handed: the request, the shared resolve of it, and the tools to do more. */
+interface PreflightContext {
+  requested: IndexSelection;
+  resolved: IndicesResolveIndexResponse;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}
+
+/** A pre-flight case: set up the facts it needs (async), then return its edit. */
+type PreflightCase = (ctx: PreflightContext) => Promise<SelectionEdit>;
 
 const negate = (name: string): string => `-${name}`;
 const isConcrete = (pattern: string): boolean => !pattern.includes('*');
@@ -66,93 +68,66 @@ const applyEdit = ({ include, exclude }: IndexSelection, edit: SelectionEdit): I
   };
 };
 
-// --- pre-flight cases: each names the ESQL rule it works around, then the edit it makes ---
+// --- pre-flight cases: each sets up the facts it needs, then returns the edit it makes ---
 
 /** A concrete name that doesn't exist makes FROM throw, and can't be negated either — so drop it. */
-const dropMissingConcreteIndices: PreflightCase = ({ include, exclude }, { existing }) => ({
-  drop: [...include, ...exclude].filter((p) => isConcrete(p) && !existing.has(p)),
-});
+const dropMissingConcreteIndices: PreflightCase = async ({ requested, resolved, logger }) => {
+  const existing = new Set<string>([
+    ...resolved.indices.map((i) => i.name),
+    ...resolved.data_streams.map((d) => d.name),
+    ...resolved.aliases.map((a) => a.name),
+  ]);
+  const missing = (patterns: string[]) => patterns.filter((p) => isConcrete(p) && !existing.has(p));
+
+  const absentIncludes = missing(requested.include);
+  if (absentIncludes.length) {
+    logger.warn(`Dropping index patterns that don't exist: ${absentIncludes.join(', ')}`);
+  }
+  // Missing exclusions are dropped too — negating a non-existent name is a no-op.
+  return { drop: [...absentIncludes, ...missing(requested.exclude)] };
+};
 
 /** A data stream with a closed backing index can't be read — exclude it, read its open backing indices instead. */
-const rerouteClosedDataStreams: PreflightCase = (_requested, { closedDataStreams }) => ({
-  exclude: closedDataStreams.map((ds) => ds.name),
-  include: closedDataStreams.flatMap((ds) => ds.openBackingIndices),
-});
+const rerouteClosedDataStreams: PreflightCase = async ({ resolved, esClient, logger }) => {
+  const streams = resolved.data_streams.map((ds) => ({
+    name: ds.name,
+    backing: asArray(ds.backing_indices),
+  }));
+
+  // resolveIndex reports backing indices by name only, so a second call learns their open/closed state.
+  const findClosed = async (names: string[]): Promise<Set<string>> => {
+    if (names.length === 0) return new Set();
+    const { indices } = await esClient.indices.resolveIndex(resolveArgs(names));
+    return new Set(indices.filter(isClosed).map((i) => i.name));
+  };
+  const closedBacking = await findClosed(streams.flatMap((ds) => ds.backing));
+
+  const affected = streams
+    .filter((ds) => ds.backing.some((b) => closedBacking.has(b)))
+    .map((ds) => ({ name: ds.name, openBacking: ds.backing.filter((b) => !closedBacking.has(b)) }));
+
+  if (affected.length) {
+    logger.warn(
+      `Rerouting data streams with closed backing indices: ${affected
+        .map((d) => d.name)
+        .join(', ')}`
+    );
+  }
+  return { exclude: affected.map((d) => d.name), include: affected.flatMap((d) => d.openBacking) };
+};
 
 /** A closed standalone index can't be read — exclude it by name. */
-const excludeClosedStandaloneIndices: PreflightCase = (
-  _requested,
-  { closedStandaloneIndices }
-) => ({
-  exclude: closedStandaloneIndices,
-});
+const excludeClosedStandaloneIndices: PreflightCase = async ({ resolved, logger }) => {
+  const closed = resolved.indices.filter((i) => !i.data_stream && isClosed(i)).map((i) => i.name);
+  if (closed.length) logger.warn(`Excluding closed indices from query: ${closed.join(', ')}`);
+  return { exclude: closed };
+};
 
 const PREFLIGHT_CASES: PreflightCase[] = [
   dropMissingConcreteIndices,
   rerouteClosedDataStreams,
   excludeClosedStandaloneIndices,
 ];
-
-/** resolveIndex reports backing indices by name only (no state); a second call learns their state. */
-const closedBackingNames = async (
-  esClient: ElasticsearchClient,
-  backingIndices: string[]
-): Promise<ReadonlySet<string>> => {
-  if (backingIndices.length === 0) return new Set();
-  const { indices } = await esClient.indices.resolveIndex(resolveArgs(backingIndices));
-  return new Set(indices.filter(isClosed).map((i) => i.name));
-};
-
-const resolveIndices = async (
-  esClient: ElasticsearchClient,
-  patterns: string[]
-): Promise<ResolvedIndices> => {
-  const {
-    indices,
-    aliases,
-    data_streams: dataStreams,
-  } = await esClient.indices.resolveIndex(resolveArgs(patterns));
-
-  const closedBacking = await closedBackingNames(
-    esClient,
-    dataStreams.flatMap((ds) => asArray(ds.backing_indices))
-  );
-
-  return {
-    existing: new Set([
-      ...indices.map((i) => i.name),
-      ...dataStreams.map((ds) => ds.name),
-      ...aliases.map((a) => a.name),
-    ]),
-    // Backing indices are excluded here — they're handled via their parent data stream below.
-    closedStandaloneIndices: indices
-      .filter((i) => !i.data_stream && isClosed(i))
-      .map((i) => i.name),
-    closedDataStreams: dataStreams
-      .map((ds) => ({ name: ds.name, backing: asArray(ds.backing_indices) }))
-      .filter((ds) => ds.backing.some((b) => closedBacking.has(b)))
-      .map((ds) => ({
-        name: ds.name,
-        openBackingIndices: ds.backing.filter((b) => !closedBacking.has(b)),
-      })),
-  };
-};
-
-const logAnomalies = (
-  logger: Logger,
-  requested: IndexSelection,
-  resolved: ResolvedIndices
-): void => {
-  // Only missing includes matter — a missing exclusion is a silent no-op, not worth reporting.
-  const missing = requested.include.filter((p) => isConcrete(p) && !resolved.existing.has(p));
-  const closed = [
-    ...resolved.closedStandaloneIndices,
-    ...resolved.closedDataStreams.map((ds) => ds.name),
-  ];
-  if (missing.length)
-    logger.warn(`Dropping index patterns that don't exist: ${missing.join(', ')}`);
-  if (closed.length) logger.warn(`Excluding closed indices from query: ${closed.join(', ')}`);
-};
 
 /** Rewrites a selection so ESQL's FROM can safely execute it; falls back to the raw selection on failure. */
 const harden = async (
@@ -162,19 +137,17 @@ const harden = async (
 ): Promise<IndexSelection> => {
   if (requested.include.length === 0) return requested;
 
-  let resolved: ResolvedIndices;
+  let resolved: IndicesResolveIndexResponse;
   try {
-    resolved = await resolveIndices(esClient, requested.include);
+    resolved = await esClient.indices.resolveIndex(resolveArgs(requested.include));
   } catch (error) {
     logger.warn(`Failed to resolve index patterns (querying them unfiltered): ${message(error)}`);
     return requested;
   }
 
-  logAnomalies(logger, requested, resolved);
-  return PREFLIGHT_CASES.reduce(
-    (current, runCase) => applyEdit(current, runCase(current, resolved)),
-    requested
-  );
+  const ctx: PreflightContext = { requested, resolved, esClient, logger };
+  const edits = await Promise.all(PREFLIGHT_CASES.map((runCase) => runCase(ctx)));
+  return edits.reduce(applyEdit, requested);
 };
 
 const splitByLocality = ({ include, exclude }: IndexSelection) => {
