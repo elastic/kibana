@@ -12,6 +12,7 @@
     "test/scout_ai_value_report/**/*",
     "test/scout_cps_local/**/*",
     "test/scout_security_attacks_alignment/**/*",
+    "test/scout_security_entity_ml_anomaly_summary/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
     "server/**/*.json",
@@ -214,8 +215,6 @@
     "@kbn/siem-readiness",
     "@kbn/presentation-publishing",
     "@kbn/entity-store",
-    "@kbn/entityManager-plugin",
-    "@kbn/entities-schema",
     "@kbn/inference-plugin",
     "@kbn/core-saved-objects-server-mocks",
     "@kbn/core-security-server-mocks",
@@ -260,7 +259,6 @@
     "@kbn/licensing-types",
     "@kbn/core-metrics-server",
     "@kbn/core-elasticsearch-server-utils",
-    "@kbn/rrule",
     "@kbn/agent-builder-genai-utils",
     "@kbn/agent-builder-server",
     "@kbn/object-utils",
@@ -305,5 +303,6 @@
     "@kbn/core-overlays-browser",
     "@kbn/workflows-management-plugin",
     "@kbn/core-application-browser-mocks",
+    "@kbn/date-range-picker",
   ]
 }

@@ -13,7 +13,7 @@ import fs, { existsSync } from 'fs';
 import Fsp from 'fs/promises';
 import pRetry from 'p-retry';
 import { resolve, basename, join } from 'path';
-import type { ClientOptions } from '@elastic/elasticsearch';
+import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson as pkg, REPO_ROOT } from '@kbn/repo-info';
@@ -42,6 +42,7 @@ import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { readStringSecrets } from './read_string_secrets';
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
+import { shouldPreferCachedSnapshot } from './find_local_cached_snapshot';
 import type { EsClusterExecOptions } from '../cluster_exec_options';
 import {
   SERVERLESS_RESOURCES_PATHS,
@@ -494,8 +495,25 @@ const RETRYABLE_DOCKER_PULL_ERROR_MESSAGES = [
  * Stops serverless from pulling the same image in each node's promise and
  * gives better control of log output, instead of falling back to docker run.
  */
+export async function isDockerImageAvailableLocally(image: string) {
+  try {
+    const { stdout } = await execa('docker', ['images', '-q', image]);
+    return stdout.trim().length > 0;
+  } catch {
+    return false;
+  }
+}
+
 export async function maybePullDockerImage(log: ToolingLog, image: string) {
   log.info(chalk.bold(`Checking for image: ${image}`));
+
+  if (shouldPreferCachedSnapshot() && (await isDockerImageAvailableLocally(image))) {
+    log.info(
+      'prefer-cached enabled, skipping pull of locally available image %s',
+      chalk.bold(image)
+    );
+    return;
+  }
 
   await pRetry(
     async () => {
@@ -629,8 +647,18 @@ export function resolveEsArgs(
 
     args.forEach((arg) => {
       const [key, ...value] = arg.split('=');
+      const trimmedKey = key.trim();
+      const trimmedValue = value.join('=').trim();
 
-      esArgs.set(key.trim(), value.join('=').trim());
+      if (trimmedKey.startsWith('es.')) {
+        // es.-prefixed settings are JVM system properties, not ES cluster settings.
+        // They must be passed via ES_JAVA_OPTS as -Des.xxx=yyy flags, same as
+        // ES_REFRESH_INTERVAL_OVERRIDE_FLAG. Appending here preserves any existing JVM args.
+        const existing = esArgs.get('ES_JAVA_OPTS') ?? '';
+        esArgs.set('ES_JAVA_OPTS', `${existing} -D${trimmedKey}=${trimmedValue}`.trim());
+      } else {
+        esArgs.set(trimmedKey, trimmedValue);
+      }
     });
   }
 
@@ -1223,7 +1251,8 @@ const REMOTE_CLUSTER_SERVER_PORT = 9400;
  * Updates the origin cluster's operator settings.json to register the linked project,
  * so ES can discover it for Cross Project Search via the /_project/tags API.
  *
- * The file is bind-mounted from the host, so writing it triggers an ES config reload.
+ * The file is bind-mounted from the host. Writing it triggers an ES config reload on
+ * native Linux (CI) and Docker Desktop, but NOT on colima — see the note below.
  */
 async function registerLinkedProjectInOriginSettings(log: ToolingLog, options: ServerlessOptions) {
   const { linkedProject } = options;
@@ -1262,6 +1291,13 @@ async function registerLinkedProjectInOriginSettings(log: ToolingLog, options: S
     },
   };
 
+  // NOTE: ES's FileSettingsService reloads operator settings when it receives a
+  // `MOVED_TO` inotify event on the operator directory. On native Linux (CI) and
+  // Docker Desktop, this host-side write propagates that event into the container
+  // and ES reloads on its own. On colima's virtiofs mount it does NOT, so ES never
+  // registers the linked project and cross-project queries fail with
+  // `no_matching_project_exception: No such project: [linked_local_project]`. Run
+  // the local CPS stack on Docker Desktop (or Linux), not colima.
   await Fsp.writeFile(settingsPath, JSON.stringify(currentJson, null, 2));
   log.success(`Linked project registered: ${linkedProject.projectId} -> ${linkedEndpoint}`);
 }
@@ -1468,9 +1504,32 @@ async function runDockerContainerInSnapshotMode(
         throw createCliError(`Invalid sha format in manifest: ${sha}`);
       }
 
-      tag = `${version}-SNAPSHOT-${sha}`;
-      repo = `${DOCKER_REGISTRY}/kibana-ci/elasticsearch`;
-      log.info(`Using commit-pinned docker tag from manifest: ${repo}:${tag}`);
+      const commitTag = `${version}-SNAPSHOT-${sha}`;
+      const commitRepo = `${DOCKER_REGISTRY}/kibana-ci/elasticsearch`;
+      const versionTag = `${version}-SNAPSHOT`;
+
+      if (shouldPreferCachedSnapshot()) {
+        if (await isDockerImageAvailableLocally(`${commitRepo}:${commitTag}`)) {
+          tag = commitTag;
+          repo = commitRepo;
+        } else if (await isDockerImageAvailableLocally(`${commitRepo}:${versionTag}`)) {
+          tag = versionTag;
+          repo = commitRepo;
+          log.info(`Using locally cached docker image ${repo}:${tag}`);
+        } else if (await isDockerImageAvailableLocally(`${DOCKER_REPO}:${versionTag}`)) {
+          tag = versionTag;
+          repo = DOCKER_REPO;
+          log.info(`Using locally cached docker image ${repo}:${tag}`);
+        } else {
+          tag = commitTag;
+          repo = commitRepo;
+        }
+      } else {
+        tag = commitTag;
+        repo = commitRepo;
+      }
+
+      log.info(`Using docker image from manifest: ${repo}:${tag}`);
     } else {
       log.warning(
         `Failed to fetch ES_SNAPSHOT_MANIFEST (${resp.status}), falling back to default image`

@@ -16,6 +16,7 @@ export const authTypeSchema = lazySchema(() =>
       z.literal(AuthType.Basic),
       z.literal(AuthType.SSL),
       z.literal(AuthType.OAuth2ClientCredentials),
+      z.literal(AuthType.OAuth2Password),
       z.literal(null),
     ])
     .default(AuthType.Basic)

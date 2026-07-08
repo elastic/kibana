@@ -13,7 +13,7 @@ import type { IntegrationCardItem } from '../../home/card_utils';
 
 import { useBrowseIntegrationHook } from '.';
 import { useUrlFilters } from './url_filters';
-import { useUrlCategories, useSetUrlCategory } from './url_categories';
+import { useUrlCategories, useUrlDefaultCategories, useSetUrlCategory } from './url_categories';
 
 jest.mock('../../home/hooks/use_available_packages');
 jest.mock('./url_filters');
@@ -32,6 +32,7 @@ describe('useBrowseIntegrationHook', () => {
       category: '',
       subCategory: undefined,
     });
+    (useUrlDefaultCategories as jest.Mock).mockReturnValue([]);
     (useSetUrlCategory as jest.Mock).mockReturnValue(mockSetUrlCategory);
   });
 
@@ -403,6 +404,37 @@ describe('useBrowseIntegrationHook', () => {
 
       // Both cards must be visible when agentless filter is removed
       expect(result.current.filteredCards).toHaveLength(2);
+    });
+  });
+
+  describe('Multi-category (AND) filter', () => {
+    it('shows only cards that belong to ALL selected default categories (intersection)', () => {
+      const cards = [
+        {
+          id: '1',
+          name: 'both',
+          title: 'Both',
+          categories: ['observability', 'opentelemetry'],
+        },
+        { id: '2', name: 'obs-only', title: 'Obs only', categories: ['observability'] },
+        { id: '3', name: 'otel-only', title: 'OTel only', categories: ['opentelemetry'] },
+      ];
+
+      mockUseAvailablePackages(cards as IntegrationCardItem[]);
+      (useUrlDefaultCategories as jest.Mock).mockReturnValue(['observability', 'opentelemetry']);
+      (useUrlFilters as jest.Mock).mockReturnValue({
+        q: undefined,
+        sort: undefined,
+        status: undefined,
+      });
+
+      const { result } = renderHook(() =>
+        useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+      );
+
+      // Only the card present in BOTH categories should remain
+      expect(result.current.filteredCards).toHaveLength(1);
+      expect(result.current.filteredCards[0].name).toBe('both');
     });
   });
 
