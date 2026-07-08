@@ -540,8 +540,8 @@ export class LensApp {
       .poll(
         async () => {
           const stopCount = await stopInputsLocator.count();
-          if (expectedStopsCount !== undefined) {
-            return stopCount === expectedStopsCount;
+          if (expectedStopsCount !== undefined && stopCount !== expectedStopsCount) {
+            return false;
           }
           if (stopCount === 0) {
             return false;
