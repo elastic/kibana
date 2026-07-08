@@ -17,6 +17,7 @@ import {
   assignCompletionItem,
   buildAddValuePlaceholder,
   buildMapValueCompleteItem,
+  getNewUserDefinedColumnSuggestion,
   newLineAndPipeCompleteItems,
   withCompleteItem,
 } from '../complete_items';
@@ -30,17 +31,7 @@ import {
   IpLocationPosition,
 } from './utils';
 
-const columnsPrefixCompleteItem: ISuggestionItem = {
-  label: 'Columns prefix',
-  text: '${1:geo} = ',
-  asSnippet: true,
-  kind: 'Reference',
-  detail: i18n.translate('kbn-esql-language.commands.ipLocation.autocomplete.prefixDescription', {
-    defaultMessage: 'The prefix for the columns being created.',
-  }),
-};
-
-const databaseFileMapParameter = {
+const getDatabaseFileMapParameter = () => ({
   type: 'string' as const,
   description: i18n.translate(
     'kbn-esql-language.commands.ipLocation.autocomplete.databaseFileDescription',
@@ -49,25 +40,25 @@ const databaseFileMapParameter = {
   suggestions: getDatabaseFileSuggestions().map((databaseFile) =>
     buildMapValueCompleteItem(databaseFile)
   ),
-};
+});
 
-const propertiesMapParameter = {
+const getPropertiesMapParameter = () => ({
   type: 'array' as const,
   description: i18n.translate(
     'kbn-esql-language.commands.ipLocation.autocomplete.propertiesDescription',
     { defaultMessage: 'List of properties to extract' }
   ),
   suggestions: [buildMapValueCompleteItem('[ $0 ]', '[]')],
-};
+});
 
-const firstOnlyMapParameter = {
+const getFirstOnlyMapParameter = () => ({
   type: 'boolean' as const,
   description: i18n.translate(
     'kbn-esql-language.commands.ipLocation.autocomplete.firstOnlyDescription',
     { defaultMessage: 'Use only the first value from multi-value IP input' }
   ),
   suggestions: [buildMapValueCompleteItem('true'), buildMapValueCompleteItem('false')],
-};
+});
 
 export async function autocomplete(
   query: string,
@@ -86,7 +77,9 @@ export async function autocomplete(
 
   switch (position) {
     case IpLocationPosition.AFTER_IP_LOCATION_KEYWORD:
-      return [columnsPrefixCompleteItem];
+      return [
+        getNewUserDefinedColumnSuggestion(callbacks.getSuggestedUserDefinedColumnName?.() || ''),
+      ];
 
     case IpLocationPosition.AFTER_TARGET_FIELD:
       return [assignCompletionItem];
@@ -115,9 +108,9 @@ export async function autocomplete(
 
     case IpLocationPosition.WITHIN_OPTIONS:
       return getCommandMapExpressionSuggestions(innerText, {
-        database_file: databaseFileMapParameter,
-        properties: propertiesMapParameter,
-        first_only: firstOnlyMapParameter,
+        database_file: getDatabaseFileMapParameter(),
+        properties: getPropertiesMapParameter(),
+        first_only: getFirstOnlyMapParameter(),
       });
 
     case IpLocationPosition.WITHIN_PROPERTIES_ARRAY: {

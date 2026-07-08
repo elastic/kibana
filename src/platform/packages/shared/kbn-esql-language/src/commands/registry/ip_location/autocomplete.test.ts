@@ -41,6 +41,17 @@ describe('IP_LOCATION Autocomplete', () => {
     jest.clearAllMocks();
   });
 
+  it('suggests target field after command keyword', async () => {
+    const mockCallbacks = getMockCallbacks();
+    mockCallbacks.getSuggestedUserDefinedColumnName = jest.fn(() => 'col0');
+
+    await expectIpLocationSuggestions(
+      'FROM a | IP_LOCATION ',
+      { contains: ['col0 = '] },
+      mockCallbacks
+    );
+  });
+
   it('suggests IP and string fields after the assignment operator', async () => {
     const mockCallbacks = getMockCallbacks();
     (mockCallbacks.getByType as jest.Mock).mockResolvedValue([
