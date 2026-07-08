@@ -11,31 +11,17 @@ import { nodeBuilder } from '@kbn/es-query';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
 import type { UserActionPersistedAttributes } from '../../common/types/user_actions';
 import type { CasesActivityV2WriterContract } from '../writer/activity';
+import {
+  RECONCILIATION_NAMESPACES_ALL,
+  RECONCILIATION_PAGE_SIZE,
+  RECONCILIATION_SUMMARY_TOP_N_SPACES,
+} from './constants';
 
-/**
- * User-action SOs fetched per ES round-trip. Matched to the cases runner's
- * page size. The per-page sync CPU is dominated by `JSON.stringify` over
- * the polymorphic `payload` field, which can be large for bulk-attachment
- * or push payloads — 100 keeps the worst-case sync span between event-loop
- * yields bounded; throughput is limited by ES bulk roundtrip latency, not
- * page count.
- */
-const PAGE_SIZE = 100;
-
-/**
- * SO-namespaces value meaning "every namespace". Same rationale as in the
- * cases runner: the unscoped internal client defaults to the `default`
- * namespace; explicit `['*']` opts every space in. Kept identical to the
- * cases runner's value so a future change to the contract can be found
- * with one search.
- */
-const NAMESPACES_ALL: string[] = ['*'];
-
-/**
- * Cap on the per-space breakdown reported in the summary log line. Same
- * rationale as in the cases runner.
- */
-const SUMMARY_TOP_N_SPACES = 25;
+// `PAGE_SIZE` / `NAMESPACES_ALL` / `SUMMARY_TOP_N_SPACES` are shared across
+// all three reconciliation runners — see `./constants` for the rationale.
+const PAGE_SIZE = RECONCILIATION_PAGE_SIZE;
+const NAMESPACES_ALL = RECONCILIATION_NAMESPACES_ALL as string[];
+const SUMMARY_TOP_N_SPACES = RECONCILIATION_SUMMARY_TOP_N_SPACES;
 
 export interface RunActivityReconciliationDeps {
   /** Internal SO client (no request scope). Used to walk every user action across every space. */
