@@ -15,6 +15,7 @@ import {
   createCodeRepositoryReader,
   identifyCodeFeatures,
   identifyCodeQueries,
+  reconcileCodeAndLogQueries,
 } from '../../../../../lib/significant_events/code_intelligence';
 
 // ---------------------------------------------------------------------------
@@ -143,7 +144,48 @@ const generateCodeQueriesRoute = createServerRoute({
   },
 });
 
+// ---------------------------------------------------------------------------
+// Reconcile Query KIs across sources (code vs logs).
+//
+// Finds semantically equivalent queries (regardless of source or ES|QL
+// phrasing) and merges each duplicate cluster into one canonical query carrying
+// both code and log evidence; duplicates are tombstoned. Idempotent.
+// ---------------------------------------------------------------------------
+
+const reconcileCodeQueriesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{streamName}/code_features/_reconcile_queries',
+  options: {
+    access: 'internal',
+    summary: 'Reconcile duplicate Query KIs across code and log sources for a stream',
+    timeout: { idleSocket: 300_000 },
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ streamName: z.string() }),
+  }),
+  handler: async ({ params, request, getScopedClients, server, logger }) => {
+    const scopedClients = await getScopedClients({ request });
+    const { licensing, uiSettingsClient } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const { streamName } = params.path;
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+
+    return reconcileCodeAndLogQueries({
+      streamName,
+      kiClient,
+      logger: logger.get('reconcile_queries', streamName),
+    });
+  },
+});
+
 export const internalSignificantEventsKICodeFeaturesRoutes = {
   ...identifyCodeFeaturesRoute,
   ...generateCodeQueriesRoute,
+  ...reconcileCodeQueriesRoute,
 };

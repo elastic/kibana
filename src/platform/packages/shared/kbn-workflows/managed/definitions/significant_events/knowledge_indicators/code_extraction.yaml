@@ -94,3 +94,17 @@ steps:
                 max-attempts: 2
                 delay: '5s'
                 strategy: exponential
+          # Reconcile: merge code- and log-derived Query KIs that are semantic
+          # duplicates into one canonical KI carrying both evidences.
+          - name: reconcile_code_queries
+            type: kibana.request
+            with:
+              method: POST
+              path: '/internal/streams/{{ foreach.item.streamName }}/code_features/_reconcile_queries'
+              headers:
+                x-elastic-internal-origin: 'kibana'
+            on-failure:
+              retry:
+                max-attempts: 2
+                delay: '5s'
+                strategy: exponential

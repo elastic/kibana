@@ -38,6 +38,16 @@ export {
   type IdentifyCodeQueriesResult,
   type IdentifyCodeQueriesStatus,
 } from './identify_code_queries';
+export {
+  reconcileCodeAndLogQueries,
+  buildQueryReconcilePlan,
+  toReconcileOperations,
+  computeClusters,
+  pickCanonical,
+  type QueryMerge,
+  type QueryReconcilePlan,
+  type ReconcileQueriesResult,
+} from './reconcile_query_kis';
 export type {
   CodeRepositoryReader,
   RepoClassification,
