@@ -184,6 +184,17 @@ describe('action_type_model_utils', () => {
         );
         expect(model.docsUrl).toBe('https://example.com/custom-docs');
       });
+
+      it('links to the connectors index from the doc-links service when docsUrl is an empty string', () => {
+        const model = transformSpecToActionTypeModel(
+          {
+            ...baseSpec,
+            metadata: { ...baseSpec.metadata, id: '.aws_lambda', docsUrl: '' },
+          },
+          docLinks
+        );
+        expect(model.docsUrl).toBe(docLinks.links.alerting.connectors);
+      });
     });
   });
 

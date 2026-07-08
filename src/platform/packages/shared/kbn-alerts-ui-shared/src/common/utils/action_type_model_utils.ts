@@ -57,22 +57,30 @@ export async function fetchConnectorSpec(
 
 /**
  * Resolves the documentation URL for a spec-based connector.
- * Uses `docsUrl` from spec metadata when set; otherwise derives it from the connector id
- * (strip leading '.', convert underscores/camelCase to kebab-case, append '-action-type').
- * The derived base URL comes from the doc-links service so it stays in sync if the docs
- * structure changes. Connectors without a dedicated page set `docsUrl` to the generic
- * connectors docs.
+ *
+ * The connectors base always comes from the doc-links service, so links stay correct
+ * if the docs structure changes:
+ * - `docsUrl === ''` → the connector has no dedicated page; link to the top-level connectors page.
+ * - `docsUrl` set → used as-is (e.g. a specific page or a third-party site).
+ * - `docsUrl` absent → derive from the connector id (strip leading '.', convert
+ *   underscores/camelCase to kebab-case, append '-action-type').
  */
 function getDocsUrlFromSpec(spec: ConnectorSpecResponse, docLinks: DocLinksStart): string {
-  if (spec.metadata.docsUrl) {
-    return spec.metadata.docsUrl;
+  const { docsUrl, id } = spec.metadata;
+  const connectorsDocs = docLinks.links.alerting.connectors;
+
+  if (docsUrl === '') {
+    return connectorsDocs;
   }
-  const slug = spec.metadata.id
+  if (docsUrl) {
+    return docsUrl;
+  }
+  const slug = id
     .replace(/^\./, '')
     .replace(/_/g, '-')
     .replace(/([a-z])([A-Z])/g, '$1-$2')
     .toLowerCase();
-  return `${docLinks.links.alerting.connectors}/${slug}-action-type`;
+  return `${connectorsDocs}/${slug}-action-type`;
 }
 
 /**
