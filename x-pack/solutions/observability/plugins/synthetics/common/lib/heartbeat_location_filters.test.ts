@@ -72,16 +72,16 @@ describe('getHeartbeatLocationsPostFilter', () => {
   });
 
   it('combines real locations and the placeholder with a should clause', () => {
-    expect(
-      getHeartbeatLocationsPostFilter(['US East', HEARTBEAT_UNMAPPED_LOCATION_LABEL])
-    ).toEqual({
-      bool: {
-        minimum_should_match: 1,
-        should: [
-          { terms: { 'observer.geo.name': ['US East'] } },
-          { bool: { must_not: { exists: { field: 'observer.geo.name' } } } },
-        ],
-      },
-    });
+    expect(getHeartbeatLocationsPostFilter(['US East', HEARTBEAT_UNMAPPED_LOCATION_LABEL])).toEqual(
+      {
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            { terms: { 'observer.geo.name': ['US East'] } },
+            { bool: { must_not: { exists: { field: 'observer.geo.name' } } } },
+          ],
+        },
+      }
+    );
   });
 });
