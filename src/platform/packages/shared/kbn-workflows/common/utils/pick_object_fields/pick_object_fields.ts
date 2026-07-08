@@ -12,6 +12,11 @@ type PlainObject = Record<string, unknown>;
 const isPlainObject = (value: unknown): value is PlainObject =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
+// Keys that would let a crafted path walk into the prototype chain and pollute
+// Object.prototype during the write phase below. The shared Liquid engine enforces
+// `ownPropertyOnly` for template access; this keeps the raw JS traversal here in step.
+const UNSAFE_SEGMENTS = new Set(['__proto__', 'prototype', 'constructor']);
+
 // Deep clone limited to JSON-serializable values. Leaf values are cloned so the
 // returned object never shares references with `source`, which keeps callers from
 // mutating the original through overlapping paths.
@@ -35,50 +40,60 @@ const cloneValue = (value: unknown): unknown => {
  * arrays are kept as-is, not stringified).
  *
  * - Paths that are absent, or that traverse through a non-object, are skipped.
+ * - Paths containing `__proto__`, `prototype`, or `constructor` are skipped to
+ *   avoid prototype pollution.
  * - The `source` is never mutated; leaf values are deep-cloned.
  * - A non-object `source` is returned unchanged.
  *
  * @example
  * pickObjectFields({ a: { b: 1, c: 2 }, d: 3 }, ['a.b', 'd']) // => { a: { b: 1 }, d: 3 }
  */
+// Copies a single dotted `path` from `source` into `result`, in place. Absent paths,
+// paths that traverse a non-object, and prototype-polluting paths are ignored.
+const copyPath = (source: PlainObject, result: PlainObject, path: string): void => {
+  if (path.length === 0) {
+    return;
+  }
+
+  const segments = path.split('.');
+  if (segments.some((segment) => UNSAFE_SEGMENTS.has(segment))) {
+    return;
+  }
+
+  let cursor: unknown = source;
+  for (const segment of segments) {
+    if (isPlainObject(cursor) && Object.prototype.hasOwnProperty.call(cursor, segment)) {
+      cursor = cursor[segment];
+    } else {
+      return;
+    }
+  }
+
+  if (cursor === undefined) {
+    return;
+  }
+
+  let target = result;
+  for (let i = 0; i < segments.length - 1; i++) {
+    const segment = segments[i];
+    if (!isPlainObject(target[segment])) {
+      target[segment] = {};
+    }
+    target = target[segment] as PlainObject;
+  }
+  target[segments[segments.length - 1]] = cloneValue(cursor);
+};
+
 export const pickObjectFields = (source: unknown, paths: readonly string[]): unknown => {
   if (!isPlainObject(source)) {
     return source;
   }
 
   const result: PlainObject = {};
-
   for (const path of paths) {
-    if (typeof path !== 'string' || path.length === 0) {
-      continue;
+    if (typeof path === 'string') {
+      copyPath(source, result, path);
     }
-
-    const segments = path.split('.');
-    let cursor: unknown = source;
-    let missing = false;
-
-    for (const segment of segments) {
-      if (isPlainObject(cursor) && Object.prototype.hasOwnProperty.call(cursor, segment)) {
-        cursor = cursor[segment];
-      } else {
-        missing = true;
-        break;
-      }
-    }
-
-    if (missing || cursor === undefined) {
-      continue;
-    }
-
-    let target = result;
-    for (let i = 0; i < segments.length - 1; i++) {
-      const segment = segments[i];
-      if (!isPlainObject(target[segment])) {
-        target[segment] = {};
-      }
-      target = target[segment] as PlainObject;
-    }
-    target[segments[segments.length - 1]] = cloneValue(cursor);
   }
 
   return result;

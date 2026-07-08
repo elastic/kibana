@@ -58,4 +58,18 @@ describe('pickObjectFields', () => {
   it('returns an empty object when no paths are provided', () => {
     expect(pickObjectFields({ a: 1 }, [])).toEqual({});
   });
+
+  it('skips paths containing prototype-pollution segments', () => {
+    // A source with own `__proto__`/`constructor` keys, as JSON.parse produces.
+    const source = JSON.parse('{"__proto__":{"polluted":true},"constructor":{"polluted":true}}');
+    expect(
+      pickObjectFields(source, ['__proto__.polluted', 'constructor.polluted', 'prototype.x'])
+    ).toEqual({});
+  });
+
+  it('does not pollute Object.prototype through a crafted path', () => {
+    const source = JSON.parse('{"__proto__":{"polluted":true}}');
+    pickObjectFields(source, ['__proto__.polluted']);
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+  });
 });
