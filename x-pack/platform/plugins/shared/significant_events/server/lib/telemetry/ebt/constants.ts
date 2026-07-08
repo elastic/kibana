@@ -1,0 +1,43 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+const SIGNIFICANT_EVENTS_ENDPOINT_LATENCY_EVENT = 'significant-events-endpoint-latency';
+const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE =
+  'significant-events-significant-events-queries-generated';
+const SIGNIFICANT_EVENTS_FEATURES_IDENTIFIED_EVENT_TYPE = 'significant-events-features-identified';
+const SIGNIFICANT_EVENTS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE =
+  'significant-events-agent-builder-knowledge-indicator-created';
+const SIGNIFICANT_EVENTS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE =
+  'significant-events-agent-tool-ki-identification-started';
+const SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE =
+  'significant-events-agent-tool-event-create';
+const SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE =
+  'significant-events-agent-tool-event-status-update';
+const SIGNIFICANT_EVENTS_CODE_ANALYSIS_GROUNDING_EVENT_TYPE =
+  'significant-events-code-analysis-grounding';
+const SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE =
+  'significant-events-significant-events-discovery-triggered';
+const SIGNIFICANT_EVENTS_ONBOARDING_SCHEDULED_EVENT_TYPE =
+  'significant-events-onboarding-scheduled';
+const SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_INVESTIGATION_ATTACH_EVENT_TYPE =
+  'significant-events-agent-tool-event-investigation-attach';
+const SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE = 'significant-events-detection-scan';
+
+export {
+  SIGNIFICANT_EVENTS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_INVESTIGATION_ATTACH_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_CODE_ANALYSIS_GROUNDING_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_ENDPOINT_LATENCY_EVENT,
+  SIGNIFICANT_EVENTS_FEATURES_IDENTIFIED_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_ONBOARDING_SCHEDULED_EVENT_TYPE,
+};

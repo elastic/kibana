@@ -165,7 +165,7 @@ export function ESQLEditor({
         esqlVariables,
         shouldUpdateAttrs,
         currentAttributesRef.current,
-        isApproximate ?? undefined
+        isApproximate
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
