@@ -42,14 +42,17 @@ describe('KibanaAgentExecutor', () => {
       .mockResolvedValue({ executionId: 'exec-1', events$: roundCompleteEvents$ }),
   });
 
-  const createExecutor = (execution: ReturnType<typeof createExecutionMock>) => {
+  const createExecutor = (
+    execution: ReturnType<typeof createExecutionMock>,
+    blocking: boolean = true
+  ) => {
     const logger = { debug: jest.fn(), error: jest.fn() } as any;
     const kibanaRequest = { headers: {} } as unknown as KibanaRequest;
     const getInternalServices = () => ({ execution } as any);
-    return new KibanaAgentExecutor(logger, getInternalServices, kibanaRequest, 'agent-1');
+    return new KibanaAgentExecutor(logger, getInternalServices, kibanaRequest, 'agent-1', blocking);
   };
 
-  it('always disables task manager scheduling, since A2A is a synchronous protocol', async () => {
+  it('disables task manager scheduling for blocking (default) requests', async () => {
     const execution = createExecutionMock();
     const executor = createExecutor(execution);
     const eventBus = createEventBusMock();
@@ -61,6 +64,30 @@ describe('KibanaAgentExecutor', () => {
     expect(execution.executeAgent).toHaveBeenCalledWith(
       expect.objectContaining({ useTaskManager: false })
     );
+  });
+
+  it('schedules on task manager and publishes a working task for non-blocking requests, without awaiting completion', async () => {
+    const execution = createExecutionMock();
+    const executor = createExecutor(execution, false);
+    const eventBus = createEventBusMock();
+    const requestContext = new RequestContext(createUserMessage(), 'task-1', 'ctx-1');
+
+    await executor.execute(requestContext, eventBus);
+
+    expect(execution.executeAgent).toHaveBeenCalledTimes(1);
+    expect(execution.executeAgent).toHaveBeenCalledWith(
+      expect.objectContaining({ useTaskManager: true, executionId: 'task-1' })
+    );
+    expect(eventBus.publish).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'task-1',
+        contextId: 'ctx-1',
+        kind: 'task',
+        status: expect.objectContaining({ state: 'working' }),
+      })
+    );
+    expect(eventBus.publish).toHaveBeenCalledTimes(1);
+    expect(eventBus.finished).toHaveBeenCalledTimes(1);
   });
 
   it('publishes the round response text and finishes the event bus', async () => {
