@@ -13,7 +13,7 @@ const makeType = (id: string): SmlTypeDefinition => ({
   async *list() {
     yield [];
   },
-  getSmlData: async () => undefined,
+  getSmlEntry: async () => undefined,
   toAttachment: async () => undefined,
 });
 

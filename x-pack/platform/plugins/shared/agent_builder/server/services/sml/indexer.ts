@@ -16,7 +16,7 @@ import type { Logger } from '@kbn/logging';
 import type {
   SmlContext,
   SmlDocument,
-  SmlChunk,
+  SmlEntry,
   SmlDeleteScope,
   SmlIngestionMethod,
   SmlIndexerParams,
@@ -42,20 +42,20 @@ export interface SmlIndexer {
   /**
    * Index, update, or delete SML data for a specific item.
    *
-   * In origin mode (no `content`), the indexer resolves the type's `getSmlData`
-   * hook and writes the produced chunks tagged `ingestion_method: 'crawled'`.
-   * If any existing chunks for this `origin_id` carry
+   * In origin mode (no `content`), the indexer resolves the type's `getSmlEntry`
+   * hook and writes the produced entry tagged `ingestion_method: 'crawled'`.
+   * If an existing entry for this `origin_id` carries
    * `ingestion_method: 'manual'`, the call is a no-op unless `force: true` is
    * passed.
    *
-   * In content mode (`content` provided), `getSmlData` is skipped and the
-   * provided chunks are written directly, tagged `ingestion_method: 'manual'`.
-   * The write always overwrites any existing chunks for the `origin_id`.
+   * In content mode (`content` provided), `getSmlEntry` is skipped and the
+   * provided entry is written directly, tagged `ingestion_method: 'manual'`.
+   * The write always overwrites the existing entry for the `origin_id`.
    *
    * **Unregistered types are handled by mode:**
    *
    * - Origin mode (`action: 'create' | 'update'` without `content`) throws
-   *   {@link SmlUnregisteredTypeError} — there is no `getSmlData` to call
+   *   {@link SmlUnregisteredTypeError} — there is no `getSmlEntry` to call
    *   and no sensible fallback. The crawler and event-driven origin-mode
    *   callers only ever target registered types, so this is never hit in
    *   normal operation; the throw exists to surface programmer error.
@@ -115,7 +115,7 @@ export interface SmlIndexer {
    * paths (HTTP routes, workflow step, event-driven CRUD) should use
    * `indexAttachment` / `deleteAttachment` instead.
    */
-  deleteChunks: (params: {
+  deleteEntry: (params: {
     originUri: string;
     esClient: ElasticsearchClient;
     ingestionMethod?: SmlIngestionMethod;
@@ -165,21 +165,21 @@ class SmlIndexerImpl implements SmlIndexer {
 
     if (action === 'delete') {
       this.logger.info(
-        `SML indexer: deleting crawled chunks for origin '${originId}' (manual entries preserved)`
+        `SML indexer: deleting crawled entry for origin '${originId}' (manual entries preserved)`
       );
-      await this.deleteChunks({ originUri, esClient, ingestionMethod: 'crawled' });
+      await this.deleteEntry({ originUri, esClient, ingestionMethod: 'crawled' });
       return;
     }
 
     if (isContentMode) {
-      await this.indexManualChunks({
+      await this.indexManualEntry({
         originId,
         attachmentType,
         spaces,
         esClient,
         savedObjectsClient,
         contextLogger,
-        chunks: params.content!,
+        entry: params.content!,
         createdAt: params.createdAt,
         requestedPermissions: params.permissions,
       });
@@ -217,30 +217,26 @@ class SmlIndexerImpl implements SmlIndexer {
     };
 
     this.logger.info(
-      `SML indexer: calling getSmlData for origin '${originId}' of type '${attachmentType}'`
+      `SML indexer: calling getSmlEntry for origin '${originId}' of type '${attachmentType}'`
     );
-    const smlData = await definition.getSmlData(originId, context);
-    if (!smlData || smlData.chunks.length === 0) {
+    const smlEntry = await definition.getSmlEntry(originId, context);
+    if (!smlEntry) {
       this.logger.info(
-        `SML indexer: no SML data returned for origin '${originId}' of type '${attachmentType}' — deleting existing crawled chunks (manual entries preserved)`
+        `SML indexer: no SML entry returned for origin '${originId}' of type '${attachmentType}' — deleting existing crawled entry (manual entries preserved)`
       );
-      await this.deleteChunks({ originUri, esClient, ingestionMethod: 'crawled' });
+      await this.deleteEntry({ originUri, esClient, ingestionMethod: 'crawled' });
       return;
     }
 
     this.logger.debug(
-      `SML indexer: getSmlData returned ${
-        smlData.chunks.length
-      } chunk(s) for origin '${originId}'. First chunk title: '${
-        smlData.chunks[0]?.title
-      }', content length: ${smlData.chunks[0]?.content?.length ?? 0}`
+      `SML indexer: getSmlEntry returned an entry for origin '${originId}'. Title: '${
+        smlEntry.title
+      }', content length: ${smlEntry.content?.length ?? 0}`
     );
 
-    // Resolve permissions BEFORE `deleteChunks` so a hook throw doesn't
+    // Resolve permissions BEFORE `deleteEntry` so a hook throw doesn't
     // leave the origin in a wiped state. `getPermissions(originId, ctx)`
-    // is a per-origin computation (it doesn't take a chunk), so one call
-    // is correct and also avoids N hook invocations when getSmlData
-    // returns multiple chunks for the same origin.
+    // is a per-origin computation.
     let resolvedPermissions: SmlPermissions;
     try {
       resolvedPermissions = await this.resolvePermissionsForOrigin({
@@ -250,39 +246,39 @@ class SmlIndexerImpl implements SmlIndexer {
       });
     } catch (error) {
       // Fail-closed: log with origin/type framing and propagate. The
-      // existing chunks for the origin remain intact (we haven't called
-      // `deleteChunks` yet). See `resolvePermissionsForOrigin` JSDoc.
+      // existing entry for the origin remains intact (we haven't called
+      // `deleteEntry` yet). See `resolvePermissionsForOrigin` JSDoc.
       this.logger.warn(
         `SML indexer: type '${
           definition.id
-        }' getPermissions threw for origin '${originId}' — aborting origin-mode write to avoid producing un-gated chunks: ${
+        }' getPermissions threw for origin '${originId}' — aborting origin-mode write to avoid producing an un-gated entry: ${
           (error as Error).message
         }`
       );
       throw error;
     }
 
-    await this.deleteChunks({ originUri, esClient });
+    await this.deleteEntry({ originUri, esClient });
 
-    const bulkOps = smlData.chunks.map((chunk) =>
-      // Use a bare UUID for `_id` (and the document's `id` field) so the chunk
-      // identifier is bounded at 36 bytes regardless of `attachmentType` /
-      // `originId` length. ES `_id` is capped at 512 bytes and `originId`
-      // can be caller-supplied (e.g. via the workflow step's `with: originId`),
-      // so an embed-the-inputs scheme was unbounded by construction. Lookups
-      // happen via the `origin_id` and `type` document fields, not by parsing
-      // `_id`, so dropping the prefix is purely an internal change.
+    // Use a bare UUID for `_id` (and the document's `id` field) so the
+    // identifier is bounded at 36 bytes regardless of `attachmentType` /
+    // `originId` length. ES `_id` is capped at 512 bytes and `originId`
+    // can be caller-supplied (e.g. via the workflow step's `with: originId`),
+    // so an embed-the-inputs scheme was unbounded by construction. Lookups
+    // happen via the `origin_id` and `type` document fields, not by parsing
+    // `_id`, so dropping the prefix is purely an internal change.
+    const bulkOps = [
       this.buildIndexOp({
         chunkId: uuidv4(),
-        chunk,
+        chunk: smlEntry,
         originId,
         spaces,
         ingestionMethod: 'crawled',
         resolvedPermissions,
-      })
-    );
+      }),
+    ];
 
-    await this.executeBulk({ bulkOps, esClient, originId, chunkCount: smlData.chunks.length });
+    await this.executeBulk({ bulkOps, esClient, originId, chunkCount: bulkOps.length });
   }
 
   async deleteAttachment(params: SmlIndexerDeleteAttachmentParams): Promise<void> {
@@ -296,9 +292,9 @@ class SmlIndexerImpl implements SmlIndexer {
     );
 
     // `'all'` translates to "no ingestion_method filter" on the underlying
-    // helper — that's the way `SmlIndexer.deleteChunks` distinguishes "wipe
+    // helper — that's the way `SmlIndexer.deleteEntry` distinguishes "wipe
     // everything for this origin" from "wipe a single method".
-    await this.deleteChunks({
+    await this.deleteEntry({
       originUri: `${attachmentType}://${originId}`,
       esClient,
       spaces,
@@ -307,40 +303,35 @@ class SmlIndexerImpl implements SmlIndexer {
   }
 
   /**
-   * Write a content-mode (manual) attachment: skip getSmlData, write chunks
-   * directly with bare-UUID IDs and `ingestion_method: 'manual'`. Always
-   * overwrites.
+   * Write a content-mode (manual) attachment: skip getSmlEntry, write the
+   * entry directly with a bare-UUID ID and `ingestion_method: 'manual'`.
+   * Always overwrites.
    *
    * Permissions resolution:
    *
    * - **Registered type with `getPermissions`** — the hook's result is
-   *   stamped onto every chunk, identical to origin-mode behaviour so a
+   *   stamped onto the entry, identical to origin-mode behaviour so a
    *   content-mode write inherits the same gating as a crawler-driven
    *   write for the same type.
    * - **Registered type without `getPermissions`** — empty
-   *   `SmlPermissions` is stamped (no privileges required); the chunk is
+   *   `SmlPermissions` is stamped (no privileges required); the entry is
    *   readable to anyone with access to the space.
    * - **Unregistered type** — empty `SmlPermissions` is stamped and a
    *   warn is logged once per process per `attachmentType` so operators
    *   can spot ad-hoc namespaces being created without permissions
    *   metadata. Content mode is intentionally permissive about
    *   registration so workflow authors can write ad-hoc content without a
-   *   code change; the trade-off is that those chunks become publicly
+   *   code change; the trade-off is that those entries become publicly
    *   readable in their space.
-   *
-   * The empty-chunks fast path (no write actually happens) is treated as
-   * a delete-via-content-mode and proceeds even for unregistered types,
-   * mirroring the cleanup-must-still-work semantics of the
-   * `action: 'delete'` path.
    */
-  private async indexManualChunks({
+  private async indexManualEntry({
     originId,
     attachmentType,
     spaces,
     esClient,
     savedObjectsClient,
     contextLogger,
-    chunks,
+    entry,
     createdAt,
     requestedPermissions,
   }: {
@@ -350,28 +341,21 @@ class SmlIndexerImpl implements SmlIndexer {
     esClient: ElasticsearchClient;
     savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
     contextLogger: Logger;
-    chunks: SmlChunk[];
+    entry: SmlEntry;
     createdAt?: string;
     requestedPermissions?: SmlPermissions;
   }): Promise<void> {
     const originUri = `${attachmentType}://${originId}`;
-    if (chunks.length === 0) {
-      this.logger.debug(
-        `SML indexer: content mode for origin '${originId}' supplied no chunks — deleting existing chunks`
-      );
-      await this.deleteChunks({ originUri, esClient, spaces });
-      return;
-    }
 
     this.logger.info(
-      `SML indexer: content mode for origin '${originId}' of type '${attachmentType}' — writing ${chunks.length} chunk(s) as 'manual'`
+      `SML indexer: content mode for origin '${originId}' of type '${attachmentType}' — writing entry as 'manual'`
     );
 
     // Content mode accepts any `attachmentType` — workflow authors and
-    // HTTP callers can write chunks under an unregistered namespace
+    // HTTP callers can write an entry under an unregistered namespace
     // (e.g. ad-hoc knowledge entries) without first registering a real
     // SmlTypeDefinition. The trade-off is that without `getPermissions`,
-    // the chunk has no permission gate and is readable to anyone in the
+    // the entry has no permission gate and is readable to anyone in the
     // space. We surface that trade-off with a one-time warn per
     // (process, type) so operators notice when a new namespace starts
     // being written with empty permissions.
@@ -379,7 +363,7 @@ class SmlIndexerImpl implements SmlIndexer {
     if (!definition && !this.warnedUnregisteredTypes.has(attachmentType)) {
       this.warnedUnregisteredTypes.add(attachmentType);
       this.logger.warn(
-        `SML indexer: unregistered type '${attachmentType}' (origin '${originId}'): stamping empty permissions — chunks will be publicly readable within their space. Register an SmlTypeDefinition to add a permission gate.`
+        `SML indexer: unregistered type '${attachmentType}' (origin '${originId}'): stamping empty permissions — entry will be publicly readable within its space. Register an SmlTypeDefinition to add a permission gate.`
       );
     }
 
@@ -389,10 +373,8 @@ class SmlIndexerImpl implements SmlIndexer {
       logger: contextLogger,
     };
 
-    // Resolve permissions BEFORE `deleteChunks` so a hook throw doesn't
-    // leave the origin in a wiped state. Per-origin computation; see the
-    // origin-mode write path for the rationale on hoisting this out of
-    // the chunk loop.
+    // Resolve permissions BEFORE `deleteEntry` so a hook throw doesn't
+    // leave the origin in a wiped state. Per-origin computation.
     let resolvedPermissions: SmlPermissions;
     try {
       resolvedPermissions = await this.resolvePermissionsForOrigin({
@@ -407,35 +389,35 @@ class SmlIndexerImpl implements SmlIndexer {
           ? `caller-supplied permissions conflict with type '${definition?.id ?? attachmentType}'`
           : `type '${definition?.id ?? attachmentType}' getPermissions threw`;
       this.logger.warn(
-        `SML indexer: ${reason} for origin '${originId}' — aborting content-mode write to avoid producing un-gated chunks: ${
+        `SML indexer: ${reason} for origin '${originId}' — aborting content-mode write to avoid producing an un-gated entry: ${
           (error as Error).message
         }`
       );
       throw error;
     }
 
-    await this.deleteChunks({ originUri, esClient, spaces });
+    await this.deleteEntry({ originUri, esClient, spaces });
 
-    const bulkOps = chunks.map((chunk) =>
-      // Use a bare UUID for `_id`: deterministic IDs are redundant because
-      // `deleteChunks` above wipes every chunk for the origin before writing,
-      // so re-runs cannot accumulate stale rows.
+    const bulkOps = [
+      // Use a bare UUID for `_id`: a deterministic ID is redundant because
+      // `deleteEntry` above wipes the existing entry for the origin before
+      // writing, so re-runs cannot accumulate stale rows.
       this.buildIndexOp({
         chunkId: uuidv4(),
-        chunk,
+        chunk: entry,
         originId,
         spaces,
         ingestionMethod: 'manual',
         resolvedPermissions,
         createdAt,
-      })
-    );
+      }),
+    ];
 
-    await this.executeBulk({ bulkOps, esClient, originId, chunkCount: chunks.length });
+    await this.executeBulk({ bulkOps, esClient, originId, chunkCount: bulkOps.length });
   }
 
   /**
-   * Resolve the {@link SmlPermissions} to stamp on every chunk for an
+   * Resolve the {@link SmlPermissions} to stamp on the entry for an
    * origin. Called **once per origin** before any ES mutation
    *
    * - If only a hook is present, it wins.
@@ -491,7 +473,7 @@ class SmlIndexerImpl implements SmlIndexer {
     createdAt,
   }: {
     chunkId: string;
-    chunk: SmlChunk;
+    chunk: SmlEntry;
     originId: string;
     spaces: string[];
     ingestionMethod: SmlIngestionMethod;
@@ -633,16 +615,17 @@ class SmlIndexerImpl implements SmlIndexer {
   }
 
   /**
-   * Delete SML chunks for a given `origin_id`.
+   * Delete the SML entry for a given `origin_id`.
    *
-   * When `ingestionMethod` is set, only chunks with that method are removed
-   * (e.g. `'crawled'` to wipe stale crawler output while preserving manual entries).
-   * When omitted, all chunks for the origin are removed regardless of method.
+   * When `ingestionMethod` is set, only the entry with that method is removed
+   * (e.g. `'crawled'` to wipe stale crawler output while preserving a manual entry).
+   * When omitted, the entry is removed regardless of method — since an origin can
+   * carry both a `'crawled'` and a `'manual'` entry at once, this may delete both.
    *
    * Uses `ignore_unavailable` / `allow_no_indices` so this is safe even before
    * the index has been created.
    */
-  async deleteChunks({
+  async deleteEntry({
     originUri,
     esClient,
     ingestionMethod,

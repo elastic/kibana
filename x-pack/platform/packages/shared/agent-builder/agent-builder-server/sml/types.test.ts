@@ -7,7 +7,7 @@
 
 import type {
   SmlTypeDefinition,
-  SmlChunk,
+  SmlEntry,
   SmlDocument,
   SmlPermissions,
   SmlSearchResult,
@@ -17,21 +17,21 @@ import type {
 } from './types';
 
 describe('SML type definitions', () => {
-  it('SmlTypeDefinition requires id, list, getSmlData, toAttachment', () => {
+  it('SmlTypeDefinition requires id, list, getSmlEntry, toAttachment', () => {
     const definition: SmlTypeDefinition = {
       id: 'test_type',
       async *list() {
         yield [];
       },
-      getSmlData: async () => undefined,
+      getSmlEntry: async () => undefined,
       toAttachment: async () => undefined,
     };
     expect(definition.id).toBe('test_type');
   });
 
-  it('SmlChunk requires type/content/title', () => {
-    const chunk: SmlChunk = { type: 'test_type', content: 'body', title: 'Title' };
-    expect(chunk.title).toBe('Title');
+  it('SmlEntry requires type/content/title', () => {
+    const entry: SmlEntry = { type: 'test_type', content: 'body', title: 'Title' };
+    expect(entry.title).toBe('Title');
   });
 
   it('SmlDocument requires the full stored-document shape', () => {

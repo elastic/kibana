@@ -1216,9 +1216,8 @@ export const buildOriginUri = (type: string, originId: string): string => `${typ
  * Fetch every chunk written under `(type, originId)` that is visible
  * in `spaceId`.
  *
- * Multiple chunks per origin are expected: the workflow step's
- * content mode and `getSmlData` in origin mode can both produce >1
- * chunk per origin. Ordering is unspecified.
+ * More than one chunk per origin is possible: an origin can carry both a
+ * `'crawled'` entry and a `'manual'` entry at once. Ordering is unspecified.
  *
  * Lookups happen via the `origin.uri` keyword field — the only mapped
  * origin identifier. The compound URI is the only safe addressable key

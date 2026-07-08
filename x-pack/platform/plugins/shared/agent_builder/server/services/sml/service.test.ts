@@ -17,7 +17,7 @@ describe('createAgentBuilderSmlService', () => {
       async *list() {
         yield [];
       },
-      getSmlData: async () => undefined,
+      getSmlEntry: async () => undefined,
       toAttachment: async () => undefined,
     });
     const start = instance.start({ logger: loggerMock.create() });

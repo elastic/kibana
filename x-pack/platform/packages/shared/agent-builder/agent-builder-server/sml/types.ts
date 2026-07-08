@@ -16,11 +16,11 @@ import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { SmlSearchFilters, SmlSearchConstraints } from './http_api';
 
 /**
- * One entry in {@link SmlChunk.discovery_labels}. `value` is what the autocomplete
+ * One entry in {@link SmlEntry.discovery_labels}. `value` is what the autocomplete
  * matches against; `kind` describes how the UI should render the matched label.
  *
  * `kind` is open (free-form keyword at the ES level). The indexer auto-prepends
- * entries with `kind: 'title'` and `kind: 'type'` derived from the chunk's title
+ * entries with `kind: 'title'` and `kind: 'type'` derived from the entry's title
  * and type fields. Producers can add additional entries with any kind (e.g.
  * 'tagline', 'nickname', 'category', 'synonym') — the UI decides how to render
  * each kind.
@@ -31,7 +31,7 @@ export interface DiscoveryLabel {
 }
 
 /**
- * A single Kibana feature privilege required to access a chunk
+ * A single Kibana feature privilege required to access an entry
  * (e.g., `saved_object:lens/get`, `action:execute`).
  */
 export interface SmlKibanaPrivilege {
@@ -40,15 +40,15 @@ export interface SmlKibanaPrivilege {
 
 /**
  * A single concrete Elasticsearch index / alias / data stream name whose
- * data a chunk's content depends on. Used by the search-time post-filter
- * to gate chunks behind the user's ES `read` privilege on each name.
+ * data an entry's content depends on. Used by the search-time post-filter
+ * to gate entries behind the user's ES `read` privilege on each name.
  */
 export interface SmlElasticsearchIndex {
   name: string;
 }
 
 /**
- * Permissions required to access a chunk, split by access boundary.
+ * Permissions required to access an entry, split by access boundary.
  *
  * Both sub-objects are always present (with possibly-empty arrays) on
  * stored documents to keep the schema rigid and predictable.
@@ -59,10 +59,11 @@ export interface SmlPermissions {
 }
 
 /**
- * A single SML chunk to be indexed.
+ * A single SML entry to be indexed. Every SML type produces exactly one
+ * entry per `originId`.
  */
-export interface SmlChunk {
-  /** Type of the chunk (e.g., 'dashboard', 'lens', 'esql') */
+export interface SmlEntry {
+  /** Type of the entry (e.g., 'dashboard', 'lens', 'esql') */
   type: string;
   /** Searchable content (indexed as `semantic_text`) */
   content: string;
@@ -100,20 +101,13 @@ export interface SmlChunk {
   references?: Array<{ uri: string }>;
   // permissions: intentionally absent. The {@link SmlTypeDefinition.getPermissions}
   // hook is the single source of truth for the permissions stamped on the
-  // indexed document — neither `getSmlData` nor content-mode callers (the
+  // indexed document — neither `getSmlEntry` nor content-mode callers (the
   // `sml.index` workflow step, event-driven content-mode indexAttachment)
   // can override it.
 }
 
 /**
- * Return value from getSmlData — normalized data to index.
- */
-export interface SmlData {
-  chunks: SmlChunk[];
-}
-
-/**
- * Context passed to SML type hooks (`list` and `getSmlData`).
+ * Context passed to SML type hooks (`list` and `getSmlEntry`).
  */
 export interface SmlContext {
   esClient: ElasticsearchClient;
@@ -164,7 +158,7 @@ export interface SmlTypeDefinition {
   /**
    * Return normalized data to index for a specific item.
    */
-  getSmlData: (originId: string, context: SmlContext) => Promise<SmlData | undefined>;
+  getSmlEntry: (originId: string, context: SmlContext) => Promise<SmlEntry | undefined>;
 
   /**
    * Convert an SML document into a conversation attachment.
@@ -181,8 +175,8 @@ export interface SmlTypeDefinition {
    * the chunk — so a workflow step's content-mode write inherits the same
    * gating as a crawler-driven write.
    *
-   * Authoritative when defined. Callers (workflow step, `getSmlData`) cannot
-   * override or bypass it — `SmlChunk` does not carry a `permissions`
+   * Authoritative when defined. Callers (workflow step, `getSmlEntry`) cannot
+   * override or bypass it — `SmlEntry` does not carry a `permissions`
    * field. Types that need permission shapes the built-in helpers do not
    * cover should still implement this directly (returning a fully-shaped
    * {@link SmlPermissions}).
@@ -214,7 +208,7 @@ export interface SmlTypeDefinition {
  * How a chunk was produced.
  *
  * - `'crawled'`: written by the SML crawler or by an event-driven `indexAttachment`
- *   origin-mode call (content fetched via `getSmlData`).
+ *   origin-mode call (content fetched via `getSmlEntry`).
  * - `'manual'`: written explicitly by a user/admin — via the HTTP upsert route or via
  *   `indexAttachment` content-mode. Manual entries are protected from being overwritten
  *   by the crawler / origin-mode `indexAttachment` unless `force: true` is passed.
@@ -397,9 +391,9 @@ export type SmlDeleteScope = SmlIngestionMethod | 'all';
  * the full unions: `SmlIndexAttachmentParams` (public, in `server/types.ts`)
  * and `SmlIndexerParams` (internal, below).
  *
- * Origin mode — content is produced by the registered type's `getSmlData`
- * hook. Resulting chunks are tagged `ingestion_method: 'crawled'`. If the
- * target `origin_id` already has any `ingestion_method: 'manual'` chunks, the
+ * Origin mode — content is produced by the registered type's `getSmlEntry`
+ * hook. The resulting entry is tagged `ingestion_method: 'crawled'`. If the
+ * target `origin_id` already has an `ingestion_method: 'manual'` entry, the
  * call is a no-op unless `force: true` is provided.
  */
 export interface SmlIndexAttachmentOriginMode {
@@ -409,13 +403,13 @@ export interface SmlIndexAttachmentOriginMode {
 }
 
 /**
- * Content mode — caller supplies pre-built chunks directly; `getSmlData` is
- * not called. Resulting chunks are tagged `ingestion_method: 'manual'`. Always
- * overwrites existing chunks for the `origin_id`.
+ * Content mode — caller supplies a pre-built entry directly; `getSmlEntry` is
+ * not called. The resulting entry is tagged `ingestion_method: 'manual'`. Always
+ * overwrites the existing entry for the `origin_id`.
  */
 export interface SmlIndexAttachmentContentMode {
-  /** Pre-built chunks; skips getSmlData; marks `ingestion_method='manual'`. */
-  content: SmlChunk[];
+  /** Pre-built entry; skips getSmlEntry; marks `ingestion_method='manual'`. */
+  content: SmlEntry;
   force?: undefined;
   /**
    * `created_at` to stamp on the written chunks. When provided (e.g. the
@@ -483,7 +477,7 @@ export interface SmlIndexerDeleteAttachmentParams {
   originId: string;
   attachmentType: string;
   /**
-   * Space-isolation guard. `deleteChunks` filters by
+   * Space-isolation guard. `deleteEntry` filters by
    * `{ terms: { spaces: [...spaces, '*'] } }` so only chunks whose stored
    * `spaces` array contains one of the provided IDs (or the global wildcard
    * `'*'`) are removed. See type-level `@remarks` for the full contract.
@@ -615,9 +609,7 @@ export interface SmlService {
    * Fetch every chunk written under the compound `(type, originId)`
    * key that is visible in `spaceId`.
    *
-   * Used by the HTTP GET route and other origin-scoped reads. A workflow
-   * step writing in content mode (or `getSmlData` in origin mode) may
-   * produce multiple chunks per origin — all are returned.
+   * Used by the HTTP GET route and other origin-scoped reads.
    *
    * The caller MUST pass both `type` and `originId`. The bare
    * `originId` is not unique on its own (a `lens` chunk and a
