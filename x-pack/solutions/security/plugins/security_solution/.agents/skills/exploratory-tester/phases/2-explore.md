@@ -124,6 +124,8 @@ First, wait for the page to settle after the action:
 - If you know a specific element should appear, use `browser_wait_for` targeting it.
 - Otherwise, allow ~3 seconds before running the detector.
 
+**This 3-second wait is for wrong-state checks only (spinners, error banners, panel content).** If instead you're about to conclude that an *expected element is entirely absent* (a tab, a table's contents, a row) — do not log it yet. A single snapshot cannot distinguish a genuine permanent absence from a transient render race; see "Confirm before logging" below before treating it as a result.
+
 Then paste the full content of `scripts/check-dom-anomalies.js` as the function argument. Log each returned item at its indicated level:
 - `level1[]` items → Level 1 finding
 - `level2[]` items → Level 2 finding
@@ -159,9 +161,33 @@ Then paste the full content of `scripts/check-dom-anomalies.js` as the function 
 
 **Screenshot:** `browser_take_screenshot` → `.exploratory-session/screenshots/<area_slug>-flow<N>-step<M>-<checklist-step-slug>.png`
 
-**Append findings:** Write one entry to `findings-flow-<N>.md` per detector result (use `templates/finding-format.md`). If all three detectors return nothing, write one Level 3 observation: "Step <N> — no anomalies detected."
+**Append findings:** For Level 3, write the entry directly to `findings-flow-<N>.md` (use `templates/finding-format.md`). If all three detectors return nothing, write one Level 3 observation: "Step <N> — no anomalies detected." **For Level 1 and Level 2, do not write yet — go to "Confirm before logging" below first.**
 
-**Agent judgment:** After the detectors, assess the overall UI state. If something the flow requires is visibly absent or wrong and the detectors didn't catch it — log a Level 2 finding with what is missing and why it matters. Do not re-derive anything the detectors already reported.
+**Agent judgment:** After the detectors, assess the overall UI state. If something the flow requires is visibly absent or wrong and the detectors didn't catch it — this is a candidate Level 1/2 finding; run it through "Confirm before logging" below before writing anything. Do not re-derive anything the detectors already reported.
+
+### Confirm before logging (Level 1 / Level 2 only)
+
+Every candidate Level 1 or Level 2 finding — from a detector or from agent judgment — gets a cheap reproduction check before it becomes a finding. A single observation cannot distinguish a genuine bug from a one-off race, a stale session, or an artifact of the exact moment you looked. This has produced confirmed false-positive findings before. Level 3 observations skip this — log them directly.
+
+**1. Reproduce it once more.** Re-trigger the same action from a fresh state (reload the page, or repeat the interaction) and confirm the same result occurs a second time.
+- **Does not reproduce** → do not log it, not even at Level 3. Note in your own scratch tracking that you checked it, so you don't re-investigate the same non-issue later in the flow.
+- **Reproduces identically** → proceed to step 2.
+
+If the candidate finding is specifically an **absent element** ("X never appeared", "X is missing" — not a wrong state, just total absence), the reproduction check needs more rigor than a second identical glance, because the exact race that produces false absences resolves within seconds and won't be caught by immediately repeating the same quick look:
+- Re-check with a longer, explicit wait: reload or re-trigger, then either call `browser_wait_for(text: "<the missing element's visible text>", time: 10)` or take a second `browser_snapshot` at least 5 seconds after the first.
+- Corroborate with Detector C — check whether the network call(s) that would populate the element were made at all:
+  - **Never called** → genuine gating/blocking (e.g. a frontend privilege pre-check). Reproduces — proceed to step 2.
+  - **Called and still pending** → not settled yet; extend the wait, not confirmed yet.
+  - **Called and failed (4xx/5xx)** → log the failed call itself via Detector C's normal path instead; the missing element is a downstream symptom, not a separate finding.
+  - **Called and succeeded, but the element still didn't render** → genuine rendering bug. Reproduces — proceed to step 2, and include the successful response in the evidence so the finding can't later be mistaken for a privilege or data problem.
+
+**2. Record video evidence.** Once a Level 1 or Level 2 finding reproduces, capture it on video using the split-screen technique in `scripts/record-evidence.md`: the real product on one side, untouched, and a live evidence panel on the other side driven by Playwright's own `response`/`console` listeners (not narration added after the fact). Save to `.exploratory-session/videos/findings-flow-<N>[-<slug>].mp4` and reference it in the finding's Evidence section (`- Video: .exploratory-session/videos/findings-flow-<N>.mp4`).
+
+This step requires the `browser_run_code_unsafe` tool and a working `ffmpeg` install. If either is unavailable, skip the recording, do not block on it, and note `- Video: unavailable (<reason>)` in the finding's Evidence section instead — the finding still gets logged from steps 1's reproduction evidence.
+
+If several Level 1/2 findings surface from the same checklist step in close succession (e.g. two related findings during one flyout open), one recording covering all of them is fine — do not re-record the same setup repeatedly. Use a slug suffix to distinguish them in the filename when one video covers more than one finding title.
+
+**3. Write the finding.** Only now write the entry to `findings-flow-<N>.md`, including the video reference from step 2.
 
 ### Mini-probe (Level 1 or Level 2 finding)
 

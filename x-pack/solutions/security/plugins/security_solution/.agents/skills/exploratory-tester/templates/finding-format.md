@@ -45,6 +45,7 @@ Never write "expected behavior unknown" — if none of the above apply, use (4) 
 - Console: `<relevant line>` — relevant = appeared after the action AND contains error/exception
   keywords or HTTP 5xx; ignore CSP violations, 404s on `/internal/cloud/solution`, browser extensions
 - Network: <METHOD> `<path>` → <status> `<relevant response snippet>`
+- Video: `.exploratory-session/videos/findings-flow-<N>.mp4` (or `- Video: unavailable (<reason>)` — see `scripts/record-evidence.md`)
 ```
 
 ## Level 3 observation (short format)
