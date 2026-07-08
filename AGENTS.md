@@ -3,6 +3,9 @@
 ## Setup
 - Run `yarn kbn bootstrap` for initial setup, after switching branches, or when encountering dependency errors
 
+## Reading source files
+- Every `.ts`, `.tsx`, and `.js` file under `src/` and `x-pack/` starts with a 6-line Elastic License / SSPL / Apache-2.0 header. It is boilerplate and carries no task-relevant signal. When reading a source file with a tool that supports byte or line offsets, skip the header (e.g. `offset=7`) unless the task is *about* the header (licensing, copyright, or the header format itself). The exact effect this has on agent quality is being measured — see `x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/docs/context_noise_eval.md`.
+
 ## Overview
 - Kibana is organized into modules, each defined by a `kibana.jsonc`: core, packages, and plugin packages. Aside from tooling and testing, most code lives in these modules.
 - Packages are reusable units with explicit boundaries and a single public entry point (no subpath imports), usually with a focused purpose.
