@@ -2008,7 +2008,7 @@ describe('current status route', () => {
       const result = await overviewStatusService.getOverviewStatus();
 
       // Active-space filter is still applied (single-space view) and the request
-      // omits CCS-only sub-aggs (`index_name`, `location_name`).
+      // omits the CCS-only `index_name` sub-agg.
       const searchCall = esClient.search.mock.calls[0][0] as any;
       const filters = searchCall.query.bool.filter;
       const spaceFilter = filters.find((f: any) => f.terms && f.terms['meta.space_id']);
@@ -2017,7 +2017,12 @@ describe('current status route', () => {
 
       const monitorAggs = searchCall.aggs.monitors.aggs;
       expect(monitorAggs.index_name).toBeUndefined();
-      expect(monitorAggs.location_name).toBeUndefined();
+      // `location_name` resolves the human-readable observer.geo.name label for
+      // external monitors (remote CCS + local Heartbeat) that carry a location.
+      // Heartbeat detection is always-on, so it runs even on serverless (unlike
+      // the CCS-gated `index_name`). Location-less pings don't rely on it — they
+      // fall back to the placeholder label.
+      expect(monitorAggs.location_name).toBeDefined();
 
       // No remote decoration without CCS.
       expect(result.upConfigs.id1).toBeDefined();
