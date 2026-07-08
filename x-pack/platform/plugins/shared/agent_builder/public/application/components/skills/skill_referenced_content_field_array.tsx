@@ -131,6 +131,10 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
 
   const handleCancel = () => {
     const snapshot = snapshotRef.current;
+    if (!snapshot.name && !snapshot.content) {
+      onRemove();
+      return;
+    }
     nameField.field.onChange(snapshot.name);
     pathField.field.onChange(snapshot.relativePath);
     contentField.field.onChange(snapshot.content);
