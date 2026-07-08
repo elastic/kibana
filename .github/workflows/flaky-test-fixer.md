@@ -85,10 +85,21 @@ safe-outputs:
     max: 1
     target: *issue_number
     hide-older-comments: true
+  # The `ai:fix-flaky` label is the trigger for this workflow. Clear it once we have a
+  # result (PR opened, existing PR found, or no PR) so the request isn't left pending;
+  # `unlabeled` doesn't re-trigger this workflow (`types: [labeled]`).
+  remove-labels:
+    allowed:
+      - ai:fix-flaky
+    max: 1
+    target: *issue_number
   create-pull-request:
     draft: true
     max: 1
     labels: [flaky-test-fixer]
+    # Request the user who asked for the fix (applied `ai:fix-flaky` or dispatched) as a
+    # reviewer, unless they are a bot / `kibanamachine` (resolves to '' to request nobody).
+    reviewers: ${{ (github.actor == 'kibanamachine' || endsWith(github.actor, '[bot]')) && '' || github.actor }}
     base-branch: main
     allowed-base-branches: ['main', '9.*', '8.*', '7.*']
     if-no-changes: 'ignore'
@@ -168,7 +179,8 @@ Kibana is already bootstrapped for you.
 4. Verify the patch: lint and type check it with `node scripts/eslint` and `node scripts/type_check` (and, for a Jest test, run it with `node scripts/jest`). FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
 5. Open the PR (see "PR format" below).
 6. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
-7. **Only if you opened a PR in step 5**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and appends the new PR's URL to your outcome comment. You cannot know the PR number while running (the PR is created afterwards), so never write the URL into the comment yourself — this tool is how the link gets there.
+7. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none — so the fix request isn't left pending.
+8. **Only if you opened a PR in step 5**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and appends the new PR's URL to your outcome comment. You cannot know the PR number while running (the PR is created afterwards), so never write the URL into the comment yourself — this tool is how the link gets there.
 
 ## PR format
 
@@ -201,14 +213,14 @@ Add the following at the very end of the PR description (and outside of the deta
 
 ```markdown
 > [!NOTE]
-> Created by the Flaky Test Fixer workflow, requested by @${{ env.REQUESTED_BY }}. Share feedback or questions in #apps-qa.
+> Created by the Flaky Test Fixer workflow, requested by @${{ env.REQUESTED_BY }}. Share feedback or questions in #kibana-qa.
 ```
 
 (Per "Requester mention", drop `requested by @${{ env.REQUESTED_BY }}` from the NOTE if the requester is a bot or `kibanamachine`.)
 
 ## Outcome comment
 
-In **every** run, finish by posting exactly one short comment on issue #${{ env.ISSUE_NUMBER }} via the `add-comment` safe output. Format it as a short `###` heading that states the outcome (with the leading emoji shown below), followed by a single sentence of detail, then `cc @${{ env.REQUESTED_BY }}` at the very end (see "Requester mention", only append if the requester isn't a bot). No other preamble or sign-off.
+In **every** run, finish by posting exactly one short comment on issue #${{ env.ISSUE_NUMBER }} via the `add-comment` safe output, and removing the `ai:fix-flaky` label (see step 7). Format the comment as a short `###` heading that states the outcome (with the leading emoji shown below), followed by a single sentence of detail, then `cc @${{ env.REQUESTED_BY }}` at the very end (see "Requester mention", only append if the requester isn't a bot). No other preamble or sign-off.
 
 Follow this format:
 

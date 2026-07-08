@@ -114,6 +114,20 @@ safe-outputs:
       - failure:inconclusive
     max: 2
     target: *issue_number
+  # On a re-investigation (e.g. a reopened issue) the previous verdict's labels are
+  # stale. Allow removing this workflow's own labels, plus a lingering `ai:fix-flaky`
+  # fix request, so the fresh verdict can replace them.
+  remove-labels:
+    allowed:
+      - failure:test-needs-update
+      - failure:test-environment
+      - failure:application
+      - failure:ci-environment
+      - failure:inconclusive
+      - failure:ai-fixable
+      - ai:fix-flaky
+    max: 7
+    target: *issue_number
 
 strict: false
 timeout-minutes: 35
@@ -178,6 +192,10 @@ Add exactly one classification label to the issue that matches the chosen `class
 
 Add `failure:ai-fixable` to the issue if we are confident that a fix is available (it would imply opening a PR against the codebase).
 
+### Refresh stale labels on re-investigation
+
+This issue may have been investigated before (for example, it was reopened after a prior verdict). Treat any pre-existing `failure:*` classification, `failure:ai-fixable`, or `ai:fix-flaky` label as stale: remove the ones that no longer match your fresh verdict, keep (or add) the single correct classification and `failure:ai-fixable` only if a fix is still available, and clear a lingering `ai:fix-flaky` (the tip block below re-invites it when the failure is fixable). If the existing labels already match your verdict, leave them as they are.
+
 ## Attribution
 
 - Mention a commit (or small set of commits, last 3 months) only when evidence strongly implicates it.
@@ -197,7 +215,7 @@ Add the following snippet of Markdown right after (and outside) the `<details>` 
 
 ```markdown
 > [!TIP]
-> Label this issue `ai:fix-flaky` and an agent will **open a fix PR** for you. This usually takes 15–20 minutes, and the PR will appear below this comment. Share early feedback in #appex-qa.
+> Label this issue `ai:fix-flaky` and an agent will **open a fix PR** for you. This usually takes 15–20 minutes, and the PR will appear below this comment. Share early feedback in #kibana-qa.
 ```
 
 If a fix PR is already up (in draft or in review) in the Kibana repository, mention the PR link in the same tip block (instead of suggesting to add the label).
