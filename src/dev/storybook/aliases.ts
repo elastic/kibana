@@ -8,6 +8,7 @@
  */
 
 export const storybookAliases = {
+  agent_builder: 'x-pack/platform/plugins/shared/agent_builder/.storybook',
   ai_assistant: 'x-pack/platform/packages/shared/kbn-ai-assistant/.storybook',
   alerting_v2: 'x-pack/platform/plugins/shared/alerting_v2/.storybook',
   alerting_v2_rule_form:
