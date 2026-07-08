@@ -41,8 +41,10 @@ export const mongodbClientType: ClientTypeSpec<MongoClient> = {
     const client = new MongoClientCtor(uri, {
       auth: { username: credentials.username, password: credentials.password },
       // Default to admin so credentials created there work without ?authSource=admin in the URI.
-      // URI query params take precedence, so ?authSource=<db> still overrides this.
-      authSource: 'admin',
+      // The driver gives programmatic options precedence over the connection string, so only
+      // apply this default when the URI omits authSource — otherwise ?authSource=<db> in the URI
+      // (which the help text and docs tell users to use) would be silently ignored.
+      ...(new ConnectionString(uri).searchParams.has('authSource') ? {} : { authSource: 'admin' }),
       serverSelectionTimeoutMS: 10_000,
     });
     await client.connect();

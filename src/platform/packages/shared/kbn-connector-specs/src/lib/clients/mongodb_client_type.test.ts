@@ -130,6 +130,28 @@ describe('mongodbClientType', () => {
       expect(MockMongoClient).not.toHaveBeenCalled();
     });
 
+    it('defaults authSource to admin when the URI does not specify one', async () => {
+      const ctx = makeBuildContext();
+      await mongodbClientType.build(ctx);
+
+      expect(MockMongoClient).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ authSource: 'admin' })
+      );
+    });
+
+    it('does not override authSource when the URI already specifies one', async () => {
+      const ctx = makeBuildContext({
+        config: { uri: 'mongodb://mongo.example.com:27017/mydb?authSource=otherdb' },
+      });
+      await mongodbClientType.build(ctx);
+
+      expect(MockMongoClient).toHaveBeenCalledWith(
+        'mongodb://mongo.example.com:27017/mydb?authSource=otherdb',
+        expect.not.objectContaining({ authSource: expect.anything() })
+      );
+    });
+
     it('correctly decodes credentials containing colons in the password', async () => {
       const ctx = makeBuildContext({
         credential: {
