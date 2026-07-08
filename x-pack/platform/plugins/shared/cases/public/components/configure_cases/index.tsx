@@ -125,6 +125,14 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const { triggersActionsUi, docLinks } = useKibana().services;
   const isTemplatesEnabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
   const isSettingsRedesignEnabled = KibanaServices.getConfig()?.casesRedesign?.settings ?? false;
+  const settingsBack = useMemo(
+    () => ({
+      href: getAllCasesUrl(),
+      label: i18n.PAGE_TITLE,
+      onClick: navigateToAllCases,
+    }),
+    [getAllCasesUrl, navigateToAllCases]
+  );
   const license = useLicense();
   const hasMinimumLicensePermissions = license.isAtLeastGold();
   const hasMinimumLicensePermissionsForObservables = license.isAtLeastPlatinum();
@@ -633,15 +641,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
   return (
     <EuiPageSection paddingSize="none">
       {isSettingsRedesignEnabled ? (
-        <AppHeader
-          title={i18n.CONFIGURE_CASES_PAGE_TITLE}
-          back={{
-            href: getAllCasesUrl(),
-            label: i18n.PAGE_TITLE,
-            onClick: navigateToAllCases,
-          }}
-          sticky={false}
-        />
+        <AppHeader title={i18n.CONFIGURE_CASES_PAGE_TITLE} back={settingsBack} sticky={false} />
       ) : (
         <>
           {isTemplatesEnabled && (

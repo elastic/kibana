@@ -177,16 +177,21 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
     [handleCreate]
   );
 
+  const fieldLibraryBack = useMemo(
+    () => ({
+      href: getCasesTemplatesUrl(),
+      // `AppHeader` renders this as "Back to {label}", so pass just the destination name.
+      label: templatesI18n.TEMPLATE_TITLE,
+      onClick: navigateToCasesTemplates,
+    }),
+    [getCasesTemplatesUrl, navigateToCasesTemplates]
+  );
+
   return (
     <>
       <AppHeader
         title={i18n.FIELD_LIBRARY_TITLE}
-        back={{
-          href: getCasesTemplatesUrl(),
-          // `AppHeader` renders this as "Back to {label}", so pass just the destination name.
-          label: templatesI18n.TEMPLATE_TITLE,
-          onClick: navigateToCasesTemplates,
-        }}
+        back={fieldLibraryBack}
         menu={fieldLibraryMenu}
         sticky={false}
       />

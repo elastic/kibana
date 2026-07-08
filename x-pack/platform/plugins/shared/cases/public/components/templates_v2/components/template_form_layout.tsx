@@ -307,6 +307,16 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
 
   const templateFormBadges = useMemo(() => getTemplateFormBadges(hasChanges), [hasChanges]);
 
+  const templateFormBack = useMemo(
+    () => ({
+      href: getCasesTemplatesUrl(),
+      // `AppHeader` renders this as "Back to {label}", so pass just the destination name.
+      label: i18n.TEMPLATE_TITLE,
+      onClick: navigateToCasesTemplates,
+    }),
+    [getCasesTemplatesUrl, navigateToCasesTemplates]
+  );
+
   return (
     <FormProvider {...form}>
       <EuiFlexGroup
@@ -321,12 +331,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
         <EuiFlexItem grow={false}>
           <AppHeader
             title={title}
-            back={{
-              href: getCasesTemplatesUrl(),
-              // `AppHeader` renders this as "Back to {label}", so pass just the destination name.
-              label: i18n.TEMPLATE_TITLE,
-              onClick: navigateToCasesTemplates,
-            }}
+            back={templateFormBack}
             badges={templateFormBadges}
             menu={templateFormMenu}
             sticky={false}

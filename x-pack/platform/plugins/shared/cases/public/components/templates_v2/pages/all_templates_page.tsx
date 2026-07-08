@@ -68,6 +68,15 @@ export const AllTemplatesPage: React.FC = () => {
     ]
   );
 
+  const templatesListBack = useMemo(
+    () => ({
+      href: getAllCasesUrl(),
+      label: PAGE_TITLE,
+      onClick: navigateToAllCases,
+    }),
+    [getAllCasesUrl, navigateToAllCases]
+  );
+
   const { queryParams, setQueryParams, sorting, selectedTemplates, selection, deselectTemplates } =
     useTemplatesState();
 
@@ -136,11 +145,7 @@ export const AllTemplatesPage: React.FC = () => {
     <>
       <AppHeader
         title={i18n.TEMPLATE_TITLE}
-        back={{
-          href: getAllCasesUrl(),
-          label: PAGE_TITLE,
-          onClick: navigateToAllCases,
-        }}
+        back={templatesListBack}
         menu={templatesListMenu}
         sticky={false}
       />
