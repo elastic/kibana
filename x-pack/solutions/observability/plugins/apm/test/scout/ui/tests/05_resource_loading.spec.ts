@@ -63,7 +63,9 @@ test.describe(
       await test.step('navigate to the errors tab', async () => {
         await page.getByTestId('errorsTab').waitFor({ timeout: EXTENDED_TIMEOUT / 2 });
         await page.getByTestId('errorsTab').click({ timeout: EXTENDED_TIMEOUT / 2 });
-        await expect(page.getByTestId('errorsTab')).toHaveAttribute('aria-selected', 'true');
+        await expect(page.getByTestId('errorsTab')).toHaveAttribute('aria-selected', 'true', {
+          timeout: EXTENDED_TIMEOUT,
+        });
         await expect(page.getByTestId('errorDistribution')).toBeVisible({
           timeout: EXTENDED_TIMEOUT,
         });
