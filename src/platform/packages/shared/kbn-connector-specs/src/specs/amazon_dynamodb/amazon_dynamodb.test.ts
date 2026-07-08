@@ -404,6 +404,44 @@ describe('AmazonDynamoDB', () => {
   });
 
   // ===========================================================================
+  // region validation (SSRF prevention)
+  // ===========================================================================
+
+  describe('region validation', () => {
+    const validRegions = [
+      'us-east-1',
+      'eu-west-2',
+      'ap-southeast-1',
+      'ca-central-1',
+      'us-gov-east-1',
+      'us-iso-east-1',
+      'me-south-1',
+      'af-south-1',
+      'il-central-1',
+    ];
+
+    const invalidRegions = [
+      'us-east-1.evil.com',
+      'us-east-1.evil.com#',
+      'user@evil.com',
+      'us-east-1/../../etc/passwd',
+      'us-east-1?foo=bar',
+      '',
+      'UPPERCASE-1',
+    ];
+
+    it.each(validRegions)('accepts valid region: %s', (region) => {
+      const result = AmazonDynamoDB.schema.safeParse({ region });
+      expect(result.success).toBe(true);
+    });
+
+    it.each(invalidRegions)('rejects invalid region: %s', (region) => {
+      const result = AmazonDynamoDB.schema.safeParse({ region });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  // ===========================================================================
   // error handling
   // ===========================================================================
 

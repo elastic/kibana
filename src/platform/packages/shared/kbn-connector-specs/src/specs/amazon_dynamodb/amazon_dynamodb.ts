@@ -120,7 +120,10 @@ export const AmazonDynamoDB: ConnectorSpec = {
     z.object({
       region: z
         .string()
-        .min(1)
+        .regex(/^[a-z][a-z0-9-]+-\d+$/, {
+          message:
+            'Must be a valid AWS region identifier (e.g. us-east-1, eu-west-2, us-gov-east-1)',
+        })
         .describe(
           i18n.translate('connectorSpecs.amazonDynamoDB.config.region', {
             defaultMessage: 'AWS Region where the DynamoDB tables are located (e.g., us-east-1)',
