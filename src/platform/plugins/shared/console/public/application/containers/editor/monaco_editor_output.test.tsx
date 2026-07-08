@@ -284,6 +284,34 @@ describe('WHEN rendering Console output', () => {
     expect(addSuccess).not.toHaveBeenCalled();
   });
 
+  it('SHOULD show an error when the selected output is empty', async () => {
+    mockEditor.getModel.mockReturnValue({
+      getLineContent: () => '',
+      getLineCount: () => 1,
+      getLineMaxColumn: () => 1,
+      getPositionAt: getMockPositionAt,
+      getValue: () => '',
+      getValueInRange: () => '',
+    } as unknown as monaco.editor.ITextModel);
+
+    render(
+      <I18nProvider>
+        <MonacoEditorOutput />
+      </I18nProvider>
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('consoleMonacoOutput')).toHaveTextContent('"acknowledged": true')
+    );
+
+    await userEvent.click(screen.getByTestId('copyOutputButton'));
+
+    await waitFor(() => expect(addDanger).toHaveBeenCalled());
+    expect(execCommand).not.toHaveBeenCalled();
+    expect(writeText).not.toHaveBeenCalled();
+    expect(addSuccess).not.toHaveBeenCalled();
+  });
+
   it('SHOULD use the Clipboard API when the document copy throws', async () => {
     jest.spyOn(document, 'createRange').mockImplementation(() => {
       throw new Error('Document copy failed');

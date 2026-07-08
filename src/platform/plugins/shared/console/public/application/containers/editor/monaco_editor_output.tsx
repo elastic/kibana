@@ -23,7 +23,6 @@ import {
   EuiToolTip,
   useEuiTheme,
   transparentize,
-  copyToClipboard,
 } from '@elastic/eui';
 import type { monaco } from '@kbn/monaco';
 import { CONSOLE_OUTPUT_THEME_ID, CONSOLE_OUTPUT_LANG_ID } from '@kbn/monaco';
@@ -42,6 +41,7 @@ import {
   useOutputFilterReadContext,
 } from '../../contexts';
 import { applyResponseFilter, isFilterableStatusCode } from '../../lib/apply_response_filter';
+import { copyTextToClipboard } from '../../lib/copy_text_to_clipboard';
 import { MonacoEditorOutputActionsProvider } from './monaco_editor_output_actions_provider';
 import { useResizeCheckerUtils } from './hooks';
 import { useActionStyles, useHighlightedLinesClassName } from './styles';
@@ -105,27 +105,6 @@ const useStatusCodeClassNames = (): StatusCodeClassNames => {
       euiTheme.colors.danger,
     ]
   );
-};
-
-const copyTextToClipboard = async (text: string): Promise<boolean> => {
-  try {
-    if (copyToClipboard(text)) {
-      return true;
-    }
-  } catch {
-    // Fall back to the async Clipboard API below.
-  }
-
-  try {
-    if (window.navigator?.clipboard) {
-      await window.navigator.clipboard.writeText(text);
-      return true;
-    }
-  } catch {
-    return false;
-  }
-
-  return false;
 };
 
 export const MonacoEditorOutput: FunctionComponent = () => {

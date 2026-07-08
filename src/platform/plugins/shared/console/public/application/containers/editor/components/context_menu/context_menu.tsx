@@ -29,6 +29,7 @@ import { convertRequestToLanguage } from '../../../../../services';
 import type { EditorRequest } from '../../types';
 
 import { useServicesContext } from '../../../../contexts';
+import { copyTextToClipboard } from '../../../../lib/copy_text_to_clipboard';
 import { StorageKeys } from '../../../../../services';
 import {
   DEFAULT_LANGUAGE,
@@ -101,11 +102,9 @@ export const ContextMenu = ({
   }, [defaultLanguage, isKbnRequestSelected]);
 
   const copyText = async (text: string) => {
-    if (window.navigator?.clipboard) {
-      await window.navigator.clipboard.writeText(text);
-      return;
+    if (!(await copyTextToClipboard(text))) {
+      throw new Error('Could not copy to clipboard!');
     }
-    throw new Error('Could not copy to clipboard!');
   };
 
   // This function will convert all the selected requests to the language by
@@ -249,7 +248,6 @@ export const ContextMenu = ({
             key="Copy to"
             data-test-subj="consoleMenuCopyAsButton"
             id="copyAs"
-            disabled={!window.navigator?.clipboard}
             onClick={() => onCopyAsSubmit()}
             icon="copy"
             css={styles.button}
