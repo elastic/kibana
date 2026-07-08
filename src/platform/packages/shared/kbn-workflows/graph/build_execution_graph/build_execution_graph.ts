@@ -10,6 +10,10 @@
 import { graphlib } from '@dagrejs/dagre';
 import { omit } from 'lodash';
 import { GraphBuildError } from './graph_build_error';
+import {
+  DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
+  isHitlWaitStepType,
+} from '../../common/wait_for_approval';
 import { DEFAULT_LOOP_MAX_ITERATIONS } from '../../spec/schema';
 import type {
   BaseStep,
@@ -28,6 +32,7 @@ import type {
   StepWithOnFailure,
   SwitchStep,
   TimeoutProp,
+  WaitForApprovalStep,
   WaitForInputStep,
   WaitStep,
   WhileStep,
@@ -49,7 +54,6 @@ import type {
   EnterForeachNode,
   EnterIfNode,
   EnterNormalPathNode,
-  EnterParallelNode,
   EnterRetryNode,
   EnterSwitchNode,
   EnterTimeoutZoneNode,
@@ -63,21 +67,22 @@ import type {
   ExitForeachNode,
   ExitIfNode,
   ExitNormalPathNode,
-  ExitParallelNode,
   ExitRetryNode,
   ExitSwitchNode,
   ExitTimeoutZoneNode,
   ExitTryBlockNode,
   ExitWhileNode,
-  GraphNodeUnion,
   LoopBreakNode,
   LoopContinueNode,
   LoopEnterNode,
+  WaitForApprovalGraphNode,
   WaitForInputGraphNode,
   WorkflowGraphType,
   WorkflowOutputGraphNode,
 } from '../types';
 import { isLoopEnterNode } from '../types';
+import type { EnterParallelNode, ExitParallelNode } from '../types/nodes/parallel_nodes';
+import type { GraphNodeUnion } from '../types/nodes/union';
 import { createTypedGraph } from '../workflow_graph/create_typed_graph';
 
 const flowControlStepTypes = new Set([
@@ -121,7 +126,8 @@ function getStepId(node: BaseStep, context: GraphBuildContext): string {
   return parts.join('_');
 }
 
-function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): WorkflowGraphType {
+function visitAbstractStep(originalStep: BaseStep, context: GraphBuildContext): WorkflowGraphType {
+  const currentStep = originalStep;
   if ((currentStep as StepWithOnFailure)['on-failure']) {
     const stepLevelOnFailureGraph = handleStepLevelOnFailure(currentStep, context);
 
@@ -138,6 +144,28 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     }
   }
 
+  return visitTypedAbstractStep(currentStep, context);
+}
+
+function tryVisitHitlWaitStep(
+  currentStep: BaseStep,
+  context: GraphBuildContext
+): WorkflowGraphType | undefined {
+  if (currentStep.type === 'waitForInput') {
+    return visitWaitForInputStep(currentStep as WaitForInputStep, context);
+  }
+
+  if (currentStep.type === 'waitForApproval') {
+    return visitWaitForApprovalStep(currentStep as WaitForApprovalStep, context);
+  }
+
+  return undefined;
+}
+
+function visitTypedAbstractStep(
+  currentStep: BaseStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
   if ((currentStep as StepWithIfCondition).if) {
     return createIfGraphForIfStepLevel(currentStep as StepWithIfCondition, context);
   }
@@ -156,6 +184,13 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
 
   if (currentStep.type === 'loop.continue') {
     return visitLoopContinueStep(currentStep as LoopContinueStep, context);
+  }
+
+  // HITL wait steps are not wrapped in enter-timeout-zone nodes. waitForApproval and
+  // waitForInput schedule their idle deadlines via handleExecutionDelay.
+  const hitlWaitGraph = tryVisitHitlWaitStep(currentStep, context);
+  if (hitlWaitGraph) {
+    return hitlWaitGraph;
   }
 
   if ((currentStep as TimeoutProp).timeout) {
@@ -191,10 +226,6 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
 
   if (currentStep.type === 'wait') {
     return visitWaitStep(currentStep as WaitStep, context);
-  }
-
-  if (currentStep.type === 'waitForInput') {
-    return visitWaitForInputStep(currentStep as WaitForInputStep, context);
   }
 
   if (currentStep.type === 'data.set') {
@@ -283,6 +314,27 @@ export function visitWaitForInputStep(
     },
   };
   graph.setNode(waitForInputNode.id, waitForInputNode);
+
+  return graph;
+}
+
+export function visitWaitForApprovalStep(
+  currentStep: WaitForApprovalStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+  const waitForApprovalNode: WaitForApprovalGraphNode = {
+    id: stepId,
+    type: 'waitForApproval',
+    stepId,
+    stepType: currentStep.type,
+    configuration: {
+      ...currentStep,
+      timeout: currentStep.timeout ?? DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
+    },
+  };
+  graph.setNode(waitForApprovalNode.id, waitForApprovalNode);
 
   return graph;
 }
@@ -1073,19 +1125,18 @@ function buildParallelBranchBody(
 
   // The parallel executor drives each branch in-process. Timer-based `wait`
   // steps are supported: a waiting branch parks across ticks and the parallel
-  // re-ticks at the earliest branch `resumeAt`. `waitForInput`, however, is an
-  // indefinite, externally-resumed wait that has no per-branch resume signal,
-  // so it cannot run inside a branch yet — reject it at compile time instead of
-  // hanging the branch at runtime.
-  const UNSUPPORTED_BRANCH_NODE_TYPES = new Set(['waitForInput']);
+  // re-ticks at the earliest branch `resumeAt`. HITL waits, however, are
+  // indefinite, externally-resumed waits that have no per-branch resume signal,
+  // so they cannot run inside a branch yet — reject them at compile time instead
+  // of hanging or self-resuming the branch at runtime.
   const unsupportedNode = bodyGraph
     .nodes()
     .map((nodeId) => bodyGraph.node(nodeId))
-    .find((bodyNode) => UNSUPPORTED_BRANCH_NODE_TYPES.has(bodyNode?.type as string));
+    .find((bodyNode) => isHitlWaitStepType(bodyNode?.type));
   if (unsupportedNode) {
     throw new GraphBuildError(
-      `Parallel step "${stepId}" has a branch body containing an unsupported step type "${unsupportedNode.stepType}". ` +
-        `"waitForInput" steps are not supported inside a parallel branch yet.`,
+      `Parallel step "${stepId}" has a branch body containing an unsupported HITL wait step "${unsupportedNode.stepType}". ` +
+        `HITL wait steps are not supported inside a parallel branch yet.`,
       stepId
     );
   }
@@ -1137,7 +1188,7 @@ function createParallelGraph(
     },
   };
   context.stack.push(enterParallelNode);
-  graph.setNode(enterNodeId, enterParallelNode);
+  graph.setNode(enterNodeId, enterParallelNode as GraphNodeUnion);
 
   const exitParallelNode: ExitParallelNode = {
     id: exitNodeId,
@@ -1146,7 +1197,7 @@ function createParallelGraph(
     stepType: parallelStep.type,
     startNodeId: enterNodeId,
   };
-  graph.setNode(exitNodeId, exitParallelNode);
+  graph.setNode(exitNodeId, exitParallelNode as GraphNodeUnion);
 
   // Wire every branch body between enter and exit. Each body's start node gets an
   // edge from enter; each body's end node(s) get an edge to exit.

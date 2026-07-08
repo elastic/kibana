@@ -466,6 +466,28 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     });
   });
 
+  describe('metadata', () => {
+    it('forwards input.metadata to executeAgent', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = createExecutionMock(events$);
+      const serviceManager = { internalStart: { execution } } as any;
+      const step = getRunAgentStepDefinition(serviceManager);
+
+      await step.handler(
+        createContext({
+          input: { message: 'hello', metadata: { workflow_execution_id: 'wf-exec-1' } },
+        })
+      );
+
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({ metadata: { workflow_execution_id: 'wf-exec-1' } })
+      );
+    });
+  });
+
   describe('token usage', () => {
     it('includes usage in output from a single round with model_usage', async () => {
       const events$ = of({
@@ -474,7 +496,13 @@ describe('ai.agent workflow step (Agent Builder)', () => {
           round: {
             id: 'r-1',
             response: { message: 'hello' },
-            model_usage: { connector_id: 'c', llm_calls: 1, input_tokens: 100, output_tokens: 50 },
+            model_usage: {
+              connector_id: 'c',
+              llm_calls: 1,
+              input_tokens: 100,
+              output_tokens: 50,
+              cached_input_tokens: 20,
+            },
           },
         },
       });
@@ -485,8 +513,10 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       const res = await step.handler(createContext({ input: { message: 'hi' } }));
 
       expect(res.output?.metadata?.usage).toEqual({
+        connectorId: 'c',
         inputTokens: 100,
         outputTokens: 50,
+        cachedTokens: 20,
         totalTokens: 150,
       });
     });
@@ -504,6 +534,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
                 llm_calls: 1,
                 input_tokens: 200,
                 output_tokens: 80,
+                cached_input_tokens: 50,
               },
             },
           },
@@ -519,6 +550,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
                 llm_calls: 1,
                 input_tokens: 300,
                 output_tokens: 120,
+                cached_input_tokens: 70,
               },
             },
           },
@@ -534,8 +566,10 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       expect(res.output?.message).toBe('intermediate');
       // Usage should be the sum across all rounds
       expect(res.output?.metadata?.usage).toEqual({
+        connectorId: 'c',
         inputTokens: 500,
         outputTokens: 200,
+        cachedTokens: 120,
         totalTokens: 700,
       });
     });
@@ -560,8 +594,36 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       expect(res.output?.metadata?.usage).toEqual({
         inputTokens: 0,
         outputTokens: 0,
+        cachedTokens: 0,
         totalTokens: 0,
       });
+    });
+
+    it("does not tag a connector when the round reports the 'unknown' sentinel", async () => {
+      // A round that made no LLM call reports connector_id: 'unknown'
+      // (see add_round_complete_event.ts); it must not surface as a connector.
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'r-1',
+            response: { message: 'ok' },
+            model_usage: {
+              connector_id: 'unknown',
+              llm_calls: 0,
+              input_tokens: 10,
+              output_tokens: 5,
+            },
+          },
+        },
+      });
+
+      const execution = createExecutionMock(events$);
+      const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
+
+      const res = await step.handler(createContext({ input: { message: 'hi' } }));
+
+      expect(res.output?.metadata?.usage).not.toHaveProperty('connectorId');
     });
 
     it('preserves partial token counts when the event stream errors mid-execution', async () => {
@@ -581,6 +643,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
                 llm_calls: 1,
                 input_tokens: 150,
                 output_tokens: 60,
+                cached_input_tokens: 30,
               },
             },
           },
@@ -594,10 +657,13 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       const res = await step.handler(createContext({ input: { message: 'hi' } }));
 
       expect(res.error).toBeInstanceOf(Error);
-      // Partial token counts are preserved in the output despite the error
+      // Partial token counts (and the resolved connector) are preserved in the
+      // output despite the error.
       expect(res.output?.metadata?.usage).toEqual({
+        connectorId: 'c',
         inputTokens: 150,
         outputTokens: 60,
+        cachedTokens: 30,
         totalTokens: 210,
       });
     });

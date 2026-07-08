@@ -138,6 +138,7 @@ export function ServiceFlyout({
             size="m"
             paddingSize="m"
             resizable
+            minWidth={400}
             session="start"
             flyoutMenuProps={{ title }}
             aria-labelledby={titleId}
