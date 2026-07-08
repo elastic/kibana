@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ServiceFlyoutTransactionsSection } from '@kbn/apm-ui-shared';
-import type { ServiceNodeData } from '../../../../../common/service_map';
+import type { ServiceFlyoutService } from '..';
 import { ServiceFlyoutOverview } from '.';
 
 const mockUseServiceHasSystemMetrics = jest.fn<
@@ -51,10 +51,9 @@ jest.mock('./lens_chart', () => ({
   ServiceFlyoutLensChart: () => <div data-test-subj="lensChartMock" />,
 }));
 
-const service: ServiceNodeData = {
+const service: ServiceFlyoutService = {
   id: 'opbeans-java',
   label: 'opbeans-java',
-  isService: true,
   agentName: 'java',
 };
 

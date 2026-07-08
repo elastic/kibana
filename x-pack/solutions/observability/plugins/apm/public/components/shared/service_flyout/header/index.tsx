@@ -16,7 +16,7 @@ import { SERVICE_FLYOUT_TABS, type ServiceFlyoutTabId } from '..';
 import { useServiceLinks } from '../hooks/use_service_links';
 
 interface ServiceFlyoutHeaderProps {
-  service: ServiceNodeData;
+  service: ServiceFlyoutService;
   title: string;
   titleId: string;
   environment: Environment;
@@ -38,15 +38,13 @@ export function ServiceFlyoutHeader({
   selectedTabId,
   onSelectedTabIdChange,
 }: ServiceFlyoutHeaderProps) {
-  const { share } = useServiceFlyoutContext();
-  const serviceOverviewHref = useMemo(
-    () =>
-      share.url.locators.get(APM_APP_LOCATOR_ID)?.getRedirectUrl({
-        serviceName: service.id,
-        query: { environment, rangeFrom, rangeTo, kuery },
-      }),
-    [share, service.id, environment, rangeFrom, rangeTo, kuery]
-  );
+  const { overviewHref: serviceOverviewHref } = useServiceLinks({
+    serviceName: service.id,
+    rangeFrom,
+    rangeTo,
+    environment,
+    kuery,
+  });
 
   return (
     <EuiFlyoutHeader>

@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { ServiceNodeData } from '../../../../../common/service_map';
+import type { ServiceFlyoutService } from '..';
 import { ServiceBadges } from './service_badges';
 import type { ServiceAnomalyScoreResponse } from '../../../../../server/routes/services/get_services/get_service_anomaly_score_for_service';
 
@@ -38,10 +38,9 @@ jest.mock('../../../../hooks/use_manage_slos_url', () => ({
   useManageSlosUrl: (...args: unknown[]) => mockUseManageSlosUrl(...args),
 }));
 
-const baseNodeData: ServiceNodeData = {
+const baseNodeData: ServiceFlyoutService = {
   id: 'opbeans-java',
   label: 'opbeans-java',
-  isService: true,
   agentName: 'java',
 };
 
@@ -63,7 +62,7 @@ function setupBadgesData({
   mockUseServiceBadgesData.mockReturnValue({ alertsCount, anomalyData });
 }
 
-function renderBadges({ service = baseNodeData }: { service?: ServiceNodeData } = {}) {
+function renderBadges({ service = baseNodeData }: { service?: ServiceFlyoutService } = {}) {
   return render(
     <IntlProvider locale="en">
       <ServiceBadges

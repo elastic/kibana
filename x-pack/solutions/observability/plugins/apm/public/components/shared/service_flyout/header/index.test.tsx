@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { ServiceNodeData } from '../../../../../common/service_map';
+import type { ServiceFlyoutService } from '..';
 import { ServiceFlyoutHeader } from '.';
 import { SERVICE_FLYOUT_DEFAULT_TAB_ID, SERVICE_FLYOUT_TABS } from '..';
 
@@ -29,10 +29,9 @@ jest.mock('./service_badges', () => ({
   },
 }));
 
-const baseNodeData: ServiceNodeData = {
+const baseNodeData: ServiceFlyoutService = {
   id: 'opbeans-java',
   label: 'opbeans-java',
-  isService: true,
   agentName: 'java',
 };
 
@@ -41,7 +40,7 @@ function renderHeader({
   selectedTabId = SERVICE_FLYOUT_DEFAULT_TAB_ID,
   onSelectedTabIdChange = jest.fn(),
 }: {
-  nodeData?: ServiceNodeData;
+  nodeData?: ServiceFlyoutService;
   selectedTabId?: (typeof SERVICE_FLYOUT_TABS)[number]['id'];
   onSelectedTabIdChange?: jest.Mock;
 } = {}) {

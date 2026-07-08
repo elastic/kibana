@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import type { ServiceNodeData } from '../../../../common/service_map';
+import type { ServiceFlyoutService } from '.';
 import { ServiceFlyout } from '.';
 
 jest.mock('@elastic/eui', () => {
@@ -93,15 +93,18 @@ jest.mock('./footer', () => ({
   ),
 }));
 
-const service: ServiceNodeData = {
+const service: ServiceFlyoutService = {
   id: 'opbeans-java',
   label: 'opbeans-java',
-  isService: true,
   agentName: 'java',
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const contextProps = { core: {} as any, share: {} as any, lens: {} as any, dataViews: {} as any };
+const contextProps = {
+  core: {} as any,
+  share: {} as any,
+  lens: {} as any,
+  dataViews: {} as any,
+};
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -264,7 +267,11 @@ describe('ServiceFlyout local filter state', () => {
     expect(screen.getByTestId('serviceFlyoutOverviewReadout')).toHaveTextContent('production:');
 
     // A different `key` (different service) remounts the flyout, re-seeding from the new props.
-    const otherService: ServiceNodeData = { ...service, id: 'opbeans-go', label: 'opbeans-go' };
+    const otherService: ServiceFlyoutService = {
+      ...service,
+      id: 'opbeans-go',
+      label: 'opbeans-go',
+    };
     rerender(
       <ServiceFlyout
         {...contextProps}

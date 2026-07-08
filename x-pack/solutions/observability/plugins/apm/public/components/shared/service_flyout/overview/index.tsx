@@ -21,7 +21,7 @@ import React, { useMemo, useState } from 'react';
 import type { LensESQLConfig } from './types';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import type { Environment } from '../../../../../common/environment_rt';
-import type { ServiceNodeData } from '../../../../../common/service_map';
+import type { ServiceFlyoutService } from '..';
 import { useServiceFlyoutContext } from '../service_flyout_context';
 import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -49,7 +49,7 @@ const INFRASTRUCTURE_METRICS_SECTION_DESCRIPTION = i18n.translate(
 );
 
 interface ServiceFlyoutOverviewProps {
-  service: ServiceNodeData;
+  service: ServiceFlyoutService;
   environment: Environment;
   kuery: string;
   rangeFrom: string;

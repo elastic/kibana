@@ -10,7 +10,7 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { Environment } from '../../../../../common/environment_rt';
-import type { ServiceNodeData } from '../../../../../common/service_map';
+import type { ServiceFlyoutService } from '..';
 import { AnomaliesBadge } from '../../../app/service_inventory/service_list/anomalies_badge';
 import { useServiceFlyoutContext } from '../service_flyout_context';
 import { AlertsBadge } from '../../badge/alerts_badge';
@@ -20,7 +20,7 @@ import { useServiceBadgesData } from '../hooks/use_service_badges_data';
 import { useServiceLinks } from '../hooks/use_service_links';
 
 interface ServiceBadgesProps {
-  service: ServiceNodeData;
+  service: ServiceFlyoutService;
   environment: Environment;
   kuery: string;
   rangeFrom: string;
@@ -53,7 +53,6 @@ export function ServiceBadges({
     environment,
     kuery,
   });
-
 
   const { alertsCount, anomalyData } = useServiceBadgesData({
     serviceName: service.id,
