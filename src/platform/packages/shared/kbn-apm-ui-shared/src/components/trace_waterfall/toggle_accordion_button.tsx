@@ -36,7 +36,7 @@ export function ToggleAccordionButton({ isOpen, childrenCount, onClick }: Props)
       }}
       tabIndex={0}
       role="button"
-      aria-label={i18n.translate('xpack.apm.toggleAccordionButton', {
+      aria-label={i18n.translate('apmCommon.toggleAccordionButton', {
         defaultMessage: 'Toggle accordion',
       })}
     >

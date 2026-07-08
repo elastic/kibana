@@ -53,7 +53,7 @@ describe('WaterfallSizeWarning', () => {
     );
 
     const warning = screen.getByTestId(TEST_SUBJ);
-    expect(warning).toHaveTextContent('xpack.apm.ui.maxTraceItems');
+    expect(warning).toHaveTextContent('apmCommon.ui.maxTraceItems');
   });
 
   it('does not render a Discover link when discoverHref is not provided', () => {

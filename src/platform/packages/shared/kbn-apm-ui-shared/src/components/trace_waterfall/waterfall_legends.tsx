@@ -21,10 +21,10 @@ interface Props {
 }
 
 const LEGEND_LABELS = {
-  [WaterfallLegendType.ServiceName]: i18n.translate('xpack.apm.transactionDetails.servicesTitle', {
+  [WaterfallLegendType.ServiceName]: i18n.translate('apmCommon.transactionDetails.servicesTitle', {
     defaultMessage: 'Services',
   }),
-  [WaterfallLegendType.Type]: i18n.translate('xpack.apm.transactionDetails.typeLegendTitle', {
+  [WaterfallLegendType.Type]: i18n.translate('apmCommon.transactionDetails.typeLegendTitle', {
     defaultMessage: 'Type',
   }),
 };

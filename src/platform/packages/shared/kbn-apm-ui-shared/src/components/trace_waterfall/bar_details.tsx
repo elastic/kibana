@@ -30,11 +30,11 @@ import { useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import { isFailureOrError } from './utils/is_failure_or_error';
 
-const ORPHAN_TITLE = i18n.translate('xpack.apm.trace.barDetails.euiIconTip.orphanTitleLabel', {
+const ORPHAN_TITLE = i18n.translate('apmCommon.trace.barDetails.euiIconTip.orphanTitleLabel', {
   defaultMessage: 'Orphan',
 });
 const ORPHAN_CONTENT = i18n.translate(
-  'xpack.apm.trace.barDetails.euiIconTip.orphanSpanContentLabel',
+  'apmCommon.trace.barDetails.euiIconTip.orphanSpanContentLabel',
   {
     defaultMessage:
       'This span is orphaned due to missing trace context and has been reparented to the root to restore the execution flow',
@@ -49,7 +49,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
   const errorCount = item.errors.length;
 
   const viewRelatedErrorsLabel = i18n.translate(
-    'xpack.apm.waterfall.embeddableRelatedErrors.unifedErrorCount',
+    'apmCommon.waterfall.embeddableRelatedErrors.unifedErrorCount',
     {
       defaultMessage: '{count, plural, one {View error} other {View # errors}}',
       values: {
@@ -127,7 +127,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
               href={getServiceBadgeHref?.(item.serviceName) as any}
               aria-label={
                 getServiceBadgeHref
-                  ? i18n.translate('xpack.apm.trace.barDetails.serviceBadge.ariaLabel', {
+                  ? i18n.translate('apmCommon.trace.barDetails.serviceBadge.ariaLabel', {
                       defaultMessage: 'Go to {serviceName} service overview',
                       values: { serviceName: item.serviceName },
                     })

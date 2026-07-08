@@ -17,7 +17,7 @@ import type { ErrorMark } from '../timeline/marker/error_marker';
 import type { OnErrorClick } from './trace_waterfall_context';
 
 const FALLBACK_WARNING = i18n.translate(
-  'xpack.apm.traceWaterfallItem.warningMessage.fallbackWarning',
+  'apmCommon.traceWaterfallItem.warningMessage.fallbackWarning',
   {
     defaultMessage:
       'The trace document is incomplete and not all spans have arrived yet. Try refreshing the page or adjusting the time range.',
@@ -25,7 +25,7 @@ const FALLBACK_WARNING = i18n.translate(
 );
 
 const INSTRUMENTATION_WARNING = i18n.translate(
-  'xpack.apm.traceWaterfallItem.euiCallOut.aDuplicatedSpanWasLabel',
+  'apmCommon.traceWaterfallItem.euiCallOut.aDuplicatedSpanWasLabel',
   {
     defaultMessage:
       'A duplicated span was detected. This indicates a problem with how your services have been instrumented, as span IDs are meant to be unique.',

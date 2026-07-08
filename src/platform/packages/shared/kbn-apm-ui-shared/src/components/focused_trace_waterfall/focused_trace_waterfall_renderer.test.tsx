@@ -10,7 +10,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { FocusedTraceWaterfallRenderer } from './focused_trace_waterfall_renderer';
+import { FocusedTraceWaterfallWithFetching } from './focused_trace_waterfall_with_fetching';
 import { FETCHER_OPERATION_IDS } from '../../../hooks/fetcher_operation_ids';
 import * as useFetcherModule from '../../../hooks/use_fetcher';
 import * as FocusedTraceWaterfallModule from '.';
@@ -45,11 +45,11 @@ const defaultProps = {
 const renderComponent = (props = {}) =>
   render(
     <I18nProvider>
-      <FocusedTraceWaterfallRenderer {...defaultProps} {...props} />
+      <FocusedTraceWaterfallWithFetching {...defaultProps} {...props} />
     </I18nProvider>
   );
 
-describe('FocusedTraceWaterfallRenderer', () => {
+describe('FocusedTraceWaterfallWithFetching', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

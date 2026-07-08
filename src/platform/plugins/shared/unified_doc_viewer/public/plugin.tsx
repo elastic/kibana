@@ -20,6 +20,7 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
+import type { APMClientV2 } from '@kbn/apm-api-shared';
 import type { UnifiedDocViewerServices } from './types';
 
 export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =
@@ -117,6 +118,18 @@ export class UnifiedDocViewerPublicPlugin
     const unifiedDocViewer = {
       registry: this.docViewsRegistry,
     };
+    // lazy proxy: APMClientV2 already returns a Promise, so this is type-compatible
+    let _api: APMClientV2 | undefined;
+    const callApmApi: APMClientV2 = ((endpoint: any, options: any) => {
+      if (_api) return _api(endpoint, options);
+      return import('@kbn/apm-api-shared').then(({ createCallApmApiV2 }) => {
+        _api = createCallApmApiV2(core, {
+          cpsManager: undefined,
+        });
+        return _api(endpoint, options);
+      });
+    }) as APMClientV2;
+
     const services = {
       analytics,
       data,
@@ -129,6 +142,7 @@ export class UnifiedDocViewerPublicPlugin
       share,
       core,
       discoverShared,
+      callApmApi,
     };
     setUnifiedDocViewerServices(services);
     return unifiedDocViewer;

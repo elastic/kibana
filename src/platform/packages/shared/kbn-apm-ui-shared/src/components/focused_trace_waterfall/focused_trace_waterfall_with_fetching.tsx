@@ -23,7 +23,7 @@ interface Props extends FocusedTraceWaterfallProps {
   callApmApi: APMClientV2;
 }
 
-export function FocusedTraceWaterfallRenderer({
+export function FocusedTraceWaterfallWithFetching({
   traceId,
   rangeFrom,
   rangeTo,
@@ -57,7 +57,7 @@ export function FocusedTraceWaterfallRenderer({
         data-test-subj="FocusedTraceWaterfallEmbeddableNoData"
         color="danger"
         size="s"
-        title={i18n.translate('xpack.apm.focusedTraceWaterfallEmbeddable.noDataCalloutLabel', {
+        title={i18n.translate('apmCommon.focusedTraceWaterfallEmbeddable.noDataCalloutLabel', {
           defaultMessage: 'Trace waterfall could not be loaded.',
         })}
       />

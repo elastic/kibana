@@ -45,7 +45,7 @@ function getUnitLabelAndConvertedValue(
   switch (unitKey) {
     case 'hours': {
       return {
-        unitLabel: i18n.translate('xpack.apm.formatters.hoursTimeUnitLabel', {
+        unitLabel: i18n.translate('apmCommon.formatters.hoursTimeUnitLabel', {
           defaultMessage: 'h',
         }),
         convertedValue: asDecimalOrInteger(moment.duration(ms).asHours(), threshold),
@@ -53,7 +53,7 @@ function getUnitLabelAndConvertedValue(
     }
     case 'minutes': {
       return {
-        unitLabel: i18n.translate('xpack.apm.formatters.minutesTimeUnitLabel', {
+        unitLabel: i18n.translate('apmCommon.formatters.minutesTimeUnitLabel', {
           defaultMessage: 'min',
         }),
         convertedValue: asDecimalOrInteger(moment.duration(ms).asMinutes(), threshold),
@@ -61,7 +61,7 @@ function getUnitLabelAndConvertedValue(
     }
     case 'seconds': {
       return {
-        unitLabel: i18n.translate('xpack.apm.formatters.secondsTimeUnitLabel', {
+        unitLabel: i18n.translate('apmCommon.formatters.secondsTimeUnitLabel', {
           defaultMessage: 's',
         }),
         convertedValue: asDecimalOrInteger(moment.duration(ms).asSeconds(), threshold),
@@ -69,7 +69,7 @@ function getUnitLabelAndConvertedValue(
     }
     case 'milliseconds': {
       return {
-        unitLabel: i18n.translate('xpack.apm.formatters.millisTimeUnitLabel', {
+        unitLabel: i18n.translate('apmCommon.formatters.millisTimeUnitLabel', {
           defaultMessage: 'ms',
         }),
         convertedValue: asDecimalOrInteger(moment.duration(ms).asMilliseconds(), threshold),
@@ -77,7 +77,7 @@ function getUnitLabelAndConvertedValue(
     }
     case 'microseconds': {
       return {
-        unitLabel: i18n.translate('xpack.apm.formatters.microsTimeUnitLabel', {
+        unitLabel: i18n.translate('apmCommon.formatters.microsTimeUnitLabel', {
           defaultMessage: 'μs',
         }),
         convertedValue: asInteger(value),
@@ -156,7 +156,7 @@ export const getDurationFormatter: TimeFormatterBuilder = memoize(
 export function asTransactionRate(value: Maybe<number>) {
   const displayedValue = asTransactionValue(value);
 
-  return i18n.translate('xpack.apm.transactionRateLabel', {
+  return i18n.translate('apmCommon.transactionRateLabel', {
     defaultMessage: `{displayedValue} tpm`,
     values: { displayedValue },
   });
@@ -181,7 +181,7 @@ export function asTransactionValue(value: Maybe<number>) {
 }
 
 export function asExactTransactionRate(value: number) {
-  return i18n.translate('xpack.apm.exactTransactionRateLabel', {
+  return i18n.translate('apmCommon.exactTransactionRateLabel', {
     defaultMessage: `{value} tpm`,
     values: { value: asDecimalOrInteger(value) },
   });

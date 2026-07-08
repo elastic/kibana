@@ -13,15 +13,15 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { TRACE_WATERFALL_EBT_CLICK_ACTIONS, TRACE_WATERFALL_EBT_ELEMENTS } from './ebt_constants';
 
-const label = i18n.translate('xpack.apm.traceWaterfall.scrollToOrigin.label', {
+const label = i18n.translate('apmCommon.traceWaterfall.scrollToOrigin.label', {
   defaultMessage: 'Scroll to origin',
 });
 
-const activeTooltip = i18n.translate('xpack.apm.traceWaterfall.scrollToOrigin.activeTooltip', {
+const activeTooltip = i18n.translate('apmCommon.traceWaterfall.scrollToOrigin.activeTooltip', {
   defaultMessage: 'Scroll back to the originally selected span',
 });
 
-const disabledTooltip = i18n.translate('xpack.apm.traceWaterfall.scrollToOrigin.disabledTooltip', {
+const disabledTooltip = i18n.translate('apmCommon.traceWaterfall.scrollToOrigin.disabledTooltip', {
   defaultMessage: 'Originally selected span is visible',
 });
 

@@ -16,6 +16,7 @@ import { TRACE_ID_FIELD } from '@kbn/discover-utils';
 import { where } from '@kbn/esql-composer';
 import { createRestorableStateProvider } from '@kbn/restorable-state';
 import { getEbtProps } from '@kbn/ebt-click';
+import { FocusedTraceWaterfallWithFetching } from '@kbn/apm-ui-shared';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { ContentFrameworkSection } from '../../../../..';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
@@ -71,7 +72,7 @@ function InternalTraceWaterfall({
   dataView,
   ebtDetail = TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
 }: Props) {
-  const { data, discoverShared } = getUnifiedDocViewerServices();
+  const { data, callApmApi, core } = getUnifiedDocViewerServices();
   const { indexes } = useDataSourcesContext();
 
   const [restoredTraceId, setRestoredTraceId] = useRestorableState('restoredTraceId', null);
@@ -122,10 +123,6 @@ function InternalTraceWaterfall({
   }, [renderReady]);
 
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
-
-  const FocusedTraceWaterfall = discoverShared.features.registry.getById(
-    'observability-focused-trace-waterfall'
-  )?.render;
 
   const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
     indexPattern: indexes.apm.traces,
@@ -252,8 +249,6 @@ function InternalTraceWaterfall({
     [ebtDetail, openInDiscoverSectionAction, setShowFullScreenWaterfall]
   );
 
-  if (!FocusedTraceWaterfall) return null;
-
   return (
     <>
       {showFullScreenWaterfall && renderReady ? (
@@ -307,7 +302,9 @@ function InternalTraceWaterfall({
             }
           `}
         >
-          <FocusedTraceWaterfall
+          <FocusedTraceWaterfallWithFetching
+            core={core}
+            callApmApi={callApmApi}
             traceId={traceId}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}

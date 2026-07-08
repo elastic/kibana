@@ -26,20 +26,20 @@ export function SpanLinksBadge({ outgoingCount, incomingCount, id, onClick }: Pr
   const total = outgoingCount + incomingCount;
   return (
     <EuiToolTip
-      title={i18n.translate('xpack.apm.waterfall.spanLinks.tooltip.title', {
+      title={i18n.translate('apmCommon.waterfall.spanLinks.tooltip.title', {
         defaultMessage: '{total} {total, plural, one {Span link} other {Span links}} found',
         values: { total },
       })}
       content={
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>
-            {i18n.translate('xpack.apm.waterfall.spanLinks.tooltip.incomingCount', {
+            {i18n.translate('apmCommon.waterfall.spanLinks.tooltip.incomingCount', {
               defaultMessage: '{incomingCount} incoming',
               values: { incomingCount },
             })}
           </EuiFlexItem>
           <EuiFlexItem>
-            {i18n.translate('xpack.apm.waterfall.spanLinks.tooltip.outgoingCount', {
+            {i18n.translate('apmCommon.waterfall.spanLinks.tooltip.outgoingCount', {
               defaultMessage: '{outgoingCount} outgoing',
               values: { outgoingCount },
             })}
@@ -56,13 +56,13 @@ export function SpanLinksBadge({ outgoingCount, incomingCount, id, onClick }: Pr
                 e.stopPropagation();
                 onClick(SPAN_LINKS_FLYOUT_TAB);
               },
-              onClickAriaLabel: i18n.translate('xpack.apm.waterfall.spanLinks.badgeAriaLabel', {
+              onClickAriaLabel: i18n.translate('apmCommon.waterfall.spanLinks.badgeAriaLabel', {
                 defaultMessage: 'Open span links details',
               }),
             }
           : { onClick: undefined, onClickAriaLabel: undefined })} // this is needed to un-confuse TypeScript
       >
-        {i18n.translate('xpack.apm.waterfall.spanLinks.badge', {
+        {i18n.translate('apmCommon.waterfall.spanLinks.badge', {
           defaultMessage: '{total} {total, plural, one {Span link} other {Span links}}',
           values: { total },
         })}

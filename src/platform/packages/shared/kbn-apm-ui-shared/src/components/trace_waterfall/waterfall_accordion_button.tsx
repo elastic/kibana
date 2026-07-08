@@ -22,14 +22,14 @@ export function WaterfallAccordionButton({ isOpen, onClick }: WaterfallAccordion
 
   return (
     <EuiToolTip
-      content={i18n.translate('xpack.apm.waterfall.foldButton.ariaLabel', {
+      content={i18n.translate('apmCommon.waterfall.foldButton.ariaLabel', {
         defaultMessage: 'Click to {isAccordionOpen} the waterfall',
         values: {
           isAccordionOpen: isOpen
-            ? i18n.translate('xpack.apm.waterfall.foldButton.ariaLabel.fold', {
+            ? i18n.translate('apmCommon.waterfall.foldButton.ariaLabel.fold', {
                 defaultMessage: 'fold',
               })
-            : i18n.translate('xpack.apm.waterfall.foldButton.ariaLabel.unfold', {
+            : i18n.translate('apmCommon.waterfall.foldButton.ariaLabel.unfold', {
                 defaultMessage: 'unfold',
               }),
         },
@@ -47,14 +47,14 @@ export function WaterfallAccordionButton({ isOpen, onClick }: WaterfallAccordion
           padding: ${euiTheme.size.m};
           width: auto;
         `}
-        aria-label={i18n.translate('xpack.apm.waterfall.foldButton.ariaLabel', {
+        aria-label={i18n.translate('apmCommon.waterfall.foldButton.ariaLabel', {
           defaultMessage: 'Click to {isAccordionOpen} the waterfall',
           values: {
             isAccordionOpen: isOpen
-              ? i18n.translate('xpack.apm.waterfall.foldButton.ariaLabel.fold', {
+              ? i18n.translate('apmCommon.waterfall.foldButton.ariaLabel.fold', {
                   defaultMessage: 'fold',
                 })
-              : i18n.translate('xpack.apm.waterfall.foldButton.ariaLabel.unfold', {
+              : i18n.translate('apmCommon.waterfall.foldButton.ariaLabel.unfold', {
                   defaultMessage: 'unfold',
                 }),
           },

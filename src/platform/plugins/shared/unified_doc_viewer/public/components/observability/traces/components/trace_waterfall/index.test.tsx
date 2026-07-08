@@ -8,7 +8,6 @@
  */
 
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { TraceWaterfall } from '.';
 import { setUnifiedDocViewerServices } from '../../../../../plugin';
@@ -89,22 +88,6 @@ describe('TraceWaterfall', () => {
           timefilter: {
             timefilter: {
               getAbsoluteTime: () => ({ from: 'now-15m', to: 'now' }),
-            },
-          },
-        },
-      },
-      discoverShared: {
-        features: {
-          registry: {
-            getById: (id: string) => {
-              if (id === 'observability-focused-trace-waterfall') {
-                return {
-                  render: () => (
-                    <div data-test-subj="focusedTraceWaterfall">FocusedTraceWaterfall</div>
-                  ),
-                };
-              }
-              return undefined;
             },
           },
         },

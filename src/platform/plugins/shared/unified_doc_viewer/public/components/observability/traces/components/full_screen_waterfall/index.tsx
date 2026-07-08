@@ -22,6 +22,7 @@ import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React from 'react';
 import { useDocViewerViewedEvent } from '@kbn/unified-doc-viewer';
 import { css } from '@emotion/react';
+import { TraceWaterfallWithFetching } from '@kbn/apm-ui-shared';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { useFlyoutHistoryKey } from '../../../../doc_viewer_flyout/flyout_history_key_context';
 import { useOriginDocType } from '../../../../doc_viewer_flyout/origin_doc_type_context';
@@ -72,10 +73,10 @@ export const FullScreenWaterfall = ({
 }: FullScreenWaterfallProps) => {
   const historyKey = useFlyoutHistoryKey();
   const originDocType = useOriginDocType();
-  const { analytics, discoverShared } = getUnifiedDocViewerServices();
-  const FullTraceWaterfall = discoverShared.features.registry.getById(
-    'observability-full-trace-waterfall'
-  )?.render;
+  const { analytics, callApmApi, core } = getUnifiedDocViewerServices();
+  // const FullTraceWaterfall = discoverShared.features.registry.getById(
+  //   'observability-full-trace-waterfall'
+  // )?.render;
   const { euiTheme } = useEuiTheme();
 
   useDocViewerViewedEvent({
@@ -97,10 +98,6 @@ export const FullScreenWaterfall = ({
   );
 
   const minWidth = euiTheme.base * 30;
-
-  if (!FullTraceWaterfall) {
-    return null;
-  }
 
   return (
     <EuiFlyout
@@ -141,7 +138,9 @@ export const FullScreenWaterfall = ({
             height: 100%;
           `}
         >
-          <FullTraceWaterfall
+          <TraceWaterfallWithFetching
+            core={core}
+            callApmApi={callApmApi}
             traceId={traceId}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}

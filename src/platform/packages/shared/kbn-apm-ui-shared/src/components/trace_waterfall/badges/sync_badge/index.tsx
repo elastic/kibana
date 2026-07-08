@@ -29,15 +29,15 @@ export interface SyncBadgeProps {
   agentName?: AgentName;
 }
 
-const BLOCKING_LABEL = i18n.translate('xpack.apm.traceWaterfall.syncBadgeBlocking', {
+const BLOCKING_LABEL = i18n.translate('apmCommon.traceWaterfall.syncBadgeBlocking', {
   defaultMessage: 'blocking',
 });
 
-const ASYNC_LABEL = i18n.translate('xpack.apm.traceWaterfall.syncBadgeAsync', {
+const ASYNC_LABEL = i18n.translate('apmCommon.traceWaterfall.syncBadgeAsync', {
   defaultMessage: 'async',
 });
 
-const TOOLTIP_CONTENT = i18n.translate('xpack.apm.traceWaterfall.syncBadgeTooltip', {
+const TOOLTIP_CONTENT = i18n.translate('apmCommon.traceWaterfall.syncBadgeTooltip', {
   defaultMessage: 'Indicates whether the span was executed synchronously or asynchronously.',
 });
 

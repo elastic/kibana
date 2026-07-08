@@ -62,7 +62,7 @@ export function TraceWaterfallWithFetching({
         data-test-subj="TraceWaterfallEmbeddableNoData"
         color="danger"
         size="s"
-        title={i18n.translate('xpack.apm.traceWaterfallEmbeddable.noDataCalloutLabel', {
+        title={i18n.translate('apmCommon.traceWaterfallEmbeddable.noDataCalloutLabel', {
           defaultMessage: 'Trace waterfall could not be loaded.',
         })}
       />

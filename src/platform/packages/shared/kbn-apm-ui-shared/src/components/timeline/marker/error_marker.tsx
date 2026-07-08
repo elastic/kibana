@@ -82,7 +82,7 @@ export function ErrorMarker({ mark }: Props) {
       isOpen={isPopoverOpen}
       closePopover={togglePopover}
       anchorPosition="upCenter"
-      aria-label={i18n.translate('xpack.apm.errorMarker.popoverAriaLabel', {
+      aria-label={i18n.translate('apmCommon.errorMarker.popoverAriaLabel', {
         defaultMessage: 'Error details',
       })}
     >

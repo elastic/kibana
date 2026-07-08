@@ -41,3 +41,4 @@ export {
 export { Loading } from './trace_waterfall/loading';
 export { useGetServiceBadgeHrefFromCore } from './trace_waterfall/use_get_service_badge_href_from_core';
 export { ColdStartBadge } from './trace_waterfall/badges/cold_start_badge';
+export { FocusedTraceWaterfallWithFetching } from './focused_trace_waterfall/focused_trace_waterfall_with_fetching';

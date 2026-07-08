@@ -38,7 +38,7 @@ export function TraceSummary({ summary }: Props) {
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={false}>
         <EuiText color="subdued" size="s">
-          {i18n.translate('xpack.apm.traceSummary.servicesFlexItemLabel', {
+          {i18n.translate('apmCommon.traceSummary.servicesFlexItemLabel', {
             defaultMessage: '{services} {services, plural, one {service} other {services}}',
             values: { services: summary.services },
           })}
@@ -47,7 +47,7 @@ export function TraceSummary({ summary }: Props) {
       <Divider />
       <EuiFlexItem grow={false}>
         <EuiText color="subdued" size="s">
-          {i18n.translate('xpack.apm.traceSummary.traceEventsFlexItemLabel', {
+          {i18n.translate('apmCommon.traceSummary.traceEventsFlexItemLabel', {
             defaultMessage:
               '{traceEvents} {traceEvents, plural, one {trace event} other {trace events}}',
             values: { traceEvents: summary.traceEvents },
@@ -67,7 +67,7 @@ export function TraceSummary({ summary }: Props) {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText color="subdued" size="s">
-              {i18n.translate('xpack.apm.traceSummary.errorsFlexItemLabel', {
+              {i18n.translate('apmCommon.traceSummary.errorsFlexItemLabel', {
                 defaultMessage: '{errors} {errors, plural, one {error} other {errors}}',
                 values: { errors: summary.errors },
               })}
