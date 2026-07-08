@@ -106,13 +106,11 @@ CONTENT RULES:
   {% endfor %}`;
 }
 
+// rows is already capped at AI_PANEL_SAMPLE_ROW_COUNT by runEsqlQuery's appended LIMIT.
 function formatSampleTable(columns: EsqlColumn[], rows: unknown[][]): string {
   const header = columns.map((c) => sanitizeCellValue(c.name)).join(' | ');
   const separator = columns.map(() => '---').join(' | ');
-  const dataRows = rows
-    .slice(0, 3)
-    .map((row) => row.map(sanitizeCellValue).join(' | '))
-    .join('\n');
+  const dataRows = rows.map((row) => row.map(sanitizeCellValue).join(' | ')).join('\n');
   return `${header}\n${separator}\n${dataRows}`;
 }
 

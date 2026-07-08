@@ -7,7 +7,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import dateMath from '@kbn/datemath';
-import { getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import { appendLimitToQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import { AI_PANEL_SAMPLE_ROW_COUNT } from '../../common/constants';
 
 const MAX_SANITIZED_CELL_LENGTH = 500;
 
@@ -63,12 +64,17 @@ export async function runEsqlQuery(
         ]
       : undefined;
 
+  // Capped independently of the query's own LIMIT — this is a schema/sample-row lookup for the
+  // LLM prompt, not the real data path, so there's no need to pull back the query's full result
+  // set just to read a handful of rows.
+  const sampledQuery = appendLimitToQuery(esqlQuery, AI_PANEL_SAMPLE_ROW_COUNT);
+
   // Shorter than the Kibana default (30s) — this is a best-effort schema/sample-row lookup for
   // the LLM prompt, not the real data path, so a slow query should fail fast into the caller's
   // non-fatal fallback rather than delay panel generation.
   const result = await esClient.esql.query(
     {
-      query: esqlQuery,
+      query: sampledQuery,
       ...(esqlParams ? { params: esqlParams } : {}),
     },
     { requestTimeout: '10s' }
