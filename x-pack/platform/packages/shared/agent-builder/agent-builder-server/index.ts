@@ -151,3 +151,31 @@ export type {
 export { describeZodSchema, formatSchemaForLlm } from './tools';
 export { SmlSearchFilterType } from './sml/http_api';
 export type { SmlSearchFilters, SmlSearchConstraints } from './sml/http_api';
+export type {
+  DiscoveryLabel,
+  SmlKibanaPrivilege,
+  SmlElasticsearchIndex,
+  SmlPermissions,
+  SmlChunk,
+  SmlData,
+  SmlContext,
+  SmlToAttachmentContext,
+  SmlListItem,
+  SmlTypeDefinition,
+  SmlIngestionMethod,
+  SmlDocument,
+  SmlSearchResult,
+  MatchedDiscoveryLabel,
+  SmlAutocompleteResult,
+  SmlCrawlerStateDocument,
+  SmlIndexAction,
+  SmlCrawler,
+  SmlDeleteScope,
+  SmlIndexAttachmentOriginMode,
+  SmlIndexAttachmentContentMode,
+  SmlIndexerOriginParams,
+  SmlIndexerContentParams,
+  SmlIndexerParams,
+  SmlIndexerDeleteAttachmentParams,
+  SmlService,
+} from './sml/types';
