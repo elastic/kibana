@@ -218,8 +218,8 @@ export const createTabsStorageManager = ({
   const getPersistentProfileState = (profileState: TabState['profileState'] | undefined) =>
     getDefinedStateOnly(
       profileStateRegistry.pickStateByType({
-        profileState,
-        stateType: ProfileStateType.Persistent,
+        profileStateMap: profileState,
+        stateTypes: [ProfileStateType.Persistent],
       })
     );
 
@@ -235,8 +235,8 @@ export const createTabsStorageManager = ({
     );
     const profileState = getDefinedStateOnly(
       profileStateRegistry.pickStateByType({
-        profileState: tabStateInStorage.profileState,
-        stateType: ProfileStateType.Persistent,
+        profileStateMap: tabStateInStorage.profileState,
+        stateTypes: [ProfileStateType.Persistent],
         shouldMergeDefaults: true,
       })
     );

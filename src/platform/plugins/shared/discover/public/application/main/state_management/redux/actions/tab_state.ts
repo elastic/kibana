@@ -260,7 +260,7 @@ export const setProfileState = <TState extends object>(
     const profileStateForRedux = services.profileStateRegistry.filterFieldsByType({
       profileState: payload.profileState,
       stateKey: payload.profileStateDefinition.key,
-      stateType: [ProfileStateType.Ui, ProfileStateType.Persistent],
+      stateTypes: [ProfileStateType.Ui, ProfileStateType.Persistent],
     });
 
     if (profileStateForRedux) {
@@ -276,7 +276,7 @@ export const setProfileState = <TState extends object>(
     const filteredUrlState = services.profileStateRegistry.filterFieldsByType({
       profileState: payload.profileState,
       stateKey: payload.profileStateDefinition.key,
-      stateType: [ProfileStateType.Url],
+      stateTypes: [ProfileStateType.Url],
     });
     const profileStateForUrl = filteredUrlState
       ? { [payload.profileStateDefinition.key]: filteredUrlState }
@@ -314,7 +314,7 @@ export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
           const filteredUrlState = services.profileStateRegistry.filterFieldsByType({
             profileState,
             stateKey: profileStateDefinition.key,
-            stateType: [ProfileStateType.Url],
+            stateTypes: [ProfileStateType.Url],
           });
           profileStateForUrl = filteredUrlState
             ? { [profileStateDefinition.key]: filteredUrlState }

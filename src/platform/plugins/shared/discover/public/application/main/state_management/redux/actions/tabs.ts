@@ -216,8 +216,8 @@ export const updateTabs: InternalStateThunkActionCreator<
         tab.appState = cloneDeep(recentlyClosedTabToRestore.appState);
         tab.globalState = cloneDeep(recentlyClosedTabToRestore.globalState);
         tab.profileState = services.profileStateRegistry.pickStateByType({
-          profileState: recentlyClosedTabToRestore.profileState,
-          stateType: ProfileStateType.Persistent,
+          profileStateMap: recentlyClosedTabToRestore.profileState,
+          stateTypes: [ProfileStateType.Persistent],
           shouldMergeDefaults: true,
         });
       } else if (!('appState' in item)) {
@@ -272,7 +272,7 @@ export const updateTabs: InternalStateThunkActionCreator<
           ? services.profileStateRegistry.filterFieldsByType({
               profileState: nextTab.profileState[profileStateDefinition.key],
               stateKey: profileStateDefinition.key,
-              stateType: [ProfileStateType.Url],
+              stateTypes: [ProfileStateType.Url],
             })
           : undefined;
         const profileStateForUrl =

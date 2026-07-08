@@ -114,7 +114,7 @@ export const createUrlSyncObservables = ({
       ? services.profileStateRegistry.filterFieldsByType({
           profileState,
           stateKey: profileStateDefinition.key,
-          stateType: [ProfileStateType.Url],
+          stateTypes: [ProfileStateType.Url],
         })
       : undefined;
 
@@ -145,12 +145,12 @@ export const createUrlSyncObservables = ({
       const nonUrlState = services.profileStateRegistry.filterFieldsByType({
         profileState: currentProfileState,
         stateKey: profileStateDefinition.key,
-        stateType: [ProfileStateType.Ui, ProfileStateType.Persistent],
+        stateTypes: [ProfileStateType.Ui, ProfileStateType.Persistent],
       });
       const urlState = services.profileStateRegistry.filterFieldsByType({
         profileState: profileUrlState?.[profileStateDefinition.key],
         stateKey: profileStateDefinition.key,
-        stateType: [ProfileStateType.Url],
+        stateTypes: [ProfileStateType.Url],
       });
       const nextProfileState = {
         ...profileStateDefinition.defaultState,

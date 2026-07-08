@@ -66,7 +66,7 @@ describe('ProfileStateRegistry', () => {
 
     expect(
       registry.pickStateByType({
-        profileState: {
+        profileStateMap: {
           testProfileState: {
             uiValue: 'ui',
             urlValue: 'url',
@@ -74,7 +74,7 @@ describe('ProfileStateRegistry', () => {
           },
           unregisteredProfileState: { uiValue: 'ignored' },
         },
-        stateType: ProfileStateType.Ui,
+        stateTypes: [ProfileStateType.Ui],
       })
     ).toEqual({
       testProfileState: {
@@ -89,12 +89,12 @@ describe('ProfileStateRegistry', () => {
 
     expect(
       registry.pickStateByType({
-        profileState: {
+        profileStateMap: {
           testProfileState: {
             uiValue: 'ui',
           },
         },
-        stateType: ProfileStateType.Persistent,
+        stateTypes: [ProfileStateType.Persistent],
       })
     ).toEqual({});
   });
@@ -105,8 +105,8 @@ describe('ProfileStateRegistry', () => {
 
     expect(
       registry.pickStateByType({
-        profileState: undefined,
-        stateType: ProfileStateType.Persistent,
+        profileStateMap: undefined,
+        stateTypes: [ProfileStateType.Persistent],
       })
     ).toEqual({});
   });
@@ -117,7 +117,7 @@ describe('ProfileStateRegistry', () => {
 
     expect(
       registry.pickStateByType({
-        profileState: {
+        profileStateMap: {
           testProfileState: {
             uiValue: 'ui',
             unregisteredValue: 'ignored',
@@ -126,7 +126,7 @@ describe('ProfileStateRegistry', () => {
             uiValue: 'ignored',
           },
         },
-        stateType: ProfileStateType.Ui,
+        stateTypes: [ProfileStateType.Ui],
       })
     ).toEqual({
       testProfileState: {
@@ -141,13 +141,13 @@ describe('ProfileStateRegistry', () => {
 
     expect(
       registry.pickStateByType({
-        profileState: {
+        profileStateMap: {
           testProfileState: {
             uiValue: 'ui',
             persistentValue: 'persistent',
           },
         },
-        stateType: ProfileStateType.Persistent,
+        stateTypes: [ProfileStateType.Persistent],
         shouldMergeDefaults: true,
       })
     ).toEqual({
@@ -166,7 +166,7 @@ describe('ProfileStateRegistry', () => {
 
     expect(
       registry.pickStateByType({
-        profileState: {
+        profileStateMap: {
           testProfileState: {
             uiValue: 'ui',
           },
@@ -174,7 +174,7 @@ describe('ProfileStateRegistry', () => {
             persistentValue: 'ignored',
           },
         },
-        stateType: ProfileStateType.Persistent,
+        stateTypes: [ProfileStateType.Persistent],
         shouldMergeDefaults: true,
       })
     ).toEqual({});
@@ -193,7 +193,7 @@ describe('ProfileStateRegistry', () => {
           nestedValue: { count: 1 },
         },
         stateKey: TEST_PROFILE_STATE_DEF.key,
-        stateType: [ProfileStateType.Ui, ProfileStateType.Url],
+        stateTypes: [ProfileStateType.Ui, ProfileStateType.Url],
       })
     ).toEqual({
       uiValue: 'ui',
@@ -212,7 +212,7 @@ describe('ProfileStateRegistry', () => {
           uiValue: 'ui',
         },
         stateKey: TEST_PROFILE_STATE_DEF.key,
-        stateType: ProfileStateType.Persistent,
+        stateTypes: [ProfileStateType.Persistent],
       })
     ).toBeUndefined();
   });
@@ -228,7 +228,7 @@ describe('ProfileStateRegistry', () => {
           persistentValue: 'persistent',
         },
         stateKey: TEST_PROFILE_STATE_DEF.key,
-        stateType: ProfileStateType.Persistent,
+        stateTypes: [ProfileStateType.Persistent],
         shouldMergeDefaults: true,
       })
     ).toEqual({

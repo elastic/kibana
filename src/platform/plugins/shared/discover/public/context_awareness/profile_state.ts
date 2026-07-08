@@ -133,36 +133,36 @@ export class ProfileStateRegistry {
    * state.
    */
   public pickStateByType({
-    profileState,
-    stateType,
+    profileStateMap,
+    stateTypes,
     shouldMergeDefaults = false,
   }: {
-    profileState: Record<string, object | undefined> | undefined;
-    stateType: ProfileStateType | ProfileStateType[];
+    profileStateMap: Record<string, object | undefined> | undefined;
+    stateTypes: ProfileStateType[];
     shouldMergeDefaults?: boolean;
   }): Record<string, object | undefined> {
-    const filteredProfileState: Record<string, object | undefined> = {};
+    const filteredStateMap: Record<string, object | undefined> = {};
 
-    if (!profileState) {
-      return filteredProfileState;
+    if (!profileStateMap) {
+      return filteredStateMap;
     }
 
-    const stateTypes = new Set(Array.isArray(stateType) ? stateType : [stateType]);
+    const stateTypeSet = new Set(stateTypes);
 
-    for (const [stateKey, state] of Object.entries(profileState)) {
+    for (const [stateKey, state] of Object.entries(profileStateMap)) {
       const filteredState = this.filterFieldsByType({
         profileState: state,
         stateKey,
-        stateType: stateTypes,
+        stateTypes: stateTypeSet,
         shouldMergeDefaults,
       });
 
       if (filteredState) {
-        filteredProfileState[stateKey] = filteredState;
+        filteredStateMap[stateKey] = filteredState;
       }
     }
 
-    return filteredProfileState;
+    return filteredStateMap;
   }
 
   /**
@@ -176,12 +176,12 @@ export class ProfileStateRegistry {
   public filterFieldsByType<TState extends object>({
     profileState,
     stateKey,
-    stateType,
+    stateTypes,
     shouldMergeDefaults = false,
   }: {
     profileState: Partial<TState> | undefined;
     stateKey: ProfileStateDefinition<TState>['key'];
-    stateType: ProfileStateType | ProfileStateType[] | Set<ProfileStateType>;
+    stateTypes: ProfileStateType[] | Set<ProfileStateType>;
     shouldMergeDefaults?: boolean;
   }): Partial<TState> | undefined {
     const definition = this.stateDefinitions.get(stateKey) as
@@ -192,19 +192,13 @@ export class ProfileStateRegistry {
       return undefined;
     }
 
-    const stateTypes =
-      stateType instanceof Set
-        ? stateType
-        : Array.isArray(stateType)
-        ? new Set(stateType)
-        : new Set([stateType]);
-
+    const stateTypeSet = stateTypes instanceof Set ? stateTypes : new Set(stateTypes);
     const filteredState: Partial<TState> = {};
 
     for (const [field, value] of Object.entries(profileState)) {
       const castedField = field as keyof TState;
 
-      if (stateTypes.has(definition.descriptor[castedField]?.type)) {
+      if (stateTypeSet.has(definition.descriptor[castedField]?.type)) {
         filteredState[castedField] = value as TState[keyof TState];
       }
     }
