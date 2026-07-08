@@ -71,7 +71,7 @@ export const useTabs = (
       );
     }
 
-    if (loadAnomalies && hasAnomalies) {
+    if (loadAnomalies) {
       tabs.push(
         getAnomaliesTab({
           entityId: entityStoreEntityId,
@@ -119,7 +119,6 @@ export const useTabs = (
     isRiskScoreExist,
     entityStoreEntityId,
     loadAnomalies,
-    hasAnomalies,
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
     name,
