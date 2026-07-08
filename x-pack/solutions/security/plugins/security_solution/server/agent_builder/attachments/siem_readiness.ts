@@ -43,6 +43,15 @@ const recommendedActionSchema = z.object({
 
 const actionableFindingSchema = z.object({
   category: z.string().max(100).optional(),
+  type: z
+    .enum([
+      'missing_field',
+      'pipeline_failure',
+      'silence',
+      'volume_drop_warning',
+      'volume_drop_critical',
+    ])
+    .optional(),
   severity: z.enum(['CRITICAL', 'WARNING', 'INFORMATIONAL']),
   message: z.string().max(5000),
   resource: z.string().max(500),
@@ -70,6 +79,18 @@ export const siemReadinessCoverageDataSchema = securityAttachmentDataSchema.exte
 
 // ---- Quality ----
 
+const missingFieldDetailSchema = z.object({
+  name: z.string().max(200),
+  status: z.enum(['missing', 'partial']),
+  unmappedIn: z.array(z.string().max(500)).optional(),
+});
+
+const missingFieldsEntrySchema = z.object({
+  ruleId: z.string().max(100),
+  ruleName: z.string().max(500),
+  fields: z.array(missingFieldDetailSchema),
+});
+
 export const siemReadinessQualityDataSchema = securityAttachmentDataSchema.extend({
   dimension: z.literal('quality'),
   status: z.enum(['healthy', 'actionsRequired', 'noData']),
@@ -84,6 +105,7 @@ export const siemReadinessQualityDataSchema = securityAttachmentDataSchema.exten
     })
   ),
   actionableFindings: z.array(actionableFindingSchema),
+  missingFieldsByRule: z.array(missingFieldsEntrySchema).optional(),
 });
 
 // ---- Continuity ----
@@ -222,6 +244,16 @@ const formatQualityForAgent = (data: QualityPayload & { dimension: 'quality' }):
     data.actionableFindings.forEach((f) => {
       const finding = f as z.infer<typeof actionableFindingSchema>;
       lines.push(...formatFindingWithBlastRadius(finding));
+    });
+  }
+  if (data.missingFieldsByRule?.length) {
+    lines.push('Rules with unmapped required fields:');
+    data.missingFieldsByRule.forEach((entry) => {
+      lines.push(`  ${entry.ruleName}:`);
+      entry.fields.forEach((f) => {
+        const detail = f.unmappedIn?.length ? ` (unmapped in: ${f.unmappedIn.join(', ')})` : '';
+        lines.push(`    ${f.name} — ${f.status}${detail}`);
+      });
     });
   }
   return lines.join('\n');
