@@ -94199,6 +94199,7 @@ components:
           items:
             anyOf:
               - anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ai_panel'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_charts'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
@@ -94389,6 +94390,44 @@ components:
         - x
         - 'y'
       title: Panel grid
+      type: object
+    Kibana_HTTP_APIs_kbn-dashboard-panel-type-ai_panel:
+      additionalProperties: false
+      properties:
+        config:
+          additionalProperties: false
+          type: object
+          properties:
+            description:
+              type: string
+            esqlQuery:
+              type: string
+            hide_border:
+              type: boolean
+            hide_title:
+              type: boolean
+            prompt:
+              type: string
+            template:
+              type: string
+            title:
+              type: string
+          required:
+            - prompt
+        grid:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
+        id:
+          description: The unique ID of the panel.
+          type: string
+        type:
+          enum:
+            - ai_panel
+          type: string
+      required:
+        - grid
+        - type
+        - config
+      title: AI Panel
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart:
       additionalProperties: false
@@ -95904,6 +95943,7 @@ components:
           items:
             discriminator:
               mapping:
+                ai_panel: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ai_panel'
                 aiops_change_point_chart: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
                 aiops_log_rate_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis'
                 aiops_pattern_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
@@ -95929,6 +95969,7 @@ components:
                 vis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
               propertyName: type
             oneOf:
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ai_panel'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_charts'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
