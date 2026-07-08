@@ -83875,15 +83875,15 @@ components:
       type: object
     Kibana_HTTP_APIs_colorByValuePalette:
       additionalProperties: false
-      description: Color by value using a named palette applied across the value range.
+      description: Color by value using a named palette applied relative to the value range.
       properties:
         open_above:
           default: true
-          description: When `true`, values above the palette's highest range use its highest color instead of being left uncolored. Defaults to `true`.
+          description: Defines whether values above the colored value range use the palette's highest color instead of being left uncolored. Defaults to `true`.
           type: boolean
         open_below:
           default: false
-          description: When `true`, values below the palette's lowest range use its lowest color instead of being left uncolored. Defaults to `false`.
+          description: Defines whether values below the colored value range use the palette's lowest color instead of being left uncolored. Defaults to `false`.
           type: boolean
         palette:
           description: The name of the palette to apply across the value range (for example, `status`, `temperature`).
