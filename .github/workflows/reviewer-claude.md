@@ -25,9 +25,6 @@ engine:
   version: "2.1.165"
   model: opus
   max-turns: 120
-  # TEMPORARY (verification only): surface hook lifecycle events in the agent debug log.
-  args:
-    - "--include-hook-events"
   env:
     ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
