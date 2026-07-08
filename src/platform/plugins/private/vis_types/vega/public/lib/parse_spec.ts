@@ -10,23 +10,26 @@
 import { parse } from 'hjson';
 import type { VegaSpec } from '../data_model/types';
 
-const specCache = new Map<string, VegaSpec | null>();
+let lastSpecString: string | undefined;
+let lastParsedSpec: VegaSpec | null = null;
 
 /**
- * Parses a Vega/Vega-Lite hjson spec, memoized by the raw spec string.
- * `getUsedIndexPattern`, `getProjectRoutingOverrides` and `usesEsql` are all
- * derived from the same spec string whenever a vis is created or updated, so
- * this avoids parsing the same spec repeatedly. Returns `null` if the spec
- * fails to parse.
+ * Parses a Vega/Vega-Lite hjson spec, memoizing only the most recently parsed
+ * spec. `getUsedIndexPattern`, `getProjectRoutingOverrides` and `usesEsql` are
+ * all derived from the same spec string whenever a vis is created or updated,
+ * so a single-slot cache avoids re-parsing the same (potentially large) spec
+ * three times in a row without accumulating every spec ever seen in memory.
+ * Returns `null` if the spec fails to parse.
  */
 export function parseVegaSpec(spec: string): VegaSpec | null {
-  if (!specCache.has(spec)) {
+  if (spec !== lastSpecString) {
+    lastSpecString = spec;
     try {
-      specCache.set(spec, parse(spec, { legacyRoot: false, keepWsc: true }) as VegaSpec);
+      lastParsedSpec = parse(spec, { legacyRoot: false, keepWsc: true }) as VegaSpec;
     } catch (e) {
-      specCache.set(spec, null);
+      lastParsedSpec = null;
     }
   }
 
-  return specCache.get(spec) ?? null;
+  return lastParsedSpec;
 }
