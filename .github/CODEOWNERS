@@ -1075,6 +1075,7 @@ x-pack/platform/packages/shared/kbn-inference-prompt-utils @elastic/appex-ai-inf
 x-pack/platform/packages/shared/kbn-inference-tracing @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-inference-tracing-config @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-ink @elastic/streams-program-team
+x-pack/platform/packages/shared/kbn-investigation-output @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-presentation-team @elastic/obs-exploration-team
 x-pack/platform/packages/shared/kbn-kibana-api-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-langchain @elastic/security-threat-hunting
@@ -3769,6 +3770,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.buildkite/scripts/steps/checks/notify_api_contract_owners.ts @elastic/kibana-core
 /.buildkite/scripts/steps/checks/notify_api_contract_owners.test.ts @elastic/kibana-core
 /.buildkite/scripts/steps/checks/unused_deps.sh @elastic/kibana-security
+/.buildkite/scripts/steps/checks/verify_codeowners_teams.ts @elastic/kibana-security
 /.buildkite/pipelines/performance/streams_weekly.yml @elastic/obs-sig-events-team @elastic/streams-ui
 /.buildkite/pipeline-resource-definitions/kibana-otel-semconv-sync.yml @elastic/streams-ui
 /.buildkite/pipeline-resource-definitions/kibana-streams-performance-weekly.yml @elastic/obs-sig-events-team @elastic/streams-ui
