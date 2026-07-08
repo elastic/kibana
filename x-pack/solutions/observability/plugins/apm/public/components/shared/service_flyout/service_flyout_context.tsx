@@ -18,7 +18,7 @@ export interface ServiceFlyoutContextValue {
   dataViews: DataViewsPublicPluginStart;
 }
 
-const ServiceFlyoutContext = createContext({} as ServiceFlyoutContextValue);
+const ServiceFlyoutContext = createContext<ServiceFlyoutContextValue | null>(null);
 
 export function ServiceFlyoutContextProvider({
   core,
@@ -35,5 +35,8 @@ export function ServiceFlyoutContextProvider({
 }
 
 export function useServiceFlyoutContext(): ServiceFlyoutContextValue {
-  return useContext(ServiceFlyoutContext);
+  const ctx = useContext(ServiceFlyoutContext);
+  if (!ctx)
+    throw new Error('useServiceFlyoutContext must be used within a ServiceFlyoutContextProvider');
+  return ctx;
 }
