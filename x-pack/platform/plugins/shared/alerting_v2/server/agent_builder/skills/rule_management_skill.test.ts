@@ -29,10 +29,11 @@ describe('createRuleManagementSkill', () => {
     expect(skill.uiSettingRequired).toBe('alerting:v2:enabled');
   });
 
-  it('exposes the manage rule and manage action policy inline tools', () => {
+  it('exposes the manage rule and manage action policy inline tools', async () => {
     const skill = createRuleManagementSkill(createDeps());
 
-    const inlineToolIds = (skill.getInlineTools?.() ?? []).map((tool) => tool.id);
+    const inlineTools = (await skill.getInlineTools?.()) ?? [];
+    const inlineToolIds = inlineTools.map((tool) => tool.id);
 
     expect(inlineToolIds).toEqual(
       expect.arrayContaining([alertingTools.manageRule, alertingTools.manageActionPolicy])

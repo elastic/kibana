@@ -19,6 +19,22 @@ const getSkillIds = (results: Array<{ id: string }>) => results.map((skill) => s
 // The alerting V2 `rule-management` skill is registered as a built-in Agent
 // Builder skill but gated behind the `alerting:v2:enabled` advanced setting.
 apiTest.describe('Agent Builder — alerting V2 rule-management skill gating', () => {
+  // Only the stateful "enabled" case flips the global setting; track that so the
+  // afterAll reset is skipped on serverless (where the endpoint is unavailable).
+  let didEnableAlertingV2 = false;
+
+  apiTest.afterAll(async ({ apiClient, requestAuth }) => {
+    if (!didEnableAlertingV2) {
+      return;
+    }
+    const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
+    await apiClient.post(`${GLOBAL_SETTINGS_API}/${ALERTING_V2_ENABLED_SETTING}`, {
+      headers: { ...COMMON_HEADERS, ...apiKeyHeader },
+      body: { value: false },
+      responseType: 'json',
+    });
+  });
+
   apiTest(
     'does not list the rule-management skill when alerting V2 is disabled',
     { tag: tags.deploymentAgnostic },
@@ -47,24 +63,17 @@ apiTest.describe('Agent Builder — alerting V2 rule-management skill gating', (
       const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
       const headers = { ...COMMON_HEADERS, ...apiKeyHeader };
 
-      try {
-        const setResponse = await apiClient.post(
-          `${GLOBAL_SETTINGS_API}/${ALERTING_V2_ENABLED_SETTING}`,
-          { headers, body: { value: true }, responseType: 'json' }
-        );
-        expect(setResponse).toHaveStatusCode(200);
+      const setResponse = await apiClient.post(
+        `${GLOBAL_SETTINGS_API}/${ALERTING_V2_ENABLED_SETTING}`,
+        { headers, body: { value: true }, responseType: 'json' }
+      );
+      didEnableAlertingV2 = true;
+      expect(setResponse).toHaveStatusCode(200);
 
-        const response = await apiClient.get(SKILLS_API, { headers, responseType: 'json' });
-        expect(response).toHaveStatusCode(200);
-        expect(getSkillIds(response.body.results)).toContain(RULE_MANAGEMENT_SKILL_ID);
-      } finally {
-        // Restore the default so the shared server state stays clean.
-        await apiClient.post(`${GLOBAL_SETTINGS_API}/${ALERTING_V2_ENABLED_SETTING}`, {
-          headers,
-          body: { value: false },
-          responseType: 'json',
-        });
-      }
+      const response = await apiClient.get(SKILLS_API, { headers, responseType: 'json' });
+      expect(response).toHaveStatusCode(200);
+      expect(Array.isArray(response.body.results)).toBe(true);
+      expect(getSkillIds(response.body.results)).toContain(RULE_MANAGEMENT_SKILL_ID);
     }
   );
 });
