@@ -612,12 +612,7 @@ export function MonitorDetailFlyout(props: Props) {
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              ) : isHeartbeat ? (
-                // Heartbeat / Elastic Agent monitors are read-only here and the
-                // read-only detail page isn't available yet (coming in a
-                // follow-up), so no footer action is offered for now.
-                null
-              ) : (
+              ) : isHeartbeat ? null : ( // follow-up), so no footer action is offered for now. // read-only detail page isn't available yet (coming in a // Heartbeat / Elastic Agent monitors are read-only here and the
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiButton

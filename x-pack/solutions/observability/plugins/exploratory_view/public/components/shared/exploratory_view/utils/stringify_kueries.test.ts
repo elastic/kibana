@@ -153,9 +153,7 @@ describe('stringifyKueries', () => {
         notExists: true,
       },
     ];
-    expect(urlFiltersToKueryString(filters)).toMatchInlineSnapshot(
-      `"not (observer.geo.name: *)"`
-    );
+    expect(urlFiltersToKueryString(filters)).toMatchInlineSnapshot(`"not (observer.geo.name: *)"`);
   });
 
   it('combines a notExists filter with other clauses', () => {
