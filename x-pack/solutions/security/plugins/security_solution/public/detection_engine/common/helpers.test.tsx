@@ -23,7 +23,10 @@ import {
   mockRuleWithEverything,
 } from '../rule_management_ui/components/rules_table/__mocks__/mock';
 import { FilterStateStore } from '@kbn/es-query';
-import type { RuleAction } from '../../../common/api/detection_engine/model/rule_schema';
+import type {
+  RuleAction,
+  RuleResponse,
+} from '../../../common/api/detection_engine/model/rule_schema';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../common/api/detection_engine/model/rule_schema';
 
 import type { Rule } from '../rule_management/logic';
@@ -307,7 +310,7 @@ describe('rule helpers', () => {
         ...mockRule('test-id'),
         concurrent_searches: 4,
         items_per_search: 2500,
-      });
+      } as RuleResponse);
       const expected = expect.objectContaining({
         concurrentSearches: 4,
         itemsPerSearch: 2500,

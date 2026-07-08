@@ -646,14 +646,23 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </EuiFormRow>
           )}
           {isThreatMatchRule(ruleType) && (
-            <ThreatMatchEdit
-              indexPatternPath="threatIndex"
-              queryPath="threatQueryBar"
-              mappingPath="threatMapping"
-              indexPatterns={indexPattern}
-              threatIndexPatterns={threatIndexPatterns}
-              loading={threatIndexPatternsLoading}
-            />
+            <>
+              <ThreatMatchEdit
+                indexPatternPath="threatIndex"
+                queryPath="threatQueryBar"
+                mappingPath="threatMapping"
+                indexPatterns={indexPattern}
+                threatIndexPatterns={threatIndexPatterns}
+                loading={threatIndexPatternsLoading}
+              />
+              {/*
+                concurrentSearches/itemsPerSearch are API-only fields with no UI controls.
+                They must still be registered as form fields so a GUI save round-trips
+                whatever was set via the API instead of dropping them (see #276203).
+              */}
+              <UseField path="concurrentSearches" component={HiddenField} />
+              <UseField path="itemsPerSearch" component={HiddenField} />
+            </>
           )}
           {isNewTermsRule(ruleType) && (
             <EuiFormRow data-test-subj="newTermsInput" fullWidth>
