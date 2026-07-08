@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RecentlyAccessedHistoryItem } from '@kbn/recently-accessed';
+import type { ChromeRecentlyAccessedHistoryItem } from '@kbn/core/public';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
-import { getDashboardRecentlyAccessedService } from '../../services/dashboard_recently_accessed_service';
 import {
   createRecentItemsData$,
   RECENTLY_ACCESSED_DASHBOARDS_EXTENSION_ID,
@@ -17,11 +16,9 @@ import {
   recentlyAccessedNavExtensionDefinition,
 } from './recently_accessed';
 
-const recentlyAccessed = getDashboardRecentlyAccessedService();
-
-const setRecentlyAccessedItems = (items: RecentlyAccessedHistoryItem[]) => {
-  recentlyAccessed.get$ = jest.fn().mockReturnValue(new BehaviorSubject(items));
-};
+const createRecentlyAccessedMock = (items: ChromeRecentlyAccessedHistoryItem[] = []) => ({
+  get$: jest.fn().mockReturnValue(new BehaviorSubject(items)),
+});
 
 const createBasePathMock = (basePath = '/s/default') => ({
   prepend: jest.fn((path: string) => `${basePath}${path}`),
@@ -35,26 +32,21 @@ describe('recentlyAccessedExtension', () => {
       templateId: 'list',
       config: {
         max: 5,
-        heading: 'Recently viewed Dashboards',
+        heading: 'Recently viewed',
       },
     });
   });
 });
 
 describe('createRecentItemsData$', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    setRecentlyAccessedItems([]);
-  });
-
   it('maps recently accessed dashboard items to recent item rows', async () => {
-    setRecentlyAccessedItems([
+    const recentlyAccessed = createRecentlyAccessedMock([
       { id: 'dash-1', label: 'Sales overview', link: '/app/dashboards#/view/dash-1' },
       { id: 'dash-2', label: 'Ops metrics', link: '/app/dashboards#/view/dash-2' },
     ]);
     const basePath = createBasePathMock();
 
-    const result = await firstValueFrom(createRecentItemsData$(basePath));
+    const result = await firstValueFrom(createRecentItemsData$(recentlyAccessed, basePath));
 
     expect(result).toEqual([
       {
@@ -72,8 +64,26 @@ describe('createRecentItemsData$', () => {
     expect(basePath.prepend).toHaveBeenCalledWith('/app/dashboards#/view/dash-2');
   });
 
+  it('filters out items that do not match the dashboard link pattern', async () => {
+    const recentlyAccessed = createRecentlyAccessedMock([
+      { id: 'dash-1', label: 'Sales overview', link: '/app/dashboards#/view/dash-1' },
+      { id: 'discover-1', label: 'Discover search', link: '/app/discover#/view/discover-1' },
+    ]);
+    const basePath = createBasePathMock();
+
+    const result = await firstValueFrom(createRecentItemsData$(recentlyAccessed, basePath));
+
+    expect(result).toEqual([
+      {
+        id: 'recent-dash-1',
+        label: 'Sales overview',
+        href: '/s/default/app/dashboards#/view/dash-1',
+      },
+    ]);
+  });
+
   it('caps the number of items using the default max', async () => {
-    setRecentlyAccessedItems(
+    const recentlyAccessed = createRecentlyAccessedMock(
       Array.from({ length: 7 }, (_, index) => ({
         id: `dash-${index}`,
         label: `Dashboard ${index}`,
@@ -82,7 +92,7 @@ describe('createRecentItemsData$', () => {
     );
     const basePath = createBasePathMock();
 
-    const result = await firstValueFrom(createRecentItemsData$(basePath));
+    const result = await firstValueFrom(createRecentItemsData$(recentlyAccessed, basePath));
 
     expect(result).toHaveLength(5);
     expect(result[0]?.id).toBe('recent-dash-0');
@@ -90,14 +100,14 @@ describe('createRecentItemsData$', () => {
   });
 
   it('respects a custom max', async () => {
-    setRecentlyAccessedItems([
+    const recentlyAccessed = createRecentlyAccessedMock([
       { id: 'dash-1', label: 'Sales overview', link: '/app/dashboards#/view/dash-1' },
       { id: 'dash-2', label: 'Ops metrics', link: '/app/dashboards#/view/dash-2' },
     ]);
     const basePath = createBasePathMock('/base');
 
     const result = await firstValueFrom(
-      createRecentItemsData$(basePath, {
+      createRecentItemsData$(recentlyAccessed, basePath, {
         max: 1,
       })
     );
@@ -111,21 +121,32 @@ describe('createRecentItemsData$', () => {
     ]);
   });
 
-  it('emits an empty array when there are no items', async () => {
+  it('emits an empty array when there are no matching items', async () => {
+    const recentlyAccessed = createRecentlyAccessedMock([
+      { id: 'discover-1', label: 'Discover search', link: '/app/discover#/view/discover-1' },
+    ]);
     const basePath = createBasePathMock();
 
-    const result = await firstValueFrom(createRecentItemsData$(basePath));
+    const result = await firstValueFrom(createRecentItemsData$(recentlyAccessed, basePath));
+
+    expect(result).toEqual([]);
+  });
+
+  it('emits an empty array when there are no items', async () => {
+    const result = await firstValueFrom(
+      createRecentItemsData$(createRecentlyAccessedMock(), createBasePathMock())
+    );
 
     expect(result).toEqual([]);
   });
 
   it('emits updated rows when recently accessed history changes', async () => {
-    const history$ = new BehaviorSubject<RecentlyAccessedHistoryItem[]>([
+    const history$ = new BehaviorSubject<ChromeRecentlyAccessedHistoryItem[]>([
       { id: 'dash-1', label: 'Sales overview', link: '/app/dashboards#/view/dash-1' },
     ]);
-    recentlyAccessed.get$ = jest.fn().mockReturnValue(history$);
+    const recentlyAccessed = { get$: jest.fn().mockReturnValue(history$) };
     const basePath = createBasePathMock();
-    const recentItemsData$ = createRecentItemsData$(basePath);
+    const recentItemsData$ = createRecentItemsData$(recentlyAccessed, basePath);
 
     expect(await firstValueFrom(recentItemsData$)).toEqual([
       {

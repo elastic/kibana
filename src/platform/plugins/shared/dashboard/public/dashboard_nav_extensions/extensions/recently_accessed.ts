@@ -8,11 +8,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EMPTY, type Observable, of, switchMap } from 'rxjs';
+import { type Observable, map } from 'rxjs';
 import type { IBasePath } from '@kbn/core/public';
-import type { NavExtensionEntry } from '@kbn/core-chrome-browser';
+import type { ChromeRecentlyAccessed, NavExtensionEntry } from '@kbn/core-chrome-browser';
 import type { DashboardNavExtension } from '../types';
-import { getDashboardRecentlyAccessedService } from '../../services/dashboard_recently_accessed_service';
+import { coreServices } from '../../services/kibana_services';
 
 export interface RecentDashboardRow {
   id: string;
@@ -31,26 +31,24 @@ declare module '@kbn/core-chrome-browser' {
 const DEFAULT_MAX_RECENT_ITEMS = 5;
 
 export const createRecentItemsData$ = (
+  recentlyAccessed: Pick<ChromeRecentlyAccessed, 'get$'>,
   basePath: Pick<IBasePath, 'prepend'>,
   { max = DEFAULT_MAX_RECENT_ITEMS }: { max?: number } = {}
 ): Observable<RecentDashboardRow[]> => {
-  return getDashboardRecentlyAccessedService()
-    .get$()
-    .pipe(
-      switchMap((items) => {
-        if (!items.length) {
-          return EMPTY;
-        }
+  const filterPattern = new RegExp(String.raw`\/app\/dashboards`);
 
-        return of(
-          items.slice(0, max).map((item) => ({
-            id: `recent-${item.id}`,
-            label: item.label,
-            href: basePath.prepend(item.link),
-          }))
-        );
-      })
-    );
+  return recentlyAccessed.get$().pipe(
+    map((items) => {
+      return items
+        .filter((item) => filterPattern.test(item.link))
+        .slice(0, max)
+        .map((item) => ({
+          id: `recent-${item.id}`,
+          label: item.label,
+          href: basePath.prepend(item.link),
+        }));
+    })
+  );
 };
 
 export const recentlyAccessedExtension: DashboardNavExtension<
@@ -66,7 +64,8 @@ export const recentlyAccessedExtension: DashboardNavExtension<
       }),
     },
   },
-  createData$: (core) => createRecentItemsData$(core.http.basePath),
+  createData$: () =>
+    createRecentItemsData$(coreServices.chrome.recentlyAccessed, coreServices.http.basePath),
 };
 
 export const recentlyAccessedNavExtensionDefinition = recentlyAccessedExtension.definition;

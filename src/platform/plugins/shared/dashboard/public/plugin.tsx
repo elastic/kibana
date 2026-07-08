@@ -164,7 +164,6 @@ export class DashboardPlugin
   private currentHistory: ScopedHistory | undefined = undefined;
   private listingViewRegistry: Set<DashboardListingTab> = new Set();
   private dashboardAppApi$ = new BehaviorSubject<DashboardApi | undefined>(undefined);
-  private dashboardNavigationExtensions?: ReturnType<typeof registerNavExtensions>;
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
@@ -334,7 +333,7 @@ export class DashboardPlugin
       return dashboardDrilldown;
     });
 
-    this.dashboardNavigationExtensions = registerNavExtensions({ navigation });
+    registerNavExtensions({ navigation });
 
     return {
       registerListingPageTab: (tab: DashboardListingTab) => {
@@ -345,8 +344,6 @@ export class DashboardPlugin
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     setKibanaServices(core, plugins);
-
-    this.dashboardNavigationExtensions?.start(core);
 
     registerActions(plugins);
 

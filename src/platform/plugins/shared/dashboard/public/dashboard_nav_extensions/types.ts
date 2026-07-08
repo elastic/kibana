@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreStart } from '@kbn/core/public';
 import type { NavExtensionData, NavExtensionId } from '@kbn/core-chrome-browser';
 import type { NavExtensionDefinition } from '@kbn/shared-ux-navigation-extension-templates';
 import type { Observable } from 'rxjs';
 
 export interface DashboardNavExtension<Id extends NavExtensionId = NavExtensionId> {
   definition: NavExtensionDefinition<Id>;
-  createData$: (core: CoreStart) => Observable<NavExtensionData<Id>>;
+  createData$: () => Observable<NavExtensionData<Id>>;
 }
