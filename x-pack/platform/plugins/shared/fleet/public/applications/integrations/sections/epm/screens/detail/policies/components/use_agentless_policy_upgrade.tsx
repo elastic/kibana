@@ -74,8 +74,9 @@ export const useAgentlessPolicyUpgrade = ({
             values: { name: packagePolicy.name },
           })
         );
+        // Only refetch on success; on failure nothing changed server-side.
+        onUpgraded?.();
       }
-      onUpgraded?.();
     } catch (error) {
       notifications.toasts.addError(error, {
         title: i18n.translate('xpack.fleet.agentlessUpgrade.errorToast.title', {
