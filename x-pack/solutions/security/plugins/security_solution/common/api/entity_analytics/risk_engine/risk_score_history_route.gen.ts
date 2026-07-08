@@ -11,12 +11,19 @@
  *
  * info:
  *   title: Risk Score History API
- *   version: 1
+ *   version: 2023-10-31
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
-import { IdentifierType, EntityRiskLevels } from '../common/common.gen';
+import {
+  IdentifierType,
+  EntityRiskLevels,
+  RiskScoreInput,
+  RiskScoreModifier,
+} from '../common/common.gen';
+import { AssetCriticalityLevel } from '../asset_criticality/common.gen';
 
 export const RiskScoreHistoryEntry = lazySchema(() =>
   z.object({
@@ -27,6 +34,17 @@ export const RiskScoreHistoryEntry = lazySchema(() =>
     score_type: z.enum(['base', 'propagated', 'resolution']).optional(),
     category_1_score: z.number().optional(),
     category_1_count: z.number().int().optional(),
+    /**
+     * Present only when requested with `include_contributions=true`.
+     */
+    inputs: z.array(RiskScoreInput).optional(),
+    /**
+     * Present only when requested with `include_contributions=true`.
+     */
+    modifiers: z.array(RiskScoreModifier).optional(),
+    category_2_score: z.number().optional(),
+    category_2_count: z.number().int().optional(),
+    criticality_level: AssetCriticalityLevel.optional(),
   })
 );
 export type RiskScoreHistoryEntry = z.infer<typeof RiskScoreHistoryEntry>;
@@ -66,6 +84,10 @@ export const GetRiskScoreHistoryRequestQuery = lazySchema(() =>
      * Maximum number of history entries to return per request.
      */
     page_size: z.coerce.number().int().min(1).max(1000).optional().default(100),
+    /**
+     * When true, each entry also includes the contributions recorded for that scoring run (`inputs`, `modifiers`, category 2 fields, and `criticality_level`), when present on the underlying document.
+     */
+    include_contributions: BooleanFromString.optional().default(false),
   })
 );
 export type GetRiskScoreHistoryRequestQuery = z.infer<typeof GetRiskScoreHistoryRequestQuery>;

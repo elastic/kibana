@@ -26,14 +26,6 @@ const EXECUTION_HISTORY_PAGE_TITLE = i18n.translate('xpack.alertingV2.executionH
   defaultMessage: 'Execution history',
 });
 
-const EXECUTION_HISTORY_DENORMALIZATION_TOOLTIP = i18n.translate(
-  'xpack.alertingV2.executionHistory.denormalizationTooltip',
-  {
-    defaultMessage:
-      'Pagination is by event. A single event may show as multiple rows, one per rule referenced by the event.',
-  }
-);
-
 const getExecutionHistoryTabs = ({
   selectedTabId,
   onSelect,
@@ -57,10 +49,6 @@ const getExecutionHistoryTabs = ({
     }),
     isSelected: selectedTabId === POLICIES_TAB_ID,
     onClick: () => onSelect(POLICIES_TAB_ID),
-    badge: {
-      iconType: 'info',
-      tooltip: EXECUTION_HISTORY_DENORMALIZATION_TOOLTIP,
-    },
     'data-test-subj': 'executionHistoryPoliciesTab',
   },
 ];
@@ -94,14 +82,18 @@ export const ExecutionHistoryPage = () => {
         sticky={false}
         title={EXECUTION_HISTORY_PAGE_TITLE}
         titleAppend={<ExperimentalBadge />}
-        padding={{ bleed: 'l' }}
+        padding={{ bleed: 'm' }}
         tabs={tabs}
       />
       <EuiSpacer size="m" />
       {selectedTabId === RULES_TAB_ID ? (
         <RulesTabContent onRuleClick={handleRuleClick} />
       ) : (
-        <PoliciesTabContent onPolicyClick={handlePolicyClick} onRuleClick={handleRuleClick} />
+        <PoliciesTabContent
+          onPolicyClick={handlePolicyClick}
+          onRuleClick={handleRuleClick}
+          activeRuleId={ruleToViewId}
+        />
       )}
       {policyToViewId && (
         <ActionPolicyDetailsFlyoutContainer

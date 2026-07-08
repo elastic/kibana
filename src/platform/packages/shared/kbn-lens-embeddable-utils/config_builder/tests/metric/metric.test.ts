@@ -8,6 +8,7 @@
  */
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+import type { MetricVisualizationState } from '@kbn/lens-common';
 
 import { validator } from '../utils/validator';
 import type { MetricConfig } from '../../schema/charts/metric';
@@ -83,7 +84,7 @@ describe('Metric', () => {
     });
   });
 
-  describe('color default application', () => {
+  describe('default application', () => {
     const baseMetric = {
       type: 'metric',
       title: 'Color default test',
@@ -130,6 +131,16 @@ describe('Metric', () => {
 
       expect(apiOutput.metrics[0].color).toEqual(AUTO_COLOR);
       expect(apiOutput.metrics[1].color).toEqual(NO_COLOR);
+    });
+
+    it('should emit default density when no density is specified', () => {
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(baseMetric);
+      const apiOutput = builder.toAPIFormat(lensState) as MetricConfig;
+      const visualization = lensState.state.visualization as MetricVisualizationState;
+
+      expect(visualization.density).toBe('default');
+      expect(apiOutput.styling?.density).toBe('default');
     });
   });
 });

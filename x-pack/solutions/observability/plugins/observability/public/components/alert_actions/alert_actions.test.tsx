@@ -39,6 +39,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const mockUseGetRuleTypesPermissions = jest.fn(() => ({
   authorizedToReadRuleType: (_ruleTypeId: string, _consumer?: string): boolean => true,
+  authorizedToReadRuleForAlert: (): boolean => true,
   authorizedToCreateAnyRules: false,
 }));
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
@@ -126,6 +127,7 @@ describe('ObservabilityActions component', () => {
     mockTelemetryClient.reportAlertAddedToCase.mockClear();
     mockUseGetRuleTypesPermissions.mockReturnValue({
       authorizedToReadRuleType: () => true,
+      authorizedToReadRuleForAlert: () => true,
       authorizedToCreateAnyRules: false,
     });
   });
@@ -234,6 +236,7 @@ describe('ObservabilityActions component', () => {
   it('should hide "View rule details" menu item when unauthorized to read the rule type', async () => {
     mockUseGetRuleTypesPermissions.mockReturnValue({
       authorizedToReadRuleType: () => false,
+      authorizedToReadRuleForAlert: () => false,
       authorizedToCreateAnyRules: false,
     });
     const wrapper = await setup('nothing');

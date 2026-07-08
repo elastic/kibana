@@ -446,12 +446,12 @@ export const DiscoverTopNav = ({
         esqlQueryStats={esqlQueryStats}
         onOpenQueryInNewTab={onOpenQueryInNewTab}
         esqlApproximation={
-          isEsqlMode && services.discoverFeatureFlags.getEsqlApproximationEnabled()
+          isEsqlMode
             ? {
                 isApproximate,
                 onChange: onUseApproximationChange,
                 additionalText: i18n.translate('discover.esqlApproximationToggle.additionalText', {
-                  defaultMessage: 'Only applies to queries that use exactly one STATS command.',
+                  defaultMessage: 'Only applies to queries that use one STATS command.',
                 }),
               }
             : undefined
