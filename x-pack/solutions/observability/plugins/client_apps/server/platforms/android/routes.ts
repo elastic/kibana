@@ -21,8 +21,7 @@ export function registerAndroidRoutes({ router, logger }: { router: IRouter; log
       path: ANDROID_CRASH_DOCUMENT_API_PATH,
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route is scoped to internal use and does not require authorization yet',
+          requiredPrivileges: ['apm'],
         },
       },
       options: {
@@ -115,8 +114,7 @@ export function registerAndroidRoutes({ router, logger }: { router: IRouter; log
       path: ANDROID_RETRACE_API_PATH,
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route is scoped to internal use and does not require authorization yet',
+          requiredPrivileges: ['apm'],
         },
       },
       options: {
