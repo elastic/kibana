@@ -746,6 +746,43 @@ export const ENTITY_HIGHLIGHTS_USAGE_EVENT: EventTypeOpts<{
   },
 };
 
+export const ENTITY_AI_SUMMARY_PERSISTED_EVENT: EventTypeOpts<{
+  entityType: string;
+  spaceId: string;
+  highlightsCount: number;
+  recommendedActionsCount: number;
+}> = {
+  eventType: 'entity_ai_summary_persisted',
+  schema: {
+    entityType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entity the AI summary was generated for (e.g. "host")',
+      },
+    },
+    spaceId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Space where the summary was persisted (e.g. "default")',
+      },
+    },
+    highlightsCount: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of highlights the model produced (pre-cap), captured client-side before capping. Compare against MAX_ENTITY_SUMMARY_HIGHLIGHTS to see how often/by how much the model overshoots.',
+      },
+    },
+    recommendedActionsCount: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of recommended actions the model produced (pre-cap), captured client-side before capping. Compare against MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS to gauge overshoot.',
+      },
+    },
+  },
+};
+
 export const ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT: EventTypeOpts<{
   actionType?: 'read' | 'mutation';
   /**
@@ -2182,6 +2219,7 @@ export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT: EventTypeOpts<{
   autoCloseEnabled: boolean;
   createConversation: boolean;
   connectorConfigured: boolean;
+  customAgent: boolean;
   autoCloseConfidenceScoreMinThreshold: number;
   autoCloseConfidenceScoreMaxThreshold: number;
 }> = {
@@ -2206,6 +2244,12 @@ export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT: EventTypeOpts<{
     connectorConfigured: {
       type: 'boolean',
       _meta: { description: 'Whether an AI connector is configured for the workflow' },
+    },
+    customAgent: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether a non-default (custom) agent is configured for the workflow',
+      },
     },
     autoCloseConfidenceScoreMinThreshold: {
       type: 'float',
@@ -2244,6 +2288,7 @@ export const events = [
   ENTITY_ENGINE_DELETION_EVENT,
   ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT,
   ENTITY_HIGHLIGHTS_USAGE_EVENT,
+  ENTITY_AI_SUMMARY_PERSISTED_EVENT,
   PRIVMON_ENGINE_INITIALIZATION_EVENT,
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   WATCHLIST_API_CALL_EVENT,
