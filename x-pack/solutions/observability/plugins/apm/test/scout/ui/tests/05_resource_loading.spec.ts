@@ -7,8 +7,8 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { test, testData } from '../../fixtures';
-import { ENVIRONMENT_ALL, EXTENDED_TIMEOUT } from '../../fixtures/constants';
+import { test, testData } from '../fixtures';
+import { ENVIRONMENT_ALL, EXTENDED_TIMEOUT } from '../fixtures/constants';
 
 test.describe(
   'APM page navigation resource loading',

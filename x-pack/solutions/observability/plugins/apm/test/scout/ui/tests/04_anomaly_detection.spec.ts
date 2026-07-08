@@ -7,8 +7,8 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { test } from '../../fixtures';
-import { PRODUCTION_ENVIRONMENT } from '../../fixtures/constants';
+import { test } from '../fixtures';
+import { PRODUCTION_ENVIRONMENT } from '../fixtures/constants';
 
 test.describe(
   'Anomaly Detection',
