@@ -13,7 +13,6 @@ import { MiniCallout } from './mini_callout';
 describe('MiniCallout', () => {
   const defaultProps: MiniCalloutProps = {
     color: 'primary',
-    iconType: 'info',
     title: 'Mini Callout Title',
   };
 

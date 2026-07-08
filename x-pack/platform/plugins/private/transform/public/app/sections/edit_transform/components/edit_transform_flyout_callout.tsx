@@ -9,14 +9,7 @@ import React, { type FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiTextColor } from '@elastic/eui';
 
 import { useDocumentationLinks } from '../../../hooks/use_documentation_links';
 export const EditTransformFlyoutCallout: FC = () => {
@@ -25,9 +18,6 @@ export const EditTransformFlyoutCallout: FC = () => {
   return (
     <EuiCallOut>
       <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="question" aria-hidden={true} />
-        </EuiFlexItem>
         <EuiFlexItem>
           <EuiTextColor color="subdued">
             {i18n.translate('xpack.transform.transformList.editFlyoutCalloutText', {

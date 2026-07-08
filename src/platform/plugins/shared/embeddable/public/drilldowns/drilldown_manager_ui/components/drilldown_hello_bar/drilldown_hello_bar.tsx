@@ -17,7 +17,6 @@ import {
   EuiLink,
   EuiSpacer,
   EuiButtonEmpty,
-  EuiIcon,
 } from '@elastic/eui';
 import { txtHideHelpButtonLabel, txtHelpText, txtViewDocsLinkLabel } from './i18n';
 
@@ -32,9 +31,6 @@ export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({ docsLink, 
   return (
     <EuiCallOut data-test-subj={WELCOME_MESSAGE_TEST_SUBJ}>
       <EuiFlexGroup responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="question" aria-hidden={true} />
-        </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiText size={'s'}>
             <EuiTextColor color="subdued">{txtHelpText}</EuiTextColor>
