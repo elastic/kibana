@@ -182,6 +182,7 @@ export function StreamListView() {
         iconType: 'gear',
         run: () => setIsSettingsFlyoutOpen(true),
         overflow: true,
+        testId: 'streamsAppSettingsButton',
       },
     ];
 

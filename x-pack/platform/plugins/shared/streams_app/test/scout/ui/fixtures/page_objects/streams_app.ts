@@ -1336,6 +1336,11 @@ export class StreamsApp {
     await this.createStreamButton.click();
   }
 
+  async openStreamsSettings() {
+    await this.page.getByTestId('app-menu-overflow-button').click();
+    await this.page.getByTestId('streamsAppSettingsButton').click();
+  }
+
   async clickCreateQueryStreamButton() {
     await this.openCreateStreamPopover();
     await this.createQueryStreamButton.click();
