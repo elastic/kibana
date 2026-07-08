@@ -102,8 +102,12 @@ describe('Metric', () => {
       delete visualization.trendlineLayerType;
 
       const apiOutput = builder.toAPIFormat(lensState) as MetricConfig;
+      const [primaryMetric] = apiOutput.metrics;
 
-      expect(apiOutput.metrics[0].background_chart).toEqual({ type: 'trend' });
+      expect(primaryMetric).toMatchObject({
+        type: 'primary',
+        background_chart: { type: 'trend' },
+      });
     });
   });
 
