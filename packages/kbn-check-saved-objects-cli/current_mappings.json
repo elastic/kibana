@@ -3080,6 +3080,10 @@
   },
   "observability-onboarding-state": {
     "properties": {
+      "createdBy": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
       "progress": {
         "dynamic": false,
         "type": "object"
