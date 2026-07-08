@@ -24,7 +24,8 @@ export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
   references: SavedObjectReference[] | undefined = undefined,
   isDashboardAppRequest: boolean = false,
-  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
+  useGASchemas?: boolean
 ): {
   dashboardState: DashboardState;
   warnings: Warnings;
@@ -55,13 +56,15 @@ export function transformDashboardOut(
     panelsJSON,
     sections,
     references,
-    isDashboardAppRequest
+    isDashboardAppRequest,
+    useGASchemas
   );
 
   const { panels: pinnedPanels, warnings: pinnedPanelWarnings } = transformPinnedPanelsOut(
     legacyControls,
     pinned_panels,
-    references
+    references,
+    useGASchemas
   );
 
   const timeRange =
