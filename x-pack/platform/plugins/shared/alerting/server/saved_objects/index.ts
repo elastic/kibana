@@ -105,9 +105,13 @@ export type RuleAttributesNotPartiallyUpdatable =
   | 'meta'
   | 'alertDelay';
 
-export const AdHocRunAttributesToEncrypt = ['apiKeyToUse'];
+export const AdHocRunAttributesToEncrypt = ['apiKeyToUse', 'uiamApiKey'];
 export const AdHocRunAttributesIncludedInAAD = ['rule', 'spaceId'];
-export type AdHocRunAttributesNotPartiallyUpdatable = 'rule' | 'spaceId' | 'apiKeyToUse';
+export type AdHocRunAttributesNotPartiallyUpdatable =
+  | 'rule'
+  | 'spaceId'
+  | 'apiKeyToUse'
+  | 'uiamApiKey';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
