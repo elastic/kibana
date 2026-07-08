@@ -125,7 +125,7 @@ export const createSavedObjects = async <T>({
       overwrite,
       refresh,
     });
-    expectedResults = bulkCreateResponse.saved_objects;
+    expectedResults = bulkCreateResponse.saved_objects as Array<SavedObject<T>>;
   }
 
   // Namespace to use as the target namespace for the legacy URLs we create when in compatibility mode. If the namespace
@@ -172,13 +172,13 @@ export const createSavedObjects = async <T>({
   // Create legacy URL aliases if needed.
   const legacyUrlAliasResults =
     legacyUrlAliases.size > 0
-      ? (
+      ? ((
           await savedObjectsClient.bulkCreate([...legacyUrlAliases.values()], {
             namespace,
             overwrite,
             refresh,
           })
-        ).saved_objects
+        ).saved_objects as SavedObject[])
       : [];
   return {
     createdObjects: remappedResults.filter((obj) => !isSavedObjectErrorResult(obj)),
