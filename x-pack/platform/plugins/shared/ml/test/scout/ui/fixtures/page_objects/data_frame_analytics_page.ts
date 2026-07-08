@@ -15,23 +15,20 @@ import { EuiComboBoxWrapper, KibanaCodeEditorWrapper } from '@kbn/scout';
  */
 export class DataFrameAnalyticsPage {
   private readonly codeEditor: KibanaCodeEditorWrapper;
-  private readonly dependentVariableComboBox: EuiComboBoxWrapper;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
-    // Use { locator } form with CSS ~= (whole-word) match because the element's
-    // data-test-subj becomes "mlAnalyticsCreateJobWizardDependentVariableSelect loaded"
-    // once options have loaded — an exact string match would miss it.
-    this.dependentVariableComboBox = new EuiComboBoxWrapper(page, {
-      locator: '[data-test-subj~="mlAnalyticsCreateJobWizardDependentVariableSelect"]',
-    });
   }
 
   // ── Navigation ────────────────────────────────────────────────────────────
 
   async gotoJobList(): Promise<void> {
     await this.page.goto(this.kbnUrl.app('management/ml/analytics'));
-    await this.page.testSubj.locator('mlAnalyticsJobList').waitFor({ state: 'visible' });
+    // The analytics list renders null until its first API fetch completes (isInitialized).
+    // Override the global 10 s actionTimeout so slow environments don't flake here.
+    await this.page.testSubj
+      .locator('mlAnalyticsJobList')
+      .waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   // ── Creation wizard ───────────────────────────────────────────────────────
@@ -223,9 +220,7 @@ export class DataFrameAnalyticsPage {
 
   async filterByJobId(jobId: string): Promise<void> {
     await this.waitForTableLoaded();
-    const searchInput = this.page.testSubj
-      .locator('mlAnalyticsTableContainer')
-      .locator('.euiFieldSearch');
+    const searchInput = this.page.testSubj.locator('mlAnalyticsSearchBox');
     await searchInput.fill('');
     await searchInput.fill(jobId);
     // wait for the matching row to appear
@@ -241,12 +236,12 @@ export class DataFrameAnalyticsPage {
       .locator('~mlAnalyticsTable')
       .locator(`[data-test-subj~="row-${jobId}"]`);
 
-    // Mirror the FTR approach: scope to .euiTableCellContent to avoid picking up
-    // whitespace or icon text from the outer <td> wrapper.
     const getText = async (subj: string) =>
-      (
-        await row.locator(`[data-test-subj="${subj}"]`).locator('.euiTableCellContent').innerText()
-      ).trim();
+      // EuiBasicTable appends a hidden tabular-copy-marker <span> (tab char) to every cell for
+      // clipboard support. That span is off-screen (not display:none), so Playwright's innerText()
+      // includes it. Scope to the direct <div> child (EuiTableCellContent) to exclude the marker
+      // without depending on the EUI internal CSS class name.
+      (await row.locator(`[data-test-subj="${subj}"] > div`).innerText()).trim();
 
     return {
       id: await getText('mlAnalyticsTableColumnId'),
@@ -305,18 +300,25 @@ export class DataFrameAnalyticsPage {
   // ── Configuration step: dependent variable & training percent ─────────────
 
   async selectDependentVariable(variable: string): Promise<void> {
-    // Wait for options to finish loading before interacting with the combo box.
-    // No ~ prefix here: the exact-match selector correctly targets the element whose
-    // data-test-subj is "mlAnalyticsCreateJobWizardDependentVariableSelect loaded".
+    // Wait for options to finish loading before opening the selector.
     await this.page.testSubj
       .locator('mlAnalyticsCreateJobWizardDependentVariableSelect loaded')
       .waitFor({ state: 'visible' });
-    // The options render as role="option" items with test-subj "optionsListControlSelection-{field}".
-    // Passing optionTestSubj avoids the strict-mode violation that occurs when getByRole('option')
-    // matches other role="option" items visible on the page (e.g. the includes/excludes table).
-    await this.dependentVariableComboBox.selectSingleOption(variable, {
-      optionTestSubj: `optionsListControlSelection-${variable}`,
-    });
+    // The dependent variable selector is an OptionsListPopover (EuiSelectable), not a standard
+    // EUI ComboBox.  Opening it by clicking comboBoxInput reveals an optionsListFilterInput
+    // (the EuiSelectable built-in search) and individual options keyed by
+    // data-test-subj="optionsListControlSelection-{field}".  Typing into optionsListFilterInput
+    // filters the list; clicking the matching row commits the selection and closes the popover.
+    await this.page.testSubj
+      .locator('~mlAnalyticsCreateJobWizardDependentVariableSelect')
+      .locator('[data-test-subj="comboBoxInput"]')
+      .click();
+    const filterInput = this.page.testSubj.locator('optionsListFilterInput');
+    await filterInput.waitFor({ state: 'visible' });
+    await filterInput.fill(variable);
+    const option = this.page.testSubj.locator(`optionsListControlSelection-${variable}`);
+    await option.waitFor({ state: 'visible' });
+    await option.click();
   }
 
   async setTrainingPercent(percent: number): Promise<void> {
@@ -349,6 +351,60 @@ export class DataFrameAnalyticsPage {
     await this.page.testSubj
       .locator(`analyticsDetailsFlyout-${jobId}`)
       .waitFor({ state: 'visible' });
+  }
+
+  // ── Field-stats flyout ────────────────────────────────────────────────────
+
+  /**
+   * Opens the field-stats flyout for a field available in the dependent-variable
+   * combo box drop-down. Waits for options to be loaded before clicking the
+   * inspect button so the trigger is reliably present.
+   */
+  async openFieldStatsFlyoutFromDependentVariableInput(fieldName: string): Promise<void> {
+    await this.page.testSubj
+      .locator('mlAnalyticsCreateJobWizardDependentVariableSelect loaded')
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj
+      .locator('~mlAnalyticsCreateJobWizardDependentVariableSelect')
+      .locator('[data-test-subj="comboBoxInput"]')
+      .click();
+    const inspectBtn = this.page.testSubj.locator(`mlInspectFieldStatsButton-${fieldName}`);
+    await inspectBtn.waitFor({ state: 'visible' });
+    await inspectBtn.click();
+    await this.page.testSubj
+      .locator('mlFieldStatsFlyout')
+      .waitFor({ state: 'visible' });
+    // The combo box dropdown was opened to access the inspect button and is still open.
+    // Press Escape to close it so subsequent selectDependentVariable() calls start from a
+    // clean state. Escape dismisses the EUI ComboBox dropdown but does not close the push
+    // flyout (which ignores Escape by design).
+    await this.page.keyboard.press('Escape');
+  }
+
+  /**
+   * Opens the field-stats flyout for a field in the include-fields table.
+   * Mirrors the outlier spec's selector pattern.
+   */
+  async openFieldStatsFlyoutFromIncludeFields(fieldName: string): Promise<void> {
+    await this.page.testSubj
+      .locator('mlAnalyticsCreateJobWizardIncludesSelect')
+      .scrollIntoViewIfNeeded();
+    await this.page.testSubj
+      .locator(
+        `~mlAnalyticsCreateJobWizardIncludesSelect > ~mlInspectFieldStatsButton-${fieldName}`
+      )
+      .click();
+    await this.page.testSubj
+      .locator('mlFieldStatsFlyout')
+      .waitFor({ state: 'visible' });
+  }
+
+  /** Closes the field-stats flyout via its footer button and waits for it to be hidden. */
+  async closeFieldStatsFlyout(): Promise<void> {
+    await this.page.testSubj.locator('mlFieldStatsFlyoutCloseButton').click();
+    await this.page.testSubj
+      .locator('mlFieldStatsFlyout')
+      .waitFor({ state: 'hidden' });
   }
 
   // ── Edit flyout ───────────────────────────────────────────────────────────

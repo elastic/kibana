@@ -14,7 +14,6 @@
  * depends on the DFA feature which is not yet verified on serverless.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, ML_USERS } from '../fixtures';
 import { createMLTestDashboard, cleanupDfaTest } from '../fixtures/helpers/dfa';
@@ -81,7 +80,7 @@ const testData = {
 
 test.describe(
   'outlier detection creation',
-  { tag: [tags.stateful.classic[0], '@local-stateful-classic'] },
+  { tag: '@local-stateful-classic' },
   () => {
     let dataViewId: string;
     let dashboardSavedObjectId: string;
@@ -188,18 +187,11 @@ test.describe(
         });
 
         // Field stats flyout from include field trigger (field '1stFlrSF')
-        await page.testSubj
-          .locator('mlAnalyticsCreateJobWizardIncludesSelect')
-          .scrollIntoViewIfNeeded();
-        await page.testSubj
-          .locator(
-            '~mlAnalyticsCreateJobWizardIncludesSelect > ~mlInspectFieldStatsButton-1stFlrSF'
-          )
-          .click();
+        await dataFrameAnalytics.openFieldStatsFlyoutFromIncludeFields('1stFlrSF');
         await expect(page.testSubj.locator('~mlFieldStatsFlyoutContent')).toBeVisible({
           timeout: 5_000,
         });
-        await page.keyboard.press('Escape');
+        await dataFrameAnalytics.closeFieldStatsFlyout();
 
         // Scatterplot matrix: sample size and randomize query
         await dataFrameAnalytics.setScatterplotSampleSize('10000');

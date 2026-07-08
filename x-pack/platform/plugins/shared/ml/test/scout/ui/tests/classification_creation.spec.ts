@@ -14,7 +14,6 @@
  * depends on the DFA feature which is not yet verified on serverless.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, ML_USERS } from '../fixtures';
 import { createMLTestDashboard, cleanupDfaTest } from '../fixtures/helpers/dfa';
@@ -77,7 +76,7 @@ const testData = {
 
 test.describe(
   'classification creation',
-  { tag: [tags.stateful.classic[0], '@local-stateful-classic'] },
+  { tag: '@local-stateful-classic' },
   () => {
     let dataViewId: string;
     let dashboardSavedObjectId: string;
@@ -156,6 +155,29 @@ test.describe(
             '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
           )
         ).toBeVisible();
+
+        // Field stats flyout from dependent variable input (numeric field 'age')
+        await dataFrameAnalytics.openFieldStatsFlyoutFromDependentVariableInput('age');
+        await expect(page.testSubj.locator('mlFieldStatsFlyoutContent age-title')).toBeVisible({
+          timeout: 5_000,
+        });
+        await expect(
+          page.testSubj.locator('mlFieldStatsFlyoutContent age-buttonGroup-topValuesButton')
+        ).toBeVisible({ timeout: 5_000 });
+        await expect(
+          page.testSubj.locator('mlFieldStatsFlyoutContent age-buttonGroup-distributionButton')
+        ).toBeVisible({ timeout: 5_000 });
+        await dataFrameAnalytics.closeFieldStatsFlyout();
+
+        // Field stats flyout from dependent variable input (keyword field 'balance.keyword')
+        await dataFrameAnalytics.openFieldStatsFlyoutFromDependentVariableInput('balance.keyword');
+        await expect(
+          page.testSubj.locator('mlFieldStatsFlyoutContent balance.keyword-title')
+        ).toBeVisible({ timeout: 5_000 });
+        await expect(
+          page.testSubj.locator('mlFieldStatsFlyoutContent balance.keyword-topValues')
+        ).toBeVisible({ timeout: 5_000 });
+        await dataFrameAnalytics.closeFieldStatsFlyout();
 
         await dataFrameAnalytics.selectDependentVariable(testData.dependentVariable);
 
@@ -313,6 +335,13 @@ test.describe(
             '[data-test-subj~="mlAnalyticsTableRowDetailsSection"][data-test-subj~="state"]'
           )
         ).toContainText('stopped');
+
+        // Counts section should show a training document count (exact value asserted in API test)
+        await expect(
+          details.locator(
+            '[data-test-subj~="mlAnalyticsTableRowDetailsSection"][data-test-subj~="counts"]'
+          )
+        ).toContainText(/\d+/);
 
         // Collapse the details row
         await row.locator('[data-test-subj="mlAnalyticsTableRowDetailsToggle"]').click();

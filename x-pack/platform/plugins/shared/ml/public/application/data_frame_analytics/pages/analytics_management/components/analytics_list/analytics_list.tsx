@@ -239,6 +239,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     onChange: handleSearchOnChange,
     box: {
       incremental: true,
+      'data-test-subj': 'mlAnalyticsSearchBox',
     },
     filters,
   };
