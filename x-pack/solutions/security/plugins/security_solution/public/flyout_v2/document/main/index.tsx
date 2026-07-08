@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -33,7 +33,9 @@ import { Header } from './header';
 import { OverviewTab } from './tabs/overview_tab';
 import { JsonTab } from './tabs/json_tab';
 import { TableTab } from './tabs/table_tab';
+import { FLYOUT_STORAGE_KEYS } from './constants/local_storage';
 import { NotesDetails } from '../../shared/tools/notes';
+import { useTabs } from '../../shared/hooks/use_tabs';
 import { useKibana } from '../../../common/lib/kibana';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import type { OpenFlyoutLinkProps } from '../../shared/components/open_flyout_link';
@@ -60,6 +62,8 @@ const headerStyles = css`
 `;
 
 type DocumentFlyoutTabId = 'overview' | 'table' | 'json';
+
+const VALID_TAB_IDS: DocumentFlyoutTabId[] = ['overview', 'table', 'json'];
 
 export const OVERVIEW_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutOverviewTab';
 export const TABLE_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutTableTab';
@@ -112,7 +116,12 @@ export const DocumentFlyout = memo(
     const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
 
     // The Table and JSON tabs are only available in Security Solution, not in Discover.
-    const [selectedTabId, setSelectedTabId] = useState<DocumentFlyoutTabId>('overview');
+    // The selected tab is persisted to localStorage, sharing the key with the legacy
+    // document flyout so the user's preference carries across both implementations.
+    const { selectedTabId, setSelectedTabId } = useTabs<DocumentFlyoutTabId>({
+      validTabIds: VALID_TAB_IDS,
+      storageKey: FLYOUT_STORAGE_KEYS.SELECTED_TAB,
+    });
 
     // The rule flyout is keyed by the rule UUID, but the table/highlighted fields display the rule
     // name. We resolve the UUID from the document so a click on a rule name opens the right rule.
@@ -208,13 +217,13 @@ export const DocumentFlyout = memo(
               <EuiSpacer size="m" />
             </>
           )}
-          {selectedTabId === 'table' ? (
+          {isSecurityApp && selectedTabId === 'table' ? (
             <TableTab
               hit={hit}
               renderCellActions={renderCellActions}
               renderFlyoutLink={renderFlyoutLink}
             />
-          ) : selectedTabId === 'json' ? (
+          ) : isSecurityApp && selectedTabId === 'json' ? (
             <JsonTab hit={hit} />
           ) : (
             <OverviewTab

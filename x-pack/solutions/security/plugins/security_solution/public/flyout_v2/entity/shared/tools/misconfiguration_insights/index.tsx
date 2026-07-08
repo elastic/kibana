@@ -22,7 +22,9 @@ import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use
 import { documentFlyoutHistoryKey } from '../../../../shared/constants/flyout_history';
 import { Misconfiguration } from '../../../../csp/misconfiguration';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
+import { EntityIconByType } from '../../../../../entity_analytics/components/entity_store/entity_icon_by_type';
 import { MisconfigurationFindingsDetailsTable } from '../../../../../cloud_security_posture/components/csp_details/misconfiguration_findings_details_table';
+import type { CloudPostureEntityIdentifier } from '../../../../../cloud_security_posture/components/entity_insight';
 import { MISCONFIGURATION_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 
 const TITLE = i18n.translate(
@@ -30,16 +32,21 @@ const TITLE = i18n.translate(
   { defaultMessage: 'Misconfigurations' }
 );
 
-const ICON_TYPE = { [EntityType.host]: 'storage', [EntityType.user]: 'user' } as const;
-const FIELD = {
+const ICON_TYPE = EntityIconByType;
+const FIELD: Record<
+  EntityType.host | EntityType.user | EntityType.generic,
+  CloudPostureEntityIdentifier
+> = {
   [EntityType.host]: EntityIdentifierFields.hostName,
   [EntityType.user]: EntityIdentifierFields.userName,
-} as const;
+  // `related.entity` carries the entity id used to filter findings for generic entities.
+  [EntityType.generic]: 'related.entity',
+};
 
 export interface MisconfigurationInsightsProps {
-  /** Whether this tool is scoped to a host or user entity. Controls the icon, query field, and entity type passed to the table. */
-  entityType: EntityType.host | EntityType.user;
-  /** Field value used to query misconfigurations — `host.name` for hosts, `user.name` for users. */
+  /** Which entity type this tool is scoped to. Controls the icon, query field, and entity type passed to the table. */
+  entityType: EntityType.host | EntityType.user | EntityType.generic;
+  /** Field value used to query misconfigurations — e.g. `host.name` for hosts, the entity id for generic. */
   value: string;
   /** Canonical Entity Store v2 id (`entity.id`) when already resolved. */
   entityId?: string;

@@ -28,15 +28,19 @@ import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { groupingOptions, groupingSettings } from './grouping_settings/grouping_configs';
 import { EmptyResultsPrompt } from './empty_results_prompt';
 import { useGroupStats } from './grouping_settings/use_group_stats';
-import { useKibana, useUiSetting } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../common/lib/telemetry';
 import { useLocalStorage } from '../../../../common/components/local_storage';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { useDefaultDocumentFlyoutProperties } from '../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 
 jest.mock('../../../../common/components/local_storage', () => ({
   useLocalStorage: jest.fn(),
 }));
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
+}));
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../user_info');
 jest.mock('../../../containers/detection_engine/lists/use_lists_config');
@@ -127,7 +131,7 @@ describe('<TableSection />', () => {
       jest.fn(),
     ]);
 
-    (useUiSetting as jest.Mock).mockReturnValue(false);
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         telemetry: {
@@ -275,7 +279,7 @@ describe('<TableSection />', () => {
   });
 
   it('should call openSystemFlyout with AttackFlyoutWrapper when enableNewFlyout is true', async () => {
-    (useUiSetting as jest.Mock).mockReturnValue(true);
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
     mockUseAttackGroupHandler.mockReturnValue({
       getAttack: jest.fn().mockReturnValue({ id: 'attack-1' }),
       isLoading: false,
