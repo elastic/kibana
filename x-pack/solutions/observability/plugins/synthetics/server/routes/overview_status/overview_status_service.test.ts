@@ -2641,6 +2641,63 @@ describe('current status route', () => {
       expect(result.up).toBe(1);
     });
 
+    it('surfaces a space-less heartbeat monitor when a space is active', async () => {
+      // Regression: earlier Heartbeat tests omit `spaceId`, which short-circuits
+      // `getSpaceFilters` entirely. Autodiscovery pings carry no `meta.space_id`,
+      // so with a space active the filter must still permit field-missing docs —
+      // otherwise a plain `terms` clause silently drops them ("nothing shows").
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'hb-no-space', locationId: null },
+              status: {
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'up',
+                      'monitor.name': 'k8s autodiscovered monitor',
+                      'monitor.type': 'http',
+                    },
+                    sort: ['2025-05-28T10:00:00.000Z'],
+                  },
+                ],
+              },
+              location_name: { buckets: [] },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        spaceId: 'default',
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      const result = await service.getOverviewStatus();
+
+      const [[searchBody]] = esClient.search.mock.calls;
+      const spaceFilter = (searchBody as any).query.bool.filter.find((f: any) =>
+        f.bool?.should?.some((s: any) => s.terms?.['meta.space_id'])
+      );
+      expect(spaceFilter).toBeDefined();
+      expect(spaceFilter.bool.should).toContainEqual({
+        bool: { must_not: { exists: { field: 'meta.space_id' } } },
+      });
+
+      const entry = result.upConfigs[`heartbeat-hb-no-space-${HEARTBEAT_UNMAPPED_LOCATION_ID}`];
+      expect(entry).toBeDefined();
+      expect(entry.origin).toBe('heartbeat');
+    });
+
     it('requests the observer.name composite source with missing_bucket enabled', async () => {
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
       esClient.search.mockResponseOnce(getEsResponse({ buckets: [] }));
