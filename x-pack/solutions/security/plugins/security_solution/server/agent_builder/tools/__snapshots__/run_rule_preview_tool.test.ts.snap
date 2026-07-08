@@ -1,0 +1,497 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`runRulePreviewTool JSON schema sent to LLM API matches the full JSON schema snapshot 1`] = `
+Object {
+  "properties": Object {
+    "enableLoggedRequests": Object {
+      "default": false,
+      "description": "When true, includes the Elasticsearch queries executed during the preview in the response logs. Defaults to false.",
+      "type": "boolean",
+    },
+    "from": Object {
+      "default": "now-1h",
+      "description": "Start of each run's look-back window relative to the run time, as datemath (e.g. \\"now-6m\\"). Defaults to \\"now-1h\\".",
+      "type": "string",
+    },
+    "interval": Object {
+      "default": "1h",
+      "description": "How often the rule would run, as a duration (e.g. \\"5m\\", \\"1h\\"). Determines how many times the rule is evaluated across the preview time range. Defaults to \\"1h\\".",
+      "type": "string",
+    },
+    "rule": Object {
+      "description": "The detection rule to preview. Set \`rule.type\` to select the rule type — each type has its own required fields. The rule is evaluated but never saved.",
+      "oneOf": Array [
+        Object {
+          "properties": Object {
+            "language": Object {
+              "const": "esql",
+              "default": "esql",
+              "type": "string",
+            },
+            "query": Object {
+              "description": "The ES|QL query for the rule (e.g. the query produced by the create_detection_rule tool).",
+              "type": "string",
+            },
+            "type": Object {
+              "const": "esql",
+              "description": "Rule type.",
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "type",
+            "query",
+          ],
+          "type": "object",
+        },
+        Object {
+          "properties": Object {
+            "data_view_id": Object {
+              "description": "Kibana data view ID to use instead of index patterns.",
+              "type": "string",
+            },
+            "event_category_override": Object {
+              "type": "string",
+            },
+            "filters": Object {
+              "description": "Array of Kibana filter objects to restrict the queried documents.",
+              "items": Object {},
+              "type": "array",
+            },
+            "index": Object {
+              "description": "Index patterns to query (e.g. [\\"logs-*\\"]). Overrides the rule-level default index patterns.",
+              "items": Object {
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "language": Object {
+              "const": "eql",
+              "default": "eql",
+              "type": "string",
+            },
+            "query": Object {
+              "description": "The EQL query for the rule.",
+              "type": "string",
+            },
+            "tiebreaker_field": Object {
+              "type": "string",
+            },
+            "timestamp_field": Object {
+              "type": "string",
+            },
+            "type": Object {
+              "const": "eql",
+              "description": "Rule type.",
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "type",
+            "query",
+          ],
+          "type": "object",
+        },
+        Object {
+          "properties": Object {
+            "data_view_id": Object {
+              "description": "Kibana data view ID to use instead of index patterns.",
+              "type": "string",
+            },
+            "filters": Object {
+              "description": "Array of Kibana filter objects to restrict the queried documents.",
+              "items": Object {},
+              "type": "array",
+            },
+            "index": Object {
+              "description": "Index patterns to query (e.g. [\\"logs-*\\"]). Overrides the rule-level default index patterns.",
+              "items": Object {
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "language": Object {
+              "description": "Query language: \\"kuery\\" (KQL, default) or \\"lucene\\".",
+              "enum": Array [
+                "kuery",
+                "lucene",
+              ],
+              "type": "string",
+            },
+            "query": Object {
+              "description": "KQL or Lucene query. Leave empty to match all documents.",
+              "type": "string",
+            },
+            "type": Object {
+              "const": "query",
+              "description": "Rule type.",
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "type",
+          ],
+          "type": "object",
+        },
+        Object {
+          "properties": Object {
+            "data_view_id": Object {
+              "description": "Kibana data view ID to use instead of index patterns.",
+              "type": "string",
+            },
+            "filters": Object {
+              "description": "Array of Kibana filter objects to restrict the queried documents.",
+              "items": Object {},
+              "type": "array",
+            },
+            "index": Object {
+              "description": "Index patterns to query (e.g. [\\"logs-*\\"]). Overrides the rule-level default index patterns.",
+              "items": Object {
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "language": Object {
+              "description": "Query language: \\"kuery\\" (KQL, default) or \\"lucene\\".",
+              "enum": Array [
+                "kuery",
+                "lucene",
+              ],
+              "type": "string",
+            },
+            "query": Object {
+              "description": "Optional KQL or Lucene override for the saved query.",
+              "type": "string",
+            },
+            "saved_id": Object {
+              "description": "ID of the saved Kibana search whose query and filters the rule will use.",
+              "type": "string",
+            },
+            "type": Object {
+              "const": "saved_query",
+              "description": "Rule type.",
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "type",
+            "saved_id",
+          ],
+          "type": "object",
+        },
+        Object {
+          "properties": Object {
+            "data_view_id": Object {
+              "description": "Kibana data view ID to use instead of index patterns.",
+              "type": "string",
+            },
+            "filters": Object {
+              "description": "Array of Kibana filter objects to restrict the queried documents.",
+              "items": Object {},
+              "type": "array",
+            },
+            "index": Object {
+              "description": "Index patterns to query (e.g. [\\"logs-*\\"]). Overrides the rule-level default index patterns.",
+              "items": Object {
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "language": Object {
+              "description": "Query language: \\"kuery\\" (KQL, default) or \\"lucene\\".",
+              "enum": Array [
+                "kuery",
+                "lucene",
+              ],
+              "type": "string",
+            },
+            "query": Object {
+              "description": "KQL or Lucene query whose matching document count is compared against the threshold.",
+              "type": "string",
+            },
+            "threshold": Object {
+              "description": "\`field\`: field(s) to group by (empty array = no grouping). \`value\`: minimum event count to generate an alert. \`cardinality\`: optional unique-value condition.",
+              "properties": Object {
+                "cardinality": Object {
+                  "items": Object {
+                    "properties": Object {
+                      "field": Object {
+                        "type": "string",
+                      },
+                      "value": Object {
+                        "maximum": 9007199254740991,
+                        "minimum": 0,
+                        "type": "integer",
+                      },
+                    },
+                    "required": Array [
+                      "field",
+                      "value",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "field": Object {
+                  "anyOf": Array [
+                    Object {
+                      "type": "string",
+                    },
+                    Object {
+                      "items": Object {
+                        "type": "string",
+                      },
+                      "maxItems": 5,
+                      "type": "array",
+                    },
+                  ],
+                },
+                "value": Object {
+                  "maximum": 9007199254740991,
+                  "minimum": 1,
+                  "type": "integer",
+                },
+              },
+              "required": Array [
+                "field",
+                "value",
+              ],
+              "type": "object",
+            },
+            "type": Object {
+              "const": "threshold",
+              "description": "Rule type.",
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "type",
+            "query",
+            "threshold",
+          ],
+          "type": "object",
+        },
+        Object {
+          "properties": Object {
+            "data_view_id": Object {
+              "description": "Kibana data view ID to use instead of index patterns.",
+              "type": "string",
+            },
+            "filters": Object {
+              "description": "Array of Kibana filter objects to restrict the queried documents.",
+              "items": Object {},
+              "type": "array",
+            },
+            "index": Object {
+              "description": "Index patterns to query (e.g. [\\"logs-*\\"]). Overrides the rule-level default index patterns.",
+              "items": Object {
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "language": Object {
+              "description": "Query language: \\"kuery\\" (KQL, default) or \\"lucene\\".",
+              "enum": Array [
+                "kuery",
+                "lucene",
+              ],
+              "type": "string",
+            },
+            "query": Object {
+              "description": "KQL or Lucene query that selects source events to match against threat intelligence.",
+              "type": "string",
+            },
+            "threat_filters": Object {
+              "description": "Optional array of Kibana filter objects to restrict the threat intelligence documents.",
+              "items": Object {},
+              "type": "array",
+            },
+            "threat_index": Object {
+              "description": "Index patterns for the threat intelligence source (e.g. [\\"logs-ti_*\\"]).",
+              "items": Object {
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "threat_indicator_path": Object {
+              "description": "Path to the threat indicator object within each threat document. Defaults to \\"threat.indicator\\".",
+              "type": "string",
+            },
+            "threat_mapping": Object {
+              "description": "Array of mapping groups; each group has \`entries\` — an array of \`{ field, type, value }\` objects that pair event fields to threat-indicator fields.",
+              "items": Object {
+                "properties": Object {
+                  "entries": Object {
+                    "items": Object {
+                      "properties": Object {
+                        "field": Object {
+                          "minLength": 1,
+                          "type": "string",
+                        },
+                        "negate": Object {
+                          "type": "boolean",
+                        },
+                        "type": Object {
+                          "const": "mapping",
+                          "type": "string",
+                        },
+                        "value": Object {
+                          "minLength": 1,
+                          "type": "string",
+                        },
+                      },
+                      "required": Array [
+                        "field",
+                        "type",
+                        "value",
+                      ],
+                      "type": "object",
+                    },
+                    "type": "array",
+                  },
+                },
+                "required": Array [
+                  "entries",
+                ],
+                "type": "object",
+              },
+              "minItems": 1,
+              "type": "array",
+            },
+            "threat_query": Object {
+              "description": "Query that filters documents in the threat intelligence index before matching.",
+              "type": "string",
+            },
+            "type": Object {
+              "const": "threat_match",
+              "description": "Rule type.",
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "type",
+            "query",
+            "threat_query",
+            "threat_mapping",
+            "threat_index",
+          ],
+          "type": "object",
+        },
+        Object {
+          "properties": Object {
+            "anomaly_threshold": Object {
+              "description": "Minimum anomaly score (0–100) to generate an alert. Higher values produce fewer, higher-confidence alerts.",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+            },
+            "machine_learning_job_id": Object {
+              "anyOf": Array [
+                Object {
+                  "type": "string",
+                },
+                Object {
+                  "items": Object {
+                    "type": "string",
+                  },
+                  "minItems": 1,
+                  "type": "array",
+                },
+              ],
+              "description": "ID or array of IDs of the Machine Learning job(s) whose anomalies to monitor.",
+            },
+            "type": Object {
+              "const": "machine_learning",
+              "description": "Rule type.",
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "type",
+            "anomaly_threshold",
+            "machine_learning_job_id",
+          ],
+          "type": "object",
+        },
+        Object {
+          "properties": Object {
+            "data_view_id": Object {
+              "description": "Kibana data view ID to use instead of index patterns.",
+              "type": "string",
+            },
+            "filters": Object {
+              "description": "Array of Kibana filter objects to restrict the queried documents.",
+              "items": Object {},
+              "type": "array",
+            },
+            "history_window_start": Object {
+              "description": "Start of the historical baseline window as datemath (e.g. \\"now-30d\\"). Values seen before this point are considered known.",
+              "minLength": 1,
+              "type": "string",
+            },
+            "index": Object {
+              "description": "Index patterns to query (e.g. [\\"logs-*\\"]). Overrides the rule-level default index patterns.",
+              "items": Object {
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "language": Object {
+              "description": "Query language: \\"kuery\\" (KQL, default) or \\"lucene\\".",
+              "enum": Array [
+                "kuery",
+                "lucene",
+              ],
+              "type": "string",
+            },
+            "new_terms_fields": Object {
+              "description": "Array of 1–3 field names to track for first-seen values (e.g. [\\"source.ip\\"]).",
+              "items": Object {
+                "type": "string",
+              },
+              "maxItems": 3,
+              "minItems": 1,
+              "type": "array",
+            },
+            "query": Object {
+              "description": "KQL or Lucene query to filter the events checked for new terms.",
+              "type": "string",
+            },
+            "type": Object {
+              "const": "new_terms",
+              "description": "Rule type.",
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "type",
+            "query",
+            "new_terms_fields",
+            "history_window_start",
+          ],
+          "type": "object",
+        },
+      ],
+    },
+    "timeframeEnd": Object {
+      "default": "now",
+      "description": "End of the preview time range as datemath (e.g. \\"now\\"). Defaults to \\"now\\".",
+      "type": "string",
+    },
+    "timeframeStart": Object {
+      "default": "now-1h",
+      "description": "Start of the preview time range as datemath (e.g. \\"now-1h\\", \\"now-24h\\", \\"now-7d\\"). The rule is evaluated over [timeframeStart, timeframeEnd]. Defaults to \\"now-1h\\".",
+      "type": "string",
+    },
+    "to": Object {
+      "default": "now",
+      "description": "End of each run's look-back window, as datemath (e.g. \\"now\\"). Defaults to \\"now\\".",
+      "type": "string",
+    },
+  },
+  "required": Array [
+    "rule",
+  ],
+  "type": "object",
+}
+`;
