@@ -75,7 +75,9 @@ const compactPaginationSpacerCss = css`
     height: 8px;
   }
 
-  .euiTableRow:has(.entityAnomaliesTableEmptyMessage) {
+  /* EUI renders the no-items message as the sole row in the table body,
+   * so :only-child reliably targets it without depending on :has(). */
+  .euiTableRow:only-child {
     pointer-events: none;
 
     &:hover {

@@ -9,12 +9,12 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { MitreAttackChain } from './mitre_attack_chain';
 
-interface MitreAttackChainProps {
+interface MitreAttackChainPlaceholderProps {
   children?: React.ReactNode;
   showLabels?: boolean;
 }
 
-export const MitreAttackChainPlaceholder: React.FC<MitreAttackChainProps> = ({
+export const MitreAttackChainPlaceholder: React.FC<MitreAttackChainPlaceholderProps> = ({
   children,
   showLabels = true,
 }) => (
