@@ -12,6 +12,10 @@ import { generateMockIndicator } from '../../../../../../common/threat_intellige
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import { BUTTON_TEST_ID } from './test_ids';
 
+jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
+}));
+
 const mockIndicator = generateMockIndicator();
 
 describe('<IndicatorsFlyout />', () => {

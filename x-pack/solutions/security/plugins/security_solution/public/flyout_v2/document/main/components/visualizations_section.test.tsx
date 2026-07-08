@@ -63,7 +63,15 @@ jest.mock('./session_preview_container', () => ({
 }));
 
 jest.mock('./graph_preview_container', () => ({
-  GraphPreviewContainer: () => <div data-test-subj="graphPreviewContainerMock" />,
+  GraphPreviewContainer: ({ onShowGraph }: { onShowGraph: () => void }) => (
+    <button type="button" data-test-subj="graphPreviewContainerMock" onClick={onShowGraph}>
+      {'GraphPreview'}
+    </button>
+  ),
+}));
+
+jest.mock('../../tools/graph', () => ({
+  GraphDetails: () => <div data-test-subj="graphDetailsMock" />,
 }));
 
 jest.mock('../hooks/use_graph_preview', () => ({
@@ -184,6 +192,38 @@ describe('VisualizationsSection', () => {
 
     const { getByTestId } = renderVisualizationsSection();
     act(() => getByTestId('sessionPreviewContainerMock').click());
+
+    expect(openSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: DOC_VIEWER_FLYOUT_HISTORY_KEY,
+        session: 'start',
+      })
+    );
+  });
+
+  it('uses Security history key when opening graph flyout in Security app', () => {
+    mockUseExpandSection.mockReturnValue(true);
+    mockUseIsInSecurityApp.mockReturnValue(true);
+
+    const { getByTestId } = renderVisualizationsSection();
+    act(() => getByTestId('graphPreviewContainerMock').click());
+
+    expect(openSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: documentFlyoutHistoryKey,
+        session: 'start',
+      })
+    );
+  });
+
+  it('uses Discover history key when opening graph flyout outside Security app', () => {
+    mockUseExpandSection.mockReturnValue(true);
+    mockUseIsInSecurityApp.mockReturnValue(false);
+
+    const { getByTestId } = renderVisualizationsSection();
+    act(() => getByTestId('graphPreviewContainerMock').click());
 
     expect(openSystemFlyout).toHaveBeenCalledWith(
       expect.anything(),
