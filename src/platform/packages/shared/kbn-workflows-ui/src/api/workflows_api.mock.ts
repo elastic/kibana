@@ -22,6 +22,7 @@ export const createMockWorkflowApi = (): MockWorkflowApi =>
     bulkCreateWorkflows: jest.fn(),
     bulkDeleteWorkflows: jest.fn(),
     mgetWorkflows: jest.fn(),
+    checkWorkflowIdConflicts: jest.fn(),
 
     cloneWorkflow: jest.fn(),
     validateWorkflow: jest.fn(),

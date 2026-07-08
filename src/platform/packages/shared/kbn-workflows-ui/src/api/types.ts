@@ -42,6 +42,14 @@ export interface MgetWorkflowsParams {
   source?: string[];
 }
 
+export interface CheckWorkflowIdConflictsParams {
+  workflows: BulkCreateWorkflowsParams['workflows'];
+}
+
+export interface CheckWorkflowIdConflictsResponse {
+  existingIds: string[];
+}
+
 export interface ValidateWorkflowParams {
   yaml: string;
 }
