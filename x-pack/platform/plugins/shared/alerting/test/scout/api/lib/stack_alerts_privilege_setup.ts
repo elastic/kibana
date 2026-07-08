@@ -137,7 +137,9 @@ export const setupStackAlertsPrivilegeTests = async (
         return Boolean(alertDoc);
       },
       {
-        timeout: 30_000,
+        // Alert indexing after rule execution can lag well past 30s on Cloud serverless; use the
+        // same 120s budget as waitForSuccessfulEventLogEntry to cover task-claim + write latency.
+        timeout: 120_000,
         intervals: [2_000],
         message: 'expected an alert to be generated for the enabled rule',
       }
