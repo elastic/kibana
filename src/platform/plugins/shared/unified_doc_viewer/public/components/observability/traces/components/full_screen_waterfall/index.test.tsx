@@ -53,6 +53,13 @@ let capturedWaterfallProps: {
   onErrorClick?: (params: any) => void;
 } = {};
 
+jest.mock('@kbn/apm-ui-shared', () => ({
+  TraceWaterfallWithFetching: (props: any) => {
+    capturedWaterfallProps = props;
+    return <div data-test-subj="fullTraceWaterfall">FullTraceWaterfall</div>;
+  },
+}));
+
 describe('FullScreenWaterfall', () => {
   const defaultProps: FullScreenWaterfallProps = {
     traceId: 'test-trace-id',
@@ -73,18 +80,6 @@ describe('FullScreenWaterfall', () => {
   beforeAll(() => {
     setUnifiedDocViewerServices({
       ...mockUnifiedDocViewerServices,
-      discoverShared: {
-        features: {
-          registry: {
-            getById: () => ({
-              render: (props: any) => {
-                capturedWaterfallProps = props;
-                return <div data-test-subj="fullTraceWaterfall">FullTraceWaterfall</div>;
-              },
-            }),
-          },
-        },
-      },
     } as unknown as UnifiedDocViewerServices);
   });
 

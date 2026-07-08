@@ -59,6 +59,7 @@
     "@kbn/lens-common",
     "@kbn/ebt-click",
     "@kbn/apm-api-shared",
+    "@kbn/zod",
   ],
   "exclude": ["target/**/*"]
 }

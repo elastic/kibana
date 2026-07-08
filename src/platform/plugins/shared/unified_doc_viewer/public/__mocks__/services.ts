@@ -36,4 +36,5 @@ export const mockUnifiedDocViewerServices: jest.Mocked<UnifiedDocViewerServices>
   share: sharePluginMock.createStartContract(),
   core: coreMock.createStart(),
   discoverShared: discoverSharedPluginMock.createStartContract(),
+  callApmApi: jest.fn(),
 };

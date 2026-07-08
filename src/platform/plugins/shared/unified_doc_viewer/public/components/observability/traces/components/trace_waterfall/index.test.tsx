@@ -8,11 +8,12 @@
  */
 
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import type { TraceWaterfallRestorableState } from '.';
 import { TraceWaterfall } from '.';
 import { setUnifiedDocViewerServices } from '../../../../../plugin';
 import type { UnifiedDocViewerServices } from '../../../../../types';
-import type { TraceWaterfallRestorableState } from '.';
 import type { FullScreenWaterfallProps } from '../full_screen_waterfall';
 
 jest.mock('../../../../../hooks/use_data_sources', () => ({
@@ -73,6 +74,12 @@ jest.mock('@kbn/esql-composer', () => ({
   where: jest.fn(),
 }));
 
+jest.mock('@kbn/apm-ui-shared', () => ({
+  FocusedTraceWaterfallWithFetching: () => (
+    <div data-test-subj="focusedTraceWaterfall">FocusedTraceWaterfall</div>
+  ),
+}));
+
 describe('TraceWaterfall', () => {
   const defaultProps = {
     traceId: 'trace-A',
@@ -92,6 +99,7 @@ describe('TraceWaterfall', () => {
           },
         },
       },
+      callApmApi: jest.fn(),
     } as unknown as UnifiedDocViewerServices);
   });
 

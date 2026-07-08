@@ -7,7 +7,13 @@
 import Boom from '@hapi/boom';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { Artifact } from '@kbn/fleet-plugin/server';
-import { routeDefinitions, type ListSourceMapArtifactsResponse } from '@kbn/apm-api-shared';
+import {
+  routeDefinitions,
+  sourceMapRt,
+  type ListSourceMapArtifactsResponse,
+} from '@kbn/apm-api-shared';
+import * as t from 'io-ts';
+import { jsonRt, stringFromBufferRt } from '@kbn/io-ts-utils';
 import type { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -58,9 +64,17 @@ const listSourceMapRoute = createApmServerRoute({
   },
 });
 
+// Can not migrate to apm-api-shared, it depends on Fleet
 const uploadSourceMapRoute = createApmServerRoute({
-  endpoint: routeDefinitions.sourceMaps.upload.endpoint,
-  params: routeDefinitions.sourceMaps.upload.params,
+  endpoint: 'POST /api/apm/sourcemaps 2023-10-31',
+  params: t.type({
+    body: t.type({
+      service_name: t.string,
+      service_version: t.string,
+      bundle_filepath: t.string,
+      sourcemap: t.union([t.string, stringFromBufferRt]).pipe(jsonRt).pipe(sourceMapRt),
+    }),
+  }),
   options: {
     body: { accepts: ['multipart/form-data'] },
   },
