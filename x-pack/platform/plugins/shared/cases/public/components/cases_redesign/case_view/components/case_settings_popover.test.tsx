@@ -54,7 +54,10 @@ describe('CaseSettingsPopover', () => {
       data: { templates: [] },
       isLoading: false,
     });
-    (useChangeAppliedTemplate as jest.Mock).mockReturnValue({ mutate: jest.fn(), isLoading: false });
+    (useChangeAppliedTemplate as jest.Mock).mockReturnValue({
+      mutate: jest.fn(),
+      isLoading: false,
+    });
     (useGetTemplate as jest.Mock).mockReturnValue({ data: null });
   });
 

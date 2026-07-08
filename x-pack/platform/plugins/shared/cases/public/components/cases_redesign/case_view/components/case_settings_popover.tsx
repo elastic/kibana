@@ -100,7 +100,13 @@ export const CaseSettingsPopover: FC<CaseSettingsPopoverProps> = ({
         },
       });
     }
-  }, [isTemplatesEnabled, selectedTemplateId, selectedTemplateData, caseData, changeAppliedTemplate]);
+  }, [
+    isTemplatesEnabled,
+    selectedTemplateId,
+    selectedTemplateData,
+    caseData,
+    changeAppliedTemplate,
+  ]);
 
   const onTemplateChange = useCallback((selected: Array<EuiComboBoxOptionOption<string>>) => {
     setSelectedTemplateId(selected[0]?.value ?? '');
