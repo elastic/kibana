@@ -371,9 +371,7 @@ export class DataFrameAnalyticsPage {
     const inspectBtn = this.page.testSubj.locator(`mlInspectFieldStatsButton-${fieldName}`);
     await inspectBtn.waitFor({ state: 'visible' });
     await inspectBtn.click();
-    await this.page.testSubj
-      .locator('mlFieldStatsFlyout')
-      .waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('mlFieldStatsFlyout').waitFor({ state: 'visible' });
     // The combo box dropdown was opened to access the inspect button and is still open.
     // Press Escape to close it so subsequent selectDependentVariable() calls start from a
     // clean state. Escape dismisses the EUI ComboBox dropdown but does not close the push
@@ -394,17 +392,13 @@ export class DataFrameAnalyticsPage {
         `~mlAnalyticsCreateJobWizardIncludesSelect > ~mlInspectFieldStatsButton-${fieldName}`
       )
       .click();
-    await this.page.testSubj
-      .locator('mlFieldStatsFlyout')
-      .waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('mlFieldStatsFlyout').waitFor({ state: 'visible' });
   }
 
   /** Closes the field-stats flyout via its footer button and waits for it to be hidden. */
   async closeFieldStatsFlyout(): Promise<void> {
     await this.page.testSubj.locator('mlFieldStatsFlyoutCloseButton').click();
-    await this.page.testSubj
-      .locator('mlFieldStatsFlyout')
-      .waitFor({ state: 'hidden' });
+    await this.page.testSubj.locator('mlFieldStatsFlyout').waitFor({ state: 'hidden' });
   }
 
   // ── Edit flyout ───────────────────────────────────────────────────────────

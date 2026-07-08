@@ -22,9 +22,7 @@ apiTest.describe(
   },
   () => {
     apiTest.beforeAll(async ({ esArchiver }) => {
-      await esArchiver.loadIfNeeded(
-        'x-pack/platform/test/fixtures/es_archives/ml/egs_regression'
-      );
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/egs_regression');
     });
 
     apiTest('ft_egs_regression has exactly 2000 documents', async ({ esClient }) => {
