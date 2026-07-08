@@ -19,6 +19,7 @@ import { createRequestHandlerContext } from './request_context_factory';
 import { PLUGIN_ID } from '../common';
 import { registerTasks } from './tasks/register_tasks';
 import { registerTriggers } from './workflow/triggers';
+import { registerSteps } from './workflow/steps';
 import { registerUiSettings } from './infra/feature_flags/register';
 import {
   EngineDescriptorType,
@@ -26,13 +27,14 @@ import {
   LegacyCcsLogExtractionStateType,
   RemoteLogExtractionStateType,
 } from './domain/saved_objects';
+import { EntityResolutionRuleType } from './domain/resolution/rules/saved_object';
 import { registerEntityMaintainerTask } from './tasks/entity_maintainers';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 import { CRUDClient } from './domain/crud';
 import { EntityMetadataClient } from './domain/entity_metadata';
 import { ResolutionClient } from './domain/resolution';
 import { registerTelemetry, createReportEvent } from './telemetry/events';
-import { automatedResolutionMaintainerConfig } from './maintainers/automated_resolution';
+import { automatedResolutionMaintainerConfig } from './domain/resolution/rules/maintainers/automated_resolution';
 import { createWorkflowTriggerEmitter } from './workflow/create_workflow_trigger_emitter';
 
 export class EntityStorePlugin
@@ -77,6 +79,7 @@ export class EntityStorePlugin
 
     registerTasks(plugins.taskManager, this.logger, core, this.isServerless);
     registerTriggers(plugins.workflowsExtensions);
+    registerSteps(plugins.workflowsExtensions, core);
     this.logger.debug('Registering routes');
     registerRoutes(router);
 
@@ -88,6 +91,7 @@ export class EntityStorePlugin
     core.savedObjects.registerType(EntityStoreGlobalStateType);
     core.savedObjects.registerType(RemoteLogExtractionStateType);
     core.savedObjects.registerType(LegacyCcsLogExtractionStateType);
+    core.savedObjects.registerType(EntityResolutionRuleType);
 
     registerEntityMaintainerTask({
       taskManager: plugins.taskManager,
