@@ -125,10 +125,25 @@ describe('registerAndroidRoutes', () => {
   describe('GET crash document', () => {
     function getCrashDocumentHandler(router: ReturnType<typeof createRouterMock>) {
       return router.get.mock.calls[0][1] as TestHandler<
-        { doc_id: string; index?: string },
+        {
+          session_id: string;
+          timestamp: string;
+          service_name: string;
+          service_version: string;
+          app_build_id: string;
+          index?: string;
+        },
         Record<string, never>
       >;
     }
+
+    const identityQuery = {
+      session_id: 'session-1',
+      timestamp: '2026-02-13T15:55:35.495Z',
+      service_name: 'weather-demo-app',
+      service_version: '1.6.0',
+      app_build_id: 'build-1',
+    };
 
     it('fetches stacktrace and build ID from the default crash index', async () => {
       const { router } = setupRoutes();
@@ -153,11 +168,23 @@ describe('registerAndroidRoutes', () => {
       });
       const response = createResponseMock();
 
-      await handler(createContext(search), { query: { doc_id: 'doc-1' }, body: {} }, response);
+      await handler(createContext(search), { query: identityQuery, body: {} }, response);
 
       expect(search).toHaveBeenCalledWith({
         index: DEFAULT_CRASH_INDEX,
-        query: { ids: { values: ['doc-1'] } },
+        query: {
+          bool: {
+            filter: [
+              { term: { 'session.id': 'session-1' } },
+              { term: { '@timestamp': '2026-02-13T15:55:35.495Z' } },
+              { term: { 'service.name': 'weather-demo-app' } },
+              { term: { 'service.version': '1.6.0' } },
+              { term: { 'app.build_id': 'build-1' } },
+              { term: { event_name: 'device.crash' } },
+            ],
+          },
+        },
+        sort: [{ '@timestamp': 'desc' }],
         size: 1,
         _source: ['attributes', 'resource.attributes'],
       });
@@ -193,7 +220,7 @@ describe('registerAndroidRoutes', () => {
 
       await handler(
         createContext(search),
-        { query: { doc_id: 'doc-1', index: 'logs-myapp.otel*' }, body: {} },
+        { query: { ...identityQuery, index: 'logs-myapp.otel*' }, body: {} },
         createResponseMock()
       );
 
@@ -207,13 +234,13 @@ describe('registerAndroidRoutes', () => {
 
       await handler(
         createContext(jest.fn().mockResolvedValue({ hits: { hits: [] } })),
-        { query: { doc_id: 'missing-doc' }, body: {} },
+        { query: identityQuery, body: {} },
         response
       );
 
       expect(response.notFound).toHaveBeenCalledWith({
         body: {
-          message: `No Android crash document found for id "missing-doc" in index "${DEFAULT_CRASH_INDEX}"`,
+          message: `No Android crash document found for session.id="session-1", @timestamp="2026-02-13T15:55:35.495Z", service.name="weather-demo-app", service.version="1.6.0", app.build_id="build-1" in index "${DEFAULT_CRASH_INDEX}"`,
         },
       });
     });
@@ -238,12 +265,15 @@ describe('registerAndroidRoutes', () => {
             },
           })
         ),
-        { query: { doc_id: 'doc-1' }, body: {} },
+        { query: identityQuery, body: {} },
         response
       );
 
       expect(response.badRequest).toHaveBeenCalledWith({
-        body: { message: 'Document "doc-1" has no exception.stacktrace field' },
+        body: {
+          message:
+            'Document for session.id="session-1", @timestamp="2026-02-13T15:55:35.495Z", service.name="weather-demo-app", service.version="1.6.0", app.build_id="build-1" has no exception.stacktrace field',
+        },
       });
     });
   });

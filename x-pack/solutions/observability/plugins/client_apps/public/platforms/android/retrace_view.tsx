@@ -40,14 +40,24 @@ export function RetraceView({ core }: RetraceViewProps) {
   const [loading, setLoading] = useState(true);
 
   const params = new URLSearchParams(window.location.search);
-  const docId = params.get('doc_id');
+  const sessionId = params.get('session_id');
+  const timestamp = params.get('timestamp');
+  const serviceName = params.get('service_name');
+  const serviceVersion = params.get('service_version');
+  const appBuildId = params.get('app_build_id');
   const index = params.get('index');
 
+  const identityLabel =
+    sessionId && timestamp && serviceName && serviceVersion && appBuildId
+      ? `${serviceName}@${serviceVersion} (build ${appBuildId}), session ${sessionId} at ${timestamp}`
+      : null;
+
   useEffect(() => {
-    if (!docId) {
+    if (!sessionId || !timestamp || !serviceName || !serviceVersion || !appBuildId) {
       setError(
-        i18n.translate('xpack.clientApps.android.retrace.missingDocIdErrorMessage', {
-          defaultMessage: 'No doc_id provided in URL parameters.',
+        i18n.translate('xpack.clientApps.android.retrace.missingIdentityErrorMessage', {
+          defaultMessage:
+            'session_id, timestamp, service_name, service_version, and app_build_id are all required in URL parameters.',
         })
       );
       setLoading(false);
@@ -56,9 +66,20 @@ export function RetraceView({ core }: RetraceViewProps) {
 
     (async () => {
       try {
+        const query: Record<string, string> = {
+          session_id: sessionId,
+          timestamp,
+          service_name: serviceName,
+          service_version: serviceVersion,
+          app_build_id: appBuildId,
+        };
+        if (index) {
+          query.index = index;
+        }
+
         const crashDoc = await core.http.fetch<AndroidCrashDocumentResponse>(
           ANDROID_CRASH_DOCUMENT_API_PATH,
-          { query: index ? { doc_id: docId, index } : { doc_id: docId } }
+          { query }
         );
 
         const res = await core.http.fetch<RetraceResponse>(ANDROID_RETRACE_API_PATH, {
@@ -81,7 +102,7 @@ export function RetraceView({ core }: RetraceViewProps) {
         setLoading(false);
       }
     })();
-  }, [docId, index, core]);
+  }, [sessionId, timestamp, serviceName, serviceVersion, appBuildId, index, core]);
 
   return (
     <EuiPage paddingSize="l">
@@ -98,10 +119,10 @@ export function RetraceView({ core }: RetraceViewProps) {
           <EuiText color="subdued" size="s">
             <p>
               {i18n.translate('xpack.clientApps.android.retrace.documentLabel', {
-                defaultMessage: 'Document: {docId}',
+                defaultMessage: 'Document: {identityLabel}',
                 values: {
-                  docId:
-                    docId ??
+                  identityLabel:
+                    identityLabel ??
                     i18n.translate('xpack.clientApps.android.retrace.noDocumentIdLabel', {
                       defaultMessage: 'none',
                     }),

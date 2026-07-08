@@ -30,7 +30,11 @@ export function registerAndroidRoutes({ router, logger }: { router: IRouter; log
       },
       validate: {
         query: schema.object({
-          doc_id: schema.string({ minLength: 1 }),
+          session_id: schema.string({ minLength: 1 }),
+          timestamp: schema.string({ minLength: 1 }),
+          service_name: schema.string({ minLength: 1 }),
+          service_version: schema.string({ minLength: 1 }),
+          app_build_id: schema.string({ minLength: 1 }),
           index: schema.maybe(schema.string({ minLength: 1 })),
         }),
       },
@@ -38,20 +42,41 @@ export function registerAndroidRoutes({ router, logger }: { router: IRouter; log
     async (context, request, response) => {
       try {
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        const { doc_id: docId, index = DEFAULT_CRASH_INDEX } = request.query;
+        const {
+          session_id: sessionId,
+          timestamp,
+          service_name: serviceName,
+          service_version: serviceVersion,
+          app_build_id: appBuildId,
+          index = DEFAULT_CRASH_INDEX,
+        } = request.query;
 
         const result = await esClient.search({
           index,
-          query: { ids: { values: [docId] } },
+          query: {
+            bool: {
+              filter: [
+                { term: { 'session.id': sessionId } },
+                { term: { '@timestamp': timestamp } },
+                { term: { 'service.name': serviceName } },
+                { term: { 'service.version': serviceVersion } },
+                { term: { 'app.build_id': appBuildId } },
+                { term: { event_name: 'device.crash' } },
+              ],
+            },
+          },
+          sort: [{ '@timestamp': 'desc' }],
           size: 1,
           _source: ['attributes', 'resource.attributes'],
         });
+
+        const identity = `session.id="${sessionId}", @timestamp="${timestamp}", service.name="${serviceName}", service.version="${serviceVersion}", app.build_id="${appBuildId}"`;
 
         const hit = result.hits?.hits?.[0];
         if (!hit) {
           return response.notFound({
             body: {
-              message: `No Android crash document found for id "${docId}" in index "${index}"`,
+              message: `No Android crash document found for ${identity} in index "${index}"`,
             },
           });
         }
@@ -64,12 +89,12 @@ export function registerAndroidRoutes({ router, logger }: { router: IRouter; log
 
         if (typeof stacktrace !== 'string' || !stacktrace) {
           return response.badRequest({
-            body: { message: `Document "${docId}" has no exception.stacktrace field` },
+            body: { message: `Document for ${identity} has no exception.stacktrace field` },
           });
         }
         if (typeof buildId !== 'string' || !buildId) {
           return response.badRequest({
-            body: { message: `Document "${docId}" has no app.build_id field` },
+            body: { message: `Document for ${identity} has no app.build_id field` },
           });
         }
 
