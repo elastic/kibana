@@ -137,7 +137,12 @@ export { EvaluatorApiClient, type MapContextFn } from './src/utils/evaluator_api
 export { getBuildkiteCiMetadataFromEnv, type BuildkiteCiMetadata } from './src/utils/ci_metadata';
 export { buildIngestRequest } from './src/utils/build_ingest_request';
 
-export { parseSelectedEvaluators, selectEvaluators } from './src/evaluators/filter';
+export {
+  parseSelectedEvaluators,
+  selectEvaluators,
+  isCodeOnlyMode,
+  filterEvaluatorsByKind,
+} from './src/evaluators/filter';
 /**
  * Trace-based evaluators — the preferred pattern for non-functional metrics.
  *
