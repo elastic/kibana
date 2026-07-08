@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import { type DashboardState } from '../../../common';
 import type { DashboardChildState, DashboardLayout } from './types';
 import type { DashboardSection } from '../../../server';
@@ -23,7 +23,7 @@ export function serializeLayout(
 
   const panels: DashboardState['panels'] = [];
   Object.entries(layout.panels).forEach(([panelId, { grid, type }]) => {
-    const config = childState[panelId] ?? {};
+    const config = cloneDeep(childState[panelId]) ?? {};
 
     const { sectionId, ...restOfGridData } = grid; // drop section ID
     const panelState = {
@@ -48,7 +48,7 @@ export function serializeLayout(
         return {
           id,
           ...omit(panel, 'order'),
-          config: childState[id],
+          config: cloneDeep(childState[id]),
         } as Required<DashboardState>['pinned_panels'][number];
       }),
   };

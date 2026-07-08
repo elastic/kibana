@@ -8,6 +8,7 @@
  */
 
 import { v4 } from 'uuid';
+import { cloneDeep } from 'lodash';
 import { type DashboardState, isDashboardSection } from '../../../common';
 import type { DashboardPanel } from '../../../server';
 import type { DashboardChildState, DashboardLayout } from './types';
@@ -23,7 +24,7 @@ export function deserializeLayout(
     pinnedPanels: (pinnedPanels ?? []).reduce((prev, panel, index) => {
       const panelId = panel.id ?? v4();
       const { width, grow, type, config } = panel;
-      childState[panelId] = config; // push to child state
+      childState[panelId] = cloneDeep(config); // push to child state
       return { ...prev, [panelId]: { type, width, grow, order: index } };
     }, {}),
   };
