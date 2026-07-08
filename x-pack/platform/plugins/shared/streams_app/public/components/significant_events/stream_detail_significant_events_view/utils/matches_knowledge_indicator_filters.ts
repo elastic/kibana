@@ -7,6 +7,7 @@
 
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { isComputedFeature } from '@kbn/significant-events-schema';
+import { getKnowledgeIndicatorSource } from './get_knowledge_indicator_source';
 import { getKnowledgeIndicatorStreamName } from './get_knowledge_indicator_stream_name';
 import { getKnowledgeIndicatorSubtype } from './get_knowledge_indicator_subtype';
 import { getKnowledgeIndicatorType } from './get_knowledge_indicator_type';
@@ -16,6 +17,7 @@ export interface KnowledgeIndicatorFilterCriteria {
   selectedTypes?: string[];
   selectedSubtypes?: string[];
   selectedStreams?: string[];
+  selectedSources?: string[];
   hideComputedTypes?: boolean;
   searchTerm?: string;
 }
@@ -31,6 +33,7 @@ export const matchesKnowledgeIndicatorFilters = (
     selectedTypes,
     selectedSubtypes,
     selectedStreams,
+    selectedSources,
     hideComputedTypes,
     searchTerm,
   } = criteria;
@@ -40,6 +43,10 @@ export const matchesKnowledgeIndicatorFilters = (
 
   if (selectedTypes?.length) {
     if (!selectedTypes.includes(getKnowledgeIndicatorType(ki))) return false;
+  }
+
+  if (selectedSources?.length) {
+    if (!selectedSources.includes(getKnowledgeIndicatorSource(ki))) return false;
   }
 
   if (selectedSubtypes?.length) {

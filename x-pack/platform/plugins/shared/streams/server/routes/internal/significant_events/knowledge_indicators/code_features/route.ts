@@ -184,8 +184,60 @@ const reconcileCodeQueriesRoute = createServerRoute({
   },
 });
 
+// ---------------------------------------------------------------------------
+// Code Intelligence availability: is any Semantic Code Search code index present
+// in the cluster? Used by the UI to show an onboarding placeholder (prompting
+// the user to ingest code via SCS) versus the code intelligence content.
+// ---------------------------------------------------------------------------
+
+const codeIntelligenceAvailabilityRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/code_intelligence/_availability',
+  options: {
+    access: 'internal',
+    summary: 'Check whether any Semantic Code Search code indices exist in the cluster',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({}),
+  handler: async ({
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<{ available: boolean }> => {
+    const scopedClients = await getScopedClients({ request });
+    const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    try {
+      const resolved = await scopedClusterClient.asCurrentUser.indices.resolveIndex({
+        name: 'code-*',
+        expand_wildcards: 'open',
+      });
+      // SCS creates `code-*` chunk indices alongside `*_locations` / `*_settings`
+      // helper indices; a real codebase requires at least one non-helper index.
+      const available = resolved.indices.some(
+        (index) => !index.name.endsWith('_locations') && !index.name.endsWith('_settings')
+      );
+      return { available };
+    } catch (error) {
+      logger.debug(
+        `code_intelligence: availability check failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return { available: false };
+    }
+  },
+});
+
 export const internalSignificantEventsKICodeFeaturesRoutes = {
   ...identifyCodeFeaturesRoute,
   ...generateCodeQueriesRoute,
   ...reconcileCodeQueriesRoute,
+  ...codeIntelligenceAvailabilityRoute,
 };

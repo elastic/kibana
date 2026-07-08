@@ -13,7 +13,11 @@ import type {
 } from '@kbn/significant-events-schema';
 import { deriveQueryType } from '@kbn/streams-schema';
 import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
-import { computeFeatureUuid, normalizeFeatureSlug } from '@kbn/significant-events-schema';
+import {
+  computeFeatureUuid,
+  deriveKnowledgeIndicatorSource,
+  normalizeFeatureSlug,
+} from '@kbn/significant-events-schema';
 import type {
   StoredFeatureKnowledgeIndicator,
   StoredKnowledgeIndicator,
@@ -152,6 +156,7 @@ export function fromStoredFeature(doc: StoredFeatureKnowledgeIndicator): Feature
     excluded: doc.excluded,
     updated_at: doc['@timestamp'],
     expires_at: doc.expires_at,
+    source: deriveKnowledgeIndicatorSource(doc.evidence),
   };
 }
 
@@ -181,6 +186,7 @@ export function fromStoredQuery(doc: StoredQueryKnowledgeIndicator): QueryLink {
       severity_score,
       features,
       evidence: doc.evidence,
+      source: deriveKnowledgeIndicatorSource(doc.evidence),
     },
   };
 }
