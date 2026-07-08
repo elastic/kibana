@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { serializePack, packExportFilename, downloadPackAsJson } from './pack_serializer';
+import {
+  serializePack,
+  packExportFilename,
+  downloadPackAsJson,
+  DEFAULT_PACK_QUERY_INTERVAL_SECONDS,
+} from './pack_serializer';
 
 // URL.revokeObjectURL is absent from jsdom; install a no-op so the deferred
 // revocation in downloadPackAsJson doesn't throw. (createObjectURL exists but
@@ -118,6 +123,10 @@ describe('pack_serializer', () => {
     it('keys queries by the query NAME (from id), not the array index', () => {
       const exported = serializePack(buildApiPack());
       expect(Object.keys(exported.queries)).toEqual(['processes_elastic']);
+      // Query text is copied VERBATIM on export — internal whitespace is not
+      // collapsed. The uploader reviver preserves it on the way back in, so the
+      // multi-space SQL is a fixed point across export→import (round-trip proven
+      // end-to-end in queries_field.test.tsx).
       expect(exported.queries.processes_elastic.query).toBe('SELECT  *   FROM processes;');
     });
 
@@ -177,6 +186,35 @@ describe('pack_serializer', () => {
       );
       expect(Object.keys(exported.queries)).toEqual(['a', 'b']);
     });
+
+    it('preserves internal query whitespace verbatim (no collapsing on export)', () => {
+      const exported = serializePack(
+        buildApiPack({
+          queries: [{ id: 'ws', query: 'SELECT   a,    b   FROM   t;', interval: 30 }],
+        })
+      );
+      expect(exported.queries.ws.query).toBe('SELECT   a,    b   FROM   t;');
+    });
+
+    it('falls back to the default interval when a query interval is unparsable', () => {
+      const exported = serializePack(
+        buildApiPack({ queries: [{ id: 'q', query: 'SELECT 1;', interval: 'not-a-number' }] })
+      );
+      expect(exported.queries.q.interval).toBe(DEFAULT_PACK_QUERY_INTERVAL_SECONDS);
+    });
+  });
+
+  describe('serializePack — empty / zero-query packs', () => {
+    it('returns an empty queries object for the array form (queries: [])', () => {
+      const exported = serializePack(buildApiPack({ queries: [] }));
+      expect(exported.queries).toEqual({});
+      expect(exported.name).toBe('my-pack');
+    });
+
+    it('returns an empty queries object for the object form (queries: {})', () => {
+      const exported = serializePack({ name: 'empty', queries: {} });
+      expect(exported).toEqual({ name: 'empty', queries: {} });
+    });
   });
 
   describe('serializePack — name-keyed object fallback', () => {
@@ -221,6 +259,45 @@ describe('pack_serializer', () => {
     it('falls back for an empty or all-illegal name', () => {
       expect(packExportFilename('')).toBe('pack.json');
       expect(packExportFilename('///')).toBe('pack.json');
+    });
+
+    it('prefixes Windows-reserved device names so they are no longer reserved', () => {
+      expect(packExportFilename('CON')).toBe('_CON.json');
+      expect(packExportFilename('COM1')).toBe('_COM1.json');
+      expect(packExportFilename('NUL')).toBe('_NUL.json');
+      // Case-insensitive.
+      expect(packExportFilename('con')).toBe('_con.json');
+      expect(packExportFilename('lpt9')).toBe('_lpt9.json');
+    });
+
+    it('does not prefix names that merely start with a reserved token', () => {
+      // `console` is not a reserved device name.
+      expect(packExportFilename('console')).toBe('console.json');
+    });
+
+    it('strips control characters including NUL', () => {
+      // NUL (0x00), unit separator (0x1F), and DEL (0x7F) interleaved with text.
+      const NUL = String.fromCharCode(0x00);
+      const US = String.fromCharCode(0x1f);
+      const DEL = String.fromCharCode(0x7f);
+      const result = packExportFilename(`a${NUL}b${US}c${DEL}d`);
+      // Each control char is replaced with `_`.
+      expect(result).toBe('a_b_c_d.json');
+      // No raw control char (0x00-0x1F, 0x7F-0x9F) leaks into the filename.
+      const hasControlChar = result.split('').some((ch) => {
+        const code = ch.charCodeAt(0);
+
+        return code <= 0x1f || (code >= 0x7f && code <= 0x9f);
+      });
+      expect(hasControlChar).toBe(false);
+    });
+
+    it('caps the base length so the final filename stays under the filesystem limit', () => {
+      const longName = 'a'.repeat(500);
+      const result = packExportFilename(longName);
+      const base = result.replace(/\.json$/, '');
+      expect(base.length).toBeLessThanOrEqual(200);
+      expect(result.endsWith('.json')).toBe(true);
     });
   });
 

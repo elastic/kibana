@@ -391,10 +391,14 @@ export const deserializeSchedule = (
     };
   }
 
-  // Interval mode (explicit or legacy fallback).
+  // Interval mode (explicit or legacy fallback). Coerce with `Number()` so a
+  // numeric-string interval survives — the pack-upload reviver stringifies every
+  // `interval` key, so a re-imported interval-schedule pack arrives here as a
+  // string (e.g. "3600") and must not fall through to the default.
+  const parsedInterval = Number(input.interval);
   const interval =
-    typeof input.interval === 'number' && input.interval > 0
-      ? input.interval
+    Number.isFinite(parsedInterval) && parsedInterval > 0
+      ? parsedInterval
       : DEFAULT_INTERVAL_SECONDS;
 
   return {

@@ -47,10 +47,12 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
 
     try {
       parsedContent = JSON.parse(content.replaceAll('\\\n', ''), (key, value) => {
-        if (key === 'query') {
-          // remove any multiple spaces from the query
-          return value.replaceAll(/\s(?=\s)/gm, '');
-        }
+        // Query text is preserved verbatim: collapsing internal whitespace
+        // broke the export→import round-trip (an exported query no longer
+        // matched what was imported). osquery accepts multi-space SQL as-is, so
+        // keeping the text untouched is both lossless and a fixed point for the
+        // JSON round-trip. Both `.json` and legacy `.conf` packs flow through
+        // this same reviver, so neither path collapses whitespace anymore.
 
         if (key === 'interval') {
           // convert interval int to string

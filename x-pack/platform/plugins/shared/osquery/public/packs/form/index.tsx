@@ -455,7 +455,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
         <EuiHorizontalRule />
 
-        <QueriesField euiFieldProps={euiFieldProps} />
+        <QueriesField euiFieldProps={euiFieldProps} editMode={editMode} />
       </FormProvider>
       <EuiSpacer size="xxl" />
       <EuiSpacer size="xxl" />

@@ -34,7 +34,8 @@ const DELETE_MODAL_CONFIG = {
 };
 
 const PackRowActionsComponent: React.FC<PackRowActionsProps> = ({ item }) => {
-  const permissions = useKibana().services.application.capabilities.osquery;
+  const { application, notifications } = useKibana().services;
+  const permissions = application.capabilities.osquery;
   const isExportPackEnabled = useIsExperimentalFeatureEnabled('exportPack');
   const { push } = useHistory();
 
@@ -52,8 +53,22 @@ const PackRowActionsComponent: React.FC<PackRowActionsProps> = ({ item }) => {
   const handleDelete = useCallback(() => deletePackMutation.mutateAsync(), [deletePackMutation]);
 
   const handleExport = useCallback(() => {
-    downloadPackAsJson(item);
-  }, [item]);
+    try {
+      downloadPackAsJson(item);
+      notifications.toasts.addSuccess(
+        i18n.translate('xpack.osquery.packList.rowActions.exportSuccessToast', {
+          defaultMessage: 'Pack exported successfully',
+        })
+      );
+    } catch (error) {
+      notifications.toasts.addDanger(
+        error?.body?.message ??
+          i18n.translate('xpack.osquery.packList.rowActions.exportErrorToast', {
+            defaultMessage: 'Failed to export pack',
+          })
+      );
+    }
+  }, [item, notifications]);
 
   const actionsAriaLabel = useMemo(
     () =>
@@ -96,6 +111,11 @@ const PackRowActionsComponent: React.FC<PackRowActionsProps> = ({ item }) => {
     []
   );
 
+  const exportAction = useMemo(
+    () => (isExportPackEnabled ? { onExport: handleExport, label: exportLabel } : undefined),
+    [isExportPackEnabled, handleExport, exportLabel]
+  );
+
   return (
     <RowActionsMenu
       itemName={item.name}
@@ -109,8 +129,7 @@ const PackRowActionsComponent: React.FC<PackRowActionsProps> = ({ item }) => {
       onEdit={handleEdit}
       onDuplicate={handleDuplicate}
       onDelete={handleDelete}
-      onExport={isExportPackEnabled ? handleExport : undefined}
-      exportLabel={isExportPackEnabled ? exportLabel : undefined}
+      exportAction={exportAction}
     />
   );
 };

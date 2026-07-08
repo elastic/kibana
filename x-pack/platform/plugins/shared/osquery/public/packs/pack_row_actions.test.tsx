@@ -35,11 +35,22 @@ jest.mock('./use_delete_pack', () => ({
   useDeletePack: () => ({ mutateAsync: jest.fn().mockResolvedValue(undefined) }),
 }));
 
+// handleExport reports success/failure through the notifications service, so the
+// mock must expose toasts (matches the real Kibana core notifications shape).
+const mockAddSuccess = jest.fn();
+const mockAddDanger = jest.fn();
+let mockWritePacksCapability = true;
+
 jest.mock('../common/lib/kibana', () => ({
   useKibana: () => ({
-    services: { application: { capabilities: { osquery: { writePacks: true } } } },
+    services: {
+      application: { capabilities: { osquery: { writePacks: mockWritePacksCapability } } },
+      notifications: { toasts: { addSuccess: mockAddSuccess, addDanger: mockAddDanger } },
+    },
   }),
 }));
+
+const downloadPackAsJsonMock = downloadPackAsJson as jest.MockedFunction<typeof downloadPackAsJson>;
 
 const item = {
   saved_object_id: 'so-1',
@@ -53,26 +64,72 @@ const renderWithIntl = (ui: React.ReactElement) =>
 describe('PackRowActions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockWritePacksCapability = true;
     useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
   });
 
-  it('exports the row pack when Export pack is clicked (flag on)', () => {
-    renderWithIntl(React.createElement(PackRowActions, { item }));
+  describe('export gating', () => {
+    it('exports the row pack when Export pack is clicked (flag on, writePacks true)', () => {
+      renderWithIntl(React.createElement(PackRowActions, { item }));
 
-    fireEvent.click(screen.getByLabelText('Actions for My Pack'));
-    fireEvent.click(screen.getByText('Export pack'));
+      fireEvent.click(screen.getByLabelText('Actions for My Pack'));
+      fireEvent.click(screen.getByText('Export pack'));
 
-    expect(downloadPackAsJson).toHaveBeenCalledTimes(1);
-    expect(downloadPackAsJson).toHaveBeenCalledWith(item);
+      expect(downloadPackAsJsonMock).toHaveBeenCalledTimes(1);
+      expect(downloadPackAsJsonMock).toHaveBeenCalledWith(item);
+    });
+
+    it('renders and exports even when writePacks is false (export is read-gated, not write-gated)', () => {
+      mockWritePacksCapability = false;
+      renderWithIntl(React.createElement(PackRowActions, { item }));
+
+      fireEvent.click(screen.getByLabelText('Actions for My Pack'));
+
+      // Export stays available; write-only actions (Duplicate/Delete) do not.
+      expect(screen.getByText('Export pack')).toBeInTheDocument();
+      expect(screen.queryByText('Duplicate pack')).not.toBeInTheDocument();
+      expect(screen.queryByText('Delete pack')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByText('Export pack'));
+      expect(downloadPackAsJsonMock).toHaveBeenCalledTimes(1);
+      expect(downloadPackAsJsonMock).toHaveBeenCalledWith(item);
+    });
+
+    it('does not render the Export pack action when the flag is off', () => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
+      renderWithIntl(React.createElement(PackRowActions, { item }));
+
+      fireEvent.click(screen.getByLabelText('Actions for My Pack'));
+
+      expect(screen.queryByText('Export pack')).not.toBeInTheDocument();
+      expect(downloadPackAsJsonMock).not.toHaveBeenCalled();
+    });
   });
 
-  it('does not render the Export pack action when the flag is off', () => {
-    useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
-    renderWithIntl(React.createElement(PackRowActions, { item }));
+  describe('export toasts', () => {
+    it('shows a success toast when the export succeeds', () => {
+      renderWithIntl(React.createElement(PackRowActions, { item }));
 
-    fireEvent.click(screen.getByLabelText('Actions for My Pack'));
+      fireEvent.click(screen.getByLabelText('Actions for My Pack'));
+      fireEvent.click(screen.getByText('Export pack'));
 
-    expect(screen.queryByText('Export pack')).not.toBeInTheDocument();
-    expect(downloadPackAsJson).not.toHaveBeenCalled();
+      expect(mockAddSuccess).toHaveBeenCalledTimes(1);
+      expect(mockAddDanger).not.toHaveBeenCalled();
+    });
+
+    it('shows a danger toast and does not throw when the export fails', () => {
+      downloadPackAsJsonMock.mockImplementationOnce(() => {
+        throw new Error('boom');
+      });
+      renderWithIntl(React.createElement(PackRowActions, { item }));
+
+      fireEvent.click(screen.getByLabelText('Actions for My Pack'));
+
+      // The click must not throw even though downloadPackAsJson does.
+      expect(() => fireEvent.click(screen.getByText('Export pack'))).not.toThrow();
+
+      expect(mockAddDanger).toHaveBeenCalledTimes(1);
+      expect(mockAddSuccess).not.toHaveBeenCalled();
+    });
   });
 });

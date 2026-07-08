@@ -25,9 +25,13 @@ import type { ScheduleFormData } from '../../components/schedule_section/types';
 
 interface QueriesFieldProps {
   euiFieldProps: EuiComboBoxProps<{}>;
+  editMode?: boolean;
 }
 
-const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) => {
+const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
+  euiFieldProps,
+  editMode = false,
+}) => {
   const {
     field: { value: fieldValue },
   } = useController<{ queries: PackQueryFormData[] }, 'queries'>({
@@ -171,45 +175,57 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
               // here is what makes an exported pack round-trip 1:1.
               ecs_mapping: newQuery.ecs_mapping ?? parsedContent.ecs_mapping,
             },
-            (value) => !isEmpty(value) || value === false
+            // Keep every value the file actually specified. `isEmpty` cannot be
+            // used as the keep-predicate here: `isEmpty(number)` and
+            // `isEmpty(boolean)` both return true, so numeric `timeout`/`interval`
+            // and boolean `snapshot`/`removed` (including `true`) would be
+            // silently dropped on re-import. Keep anything that is not
+            // undefined/null/'' so numbers and booleans survive verbatim.
+            (value) => value !== undefined && value !== null && value !== ''
           )
         )
       );
 
-      // A Kibana-pack JSON carries its own `name`/`description`; prefer those so
-      // the pack reconstructs 1:1 across clusters. Fall back to the filename for
-      // community `.conf` files that have no in-file name.
-      if (!isEmpty(parsedContent.name)) {
-        setValue('name', parsedContent.name);
-      } else {
-        handleNameChange(uploadedPackName);
-      }
+      // In EDIT mode the form is already populated with the existing pack's
+      // metadata/schedule/enabled flag; an upload must not clobber it. Only a
+      // fresh CREATE flow adopts the file's name/description/schedule and forces
+      // the pack disabled.
+      if (!editMode) {
+        // A Kibana-pack JSON carries its own `name`/`description`; prefer those
+        // so the pack reconstructs 1:1 across clusters. Fall back to the
+        // filename for community `.conf` files that have no in-file name.
+        if (!isEmpty(parsedContent.name)) {
+          setValue('name', parsedContent.name);
+        } else {
+          handleNameChange(uploadedPackName);
+        }
 
-      if (!isEmpty(parsedContent.description)) {
-        setValue('description', parsedContent.description);
-      }
+        if (!isEmpty(parsedContent.description)) {
+          setValue('description', parsedContent.description);
+        }
 
-      // Imported packs land disabled regardless of any `enabled` in the file:
-      // the operator assigns target-cluster policies and enables deliberately.
-      setValue('enabled', false);
+        // Imported packs land disabled regardless of any `enabled` in the file:
+        // the operator assigns target-cluster policies and enables deliberately.
+        setValue('enabled', false);
 
-      // Pack-level schedule (rrule / interval), carried 1:1 when the file has
-      // one. Presence is the gate: export only emits it when the source pack
-      // had a schedule (rruleScheduling on), and on a flag-off target the form's
-      // deserializer/submit path strips it — so setting it here is safe either
-      // way and dormant until the feature ships.
-      if (!isEmpty(parsedContent.schedule_type)) {
-        setValue(
-          'schedule',
-          deserializeSchedule({
-            schedule_type: parsedContent.schedule_type,
-            interval: parsedContent.interval,
-            rrule_schedule: parsedContent.rrule_schedule,
-          })
-        );
+        // Pack-level schedule (rrule / interval), carried 1:1 when the file has
+        // one. Presence is the gate: export only emits it when the source pack
+        // had a schedule (rruleScheduling on), and on a flag-off target the
+        // form's deserializer/submit path strips it — so setting it here is safe
+        // either way and dormant until the feature ships.
+        if (!isEmpty(parsedContent.schedule_type)) {
+          setValue(
+            'schedule',
+            deserializeSchedule({
+              schedule_type: parsedContent.schedule_type,
+              interval: parsedContent.interval,
+              rrule_schedule: parsedContent.rrule_schedule,
+            })
+          );
+        }
       }
     },
-    [handleNameChange, replace, setValue]
+    [editMode, handleNameChange, replace, setValue]
   );
 
   const tableData = useMemo(() => (fieldValue?.length ? fieldValue : []), [fieldValue]);

@@ -126,17 +126,20 @@ describe('RowActionsMenu', () => {
   });
 
   describe('export action', () => {
-    it('does not render an export item when onExport is not provided', () => {
+    it('does not render an export item when exportAction is not provided', () => {
       renderWithIntl(React.createElement(RowActionsMenu, defaultProps));
       fireEvent.click(screen.getByLabelText('Actions for test-item'));
 
       expect(screen.queryByText('Export')).not.toBeInTheDocument();
     });
 
-    it('renders an export item when onExport is provided', () => {
+    it('renders an export item when exportAction is provided', () => {
       const onExport = jest.fn();
       renderWithIntl(
-        React.createElement(RowActionsMenu, { ...defaultProps, onExport, exportLabel: 'Export' })
+        React.createElement(RowActionsMenu, {
+          ...defaultProps,
+          exportAction: { onExport, label: 'Export' },
+        })
       );
       fireEvent.click(screen.getByLabelText('Actions for test-item'));
 
@@ -149,8 +152,7 @@ describe('RowActionsMenu', () => {
         React.createElement(RowActionsMenu, {
           ...defaultProps,
           canWrite: false,
-          onExport,
-          exportLabel: 'Export',
+          exportAction: { onExport, label: 'Export' },
         })
       );
       fireEvent.click(screen.getByLabelText('Actions for test-item'));
@@ -162,7 +164,10 @@ describe('RowActionsMenu', () => {
     it('calls onExport when export is clicked', () => {
       const onExport = jest.fn();
       renderWithIntl(
-        React.createElement(RowActionsMenu, { ...defaultProps, onExport, exportLabel: 'Export' })
+        React.createElement(RowActionsMenu, {
+          ...defaultProps,
+          exportAction: { onExport, label: 'Export' },
+        })
       );
       fireEvent.click(screen.getByLabelText('Actions for test-item'));
       fireEvent.click(screen.getByText('Export'));

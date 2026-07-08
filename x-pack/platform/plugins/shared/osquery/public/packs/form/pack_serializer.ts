@@ -9,13 +9,23 @@ import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import type { RRuleScheduleConfig, ScheduleType } from '../../../common/schedule';
 
 /**
- * A single query as it appears on a pack fetched from the public packs API and
- * held by the Packs table. Note this is NOT the saved-object *type*: the public
- * API returns `queries` as an ARRAY where the query name lives in `id`, and
- * `ecs_mapping` as an ARRAY of `{ key, value }` (not the osquery object form).
- * This shape is the ground truth the exporter reads — verified at runtime. All
- * fields are optional/loose because the static `PackSavedObject` type does not
- * match this runtime shape; the serializer narrows defensively.
+ * Default query interval (seconds) applied when a pack query carries no parsable
+ * interval. Mirrors the osquery scheduling default of one hour.
+ */
+export const DEFAULT_PACK_QUERY_INTERVAL_SECONDS = 3600;
+
+/**
+ * AUTHORITATIVE NOTE ON QUERY SHAPES.
+ *
+ * A pack's `queries` arrive in one of two shapes, and BOTH are live:
+ *  - the public-API ARRAY form (the `find` route) where the query name lives in
+ *    `id` and `ecs_mapping` is an ARRAY of `{ key, value }`; and
+ *  - the name-keyed RECORD form (the saved-object `read` route / internal API)
+ *    where the key is the query name and `ecs_mapping` is the osquery object.
+ *
+ * Neither branch is dead code. The serializer detects the shape at runtime and
+ * narrows defensively — the static `PackSavedObject` type does not match the
+ * runtime array shape, so `ApiPackQuery` fields are kept optional/loose.
  */
 interface ApiPackQuery {
   id?: string;
@@ -27,20 +37,18 @@ interface ApiPackQuery {
   snapshot?: boolean;
   removed?: boolean;
   ecs_mapping?: ECSMapping | Array<{ key: string; value: ECSMapping[string] }>;
-  [key: string]: unknown;
 }
 
 /**
  * The exporter reads a pack's `name`, `description`, and `queries`. `queries` is
- * typed loosely (array or record) so callers can pass their real
- * `PackSavedObject` / `PackItem` without a cast — the static SO type declares
- * `queries` as a name-keyed record, but at runtime the public API delivers an
- * array (name in `id`). Both are handled at runtime.
+ * typed as either shape (see the authoritative note above) so callers can pass
+ * their real `PackSavedObject` / `PackItem` — `Array.isArray` narrows the union
+ * at runtime instead of relying on a blind cast.
  */
 interface ExportablePack {
   name: string;
   description?: string;
-  queries: unknown;
+  queries: ApiPackQuery[] | Record<string, ApiPackQuery>;
   // Pack-level schedule. Only present when the `rruleScheduling` feature is on
   // (the read API strips it otherwise), so "export when present" is self-gating.
   schedule_type?: ScheduleType;
@@ -65,10 +73,12 @@ export interface ExportedPackQuery {
 }
 
 /**
- * A pack exported as portable Kibana-pack JSON. Carries the pack `name` and
- * `description` so it can be reconstructed 1:1 on another cluster, plus the
- * queries keyed by name. Deliberately omits `enabled` (imported packs land
- * disabled) and all cluster-specific data (policy_ids, shards, internal IDs).
+ * A pack exported as portable Kibana-pack JSON. Round-trips the portable fields
+ * (name / description / queries / schedule); cluster-specific state and
+ * enablement are reassigned on import. The export is intentionally lossy: it
+ * omits `enabled` (the importer force-sets imported packs to disabled),
+ * `policy_ids`, `shards`, and all internal IDs, and narrows a query's `version`
+ * array to its first element.
  */
 export interface ExportedPack {
   name: string;
@@ -119,7 +129,9 @@ const serializeQuery = (name: string, source: ApiPackQuery): [string, ExportedPa
 
   const query: ExportedPackQuery = {
     query: source.query ?? '',
-    interval: Number.isFinite(parsedInterval) ? parsedInterval : 3600,
+    interval: Number.isFinite(parsedInterval)
+      ? parsedInterval
+      : DEFAULT_PACK_QUERY_INTERVAL_SECONDS,
   };
 
   if (typeof source.timeout === 'number') {
@@ -131,6 +143,8 @@ const serializeQuery = (name: string, source: ApiPackQuery): [string, ExportedPa
   }
 
   if (source.version) {
+    // By design we export a single osquery version (version is conventionally a
+    // scalar minimum), so an array source is narrowed to its first element.
     query.version = Array.isArray(source.version) ? source.version[0] : source.version;
   }
 
@@ -154,20 +168,18 @@ const serializeQuery = (name: string, source: ApiPackQuery): [string, ExportedPa
  * Serialize a pack into portable Kibana-pack JSON.
  *
  * Emits `name`, `description` (when present), and `queries` keyed by the query
- * NAME. Reads whichever query shape the pack carries — the public-API array
- * (name in `id`) or the name-keyed object — converts `ecs_mapping` to the
- * osquery object form and `interval` to a number, and drops all
- * cluster-internal / saved-object fields (and `enabled`) by construction: we
- * only ever copy the portable fields onto the output.
+ * NAME. Reads whichever query shape the pack carries (see the authoritative
+ * note at the top of this file), converts `ecs_mapping` to the osquery object
+ * form and `interval` to a number, and drops all cluster-internal /
+ * saved-object fields (and `enabled`) by construction: we only ever copy the
+ * portable fields onto the output.
  */
 export const serializePack = (pack: ExportablePack): ExportedPack => {
   const entries = Array.isArray(pack.queries)
     ? // Public-API array form: the query name lives in `id`.
-      (pack.queries as ApiPackQuery[]).map((q, index) => serializeQuery(q.id ?? `${index}`, q))
+      pack.queries.map((q, index) => serializeQuery(q.id ?? `${index}`, q))
     : // Name-keyed object form (saved object / internal API).
-      Object.entries((pack.queries ?? {}) as Record<string, ApiPackQuery>).map(([name, q]) =>
-        serializeQuery(name, q)
-      );
+      Object.entries(pack.queries ?? {}).map(([name, q]) => serializeQuery(name, q));
 
   const exported: ExportedPack = {
     name: pack.name,
@@ -178,9 +190,9 @@ export const serializePack = (pack: ExportablePack): ExportedPack => {
     exported.description = pack.description;
   }
 
-  // Pack-level schedule — carry it through 1:1 when present. It only appears on
-  // the source pack when `rruleScheduling` is enabled, so this is dormant until
-  // that feature ships.
+  // Pack-level schedule — carry the portable schedule fields through when
+  // present. It only appears on the source pack when `rruleScheduling` is
+  // enabled, so this is dormant until that feature ships.
   if (pack.schedule_type === 'rrule' && pack.rrule_schedule) {
     exported.schedule_type = 'rrule';
     exported.rrule_schedule = pack.rrule_schedule;
@@ -194,17 +206,56 @@ export const serializePack = (pack: ExportablePack): ExportedPack => {
 
 const FILENAME_FALLBACK = 'pack';
 
-// Windows-reserved chars, path separators, and any whitespace/control char.
+// Windows-reserved chars, path separators, and any whitespace. Control chars
+// (C0/C1, NUL, DEL) are handled separately in `stripIllegalChars` to keep this
+// regex free of control-char literals.
 const ILLEGAL_FILENAME_CHARS = /[<>:"/\\|?*\s]/g;
+
+// Windows-reserved device names (case-insensitive), which cannot be used as a
+// bare basename even with an extension.
+const WINDOWS_RESERVED_NAMES = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i;
+
+// Cap the base so the final filename stays well under the 255-byte limit
+// common to most filesystems, leaving room for the `.json` extension.
+const MAX_FILENAME_BASE_LENGTH = 200;
+
+const trimSeparators = (value: string): string => value.replace(/^[._]+|[._]+$/g, '');
+
+/**
+ * Replace illegal filename characters with `_`: the Windows-reserved chars,
+ * path separators, and whitespace via `ILLEGAL_FILENAME_CHARS`, plus C0/C1
+ * control chars (0x00–0x1F, 0x7F–0x9F) matched by code point so no control-char
+ * literal appears in a regex.
+ */
+const stripIllegalChars = (value: string): string =>
+  value
+    .replace(ILLEGAL_FILENAME_CHARS, '_')
+    .split('')
+    .map((char) => {
+      const code = char.charCodeAt(0);
+
+      return code <= 0x1f || (code >= 0x7f && code <= 0x9f) ? '_' : char;
+    })
+    .join('');
 
 /**
  * Derive a safe, cross-platform `.json` filename from a pack name. Illegal
- * filesystem characters and whitespace are replaced with `_`; surrounding dots
- * and underscores are trimmed; an empty result falls back to a stable default
- * so the download is never empty or misleading.
+ * filesystem characters, control chars, and whitespace are replaced with `_`;
+ * surrounding dots and underscores are trimmed; the base is length-capped;
+ * Windows-reserved device names (CON, PRN, …) are prefixed so they are no
+ * longer reserved; and an empty result falls back to a stable default so the
+ * download is never empty or misleading.
  */
 export const packExportFilename = (name: string): string => {
-  const base = (name ?? '').replace(ILLEGAL_FILENAME_CHARS, '_').replace(/^[._]+|[._]+$/g, '');
+  let base = trimSeparators(stripIllegalChars(name ?? ''));
+
+  if (base.length > MAX_FILENAME_BASE_LENGTH) {
+    base = trimSeparators(base.slice(0, MAX_FILENAME_BASE_LENGTH));
+  }
+
+  if (WINDOWS_RESERVED_NAMES.test(base)) {
+    base = `_${base}`;
+  }
 
   return `${base || FILENAME_FALLBACK}.json`;
 };

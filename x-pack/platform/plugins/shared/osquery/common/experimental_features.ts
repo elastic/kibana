@@ -32,8 +32,8 @@ export const allowedExperimentalValues = Object.freeze({
   exportResults: true,
   /**
    * Enables the per-pack "Export pack" row action in the Packs table, which
-   * serializes a pack to an osquery-standard `.conf` file and downloads it
-   * (round-trips through the existing pack importer). Read-only; requires only
+   * serializes a pack to a portable Kibana-pack `.json` file and downloads it
+   * (re-imports via the existing pack uploader). Read-only; requires only
    * pack read access.
    */
   exportPack: false,

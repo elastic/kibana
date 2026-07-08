@@ -43,11 +43,11 @@ interface RowActionsMenuProps {
   /**
    * Optional export action. When provided, an "Export" item is rendered
    * regardless of write permissions (export is a read-only operation).
-   * Consumers that do not provide it (e.g. the saved-query list) render an
-   * unchanged menu.
+   * Grouping the handler and label into a single prop enforces the invariant
+   * that a label is always present whenever the action is enabled. Consumers
+   * that do not provide it (e.g. the saved-query list) render an unchanged menu.
    */
-  onExport?: () => void;
-  exportLabel?: string;
+  exportAction?: { onExport: () => void; label: string };
 }
 
 /**
@@ -69,8 +69,7 @@ const RowActionsMenuComponent: React.FC<RowActionsMenuProps> = ({
   onEdit,
   onDuplicate,
   onDelete,
-  onExport,
-  exportLabel,
+  exportAction,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
@@ -101,8 +100,8 @@ const RowActionsMenuComponent: React.FC<RowActionsMenuProps> = ({
 
   const handleExportClick = useCallback(() => {
     closePopover();
-    onExport?.();
-  }, [closePopover, onExport]);
+    exportAction?.onExport();
+  }, [closePopover, exportAction]);
 
   const handleCloseDeleteModal = useCallback(() => {
     setIsDeleteModalVisible(false);
@@ -121,10 +120,10 @@ const RowActionsMenuComponent: React.FC<RowActionsMenuProps> = ({
       </EuiContextMenuItem>,
     ];
 
-    if (onExport) {
+    if (exportAction) {
       items.push(
         <EuiContextMenuItem key="export" icon="export" onClick={handleExportClick}>
-          {exportLabel}
+          {exportAction.label}
         </EuiContextMenuItem>
       );
     }
@@ -153,9 +152,8 @@ const RowActionsMenuComponent: React.FC<RowActionsMenuProps> = ({
     handleDeleteClick,
     canWrite,
     isReadOnly,
-    onExport,
+    exportAction,
     editLabel,
-    exportLabel,
     duplicateLabel,
     deleteLabel,
   ]);
