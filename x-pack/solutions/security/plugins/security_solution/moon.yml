@@ -299,6 +299,7 @@ dependsOn:
   - '@kbn/workflows-management-plugin'
   - '@kbn/core-application-browser-mocks'
   - '@kbn/date-range-picker'
+  - '@kbn/chart-icons'
 tags:
   - plugin
   - prod
