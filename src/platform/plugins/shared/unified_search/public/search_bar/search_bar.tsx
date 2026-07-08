@@ -520,8 +520,12 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
         return;
     }
 
-    const telemetryService = await this.services.esql?.getTelemetryService();
-    telemetryService?.trackQuerySubmitted({ source, query: query.esql });
+    try {
+      const telemetryService = await this.services.esql?.getTelemetryService();
+      telemetryService?.trackQuerySubmitted({ source, query: query.esql });
+    } catch {
+      // best effort, don't block the query submission if telemetry fails
+    }
   }
 
   public onQueryBarSubmit = (
@@ -550,11 +554,8 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
             this.isDirty()
           );
         }
-        try {
-          void this.trackESQLQuerySubmitted(this.state.query, trigger);
-        } catch {
-          // best-effort telemetry; failures shouldn't affect the search bar
-        }
+
+        void this.trackESQLQuerySubmitted(this.state.query, trigger);
         this.services.usageCollection?.reportUiCounter(
           this.services.appName,
           METRIC_TYPE.CLICK,
