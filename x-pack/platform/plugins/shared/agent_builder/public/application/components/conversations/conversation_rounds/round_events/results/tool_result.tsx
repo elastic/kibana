@@ -11,10 +11,12 @@ import {
   isQueryResult,
   isEsqlResultsResult,
   isErrorResult,
+  isResponseActionResult,
 } from '@kbn/agent-builder-common/tools/tool_result';
 import { QueryResult } from './query_result';
 import { EsqlResults } from './esql_results';
 import { ToolErrorResult } from './tool_error_result';
+import { ResponseActionResult } from './response_action_result';
 import { JsonCodeBlock } from '../json_code_block';
 
 interface ToolResultProps {
@@ -25,9 +27,15 @@ export const ToolResult: React.FC<ToolResultProps> = ({ result }) => {
   if (isQueryResult(result)) return <QueryResult result={result} />;
   if (isEsqlResultsResult(result)) return <EsqlResults result={result} />;
   if (isErrorResult(result)) return <ToolErrorResult result={result} />;
+  if (isResponseActionResult(result)) return <ResponseActionResult result={result} />;
   return <JsonCodeBlock data={result.data} />;
 };
 
 export const isInlineRenderableResult = (result: ToolResultType): boolean => {
-  return isQueryResult(result) || isEsqlResultsResult(result) || isErrorResult(result);
+  return (
+    isQueryResult(result) ||
+    isEsqlResultsResult(result) ||
+    isErrorResult(result) ||
+    isResponseActionResult(result)
+  );
 };

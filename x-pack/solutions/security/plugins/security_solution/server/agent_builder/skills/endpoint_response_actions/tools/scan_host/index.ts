@@ -98,6 +98,7 @@ export const scanHostTool = (
                 tool_result_id: getToolResultId(),
                 type: ToolResultType.other,
                 data: {
+                  kind: 'response_action_result' as const,
                   hostName,
                   found: false,
                   reason: 'endpoint_not_found' as const,
@@ -151,6 +152,8 @@ export const scanHostTool = (
               tool_result_id: getToolResultId(),
               type: ToolResultType.other,
               data: {
+                kind: 'response_action_result' as const,
+                action: 'scan' as const,
                 hostName,
                 found: true,
                 path,

@@ -88,6 +88,7 @@ export const isolateHostTool = (
                 tool_result_id: getToolResultId(),
                 type: ToolResultType.other,
                 data: {
+                  kind: 'response_action_result' as const,
                   hostName,
                   found: false,
                   reason: 'endpoint_not_found' as const,
@@ -140,6 +141,8 @@ export const isolateHostTool = (
               tool_result_id: getToolResultId(),
               type: ToolResultType.other,
               data: {
+                kind: 'response_action_result' as const,
+                action: 'isolate' as const,
                 actionId: actionDetails.id,
                 status: actionDetails.status,
                 wasSuccessful: actionDetails.wasSuccessful,
