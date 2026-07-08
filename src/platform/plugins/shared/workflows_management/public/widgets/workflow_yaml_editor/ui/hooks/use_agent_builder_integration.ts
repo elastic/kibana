@@ -11,9 +11,10 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { v4 } from 'uuid';
 import { isConversationIdSetEvent } from '@kbn/agent-builder-common/chat/events';
+import type { monaco } from '@kbn/code-editor';
+import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import type { monaco } from '@kbn/monaco';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { setAiAssisted } from '../../../../entities/workflows/store/workflow_detail/slice';
 import { AttachmentBridge, ProposalManager } from '../../../../features/ai_integration';
@@ -33,6 +34,10 @@ interface UseAgentBuilderIntegrationParams {
 interface OpenAgentChatOptions {
   initialMessage?: string;
   autoSendInitialMessage?: boolean;
+  // Internal: auto-open path from the mount effect. Tags the chat-opened /
+  // session-completed events with `autoOpened: true` so analysts can filter
+  // out non-deliberate opens when measuring engagement.
+  isAutoOpen?: boolean;
 }
 
 interface UseAgentBuilderIntegrationReturn {
@@ -42,6 +47,11 @@ interface UseAgentBuilderIntegrationReturn {
 }
 
 const ATTACHMENT_SYNC_DEBOUNCE_TIME = 500;
+
+const WORKFLOW_EDITOR_GREETING = i18n.translate(
+  'workflowsManagement.agentBuilder.workflowEditorGreeting',
+  { defaultMessage: 'What do you want to automate?' }
+);
 
 export const useAgentBuilderIntegration = ({
   editorRef,
@@ -61,10 +71,12 @@ export const useAgentBuilderIntegration = ({
   const attachmentBridgeRef = useRef<AttachmentBridge | null>(null);
   const trackerRef = useRef<ProposalTracker | null>(null);
   const chatOpenedReportedRef = useRef(false);
+  const sessionAutoOpenedRef = useRef(false);
   const conversationIdRef = useRef<string | undefined>(undefined);
   const validationErrorsRef = useRef(validationErrors);
   validationErrorsRef.current = validationErrors;
   const chatRefHandle = useRef<{ close: () => void } | null>(null);
+  const hasAutoOpenedRef = useRef(false);
   const unsavedWorkflowIdRef = useRef<string>(v4());
   const workflowNameRef = useRef(workflowName);
   workflowNameRef.current = workflowName;
@@ -207,6 +219,7 @@ export const useAgentBuilderIntegration = ({
       const attachment = buildAttachment(yaml);
       agentBuilder.setChatConfig({
         sessionTag: `workflow-editor:${attachmentId}`,
+        greetingMessage: WORKFLOW_EDITOR_GREETING,
         attachments: [attachment],
       });
       agentBuilder.addAttachment(attachment);
@@ -236,9 +249,11 @@ export const useAgentBuilderIntegration = ({
           proposalsAccepted: records.filter((r) => r.status === 'accepted').length,
           proposalsDeclined: records.filter((r) => r.status === 'declined').length,
           proposalsPending: records.filter((r) => r.status === 'pending').length,
+          autoOpened: sessionAutoOpenedRef.current,
         });
       }
       chatOpenedReportedRef.current = false;
+      sessionAutoOpenedRef.current = false;
       conversationIdRef.current = undefined;
 
       if (debounceTimer) {
@@ -279,6 +294,7 @@ export const useAgentBuilderIntegration = ({
 
       const { chatRef } = agentBuilder.openChat({
         sessionTag: `workflow-editor:${attachmentId}`,
+        greetingMessage: WORKFLOW_EDITOR_GREETING,
         initialMessage: options?.initialMessage,
         autoSendInitialMessage: options?.autoSendInitialMessage,
         attachments: [
@@ -294,10 +310,12 @@ export const useAgentBuilderIntegration = ({
       chatRefHandle.current = chatRef;
 
       if (!chatOpenedReportedRef.current) {
+        sessionAutoOpenedRef.current = options?.isAutoOpen === true;
         telemetry.reportWorkflowAiChatOpened({
           entryPoint: 'workflow_editor',
           sessionType: workflowId ? 'edit' : 'create',
           workflowId,
+          autoOpened: sessionAutoOpenedRef.current,
         });
         chatOpenedReportedRef.current = true;
       }
@@ -313,6 +331,17 @@ export const useAgentBuilderIntegration = ({
       telemetry,
     ]
   );
+
+  // Auto-open the sidebar once per editor mount so users land on the workflow
+  // editor with the AI Agent already available. Guarded by hasAutoOpenedRef so
+  // it never re-fires within the same session — if the user closes the sidebar,
+  // it stays closed until they open it again.
+  useEffect(() => {
+    if (!isEditorMounted || !agentBuilder || !isExperimentalEnabled) return;
+    if (hasAutoOpenedRef.current) return;
+    hasAutoOpenedRef.current = true;
+    openAgentChat({ isAutoOpen: true });
+  }, [isEditorMounted, agentBuilder, isExperimentalEnabled, openAgentChat]);
 
   return {
     openAgentChat,

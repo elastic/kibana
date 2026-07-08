@@ -130,7 +130,7 @@ describe('executeRuleOperations', () => {
       });
     });
 
-    it('stores no_data_strategy: "emit" and no_data block on the rule data', async () => {
+    it('stores no_data_strategy and no_data block on the rule data', async () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
@@ -139,13 +139,13 @@ describe('executeRuleOperations', () => {
             breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
             no_data: { query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name' },
           },
-          no_data_strategy: 'emit',
+          no_data_strategy: 'last_known_status',
         },
       ];
 
       const result = await executeRuleOperations({}, ops);
 
-      expect(result.data.no_data_strategy).toBe('emit');
+      expect(result.data.no_data_strategy).toBe('last_known_status');
       expect((result.data.query as { no_data?: { query: string } }).no_data).toEqual({
         query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name',
       });
@@ -679,13 +679,13 @@ describe('executeRuleOperations', () => {
       expect(result.data.recovery_strategy).toBe('query');
     });
 
-    it('passes validation for a rule with no_data_strategy: "emit"', async () => {
+    it('passes validation for a rule with a no_data_strategy', async () => {
       const ops: RuleOperation[] = [{ operation: 'validate' }];
 
       const result = await executeRuleOperations(
         {
           ...validRule,
-          no_data_strategy: 'emit',
+          no_data_strategy: 'last_known_status',
           query: {
             format: 'standalone',
             breach: { query: 'FROM metrics-* | STATS COUNT(*)' },
@@ -695,7 +695,7 @@ describe('executeRuleOperations', () => {
         ops
       );
 
-      expect(result.data.no_data_strategy).toBe('emit');
+      expect(result.data.no_data_strategy).toBe('last_known_status');
     });
   });
 
