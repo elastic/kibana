@@ -19,8 +19,6 @@ const getSkillIds = (results: Array<{ id: string }>) => results.map((skill) => s
 // The alerting V2 `rule-management` skill is registered as a built-in Agent
 // Builder skill but gated behind the `alerting:v2:enabled` advanced setting.
 apiTest.describe('Agent Builder — alerting V2 rule-management skill gating', () => {
-  // Only the stateful "enabled" case flips the global setting; track that so the
-  // afterAll reset is skipped on serverless (where the endpoint is unavailable).
   let didEnableAlertingV2 = false;
 
   apiTest.afterAll(async ({ apiClient, requestAuth }) => {
