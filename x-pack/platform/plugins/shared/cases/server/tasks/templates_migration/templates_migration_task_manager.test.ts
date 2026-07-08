@@ -845,6 +845,40 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(caseFind).toBeUndefined();
       expect(repo.bulkUpdate).not.toHaveBeenCalled();
     });
+
+    it('skips not-found (404) case updates and still completes the space', async () => {
+      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const caseSO = buildCaseSO('case-1', [
+        { key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' },
+      ]);
+      mockFindByType(configSO, [caseSO]);
+      // A 404 means the case can't be resolved for update (deleted, or a stored id/namespace that
+      // doesn't line up) — retrying will never succeed.
+      repo.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'case-1',
+            type: CASE_SAVED_OBJECT,
+            error: {
+              statusCode: 404,
+              error: 'Not Found',
+              message: 'Saved object [cases/case-1] not found',
+            },
+          },
+        ],
+      });
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      // The space is still flagged complete (not retried forever) despite the unresolvable case.
+      expect(repo.update).toHaveBeenCalledWith(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        configSO.id,
+        { legacyCasesMigrated: true },
+        expect.anything()
+      );
+    });
   });
 
   describe('existing-case backfill at scale (resumable)', () => {

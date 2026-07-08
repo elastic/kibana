@@ -42,8 +42,6 @@ You may need to check for this in hover events.
 
 */
 
-import jQuery from 'jquery';
-
 (function ($) {
     var options = {
         series: { threshold: null } // or { below: number, color: color spec}
