@@ -22,6 +22,7 @@ import { HistorySnapshotClient } from './domain/history_snapshot';
 import { CRUDClient } from './domain/crud';
 import { EntityMetadataClient } from './domain/entity_metadata';
 import { ResolutionClient } from './domain/resolution';
+import { ResolutionRulesClient } from './domain/resolution/rules';
 import type { TelemetryReporter } from './telemetry/events';
 import { createWorkflowTriggerEmitter } from './workflow/create_workflow_trigger_emitter';
 
@@ -146,6 +147,11 @@ export async function createRequestHandlerContext({
       esClient: core.elasticsearch.client.asCurrentUser,
       namespace,
     }),
+    entityResolutionRuleClient: new ResolutionRulesClient(
+      core.savedObjects.client,
+      namespace,
+      logger
+    ),
     remoteLogsExtractionClient,
     featureFlags: new FeatureFlags(core.uiSettings.client),
     logsExtractionClient,

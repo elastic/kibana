@@ -34,7 +34,6 @@ import {
   getSidebarHidden,
   getEsqlDataView,
 } from '@kbn/discover-utils';
-import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { isEqual, sortBy } from 'lodash';
@@ -329,22 +328,18 @@ export function getDataStateContainer({
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
-            const fetchMoreTracker =
-              scopedEbtManager.trackQueryPerformanceEvent('discoverFetchMore');
-
-            // Calculate query range in seconds
-            const timeRange = timefilter.getAbsoluteTime();
-            const queryRangeSeconds = getTimeDifferenceInSeconds(timeRange);
+            const fetchMoreTracker = scopedEbtManager.trackQueryPerformanceEvent({
+              eventName: 'discoverFetchMore',
+              query: getCurrentTab().appState.query,
+              timeRange: timefilter.getAbsoluteTime(),
+            });
 
             await fetchMoreDocuments({
               ...commonFetchParams,
               abortController: abortControllerFetchMore,
             });
 
-            fetchMoreTracker.reportEvent({
-              queryRangeSeconds,
-              requests: inspectorAdapters.requests?.getRequestsSince(fetchMoreTracker.startTime),
-            });
+            fetchMoreTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
 
             return;
           }
@@ -469,11 +464,11 @@ export function getDataStateContainer({
           }
 
           const prevAutoRefreshDone = autoRefreshDone;
-          const fetchAllTracker = scopedEbtManager.trackQueryPerformanceEvent('discoverFetchAll');
-
-          // Calculate query range in seconds
-          const timeRange = timefilter.getAbsoluteTime();
-          const queryRangeSeconds = getTimeDifferenceInSeconds(timeRange);
+          const fetchAllTracker = scopedEbtManager.trackQueryPerformanceEvent({
+            eventName: 'discoverFetchAll',
+            query,
+            timeRange: timefilter.getAbsoluteTime(),
+          });
 
           await fetchAll({
             ...commonFetchParams,
@@ -558,10 +553,7 @@ export function getDataStateContainer({
             },
           });
 
-          fetchAllTracker.reportEvent({
-            queryRangeSeconds,
-            requests: inspectorAdapters.requests?.getRequestsSince(fetchAllTracker.startTime),
-          });
+          fetchAllTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
 
           // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
           // replacing this current one, call it to make sure we tell that the auto refresh is done

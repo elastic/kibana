@@ -45,6 +45,14 @@ export interface FrozenPhaseCallouts {
   showDefaultRepositoryCallout?: boolean;
   /** Navigate directly to the create-repository page instead of opening a modal. */
   createDefaultRepositoryHref?: string;
+  /**
+   * URL to the Snapshot and Restore repositories list. When the user already has repositories
+   * configured (see `hasExistingRepositories`) the callout directs them here to pick one as the
+   * default instead of creating a new repository.
+   */
+  manageRepositoriesUrl?: string;
+  /** Whether the user already has at least one snapshot repository configured. */
+  hasExistingRepositories?: boolean;
   onRefreshDefaultRepository?: () => void;
   isRefreshingDefaultRepository?: boolean;
 }
