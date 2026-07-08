@@ -16,6 +16,7 @@ import {
 import { useKibana } from '../use_kibana';
 import { DISCOVERY_QUERIES_QUERY_KEY } from './use_fetch_discovery_queries';
 import { CODE_KNOWLEDGE_INDICATORS_QUERY_KEY } from './use_fetch_code_knowledge_indicators';
+import { CODE_INTELLIGENCE_SERVICE_DISTRIBUTION_QUERY_KEY } from './use_code_intelligence_service_distribution';
 
 export const CODE_INTELLIGENCE_RUN_STATUS_QUERY_KEY = ['code-intelligence-run-status'];
 
@@ -68,6 +69,7 @@ export function useCodeIntelligenceRunStatus({ enabled = true }: { enabled?: boo
     // A run just finished — refresh the derived views.
     void Promise.all([
       queryClient.invalidateQueries({ queryKey: CODE_KNOWLEDGE_INDICATORS_QUERY_KEY }),
+      queryClient.invalidateQueries({ queryKey: CODE_INTELLIGENCE_SERVICE_DISTRIBUTION_QUERY_KEY }),
       queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
     ]);
 

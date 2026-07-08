@@ -31,8 +31,10 @@ import { useCodeIntelligenceAvailability } from '../../../../../hooks/significan
 import { useCodeIntelligenceRun } from '../../../../../hooks/significant_events/use_code_intelligence_run';
 import { useCodeIntelligenceRunStatus } from '../../../../../hooks/significant_events/use_code_intelligence_run_status';
 import { useFetchCodeKnowledgeIndicators } from '../../../../../hooks/significant_events/use_fetch_code_knowledge_indicators';
+import { useCodeIntelligenceServiceDistribution } from '../../../../../hooks/significant_events/use_code_intelligence_service_distribution';
 import { useKnowledgeIndicatorsBulkDelete } from '../../../../../hooks/significant_events/use_knowledge_indicators_bulk_delete';
 import { CodeIntelligencePlaceholder } from '../../../stream_detail_significant_events_view/code_insights_panel';
+import { CodeIntelligenceServiceDistribution } from './code_intelligence_service_distribution';
 import { KnowledgeIndicatorActionsCell } from '../../../stream_detail_significant_events_view/knowledge_indicator_actions_cell';
 import { KnowledgeIndicatorDetailsFlyout } from '../../../stream_detail_significant_events_view/knowledge_indicator_details_flyout';
 import { KnowledgeIndicatorSourceBadge } from '../../../stream_detail_significant_events_view/knowledge_indicator_source_badge';
@@ -81,6 +83,7 @@ export function CodeIntelligenceTab() {
   const { runAll, isRunningAll, reset, isResetting, reconcile, isReconciling } =
     useCodeIntelligenceRun();
   const { isRunning } = useCodeIntelligenceRunStatus({ enabled: available });
+  const distribution = useCodeIntelligenceServiceDistribution({ enabled: available });
   const { deleteKnowledgeIndicatorsInBulk, isDeleting } = useKnowledgeIndicatorsBulkDelete({
     onSuccess: refetch,
   });
@@ -201,6 +204,12 @@ export function CodeIntelligenceTab() {
 
   return (
     <>
+      <CodeIntelligenceServiceDistribution
+        codeOnly={distribution.codeOnly}
+        both={distribution.both}
+        logsOnly={distribution.logsOnly}
+      />
+      <EuiSpacer size="m" />
       <EuiFlexGroup
         justifyContent="flexEnd"
         alignItems="center"

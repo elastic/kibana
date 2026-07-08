@@ -13,6 +13,7 @@ import { getFormattedError } from '../../util/errors';
 import { DISCOVERY_QUERIES_QUERY_KEY } from './use_fetch_discovery_queries';
 import { CODE_INTELLIGENCE_RUN_STATUS_QUERY_KEY } from './use_code_intelligence_run_status';
 import { CODE_KNOWLEDGE_INDICATORS_QUERY_KEY } from './use_fetch_code_knowledge_indicators';
+import { CODE_INTELLIGENCE_SERVICE_DISTRIBUTION_QUERY_KEY } from './use_code_intelligence_service_distribution';
 
 /**
  * Triggers code intelligence identification from the discovery Code Intelligence
@@ -37,6 +38,7 @@ export function useCodeIntelligenceRun() {
   const invalidate = () =>
     Promise.all([
       queryClient.invalidateQueries({ queryKey: CODE_KNOWLEDGE_INDICATORS_QUERY_KEY }),
+      queryClient.invalidateQueries({ queryKey: CODE_INTELLIGENCE_SERVICE_DISTRIBUTION_QUERY_KEY }),
       queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
     ]);
 

@@ -39,6 +39,19 @@ const hasCodeSource = (evidence: string[] | undefined, source: string | undefine
 };
 
 /**
+ * Whether a KI is *purely* code-derived (no log evidence). Used by reset so that
+ * deleting "code features" never destroys a KI that also carries log evidence
+ * (a merged `both` KI) — those are left intact.
+ */
+const isPurelyCodeSource = (
+  evidence: string[] | undefined,
+  source: string | undefined
+): boolean => {
+  const resolved = source ?? deriveKnowledgeIndicatorSource(evidence);
+  return resolved === 'code';
+};
+
+/**
  * Lists the real streams and the index/pattern each one's data lives in, used to
  * resolve which stream ingests a given `service.name`.
  */
@@ -338,6 +351,88 @@ const listCodeKnowledgeIndicatorsRoute = createServerRoute({
 });
 
 // ---------------------------------------------------------------------------
+// Service coverage distribution: how many services are known from code only,
+// logs only, or both. Computed over `service` entity KIs across all streams,
+// grouped by service name. Powers the Code Intelligence tab visualization.
+// ---------------------------------------------------------------------------
+
+const serviceDistributionRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/code_intelligence/_service_distribution',
+  options: {
+    access: 'internal',
+    summary: 'Distribution of services known from code, logs, or both',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({}),
+  handler: async ({
+    request,
+    getScopedClients,
+    server,
+  }): Promise<{ codeOnly: number; both: number; logsOnly: number }> => {
+    const scopedClients = await getScopedClients({ request });
+    const { licensing, uiSettingsClient } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+    const streamNames = await kiClient.getStreamNamesWithKnowledgeIndicators();
+    if (streamNames.length === 0) {
+      return { codeOnly: 0, both: 0, logsOnly: 0 };
+    }
+
+    const { hits } = await kiClient.getFeatures(streamNames, {
+      type: ['entity'],
+      includeExpired: true,
+      limit: 10_000,
+    });
+
+    // Group service entities by name; a service can be represented by separate
+    // code and log entities, or a single merged (`both`) one.
+    const byService = new Map<string, { code: boolean; log: boolean }>();
+    for (const feature of hits) {
+      if (feature.subtype !== 'service') {
+        continue;
+      }
+      const name =
+        typeof feature.properties?.name === 'string' && feature.properties.name.length > 0
+          ? feature.properties.name
+          : feature.title;
+      if (!name) {
+        continue;
+      }
+      const source = feature.source ?? deriveKnowledgeIndicatorSource(feature.evidence);
+      const entry = byService.get(name) ?? { code: false, log: false };
+      if (source === 'code' || source === 'both') {
+        entry.code = true;
+      }
+      if (source === 'logs' || source === 'both') {
+        entry.log = true;
+      }
+      byService.set(name, entry);
+    }
+
+    let codeOnly = 0;
+    let both = 0;
+    let logsOnly = 0;
+    for (const { code, log } of byService.values()) {
+      if (code && log) {
+        both += 1;
+      } else if (code) {
+        codeOnly += 1;
+      } else if (log) {
+        logsOnly += 1;
+      }
+    }
+
+    return { codeOnly, both, logsOnly };
+  },
+});
+
+// ---------------------------------------------------------------------------
 // Reset: delete every code-derived Feature KI across all streams.
 //
 // Removes all `code_analysis` features (including excluded ones), which also
@@ -398,13 +493,15 @@ const resetCodeFeaturesRoute = createServerRoute({
       opsByStream.set(stream, ops);
     };
 
+    // Only delete purely code-derived KIs. Merged KIs (`both`) also carry log
+    // evidence, so deleting them would destroy the log side too — leave those.
     for (const feature of allFeatures) {
-      if (hasCodeSource(feature.evidence, feature.source)) {
+      if (isPurelyCodeSource(feature.evidence, feature.source)) {
         addOp(feature.stream_name, { delete: { type: KI_TYPE_FEATURE, id: feature.uuid } });
       }
     }
     for (const link of links) {
-      if (hasCodeSource(link.query.evidence, link.query.source)) {
+      if (isPurelyCodeSource(link.query.evidence, link.query.source)) {
         addOp(link.stream_name, { delete: { type: KI_TYPE_QUERY, id: link.query.id } });
       }
     }
@@ -739,6 +836,7 @@ export const internalKICodeFeaturesRoutes = {
   ...reconcileCodeQueriesRoute,
   ...codeIntelligenceAvailabilityRoute,
   ...listCodeKnowledgeIndicatorsRoute,
+  ...serviceDistributionRoute,
   ...identifyServiceRoute,
   ...runCodeIntelligenceRoute,
   ...codeIntelligenceRunStatusRoute,
