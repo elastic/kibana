@@ -39,7 +39,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { BackgroundSearchRestoredCallout } from '@kbn/background-search';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { type ESQLQueryStats } from '@kbn/esql-types';
+import { QuerySource, type ESQLQueryStats } from '@kbn/esql-types';
 import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
 import type { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
@@ -53,7 +53,7 @@ import type { QueryBarTopRowProps } from '../query_string_input/query_bar_top_ro
 import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
 import { searchBarStyles } from './search_bar.styles';
-import { getESQLQuerySubmittedTelemetry, type QuerySubmitMetadata } from './query_submit_metadata';
+import { QuerySubmitTrigger } from './query_submit_metadata';
 
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IUnifiedSearchPluginServices>;
@@ -502,19 +502,31 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
 
   private async trackESQLQuerySubmitted(
     query: Query | AggregateQuery | undefined,
-    metadata?: QuerySubmitMetadata
+    trigger?: QuerySubmitTrigger
   ) {
-    const telemetry = getESQLQuerySubmittedTelemetry(query, metadata);
-    if (!telemetry) {
+    if (!query || !isOfAggregateQueryType(query)) {
       return;
     }
+
+    let source: QuerySource.SEARCH_BUTTON | QuerySource.TIME_FILTER;
+    switch (trigger) {
+      case QuerySubmitTrigger.QUERY_BAR_SUBMIT:
+        source = QuerySource.SEARCH_BUTTON;
+        break;
+      case QuerySubmitTrigger.TIME_FILTER:
+        source = QuerySource.TIME_FILTER;
+        break;
+      default:
+        return;
+    }
+
     const telemetryService = await this.services.esql?.getTelemetryService();
-    telemetryService?.trackQuerySubmitted(telemetry);
+    telemetryService?.trackQuerySubmitted({ source, query: query.esql });
   }
 
   public onQueryBarSubmit = (
     queryAndDateRange: { dateRange?: TimeRange; query?: QT | Query },
-    metadata?: QuerySubmitMetadata
+    trigger?: QuerySubmitTrigger
   ) => {
     this.setState(
       {
@@ -538,7 +550,11 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
             this.isDirty()
           );
         }
-        void this.trackESQLQuerySubmitted(this.state.query, metadata);
+        try {
+          void this.trackESQLQuerySubmitted(this.state.query, trigger);
+        } catch {
+          // best-effort telemetry; failures shouldn't affect the search bar
+        }
         this.services.usageCollection?.reportUiCounter(
           this.services.appName,
           METRIC_TYPE.CLICK,

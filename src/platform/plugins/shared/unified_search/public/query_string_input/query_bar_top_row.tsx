@@ -73,7 +73,7 @@ import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types'
 import { shallowEqual } from '../utils/shallow_equal';
 import { FilterBarToggleButton } from '../filter_bar/filter_bar_toggle_button';
 import { FilterBarContextProvider } from '../filter_bar/filter_bar_context';
-import { QuerySubmitTrigger, type QuerySubmitMetadata } from '../search_bar/query_submit_metadata';
+import { QuerySubmitTrigger } from '../search_bar/query_submit_metadata';
 
 /** Feature flag key for the new DateRangePicker. Falls back to `true` (new picker). */
 const DATE_RANGE_PICKER_FEATURE_FLAG = 'unifiedSearch.newDateRangePickerEnabled';
@@ -166,7 +166,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   onSubmit: (
     payload: { dateRange: TimeRange; query?: Query | QT },
-    metadata?: QuerySubmitMetadata
+    trigger?: QuerySubmitTrigger
   ) => void;
   onSendToBackground: (payload: { dateRange: TimeRange; query?: Query | QT }) => Promise<void>;
   onCancel?: () => void;
@@ -522,13 +522,13 @@ export const QueryBarTopRow = React.memo(
     const onSubmit = useCallback(
       (
         { query, dateRange }: { query?: Query | QT; dateRange: TimeRange },
-        metadata?: QuerySubmitMetadata
+        trigger?: QuerySubmitTrigger
       ) => {
         if (timeHistory) {
           timeHistory.add(dateRange);
         }
 
-        propsOnSubmit({ query, dateRange }, metadata);
+        propsOnSubmit({ query, dateRange }, trigger);
       },
       [timeHistory, propsOnSubmit]
     );
@@ -544,7 +544,7 @@ export const QueryBarTopRow = React.memo(
             query: queryRef.current,
             dateRange: dateRangeRef.current,
           },
-          { trigger: QuerySubmitTrigger.QUERY_BAR_SUBMIT }
+          QuerySubmitTrigger.QUERY_BAR_SUBMIT
         );
       },
       [persistedLog, onSubmit]
@@ -615,7 +615,7 @@ export const QueryBarTopRow = React.memo(
         };
 
         if (isQuickSelection) {
-          onSubmit(retVal, { trigger: QuerySubmitTrigger.TIME_FILTER });
+          onSubmit(retVal, QuerySubmitTrigger.TIME_FILTER);
         } else {
           propsOnChange(retVal);
         }
@@ -642,7 +642,7 @@ export const QueryBarTopRow = React.memo(
               query: queryRef.current,
               dateRange: { from: start, to: end },
             },
-            { trigger: QuerySubmitTrigger.TIME_FILTER }
+            QuerySubmitTrigger.TIME_FILTER
           );
         }
       },
@@ -726,7 +726,7 @@ export const QueryBarTopRow = React.memo(
             query,
             dateRange: dateRangeRef.current,
           },
-          { trigger: QuerySubmitTrigger.QUERY_BAR_SUBMIT }
+          QuerySubmitTrigger.QUERY_BAR_SUBMIT
         );
       },
       [onSubmit]
@@ -1286,13 +1286,10 @@ export const QueryBarTopRow = React.memo(
             warning={props.textBasedLanguageModeWarning}
             expandToFitQueryOnMount
             onTextLangQuerySubmit={async () =>
-              onSubmit(
-                {
-                  query: queryRef.current,
-                  dateRange: dateRangeRef.current,
-                },
-                { trigger: QuerySubmitTrigger.TEXT_BASED_EDITOR }
-              )
+              onSubmit({
+                query: queryRef.current,
+                dateRange: dateRangeRef.current,
+              })
             }
             isDisabled={props.isDisabled}
             data-test-subj="unifiedTextLangEditor"
