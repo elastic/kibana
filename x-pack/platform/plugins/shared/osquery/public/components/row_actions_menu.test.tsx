@@ -146,6 +146,23 @@ describe('RowActionsMenu', () => {
       expect(screen.getByText('Export')).toBeInTheDocument();
     });
 
+    it('renders the export item last, after edit/duplicate/delete', () => {
+      const onExport = jest.fn();
+      renderWithIntl(
+        React.createElement(RowActionsMenu, {
+          ...defaultProps,
+          exportAction: { onExport, label: 'Export' },
+        })
+      );
+      fireEvent.click(screen.getByLabelText('Actions for test-item'));
+
+      const labels = screen
+        .getAllByRole('menuitem')
+        .map((item) => item.textContent);
+
+      expect(labels).toEqual(['Edit', 'Duplicate', 'Delete', 'Export']);
+    });
+
     it('renders the export item even when canWrite is false (read-only operation)', () => {
       const onExport = jest.fn();
       renderWithIntl(

@@ -120,14 +120,6 @@ const RowActionsMenuComponent: React.FC<RowActionsMenuProps> = ({
       </EuiContextMenuItem>,
     ];
 
-    if (exportAction) {
-      items.push(
-        <EuiContextMenuItem key="export" icon="export" onClick={handleExportClick}>
-          {exportAction.label}
-        </EuiContextMenuItem>
-      );
-    }
-
     if (canWrite) {
       items.push(
         <EuiContextMenuItem key="duplicate" icon="copy" onClick={handleDuplicateClick}>
@@ -142,6 +134,14 @@ const RowActionsMenuComponent: React.FC<RowActionsMenuProps> = ({
           </EuiContextMenuItem>
         );
       }
+    }
+
+    if (exportAction) {
+      items.push(
+        <EuiContextMenuItem key="export" icon="export" onClick={handleExportClick}>
+          {exportAction.label}
+        </EuiContextMenuItem>
+      );
     }
 
     return items;
