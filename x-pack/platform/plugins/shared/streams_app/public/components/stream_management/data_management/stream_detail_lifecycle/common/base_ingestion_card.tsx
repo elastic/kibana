@@ -63,7 +63,7 @@ export const BaseIngestionCard = ({
               id="xpack.streams.ingestionCard.subtitle"
               defaultMessage="{perDayDocs} documents"
               values={{
-                perDayDocs: perDayDocs ? formatNumber(perDayDocs * multiplier, '0,0') : '-',
+                perDayDocs: formatNumber((perDayDocs ?? 0) * multiplier, '0,0'),
               }}
             />
           ),

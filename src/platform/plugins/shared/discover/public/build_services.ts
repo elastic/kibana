@@ -67,7 +67,6 @@ import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/publ
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import { ESQL_APPROXIMATION_FEATURE_FLAG_KEY } from '@kbn/esql-utils';
 import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
@@ -98,7 +97,6 @@ export interface DiscoverFeatureFlags {
   getCascadeLayoutEnabled: () => boolean;
   getIsEsqlDefault: () => boolean;
   getEmbeddableTransformsEnabled: () => boolean;
-  getEsqlApproximationEnabled: () => boolean;
 }
 
 export interface DiscoverServices {
@@ -220,8 +218,6 @@ export const buildServices = ({
         core.featureFlags.getBooleanValue(IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false),
       getEmbeddableTransformsEnabled: () =>
         core.featureFlags.getBooleanValue(EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY, true),
-      getEsqlApproximationEnabled: () =>
-        core.featureFlags.getBooleanValue(ESQL_APPROXIMATION_FEATURE_FLAG_KEY, false),
     },
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,

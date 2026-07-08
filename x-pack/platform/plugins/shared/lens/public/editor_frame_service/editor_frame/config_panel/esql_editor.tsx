@@ -165,7 +165,7 @@ export function ESQLEditor({
         esqlVariables,
         shouldUpdateAttrs,
         currentAttributesRef.current,
-        isApproximate ?? undefined
+        isApproximate
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
@@ -239,7 +239,8 @@ export function ESQLEditor({
       setDataGridAttrs,
       esqlVariables,
       false,
-      currentAttributesRef.current
+      currentAttributesRef.current,
+      isApproximate
     ).catch(() => {
       // The chart itself will surface query errors via its own error handling path
     });
@@ -250,6 +251,7 @@ export function ESQLEditor({
   }, [
     searchSessionId,
     esqlVariables,
+    isApproximate,
     data,
     http,
     uiSettings,
@@ -286,6 +288,7 @@ export function ESQLEditor({
           dataGridAttrs={dataGridAttrs}
           isAccordionOpen={isESQLResultsAccordionOpen}
           isTableView={visualization.activeId !== 'lnsDatatable'}
+          isApproximate={isApproximate}
           setIsAccordionOpen={setIsESQLResultsAccordionOpen}
           query={query}
           onAccordionToggleCb={(status) => {
