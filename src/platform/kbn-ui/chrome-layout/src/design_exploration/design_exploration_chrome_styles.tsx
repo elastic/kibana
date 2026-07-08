@@ -129,7 +129,7 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} [class*='css-'][class*='react_expression_renderer--ReactExpressionRenderer']:has(.echMetricText),
     ${scope} [class*='css-'][class*='visualization_container--VisualizationContainer']:has(.echMetricText) {
-      padding: 4px !important;
+      padding: 8px 4px 4px !important;
     }
 
     ${scope} .euiFormControlLayout:not(.euiFormControlLayout--group):not(:focus-within):not(:has(:invalid, [aria-invalid='true'])):not(:has(:disabled)) {
