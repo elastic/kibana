@@ -28,10 +28,23 @@ jest.mock('@kbn/response-ops-alert-snooze', () => ({
     onScheduleChange: (endDate: string | null | undefined) => void;
   }) => (
     <input
-      data-test-subj="snoozeFormInput"
+      data-test-subj="quickSnoozeInput"
       onChange={(e) => {
         const raw = (e.target as HTMLInputElement).value;
-        onScheduleChange(raw === '' ? null : raw);
+        onScheduleChange(raw === '' ? undefined : raw);
+      }}
+    />
+  ),
+  ConditionalSnoozePanel: ({
+    onScheduleChange,
+  }: {
+    onScheduleChange: (schedule: { conditions?: unknown[] } | undefined) => void;
+  }) => (
+    <input
+      data-test-subj="conditionalSnoozeInput"
+      onChange={(e) => {
+        const raw = (e.target as HTMLInputElement).value;
+        onScheduleChange(raw === '' ? undefined : { conditions: [{ type: 'severity_change' }] });
       }}
     />
   ),
@@ -59,20 +72,43 @@ beforeEach(() => {
   });
 });
 
+afterEach(() => {
+  // Clean up document.body to remove any modals that might be left over from tests
+  document.body.innerHTML = '';
+});
+
 describe('openSnoozeExpiryModal', () => {
-  it('resolves with the entered expiry on confirm', async () => {
+  it('defaults to the quick tab and resolves { expiresAt } on confirm', async () => {
     const promise = openSnoozeExpiryModal(mockOverlays, mockRendering);
 
     await waitFor(() => {
       expect(screen.getByTestId('snoozeExpiryModal')).toBeInTheDocument();
     });
 
-    const input = screen.getByTestId('snoozeFormInput'); // data-test-subj="snoozeFormInput" from mock
+    // Quick tab is active by default.
+    const input = screen.getByTestId('quickSnoozeInput');
     fireEvent.change(input, { target: { value: '2026-06-01T12:00:00.000Z' } });
 
     fireEvent.click(screen.getByTestId('snoozeExpiryConfirm'));
 
-    await expect(promise).resolves.toBe('2026-06-01T12:00:00.000Z');
+    await expect(promise).resolves.toEqual({ expiresAt: '2026-06-01T12:00:00.000Z' });
+  });
+
+  it('switches to the conditional tab and resolves the schedule on confirm', async () => {
+    const promise = openSnoozeExpiryModal(mockOverlays, mockRendering);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('snoozeExpiryModal')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('snoozeTab-conditional'));
+
+    fireEvent.change(screen.getByTestId('conditionalSnoozeInput'), {
+      target: { value: 'go' },
+    });
+    fireEvent.click(screen.getByTestId('snoozeExpiryConfirm'));
+
+    await expect(promise).resolves.toEqual({ conditions: [{ type: 'severity_change' }] });
   });
 
   it('resolves with undefined on cancel', async () => {
@@ -94,6 +130,9 @@ describe('openSnoozeExpiryModal', () => {
       expect(screen.getByTestId('snoozeExpiryModal')).toBeInTheDocument();
     });
 
+    fireEvent.change(screen.getByTestId('quickSnoozeInput'), {
+      target: { value: '2026-06-01T12:00:00.000Z' },
+    });
     fireEvent.click(screen.getByTestId('snoozeExpiryConfirm'));
 
     await waitFor(() => {

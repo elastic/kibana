@@ -164,4 +164,91 @@ describe('applySuppression', () => {
     expect(suppressed).toHaveLength(0);
     expect(dispatchable).toHaveLength(1);
   });
+
+  describe('conditional snooze', () => {
+    const conditionalSnooze = (overrides = {}) =>
+      createAlertEpisodeSuppression({
+        rule_id: 'r1',
+        group_hash: 'h1',
+        episode_id: 'e1',
+        should_suppress: true,
+        last_snooze_action: 'snooze',
+        conditions: [{ type: 'severity_equals', value: 'critical' }],
+        condition_operator: 'any',
+        ...overrides,
+      });
+
+    it('keeps the episode suppressed while the condition is not met', () => {
+      const episode = createAlertEpisode({
+        rule_id: 'r1',
+        group_hash: 'h1',
+        episode_id: 'e1',
+        severity: 'high',
+      });
+
+      const { suppressed, dispatchable, autoUnsnoozed } = applySuppression(
+        [episode],
+        [conditionalSnooze()]
+      );
+
+      expect(suppressed).toHaveLength(1);
+      expect(suppressed[0].reason).toBe('snooze');
+      expect(dispatchable).toHaveLength(0);
+      expect(autoUnsnoozed).toHaveLength(0);
+    });
+
+    it('lifts the snooze (dispatchable + auto-unsnoozed) once the condition is met', () => {
+      const episode = createAlertEpisode({
+        rule_id: 'r1',
+        group_hash: 'h1',
+        episode_id: 'e1',
+        severity: 'critical',
+      });
+
+      const { suppressed, dispatchable, autoUnsnoozed } = applySuppression(
+        [episode],
+        [conditionalSnooze()]
+      );
+
+      expect(suppressed).toHaveLength(0);
+      expect(dispatchable).toHaveLength(1);
+      expect(autoUnsnoozed).toEqual([episode]);
+    });
+
+    it('still suppresses via ack when a conditional snooze is lifted, but records the unsnooze', () => {
+      const episode = createAlertEpisode({
+        rule_id: 'r1',
+        group_hash: 'h1',
+        episode_id: 'e1',
+        severity: 'critical',
+      });
+
+      const { suppressed, autoUnsnoozed } = applySuppression(
+        [episode],
+        [conditionalSnooze({ last_ack_action: 'ack' })]
+      );
+
+      expect(suppressed).toHaveLength(1);
+      expect(suppressed[0].reason).toBe('ack');
+      expect(autoUnsnoozed).toEqual([episode]);
+    });
+
+    it('uses severity_change against the baseline', () => {
+      const episode = createAlertEpisode({
+        rule_id: 'r1',
+        group_hash: 'h1',
+        episode_id: 'e1',
+        severity: 'critical',
+      });
+      const suppression = conditionalSnooze({
+        conditions: [{ type: 'severity_change' }],
+        baseline: { severity: 'high' },
+      });
+
+      const { dispatchable, autoUnsnoozed } = applySuppression([episode], [suppression]);
+
+      expect(dispatchable).toHaveLength(1);
+      expect(autoUnsnoozed).toEqual([episode]);
+    });
+  });
 });

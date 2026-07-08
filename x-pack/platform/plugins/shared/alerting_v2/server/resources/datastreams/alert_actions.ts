@@ -7,10 +7,11 @@
 
 import type { MappingsDefinition } from '@kbn/es-mappings';
 import { z } from '@kbn/zod/v4';
+import { snoozeConditionSchema, snoozeConditionOperatorSchema } from '@kbn/alerting-v2-schemas';
 import type { ResourceDefinition } from './types';
 
 export const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
-export const ALERT_ACTIONS_DATA_STREAM_VERSION = 3;
+export const ALERT_ACTIONS_DATA_STREAM_VERSION = 4;
 export const ALERT_ACTIONS_BACKING_INDEX = '.ds-.alert-actions-*';
 
 const mappings: MappingsDefinition = {
@@ -50,6 +51,12 @@ export const alertActionSchema = z.object({
   tags: z.array(z.string()).optional(),
   reason: z.string().optional(),
   space_id: z.string(),
+  // Conditional snooze. Deliberately not in the ES `mappings` above: with `dynamic: false`, unmapped
+  // fields are still saved in the document `_source`, just not indexed as queryable columns. We never
+  // filter or aggregate on them, so that's fine — the dispatcher reads them back out of `_source` via
+  // `METADATA _source` + `JSON_EXTRACT` in the suppressions query.
+  conditions: z.array(snoozeConditionSchema).optional(),
+  condition_operator: snoozeConditionOperatorSchema.optional(),
 });
 
 export type AlertAction = z.infer<typeof alertActionSchema>;

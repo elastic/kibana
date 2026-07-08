@@ -6,11 +6,9 @@
  */
 
 import moment from 'moment';
-import { set } from '@kbn/safer-lodash-set';
 import { inject, injectable } from 'inversify';
 import type {
   AlertEpisode,
-  AlertEpisodeData,
   DispatcherStep,
   DispatcherPipelineState,
   DispatcherStepOutput,
@@ -20,6 +18,9 @@ import type { QueryServiceContract } from '../../services/query_service/query_se
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
 import { LOOKBACK_WINDOW_MINUTES } from '../constants';
 import { getDispatchableAlertEventsQuery } from '../queries';
+import { parseDataJson } from '../parse_episode_data';
+
+export { parseDataJson };
 
 interface RawAlertEpisode {
   last_event_timestamp: string;
@@ -73,20 +74,4 @@ export function parseAlertEpisodes(raw: RawAlertEpisode[]): AlertEpisode[] {
     ...(severity ? { severity } : {}),
     ...(data_json ? { data: parseDataJson(data_json) } : {}),
   }));
-}
-
-export function parseDataJson(json: string): AlertEpisodeData {
-  try {
-    const parsed = JSON.parse(json);
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return {};
-    const result: AlertEpisodeData = {};
-    for (const [key, value] of Object.entries(parsed)) {
-      if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-        set(result, key.split('.'), value);
-      }
-    }
-    return result;
-  } catch {
-    return {};
-  }
 }

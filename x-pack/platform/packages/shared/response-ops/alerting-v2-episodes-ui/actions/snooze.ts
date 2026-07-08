@@ -31,13 +31,16 @@ export const createSnoozeAction = (deps: SnoozeActionDeps): EpisodeAction => ({
   isCompatible: ({ episodes }: EpisodeActionContext) =>
     episodes.length > 0 && episodes.some((ep) => ep.last_snooze_action !== 'snooze'),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    const expiry = await openSnoozeExpiryModal(deps.overlays, deps.rendering);
-    if (expiry === undefined) return;
+    const schedule = await openSnoozeExpiryModal(deps.overlays, deps.rendering);
+    if (schedule === undefined) return;
 
+    const { expiresAt, conditions, conditionOperator } = schedule;
     const items = uniqueByGroup(episodes).map((ep) => ({
       group_hash: ep.group_hash,
       action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-      ...(expiry === null ? {} : { expiry }),
+      ...(expiresAt ? { expiry: expiresAt } : {}),
+      ...(conditions && conditions.length > 0 ? { conditions } : {}),
+      ...(conditionOperator ? { condition_operator: conditionOperator } : {}),
     }));
     if (!items.length) return;
 

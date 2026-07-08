@@ -104,18 +104,28 @@ export const getAlertEpisodeSuppressionsQueries = (
   return chunkInClauseLiterals(uniquePairKeys).map((chunk) => {
     const pairValues = chunk.map((key) => esql.str(key));
 
-    return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
+    return esql`FROM ${ALERT_ACTIONS_DATA_STREAM} METADATA _source
         | EVAL _pair_key = CONCAT(rule_id, ${PAIR_SEPARATOR}, group_hash)
         | WHERE _pair_key IN (${pairValues})
         | WHERE action_type IN ("ack", "unack", "deactivate", "activate", "snooze", "unsnooze")
-        | WHERE action_type != "snooze" OR expiry > ${minLastEventTimestamp}::datetime
+        | WHERE action_type != "snooze" OR expiry IS NULL OR expiry > ${minLastEventTimestamp}::datetime
+        | EVAL
+            conditions_json = CASE(action_type == "snooze", JSON_EXTRACT(_source, "$.conditions"), NULL),
+            condition_operator_json = CASE(action_type == "snooze", JSON_EXTRACT(_source, "$.condition_operator"), NULL)
+        | DROP _source
         | INLINE STATS
-            last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze")
+            last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
+            snooze_ts = MAX(@timestamp) WHERE action_type == "snooze",
+            conditions_json = LAST(conditions_json, @timestamp) WHERE action_type == "snooze",
+            condition_operator_json = LAST(condition_operator_json, @timestamp) WHERE action_type == "snooze"
             BY rule_id, group_hash
         | STATS
             last_ack_action = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),
             last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
-            last_snooze_action = MAX(last_snooze_action)
+            last_snooze_action = MAX(last_snooze_action),
+            snooze_ts = MAX(snooze_ts),
+            conditions_json = MAX(conditions_json),
+            condition_operator_json = MAX(condition_operator_json)
           BY rule_id, group_hash, episode_id
         | EVAL should_suppress = CASE(
             last_snooze_action == "snooze", true,
@@ -123,7 +133,37 @@ export const getAlertEpisodeSuppressionsQueries = (
             last_deactivate_action == "deactivate", true,
             false
           )
-        | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action`.toRequest();
+        | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, snooze_ts, conditions_json, condition_operator_json`.toRequest();
+  });
+};
+
+// For each series with a conditional snooze, reads the "baseline" from `.rule-events` history: the
+// severity and data field values as-of the snooze's creation `@timestamp`. Compared later against the
+// current values to tell whether a `field_change`/`severity_change` condition fired. Baseline is per
+// group (rule_id, group_hash); chunked like the other IN-list queries.
+export const getSnoozeBaselineQueries = (pairKeys: string[]): EsqlRequest[] => {
+  const alertEventType: AlertEventType = 'alert';
+
+  return chunkInClauseLiterals(pairKeys).map((chunk) => {
+    const pairValues = chunk.map((key) => esql.str(key));
+
+    return esql`FROM ${ALERT_EVENTS_DATA_STREAM},${ALERT_ACTIONS_DATA_STREAM} METADATA _source
+        | WHERE type IS NULL OR type == ${alertEventType}
+        | EVAL rule_id = COALESCE(rule.id, rule_id)
+        | EVAL _pair_key = CONCAT(rule_id, ${PAIR_SEPARATOR}, group_hash)
+        | WHERE _pair_key IN (${pairValues})
+        | EVAL
+            severity_evt = CASE(type IS NOT NULL, severity, NULL),
+            data_json = CASE(type IS NOT NULL, JSON_EXTRACT(_source, "$.data"), NULL)
+        | DROP _source, rule.id
+        | INLINE STATS snooze_ts = MAX(@timestamp) WHERE action_type == "snooze" BY rule_id, group_hash
+        | WHERE snooze_ts IS NOT NULL AND type IS NOT NULL AND @timestamp <= snooze_ts
+        | STATS
+            severity_as_of = LAST(severity_evt, @timestamp),
+            data_json_as_of = LAST(data_json, @timestamp)
+          BY rule_id, group_hash
+        | KEEP rule_id, group_hash, severity_as_of, data_json_as_of
+        | LIMIT 10000`.toRequest();
   });
 };
 

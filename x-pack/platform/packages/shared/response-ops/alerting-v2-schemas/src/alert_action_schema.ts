@@ -7,7 +7,47 @@
 
 import { z } from '@kbn/zod/v4';
 import { tagsSchema } from './common';
-import { ID_MAX_LENGTH, MAX_BULK_ITEMS } from './constants';
+import {
+  ID_MAX_LENGTH,
+  MAX_BULK_ITEMS,
+  MAX_FIELD_NAME_LENGTH,
+  MAX_SNOOZE_CONDITIONS,
+} from './constants';
+
+/** Severity levels an alert episode can carry. Kept in sync with the alerting_v2 alert-events schema. */
+export const SNOOZE_SEVERITY_LEVELS = ['info', 'low', 'medium', 'high', 'critical'] as const;
+
+/**
+ * A condition that lifts an episode snooze when it is met. Mirrors Alerting V1's per-alert snooze
+ * conditions: the snooze auto-lifts when a tracked field changes from its value at snooze time
+ * (`field_change`/`severity_change`) or when severity reaches a given level (`severity_equals`).
+ */
+export const snoozeConditionSchema = z.discriminatedUnion('type', [
+  z
+    .object({
+      type: z.literal('field_change'),
+      field: z
+        .string()
+        .min(1)
+        .max(MAX_FIELD_NAME_LENGTH)
+        .describe('Dot-notation path of the episode data field to watch for changes.'),
+    })
+    .describe('Lifts the snooze when the watched field changes from its value at snooze time.'),
+  z
+    .object({ type: z.literal('severity_change') })
+    .describe('Lifts the snooze when the episode severity changes from its value at snooze time.'),
+  z
+    .object({
+      type: z.literal('severity_equals'),
+      value: z.enum(SNOOZE_SEVERITY_LEVELS).describe('Severity level that lifts the snooze.'),
+    })
+    .describe('Lifts the snooze when the episode severity equals the given level.'),
+]);
+export type SnoozeCondition = z.infer<typeof snoozeConditionSchema>;
+
+/** How multiple snooze conditions combine: `any` (default) lifts on the first met, `all` requires every one. */
+export const snoozeConditionOperatorSchema = z.enum(['any', 'all']);
+export type SnoozeConditionOperator = z.infer<typeof snoozeConditionOperatorSchema>;
 
 export enum ALERT_EPISODE_STATUS {
   INACTIVE = 'inactive',
@@ -72,6 +112,14 @@ const tagActionSchema = z.object({
 const snoozeActionSchema = z.object({
   action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.SNOOZE).describe('Snoozes an alert.'),
   expiry: z.iso.datetime().optional().describe('ISO datetime when snooze should expire.'),
+  conditions: z
+    .array(snoozeConditionSchema)
+    .max(MAX_SNOOZE_CONDITIONS)
+    .optional()
+    .describe('Optional conditions that automatically lift the snooze when met.'),
+  condition_operator: snoozeConditionOperatorSchema
+    .optional()
+    .describe('How to combine `conditions` when deciding to lift the snooze. Defaults to `any`.'),
 });
 
 const unsnoozeActionSchema = z.object({

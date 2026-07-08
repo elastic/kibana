@@ -58,7 +58,9 @@ describe('createSnoozeAction', () => {
 
   it('execute: opens modal, POSTs unique-by-group SNOOZE items, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    jest.spyOn(modal, 'openSnoozeExpiryModal').mockResolvedValue('2026-05-01T00:00:00Z');
+    jest
+      .spyOn(modal, 'openSnoozeExpiryModal')
+      .mockResolvedValue({ expiresAt: '2026-05-01T00:00:00Z' });
     jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 1, total: 1 });
     const onSuccess = jest.fn();
     await createSnoozeAction(deps).execute({
@@ -70,6 +72,24 @@ describe('createSnoozeAction', () => {
     ]);
     expect(deps.notifications.toasts.add).toHaveBeenCalled();
     expect(onSuccess).toHaveBeenCalled();
+  });
+
+  it('execute: maps conditions and operator into the SNOOZE items', async () => {
+    const deps = makeDeps();
+    jest.spyOn(modal, 'openSnoozeExpiryModal').mockResolvedValue({
+      conditions: [{ type: 'severity_equals', value: 'critical' }],
+      conditionOperator: 'all',
+    });
+    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 1, total: 1 });
+    await createSnoozeAction(deps).execute({ episodes: [makeEpisode()] });
+    expect(bulk.bulkCreateAlertActions).toHaveBeenCalledWith(deps.http, [
+      {
+        group_hash: 'g1',
+        action_type: 'snooze',
+        conditions: [{ type: 'severity_equals', value: 'critical' }],
+        condition_operator: 'all',
+      },
+    ]);
   });
 
   it('execute: cancelled modal is a no-op', async () => {
