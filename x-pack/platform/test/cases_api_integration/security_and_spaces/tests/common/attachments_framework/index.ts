@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { createSpacesAndUsers, deleteSpacesAndUsers } from '../../../common/lib/authentication';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { createSpacesAndUsers, deleteSpacesAndUsers } from '../../../../common/lib/authentication';
 
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
-  describe('cases unified attachments (feature flag ON)', function () {
+  describe('cases attachments framework (feature flag ON)', function () {
     before(async () => {
       await createSpacesAndUsers(getService);
     });
@@ -18,18 +18,19 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
       await deleteSpacesAndUsers(getService);
     });
 
-    loadTestFile(require.resolve('./unified_alerts'));
-    loadTestFile(require.resolve('./unified_comments'));
-    loadTestFile(require.resolve('./unified_endpoint'));
-    loadTestFile(require.resolve('./unified_events'));
-    loadTestFile(require.resolve('./unified_files'));
-    loadTestFile(require.resolve('./unified_osquery'));
-    loadTestFile(require.resolve('./unified_persistable_state'));
+    loadTestFile(require.resolve('./alerts'));
+    loadTestFile(require.resolve('./comments'));
+    loadTestFile(require.resolve('./endpoint'));
+    loadTestFile(require.resolve('./events'));
+    loadTestFile(require.resolve('./files'));
+    loadTestFile(require.resolve('./indicator'));
+    loadTestFile(require.resolve('./osquery'));
+    loadTestFile(require.resolve('./persistable_state'));
     loadTestFile(require.resolve('./mixed_reads'));
-    loadTestFile(require.resolve('./unified_validation'));
+    loadTestFile(require.resolve('./validation'));
     loadTestFile(require.resolve('./entity_sub_privilege'));
 
-    // Unified only attachments
+    // Types that only exist as unified attachments
     loadTestFile(require.resolve('./dashboard'));
     loadTestFile(require.resolve('./discover_session'));
     loadTestFile(require.resolve('./map'));

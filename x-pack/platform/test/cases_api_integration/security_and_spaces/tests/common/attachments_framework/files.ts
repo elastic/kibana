@@ -17,13 +17,13 @@ import { constructFileKindIdByOwner } from '@kbn/cases-plugin/common/files';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import type { AttachmentRequestV2 } from '@kbn/cases-plugin/common/types/api';
-import type { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   fileMetadata,
   getFilesAttachmentReq,
   postCaseReq,
   postFileReq,
-} from '../../../common/lib/mock';
+} from '../../../../common/lib/mock';
 import {
   bulkCreateAttachments,
   createCase,
@@ -34,7 +34,7 @@ import {
   deleteAllFiles,
   getCase,
   getComment,
-} from '../../../common/lib/api';
+} from '../../../../common/lib/api';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
