@@ -50,6 +50,18 @@ export const buildResolutionModifierEntity = ({
     }
   }
 
+  // Attribute the aggregated level to every member that holds it (ties included),
+  // so score documents can report which entities drove the criticality modifier.
+  const criticalityContributors = maxCriticality
+    ? [
+        ...new Set(
+          memberIds.filter(
+            (memberId) => memberEntities.get(memberId)?.asset?.criticality === maxCriticality
+          )
+        ),
+      ]
+    : [];
+
   return {
     entity: {
       id: score.resolution_target_id,
@@ -60,5 +72,6 @@ export const buildResolutionModifierEntity = ({
     asset: {
       criticality: maxCriticality,
     },
+    ...(criticalityContributors.length > 0 && { criticalityContributors }),
   };
 };

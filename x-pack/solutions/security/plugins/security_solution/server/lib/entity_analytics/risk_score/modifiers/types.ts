@@ -10,7 +10,15 @@ import type { AssetCriticalityRecord } from '../../../../../common/api/entity_an
 interface ModifierTypeMap {
   asset_criticality: {
     subtype: void;
-    metadata: { criticality_level: AssetCriticalityRecord['criticality_level'] | null | undefined };
+    metadata: {
+      criticality_level: AssetCriticalityRecord['criticality_level'] | null | undefined;
+      /**
+       * EUIDs of the entities whose criticality set `criticality_level`. Only
+       * present on resolution scores, where the level is aggregated across
+       * group members and is otherwise unattributable from the score document.
+       */
+      contributing_entity_ids?: string[];
+    };
   };
   watchlist: {
     subtype: string;
