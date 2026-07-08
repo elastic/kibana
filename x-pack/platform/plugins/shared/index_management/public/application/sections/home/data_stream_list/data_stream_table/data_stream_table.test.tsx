@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { ScopedHistory } from '@kbn/core/public';
 import { MAX_DATA_RETENTION } from '../../../../../../common/constants';
 import type { DataStream } from '../../../../../../common/types';
@@ -147,6 +148,8 @@ jest.mock('../../components', () => ({
   FilterListButton: () => null,
 }));
 
+const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
+
 const createDataStream = (overrides: Partial<DataStream> = {}): DataStream => ({
   name: 'my-data-stream',
   timeStampField: { name: '@timestamp' },
@@ -165,6 +168,7 @@ const createDataStream = (overrides: Partial<DataStream> = {}): DataStream => ({
     delete_index: true,
     manage_data_stream_lifecycle: true,
     read_failure_store: true,
+    manage: true,
   },
   hidden: false,
   nextGenerationManagedBy: 'Data stream lifecycle',
@@ -189,7 +193,7 @@ describe('DataStreamTable', () => {
       nextGenerationManagedBy: 'Data stream lifecycle',
     });
 
-    render(
+    renderWithIntl(
       <DataStreamTable
         dataStreams={[dataStream]}
         reload={jest.fn()}
@@ -216,7 +220,7 @@ describe('DataStreamTable', () => {
       lifecycle: undefined,
     });
 
-    render(
+    renderWithIntl(
       <DataStreamTable
         dataStreams={[dataStream]}
         reload={jest.fn()}
@@ -246,7 +250,7 @@ describe('DataStreamTable', () => {
       } as DataStream['lifecycle'],
     });
 
-    render(
+    renderWithIntl(
       <DataStreamTable
         dataStreams={[dataStream]}
         reload={jest.fn()}
@@ -274,7 +278,7 @@ describe('DataStreamTable', () => {
       } as DataStream['lifecycle'],
     });
 
-    render(
+    renderWithIntl(
       <DataStreamTable
         dataStreams={[dataStream]}
         reload={jest.fn()}

@@ -21,6 +21,8 @@
     "@kbn/profiling-utils",
     "@kbn/slo-schema",
     "@kbn/elastic-agent-utils",
-    "@kbn/apm-types-shared"
+    "@kbn/apm-types-shared",
+    "@kbn/zod",
+    "@kbn/zod-helpers"
   ]
 }

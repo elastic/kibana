@@ -27,9 +27,7 @@ jest.mock('../../../../common/lib/kibana');
   data: { templates: [] },
   isLoading: false,
 });
-(useChangeAppliedTemplate as jest.Mock).mockReturnValue({
-  mutate: jest.fn(),
-});
+(useChangeAppliedTemplate as jest.Mock).mockReturnValue({ mutate: jest.fn(), isLoading: false });
 (useGetTemplate as jest.Mock).mockReturnValue({ data: null });
 
 describe('CaseSettingsPopover', () => {
@@ -42,7 +40,6 @@ describe('CaseSettingsPopover', () => {
     onSyncAlertsChange: jest.fn(),
     showMetrics: true,
     onShowMetricsChange: jest.fn(),
-    onCaseNameChange: jest.fn(),
     isOpen: true,
     onClose: jest.fn(),
     anchorElement,
@@ -59,6 +56,7 @@ describe('CaseSettingsPopover', () => {
     });
     (useChangeAppliedTemplate as jest.Mock).mockReturnValue({
       mutate: jest.fn(),
+      isLoading: false,
     });
     (useGetTemplate as jest.Mock).mockReturnValue({ data: null });
   });
@@ -114,58 +112,6 @@ describe('CaseSettingsPopover', () => {
     });
   });
 
-  it('renders edit case name link', async () => {
-    renderWithTestingProviders(<CaseSettingsPopover {...defaultProps} />);
-
-    expect(await screen.findByTestId('case-settings-change-name')).toBeInTheDocument();
-  });
-
-  it('opens rename modal when edit case name is clicked', async () => {
-    renderWithTestingProviders(<CaseSettingsPopover {...defaultProps} />);
-
-    await userEvent.click(await screen.findByTestId('case-settings-change-name'));
-
-    expect(await screen.findByTestId('case-rename-modal')).toBeInTheDocument();
-    expect(defaultProps.onClose).toHaveBeenCalled();
-  });
-
-  it('submits new name and closes modal', async () => {
-    renderWithTestingProviders(<CaseSettingsPopover {...defaultProps} />);
-
-    await userEvent.click(await screen.findByTestId('case-settings-change-name'));
-
-    const input = await screen.findByTestId('case-rename-input');
-    await userEvent.clear(input);
-    await userEvent.type(input, 'New case name');
-
-    await userEvent.click(await screen.findByTestId('case-rename-submit'));
-
-    await waitFor(() => {
-      expect(defaultProps.onCaseNameChange).toHaveBeenCalledWith('New case name');
-    });
-  });
-
-  it('disables submit when name is same as current', async () => {
-    renderWithTestingProviders(<CaseSettingsPopover {...defaultProps} />);
-
-    await userEvent.click(await screen.findByTestId('case-settings-change-name'));
-
-    const submitButton = await screen.findByTestId('case-rename-submit');
-    expect(submitButton).toBeDisabled();
-  });
-
-  it('disables submit when name is empty', async () => {
-    renderWithTestingProviders(<CaseSettingsPopover {...defaultProps} />);
-
-    await userEvent.click(await screen.findByTestId('case-settings-change-name'));
-
-    const input = await screen.findByTestId('case-rename-input');
-    await userEvent.clear(input);
-
-    const submitButton = await screen.findByTestId('case-rename-submit');
-    expect(submitButton).toBeDisabled();
-  });
-
   it('does not render popover content when isOpen is false', () => {
     renderWithTestingProviders(<CaseSettingsPopover {...defaultProps} isOpen={false} />);
 
@@ -198,11 +144,14 @@ describe('CaseSettingsPopover', () => {
     expect(screen.queryByTestId('case-settings-template-select')).not.toBeInTheDocument();
   });
 
-  it('does not call changeTemplate when the case already has the selected template applied', async () => {
-    const mutateMock = jest.fn();
+  it('does not apply a template when the case already has the selected template applied', async () => {
+    const changeAppliedTemplateMock = jest.fn();
     const templateId = 'template-1';
 
-    (useChangeAppliedTemplate as jest.Mock).mockReturnValue({ mutate: mutateMock });
+    (useChangeAppliedTemplate as jest.Mock).mockReturnValue({
+      mutate: changeAppliedTemplateMock,
+      isLoading: false,
+    });
     (useGetTemplate as jest.Mock).mockReturnValue({
       data: { templateId, templateVersion: 1, definition: { fields: [] } },
     });
@@ -218,6 +167,13 @@ describe('CaseSettingsPopover', () => {
 
     await screen.findByTestId('case-settings-popover');
 
-    expect(mutateMock).not.toHaveBeenCalled();
+    expect(changeAppliedTemplateMock).not.toHaveBeenCalled();
+  });
+
+  it('does not render edit case name link', async () => {
+    renderWithTestingProviders(<CaseSettingsPopover {...defaultProps} />);
+
+    await screen.findByTestId('case-settings-popover');
+    expect(screen.queryByTestId('case-settings-change-name')).not.toBeInTheDocument();
   });
 });

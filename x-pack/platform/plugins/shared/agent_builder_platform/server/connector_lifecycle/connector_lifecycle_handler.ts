@@ -7,7 +7,10 @@
 
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { Logger } from '@kbn/logging';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import {
+  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+  CONTEXT_ENGINE_ENABLED_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import type {
   ConnectorLifecyclePostCreateParams,
   ConnectorLifecyclePostDeleteParams,
@@ -15,6 +18,7 @@ import type {
 import type { CoreStart } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentContextLayerPluginStart } from '@kbn/agent-context-layer-plugin/server';
+import { isChatCallableConnectorType } from '../skills/connector_authoring/utils';
 
 interface ConnectorLifecycleHandlerDeps {
   logger: Logger;
@@ -41,15 +45,24 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
 
       const { connectorId, connectorType } = params;
 
+      // Skipping SML indexing for connector, because it can't be called from chat
+      if (!isChatCallableConnectorType(connectorType)) {
+        return;
+      }
+
       try {
         const [coreStart, startDeps] = await getStartServices();
         const request = params.request;
         const soClient = coreStart.savedObjects.getScopedClient(request);
         const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
-        const isExperimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
-          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-        );
-        if (!isExperimentalFeaturesEnabled) return;
+        // SML ingest lives in the Agent Builder family, so crawling connectors
+        // into SML requires both the Agent Builder experimental flag and the
+        // dedicated Context Engine flag. Both must be enabled.
+        const [isExperimentalEnabled, isContextEngineEnabled] = await Promise.all([
+          uiSettingsClient.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID),
+          uiSettingsClient.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID),
+        ]);
+        if (!isExperimentalEnabled || !isContextEngineEnabled) return;
 
         try {
           await startDeps.agentContextLayer.indexAttachment({

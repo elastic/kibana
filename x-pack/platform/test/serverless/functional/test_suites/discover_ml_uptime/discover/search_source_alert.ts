@@ -231,11 +231,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const openDiscoverAlertFlyout = async () => {
     await testSubjects.click('app-menu-overflow-button');
     await testSubjects.click('discoverAlertsButton');
-    // Different create rule buttons in serverless
     if (await testSubjects.exists('discoverCreateAlertButton')) {
       await testSubjects.click('discoverCreateAlertButton');
-    } else {
+    } else if (await testSubjects.exists('discoverLegacySearchThresholdRule')) {
+      await testSubjects.click('discoverLegacySearchThresholdRule');
+    } else if (await testSubjects.exists('discoverAppMenuCustomThresholdRule')) {
       await testSubjects.click('discoverAppMenuCustomThresholdRule');
+    } else {
+      throw new Error('No discover alert rule option found in the app menu');
     }
   };
 
@@ -493,7 +496,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       const dataViewsElem = await testSubjects.find('euiSelectableList');
       const sourceDataViewOption = await dataViewsElem.findByCssSelector(
-        `[title="${SOURCE_DATA_VIEW}"]`
+        `[data-test-subj="dataView-${SOURCE_DATA_VIEW}"]`
       );
       await sourceDataViewOption.click();
 
@@ -717,7 +720,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       const dataViewsElem = await testSubjects.find('euiSelectableList');
       const sourceDataViewOption = await dataViewsElem.findByCssSelector(
-        `[title="${SOURCE_DATA_VIEW}"]`
+        `[data-test-subj="dataView-${SOURCE_DATA_VIEW}"]`
       );
       await sourceDataViewOption.click();
 

@@ -17,6 +17,7 @@ import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
 import { bulkUpdateAgents, getAgentById, getAgents, getAgentsByKuery, updateAgent } from './crud';
 import type { GetAgentsOptions } from './crud';
+import { bulkCreateAgentActionResults, createAgentAction } from './actions';
 
 export class CollectorRemovalError extends AgentRequestInvalidError {}
 
@@ -32,10 +33,23 @@ export async function removeCollector(
     );
   }
 
+  const now = new Date().toISOString();
   await updateAgent(esClient, agentId, {
     active: false,
-    unenrolled_at: new Date().toISOString(),
+    unenrolled_at: now,
   });
+
+  const actionId = uuidv4();
+  const currentSpaceId = getCurrentNamespace(soClient);
+  await createAgentAction(esClient, soClient, {
+    id: actionId,
+    agents: [agentId],
+    created_at: now,
+    type: 'REMOVE_COLLECTOR',
+    total: 1,
+    namespaces: [currentSpaceId],
+  });
+  await bulkCreateAgentActionResults(esClient, [{ agentId, actionId }]);
 }
 
 export async function removeCollectors(
@@ -43,9 +57,30 @@ export async function removeCollectors(
   soClient: SavedObjectsClientContract,
   options: GetAgentsOptions & {
     showInactive?: boolean;
+    dryRun?: boolean;
   }
-): Promise<{ actionId: string }> {
+): Promise<{ actionId: string } | { count: number }> {
   const spaceId = getCurrentNamespace(soClient);
+
+  if (options.dryRun) {
+    if ('agentIds' in options) {
+      const agents = await getAgents(esClient, soClient, options);
+      return { count: agents.filter((a) => a.type === AGENT_TYPE_OPAMP).length };
+    }
+    const opampFilter = `agent.type:${AGENT_TYPE_OPAMP}`;
+    const kuery = buildFilterWithNamespace(
+      await agentsKueryNamespaceFilter(spaceId),
+      options.kuery ? `(${options.kuery}) AND ${opampFilter}` : opampFilter
+    );
+    const { total } = await getAgentsByKuery(esClient, soClient, {
+      kuery,
+      showAgentless: options.showAgentless,
+      showInactive: options.showInactive ?? false,
+      page: 1,
+      perPage: 0,
+    });
+    return { count: total };
+  }
 
   const candidateAgents =
     'agentIds' in options
@@ -75,5 +110,23 @@ export async function removeCollectors(
     {}
   );
 
-  return { actionId: uuidv4() };
+  const actionId = uuidv4();
+
+  if (collectors.length > 0) {
+    const collectorIds = collectors.map((a) => a.id);
+    await createAgentAction(esClient, soClient, {
+      id: actionId,
+      agents: collectorIds,
+      created_at: now,
+      type: 'REMOVE_COLLECTOR',
+      total: collectorIds.length,
+      namespaces: [spaceId],
+    });
+    await bulkCreateAgentActionResults(
+      esClient,
+      collectorIds.map((id) => ({ agentId: id, actionId }))
+    );
+  }
+
+  return { actionId };
 }

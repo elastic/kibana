@@ -36,7 +36,7 @@ import type {
 } from '@elastic/esql/types';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 
 const DEFAULT_ESQL_LIMIT = 1000;
 
@@ -289,7 +289,7 @@ export const getKqlSearchQueries = (esql: string) => {
  * @param lineWidth - Optional line width in characters; when provided, output is wrapped to fit. Otherwise uses the library default (80).
  */
 export const prettifyQuery = (src: string, lineWidth?: number): string => {
-  const { root } = Parser.parse(src, { withFormatting: true });
+  const { root } = Parser.parse(src, { withFormatting: true, withParens: true });
   return WrappingPrettyPrinter.print(root, {
     multiline: true,
     ...(lineWidth !== undefined && { wrap: lineWidth }),

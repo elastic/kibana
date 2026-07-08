@@ -38,6 +38,7 @@ export type {
   WorkflowExecutionLogModel,
   WorkflowStepExecutionDto,
   WorkflowTokenUsage,
+  WorkflowStepTokenUsage,
   WorkflowListDto,
   WorkflowListItemAction,
   WorkflowListItemDto,
@@ -53,6 +54,7 @@ export type {
   ExecutionStatusUnion,
   ExecutionTypeUnion,
   // api types
+  WorkflowSortField,
   WorkflowsSearchParams,
   // connector types
   ConnectorSubAction,
@@ -62,7 +64,7 @@ export type {
   InternalConnectorContract,
   DynamicConnectorContract,
   BaseConnectorContract,
-  StepStabilityLevel,
+  StabilityLevel,
   HttpMethod,
   EditorHandlers,
   EditorHandlersConfig,
@@ -92,6 +94,7 @@ export {
   WorkflowExecutionSortFields,
   TerminalExecutionStatuses,
   NonTerminalExecutionStatuses,
+  ConcurrencySlotOccupyingExecutionStatuses,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
   // shared constants

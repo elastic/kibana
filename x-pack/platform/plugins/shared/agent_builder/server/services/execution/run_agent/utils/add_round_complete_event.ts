@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { OperatorFunction } from 'rxjs';
-import { map, merge, share, toArray } from 'rxjs';
+import { map, merge, shareReplay, toArray } from 'rxjs';
 import type {
   RoundCompleteEvent,
   RoundInput,
@@ -98,6 +98,7 @@ export const addRoundCompleteEvent = ({
   compactionResult,
   roundId: providedRoundId,
   initialTodos,
+  getWorkspaceId,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
@@ -114,9 +115,11 @@ export const addRoundCompleteEvent = ({
   roundId?: string;
   /** Todo list at round start; used as fallback when the agent never called todoWrite this round */
   initialTodos?: TodoItem[];
+  /** Returns the workspace_id used in this round, if any */
+  getWorkspaceId?: () => string | undefined;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
-    const shared$ = events$.pipe(share());
+    const shared$ = events$.pipe(shareReplay());
     return merge(
       shared$,
       shared$.pipe(
@@ -150,6 +153,7 @@ export const addRoundCompleteEvent = ({
 
           round.state = buildRoundState({ round, events, stateManager });
 
+          const workspaceId = getWorkspaceId?.();
           const event: RoundCompleteEvent = {
             type: ChatEventType.roundComplete,
             data: {
@@ -157,6 +161,7 @@ export const addRoundCompleteEvent = ({
               resumed: pendingRound !== undefined,
               conversation_state: getConversationState(),
               attachments: attachmentStateManager.getAll(),
+              ...(workspaceId ? { workspace_id: workspaceId } : {}),
             },
           };
 
@@ -485,9 +490,15 @@ const createToolCallStep = ({
 const getModelUsage = (stats: ModelProviderStats): RoundModelUsageStats => {
   let inputTokens = 0;
   let outputTokens = 0;
+  let cachedInputTokens = 0;
+  let hasCachedInputTokens = false;
   for (const call of stats.calls) {
     inputTokens += call.tokens?.prompt ?? 0;
     outputTokens += call.tokens?.completion ?? 0;
+    if (call.tokens?.cached !== undefined) {
+      cachedInputTokens += call.tokens.cached;
+      hasCachedInputTokens = true;
+    }
   }
   const modelFromResponse = stats.calls.find((call) => call.model)?.model;
 
@@ -497,6 +508,7 @@ const getModelUsage = (stats: ModelProviderStats): RoundModelUsageStats => {
     llm_calls: stats.calls.length,
     input_tokens: inputTokens,
     output_tokens: outputTokens,
+    ...(hasCachedInputTokens ? { cached_input_tokens: cachedInputTokens } : {}),
     ...(modelFromResponse ? { model: modelFromResponse } : {}),
   };
 };
@@ -566,6 +578,9 @@ const mergeModelUsage = (
     llm_calls: a.llm_calls + b.llm_calls,
     input_tokens: a.input_tokens + b.input_tokens,
     output_tokens: a.output_tokens + b.output_tokens,
+    ...(a.cached_input_tokens !== undefined || b.cached_input_tokens !== undefined
+      ? { cached_input_tokens: (a.cached_input_tokens ?? 0) + (b.cached_input_tokens ?? 0) }
+      : {}),
     model: a.model ?? b.model,
   };
 };

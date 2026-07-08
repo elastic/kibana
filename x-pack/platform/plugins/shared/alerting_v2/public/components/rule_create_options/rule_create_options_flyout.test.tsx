@@ -68,12 +68,11 @@ describe('RuleCreateOptionsFlyout', () => {
     expect(onCreateWithAgent).toHaveBeenCalledTimes(1);
   });
 
-  it('renders the "Start from a rule builder" heading', () => {
+  it('renders the builder divider before the Threshold Alert option', () => {
     renderFlyout();
 
-    expect(
-      screen.getByRole('heading', { level: 3, name: 'Start from a rule builder' })
-    ).toBeInTheDocument();
+    expect(screen.getByText('or start from a builder')).toBeInTheDocument();
+    expect(screen.queryByText('Start from a rule builder')).not.toBeInTheDocument();
   });
 
   it('calls onCreateThresholdAlert when the Threshold Alert option is selected', () => {
@@ -82,5 +81,28 @@ describe('RuleCreateOptionsFlyout', () => {
     fireEvent.click(screen.getByRole('button', { name: /threshold alert/i }));
 
     expect(onCreateThresholdAlert).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders the AI Agent option disabled and does not fire onCreateWithAgent when createWithAgentDisabled is set', () => {
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsFlyout
+          onClose={onClose}
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          createWithAgentDisabled
+          createWithAgentTooltipText="Missing privileges"
+          onCreateThresholdAlert={onCreateThresholdAlert}
+        />
+      </I18nProvider>
+    );
+
+    const agentCard = screen.getByTestId('createWithAgentCard');
+    expect(agentCard).toBeInTheDocument();
+    // Kept focusable (aria-disabled) rather than natively disabled so the tooltip stays reachable.
+    expect(agentCard).toHaveAttribute('aria-disabled', 'true');
+
+    fireEvent.click(screen.getByRole('button', { name: /create with ai agent/i }));
+    expect(onCreateWithAgent).not.toHaveBeenCalled();
   });
 });
