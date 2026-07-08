@@ -314,6 +314,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
           global_data_tags: getAgentlessGlobalDataTags(pkgInfo),
           fleet_server_host_id: fleetServerId,
           data_output_id: outputId,
+          monitoring_output_id: outputId,
           is_protected: false,
         },
         { id: agentPolicyId, skipDeploy: true, request, user }
