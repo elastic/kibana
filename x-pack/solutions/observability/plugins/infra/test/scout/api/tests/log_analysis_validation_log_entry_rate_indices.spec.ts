@@ -110,6 +110,41 @@ apiTest.describe(
       }
     );
 
+    apiTest('returns errors in a deterministic order', async ({ apiClient }) => {
+      // Use several non-existent index patterns so each produces an
+      // `INDEX_NOT_FOUND` error. The response errors must follow the input
+      // index order regardless of the concurrent query completion order.
+      const indices = Array.from({ length: 25 }, (_, index) => `missing-index-${index}-*`);
+
+      const response = await apiClient.post(LOG_ANALYSIS_VALIDATE_INDICES_PATH, {
+        headers: {
+          ...viewerApiCredentials.apiKeyHeader,
+          ...testData.INTERNAL_HEADERS,
+        },
+        responseType: 'json',
+        body: validationIndicesRequestPayloadRT.encode({
+          data: {
+            fields: [TIMESTAMP_FIELD],
+            indices,
+            runtimeMappings: {},
+          },
+        }),
+      });
+
+      expect(response).toHaveStatusCode(200);
+
+      const {
+        data: { errors },
+      } = decodeOrThrow(validationIndicesResponsePayloadRT)(response.body);
+
+      expect(errors).toStrictEqual(
+        indices.map((index) => ({
+          error: 'INDEX_NOT_FOUND',
+          index,
+        }))
+      );
+    });
+
     apiTest('rejects requests with too many indices', async ({ apiClient }) => {
       const indices = Array.from({ length: 1001 }, (_, index) => `filebeat-${index}-*`);
 

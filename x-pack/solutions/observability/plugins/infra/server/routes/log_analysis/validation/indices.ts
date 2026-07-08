@@ -84,8 +84,6 @@ export const initValidateLogAnalysisIndicesRoute = ({ framework }: InfraBackendL
           data: { fields, indices, runtimeMappings },
         } = request.body;
 
-        const errors: logAnalysisValidationV1.ValidationIndicesError[] = [];
-
         // Deduplicate the user-provided indices and fields to avoid redundant queries.
         const uniqueIndices = [...new Set(indices)];
         const deduplicatedFields = deduplicateFields(fields);
@@ -100,48 +98,62 @@ export const initValidateLogAnalysisIndicesRoute = ({ framework }: InfraBackendL
 
         const uniqueFields = deduplicatedFields.fields;
 
-        // Query each pattern individually, to map correctly the errors
-        await asyncMapWithLimit(uniqueIndices, MAX_CONCURRENT_INDEX_QUERIES, async (index) => {
-          const fieldCaps = await (
-            await requestContext.core
-          ).elasticsearch.client.asCurrentUser.fieldCaps({
-            allow_no_indices: true,
-            fields: uniqueFields.map((field) => field.name),
-            ignore_unavailable: true,
-            index,
-            runtime_mappings: runtimeMappings,
-          });
+        // Query each pattern individually, to map correctly the errors. Collect
+        // the errors per index and flatten them afterwards so the response order
+        // stays deterministic regardless of the concurrent query completion order.
+        const errorsByIndex = await asyncMapWithLimit(
+          uniqueIndices,
+          MAX_CONCURRENT_INDEX_QUERIES,
+          async (index) => {
+            const indexErrors: logAnalysisValidationV1.ValidationIndicesError[] = [];
 
-          if (fieldCaps.indices.length === 0) {
-            errors.push({
-              error: 'INDEX_NOT_FOUND',
+            const fieldCaps = await (
+              await requestContext.core
+            ).elasticsearch.client.asCurrentUser.fieldCaps({
+              allow_no_indices: true,
+              fields: uniqueFields.map((field) => field.name),
+              ignore_unavailable: true,
               index,
+              runtime_mappings: runtimeMappings,
             });
-            return;
-          }
 
-          uniqueFields.forEach(({ name: fieldName, validTypes }) => {
-            const fieldMetadata = fieldCaps.fields[fieldName];
-
-            if (fieldMetadata === undefined) {
-              errors.push({
-                error: 'FIELD_NOT_FOUND',
+            if (fieldCaps.indices.length === 0) {
+              indexErrors.push({
+                error: 'INDEX_NOT_FOUND',
                 index,
-                field: fieldName,
               });
-            } else {
-              const fieldTypes = Object.keys(fieldMetadata);
+              return indexErrors;
+            }
 
-              if (!fieldTypes.every((fieldType) => validTypes.includes(fieldType))) {
-                errors.push({
-                  error: `FIELD_NOT_VALID`,
+            uniqueFields.forEach(({ name: fieldName, validTypes }) => {
+              const fieldMetadata = fieldCaps.fields[fieldName];
+
+              if (fieldMetadata === undefined) {
+                indexErrors.push({
+                  error: 'FIELD_NOT_FOUND',
                   index,
                   field: fieldName,
                 });
+              } else {
+                const fieldTypes = Object.keys(fieldMetadata);
+
+                if (!fieldTypes.every((fieldType) => validTypes.includes(fieldType))) {
+                  indexErrors.push({
+                    error: `FIELD_NOT_VALID`,
+                    index,
+                    field: fieldName,
+                  });
+                }
               }
-            }
-          });
-        });
+            });
+
+            return indexErrors;
+          }
+        );
+
+        // `asyncMapWithLimit` preserves input order, so flattening yields a
+        // deterministic ordering that follows the deduplicated index order.
+        const errors = errorsByIndex.flat();
 
         return response.ok({
           body: logAnalysisValidationV1.validationIndicesResponsePayloadRT.encode({
