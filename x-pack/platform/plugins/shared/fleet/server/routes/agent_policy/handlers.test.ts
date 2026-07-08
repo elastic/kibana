@@ -141,7 +141,7 @@ describe('Agent policy API handlers', () => {
       } as AgentPolicy);
 
       await expect(copyAgentPolicyHandler(context, getCopyRequest(), response)).rejects.toThrow(
-        /Agentless agent policies cannot be copied/
+        /Agentless agent policies cannot be copied.*Source agent policy: source-policy\./
       );
       expect(agentPolicyServiceMock.copy).not.toHaveBeenCalled();
     });

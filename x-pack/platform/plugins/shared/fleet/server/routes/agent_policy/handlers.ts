@@ -710,7 +710,7 @@ export const copyAgentPolicyHandler: RequestHandler<
       // A missing source falls through to `copy`, which reports the not-found error.
       if (sourceAgentPolicy?.supports_agentless) {
         throw new FleetError(
-          'Agentless agent policies cannot be copied. To create agentless deployments, use the agentless policies API.'
+          `Agentless agent policies cannot be copied. To create agentless deployments, use the agentless policies API. Source agent policy: ${request.params.agentPolicyId}.`
         );
       }
     }

@@ -65,6 +65,7 @@ import { runWithCache } from '../../services/epm/packages/cache';
 
 import {
   alignInputsAndStreams,
+  getAgentlessAgentPolicyIds,
   haveAgentlessAgentPolicies,
   isSimplifiedCreatePackagePolicyRequest,
   removeFieldsFromInputSchema,
@@ -427,10 +428,13 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
   // The cheap own/body-flag detection runs regardless of the flag so legacy
   // agentless usage is measurable before the flip. The body flag is checked to
   // prevent converting a regular package policy into an agentless one.
+  const { packagePolicyId } = request.params;
   const isAgentless = Boolean(packagePolicy.supports_agentless || request.body.supports_agentless);
   if (isAgentless) {
     if (legacyAgentlessApiDisabled) {
-      throw new FleetError('To update agentless package policies, use the agentless policies API.');
+      throw new FleetError(
+        `To update agentless package policies, use the agentless policies API. Offending package policy: ${packagePolicyId}.`
+      );
     }
     logLegacyAgentlessWriteDeprecation('update package policy');
   }
@@ -442,14 +446,19 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       ...(request.body.policy_ids ?? []),
       ...(request.body.policy_id ? [request.body.policy_id] : []),
     ];
-    if (await haveAgentlessAgentPolicies(soClient, targetParentPolicyIds)) {
+    const agentlessTargetIds = await getAgentlessAgentPolicyIds(soClient, targetParentPolicyIds);
+    if (agentlessTargetIds.length > 0) {
       throw new FleetError(
-        'To add integrations to an agentless agent policy, use the agentless policies API.'
+        `To add integrations to an agentless agent policy, use the agentless policies API. Agentless agent policies: ${agentlessTargetIds.join(
+          ', '
+        )}.`
       );
     }
 
     if (await haveAgentlessAgentPolicies(soClient, packagePolicy.policy_ids ?? [])) {
-      throw new FleetError('To update agentless package policies, use the agentless policies API.');
+      throw new FleetError(
+        `To update agentless package policies, use the agentless policies API. Offending package policy: ${packagePolicyId}.`
+      );
     }
   }
 
@@ -643,14 +652,27 @@ const throwIfTargetsAgentlessPolicies = async (
   const packagePolicies =
     (await packagePolicyService.getByIDs(soClient, packagePolicyIds, { ignoreMissing: true })) ??
     [];
-  let hasAgentless = packagePolicies.some((packagePolicy) => packagePolicy.supports_agentless);
-  if (!hasAgentless) {
-    // Older agentless package policies may not carry the flag themselves — check parents.
-    const parentPolicyIds = packagePolicies.flatMap((packagePolicy) => packagePolicy.policy_ids);
-    hasAgentless = await haveAgentlessAgentPolicies(soClient, parentPolicyIds);
-  }
-  if (hasAgentless) {
-    throw new FleetError(`To upgrade agentless package policies, use the agentless policies API.`);
+  // Older agentless package policies may not carry the flag themselves — check parents too.
+  const agentlessParentIds = new Set(
+    await getAgentlessAgentPolicyIds(
+      soClient,
+      packagePolicies.flatMap((packagePolicy) => packagePolicy.policy_ids)
+    )
+  );
+  const offendingIds = packagePolicies
+    .filter(
+      (packagePolicy) =>
+        packagePolicy.supports_agentless ||
+        packagePolicy.policy_ids.some((id) => agentlessParentIds.has(id))
+    )
+    .map(({ id }) => id);
+  if (offendingIds.length > 0) {
+    // The whole batch is rejected, so name the offenders for self-remediation.
+    throw new FleetError(
+      `To upgrade agentless package policies, use the agentless policies API. Agentless package policies in this request: ${offendingIds.join(
+        ', '
+      )}.`
+    );
   }
 };
 

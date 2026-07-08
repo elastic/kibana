@@ -600,7 +600,7 @@ describe('When calling package policy', () => {
         });
 
         await expect(routeHandler(context, getUpdateKibanaRequest(), response)).rejects.toThrow(
-          /To update agentless package policies/
+          /To update agentless package policies.*Offending package policy: 1\./
         );
         expect(packagePolicyServiceMock.update).not.toHaveBeenCalled();
       });
@@ -618,7 +618,7 @@ describe('When calling package policy', () => {
 
       it('should reject when request policy_ids target an agentless agent policy', async () => {
         (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
-          { is_managed: false, supports_agentless: true },
+          { id: 'agentless', is_managed: false, supports_agentless: true },
         ]);
 
         await expect(
@@ -627,13 +627,15 @@ describe('When calling package policy', () => {
             getUpdateKibanaRequest({ policy_ids: ['agentless'] } as any),
             response
           )
-        ).rejects.toThrow(/To add integrations to an agentless agent policy/);
+        ).rejects.toThrow(
+          /To add integrations to an agentless agent policy.*Agentless agent policies: agentless\./
+        );
         expect(packagePolicyServiceMock.update).not.toHaveBeenCalled();
       });
 
       it('should reject when request policy_id targets an agentless agent policy', async () => {
         (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
-          { is_managed: false, supports_agentless: true },
+          { id: 'agentless', is_managed: false, supports_agentless: true },
         ]);
 
         await expect(
@@ -644,11 +646,11 @@ describe('When calling package policy', () => {
 
       it('should reject when a parent agent policy is agentless', async () => {
         (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
-          { is_managed: false, supports_agentless: true },
+          { id: '2', is_managed: false, supports_agentless: true },
         ]);
 
         await expect(routeHandler(context, getUpdateKibanaRequest(), response)).rejects.toThrow(
-          /To update agentless package policies/
+          /To update agentless package policies.*Offending package policy: 1\./
         );
         expect(packagePolicyServiceMock.update).not.toHaveBeenCalled();
       });
@@ -1192,8 +1194,9 @@ describe('When calling package policy', () => {
           },
         });
 
+        // Only the offending id is named, so a batch owner can self-remediate.
         await expect(upgradePackagePolicyHandler(context, request, response)).rejects.toThrow(
-          /To upgrade agentless package policies/
+          /To upgrade agentless package policies.*Agentless package policies in this request: 2\./
         );
         expect(packagePolicyServiceMock.bulkUpgrade).not.toHaveBeenCalled();
       });
@@ -1213,7 +1216,7 @@ describe('When calling package policy', () => {
         });
 
         await expect(upgradePackagePolicyHandler(context, request, response)).rejects.toThrow(
-          /To upgrade agentless package policies/
+          /Agentless package policies in this request: 1\./
         );
         expect(packagePolicyServiceMock.bulkUpgrade).not.toHaveBeenCalled();
       });

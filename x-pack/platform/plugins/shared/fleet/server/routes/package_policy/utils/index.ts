@@ -28,18 +28,25 @@ import type { SimplifiedPackagePolicy } from '../../../../common/services/simpli
 import { PackagePolicyRequestError } from '../../../errors';
 import type { NewPackagePolicyInputStream } from '../../../../common';
 
-// True if any given id belongs to an agentless agent policy. Shared by the
-// legacy-API blocks so parent detection can't drift between sites.
+// The subset of the given ids that belong to an agentless agent policy. Shared by
+// the legacy-API blocks so parent detection can't drift between sites.
+export async function getAgentlessAgentPolicyIds(
+  soClient: SavedObjectsClientContract,
+  agentPolicyIds: string[]
+): Promise<string[]> {
+  const ids = uniq(agentPolicyIds);
+  if (ids.length === 0) {
+    return [];
+  }
+  const agentPolicies = await agentPolicyService.getByIds(soClient, ids, { ignoreMissing: true });
+  return agentPolicies.filter((agentPolicy) => agentPolicy.supports_agentless).map(({ id }) => id);
+}
+
 export async function haveAgentlessAgentPolicies(
   soClient: SavedObjectsClientContract,
   agentPolicyIds: string[]
 ): Promise<boolean> {
-  const ids = uniq(agentPolicyIds);
-  if (ids.length === 0) {
-    return false;
-  }
-  const agentPolicies = await agentPolicyService.getByIds(soClient, ids, { ignoreMissing: true });
-  return agentPolicies.some((agentPolicy) => agentPolicy.supports_agentless);
+  return (await getAgentlessAgentPolicyIds(soClient, agentPolicyIds)).length > 0;
 }
 
 export function isSimplifiedCreatePackagePolicyRequest(
