@@ -31,11 +31,14 @@ const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 describe('AlertAnalysisWorkflowPage', () => {
   const coreStart = coreMock.createStart();
 
+  const listAgentsMock = jest.fn();
+
   const settingsGetResponse = (
     settings: Record<string, unknown> = {
       autoCloseEnabled: true,
       autoCloseConfidenceScoreMinThreshold: 0.85,
       autoCloseConfidenceScoreMaxThreshold: 1,
+      tagPrefix: 'alert-analysis',
     }
   ) => ({
     settings,
@@ -74,9 +77,17 @@ describe('AlertAnalysisWorkflowPage', () => {
       };
     });
 
+    const startServices = createStartServicesMock(coreStart);
     return render(
       <MemoryRouter>
-        <TestProviders startServices={createStartServicesMock(coreStart)}>
+        <TestProviders
+          startServices={
+            {
+              ...startServices,
+              agentBuilder: { agents: { list: listAgentsMock } },
+            } as unknown as typeof startServices
+          }
+        >
           <AlertAnalysisWorkflowPage />
         </TestProviders>
       </MemoryRouter>
@@ -85,6 +96,28 @@ describe('AlertAnalysisWorkflowPage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    listAgentsMock.mockResolvedValue([
+      { id: 'elastic-ai-agent', name: 'Elastic AI Agent', readonly: false },
+      { id: 'my-custom-agent', name: 'My Custom Agent', readonly: false },
+      { id: 'platform.builtin', name: 'Built-in Agent', readonly: true },
+    ]);
+  });
+
+  it('lists the user selectable agents excluding platform built-ins', async () => {
+    renderComponent();
+
+    fireEvent.click(await screen.findByTestId('alertAnalysisWorkflowAgentSelector'));
+
+    expect(await screen.findByText('My Custom Agent')).toBeInTheDocument();
+  });
+
+  it('excludes readonly built-in agents from the agent selector', async () => {
+    renderComponent();
+
+    fireEvent.click(await screen.findByTestId('alertAnalysisWorkflowAgentSelector'));
+
+    await screen.findByText('My Custom Agent');
+    expect(screen.queryByText('Built-in Agent')).not.toBeInTheDocument();
   });
 
   it('saves changed settings through the Security route', async () => {
@@ -110,6 +143,7 @@ describe('AlertAnalysisWorkflowPage', () => {
           autoCloseEnabled: false,
           autoCloseConfidenceScoreMinThreshold: 0.85,
           autoCloseConfidenceScoreMaxThreshold: 1,
+          tagPrefix: 'alert-analysis',
         }),
       });
     });
@@ -160,6 +194,22 @@ describe('AlertAnalysisWorkflowPage', () => {
 
     const minThresholdField = await screen.findByTestId('alertAnalysisWorkflowMinThreshold');
     fireEvent.change(minThresholdField, { target: { value: '' } });
+
+    const saveButton = await screen.findByTestId('alertAnalysisWorkflowSaveButton');
+    expect(saveButton).toBeDisabled();
+
+    fireEvent.click(saveButton);
+    expect(coreStart.http.fetch).not.toHaveBeenCalledWith(
+      ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE,
+      expect.objectContaining({ method: 'PUT' })
+    );
+  });
+
+  it('disables saving when the tag prefix is cleared', async () => {
+    renderComponent();
+
+    const tagPrefixField = await screen.findByTestId('alertAnalysisWorkflowTagPrefix');
+    fireEvent.change(tagPrefixField, { target: { value: '' } });
 
     const saveButton = await screen.findByTestId('alertAnalysisWorkflowSaveButton');
     expect(saveButton).toBeDisabled();

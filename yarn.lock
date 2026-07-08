@@ -7573,6 +7573,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/investigation-output@link:x-pack/platform/packages/shared/kbn-investigation-output":
+  version "0.0.0"
+  uid ""
+
 "@kbn/io-ts-utils@link:src/platform/packages/shared/kbn-io-ts-utils":
   version "0.0.0"
   uid ""
@@ -16631,19 +16635,19 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@xyflow/react@12.11.0":
-  version "12.11.0"
-  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.11.0.tgz#7dca326d0e3e8def2988e6089d3c267fe8511242"
-  integrity sha512-na4IO33FSs2OS72hASgZDmTYwFAkef7Z74uBUVrong3ARmQQHfnRUVaCFn1kTt5LbS6pK03TbYjCPGLjLFfziA==
+"@xyflow/react@12.11.1":
+  version "12.11.1"
+  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.11.1.tgz#338d3f2e415bf236ed4661b514722ae60587b704"
+  integrity sha512-L+zBoLGSXham0MnlY8QqjfR7/C5JNw0zxkaey5aZ5XmCgJBAdH4+WRIu8CR40d3l/BdU635V6YbhBK1jMo8/6Q==
   dependencies:
-    "@xyflow/system" "0.0.77"
+    "@xyflow/system" "0.0.78"
     classcat "^5.0.3"
     zustand "^4.4.0"
 
-"@xyflow/system@0.0.77":
-  version "0.0.77"
-  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.77.tgz#e6ebc3f3ee0af8cca8352b4a63b414d921435001"
-  integrity sha512-qCDCMCQAAgUu8yHnhloHG9F5mwPX5E+Wl8McpYIOPSSXfzFJJoZcwOcsDiAjitVKIg2de1WmJbCHfpcvxprsgg==
+"@xyflow/system@0.0.78":
+  version "0.0.78"
+  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.78.tgz#0a6c09236f1f5b7748584182d2d635d5f468e706"
+  integrity sha512-lY0z2qP33fUhTva9Vaxrk0lqZta2pkbxB1trHAx1omnJqRtPvDlAQYV2r5fhS6AdpkulYmbNW0svy+A4/t4B/g==
   dependencies:
     "@types/d3-drag" "^3.0.7"
     "@types/d3-interpolate" "^3.0.4"
