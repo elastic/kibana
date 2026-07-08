@@ -23,11 +23,14 @@ import {
   NO_BEHAVIORS_EUID,
   sourceTestData,
   anomalyTestData,
+  entityTestData,
   ANOMALY_RECORD_IDS,
   SOURCE_EVENT_IDS,
 } from '../../../fixtures/ml_anomaly_summary_test_data';
 
 const ML_ANOMALIES_SHARED_INDEX = '.ml-anomalies-shared';
+const ENTITY_STORE_LATEST_ALIAS = 'entities-latest-default';
+const UNKNOWN_ENTITY_EUID = 'user:does-not-exist@a1b2c3d4e5f6789012345678901234ab@local';
 const SOURCE_EVENTS_INDEX = 'logs-windows.forwarded-default';
 
 const INTERNAL_HEADERS = {
@@ -163,6 +166,18 @@ apiTest.describe(
         ]),
         refresh: true,
       });
+
+      // Index the entity store documents backing the anomaly test entities.
+      // The anomaly overview/summary routes 404 when the entity isn't present
+      // in the entity store's latest index, independent of ML data.
+      log.debug(`Indexing test entity store documents...`);
+      await esClient.bulk({
+        operations: entityTestData.flatMap((data) => [
+          { index: { _index: ENTITY_STORE_LATEST_ALIAS } },
+          data,
+        ]),
+        refresh: true,
+      });
     });
 
     apiTest.afterAll(async ({ apiClient, esClient }) => {
@@ -209,6 +224,19 @@ apiTest.describe(
         .catch(() => {});
       await esClient.indices
         .delete({ index: ML_ANOMALIES_SHARED_INDEX, ignore_unavailable: true })
+        .catch(() => {});
+      // Clean up the entity store documents seeded for these tests.
+      await esClient
+        .deleteByQuery({
+          index: ENTITY_STORE_LATEST_ALIAS,
+          query: {
+            terms: {
+              'entity.id': [CAROL_EUID, DAVID_EUID, WIN_APP01_EUID, NO_BEHAVIORS_EUID],
+            },
+          },
+          refresh: true,
+          ignore_unavailable: true,
+        })
         .catch(() => {});
     });
 
@@ -765,6 +793,32 @@ apiTest.describe(
     );
 
     apiTest(
+      'Anomaly summary API: returns 404 for an entity that does not exist in the entity store',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(buildUrl(UNKNOWN_ENTITY_EUID, 'user'), {
+          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          responseType: 'json',
+          body: {},
+        });
+
+        expect(response).toHaveStatusCode(404);
+      }
+    );
+
+    apiTest(
+      'Anomaly overview API: returns 404 for an entity that does not exist in the entity store',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(buildOverviewUrl(UNKNOWN_ENTITY_EUID, 'user'), {
+          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          responseType: 'json',
+          body: {},
+        });
+
+        expect(response).toHaveStatusCode(404);
+      }
+    );
+
+    apiTest(
       'Anomaly summary API: returns error for user without .ml-anomlies* access',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
@@ -773,6 +827,7 @@ apiTest.describe(
           body: {},
         });
 
+        expect(response).toHaveStatusCode(403);
         expect(response.body.message).toBe('Insufficient privileges to access feature');
       }
     );
@@ -786,6 +841,7 @@ apiTest.describe(
           body: {},
         });
 
+        expect(response).toHaveStatusCode(403);
         expect(response.body.message).toBe('Insufficient privileges to access feature');
       }
     );

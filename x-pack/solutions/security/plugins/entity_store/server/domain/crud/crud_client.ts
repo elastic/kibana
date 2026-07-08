@@ -484,6 +484,7 @@ export class CRUDClient {
     }
 
     const resp = await this.esClient.search<Entity>({
+      ignore_unavailable: true,
       index: getLatestEntitiesIndexName(this.namespace),
       query,
       size,
