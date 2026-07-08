@@ -31,7 +31,7 @@ export function useServiceLinks({
   const { share } = useServiceFlyoutContext();
 
   return useMemo(() => {
-    const locator = share.url.locators.get(APM_APP_LOCATOR_ID);
+    const locator = share?.url?.locators?.get(APM_APP_LOCATOR_ID);
 
     const overviewHref = locator?.getRedirectUrl({
       serviceName,
@@ -45,7 +45,7 @@ export function useServiceLinks({
     });
 
     const slosHref = getManageSlosUrl(
-      share.url.locators.get<SloListLocatorParams>(sloListLocatorID),
+      share?.url?.locators?.get<SloListLocatorParams>(sloListLocatorID),
       { serviceName, environment }
     );
 
