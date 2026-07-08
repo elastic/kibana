@@ -18,6 +18,61 @@ describe('enrichErrorMessage', () => {
     clearDescriptionCache();
   });
 
+  describe('constraint violations preserve the original message', () => {
+    const schema = z.object({
+      concurrency: z.object({
+        max: z.number().int().positive().max(20, 'Parallel concurrency "max" cannot exceed 20.'),
+      }),
+    });
+
+    it('keeps the author-written too_big message instead of describing the type', () => {
+      // Regression: a `too_big` constraint message must survive schema-aware
+      // enrichment, which previously rewrote it to "max expects number".
+      const result = enrichErrorMessage(
+        ['concurrency', 'max'],
+        'Parallel concurrency "max" cannot exceed 20.',
+        'too_big',
+        { schema }
+      );
+      expect(result.message).toContain('cannot exceed 20');
+      expect(result.message).not.toContain('expects number');
+    });
+
+    it('still describes the type for an invalid_type mismatch at the same path', () => {
+      const result = enrichErrorMessage(
+        ['concurrency', 'max'],
+        'Invalid input: expected number, received string',
+        'invalid_type',
+        { schema }
+      );
+      expect(result.message).toContain('max expects');
+    });
+
+    it('keeps a custom refinement message attached at a step node', () => {
+      // Regression: a `custom` refinement (e.g. the parallel-mode mutual-
+      // exclusivity rule) attaches at the step node, so its path points at the
+      // step-union. Schema-aware enrichment would otherwise replace the friendly
+      // message with the giant "must be one of ...N more" union dump.
+      const unionSchema = z.object({
+        steps: z.array(
+          z.discriminatedUnion('type', [
+            z.object({ type: z.literal('parallel'), name: z.string() }),
+            z.object({ type: z.literal('console'), name: z.string() }),
+          ])
+        ),
+      });
+      const friendlyMessage =
+        'A "parallel" step must use either dynamic fan-out (`foreach` + `steps`) or static `branches`, but not both.';
+
+      const result = enrichErrorMessage(['steps', 0], friendlyMessage, 'custom', {
+        schema: unionSchema,
+      });
+
+      expect(result.message).toContain('must use either dynamic fan-out');
+      expect(result.message).not.toContain('must be one of');
+    });
+  });
+
   describe('large workflow `steps` array element', () => {
     function buildWorkflowSchema(connectorCount: number) {
       const stepSchema: z.ZodType = z.lazy(() =>

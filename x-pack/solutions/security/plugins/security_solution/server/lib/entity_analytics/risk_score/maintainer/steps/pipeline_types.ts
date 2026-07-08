@@ -58,4 +58,5 @@ export interface StepResult {
 /** Phase 2 scoring summary with optional skip reason. */
 export interface ResolutionStepResult extends StepResult {
   skippedReason?: 'lookup_empty';
+  scores: Record<string, number>;
 }

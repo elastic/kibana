@@ -95,17 +95,19 @@ describe('deleteAllPerSpaceCasesDataViews', () => {
     }
   });
 
-  it('passes namespaces: ["*"] on find so the walk crosses every space', async () => {
+  it('opens the point-in-time finder with namespaces: ["*"] so the walk crosses every space', async () => {
     // Structural lock — the unscoped internal SO client defaults
     // `options.namespaces` to `[DEFAULT_NAMESPACE_STRING]` when
     // omitted, so dropping the `['*']` arg would silently scope the
-    // walk to `default` and miss every other space.
+    // walk to `default` and miss every other space. The walk uses a
+    // point-in-time finder (not page/offset `find`) so it isn't bounded
+    // by `index.max_result_window` at 10K-space scale.
     const soClient = savedObjectsClientMock.create();
     soClient.find.mockResolvedValue({ saved_objects: [], total: 0, per_page: 100, page: 1 });
 
     await deleteAllPerSpaceCasesDataViews(soClient, logger);
 
-    expect(soClient.find).toHaveBeenCalledWith(
+    expect(soClient.createPointInTimeFinder).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'index-pattern',
         namespaces: ['*'],
@@ -356,6 +358,8 @@ describe('registerCasesAnalyticsV2Routes — enableAdminRoutes gating', () => {
       getTaskManager: () => null,
       getInternalSavedObjectsClient: () => null,
       getWriter: () => null,
+      getActivityWriter: () => null,
+      getAttachmentsWriter: () => null,
       clearDataViewBootstrapCache: jest.fn(),
       enabled: true,
       enableAdminRoutes: false,
@@ -448,6 +452,70 @@ describe('registerCasesAnalyticsV2Routes — enableAdminRoutes gating', () => {
       });
     }
   });
+
+  /**
+   * Regression guard for the multi-surface `/state` response shape.
+   * The integration suite (`tests/trial/analytics_v2/state.ts`)
+   * asserts the same shape against a live Kibana, but a unit-level
+   * pin here catches regressions during in-tree refactors before
+   * they hit CI's slower integration phase.
+   *
+   * A regression that drops a surface from the response (e.g. a
+   * missing key in the route handler's `surfaces: { ... }` literal)
+   * would otherwise be invisible until either an administrator hits
+   * `/state` or the integration suite runs.
+   */
+  it('GET /state response includes per-surface blocks for cases, activity, and attachments', async () => {
+    const args = buildArgs({ enableAdminRoutes: false });
+    registerCasesAnalyticsV2Routes(args);
+
+    // Pull the registered GET /state handler off the mock router.
+    const router = (args.core.http.createRouter as jest.Mock).mock.results[0].value;
+    const stateCall = (router.get as jest.Mock).mock.calls.find(
+      ([def]: [{ path: string }]) => def.path === CASES_ANALYTICS_V2_STATE_URL
+    );
+    expect(stateCall).toBeDefined();
+    const handler = stateCall![1] as (
+      ctx: object,
+      req: object,
+      res: { ok: jest.Mock; customError: jest.Mock }
+    ) => Promise<unknown>;
+
+    // Mock the request handler context: ES client says every index
+    // exists; SO client returns no reset task. The handler doesn't
+    // care about the actual ES content for shape-pinning purposes.
+    const esClient = {
+      indices: { exists: jest.fn().mockResolvedValue(true) },
+    };
+    const ctx = {
+      core: Promise.resolve({
+        elasticsearch: { client: { asInternalUser: esClient } },
+      }),
+    };
+
+    const response = { ok: jest.fn((arg) => arg), customError: jest.fn() };
+    const result = (await handler(ctx, {}, response)) as {
+      body: {
+        surfaces: { cases: unknown; activity: unknown; attachments: unknown };
+        index: string;
+        index_exists: boolean;
+      };
+    };
+
+    expect(response.ok).toHaveBeenCalledTimes(1);
+    expect(result.body).toEqual(
+      expect.objectContaining({
+        // Cases-surface aliases at the top level (back-compat with PR1).
+        index: '.cases',
+        index_exists: true,
+        surfaces: {
+          cases: { index: '.cases', index_exists: true },
+          activity: { index: '.cases-activity', index_exists: true },
+          attachments: { index: '.cases-attachments', index_exists: true },
+        },
+      })
+    );
+  });
 });
 
 describe('POST /reconcile/run_soon handler', () => {
@@ -474,6 +542,8 @@ describe('POST /reconcile/run_soon handler', () => {
       getTaskManager: () => null,
       getInternalSavedObjectsClient: () => null,
       getWriter: () => null,
+      getActivityWriter: () => null,
+      getAttachmentsWriter: () => null,
       clearDataViewBootstrapCache: jest.fn(),
       enabled: true,
       enableAdminRoutes: true,

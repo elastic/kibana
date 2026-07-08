@@ -15,19 +15,19 @@ import { StatefulEventContext } from '../../../../../common/components/events_vi
 import { TableId } from '@kbn/securitysolution-data-table';
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 
 const mockOpenFlyout = jest.fn();
 const mockOpenSystemFlyout = jest.fn();
-const mockUseIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(false);
 
 jest.mock('@kbn/expandable-flyout');
 
-jest.mock('../../../../../common/components/draggables', () => ({
-  DefaultDraggable: () => <div data-test-subj="DefaultDraggable" />,
+jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
 }));
 
-jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: (flag: string) => mockUseIsExperimentalFeatureEnabled(flag),
+jest.mock('../../../../../common/components/draggables', () => ({
+  DefaultDraggable: () => <div data-test-subj="DefaultDraggable" />,
 }));
 
 jest.mock('../../../../../flyout_v2/shared/components/flyout_provider', () => ({
@@ -62,7 +62,7 @@ jest.mock('../../../../../common/lib/kibana', () => {
 
 describe('HostName', () => {
   beforeEach(() => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue({
       ...createExpandableFlyoutApiMock(),
       openFlyout: mockOpenFlyout,
@@ -213,8 +213,8 @@ describe('HostName', () => {
     });
   });
 
-  test('should open the v2 system flyout when newFlyoutSystemEnabled is true', async () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+  test('should open the v2 system flyout when the new flyout advanced setting is enabled', async () => {
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,

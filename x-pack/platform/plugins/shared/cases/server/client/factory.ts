@@ -64,8 +64,10 @@ import type { ConfigType } from '../config';
 import type { CasesEventBus } from '../events/event_bus';
 import { getSavedObjectsTypes } from '../../common';
 import type {
+  CasesActivityV2WriterContract,
   CasesAnalyticsV2DataViewRefresher,
   CasesAnalyticsV2WriterContract,
+  CasesAttachmentsV2WriterContract,
 } from '../cases_analytics_v2';
 
 interface CasesClientFactoryArgs {
@@ -98,6 +100,19 @@ interface CasesClientFactoryArgs {
    * and SO-service hooks compile down to nothing.
    */
   analyticsV2Writer: CasesAnalyticsV2WriterContract;
+  /**
+   * Stable proxy returned by `CasesAnalyticsV2Service.getActivityWriter()`.
+   * Same lifetime + semantics as `analyticsV2Writer`; consumed by the
+   * user-actions SO service to mirror writes to `.cases-activity`.
+   */
+  analyticsV2ActivityWriter: CasesActivityV2WriterContract;
+  /**
+   * Stable proxy returned by `CasesAnalyticsV2Service.getAttachmentsWriter()`.
+   * Same lifetime + semantics as `analyticsV2Writer`; consumed by the
+   * AttachmentService for create / patch / delete mirrors and by the
+   * CasesService for cascade-on-case-delete.
+   */
+  analyticsV2AttachmentsWriter: CasesAttachmentsV2WriterContract;
   /**
    * Stable callback returned by `CasesAnalyticsV2Service.getDataViewRefresher()`.
    * Always resolvable — when v2 is disabled, defaults to
@@ -243,6 +258,7 @@ export class CasesClientFactory {
       log: this.logger,
       unsecuredSavedObjectsClient,
       config: this.options.config,
+      analyticsV2AttachmentsWriter: this.options.analyticsV2AttachmentsWriter,
     });
 
     const spaceId =
@@ -277,6 +293,8 @@ export class CasesClientFactory {
       unsecuredSavedObjectsClient,
       attachmentService,
       analyticsV2Writer: this.options.analyticsV2Writer,
+      analyticsV2ActivityWriter: this.options.analyticsV2ActivityWriter,
+      analyticsV2AttachmentsWriter: this.options.analyticsV2AttachmentsWriter,
     });
 
     const licensingService = new LicensingService(
@@ -310,7 +328,7 @@ export class CasesClientFactory {
         unsecuredSavedObjectsClient,
         savedObjectsSerializer,
         auditLogger,
-        isCasesAttachmentsEnabled: this.options.config.attachments?.enabled === true,
+        analyticsV2ActivityWriter: this.options.analyticsV2ActivityWriter,
       }),
       attachmentService,
       licensingService,
