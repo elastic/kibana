@@ -1221,8 +1221,13 @@ export class StreamsApp {
 
   async selectAllAttachmentsInFlyout() {
     const flyoutTable = this.page.getByTestId('streamsAppAddAttachmentFlyoutAttachmentsTable');
-    // Click the header checkbox to select all
     await flyoutTable.locator('thead input[type="checkbox"]').click();
+  }
+
+  async selectAttachmentInFlyout(attachmentTitle: string) {
+    const flyoutTable = this.page.getByTestId('streamsAppAddAttachmentFlyoutAttachmentsTable');
+    const row = flyoutTable.getByRole('row', { name: attachmentTitle });
+    await row.locator('input[type="checkbox"]').click();
   }
 
   async clickAddToStreamButton() {
