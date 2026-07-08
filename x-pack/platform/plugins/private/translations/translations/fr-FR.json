@@ -51445,7 +51445,6 @@
     "xpack.streams.streamsListView.conflictCalloutMessage": "Activer les flux câblés pour aligner votre configuration Streams avec l'état actuel d'Elasticsearch.",
     "xpack.streams.streamsListView.conflictCalloutTitle": "Conflit de configuration",
     "xpack.streams.streamsListView.createClassicStreamButtonLabel": "Créer un flux classique",
-    "xpack.streams.streamsListView.createQueryStreamButtonLabel": "Créer un flux de requêtes",
     "xpack.streams.streamsListView.disableWiredStreamsErrorToastTitle": "Erreur lors de la mise à jour du paramètre de flux filaires",
     "xpack.streams.streamsListView.enableWiredStreamsErrorToastTitle": "Erreur lors de la mise à jour du paramètre « Wired Streams »",
     "xpack.streams.streamsListView.enableWiredStreamsSwitchLabel": "Activer les flux câblés",
