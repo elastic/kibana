@@ -33,7 +33,7 @@ import * as path from 'path';
 import Papa from 'papaparse';
 import type { SecuritySkillsExample, SecuritySkillsCategory } from '../dataset';
 
-interface SecuritySkillsCsvRow {
+export interface SecuritySkillsCsvRow {
   category: string;
   query_intent: string;
   query: string;
@@ -46,6 +46,8 @@ interface SecuritySkillsCsvRow {
   reference: string;
   notes: string;
 }
+
+const VALID_CATEGORIES: SecuritySkillsCategory[] = ['find-rules', 'distractor'];
 
 function parseToolSequence(raw: string): string[] | undefined {
   const trimmed = raw.trim();
@@ -65,17 +67,58 @@ function parseDatasetSplit(raw: string): string[] {
     .filter((s) => s.length > 0);
 }
 
+/**
+ * Validates a single CSV row and throws a descriptive error for malformed data.
+ * Exported so unit tests can exercise validation without touching the filesystem.
+ */
+export function validateCsvRow(row: SecuritySkillsCsvRow, rowIndex: number): void {
+  const rowLabel = `row ${rowIndex + 1} ("${row.query?.trim() ?? '<missing query>'}")`;
+
+  if (!row.query?.trim()) {
+    throw new Error(`${rowLabel}: "query" is required`);
+  }
+  if (!row.reference?.trim()) {
+    throw new Error(`${rowLabel}: "reference" is required`);
+  }
+
+  const category = row.category?.trim();
+  if (!VALID_CATEGORIES.includes(category as SecuritySkillsCategory)) {
+    throw new Error(
+      `${rowLabel}: "category" must be one of ${VALID_CATEGORIES.join(', ')}, got "${category}"`
+    );
+  }
+
+  const expectedSkill = row.expected_skill?.trim();
+  const shouldNotActivateSkill = row.should_not_activate_skill?.trim();
+  if (!expectedSkill && !shouldNotActivateSkill) {
+    throw new Error(
+      `${rowLabel}: one of "expected_skill" or "should_not_activate_skill" is required`
+    );
+  }
+  if (expectedSkill && shouldNotActivateSkill) {
+    throw new Error(
+      `${rowLabel}: "expected_skill" and "should_not_activate_skill" are mutually exclusive`
+    );
+  }
+}
+
 function parseCsv(): SecuritySkillsExample[] {
   const csvPath = path.join(__dirname, 'security_skills_dataset.csv');
   const csvString = fs.readFileSync(csvPath, 'utf-8');
+  return parseCsvString(csvString);
+}
 
+/** Exported for unit testing against fixture CSV strings without touching the filesystem. */
+export function parseCsvString(csvString: string): SecuritySkillsExample[] {
   const { data } = Papa.parse<SecuritySkillsCsvRow>(csvString, {
     header: true,
     dynamicTyping: false,
     skipEmptyLines: true,
   });
 
-  return data.map((row) => {
+  return data.map((row, rowIndex) => {
+    validateCsvRow(row, rowIndex);
+
     const expectedSkill = row.expected_skill.trim();
     const shouldNotActivateSkill = row.should_not_activate_skill.trim();
     const expectedOnlyToolId = row.expected_only_tool_id.trim();
