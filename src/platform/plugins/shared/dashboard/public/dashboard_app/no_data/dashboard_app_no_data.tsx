@@ -83,7 +83,6 @@ export const DashboardAppNoDataPage = ({
           search: dataService.search.search,
           signal: abc.signal,
           timeRange: dataService.query.timefilter.timefilter.getAbsoluteTime(),
-          includeColumnMetadata: true,
         });
 
         // lens suggestions api context
