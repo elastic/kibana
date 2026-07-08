@@ -212,6 +212,7 @@ enabled:
   - x-pack/platform/test/fleet_api_integration/config.event_ingested.ts
   - x-pack/platform/test/fleet_api_integration/config.fleet.ts
   - x-pack/platform/test/fleet_api_integration/config.package_policy.ts
+  - x-pack/platform/test/fleet_api_integration/config.preconfiguration_updates.ts
   - x-pack/platform/test/fleet_api_integration/config.space_awareness.ts
   - x-pack/platform/test/fleet_api_integration/config.cloud_connector.ts
   - x-pack/platform/test/fleet_functional/config.ts
