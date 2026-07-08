@@ -30,6 +30,10 @@ export const AlertAnalysisWorkflowSettings = z.object({
   autoCloseEnabled: z.boolean(),
   autoCloseConfidenceScoreMinThreshold: z.number().min(0).max(1),
   autoCloseConfidenceScoreMaxThreshold: z.number().min(0).max(1),
+  // Agent Builder agent id the workflow's ai.agent step runs with. Non-empty (defaults to the
+  // platform default agent) so the workflow step always has a real agent to invoke. Max length
+  // matches Agent Builder's `agentIdMaxLength`.
+  agentId: z.string().min(1).max(64),
   // Prefix for the workflow tags written to (and matched on) each analyzed alert. Non-empty so the
   // dedup gate and tag replacement always have a real namespace to match against.
   tagPrefix: z.string().min(1).max(256),

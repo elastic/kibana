@@ -27,9 +27,7 @@ jest.mock('../../../../common/lib/kibana');
   data: { templates: [] },
   isLoading: false,
 });
-(useChangeAppliedTemplate as jest.Mock).mockReturnValue({
-  mutate: jest.fn(),
-});
+(useChangeAppliedTemplate as jest.Mock).mockReturnValue({ mutate: jest.fn(), isLoading: false });
 (useGetTemplate as jest.Mock).mockReturnValue({ data: null });
 
 describe('CaseSettingsPopover', () => {
@@ -58,6 +56,7 @@ describe('CaseSettingsPopover', () => {
     });
     (useChangeAppliedTemplate as jest.Mock).mockReturnValue({
       mutate: jest.fn(),
+      isLoading: false,
     });
     (useGetTemplate as jest.Mock).mockReturnValue({ data: null });
   });
@@ -145,11 +144,14 @@ describe('CaseSettingsPopover', () => {
     expect(screen.queryByTestId('case-settings-template-select')).not.toBeInTheDocument();
   });
 
-  it('does not call changeTemplate when the case already has the selected template applied', async () => {
-    const mutateMock = jest.fn();
+  it('does not apply a template when the case already has the selected template applied', async () => {
+    const changeAppliedTemplateMock = jest.fn();
     const templateId = 'template-1';
 
-    (useChangeAppliedTemplate as jest.Mock).mockReturnValue({ mutate: mutateMock });
+    (useChangeAppliedTemplate as jest.Mock).mockReturnValue({
+      mutate: changeAppliedTemplateMock,
+      isLoading: false,
+    });
     (useGetTemplate as jest.Mock).mockReturnValue({
       data: { templateId, templateVersion: 1, definition: { fields: [] } },
     });
@@ -165,7 +167,7 @@ describe('CaseSettingsPopover', () => {
 
     await screen.findByTestId('case-settings-popover');
 
-    expect(mutateMock).not.toHaveBeenCalled();
+    expect(changeAppliedTemplateMock).not.toHaveBeenCalled();
   });
 
   it('does not render edit case name link', async () => {

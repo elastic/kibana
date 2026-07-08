@@ -45,6 +45,16 @@ export interface LinkResult {
   entity_type: string;
 }
 
+export interface CascadeResult {
+  linked: string[];
+  /** Aliases that previously pointed at a linked entity and now point directly at the target. */
+  retargeted: string[];
+  skipped: string[];
+  /** Number of requested cascade writes that were rejected because the existing graph was unsafe to rewrite. */
+  cascadesBlocked: number;
+  target_id: string;
+}
+
 export interface UnlinkResult {
   unlinked: string[];
   skipped: string[];
@@ -163,6 +173,90 @@ export class ResolutionClient {
     this.throwOnBulkErrors(linkResult, `linking entities to '${targetId}'`);
 
     return { linked, skipped, target_id: targetId, entity_type: entityType };
+  }
+
+  /**
+   * Links entities to a target and retargets their pre-existing incoming aliases
+   * to the same target. This is used by automated rules that can merge existing
+   * resolution groups while keeping the graph flat: aliases point directly to
+   * the target, not to another alias.
+   */
+  public async cascadeLinkEntities(
+    targetId: string,
+    rawEntityIds: string[]
+  ): Promise<CascadeResult> {
+    const index = getLatestEntitiesIndexName(this.namespace);
+    const entityIds = [...new Set(rawEntityIds)];
+
+    if (entityIds.includes(targetId)) {
+      throw new SelfLinkError(targetId);
+    }
+
+    if (entityIds.length === 0) {
+      return { linked: [], retargeted: [], skipped: [], cascadesBlocked: 0, target_id: targetId };
+    }
+
+    const { sources, docIds } = await this.fetchAndValidateEntities([targetId, ...entityIds]);
+    this.assertSingleEntityType(sources);
+
+    const targetEntity = sources.get(targetId)!;
+    const targetResolvedTo = getFieldValue(targetEntity, RESOLVED_TO_FIELD);
+    if (targetResolvedTo) {
+      throw new ChainResolutionError(targetId, targetResolvedTo);
+    }
+
+    const linked: string[] = [];
+    const skipped: string[] = [];
+
+    for (const entityId of entityIds) {
+      const entity = sources.get(entityId)!;
+      const resolvedTo = getFieldValue(entity, RESOLVED_TO_FIELD);
+
+      if (resolvedTo === targetId) {
+        skipped.push(entityId);
+      } else if (resolvedTo) {
+        throw new ChainResolutionError(entityId, resolvedTo);
+      } else {
+        linked.push(entityId);
+      }
+    }
+
+    if (linked.length === 0) {
+      return { linked: [], retargeted: [], skipped, cascadesBlocked: 0, target_id: targetId };
+    }
+
+    const { aliasDocIds, cascadesBlocked } = await this.validateAndGetRetargetableAliases({
+      targetId,
+      entityIds: linked,
+    });
+
+    if (cascadesBlocked > 0) {
+      return { linked: [], retargeted: [], skipped, cascadesBlocked, target_id: targetId };
+    }
+
+    const linkedSet = new Set(linked);
+    const retargeted = [...aliasDocIds.keys()].filter((aliasId) => !linkedSet.has(aliasId));
+    // Both maps are built only from ES hits with `_id`, so every linked or
+    // retargeted entity below has a docId for the bulk update.
+    const updates = [
+      ...linked.map((entityId) => ({
+        docId: docIds.get(entityId)!,
+        doc: { [RESOLVED_TO_FIELD]: targetId },
+      })),
+      ...retargeted.map((entityId) => ({
+        docId: aliasDocIds.get(entityId)!,
+        doc: { [RESOLVED_TO_FIELD]: targetId },
+      })),
+    ];
+
+    this.logger.debug(
+      `Cascade linking ${linked.length} entities and retargeting ${retargeted.length} aliases to target '${targetId}'`
+    );
+
+    const result = await bulkUpdateEntityDocs(this.esClient, { index, updates });
+    this.throwOnBulkErrors(result, `cascade linking entities to '${targetId}'`);
+
+    return { linked, retargeted, skipped, cascadesBlocked: 0, target_id: targetId };
   }
 
   /**
@@ -385,6 +479,67 @@ export class ResolutionClient {
       result.set(resolvedTo, existing);
     }
     return result;
+  }
+
+  private async validateAndGetRetargetableAliases({
+    targetId,
+    entityIds,
+  }: {
+    targetId: string;
+    entityIds: string[];
+  }): Promise<{ aliasDocIds: Map<string, string>; cascadesBlocked: number }> {
+    const index = getLatestEntitiesIndexName(this.namespace);
+    const response = await searchByResolvedToField(this.esClient, {
+      index,
+      resolvedToField: RESOLVED_TO_FIELD,
+      targetIds: entityIds,
+      maxSize: MAX_RESOLUTION_SEARCH_SIZE,
+      source: [ENTITY_ID_FIELD, RESOLVED_TO_FIELD],
+    });
+
+    this.throwIfTruncated(response, `validateAndGetRetargetableAliases for target '${targetId}'`);
+
+    const aliasDocIds = new Map<string, string>();
+    for (const hit of response.hits.hits) {
+      const source = hit._source as Record<string, unknown>;
+      const aliasId = getFieldValue(source, ENTITY_ID_FIELD);
+      if (!aliasId) {
+        continue;
+      }
+
+      if (aliasId === targetId) {
+        this.logger.warn(`Cascade cycle blocked for target '${targetId}'`);
+        return { aliasDocIds: new Map(), cascadesBlocked: 1 };
+      }
+
+      if (hit._id) {
+        aliasDocIds.set(aliasId, hit._id);
+      }
+    }
+
+    if (aliasDocIds.size === 0) {
+      return { aliasDocIds, cascadesBlocked: 0 };
+    }
+
+    const aliasesOfAliasesResponse = await searchByResolvedToField(this.esClient, {
+      index,
+      resolvedToField: RESOLVED_TO_FIELD,
+      targetIds: [...aliasDocIds.keys()],
+      maxSize: MAX_RESOLUTION_SEARCH_SIZE,
+      source: [ENTITY_ID_FIELD, RESOLVED_TO_FIELD],
+    });
+
+    this.throwIfTruncated(
+      aliasesOfAliasesResponse,
+      `detectAliasesOfAliasesForCascade for target '${targetId}'`
+    );
+
+    if (aliasesOfAliasesResponse.hits.hits.length > 0) {
+      this.logger.warn(`Cascade alias-of-alias graph blocked for target '${targetId}'`);
+      return { aliasDocIds: new Map(), cascadesBlocked: 1 };
+    }
+
+    return { aliasDocIds, cascadesBlocked: 0 };
   }
 
   /**

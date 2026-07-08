@@ -20,8 +20,6 @@
  * For details,  see https://github.com/flot/flot/pull/1328
 */
 
-import jQuery from 'jquery';
-
 (function($) {
 
   function log10(value) {
