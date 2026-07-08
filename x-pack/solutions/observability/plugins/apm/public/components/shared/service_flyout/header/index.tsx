@@ -13,7 +13,7 @@ import type { ServiceFlyoutService } from '..';
 import { SERVICE_FLYOUT_EBT_ACTIONS, SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { ServiceBadges } from './service_badges';
 import { SERVICE_FLYOUT_TABS, type ServiceFlyoutTabId } from '..';
-import { useServiceLinks } from '../hooks/use_service_links';
+import { useServiceFlyoutLinks } from '../hooks/use_service_flyout_links';
 
 interface ServiceFlyoutHeaderProps {
   service: ServiceFlyoutService;
@@ -38,13 +38,13 @@ export function ServiceFlyoutHeader({
   selectedTabId,
   onSelectedTabIdChange,
 }: ServiceFlyoutHeaderProps) {
-  const { overviewHref: serviceOverviewHref } = useServiceLinks({
+  const { apm } = useServiceFlyoutLinks({
     serviceName: service.name,
     rangeFrom,
     rangeTo,
     environment,
-    kuery,
   });
+  const serviceOverviewHref = apm.overview;
 
   return (
     <EuiFlyoutHeader>

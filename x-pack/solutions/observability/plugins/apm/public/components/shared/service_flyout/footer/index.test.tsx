@@ -29,10 +29,18 @@ const mockCore = {
   http: { basePath: { prepend: (path: string) => path } },
 } as any;
 
+const mockLens = undefined as any;
+const mockDataViews = undefined as any;
+
 function renderFooter(core = mockCore, share = mockShare) {
   return render(
     <IntlProvider locale="en">
-      <ServiceFlyoutContextProvider core={core} share={share}>
+      <ServiceFlyoutContextProvider
+        core={core}
+        share={share}
+        lens={mockLens}
+        dataViews={mockDataViews}
+      >
         <ServiceFlyoutFooter
           serviceName="opbeans-java"
           environment="production"
@@ -65,7 +73,12 @@ describe('ServiceFlyoutFooter', () => {
     setupAllHrefs();
     render(
       <IntlProvider locale="en">
-        <ServiceFlyoutContextProvider core={mockCore} share={mockShare}>
+        <ServiceFlyoutContextProvider
+          core={mockCore}
+          share={mockShare}
+          lens={mockLens}
+          dataViews={mockDataViews}
+        >
           <ServiceFlyoutFooter
             serviceName="opbeans-java"
             environment="production"

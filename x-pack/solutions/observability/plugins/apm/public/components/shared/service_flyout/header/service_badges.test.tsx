@@ -23,19 +23,9 @@ jest.mock('../hooks/use_service_badges_data', () => ({
   useServiceBadgesData: (...args: unknown[]) => mockUseServiceBadgesData(...args),
 }));
 
-const mockLink = jest.fn(
-  (path: string, { path: pathParams, query }: { path: Record<string, string>; query: unknown }) =>
-    `${path.replace('{serviceName}', pathParams.serviceName)}?${new URLSearchParams(
-      query as Record<string, string>
-    ).toString()}`
-);
-jest.mock('../../../../hooks/use_apm_router', () => ({
-  useApmRouter: () => ({ link: mockLink }),
-}));
-
-const mockUseManageSlosUrl = jest.fn();
-jest.mock('../../../../hooks/use_manage_slos_url', () => ({
-  useManageSlosUrl: (...args: unknown[]) => mockUseManageSlosUrl(...args),
+const mockUseServiceFlyoutLinks = jest.fn();
+jest.mock('../hooks/use_service_flyout_links', () => ({
+  useServiceFlyoutLinks: (...args: unknown[]) => mockUseServiceFlyoutLinks(...args),
 }));
 
 const baseNodeData: ServiceFlyoutService = {
@@ -51,6 +41,18 @@ function setupContext({ canReadSlos = true }: { canReadSlos?: boolean } = {}) {
         capabilities: { slo: { read: canReadSlos } },
       },
     },
+  });
+}
+
+function setupLinks({
+  alertsHref = '/app/apm/services/opbeans-java/alerts',
+  slosHref = '/app/slos/slos-href',
+}: { alertsHref?: string; slosHref?: string } = {}) {
+  mockUseServiceFlyoutLinks.mockReturnValue({
+    apm: { overview: '/app/apm/services/opbeans-java/overview', alerts: alertsHref },
+    alerts: undefined,
+    slos: slosHref,
+    discover: { traces: undefined, logs: undefined },
   });
 }
 
@@ -78,7 +80,7 @@ function renderBadges({ service = baseNodeData }: { service?: ServiceFlyoutServi
 describe('ServiceBadges', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseManageSlosUrl.mockReturnValue('/app/slos/slos-href');
+    setupLinks();
   });
 
   it('always renders the service badge', () => {

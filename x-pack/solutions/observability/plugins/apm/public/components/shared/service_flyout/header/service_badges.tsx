@@ -17,7 +17,7 @@ import { AlertsBadge } from '../../badge/alerts_badge';
 import { SloStatusBadge } from '../../slo_status_badge';
 import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { useServiceBadgesData } from '../hooks/use_service_badges_data';
-import { useServiceLinks } from '../hooks/use_service_links';
+import { useServiceFlyoutLinks } from '../hooks/use_service_flyout_links';
 
 interface ServiceBadgesProps {
   service: ServiceFlyoutService;
@@ -46,13 +46,13 @@ export function ServiceBadges({
   const { capabilities, navigateToUrl } = core.application;
   const canReadSlos = !!capabilities.slo?.read;
 
-  const { alertsHref, slosHref } = useServiceLinks({
+  const { apm, slos: slosHref } = useServiceFlyoutLinks({
     serviceName: service.name,
     rangeFrom,
     rangeTo,
     environment,
-    kuery,
   });
+  const alertsHref = apm.alerts;
 
   const { alertsCount, anomalyData } = useServiceBadgesData({
     serviceName: service.name,

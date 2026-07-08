@@ -12,10 +12,12 @@ import type { ServiceFlyoutService } from '..';
 import { ServiceFlyoutHeader } from '.';
 import { SERVICE_FLYOUT_DEFAULT_TAB_ID, SERVICE_FLYOUT_TABS } from '..';
 
-jest.mock('../hooks/use_service_links', () => ({
-  useServiceLinks: () => ({
-    overviewHref: '/app/apm/overview-href',
-    alertsHref: '/app/apm/alerts-href',
+jest.mock('../hooks/use_service_flyout_links', () => ({
+  useServiceFlyoutLinks: () => ({
+    apm: { overview: '/app/apm/overview-href', alerts: '/app/apm/alerts-href' },
+    alerts: undefined,
+    slos: undefined,
+    discover: { traces: undefined, logs: undefined },
   }),
 }));
 

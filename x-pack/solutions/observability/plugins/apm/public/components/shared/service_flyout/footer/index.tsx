@@ -9,15 +9,10 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/
 import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import type { SloListLocatorParams } from '@kbn/deeplinks-observability';
-import { sloListLocatorID } from '@kbn/deeplinks-observability';
 import type { Environment } from '../../../../../common/environment_rt';
-import { getManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
-import { useServiceFlyoutContext } from '../service_flyout_context';
-import { useAlertsHref } from './hooks/use_alerts_href';
-import { useDiscoverHref } from '../../links/discover_links/use_discover_href';
 import { ActionsContextMenu, type ActionGroups } from '../../actions_context_menu';
 import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
+import { useServiceFlyoutLinks } from '../hooks/use_service_flyout_links';
 
 interface ServiceFlyoutFooterProps {
   serviceName: string;
@@ -34,28 +29,11 @@ export function ServiceFlyoutFooter({
   rangeTo,
   transactionType,
 }: ServiceFlyoutFooterProps) {
-  const { core, share } = useServiceFlyoutContext();
-  const alertsHref = useAlertsHref({ core, serviceName, environment, rangeFrom, rangeTo });
-
-  const sloListLocator = share?.url?.locators?.get<SloListLocatorParams>(sloListLocatorID);
-  const slosHref = useMemo(
-    () => getManageSlosUrl(sloListLocator, { serviceName, environment }),
-    [sloListLocator, serviceName, environment]
-  );
-
-  const tracesDiscoverHref = useDiscoverHref({
-    indexType: 'traces',
-    rangeFrom,
-    rangeTo,
-    queryParams: { serviceName, transactionType, environment, sortDirection: 'DESC' },
-  });
-
-  const logsDiscoverHref = useDiscoverHref({
-    indexType: 'error',
-    rangeFrom,
-    rangeTo,
-    queryParams: { serviceName, environment, sortDirection: 'DESC' },
-  });
+  const {
+    alerts: alertsHref,
+    slos: slosHref,
+    discover: { traces: tracesDiscoverHref, logs: logsDiscoverHref },
+  } = useServiceFlyoutLinks({ serviceName, environment, rangeFrom, rangeTo, transactionType });
 
   const hasAnyActions = tracesDiscoverHref || logsDiscoverHref || alertsHref || slosHref;
 
