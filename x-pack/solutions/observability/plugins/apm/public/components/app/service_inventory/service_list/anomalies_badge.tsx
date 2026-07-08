@@ -14,6 +14,7 @@ import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { isMobileAgentName } from '../../../../../common/agent_name';
 import {
   getApmMlDetectorLabel,
@@ -22,7 +23,6 @@ import {
 } from '../../../../../common/anomaly_detection';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 import type { ApmRoutes } from '../../../routing/apm_route_config';
-import type { ApmPluginStartDeps } from '../../../../plugin';
 
 function getI18nLabel(severity: ML_ANOMALY_SEVERITY): string {
   switch (severity) {
@@ -107,7 +107,7 @@ interface AnomaliesBadgeProps {
 }
 
 export function AnomaliesBadge({ score, detectorType, navigationProps }: AnomaliesBadgeProps) {
-  const { services } = useKibana<ApmPluginStartDeps>();
+  const { services } = useKibana<{ share?: SharePublicStart }>();
   const locator = services.share?.url.locators.get(APM_APP_LOCATOR_ID);
 
   const severity = getSeverity(score);
