@@ -6,7 +6,7 @@
  */
 
 import { createSmlTypeRegistry } from './type_registry';
-import type { SmlTypeDefinition } from './types';
+import type { SmlTypeDefinition } from '@kbn/agent-builder-server';
 
 const makeType = (id: string): SmlTypeDefinition => ({
   id,

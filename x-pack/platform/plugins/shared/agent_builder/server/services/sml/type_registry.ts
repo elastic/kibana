@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SmlTypeDefinition } from './types';
+import type { SmlTypeDefinition } from '@kbn/agent-builder-server';
 
 export interface SmlTypeRegistry {
   register(definition: SmlTypeDefinition): void;
