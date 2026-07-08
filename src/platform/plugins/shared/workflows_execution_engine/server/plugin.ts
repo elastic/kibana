@@ -381,7 +381,7 @@ export class WorkflowsExecutionEnginePlugin
               }
 
               try {
-                await resumeWorkflow({
+                const { idleTimeoutResumeAt } = await resumeWorkflow({
                   workflowRunId,
                   spaceId,
                   taskAbortController,
@@ -393,6 +393,16 @@ export class WorkflowsExecutionEnginePlugin
                   meteringService: this.meteringService,
                   internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
                 });
+
+                if (
+                  taskInstance.id === getWorkflowGlobalTimeoutResumeTaskId(workflowRunId) &&
+                  idleTimeoutResumeAt
+                ) {
+                  // Task Manager deletes one-shot resume tasks on success unless a future
+                  // runAt is returned. Re-arm this stable waiter when chained HITL leaves the
+                  // execution waiting again (e.g. external resume → second waitForApproval).
+                  return { runAt: idleTimeoutResumeAt, state: {} };
+                }
               } catch (error) {
                 await resolveExhaustedWorkflowRunTask({
                   workflowExecutionRepository,
@@ -1239,7 +1249,8 @@ export class WorkflowsExecutionEnginePlugin
       executionId,
       spaceId,
       input,
-      request
+      request,
+      options
     ) => {
       await checkLicense(plugins.licensing);
 
@@ -1275,17 +1286,18 @@ export class WorkflowsExecutionEnginePlugin
         );
       }
 
-      const resumedBy = await getAuthenticatedUser(
-        request,
-        coreStart.security,
-        coreStart.elasticsearch.client
-      );
+      const resumedBy =
+        options?.resumedBy ??
+        (request
+          ? await getAuthenticatedUser(request, coreStart.security, coreStart.elasticsearch.client)
+          : 'unknown');
+      const resumedAt = new Date().toISOString();
 
       const resumeContext = {
         ...workflowExecution.context,
         resumeInput: input,
         resumedBy,
-        resumedAt: new Date().toISOString(),
+        resumedAt,
       };
 
       await internalResumeWorkflowExecution(executionId, spaceId, resumeContext, request);
@@ -1304,6 +1316,14 @@ export class WorkflowsExecutionEnginePlugin
           id: executionId,
           context,
         });
+      }
+
+      if (!request) {
+        // External resume: wake the idle-timeout task created when entering WAITING_FOR_INPUT.
+        // That task retains the workflow runner API key; ad-hoc tasks scheduled without a
+        // request cannot be executed by workflow:resume (no fakeRequest at run time).
+        await plugins.taskManager.runSoon(getWorkflowGlobalTimeoutResumeTaskId(executionId));
+        return;
       }
 
       await plugins.taskManager

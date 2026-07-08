@@ -13,6 +13,7 @@ import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/c
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import {
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED,
@@ -21,6 +22,7 @@ import {
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX,
 } from '@kbn/management-settings-ids';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
   ALERT_ANALYSIS_WORKFLOW_API_VERSION,
   ALERT_ANALYSIS_WORKFLOW_RUNTIME_CONFIG_ROUTE,
@@ -76,6 +78,7 @@ const toWorkflowSettings = ({
   autoCloseConfidenceScoreMinThreshold,
   autoCloseConfidenceScoreMaxThreshold,
   connectorId,
+  agentId,
   workflowEnabled,
   createConversation,
   tagPrefix,
@@ -84,6 +87,7 @@ const toWorkflowSettings = ({
   autoCloseConfidenceScoreMinThreshold,
   autoCloseConfidenceScoreMaxThreshold,
   connectorId: connectorId ?? '',
+  agentId,
   workflowEnabled,
   createConversation,
   tagPrefix,
@@ -208,6 +212,8 @@ export const registerAlertAnalysisWorkflowSettingsRoutes = (
                 autoCloseEnabled: settings.autoCloseEnabled,
                 createConversation: settings.createConversation,
                 connectorConfigured: Boolean(settings.connectorId),
+                // Report only whether a non-default (custom) agent is used, never the agent id.
+                customAgent: settings.agentId !== agentBuilderDefaultAgentId,
                 autoCloseConfidenceScoreMinThreshold: settings.autoCloseConfidenceScoreMinThreshold,
                 autoCloseConfidenceScoreMaxThreshold: settings.autoCloseConfidenceScoreMaxThreshold,
               }
@@ -236,6 +242,7 @@ export const registerAlertAnalysisWorkflowSettingsRoutes = (
             [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD]:
               settings.autoCloseConfidenceScoreMaxThreshold,
             [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID]: settings.connectorId,
+            [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID]: settings.agentId,
             [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION]:
               settings.createConversation,
             [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX]: settings.tagPrefix,
