@@ -114,29 +114,6 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(agentStep['create-conversation']).toBe('${{ variables.create_conversation }}');
   });
 
-  it('trims the alert to a curated, allow-list-aligned object before sending it to the agent', () => {
-    const minimalAlertStep = findStepByName(workflow.steps, 'build_minimal_alert') as {
-      type: string;
-      with: { minimal_alert: Record<string, unknown> };
-    };
-
-    expect(minimalAlertStep).toBeDefined();
-    expect(minimalAlertStep.type).toBe('data.set');
-    // Keeps the alert identifiers plus curated ECS branches, rather than the full _source.
-    expect(minimalAlertStep.with.minimal_alert._id).toBe('{{ foreach.item._id }}');
-    expect(minimalAlertStep.with.minimal_alert._index).toBe('{{ foreach.item._index }}');
-    expect(minimalAlertStep.with.minimal_alert.process).toBeDefined();
-    expect(minimalAlertStep.with.minimal_alert.kibana).toBeDefined();
-  });
-
-  it('sends the trimmed alert (not the full foreach item) to the agent attachment', () => {
-    const agentStep = findStepByName(workflow.steps, 'runAgent_step') as {
-      with: { attachments: Array<{ type: string; data: { alert: string } }> };
-    };
-
-    expect(agentStep.with.attachments[0].data.alert).toBe('{{ variables.minimal_alert | json:2 }}');
-  });
-
   it('adds token usage metadata to the verdict note', () => {
     const verdictNoteStep = findStepByName(workflow.steps, 'add_verdict_note_to_alert') as {
       with: { body: { note: { note: string } } };

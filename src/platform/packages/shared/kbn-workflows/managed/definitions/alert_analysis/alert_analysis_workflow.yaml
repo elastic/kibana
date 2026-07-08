@@ -939,94 +939,6 @@ steps:
                 {%- endif %}
                 {%- endif %}
 
-          # Trim the alert before sending it to the model. The full alert _source is mostly noise
-          # (tens of thousands of tokens); this keeps the alert id/index plus the high-signal fields
-          # that mirror the elastic-assistant default anonymization allow-list (DEFAULT_ALLOW in
-          # elastic_assistant/common/anonymization). Absent fields render empty and are cheap. The
-          # richer vendor-specific identifiers (aws/azure/gcp) already reach the model through the
-          # observable-context section of the agent message above.
-          - name: build_minimal_alert
-            type: data.set
-            with:
-              minimal_alert:
-                _id: "{{ foreach.item._id }}"
-                _index: "{{ foreach.item._index }}"
-                "@timestamp": '{{ foreach.item["@timestamp"] }}'
-                event:
-                  category: "${{ foreach.item.event.category }}"
-                  action: "{{ foreach.item.event.action }}"
-                  type: "${{ foreach.item.event.type }}"
-                  outcome: "{{ foreach.item.event.outcome }}"
-                  code: "{{ foreach.item.event.code }}"
-                  severity: "${{ foreach.item.event.severity }}"
-                  dataset: "{{ foreach.item.event.dataset }}"
-                  module: "{{ foreach.item.event.module }}"
-                host:
-                  name: "{{ foreach.item.host.name }}"
-                  architecture: "{{ foreach.item.host.architecture }}"
-                  os:
-                    name: "{{ foreach.item.host.os.name }}"
-                    version: "{{ foreach.item.host.os.version }}"
-                user:
-                  name: "{{ foreach.item.user.name }}"
-                  domain: "{{ foreach.item.user.domain }}"
-                  id: "{{ foreach.item.user.id }}"
-                process:
-                  name: "{{ foreach.item.process.name }}"
-                  executable: "{{ foreach.item.process.executable }}"
-                  command_line: "{{ foreach.item.process.command_line }}"
-                  args: "${{ foreach.item.process.args }}"
-                  pid: "${{ foreach.item.process.pid }}"
-                  working_directory: "{{ foreach.item.process.working_directory }}"
-                  hash:
-                    sha256: "{{ foreach.item.process.hash.sha256 }}"
-                  code_signature:
-                    exists: "${{ foreach.item.process.code_signature.exists }}"
-                    trusted: "${{ foreach.item.process.code_signature.trusted }}"
-                    status: "{{ foreach.item.process.code_signature.status }}"
-                    subject_name: "{{ foreach.item.process.code_signature.subject_name }}"
-                  parent:
-                    name: "{{ foreach.item.process.parent.name }}"
-                    executable: "{{ foreach.item.process.parent.executable }}"
-                    command_line: "{{ foreach.item.process.parent.command_line }}"
-                    args: "${{ foreach.item.process.parent.args }}"
-                    code_signature:
-                      trusted: "${{ foreach.item.process.parent.code_signature.trusted }}"
-                      subject_name: "{{ foreach.item.process.parent.code_signature.subject_name }}"
-                file:
-                  name: "{{ foreach.item.file.name }}"
-                  path: "{{ foreach.item.file.path }}"
-                  hash:
-                    sha256: "{{ foreach.item.file.hash.sha256 }}"
-                source:
-                  ip: "{{ foreach.item.source.ip }}"
-                destination:
-                  ip: "{{ foreach.item.destination.ip }}"
-                network:
-                  protocol: "{{ foreach.item.network.protocol }}"
-                url:
-                  full: "{{ foreach.item.url.full }}"
-                dns:
-                  question:
-                    name: "{{ foreach.item.dns.question.name }}"
-                    type: "{{ foreach.item.dns.question.type }}"
-                cloud:
-                  provider: "{{ foreach.item.cloud.provider }}"
-                  region: "{{ foreach.item.cloud.region }}"
-                  account:
-                    id: "{{ foreach.item.cloud.account.id }}"
-                message: "{{ foreach.item.message }}"
-                kibana:
-                  alert:
-                    severity: "{{ foreach.item.kibana.alert.severity }}"
-                    risk_score: "${{ foreach.item.kibana.alert.risk_score }}"
-                    workflow_status: "{{ foreach.item.kibana.alert.workflow_status }}"
-                    rule:
-                      name: "{{ foreach.item.kibana.alert.rule.name }}"
-                      description: "{{ foreach.item.kibana.alert.rule.description }}"
-                      references: "${{ foreach.item.kibana.alert.rule.references }}"
-                      threat: "${{ foreach.item.kibana.alert.rule.threat }}"
-
           - name: runAgent_step
             type: ai.agent
             agent-id: "elastic-ai-agent"
@@ -1041,9 +953,7 @@ steps:
               attachments:
                 - type: "security.alert"
                   data:
-                    # Trimmed alert (see build_minimal_alert), serialized to keep the previous string
-                    # shape the attachment expects, but far smaller than the full _source.
-                    alert: "{{ variables.minimal_alert | json:2 }}"
+                    alert: "{{ foreach.item | json:2 }}"
                     attachmentLabel: "{{ steps.get_seed_timeline_string.output.attachment_label }}"
 
               # Structured output schema the AI agent must conform to.
