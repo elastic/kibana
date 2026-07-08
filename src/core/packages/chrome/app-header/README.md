@@ -71,11 +71,10 @@ button is present.
 - `'none'` — no horizontal padding, no bleed.
 - `'s'` — symmetric horizontal padding (compact).
 - `'m'` — symmetric horizontal padding (default for inline headers).
-- `{ bleed: 'm' | 'l' }` — for a header rendered inline inside a padded section (e.g. an
-  `EuiPageSection`). Set `bleed` to the section's **symmetric** padding: the header breaks out to that
-  section's top/left/right edges via negative margin so it spans full width and sits flush at the top,
-  and its content is auto re-inset by the same amount to stay aligned with the page gutter. (The
-  single value applies to both the sides and the top because the section's padding is symmetric.)
+- `{ bleed: 'm' | 'l' }` — for a header rendered inline inside a padded section (e.g. Stack
+  Management). Set `bleed` to the section's **symmetric** EUI `paddingSize`: `'m'` for 16px
+  containers, `'l'` for 24px. The header breaks out to that section's top/left/right edges via negative
+  margin and re-insets content to stay aligned with the page gutter.
 
 ## Testing
 

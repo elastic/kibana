@@ -40,6 +40,10 @@ import {
 import { AnomalyJobName } from './table/anomaly_job_name';
 import { AnomalyTimestamp } from './table/anomaly_timestamp';
 import { truncatedAnchorCss } from './table/constants';
+import {
+  ANOMALIES_SECTION_EXPANDABLE_PANEL_TEST_ID,
+  ANOMALIES_RECENT_TABLE_TEST_ID,
+} from './test_ids';
 
 const RECENT_TABLE_OTHER_COLUMN_WIDTH = '35.71%';
 const RECENT_TABLE_ANOMALY_COLUMN_WIDTH = '28.57%';
@@ -48,12 +52,14 @@ interface AnomaliesOverviewProps {
   data: GetAnomalyOverviewResponse;
   isPreviewMode?: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
+  hideHeaderIcons?: boolean;
 }
 
 export const AnomaliesOverview: React.FC<AnomaliesOverviewProps> = ({
   data,
   isPreviewMode,
   openDetailsPanel,
+  hideHeaderIcons,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -118,9 +124,9 @@ export const AnomaliesOverview: React.FC<AnomaliesOverviewProps> = ({
 
   return (
     <ExpandablePanel
-      data-test-subj="entity-anomalies-flyout-section-expandable-panel"
+      data-test-subj={ANOMALIES_SECTION_EXPANDABLE_PANEL_TEST_ID}
       header={{
-        iconType: !isPreviewMode ? 'chevronLimitLeft' : undefined,
+        iconType: !isPreviewMode && !hideHeaderIcons ? 'chevronLimitLeft' : undefined,
         title: (
           <EuiText
             size="xs"
@@ -174,7 +180,7 @@ export const AnomaliesOverview: React.FC<AnomaliesOverviewProps> = ({
       <EuiSpacer size="s" />
       <EuiBasicTable
         tableCaption={ENTITY_ANOMALIES_RECENT_TABLE_TITLE}
-        data-test-subj="entity-anomalies-flyout-section-recent-table"
+        data-test-subj={ANOMALIES_RECENT_TABLE_TEST_ID}
         items={data.recentAnomalies}
         columns={recentAnomaliesColumns}
         compressed
