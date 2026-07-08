@@ -7,12 +7,13 @@
 
 import { EuiFlyoutHeader, EuiLink, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { Environment } from '../../../../../common/environment_rt';
 import type { ServiceNodeData } from '../../../../../common/service_map';
+import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 import { SERVICE_FLYOUT_EBT_ACTIONS, SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
+import { useServiceFlyoutContext } from '../service_flyout_context';
 import { ServiceBadges } from './service_badges';
-import { useServiceLinks } from '../hooks/use_service_links';
 import { SERVICE_FLYOUT_TABS, type ServiceFlyoutTabId } from '..';
 
 interface ServiceFlyoutHeaderProps {
@@ -38,13 +39,15 @@ export function ServiceFlyoutHeader({
   selectedTabId,
   onSelectedTabIdChange,
 }: ServiceFlyoutHeaderProps) {
-  const { overviewHref: serviceOverviewHref } = useServiceLinks({
-    serviceName: service.id,
-    rangeFrom,
-    rangeTo,
-    environment,
-    kuery,
-  });
+  const { share } = useServiceFlyoutContext();
+  const serviceOverviewHref = useMemo(
+    () =>
+      share.url.locators.get(APM_APP_LOCATOR_ID)?.getRedirectUrl({
+        serviceName: service.id,
+        query: { environment, rangeFrom, rangeTo, kuery },
+      }),
+    [share, service.id, environment, rangeFrom, rangeTo, kuery]
+  );
 
   return (
     <EuiFlyoutHeader>
