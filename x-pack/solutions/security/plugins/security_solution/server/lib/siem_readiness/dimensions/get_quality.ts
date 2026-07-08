@@ -107,10 +107,13 @@ export const getQuality = async ({
 }): Promise<QualityPayload> => {
   const { ruleQueryIndices, ruleNames, ruleRequiredFields, errors } = reverseMapResult;
 
-  const [qualityResults, missingFieldsByRule] = await Promise.all([
+  const [qualityResults, fieldCapsResult] = await Promise.all([
     fetchDataQualityResults({ esClient, logger }),
-    fetchRuleFieldCaps({ esClient, ruleQueryIndices, ruleNames, ruleRequiredFields }),
+    fetchRuleFieldCaps({ esClient, logger, ruleQueryIndices, ruleNames, ruleRequiredFields }),
   ]);
+
+  const { entries: missingFieldsByRule, partial: fieldCapsPartial } = fieldCapsResult;
+  const rulesPartial = errors.rulesPartial || fieldCapsPartial;
 
   const ecsFindings: ActionableFinding[] = qualityResults
     .filter((result) => isQualityIncompatible(result.incompatibleFieldCount))
@@ -127,8 +130,15 @@ export const getQuality = async ({
     checkedCount: qualityResults.length,
     incompatibleCount: ecsFindings.length,
     missingFieldCount: missingFieldsByRule.length,
-    rulesPartial: errors.rulesPartial,
+    rulesPartial,
   });
 
-  return { status, summary, items: qualityResults, actionableFindings, missingFieldsByRule };
+  return {
+    status,
+    summary,
+    items: qualityResults,
+    actionableFindings,
+    missingFieldsByRule,
+    rulesPartial,
+  };
 };

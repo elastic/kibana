@@ -70,7 +70,7 @@ describe('getQuality', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Default: no unmapped rule-required fields, so ECS-only assertions hold.
-    mockFetchRuleFieldCaps.mockResolvedValue([]);
+    mockFetchRuleFieldCaps.mockResolvedValue({ entries: [], partial: false });
   });
 
   describe('status', () => {
@@ -97,9 +97,12 @@ describe('getQuality', () => {
 
     it('returns actionsRequired when only missing rule-required fields exist (no quality results)', async () => {
       mockSearchResponse([]);
-      mockFetchRuleFieldCaps.mockResolvedValueOnce([
-        { ruleId: 'r1', ruleName: 'Rule 1', fields: [{ name: 'user.name', status: 'missing' }] },
-      ] satisfies MissingFieldsEntry[]);
+      mockFetchRuleFieldCaps.mockResolvedValueOnce({
+        entries: [
+          { ruleId: 'r1', ruleName: 'Rule 1', fields: [{ name: 'user.name', status: 'missing' }] },
+        ],
+        partial: false,
+      });
       const result = await getQuality({ esClient, logger, reverseMapResult: makeReverseMap() });
       expect(result.status).toBe('actionsRequired');
     });
@@ -167,14 +170,14 @@ describe('getQuality', () => {
 
     it('returns missingFieldsByRule verbatim from fetchRuleFieldCaps', async () => {
       mockSearchResponse([]);
-      mockFetchRuleFieldCaps.mockResolvedValueOnce(missingFieldsFixture);
+      mockFetchRuleFieldCaps.mockResolvedValueOnce({ entries: missingFieldsFixture, partial: false });
       const result = await getQuality({ esClient, logger, reverseMapResult: makeReverseMap() });
       expect(result.missingFieldsByRule).toEqual(missingFieldsFixture);
     });
 
     it('emits one WARNING missing_field finding per unmapped field, naming the rule and field', async () => {
       mockSearchResponse([]);
-      mockFetchRuleFieldCaps.mockResolvedValueOnce(missingFieldsFixture);
+      mockFetchRuleFieldCaps.mockResolvedValueOnce({ entries: missingFieldsFixture, partial: false });
       const result = await getQuality({ esClient, logger, reverseMapResult: makeReverseMap() });
 
       const missingFindings = result.actionableFindings.filter((f) => f.type === 'missing_field');
@@ -192,15 +195,18 @@ describe('getQuality', () => {
 
     it('emits a partial-gap finding with the affected indices in the message', async () => {
       mockSearchResponse([]);
-      mockFetchRuleFieldCaps.mockResolvedValueOnce([
-        {
-          ruleId: 'rule-3',
-          ruleName: 'Cross Source Rule',
-          fields: [
-            { name: 'user.name', status: 'partial', unmappedIn: ['logs-aws.cloudtrail-default'] },
-          ],
-        },
-      ] satisfies MissingFieldsEntry[]);
+      mockFetchRuleFieldCaps.mockResolvedValueOnce({
+        entries: [
+          {
+            ruleId: 'rule-3',
+            ruleName: 'Cross Source Rule',
+            fields: [
+              { name: 'user.name', status: 'partial', unmappedIn: ['logs-aws.cloudtrail-default'] },
+            ],
+          },
+        ],
+        partial: false,
+      });
       const result = await getQuality({ esClient, logger, reverseMapResult: makeReverseMap() });
 
       const partialFinding = result.actionableFindings.find((f) => f.resource === 'user.name');
@@ -213,7 +219,7 @@ describe('getQuality', () => {
 
     it('includes both incompatible-field and missing-field counts in the summary', async () => {
       mockSearchResponse([makeSearchHit('logs-endpoint.events-default', 3)]);
-      mockFetchRuleFieldCaps.mockResolvedValueOnce(missingFieldsFixture);
+      mockFetchRuleFieldCaps.mockResolvedValueOnce({ entries: missingFieldsFixture, partial: false });
       const result = await getQuality({ esClient, logger, reverseMapResult: makeReverseMap() });
 
       expect(result.status).toBe('actionsRequired');
@@ -223,7 +229,7 @@ describe('getQuality', () => {
 
     it('adds an incomplete-list caveat to the summary when rulesPartial is true', async () => {
       mockSearchResponse([]);
-      mockFetchRuleFieldCaps.mockResolvedValueOnce([]);
+      mockFetchRuleFieldCaps.mockResolvedValueOnce({ entries: [], partial: false });
       const result = await getQuality({
         esClient,
         logger,
@@ -231,12 +237,21 @@ describe('getQuality', () => {
           errors: { pipelineMap: false, categoryMap: false, rulesPartial: true },
         }),
       });
+      expect(result.rulesPartial).toBe(true);
+      expect(result.summary).toContain('may be incomplete');
+    });
+
+    it('sets rulesPartial and adds the caveat when fieldCaps reports partial', async () => {
+      mockSearchResponse([]);
+      mockFetchRuleFieldCaps.mockResolvedValueOnce({ entries: [], partial: true });
+      const result = await getQuality({ esClient, logger, reverseMapResult: makeReverseMap() });
+      expect(result.rulesPartial).toBe(true);
       expect(result.summary).toContain('may be incomplete');
     });
 
     it('stays healthy and emits no missing_field findings when nothing is unmapped', async () => {
       mockSearchResponse([makeSearchHit('logs-endpoint.events-default', 0)]);
-      mockFetchRuleFieldCaps.mockResolvedValueOnce([]);
+      mockFetchRuleFieldCaps.mockResolvedValueOnce({ entries: [], partial: false });
       const result = await getQuality({ esClient, logger, reverseMapResult: makeReverseMap() });
       expect(result.status).toBe('healthy');
       expect(result.missingFieldsByRule).toHaveLength(0);

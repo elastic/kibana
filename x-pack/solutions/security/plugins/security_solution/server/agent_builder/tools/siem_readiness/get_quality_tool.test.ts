@@ -68,6 +68,7 @@ const makePayload = (overrides: Partial<QualityPayload> = {}): QualityPayload =>
   items: [],
   actionableFindings: [],
   missingFieldsByRule: [],
+  rulesPartial: false,
   ...overrides,
 });
 
@@ -416,14 +417,7 @@ describe('getQualityTool', () => {
     });
 
     it('adds an incomplete-list caveat to the summary when rulesPartial is true', async () => {
-      mockGetSharedContext.mockResolvedValueOnce({
-        ...mockSharedContext,
-        reverseMapResult: {
-          ...mockSharedContext.reverseMapResult,
-          errors: { pipelineMap: false, categoryMap: false, rulesPartial: true },
-        },
-      });
-      mockGetQuality.mockResolvedValueOnce(makePayload());
+      mockGetQuality.mockResolvedValueOnce(makePayload({ rulesPartial: true }));
 
       const result = (await tool.handler(
         {},
@@ -431,6 +425,7 @@ describe('getQualityTool', () => {
       )) as ToolHandlerStandardReturn;
 
       const data = (result.results[0] as OtherResult<QualityPayload>).data;
+      expect(data.rulesPartial).toBe(true);
       expect(data.summary).toContain('may be incomplete');
     });
 

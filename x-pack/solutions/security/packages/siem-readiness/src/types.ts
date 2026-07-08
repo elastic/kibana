@@ -222,6 +222,9 @@ export interface QualityPayload {
   actionableFindings: ActionableFinding[];
   /** Rules that declare required_fields not mapped in their queried indices. */
   missingFieldsByRule: MissingFieldsEntry[];
+  /** True when the required-field coverage list may be incomplete — either rule index
+   * resolution failed (reverse map) or a fieldCaps call failed for some rules. */
+  rulesPartial: boolean;
 }
 
 export interface ContinuityPayload {

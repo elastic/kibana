@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RequiredField } from '@kbn/siem-readiness';
 import { fetchRuleFieldCaps } from './fetch_rule_field_caps';
 
@@ -40,7 +41,11 @@ const makeRuleMaps = (
 });
 
 describe('fetchRuleFieldCaps', () => {
-  beforeEach(() => jest.clearAllMocks());
+  const logger = loggingSystemMock.createLogger();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   describe('when all required fields are mapped', () => {
     it('returns an empty array', async () => {
@@ -55,12 +60,14 @@ describe('fetchRuleFieldCaps', () => {
 
       const result = await fetchRuleFieldCaps({
         esClient,
+        logger,
         ruleQueryIndices,
         ruleNames,
         ruleRequiredFields,
       });
 
-      expect(result).toHaveLength(0);
+      expect(result.entries).toHaveLength(0);
+      expect(result.partial).toBe(false);
       expect(esClient.fieldCaps).toHaveBeenCalledTimes(1);
       expect(esClient.fieldCaps).toHaveBeenCalledWith(
         expect.objectContaining({ include_unmapped: true })
@@ -82,15 +89,16 @@ describe('fetchRuleFieldCaps', () => {
 
       const result = await fetchRuleFieldCaps({
         esClient,
+        logger,
         ruleQueryIndices,
         ruleNames,
         ruleRequiredFields,
       });
 
-      expect(result).toHaveLength(1);
-      expect(result[0].ruleId).toBe('rule-1');
-      expect(result[0].ruleName).toBe('Rule 1');
-      expect(result[0].fields).toEqual([
+      expect(result.entries).toHaveLength(1);
+      expect(result.entries[0].ruleId).toBe('rule-1');
+      expect(result.entries[0].ruleName).toBe('Rule 1');
+      expect(result.entries[0].fields).toEqual([
         {
           name: 'process.parent.name',
           status: 'missing',
@@ -125,13 +133,14 @@ describe('fetchRuleFieldCaps', () => {
 
       const result = await fetchRuleFieldCaps({
         esClient,
+        logger,
         ruleQueryIndices,
         ruleNames,
         ruleRequiredFields,
       });
 
-      expect(result).toHaveLength(1);
-      expect(result[0].fields).toEqual([
+      expect(result.entries).toHaveLength(1);
+      expect(result.entries[0].fields).toEqual([
         {
           name: 'user.name',
           status: 'partial',
@@ -164,12 +173,13 @@ describe('fetchRuleFieldCaps', () => {
 
       const result = await fetchRuleFieldCaps({
         esClient,
+        logger,
         ruleQueryIndices,
         ruleNames,
         ruleRequiredFields,
       });
 
-      expect(result[0].fields[0].unmappedIn).toEqual(['logs-aws.cloudtrail-default']);
+      expect(result.entries[0].fields[0].unmappedIn).toEqual(['logs-aws.cloudtrail-default']);
     });
   });
 
@@ -188,12 +198,13 @@ describe('fetchRuleFieldCaps', () => {
 
       const result = await fetchRuleFieldCaps({
         esClient,
+        logger,
         ruleQueryIndices,
         ruleNames,
         ruleRequiredFields,
       });
 
-      expect(result).toHaveLength(0);
+      expect(result.entries).toHaveLength(0);
       expect(esClient.fieldCaps).toHaveBeenCalledWith(
         expect.objectContaining({ index: ['logs-endpoint-000001'] })
       );
@@ -221,6 +232,7 @@ describe('fetchRuleFieldCaps', () => {
 
       const result = await fetchRuleFieldCaps({
         esClient,
+        logger,
         ruleQueryIndices,
         ruleNames,
         ruleRequiredFields,
@@ -232,7 +244,7 @@ describe('fetchRuleFieldCaps', () => {
         expect.objectContaining({ include_unmapped: true })
       );
       // Neither rule has missing fields
-      expect(result).toHaveLength(0);
+      expect(result.entries).toHaveLength(0);
     });
 
     it('makes TWO fieldCaps calls for rules with different field sets', async () => {
@@ -257,13 +269,14 @@ describe('fetchRuleFieldCaps', () => {
 
       const result = await fetchRuleFieldCaps({
         esClient,
+        logger,
         ruleQueryIndices,
         ruleNames,
         ruleRequiredFields,
       });
 
       expect(esClient.fieldCaps).toHaveBeenCalledTimes(2);
-      expect(result).toHaveLength(0);
+      expect(result.entries).toHaveLength(0);
     });
   });
 
@@ -280,13 +293,14 @@ describe('fetchRuleFieldCaps', () => {
 
       const result = await fetchRuleFieldCaps({
         esClient,
+        logger,
         ruleQueryIndices,
         ruleNames,
         ruleRequiredFields,
       });
 
       expect(esClient.fieldCaps).not.toHaveBeenCalled();
-      expect(result).toHaveLength(0);
+      expect(result.entries).toHaveLength(0);
     });
   });
 
@@ -302,18 +316,19 @@ describe('fetchRuleFieldCaps', () => {
 
       const result = await fetchRuleFieldCaps({
         esClient,
+        logger,
         ruleQueryIndices,
         ruleNames,
         ruleRequiredFields,
       });
 
       expect(esClient.fieldCaps).not.toHaveBeenCalled();
-      expect(result).toHaveLength(0);
+      expect(result.entries).toHaveLength(0);
     });
   });
 
   describe('fieldCaps call failure', () => {
-    it('skips the failing group and continues processing others', async () => {
+    it('skips the failing group, continues processing others, logs a warning, and sets partial', async () => {
       const ruleQueryIndices = new Map([
         ['rule-1', ['logs-endpoint-000001']],
         ['rule-2', ['logs-aws-000001']],
@@ -338,13 +353,19 @@ describe('fetchRuleFieldCaps', () => {
 
       const result = await fetchRuleFieldCaps({
         esClient,
+        logger,
         ruleQueryIndices,
         ruleNames,
         ruleRequiredFields,
       });
 
       // rule-1 group failed → skipped; rule-2 has all fields → no missing fields
-      expect(result).toHaveLength(0);
+      expect(result.entries).toHaveLength(0);
+      expect(result.partial).toBe(true);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('index_not_found_exception')
+      );
     });
   });
 });

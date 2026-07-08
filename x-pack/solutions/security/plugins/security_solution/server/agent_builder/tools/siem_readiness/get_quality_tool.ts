@@ -73,8 +73,7 @@ export const getQualityTool = (
         reverseMapResult,
       });
 
-      const { errors } = reverseMapResult;
-      const { missingFieldsByRule } = payload;
+      const { missingFieldsByRule, rulesPartial } = payload;
 
       // Phase 3: blast radius enrichment — ECS quality findings only.
       // missing_field findings already name the affected rule directly in the message;
@@ -121,7 +120,7 @@ export const getQualityTool = (
         checkedCount: categorizedItems.length,
         incompatibleCount,
         missingFieldCount: missingFieldsByRule.length,
-        rulesPartial: errors.rulesPartial,
+        rulesPartial,
       });
 
       return {

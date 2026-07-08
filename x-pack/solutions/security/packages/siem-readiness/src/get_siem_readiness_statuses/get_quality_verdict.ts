@@ -8,11 +8,11 @@
 import type { VisibilityStatus } from '../types';
 
 /**
- * Appended when rule index resolution failed for some rules, so the required-field coverage list
+ * Appended when some rules could not be fully checked, so the required-field coverage list
  * may be undercounted. Shared by the summary line and the noData note.
  */
 export const QUALITY_RULES_PARTIAL_CAVEAT =
-  'index resolution failed for some rules — the required-field coverage list may be incomplete';
+  'some rules could not be fully checked — the required-field coverage list may be incomplete';
 
 export interface QualityVerdictInput {
   /** Indices with quality-check results in scope — all indices for the orchestrator, the
@@ -22,7 +22,7 @@ export interface QualityVerdictInput {
   incompatibleCount: number;
   /** Rules whose required_fields are not fully mapped in their queried indices. */
   missingFieldCount: number;
-  /** True when rule index resolution failed for some rules (coverage list may be incomplete). */
+  /** True when the required-field coverage list may be incomplete (reverse-map or fieldCaps failure). */
   rulesPartial: boolean;
 }
 

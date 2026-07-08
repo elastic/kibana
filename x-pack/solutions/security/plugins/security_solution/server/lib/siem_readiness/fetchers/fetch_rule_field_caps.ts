@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import type { MissingFieldDetail, MissingFieldsEntry, RequiredField } from '@kbn/siem-readiness';
 
 type FieldMappingStatus = 'mapped' | 'partial' | 'missing';
@@ -39,6 +40,7 @@ const toIndexArray = (indices: string | string[]): string[] =>
  */
 const fetchFieldMappingStatus = async (
   esClient: ElasticsearchClient,
+  logger: Logger,
   indices: string[],
   fields: string[]
 ): Promise<Map<string, FieldMappingResult> | null> => {
@@ -74,7 +76,13 @@ const fetchFieldMappingStatus = async (
     }
 
     return results;
-  } catch {
+  } catch (error: unknown) {
+    const e = error as { message?: string };
+    logger.warn(
+      `siem_readiness: fieldCaps failed for indices [${indices.join(
+        ', '
+      )}] and fields [${fields.join(', ')}]: ${e.message ?? 'unknown error'}`
+    );
     return null;
   }
 };
@@ -97,16 +105,18 @@ const fetchFieldMappingStatus = async (
  */
 export const fetchRuleFieldCaps = async ({
   esClient,
+  logger,
   ruleQueryIndices,
   ruleNames,
   ruleRequiredFields,
 }: {
   esClient: ElasticsearchClient;
+  logger: Logger;
   /** ruleId → query/event indices whose schema required_fields describe. */
   ruleQueryIndices: Map<string, string[]>;
   ruleNames: Map<string, string>;
   ruleRequiredFields: Map<string, RequiredField[]>;
-}): Promise<MissingFieldsEntry[]> => {
+}): Promise<{ entries: MissingFieldsEntry[]; partial: boolean }> => {
   // Group rules by cache key: sortedIndices|sortedFieldNames
   // Rules sharing the same (indices, fields) share one fieldCaps call.
   interface Group {
@@ -138,10 +148,14 @@ export const fetchRuleFieldCaps = async ({
   // fetchFieldMappingStatus never rejects (it returns null on failure), so Promise.all is safe.
   const groupList = [...groups.values()];
   const fieldStatusByGroup = await Promise.all(
-    groupList.map(({ indices, fields }) => fetchFieldMappingStatus(esClient, indices, fields))
+    groupList.map(({ indices, fields }) =>
+      fetchFieldMappingStatus(esClient, logger, indices, fields)
+    )
   );
 
-  const results: MissingFieldsEntry[] = [];
+  const partial = fieldStatusByGroup.some((status) => status === null);
+
+  const entries: MissingFieldsEntry[] = [];
 
   groupList.forEach(({ ruleIds }, groupIndex) => {
     // null signals that fieldCaps failed for this group — skip it so one bad group
@@ -165,7 +179,7 @@ export const fetchRuleFieldCaps = async ({
       }
 
       if (fieldDetails.length > 0) {
-        results.push({
+        entries.push({
           ruleId,
           ruleName: ruleNames.get(ruleId) ?? ruleId,
           fields: fieldDetails,
@@ -174,5 +188,5 @@ export const fetchRuleFieldCaps = async ({
     }
   });
 
-  return results;
+  return { entries, partial };
 };
