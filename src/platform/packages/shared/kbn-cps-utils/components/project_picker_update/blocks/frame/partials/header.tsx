@@ -1,0 +1,141 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useState, useMemo, useCallback } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiContextMenuPanel,
+  EuiButtonIcon,
+  EuiToolTip,
+  EuiPopover,
+  EuiBadge,
+  EuiContextMenuItem,
+  EuiHorizontalRule,
+  type EuiContextMenuItemProps,
+  useGeneratedHtmlId,
+  EuiTitle,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useProjectPickerActions } from '../../../state';
+
+const getContextMenuItems = (
+  actions: ReturnType<typeof useProjectPickerActions>
+): Array<Pick<EuiContextMenuItemProps, 'icon' | 'onClick' | 'external'> & { label: string }>[] => [
+  [
+    {
+      icon: 'eraser',
+      label: i18n.translate('kbn.cps.projectPickerFrameHeader.clearProjectFilters', {
+        defaultMessage: 'Clear project filters',
+      }),
+      onClick: () => {
+        actions.clearProjectFilters();
+      },
+    },
+    {
+      icon: 'clockCounter',
+      label: i18n.translate('kbn.cps.projectPickerFrameHeader.revertToSpaceDefaults', {
+        defaultMessage: 'Revert to space defaults',
+      }),
+      onClick: () => {
+        actions.revertToSpaceDefaults();
+      },
+    },
+  ],
+  [
+    {
+      icon: 'controls',
+      label: i18n.translate('kbn.cps.projectPickerFrameHeader.addProject', {
+        defaultMessage: 'Adjust space defaults',
+      }),
+    },
+    {
+      icon: 'gear',
+      label: i18n.translate('kbn.cps.projectPickerFrameHeader.adjustSpaceDefaults', {
+        defaultMessage: 'Manage cross-project search',
+      }),
+      external: true,
+    },
+  ],
+];
+
+export function ProjectPickerFrameHeader() {
+  const [isOpen, setIsOpen] = useState(false);
+  const actions = useProjectPickerActions();
+  const contextMenuTooltipId = useGeneratedHtmlId();
+
+  const closePopover = useCallback(() => setIsOpen(false), []);
+  const contextMenuConfig = useMemo(() => getContextMenuItems(actions), [actions]);
+
+  return (
+    <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexItem grow>
+        <EuiTitle size="xxs">
+          <h3>
+            {i18n.translate('kbn.cps.projectPickerFrameHeader.title', {
+              defaultMessage: 'Cross-project search',
+            })}
+          </h3>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiBadge color="primary">
+              {i18n.translate('kbn.cps.projectPickerFrameHeader.addProject', {
+                defaultMessage: 'Using space defaults',
+              })}
+            </EuiBadge>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiPopover
+              panelPaddingSize="none"
+              aria-labelledby={contextMenuTooltipId}
+              button={
+                <EuiToolTip
+                  id={contextMenuTooltipId}
+                  content={i18n.translate('kbn.cps.projectPickerFrameHeader.addProjectTooltip', {
+                    defaultMessage: 'Global actions',
+                  })}
+                >
+                  <EuiButtonIcon
+                    aria-labelledby={contextMenuTooltipId}
+                    iconType="ellipsis"
+                    aria-hidden={true}
+                    onClick={() => setIsOpen(true)}
+                  />
+                </EuiToolTip>
+              }
+              isOpen={isOpen}
+              closePopover={closePopover}
+            >
+              <EuiContextMenuPanel
+                items={contextMenuConfig.reduce((acc, section, index) => {
+                  acc = acc.concat(
+                    section.map((item) => (
+                      <EuiContextMenuItem key={item.label} icon={item.icon} onClick={item.onClick}>
+                        {item.label}
+                      </EuiContextMenuItem>
+                    ))
+                  );
+
+                  if (index < contextMenuConfig.length - 1) {
+                    acc.push(<EuiHorizontalRule key={`separator-${index}`} margin="xs" />);
+                  }
+
+                  return acc;
+                }, [] as React.ReactElement[])}
+              />
+            </EuiPopover>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}

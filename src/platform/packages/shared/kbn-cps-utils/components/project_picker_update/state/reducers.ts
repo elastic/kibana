@@ -30,5 +30,9 @@ export function createStoreReducers() {
       ...state,
       selectedProjects: [],
     }),
+    includeAllVisibleProjects: (state: ProjectPickerState) => ({
+      ...state,
+      selectedProjects: state.availableProjects,
+    }),
   } as const;
 }
