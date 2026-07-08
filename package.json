@@ -1631,7 +1631,6 @@
     "@babel/register": "7.24.6",
     "@babel/traverse": "7.26.8",
     "@babel/types": "7.21.2",
-    "@cypress/debugging-proxy": "2.0.1",
     "@cypress/grep": "5.1.0",
     "@cypress/webpack-preprocessor": "6.0.2",
     "@elastic/eslint-plugin-eui": "2.13.0",
