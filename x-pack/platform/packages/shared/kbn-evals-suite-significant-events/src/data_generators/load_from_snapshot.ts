@@ -10,7 +10,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createGcsRepository, restoreSnapshot } from '@kbn/es-snapshot-loader';
-import type { Detection, Discovery, Feature } from '@kbn/streams-schema';
+import type { Detection, Discovery, Feature } from '@kbn/significant-events-schema';
 import type { GcsConfig } from './snapshot_run_config';
 import { resolveBasePath } from './snapshot_run_config';
 import {
@@ -23,7 +23,7 @@ import { DEFAULT_LOGS_INDEX } from '../constants';
 
 /**
  * Raw query knowledge-indicator doc as captured from the KI data stream. Carries
- * `query.rule_id`, which the investigator/judge match against `detection.rule_uuid`.
+ * `query.rule_id`, which the discovery/judge match against `detection.rule_uuid`.
  */
 export interface SnapshotQueryKi {
   id?: string;

@@ -38,21 +38,18 @@ export interface ComputeSuccessfulLifecycleFlyoutPreviewArgs {
   isServerless: boolean;
   ilmPhases: IlmPhasesMap;
   hotColor: string;
-  stats?: { size?: string; sizeBytes?: number; totalDocs?: number };
 }
 
 const previewFromSerializedIlmPolicy = ({
   policy,
   ilmPhases,
-  stats,
   indexMode,
 }: {
   policy: PolicyFromES['policy'];
   ilmPhases: IlmPhasesMap;
-  stats?: ComputeSuccessfulLifecycleFlyoutPreviewArgs['stats'];
   indexMode: string | undefined;
 }): Extract<SuccessfulLifecycleFlyoutPreview, { action: 'apply' }> => {
-  const phases = buildIlmPreviewPhases({ policy, ilmPhases, stats });
+  const phases = buildIlmPreviewPhases({ policy, ilmPhases });
   const { phaseCount, downsampleStepCount } = getIlmPolicySummaryStats(policy.phases);
   return {
     action: 'apply',
@@ -68,11 +65,10 @@ const previewForDlmSelection = ({
   isServerless,
   ilmPhases,
   hotColor,
-  stats,
   indexMode,
 }: Pick<
   ComputeSuccessfulLifecycleFlyoutPreviewArgs,
-  'effectiveLifecycle' | 'isServerless' | 'ilmPhases' | 'hotColor' | 'stats' | 'indexMode'
+  'effectiveLifecycle' | 'isServerless' | 'ilmPhases' | 'hotColor' | 'indexMode'
 >): Extract<SuccessfulLifecycleFlyoutPreview, { action: 'apply' }> => {
   const baseline = effectiveToIngestLifecycle(effectiveLifecycle);
   const baselineDsl = 'dsl' in baseline ? baseline.dsl : {};
@@ -82,7 +78,9 @@ const previewForDlmSelection = ({
     hotDescription: ilmPhases.hot.description,
     deletePhaseColor: ilmPhases.delete.color,
     deletePhaseDescription: ilmPhases.delete.description,
-    stats,
+    frozenAfter: baselineDsl.frozen_after,
+    frozenColor: ilmPhases.frozen.color,
+    frozenDescription: ilmPhases.frozen.description,
     retentionPeriod: baselineDsl.data_retention,
     downsampleSteps: baselineDsl.downsample ?? null,
     indexMode: indexMode ?? 'standard',
@@ -103,14 +101,13 @@ const previewFromLifecycle = ({
   isServerless,
   ilmPhases,
   hotColor,
-  stats,
   indexMode,
 }: {
   lifecycle: Streams.ingest.all.GetResponse['effective_lifecycle'];
   ilmPolicies: IlmPolicyForFlyout[];
 } & Pick<
   ComputeSuccessfulLifecycleFlyoutPreviewArgs,
-  'isServerless' | 'ilmPhases' | 'hotColor' | 'stats' | 'indexMode'
+  'isServerless' | 'ilmPhases' | 'hotColor' | 'indexMode'
 >): Extract<SuccessfulLifecycleFlyoutPreview, { action: 'apply' }> => {
   const baseline = effectiveToIngestLifecycle(lifecycle);
   if ('ilm' in baseline) {
@@ -119,7 +116,6 @@ const previewFromLifecycle = ({
       return previewFromSerializedIlmPolicy({
         policy: found.serializedPolicy,
         ilmPhases,
-        stats,
         indexMode,
       });
     }
@@ -127,13 +123,16 @@ const previewFromLifecycle = ({
 
   const retentionPeriod = 'dsl' in baseline ? baseline.dsl.data_retention : undefined;
   const downsampleSteps = 'dsl' in baseline ? baseline.dsl.downsample ?? null : null;
+  const frozenAfter = 'dsl' in baseline ? baseline.dsl.frozen_after : undefined;
   const model = buildDlmPreviewModel({
     isServerless,
     hotColor,
     hotDescription: ilmPhases.hot.description,
     deletePhaseColor: ilmPhases.delete.color,
     deletePhaseDescription: ilmPhases.delete.description,
-    stats,
+    frozenAfter,
+    frozenColor: ilmPhases.frozen.color,
+    frozenDescription: ilmPhases.frozen.description,
     retentionPeriod,
     downsampleSteps,
     indexMode: indexMode ?? 'standard',
@@ -164,7 +163,6 @@ export const computeSuccessfulLifecycleFlyoutPreview = (
     isServerless,
     ilmPhases,
     hotColor,
-    stats,
   } = args;
 
   if (inheritLifecycle) {
@@ -186,7 +184,6 @@ export const computeSuccessfulLifecycleFlyoutPreview = (
       isServerless,
       ilmPhases,
       hotColor,
-      stats,
       indexMode,
     });
   }
@@ -202,7 +199,6 @@ export const computeSuccessfulLifecycleFlyoutPreview = (
         ...previewFromSerializedIlmPolicy({
           policy: inspected.serializedPolicy,
           ilmPhases,
-          stats,
           indexMode,
         }),
         suppressUnsavedChanges: true,
@@ -219,7 +215,6 @@ export const computeSuccessfulLifecycleFlyoutPreview = (
       return previewFromSerializedIlmPolicy({
         policy: selected.serializedPolicy,
         ilmPhases,
-        stats,
         indexMode,
       });
     }
@@ -230,7 +225,6 @@ export const computeSuccessfulLifecycleFlyoutPreview = (
     isServerless,
     ilmPhases,
     hotColor,
-    stats,
     indexMode,
   });
 };
