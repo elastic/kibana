@@ -37,6 +37,9 @@ export function ContextualServiceMapControls({
         <EuiFieldNumber
           compressed
           data-test-subj="contextualServiceMapMaxVisible"
+          aria-label={i18n.translate('xpack.apm.serviceMap.contextual.maxVisibleAria', {
+            defaultMessage: 'Maximum visible nodes',
+          })}
           prepend={i18n.translate('xpack.apm.serviceMap.contextual.maxVisible', {
             defaultMessage: 'Max visible',
           })}
@@ -51,6 +54,9 @@ export function ContextualServiceMapControls({
         <EuiFieldNumber
           compressed
           data-test-subj="contextualServiceMapMaxHops"
+          aria-label={i18n.translate('xpack.apm.serviceMap.contextual.maxHopsAria', {
+            defaultMessage: 'Maximum hops',
+          })}
           prepend={i18n.translate('xpack.apm.serviceMap.contextual.maxHops', {
             defaultMessage: 'Hops',
           })}

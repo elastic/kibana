@@ -237,6 +237,11 @@ function ContextualGraphInner({
         <CollapsibleServiceMapProvider value={collapseContext}>
           <div
             data-test-subj="contextualServiceMapGraph"
+            role="group"
+            aria-label={i18n.translate('xpack.apm.serviceMap.contextual.regionLabel', {
+              defaultMessage: 'Contextual service map with {nodeCount} services and dependencies.',
+              values: { nodeCount: nodes.length },
+            })}
             style={{ height, width: '100%', position: 'relative' }}
           >
             <ReactFlow

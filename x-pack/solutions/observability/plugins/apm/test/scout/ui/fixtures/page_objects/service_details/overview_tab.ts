@@ -112,17 +112,17 @@ export class OverviewTab extends ServiceDetailsTab {
     });
     await this.contextualServiceMapMaxHopsInput.click();
     await this.contextualServiceMapMaxHopsInput.fill(String(maxHops));
-    await this.contextualServiceMapMaxHopsInput.press('Enter');
+    await this.contextualServiceMapMaxHopsInput.press('Tab');
+  }
+
+  getContextualMapNodes() {
+    return this.contextualServiceMapGraph.locator('.react-flow__node');
   }
 
   getExpandHiddenDependenciesButton(serviceName: string) {
     return this.getContextualServiceNodeRoot(serviceName).getByTestId(
       'serviceMapExpandHiddenButton'
     );
-  }
-
-  getContextualMapNodes() {
-    return this.contextualServiceMapGraph.locator('[data-id]');
   }
 
   // #region Charts and Tables
