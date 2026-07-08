@@ -130,6 +130,7 @@ tags:
     description: |
       Fleet internals APIs enable you to manage Fleet internal operations, including checking permissions, monitoring Fleet Server health, managing settings, and initiating Fleet setup.
     x-displayName: Fleet internals
+  - name: Fleet managed integrations
   - name: Fleet outputs
     description: |
       Fleet outputs APIs enable you to manage Fleet outputs, including creating, updating, and deleting output configurations, generating Logstash API keys, and monitoring output health.
@@ -25041,7 +25042,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        List agentless policies
+        Deprecated. Use `GET /api/fleet/managed_integrations` instead. List managed integrations
       operationId: get-fleet-agentless-policies
       parameters:
         - description: Page number. Defaults to `1`.
@@ -25085,7 +25086,7 @@ paths:
             application/json:
               examples:
                 listAgentlessPoliciesResponseExample:
-                  description: Example response for listing agentless policies
+                  description: Example response for listing managed integrations
                   value:
                     items:
                       - created_at: '2025-11-06T18:27:43.541Z'
@@ -25188,7 +25189,7 @@ paths:
                   - message
                   - attributes
           description: Bad Request
-      summary: Get agentless policies
+      summary: 'Deprecated: Get managed integrations'
       tags:
         - Fleet agentless policies
       x-state: Experimental
@@ -25203,7 +25204,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an agentless policy
+        Deprecated. Use `POST /api/fleet/managed_integrations` instead. Create a managed integration
       operationId: post-fleet-agentless-policies
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -25218,7 +25219,7 @@ paths:
           application/json:
             examples:
               createAgentlessPoliciesRequestExample:
-                description: Example request to create agentless policies
+                description: Example request to create a managed integration
                 value:
                   description: test
                   inputs:
@@ -25245,7 +25246,7 @@ paths:
                     name: ess_billing
                     version: 1.6.0
               createAgentlessPoliciesReuseAWSCloudConnectorExample:
-                description: Example request to create agentless policy reusing an existing AWS cloud connector
+                description: Example request to create a managed integration reusing an existing AWS cloud connector
                 value:
                   cloud_connector:
                     cloud_connector_id: existing-aws-connector-id
@@ -25281,7 +25282,7 @@ paths:
                     deployment: aws
                     posture: cspm
               createAgentlessPoliciesWithAWSCloudConnectorExample:
-                description: Example request to create agentless policy with AWS cloud connector
+                description: Example request to create a managed integration with AWS cloud connector
                 value:
                   cloud_connector:
                     enabled: true
@@ -25316,7 +25317,7 @@ paths:
                     deployment: aws
                     posture: cspm
               createAgentlessPoliciesWithAzureCloudConnectorExample:
-                description: Example request to create agentless policy with Azure cloud connector
+                description: Example request to create a managed integration with Azure cloud connector
                 value:
                   cloud_connector:
                     enabled: true
@@ -25359,7 +25360,7 @@ paths:
             application/json:
               examples:
                 createAgentlessPoliciesResponseExample:
-                  description: Example response for creating an agentless policy
+                  description: Example response for creating a managed integration
                   value:
                     item:
                       created_at: '2025-11-06T18:27:43.541Z'
@@ -25540,7 +25541,7 @@ paths:
                   - message
                   - attributes
           description: Conflict
-      summary: Create an agentless policy
+      summary: 'Deprecated: Create a managed integration'
       tags:
         - Fleet agentless policies
       x-state: Experimental
@@ -25556,7 +25557,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Upgrade multiple agentless policies to their installed package version, migrating each package policy's config onto the new schema. Always returns 200 with a per-policy result array; a missing or non-agentless id is reported as a per-item failure (`success: false` + `statusCode`) without failing the batch, so valid ids are still upgraded. A successful result means the policy's saved object was upgraded, while the agentless deployment is reconciled asynchronously in the background. Policies already at the installed version are a genuine no-op: they still report `success: true` (calls stay idempotent) but nothing is re-persisted or redeployed. Note: agent-policy-level agentless settings (resources, ownership tags) are not re-derived from the new package version — use the update (PUT) endpoint for those.
+        Deprecated. Use `POST /api/fleet/managed_integrations/_upgrade` instead. Upgrade multiple managed integrations to their installed package version, migrating each package policy's config onto the new schema. Always returns 200 with a per-policy result array; a missing id, or an id that is not a managed integration, is reported as a per-item failure (`success: false` + `statusCode`) without failing the batch, so valid ids are still upgraded. A successful result means the policy's saved object was upgraded, while the agentless deployment is reconciled asynchronously in the background. Policies already at the installed version are a genuine no-op: they still report `success: true` (calls stay idempotent) but nothing is re-persisted or redeployed. Note: agent-policy-level agentless settings (resources, ownership tags) are not re-derived from the new package version — use the update (PUT) endpoint for those.
       operationId: post-fleet-agentless-policies-upgrade
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -25571,7 +25572,7 @@ paths:
           application/json:
             examples:
               upgradeAgentlessPoliciesRequestExample:
-                description: Bulk upgrade agentless policies to their installed package version
+                description: Bulk upgrade managed integrations to their installed package version
                 value:
                   policyIds:
                     - d52a7812-5736-4fdc-aed8-72152afa1ffa
@@ -25584,7 +25585,7 @@ paths:
             application/json:
               examples:
                 upgradeAgentlessPoliciesPartialFailureResponseExample:
-                  description: Example response where one policy upgraded and another id was missing or not an agentless policy (the batch still returns 200)
+                  description: Example response where one managed integration upgraded and another id was missing or not a managed integration (the batch still returns 200)
                   value:
                     - id: d52a7812-5736-4fdc-aed8-72152afa1ffa
                       name: ess_billing-1
@@ -25608,7 +25609,7 @@ paths:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_bulk_upgrade_agentless_policy_result'
                 maxItems: 10000
                 type: array
-          description: "Indicates a successful response. Each item reports the per-policy upgrade outcome; inspect every item's `success` flag. A missing or non-agentless id is reported as a per-item failure (`success: false` + `statusCode`) without failing the batch."
+          description: "Indicates a successful response. Each item reports the per-policy upgrade outcome; inspect every item's `success` flag. A missing id, or an id that is not a managed integration, is reported as a per-item failure (`success: false` + `statusCode`) without failing the batch."
         '400':
           content:
             application/json:
@@ -25638,7 +25639,7 @@ paths:
                   - message
                   - attributes
           description: Bad Request
-      summary: Bulk upgrade agentless policies
+      summary: 'Deprecated: Bulk upgrade managed integrations'
       tags:
         - Fleet agentless policies
       x-state: Experimental
@@ -25654,7 +25655,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Preview upgrading multiple agentless policies without applying any change. Targets the installed package version by default; pass `pkgVersion` to preview a specific (for example, not-yet-installed) version. Each result returns the current/proposed version and any migration errors, plus — only on a clean dry-run (`hasErrors: false`) — the migrated `proposedPolicy`. `proposedPolicy` is for the edit-and-upgrade flow (edit it, then save via the update (PUT) endpoint); to apply an upgrade as-is, use `_upgrade`.
+        Deprecated. Use `POST /api/fleet/managed_integrations/_upgrade/dryrun` instead. Preview upgrading multiple managed integrations without applying any change. Targets the installed package version by default; pass `pkgVersion` to preview a specific (for example, not-yet-installed) version. Each result returns the current/proposed version and any migration errors, plus — only on a clean dry-run (`hasErrors: false`) — the migrated `proposedPolicy`. `proposedPolicy` is for the edit-and-upgrade flow (edit it, then save via the update (PUT) endpoint); to apply an upgrade as-is, use `_upgrade`.
       operationId: post-fleet-agentless-policies-upgrade-dryrun
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -25669,7 +25670,7 @@ paths:
           application/json:
             examples:
               upgradeAgentlessPoliciesDryRunRequestExample:
-                description: Preview the upgrade of agentless policies to their installed package version
+                description: Preview the upgrade of managed integrations to their installed package version
                 value:
                   policyIds:
                     - d52a7812-5736-4fdc-aed8-72152afa1ffa
@@ -25697,7 +25698,7 @@ paths:
                       name: ess_billing-1
                       proposedVersion: 1.6.0
                 upgradeAgentlessPoliciesDryRunMixedResponseExample:
-                  description: 'Example dry-run response for a mixed batch: one policy previews cleanly while two ids are missing or not agentless. Missing / non-agentless ids are surfaced as per-item failures (`hasErrors: true` + `statusCode`) without failing the batch, and results stay in request order.'
+                  description: 'Example dry-run response for a mixed batch: one managed integration previews cleanly while two ids are missing or not managed integrations. Ids that are missing or not managed integrations are surfaced as per-item failures (`hasErrors: true` + `statusCode`) without failing the batch, and results stay in request order.'
                   value:
                     - currentVersion: 0.5.0
                       hasErrors: false
@@ -25781,7 +25782,7 @@ paths:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy_upgrade_dry_run_result'
                 maxItems: 10000
                 type: array
-          description: 'Indicates a successful response. Each clean item (`hasErrors: false`) previews the migrated policy as a consumable agentless policy (`proposedPolicy`); a missing or non-agentless id, or a migration error, is reported as a per-item failure (`hasErrors: true`, with `proposedPolicy` omitted) without failing the batch. Inspect every item.'
+          description: 'Indicates a successful response. Each clean item (`hasErrors: false`) previews the migrated policy as a consumable managed integration (`proposedPolicy`); a missing id, an id that is not a managed integration, or a migration error, is reported as a per-item failure (`hasErrors: true`, with `proposedPolicy` omitted) without failing the batch. Inspect every item.'
         '400':
           content:
             application/json:
@@ -25811,7 +25812,7 @@ paths:
                   - message
                   - attributes
           description: Bad Request
-      summary: Preview an agentless policies upgrade
+      summary: 'Deprecated: Preview a managed integrations upgrade'
       tags:
         - Fleet agentless policies
       x-state: Experimental
@@ -25827,7 +25828,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete an agentless policy
+        Deprecated. Use `DELETE /api/fleet/managed_integrations/{policyId}` instead. Delete a managed integration
       operationId: delete-fleet-agentless-policies-policyid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -25855,18 +25856,18 @@ paths:
           content:
             application/json:
               examples:
-                createAgentlessPoliciesResponseExample:
-                  description: Example response showing the successful result of communication initialisation over MCP protocol
+                deleteAgentlessPoliciesResponseExample:
+                  description: Example response for deleting a managed integration
                   value:
                     item:
                       id: d52a7812-5736-4fdc-aed8-72152afa1ffa
               schema:
                 additionalProperties: false
-                description: Response for deleting an agentless package policy.
+                description: Response for deleting a managed integration.
                 type: object
                 properties:
                   id:
-                    description: The ID of the deleted agentless package policy.
+                    description: The ID of the deleted managed integration.
                     type: string
                 required:
                   - id
@@ -25929,7 +25930,7 @@ paths:
                   - message
                   - attributes
           description: Conflict
-      summary: Delete an agentless policy
+      summary: 'Deprecated: Delete a managed integration'
       tags:
         - Fleet agentless policies
       x-state: Experimental
@@ -25944,10 +25945,10 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get an agentless policy by ID
+        Deprecated. Use `GET /api/fleet/managed_integrations/{policyId}` instead. Get a managed integration by ID
       operationId: get-fleet-agentless-policies-policyid
       parameters:
-        - description: The ID of the agentless policy to retrieve.
+        - description: The ID of the managed integration to retrieve.
           in: path
           name: policyId
           required: true
@@ -25960,7 +25961,7 @@ paths:
             application/json:
               examples:
                 getAgentlessPolicyResponseExample:
-                  description: Example response for getting an agentless policy by ID
+                  description: Example response for getting a managed integration by ID
                   value:
                     item:
                       created_at: '2025-11-06T18:27:43.541Z'
@@ -26045,7 +26046,7 @@ paths:
                 required:
                   - message
           description: Not Found
-      summary: Get an agentless policy
+      summary: 'Deprecated: Get a managed integration'
       tags:
         - Fleet agentless policies
       x-state: Experimental
@@ -26060,7 +26061,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update an agentless policy by ID. Uses full-replace semantics: the policy is rebuilt entirely from the request body, so any omitted optional field (for example, `description`, `vars`, `global_data_tags`, `cloud_connector`) is cleared or reset to its default. The integration package name is immutable and the runtime-managed `cluster_id` is preserved from the existing policy.
+        Deprecated. Use `PUT /api/fleet/managed_integrations/{policyId}` instead. Update a managed integration by ID. Uses full-replace semantics: the policy is rebuilt entirely from the request body, so any omitted optional field (for example, `description`, `vars`, `global_data_tags`, `cloud_connector`) is cleared or reset to its default. The integration package name is immutable and the runtime-managed `cluster_id` is preserved from the existing policy.
       operationId: put-fleet-agentless-policies-policyid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -26070,7 +26071,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The ID of the agentless policy to update.
+        - description: The ID of the managed integration to update.
           in: path
           name: policyId
           required: true
@@ -26082,7 +26083,7 @@ paths:
           application/json:
             examples:
               updateAgentlessPolicyAttachAWSCloudConnectorRequestExample:
-                description: Example request to attach an AWS cloud connector to an agentless policy on update. Because `PUT` is full-replace, the `cloud_connector` block must be present on every subsequent update or the connector is detached.
+                description: Example request to attach an AWS cloud connector to a managed integration on update. Because `PUT` is full-replace, the `cloud_connector` block must be present on every subsequent update or the connector is detached.
                 value:
                   cloud_connector:
                     enabled: true
@@ -26136,7 +26137,7 @@ paths:
                     name: ess_billing
                     version: 1.6.0
               updateAgentlessPolicyRequestExample:
-                description: 'Example request to update an agentless policy. `PUT` uses full-replace semantics: the policy is rebuilt entirely from this body, so any omitted optional field is cleared or reset to its default rather than preserved. For example, omitting `description` clears it, omitting `vars` or `global_data_tags` removes them, and omitting `cloud_connector` detaches any previously attached connector. Detaching or swapping a cloud connector only removes the reference; the connector itself is not deleted, as connectors have an independent, shareable lifecycle and are managed through the cloud connector API. Two fields are exceptions that cannot be changed using `PUT`: the integration `package.name` is immutable, and the runtime-managed `cluster_id` is preserved from the existing agent policy.'
+                description: 'Example request to update a managed integration. `PUT` uses full-replace semantics: the policy is rebuilt entirely from this body, so any omitted optional field is cleared or reset to its default rather than preserved. For example, omitting `description` clears it, omitting `vars` or `global_data_tags` removes them, and omitting `cloud_connector` detaches any previously attached connector. Detaching or swapping a cloud connector only removes the reference; the connector itself is not deleted, as connectors have an independent, shareable lifecycle and are managed through the cloud connector API. Two fields are exceptions that cannot be changed using `PUT`: the integration `package.name` is immutable, and the runtime-managed `cluster_id` is preserved from the existing agent policy.'
                 value:
                   description: updated description
                   inputs:
@@ -26163,7 +26164,7 @@ paths:
                     name: ess_billing
                     version: 1.6.0
               updateAgentlessPolicyReuseAWSCloudConnectorRequestExample:
-                description: Example request to update an agentless policy reusing an existing AWS cloud connector by ID instead of creating a new one.
+                description: Example request to update a managed integration reusing an existing AWS cloud connector by ID instead of creating a new one.
                 value:
                   cloud_connector:
                     cloud_connector_id: existing-aws-connector-id
@@ -26199,7 +26200,7 @@ paths:
                     deployment: aws
                     posture: cspm
               updateAgentlessPolicyVersionChangeRequestExample:
-                description: Example request to update an agentless policy to a different package version. The package name is immutable, but the version may change.
+                description: Example request to update a managed integration to a different package version. The package name is immutable, but the version may change.
                 value:
                   description: bumped to a newer package version
                   inputs:
@@ -26226,7 +26227,7 @@ paths:
             application/json:
               examples:
                 updateAgentlessPolicyResponseExample:
-                  description: Example response for updating an agentless policy
+                  description: Example response for updating a managed integration
                   value:
                     item:
                       created_at: '2025-11-06T18:27:43.541Z'
@@ -26387,7 +26388,7 @@ paths:
                   - message
                   - attributes
           description: Conflict — for example, the requested name is already used by another integration policy.
-      summary: Update an agentless policy
+      summary: 'Deprecated: Update a managed integration'
       tags:
         - Fleet agentless policies
       x-state: Experimental
@@ -37377,6 +37378,1368 @@ paths:
       summary: Generate a Logstash API key
       tags:
         - Fleet outputs
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/fleet/managed_integrations:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/managed_integrations</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        List managed integrations
+      operationId: get-fleet-managed-integrations
+      parameters:
+        - description: Page number. Defaults to `1`.
+          in: query
+          name: page
+          required: false
+          schema:
+            type: number
+        - description: Number of results per page. Defaults to `20`.
+          in: query
+          name: perPage
+          required: false
+          schema:
+            type: number
+        - description: Field to sort results by. Defaults to `updated_at`.
+          in: query
+          name: sortField
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+        - description: Sort order, ascending or descending. Defaults to `desc`.
+          in: query
+          name: sortOrder
+          required: false
+          schema:
+            enum:
+              - desc
+              - asc
+            type: string
+        - description: 'A KQL query string to filter results. Filtering is restricted to the following fields: `name`, `namespace`, `package.name`.'
+          in: query
+          name: kuery
+          required: false
+          schema:
+            maxLength: 4096
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                listAgentlessPoliciesResponseExample:
+                  description: Example response for listing managed integrations
+                  value:
+                    items:
+                      - created_at: '2025-11-06T18:27:43.541Z'
+                        created_by: test_user
+                        description: test
+                        id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                        inputs:
+                          ESS Billing-cel:
+                            enabled: true
+                            streams:
+                              ess_billing.billing:
+                                enabled: true
+                              ess_billing.credits:
+                                enabled: false
+                            vars:
+                              api_key:
+                                id: QY1sWpoBbWcMW-edr0Ee
+                                isSecretRef: true
+                              organization_id: '1234'
+                              url: https://billing.elastic-cloud.com
+                        name: ess_billing-1
+                        namespace: default
+                        package:
+                          name: ess_billing
+                          title: Elasticsearch Service Billing
+                          version: 1.6.0
+                        updated_at: '2025-11-06T18:27:43.541Z'
+                        updated_by: test_user
+                      - cloud_connector:
+                          cloud_connector_id: aws-connector-67890
+                          enabled: true
+                        created_at: '2025-11-06T18:27:43.541Z'
+                        created_by: test_user
+                        description: CSPM integration for AWS with cloud connector
+                        id: aws-policy-12345
+                        inputs:
+                          cspm-cloudbeat/cis_aws:
+                            enabled: true
+                        name: cspm-aws-policy
+                        namespace: default
+                        package:
+                          name: cloud_security_posture
+                          title: Cloud Security Posture Management
+                          version: 3.1.1
+                        updated_at: '2025-11-06T18:27:43.541Z'
+                        updated_by: test_user
+                        vars:
+                          deployment: aws
+                          posture: cspm
+                    page: 1
+                    perPage: 20
+                    total: 2
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  items:
+                    items:
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy'
+                    maxItems: 10000
+                    type: array
+                  page:
+                    type: number
+                  perPage:
+                    type: number
+                  total:
+                    type: number
+                required:
+                  - items
+                  - total
+                  - page
+                  - perPage
+          description: Indicates a successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Get managed integrations
+      tags:
+        - Fleet managed integrations
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/managed_integrations</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create a managed integration
+      operationId: post-fleet-managed-integrations
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createAgentlessPoliciesRequestExample:
+                description: Example request to create a managed integration
+                value:
+                  description: test
+                  inputs:
+                    ESS Billing-cel:
+                      enabled: true
+                      streams:
+                        ess_billing.billing:
+                          enabled: true
+                          vars:
+                            hide_sensitive: true
+                            http_client_timeout: 30s
+                            lookbehind: 365
+                            tags:
+                              - forwarded
+                              - billing
+                        ess_billing.credits:
+                          enabled: false
+                      vars:
+                        api_key: <REPLACE_WITH_YOUR_API_KEY>
+                        organization_id: '1234'
+                  name: ess_billing-1
+                  namespace: default
+                  package:
+                    name: ess_billing
+                    version: 1.6.0
+              createAgentlessPoliciesReuseAWSCloudConnectorExample:
+                description: Example request to create a managed integration reusing an existing AWS cloud connector
+                value:
+                  cloud_connector:
+                    cloud_connector_id: existing-aws-connector-id
+                    enabled: true
+                    target_csp: aws
+                  description: CSPM integration for AWS reusing existing cloud connector
+                  inputs:
+                    cspm-cloudbeat/cis_aws:
+                      enabled: true
+                      streams:
+                        cloud_security_posture.findings:
+                          enabled: true
+                          vars:
+                            aws.account_type: organization-account
+                            aws.credentials.type: cloud_connector
+                            aws.supports_cloud_connectors: true
+                            external_id:
+                              id: ABCDEFGHIJKLMNOPQRST
+                              isSecretRef: true
+                            role_arn: arn:aws:iam::123456789012:role/TestRole
+                      vars:
+                        cloud_formation_template: https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-ACCOUNT_TYPE-9.2.0.yml
+                    cspm-cloudbeat/cis_azure:
+                      enabled: false
+                    cspm-cloudbeat/cis_gcp:
+                      enabled: false
+                  name: cspm-aws-reuse-policy
+                  namespace: default
+                  package:
+                    name: cloud_security_posture
+                    version: 3.1.1
+                  vars:
+                    deployment: aws
+                    posture: cspm
+              createAgentlessPoliciesWithAWSCloudConnectorExample:
+                description: Example request to create a managed integration with AWS cloud connector
+                value:
+                  cloud_connector:
+                    enabled: true
+                    target_csp: aws
+                  description: CSPM integration for AWS with cloud connector
+                  inputs:
+                    cspm-cloudbeat/cis_aws:
+                      enabled: true
+                      streams:
+                        cloud_security_posture.findings:
+                          enabled: true
+                          vars:
+                            aws.account_type: organization-account
+                            aws.credentials.type: cloud_connector
+                            aws.supports_cloud_connectors: true
+                            external_id:
+                              id: ABCDEFGHIJKLMNOPQRST
+                              isSecretRef: true
+                            role_arn: arn:aws:iam::123456789012:role/TestRole
+                      vars:
+                        cloud_formation_template: https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-ACCOUNT_TYPE-9.2.0.yml
+                    cspm-cloudbeat/cis_azure:
+                      enabled: false
+                    cspm-cloudbeat/cis_gcp:
+                      enabled: false
+                  name: cspm-aws-policy
+                  namespace: default
+                  package:
+                    name: cloud_security_posture
+                    version: 3.1.1
+                  vars:
+                    deployment: aws
+                    posture: cspm
+              createAgentlessPoliciesWithAzureCloudConnectorExample:
+                description: Example request to create a managed integration with Azure cloud connector
+                value:
+                  cloud_connector:
+                    enabled: true
+                    target_csp: azure
+                  description: CSPM integration for Azure with cloud connector
+                  inputs:
+                    cspm-cloudbeat/cis_aws:
+                      enabled: false
+                    cspm-cloudbeat/cis_azure:
+                      enabled: true
+                      streams:
+                        cloud_security_posture.findings:
+                          enabled: true
+                          vars:
+                            azure_credentials_cloud_connector_id:
+                              type: text
+                              value: existing-azure-credentials-connector-id
+                            azure.account_type: organization-account
+                            client_id:
+                              id: client-secret-id
+                              isSecretRef: true
+                            tenant_id:
+                              id: tenant-secret-id
+                              isSecretRef: true
+                    cspm-cloudbeat/cis_gcp:
+                      enabled: false
+                  name: cspm-azure-policy
+                  namespace: default
+                  package:
+                    name: cloud_security_posture
+                    version: 3.1.1
+                  vars:
+                    deployment: azure
+                    posture: cspm
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_create_agentless_policy_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                createAgentlessPoliciesResponseExample:
+                  description: Example response for creating a managed integration
+                  value:
+                    item:
+                      created_at: '2025-11-06T18:27:43.541Z'
+                      created_by: test_user
+                      description: test
+                      id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                      inputs:
+                        ESS Billing-cel:
+                          enabled: true
+                          streams:
+                            ess_billing.billing:
+                              enabled: true
+                              vars:
+                                hide_sensitive: true
+                                http_client_timeout: 30s
+                                lookbehind: 365
+                                tags:
+                                  - forwarded
+                                  - billing
+                            ess_billing.credits:
+                              enabled: false
+                          vars:
+                            api_key:
+                              id: QY1sWpoBbWcMW-edr0Ee
+                              isSecretRef: true
+                            organization_id: '1234'
+                            url: https://billing.elastic-cloud.com
+                      name: ess_billing-1
+                      namespace: default
+                      package:
+                        name: ess_billing
+                        title: Elasticsearch Service Billing
+                        version: 1.6.0
+                      updated_at: '2025-11-06T18:27:43.541Z'
+                      updated_by: test_user
+                createAgentlessPoliciesWithAWSCloudConnectorResponseExample:
+                  description: Example response for AWS cloud connector integration
+                  value:
+                    item:
+                      cloud_connector:
+                        cloud_connector_id: aws-connector-67890
+                        enabled: true
+                      created_at: '2025-11-06T18:27:43.541Z'
+                      created_by: test_user
+                      description: CSPM integration for AWS with cloud connector
+                      id: aws-policy-12345
+                      inputs:
+                        cspm-cloudbeat/cis_aws:
+                          enabled: true
+                          streams:
+                            cloud_security_posture.findings:
+                              enabled: true
+                              vars:
+                                aws.account_type: organization-account
+                                aws.credentials.type: cloud_connector
+                                external_id:
+                                  id: secret-external-id-123
+                                  isSecretRef: true
+                                role_arn: arn:aws:iam::123456789012:role/TestRole
+                          vars:
+                            cloud_formation_template: https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-ACCOUNT_TYPE-9.2.0.yml
+                        cspm-cloudbeat/cis_azure:
+                          enabled: false
+                        cspm-cloudbeat/cis_gcp:
+                          enabled: false
+                      name: cspm-aws-policy
+                      namespace: default
+                      package:
+                        name: cloud_security_posture
+                        title: Cloud Security Posture Management
+                        version: 3.1.1
+                      updated_at: '2025-11-06T18:27:43.541Z'
+                      updated_by: test_user
+                      vars:
+                        deployment: aws
+                        posture: cspm
+                createAgentlessPoliciesWithAzureCloudConnectorResponseExample:
+                  description: Example response for Azure cloud connector integration
+                  value:
+                    item:
+                      cloud_connector:
+                        cloud_connector_id: azure-connector-67890
+                        enabled: true
+                      created_at: '2025-11-06T18:27:43.541Z'
+                      created_by: test_user
+                      description: CSPM integration for Azure with cloud connector
+                      id: azure-policy-12345
+                      inputs:
+                        cspm-cloudbeat/cis_aws:
+                          enabled: false
+                        cspm-cloudbeat/cis_azure:
+                          enabled: true
+                          streams:
+                            cloud_security_posture.findings:
+                              enabled: true
+                              vars:
+                                azure_credentials_cloud_connector_id:
+                                  type: text
+                                  value: existing-azure-credentials-connector-id
+                                azure.account_type: organization-account
+                                client_id:
+                                  id: client-secret-id-456
+                                  isSecretRef: true
+                                tenant_id:
+                                  id: tenant-secret-id-123
+                                  isSecretRef: true
+                        cspm-cloudbeat/cis_gcp:
+                          enabled: false
+                      name: cspm-azure-policy
+                      namespace: default
+                      package:
+                        name: cloud_security_posture
+                        title: Cloud Security Posture Management
+                        version: 3.1.1
+                      updated_at: '2025-11-06T18:27:43.541Z'
+                      updated_by: test_user
+                      vars:
+                        deployment: azure
+                        posture: cspm
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy_response'
+          description: Indicates a successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+        '409':
+          content:
+            application/json:
+              examples:
+                conflictErrorResponseExample:
+                  description: Example of a conflict error response
+                  value:
+                    error: Conflict
+                    message: An error message describing what went wrong
+                    statusCode: 409
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Conflict
+      summary: Create a managed integration
+      tags:
+        - Fleet managed integrations
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/fleet/managed_integrations/_upgrade:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/managed_integrations/_upgrade</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Upgrade multiple managed integrations to their installed package version, migrating each package policy's config onto the new schema. Always returns 200 with a per-policy result array; a missing id, or an id that is not a managed integration, is reported as a per-item failure (`success: false` + `statusCode`) without failing the batch, so valid ids are still upgraded. A successful result means the policy's saved object was upgraded, while the agentless deployment is reconciled asynchronously in the background. Policies already at the installed version are a genuine no-op: they still report `success: true` (calls stay idempotent) but nothing is re-persisted or redeployed. Note: agent-policy-level agentless settings (resources, ownership tags) are not re-derived from the new package version — use the update (PUT) endpoint for those.
+      operationId: post-fleet-managed-integrations-upgrade
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              upgradeAgentlessPoliciesRequestExample:
+                description: Bulk upgrade managed integrations to their installed package version
+                value:
+                  policyIds:
+                    - d52a7812-5736-4fdc-aed8-72152afa1ffa
+                    - aws-policy-12345
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_bulk_upgrade_agentless_policies_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                upgradeAgentlessPoliciesPartialFailureResponseExample:
+                  description: Example response where one managed integration upgraded and another id was missing or not a managed integration (the batch still returns 200)
+                  value:
+                    - id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                      name: ess_billing-1
+                      success: true
+                    - body:
+                        message: Agentless policy aws-policy-12345 not found
+                      id: aws-policy-12345
+                      statusCode: 404
+                      success: false
+                upgradeAgentlessPoliciesResponseExample:
+                  description: Example response where every policy was upgraded
+                  value:
+                    - id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                      name: ess_billing-1
+                      success: true
+                    - id: aws-policy-12345
+                      name: cspm-aws-policy
+                      success: true
+              schema:
+                items:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_bulk_upgrade_agentless_policy_result'
+                maxItems: 10000
+                type: array
+          description: "Indicates a successful response. Each item reports the per-policy upgrade outcome; inspect every item's `success` flag. A missing id, or an id that is not a managed integration, is reported as a per-item failure (`success: false` + `statusCode`) without failing the batch."
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Bulk upgrade managed integrations
+      tags:
+        - Fleet managed integrations
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/fleet/managed_integrations/_upgrade/dryrun:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/managed_integrations/_upgrade/dryrun</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Preview upgrading multiple managed integrations without applying any change. Targets the installed package version by default; pass `pkgVersion` to preview a specific (for example, not-yet-installed) version. Each result returns the current/proposed version and any migration errors, plus — only on a clean dry-run (`hasErrors: false`) — the migrated `proposedPolicy`. `proposedPolicy` is for the edit-and-upgrade flow (edit it, then save via the update (PUT) endpoint); to apply an upgrade as-is, use `_upgrade`.
+      operationId: post-fleet-managed-integrations-upgrade-dryrun
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              upgradeAgentlessPoliciesDryRunRequestExample:
+                description: Preview the upgrade of managed integrations to their installed package version
+                value:
+                  policyIds:
+                    - d52a7812-5736-4fdc-aed8-72152afa1ffa
+              upgradeAgentlessPoliciesDryRunTargetVersionRequestExample:
+                description: Preview the upgrade against an explicit target package version (for example, before installing the new version). Defaults to the installed package version when omitted.
+                value:
+                  pkgVersion: 1.6.0
+                  policyIds:
+                    - d52a7812-5736-4fdc-aed8-72152afa1ffa
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy_upgrade_dry_run_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                upgradeAgentlessPoliciesDryRunMigrationErrorsExample:
+                  description: Example dry-run response where migrating the config to the new version produced errors. `hasErrors` is true and `errors` explains why; do not feed the (partial) proposed config into the update endpoint without resolving them.
+                  value:
+                    - currentVersion: 1.5.0
+                      errors:
+                        - message: Variable "organization_id" is required
+                      hasErrors: true
+                      id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                      name: ess_billing-1
+                      proposedVersion: 1.6.0
+                upgradeAgentlessPoliciesDryRunMixedResponseExample:
+                  description: 'Example dry-run response for a mixed batch: one managed integration previews cleanly while two ids are missing or not managed integrations. Ids that are missing or not managed integrations are surfaced as per-item failures (`hasErrors: true` + `statusCode`) without failing the batch, and results stay in request order.'
+                  value:
+                    - currentVersion: 0.5.0
+                      hasErrors: false
+                      id: 2e426392-f856-4ab2-bc31-92d4dbb8d134
+                      name: agentless_hello_world-16
+                      proposedPolicy:
+                        cloud_connector: null
+                        created_at: '2026-07-01T15:59:08.299Z'
+                        created_by: admin
+                        description: ''
+                        id: 2e426392-f856-4ab2-bc31-92d4dbb8d134
+                        inputs:
+                          agentless_hello_world-cel:
+                            enabled: true
+                            streams:
+                              agentless_hello_world.generic:
+                                enabled: true
+                                vars:
+                                  url: https://epr.elastic.co
+                              agentless_hello_world.mock_counter:
+                                enabled: false
+                                vars:
+                                  events_per_second: 10
+                                  mode: constant
+                                  spike_events: 100
+                                  spike_every_seconds: 60
+                          agentless_hello_world-httpjson:
+                            enabled: false
+                            streams:
+                              agentless_hello_world.generic:
+                                enabled: false
+                                vars:
+                                  url: https://epr.elastic.co
+                        name: agentless_hello_world-16
+                        namespace: default
+                        package:
+                          name: agentless_hello_world
+                          title: Agentless Hello World
+                          version: 0.5.0
+                        updated_at: '2026-07-01T16:02:14.067Z'
+                        updated_by: admin
+                      proposedVersion: 0.5.0
+                    - body:
+                        message: Agentless policy 9300464c-6cfc-4566-850d-e9e7927457fe not found
+                      hasErrors: true
+                      id: 9300464c-6cfc-4566-850d-e9e7927457fe
+                      statusCode: 404
+                    - body:
+                        message: Agentless policy 5b8763e9-791a-4038-be29-b384d578200e not found
+                      hasErrors: true
+                      id: 5b8763e9-791a-4038-be29-b384d578200e
+                      statusCode: 404
+                upgradeAgentlessPoliciesDryRunResponseExample:
+                  description: 'Example clean dry-run response (`hasErrors: false`) with the proposed (migrated) policy. `proposedPolicy` is intended for the edit-and-upgrade flow: edit it and submit the edited payload to the update (PUT) endpoint. To apply without edits, use the `_upgrade` endpoint instead.'
+                  value:
+                    - currentVersion: 1.5.0
+                      hasErrors: false
+                      id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                      name: ess_billing-1
+                      proposedPolicy:
+                        created_at: '2025-11-06T18:27:43.541Z'
+                        created_by: test_user
+                        description: test
+                        id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                        inputs:
+                          ESS Billing-cel:
+                            enabled: true
+                            vars:
+                              organization_id: '1234'
+                        name: ess_billing-1
+                        namespace: default
+                        package:
+                          name: ess_billing
+                          title: Elasticsearch Service Billing
+                          version: 1.6.0
+                        updated_at: '2025-11-06T18:27:43.541Z'
+                        updated_by: test_user
+                      proposedVersion: 1.6.0
+              schema:
+                items:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy_upgrade_dry_run_result'
+                maxItems: 10000
+                type: array
+          description: 'Indicates a successful response. Each clean item (`hasErrors: false`) previews the migrated policy as a consumable managed integration (`proposedPolicy`); a missing id, an id that is not a managed integration, or a migration error, is reported as a per-item failure (`hasErrors: true`, with `proposedPolicy` omitted) without failing the batch. Inspect every item.'
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Preview a managed integrations upgrade
+      tags:
+        - Fleet managed integrations
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/fleet/managed_integrations/{policyId}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/managed_integrations/{policyId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Delete a managed integration
+      operationId: delete-fleet-managed-integrations-policyid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The ID of the policy to delete.
+          in: path
+          name: policyId
+          required: true
+          schema:
+            maxLength: 256
+            type: string
+        - description: Force delete the policy even if the policy is managed.
+          in: query
+          name: force
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deleteAgentlessPoliciesResponseExample:
+                  description: Example response for deleting a managed integration
+                  value:
+                    item:
+                      id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+              schema:
+                additionalProperties: false
+                description: Response for deleting a managed integration.
+                type: object
+                properties:
+                  id:
+                    description: The ID of the deleted managed integration.
+                    type: string
+                required:
+                  - id
+          description: Indicates a successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+        '409':
+          content:
+            application/json:
+              examples:
+                conflictErrorResponseExample:
+                  description: Example of a conflict error response
+                  value:
+                    error: Conflict
+                    message: An error message describing what went wrong
+                    statusCode: 409
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Conflict
+      summary: Delete a managed integration
+      tags:
+        - Fleet managed integrations
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/managed_integrations/{policyId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get a managed integration by ID
+      operationId: get-fleet-managed-integrations-policyid
+      parameters:
+        - description: The ID of the managed integration to retrieve.
+          in: path
+          name: policyId
+          required: true
+          schema:
+            maxLength: 256
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getAgentlessPolicyResponseExample:
+                  description: Example response for getting a managed integration by ID
+                  value:
+                    item:
+                      created_at: '2025-11-06T18:27:43.541Z'
+                      created_by: test_user
+                      description: test
+                      id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                      inputs:
+                        ESS Billing-cel:
+                          enabled: true
+                          streams:
+                            ess_billing.billing:
+                              enabled: true
+                              vars:
+                                hide_sensitive: true
+                                http_client_timeout: 30s
+                                lookbehind: 365
+                                tags:
+                                  - forwarded
+                                  - billing
+                            ess_billing.credits:
+                              enabled: false
+                          vars:
+                            api_key:
+                              id: QY1sWpoBbWcMW-edr0Ee
+                              isSecretRef: true
+                            organization_id: '1234'
+                            url: https://billing.elastic-cloud.com
+                      name: ess_billing-1
+                      namespace: default
+                      package:
+                        name: ess_billing
+                        title: Elasticsearch Service Billing
+                        version: 1.6.0
+                      updated_at: '2025-11-06T18:27:43.541Z'
+                      updated_by: test_user
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy_response'
+          description: Indicates a successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundErrorResponseExample:
+                  description: Example of a not found error response
+                  value:
+                    message: Agentless policy d52a7812-5736-4fdc-aed8-72152afa1ffa not found
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
+      summary: Get a managed integration
+      tags:
+        - Fleet managed integrations
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/managed_integrations/{policyId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Update a managed integration by ID. Uses full-replace semantics: the policy is rebuilt entirely from the request body, so any omitted optional field (for example, `description`, `vars`, `global_data_tags`, `cloud_connector`) is cleared or reset to its default. The integration package name is immutable and the runtime-managed `cluster_id` is preserved from the existing policy.
+      operationId: put-fleet-managed-integrations-policyid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The ID of the managed integration to update.
+          in: path
+          name: policyId
+          required: true
+          schema:
+            maxLength: 256
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateAgentlessPolicyAttachAWSCloudConnectorRequestExample:
+                description: Example request to attach an AWS cloud connector to a managed integration on update. Because `PUT` is full-replace, the `cloud_connector` block must be present on every subsequent update or the connector is detached.
+                value:
+                  cloud_connector:
+                    enabled: true
+                    target_csp: aws
+                  description: CSPM integration for AWS with cloud connector
+                  inputs:
+                    cspm-cloudbeat/cis_aws:
+                      enabled: true
+                      streams:
+                        cloud_security_posture.findings:
+                          enabled: true
+                          vars:
+                            aws.account_type: organization-account
+                            aws.credentials.type: cloud_connector
+                            aws.supports_cloud_connectors: true
+                            external_id:
+                              id: ABCDEFGHIJKLMNOPQRST
+                              isSecretRef: true
+                            role_arn: arn:aws:iam::123456789012:role/TestRole
+                      vars:
+                        cloud_formation_template: https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-ACCOUNT_TYPE-9.2.0.yml
+                    cspm-cloudbeat/cis_azure:
+                      enabled: false
+                    cspm-cloudbeat/cis_gcp:
+                      enabled: false
+                  name: cspm-aws-policy
+                  namespace: default
+                  package:
+                    name: cloud_security_posture
+                    version: 3.1.1
+                  vars:
+                    deployment: aws
+                    posture: cspm
+              updateAgentlessPolicyClearFieldsRequestExample:
+                description: Example showing full-replace clearing semantics. Compared to the prior state, this request omits `description` (clearing it) and provides only the minimal required fields. Any optional field not present in the body (for example, `description`, `vars`, `global_data_tags`, `cloud_connector`) is dropped from the resulting policy.
+                value:
+                  inputs:
+                    ESS Billing-cel:
+                      enabled: true
+                      streams:
+                        ess_billing.billing:
+                          enabled: true
+                        ess_billing.credits:
+                          enabled: true
+                      vars:
+                        api_key: <REPLACE_WITH_YOUR_API_KEY>
+                        organization_id: '1234'
+                  name: ess_billing-1
+                  namespace: default
+                  package:
+                    name: ess_billing
+                    version: 1.6.0
+              updateAgentlessPolicyRequestExample:
+                description: 'Example request to update a managed integration. `PUT` uses full-replace semantics: the policy is rebuilt entirely from this body, so any omitted optional field is cleared or reset to its default rather than preserved. For example, omitting `description` clears it, omitting `vars` or `global_data_tags` removes them, and omitting `cloud_connector` detaches any previously attached connector. Detaching or swapping a cloud connector only removes the reference; the connector itself is not deleted, as connectors have an independent, shareable lifecycle and are managed through the cloud connector API. Two fields are exceptions that cannot be changed using `PUT`: the integration `package.name` is immutable, and the runtime-managed `cluster_id` is preserved from the existing agent policy.'
+                value:
+                  description: updated description
+                  inputs:
+                    ESS Billing-cel:
+                      enabled: true
+                      streams:
+                        ess_billing.billing:
+                          enabled: true
+                          vars:
+                            hide_sensitive: true
+                            http_client_timeout: 30s
+                            lookbehind: 180
+                            tags:
+                              - forwarded
+                              - billing
+                        ess_billing.credits:
+                          enabled: true
+                      vars:
+                        api_key: <REPLACE_WITH_YOUR_API_KEY>
+                        organization_id: '1234'
+                  name: ess_billing-1
+                  namespace: default
+                  package:
+                    name: ess_billing
+                    version: 1.6.0
+              updateAgentlessPolicyReuseAWSCloudConnectorRequestExample:
+                description: Example request to update a managed integration reusing an existing AWS cloud connector by ID instead of creating a new one.
+                value:
+                  cloud_connector:
+                    cloud_connector_id: existing-aws-connector-id
+                    enabled: true
+                    target_csp: aws
+                  description: CSPM integration for AWS reusing existing cloud connector
+                  inputs:
+                    cspm-cloudbeat/cis_aws:
+                      enabled: true
+                      streams:
+                        cloud_security_posture.findings:
+                          enabled: true
+                          vars:
+                            aws.account_type: organization-account
+                            aws.credentials.type: cloud_connector
+                            aws.supports_cloud_connectors: true
+                            external_id:
+                              id: ABCDEFGHIJKLMNOPQRST
+                              isSecretRef: true
+                            role_arn: arn:aws:iam::123456789012:role/TestRole
+                      vars:
+                        cloud_formation_template: https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-ACCOUNT_TYPE-9.2.0.yml
+                    cspm-cloudbeat/cis_azure:
+                      enabled: false
+                    cspm-cloudbeat/cis_gcp:
+                      enabled: false
+                  name: cspm-aws-policy
+                  namespace: default
+                  package:
+                    name: cloud_security_posture
+                    version: 3.1.1
+                  vars:
+                    deployment: aws
+                    posture: cspm
+              updateAgentlessPolicyVersionChangeRequestExample:
+                description: Example request to update a managed integration to a different package version. The package name is immutable, but the version may change.
+                value:
+                  description: bumped to a newer package version
+                  inputs:
+                    ESS Billing-cel:
+                      enabled: true
+                      streams:
+                        ess_billing.billing:
+                          enabled: true
+                        ess_billing.credits:
+                          enabled: false
+                      vars:
+                        api_key: <REPLACE_WITH_YOUR_API_KEY>
+                        organization_id: '1234'
+                  name: ess_billing-1
+                  namespace: default
+                  package:
+                    name: ess_billing
+                    version: 1.7.0
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_create_agentless_policy_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateAgentlessPolicyResponseExample:
+                  description: Example response for updating a managed integration
+                  value:
+                    item:
+                      created_at: '2025-11-06T18:27:43.541Z'
+                      created_by: test_user
+                      description: updated description
+                      id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                      inputs:
+                        ESS Billing-cel:
+                          enabled: true
+                          streams:
+                            ess_billing.billing:
+                              enabled: true
+                              vars:
+                                hide_sensitive: true
+                                http_client_timeout: 30s
+                                lookbehind: 180
+                                tags:
+                                  - forwarded
+                                  - billing
+                            ess_billing.credits:
+                              enabled: true
+                          vars:
+                            api_key:
+                              id: QY1sWpoBbWcMW-edr0Ee
+                              isSecretRef: true
+                            organization_id: '1234'
+                            url: https://billing.elastic-cloud.com
+                      name: ess_billing-1
+                      namespace: default
+                      package:
+                        name: ess_billing
+                        title: Elasticsearch Service Billing
+                        version: 1.6.0
+                      updated_at: '2025-11-07T09:14:02.118Z'
+                      updated_by: test_user
+                updateAgentlessPolicyWithAWSCloudConnectorResponseExample:
+                  description: Example response after attaching an AWS cloud connector on update
+                  value:
+                    item:
+                      cloud_connector:
+                        cloud_connector_id: aws-connector-67890
+                        enabled: true
+                      created_at: '2025-11-06T18:27:43.541Z'
+                      created_by: test_user
+                      description: CSPM integration for AWS with cloud connector
+                      id: aws-policy-12345
+                      inputs:
+                        cspm-cloudbeat/cis_aws:
+                          enabled: true
+                          streams:
+                            cloud_security_posture.findings:
+                              enabled: true
+                              vars:
+                                aws.account_type: organization-account
+                                aws.credentials.type: cloud_connector
+                                external_id:
+                                  id: secret-external-id-123
+                                  isSecretRef: true
+                                role_arn: arn:aws:iam::123456789012:role/TestRole
+                          vars:
+                            cloud_formation_template: https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-ACCOUNT_TYPE-9.2.0.yml
+                        cspm-cloudbeat/cis_azure:
+                          enabled: false
+                        cspm-cloudbeat/cis_gcp:
+                          enabled: false
+                      name: cspm-aws-policy
+                      namespace: default
+                      package:
+                        name: cloud_security_posture
+                        title: Cloud Security Posture Management
+                        version: 3.1.1
+                      updated_at: '2025-11-07T09:14:02.118Z'
+                      updated_by: test_user
+                      vars:
+                        deployment: aws
+                        posture: cspm
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_agentless_policy_response'
+          description: Indicates a successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+                packageNameChangeErrorResponseExample:
+                  description: The integration package name cannot be changed on update
+                  value:
+                    error: Bad Request
+                    message: Cannot change the integration package of an agentless policy (from "ess_billing" to "cloud_security_posture").
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundErrorResponseExample:
+                  description: Example of a not found error response
+                  value:
+                    message: Agentless policy d52a7812-5736-4fdc-aed8-72152afa1ffa not found
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              examples:
+                conflictErrorResponseExample:
+                  description: Example of a name-conflict error response
+                  value:
+                    error: Conflict
+                    message: An integration policy with the name my-agentless-policy already exists. Please rename it or choose a different name.
+                    statusCode: 409
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Conflict — for example, the requested name is already used by another integration policy.
+      summary: Update a managed integration
+      tags:
+        - Fleet managed integrations
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -69745,7 +71108,7 @@ components:
       additionalProperties: false
       properties:
         additional_datastreams_permissions:
-          description: Additional data stream permissions granted to the agentless agent policy.
+          description: Additional data stream permissions granted to the managed integration.
           items:
             maxLength: 256
             type: string
@@ -69764,7 +71127,7 @@ components:
           maxLength: 1024
           type: string
         description:
-          description: Agentless policy description.
+          description: Managed integration description.
           maxLength: 2048
           type: string
         global_data_tags:
@@ -69789,7 +71152,7 @@ components:
           maxItems: 100
           type: array
         id:
-          description: Agentless policy unique identifier.
+          description: Managed integration unique identifier.
           maxLength: 255
           type: string
         inputs:
@@ -69888,7 +71251,7 @@ components:
           description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
           type: object
         name:
-          description: Agentless policy name.
+          description: Managed integration name.
           maxLength: 255
           type: string
         namespace:
@@ -70002,7 +71365,7 @@ components:
           maxLength: 256
           type: string
         policyIds:
-          description: IDs of the agentless policies to preview upgrading.
+          description: IDs of the managed integrations to preview upgrading.
           items:
             maxLength: 256
             type: string
@@ -70047,11 +71410,11 @@ components:
           description: Whether the dry-run migration produced any errors.
           type: boolean
         id:
-          description: The ID of the agentless policy.
+          description: The ID of the managed integration.
           maxLength: 256
           type: string
         name:
-          description: The name of the agentless policy.
+          description: The name of the managed integration.
           maxLength: 256
           type: string
         proposedPolicy:
@@ -71386,7 +72749,7 @@ components:
       additionalProperties: false
       properties:
         policyIds:
-          description: IDs of the agentless policies to upgrade to their installed package version.
+          description: IDs of the managed integrations to upgrade to their installed package version.
           items:
             maxLength: 256
             type: string
@@ -71410,11 +72773,11 @@ components:
           required:
             - message
         id:
-          description: The ID of the agentless policy.
+          description: The ID of the managed integration.
           maxLength: 256
           type: string
         name:
-          description: The name of the agentless policy.
+          description: The name of the managed integration.
           maxLength: 256
           type: string
         statusCode:
@@ -72692,7 +74055,7 @@ components:
         package:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_package'
         policy_template:
-          description: The policy template to use for the agentless package policy. If not provided, the default policy template is used.
+          description: The policy template to use for the managed integration. If not provided, the default policy template is used.
           maxLength: 256
           type: string
         var_group_selections:
@@ -73028,7 +74391,7 @@ components:
           type: array
         supports_agentless:
           deprecated: true
-          description: Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet agentless policies API.
+          description: Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet managed integrations API.
           nullable: true
           type: boolean
         supports_cloud_connector:
@@ -91342,7 +92705,7 @@ components:
           type: array
         supports_agentless:
           deprecated: true
-          description: Indicates whether the agent policy supports agentless integrations. Deprecated in favor of the Fleet agentless policies API.
+          description: Indicates whether the agent policy supports agentless integrations. Deprecated in favor of the Fleet managed integrations API.
           nullable: true
           type: boolean
         unenroll_timeout:
@@ -97126,7 +98489,7 @@ components:
           type: array
         supports_agentless:
           deprecated: true
-          description: Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet agentless policies API.
+          description: Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet managed integrations API.
           nullable: true
           type: boolean
         var_group_selections:
