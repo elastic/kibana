@@ -34,7 +34,6 @@ export async function getDataStreamGlobalRetention({
     const response = await esClient.transport.request<DataStreamLifecycleResponse>({
       method: 'GET',
       path: `/_data_stream/${encodeURIComponent(name)}/_lifecycle`,
-      querystring: { include_defaults: true },
     });
     const { default_retention: defaultRetention, max_retention: maxRetention } =
       response.global_retention ?? {};
