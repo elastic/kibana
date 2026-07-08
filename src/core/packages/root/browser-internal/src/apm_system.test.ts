@@ -158,6 +158,31 @@ describe('ApmSystem', () => {
           'cached-resources': 0,
         });
       });
+
+      it('updates page-load transaction name to /app/{appId} before closing', async () => {
+        const apmSystem = new ApmSystem({ active: true });
+        const currentAppId$ = new Subject<string>();
+        const mockTransaction: MockedKeys<Transaction> = {
+          type: 'page-load',
+          name: '/app/apm/services/my-service/overview',
+          // @ts-expect-error 2345
+          block: jest.fn(),
+          mark: jest.fn(),
+          end: jest.fn(),
+          addLabels: jest.fn(),
+        };
+        apmMock.getCurrentTransaction.mockReturnValue(mockTransaction);
+        await apmSystem.setup();
+        await apmSystem.start({
+          application: {
+            currentAppId$,
+          } as any as InternalApplicationStart,
+          executionContext: executionContextServiceMock.createInternalStartContract(),
+        });
+        currentAppId$.next('apm');
+
+        expect(mockTransaction.name).toBe('/app/apm');
+      });
     });
 
     describe('http request normalization', () => {
@@ -282,6 +307,133 @@ describe('ApmSystem', () => {
             name: 'GET /alpha/beta/',
           } as Transaction)
         ).toEqual({ type: 'http-request', name: 'GET /beta/' });
+      });
+    });
+
+    describe('route-change normalization', () => {
+      const returnArg = <T>(func: (input: T) => any): ((input: T) => T) => {
+        return (input) => {
+          func(input);
+          return input;
+        };
+      };
+
+      it('updates page-load transaction name from execution context when page is available', async () => {
+        const apmSystem = new ApmSystem({ active: true });
+
+        const executionContext = executionContextServiceMock.createInternalStartContract();
+        executionContext.get.mockReturnValue({
+          name: 'apm',
+          page: '/services/:serviceName/overview',
+        });
+
+        await apmSystem.setup();
+        await apmSystem.start({
+          application: {
+            currentAppId$: new Subject<string>(),
+          } as any as InternalApplicationStart,
+          executionContext,
+        });
+
+        const routeChangeObserver = apmMock.observe.mock.calls[1][1];
+        const wrappedObserver = returnArg(routeChangeObserver);
+
+        expect(
+          wrappedObserver({
+            type: 'page-load',
+            name: '/app/apm/services/my-service/overview',
+          } as Transaction)
+        ).toEqual({
+          type: 'page-load',
+          name: 'apm /services/:serviceName/overview',
+        });
+      });
+
+      it('does not modify page-load transaction name when execution context has no page', async () => {
+        const apmSystem = new ApmSystem({ active: true });
+
+        const executionContext = executionContextServiceMock.createInternalStartContract();
+        executionContext.get.mockReturnValue({ name: 'apm' });
+
+        await apmSystem.setup();
+        await apmSystem.start({
+          application: {
+            currentAppId$: new Subject<string>(),
+          } as any as InternalApplicationStart,
+          executionContext,
+        });
+
+        const routeChangeObserver = apmMock.observe.mock.calls[1][1];
+        const wrappedObserver = returnArg(routeChangeObserver);
+
+        expect(
+          wrappedObserver({
+            type: 'page-load',
+            name: '/app/apm',
+          } as Transaction)
+        ).toEqual({
+          type: 'page-load',
+          name: '/app/apm',
+        });
+      });
+
+      it('still updates route-change transaction names from execution context', async () => {
+        const apmSystem = new ApmSystem({ active: true });
+
+        const executionContext = executionContextServiceMock.createInternalStartContract();
+        executionContext.get.mockReturnValue({
+          name: 'security',
+          page: '/rules/:id/edit',
+        });
+
+        await apmSystem.setup();
+        await apmSystem.start({
+          application: {
+            currentAppId$: new Subject<string>(),
+          } as any as InternalApplicationStart,
+          executionContext,
+        });
+
+        const routeChangeObserver = apmMock.observe.mock.calls[1][1];
+        const wrappedObserver = returnArg(routeChangeObserver);
+
+        expect(
+          wrappedObserver({
+            type: 'route-change',
+            name: 'Click - a',
+          } as Transaction)
+        ).toEqual({
+          type: 'route-change',
+          name: 'security /rules/:id/edit',
+        });
+      });
+
+      it('falls back to /app/{appId} for page-load when execution context has no page', async () => {
+        const apmSystem = new ApmSystem({ active: true });
+        const executionContext = executionContextServiceMock.createInternalStartContract();
+        executionContext.get.mockReturnValue({ name: 'apm' });
+
+        const currentAppId$ = new Subject<string>();
+        const mockTransaction: MockedKeys<Transaction> = {
+          type: 'page-load',
+          name: '/app/apm/services/my-service/overview',
+          // @ts-expect-error 2345
+          block: jest.fn(),
+          mark: jest.fn(),
+          end: jest.fn(),
+          addLabels: jest.fn(),
+        };
+        apmMock.getCurrentTransaction.mockReturnValue(mockTransaction);
+        await apmSystem.setup();
+        await apmSystem.start({
+          application: {
+            currentAppId$,
+          } as any as InternalApplicationStart,
+          executionContext,
+        });
+        currentAppId$.next('apm');
+
+        expect(mockTransaction.name).toBe('/app/apm');
       });
     });
 
