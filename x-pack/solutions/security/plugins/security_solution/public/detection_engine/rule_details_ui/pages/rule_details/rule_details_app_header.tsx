@@ -22,6 +22,7 @@ import {
   useRuleActionsMenuItems,
   type UseRuleActionsMenuItemsParams,
 } from './rule_actions_overflow/use_rule_actions_menu_items';
+import { useMlJobsSettingsMenu } from '../../../rule_management_ui/components/rules_table/use_ml_jobs_settings_menu';
 
 interface RuleDetailsAppHeaderProps {
   title: string;
@@ -54,26 +55,35 @@ export const RuleDetailsAppHeader = React.memo<RuleDetailsAppHeaderProps>(
     actionsParams,
   }) => {
     const actionsMenuItems = useRuleActionsMenuItems(actionsParams);
+    const { menuItem: mlJobSettingsMenuItem, popover: mlJobSettingsPopover } =
+      useMlJobsSettingsMenu();
 
     const menu = useMemo<AppMenuConfig>(
       () => ({
         switch: switchConfig,
         primaryActionItem,
-        items: [...staticItems, ...actionsMenuItems],
+        items: [
+          ...staticItems,
+          ...(mlJobSettingsMenuItem ? [mlJobSettingsMenuItem] : []),
+          ...actionsMenuItems,
+        ],
       }),
-      [switchConfig, primaryActionItem, staticItems, actionsMenuItems]
+      [switchConfig, primaryActionItem, staticItems, mlJobSettingsMenuItem, actionsMenuItems]
     );
 
     return (
-      <AppHeader
-        title={title}
-        back={back}
-        badges={badges}
-        metadata={metadata}
-        tabs={tabs}
-        menu={menu}
-        padding={{ bleed: 'l' }}
-      />
+      <>
+        <AppHeader
+          title={title}
+          back={back}
+          badges={badges}
+          metadata={metadata}
+          tabs={tabs}
+          menu={menu}
+          padding={{ bleed: 'l' }}
+        />
+        {mlJobSettingsPopover}
+      </>
     );
   }
 );

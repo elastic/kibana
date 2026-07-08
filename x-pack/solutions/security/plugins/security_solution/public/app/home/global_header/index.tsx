@@ -19,7 +19,12 @@ import { PageScope } from '../../../data_view_manager/constants';
 import { SECURITY_FEATURE_ID } from '../../../../common';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
-import { isDashboardViewPath, isDetectionsPath, isRuleChangesHistoryPath } from '../../../helpers';
+import {
+  isDashboardViewPath,
+  isDetectionsPath,
+  isRuleChangesHistoryPath,
+  isRulesPath,
+} from '../../../helpers';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { timelineSelectors } from '../../../timelines/store';
@@ -52,6 +57,10 @@ export const GlobalHeader = React.memo(() => {
   const canAddData = canReadFleet && !hasSearchAILakeConfigurations;
   const { pathname } = useLocation();
 
+  // The rules page renders its own inline app header (ML job settings, Add integrations), so the
+  // global header versions are hidden there to avoid duplication.
+  const isRulesPage = isRulesPath(pathname);
+
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const showTimeline = useShallowEqualSelector(
     (state) => (getTimeline(state, TimelineId.active) ?? timelineDefaults).show
@@ -64,12 +73,18 @@ export const GlobalHeader = React.memo(() => {
 
   const { href, onClick } = useAddIntegrationsUrl();
 
+  const showMlPopover = isDetectionsPath(pathname) && !isRulesPage;
+  const showAddData = canAddData && !isRulesPage;
+  const showDataViewPickerButton = showDataViewPicker && !showTimeline;
+  // Avoid mounting an empty global header action menu bar when there is nothing to render.
+  const hasGlobalHeaderContent = showMlPopover || showAddData || showDataViewPickerButton;
+
   useEffect(() => {
     if (!setHeaderActionMenu) {
       return;
     }
 
-    if (changesHistoryPath) {
+    if (changesHistoryPath || !hasGlobalHeaderContent) {
       setHeaderActionMenu(undefined);
       return;
     }
@@ -97,12 +112,13 @@ export const GlobalHeader = React.memo(() => {
     kibanaServiceI18n,
     dashboardViewPath,
     changesHistoryPath,
+    hasGlobalHeaderContent,
   ]);
 
   return (
     <InPortal node={portalNode}>
       <EuiHeaderSection side="right">
-        {isDetectionsPath(pathname) && (
+        {showMlPopover && (
           <EuiHeaderSectionItem>
             <MlPopover />
           </EuiHeaderSectionItem>
@@ -110,7 +126,7 @@ export const GlobalHeader = React.memo(() => {
 
         <EuiHeaderSectionItem>
           <EuiHeaderLinks>
-            {canAddData && (
+            {showAddData && (
               <EuiHeaderLink
                 color="primary"
                 data-test-subj="add-data"
@@ -121,7 +137,7 @@ export const GlobalHeader = React.memo(() => {
                 {BUTTON_ADD_DATA}
               </EuiHeaderLink>
             )}
-            {showDataViewPicker && !showTimeline && (
+            {showDataViewPickerButton && (
               <DataViewPicker scope={pageScope} disabled={pageScope === PageScope.alerts} />
             )}
           </EuiHeaderLinks>

@@ -189,6 +189,13 @@ export const isRuleChangesHistoryPath = (pathname: string): boolean =>
     strict: false,
   });
 
+export const isRulesPath = (pathname: string): boolean => {
+  return !!matchPath(pathname, {
+    path: `${RULES_PATH}`,
+    strict: false,
+  });
+};
+
 const isAlertsPath = (pathname: string): boolean => {
   return !!matchPath(pathname, {
     path: `${ALERTS_PATH}`,
