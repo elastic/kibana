@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
+import { asyncMapWithLimit } from '@kbn/std';
 
-import { pipe } from 'fp-ts/pipeable';
-import { fold } from 'fp-ts/Either';
-import { identity } from 'fp-ts/function';
-import { schema } from '@kbn/config-schema';
-import { throwErrors } from '@kbn/io-ts-utils';
+import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import type { InfraBackendLibs } from '../../../lib/infra_types';
 
 import { logAnalysisValidationV1 } from '../../../../common/http_api';
 
-const escapeHatch = schema.object({}, { unknowns: 'allow' });
+// Bound the number of concurrent field_caps requests fanned out per request.
+const MAX_CONCURRENT_INDEX_QUERIES = 10;
 
 export const initValidateLogAnalysisIndicesRoute = ({ framework }: InfraBackendLibs) => {
   framework
@@ -28,61 +25,67 @@ export const initValidateLogAnalysisIndicesRoute = ({ framework }: InfraBackendL
     .addVersion(
       {
         version: '1',
-        validate: { request: { body: escapeHatch } },
+        validate: {
+          request: {
+            body: createRouteValidationFunction(
+              logAnalysisValidationV1.validationIndicesRequestPayloadRT
+            ),
+          },
+        },
       },
       async (requestContext, request, response) => {
-        const payload = pipe(
-          logAnalysisValidationV1.validationIndicesRequestPayloadRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
+        const {
+          data: { fields, indices, runtimeMappings },
+        } = request.body;
 
-        const { fields, indices, runtimeMappings } = payload.data;
         const errors: logAnalysisValidationV1.ValidationIndicesError[] = [];
 
+        // Deduplicate the user-provided indices and fields to avoid redundant queries.
+        const uniqueIndices = [...new Set(indices)];
+        const uniqueFields = [...new Map(fields.map((field) => [field.name, field])).values()];
+
         // Query each pattern individually, to map correctly the errors
-        await Promise.all(
-          indices.map(async (index) => {
-            const fieldCaps = await (
-              await requestContext.core
-            ).elasticsearch.client.asCurrentUser.fieldCaps({
-              allow_no_indices: true,
-              fields: fields.map((field) => field.name),
-              ignore_unavailable: true,
+        await asyncMapWithLimit(uniqueIndices, MAX_CONCURRENT_INDEX_QUERIES, async (index) => {
+          const fieldCaps = await (
+            await requestContext.core
+          ).elasticsearch.client.asCurrentUser.fieldCaps({
+            allow_no_indices: true,
+            fields: uniqueFields.map((field) => field.name),
+            ignore_unavailable: true,
+            index,
+            runtime_mappings: runtimeMappings,
+          });
+
+          if (fieldCaps.indices.length === 0) {
+            errors.push({
+              error: 'INDEX_NOT_FOUND',
               index,
-              runtime_mappings: runtimeMappings,
             });
+            return;
+          }
 
-            if (fieldCaps.indices.length === 0) {
+          uniqueFields.forEach(({ name: fieldName, validTypes }) => {
+            const fieldMetadata = fieldCaps.fields[fieldName];
+
+            if (fieldMetadata === undefined) {
               errors.push({
-                error: 'INDEX_NOT_FOUND',
+                error: 'FIELD_NOT_FOUND',
                 index,
+                field: fieldName,
               });
-              return;
-            }
+            } else {
+              const fieldTypes = Object.keys(fieldMetadata);
 
-            fields.forEach(({ name: fieldName, validTypes }) => {
-              const fieldMetadata = fieldCaps.fields[fieldName];
-
-              if (fieldMetadata === undefined) {
+              if (!fieldTypes.every((fieldType) => validTypes.includes(fieldType))) {
                 errors.push({
-                  error: 'FIELD_NOT_FOUND',
+                  error: `FIELD_NOT_VALID`,
                   index,
                   field: fieldName,
                 });
-              } else {
-                const fieldTypes = Object.keys(fieldMetadata);
-
-                if (!fieldTypes.every((fieldType) => validTypes.includes(fieldType))) {
-                  errors.push({
-                    error: `FIELD_NOT_VALID`,
-                    index,
-                    field: fieldName,
-                  });
-                }
               }
-            });
-          })
-        );
+            }
+          });
+        });
 
         return response.ok({
           body: logAnalysisValidationV1.validationIndicesResponsePayloadRT.encode({
