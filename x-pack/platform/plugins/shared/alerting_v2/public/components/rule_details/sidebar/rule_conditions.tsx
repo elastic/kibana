@@ -144,7 +144,7 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
             title: i18n.translate('xpack.alertingV2.ruleDetails.noDataBehavior', {
               defaultMessage: 'No data behavior',
             }),
-            description: formatNoDataStrategy(rule.no_data_strategy),
+            description: formatNoDataStrategy(rule.no_data_strategy ?? 'none'),
             'data-test-subj': 'alertingV2RuleDetailsNoDataStrategy',
           },
         ]

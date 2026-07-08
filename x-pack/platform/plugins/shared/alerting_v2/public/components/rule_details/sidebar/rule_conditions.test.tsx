@@ -87,7 +87,9 @@ describe('RuleConditions', () => {
       'After 3 matches or 5m'
     );
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('-');
-    expect(screen.getByTestId('alertingV2RuleDetailsNoDataStrategy')).toHaveTextContent('-');
+    expect(screen.getByTestId('alertingV2RuleDetailsNoDataStrategy')).toHaveTextContent(
+      'Do nothing'
+    );
   });
 
   it('renders Custom recovery with the recovery condition snippet in its own row when recovery_strategy is query', () => {
