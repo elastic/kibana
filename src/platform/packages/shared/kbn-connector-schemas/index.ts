@@ -37,5 +37,6 @@ export { CONNECTOR_ID as TheHiveConnectorTypeId } from './thehive';
 export { CONNECTOR_ID as TinesConnectorTypeId } from './tines';
 export { CONNECTOR_ID as TorqConnectorTypeId } from './torq';
 export { CONNECTOR_ID as WebhookConnectorTypeId } from './webhook';
+export { CONNECTOR_ID as WorkdayConnectorTypeId } from './workday';
 export { CONNECTOR_ID as XmattersConnectorTypeId } from './xmatters';
 export { CONNECTOR_ID as XsoarConnectorTypeId } from './xsoar';
