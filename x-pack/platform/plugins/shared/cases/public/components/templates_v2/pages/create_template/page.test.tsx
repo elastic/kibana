@@ -53,7 +53,7 @@ describe('CreateTemplatePage', () => {
     mockMutateAsync.mockResolvedValue(undefined);
   });
 
-  it('renders the layout with header and sections', () => {
+  it('renders the layout with header and sections', async () => {
     render(
       <TestProviders>
         <CreateTemplatePage />
@@ -65,7 +65,9 @@ describe('CreateTemplatePage', () => {
       'aria-label',
       `Back to ${i18n.TEMPLATE_TITLE}`
     );
-    expect(screen.getByTestId('saveTemplateHeaderButton')).toBeInTheDocument();
+    // AppMenu resolves its contents via a dynamic import, so the save button isn't available
+    // in the very first render tick.
+    expect(await screen.findByTestId('saveTemplateHeaderButton')).toBeInTheDocument();
     expect(screen.getByTestId('template-yaml-editor')).toBeInTheDocument();
     expect(screen.getByTestId('create-template-preview')).toBeInTheDocument();
   });
