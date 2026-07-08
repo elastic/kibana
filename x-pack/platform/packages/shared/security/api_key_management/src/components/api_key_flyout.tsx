@@ -1235,4 +1235,3 @@ function mapApiKeyFormValues(apiKey: CategorizedApiKey): ApiKeyFormValues {
     certificateIdentity,
   };
 }
-

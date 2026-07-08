@@ -206,6 +206,7 @@ const enhanceDataStreams = ({
         read_failure_store: dataStreamsPrivileges
           ? dataStreamsPrivileges.index[dataStream.name].read_failure_store
           : true,
+        manage: dataStreamsPrivileges ? dataStreamsPrivileges.index[dataStream.name].manage : true,
       },
     };
 
@@ -269,7 +270,12 @@ const getDataStreamsPrivileges = (client: IScopedClusterClient, names: string[])
     index: [
       {
         names,
-        privileges: ['delete_index', 'manage_data_stream_lifecycle', 'read_failure_store'],
+        privileges: [
+          'delete_index',
+          'manage_data_stream_lifecycle',
+          'read_failure_store',
+          'manage',
+        ],
       },
     ],
   });

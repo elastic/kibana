@@ -107,5 +107,4 @@ describe('mapUpdateApiKeyValues', () => {
 
     expect(result.certificate_identity).toBeUndefined();
   });
-
 });
