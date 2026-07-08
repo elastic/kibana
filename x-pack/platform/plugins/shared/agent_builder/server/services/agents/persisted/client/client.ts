@@ -52,7 +52,6 @@ import { runSkillRefCleanup } from '../skill_reference_cleanup';
 import { runToolRefCleanup } from '../tool_reference_cleanup';
 import { runPluginRefCleanup } from '../plugin_reference_cleanup';
 import {
-  buildReadAccessFilter,
   getAgentPermissions,
   hasDeleteAccess,
   hasManageAccessControlAccess,
@@ -62,8 +61,9 @@ import {
   normalizeAccessControl,
   redactAccessControlForCaller,
   validateAccessControlUpdateAccess,
-} from '../../access_control/persisted';
-import { validateAccessControlUpdate } from '../../access_control/update_validation';
+  buildReadAccessFilter,
+  validateAccessControlUpdate,
+} from '../../access_control';
 import { hasRequiredDocumentFields } from './utils/helper';
 
 export interface GetAgentAccessControlResult {
@@ -88,6 +88,7 @@ export interface AgentClient {
     agentId: string,
     profile: AgentUpdateRequest
   ): Promise<PersistedAgentDefinitionWithPermissions>;
+  getIds(options?: AgentListOptions): Promise<string[]>;
   list(options?: AgentListOptions): Promise<PersistedAgentDefinitionWithPermissions[]>;
   delete(options: AgentDeleteRequest): Promise<boolean>;
   getAccessControl(agentId: string): Promise<GetAgentAccessControlResult>;
@@ -263,11 +264,27 @@ class AgentClientImpl implements AgentClient {
     }
   }
 
+  async getIds(options: AgentListOptions = {}): Promise<string[]> {
+    const filters = this.getListFilters();
+
+    const response = await this.storage.getClient().search({
+      track_total_hits: false,
+      size: 1000,
+      _source: ['id'],
+      query: {
+        bool: {
+          filter: filters,
+        },
+      },
+    });
+
+    return response.hits.hits
+      .map((hit) => hit._source?.id ?? hit._id)
+      .filter((id): id is string => typeof id === 'string');
+  }
+
   async list(options: AgentListOptions = {}): Promise<PersistedAgentDefinitionWithPermissions[]> {
-    const filters = [createSpaceDslFilter(this.space)];
-    if (!this.isAdmin) {
-      filters.push(buildReadAccessFilter({ user: this.user }));
-    }
+    const filters = this.getListFilters();
 
     const response = await this.storage.getClient().search({
       track_total_hits: false,
@@ -283,6 +300,15 @@ class AgentClientImpl implements AgentClient {
       const document = hit as Document;
       return this.toResponseAgent(document as Required<Document>);
     });
+  }
+
+  private getListFilters() {
+    const filters = [createSpaceDslFilter(this.space)];
+    if (!this.isAdmin) {
+      filters.push(buildReadAccessFilter({ user: this.user }));
+    }
+
+    return filters;
   }
 
   async create(profile: AgentCreateRequest): Promise<PersistedAgentDefinitionWithPermissions> {

@@ -8,17 +8,14 @@
 import React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { isEqual, omit, pick } from 'lodash';
+import { isEqual, pick } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 
 import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-language';
 
-import {
-  formatInputs,
-  formatVars,
-} from '../../../../../../../../common/services/simplified_package_policy_helper';
+import { toNewAgentlessPolicy } from '../../../../../../../../common/services';
 
 import { sendCreateAgentlessPolicy } from '../../../../../../../hooks/use_request/agentless_policy';
 
@@ -153,59 +150,20 @@ export const createAgentPolicyIfNeeded = async ({
 
 async function savePackagePolicy(
   pkgPolicy: CreatePackagePolicyRequest['body'],
-  varGroups?: RegistryVarGroup[]
+  varGroups?: RegistryVarGroup[],
+  packageInfo?: PackageInfo
 ): Promise<SavedPolicyResult> {
   const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(pkgPolicy);
 
   // If agentless use agentless policies API
   if (policy.supports_agentless) {
-    function formatPackage(pkg: NewPackagePolicy['package']) {
-      return omit(pkg, 'title');
-    }
-
-    // Detect target cloud provider from var_groups or inputs
-    const targetCsp = detectTargetCsp(pkgPolicy as NewPackagePolicy, varGroups);
-
-    // TODO: Replace this omit-based approach with a pick-based toNewAgentlessPolicy()
-    // mapper that produces a NewAgentlessPolicy directly.
-    const agentlessRequestBody = {
-      package: formatPackage(pkgPolicy.package),
-      ...omit(
-        pkgPolicy,
-        'policy_ids',
-        'policy_id',
-        'package',
-        'enabled',
-        'inputs',
-        'vars',
-        'id',
-        'condition',
-        'supports_agentless',
-        'supports_cloud_connector',
-        'cloud_connector_id',
-        'cloud_connector_name'
-      ),
-      id: pkgPolicy.id ? String(pkgPolicy.id) : undefined,
-      inputs: formatInputs(pkgPolicy.inputs),
-      vars: formatVars(pkgPolicy.vars),
-      // Build cloud_connector object if cloud connectors are supported
-      ...(pkgPolicy.supports_cloud_connector && {
-        cloud_connector: {
-          enabled: true,
-          // Include target_csp if detected (required for var_groups packages)
-          ...(targetCsp && { target_csp: targetCsp }),
-          ...(pkgPolicy.cloud_connector_id && {
-            cloud_connector_id: pkgPolicy.cloud_connector_id,
-          }),
-          // Only pass the name if creating a new connector (no cloud_connector_id)
-          ...(!pkgPolicy.cloud_connector_id &&
-            pkgPolicy.cloud_connector_name && {
-              name: pkgPolicy.cloud_connector_name,
-            }),
-        },
-      }),
-    };
-
+    // Pass `packageInfo` so the create write applies the same template-aware input allow-check as the
+    // edit read path (`agentlessPolicyToPackagePolicy`), keeping create → GET → form → PUT idempotent.
+    const agentlessRequestBody = toNewAgentlessPolicy(
+      pkgPolicy as NewPackagePolicy,
+      varGroups,
+      packageInfo
+    );
     const { item } = await sendCreateAgentlessPolicy(agentlessRequestBody);
     return { type: 'agentless', policy: item };
   }
@@ -460,7 +418,9 @@ export function useOnSubmit({
               'overrides',
               'supports_agentless',
               'supports_cloud_connector',
-              'additional_datastreams_permissions'
+              'additional_datastreams_permissions',
+              'global_data_tags',
+              'var_group_selections'
             )
           );
         }
@@ -755,7 +715,8 @@ export function useOnSubmit({
             force: forceInstall,
             create_dataset_templates: createDatasetTemplates,
           },
-          varGroups
+          varGroups,
+          packageInfo
         );
 
         if (savedPolicyResult.policy.package) {

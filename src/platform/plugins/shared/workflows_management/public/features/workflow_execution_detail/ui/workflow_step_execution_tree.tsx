@@ -68,6 +68,9 @@ function convertTreeToEuiTreeViewItems(
     const selected = selectedId === stepExecution?.id;
 
     const stepId = stepExecution?.stepId ?? item.stepId;
+    // Prefer a resolved display label (e.g. a static parallel branch name) over
+    // the raw stepId, which for parallel/foreach scope nodes is the bare index.
+    const displayLabel = item.displayLabel ?? stepId;
     const stepType = stepExecution?.stepType ?? item.stepType;
 
     // Check if this is a skeleton step (not yet received from server) or a loading placeholder
@@ -120,7 +123,7 @@ function convertTreeToEuiTreeViewItems(
       ),
       label: (
         <StepExecutionTreeItemLabel
-          stepId={stepId}
+          stepId={displayLabel}
           selected={selected}
           status={status}
           executionTimeMs={stepExecution?.executionTimeMs ?? null}
@@ -287,16 +290,15 @@ export const WorkflowStepExecutionTree = ({
       stepExecutionMap.set('__overview', executionOverview);
     }
 
-    const triggerPseudoStep =
+    const triggerTreeItem =
       stepExecutionsTree.find((item) => item.stepType === '__trigger') ??
       stepExecutionsTree.find((item) => item.stepType === '__inputs');
-
-    if (triggerPseudoStep && execution.context) {
+    if (triggerTreeItem && execution.context) {
       const triggerExecution = buildTriggerStepExecutionFromContext(execution);
       if (triggerExecution) {
         stepExecutionMap.set(triggerExecution.id, triggerExecution);
-        triggerPseudoStep.stepExecutionId = triggerExecution.id;
-        triggerPseudoStep.stepType = triggerExecution.stepType ?? '';
+        triggerTreeItem.stepExecutionId = triggerExecution.id;
+        triggerTreeItem.stepType = triggerExecution.stepType ?? '';
       }
     }
     const items: EuiTreeViewProps['items'] = convertTreeToEuiTreeViewItems(
