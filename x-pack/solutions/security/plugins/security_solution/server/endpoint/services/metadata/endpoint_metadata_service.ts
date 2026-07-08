@@ -378,7 +378,7 @@ export class EndpointMetadataService {
 
     let unitedMetadataQueryResponse: SearchResponse<UnitedAgentMetadataPersistedData>;
 
-    logger.debug(() => `Executing query: ${stringify(unitedIndexQuery)}`);
+    logger.debug(() => `Executing query: ${stringify(unitedIndexQuery, 15)}`);
 
     try {
       unitedMetadataQueryResponse = await this.esClient.search<UnitedAgentMetadataPersistedData>(

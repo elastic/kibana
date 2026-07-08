@@ -32,20 +32,6 @@ export function buildBaseEndpointMetadataFilter(policyIds?: string[]): QueryDslQ
 
   // Only include policy filter if policyIds are explicitly provided
   if (policyIds) {
-    // FIXME:PT DO NOT COMMIT THIS. Cleanup needed
-    // https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-wildcard-query
-    // {
-    //   "query": {
-    //     "wildcard": {
-    //       "user.id": {
-    //         "value": "ki*y",
-    //         "boost": 1.0,
-    //         "rewrite": "constant_score_blended"
-    //       }
-    //     }
-    //   }
-    // }
-
     baseFilters.push({
       bool: {
         should: [
@@ -59,10 +45,6 @@ export function buildBaseEndpointMetadataFilter(policyIds?: string[]): QueryDslQ
         minimum_should_match: 1,
       },
     });
-
-    // baseFilters.push({
-    //   terms: { 'united.agent.policy_id': uniq(policyIds) },
-    // });
   }
 
   const filterEndpointPolicyAgents = {
