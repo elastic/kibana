@@ -12,8 +12,6 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/inference-common",
     "@kbn/core",
-    "@kbn/utility-types",
-    "@kbn/actions-plugin"
   ],
   "exclude": [
     "target/**/*"

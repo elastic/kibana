@@ -304,7 +304,5 @@
     "@kbn/workflows-management-plugin",
     "@kbn/core-application-browser-mocks",
     "@kbn/date-range-picker",
-    "@kbn/discoveries-schemas",
-    "@kbn/esql-types"
   ]
 }
