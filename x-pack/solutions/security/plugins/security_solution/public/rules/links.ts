@@ -5,14 +5,20 @@
  * 2.0.
  */
 
+import { createElement } from 'react';
+import type { EuiIconProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   EXCEPTIONS_UI_READ_PRIVILEGES,
   RULES_UI_DETECTIONS_PRIVILEGE,
+  RULES_UI_EDIT_PRIVILEGE,
   RULES_UI_READ_PRIVILEGE,
   SECURITY_UI_SHOW_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
+import { AiIcon } from '@kbn/shared-ux-ai-components';
+import { WORKFLOWS_MANAGEMENT_FEATURE_ID, WorkflowsManagementUiActions } from '@kbn/workflows';
 import {
+  ALERT_ANALYSIS_WORKFLOW_PATH,
   COVERAGE_OVERVIEW_PATH,
   DE_SPACE_RULES_HEALTH_PATH,
   EXCEPTIONS_PATH,
@@ -23,6 +29,7 @@ import {
 } from '../../common/constants';
 import {
   ADD_RULES,
+  ALERT_ANALYSIS_WORKFLOW,
   COVERAGE_OVERVIEW,
   CREATE_NEW_RULE,
   DE_SPACE_RULES_HEALTH,
@@ -36,6 +43,8 @@ import type { LinkItem } from '../common/links';
 import { IconConsoleCloud } from '../common/icons/console_cloud';
 import { IconRollup } from '../common/icons/rollup';
 import { IconDashboards } from '../common/icons/dashboards';
+
+const WORKFLOWS_MANAGEMENT_UPDATE_PRIVILEGE = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}.${WorkflowsManagementUiActions.update}`;
 
 export const links: LinkItem = {
   id: SecurityPageName.rulesLanding,
@@ -103,6 +112,25 @@ export const links: LinkItem = {
         }),
       ],
     },
+    {
+      id: SecurityPageName.alertAnalysisWorkflow,
+      title: ALERT_ANALYSIS_WORKFLOW,
+      description: i18n.translate(
+        'xpack.securitySolution.appLinks.alertAnalysisWorkflowDescription',
+        {
+          defaultMessage:
+            'Configure the managed alert analysis workflow that automatically classifies and closes false positive alerts.',
+        }
+      ),
+      landingIcon: (props: Omit<EuiIconProps, 'type'>) =>
+        createElement(AiIcon, { iconType: 'sparkles', ...props }),
+      path: ALERT_ANALYSIS_WORKFLOW_PATH,
+      capabilities: [
+        [RULES_UI_READ_PRIVILEGE, RULES_UI_EDIT_PRIVILEGE, WORKFLOWS_MANAGEMENT_UPDATE_PRIVILEGE],
+      ],
+      skipUrlState: true,
+      hideTimeline: true,
+    },
     benchmarksLink,
     {
       id: SecurityPageName.coverageOverview,
@@ -132,6 +160,7 @@ export const links: LinkItem = {
         SecurityPageName.rules,
         SecurityPageName.cloudSecurityPostureBenchmarks,
         SecurityPageName.exceptions,
+        SecurityPageName.alertAnalysisWorkflow,
       ],
     },
     {

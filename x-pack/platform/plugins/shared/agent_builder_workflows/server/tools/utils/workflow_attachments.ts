@@ -63,6 +63,7 @@ export const emitWorkflowDiff = async (
     const created = await context.attachments.add({
       type: WORKFLOW_YAML_ATTACHMENT_TYPE,
       data: attachmentData,
+      description: input.name ?? 'Workflow',
     });
     attachmentId = created.id;
     attachmentVersion = created.current_version;

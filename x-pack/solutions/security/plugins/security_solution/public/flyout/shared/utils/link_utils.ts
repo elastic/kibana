@@ -7,7 +7,7 @@
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
-import { getEcsField } from '../../document_details/right/components/table_field_name_cell';
+import { getEcsField } from '../../../flyout_v2/shared/components/table_field_name_cell';
 import {
   HOST_ENTITY_ID_FIELD_NAME,
   HOST_NAME_FIELD_NAME,

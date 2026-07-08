@@ -74,6 +74,19 @@ export const InputSchema = z.object({
     .string()
     .optional()
     .describe('Optional existing conversation ID to continue a previous conversation.'),
+  /**
+   * Optional arbitrary key-value tags stored with the underlying agent execution, searchable
+   * via the execution service's findExecutions. Lets a caller that doesn't yet know the
+   * execution's (auto-generated) id look it up by a tag it does know — e.g. the workflow
+   * execution id — to follow the agent's live event stream (tool calls, reasoning, custom UI
+   * events) while this step is still running, instead of waiting for the step to complete.
+   */
+  metadata: z
+    .record(z.string().max(512), z.string().max(1024))
+    .optional()
+    .describe(
+      'Optional key-value tags stored with the underlying agent execution and searchable via findExecutions. Callers that need to discover the execution id before this step completes (e.g. to follow it live) can tag it with a value they already know and look it up by that tag.'
+    ),
 });
 
 /**
@@ -98,8 +111,17 @@ export const OutputSchema = z.object({
   metadata: z
     .object({
       usage: z.object({
+        connectorId: z
+          .string()
+          .max(512)
+          .optional()
+          .describe('Id of the LLM connector used for this step, when reported by the model.'),
         inputTokens: z.number().describe('Total input tokens consumed across all LLM rounds.'),
         outputTokens: z.number().describe('Total output tokens produced across all LLM rounds.'),
+        cachedTokens: z
+          .number()
+          .optional()
+          .describe('Cached input tokens reused across all LLM rounds. Subset of inputTokens.'),
         totalTokens: z.number().describe('Sum of input and output tokens across all LLM rounds.'),
       }),
     })
@@ -321,6 +343,22 @@ When a schema is provided, the agent's response will be available in \`output.st
         - sentiment
         - confidence
 \`\`\``,
+
+      `## Follow the agent execution live while the step is still running
+\`\`\`yaml
+- name: investigate
+  type: ${RunAgentStepTypeId}
+  agent-id: "my-custom-agent"
+  with:
+    metadata:
+      workflow_execution_id: "{{ execution.id }}"
+    message: "Investigate the root cause of the issue."
+\`\`\`
+
+Tagging the execution with a value the caller already knows (such as the workflow execution id)
+lets the caller look up the agent execution's (auto-generated) id via the execution service's
+findExecutions, then follow its live event stream — tool calls, reasoning, and custom UI events —
+before this step returns.`,
     ],
   },
   inputSchema: InputSchema,
