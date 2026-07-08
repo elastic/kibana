@@ -466,6 +466,28 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     });
   });
 
+  describe('metadata', () => {
+    it('forwards input.metadata to executeAgent', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = createExecutionMock(events$);
+      const serviceManager = { internalStart: { execution } } as any;
+      const step = getRunAgentStepDefinition(serviceManager);
+
+      await step.handler(
+        createContext({
+          input: { message: 'hello', metadata: { workflow_execution_id: 'wf-exec-1' } },
+        })
+      );
+
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({ metadata: { workflow_execution_id: 'wf-exec-1' } })
+      );
+    });
+  });
+
   describe('token usage', () => {
     it('includes usage in output from a single round with model_usage', async () => {
       const events$ = of({
