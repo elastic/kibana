@@ -238,7 +238,12 @@ export const useTemplateFormSync = (
     // Do NOT set appliedRef.current yet — the effect must re-run once both are available.
     if (isLoadingFieldDefs || isLoadingConnectors) return;
 
-    syncTemplateConnector(definition.connector, connectors, updateFieldValues, didApplyConnectorRef);
+    syncTemplateConnector(
+      definition.connector,
+      connectors,
+      updateFieldValues,
+      didApplyConnectorRef
+    );
 
     // Resolve all fields — inline fields pass through, ref fields are looked up in the library
     const libraryDefs = fieldDefsData?.fieldDefinitions ?? [];
