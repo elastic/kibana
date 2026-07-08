@@ -6,12 +6,12 @@
  */
 
 import React, { useMemo, useRef } from 'react';
+import type { RefObject } from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
 import { editDataLifecycleFlyoutStrings as strings } from './strings';
 import type { DataLifecycleMethod, IlmPolicyForFlyout } from './types';
 import { getIlmPolicySummaryStats } from './ilm_policy_summary_stats';
 import { EditDataLifecycleFlyoutBodyContent } from './edit_data_lifecycle_flyout_body_content';
-import { editDataLifecycleFlyoutBodyStyles as styles } from './styles';
 
 const EMPTY_ILM_POLICIES: IlmPolicyForFlyout[] = [];
 
@@ -126,13 +126,14 @@ export const EditDataLifecycleFlyoutBody = (props: EditDataLifecycleFlyoutBodyPr
     return sortedRetentionOptions.filter((option) => option.name === selectedIlmPolicyName);
   }, [inheritLifecycle, sortedRetentionOptions, selectedIlmPolicyName]);
 
+  const flyoutScrollContainerRef = useRef<HTMLDivElement>(null);
+  const flyoutScrollContainerRefForContent: RefObject<HTMLElement | null> | undefined =
+    showLifecycleMethodPicker ? flyoutScrollContainerRef : undefined;
+
   return (
-    <EuiFlyoutBody
-      css={
-        lifecycleMethod === 'ilm' && showLifecycleMethodPicker ? styles.overflowHidden : undefined
-      }
-    >
+    <EuiFlyoutBody scrollContainerRef={flyoutScrollContainerRef}>
       <EditDataLifecycleFlyoutBodyContent
+        flyoutScrollContainerRef={flyoutScrollContainerRefForContent}
         inheritLifecycle={inheritLifecycle}
         lifecycleMethod={lifecycleMethod}
         showLifecycleMethodPicker={showLifecycleMethodPicker}
