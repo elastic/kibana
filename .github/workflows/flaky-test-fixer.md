@@ -124,8 +124,9 @@ safe-outputs:
           required: true
           type: boolean
       env:
-        # The URL of the fix PR that safe_outputs just created (the link to add).
+        # The URL and number of the fix PR that safe_outputs just created.
         GH_AW_PR_URL: ${{ needs.safe_outputs.outputs.created_pr_url }}
+        GH_AW_PR_NUMBER: ${{ needs.safe_outputs.outputs.created_pr_number }}
         # The id of the outcome comment safe_outputs just posted (which comment to edit).
         GH_AW_COMMENT_ID: ${{ needs.safe_outputs.outputs.comment_id }}
       steps:
@@ -135,17 +136,12 @@ safe-outputs:
             github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
             script: |
               const prUrl = process.env.GH_AW_PR_URL;
+              const prNumber = process.env.GH_AW_PR_NUMBER;
               const commentId = Number(process.env.GH_AW_COMMENT_ID);
-              if (!prUrl || !Number.isInteger(commentId)) {
-                core.info('Missing PR URL or comment id; nothing to do.');
+              if (!prUrl || !prNumber || !Number.isInteger(commentId)) {
+                core.info('Missing PR URL, PR number, or comment id; nothing to do.');
                 return;
               }
-              const prNumberMatch = prUrl.match(/\/pull\/(\d+)/);
-              if (!prNumberMatch) {
-                core.info(`Could not parse a PR number from ${prUrl}; nothing to do.`);
-                return;
-              }
-              const prNumber = prNumberMatch[1];
               const { owner, repo } = context.repo;
               const { data: comment } = await github.rest.issues.getComment({ owner, repo, comment_id: commentId });
               const body = comment.body || '';
