@@ -41,7 +41,7 @@ import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { SigEventDetails } from '../../../significant_event_details/sig_event_details';
 import { EventInvestigations } from './event_investigations';
-import { hasPendingInvestigation } from '../shared/investigation_status';
+import { hasRunningInvestigation } from '../shared/investigation_status';
 import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
 
 const LIFECYCLE_TITLE = i18n.translate('xpack.streams.sigEventsTab.flyout.lifecycleTitle', {
@@ -109,17 +109,19 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
   // versions that fall outside the time-filtered list query used by the parent table.
   const latestEvent = useMemo(() => lifecycleData?.events.at(-1) ?? event, [lifecycleData, event]);
 
+  const isInvestigationRunning = hasRunningInvestigation(latestEvent);
+
   // Poll lifecycle while a pending investigation is in progress, or briefly after the
   // footer button triggers one (the async workflow step may not have written back yet).
   const [isPollingAfterTrigger, setIsPollingAfterTrigger] = useState(false);
   const triggerPollTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
-    if (hasPendingInvestigation(latestEvent) && isPollingAfterTrigger) {
+    if (isInvestigationRunning && isPollingAfterTrigger) {
       setIsPollingAfterTrigger(false);
       clearTimeout(triggerPollTimeoutRef.current);
     }
-  }, [latestEvent, isPollingAfterTrigger]);
+  }, [isInvestigationRunning, isPollingAfterTrigger]);
 
   useEffect(() => () => clearTimeout(triggerPollTimeoutRef.current), []);
 
@@ -134,12 +136,11 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
     onUpdateSuccess: onClose,
   });
 
-  const isInvestigationRunning = hasPendingInvestigation(latestEvent);
   const isClosed = latestEvent.status === 'closed';
 
   useInterval(
     refetchLifecycle,
-    isPollingAfterTrigger || hasPendingInvestigation(latestEvent) ? RUNNING_POLL_INTERVAL_MS : null
+    isPollingAfterTrigger || isInvestigationRunning ? RUNNING_POLL_INTERVAL_MS : null
   );
 
   useEffect(() => {
