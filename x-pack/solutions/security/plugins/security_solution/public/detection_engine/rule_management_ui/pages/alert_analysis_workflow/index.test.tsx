@@ -10,11 +10,9 @@ import { MemoryRouter } from 'react-router-dom';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { focusManager } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
-import { useLoadConnectors } from '@kbn/inference-connectors';
 import { TestProviders } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { ALERT_ANALYSIS_WORKFLOW_INFERENCE_FEATURE_ID } from '../../../../../common/workflows/alert_analysis_workflow';
 import { ALERT_ANALYSIS_WORKFLOW_API_VERSION, ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE } from './api';
 import { AlertAnalysisWorkflowPage } from '.';
 
@@ -28,23 +26,7 @@ jest.mock('../../../../common/containers/use_full_screen', () => ({
 jest.mock('../../../../common/hooks/use_license');
 jest.mock('../../../../common/components/user_privileges');
 
-jest.mock('@kbn/inference-connectors', () => ({
-  ...jest.requireActual('@kbn/inference-connectors'),
-  useLoadConnectors: jest.fn(),
-}));
-
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
-const useLoadConnectorsMock = useLoadConnectors as jest.Mock;
-
-// EIS (Elastic-managed inference endpoints) surface as preconfigured connectors from the inference
-// connectors API; the picker only shows them when the page loads connectors from that API.
-const eisConnector = {
-  id: '.elastic-managed-llm',
-  name: 'Elastic Managed LLM',
-  actionTypeId: '.inference',
-  isPreconfigured: true,
-  isEis: true,
-};
 
 describe('AlertAnalysisWorkflowPage', () => {
   const coreStart = coreMock.createStart();
@@ -114,7 +96,6 @@ describe('AlertAnalysisWorkflowPage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useLoadConnectorsMock.mockReturnValue({ data: [eisConnector], isLoading: false });
     listAgentsMock.mockResolvedValue([
       { id: 'elastic-ai-agent', name: 'Elastic AI Agent', readonly: false },
       { id: 'my-custom-agent', name: 'My Custom Agent', readonly: false },
@@ -273,23 +254,5 @@ describe('AlertAnalysisWorkflowPage', () => {
     fireEvent.click(autoCloseSwitch);
 
     expect(saveButton).not.toBeDisabled();
-  });
-
-  it('loads connectors scoped to the alert analysis workflow inference feature', async () => {
-    renderComponent();
-
-    await screen.findByTestId('connector-selector');
-
-    expect(useLoadConnectorsMock).toHaveBeenCalledWith(
-      expect.objectContaining({ featureId: ALERT_ANALYSIS_WORKFLOW_INFERENCE_FEATURE_ID })
-    );
-  });
-
-  it('shows Elastic managed (EIS) connectors in the connector selector', async () => {
-    renderComponent();
-
-    fireEvent.click(await screen.findByTestId('connector-selector'));
-
-    expect(await screen.findByTestId(`connector-option-${eisConnector.name}`)).toBeInTheDocument();
   });
 });

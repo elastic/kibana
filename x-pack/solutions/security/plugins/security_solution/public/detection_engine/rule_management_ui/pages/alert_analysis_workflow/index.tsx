@@ -26,14 +26,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isEqual } from 'lodash';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
-import { useLoadConnectors } from '@kbn/inference-connectors';
 import { AiIcon } from '@kbn/shared-ux-ai-components';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { WorkflowsManagementUiActions } from '@kbn/workflows';
-import {
-  ALERT_ANALYSIS_WORKFLOW_INFERENCE_FEATURE_ID,
-  TAG_PREFIX_PATTERN,
-} from '../../../../../common/workflows/alert_analysis_workflow';
+import { TAG_PREFIX_PATTERN } from '../../../../../common/workflows/alert_analysis_workflow';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { ExperimentalBadge } from '../../../../common/components/experimental_badge';
@@ -42,6 +38,7 @@ import { NotFoundPage } from '../../../../app/404';
 import { SecurityPageName } from '../../../../app/types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useLicense } from '../../../../common/hooks/use_license';
+import { useAIConnectors } from '../../../../common/hooks/use_ai_connectors';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import {
   fetchAlertAnalysisWorkflowSettings,
@@ -72,14 +69,7 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
     application.capabilities.advancedSettings?.save && canEditRules && canEditWorkflow
   );
   const canAccessPage = isEnterprise && canEditAdvancedSettings;
-  // Load connectors via the inference connectors API (not the raw Actions API) so the picker
-  // includes Elastic-managed inference endpoints (EIS), matching the Feature settings model picker.
-  const { data: aiConnectors, isLoading: isLoadingConnectors } = useLoadConnectors({
-    http,
-    toasts: notifications.toasts,
-    featureId: ALERT_ANALYSIS_WORKFLOW_INFERENCE_FEATURE_ID,
-    settings,
-  });
+  const { aiConnectors, isLoading: isLoadingConnectors } = useAIConnectors();
   const { agents, isLoading: isLoadingAgents } = useAlertAnalysisWorkflowAgents(canAccessPage);
   const { data: savedSettingsResponse, isLoading } = useQuery({
     queryKey: ALERT_ANALYSIS_WORKFLOW_SETTINGS_QUERY_KEY,
@@ -254,7 +244,7 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
               <EuiFormRow fullWidth label={translations.CONNECTOR_LABEL}>
                 <ConnectorSelector
                   data-test-subj="alertAnalysisWorkflowConnectorSelector"
-                  connectors={aiConnectors ?? []}
+                  connectors={aiConnectors}
                   selectedId={pageSettings.connectorId}
                   isLoading={isLoadingConnectors}
                   isDisabled={!canEditAdvancedSettings || !isWorkflowEnabled}

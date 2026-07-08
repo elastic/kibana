@@ -9,11 +9,6 @@ import { z } from '@kbn/zod/v4';
 
 export const ALERT_ANALYSIS_WORKFLOW_API_VERSION = '1' as const;
 
-// Feature id used to scope inference (EIS + stack) connectors for the alert analysis workflow's AI
-// connector picker. Registered as a search_inference_endpoints child feature server-side so the
-// connector list includes Elastic-managed inference endpoints, not just stack action connectors.
-export const ALERT_ANALYSIS_WORKFLOW_INFERENCE_FEATURE_ID = 'alert_analysis_workflow' as const;
-
 export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE =
   '/internal/security_solution/alert_analysis_workflow/settings' as const;
 // Read-only settings route the managed workflow calls at run time (via a kibana.request step,
