@@ -11,3 +11,5 @@ export const internalApiPath = `/internal/agent_builder`;
 export const AGENTBUILDER_PLUGIN_ID = 'agentBuilder';
 
 export const PREFERRED_DEFAULT_CONNECTOR_ID = 'Anthropic-Claude-Sonnet-4-5';
+
+export const MAX_CHUNKS_PER_ORIGIN = 1000;

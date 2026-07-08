@@ -29,7 +29,6 @@ import { createSmlStorage, smlIndexName } from './storage';
 import { SmlUnregisteredTypeError } from './sml_unregistered_type_error';
 import { SmlPermissionsConflictError } from './sml_permissions_conflict_error';
 
-// TODO(dedupe): also needed by query.ts once Task 9 lands — reconcile then
 export const isNotFoundError = (error: unknown): boolean => {
   return error instanceof errors.ResponseError && error.statusCode === 404;
 };
