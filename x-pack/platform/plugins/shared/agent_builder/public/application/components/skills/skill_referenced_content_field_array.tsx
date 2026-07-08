@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useRef, useMemo, useEffect } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,7 +21,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useController, useFieldArray, useWatch, type Control } from 'react-hook-form';
+import {
+  useController,
+  useFieldArray,
+  useFormContext,
+  useWatch,
+  type Control,
+} from 'react-hook-form';
 import { maxReferencedContentItems, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { estimateTokens } from '@kbn/agent-builder-common/attachments';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -101,9 +107,8 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
   defaultIsEditing,
 }) => {
   const [isEditing, setIsEditing] = useState(defaultIsEditing);
-  const [showSaved, setShowSaved] = useState(false);
   const snapshotRef = useRef<ReferencedContentItem>({ ...DEFAULT_REFERENCED_FILE });
-  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { trigger } = useFormContext<SkillFormData>();
 
   const nameField = useController({ control, name: `referenced_content.${index}.name` });
   const pathField = useController({ control, name: `referenced_content.${index}.relativePath` });
@@ -111,13 +116,6 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
 
   const debouncedContent = useDebouncedValue(contentField.field.value, 300);
   const tokenCount = useMemo(() => estimateTokens(debouncedContent), [debouncedContent]);
-
-  useEffect(
-    () => () => {
-      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
-    },
-    []
-  );
 
   const handleEdit = () => {
     snapshotRef.current = {
@@ -128,11 +126,13 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
     setIsEditing(true);
   };
 
-  const handleDone = () => {
-    setIsEditing(false);
-    if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
-    setShowSaved(true);
-    savedTimerRef.current = setTimeout(() => setShowSaved(false), 2000);
+  const handleDone = async () => {
+    const isValid = await trigger([
+      `referenced_content.${index}.name`,
+      `referenced_content.${index}.relativePath`,
+      `referenced_content.${index}.content`,
+    ]);
+    if (isValid) setIsEditing(false);
   };
 
   const handleCancel = () => {
@@ -166,14 +166,6 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
               {labels.skills.referencedFileSection.compactTokenCount(tokenCount)}
             </EuiText>
           </EuiFlexItem>
-          {showSaved && (
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="success">
-                <EuiIcon type="checkInCircleFilled" color="success" size="s" aria-hidden={true} />{' '}
-                {labels.skills.referencedFileSection.savedIndicator}
-              </EuiText>
-            </EuiFlexItem>
-          )}
           <EuiFlexItem grow={false}>
             <EuiToolTip
               content={labels.skills.referencedFileSection.editFileAriaLabel}
@@ -238,6 +230,11 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
             <EuiButton
               size="s"
               onClick={handleDone}
+              disabled={
+                Boolean(nameField.fieldState.error) ||
+                Boolean(pathField.fieldState.error) ||
+                Boolean(contentField.fieldState.error)
+              }
               data-test-subj={`agentBuilderSkillReferencedContentDone-${index}`}
             >
               {labels.skills.referencedFileSection.doneButton}

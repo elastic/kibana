@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiFieldText,
@@ -80,6 +80,8 @@ export const ReferencedContentFileCard: React.FC<ReferencedContentFileCardProps>
     ? `${fileName}.md`
     : labels.skills.referencedFileSection.unnamedFilePlaceholder;
 
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+
   const activeBorderStyle = isActive
     ? css`
         border-color: ${euiTheme.colors.primary};
@@ -148,7 +150,8 @@ export const ReferencedContentFileCard: React.FC<ReferencedContentFileCardProps>
       <EuiAccordion
         id={accordionId}
         buttonContent={labels.skills.referencedFileCard.advancedLabel}
-        forceState={relativePathError ? 'open' : undefined}
+        forceState={relativePathError || isAdvancedOpen ? 'open' : 'closed'}
+        onToggle={setIsAdvancedOpen}
       >
         <EuiSpacer size="s" />
         <EuiFormRow

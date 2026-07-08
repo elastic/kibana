@@ -964,12 +964,6 @@ export const labels = {
       cancelButton: i18n.translate('xpack.agentBuilder.skills.referencedFileSection.cancelButton', {
         defaultMessage: 'Cancel',
       }),
-      savedIndicator: i18n.translate(
-        'xpack.agentBuilder.skills.referencedFileSection.savedIndicator',
-        {
-          defaultMessage: 'Saved',
-        }
-      ),
       compactTokenCount: (count: number) =>
         i18n.translate('xpack.agentBuilder.skills.referencedFileSection.compactTokenCount', {
           defaultMessage: '~{count} tokens',
