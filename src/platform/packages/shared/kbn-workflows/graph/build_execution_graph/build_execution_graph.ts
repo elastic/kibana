@@ -1135,8 +1135,8 @@ function buildParallelBranchBody(
     .find((bodyNode) => isHitlWaitStepType(bodyNode?.type));
   if (unsupportedNode) {
     throw new GraphBuildError(
-      `Parallel step "${stepId}" has a branch body containing an unsupported step type "${unsupportedNode.stepType}". ` +
-        `"waitForInput" and "waitForApproval" steps are not supported inside a parallel branch yet.`,
+      `Parallel step "${stepId}" has a branch body containing an unsupported HITL wait step "${unsupportedNode.stepType}". ` +
+        `HITL wait steps are not supported inside a parallel branch yet.`,
       stepId
     );
   }
