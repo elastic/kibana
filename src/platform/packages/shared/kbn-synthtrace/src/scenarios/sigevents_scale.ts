@@ -367,6 +367,9 @@ const parseScaleOpts = (raw: Record<string, unknown> | undefined): ScaleOpts => 
     : undefined;
 
   if (archetypes) {
+    if (archetypes.length === 0) {
+      throw new Error(`Invalid scenario option "archetypes": expected at least one archetype id`);
+    }
     const unknown = archetypes.filter((id) => !ARCHETYPES.some((a) => a.id === id));
     if (unknown.length > 0) {
       throw new Error(
