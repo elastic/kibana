@@ -665,9 +665,7 @@ export class OverviewStatusService {
           // `missing_bucket` yields a null key for pings with no `observer.name`
           // (location-less Heartbeat / Agent monitors) — map it to a placeholder.
           const locationId =
-            bKey.locationId == null
-              ? HEARTBEAT_UNMAPPED_LOCATION_ID
-              : String(bKey.locationId);
+            bKey.locationId == null ? HEARTBEAT_UNMAPPED_LOCATION_ID : String(bKey.locationId);
           const metrics = statusAgg.top?.[0].metrics;
           const status = String(metrics?.['monitor.status']);
           const rawMonitorUrl = metrics?.['url.full.keyword'];
