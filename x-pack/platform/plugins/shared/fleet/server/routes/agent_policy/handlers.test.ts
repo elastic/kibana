@@ -89,6 +89,25 @@ describe('Agent policy API handlers', () => {
       expect(response.ok).toHaveBeenCalledWith({
         body: { item: createdAgentPolicy },
       });
+      // Flag off: the legacy agentless write is allowed but logged so it stays
+      // measurable before the flag is flipped fleet-wide.
+      expect(appContextService.getLogger().warn).toHaveBeenCalledWith(
+        expect.stringContaining('legacy_agentless_write_deprecation')
+      );
+    });
+
+    it('should not log the legacy agentless deprecation for non-agentless agent policies when the flag is disabled', async () => {
+      appContextService.start(createAppContextStartContractMock());
+      const request = httpServerMock.createKibanaRequest({
+        body: { name: 'Regular policy', namespace: 'default' },
+      });
+
+      await createAgentPolicyHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
+      expect(appContextService.getLogger().warn).not.toHaveBeenCalledWith(
+        expect.stringContaining('legacy_agentless_write_deprecation')
+      );
     });
   });
 

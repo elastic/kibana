@@ -669,6 +669,20 @@ describe('When calling package policy', () => {
       await routeHandler(context, getUpdateKibanaRequest(), response);
 
       expect(response.ok).toHaveBeenCalled();
+      // Flag off: the legacy agentless write is allowed but logged so it stays
+      // measurable before the flag is flipped fleet-wide.
+      expect(appContextService.getLogger().warn).toHaveBeenCalledWith(
+        expect.stringContaining('legacy_agentless_write_deprecation')
+      );
+    });
+
+    it('should not log the legacy agentless deprecation for non-agentless updates when the flag is disabled', async () => {
+      await routeHandler(context, getUpdateKibanaRequest(), response);
+
+      expect(response.ok).toHaveBeenCalled();
+      expect(appContextService.getLogger().warn).not.toHaveBeenCalledWith(
+        expect.stringContaining('legacy_agentless_write_deprecation')
+      );
     });
   });
 
@@ -970,6 +984,27 @@ describe('When calling package policy', () => {
       expect(response.ok).toHaveBeenCalled();
       expect(getPackageInfo).not.toHaveBeenCalled();
       expect(agentPolicyService.getByIds).not.toHaveBeenCalled();
+      // Flag off: the legacy agentless write is allowed but logged so it stays
+      // measurable before the flag is flipped fleet-wide.
+      expect(appContextService.getLogger().warn).toHaveBeenCalledWith(
+        expect.stringContaining('legacy_agentless_write_deprecation')
+      );
+    });
+
+    it('should not log the legacy agentless deprecation for non-agentless creates when the flag is disabled', async () => {
+      packagePolicyServiceMock.get.mockResolvedValue(testPackagePolicy);
+      (
+        (await context.fleet).packagePolicyService.asCurrentUser as jest.Mocked<PackagePolicyClient>
+      ).create.mockResolvedValue(testPackagePolicy);
+
+      const request = httpServerMock.createKibanaRequest({ body: testPackagePolicy });
+
+      await createPackagePolicyHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
+      expect(appContextService.getLogger().warn).not.toHaveBeenCalledWith(
+        expect.stringContaining('legacy_agentless_write_deprecation')
+      );
     });
   });
 

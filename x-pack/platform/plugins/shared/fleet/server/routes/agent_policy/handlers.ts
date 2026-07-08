@@ -34,6 +34,7 @@ import {
   licenseService,
 } from '../../services';
 import { type AgentClient } from '../../services/agents';
+import { logLegacyAgentlessWriteDeprecation } from '../../services/utils/agentless';
 import { UNPRIVILEGED_AGENT_KUERY } from '../../constants';
 import type {
   GetAgentPoliciesRequestSchema,
@@ -429,11 +430,14 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       }
     }
 
-    if (
-      appContextService.getExperimentalFeatures().disableAgentlessLegacyAPI &&
-      request.body.supports_agentless
-    ) {
-      throw new FleetError('To create agentless agent policies, use the agentless policies API.');
+    // The cheap `supports_agentless` detection runs regardless of the flag so
+    // legacy agentless usage is measurable (deprecation warn) before the flag is
+    // flipped fleet-wide — the flip is what starts rejecting these callers.
+    if (request.body.supports_agentless) {
+      if (appContextService.getExperimentalFeatures().disableAgentlessLegacyAPI) {
+        throw new FleetError('To create agentless agent policies, use the agentless policies API.');
+      }
+      logLegacyAgentlessWriteDeprecation('create agent policy');
     }
 
     const agentPolicy = await createAgentPolicyWithPackages({

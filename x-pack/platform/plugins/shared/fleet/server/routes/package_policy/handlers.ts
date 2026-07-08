@@ -41,6 +41,7 @@ import type {
   UpgradePackagePolicyResponse,
 } from '../../../common/types';
 import { isOnlyAgentlessIntegration } from '../../../common/services/agentless_policy_helper';
+import { logLegacyAgentlessWriteDeprecation } from '../../services/utils/agentless';
 import { inputsFormat, installationStatuses } from '../../../common/constants';
 import {
   CustomPackagePolicyNotAllowedForAgentlessError,
@@ -241,10 +242,22 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   // These checks run before the try block on purpose: its catch treats errors as
   // creation failures (error log + package installation rollback), which must not
   // run for these pure validation rejections.
-  if (appContextService.getExperimentalFeatures().disableAgentlessLegacyAPI) {
-    if (request.body.supports_agentless) {
+  const legacyAgentlessApiDisabled =
+    appContextService.getExperimentalFeatures().disableAgentlessLegacyAPI;
+
+  // The cheap `supports_agentless` detection runs regardless of the flag so legacy
+  // agentless usage is measurable (deprecation warn) before the flag is flipped
+  // fleet-wide — the flip is what starts rejecting these callers.
+  if (request.body.supports_agentless) {
+    if (legacyAgentlessApiDisabled) {
       throw new FleetError('To create agentless package policies, use the agentless policies API.');
     }
+    logLegacyAgentlessWriteDeprecation('create package policy');
+  }
+
+  // The remaining detections need extra SO/registry lookups, so they stay
+  // flag-gated to avoid adding cost to normal (flag-off) traffic.
+  if (legacyAgentlessApiDisabled) {
     if (pkg) {
       const pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
@@ -410,17 +423,23 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
     }
   }
 
-  if (appContextService.getExperimentalFeatures().disableAgentlessLegacyAPI) {
-    // Older agentless package policies may not carry the flag themselves, so the
-    // parent agent policy is checked too; the body flag is checked to prevent
-    // converting a regular package policy into an agentless one.
-    const isAgentless = Boolean(
-      packagePolicy.supports_agentless || request.body.supports_agentless
-    );
-    if (isAgentless) {
+  const legacyAgentlessApiDisabled =
+    appContextService.getExperimentalFeatures().disableAgentlessLegacyAPI;
+
+  // The cheap own/body-flag detection runs regardless of the flag so legacy
+  // agentless usage is measurable before the flip. The body flag is checked to
+  // prevent converting a regular package policy into an agentless one.
+  const isAgentless = Boolean(packagePolicy.supports_agentless || request.body.supports_agentless);
+  if (isAgentless) {
+    if (legacyAgentlessApiDisabled) {
       throw new FleetError('To update agentless package policies, use the agentless policies API.');
     }
+    logLegacyAgentlessWriteDeprecation('update package policy');
+  }
 
+  // The parent-agent-policy detections need extra SO lookups, so they stay flag-gated to avoid
+  // adding cost to normal (flag-off) traffic.
+  if (legacyAgentlessApiDisabled) {
     const targetParentPolicyIds = deduplicateIds([
       ...(request.body.policy_ids ?? []),
       ...(request.body.policy_id ? [request.body.policy_id] : []),
