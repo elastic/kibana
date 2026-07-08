@@ -23,10 +23,9 @@ import {
 import { internalStateSlice } from '../redux/internal_state';
 import { selectUrlProfileStateDefinition } from '../redux/runtime_state';
 import { createTabAppStateObservable } from './create_tab_app_state_observable';
-import { getProfileUrlState, type ProfileUrlState } from './profile_state_url';
 import { ProfileStateType } from '../../../../context_awareness';
 
-const EMPTY_PROFILE_URL_STATE: ProfileUrlState = {};
+const EMPTY_PROFILE_URL_STATE = {};
 
 /**
  * Create observables and state containers for 2-directional syncing of appState and globalState with the URL
@@ -108,12 +107,17 @@ export const createUrlSyncObservables = ({
 
   const getCurrentProfileUrlState = () => {
     const profileStateDefinition = selectUrlProfileStateDefinition(runtimeStateManager, tabId);
+    const profileState = profileStateDefinition
+      ? selectTab(getState(), tabId).profileState[profileStateDefinition.key]
+      : undefined;
+    const pickedUrlState = profileStateDefinition
+      ? services.profileStateRegistry.pickStateByType({
+          profileState: { [profileStateDefinition.key]: profileState },
+          stateType: [ProfileStateType.Url],
+        })
+      : undefined;
 
-    return getProfileUrlState({
-      profileState: selectTab(getState(), tabId).profileState,
-      profileStateDefinition,
-      profileStateRegistry: services.profileStateRegistry,
-    });
+    return pickedUrlState && Object.keys(pickedUrlState).length ? pickedUrlState : undefined;
   };
 
   const profileState$ = internalState$.pipe(
@@ -123,7 +127,7 @@ export const createUrlSyncObservables = ({
     skip(1)
   );
 
-  const profileStateContainer: INullableBaseStateContainer<ProfileUrlState> = {
+  const profileStateContainer: INullableBaseStateContainer<Record<string, object | undefined>> = {
     get: () => getCurrentProfileUrlState() ?? EMPTY_PROFILE_URL_STATE,
     set: (profileUrlState) => {
       const profileStateDefinition = selectUrlProfileStateDefinition(runtimeStateManager, tabId);
@@ -139,11 +143,10 @@ export const createUrlSyncObservables = ({
         profileState: { [profileStateDefinition.key]: currentProfileState },
         stateType: [ProfileStateType.Ui, ProfileStateType.Persistent],
       })[profileStateDefinition.key];
-      const urlState = getProfileUrlState({
+      const urlState = services.profileStateRegistry.pickStateByType({
         profileState: profileUrlState ?? EMPTY_PROFILE_URL_STATE,
-        profileStateDefinition,
-        profileStateRegistry: services.profileStateRegistry,
-      })?.[profileStateDefinition.key];
+        stateType: [ProfileStateType.Url],
+      })[profileStateDefinition.key];
       const nextProfileState = {
         ...profileStateDefinition.defaultState,
         ...nonUrlState,

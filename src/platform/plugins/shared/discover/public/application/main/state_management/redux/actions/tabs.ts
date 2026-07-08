@@ -19,7 +19,6 @@ import type { UISession } from '@kbn/data-plugin/public/search/session/sessions_
 import type { OpenInNewTabParams } from '../../../../../context_awareness/types';
 import { ProfileStateType } from '../../../../../context_awareness';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
-import { getProfileUrlState } from '../../utils/profile_state_url';
 import type { DiscoverAppState, TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
@@ -269,6 +268,14 @@ export const updateTabs: InternalStateThunkActionCreator<
           runtimeStateManager,
           nextTab.id
         );
+        const pickedUrlState = profileStateDefinition
+          ? services.profileStateRegistry.pickStateByType({
+              profileState: nextTab.profileState,
+              stateType: [ProfileStateType.Url],
+            })
+          : undefined;
+        const profileStateForUrl =
+          pickedUrlState && Object.keys(pickedUrlState).length ? pickedUrlState : undefined;
 
         await Promise.all([
           urlStateStorage.set<QueryState>(
@@ -283,15 +290,7 @@ export const updateTabs: InternalStateThunkActionCreator<
           urlStateStorage.set<DiscoverAppState>(APP_STATE_URL_KEY, nextTab.appState, {
             replace: true,
           }),
-          urlStateStorage.set(
-            PROFILE_STATE_URL_KEY,
-            getProfileUrlState({
-              profileState: nextTab.profileState,
-              profileStateDefinition,
-              profileStateRegistry: services.profileStateRegistry,
-            }),
-            { replace: true }
-          ),
+          urlStateStorage.set(PROFILE_STATE_URL_KEY, profileStateForUrl, { replace: true }),
         ]);
 
         services.timefilter.setTime(timeRange ?? services.timefilter.getTimeDefaults());
