@@ -56,7 +56,7 @@ spaceTest.describe('TSVB Dashboard - Open in Lens', { tag: tags.deploymentAgnost
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'My TSVB to Lens vis 1'
       );
-      await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+      await lens.waitForVisualization('xyVisChart');
 
       const dimensions = page.testSubj.locator('lns-dimensionTrigger');
       await expect(dimensions.getByText('Count of records')).toBeVisible();
@@ -104,7 +104,7 @@ spaceTest.describe('TSVB Dashboard - Open in Lens', { tag: tags.deploymentAgnost
 
       // Convert to Lens
       await dashboard.clickPanelAction(testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION, visTitle);
-      await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+      await lens.waitForVisualization('xyVisChart');
 
       const dimensions = page.testSubj.locator('lns-dimensionTrigger');
       await expect(dimensions.getByText('Count of records')).toBeVisible();

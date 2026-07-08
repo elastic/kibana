@@ -74,12 +74,12 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
   });
 
   spaceTest('should convert to horizontal bar', async ({ page, pageObjects }) => {
-    const { dashboard } = pageObjects;
+    const { dashboard, lens } = pageObjects;
     await dashboard.clickPanelAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Top N - Horizontal bar'
     );
-    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+    await lens.waitForVisualization('xyVisChart');
 
     const chartSwitcher = page.testSubj.locator('lnsChartSwitchPopover');
     await expect(chartSwitcher).toHaveText('Bar');
@@ -91,12 +91,12 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
   });
 
   spaceTest('should convert group by to vertical axis', async ({ page, pageObjects }) => {
-    const { dashboard } = pageObjects;
+    const { dashboard, lens } = pageObjects;
     await dashboard.clickPanelAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Top N - Group by'
     );
-    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+    await lens.waitForVisualization('xyVisChart');
 
     const xDimension = page.testSubj
       .locator('lnsXY_xDimensionPanel')
@@ -111,12 +111,12 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
   spaceTest(
     'should convert last value mode to reduced time range',
     async ({ page, pageObjects }) => {
-      const { dashboard } = pageObjects;
+      const { dashboard, lens } = pageObjects;
       await dashboard.clickPanelAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Top N - Last value'
       );
-      await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+      await lens.waitForVisualization('xyVisChart');
 
       const yDimension = page.testSubj
         .locator('lnsXY_yDimensionPanel')
@@ -136,12 +136,12 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
   spaceTest(
     'should convert static value to separate layer with y dimension',
     async ({ page, pageObjects }) => {
-      const { dashboard } = pageObjects;
+      const { dashboard, lens } = pageObjects;
       await dashboard.clickPanelAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Top N - Static value'
       );
-      await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+      await lens.waitForVisualization('xyVisChart');
 
       // Verify 2 layer tabs exist (Lens renders one layer panel at a time, switched via tabs)
       const layerTab1 = page.getByRole('tab', { name: 'Data layer 1' });
@@ -166,12 +166,12 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
   );
 
   spaceTest('should visualize field to Lens', async ({ page, pageObjects }) => {
-    const { dashboard } = pageObjects;
+    const { dashboard, lens } = pageObjects;
     await dashboard.clickPanelAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Top N - Basic'
     );
-    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+    await lens.waitForVisualization('xyVisChart');
 
     const yDimension = page.testSubj
       .locator('lnsXY_yDimensionPanel')
@@ -179,24 +179,24 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
     await expect(yDimension).toHaveText('Count of records');
   });
 
-  spaceTest('should preserve app filters in lens', async ({ page, pageObjects }) => {
-    const { dashboard } = pageObjects;
+  spaceTest('should preserve app filters in Lens', async ({ pageObjects }) => {
+    const { dashboard, lens } = pageObjects;
     await dashboard.clickPanelAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Top N - With filter'
     );
-    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+    await lens.waitForVisualization('xyVisChart');
 
     expect(await pageObjects.filterBar.hasFilter({ field: 'extension', value: 'css' })).toBe(true);
   });
 
-  spaceTest('should preserve query in lens', async ({ page, pageObjects }) => {
-    const { dashboard } = pageObjects;
+  spaceTest('should preserve query in Lens', async ({ page, pageObjects }) => {
+    const { dashboard, lens } = pageObjects;
     await dashboard.clickPanelAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Top N - With query'
     );
-    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+    await lens.waitForVisualization('xyVisChart');
 
     const queryInput = page.testSubj.locator('queryInput');
     await expect(queryInput).toHaveValue('machine.os : ios');
@@ -205,12 +205,12 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
   spaceTest(
     'should bring ignore global filters at series level over',
     async ({ page, pageObjects }) => {
-      const { dashboard } = pageObjects;
+      const { dashboard, lens } = pageObjects;
       await dashboard.clickPanelAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Top N - Ignore global filters series'
       );
-      await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+      await lens.waitForVisualization('xyVisChart');
       await expect(page.testSubj.locator('lnsChangeIndexPatternIgnoringFilters')).toBeVisible();
     }
   );
@@ -218,12 +218,12 @@ spaceTest.describe('TSVB Top N - Open in Lens', { tag: tags.deploymentAgnostic }
   spaceTest(
     'should bring ignore global filters at panel level over',
     async ({ page, pageObjects }) => {
-      const { dashboard } = pageObjects;
+      const { dashboard, lens } = pageObjects;
       await dashboard.clickPanelAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Top N - Ignore global filters panel'
       );
-      await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+      await lens.waitForVisualization('xyVisChart');
       await expect(page.testSubj.locator('lnsChangeIndexPatternIgnoringFilters')).toBeVisible();
     }
   );
