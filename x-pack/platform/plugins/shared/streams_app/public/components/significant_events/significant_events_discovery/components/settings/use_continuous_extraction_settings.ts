@@ -12,7 +12,7 @@ import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
 } from '@kbn/management-settings-ids';
-import { DEFAULT_EXTRACTION_INTERVAL_HOURS } from '@kbn/streams-plugin/common';
+import { DEFAULT_EXTRACTION_INTERVAL_HOURS } from '@kbn/significant-events-plugin/common';
 
 export interface ContinuousExtractionState {
   enabled: boolean;
@@ -57,7 +57,7 @@ export const useContinuousExtractionSettings = ({
   }, [saved]);
 
   const save = useCallback(async () => {
-    await http.put('/internal/streams/_significant_events/settings', {
+    await http.put('/internal/streams/_knowledge_indicators/continuous_ki_extraction/settings', {
       body: JSON.stringify({ continuousKiExtraction: draft }),
     });
 
