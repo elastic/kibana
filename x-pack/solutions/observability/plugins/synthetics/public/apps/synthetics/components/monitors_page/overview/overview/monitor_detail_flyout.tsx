@@ -64,7 +64,7 @@ import type { FlyoutParamProps } from './types';
 import { quietFetchOverviewStatusAction } from '../../../../state/overview_status';
 import { MonitorStatusPanel } from '../../../monitor_details/monitor_status/monitor_status_panel';
 import { FlyoutLastTestRun, FlyoutSummaryKPIs } from './flyout_panels';
-import { RemoteMonitorDetailsPanel } from './remote_monitor_details_panel';
+import { ExternalMonitorDetailsPanel } from './external_monitor_details_panel';
 
 interface Props {
   configId: string;
@@ -544,7 +544,7 @@ export function MonitorDetailFlyout(props: Props) {
           // local saved object, so render the ping-derived details panel rather
           // than waiting on `monitorObject`, which never resolves for them.
           (isReadOnly && monitor ? (
-            <RemoteMonitorDetailsPanel monitor={monitor} latestPing={monitorDetail.data} />
+            <ExternalMonitorDetailsPanel monitor={monitor} latestPing={monitorDetail.data} />
           ) : monitorObject ? (
             <MonitorDetailsPanel
               hasBorder={false}
