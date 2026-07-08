@@ -11,6 +11,7 @@ import {
   SECURITY_FEATURE_ID_V5,
 } from '@kbn/security-solution-features/constants';
 import * as i18n from './translations';
+import { MITRE_ATTACK_VERSION } from './detection_engine/mitre/mitre_version';
 
 export {
   SecurityPageName,
@@ -512,6 +513,9 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   DEFAULT_LLM: `elasticAssistant.elasticLLM.costAwarenessTour.assistantHeader.v8.19.default`,
   ATTACKS_PAGE: 'securitySolution.attacksPage.newFeaturesTour.v9.5',
   ATTACKS_PAGE_CALLOUT: 'securitySolution.attacksPage.tourCalloutDismissed.v9.5',
+  // Notifies users that the bundled MITRE ATT&CK® dataset was bumped. Keyed to
+  // MITRE_ATTACK_VERSION so each upgrade automatically re-surfaces the callout.
+  MITRE_VERSION_UPGRADED_CALLOUT: `securitySolution.rulesManagementPage.mitreVersionUpgradedCallout.${MITRE_ATTACK_VERSION}`,
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
