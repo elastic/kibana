@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { of } from 'rxjs';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type { ISearchGeneric, IKibanaSearchResponse } from '@kbn/search-types';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import {
   getStartEndParams,
   getNamedParams,
   getESQLQueryColumnsRaw,
+  getESQLQueryColumns,
   getESQLResults,
 } from './run_query';
 
@@ -228,6 +230,39 @@ describe('run query helpers', () => {
         }),
         expect.anything()
       );
+    });
+
+    const mockRawResponseWithMeta = () =>
+      of({
+        isRunning: false,
+        rawResponse: {
+          columns: [{ name: 'foo', type: 'keyword', _meta: { approximation: true } }],
+          values: [],
+        },
+      } as unknown as IKibanaSearchResponse<ESQLSearchResponse>);
+
+    it('getESQLQueryColumnsRaw propagates the _meta returned for each column', async () => {
+      search.mockReturnValue(mockRawResponseWithMeta());
+
+      const columns = await getESQLQueryColumnsRaw({
+        esqlQuery: 'FROM foo',
+        search,
+        includeColumnMetadata: true,
+      });
+
+      expect(columns[0]._meta).toEqual({ approximation: true });
+    });
+
+    it('getESQLQueryColumns maps the propagated _meta to meta.esMeta', async () => {
+      search.mockReturnValue(mockRawResponseWithMeta());
+
+      const columns = await getESQLQueryColumns({
+        esqlQuery: 'FROM foo',
+        search,
+        includeColumnMetadata: true,
+      });
+
+      expect(columns[0].meta.esMeta).toEqual({ approximation: true });
     });
   });
 });

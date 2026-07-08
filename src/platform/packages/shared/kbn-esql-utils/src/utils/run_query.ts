@@ -60,12 +60,16 @@ export const getNamedParams = (
 };
 
 export function formatESQLColumns(columns: ESQLColumn[]): DatatableColumn[] {
-  return columns.map(({ name, type }) => {
+  return columns.map(({ name, type, _meta }) => {
     const kibanaType = esFieldTypeToKibanaFieldType(type);
     return {
       id: name,
       name,
-      meta: { type: kibanaType, esType: type },
+      meta: {
+        type: kibanaType,
+        esType: type,
+        ...(_meta !== undefined && { esMeta: _meta }),
+      },
     } as DatatableColumn;
   });
 }
@@ -116,12 +120,13 @@ export async function getESQLQueryColumnsRaw({
     const lookup = new Set(hasEmptyColumns ? table.columns?.map(({ name }) => name) || [] : []);
 
     const allColumns =
-      (table.all_columns ?? table.columns)?.map(({ name, type, original_types }) => {
+      (table.all_columns ?? table.columns)?.map(({ name, type, original_types, _meta }) => {
         return {
           name,
           type,
           original_types,
           isNull: hasEmptyColumns ? !lookup.has(name) : false,
+          ...(_meta !== undefined && { _meta }),
         };
       }) ?? [];
 
