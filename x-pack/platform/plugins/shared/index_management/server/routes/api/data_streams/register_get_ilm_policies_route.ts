@@ -115,7 +115,8 @@ export function registerGetIlmPoliciesRoute({
               .has_all_requested
           : true;
 
-        const policiesByName = await client.asCurrentUser.ilm.getLifecycle().catch(() => ({}));
+        // Only fetch policies when the user can manage ILM.
+        const policiesByName = hasManageIlm ? await client.asCurrentUser.ilm.getLifecycle() : {};
 
         const policies: IlmPolicyForFlyout[] = Object.entries(policiesByName).map(
           ([name, policyEntry]) => {

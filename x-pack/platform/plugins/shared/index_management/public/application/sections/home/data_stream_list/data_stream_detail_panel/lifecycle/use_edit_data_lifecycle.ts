@@ -147,10 +147,10 @@ export const useEditDataLifecycle = ({
         method: 'get',
       });
       setIlmPolicies(Array.isArray(data?.policies) ? data.policies : []);
-      setHasManageIlm(data?.hasManageIlm ?? true);
+      setHasManageIlm(data?.hasManageIlm ?? false);
     } catch {
       setIlmPolicies([]);
-      setHasManageIlm(true);
+      setHasManageIlm(false);
     }
   }, []);
 
