@@ -15,7 +15,7 @@ import { TestProviders } from '../../../../common/mock';
 import { HostDetails } from './host_details';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { mockAnomalies } from '../../../../common/components/ml/mock';
-import { useObservedHost } from '../../../entity_details/host_right/hooks/use_observed_host';
+import { useObservedHost } from '../../../../flyout_v2/entity/host/main/hooks/use_observed_host';
 import { useHostRelatedUsers } from '../../../../common/containers/related_entities/related_users';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 import {
@@ -85,6 +85,10 @@ jest.mock('../../../../helper_hooks', () => ({
   useHasSecurityCapability: () => mockUseHasSecurityCapability(),
 }));
 
+jest.mock('../../../../common/hooks/use_space_id', () => ({
+  useSpaceId: () => 'default',
+}));
+
 jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () => ({
   AnomalyTableProvider: ({
     children,
@@ -97,7 +101,7 @@ jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () 
   }) => children({ anomaliesData: mockAnomalies, isLoadingAnomaliesData: false, jobNameById: {} }),
 }));
 
-jest.mock('../../../entity_details/host_right/hooks/use_observed_host');
+jest.mock('../../../../flyout_v2/entity/host/main/hooks/use_observed_host');
 const mockUseObservedHost = useObservedHost as jest.Mock;
 
 jest.mock('../../../../common/containers/related_entities/related_users');
@@ -242,9 +246,10 @@ describe('<HostDetails />', () => {
     it('should render the related user table with correct dates and indices', () => {
       const { getByTestId } = renderHostDetails(mockContextValue);
       expect(mockUseHostsRelatedUsers).toBeCalledWith({
+        entityId: undefined,
         from: timestamp,
         hostName: defaultProps.hostName,
-        indexNames: ['index'],
+        indexNames: ['entities-latest-default'],
         skip: false,
       });
       expect(getByTestId(HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID)).toBeInTheDocument();
@@ -258,10 +263,11 @@ describe('<HostDetails />', () => {
       });
       mockUseHasSecurityCapability.mockReturnValue(true);
 
-      const { queryAllByRole } = renderHostDetails(mockContextValue);
-      expect(queryAllByRole('columnheader').length).toBe(3);
-      expect(queryAllByRole('row')[1].textContent).toContain('test user');
-      expect(queryAllByRole('row')[1].textContent).toContain('Low');
+      const { container, queryAllByTestId } = renderHostDetails(mockContextValue);
+      expect(queryAllByTestId(/tableHeaderCell_/).length).toBe(3);
+      expect(container.querySelectorAll('.euiTableRow')[0].textContent).toContain('test user');
+      expect(container.querySelectorAll('.euiTableRow')[0].textContent).toContain('100.XXX.XXX');
+      expect(container.querySelectorAll('.euiTableRow')[0].textContent).toContain('Low');
     });
 
     it('should not render host risk score column when user has no entity-risk capability', () => {
@@ -271,13 +277,13 @@ describe('<HostDetails />', () => {
       });
       mockUseHasSecurityCapability.mockReturnValue(false);
 
-      const { queryAllByRole } = renderHostDetails(mockContextValue);
-      expect(queryAllByRole('columnheader').length).toBe(2);
+      const { queryAllByTestId } = renderHostDetails(mockContextValue);
+      expect(queryAllByTestId(/tableHeaderCell_/).length).toBe(2);
     });
 
     it('should not render host risk score column when license is not valid', () => {
-      const { queryAllByRole } = renderHostDetails(mockContextValue);
-      expect(queryAllByRole('columnheader').length).toBe(2);
+      const { queryAllByTestId } = renderHostDetails(mockContextValue);
+      expect(queryAllByTestId(/tableHeaderCell_/).length).toBe(2);
     });
 
     it('should render empty table if no related user is returned', () => {

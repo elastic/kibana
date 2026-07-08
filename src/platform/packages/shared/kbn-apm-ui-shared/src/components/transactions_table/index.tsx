@@ -51,6 +51,8 @@ interface TransactionsTableProps {
   onSearchQueryChange?: (query: string) => void;
   remainingTransactionsCellTooltipContent?: React.ReactNode;
   showSparklines?: boolean;
+  errorMessage?: string;
+  'data-test-subj': string;
 }
 
 function shouldFetchServer({
@@ -80,6 +82,8 @@ export function TransactionsTable({
   onSearchQueryChange,
   remainingTransactionsCellTooltipContent,
   showSparklines: showSparklinesProp,
+  errorMessage,
+  'data-test-subj': dataTestSubj,
 }: TransactionsTableProps) {
   const searchQueryRef = useRef('');
 
@@ -128,7 +132,11 @@ export function TransactionsTable({
   );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      data-test-subj={isLoading ? `${dataTestSubj}-loading` : `${dataTestSubj}-loaded`}
+    >
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
@@ -167,6 +175,7 @@ export function TransactionsTable({
         <EuiFlexItem>
           <EuiCallOut
             announceOnMount
+            size="s"
             title={i18n.translate('apmUiShared.transactionsTable.cardinalityWarning.title', {
               defaultMessage:
                 'Number of transaction groups exceed the allowed maximum (1,000) that are displayed.',
@@ -185,31 +194,35 @@ export function TransactionsTable({
       )}
 
       <EuiFlexItem>
-        <EuiInMemoryTable
-          tableCaption={title}
-          items={items}
-          columns={resolvedColumns}
-          loading={isLoading}
-          noItemsMessage={
-            isLoading
-              ? i18n.translate('apmUiShared.transactionsTable.loading', {
-                  defaultMessage: 'Loading...',
-                })
-              : i18n.translate('apmUiShared.transactionsTable.noResults', {
-                  defaultMessage: 'No transactions found',
-                })
-          }
-          pagination={{
-            initialPageSize: 10,
-            showPerPageOptions: true,
-            pageSizeOptions: [10, 25, 50],
-          }}
-          sorting={{ sort: { field: 'latency' as keyof TransactionGroup, direction: 'desc' } }}
-          search={{
-            box: { incremental: true },
-            onChange: onSearchChange,
-          }}
-        />
+        {errorMessage ? (
+          <EuiCallOut announceOnMount size="s" color="danger" title={errorMessage} />
+        ) : (
+          <EuiInMemoryTable
+            tableCaption={title}
+            items={items}
+            columns={resolvedColumns}
+            loading={isLoading}
+            noItemsMessage={
+              isLoading
+                ? i18n.translate('apmUiShared.transactionsTable.loading', {
+                    defaultMessage: 'Loading...',
+                  })
+                : i18n.translate('apmUiShared.transactionsTable.noResults', {
+                    defaultMessage: 'No transactions found',
+                  })
+            }
+            pagination={{
+              initialPageSize: 10,
+              showPerPageOptions: true,
+              pageSizeOptions: [10, 25, 50],
+            }}
+            sorting={{ sort: { field: 'latency' as keyof TransactionGroup, direction: 'desc' } }}
+            search={{
+              box: { incremental: true },
+              onChange: onSearchChange,
+            }}
+          />
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

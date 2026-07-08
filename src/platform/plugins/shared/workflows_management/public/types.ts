@@ -24,6 +24,7 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
 import type {
@@ -79,6 +80,7 @@ export interface WorkflowsPublicPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   workflowsExtensions: WorkflowsExtensionsPublicPluginStart;
   licensing: LicensingPluginStart;
+  uiActions: UiActionsStart;
   cloud?: CloudStart;
 }
 
@@ -88,9 +90,6 @@ export interface WorkflowsPublicPluginStartAdditionalServices {
     telemetry: TelemetryServiceClient;
     agentBuilder?: AgentBuilderPluginStart;
     availability: AvailabilityService;
-    globalExecutionsView: {
-      enabled: boolean;
-    };
   };
 }
 

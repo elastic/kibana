@@ -6,6 +6,11 @@
  */
 
 export {
+  ConversationAccessControlMode,
+  getDefaultConversationAccessControl,
+  type ConversationAccessControl,
+} from './access_control';
+export {
   ConversationRoundStatus,
   ConversationDisplayStatus,
   type ConversationAction,
@@ -15,6 +20,7 @@ export {
   type ToolCallWithResult,
   type ConversationRound,
   type Conversation,
+  type ConversationSource,
   type ConversationInternalState,
   type TodoItem,
   type TodoStatus,
@@ -42,9 +48,14 @@ export {
   type CompactionToolCallSummary,
   type CompactionEntity,
   ConversationRoundStepType,
+  ConversationSourceType,
   isToolCallStep,
   isReasoningStep,
   isCompactionStep,
+  type AskUserQuestionStep,
+  type AskUserQuestionStepData,
+  createAskUserQuestionStep,
+  isAskUserQuestionStep,
 } from './conversation';
 export {
   ChatEventType,
@@ -105,6 +116,14 @@ export {
   isTodosUpdatedEvent,
   TODOS_UPDATED_UI_EVENT,
   type TodosUpdatedUiEventData,
+  type UserQuestionAskedEvent,
+  type UserQuestionAskedEventData,
+  type UserQuestionAnsweredEvent,
+  type UserQuestionAnsweredEventData,
+  isUserQuestionAskedEvent,
+  isUserQuestionAnsweredEvent,
+  createUserQuestionAskedEvent,
+  createUserQuestionAnsweredEvent,
 } from './events';
 export type { RoundState } from './round_state';
 export type { ConversationListOptions } from './conversation_list';

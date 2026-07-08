@@ -9,7 +9,8 @@
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { screen } from '@testing-library/react';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
 import { SyncJobType, SyncStatus, TriggerMethod } from '../..';
 
@@ -44,32 +45,40 @@ describe('SyncCalloutsPanel', () => {
     trigger_method: TriggerMethod.ON_DEMAND,
     worker_hostname: 'hostname_fake',
   };
-  it('renders', () => {
-    const wrapper = shallow(<SyncJobCallouts syncJob={syncJob} />);
 
-    expect(wrapper).toMatchSnapshot();
-  });
-  it('renders error job', () => {
-    const wrapper = shallow(<SyncJobCallouts syncJob={{ ...syncJob, status: SyncStatus.ERROR }} />);
+  it('renders the sync complete callout', () => {
+    renderWithKibanaRenderContext(<SyncJobCallouts syncJob={syncJob} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByText('Sync complete')).toBeInTheDocument();
+    expect(screen.getByText('Sync started manually')).toBeInTheDocument();
   });
-  it('renders canceled job', () => {
-    const wrapper = shallow(
+
+  it('renders the sync failure callout for an error job', () => {
+    renderWithKibanaRenderContext(
+      <SyncJobCallouts syncJob={{ ...syncJob, status: SyncStatus.ERROR }} />
+    );
+
+    expect(screen.getByText('Sync failure')).toBeInTheDocument();
+  });
+
+  it('renders the sync canceled callout for a canceled job', () => {
+    renderWithKibanaRenderContext(
       <SyncJobCallouts syncJob={{ ...syncJob, status: SyncStatus.CANCELED }} />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByText('Sync canceled')).toBeInTheDocument();
   });
-  it('renders in progress job', () => {
-    const wrapper = shallow(
+
+  it('renders the in progress callout', () => {
+    renderWithKibanaRenderContext(
       <SyncJobCallouts syncJob={{ ...syncJob, status: SyncStatus.IN_PROGRESS }} />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByText('In progress')).toBeInTheDocument();
   });
-  it('renders different trigger method', () => {
-    const wrapper = shallow(
+
+  it('renders "sync started by schedule" for a scheduled trigger', () => {
+    renderWithKibanaRenderContext(
       <SyncJobCallouts
         syncJob={{
           ...syncJob,
@@ -79,6 +88,7 @@ describe('SyncCalloutsPanel', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByText('Sync started by schedule')).toBeInTheDocument();
+    expect(screen.queryByText('Sync started manually')).not.toBeInTheDocument();
   });
 });

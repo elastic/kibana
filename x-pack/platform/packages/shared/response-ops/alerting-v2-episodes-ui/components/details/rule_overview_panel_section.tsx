@@ -9,6 +9,12 @@ import React from 'react';
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
+import {
+  getRuleIdFromRuleState,
+  isRuleError,
+  isRuleLoaded,
+  isRuleLoading,
+} from '../../types/rule_state';
 import { getRuleDetailsPath } from '../../constants';
 import { AlertEpisodeRuleOverviewPanel } from './rule_overview_panel';
 import type { AlertEpisodeDetailsServices } from './types';
@@ -31,13 +37,12 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
 
   const ruleId = episode?.['rule.id'];
 
-  const {
-    data: rule,
-    isLoading: isLoadingRule,
-    isError: isRuleError,
-  } = useFetchRule({ id: ruleId, http: services.http });
+  const { ruleState } = useFetchRule({
+    id: ruleId,
+    http: services.http,
+  });
 
-  if (isLoadingEpisode || (ruleId && isLoadingRule)) {
+  if (isLoadingEpisode || (ruleId && isRuleLoading(ruleState))) {
     return (
       <EuiLoadingSpinner
         size="m"
@@ -46,7 +51,7 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
     );
   }
 
-  if (isEpisodeError || isRuleError || !ruleId || !rule) {
+  if (isEpisodeError || isRuleError(ruleState)) {
     return (
       <EuiEmptyPrompt
         data-test-subj="alertingV2EpisodeRuleOverviewPanelSectionError"
@@ -58,10 +63,20 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
     );
   }
 
+  if (!isRuleLoaded(ruleState)) {
+    return null;
+  }
+
+  const resolvedRuleId = getRuleIdFromRuleState(ruleState);
+
+  if (!resolvedRuleId) {
+    return null;
+  }
+
   return (
     <AlertEpisodeRuleOverviewPanel
-      rule={rule}
-      ruleDetailsHref={services.http.basePath.prepend(getRuleDetailsPath(ruleId))}
+      rule={ruleState.rule}
+      ruleDetailsHref={services.http.basePath.prepend(getRuleDetailsPath(resolvedRuleId))}
     />
   );
 };

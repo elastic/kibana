@@ -10,7 +10,21 @@ import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../common';
 import { securityLabsSearchTool } from './security_labs_search_tool';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
-import { entityRiskScoreTool, getEntityTool, searchEntitiesTool } from './entity_analytics';
+import {
+  addEntitiesToWatchlistTool,
+  createWatchlistTool,
+  deleteWatchlistTool,
+  entityRiskScoreTool,
+  getEntityTool,
+  listWatchlistsTool,
+  removeEntitiesFromWatchlistTool,
+  searchEntitiesTool,
+  updateWatchlistTool,
+  generateLeadsTool,
+  listLeadsTool,
+  dismissLeadTool,
+  setAssetCriticalityTool,
+} from './entity_analytics';
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
 import { pciComplianceTool } from './pci_compliance_tool';
@@ -19,7 +33,10 @@ import { pciFieldMapperTool } from './pci_field_mapper_tool';
 import { registerSiemReadinessTools } from './siem_readiness';
 import { runRulePreviewTool } from './run_rule_preview_tool';
 import type { RunRulePreviewDeps } from '../../lib/detection_engine/rule_preview/api/preview_rules/run_rule_preview';
-import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
+import type {
+  SecuritySolutionPluginCoreSetupDependencies,
+  SetupPlugins,
+} from '../../plugin_contract';
 
 /**
  * Registers all security agent builder tools with the agentBuilder plugin.
@@ -28,24 +45,46 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_c
  * `run_rule_preview` tool behind `experimentalFeatures.rulePreviewAttachmentEnabled` so the
  * features can ship dark and be enabled per environment.
  */
-export const registerTools = async (
+export const registerTools = (
   agentBuilder: AgentBuilderPluginSetup,
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
   experimentalFeatures: ExperimentalFeatures,
+  ml: SetupPlugins['ml'],
   rulePreviewDeps: RunRulePreviewDeps,
-  isServerless: boolean = false
+  isServerless: boolean = false,
+  kibanaVersion: string,
+  hasEncryptionKey: boolean = false
 ) => {
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
   agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
   agentBuilder.tools.register(securityLabsSearchTool(core));
   agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(alertsTool(core, logger));
-  agentBuilder.tools.register(getEntityTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(getEntityTool(core, logger, ml, experimentalFeatures));
+  agentBuilder.tools.register(addEntitiesToWatchlistTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(createWatchlistTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(
+    deleteWatchlistTool(core, logger, experimentalFeatures, hasEncryptionKey)
+  );
+  agentBuilder.tools.register(listWatchlistsTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(removeEntitiesFromWatchlistTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(
+    setAssetCriticalityTool(core, logger, experimentalFeatures, kibanaVersion)
+  );
+  agentBuilder.tools.register(updateWatchlistTool(core, logger, experimentalFeatures));
 
   if (experimentalFeatures.rulePreviewAttachmentEnabled) {
     agentBuilder.tools.register(runRulePreviewTool(rulePreviewDeps));
+  }
+
+  if (experimentalFeatures.leadGenerationEnabled) {
+    agentBuilder.tools.register(listLeadsTool(core, logger, experimentalFeatures));
+    agentBuilder.tools.register(
+      generateLeadsTool(core, logger, experimentalFeatures, rulePreviewDeps.getStartServices, ml)
+    );
+    agentBuilder.tools.register(dismissLeadTool(core, logger, experimentalFeatures));
   }
 
   if (experimentalFeatures.pciComplianceAgentBuilder) {

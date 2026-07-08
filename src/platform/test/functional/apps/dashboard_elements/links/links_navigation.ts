@@ -34,7 +34,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
    *
    * Migration: migrate to scout - move to links plugin
    */
-  describe('links panel navigation', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/274945
+  describe.skip('links panel navigation', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles([
