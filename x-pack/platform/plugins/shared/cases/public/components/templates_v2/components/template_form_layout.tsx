@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { AppHeader } from '@kbn/app-header';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { isEqual } from 'lodash';
 import type { UseFormReturn } from 'react-hook-form';
 import { FormProvider } from 'react-hook-form';
@@ -322,8 +321,8 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       <EuiFlexGroup
         direction="column"
         gutterSize="none"
-        // The wrapper cancels the page-section padding via negative margins, so the only
-        // extra vertical space to reserve is the Security Solution timeline bottom bar
+        // The header cancels the page-section padding itself (see its `padding` prop below),
+        // so the wrapper only needs to reserve the Security Solution timeline bottom bar
         // (57px, the same value used by the validation accordion). This makes the page
         // fill the viewport exactly and never scroll the header under the sticky top bar.
         css={[kbnFullBodyHeightCss('57px'), styles.wrapper]}
@@ -335,10 +334,14 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             badges={templateFormBadges}
             menu={templateFormMenu}
             sticky={false}
+            // Breaks the header out to the surrounding EuiPageSection's edges (top/left/right)
+            // and re-insets its content by the same amount, so it runs edge-to-edge while the
+            // title/menu stay aligned with the page gutter.
+            padding={{ bleed: 'l' }}
           />
         </EuiFlexItem>
 
-        <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
+        <EuiFlexItem css={styles.editorWrapper}>
           <TemplateEditorLayout
             isLoading={isLoading}
             yamlValue={yamlValue}
