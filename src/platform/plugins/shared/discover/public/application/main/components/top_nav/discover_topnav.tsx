@@ -81,7 +81,7 @@ export const DiscoverTopNav = ({
   const onSaveCbRef = useRef<(() => void) | undefined>(undefined);
 
   const query = useAppStateSelector((state) => state.query);
-  const useApproximation = useAppStateSelector((state) => state.useApproximation ?? false);
+  const isApproximate = useAppStateSelector((state) => state.isApproximate ?? false);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
   const { timeRangeAbsolute } = useCurrentTabSelector((tab) => tab.dataRequestParams);
   const refreshInterval = useCurrentTabSelector((state) => state.globalState.refreshInterval);
@@ -204,7 +204,7 @@ export const DiscoverTopNav = ({
 
   const onUseApproximationChange = useCallback(
     (nextValue: boolean) => {
-      dispatch(updateAppState({ appState: { useApproximation: nextValue } }));
+      dispatch(updateAppState({ appState: { isApproximate: nextValue } }));
     },
     [dispatch, updateAppState]
   );
@@ -446,12 +446,12 @@ export const DiscoverTopNav = ({
         esqlQueryStats={esqlQueryStats}
         onOpenQueryInNewTab={onOpenQueryInNewTab}
         esqlApproximation={
-          isEsqlMode && services.discoverFeatureFlags.getEsqlApproximationEnabled()
+          isEsqlMode
             ? {
-                useApproximation,
+                isApproximate,
                 onChange: onUseApproximationChange,
                 additionalText: i18n.translate('discover.esqlApproximationToggle.additionalText', {
-                  defaultMessage: 'Only applies to queries that use exactly one STATS command.',
+                  defaultMessage: 'Only applies to queries that use one STATS command.',
                 }),
               }
             : undefined

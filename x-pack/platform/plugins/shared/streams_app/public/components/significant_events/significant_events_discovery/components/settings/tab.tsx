@@ -37,7 +37,7 @@ import {
 import {
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MIN_EXTRACTION_INTERVAL_HOURS,
-} from '@kbn/streams-plugin/common';
+} from '@kbn/significant-events-plugin/common';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url';
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';

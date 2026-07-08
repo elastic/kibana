@@ -53,6 +53,9 @@ jest.mock('../../../../containers/use_post_push_to_service');
 jest.mock('../../../user_actions/timestamp', () => ({
   UserActionTimestamp: () => <></>,
 }));
+jest.mock('./sidebar_toggle_button', () => ({
+  SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
+}));
 jest.mock('../../../../common/navigation/hooks');
 jest.mock('../../../../containers/use_get_action_license');
 jest.mock('../../../../containers/use_get_tags');
@@ -121,7 +124,7 @@ const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
 const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
 const useOnUpdateFieldMock = useOnUpdateField as jest.Mock;
 
-const localStorageKey = `${basicCase.owner}.cases.userActivity.sortOrder`;
+const localStorageKey = `${basicCase.owner}.cases.userActivity.redesign.filters`;
 
 describe('Case View Page activity tab (redesign)', () => {
   const caseConnectors = getCaseConnectorsMockResponse();
@@ -248,12 +251,46 @@ describe('Case View Page activity tab (redesign)', () => {
     expect(screen.queryByTestId('user-actions-list')).not.toBeInTheDocument();
   });
 
-  it('should save sortOrder in localstorage', async () => {
+  it('should save filter selection in localstorage', async () => {
+    // The previous test ('should show a loading when loading user actions
+    // stats') leaves this mocked as `isLoading: true`; `jest.clearAllMocks`
+    // in `beforeEach` doesn't reset return values, so it must be restored
+    // here for the filter bar's controls to be interactive.
+    useGetCaseUserActionsStatsMock.mockReturnValue({ data: userActionsStats, isLoading: false });
+
     renderWithTestingProviders(<CaseViewActivity {...caseProps} />);
 
-    await userEvent.selectOptions(await screen.findByTestId('user-actions-sort-select'), 'desc');
+    await userEvent.click(await screen.findByTestId('user-actions-filter-bar-sort-button'));
+    await userEvent.click(await screen.findByTestId('user-actions-filter-bar-sort-option-desc'));
 
-    expect(localStorage.getItem(localStorageKey)).toBe('"desc"');
+    await waitFor(() => {
+      expect(localStorage.getItem(localStorageKey)).toBe(
+        JSON.stringify({ type: 'all', sortOrder: 'desc' })
+      );
+    });
+  });
+
+  it('should save the authors filter selection in localstorage', async () => {
+    useGetCaseUserActionsStatsMock.mockReturnValue({ data: userActionsStats, isLoading: false });
+
+    renderWithTestingProviders(<CaseViewActivity {...caseProps} />);
+
+    await userEvent.click(await screen.findByTestId('user-actions-filter-bar-author-button'));
+    await userEvent.click(
+      await screen.findByTestId(
+        `user-actions-filter-bar-author-option-${caseUsers.participants[0].user.username}`
+      )
+    );
+
+    await waitFor(() => {
+      expect(localStorage.getItem(localStorageKey)).toBe(
+        JSON.stringify({
+          type: 'all',
+          sortOrder: 'asc',
+          authors: [caseUsers.participants[0].user.username],
+        })
+      );
+    });
   });
 
   describe('filter activity', () => {
@@ -272,7 +309,8 @@ describe('Case View Page activity tab (redesign)', () => {
 
       const lastPageForAll = Math.ceil(userActionsStats.total / userActivityQueryParams.perPage);
 
-      await userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-all'));
+      await userEvent.click(await screen.findByTestId('user-actions-filter-bar-type-button'));
+      await userEvent.click(await screen.findByTestId('user-actions-filter-bar-type-option-all'));
 
       expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
         caseData.id,
@@ -296,8 +334,9 @@ describe('Case View Page activity tab (redesign)', () => {
         userActionsStats.totalComments / userActivityQueryParams.perPage
       );
 
+      await userEvent.click(await screen.findByTestId('user-actions-filter-bar-type-button'));
       await userEvent.click(
-        await screen.findByTestId('user-actions-filter-activity-button-comments')
+        await screen.findByTestId('user-actions-filter-bar-type-option-comments')
       );
 
       expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
@@ -320,8 +359,9 @@ describe('Case View Page activity tab (redesign)', () => {
         userActionsStats.totalOtherActions / userActivityQueryParams.perPage
       );
 
+      await userEvent.click(await screen.findByTestId('user-actions-filter-bar-type-button'));
       await userEvent.click(
-        await screen.findByTestId('user-actions-filter-activity-button-history')
+        await screen.findByTestId('user-actions-filter-bar-type-option-history')
       );
 
       expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
@@ -334,6 +374,30 @@ describe('Case View Page activity tab (redesign)', () => {
         caseData.id,
         { ...userActivityQueryParams, type: 'action', page: lastPageForHistory },
         true
+      );
+    });
+
+    it('should call user action hooks correctly when filtering by author', async () => {
+      renderWithTestingProviders(<CaseViewActivity {...caseProps} />);
+
+      const author = caseUsers.participants[0].user.username as string;
+
+      await userEvent.click(await screen.findByTestId('user-actions-filter-bar-author-button'));
+      await userEvent.click(
+        await screen.findByTestId(`user-actions-filter-bar-author-option-${author}`)
+      );
+
+      // Filtering (like searching) collapses pagination into a single
+      // infinite query that fetches every page, including the last.
+      expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
+        caseData.id,
+        { ...userActivityQueryParams, authors: [author] },
+        true
+      );
+      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+        caseData.id,
+        { ...userActivityQueryParams, authors: [author] },
+        false
       );
     });
   });

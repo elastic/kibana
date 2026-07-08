@@ -55,6 +55,11 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
     const searchTerm = await pageObjects.globalSearch.getFieldValue();
     expect(searchTerm).toBe('type:dashboard');
 
+    // Refine with a title term so the results stay within the provider's result cap
+    // (defaultMaxProviderResults) even on deployments that ship many managed dashboards
+    // (e.g. cloud Fleet integrations), which would otherwise displace the archive dashboards.
+    await pageObjects.globalSearch.searchFor('type:dashboard dashboard');
+
     const expectedLabels = [
       'dashboard 1 (tag-2)',
       'dashboard 2 (tag-3)',
@@ -89,7 +94,10 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
 
   test('allows to filter by type', async ({ pageObjects }) => {
     await pageObjects.globalSearch.navigateToHome();
-    await pageObjects.globalSearch.searchFor('type:dashboard');
+    // Include a title term ('dashboard') alongside the type filter so the four archive
+    // dashboards stay within the provider's result cap on deployments that ship many
+    // managed dashboards (e.g. cloud Fleet integrations).
+    await pageObjects.globalSearch.searchFor('type:dashboard dashboard');
 
     const expectedLabels = [
       'dashboard 1 (tag-2)',
@@ -104,7 +112,10 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
   });
 
   test('allows to filter by multiple types', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.searchFor('type:(dashboard OR visualization)');
+    // The 'tag' term matches every archive fixture (their titles all contain '(tag-N)') but
+    // not the managed dashboards a cloud deployment ships, keeping the expected objects within
+    // the provider's result cap.
+    await pageObjects.globalSearch.searchFor('type:(dashboard OR visualization) tag');
 
     const expectedLabels = [
       'Visualization 1 (tag-1)',
