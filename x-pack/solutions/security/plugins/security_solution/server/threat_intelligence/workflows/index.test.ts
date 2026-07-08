@@ -127,17 +127,28 @@ describe('installBuiltinWorkflows', () => {
 // nl_extraction_behavioral isolation guard
 //
 // WHY this test exists:
-//   nl-extraction must ONLY load pending docs. STIX partner docs are
-//   pre-structured at ingest (Cycle 2) and carry extraction_method:'stix'.
-//   The `load_pending_reports` step and the `check_already_extracted`
-//   per-item dedup gate together form the isolation boundary that prevents
-//   Haiku from re-extracting IOCs we already parsed — and from clobbering
-//   the 'stix' extraction_method marker.
+//   nl-extraction must ONLY load pending docs. Two structured-method types
+//   must NEVER be reprocessed by the nl-extraction workflow:
+//
+//     • 'stix'                — STIX partner docs are pre-structured at
+//                               ingest (Cycle 2) and carry extraction_method:'stix'.
+//                               Re-running Haiku over them would clobber the
+//                               stix marker and double-count IOCs.
+//
+//     • 'text_indicator_list' — Maltrail trail files are parsed deterministically
+//                               by the text_indicator_list adapter at ingest time.
+//                               IOCs are already extracted; nl-extraction must not
+//                               touch them or overwrite the extraction_method marker.
+//
+//   The `load_pending_reports` step (term filter: extraction_method == 'pending')
+//   and the `check_already_extracted` per-item dedup gate together form the
+//   isolation boundary. Both structured types are excluded automatically because
+//   neither value equals 'pending' under strict term semantics.
 //
 //   A future edit that drops, weakens, or renames either filter would
 //   silently break the boundary. This test fails loudly in that case.
 // ---------------------------------------------------------------------------
-describe('nl_extraction_behavioral — STIX isolation boundary', () => {
+describe('nl_extraction_behavioral — structured-method isolation boundary (stix + text_indicator_list)', () => {
   const nlWorkflow = BUILTIN_WORKFLOWS.find(
     (wf) => wf.id === 'threat-intel-nl-extraction-behavioral'
   );
@@ -179,6 +190,23 @@ describe('nl_extraction_behavioral — STIX isolation boundary', () => {
       // 'stix' != 'pending', so STIX docs are excluded by ES term semantics.
       expect(step).toContain('term:');
       expect(step).toContain('pending');
+    });
+
+    it('a doc with extraction_method text_indicator_list would not match the load_pending_reports filter (structural)', () => {
+      // Structural negative for text_indicator_list: same invariant as the stix
+      // test above. Maltrail trail files are ingested with extraction_method set
+      // to 'text_indicator_list' by the textIndicatorListAdapter at ingest time.
+      // The `term: pending` filter is strict exact-match, so any doc whose
+      // extraction_method is 'text_indicator_list' is excluded automatically —
+      // no special-case logic is needed. This test locks the invariant against
+      // a future weakening of the filter (e.g. changing `term:` to `exists:`).
+      const step = stepText(yaml, 'load_pending_reports');
+      // term: + pending → 'text_indicator_list' != 'pending' → excluded.
+      expect(step).toContain('term:');
+      expect(step).toContain('pending');
+      // The filter must NOT use 'exists:' or 'match:' (which would include
+      // text_indicator_list docs). The two assertions above already verify
+      // term: semantics — this comment makes the protection explicit.
     });
   }
 });

@@ -46,13 +46,27 @@ import {
  */
 interface DefaultSource {
   id: string;
-  adapter_type: 'rss' | 'vendor_api';
+  adapter_type: 'rss' | 'vendor_api' | 'text_indicator_list';
   name: string;
   config: { url: string };
   tags: string[];
 }
 
 export const DEFAULT_SOURCES: readonly DefaultSource[] = [
+  // --- Maltrail structured indicator lists --------------------------------
+  // Maltrail is an MIT-licensed threat intelligence project maintained by
+  // Miroslav Stampar (stamparm/maltrail on GitHub). Provenance is preserved
+  // via source.url on every ingested report.
+  {
+    id: 'text_indicator_list:maltrail-cobaltstrike',
+    adapter_type: 'text_indicator_list',
+    name: 'Maltrail — CobaltStrike C2 indicators',
+    config: {
+      url: 'https://raw.githubusercontent.com/stamparm/maltrail/master/trails/static/malware/cobaltstrike.txt',
+    },
+    tags: ['malware', 'research-tools', 'feed'],
+  },
+
   // --- Vendor research blogs ---------------------------------------------
   {
     id: 'vendor_api:elastic-security-labs',

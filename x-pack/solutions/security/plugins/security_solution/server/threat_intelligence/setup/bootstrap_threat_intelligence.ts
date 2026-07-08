@@ -86,6 +86,52 @@ const checkDiamondInferenceEndpoint = async (
 };
 
 /**
+ * Seeds the default feed catalog into `.kibana-threat-intel-sources`.
+ *
+ * Separated from template installation so seeding can be catalog-gated while
+ * templates run on every boot. Called only when the catalog is empty.
+ */
+const seedThreatIntelligenceCatalog = async ({
+  esClient,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}): Promise<BootstrapThreatIntelligenceResult> => {
+  const log = logger.get('bootstrap');
+
+  const seed = await withElasticsearchRetry(
+    () => seedDefaultSources({ esClient, logger }),
+    log,
+    'Threat intelligence default source seeding'
+  );
+
+  log.info(
+    `Threat intelligence source seeding finished: ${seed.created} sources created, ` +
+      `${seed.skipped} already present, ${seed.failed} failed (${seed.total} catalog entries)`
+  );
+
+  if (seed.failed > 0) {
+    log.warn(
+      `Threat intelligence default-source seeding had ${seed.failed} failure(s); ` +
+        'check earlier warn logs for per-source errors'
+    );
+  }
+
+  const catalogCount = await esClient.count(
+    { index: THREAT_INTEL_SOURCES_INDEX },
+    { ignore: [404] }
+  );
+  if (catalogCount.count === 0 && seed.created === 0) {
+    log.error(
+      'Threat intelligence source seeding completed but `.kibana-threat-intel-sources` is still empty'
+    );
+  }
+
+  return { seed };
+};
+
+/**
  * Installs plugin-owned index templates / indices, then seeds the default feed
  * catalog into `.kibana-threat-intel-sources`.
  *
@@ -113,41 +159,21 @@ export const bootstrapThreatIntelligence = async ({
   // Non-blocking check — see `checkDiamondInferenceEndpoint` doc comment.
   await checkDiamondInferenceEndpoint(esClient, log);
 
-  const seed = await withElasticsearchRetry(
-    () => seedDefaultSources({ esClient, logger }),
-    log,
-    'Threat intelligence default source seeding'
-  );
-
-  log.info(
-    `Threat intelligence bootstrap finished: ${seed.created} sources created, ` +
-      `${seed.skipped} already present, ${seed.failed} failed (${seed.total} catalog entries)`
-  );
-
-  if (seed.failed > 0) {
-    log.warn(
-      `Threat intelligence default-source seeding had ${seed.failed} failure(s); ` +
-        'check earlier warn logs for per-source errors'
-    );
-  }
-
-  const catalogCount = await esClient.count(
-    { index: THREAT_INTEL_SOURCES_INDEX },
-    { ignore: [404] }
-  );
-  if (catalogCount.count === 0 && seed.created === 0) {
-    log.error(
-      'Threat intelligence bootstrap completed but `.kibana-threat-intel-sources` is still empty'
-    );
-  }
-
-  return { seed };
+  return seedThreatIntelligenceCatalog({ esClient, logger });
 };
 
 /**
- * Idempotent guard used on setup and start. Re-runs bootstrap when the sources
- * catalog index is missing or empty (e.g. Elasticsearch data was wiped while
- * Kibana stayed up, or the first bootstrap attempt failed during a cold start).
+ * Idempotent entry point called on every plugin boot.
+ *
+ * Index templates and schema migrations (installIndexTemplates) run on EVERY
+ * boot — they are unconditional PUT operations that are safe to re-run and
+ * must run on each restart so version bumps and migrateExisting* patches reach
+ * populated clusters. Skipping them when the catalog is non-empty was the bug
+ * that caused ALL schema migrations (v14–v19) to silently miss any cluster
+ * that had already been seeded.
+ *
+ * Source catalog seeding is still catalog-gated: it only runs when the sources
+ * index is missing or empty (fresh install, or ES data wiped while Kibana ran).
  */
 export const ensureThreatIntelligenceBootstrap = async ({
   esClient,
@@ -158,6 +184,18 @@ export const ensureThreatIntelligenceBootstrap = async ({
 }): Promise<BootstrapThreatIntelligenceResult | undefined> => {
   const log = logger.get('bootstrap');
 
+  // Always install templates and run migration patches — idempotent and safe
+  // to re-run; skipping them on a populated cluster silently breaks schema
+  // upgrades (the bug that kept templates at v18 on every non-fresh boot).
+  await withElasticsearchRetry(
+    () => installIndexTemplates({ esClient, logger }),
+    log,
+    'Threat intelligence index template installation'
+  );
+
+  // Non-blocking check — see `checkDiamondInferenceEndpoint` doc comment.
+  await checkDiamondInferenceEndpoint(esClient, log);
+
   const catalogCount = await esClient.count(
     { index: THREAT_INTEL_SOURCES_INDEX },
     { ignore: [404] }
@@ -165,14 +203,12 @@ export const ensureThreatIntelligenceBootstrap = async ({
 
   if (catalogCount.count > 0) {
     log.debug(
-      `Threat intelligence catalog already has ${catalogCount.count} sources; skipping bootstrap`
+      `Threat intelligence catalog already has ${catalogCount.count} sources; skipping source seeding`
     );
     return undefined;
   }
 
-  log.info(
-    'Threat intelligence catalog is empty; running bootstrap (index templates + default sources)'
-  );
+  log.info('Threat intelligence catalog is empty; running source seeding');
 
-  return bootstrapThreatIntelligence({ esClient, logger });
+  return seedThreatIntelligenceCatalog({ esClient, logger });
 };

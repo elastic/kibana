@@ -10,6 +10,7 @@ import { rssAdapter } from './rss/rss_adapter';
 import { stixAdapter } from './stix/stix_adapter';
 import { taxiiAdapter } from './taxii/taxii_adapter';
 import { vendorApiAdapter } from './vendor_api/vendor_api_adapter';
+import { textIndicatorListAdapter } from './text_indicator_list/text_indicator_list_adapter';
 import type { AdapterRunContext, FetchAdapter, NormalizedReport, SourceHit } from './types';
 
 /**
@@ -29,6 +30,7 @@ const ADAPTERS: Partial<Record<SourceType, FetchAdapter>> = {
   stix: stixAdapter,
   taxii: taxiiAdapter,
   vendor_api: vendorApiAdapter,
+  text_indicator_list: textIndicatorListAdapter,
 };
 
 /**

@@ -21,8 +21,8 @@ import * as path from 'path';
 const src = fs.readFileSync(path.join(__dirname, 'index_templates.ts'), 'utf8');
 
 describe('index_templates — mapping coverage guard', () => {
-  it('TEMPLATE_VERSION is 18', () => {
-    expect(src).toContain('const TEMPLATE_VERSION = 18;');
+  it('TEMPLATE_VERSION is 19', () => {
+    expect(src).toContain('const TEMPLATE_VERSION = 19;');
   });
 
   it('content.external_references is declared as nested with the expected property shape', () => {
@@ -30,8 +30,11 @@ describe('index_templates — mapping coverage guard', () => {
     expect(src).toContain("type: 'nested' as const,");
     expect(src).toContain("source_name: { type: 'keyword' as const }");
     expect(src).toContain("url: { type: 'keyword' as const }");
+    expect(src).toContain("canonical_url: { type: 'keyword' as const }");
     expect(src).toContain("external_id: { type: 'keyword' as const }");
     expect(src).toContain("description: { type: 'text' as const, index: false as const }");
+    expect(src).toContain("ref_part: { type: 'integer' as const }");
+    expect(src).toContain("ref_part_count: { type: 'integer' as const }");
   });
 
   it('migrateExistingExternalReferencesMapping is wired into installIndexTemplates', () => {
@@ -42,5 +45,10 @@ describe('index_templates — mapping coverage guard', () => {
 
     const callIdx = src.indexOf('await migrateExistingExternalReferencesMapping', installIdx);
     expect(callIdx).toBeGreaterThan(installIdx);
+  });
+
+  it('extracted.iocs includes reference and block_index fields (v19 maltrail adapter fields)', () => {
+    expect(src).toContain("reference: { type: 'keyword' as const }");
+    expect(src).toContain("block_index: { type: 'integer' as const }");
   });
 });

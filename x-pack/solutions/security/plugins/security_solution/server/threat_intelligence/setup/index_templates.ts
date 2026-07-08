@@ -163,6 +163,34 @@ import {
  *   queries (e.g. "docs where MITRE cited url X"). Consumed as cross-links (report↔report)
  *   and as the source-discovery seed queue by the self-watering router.
  *   A `migrateExistingExternalReferencesMapping` call patches pre-v18 backing indices at startup.
+ *   v19 addition: `canonical_url` (keyword) — scheme/port-normalised form of `url`, used as
+ *   the self-watering URL-reconciliation key by `adapters/canonicalize_url.ts`. Added to the
+ *   block in v19; the same migration also patches indices that already have external_references
+ *   but were created before canonical_url was introduced.
+ *
+ * v19: adds `sources` (nested) to the indicators companion index
+ *   (`.kibana-threat-intel-indicators`) — per-report provenance accumulator so an IOC
+ *   cited by multiple reports/trails carries ALL citing sources instead of the last writer
+ *   winning. Each entry has:
+ *   - `report_id`  (keyword) — `_id` of the citing threat report; dedup key within sources[].
+ *   - `provider`   (keyword) — `source.name` from the citing report (e.g. "maltrail").
+ *   - `trail`      (keyword) — Maltrail trail label (`content.title`); absent for non-maltrail.
+ *   - `reference`  (keyword) — per-IOC nearest-ref URL (Maltrail `extracted.iocs[].reference`),
+ *                              falling back to the report's `source.url`; absent when neither.
+ *   - `first_seen` (date)    — `provenance.extracted_at` of the citing report.
+ *   Populated by a Painless scripted upsert in `tasks/ioc_indicator_sync.ts`; dedup by
+ *   `report_id` ensures re-running the sync for the same report never duplicates its entry.
+ *   A `migrateExistingIndicatorSourcesMapping` call patches the pre-v19 companion index at
+ *   startup (companion index, not data stream — PUT mapping targets the index directly).
+ *   Also adds `extracted.iocs[].reference` (keyword) and `extracted.iocs[].block_index`
+ *   (integer) to the reports data stream — written by the `text_indicator_list` adapter for
+ *   Maltrail trail files. A `migrateExistingIocReferenceMappings` call patches pre-v19 backing
+ *   indices at startup.
+ *   Also adds `content.external_references[].ref_part` (integer) and `.ref_part_count` (integer)
+ *   — per-reference fragmentation m-of-n fields written when a single `# Reference:` block must
+ *   be split across multiple chunk docs to stay under the 10k nested-object limit. Always present
+ *   on text_indicator_list reports (unsplit = 1/1). Folded into `migrateExistingExternalReferencesMapping`
+ *   so pre-v19 indices gain these fields at startup without a separate migration call.
  *
  * v16: adds `extracted.gate.*` (7 fields) — the relevance/provenance gate verdict block.
  *   Note: `primary_links` is deferred — no consumer until Slice-5 link-chasing.
@@ -193,7 +221,7 @@ import {
  * template PUT or rollover). `bootstrap_threat_intelligence` logs an error at
  * startup if the endpoint is absent so operators catch the gap before data flows.
  */
-const TEMPLATE_VERSION = 18;
+const TEMPLATE_VERSION = 19;
 
 /** Keyword sentinel meaning "visible from every space". */
 export const SPACE_ID_GLOBAL = '*' as const;
@@ -277,8 +305,15 @@ const threatReportsTemplate = {
               properties: {
                 source_name: { type: 'keyword' as const },
                 url: { type: 'keyword' as const },
+                canonical_url: { type: 'keyword' as const },
                 external_id: { type: 'keyword' as const },
                 description: { type: 'text' as const, index: false as const },
+                // Per-reference m-of-n fragmentation fields (v19 chunking). Written by the
+                // text_indicator_list adapter when a single # Reference: block must be split
+                // across multiple report docs to stay under the nested-object limit.
+                // Always present on text_indicator_list reports (unsplit = 1/1).
+                ref_part: { type: 'integer' as const },
+                ref_part_count: { type: 'integer' as const },
               },
             },
           },
@@ -325,6 +360,12 @@ const threatReportsTemplate = {
                 tier_basis: { type: 'keyword' as const },
                 // Port from socket extraction (v17): ip:port / domain:port → integer.
                 port: { type: 'integer' as const },
+                // Per-IOC nearest-ref URL from Maltrail trail files (v19). The ioc_indicator_sync
+                // task copies this into sources[].reference for the indicators companion index.
+                reference: { type: 'keyword' as const },
+                // Index of the Maltrail block this IOC belongs to (v19). Used by the sync task
+                // to associate each IOC with its source reference URL.
+                block_index: { type: 'integer' as const },
               },
             },
             ioc_set_hash: { type: 'keyword' as const },
@@ -627,8 +668,22 @@ const COMPANION_INDEX_TEMPLATES: Array<{
                 },
               },
             },
-            // Sync bookkeeping — used by the Task Manager runner to
-            // decide whether to refresh an existing row or write a new one.
+            // Per-report provenance accumulator (v19). Nested so each entry's
+            // fields are associated correctly in multi-field queries. Dedup key
+            // within the array is `report_id` — scripted upsert in
+            // `tasks/ioc_indicator_sync.ts` guards against duplicates.
+            sources: {
+              type: 'nested',
+              properties: {
+                report_id: { type: 'keyword' },
+                provider: { type: 'keyword' },
+                trail: { type: 'keyword' },
+                reference: { type: 'keyword' },
+                first_seen: { type: 'date' },
+              },
+            },
+            // Sync bookkeeping — retained for backward-compat reads; sources[]
+            // is now the authoritative provenance store.
             source_report_id: { type: 'keyword' },
             source_report_url: { type: 'keyword' },
             severity: { type: 'keyword' },
@@ -1015,6 +1070,86 @@ const migrateExistingIocPortMapping = async (
 };
 
 /**
+ * Patches the `extracted.iocs[].reference` and `extracted.iocs[].block_index` fields
+ * onto any existing `.ds-.kibana-threat-reports-*` backing indices created before
+ * the v19 template. These fields are written by the `text_indicator_list` adapter
+ * (Maltrail trail files) — `reference` is the per-IOC nearest-ref URL; `block_index`
+ * is the ordinal position of the Maltrail block that contributed the IOC.
+ *
+ * Safe to re-run on every plugin start: PUT mapping is additive and idempotent.
+ * Without this, text_indicator_list writes fail with `strict_dynamic_mapping_exception`
+ * on pre-v19 indices.
+ */
+const migrateExistingIocReferenceMappings = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> => {
+  const log = logger.get('ioc-reference-mapping-migration');
+
+  let backingIndices: string[];
+  try {
+    const streamInfo = await esClient.indices.getDataStream(
+      { name: THREAT_REPORTS_DATA_STREAM },
+      { ignore: [404] }
+    );
+    backingIndices = (streamInfo.data_streams ?? []).flatMap((ds) =>
+      (ds.indices ?? []).map((i) => i.index_name)
+    );
+  } catch (err) {
+    log.debug(
+      `ioc-reference-mapping-migration: data stream not found — skipping (${
+        (err as Error).message
+      })`
+    );
+    return;
+  }
+
+  for (const indexName of backingIndices) {
+    try {
+      const { [indexName]: indexMappings } = await esClient.indices.getMapping({
+        index: indexName,
+      });
+      const iocProps = (
+        (
+          indexMappings?.mappings?.properties as
+            | Record<
+                string,
+                { properties?: Record<string, { properties?: Record<string, unknown> }> }
+              >
+            | undefined
+        )?.extracted?.properties?.iocs as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+
+      if (!iocProps?.reference || !iocProps?.block_index) {
+        await esClient.indices.putMapping({
+          index: indexName,
+          properties: {
+            extracted: {
+              properties: {
+                iocs: {
+                  type: 'nested',
+                  properties: {
+                    reference: { type: 'keyword' },
+                    block_index: { type: 'integer' },
+                  },
+                },
+              },
+            },
+          },
+        });
+        log.info(`Migrated ioc reference/block_index mappings on ${indexName} (v19 backfill)`);
+      }
+    } catch (err) {
+      log.error(
+        `Failed to migrate ioc reference mappings on ${indexName}: ${(err as Error).message}. ` +
+          `The extracted.iocs reference/block_index fields will be rejected by dynamic: strict ` +
+          `until the mapping is updated manually.`
+      );
+    }
+  }
+};
+
+/**
  * Patches the `extracted.gate.*` field mappings onto any existing
  * `.ds-.kibana-threat-reports-*` backing indices created before the v16 template.
  * The v16 template adds these fields automatically to new rollovers; pre-existing
@@ -1137,7 +1272,12 @@ const migrateExistingExternalReferencesMapping = async (
           | undefined
       )?.content?.properties;
 
+      const extRefProps = (
+        contentProps?.external_references as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+
       if (!contentProps?.external_references) {
+        // State 2: index predates v18 — no external_references block at all.
         await esClient.indices.putMapping({
           index: indexName,
           properties: {
@@ -1148,6 +1288,7 @@ const migrateExistingExternalReferencesMapping = async (
                   properties: {
                     source_name: { type: 'keyword' },
                     url: { type: 'keyword' },
+                    canonical_url: { type: 'keyword' },
                     external_id: { type: 'keyword' },
                     description: { type: 'text', index: false },
                   },
@@ -1157,6 +1298,51 @@ const migrateExistingExternalReferencesMapping = async (
           },
         });
         log.info(`Migrated external_references mapping on ${indexName} (v18 backfill)`);
+      } else if (!extRefProps?.canonical_url) {
+        // State 3: index has external_references (v18/v19) but canonical_url subfield is absent.
+        // putMapping onto an existing nested field is additive and idempotent.
+        await esClient.indices.putMapping({
+          index: indexName,
+          properties: {
+            content: {
+              properties: {
+                external_references: {
+                  type: 'nested',
+                  properties: {
+                    canonical_url: { type: 'keyword' },
+                    ref_part: { type: 'integer' },
+                    ref_part_count: { type: 'integer' },
+                  },
+                },
+              },
+            },
+          },
+        });
+        log.info(
+          `Migrated canonical_url + ref_part/ref_part_count subfields on ${indexName} (v19 backfill)`
+        );
+      } else if (!extRefProps?.ref_part || !extRefProps?.ref_part_count) {
+        // State 4: index has external_references + canonical_url but lacks ref_part/ref_part_count
+        // (v19 indices created before chunking was added). Additive and idempotent.
+        await esClient.indices.putMapping({
+          index: indexName,
+          properties: {
+            content: {
+              properties: {
+                external_references: {
+                  type: 'nested',
+                  properties: {
+                    ref_part: { type: 'integer' },
+                    ref_part_count: { type: 'integer' },
+                  },
+                },
+              },
+            },
+          },
+        });
+        log.info(
+          `Migrated ref_part/ref_part_count subfields on ${indexName} (v19 chunking backfill)`
+        );
       }
     } catch (err) {
       log.error(
@@ -1167,6 +1353,63 @@ const migrateExistingExternalReferencesMapping = async (
           `mapping is updated manually.`
       );
     }
+  }
+};
+
+/**
+ * Patches the `sources` nested field mapping onto the pre-v19 indicators companion
+ * index (`.kibana-threat-intel-indicators`). The indicators index is a plain companion
+ * index (not a data stream), so the PUT mapping targets it directly.
+ *
+ * Safe to re-run on every plugin start: PUT mapping is idempotent for additive fields.
+ * Without this, scripted upserts that write `sources[]` entries would be rejected by
+ * `strict_dynamic_mapping_exception` on pre-v19 indices.
+ */
+const migrateExistingIndicatorSourcesMapping = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> => {
+  const log = logger.get('indicator-sources-mapping-migration');
+
+  try {
+    const exists = await esClient.indices.exists({ index: THREAT_INTEL_INDICATORS_INDEX });
+    if (!exists) {
+      log.debug(`indicator-sources-mapping-migration: index not found — skipping`);
+      return;
+    }
+
+    const { [THREAT_INTEL_INDICATORS_INDEX]: indexMappings } = await esClient.indices.getMapping({
+      index: THREAT_INTEL_INDICATORS_INDEX,
+    });
+    const topLevelProps = indexMappings?.mappings?.properties as
+      | Record<string, unknown>
+      | undefined;
+
+    if (!topLevelProps?.sources) {
+      await esClient.indices.putMapping({
+        index: THREAT_INTEL_INDICATORS_INDEX,
+        properties: {
+          sources: {
+            type: 'nested',
+            properties: {
+              report_id: { type: 'keyword' },
+              provider: { type: 'keyword' },
+              trail: { type: 'keyword' },
+              reference: { type: 'keyword' },
+              first_seen: { type: 'date' },
+            },
+          },
+        },
+      });
+      log.info(`Migrated sources[] mapping on ${THREAT_INTEL_INDICATORS_INDEX} (v19 backfill)`);
+    }
+  } catch (err) {
+    log.error(
+      `Failed to migrate sources[] mapping on ${THREAT_INTEL_INDICATORS_INDEX}: ${
+        (err as Error).message
+      }. ` +
+        `The sources[] field will be rejected by dynamic: strict until the mapping is updated manually.`
+    );
   }
 };
 
@@ -1252,6 +1495,10 @@ export const installIndexTemplates = async ({
   await migrateExistingIocPortMapping(esClient, log);
   // Patch content.external_references nested field onto any pre-v18 backing indices. Safe to re-run.
   await migrateExistingExternalReferencesMapping(esClient, log);
+  // Patch ioc reference/block_index fields onto any pre-v19 backing indices. Safe to re-run.
+  await migrateExistingIocReferenceMappings(esClient, log);
+  // Patch sources[] nested field onto the pre-v19 indicators companion index. Safe to re-run.
+  await migrateExistingIndicatorSourcesMapping(esClient, log);
 
   log.info('Threat intelligence index templates installed');
 };

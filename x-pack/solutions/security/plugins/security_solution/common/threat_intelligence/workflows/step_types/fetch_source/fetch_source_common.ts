@@ -116,6 +116,17 @@ export const normalizedReportSchema = z.object({
           url: z.string().optional(),
           external_id: z.string().optional(),
           description: z.string().optional(),
+          /** Canonical form of `url` for cross-source reconciliation (see `adapters/canonicalize_url.ts`). */
+          canonical_url: z.string().optional(),
+          /**
+           * When the `text_indicator_list` adapter splits a single `# Reference:` block
+           * across multiple chunk docs (because that block alone exceeds the nested-object
+           * limit), each chunk's entry for the reference carries a 1-based part index and
+           * the total part count for that reference. Always present on text_indicator_list
+           * reports (unsplit entries carry 1/1) so consumers never need an absent-vs-1of1 check.
+           */
+          ref_part: z.number().int().optional(),
+          ref_part_count: z.number().int().optional(),
         })
       )
       .optional(),
@@ -127,12 +138,14 @@ export const normalizedReportSchema = z.object({
   provenance: z.object({
     ingested_at: z.string(),
     /**
-     * `'pending'` — needs nl-extraction (all non-structured adapters).
-     * `'stix'`    — already structured at ingest via parseStixPattern;
-     *               nl-extraction skips this doc (Slice D).
+     * `'pending'`             — needs nl-extraction (all non-structured adapters).
+     * `'stix'`                — already structured at ingest via parseStixPattern;
+     *                          nl-extraction skips this doc (Slice D).
+     * `'text_indicator_list'` — already structured at ingest via parseIndicatorList;
+     *                          nl-extraction skips this doc (same as 'stix').
      * Any other value silently excludes the report from extraction.
      */
-    extraction_method: z.enum(['pending', 'stix']),
+    extraction_method: z.enum(['pending', 'stix', 'text_indicator_list']),
     /**
      * ISO-8601 wall-clock of the extraction run. Set by structured adapters
      * at ingest (STIX indicator path) OR stamped later by nl-extraction.
@@ -156,10 +169,14 @@ export const normalizedReportSchema = z.object({
   }),
   /**
    * IOCs seeded at ingest by structured adapters. Only present when
-   * `provenance.extraction_method` is `'stix'` (or a future structured
-   * adapter). The array mirrors the `ExtractedIoc` shape from
+   * `provenance.extraction_method` is `'stix'` or `'text_indicator_list'`.
+   * The array mirrors the `ExtractedIoc` shape from
    * `services/extract_iocs.ts`; plain z.string() is used for enum fields
    * since extract_iocs already validates them upstream.
+   *
+   * `reference` and `block_index` are per-IOC provenance fields set by the
+   * `text_indicator_list` adapter (Maltrail nearest-reference attribution).
+   * STIX docs do not set them — the optional fields preserve back-compat.
    */
   extracted: z
     .object({
@@ -172,6 +189,8 @@ export const normalizedReportSchema = z.object({
           tier_heuristic: z.string(),
           tier_basis: z.string(),
           port: z.number().optional(),
+          reference: z.string().optional(),
+          block_index: z.number().optional(),
         })
       ),
     })

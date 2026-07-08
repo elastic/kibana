@@ -84,19 +84,77 @@ interface ReportHit {
   _source?: {
     '@timestamp'?: string;
     source?: { name?: string; url?: string };
+    content?: { title?: string };
     severity?: { level?: string };
     extracted?: {
-      iocs?: Array<{ type?: string; value?: string }>;
+      iocs?: Array<{ type?: string; value?: string; reference?: string }>;
     };
     provenance?: { extracted_at?: string };
   };
 }
 
-interface IocIndicatorDoc {
+/**
+ * One entry in the sources[] accumulator. Dedup key is report_id — re-running
+ * the sync for the same report must not duplicate the entry.
+ */
+interface SourceEntry {
+  report_id: string;
+  provider: string;
+  trail?: string;
+  reference?: string;
+  first_seen: string;
+}
+
+interface IocIndicatorOp {
   _index: typeof THREAT_INTEL_INDICATORS_INDEX;
   _id: string;
-  doc: Record<string, unknown>;
+  /** Full initial document for the upsert (first-time-seen path). */
+  upsert: Record<string, unknown>;
+  /** Params forwarded into the Painless script. */
+  scriptParams: {
+    report_id: string;
+    provider: string;
+    trail: string | null;
+    reference: string | null;
+    first_seen: string;
+    now: string;
+  };
 }
+
+/**
+ * Painless script that appends a sources[] entry for a citing report, deduped by
+ * report_id. Also refreshes threat.indicator.last_seen and @timestamp to `now`.
+ *
+ * Params (passed via `params` — never interpolated into the script body):
+ *   report_id  — dedup key
+ *   provider   — source.name of the citing report
+ *   trail      — Maltrail trail label (content.title), null for non-maltrail
+ *   reference  — per-IOC nearest-ref URL (or source.url), null when absent
+ *   first_seen — provenance.extracted_at of the citing report
+ *   now        — wall-clock ISO string at the time of the bulk call
+ */
+const SOURCES_UPSERT_SCRIPT = `
+if (ctx._source.sources == null) {
+  ctx._source.sources = [];
+}
+boolean alreadyPresent = false;
+for (def entry : ctx._source.sources) {
+  if (entry.report_id == params.report_id) {
+    alreadyPresent = true;
+    break;
+  }
+}
+if (!alreadyPresent) {
+  def newEntry = ['report_id': params.report_id, 'provider': params.provider, 'first_seen': params.first_seen];
+  if (params.trail != null) { newEntry['trail'] = params.trail; }
+  if (params.reference != null) { newEntry['reference'] = params.reference; }
+  ctx._source.sources.add(newEntry);
+}
+if (ctx._source.threat == null) { ctx._source.threat = ['indicator': [:]]; }
+if (ctx._source.threat.indicator == null) { ctx._source.threat.indicator = [:]; }
+ctx._source.threat.indicator.last_seen = params.now;
+ctx._source['@timestamp'] = params.now;
+`.trim();
 
 const isIocType = (value: unknown): value is IocType =>
   typeof value === 'string' && (IOC_TYPES as readonly string[]).includes(value);
@@ -148,14 +206,17 @@ const ecsIndicatorPayload = (type: IocType, rawValue: string): Record<string, un
   return { type: 'file', file: { hash: { [hashField]: rawValue.toLowerCase() } } };
 };
 
-const buildBulkBody = (reports: ReportHit[], now: string): IocIndicatorDoc[] => {
-  const docs: IocIndicatorDoc[] = [];
+const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
+  const ops: IocIndicatorOp[] = [];
   for (const report of reports) {
     const reportId = report._id;
     const iocs = report._source?.extracted?.iocs ?? [];
     const provider = report._source?.source?.name ?? 'unknown';
     const reportUrl = report._source?.source?.url;
     const severity = report._source?.severity?.level;
+    const trailLabel = report._source?.content?.title ?? null;
+    const firstSeen = report._source?.provenance?.extracted_at ?? now;
+
     // Defensive filter: Workflow 2's extractor should not emit IOCs with
     // missing values or unknown types, but stay defensive on the indexer
     // boundary so a single malformed row never poisons the bulk write.
@@ -165,10 +226,22 @@ const buildBulkBody = (reports: ReportHit[], now: string): IocIndicatorDoc[] => 
     );
     for (const ioc of usableIocs) {
       const id = indicatorId(ioc.type, ioc.value);
-      docs.push({
+      // Per-IOC reference: use the Maltrail nearest-ref URL when present,
+      // fall back to the report's source.url, absent otherwise.
+      const reference = ioc.reference ?? reportUrl ?? null;
+
+      const sourceEntry: SourceEntry = {
+        report_id: reportId,
+        provider,
+        first_seen: firstSeen,
+        ...(trailLabel !== null ? { trail: trailLabel } : {}),
+        ...(reference !== null ? { reference } : {}),
+      };
+
+      ops.push({
         _index: THREAT_INTEL_INDICATORS_INDEX,
         _id: id,
-        doc: {
+        upsert: {
           '@timestamp': now,
           threat: {
             indicator: {
@@ -177,27 +250,39 @@ const buildBulkBody = (reports: ReportHit[], now: string): IocIndicatorDoc[] => 
               // Workflow 4's join key. Indicator Match alerts carry this
               // through to `threat.enrichments.indicator.reference`.
               reference: `${INDICATOR_REFERENCE_PREFIX}${reportId}`,
-              first_seen: report._source?.provenance?.extracted_at ?? now,
+              first_seen: firstSeen,
               last_seen: now,
               ...(severity ? { confidence: severity } : {}),
             },
           },
+          sources: [sourceEntry],
           source_report_id: reportId,
           ...(reportUrl ? { source_report_url: reportUrl } : {}),
           ...(severity ? { severity } : {}),
         },
+        scriptParams: {
+          report_id: reportId,
+          provider,
+          trail: trailLabel,
+          reference,
+          first_seen: firstSeen,
+          now,
+        },
       });
     }
   }
-  return docs;
+  return ops;
 };
+
+/** Exported for unit tests only — not part of the public plugin API. */
+export const buildBulkOpsForTest = buildBulkOps;
 
 interface BulkUpdateAction {
   update: { _index: string; _id: string };
 }
-interface BulkUpdateDoc {
-  doc: Record<string, unknown>;
-  doc_as_upsert: true;
+interface BulkScriptedUpsert {
+  script: { source: string; lang: 'painless'; params: Record<string, unknown> };
+  upsert: Record<string, unknown>;
 }
 
 export const registerIocIndicatorSyncTask = ({
@@ -264,6 +349,7 @@ export const registerIocIndicatorSyncTask = ({
                     '@timestamp',
                     'source.name',
                     'source.url',
+                    'content.title',
                     'severity.level',
                     'extracted.iocs',
                     'provenance.extracted_at',
@@ -309,12 +395,19 @@ export const registerIocIndicatorSyncTask = ({
             const hits = (searchResponse?.hits?.hits ?? []) as ReportHit[];
             if (hits.length === 0) break;
 
-            const docs = buildBulkBody(hits, now);
-            if (docs.length > 0) {
-              const bulkBody: Array<BulkUpdateAction | BulkUpdateDoc> = [];
-              for (const doc of docs) {
-                bulkBody.push({ update: { _index: doc._index, _id: doc._id } });
-                bulkBody.push({ doc: doc.doc, doc_as_upsert: true });
+            const ops = buildBulkOps(hits, now);
+            if (ops.length > 0) {
+              const bulkBody: Array<BulkUpdateAction | BulkScriptedUpsert> = [];
+              for (const op of ops) {
+                bulkBody.push({ update: { _index: op._index, _id: op._id } });
+                bulkBody.push({
+                  script: {
+                    source: SOURCES_UPSERT_SCRIPT,
+                    lang: 'painless',
+                    params: op.scriptParams as Record<string, unknown>,
+                  },
+                  upsert: op.upsert,
+                });
               }
               try {
                 const bulkResponse = await esClient.bulk(
@@ -331,7 +424,7 @@ export const registerIocIndicatorSyncTask = ({
                     )})`
                   );
                 }
-                indicatorsWritten += docs.length;
+                indicatorsWritten += ops.length;
               } catch (err) {
                 const message = (err as Error).message ?? String(err);
                 throwRetryableError(
