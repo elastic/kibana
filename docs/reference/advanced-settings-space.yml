@@ -107,7 +107,7 @@ groups:
 
           The default value depends on your version:
 
-          * {applies_to}`stack: ga 9.5` Defaults to `system`.
+          * {applies_to}`stack: ga 9.5+` Defaults to `system`.
           * {applies_to}`stack: ga 9.0-9.4` Defaults to `disabled`.
         datatype: enum
         options:
