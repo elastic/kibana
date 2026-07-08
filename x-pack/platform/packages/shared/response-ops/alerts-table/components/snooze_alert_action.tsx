@@ -12,6 +12,7 @@ import { ALERT_RULE_TYPE_ID, ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule
 import { AlertSnoozePanelInline, useAlertSnooze } from '@kbn/response-ops-alert-snooze';
 import type { AlertSnoozePayload } from '@kbn/response-ops-alert-snooze';
 import { useAlertFieldNames } from '@kbn/alerts-ui-shared/src/common/hooks/use_alert_field_names';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import type { AdditionalContext, AlertActionsProps } from '../types';
 import { UNSNOOZE, SNOOZE } from '../translations';
 import { useAlertMutedState } from '../hooks/use_alert_muted_state';
@@ -38,7 +39,12 @@ const SnoozeInlineForm = ({
   onApply: (payload: AlertSnoozePayload) => void;
   onBack: () => void;
 }) => {
-  const { fieldNames, isLoading } = useAlertFieldNames({ http, ruleTypeIds });
+  // The alerts table scopes its QueryClient to AlertsQueryContext.
+  const { fieldNames, isLoading } = useAlertFieldNames({
+    http,
+    ruleTypeIds,
+    context: AlertsQueryContext,
+  });
   return (
     <AlertSnoozePanelInline
       onApply={onApply}

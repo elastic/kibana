@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createContext } from 'react';
 import { renderHook } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import type { QueryClient } from '@kbn/react-query';
 import { useFetchAlertsFieldsQuery } from './use_fetch_alerts_fields_query';
 import { useAlertFieldNames } from './use_alert_field_names';
 
@@ -68,6 +70,18 @@ describe('useAlertFieldNames', () => {
     expect(mockUseFetchAlertsFieldsQuery).toHaveBeenCalledWith(
       { http, ruleTypeIds: ['.es-query'] },
       expect.objectContaining({ enabled: false })
+    );
+  });
+
+  it('forwards the react-query context so the query resolves against the caller’s QueryClient', () => {
+    mockUseFetchAlertsFieldsQuery.mockReturnValue({ data: undefined, isLoading: false });
+    const context = createContext<QueryClient | undefined>(undefined);
+
+    renderHook(() => useAlertFieldNames({ http, ruleTypeIds: ['.es-query'], context }));
+
+    expect(mockUseFetchAlertsFieldsQuery).toHaveBeenCalledWith(
+      { http, ruleTypeIds: ['.es-query'] },
+      expect.objectContaining({ context })
     );
   });
 });
