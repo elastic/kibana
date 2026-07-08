@@ -7,17 +7,19 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ShowEventButton } from './show_event_button';
+import { ShowAlertButton } from './show_alert_button';
 import { useCaseViewNavigation, useCaseViewParams } from '@kbn/cases-plugin/public';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useDocumentFlyoutApi } from '../../../../flyout_v2/document/use_document_flyout_api';
 import { createDocumentFlyoutApiMock } from '../../../../flyout_v2/document/use_document_flyout_api.mock';
 import { casesCellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
 const props = {
   id: 'action-id',
-  eventId: 'event-id',
-  index: 'event-index',
+  alertId: 'alert-id',
+  index: 'alert-index',
 };
 
 const mockOpenFlyout = jest.fn();
@@ -27,11 +29,7 @@ jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
 }));
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: { telemetry: { reportEvent: mockReportEvent } },
-  }),
-}));
+jest.mock('../../../../common/lib/kibana');
 
 jest.mock('@kbn/cases-plugin/public', () => ({
   useCaseViewNavigation: jest.fn(),
@@ -43,8 +41,22 @@ jest.mock('../../../../common/hooks/use_is_new_flyout_enabled');
 
 const useCaseViewParamsMock = useCaseViewParams as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
+const useKibanaMock = useKibana as jest.Mock;
 
-describe('ShowEventButton', () => {
+const setKibanaServices = (ease: boolean) => {
+  useKibanaMock.mockReturnValue({
+    services: {
+      telemetry: { reportEvent: mockReportEvent },
+      application: {
+        capabilities: {
+          [SECURITY_FEATURE_ID]: { configurations: ease },
+        },
+      },
+    },
+  });
+};
+
+describe('ShowAlertButton', () => {
   const navigateToCaseView = jest.fn();
   let documentFlyoutApi: ReturnType<typeof createDocumentFlyoutApiMock>;
 
@@ -55,23 +67,24 @@ describe('ShowEventButton', () => {
     documentFlyoutApi = createDocumentFlyoutApiMock();
     jest.mocked(useDocumentFlyoutApi).mockReturnValue(documentFlyoutApi);
     jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    setKibanaServices(false);
   });
 
-  it('renders the show event button', () => {
-    render(<ShowEventButton {...props} />);
-    expect(screen.getByTestId('comment-action-show-event-action-id')).toBeInTheDocument();
+  it('renders the show alert button', () => {
+    render(<ShowAlertButton {...props} />);
+    expect(screen.getByTestId('comment-action-show-alert-action-id')).toBeInTheDocument();
   });
 
-  it('opens the legacy expandable flyout when the new flyout is disabled', () => {
-    render(<ShowEventButton {...props} />);
-    const button = screen.getByTestId('comment-action-show-event-action-id');
-    fireEvent.click(button);
+  it('opens the legacy expandable flyout when the new flyout is disabled (non-EASE)', () => {
+    render(<ShowAlertButton {...props} />);
+    fireEvent.click(screen.getByTestId('comment-action-show-alert-action-id'));
+
     expect(mockOpenFlyout).toHaveBeenCalledWith({
       right: {
         id: 'document-details-right',
         params: {
-          id: 'event-id',
-          indexName: 'event-index',
+          id: 'alert-id',
+          indexName: 'alert-index',
           scopeId: 'timeline-case',
         },
       },
@@ -81,20 +94,53 @@ describe('ShowEventButton', () => {
     expect(navigateToCaseView).not.toHaveBeenCalled();
   });
 
-  it('opens the new document flyout (from index) when the new flyout is enabled', () => {
+  it('opens the new document flyout (from index) when the new flyout is enabled (non-EASE)', () => {
     jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
-    render(<ShowEventButton {...props} />);
-    const button = screen.getByTestId('comment-action-show-event-action-id');
-    fireEvent.click(button);
+    render(<ShowAlertButton {...props} />);
+    fireEvent.click(screen.getByTestId('comment-action-show-alert-action-id'));
 
     expect(documentFlyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith({
-      documentId: 'event-id',
-      indexName: 'event-index',
+      documentId: 'alert-id',
+      indexName: 'alert-index',
       renderCellActions: casesCellActionRenderer,
     });
     expect(mockOpenFlyout).not.toHaveBeenCalled();
     expect(mockReportEvent).toHaveBeenCalled();
     expect(navigateToCaseView).not.toHaveBeenCalled();
+  });
+
+  it('opens the legacy EASE flyout when the EASE capability is on, regardless of the new flyout flag', () => {
+    setKibanaServices(true);
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+
+    render(<ShowAlertButton {...props} />);
+    fireEvent.click(screen.getByTestId('comment-action-show-alert-action-id'));
+
+    expect(mockOpenFlyout).toHaveBeenCalledWith({
+      right: {
+        id: 'ease-details',
+        params: {
+          id: 'alert-id',
+          indexName: 'alert-index',
+        },
+      },
+    });
+    expect(documentFlyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
+    // EASE path does not report the document flyout telemetry event
+    expect(mockReportEvent).not.toHaveBeenCalled();
+    expect(navigateToCaseView).not.toHaveBeenCalled();
+  });
+
+  it('navigates to the case view when there is no valid index', () => {
+    render(<ShowAlertButton {...props} index="" />);
+    fireEvent.click(screen.getByTestId('comment-action-show-alert-action-id'));
+
+    expect(navigateToCaseView).toHaveBeenCalledWith({
+      detailName: 'case-id',
+      tabId: 'alerts',
+    });
+    expect(mockOpenFlyout).not.toHaveBeenCalled();
+    expect(documentFlyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
   });
 });

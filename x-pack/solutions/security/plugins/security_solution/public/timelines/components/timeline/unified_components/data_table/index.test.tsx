@@ -20,10 +20,13 @@ import * as timelineActions from '../../../../store/actions';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { useDocumentFlyoutApi } from '../../../../../flyout_v2/document/use_document_flyout_api';
+import { createDocumentFlyoutApiMock } from '../../../../../flyout_v2/document/use_document_flyout_api.mock';
 
 jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
   useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
 }));
+jest.mock('../../../../../flyout_v2/document/use_document_flyout_api');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useLocation: jest.fn(() => ({
@@ -153,6 +156,8 @@ const getTimelineFromStore = (
 };
 
 describe('unified data table', () => {
+  let documentFlyoutApi: ReturnType<typeof createDocumentFlyoutApiMock>;
+
   beforeEach(() => {
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
       openFlyout: openFlyoutMock,
@@ -160,6 +165,8 @@ describe('unified data table', () => {
     });
     mockUiSettingsGet.mockReturnValue(false);
     jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    documentFlyoutApi = createDocumentFlyoutApiMock();
+    jest.mocked(useDocumentFlyoutApi).mockReturnValue(documentFlyoutApi);
   });
   afterEach(() => {
     updateSampleSizeSpy.mockClear();
@@ -199,7 +206,7 @@ describe('unified data table', () => {
   );
 
   it(
-    'opens DocumentFlyoutWrapper via system flyout when enableNewFlyout setting is enabled and row is not an attack',
+    'opens the new document flyout (from index) when enableNewFlyout setting is enabled and row is not an attack',
     async () => {
       jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
@@ -209,13 +216,16 @@ describe('unified data table', () => {
       fireEvent.click(screen.getAllByTestId('docTableExpandToggleColumn')[0]);
 
       await waitFor(() => {
-        expect(mockOpenSystemFlyout).toHaveBeenCalled();
+        expect(documentFlyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith(
+          expect.objectContaining({
+            documentId: mockTimelineData[0]._id,
+            indexName: mockTimelineData[0].ecs._index,
+          })
+        );
       });
 
-      const flyoutElement = mockOpenSystemFlyout.mock.calls[0][0];
-      expect(flyoutElement.props.documentId).toBe(mockTimelineData[0]._id);
-      expect(flyoutElement.props.indexName).toBe(mockTimelineData[0].ecs._index);
-      expect(flyoutElement.props.onAlertUpdated).toBe(refetchMock);
+      // the document (non-attack) new flyout no longer goes through the inline system flyout
+      expect(mockOpenSystemFlyout).not.toHaveBeenCalled();
     },
     SPECIAL_TEST_TIMEOUT
   );
@@ -238,7 +248,8 @@ describe('unified data table', () => {
       expect(flyoutElement.props.attackId).toBe('attack-1');
       expect(flyoutElement.props.indexName).toBe('attack-index');
       expect(flyoutElement.props.onAttackUpdated).toBe(refetchMock);
-      expect(mockDocumentFlyoutWrapper).not.toHaveBeenCalled();
+      // attack rows keep using the inline system flyout, not the document flyout api
+      expect(documentFlyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
     },
     SPECIAL_TEST_TIMEOUT
   );

@@ -8,7 +8,7 @@
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 import type { Dispatch } from 'redux';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
@@ -26,6 +26,13 @@ import type { ExperimentalFeatures } from '../../../../../../common';
 import { allowedExperimentalValues } from '../../../../../../common';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana_react.mock';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
+import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
+import { useDocumentFlyoutApi } from '../../../../../flyout_v2/document/use_document_flyout_api';
+import { createDocumentFlyoutApiMock } from '../../../../../flyout_v2/document/use_document_flyout_api.mock';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 
 jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -36,6 +43,12 @@ jest.mock('../../../../containers/details', () => ({
 jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
 }));
+
+jest.mock('../../../../../common/components/user_privileges');
+
+jest.mock('@kbn/expandable-flyout');
+jest.mock('../../../../../flyout_v2/document/use_document_flyout_api');
+jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -61,6 +74,8 @@ const useKibanaMock = useKibana as jest.Mock;
 
 describe('PinnedTabContent', () => {
   let props = {} as PinnedTabContentComponentProps;
+  const mockOpenFlyout = jest.fn();
+  let documentFlyoutApi: ReturnType<typeof createDocumentFlyoutApiMock>;
   const sort: Sort[] = [
     {
       columnId: '@timestamp',
@@ -98,6 +113,20 @@ describe('PinnedTabContent', () => {
       }
     );
 
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      notesPrivileges: { read: true },
+      timelinePrivileges: { crud: true, read: true },
+    });
+
+    documentFlyoutApi = createDocumentFlyoutApiMock();
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
+      ...createExpandableFlyoutApiMock(),
+      openFlyout: mockOpenFlyout,
+    });
+    jest.mocked(useDocumentFlyoutApi).mockReturnValue(documentFlyoutApi);
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+
     useKibanaMock.mockReturnValue(kibanaMockResult);
 
     props = {
@@ -123,6 +152,86 @@ describe('PinnedTabContent', () => {
       );
 
       expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+    });
+  });
+
+  describe('Leading actions - notes', () => {
+    beforeEach(() => {
+      // The notes control column only renders when the corresponding rawEvent is present,
+      // so we provide a rawEvent that matches the first (and only) event.
+      (useTimelineEvents as jest.Mock).mockReturnValue([
+        false,
+        {
+          events: mockTimelineData.slice(0, 1),
+          rawEvents: [
+            {
+              _id: mockTimelineData[0]._id,
+              _index: 'test-index',
+              _source: {},
+            },
+          ],
+          pageInfo: {
+            activePage: 0,
+            totalPages: 1,
+          },
+        },
+      ]);
+
+      props = {
+        ...props,
+        pinnedEventIds: { [mockTimelineData[0]._id]: true },
+      };
+    });
+
+    it('should open the legacy notes flyout when the new flyout is disabled', async () => {
+      render(
+        <TestProviders>
+          <PinnedTabContentComponent {...props} />
+        </TestProviders>
+      );
+
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+      });
+
+      fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+
+      await waitFor(() => {
+        expect(mockOpenFlyout).toHaveBeenCalledWith(
+          expect.objectContaining({
+            right: expect.objectContaining({ id: 'document-details-right' }),
+            left: expect.objectContaining({ id: 'document-details-left' }),
+          })
+        );
+      });
+      expect(documentFlyoutApi.openNotes).not.toHaveBeenCalled();
+    });
+
+    it('should open the new notes flyout when the new flyout is enabled', async () => {
+      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+
+      render(
+        <TestProviders>
+          <PinnedTabContentComponent {...props} />
+        </TestProviders>
+      );
+
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+      });
+
+      fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+
+      await waitFor(() => {
+        expect(documentFlyoutApi.openNotes).toHaveBeenCalledWith({
+          hit: expect.objectContaining({ _id: mockTimelineData[0]._id }),
+        });
+      });
+      expect(mockOpenFlyout).not.toHaveBeenCalled();
     });
   });
 });

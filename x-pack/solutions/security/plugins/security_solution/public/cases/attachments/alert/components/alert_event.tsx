@@ -9,11 +9,19 @@ import { isEmpty } from 'lodash';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { UserActionTitle } from '@kbn/cases-components';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useStore } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import { getRuleInfo, type AlertAttachmentMetadata } from '@kbn/cases-plugin/common';
 import { useFetchAlertData } from '../../../pages/use_fetch_alert_data';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useKibana } from '../../../../common/lib/kibana';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import * as i18n from '../translations';
 import { RulePanelKey } from '../../../../flyout/rule_details/right';
+import { RuleDetails } from '../../../../flyout_v2/rule/main';
+import { flyoutProviders } from '../../../../flyout_v2/shared/components/flyout_provider';
+import { useDefaultDocumentFlyoutProperties } from '../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { documentFlyoutHistoryKey } from '../../../../flyout_v2/shared/constants/flyout_history';
 
 /**
  * Security signals (`signal.*`) shipped before the ECS `kibana.alert.*` move,
@@ -41,6 +49,12 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
   rule,
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
+  const { services } = useKibana();
+  const { overlays } = services;
+  const store = useStore();
+  const history = useHistory();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const {
     rulesPrivileges: {
       rules: { read: canReadRules },
@@ -72,10 +86,38 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
   );
 
   const onRuleClick = useCallback(() => {
-    if (resolvedRuleId && canReadRules) {
+    if (!resolvedRuleId || !canReadRules) {
+      return;
+    }
+
+    if (enableNewFlyout) {
+      overlays.openSystemFlyout(
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: <RuleDetails ruleId={resolvedRuleId} />,
+        }),
+        {
+          ...defaultDocumentFlyoutProperties,
+          historyKey: documentFlyoutHistoryKey,
+          session: 'start',
+        }
+      );
+    } else {
       openFlyout({ right: { id: RulePanelKey, params: { ruleId: resolvedRuleId } } });
     }
-  }, [openFlyout, canReadRules, resolvedRuleId]);
+  }, [
+    openFlyout,
+    canReadRules,
+    resolvedRuleId,
+    enableNewFlyout,
+    overlays,
+    services,
+    store,
+    history,
+    defaultDocumentFlyoutProperties,
+  ]);
 
   if (loadingAlertData) {
     return <EuiLoadingSpinner size="m" />;
