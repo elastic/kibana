@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Locator } from '@kbn/scout';
-import type { ScoutPage } from '@kbn/scout';
+import type { Locator } from '../../..';
+import type { ScoutPage } from '..';
 
 export interface CopyToSpaceSetupOptions {
   destinationSpaceId: string;
@@ -105,6 +105,34 @@ export class CopySavedObjectsToSpaceFlyout {
     await this.page.testSubj
       .locator(`cts-summary-indicator-success-${destinationSpaceId}`)
       .waitFor({ state: 'visible', timeout: 30_000 });
+  }
+
+  /**
+   * Waits for the per-space loading indicator to disappear and the conflicts
+   * indicator to appear for the supplied destination space.
+   */
+  async waitForConflicts(destinationSpaceId: string): Promise<void> {
+    const loading = this.page.testSubj.locator(
+      `cts-summary-indicator-loading-${destinationSpaceId}`
+    );
+    await loading.waitFor({ state: 'detached', timeout: 30_000 }).catch(() => {});
+    await this.page.testSubj
+      .locator(`cts-summary-indicator-conflicts-${destinationSpaceId}`)
+      .waitFor({ state: 'visible', timeout: 30_000 });
+  }
+
+  /**
+   * Expands the per-space result row and marks a specific conflicting object to
+   * be overwritten. `conflictObjectId` is the saved-object identifier as it
+   * appears in the `cts-overwrite-conflict-${id}` test subject (e.g.
+   * `index-pattern:logstash-*`).
+   */
+  async resolveConflictByOverwrite(
+    destinationSpaceId: string,
+    conflictObjectId: string
+  ): Promise<void> {
+    await this.page.testSubj.locator(`cts-space-result-${destinationSpaceId}`).click();
+    await this.page.testSubj.locator(`cts-overwrite-conflict-${conflictObjectId}`).click();
   }
 
   /** Reads the four EuiStat counters in the flyout summary. */

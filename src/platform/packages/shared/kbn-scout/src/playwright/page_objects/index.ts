@@ -11,6 +11,7 @@ import type { ScoutPage } from '..';
 import type { ScoutLogger } from '../../common';
 import type { ScoutTestConfig } from '../../types';
 import { CollapsibleNav } from './collapsible_nav';
+import { CopySavedObjectsToSpaceFlyout } from './copy_saved_objects_to_space_flyout';
 import { DashboardApp } from './dashboard_app';
 import { DataGrid } from './data_grid';
 import { DataViewsManagementPage } from './data_views_management_page';
@@ -45,8 +46,13 @@ export {
   ListingTable,
   buildContentListSearch,
   buildContentListUrlRegex,
+  CopySavedObjectsToSpaceFlyout,
 };
 export type { ContentListUrlState };
+export type {
+  CopyToSpaceSetupOptions,
+  CopyToSpaceSummary,
+} from './copy_saved_objects_to_space_flyout';
 
 export interface PageObjectsFixtures {
   page: ScoutPage;
@@ -75,6 +81,7 @@ export interface PageObjects {
   visualize: VisualizeApp;
   unifiedFieldList: UnifiedFieldList;
   unifiedTabs: UnifiedTabs;
+  copySavedObjectsToSpaceFlyout: CopySavedObjectsToSpaceFlyout;
 }
 
 /**
@@ -104,5 +111,9 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     visualize: createLazyPageObject(VisualizeApp, fixtures.page),
     unifiedFieldList: createLazyPageObject(UnifiedFieldList, fixtures.page),
     unifiedTabs: createLazyPageObject(UnifiedTabs, fixtures.page),
+    copySavedObjectsToSpaceFlyout: createLazyPageObject(
+      CopySavedObjectsToSpaceFlyout,
+      fixtures.page
+    ),
   };
 }
