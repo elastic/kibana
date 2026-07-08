@@ -15,7 +15,6 @@ import type {
 import { SavedObjectsClient, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   AGENT_BUILDER_OVERVIEW_DASHBOARD_ID,
-  AGENT_BUILDER_OVERVIEW_DASHBOARD_VERSION,
   AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER,
 } from './constants';
 import { overviewDashboard } from './assets/overview_dashboard';
@@ -49,19 +48,6 @@ async function installAgentBuilderOverviewDashboard(
   spaceId: string,
   namespace: string | undefined
 ): Promise<void> {
-  // Skip the import when the installed dashboard is already at the bundled version.
-  const installedVersion = await getInstalledDashboardVersion(client, spaceId, namespace);
-  if (
-    installedVersion !== undefined &&
-    installedVersion === AGENT_BUILDER_OVERVIEW_DASHBOARD_VERSION
-  ) {
-    logger.debug(
-      `Agent Builder overview dashboard already at version ${AGENT_BUILDER_OVERVIEW_DASHBOARD_VERSION} in space "${spaceId}", skipping install`
-    );
-    return;
-  }
-
-  // Substitute the namespace placeholder everywhere it appears in the saved object
   const dashboard = JSON.parse(
     JSON.stringify(sourceOverviewDashboard).replaceAll(
       AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER,
@@ -92,30 +78,6 @@ async function installAgentBuilderOverviewDashboard(
   }
 
   logger.debug(`Agent Builder overview dashboard installed in space "${spaceId}"`);
-}
-
-/**
- * read the content version of the dashboard already installed in the given
- * space, or undefined when it isn't installed yet.
- */
-async function getInstalledDashboardVersion(
-  client: SavedObjectsClientContract,
-  spaceId: string,
-  namespace: string | undefined
-): Promise<number | undefined> {
-  try {
-    const existing = await client.get<{ version?: number }>(
-      'dashboard',
-      overviewDashboardId(spaceId),
-      { namespace }
-    );
-    return existing?.attributes?.version;
-  } catch (error) {
-    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-      return undefined;
-    }
-    throw error;
-  }
 }
 
 /**
