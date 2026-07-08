@@ -31,8 +31,6 @@ export function registerAndroidRoutes({ router, logger }: { router: IRouter; log
         query: schema.object({
           session_id: schema.string({ minLength: 1 }),
           timestamp: schema.string({ minLength: 1 }),
-          service_name: schema.string({ minLength: 1 }),
-          service_version: schema.string({ minLength: 1 }),
           app_build_id: schema.string({ minLength: 1 }),
           index: schema.maybe(schema.string({ minLength: 1 })),
         }),
@@ -44,8 +42,6 @@ export function registerAndroidRoutes({ router, logger }: { router: IRouter; log
         const {
           session_id: sessionId,
           timestamp,
-          service_name: serviceName,
-          service_version: serviceVersion,
           app_build_id: appBuildId,
           index = DEFAULT_CRASH_INDEX,
         } = request.query;
@@ -57,8 +53,6 @@ export function registerAndroidRoutes({ router, logger }: { router: IRouter; log
               filter: [
                 { term: { 'session.id': sessionId } },
                 { term: { '@timestamp': timestamp } },
-                { term: { 'service.name': serviceName } },
-                { term: { 'service.version': serviceVersion } },
                 { term: { 'app.build_id': appBuildId } },
                 { term: { event_name: 'device.crash' } },
               ],
@@ -69,7 +63,7 @@ export function registerAndroidRoutes({ router, logger }: { router: IRouter; log
           _source: ['attributes', 'resource.attributes'],
         });
 
-        const identity = `session.id="${sessionId}", @timestamp="${timestamp}", service.name="${serviceName}", service.version="${serviceVersion}", app.build_id="${appBuildId}"`;
+        const identity = `session.id="${sessionId}", @timestamp="${timestamp}", app.build_id="${appBuildId}"`;
 
         const hit = result.hits?.hits?.[0];
         if (!hit) {

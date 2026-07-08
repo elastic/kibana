@@ -11,7 +11,7 @@ export const ANDROID_RETRACE_API_PATH = '/internal/client_apps/android/retrace';
 
 /**
  * Fetches an Android crash document from Elasticsearch by session.id, @timestamp,
- * service.name, service.version, and app.build_id.
+ * and app.build_id.
  */
 export const ANDROID_CRASH_DOCUMENT_API_PATH = '/internal/client_apps/android/crash_document';
 

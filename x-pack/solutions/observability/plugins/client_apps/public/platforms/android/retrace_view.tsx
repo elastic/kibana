@@ -42,22 +42,20 @@ export function RetraceView({ core }: RetraceViewProps) {
   const params = new URLSearchParams(window.location.search);
   const sessionId = params.get('session_id');
   const timestamp = params.get('timestamp');
-  const serviceName = params.get('service_name');
-  const serviceVersion = params.get('service_version');
   const appBuildId = params.get('app_build_id');
   const index = params.get('index');
 
   const identityLabel =
-    sessionId && timestamp && serviceName && serviceVersion && appBuildId
-      ? `${serviceName}@${serviceVersion} (build ${appBuildId}), session ${sessionId} at ${timestamp}`
+    sessionId && timestamp && appBuildId
+      ? `build ${appBuildId}, session ${sessionId} at ${timestamp}`
       : null;
 
   useEffect(() => {
-    if (!sessionId || !timestamp || !serviceName || !serviceVersion || !appBuildId) {
+    if (!sessionId || !timestamp || !appBuildId) {
       setError(
         i18n.translate('xpack.clientApps.android.retrace.missingIdentityErrorMessage', {
           defaultMessage:
-            'session_id, timestamp, service_name, service_version, and app_build_id are all required in URL parameters.',
+            'session_id, timestamp, and app_build_id are all required in URL parameters.',
         })
       );
       setLoading(false);
@@ -69,8 +67,6 @@ export function RetraceView({ core }: RetraceViewProps) {
         const query: Record<string, string> = {
           session_id: sessionId,
           timestamp,
-          service_name: serviceName,
-          service_version: serviceVersion,
           app_build_id: appBuildId,
         };
         if (index) {
@@ -102,7 +98,7 @@ export function RetraceView({ core }: RetraceViewProps) {
         setLoading(false);
       }
     })();
-  }, [sessionId, timestamp, serviceName, serviceVersion, appBuildId, index, core]);
+  }, [sessionId, timestamp, appBuildId, index, core]);
 
   return (
     <EuiPage paddingSize="l">

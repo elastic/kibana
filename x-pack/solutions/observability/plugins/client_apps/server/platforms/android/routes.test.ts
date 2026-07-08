@@ -128,8 +128,6 @@ describe('registerAndroidRoutes', () => {
         {
           session_id: string;
           timestamp: string;
-          service_name: string;
-          service_version: string;
           app_build_id: string;
           index?: string;
         },
@@ -140,8 +138,6 @@ describe('registerAndroidRoutes', () => {
     const identityQuery = {
       session_id: 'session-1',
       timestamp: '2026-02-13T15:55:35.495Z',
-      service_name: 'weather-demo-app',
-      service_version: '1.6.0',
       app_build_id: 'build-1',
     };
 
@@ -177,8 +173,6 @@ describe('registerAndroidRoutes', () => {
             filter: [
               { term: { 'session.id': 'session-1' } },
               { term: { '@timestamp': '2026-02-13T15:55:35.495Z' } },
-              { term: { 'service.name': 'weather-demo-app' } },
-              { term: { 'service.version': '1.6.0' } },
               { term: { 'app.build_id': 'build-1' } },
               { term: { event_name: 'device.crash' } },
             ],
@@ -240,7 +234,7 @@ describe('registerAndroidRoutes', () => {
 
       expect(response.notFound).toHaveBeenCalledWith({
         body: {
-          message: `No Android crash document found for session.id="session-1", @timestamp="2026-02-13T15:55:35.495Z", service.name="weather-demo-app", service.version="1.6.0", app.build_id="build-1" in index "${DEFAULT_CRASH_INDEX}"`,
+          message: `No Android crash document found for session.id="session-1", @timestamp="2026-02-13T15:55:35.495Z", app.build_id="build-1" in index "${DEFAULT_CRASH_INDEX}"`,
         },
       });
     });
@@ -272,7 +266,7 @@ describe('registerAndroidRoutes', () => {
       expect(response.badRequest).toHaveBeenCalledWith({
         body: {
           message:
-            'Document for session.id="session-1", @timestamp="2026-02-13T15:55:35.495Z", service.name="weather-demo-app", service.version="1.6.0", app.build_id="build-1" has no exception.stacktrace field',
+            'Document for session.id="session-1", @timestamp="2026-02-13T15:55:35.495Z", app.build_id="build-1" has no exception.stacktrace field',
         },
       });
     });

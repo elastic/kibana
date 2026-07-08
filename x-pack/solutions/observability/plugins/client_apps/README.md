@@ -84,16 +84,22 @@ Utilities needed by more than one platform belong in:
 ### URL drilldown integration
 
 The plugin registers with `visibleIn: []`, meaning that it does not appear in Kibana's navigation menu.
-Users reach platform views via URL drilldowns configured on dashboard panels.
+Users reach platform views via URL drilldowns configured on dashboard panels. Each platform
+action defines the query parameters it needs to locate the source event.
 
 ```
-{{kibanaUrl}}/app/clientApps/<platform>/<action>?doc_id={{event.value}}
+{{kibanaUrl}}/app/clientApps/<platform>/<action>?<platform-specific-query-params>
 ```
 
-For example, an Android crash dashboard drills down to:
+For Android crash retracing, the drilldown must provide the crash event identity. Kibana's URL
+drilldown templates can't reference arbitrary field names directly, so the source panel must be
+a table with `session.id`, `@timestamp`, and `app.build_id` as columns (in that order), and the
+drilldown must use the **Row click** trigger, which exposes every column of the clicked row as
+`event.values`, indexed by column position. The route uses these values to find the crash
+document and read its stacktrace and `app.build_id`:
 
 ```
-{{kibanaUrl}}/app/clientApps/android/retrace?doc_id={{event.value}}
+{{kibanaUrl}}/app/clientApps/android/retrace?session_id={{event.values.[0]}}&timestamp={{event.values.[1]}}&app_build_id={{event.values.[2]}}
 ```
 
 For environments where crash documents are written outside the default
@@ -101,12 +107,14 @@ For environments where crash documents are written outside the default
 index pattern:
 
 ```
-{{kibanaUrl}}/app/clientApps/android/retrace?doc_id={{event.value}}&index=logs-myapp.otel*
+{{kibanaUrl}}/app/clientApps/android/retrace?session_id={{event.values.[0]}}&timestamp={{event.values.[1]}}&app_build_id={{event.values.[2]}}&index=logs-myapp.otel*
 ```
 
-The `index` value is passed to Elasticsearch as the current Kibana user. It is intentionally
-free-form so deployments can route crash events to custom data streams or aliases, but the
-user must still have Elasticsearch index privileges for the requested pattern.
+The `@timestamp` column must not have a custom display format applied, since the route matches
+it with an exact Elasticsearch `term` query that requires the value to parse to the same instant
+as the indexed one. The `index` value is passed to Elasticsearch as the current Kibana user. It
+is intentionally free-form so deployments can route crash events to custom data streams or
+aliases, but the user must still have Elasticsearch index privileges for the requested pattern.
 
 ## Extra info per platform
 
