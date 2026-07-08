@@ -10,7 +10,10 @@
 import { graphlib } from '@dagrejs/dagre';
 import { omit } from 'lodash';
 import { GraphBuildError } from './graph_build_error';
-import { DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT } from '../../common/wait_for_approval';
+import {
+  DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
+  isHitlWaitStepType,
+} from '../../common/wait_for_approval';
 import { DEFAULT_LOOP_MAX_ITERATIONS } from '../../spec/schema';
 import type {
   BaseStep,
@@ -1126,11 +1129,10 @@ function buildParallelBranchBody(
   // indefinite, externally-resumed waits that have no per-branch resume signal,
   // so they cannot run inside a branch yet — reject them at compile time instead
   // of hanging or self-resuming the branch at runtime.
-  const UNSUPPORTED_BRANCH_NODE_TYPES = new Set(['waitForInput', 'waitForApproval']);
   const unsupportedNode = bodyGraph
     .nodes()
     .map((nodeId) => bodyGraph.node(nodeId))
-    .find((bodyNode) => UNSUPPORTED_BRANCH_NODE_TYPES.has(bodyNode?.type as string));
+    .find((bodyNode) => isHitlWaitStepType(bodyNode?.type));
   if (unsupportedNode) {
     throw new GraphBuildError(
       `Parallel step "${stepId}" has a branch body containing an unsupported step type "${unsupportedNode.stepType}". ` +
