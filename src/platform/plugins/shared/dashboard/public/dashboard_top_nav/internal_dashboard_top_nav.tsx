@@ -452,7 +452,7 @@ export function InternalDashboardTopNav({
           ref={dashboardTitleRef}
         >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
       </EuiScreenReaderOnly>
-      {headerMode === 'inline' && (
+      {headerMode === 'inline' && viewMode !== 'print' && (
         <AppHeader
           title={dashboardTitle}
           menu={appMenuConfig}
