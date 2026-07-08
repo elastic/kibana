@@ -36,6 +36,28 @@ jest.mock('../ilm_phase_select/ilm_phase_select', () => ({
   },
 }));
 
+jest.mock('../../../../../../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    core: {
+      docLinks: {
+        links: {
+          observability: {
+            downsamplingConcepts: 'https://www.elastic.co',
+          },
+        },
+      },
+    },
+    dependencies: {
+      start: {
+        streams: {
+          streamsRepositoryClient: {},
+        },
+      },
+    },
+    isServerless: false,
+  }),
+}));
+
 const DATA_TEST_SUBJ = 'streamsEditIlmPhasesFlyout';
 
 const tick = async () => {
@@ -1044,6 +1066,57 @@ describe('EditIlmPhasesFlyout', () => {
         clearTimeoutSpy.mockRestore();
         jest.useRealTimers();
       }
+    });
+  });
+
+  describe('min age boundary help text', () => {
+    const setup = () =>
+      renderFlyout({
+        initialPhases: {
+          hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+          warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
+          frozen: { name: 'frozen', size_in_bytes: 0, min_age: '40d' },
+          delete: { name: 'delete', min_age: '50d' },
+        },
+      });
+
+    it('shows only the next-phase bound on the first configurable phase (hot is not a boundary)', async () => {
+      setup();
+      await tick();
+      // warm's only earlier phase is hot (min age 0, not configurable) so there is no lower
+      // boundary, but the next phase still bounds it from above.
+      expect(withinPhase('warm').queryByText(/Must occur after/)).toBeNull();
+      expect(
+        withinPhase('warm').getByText('Must occur before the frozen phase (40d).')
+      ).toBeInTheDocument();
+    });
+
+    it('references the previous and next configured phases', async () => {
+      setup();
+      await tick();
+      expect(
+        withinPhase('frozen').getByText(
+          'Must occur after the warm phase (30d) and before the delete phase (50d).'
+        )
+      ).toBeInTheDocument();
+      expect(
+        withinPhase('delete').getByText('Must occur after the frozen phase (40d).')
+      ).toBeInTheDocument();
+    });
+
+    it('references the closest previous phase when values are equal', async () => {
+      renderFlyout({
+        initialPhases: {
+          hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+          warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
+          cold: { name: 'cold', size_in_bytes: 0, min_age: '30d' },
+          frozen: { name: 'frozen', size_in_bytes: 0, min_age: '40d' },
+        },
+      });
+      await tick();
+      expect(
+        withinPhase('frozen').getByText('Must occur after the cold phase (30d).')
+      ).toBeInTheDocument();
     });
   });
 });

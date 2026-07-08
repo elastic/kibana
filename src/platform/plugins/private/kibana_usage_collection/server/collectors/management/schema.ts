@@ -908,10 +908,23 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'AI connector used by the alert analysis workflow' },
   },
+  'securitySolution:alertAnalysisWorkflowAgentId': {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Agent used by the alert analysis workflow (value is redacted; the setting is sensitive)',
+    },
+  },
   'securitySolution:alertAnalysisWorkflowCreateConversation': {
     type: 'boolean',
     _meta: {
       description: 'Whether the AI agent creates a new conversation per alert analysis',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowTagPrefix': {
+    type: 'keyword',
+    _meta: {
+      description: 'Prefix for the tags the alert analysis workflow adds to analyzed alerts',
     },
   },
   'elasticRamen:enabled': {

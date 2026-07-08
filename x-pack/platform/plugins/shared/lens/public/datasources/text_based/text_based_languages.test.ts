@@ -1175,6 +1175,11 @@ describe('Textbased Data Source', () => {
               "function": "lens_map_to_columns",
               "type": "function",
             },
+            Object {
+              "arguments": Object {},
+              "function": "lens_date_histogram_textbased",
+              "type": "function",
+            },
           ],
           "type": "expression",
         }

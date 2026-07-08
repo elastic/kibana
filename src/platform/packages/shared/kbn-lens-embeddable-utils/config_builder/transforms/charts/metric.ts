@@ -28,6 +28,7 @@ import {
   DEFAULT_PRIMARY_LABELS_ALIGNMENT,
   DEFAULT_PRIMARY_VALUE_ALIGNMENT,
   DEFAULT_PRIMARY_ICON_ALIGNMENT,
+  DEFAULT_DENSITY,
   DEFAULT_SECONDARY_LABEL_VISIBLE,
   DEFAULT_SECONDARY_LABEL_PLACEMENT,
   DEFAULT_SECONDARY_VALUE_ALIGNMENT,
@@ -89,6 +90,7 @@ const ACCESSOR = 'metric_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const TRENDLINE_LAYER_ID = 'layer_0_trendline';
 const LENS_METRIC_COMPARE_TO_REVERSED = false;
+const LEGACY_METRIC_DENSITY = 'compact' as const;
 
 type MetricStyling = NonNullable<MetricConfig['styling']>;
 type MetricIconName = NonNullable<NonNullable<MetricStyling['icon']>['name']>;
@@ -158,16 +160,13 @@ function convertStylingToStateFormat(
   hasSecondary: boolean
 ): Partial<MetricVisualizationState> {
   if (!styling) {
-    return {};
+    return { density: DEFAULT_DENSITY };
   }
   const primaryStyling = styling.primary;
   const secondaryStyling = styling.secondary;
 
-  if (!primaryStyling && !secondaryStyling) {
-    return {};
-  }
-
   return stripUndefined({
+    density: styling.density ?? DEFAULT_DENSITY,
     valueFontMode:
       primaryStyling?.value?.sizing != null
         ? primaryStyling.value.sizing === 'fill'
@@ -196,6 +195,7 @@ function convertStylingToAPIFormat(
   const iconName = visualization.icon ? iconCompat.toAPI(visualization.icon) : undefined;
 
   return stripUndefined({
+    density: visualization.density ?? LEGACY_METRIC_DENSITY,
     icon: iconName
       ? {
           name: iconName,
