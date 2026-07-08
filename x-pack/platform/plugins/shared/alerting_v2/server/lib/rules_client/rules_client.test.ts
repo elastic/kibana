@@ -2687,19 +2687,17 @@ describe('RulesClient', () => {
         ]);
       });
 
-      it('still emits ruleEnabled and re-ensures the task when the rule is already enabled', async () => {
+      it('is a no-op when the rule is already enabled', async () => {
         const client = createClient();
         mockGetExistingRule('rule-id-wf-enable-noop');
 
         await client.enableRule({ id: 'rule-id-wf-enable-noop' });
 
-        // Re-enabling is not a no-op: it re-writes the SO and re-ensures the
-        // executor task (self-heal), and still emits the event.
-        expect(mockSavedObjectsClient.update).toHaveBeenCalled();
-        expect(ensureRuleExecutorTaskScheduledMock).toHaveBeenCalled();
-        expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith(request, [
-          expect.objectContaining({ id: 'rule-id-wf-enable-noop', spaceId: 'space-1' }),
-        ]);
+        // Enabling an already-enabled rule does not touch the SO, re-ensure the
+        // task, or emit a lifecycle event (mirrors bulkEnableRules).
+        expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+        expect(ensureRuleExecutorTaskScheduledMock).not.toHaveBeenCalled();
+        expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
       });
     });
 
@@ -2715,19 +2713,17 @@ describe('RulesClient', () => {
         ]);
       });
 
-      it('still emits ruleDisabled and removes the task when the rule is already disabled', async () => {
+      it('is a no-op when the rule is already disabled', async () => {
         const client = createClient();
         mockGetExistingRule('rule-id-wf-5', { ...workflowSoAttrs, enabled: false });
 
         await client.disableRule({ id: 'rule-id-wf-5' });
 
-        // Re-disabling is not a no-op: it re-writes the SO and removes the
-        // executor task (self-heal), and still emits the event.
-        expect(mockSavedObjectsClient.update).toHaveBeenCalled();
-        expect(taskManager.removeIfExists).toHaveBeenCalled();
-        expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(request, [
-          expect.objectContaining({ id: 'rule-id-wf-5', spaceId: 'space-1' }),
-        ]);
+        // Disabling an already-disabled rule does not touch the SO, remove the
+        // task, or emit a lifecycle event (mirrors bulkDisableRules).
+        expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+        expect(taskManager.removeIfExists).not.toHaveBeenCalled();
+        expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
       });
     });
 

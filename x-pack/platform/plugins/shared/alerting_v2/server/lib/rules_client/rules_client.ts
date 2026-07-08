@@ -533,10 +533,17 @@ export class RulesClient {
   public async enableRule({ id }: { id: string }): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
 
+    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
+
+    // Enabling an already-enabled rule is a true no-op: it does not bump the
+    // change counter, re-write the SO, re-ensure the task, or emit a lifecycle
+    // event. This mirrors bulkEnableRules, which skips already-enabled rules.
+    if (existingAttrs.enabled) {
+      return transformRuleSoAttributesToRuleApiResponse(id, existingAttrs, existingVersion);
+    }
+
     const author = await this.userService.getCurrentUserProfile();
     const nowIso = new Date().toISOString();
-
-    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
 
     const sequence = this.nextChangeHistorySequence(existingAttrs.change_history_sequence);
     const nextAttrs: RuleSavedObjectAttributes = {
@@ -547,13 +554,8 @@ export class RulesClient {
       change_history_sequence: sequence,
     };
 
-    // Re-enabling an already-enabled rule is intentionally not short-circuited:
-    // it re-writes the SO and re-ensures the executor task (self-heal), and still
-    // emits `ruleEnabled`. Only count new scheduled load on an actual transition —
-    // an already-enabled rule already contributes to the total.
-    if (!existingAttrs.enabled) {
-      await this.validateSchedule({ updatedEvery: nextAttrs.schedule.every, checkLimit: true });
-    }
+    // A disabled rule becoming enabled adds new scheduled load, so enforce the limit.
+    await this.validateSchedule({ updatedEvery: nextAttrs.schedule.every, checkLimit: true });
 
     await this.scheduleRuleExecutorTask({
       ruleId: id,
@@ -584,14 +586,18 @@ export class RulesClient {
   public async disableRule({ id }: { id: string }): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
 
+    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
+
+    // Disabling an already-disabled rule is a true no-op: it does not bump the
+    // change counter, re-write the SO, remove the task, or emit a lifecycle
+    // event. This mirrors bulkDisableRules, which skips already-disabled rules.
+    if (!existingAttrs.enabled) {
+      return transformRuleSoAttributesToRuleApiResponse(id, existingAttrs, existingVersion);
+    }
+
     const author = await this.userService.getCurrentUserProfile();
     const nowIso = new Date().toISOString();
 
-    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
-
-    // Disabling an already-disabled rule is intentionally not short-circuited: it
-    // re-writes the SO and removes the executor task (self-heal), and still emits
-    // `ruleDisabled`.
     const sequence = this.nextChangeHistorySequence(existingAttrs.change_history_sequence);
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
