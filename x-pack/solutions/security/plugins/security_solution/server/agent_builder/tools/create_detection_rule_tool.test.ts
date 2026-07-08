@@ -336,8 +336,7 @@ describe('createDetectionRuleTool', () => {
           {
             type: ToolResultType.error,
             data: {
-              message: `Failed to create detection rule: ${mockErrors.join('; ')}`,
-              errors: mockErrors,
+              message: 'Failed to create detection rule. Please try again or refine your request.',
             },
           },
         ],
@@ -361,8 +360,7 @@ describe('createDetectionRuleTool', () => {
           {
             type: ToolResultType.error,
             data: {
-              message: `Failed to create detection rule: ${mockError.message}`,
-              error: mockError.toString(),
+              message: 'Failed to create detection rule. Please try again or refine your request.',
             },
           },
         ],

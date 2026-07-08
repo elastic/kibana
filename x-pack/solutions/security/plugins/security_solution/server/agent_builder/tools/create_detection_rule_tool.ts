@@ -149,8 +149,8 @@ The tool stores the result as an attachment (creating new or updating existing).
               {
                 type: ToolResultType.error,
                 data: {
-                  message: `Failed to create detection rule: ${result.errors.join('; ')}`,
-                  errors: result.errors,
+                  message:
+                    'Failed to create detection rule. Please try again or refine your request.',
                 },
               },
             ],
@@ -208,8 +208,8 @@ The tool stores the result as an attachment (creating new or updating existing).
             {
               type: ToolResultType.error,
               data: {
-                message: `Failed to create detection rule: ${error.message}`,
-                error: error.toString(),
+                message:
+                  'Failed to create detection rule. Please try again or refine your request.',
               },
             },
           ],
