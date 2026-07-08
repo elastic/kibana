@@ -9,10 +9,10 @@ import { calculateAuto } from '@kbn/calculate-auto';
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
 import type {
   QueriesGetResponse,
-  SignificantEventsResponse,
+  QueryWithOccurrences,
   StreamQuery,
 } from '@kbn/significant-events-schema';
-import type { QueryStatus } from '@kbn/streams-plugin/common';
+import type { QueryStatus } from '@kbn/significant-events-plugin/common';
 import moment from 'moment';
 import { useKibana } from '../use_kibana';
 import { useTimefilter } from '../use_timefilter';
@@ -22,7 +22,7 @@ export interface SignificantEventQueryRow {
   query: StreamQuery;
   stream_name: string;
   occurrences: Array<{ x: number; y: number }>;
-  change_points: SignificantEventsResponse['change_points'];
+  change_points: QueryWithOccurrences['change_points'];
   rule_backed: boolean;
 }
 
@@ -104,14 +104,14 @@ export const useFetchDiscoveryQueries = (
       page: response.page,
       perPage: response.perPage,
       total: response.total,
-      queries: response.queries.map((series: SignificantEventsResponse) => {
+      queries: response.queries.map((series: QueryWithOccurrences) => {
         const { occurrences, change_points, stream_name, rule_backed, ...rest } = series;
         return {
           query: rest,
           stream_name,
           change_points,
           occurrences: occurrences.map(
-            (occurrence: SignificantEventsResponse['occurrences'][number]) => ({
+            (occurrence: QueryWithOccurrences['occurrences'][number]) => ({
               x: new Date(occurrence.date).getTime(),
               y: occurrence.count,
             })

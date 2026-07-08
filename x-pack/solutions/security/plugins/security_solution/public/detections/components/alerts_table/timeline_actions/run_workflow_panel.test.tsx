@@ -48,9 +48,13 @@ const requiredInputsWorkflow: WorkflowListItemDto = {
 
 let mockWorkflowsData: WorkflowListItemDto[] = [noInputsWorkflow];
 
+const mockUseWorkflows = jest.fn((_params: unknown) => ({ data: { results: mockWorkflowsData } }));
+const mockUseWorkflowsCapabilities = jest.fn(() => ({ canReadManagedWorkflow: true }));
+
 jest.mock('@kbn/workflows-ui', () => ({
   useRunWorkflow: () => ({ mutate: mockMutate }),
-  useWorkflows: () => ({ data: { results: mockWorkflowsData } }),
+  useWorkflows: (params: unknown) => mockUseWorkflows(params),
+  useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
   WorkflowSelector: ({ onWorkflowChange }: { onWorkflowChange: (id: string) => void }) => (
     <div data-test-subj="workflow-selector-mock">
       <button
@@ -124,6 +128,7 @@ describe('RunWorkflowPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockWorkflowsData = [noInputsWorkflow];
+    mockUseWorkflowsCapabilities.mockReturnValue({ canReadManagedWorkflow: true });
   });
 
   it('should render the workflow selector', () => {
@@ -249,6 +254,37 @@ describe('RunWorkflowPanel', () => {
 
     expect(mockAddError).toHaveBeenCalledWith(error, {
       title: i18n.WORKFLOW_START_FAILED_TOAST,
+    });
+  });
+
+  describe('managed workflow visibility', () => {
+    it('requests only unmanaged workflows when no visibility is provided', () => {
+      renderComponent();
+
+      expect(mockUseWorkflows).toHaveBeenCalledWith(
+        expect.not.objectContaining({ managed: expect.anything() })
+      );
+    });
+
+    it('opts into managed workflows matching the visibility context when readable', () => {
+      renderComponent({ visibility: { selectors: ['rule_action'] } });
+
+      expect(mockUseWorkflows).toHaveBeenCalledWith(
+        expect.objectContaining({
+          managed: 'all',
+          visibilityContext: ['selector:rule_action'],
+        })
+      );
+    });
+
+    it('does not opt into managed workflows without the read-managed capability', () => {
+      mockUseWorkflowsCapabilities.mockReturnValue({ canReadManagedWorkflow: false });
+
+      renderComponent({ visibility: { selectors: ['rule_action'] } });
+
+      expect(mockUseWorkflows).toHaveBeenCalledWith(
+        expect.not.objectContaining({ managed: expect.anything() })
+      );
     });
   });
 
