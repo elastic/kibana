@@ -147,6 +147,9 @@ export type {
   RuntimeStart,
   ReadOnlyConversationClient,
   ConversationsStart,
+  AgentBuilderSmlServiceSetup,
+  AgentBuilderSmlServiceStart,
+  AgentBuilderSmlResolvedItemResult,
 } from './plugin_contract';
 export { describeZodSchema, formatSchemaForLlm } from './tools';
 export { SmlSearchFilterType } from './sml/http_api';

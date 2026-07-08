@@ -7,6 +7,9 @@
 
 import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { Logger } from '@kbn/logging';
 import type {
   Conversation,
   ConversationWithoutRounds,
@@ -28,6 +31,16 @@ import type {
   AgentExecution,
   FindExecutionsOptions,
 } from './execution';
+import type {
+  SmlTypeDefinition,
+  SmlSearchResult,
+  SmlAutocompleteResult,
+  SmlDocument,
+  SmlSearchFilters,
+  SmlSearchConstraints,
+  SmlIndexerParams,
+  SmlIndexerDeleteAttachmentParams,
+} from './sml/types';
 
 /**
  * AgentBuilder tool service's setup contract.
@@ -203,6 +216,106 @@ export interface TopSnippetsConfig {
 }
 
 /**
+ * Result of resolving a single SML chunk id into attachment data via
+ * {@link AgentBuilderSmlServiceStart.resolveSmlAttachItems}.
+ */
+export type AgentBuilderSmlResolvedItemResult =
+  | {
+      success: true;
+      chunk_id: string;
+      attachment: {
+        type: string;
+        data: unknown;
+        origin: string;
+        description: string;
+      };
+    }
+  | {
+      success: false;
+      chunk_id: string;
+      attachment_type?: string;
+      message: string;
+    };
+
+/**
+ * AgentBuilder SML service's setup contract.
+ */
+export interface AgentBuilderSmlServiceSetup {
+  /**
+   * Register an SML type definition. Should be called during plugin setup.
+   */
+  registerType: (definition: SmlTypeDefinition) => void;
+}
+
+/**
+ * AgentBuilder SML service's start contract.
+ */
+export interface AgentBuilderSmlServiceStart {
+  search: (params: {
+    query: string;
+    size?: number;
+    fields?: string[];
+    spaceId: string;
+    esClient: IScopedClusterClient;
+    request: KibanaRequest;
+    constraints?: SmlSearchConstraints;
+    filters?: SmlSearchFilters;
+  }) => Promise<{ results: SmlSearchResult[] }>;
+  autocomplete: (params: {
+    query: string;
+    size?: number;
+    spaceId: string;
+    esClient: IScopedClusterClient;
+    request: KibanaRequest;
+    constraints?: SmlSearchConstraints;
+    filters?: SmlSearchFilters;
+  }) => Promise<{ results: SmlAutocompleteResult[] }>;
+  checkItemsAccess: (params: {
+    ids: string[];
+    spaceId: string;
+    esClient: IScopedClusterClient;
+    request: KibanaRequest;
+  }) => Promise<Map<string, boolean>>;
+  indexAttachment: (params: SmlIndexerParams) => Promise<void>;
+  deleteAttachment: (params: SmlIndexerDeleteAttachmentParams) => Promise<void>;
+  getDocuments: (params: {
+    ids: string[];
+    spaceId: string;
+    esClient: IScopedClusterClient;
+  }) => Promise<Map<string, SmlDocument>>;
+  listDocuments: (params: {
+    spaceId: string;
+    esClient: IScopedClusterClient;
+    page?: number;
+    perPage?: number;
+    type?: string;
+    originUri?: string;
+    tags?: string[];
+  }) => Promise<{ total: number; results: SmlDocument[] }>;
+  findByOrigin: (params: {
+    type: string;
+    originId: string;
+    spaceId: string;
+    esClient: IScopedClusterClient;
+  }) => Promise<SmlDocument[]>;
+  findByOriginAcrossSpaces: (params: {
+    type: string;
+    originId: string;
+    esClient: IScopedClusterClient;
+  }) => Promise<SmlDocument[]>;
+  getTypeDefinition: (typeId: string) => SmlTypeDefinition | undefined;
+  listTypeDefinitions: () => SmlTypeDefinition[];
+  resolveSmlAttachItems: (params: {
+    chunkIds: string[];
+    esClient: IScopedClusterClient;
+    request: KibanaRequest;
+    spaceId: string;
+    savedObjectsClient: SavedObjectsClientContract;
+    logger: Logger;
+  }) => Promise<AgentBuilderSmlResolvedItemResult[]>;
+}
+
+/**
  * Setup contract of the agentBuilder plugin.
  */
 export interface AgentBuilderPluginSetup {
@@ -234,6 +347,14 @@ export interface AgentBuilderPluginSetup {
    * Plugins setup contract, which can be used to register built-in plugins.
    */
   plugins: PluginsSetup;
+  /**
+   * SML service setup contract, which can be used to register SML type definitions.
+   *
+   * Not yet consumed anywhere — the built-in SML tools still call the older
+   * `agentContextLayer.registerType`. This is a parallel, independently-tested
+   * path that a future PR will cut consumers over to.
+   */
+  smlService: AgentBuilderSmlServiceSetup;
   /**
    * TOP_SNIPPETS configuration (numSnippets, numWords) from `xpack.agentBuilder.topSnippets`.
    * Exposed so that dependent plugins can pass these values to search utilities.
@@ -274,4 +395,12 @@ export interface AgentBuilderPluginStart {
    * Conversations service (read-only), to list and retrieve conversations.
    */
   conversations: ConversationsStart;
+  /**
+   * SML service, to search, fetch, and index Shared Memory Layer content.
+   *
+   * Not yet consumed anywhere — `sml_search.ts`/`sml_attach.ts` still call the
+   * older `agentContextLayer` start contract. This is a parallel,
+   * independently-tested path that a future PR will cut consumers over to.
+   */
+  smlService: AgentBuilderSmlServiceStart;
 }

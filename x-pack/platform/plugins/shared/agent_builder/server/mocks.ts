@@ -39,6 +39,9 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     plugins: {
       register: jest.fn(),
     },
+    smlService: {
+      registerType: jest.fn(),
+    },
     topSnippets: { numSnippets: 2, numWords: 750 },
   };
 };
@@ -75,6 +78,20 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
         get: jest.fn(),
         list: jest.fn(),
       }),
+    },
+    smlService: {
+      search: jest.fn(),
+      autocomplete: jest.fn(),
+      checkItemsAccess: jest.fn(),
+      indexAttachment: jest.fn(),
+      deleteAttachment: jest.fn(),
+      getDocuments: jest.fn(),
+      listDocuments: jest.fn(),
+      findByOrigin: jest.fn(),
+      findByOriginAcrossSpaces: jest.fn(),
+      getTypeDefinition: jest.fn(),
+      listTypeDefinitions: jest.fn(),
+      resolveSmlAttachItems: jest.fn(),
     },
   };
 };

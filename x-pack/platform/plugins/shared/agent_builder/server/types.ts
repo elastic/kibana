@@ -50,6 +50,9 @@ export type {
   RuntimeStart,
   ReadOnlyConversationClient,
   ConversationsStart,
+  AgentBuilderSmlServiceSetup,
+  AgentBuilderSmlServiceStart,
+  AgentBuilderSmlResolvedItemResult,
 } from '@kbn/agent-builder-server';
 
 export interface AgentBuilderSetupDependencies {

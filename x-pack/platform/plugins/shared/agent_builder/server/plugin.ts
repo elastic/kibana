@@ -37,6 +37,10 @@ import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
+import {
+  createAgentBuilderSmlService,
+  type AgentBuilderSmlServiceInstance,
+} from './services/sml/service';
 
 export class AgentBuilderPlugin
   implements
@@ -56,10 +60,12 @@ export class AgentBuilderPlugin
   private home: HomeServerPluginSetup | null = null;
   private teardownTracing?: () => Promise<void>;
   private startDeps?: AgentBuilderStartDependencies;
+  private smlServiceInstance: AgentBuilderSmlServiceInstance;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
     this.serviceManager = new ServiceManager(this.config);
+    this.smlServiceInstance = createAgentBuilderSmlService();
   }
 
   setup(
@@ -81,6 +87,8 @@ export class AgentBuilderPlugin
     }
 
     registerInferenceFeatures({ searchInferenceEndpoints: setupDeps.searchInferenceEndpoints });
+
+    const smlServiceSetup = this.smlServiceInstance.setup({ logger: this.logger.get('sml') });
 
     // Register server-side EBT events for Agent Builder
     this.analyticsService = new AnalyticsService(
@@ -207,6 +215,9 @@ export class AgentBuilderPlugin
       plugins: {
         register: serviceSetups.plugins.register.bind(serviceSetups.plugins),
       },
+      smlService: {
+        registerType: smlServiceSetup.registerType,
+      },
       topSnippets: this.config.topSnippets,
     };
   }
@@ -220,12 +231,24 @@ export class AgentBuilderPlugin
     }).then((teardownTracing) => {
       this.teardownTracing = teardownTracing;
     });
-    const { inference, spaces, actions, taskManager, searchInferenceEndpoints } = startDeps;
+    const {
+      inference,
+      spaces,
+      actions,
+      taskManager,
+      searchInferenceEndpoints,
+      security: securityPlugin,
+    } = startDeps;
     const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
 
     this.cleanupLegacySmlTasks(taskManager).catch((error) => {
       this.logger.warn(`Failed to clean up legacy SML tasks: ${(error as Error).message}`);
+    });
+
+    const smlServiceStart = this.smlServiceInstance.start({
+      logger: this.logger.get('sml'),
+      securityAuthz: securityPlugin?.authz,
     });
 
     const startServices = this.serviceManager.startServices({
@@ -294,6 +317,20 @@ export class AgentBuilderPlugin
             list: client.list.bind(client),
           };
         },
+      },
+      smlService: {
+        search: smlServiceStart.search,
+        autocomplete: smlServiceStart.autocomplete,
+        checkItemsAccess: smlServiceStart.checkItemsAccess,
+        indexAttachment: smlServiceStart.indexAttachment,
+        deleteAttachment: smlServiceStart.deleteAttachment,
+        getDocuments: smlServiceStart.getDocuments,
+        listDocuments: smlServiceStart.listDocuments,
+        findByOrigin: smlServiceStart.findByOrigin,
+        findByOriginAcrossSpaces: smlServiceStart.findByOriginAcrossSpaces,
+        getTypeDefinition: smlServiceStart.getTypeDefinition,
+        listTypeDefinitions: smlServiceStart.listTypeDefinitions,
+        resolveSmlAttachItems: smlServiceStart.resolveSmlAttachItems,
       },
     };
   }
