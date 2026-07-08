@@ -126,7 +126,11 @@ export class ProfileStateRegistry {
   }
 
   /**
-   * Returns the subset of registered profile state fields matching the requested lifetime type(s).
+   * Filters a profile state map by field lifetime type. Unregistered state keys and entries with no
+   * matching fields are omitted from the returned map.
+   *
+   * When `shouldMergeDefaults` is true, each returned entry is merged over its registered default
+   * state.
    */
   public pickStateByType({
     profileState,
@@ -137,40 +141,79 @@ export class ProfileStateRegistry {
     stateType: ProfileStateType | ProfileStateType[];
     shouldMergeDefaults?: boolean;
   }): Record<string, object | undefined> {
-    const stateTypes = new Set(Array.isArray(stateType) ? stateType : [stateType]);
     const filteredProfileState: Record<string, object | undefined> = {};
 
     if (!profileState) {
       return filteredProfileState;
     }
 
-    for (const [rawKey, state] of Object.entries(profileState)) {
-      if (!state) {
-        continue;
-      }
+    const stateTypes = new Set(Array.isArray(stateType) ? stateType : [stateType]);
 
-      const definition = this.stateDefinitions.get(rawKey);
+    for (const [stateKey, state] of Object.entries(profileState)) {
+      const filteredState = this.filterFieldsByType({
+        profileState: state,
+        stateKey,
+        stateType: stateTypes,
+        shouldMergeDefaults,
+      });
 
-      if (!definition) {
-        continue;
-      }
-
-      const filteredState: Record<string, unknown> = {};
-
-      for (const [field, value] of Object.entries(state)) {
-        if (stateTypes.has(definition.descriptor[field]?.type)) {
-          filteredState[field] = value;
-        }
-      }
-
-      if (Object.keys(filteredState).length > 0) {
-        filteredProfileState[rawKey] = shouldMergeDefaults
-          ? { ...definition.defaultState, ...filteredState }
-          : filteredState;
+      if (filteredState) {
+        filteredProfileState[stateKey] = filteredState;
       }
     }
 
     return filteredProfileState;
+  }
+
+  /**
+   * Filters one profile state object by field lifetime type using the registered definition for
+   * `stateKey`.
+   *
+   * Returns `undefined` when the state key is not registered, the state is missing, or no fields
+   * match the requested type. When `shouldMergeDefaults` is true, the matching fields are merged over
+   * the registered default state.
+   */
+  public filterFieldsByType<TState extends object>({
+    profileState,
+    stateKey,
+    stateType,
+    shouldMergeDefaults = false,
+  }: {
+    profileState: Partial<TState> | undefined;
+    stateKey: ProfileStateDefinition<TState>['key'];
+    stateType: ProfileStateType | ProfileStateType[] | Set<ProfileStateType>;
+    shouldMergeDefaults?: boolean;
+  }): Partial<TState> | undefined {
+    const definition = this.stateDefinitions.get(stateKey) as
+      | ProfileStateDefinition<TState>
+      | undefined;
+
+    if (!definition || !profileState) {
+      return undefined;
+    }
+
+    const stateTypes =
+      stateType instanceof Set
+        ? stateType
+        : Array.isArray(stateType)
+        ? new Set(stateType)
+        : new Set([stateType]);
+
+    const filteredState: Partial<TState> = {};
+
+    for (const [field, value] of Object.entries(profileState)) {
+      const castedField = field as keyof TState;
+
+      if (stateTypes.has(definition.descriptor[castedField]?.type)) {
+        filteredState[castedField] = value as TState[keyof TState];
+      }
+    }
+
+    if (Object.keys(filteredState).length === 0) {
+      return undefined;
+    }
+
+    return shouldMergeDefaults ? { ...definition.defaultState, ...filteredState } : filteredState;
   }
 }
 

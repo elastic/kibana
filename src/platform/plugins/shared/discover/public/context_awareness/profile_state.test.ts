@@ -179,6 +179,65 @@ describe('ProfileStateRegistry', () => {
       })
     ).toEqual({});
   });
+
+  it('picks fields by state type from a single profile state object', () => {
+    const registry = new ProfileStateRegistry();
+    registry.registerDefinition(TEST_PROFILE_STATE_DEF);
+
+    expect(
+      registry.filterFieldsByType({
+        profileState: {
+          uiValue: 'ui',
+          urlValue: 'url',
+          persistentValue: 'persistent',
+          nestedValue: { count: 1 },
+        },
+        stateKey: TEST_PROFILE_STATE_DEF.key,
+        stateType: [ProfileStateType.Ui, ProfileStateType.Url],
+      })
+    ).toEqual({
+      uiValue: 'ui',
+      urlValue: 'url',
+      nestedValue: { count: 1 },
+    });
+  });
+
+  it('returns undefined when no fields match a single profile state object', () => {
+    const registry = new ProfileStateRegistry();
+    registry.registerDefinition(TEST_PROFILE_STATE_DEF);
+
+    expect(
+      registry.filterFieldsByType({
+        profileState: {
+          uiValue: 'ui',
+        },
+        stateKey: TEST_PROFILE_STATE_DEF.key,
+        stateType: ProfileStateType.Persistent,
+      })
+    ).toBeUndefined();
+  });
+
+  it('picks fields by state type from a single profile state object merged over defaults', () => {
+    const registry = new ProfileStateRegistry();
+    registry.registerDefinition(TEST_PROFILE_STATE_DEF);
+
+    expect(
+      registry.filterFieldsByType({
+        profileState: {
+          uiValue: 'ui',
+          persistentValue: 'persistent',
+        },
+        stateKey: TEST_PROFILE_STATE_DEF.key,
+        stateType: ProfileStateType.Persistent,
+        shouldMergeDefaults: true,
+      })
+    ).toEqual({
+      uiValue: 'defaultUi',
+      urlValue: 'defaultUrl',
+      persistentValue: 'persistent',
+      nestedValue: { count: 0 },
+    });
+  });
 });
 
 describe('createProfileStateAdapterFactory', () => {
