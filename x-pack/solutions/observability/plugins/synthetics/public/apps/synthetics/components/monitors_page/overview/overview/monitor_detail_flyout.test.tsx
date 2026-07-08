@@ -526,12 +526,12 @@ describe('Monitor Detail Flyout', () => {
       },
     };
 
-    it('resolves a stale heartbeat monitor and renders it read-only (no Edit, no 404 callout)', () => {
+    it('resolves a stale heartbeat monitor and renders it read-only (no Edit, no Go to monitor, no 404 callout)', () => {
       jest
         .spyOn(monitorDetailLocator, 'useMonitorDetailLocator')
         .mockReturnValue('/app/synthetics/monitor/hb-config-id?locationId=us-east');
 
-      const { getByText, queryByText } = render(
+      const { queryByText } = render(
         <MonitorDetailFlyout
           configId="hb-config-id"
           id="hb-config-id"
@@ -544,8 +544,9 @@ describe('Monitor Detail Flyout', () => {
         { state: heartbeatState }
       );
 
-      // The read-only detail link is offered, but editing is not.
-      expect(getByText('Go to monitor')).toBeInTheDocument();
+      // Editing is not offered, and the read-only detail page isn't available
+      // yet (coming in a follow-up), so "Go to monitor" is hidden too.
+      expect(queryByText('Go to monitor')).not.toBeInTheDocument();
       expect(queryByText('Edit monitor')).not.toBeInTheDocument();
       // Remote-only affordances must not appear for heartbeat monitors.
       expect(queryByText('View on remote cluster')).not.toBeInTheDocument();

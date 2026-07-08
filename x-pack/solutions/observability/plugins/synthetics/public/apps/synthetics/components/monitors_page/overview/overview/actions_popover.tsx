@@ -294,12 +294,18 @@ export function ActionsPopover({
   const alertLoading = alertStatus(monitor.configId) === FETCH_STATUS.LOADING;
 
   const popoverItems: EuiContextMenuPanelItemDescriptor[] = [
-    {
-      name: actionsMenuGoToMonitorName,
-      icon: 'sortRight',
-      href: detailUrl,
-      'data-test-subj': 'actionsPopoverGoToMonitor',
-    },
+    // Heartbeat / Elastic Agent monitors have no read-only detail page yet
+    // (coming in a follow-up), so omit "Go to monitor" for them.
+    ...(isHeartbeat
+      ? []
+      : [
+          {
+            name: actionsMenuGoToMonitorName,
+            icon: 'sortRight',
+            href: detailUrl,
+            'data-test-subj': 'actionsPopoverGoToMonitor',
+          },
+        ]),
     quickInspectPopoverItem,
     {
       name: isReadOnly ? (

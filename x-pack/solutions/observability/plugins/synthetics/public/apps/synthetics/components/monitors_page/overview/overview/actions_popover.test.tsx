@@ -491,12 +491,14 @@ describe('ActionsPopover', () => {
       expect(getByTestId('syntheticsActionsPopoverAddToDashboard')).toBeDisabled();
     });
 
-    it('keeps Go to monitor enabled for read-only navigation', () => {
+    // The read-only detail page isn't available yet (coming in a follow-up),
+    // so "Go to monitor" is omitted for heartbeat monitors.
+    it('omits Go to monitor', () => {
       jest
         .spyOn(monitorDetailLocatorModule, 'useMonitorDetailLocator')
         .mockReturnValue('/a/test/detail/url');
 
-      const { getByTestId } = render(
+      const { queryByTestId } = render(
         <ActionsPopover
           isPopoverOpen={true}
           position="relative"
@@ -506,10 +508,7 @@ describe('ActionsPopover', () => {
         />
       );
 
-      expect(getByTestId('actionsPopoverGoToMonitor')).toHaveAttribute(
-        'href',
-        '/a/test/detail/url'
-      );
+      expect(queryByTestId('actionsPopoverGoToMonitor')).not.toBeInTheDocument();
     });
   });
 });
