@@ -508,8 +508,6 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     if (!telemetry) {
       return;
     }
-    // The telemetry service (and its `@elastic/esql` parser dependency) is loaded lazily from the
-    // esql plugin so it stays out of the page-load bundle; tracking is fire-and-forget.
     const telemetryService = await this.services.esql?.getTelemetryService();
     telemetryService?.trackQuerySubmitted(telemetry);
   }
