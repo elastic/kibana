@@ -349,6 +349,18 @@ export interface ConversationRound {
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
 }
 
+/** External system the message comes from, for example Slack or GitHub. */
+export enum ConversationSourceType {
+  Slack = 'slack',
+}
+
+export interface ConversationSource {
+  /** External system the message comes from. */
+  type: ConversationSourceType;
+  /** Stable external conversation key, for example a Slack team/channel/thread identifier. */
+  external_conversation_id: string;
+}
+
 export interface RoundModelUsageStats {
   /**
    * Id of the connector used for this round
@@ -418,6 +430,8 @@ export interface Conversation {
   workspace_id?: string;
   /** Access mode for the conversation. Missing values are treated as private. */
   access_control?: ConversationAccessControl;
+  /** External source used to resolve conversations submitted by stateless relays. */
+  source?: ConversationSource;
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';

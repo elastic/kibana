@@ -124,7 +124,7 @@ pageLoadAssetSize:
   ml: 99842
   mockIdpPlugin: 7463
   monitoring: 28983
-  navigation: 17399
+  navigation: 18600
   newsfeed: 11110
   noDataPage: 1749
   notificationCenter: 1791
@@ -139,7 +139,7 @@ pageLoadAssetSize:
   osquery: 48128
   painlessLab: 6299
   presentationUtil: 8391
-  productDocBase: 5678
+  productDocBase: 6769
   productIntercept: 9860
   profiling: 20716
   queryActivity: 4326

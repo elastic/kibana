@@ -196,7 +196,7 @@ describe('manageRuleTool', () => {
                 breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
                 no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name' },
               },
-              no_data_strategy: 'emit',
+              no_data_strategy: 'last_known_status',
             },
           ],
         },
@@ -206,7 +206,7 @@ describe('manageRuleTool', () => {
       const addCall = ctx.attachments.add.mock.calls[0][0] as {
         data: { no_data_strategy?: string };
       };
-      expect(addCall.data.no_data_strategy).toBe('emit');
+      expect(addCall.data.no_data_strategy).toBe('last_known_status');
     });
 
     it('updates an persisted attachment when ruleAttachmentId is provided', async () => {

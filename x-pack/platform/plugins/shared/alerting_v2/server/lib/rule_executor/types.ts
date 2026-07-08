@@ -28,6 +28,7 @@ export interface RulePipelineState {
   readonly queryPayload?: QueryPayload;
   readonly esqlRowBatch?: ReadonlyArray<Record<string, unknown>>;
   readonly alertEventsBatch?: ReadonlyArray<AlertEvent>;
+  readonly dataPresentGroupHashes?: ReadonlySet<string>;
 }
 
 export type HaltReason = 'rule_deleted' | 'rule_disabled' | 'state_not_ready';
