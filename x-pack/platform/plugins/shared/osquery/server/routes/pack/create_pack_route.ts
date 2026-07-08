@@ -11,10 +11,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { has, unset, some, mapKeys, mapValues } from 'lodash';
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import {
-  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-} from '@kbn/fleet-plugin/common';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -24,12 +21,12 @@ import { buildRouteValidation } from '../../utils/build_validation/route_validat
 import { API_VERSIONS } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { StartPlugins } from '../../types';
-import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
 import {
   convertSOQueriesToPackConfig,
   convertPackQueriesToSO,
+  fetchAllPackagePolicies,
   findMatchingShards,
   getInitialPolicies,
   makePackKey,
@@ -166,11 +163,12 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           return response.conflict({ body: `Pack with name "${name}" already exists.` });
         }
 
-        const { items: packagePolicies } = (await packagePolicyService?.list(spaceScopedClient, {
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-          perPage: 1000,
-          page: 1,
-        })) ?? { items: [] };
+        // Drain ALL policies via keyset `fetchAllItems`; an offset-capped
+        // `list({ perPage: 1000 })` would drop attachments on policies past 1000.
+        const packagePolicies = await fetchAllPackagePolicies(
+          packagePolicyService,
+          spaceScopedClient
+        );
 
         const { policiesList, invalidPolicies } = getInitialPolicies(
           packagePolicies,
