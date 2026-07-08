@@ -82,7 +82,7 @@ export const AgentlessPolicySchema = schema.object(
       schema.arrayOf(schema.string({ maxLength: 256 }), {
         maxSize: 1000,
         meta: {
-          description: 'Additional data stream permissions granted to the agentless agent policy.',
+          description: 'Additional data stream permissions granted to the managed integration.',
         },
       })
     ),

@@ -3,7 +3,7 @@ requestBody:
     application/json:
       examples:
         createAgentlessPoliciesRequestExample:
-          description: 'Example request to create managed integrations'
+          description: 'Example request to create a managed integration'
           value:
             package:
               name: ess_billing
