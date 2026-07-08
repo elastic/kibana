@@ -7,16 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  BehaviorSubject,
-  debounceTime,
-  finalize,
-  first,
-  firstValueFrom,
-  skipWhile,
-  switchMap,
-  type Observable,
-} from 'rxjs';
+import { BehaviorSubject, debounceTime, type Observable } from 'rxjs';
 
 import { startTrackingHistory } from '@kbn/rxjs-history';
 
@@ -25,7 +16,7 @@ import type { initializeDataLoadingManager } from './data_loading_manager';
 
 export function initializeHistoryManager({
   anyStateChange$,
-  lastSavedState,
+  initialState,
   setState,
   getState,
   dataLoadingManager: {
@@ -33,7 +24,7 @@ export function initializeHistoryManager({
   },
 }: {
   anyStateChange$: Observable<void>;
-  lastSavedState: DashboardState;
+  initialState: DashboardState;
   getState: () => DashboardState;
   setState: (state: DashboardState) => void;
   dataLoadingManager: ReturnType<typeof initializeDataLoadingManager>;
@@ -41,10 +32,10 @@ export function initializeHistoryManager({
   api: ReturnType<typeof startTrackingHistory<DashboardState>>['api'];
   cleanup: () => void;
 } {
-  const dashboardState$ = new BehaviorSubject<DashboardState>(lastSavedState);
+  const dashboardCurrentState$ = new BehaviorSubject<DashboardState>(initialState);
   const { api: historyApi, cleanup: cleanupHistoryTracking } = startTrackingHistory<DashboardState>(
     {
-      state$: dashboardState$,
+      state$: dashboardCurrentState$,
       mapState: (state) => {
         const sortById = (
           { id: idA }: DashboardState['panels'][number] | DashboardState['pinned_panels'][number],
@@ -60,28 +51,17 @@ export function initializeHistoryManager({
     }
   );
 
-  // when state changes, update full dashboard state so that we can store it in the history
+  // when the Dashboard state changes, add the new state to the history stack
   const onAnyStateChangeSubscription = anyStateChange$
     .pipe(
-      debounceTime(300), // wait until state updates stabilize before updating history
-      switchMap(async () => {
-        // wait for panels to load before updating history
-        const waitForPanelsToLoad$ = dataLoading$.pipe(
-          skipWhile((isLoading: boolean | undefined) => Boolean(isLoading))
-        );
-        console.log('BEFORE');
-        const result = await firstValueFrom(waitForPanelsToLoad$);
-        console.log({ result });
-      })
+      debounceTime(500) // wait until state updates stabilize before updating history
     )
     .subscribe(() => {
-      console.log('anyStateChange$');
-      dashboardState$.next(getState());
+      dashboardCurrentState$.next(getState());
     });
 
-  // when the history's current state updates, respond by setting state on the Dashboard
+  // when the history's state updates, respond by setting state on the Dashboard
   const historyStateSubscription = historyApi.currentState$.subscribe((newState) => {
-    console.log('currentState$', { newState });
     setState(newState);
   });
 

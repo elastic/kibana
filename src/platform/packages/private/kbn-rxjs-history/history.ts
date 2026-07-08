@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import deepEqual from 'fast-deep-equal';
 import * as jsondiffpatch from 'jsondiffpatch';
-import { cloneDeep } from 'lodash';
 
-import { BehaviorSubject, pairwise, distinctUntilChanged, skip, map } from 'rxjs';
+import { BehaviorSubject, map, pairwise, skip } from 'rxjs';
 
 export function startTrackingHistory<T extends object = {}>({
   state$,
@@ -35,7 +33,6 @@ export function startTrackingHistory<T extends object = {}>({
   const stateSubscription = state$
     .pipe(map(mapState), pairwise())
     .subscribe(([previous, current]) => {
-      console.log({ undoOrRedoAction, previous, current });
       if (undoOrRedoAction) {
         // do not add to history if state change is coming from undo or redo action
         undoOrRedoAction = false;
@@ -54,8 +51,6 @@ export function startTrackingHistory<T extends object = {}>({
       }
       history.push(diff);
       pointer$.next(history.length - 1);
-
-      console.log('STATE CHANGED', { pointerAfter: pointer$.getValue(), history: [...history] });
     });
 
   const disabledActionsSubscription = pointer$.subscribe((pointer) => {
@@ -74,12 +69,8 @@ export function startTrackingHistory<T extends object = {}>({
 
         const reversedPatch = jsondiffpatch.reverse(history[pointer]); // must undo the **current** patch
         undoOrRedoAction = true;
-        // jsondiffpatch.patch mutates its first argument in place, so clone before patching -
-        // otherwise it corrupts any state still referenced live elsewhere (e.g. an embeddable's
-        // own state manager, which may hold the exact same nested object/array by reference).
         currentState$.next(jsondiffpatch.patch(state$.getValue(), reversedPatch) as T);
         pointer$.next(pointer - 1);
-        console.log('UNDO - after', { pointer: pointer$.getValue(), history: [...history] });
       },
       redo: () => {
         const pointer = pointer$.getValue();
@@ -87,7 +78,6 @@ export function startTrackingHistory<T extends object = {}>({
         undoOrRedoAction = true;
         currentState$.next(jsondiffpatch.patch(state$.getValue(), patch) as T);
         pointer$.next(pointer + 1);
-        console.log('REDO - after', { pointer: pointer$.getValue(), history: [...history] });
       },
     },
     cleanup: () => {
