@@ -60,6 +60,15 @@ test.describe(
         expect(apmPoliciesRequests()).toBe(1);
       });
 
+      await test.step('wait for other tabs to load', async () => {
+        await expect(page.getByTestId('transactionsTab')).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
+        await expect(page.getByTestId('dependenciesTab')).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
+      });
+
       await test.step('navigate to the errors tab', async () => {
         await page.getByTestId('errorsTab').waitFor({ timeout: EXTENDED_TIMEOUT / 2 });
         await page.getByTestId('errorsTab').click({ timeout: EXTENDED_TIMEOUT / 2 });
