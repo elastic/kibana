@@ -296,6 +296,27 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.message).toContain(`changeId: "${missingChangeId}" not found`);
     });
 
+    it('returns 404 for changeId, not ruleId, when a deleted rule has history but not the requested changeId', async () => {
+      const { body: rule } = await detectionsApi
+        .createRule({ body: getCustomQueryRuleParams() })
+        .expect(200);
+
+      await refreshHistory();
+
+      await detectionsApi.deleteRule({ query: { id: rule.id } }).expect(200);
+
+      const missingChangeId = uuidv4();
+
+      const { body } = await detectionsApi
+        .restoreRuleFromHistory({
+          params: { ruleId: rule.id, changeId: missingChangeId },
+          body: {},
+        })
+        .expect(404);
+
+      expect(body.message).toContain(`changeId: "${missingChangeId}" not found`);
+    });
+
     it('make zero side effect when restoring the state equals to the current state', async () => {
       const { body: rule } = await detectionsApi
         .createRule({ body: getCustomQueryRuleParams() })
