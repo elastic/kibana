@@ -724,3 +724,41 @@ export const INVALID_YAML_DEFINITION = i18n.translate(
   'xpack.cases.templates.invalidYamlDefinition',
   { defaultMessage: 'Invalid YAML definition' }
 );
+
+export const CONNECTOR_TITLE = i18n.translate('xpack.cases.templates.preview.connectorTitle', {
+  defaultMessage: 'Connector',
+});
+
+export const FIELDS_TAB_LABEL = i18n.translate('xpack.cases.templates.renderPanel.fieldsTab', {
+  defaultMessage: 'Fields',
+});
+
+export const SETTINGS_TAB_LABEL = i18n.translate('xpack.cases.templates.renderPanel.settingsTab', {
+  defaultMessage: 'Settings',
+});
+
+export const SETTINGS_SECTION_TITLE = i18n.translate(
+  'xpack.cases.templates.settings.sectionTitle',
+  { defaultMessage: 'Case settings' }
+);
+
+export const SETTINGS_SECTION_DESCRIPTION = i18n.translate(
+  'xpack.cases.templates.settings.sectionDescription',
+  {
+    defaultMessage:
+      'Defaults applied to cases created from this template. These are managed here, not in the YAML.',
+  }
+);
+
+export const CONNECTOR_SECTION_TITLE = i18n.translate(
+  'xpack.cases.templates.settings.connectorSectionTitle',
+  { defaultMessage: 'External connector' }
+);
+
+export const CONNECTOR_NOT_FOUND = i18n.translate(
+  'xpack.cases.templates.preview.connectorNotFound',
+  {
+    defaultMessage:
+      'Connector not found. Cases created from this template will fall back to no connector.',
+  }
+);

@@ -264,9 +264,16 @@ export class CasePlugin
       getSpaceId,
       serverlessProjectType,
       isCasesAttachmentsEnabled: this.caseConfig.attachments?.enabled === true,
+      isTemplatesEnabled: this.caseConfig.templates?.enabled === true,
     });
 
-    registerCaseWorkflowSteps(plugins.workflowsExtensions, getCasesClient);
+    registerCaseWorkflowSteps(
+      plugins.workflowsExtensions,
+      getCasesClient,
+      this.unifiedAttachmentTypeRegistry,
+      this.caseConfig.attachments?.enabled === true,
+      () => core.getStartServices()
+    );
     registerCaseWorkflowTriggers(plugins.workflowsExtensions);
 
     if (plugins.agentBuilder) {
