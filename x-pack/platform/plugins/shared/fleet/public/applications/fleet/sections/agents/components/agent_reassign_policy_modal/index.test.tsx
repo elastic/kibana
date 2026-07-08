@@ -57,11 +57,15 @@ function mockPolicies(policies = [POLICY_A, POLICY_B]) {
   });
 }
 
-function render(props: { agents: any; onClose?: () => void }) {
+function render(props: { agents: any; agentCount?: number; onClose?: () => void }) {
   const renderer = createFleetTestRendererMock();
   const onClose = props.onClose ?? jest.fn();
   const utils = renderer.render(
-    <AgentReassignAgentPolicyModal onClose={onClose} agents={props.agents} />
+    <AgentReassignAgentPolicyModal
+      onClose={onClose}
+      agents={props.agents}
+      agentCount={props.agentCount ?? 1}
+    />
   );
   return { utils, onClose };
 }
@@ -88,6 +92,14 @@ describe('AgentReassignAgentPolicyModal', () => {
 
       // policy-a is pre-selected (matches agent's current policy) — button must be disabled
       expect(utils.getByTestId('confirmModalConfirmButton')).toBeDisabled();
+    });
+
+    it('shows the singular agent count in the description', () => {
+      const { utils } = render({ agents: singleAgent, agentCount: 1 });
+
+      expect(
+        utils.getByText('Choose a new agent policy to assign the selected agent to.')
+      ).toBeInTheDocument();
     });
 
     it('calls sendPostAgentReassign when a different policy is selected', async () => {
@@ -168,7 +180,7 @@ describe('AgentReassignAgentPolicyModal', () => {
 
     it('calls sendPostBulkAgentReassign with agent ids and selected policy', async () => {
       mockSendPostBulkAgentReassign.mockResolvedValue({});
-      const { utils, onClose } = render({ agents: bulkAgents });
+      const { utils, onClose } = render({ agents: bulkAgents, agentCount: bulkAgents.length });
 
       act(() => {
         fireEvent.click(utils.getByTestId('confirmModalConfirmButton'));
@@ -187,9 +199,17 @@ describe('AgentReassignAgentPolicyModal', () => {
       expect(onClose).toHaveBeenCalled();
     });
 
+    it('shows the agent count in the description', () => {
+      const { utils } = render({ agents: bulkAgents, agentCount: bulkAgents.length });
+
+      expect(
+        utils.getByText('Choose a new agent policy to assign the selected 2 agents to.')
+      ).toBeInTheDocument();
+    });
+
     it('shows "in progress" success toast for bulk agent array', async () => {
       mockSendPostBulkAgentReassign.mockResolvedValue({});
-      const { utils } = render({ agents: bulkAgents });
+      const { utils } = render({ agents: bulkAgents, agentCount: bulkAgents.length });
 
       act(() => {
         fireEvent.click(utils.getByTestId('confirmModalConfirmButton'));
@@ -206,7 +226,7 @@ describe('AgentReassignAgentPolicyModal', () => {
 
     it('passes the kuery string directly to sendPostBulkAgentReassign', async () => {
       mockSendPostBulkAgentReassign.mockResolvedValue({});
-      const { utils } = render({ agents: kuery });
+      const { utils } = render({ agents: kuery, agentCount: 5 });
 
       act(() => {
         fireEvent.click(utils.getByTestId('confirmModalConfirmButton'));
@@ -222,9 +242,17 @@ describe('AgentReassignAgentPolicyModal', () => {
       });
     });
 
+    it('shows the query-based agent count in the description', () => {
+      const { utils } = render({ agents: kuery, agentCount: 5 });
+
+      expect(
+        utils.getByText('Choose a new agent policy to assign the selected 5 agents to.')
+      ).toBeInTheDocument();
+    });
+
     it('shows "in progress" success toast for kuery-based bulk reassignment', async () => {
       mockSendPostBulkAgentReassign.mockResolvedValue({});
-      const { utils } = render({ agents: kuery });
+      const { utils } = render({ agents: kuery, agentCount: 5 });
 
       act(() => {
         fireEvent.click(utils.getByTestId('confirmModalConfirmButton'));
@@ -237,7 +265,7 @@ describe('AgentReassignAgentPolicyModal', () => {
 
     it('does not use single-agent path for kuery string', async () => {
       mockSendPostBulkAgentReassign.mockResolvedValue({});
-      const { utils } = render({ agents: kuery });
+      const { utils } = render({ agents: kuery, agentCount: 5 });
 
       act(() => {
         fireEvent.click(utils.getByTestId('confirmModalConfirmButton'));

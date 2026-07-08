@@ -232,14 +232,14 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
   const baseQuery = query.format === 'composed' ? query.base : query.breach.query;
   const alertBlock = query.format === 'composed' ? query.breach.segment : '';
 
-  const ctaLabel =
-    state === 'before_apply' || state === 'empty'
-      ? i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.openEditorButtonLabel', {
-          defaultMessage: 'Open query editor',
-        })
-      : i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.editQueryButtonLabel', {
-          defaultMessage: 'Edit query',
-        });
+  const isEditCta = state !== 'before_apply' && state !== 'empty';
+  const ctaLabel = isEditCta
+    ? i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.editQueryButtonLabel', {
+        defaultMessage: 'Edit query',
+      })
+    : i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.openEditorButtonLabel', {
+        defaultMessage: 'Open query editor',
+      });
 
   return (
     <div data-test-subj={`esqlQuerySummarySection-${state}`}>
@@ -284,7 +284,8 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
       <EuiSpacer size="s" />
       <EuiButton
         size="s"
-        iconType="editorCodeBlock"
+        color={isEditCta ? 'text' : undefined}
+        iconType={isEditCta ? 'chevronLimitLeft' : 'editorCodeBlock'}
         isDisabled={isEditorOpen}
         onClick={onOpenEditor}
         data-test-subj="esqlSummaryOpenEditor"

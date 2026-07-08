@@ -104,9 +104,7 @@ export function LayerPanel(props: LayerPanelProps) {
       : new BehaviorSubject(undefined)
   );
   const isApproximate = useStateFromPublishingSubject(
-    apiPublishesApproximation(parentApi)
-      ? parentApi?.isApproximate$
-      : new BehaviorSubject(undefined)
+    apiPublishesApproximation(parentApi) ? parentApi?.isApproximate$ : new BehaviorSubject(false)
   );
 
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
@@ -903,7 +901,7 @@ export function LayerPanel(props: LayerPanelProps) {
                 indexPatterns: dataViews.indexPatterns,
                 activeData: layerVisualizationConfigProps.activeData,
                 esqlVariables,
-                isApproximate: isApproximate ?? undefined,
+                isApproximate,
                 dataSectionExtra: !isFullscreen &&
                   openDimension.isComplete &&
                   activeVisualization.DimensionEditorDataExtraComponent && (

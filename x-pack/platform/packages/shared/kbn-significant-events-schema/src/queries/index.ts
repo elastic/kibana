@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { NonEmptyString } from '@kbn/zod-helpers/v4';
 import type { Feature } from '../feature';
 import type { QueryWithOccurrences } from '../api/significant_events';
+import { MAX_ID_LENGTH, MAX_TEXT_LENGTH } from '../significant_events/constants';
 
 /**
  * A knowledge indicator (feature or query link) is durable when it has no
@@ -34,7 +35,7 @@ export interface EsqlQuery {
 }
 
 export const esqlQuerySchema: z.Schema<EsqlQuery> = z.object({
-  query: z.string(),
+  query: z.string().max(MAX_TEXT_LENGTH),
 });
 
 interface StreamQueryBase {
@@ -58,8 +59,8 @@ export const HIGH_SEVERITY_THRESHOLD = 60;
 export const queryTypeSchema = z.enum([QUERY_TYPE_MATCH, QUERY_TYPE_STATS]);
 
 export const queryFeatureSchema = z.object({
-  id: z.string(),
-  run_id: z.string().optional(),
+  id: z.string().max(MAX_ID_LENGTH),
+  run_id: z.string().max(MAX_ID_LENGTH).optional(),
 });
 
 export type QueryFeature = z.infer<typeof queryFeatureSchema>;
@@ -77,7 +78,7 @@ export interface StreamQuery extends StreamQueryBase {
 const streamQueryBaseSchema = z.object({
   id: NonEmptyString,
   title: NonEmptyString,
-  description: z.string(),
+  description: z.string().max(MAX_TEXT_LENGTH),
 }) satisfies z.Schema<StreamQueryBase>;
 
 /**
@@ -88,7 +89,7 @@ const streamQueryBaseSchema = z.object({
 export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryBaseSchema.extend({
   type: queryTypeSchema.default(QUERY_TYPE_MATCH),
   severity_score: z.number().optional(),
-  evidence: z.array(z.string()).optional(),
+  evidence: z.array(z.string().max(MAX_TEXT_LENGTH)).optional(),
   features: z.array(queryFeatureSchema).optional(),
   esql: esqlQuerySchema,
   expires_at: z.iso.datetime().optional(),
@@ -103,8 +104,8 @@ export const upsertStreamQueryRequestSchema = z.object({
   title: NonEmptyString,
   esql: esqlQuerySchema,
   severity_score: z.number().optional(),
-  evidence: z.array(z.string()).optional(),
-  description: z.string().default(''),
+  evidence: z.array(z.string().max(MAX_TEXT_LENGTH)).optional(),
+  description: z.string().max(MAX_TEXT_LENGTH).default(''),
   expires_at: z.iso.datetime().optional(),
 });
 
