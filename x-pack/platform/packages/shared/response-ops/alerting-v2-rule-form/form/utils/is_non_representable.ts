@@ -14,7 +14,7 @@ import type { RuleResponse } from '@kbn/alerting-v2-schemas';
  * Non-representable cases:
  * - `alert` kind with `standalone` query format (form requires composed base+segments)
  * - `recovery_strategy` other than `'query'` (form only supports custom recovery queries)
- * - `no_data_strategy` set to any active value (form has no UI for no-data handling)
+ * - `no_data_strategy: 'emit'` (temporarily rejected by the write API; dropdown has no option)
  *
  * Note: `query.no_data` is not checked separately because it can only appear on
  * standalone format queries, which the `format === 'standalone'` check already catches.
@@ -28,9 +28,7 @@ export const isNonRepresentableRule = (rule: RuleResponse): boolean => {
     return true;
   }
 
-  if (rule.no_data_strategy != null && rule.no_data_strategy !== 'none') {
-    return true;
-  }
+  if (rule.no_data_strategy === 'emit') return true;
 
   return false;
 };

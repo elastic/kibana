@@ -58,6 +58,7 @@ export interface ContentProps {
   isPreviewMode: boolean;
   /** When using Entity Store v2: entity record for asset criticality upsert. */
   entityRecord?: Entity;
+  refetchEntityRecord?: () => void;
   /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
   skipRiskAndCriticality?: boolean;
   /** Entity store entity ID for the user. */
@@ -73,6 +74,15 @@ export interface ContentProps {
   enableGraphAndResolutionNavigation?: boolean;
   /** When true, hides the chevron icons in the risk summary and alerts section headers. Used by the v2 flyout. */
   hideHeaderIcons?: boolean;
+  /**
+   * When provided, clicking a related entity in the resolution section is delegated to this callback
+   * (used by the new EUI system flyout) instead of the legacy expandable flyout.
+   */
+  onShowEntity?: (params: {
+    engineType: string | undefined;
+    entityId: string;
+    entityName: string | undefined;
+  }) => void;
 }
 
 /**
@@ -90,11 +100,13 @@ export const Content = ({
   onAssetCriticalityChange,
   isPreviewMode,
   entityRecord,
+  refetchEntityRecord,
   skipRiskAndCriticality = false,
   entityStoreEntityId,
   prefetchedResolutionRisk,
   enableGraphAndResolutionNavigation = true,
   hideHeaderIcons = false,
+  onShowEntity,
 }: ContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
   const isAnomalyDetailsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAnomalyDetails');
@@ -117,6 +129,8 @@ export const Content = ({
         <EntityHighlightsAccordion
           entityIdentifier={entityRecord?.entity?.id ?? userName}
           entityType={EntityType.user}
+          entityRecord={entityRecord}
+          refetchEntityRecord={refetchEntityRecord}
         />
       )}
       {!skipRiskAndCriticality &&
@@ -145,6 +159,7 @@ export const Content = ({
             entityId={entityStoreEntityId}
             isPreviewMode={isPreviewMode}
             openDetailsPanel={openDetailsPanel}
+            hideHeaderIcons={hideHeaderIcons}
           />
         </>
       )}
@@ -166,6 +181,7 @@ export const Content = ({
             entityType={EntityType.user}
             scopeId={scopeId}
             openDetailsPanel={enableGraphAndResolutionNavigation ? openDetailsPanel : undefined}
+            onShowEntity={onShowEntity}
           />
           <EuiHorizontalRule />
         </>

@@ -52,7 +52,19 @@ function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');
 }
 
-function buildGroupHash({
+export const buildExecutionUuid = ({
+  ruleId,
+  spaceId,
+  scheduledTimestamp,
+  suffix,
+}: {
+  ruleId: string;
+  spaceId: string;
+  scheduledTimestamp: string;
+  suffix?: string;
+}): string => sha256(`${ruleId}|${spaceId}|${scheduledTimestamp}${suffix ? `|${suffix}` : ''}`);
+
+export function buildGroupHash({
   rowDoc,
   groupKeyFields,
   fallbackSeed,
@@ -93,7 +105,7 @@ export function createAlertEventsBatchBuilder({
 }: BuildAlertEventsBaseOpts): AlertEventsBatchBuilder {
   // Stable per run to support retries without duplicating documents.
   // Include spaceId to avoid collisions when multiple spaces write into the same data stream.
-  const executionUuid = sha256(`${ruleId}|${spaceId}|${scheduledTimestamp}`);
+  const executionUuid = buildExecutionUuid({ ruleId, spaceId, scheduledTimestamp });
 
   // Timestamp when the alert event is written to the index.
   const wroteAt = new Date().toISOString();
@@ -141,6 +153,7 @@ export interface BuildRecoveryAlertEventsOpts {
   activeGroupHashes: ActiveAlertGroupHash[];
   breachedGroupHashes: Set<string>;
   scheduledTimestamp: string;
+  dataPresentGroupHashes?: ReadonlySet<string>;
 }
 
 /**
@@ -156,11 +169,16 @@ export function buildRecoveryAlertEvents({
   activeGroupHashes,
   breachedGroupHashes,
   scheduledTimestamp,
+  dataPresentGroupHashes,
 }: BuildRecoveryAlertEventsOpts): AlertEvent[] {
   const wroteAt = new Date().toISOString();
 
   return activeGroupHashes
-    .filter(({ group_hash }) => !breachedGroupHashes.has(group_hash))
+    .filter(
+      ({ group_hash }) =>
+        !breachedGroupHashes.has(group_hash) &&
+        (dataPresentGroupHashes == null || dataPresentGroupHashes.has(group_hash))
+    )
     .map(({ group_hash }) =>
       buildRuleEventDocument({
         '@timestamp': wroteAt,
@@ -176,7 +194,78 @@ export function buildRecoveryAlertEvents({
     );
 }
 
-function rowToDocument(
+export interface BuildContinuedBreachAlertEventsOpts {
+  ruleId: string;
+  ruleVersion: number;
+  spaceId: string;
+  groupHashes: string[];
+  scheduledTimestamp: string;
+}
+
+/**
+ * Creates continued `breached` alert events for the supplied group hashes.
+ *
+ * Used when active group that is absent from the breach batch and did not match the
+ * recovery query, but still has data.
+ */
+export function buildContinuedBreachAlertEvents({
+  ruleId,
+  ruleVersion,
+  spaceId,
+  groupHashes,
+  scheduledTimestamp,
+}: BuildContinuedBreachAlertEventsOpts): AlertEvent[] {
+  const wroteAt = new Date().toISOString();
+
+  return groupHashes.map((groupHash) => ({
+    '@timestamp': wroteAt,
+    scheduled_timestamp: scheduledTimestamp,
+    rule: { id: ruleId, version: ruleVersion },
+    group_hash: groupHash,
+    data: {},
+    status: 'breached' as const,
+    source: 'internal',
+    type: 'signal' as const,
+    space_id: spaceId,
+  }));
+}
+
+export interface BuildNoDataAlertEventsOpts {
+  ruleId: string;
+  ruleVersion: number;
+  spaceId: string;
+  groupHashes: string[];
+  scheduledTimestamp: string;
+}
+
+/**
+ * Creates `no_data` alert events for the supplied group hashes.
+ *
+ * Used when no_data_strategy is configured on the rule.
+ */
+export function buildNoDataAlertEvents({
+  ruleId,
+  ruleVersion,
+  spaceId,
+  groupHashes,
+  scheduledTimestamp,
+}: BuildNoDataAlertEventsOpts): AlertEvent[] {
+  const wroteAt = new Date().toISOString();
+
+  return groupHashes.map((groupHash) => ({
+    '@timestamp': wroteAt,
+    scheduled_timestamp: scheduledTimestamp,
+    rule: { id: ruleId, version: ruleVersion },
+    group_hash: groupHash,
+    data: {},
+    status: 'no_data' as const,
+    source: 'internal',
+    type: 'signal' as const,
+    space_id: spaceId,
+  }));
+}
+
+export function rowToDocument(
   columns: EsqlQueryResponse['columns'],
   row: unknown[]
 ): Record<string, unknown> {
@@ -193,6 +282,7 @@ export interface BuildQueryRecoveryAlertEventsOpts {
   spaceId: string;
   ruleAttributes: Pick<RuleResponse, 'grouping'>;
   activeGroupHashes: ActiveAlertGroupHash[];
+  breachedGroupHashes: Set<string>;
   esqlResponse: EsqlQueryResponse;
   scheduledTimestamp: string;
 }
@@ -201,6 +291,9 @@ export interface BuildQueryRecoveryAlertEventsOpts {
  *
  * Active groups whose group hash matches a row in the recovery query results
  * are considered recovered. Used when the rule has a recover query configured.
+ *
+ * Breach always takes priority: groups present in the current breach batch are
+ * excluded even if the recovery query also matched them.
  */
 export function buildQueryRecoveryAlertEvents({
   ruleId,
@@ -208,6 +301,7 @@ export function buildQueryRecoveryAlertEvents({
   spaceId,
   ruleAttributes,
   activeGroupHashes,
+  breachedGroupHashes,
   esqlResponse,
   scheduledTimestamp,
 }: BuildQueryRecoveryAlertEventsOpts): AlertEvent[] {
@@ -218,7 +312,12 @@ export function buildQueryRecoveryAlertEvents({
     return [];
   }
 
-  const executionUuid = sha256(`${ruleId}|${spaceId}|${scheduledTimestamp}|recovery`);
+  const executionUuid = buildExecutionUuid({
+    ruleId,
+    spaceId,
+    scheduledTimestamp,
+    suffix: 'recovery',
+  });
   const groupingFields = ruleAttributes.grouping?.fields ?? [];
   const activeGroupHashSet = new Set(activeGroupHashes.map(({ group_hash }) => group_hash));
 
@@ -235,7 +334,11 @@ export function buildQueryRecoveryAlertEvents({
       },
     });
 
-    if (activeGroupHashSet.has(groupHash) && !recoveredByGroupHash.has(groupHash)) {
+    if (
+      activeGroupHashSet.has(groupHash) &&
+      !breachedGroupHashes.has(groupHash) &&
+      !recoveredByGroupHash.has(groupHash)
+    ) {
       recoveredByGroupHash.set(groupHash, rowDoc);
     }
   }
