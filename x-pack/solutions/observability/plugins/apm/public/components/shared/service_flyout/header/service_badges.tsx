@@ -52,7 +52,7 @@ export function ServiceBadges({
     rangeTo,
     environment,
   });
-  const alertsHref = apm.alerts;
+  const alertsTabHref = apm.alertsTab;
 
   const { alertsCount, anomalyData } = useServiceBadgesData({
     serviceName: service.name,
@@ -79,16 +79,18 @@ export function ServiceBadges({
             count={alertsCount}
             serviceName={service.name}
             data-test-subj="serviceFlyoutAlertsBadge"
-            ebt={{
-              action: EBT_CLICK_ACTIONS.VIEW_ALERTS,
-              element: SERVICE_FLYOUT_EBT_ELEMENTS.ALERTS_BADGE,
-            }}
-            onClick={(event) => {
-              if (alertsHref) {
-                event.preventDefault();
-                navigateToUrl(alertsHref);
-              }
-            }}
+            {...(alertsTabHref
+              ? {
+                  ebt: {
+                    action: EBT_CLICK_ACTIONS.VIEW_ALERTS,
+                    element: SERVICE_FLYOUT_EBT_ELEMENTS.ALERTS_BADGE,
+                  },
+                  onClick: (event) => {
+                    event.preventDefault();
+                    navigateToUrl(alertsTabHref);
+                  },
+                }
+              : {})}
           />
         </EuiFlexItem>
       )}

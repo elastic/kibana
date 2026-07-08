@@ -44,7 +44,7 @@ export function ServiceFlyoutHeader({
     rangeTo,
     environment,
   });
-  const serviceOverviewHref = apm.overview;
+  const serviceOverviewHref = apm.overviewTab;
 
   return (
     <EuiFlyoutHeader>

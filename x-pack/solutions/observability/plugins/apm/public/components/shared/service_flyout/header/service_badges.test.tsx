@@ -49,7 +49,7 @@ function setupLinks({
   slosHref = '/app/slos/slos-href',
 }: { alertsHref?: string; slosHref?: string } = {}) {
   mockUseServiceFlyoutLinks.mockReturnValue({
-    apm: { overview: '/app/apm/services/opbeans-java/overview', alerts: alertsHref },
+    apm: { overview: '/app/apm/services/opbeans-java/overview', alertsTab: alertsHref },
     alerts: undefined,
     slos: slosHref,
     discover: { traces: undefined, logs: undefined },

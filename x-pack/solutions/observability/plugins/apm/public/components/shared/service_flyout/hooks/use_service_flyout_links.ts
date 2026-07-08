@@ -36,11 +36,11 @@ export function useServiceFlyoutLinks({
   const apm = useMemo(() => {
     const locator = share?.url?.locators?.get(APM_APP_LOCATOR_ID);
     return {
-      overview: locator?.getRedirectUrl({
+      overviewTab: locator?.getRedirectUrl({
         serviceName,
         query: { environment, rangeFrom, rangeTo },
       }),
-      alerts: locator?.getRedirectUrl({
+      alertsTab: locator?.getRedirectUrl({
         serviceName,
         serviceOverviewTab: 'alerts',
         query: { environment, rangeFrom, rangeTo },

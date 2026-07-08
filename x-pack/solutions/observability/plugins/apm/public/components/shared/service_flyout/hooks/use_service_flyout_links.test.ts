@@ -72,7 +72,7 @@ describe('useServiceFlyoutLinks', () => {
     });
   });
 
-  it('builds apm.alerts using the APM locator, dropping the kuery', () => {
+  it('builds apm.alertsTab using the APM locator, dropping the kuery', () => {
     renderHook(() => useServiceFlyoutLinks(baseParams));
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
@@ -132,8 +132,8 @@ describe('useServiceFlyoutLinks', () => {
       useServiceFlyoutLinks({ ...baseParams, transactionType: 'request' })
     );
 
-    expect(result.current.apm.overview).toEqual('/app/apm/services/opbeans-java/overview');
-    expect(result.current.apm.alerts).toEqual('/app/apm/services/opbeans-java/alerts');
+    expect(result.current.apm.overviewTab).toEqual('/app/apm/services/opbeans-java/overview');
+    expect(result.current.apm.alertsTab).toEqual('/app/apm/services/opbeans-java/alerts');
     expect(result.current.slos).toEqual('/app/slos?serviceName=opbeans-java');
     expect(result.current.alerts).toEqual('/app/observability/alerts?mock');
     expect(result.current.discover.traces).toEqual('/app/discover/traces');
