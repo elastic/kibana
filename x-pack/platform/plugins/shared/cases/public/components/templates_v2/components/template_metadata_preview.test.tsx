@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { ConnectorTypes } from '../../../../common/types/domain';
 import type { TemplateMetadataPreviewProps } from './template_metadata_preview';
 import { TemplateMetadataPreview } from './template_metadata_preview';
 
@@ -14,6 +15,11 @@ jest.mock('../../severity/config', () => ({
   SeverityHealth: ({ severity }: { severity: string }) => (
     <span data-test-subj="severity-health">{severity}</span>
   ),
+}));
+
+const mockUseCasesFeatures = jest.fn(() => ({ isSyncAlertsEnabled: true }));
+jest.mock('../../../common/use_cases_features', () => ({
+  useCasesFeatures: () => mockUseCasesFeatures(),
 }));
 
 const defaultProps: TemplateMetadataPreviewProps = {
@@ -27,6 +33,10 @@ const renderComponent = (props: Partial<TemplateMetadataPreviewProps> = {}) =>
   render(<TemplateMetadataPreview {...defaultProps} {...props} />);
 
 describe('TemplateMetadataPreview', () => {
+  beforeEach(() => {
+    mockUseCasesFeatures.mockReturnValue({ isSyncAlertsEnabled: true });
+  });
+
   it('renders the template name', () => {
     renderComponent();
 
@@ -121,6 +131,65 @@ describe('TemplateMetadataPreview', () => {
     renderComponent();
 
     expect(screen.queryByText('Tags')).not.toBeInTheDocument();
+  });
+
+  it('renders sync alerts setting when provided', () => {
+    renderComponent({
+      parsedTemplate: {
+        name: 'Test',
+        settings: { syncAlerts: true },
+        fields: [],
+      },
+    });
+
+    expect(screen.getByText('Sync alerts')).toBeInTheDocument();
+    expect(screen.getByText('On')).toBeInTheDocument();
+  });
+
+  it('does not render the sync alerts setting when alert syncing is disabled (e.g. Observability)', () => {
+    mockUseCasesFeatures.mockReturnValue({ isSyncAlertsEnabled: false });
+
+    renderComponent({
+      parsedTemplate: {
+        name: 'Test',
+        settings: { syncAlerts: true },
+        fields: [],
+      },
+    });
+
+    expect(screen.queryByText('Sync alerts')).not.toBeInTheDocument();
+  });
+
+  it('renders extract observables setting when provided', () => {
+    renderComponent({
+      parsedTemplate: {
+        name: 'Test',
+        settings: { extractObservables: false },
+        fields: [],
+      },
+    });
+
+    expect(screen.getByText('Extract observables')).toBeInTheDocument();
+    expect(screen.getByText('Off')).toBeInTheDocument();
+  });
+
+  it('does not render settings rows when settings are not provided', () => {
+    renderComponent();
+
+    expect(screen.queryByText('Sync alerts')).not.toBeInTheDocument();
+    expect(screen.queryByText('Extract observables')).not.toBeInTheDocument();
+  });
+
+  it('does not render the connector preview for the none connector', () => {
+    renderComponent({
+      parsedTemplate: {
+        name: 'Test',
+        connector: { type: ConnectorTypes.none, id: 'none', fields: null },
+        fields: [],
+      },
+    });
+
+    expect(screen.queryByText('Connector')).not.toBeInTheDocument();
   });
 
   it('renders all metadata fields together', () => {

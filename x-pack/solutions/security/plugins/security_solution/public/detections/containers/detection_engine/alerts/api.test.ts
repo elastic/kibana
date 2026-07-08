@@ -16,6 +16,7 @@ import {
 } from './mock';
 import {
   fetchQueryAlerts,
+  fetchQueryAttacks,
   fetchQueryUnifiedAlerts,
   getSignalIndex,
   getUserPrivilege,
@@ -25,10 +26,12 @@ import {
   updateAlertStatusByIds,
 } from './api';
 import { coreMock } from '@kbn/core/public/mocks';
+import { searchAttacks } from '../../../../common/containers/attacks/api';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/containers/attacks/api');
 
 const coreStartMock = coreMock.createStart({ basePath: '/mock' });
 mockKibanaServices.mockReturnValue(coreStartMock);
@@ -86,6 +89,29 @@ describe('Detections Alerts API', () => {
         signal: abortCtrl.signal,
       });
       expect(signalsResp).toEqual(alertsMock);
+    });
+  });
+
+  describe('fetchQueryAttacks', () => {
+    beforeEach(() => {
+      (searchAttacks as jest.Mock).mockClear();
+      (searchAttacks as jest.Mock).mockResolvedValue(alertsMock);
+    });
+
+    test('calls searchAttacks with query and signal', async () => {
+      await fetchQueryAttacks({ query: mockAlertsQuery, signal: abortCtrl.signal });
+      expect(searchAttacks).toHaveBeenCalledWith({
+        query: mockAlertsQuery,
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('happy path', async () => {
+      const attacksResp = await fetchQueryAttacks({
+        query: mockAlertsQuery,
+        signal: abortCtrl.signal,
+      });
+      expect(attacksResp).toEqual(alertsMock);
     });
   });
 

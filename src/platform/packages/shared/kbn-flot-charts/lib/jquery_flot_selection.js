@@ -78,8 +78,6 @@ The plugin also adds the following methods to the plot object:
 
 */
 
-import jQuery from 'jquery';
-
 (function ($) {
     function init(plot) {
         var selection = {
