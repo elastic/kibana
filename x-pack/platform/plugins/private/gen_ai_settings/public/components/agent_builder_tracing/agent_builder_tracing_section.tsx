@@ -100,65 +100,74 @@ export const AgentBuilderTracingSection: React.FC = () => {
             {hasTracingEnabledBeenSaved && tracingEnabledSaved && (
               <EuiFlexItem grow={false}>
                 {isInstalled ? (
-                  <EuiSplitButton
-                    isDisabled={isDeleting}
-                    data-test-subj="agentBuilderTracingDashboardSplitButton"
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'xpack.genAiSettings.agentBuilderTracing.viewDashboardTooltip',
+                      {
+                        defaultMessage: 'Explore the conversation traces collected in this space.',
+                      }
+                    )}
                   >
-                    <EuiSplitButton.ActionPrimary
-                      href={dashboardUrl}
-                      iconType="eye"
-                      isLoading={isDeleting}
-                      data-test-subj="agentBuilderTracingViewDashboard"
+                    <EuiSplitButton
+                      isDisabled={isDeleting}
+                      data-test-subj="agentBuilderTracingDashboardSplitButton"
                     >
-                      {i18n.translate(
-                        'xpack.genAiSettings.agentBuilderTracing.viewDashboardButton',
-                        { defaultMessage: 'View Dashboard' }
-                      )}
-                    </EuiSplitButton.ActionPrimary>
-                    <EuiSplitButton.ActionSecondary
-                      iconType="arrowDown"
-                      aria-label={i18n.translate(
-                        'xpack.genAiSettings.agentBuilderTracing.dashboardMenuAriaLabel',
-                        { defaultMessage: 'More dashboard options' }
-                      )}
-                      onClick={() => setIsDashboardMenuOpen(!isDashboardMenuOpen)}
-                      data-test-subj="agentBuilderTracingDashboardMenuButton"
-                      popoverProps={{
-                        isOpen: isDashboardMenuOpen,
-                        closePopover: () => setIsDashboardMenuOpen(false),
-                        panelPaddingSize: 'none',
-                        children: (
-                          <EuiContextMenuPanel
-                            items={[
-                              <EuiContextMenuItem
-                                key="deleteDashboard"
-                                icon="trash"
-                                color="danger"
-                                onClick={() => {
-                                  setIsDashboardMenuOpen(false);
-                                  deleteDashboard();
-                                }}
-                                disabled={isDeleting}
-                                data-test-subj="agentBuilderTracingDeleteDashboard"
-                              >
-                                {i18n.translate(
-                                  'xpack.genAiSettings.agentBuilderTracing.deleteDashboardMenuItem',
-                                  { defaultMessage: 'Delete this dashboard' }
-                                )}
-                              </EuiContextMenuItem>,
-                            ]}
-                          />
-                        ),
-                      }}
-                    />
-                  </EuiSplitButton>
+                      <EuiSplitButton.ActionPrimary
+                        href={dashboardUrl}
+                        iconType="eye"
+                        isLoading={isDeleting}
+                        data-test-subj="agentBuilderTracingViewDashboard"
+                      >
+                        {i18n.translate(
+                          'xpack.genAiSettings.agentBuilderTracing.viewDashboardButton',
+                          { defaultMessage: 'View Dashboard' }
+                        )}
+                      </EuiSplitButton.ActionPrimary>
+                      <EuiSplitButton.ActionSecondary
+                        iconType="arrowDown"
+                        aria-label={i18n.translate(
+                          'xpack.genAiSettings.agentBuilderTracing.dashboardMenuAriaLabel',
+                          { defaultMessage: 'More dashboard options' }
+                        )}
+                        onClick={() => setIsDashboardMenuOpen(!isDashboardMenuOpen)}
+                        data-test-subj="agentBuilderTracingDashboardMenuButton"
+                        popoverProps={{
+                          isOpen: isDashboardMenuOpen,
+                          closePopover: () => setIsDashboardMenuOpen(false),
+                          panelPaddingSize: 'none',
+                          children: (
+                            <EuiContextMenuPanel
+                              items={[
+                                <EuiContextMenuItem
+                                  key="deleteDashboard"
+                                  icon="trash"
+                                  color="danger"
+                                  onClick={() => {
+                                    setIsDashboardMenuOpen(false);
+                                    deleteDashboard();
+                                  }}
+                                  disabled={isDeleting}
+                                  data-test-subj="agentBuilderTracingDeleteDashboard"
+                                >
+                                  {i18n.translate(
+                                    'xpack.genAiSettings.agentBuilderTracing.deleteDashboardMenuItem',
+                                    { defaultMessage: 'Delete this dashboard' }
+                                  )}
+                                </EuiContextMenuItem>,
+                              ]}
+                            />
+                          ),
+                        }}
+                      />
+                    </EuiSplitButton>
+                  </EuiToolTip>
                 ) : (
                   <EuiToolTip
                     content={i18n.translate(
                       'xpack.genAiSettings.agentBuilderTracing.installDashboardTooltip',
                       {
                         defaultMessage:
-                          'Creates the Agent Builder Traces dashboard for this space. You can reinstall it here if it\u2019s ever deleted.',
+                          'Add a prebuilt dashboard for exploring conversation traces in this space.',
                       }
                     )}
                   >
