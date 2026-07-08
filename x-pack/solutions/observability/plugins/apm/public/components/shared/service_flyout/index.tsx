@@ -9,6 +9,7 @@ import { EuiFlyoutBody, EuiPortal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import type { SloStatus } from '@kbn/apm-types';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
@@ -43,7 +44,7 @@ export const SERVICE_FLYOUT_TABS = [
 
 export interface ServiceFlyoutService {
   name: string;
-  agentName?: string;
+  agentName?: AgentName;
   sloStatus?: SloStatus | 'noSLOs';
   sloCount?: number;
 }
