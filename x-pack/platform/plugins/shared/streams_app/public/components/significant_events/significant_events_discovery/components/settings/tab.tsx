@@ -335,145 +335,131 @@ export function SettingsTab() {
                     disabled={!canEditSettings}
                   />
                 </EuiFormRow>
-                <EuiFlexGroup gutterSize="m">
-                  <EuiFlexItem>
-                    <EuiFormRow
-                      label={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.detectionIntervalLabel',
-                        { defaultMessage: 'Detection interval (minutes)' }
-                      )}
-                    >
-                      <EuiFieldNumber
-                        data-test-subj="streams-settings-scheduled-detection-interval"
-                        value={scheduledDiscovery.draft.detectionIntervalMinutes}
-                        onChange={(e) =>
-                          scheduledDiscovery.setDraft((prev) => ({
-                            ...prev,
-                            detectionIntervalMinutes: clampNumber(
-                              e.target.value,
-                              MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
-                              Number.MAX_SAFE_INTEGER
-                            ),
-                          }))
-                        }
-                        min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
-                        disabled={!canEditSettings || !scheduledDiscovery.draft.enabled}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFormRow
-                      label={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.reviewIntervalLabel',
-                        { defaultMessage: 'Review interval (minutes)' }
-                      )}
-                    >
-                      <EuiFieldNumber
-                        data-test-subj="streams-settings-scheduled-review-interval"
-                        value={scheduledDiscovery.draft.reviewIntervalMinutes}
-                        onChange={(e) =>
-                          scheduledDiscovery.setDraft((prev) => ({
-                            ...prev,
-                            reviewIntervalMinutes: clampNumber(
-                              e.target.value,
-                              MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
-                              Number.MAX_SAFE_INTEGER
-                            ),
-                          }))
-                        }
-                        min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
-                        disabled={!canEditSettings || !scheduledDiscovery.draft.enabled}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiFlexGroup gutterSize="m">
-                  <EuiFlexItem>
-                    <EuiFormRow
-                      label={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.discoveryBatchSizeLabel',
-                        { defaultMessage: 'Discovery batch size' }
-                      )}
-                    >
-                      <EuiFieldNumber
-                        data-test-subj="streams-settings-scheduled-discovery-batch-size"
-                        value={scheduledDiscovery.draft.discoveryBatchSize}
-                        onChange={(e) =>
-                          scheduledDiscovery.setDraft((prev) => ({
-                            ...prev,
-                            discoveryBatchSize: clampNumber(
-                              e.target.value,
-                              MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
-                              MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE
-                            ),
-                          }))
-                        }
-                        min={MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
-                        max={MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
-                        disabled={!canEditSettings || !scheduledDiscovery.draft.enabled}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFormRow
-                      label={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.triageBatchSizeLabel',
-                        { defaultMessage: 'Triage batch size' }
-                      )}
-                    >
-                      <EuiFieldNumber
-                        data-test-subj="streams-settings-scheduled-triage-batch-size"
-                        value={scheduledDiscovery.draft.triageBatchSize}
-                        onChange={(e) =>
-                          scheduledDiscovery.setDraft((prev) => ({
-                            ...prev,
-                            triageBatchSize: clampNumber(
-                              e.target.value,
-                              MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
-                              MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE
-                            ),
-                          }))
-                        }
-                        min={MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
-                        max={MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
-                        disabled={!canEditSettings || !scheduledDiscovery.draft.enabled}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFormRow
-                      label={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.maxReviewPassesLabel',
-                        { defaultMessage: 'Review passes' }
-                      )}
-                      helpText={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.maxReviewPassesHelp',
-                        {
-                          defaultMessage:
-                            'Maximum discovery and triage pass pairs per scheduled review run.',
-                        }
-                      )}
-                    >
-                      <EuiFieldNumber
-                        data-test-subj="streams-settings-scheduled-max-review-passes"
-                        value={scheduledDiscovery.draft.maxReviewPasses}
-                        onChange={(e) =>
-                          scheduledDiscovery.setDraft((prev) => ({
-                            ...prev,
-                            maxReviewPasses: clampNumber(
-                              e.target.value,
-                              MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
-                              MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES
-                            ),
-                          }))
-                        }
-                        min={MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES}
-                        max={MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES}
-                        disabled={!canEditSettings || !scheduledDiscovery.draft.enabled}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.detectionIntervalLabel',
+                    { defaultMessage: 'Detection interval (minutes)' }
+                  )}
+                >
+                  <EuiFieldNumber
+                    data-test-subj="streams-settings-scheduled-detection-interval"
+                    value={scheduledDiscovery.draft.detectionIntervalMinutes}
+                    onChange={(e) =>
+                      scheduledDiscovery.setDraft((prev) => ({
+                        ...prev,
+                        detectionIntervalMinutes: clampNumber(
+                          e.target.value,
+                          MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
+                          Number.MAX_SAFE_INTEGER
+                        ),
+                      }))
+                    }
+                    min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
+                    disabled={!canEditSettings || !scheduledDiscovery.draft.enabled}
+                  />
+                </EuiFormRow>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.reviewIntervalLabel',
+                    { defaultMessage: 'Review interval (minutes)' }
+                  )}
+                >
+                  <EuiFieldNumber
+                    data-test-subj="streams-settings-scheduled-review-interval"
+                    value={scheduledDiscovery.draft.reviewIntervalMinutes}
+                    onChange={(e) =>
+                      scheduledDiscovery.setDraft((prev) => ({
+                        ...prev,
+                        reviewIntervalMinutes: clampNumber(
+                          e.target.value,
+                          MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
+                          Number.MAX_SAFE_INTEGER
+                        ),
+                      }))
+                    }
+                    min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
+                    disabled={!canEditSettings || !scheduledDiscovery.draft.enabled}
+                  />
+                </EuiFormRow>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.discoveryBatchSizeLabel',
+                    { defaultMessage: 'Discovery batch size' }
+                  )}
+                >
+                  <EuiFieldNumber
+                    data-test-subj="streams-settings-scheduled-discovery-batch-size"
+                    value={scheduledDiscovery.draft.discoveryBatchSize}
+                    onChange={(e) =>
+                      scheduledDiscovery.setDraft((prev) => ({
+                        ...prev,
+                        discoveryBatchSize: clampNumber(
+                          e.target.value,
+                          MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
+                          MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE
+                        ),
+                      }))
+                    }
+                    min={MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
+                    max={MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
+                    disabled={!canEditSettings || !scheduledDiscovery.draft.enabled}
+                  />
+                </EuiFormRow>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.triageBatchSizeLabel',
+                    { defaultMessage: 'Triage batch size' }
+                  )}
+                >
+                  <EuiFieldNumber
+                    data-test-subj="streams-settings-scheduled-triage-batch-size"
+                    value={scheduledDiscovery.draft.triageBatchSize}
+                    onChange={(e) =>
+                      scheduledDiscovery.setDraft((prev) => ({
+                        ...prev,
+                        triageBatchSize: clampNumber(
+                          e.target.value,
+                          MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
+                          MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE
+                        ),
+                      }))
+                    }
+                    min={MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
+                    max={MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
+                    disabled={!canEditSettings || !scheduledDiscovery.draft.enabled}
+                  />
+                </EuiFormRow>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.maxReviewPassesLabel',
+                    { defaultMessage: 'Review passes' }
+                  )}
+                  helpText={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.maxReviewPassesHelp',
+                    {
+                      defaultMessage:
+                        'Maximum discovery and triage pass pairs per scheduled review run.',
+                    }
+                  )}
+                >
+                  <EuiFieldNumber
+                    data-test-subj="streams-settings-scheduled-max-review-passes"
+                    value={scheduledDiscovery.draft.maxReviewPasses}
+                    onChange={(e) =>
+                      scheduledDiscovery.setDraft((prev) => ({
+                        ...prev,
+                        maxReviewPasses: clampNumber(
+                          e.target.value,
+                          MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
+                          MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES
+                        ),
+                      }))
+                    }
+                    min={MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES}
+                    max={MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES}
+                    disabled={!canEditSettings || !scheduledDiscovery.draft.enabled}
+                  />
+                </EuiFormRow>
               </EuiForm>
             </EuiFlexItem>
           </EuiFlexGroup>
