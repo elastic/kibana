@@ -67,6 +67,13 @@ describe('useAlertsHref', () => {
     );
   });
 
+  it('escapes double-quotes and backslashes in the service name', () => {
+    const href = renderAlertsHref({ serviceName: 'my"service\\path' });
+    expect(getKuery(href)).toEqual(
+      'service.name: "my\\"service\\\\path" AND service.environment: "production"'
+    );
+  });
+
   it('wires rangeFrom and rangeTo into the encoded state', () => {
     const href = renderAlertsHref({ rangeFrom: 'now-1h', rangeTo: 'now' });
     const state = rison.decode(href!.split('?_a=')[1]) as any;

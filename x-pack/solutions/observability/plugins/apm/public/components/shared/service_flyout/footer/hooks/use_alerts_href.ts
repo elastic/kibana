@@ -41,7 +41,9 @@ export function useAlertsHref({
         : isEnvironmentDefined(environment)
         ? `${SERVICE_ENVIRONMENT}: "${escapeQuotes(environment)}"`
         : null;
-    const kuery = [`${SERVICE_NAME}: "${serviceName}"`, envKuery].filter(Boolean).join(' AND ');
+    const kuery = [`${SERVICE_NAME}: "${escapeQuotes(serviceName)}"`, envKuery]
+      .filter(Boolean)
+      .join(' AND ');
     return `${base}?_a=${rison.encode({ kuery, rangeFrom, rangeTo, status: 'all' })}`;
   }, [core.http.basePath, environment, serviceName, rangeFrom, rangeTo]);
 }
