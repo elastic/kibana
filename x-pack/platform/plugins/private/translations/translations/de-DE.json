@@ -51613,7 +51613,6 @@
     "xpack.streams.streamsListView.conflictCalloutMessage": "Aktivieren Sie kabelgebundene Streams, um Ihre Streams-Konfiguration an den aktuellen Elasticsearch-Status anzupassen.",
     "xpack.streams.streamsListView.conflictCalloutTitle": "Konfigurationskonflikt",
     "xpack.streams.streamsListView.createClassicStreamButtonLabel": "Klassischen Stream erstellen",
-    "xpack.streams.streamsListView.createQueryStreamButtonLabel": "Abfrage-Stream erstellen",
     "xpack.streams.streamsListView.disableWiredStreamsErrorToastTitle": "Fehler beim Aktualisieren der Einstellung für kabelgebundene Streams",
     "xpack.streams.streamsListView.enableWiredStreamsErrorToastTitle": "Fehler beim Aktualisieren der Einstellung für kabelgebundene Streams",
     "xpack.streams.streamsListView.enableWiredStreamsSwitchLabel": "Wired Streams aktivieren",
