@@ -15,15 +15,13 @@ import { ScheduleTypeSelector } from './schedule_type_selector';
 import { SplayTimeField } from './splay_time_field';
 import { StartDateField } from './start_date_field';
 import { StopAfterField } from './stop_after_field';
-import { roundUpTo30Min } from './slot_utils';
+import { ONE_DAY_MS, roundUpTo30Min } from './slot_utils';
 import {
   ADVANCED_PARTS_ADVISORY_BODY,
   ADVANCED_PARTS_ADVISORY_TITLE,
   SCHEDULE_SECTION_TITLE,
 } from './translations';
 import type { ScheduleFormData } from './types';
-
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 export interface ScheduleSectionProps {
   value: ScheduleFormData;

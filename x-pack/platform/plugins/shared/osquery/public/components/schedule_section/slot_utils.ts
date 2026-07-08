@@ -16,6 +16,8 @@
 export const SLOT_MINUTES = 30;
 const SLOT_MS = SLOT_MINUTES * 60 * 1000;
 
+export const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
 /**
  * Round a date UP to the next 30-minute boundary. A date already on a boundary
  * is returned unchanged. Seconds / milliseconds below a boundary count as "not

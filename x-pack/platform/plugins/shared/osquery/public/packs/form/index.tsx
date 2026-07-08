@@ -240,6 +240,18 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     [setValue]
   );
 
+  // Surface schedule errors so a blocked submit is never a silent no-op.
+  const showScheduleErrorsToast = useCallback(
+    (errors: string[]) => {
+      setShowScheduleErrors(true);
+      toasts.addDanger({
+        title: SCHEDULE_ERRORS_TOAST_TITLE,
+        text: errors.join('\n'),
+      });
+    },
+    [toasts]
+  );
+
   const onSubmit = useCallback(
     async (values: PackFormData) => {
       // RHF field errors alone don't block submit for the controlled
@@ -249,14 +261,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           originalStartDate,
         });
         if (submitScheduleErrors.length > 0) {
-          // A blocked submit must be visible, never a silent no-op (design.md
-          // D4) — surface the schedule errors the same way `handleSaveClick`
-          // does for its own pre-submit check.
-          setShowScheduleErrors(true);
-          toasts.addDanger({
-            title: SCHEDULE_ERRORS_TOAST_TITLE,
-            text: submitScheduleErrors.join('\n'),
-          });
+          showScheduleErrorsToast(submitScheduleErrors);
 
           return;
         }
@@ -314,7 +319,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       isRruleSchedulingEnabled,
       originalStartDate,
       shards,
-      toasts,
+      showScheduleErrorsToast,
       updateAsync,
     ]
   );
@@ -342,11 +347,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     }
 
     if (scheduleErrors.length > 0) {
-      setShowScheduleErrors(true);
-      toasts.addDanger({
-        title: SCHEDULE_ERRORS_TOAST_TITLE,
-        text: scheduleErrors.join('\n'),
-      });
+      showScheduleErrorsToast(scheduleErrors);
 
       return;
     }
@@ -358,7 +359,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     }
 
     handleSubmitForm();
-  }, [agentCount, handleSubmitForm, scheduleErrors, toasts, trigger]);
+  }, [agentCount, handleSubmitForm, scheduleErrors, showScheduleErrorsToast, trigger]);
 
   const handleConfirmConfirmationClick = useCallback(async () => {
     setShowConfirmationModal(false);
