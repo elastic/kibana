@@ -113,6 +113,8 @@ export const EditDlmPhasesFlyout = ({
   onRefreshDefaultRepository,
   isRefreshingDefaultRepository,
   manageRepositoriesHref,
+  createDefaultRepositoryHref,
+  hasExistingRepositories,
   defaultRepositoryName,
   canCreateRepository = true,
   'data-test-subj': dataTestSubjProp,
@@ -428,7 +430,8 @@ export const EditDlmPhasesFlyout = ({
             dataTestSubj={dataTestSubj}
             manageRepositoriesHref={manageRepositoriesHref}
             defaultRepositoryName={defaultRepositoryName}
-            onCreateDefaultRepository={onMissingDefaultRepository}
+            createDefaultRepositoryHref={createDefaultRepositoryHref}
+            hasExistingRepositories={hasExistingRepositories}
             onRefresh={onRefreshDefaultRepository}
             isRefreshing={isRefreshingDefaultRepository}
           />

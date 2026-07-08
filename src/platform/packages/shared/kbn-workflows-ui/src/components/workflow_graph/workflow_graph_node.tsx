@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IconType } from '@elastic/eui';
 import { EuiButtonIcon, EuiIcon, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { Handle, Position } from '@xyflow/react';
 import type { Node, NodeProps } from '@xyflow/react';
@@ -51,7 +52,7 @@ function getStepMaxAttempts(step: WorkflowGraphNodeData['step']): number | undef
 
 // Branded multi-color icons keep their natural palette; everything else is
 // tinted with the trigger/step accent color.
-const LOGO_ICONS = new Set(['logoElasticsearch', 'logoKibana']);
+const LOGO_ICONS = new Set<IconType>(['logoElasticsearch', 'logoKibana']);
 
 interface NodePalette {
   readonly outerBorder: string;

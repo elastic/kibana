@@ -178,5 +178,6 @@
     "@kbn/deeplinks-analytics",
     "@kbn/core-user-profile-common",
     "@kbn/synthtrace-client",
+    "@kbn/significant-events-plugin",
   ]
 }

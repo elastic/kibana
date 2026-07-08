@@ -18,6 +18,7 @@ import glyph from './icons/glyph.svg';
 import elasticsearchLogoSvg from './icons/logo_elasticsearch.svg';
 import kibanaLogoSvg from './icons/logo_kibana.svg';
 import output from './icons/output.svg';
+import parallel from './icons/parallel.svg';
 import plugs from './icons/plugs.svg';
 import productStreamsWired from './icons/product_streams_wired.svg';
 import sparkles from './icons/sparkles.svg';
@@ -37,9 +38,11 @@ export const HardcodedIcons: Record<string, string> = {
   foreach: 'refresh',
   while: 'refresh',
   switch: productStreamsWired,
+  parallel,
   if: 'branch',
   wait: clock,
   waitForInput: user,
+  waitForApproval: user,
   alert: warning,
   scheduled: clock,
   manual: user,
