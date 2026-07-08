@@ -43,3 +43,11 @@ export const RESTORE_CONFIRM_BUTTON = i18n.translate(
 export const RESTORE_CANCEL_BUTTON = i18n.translate('xpack.changeHistoryUi.restore.cancelButton', {
   defaultMessage: 'Cancel',
 });
+
+export const RESTORE_UNSAVED_CHANGES_WARNING = i18n.translate(
+  'xpack.changeHistoryUi.restore.unsavedChangesWarning',
+  {
+    defaultMessage:
+      'You have unsaved changes. Restoring this version will overwrite all changes that have not been saved.',
+  }
+);
