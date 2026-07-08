@@ -31,7 +31,7 @@ describe('resolveApiKeyFactory', () => {
         isManagedOtlpServiceAvailable: true,
         isServerless: false,
         managedOtlpPrwEndpointEnabled: false,
-        isManagedElasticsearchEndpointAvailable: false,
+        isManagedElasticsearchBulkEndpointAvailable: false,
       });
 
       await factory(esClient, 'name');
@@ -45,7 +45,7 @@ describe('resolveApiKeyFactory', () => {
         isManagedOtlpServiceAvailable: false,
         isServerless: false,
         managedOtlpPrwEndpointEnabled: false,
-        isManagedElasticsearchEndpointAvailable: false,
+        isManagedElasticsearchBulkEndpointAvailable: false,
       });
 
       await factory(esClient, 'name');
@@ -61,7 +61,7 @@ describe('resolveApiKeyFactory', () => {
         isManagedOtlpServiceAvailable: true,
         isServerless: true,
         managedOtlpPrwEndpointEnabled: false,
-        isManagedElasticsearchEndpointAvailable: false,
+        isManagedElasticsearchBulkEndpointAvailable: false,
       });
 
       await factory(esClient, 'name');
@@ -75,7 +75,7 @@ describe('resolveApiKeyFactory', () => {
         isManagedOtlpServiceAvailable: false,
         isServerless: false,
         managedOtlpPrwEndpointEnabled: false,
-        isManagedElasticsearchEndpointAvailable: false,
+        isManagedElasticsearchBulkEndpointAvailable: false,
       });
 
       await factory(esClient, 'name');
@@ -89,7 +89,7 @@ describe('resolveApiKeyFactory', () => {
         isManagedOtlpServiceAvailable: true,
         isServerless: false,
         managedOtlpPrwEndpointEnabled: false,
-        isManagedElasticsearchEndpointAvailable: false,
+        isManagedElasticsearchBulkEndpointAvailable: false,
       });
 
       await factory(esClient, 'name');
@@ -103,7 +103,7 @@ describe('resolveApiKeyFactory', () => {
         isManagedOtlpServiceAvailable: true,
         isServerless: false,
         managedOtlpPrwEndpointEnabled: true,
-        isManagedElasticsearchEndpointAvailable: false,
+        isManagedElasticsearchBulkEndpointAvailable: false,
       });
 
       await factory(esClient, 'name');
@@ -119,7 +119,7 @@ describe('resolveApiKeyFactory', () => {
         isManagedOtlpServiceAvailable: true,
         isServerless: false,
         managedOtlpPrwEndpointEnabled: false,
-        isManagedElasticsearchEndpointAvailable: true,
+        isManagedElasticsearchBulkEndpointAvailable: true,
       };
       const factory = resolveApiKeyFactory(ApiEndpointId.Elasticsearch, context);
 
@@ -134,7 +134,7 @@ describe('resolveApiKeyFactory', () => {
         isManagedOtlpServiceAvailable: false,
         isServerless: false,
         managedOtlpPrwEndpointEnabled: false,
-        isManagedElasticsearchEndpointAvailable: false,
+        isManagedElasticsearchBulkEndpointAvailable: false,
       });
 
       await factory(esClient, 'name');

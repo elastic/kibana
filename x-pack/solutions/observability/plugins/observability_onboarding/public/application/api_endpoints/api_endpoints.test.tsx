@@ -95,10 +95,7 @@ describe('ApiEndpoints', () => {
     expect(
       screen.getByText(/Send data to your deployment's managed inputs, using an API key./)
     ).toBeInTheDocument();
-    expect(learnMoreLink).toHaveAttribute(
-      'href',
-      'https://www.elastic.co/docs/reference/opentelemetry/managed-inputs'
-    );
+    expect(learnMoreLink).toHaveAttribute('href', 'https://ela.st/managed-inputs');
   });
 
   it('describes direct endpoints when managed OTLP is unavailable', () => {
@@ -162,6 +159,6 @@ describe('ApiEndpoints', () => {
     ).toBeInTheDocument();
     expect(
       container.querySelector('[data-test-subj="observabilityOnboardingApiEndpointsLearnMore"]')
-    ).toHaveAttribute('href', 'https://www.elastic.co/docs/reference/opentelemetry/managed-inputs');
+    ).toHaveAttribute('href', 'https://ela.st/managed-inputs');
   });
 });

@@ -18,7 +18,7 @@ export interface ApiKeyFactoryContext {
   isManagedOtlpServiceAvailable: boolean;
   isServerless: boolean;
   managedOtlpPrwEndpointEnabled: boolean;
-  isManagedElasticsearchEndpointAvailable: boolean;
+  isManagedElasticsearchBulkEndpointAvailable: boolean;
 }
 
 export function resolveApiKeyFactory(
@@ -27,7 +27,7 @@ export function resolveApiKeyFactory(
     isManagedOtlpServiceAvailable,
     isServerless,
     managedOtlpPrwEndpointEnabled,
-    isManagedElasticsearchEndpointAvailable,
+    isManagedElasticsearchBulkEndpointAvailable,
   }: ApiKeyFactoryContext
 ): ApiKeyFactory {
   switch (id) {
@@ -38,7 +38,7 @@ export function resolveApiKeyFactory(
         ? createManagedOtlpServiceApiKey
         : createPrometheusApiKey;
     case ApiEndpointId.Elasticsearch:
-      return isManagedElasticsearchEndpointAvailable
+      return isManagedElasticsearchBulkEndpointAvailable
         ? createManagedOtlpServiceApiKey
         : (esClient, name) => createShipperApiKey(esClient, name, true);
   }

@@ -32,8 +32,7 @@ import { useApiEndpoints } from './use_api_endpoints';
 import { useApiKeys } from './use_api_keys';
 
 const DIRECT_ENDPOINTS_DOCS_LINK = 'https://ela.st/connect-deployment-endpoints';
-const MANAGED_INPUTS_DOCS_LINK =
-  'https://www.elastic.co/docs/reference/opentelemetry/managed-inputs';
+const MANAGED_INPUTS_DOCS_LINK = 'https://ela.st/managed-inputs';
 
 const API_ENDPOINTS_SECTION_ID = 'apiEndpoints';
 const TITLE_ID = `${API_ENDPOINTS_SECTION_ID}Title`;

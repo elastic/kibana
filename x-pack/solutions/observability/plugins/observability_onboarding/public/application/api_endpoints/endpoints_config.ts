@@ -32,7 +32,7 @@ const normalizeEndpointUrl = (url?: string): string | undefined => {
   const trimmedUrl = url?.trim();
   return trimmedUrl ? trimTrailingSlashes(trimmedUrl) : undefined;
 };
-const getManagedElasticsearchUrl = ({
+const getManagedElasticsearchCompatibleUrl = ({
   managedOtlpServiceUrl,
 }: ApiEndpointContext): string | undefined => {
   const managedUrl = normalizeEndpointUrl(managedOtlpServiceUrl);
@@ -95,9 +95,9 @@ export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
     id: ApiEndpointId.Elasticsearch,
     label: elasticsearchLabel,
     euiIconType: 'logoElasticsearch',
-    usesManagedInput: (context) => Boolean(getManagedElasticsearchUrl(context)),
+    usesManagedInput: (context) => Boolean(getManagedElasticsearchCompatibleUrl(context)),
     getUrl: (context) => {
-      const managedUrl = getManagedElasticsearchUrl(context);
+      const managedUrl = getManagedElasticsearchCompatibleUrl(context);
       if (managedUrl) {
         return managedUrl;
       }

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { hasManagedElasticsearchEndpoint } from './route';
+import { hasManagedElasticsearchBulkEndpoint } from './route';
 
-describe('hasManagedElasticsearchEndpoint', () => {
-  it('uses managed URL presence as the Elasticsearch-compatible endpoint availability signal', () => {
-    expect(hasManagedElasticsearchEndpoint('https://otlp.example.com:443')).toBe(true);
+describe('hasManagedElasticsearchBulkEndpoint', () => {
+  it('uses managed URL presence as the Elasticsearch-compatible bulk endpoint availability signal', () => {
+    expect(hasManagedElasticsearchBulkEndpoint('https://otlp.example.com:443')).toBe(true);
   });
 
   it('treats missing or blank managed URLs as unavailable', () => {
-    expect(hasManagedElasticsearchEndpoint(undefined)).toBe(false);
-    expect(hasManagedElasticsearchEndpoint('   ')).toBe(false);
+    expect(hasManagedElasticsearchBulkEndpoint(undefined)).toBe(false);
+    expect(hasManagedElasticsearchBulkEndpoint('   ')).toBe(false);
   });
 });
