@@ -61,6 +61,8 @@ import {
 } from './handlers';
 import { registerRoutes } from '.';
 
+import { getInstallation, removeInstallation } from '../../services/epm/packages';
+
 const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyClient>;
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
@@ -149,6 +151,7 @@ jest.mock('../../services/epm/packages', () => {
     ensureInstalledPackage: jest.fn(() => Promise.resolve()),
     getPackageInfo: jest.fn(() => Promise.resolve()),
     getInstallation: jest.fn(),
+    removeInstallation: jest.fn(),
     getInstallations: jest.fn().mockResolvedValue({
       saved_objects: [
         {
@@ -791,6 +794,29 @@ describe('When calling package policy', () => {
       });
       const validationResp = CreatePackagePolicyResponseSchema.validate(expectedResponse);
       expect(validationResp).toEqual(expectedResponse);
+    });
+
+    it('does not uninstall an already-installed package when create fails during request processing', async () => {
+      // Regression: a validation error thrown while processing the request body
+      // (e.g. an unknown input id in a simplified request) must not roll back an
+      // already-installed package. The install state is captured before body
+      // processing, so the catch block must skip removeInstallation here.
+      jest.mocked(getInstallation).mockResolvedValue({ install_status: 'installed' } as any);
+      const validationError = Object.assign(new Error('Input not found: a-package-bogus'), {
+        statusCode: 400,
+      });
+      packagePolicyServiceMock.enrichPolicyWithDefaultsFromPackage.mockRejectedValueOnce(
+        validationError
+      );
+
+      const request = httpServerMock.createKibanaRequest({ body: testPackagePolicy });
+      await createPackagePolicyHandler(context, request, response);
+
+      expect(jest.mocked(removeInstallation)).not.toHaveBeenCalled();
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: { message: 'Input not found: a-package-bogus' },
+      });
     });
   });
 

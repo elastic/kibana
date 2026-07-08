@@ -248,6 +248,18 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   }
 
   try {
+    // Capture install state before processing the request body. A validation
+    // error thrown here (e.g. an unknown input id in a simplified request) must
+    // not leave this false, or the catch block would uninstall an
+    // already-installed package as an erroneous rollback.
+    if (pkg?.name) {
+      const existingInstallation = await getInstallation({
+        savedObjectsClient: soClient,
+        pkgName: pkg.name,
+      });
+      wasPackageAlreadyInstalled = existingInstallation?.install_status === 'installed';
+    }
+
     let newPackagePolicy: NewPackagePolicy;
     if (isSimplifiedCreatePackagePolicyRequest(newPolicy)) {
       if (!pkg) {
@@ -270,13 +282,6 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       } as NewPackagePolicy);
     }
     newPackagePolicy.inputs = alignInputsAndStreams(newPackagePolicy.inputs);
-
-    const installation = await getInstallation({
-      savedObjectsClient: soClient,
-      pkgName: pkg!.name,
-    });
-
-    wasPackageAlreadyInstalled = installation?.install_status === 'installed';
 
     // Create package policy
     const packagePolicy = await fleetContext.packagePolicyService.asCurrentUser.create(
