@@ -141,10 +141,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   button={
-                    <EuiToolTip
-                      content={i18n.QUICK_PROMPT_OVERFLOW_ARIA}
-                      disableScreenReaderOutput
-                    >
+                    <EuiToolTip content={i18n.QUICK_PROMPT_OVERFLOW_ARIA} disableScreenReaderOutput>
                       <EuiButtonIcon
                         color={'primary'}
                         iconType={'boxesVertical'}

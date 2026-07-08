@@ -66,12 +66,9 @@ export const FlyoutNavigation = memo<FlyoutNavigationProps>(
               defaultMessage: 'Hide chats',
             }
           )
-        : i18n.translate(
-            'xpack.elasticAssistant.flyout.right.header.expandDetailButtonAriaLabel',
-            {
-              defaultMessage: 'Show chats',
-            }
-          );
+        : i18n.translate('xpack.elasticAssistant.flyout.right.header.expandDetailButtonAriaLabel', {
+            defaultMessage: 'Show chats',
+          });
 
       return (
         <EuiToolTip content={toggleLabel} disableScreenReaderOutput>
