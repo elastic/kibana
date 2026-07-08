@@ -26,7 +26,7 @@ const SettingsSectionComponent: React.FC<SettingsSectionProps> = ({
     <EuiTitle size="s">
       <h2>{title}</h2>
     </EuiTitle>
-    <EuiSpacer size="s" />
+    <EuiSpacer size="m" />
     <EuiText size="m">{description}</EuiText>
     <EuiSpacer size="m" />
     {children}

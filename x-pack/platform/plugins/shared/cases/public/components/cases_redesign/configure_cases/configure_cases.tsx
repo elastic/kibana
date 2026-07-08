@@ -63,7 +63,7 @@ ConfigureCasesBreadcrumbs.displayName = 'ConfigureCasesBreadcrumbs';
 
 const contentWrapperCss = css`
   box-sizing: content-box;
-  max-width: 1175px;
+  max-width: 960px;
   width: 100%;
 `;
 
@@ -455,7 +455,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                 </SettingsSection>
               )}
 
-              {showConnectorsSection && showClosureSection && <EuiHorizontalRule margin="m" />}
+              {showConnectorsSection && showClosureSection && <EuiHorizontalRule margin="l" />}
 
               {showClosureSection && (
                 <SettingsSection
@@ -474,7 +474,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
               )}
 
               {(showConnectorsSection || showClosureSection) && showObservableTypesSection && (
-                <EuiHorizontalRule margin="m" />
+                <EuiHorizontalRule margin="l" />
               )}
 
               {showObservableTypesSection && (
