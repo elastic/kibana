@@ -14,8 +14,7 @@ import type { InfraBackendLibs } from '../../../lib/infra_types';
 
 import { logAnalysisValidationV1 } from '../../../../common/http_api';
 
-// Bound the number of concurrent dataset queries fanned out per request.
-const MAX_CONCURRENT_INDEX_QUERIES = 10;
+const { MAX_CONCURRENT_INDEX_QUERIES } = logAnalysisValidationV1;
 
 export const initValidateLogAnalysisDatasetsRoute = ({
   framework,

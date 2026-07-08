@@ -8,6 +8,7 @@
 import * as rt from 'io-ts';
 import { LimitedSizeArray } from '@kbn/securitysolution-io-ts-types';
 import { mappingRuntimeFieldRT } from '../../../shared/es_request';
+import { MAX_VALIDATION_FIELDS, MAX_VALIDATION_INDICES } from './constants';
 
 export const LOG_ANALYSIS_VALIDATE_INDICES_PATH =
   '/api/infra/log_analysis/validation/log_entry_rate_indices';
@@ -26,8 +27,11 @@ export type ValidationIndicesFieldSpecification = rt.TypeOf<
 
 export const validationIndicesRequestPayloadRT = rt.type({
   data: rt.type({
-    fields: LimitedSizeArray({ codec: validationIndicesFieldSpecificationRT, maxSize: 100 }),
-    indices: LimitedSizeArray({ codec: rt.string, maxSize: 1000 }),
+    fields: LimitedSizeArray({
+      codec: validationIndicesFieldSpecificationRT,
+      maxSize: MAX_VALIDATION_FIELDS,
+    }),
+    indices: LimitedSizeArray({ codec: rt.string, maxSize: MAX_VALIDATION_INDICES }),
     runtimeMappings: rt.record(rt.string, mappingRuntimeFieldRT),
   }),
 });
