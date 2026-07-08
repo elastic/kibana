@@ -52,6 +52,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/logging-mocks'
   - '@kbn/std'
+  - '@kbn/test-eui-helpers'
 tags:
   - shared-browser
   - package
