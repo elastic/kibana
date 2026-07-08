@@ -358,10 +358,19 @@ const WorkflowYamlCanvasContent: React.FC<{
 const INLINE_PREVIEW_HEIGHT_SIDEBAR = 180;
 const INLINE_PREVIEW_HEIGHT_DEFAULT = 220;
 
+// Guards against valid-YAML/wrong-shape (e.g. LLM emits `steps:` as a mapping):
+// WorkflowGraphPreview iterates `workflow.steps` / `workflow.triggers`, which
+// would throw "object is not iterable" — there's no error boundary in the
+// inline attachment render path, so a throw crashes the whole chat message.
 const parseWorkflowYaml = (yaml: string): WorkflowYaml | null => {
   try {
     const parsed = parseYaml(yaml);
-    if (parsed && typeof parsed === 'object') {
+    if (
+      parsed &&
+      typeof parsed === 'object' &&
+      (parsed.steps === undefined || Array.isArray(parsed.steps)) &&
+      (parsed.triggers === undefined || Array.isArray(parsed.triggers))
+    ) {
       return parsed as WorkflowYaml;
     }
     return null;

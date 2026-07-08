@@ -137,6 +137,25 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
       expect(queryByTestId('workflowYamlInlinePreviewInvalid')).not.toBeNull();
       expect(queryByTestId('workflowGraphPreview')).toBeNull();
     });
+
+    it('renders an invalid-yaml callout when steps is not an array', () => {
+      const services = createMockServices();
+      const definition = createWorkflowYamlAttachmentUiDefinition(services);
+      const attachment = {
+        ...createAttachment(),
+        // Valid YAML, wrong shape: steps authored as a mapping instead of a list.
+        // WorkflowGraphPreview iterates workflow.steps, so this would throw
+        // "object is not iterable" without the shape guard in parseWorkflowYaml.
+        data: { yaml: 'name: shape-mismatch\nsteps:\n  foo: bar\n' },
+      };
+
+      const { queryByTestId } = render(
+        <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
+      );
+
+      expect(queryByTestId('workflowYamlInlinePreviewInvalid')).not.toBeNull();
+      expect(queryByTestId('workflowGraphPreview')).toBeNull();
+    });
   });
 
   describe('getLabel', () => {
