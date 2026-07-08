@@ -12,7 +12,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import userEvent from '@testing-library/user-event';
 
 import { DataStreamDetailPanel } from './data_stream_detail_panel';
-import { useLoadDataStream } from '../../../../services/api';
+import { useLoadDataStream, loadSnapshotRepositories } from '../../../../services/api';
 import { useAppContext } from '../../../../app_context';
 import type { AppDependencies } from '../../../../app_context';
 import { sendRequest } from '../../../../services/use_request';
@@ -37,6 +37,7 @@ jest.mock('./streams_promotion', () => ({
 }));
 
 const mockUseLoadDataStream = jest.mocked(useLoadDataStream);
+const mockLoadSnapshotRepositories = jest.mocked(loadSnapshotRepositories);
 const mockUseAppContext = jest.mocked(useAppContext);
 const mockSendRequest = jest.mocked(sendRequest);
 const mockUpdateDataLifecycle = jest.mocked(updateDataLifecycle);
@@ -52,6 +53,7 @@ describe('DataStreamDetailPanel', () => {
     jest.clearAllMocks();
     mockAppContext = createMockAppContext();
     mockUseAppContext.mockReturnValue(mockAppContext);
+    mockLoadSnapshotRepositories.mockResolvedValue({ data: undefined } as any);
     mockSendRequest.mockResolvedValue({ data: undefined } as any);
     mockUpdateDataLifecycle.mockResolvedValue({} as any);
     mockUpdateDSFailureStore.mockResolvedValue({} as any);

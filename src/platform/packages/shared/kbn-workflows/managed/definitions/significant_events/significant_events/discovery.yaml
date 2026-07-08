@@ -30,7 +30,7 @@ triggers:
         type: number
         default: 10
         required: false
-        description: 'Max rules per investigator invocation. Caps agent message size; remaining detections are picked up on the next cycle.'
+        description: 'Max rules per discovery invocation. Caps agent message size; remaining detections are picked up on the next cycle.'
       - name: discoveryDedupWindow
         type: string
         default: 'now-1h'
@@ -259,10 +259,10 @@ steps:
   # -----------------------------------------------------------------------
   # Step 4: Correlate detections into discoveries.
   # -----------------------------------------------------------------------
-  - name: run_investigator_agent
+  - name: run_discovery_agent
     type: ai.agent
-    agent-id: 'platform.sig_events.discovery.investigator'
-    connector-id: '${{ inputs.agentConnectorId }}'
+    agent-id: "platform.streams.sig-events.discovery"
+    connector-id: "${{ inputs.agentConnectorId }}"
     # Keep plugin-id/aggregate-by in sync with @kbn/streams-schema inference_feature_ids.ts
     # (SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID / SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
     plugin-id: 'significant_events_discovery'
@@ -431,8 +431,8 @@ steps:
   - name: snapshot_discoveries
     type: data.set
     with:
-      discoveries: '${{ steps.run_investigator_agent.output.structured_output.discoveries }}'
-      conversation_id: '{{ steps.run_investigator_agent.output.conversation_id }}'
+      discoveries: "${{ steps.run_discovery_agent.output.structured_output.discoveries }}"
+      conversation_id: "{{ steps.run_discovery_agent.output.conversation_id }}"
 
   - name: foreach_discovery
     type: foreach
@@ -552,7 +552,7 @@ steps:
     # Skip handled-stamping if the agent failed, so its detections are retried next cycle.
     if: >-
       ${{ steps.compute_stamp_rule_uuids.output.stamp_rule_uuids.size > 0
-      and steps.run_investigator_agent.error == null }}
+      and steps.run_discovery_agent.error == null }}
     type: elasticsearch.request
     with:
       method: POST

@@ -482,6 +482,19 @@ describe('utils', () => {
       const result = mapAppMenuItemToPanelItem(baseItem);
       expect(result.color).toBeUndefined();
     });
+
+    it('should apply a selected background when isSelected is true', () => {
+      const item = { ...baseItem, isSelected: true };
+      const result = mapAppMenuItemToPanelItem(item);
+
+      expect(result.css).toBeDefined();
+    });
+
+    it('should not apply a selected background when isSelected is falsy', () => {
+      const result = mapAppMenuItemToPanelItem(baseItem);
+
+      expect(result.css).toBeUndefined();
+    });
   });
 
   describe('getPopoverActionItems', () => {
