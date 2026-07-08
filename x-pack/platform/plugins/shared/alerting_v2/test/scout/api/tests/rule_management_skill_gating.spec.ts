@@ -7,17 +7,12 @@
 
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { COMMON_HEADERS } from '../fixtures/constants';
 
 const SKILLS_API = '/api/agent_builder/skills';
 const GLOBAL_SETTINGS_API = '/api/kibana/global_settings';
 const ALERTING_V2_ENABLED_SETTING = 'alerting:v2:enabled';
 const RULE_MANAGEMENT_SKILL_ID = 'rule-management';
-
-const COMMON_HEADERS = {
-  'kbn-xsrf': 'kibana',
-  'x-elastic-internal-origin': 'kibana',
-  'Content-Type': 'application/json',
-};
 
 const getSkillIds = (results: Array<{ id: string }>) => results.map((skill) => skill.id);
 
