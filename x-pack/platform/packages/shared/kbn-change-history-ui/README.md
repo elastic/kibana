@@ -2,15 +2,18 @@
 
 Shared browser package for **change history** UI in Kibana. Domains integrate via `ChangeHistoryAdapter`; the package ships a **fullscreen modal** shell and reusable timeline components.
 
-List, detail, and restore flows use **react-query** (`@kbn/react-query`) for caching and invalidation. The package does not create its own `QueryClient` — the host app must provide one.
+The host app must provide **`QueryClientProvider`** (`@kbn/react-query`). This package does not create its own `QueryClient`.
 
-## Integration (4 steps)
+## Integration
 
-1. **Mount `QueryClientProvider`** — once at the app root (or any ancestor of change history UI). Most Kibana apps already do this; if yours does not, add it before `ChangeHistoryProvider`.
-2. **Implement `ChangeHistoryAdapter`** — `listChanges` and `getChange`, optional `restoreChange`.
-3. **Wrap with `ChangeHistoryProvider`** — pass adapter, `renderPreview`, `labels.previewTitle`, optional `renderBadge`, `features`, and `permissions`.
+1. Implement **`ChangeHistoryAdapter`** — `listChanges`, `getChange`, optional `restoreChange`, optional `getPendingChange`.
+2. Wrap with **`ChangeHistoryProvider`** — adapter, `renderPreview`, `labels.previewTitle`, **`scope`**, optional `renderBadge`, optional `renderChangesSummary`, `features`, `permissions`, optional `listPageSize` (defaults to `DEFAULT_CHANGE_HISTORY_PAGE_SIZE`, currently 20), and optional `analytics`.
    Enable restore with **both** `features={{ restore: true }}` and `permissions={{ canRestore: true }}`.
-4. **Render `ChangeHistoryTrigger` + `ChangeHistoryModal`** — modal overlay; no dedicated route required.
+   Enable unsaved in-editor state with **`features={{ unsavedChanges: true }}`** when the adapter implements `getPendingChange`.
+   Disable compare with `features={{ compare: false }}` (enabled by default).
+3. Render **`ChangeHistoryTrigger`** and **`ChangeHistoryModal`**.
+
+### Minimal (domain-neutral)
 
 ```tsx
 import { QueryClientProvider } from '@kbn/react-query';
@@ -22,11 +25,18 @@ import {
 
 <QueryClientProvider client={queryClient}>
   <ChangeHistoryProvider
-    objectId={workflowId}
-    adapter={workflowChangeHistoryAdapter}
-    renderPreview={renderWorkflowYamlPreview}
-    renderBadge={renderWorkflowBadge}
-    labels={{ previewTitle: workflowName }}
+    objectId={documentId}
+    adapter={documentChangeHistoryAdapter}
+    renderPreview={({ change, compareSpec, diffTelemetry }) => (
+      <pre>{JSON.stringify(compareSpec?.target.snapshot ?? change.snapshot, null, 2)}</pre>
+    )}
+    labels={{ previewTitle: documentTitle }}
+    scope={{
+      module: 'stack',
+      dataset: 'documents',
+      objectType: 'document',
+    }}
+    analytics={{ reportEvent: core.analytics.reportEvent }}
   >
     <ChangeHistoryTrigger />
     <ChangeHistoryModal />
@@ -34,45 +44,53 @@ import {
 </QueryClientProvider>
 ```
 
-### Tests
+Implement `ChangeHistoryAdapter.listChanges` / `getChange` against your domain API. Snapshots are opaque (`unknown`); map your entity shape in the adapter. Call `diffTelemetry?.reportDiffViewed()` from `renderPreview` when your diff UI shows a non-empty comparison.
 
-Wrap components under test with a `QueryClientProvider`. See `src/test_utils/create_query_client_wrapper.tsx`.
+**Compare:** When compare is enabled, `getChange` supplies baseline/target snapshot detail as needed. Implementations should resolve any requested `changeId`. List rows must stay newest-first.
 
-## React-query cache
+**`scope`** — `{ module, dataset, objectType }`, aligned with `@kbn/change-history` server clients and telemetry payloads. **`objectId`** must be unique within that scope when multiple domains share one `QueryClient`.
 
-Hooks read from the nearest `QueryClientProvider`. Multiple consumers in the same app **share one client**; cache entries are isolated by query key, not by adapter instance.
-
-Query keys are scoped per object:
-
-```
-['change-history', <objectId>, 'list', pageSize]
-['change-history', <objectId>, 'detail', <changeId>]
-```
-
-- **`objectId` must be unique** among all change-history consumers under the same `QueryClient`. Use the domain's real saved-object id, or prefix it (e.g. `workflow:${id}`) if ids could collide across features.
-- **`adapter` is not part of the key** — do not reuse the same `objectId` with different adapters.
-- After a successful restore, `useChangeHistoryRestore` calls `useInvalidateChangeHistory(objectId)` to refetch active list and detail queries. Consumers do not need to call invalidation unless they mutate history outside the restore button.
+In `renderPreview`, call `diffTelemetry?.reportDiffViewed()` when your consumer shows a non-empty diff. Use `diffTelemetry.reportDiffChangeNavigated(source)` for in-diff navigation (e.g. hunk prev/next).
 
 ## HTTP adapter
 
-`createChangeHistoryHttpAdapter` sends **0-based** `page` query params, matching the package's internal pagination (`page.index` starts at `0`).
+`createChangeHistoryHttpAdapter` uses **0-based** `page` query params. Domains with **1-based** list APIs or detail embedded in list rows should implement a custom `ChangeHistoryAdapter`.
 
-Domains with **1-based** list APIs that embed detail in each row (e.g. workflows) should implement a custom `ChangeHistoryAdapter` instead of the generic HTTP helper.
+## Telemetry
 
-For list-backed adapters, ensure `getChange` can resolve while the list is refetching (e.g. do not clear an in-memory detail cache until new list data has arrived).
+Register EBT event types once in the consuming plugin's `setup()`:
 
-## Running tests
+```tsx
+import { registerChangeHistoryTelemetryEvents } from '@kbn/change-history-ui';
 
-```bash
-node scripts/jest x-pack/platform/packages/shared/kbn-change-history-ui/src/hooks/use_change_history_list.test.ts
-node scripts/jest x-pack/platform/packages/shared/kbn-change-history-ui/src/components/modal/change_history_modal.test.tsx
+registerChangeHistoryTelemetryEvents(analytics);
 ```
 
-## Exports
+For bundle size, lazy-load registration:
 
-- Types (`ChangeHistoryAdapter`, DTOs, …)
-- `ChangeHistoryProvider`, `useChangeHistoryConfig`, `useChangeHistoryList`, `useChangeHistoryDetail`, `useChangeHistoryRestore`
-- `useInvalidateChangeHistory`, `useChangeHistoryAutoSelection`
-- Query key helpers (`changeHistoryListQueryKey`, `changeHistoryDetailQueryKey`, `changeHistoryObjectQueryKeyPrefix`, …)
-- `ChangeHistoryModal`, `ChangeHistoryTrigger`, `ChangeHistoryPreviewPanel`
-- `createChangeHistoryHttpAdapter`
+```tsx
+void import('@kbn/change-history-ui/src/telemetry/register_change_history_telemetry_events').then(
+  ({ registerChangeHistoryTelemetryEvents }) => registerChangeHistoryTelemetryEvents(analytics)
+);
+```
+
+Pass **`analytics={{ reportEvent: core.analytics.reportEvent }}`** and **`scope`** into `ChangeHistoryProvider`. Set `features={{ telemetry: false }}` to disable reporting.
+
+Registration is idempotent: call from each consumer's `setup()`; Core rejects duplicate event types and other errors are rethrown. First successful registration wins for schema ownership.
+
+Every payload includes `eventName`, `module`, `dataset`, and `objectType` (from `scope`). Use `useChangeHistoryConfig().telemetry` to emit additional events from custom UI.
+
+### Events
+
+| Event type | `eventName` | When emitted | Notable properties |
+| --- | --- | --- | --- |
+| `change_history_opened` | Change history opened | Each time the modal is opened (closed → open) | — |
+| `change_history_change_selected` | Change history change selected | User selects a timeline row or auto-selects latest | `selectionSource` (`user_click` \| `auto_latest`), `hasSequence`, optional `eventAction` |
+| `change_history_filter_applied` | Change history filter applied | Filter UI applies a change *(not wired yet)* | `filterType` (`timeRange` \| `actor`), optional `hasActiveTimeRange`, `activeActorCount` |
+| `change_history_diff_viewed` | Change history diff viewed | Preview consumer calls `diffTelemetry.reportDiffViewed()` when a non-empty diff is shown | `comparisonType` (`vs_previous` \| `vs_row`), optional `versionDistance` (from `metadata.version` when both rows include it), `compareMode`, `hasChangesSummaryTooltip` |
+| `change_history_diff_change_navigated` | Change history diff change navigated | Preview consumer reports diff navigation (e.g. hunk prev/next) | `navigationSource` (consumer-defined keyword) |
+| `change_history_restore_confirmed` | Change history restore confirmed | User confirms restore in the dialog | optional `restoredFromSequence`, `currentSequence`, `rollbackDistance`, `hadUnsavedLocalEdits` |
+| `change_history_restore_completed` | Change history restore completed | Restore API succeeds | same sequence fields + optional `hadUnsavedLocalEdits` + optional `durationMs` (confirm → API success) |
+| `change_history_restore_failed` | Change history restore failed | Restore API fails | optional sequence fields + optional `hadUnsavedLocalEdits` + optional `errorCode` (e.g. `RESTORE_CONFLICT`) |
+
+`rollbackDistance` is `currentSequence - restoredFromSequence` when both are present. Sequence fields are omitted when list rows lack `object.sequence`.

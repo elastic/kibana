@@ -21,10 +21,11 @@ import { useOnUpdateField } from '../../../case_view/use_on_update_field';
 import { useCasesContext } from '../../../cases_context/use_cases_context';
 import { useGetCaseUserActionsStats } from '../../../../containers/use_get_case_user_actions_stats';
 import type {
+  UserActivityFilters,
   UserActivityParams,
-  UserActivitySortOrder,
 } from '../../../user_actions_activity_bar/types';
-import { UserActionsActivityBar } from '../../../user_actions_activity_bar';
+import { UserActionsFilterBar } from './user_actions_filter_bar';
+import { SidebarToggleButton } from './sidebar_toggle_button';
 import { parseCaseUsers } from '../../../utils';
 import { useStatusAction } from '../../../actions/status/use_status_action';
 import { useRefreshCaseViewPage } from '../../../case_view/use_on_refresh_case_view_page';
@@ -32,14 +33,13 @@ import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
 import { Description } from '../../description';
 
 export const CaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
-  const [sortOrder, setSortOrder] = useCasesLocalStorage<UserActivitySortOrder>(
-    LOCAL_STORAGE_KEYS.userActivitySortOrder,
-    'asc'
+  const [persistedFilters, setPersistedFilters] = useCasesLocalStorage<UserActivityFilters>(
+    LOCAL_STORAGE_KEYS.userActivityFilters,
+    { type: 'all', sortOrder: 'asc' }
   );
 
   const [userActivityQueryParams, setUserActivityQueryParams] = useState<UserActivityParams>({
-    type: 'all',
-    sortOrder,
+    ...persistedFilters,
     page: 1,
     perPage: 10,
   });
@@ -89,17 +89,16 @@ export const CaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
     [caseData, onUpdateField, statusAction]
   );
 
-  const handleUserActionsActivityChanged = useCallback(
+  const handleUserActivityParamsChanged = useCallback(
     (params: UserActivityParams) => {
-      setSortOrder(params.sortOrder);
-      setUserActivityQueryParams((oldParams) => ({
-        ...oldParams,
-        page: 1,
+      setPersistedFilters({
         type: params.type,
         sortOrder: params.sortOrder,
-      }));
+        authors: params.authors,
+      });
+      setUserActivityQueryParams({ ...params, page: 1 });
     },
-    [setSortOrder, setUserActivityQueryParams]
+    [setPersistedFilters, setUserActivityQueryParams]
   );
 
   const showUserActions =
@@ -115,21 +114,28 @@ export const CaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
   return (
     <>
       <EuiSpacer size="s" />
-      <Description
-        isLoadingDescription={isLoadingDescription}
-        caseData={caseData}
-        onUpdateField={onUpdateField}
-      />
-      <EuiSpacer size="l" />
       <EuiFlexItem grow={false}>
-        <UserActionsActivityBar
-          onUserActionsActivityChanged={handleUserActionsActivityChanged}
-          params={userActivityQueryParams}
-          userActionsStats={userActionsStats}
-          isLoading={isLoadingUserActionsStats}
+        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="flexStart">
+          <EuiFlexItem grow={true}>
+            <UserActionsFilterBar
+              caseId={caseData.id}
+              onParamsChange={handleUserActivityParamsChanged}
+              params={userActivityQueryParams}
+              userActionsStats={userActionsStats}
+              isLoading={isLoadingUserActionsStats}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SidebarToggleButton />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <Description
+          isLoadingDescription={isLoadingDescription}
+          caseData={caseData}
+          onUpdateField={onUpdateField}
         />
       </EuiFlexItem>
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
       {(isLoadingUserActionsStats || isLoadingCaseConnectors || isLoadingCaseUsers) && (
         <EuiLoadingSpinner data-test-subj="case-view-loading-content" size="l" />
       )}

@@ -11,6 +11,7 @@ import React from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import type { Store } from 'redux';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { type QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { createTestQueryClient } from './query_client_wrapper';
@@ -40,7 +41,9 @@ export function TestWrapper({ store, queryClient, routerHistory, children }: Tes
     <QueryClientProvider client={client}>
       <MemoryRouter initialEntries={routerHistory}>
         <I18nProvider>
-          <ReduxProvider store={reduxStore}>{children}</ReduxProvider>
+          <MockAppHeaderProvider>
+            <ReduxProvider store={reduxStore}>{children}</ReduxProvider>
+          </MockAppHeaderProvider>
         </I18nProvider>
       </MemoryRouter>
     </QueryClientProvider>
