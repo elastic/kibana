@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import type { EisInferenceEndpoint } from '../../../common/types';
-
 import { ModelDetailFlyout } from './model_detail_flyout';
 import { useKibana } from '../../hooks/use_kibana';
 import { INFERENCE_PREFERENCES_FEATURE_FLAG_ID } from '../../../common/constants';
@@ -18,8 +18,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useUiSetting: jest.fn((key: string, defaultValue?: unknown) => defaultValue),
 }));
-
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
 const mockUseUiSetting = useUiSetting as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;

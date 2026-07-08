@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, waitFor, fireEvent } from '@testing-library/react';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { ElasticInferenceServiceModelsHeader } from './header';
 import { useKibana } from '../../hooks/use_kibana';
 import { docLinks } from '../../../common/doc_links';
@@ -17,8 +18,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useUiSetting: jest.fn((key: string, defaultValue?: unknown) => defaultValue),
 }));
-
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
 const mockUseUiSetting = useUiSetting as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
