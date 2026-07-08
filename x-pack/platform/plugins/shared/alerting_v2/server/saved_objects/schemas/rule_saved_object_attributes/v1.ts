@@ -93,8 +93,4 @@ export const ruleSavedObjectAttributesSchema = schema.object({
   updatedBy: schema.nullable(schema.string()),
   updatedAt: schema.string(),
   createdAt: schema.string(),
-  // Rule change counter, incremented on every successful mutation. Used as
-  // `object.sequence` in the change history index and as `rule.version` on
-  // emitted rule events.
-  change_history_sequence: schema.maybe(schema.number()),
 });

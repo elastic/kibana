@@ -6,7 +6,10 @@
  */
 
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { ruleSavedObjectAttributesSchemaV1 } from '../schemas/rule_saved_object_attributes';
+import {
+  ruleSavedObjectAttributesSchemaV1,
+  ruleSavedObjectAttributesSchemaV3,
+} from '../schemas/rule_saved_object_attributes';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -34,6 +37,22 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: ruleSavedObjectAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
       create: ruleSavedObjectAttributesSchemaV1,
+    },
+  },
+  '3': {
+    // Adds the server-managed `change_history_sequence` attribute. It is not
+    // indexed (we never search/sort/aggregate on it), so there is no mappings
+    // change. Pre-v3 rules are backfilled to `1` so every rule has a valid
+    // baseline counter; the next mutation increments from there.
+    changes: [
+      {
+        type: 'data_backfill',
+        backfillFn: () => ({ attributes: { change_history_sequence: 1 } }),
+      },
+    ],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV3,
     },
   },
 };

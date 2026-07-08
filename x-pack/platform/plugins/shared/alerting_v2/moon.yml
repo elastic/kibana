@@ -129,6 +129,7 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/app-header'
   - '@kbn/core-chrome-browser-context-mocks'
+  - '@kbn/change-history'
 tags:
   - plugin
   - prod
