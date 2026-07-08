@@ -15,27 +15,24 @@ import { INFERENCE_PREFERENCES_FEATURE_FLAG_ID } from '../../../common/constants
 
 jest.mock('../../hooks/use_eis_models');
 jest.mock('../../hooks/use_kibana');
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+  useUiSetting: jest.fn((key: string, defaultValue?: unknown) => defaultValue),
+}));
+
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+
+const mockUseUiSetting = useUiSetting as jest.Mock;
 
 const { useKibana } = jest.requireMock('../../hooks/use_kibana');
 const mockUseKibana = useKibana as jest.Mock;
 
-const mockUiSettings = (ffEnabled: boolean = false) => ({
-  get: jest.fn((key: string, defaultValue?: unknown) => {
-    if (key === INFERENCE_PREFERENCES_FEATURE_FLAG_ID) return ffEnabled;
-    return defaultValue;
-  }),
-});
-
-const mockKibanaReturn = ({
-  manage = true,
-  ffEnabled = false,
-}: { manage?: boolean; ffEnabled?: boolean } = {}) => ({
+const mockKibanaReturn = ({ manage = true }: { manage?: boolean } = {}) => ({
   services: {
     notifications: { toasts: { addSuccess: jest.fn(), addDanger: jest.fn() } },
     application: {
       capabilities: { searchInferenceEndpoints: { show: true, manage } },
     },
-    uiSettings: mockUiSettings(ffEnabled),
   },
 });
 
@@ -50,6 +47,10 @@ const endpoints = InferenceEndpoints.filter((ep) => ep.service === 'elastic');
 describe('ElasticInferenceServiceModelsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseUiSetting.mockImplementation((key: string, defaultValue?: unknown) => {
+      if (key === INFERENCE_PREFERENCES_FEATURE_FLAG_ID) return false;
+      return defaultValue;
+    });
     mockUseKibana.mockReturnValue(mockKibanaReturn());
   });
 
