@@ -313,14 +313,15 @@ Define a `ProfileStateDefinition<TState>` near the profile provider that uses it
  */
 
 import type { ProfileStateDefinition, ProfileStateRegistry } from '../../profile_state';
+import type { EuiPanelProps } from '@elastic/eui';
 import type { RowControlProps } from '@kbn/discover-utils';
 import { ProfileStateType } from '../../profile_state';
 
 // Define the state shape shared across profiles and extension point implementations
 interface ExampleProfileState {
   timestampColor: string;
-  docViewMode: 'summary' | 'details';
   rowControlColor: NonNullable<RowControlProps['color']>;
+  boxColor: NonNullable<EuiPanelProps['color']>;
 }
 
 // Define a unique state key, field lifetime metadata, and the default typed state
@@ -328,13 +329,13 @@ const EXAMPLE_PROFILE_STATE_DEF: ProfileStateDefinition<ExampleProfileState> = {
   key: 'exampleProfileState',
   descriptor: {
     timestampColor: { type: ProfileStateType.Ui },
-    docViewMode: { type: ProfileStateType.Url },
     rowControlColor: { type: ProfileStateType.Persistent },
+    boxColor: { type: ProfileStateType.Url },
   },
   defaultState: {
     timestampColor: 'hollow',
-    docViewMode: 'summary',
     rowControlColor: 'text',
+    boxColor: 'transparent',
   },
 };
 

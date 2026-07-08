@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiFlyout, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiFlyout, EuiFormRow, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type {
   RowControlColumn,
@@ -95,27 +95,22 @@ const getRowControlColor = (value: string) =>
   rowControlColorOptions.find((option) => option.value === value)?.value ??
   EXAMPLE_PROFILE_STATE_DEFAULTS.rowControlColor;
 
-const docViewModeOptions: Array<{
-  value: ExampleProfileState['docViewMode'];
+const boxColorOptions: Array<{
+  value: ExampleProfileState['boxColor'];
   text: string;
 }> = [
   {
-    value: 'summary',
-    text: i18n.translate('discover.exampleProfile.docViewModeSummaryDropDownOptionLabel', {
-      defaultMessage: 'Summary',
+    value: 'transparent',
+    text: i18n.translate('discover.exampleProfile.boxColorNoneDropDownOptionLabel', {
+      defaultMessage: 'None',
     }),
   },
-  {
-    value: 'details',
-    text: i18n.translate('discover.exampleProfile.docViewModeDetailsDropDownOptionLabel', {
-      defaultMessage: 'Details',
-    }),
-  },
+  ...commonColorOptions,
 ];
 
-const getDocViewMode = (value: string) =>
-  docViewModeOptions.find((option) => option.value === value)?.value ??
-  EXAMPLE_PROFILE_STATE_DEFAULTS.docViewMode;
+const getBoxColor = (value: string) =>
+  boxColorOptions.find((option) => option.value === value)?.value ??
+  EXAMPLE_PROFILE_STATE_DEFAULTS.boxColor;
 
 export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<{
   formatRecord: (flattenedRecord: Record<string, unknown>) => string;
@@ -193,8 +188,8 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
             function ProfileStateExample() {
               const profileState = useObservable(profileState$, stateAdapter.getState());
               const timestampColor = profileState.timestampColor;
-              const docViewMode = profileState.docViewMode;
               const rowControlColor = profileState.rowControlColor;
+              const boxColor = profileState.boxColor;
 
               return (
                 <>
@@ -203,7 +198,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
                     label={
                       <FormattedMessage
                         id="discover.exampleProfile.timestampColorLabel"
-                        defaultMessage="Timestamp color"
+                        defaultMessage="Timestamp color (UI state)"
                       />
                     }
                   >
@@ -225,37 +220,8 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
                   <EuiFormRow
                     label={
                       <FormattedMessage
-                        id="discover.exampleProfile.docViewModeLabel"
-                        defaultMessage="Document view mode"
-                      />
-                    }
-                    helpText={
-                      <FormattedMessage
-                        id="discover.exampleProfile.docViewModeUrlStateDescription"
-                        defaultMessage="This URL-backed field is synced through the _p URL parameter for the active data source profile."
-                      />
-                    }
-                  >
-                    <EuiSelect
-                      data-test-subj="exampleProfileStateDocViewModeSelect"
-                      aria-label={i18n.translate('discover.exampleProfile.docViewModeAriaLabel', {
-                        defaultMessage: 'Select document view mode',
-                      })}
-                      options={docViewModeOptions}
-                      value={docViewMode}
-                      onChange={(event) => {
-                        stateAdapter.updateState(
-                          { docViewMode: getDocViewMode(event.target.value) },
-                          { historyMethod: 'replace' }
-                        );
-                      }}
-                    />
-                  </EuiFormRow>
-                  <EuiFormRow
-                    label={
-                      <FormattedMessage
                         id="discover.exampleProfile.rowControlColorLabel"
-                        defaultMessage="Row control color"
+                        defaultMessage="Row control color (Persistent state)"
                       />
                     }
                   >
@@ -276,6 +242,44 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
                       }}
                     />
                   </EuiFormRow>
+                  <EuiFormRow
+                    label={
+                      <FormattedMessage
+                        id="discover.exampleProfile.boxColorLabel"
+                        defaultMessage="Box color (URL state)"
+                      />
+                    }
+                  >
+                    <EuiSelect
+                      data-test-subj="exampleProfileStateBoxColorSelect"
+                      aria-label={i18n.translate('discover.exampleProfile.boxColorAriaLabel', {
+                        defaultMessage: 'Select box color',
+                      })}
+                      options={boxColorOptions}
+                      value={boxColor}
+                      onChange={(event) => {
+                        stateAdapter.updateState(
+                          { boxColor: getBoxColor(event.target.value) },
+                          { historyMethod: 'replace' }
+                        );
+                      }}
+                    />
+                  </EuiFormRow>
+                  <EuiSpacer size="m" />
+                  <EuiPanel
+                    color={boxColor}
+                    hasBorder={boxColor === 'transparent'}
+                    hasShadow={false}
+                    css={{
+                      alignItems: 'center',
+                      display: 'flex',
+                      height: 100,
+                      justifyContent: 'center',
+                      width: 100,
+                    }}
+                  >
+                    {boxColor}
+                  </EuiPanel>
                 </>
               );
             }

@@ -8,27 +8,28 @@
  */
 
 import type { RowControlProps } from '@kbn/discover-utils';
+import type { EuiPanelProps } from '@elastic/eui';
 import type { ProfileStateDefinition, ProfileStateRegistry } from '../../profile_state';
 import { ProfileStateType } from '../../profile_state';
 
 export interface ExampleProfileState {
   timestampColor: string;
-  docViewMode: 'summary' | 'details';
   rowControlColor: NonNullable<RowControlProps['color']>;
+  boxColor: NonNullable<EuiPanelProps['color']>;
 }
 
 export const EXAMPLE_PROFILE_STATE_DEFAULTS: ExampleProfileState = {
   timestampColor: 'hollow',
-  docViewMode: 'summary',
   rowControlColor: 'text',
+  boxColor: 'transparent',
 };
 
 export const EXAMPLE_PROFILE_STATE_DEF: ProfileStateDefinition<ExampleProfileState> = {
   key: 'exampleProfileState',
   descriptor: {
     timestampColor: { type: ProfileStateType.Ui },
-    docViewMode: { type: ProfileStateType.Url },
     rowControlColor: { type: ProfileStateType.Persistent },
+    boxColor: { type: ProfileStateType.Url },
   },
   defaultState: EXAMPLE_PROFILE_STATE_DEFAULTS,
 };
