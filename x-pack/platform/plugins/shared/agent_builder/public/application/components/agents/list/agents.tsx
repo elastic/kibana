@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiButton, EuiLink, useEuiTheme } from '@elastic/eui';
@@ -19,17 +19,30 @@ import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 import { DeleteAgentProvider } from '../../../context/delete_agent_context';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { KiEvaluationFlyout } from '../../ki_evaluation/ki_evaluation_flyout';
 
 export const AgentBuilderAgents = () => {
   const { euiTheme } = useEuiTheme();
   const { manageAgents } = useUiPrivileges();
   const { docLinksService } = useAgentBuilderServices();
+  const [isEvalFlyoutOpen, setIsEvalFlyoutOpen] = useState(false);
   const headerStyles = css`
     background-color: ${euiTheme.colors.backgroundBasePlain};
     border-style: none;
   `;
   const { createAgentBuilderUrl } = useNavigation();
   const headerButtons = [
+    <EuiButton
+      iconType="beaker"
+      color="primary"
+      iconSide="left"
+      onClick={() => setIsEvalFlyoutOpen(true)}
+      data-test-subj="agentBuilderEvalKiButton"
+    >
+      {i18n.translate('xpack.agentBuilder.agents.evalKiButton', {
+        defaultMessage: 'Evaluate KIs',
+      })}
+    </EuiButton>,
     manageAgents && (
       <EuiButton
         iconType="plus"
@@ -100,6 +113,7 @@ export const AgentBuilderAgents = () => {
           <AgentsList />
         </KibanaPageTemplate.Section>
       </KibanaPageTemplate>
+      {isEvalFlyoutOpen && <KiEvaluationFlyout onClose={() => setIsEvalFlyoutOpen(false)} />}
     </DeleteAgentProvider>
   );
 };

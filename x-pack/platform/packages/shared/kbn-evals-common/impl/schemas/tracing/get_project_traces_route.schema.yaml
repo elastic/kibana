@@ -124,6 +124,9 @@ components:
           type: string
         model:
           type: string
+        user_prompt:
+          type: string
+          description: The actual user prompt text extracted from gen_ai.user.message span events in logs-*
       required:
         - trace_id
         - name
