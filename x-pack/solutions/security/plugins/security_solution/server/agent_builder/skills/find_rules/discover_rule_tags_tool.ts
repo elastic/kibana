@@ -6,29 +6,23 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { StartServicesAccessor } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { TAGS_FIELD } from '../../../../common/detection_engine/rule_management/rule_fields';
 import { EXPECTED_MAX_TAGS } from '../../../lib/detection_engine/rule_management/constants';
 import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
-import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 
 export const DISCOVER_RULE_TAGS_INLINE_TOOL_ID = 'security.discover_rule_tags';
 
 export const discoverRuleTagsSchema = z.object({}).strict();
 
-interface DiscoverRuleTagsToolDeps {
-  getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>;
-  logger: Logger;
-}
-
-export const createDiscoverRuleTagsInlineTool = ({
-  getStartServices,
-  logger,
-}: DiscoverRuleTagsToolDeps): BuiltinSkillBoundedTool<typeof discoverRuleTagsSchema> => ({
+export const discoverRuleTagsTool = (
+  core: SecuritySolutionPluginCoreSetupDependencies,
+  logger: Logger
+): BuiltinToolDefinition<typeof discoverRuleTagsSchema> => ({
   id: DISCOVER_RULE_TAGS_INLINE_TOOL_ID,
   type: ToolType.builtin,
   description:
@@ -41,7 +35,7 @@ export const createDiscoverRuleTagsInlineTool = ({
   schema: discoverRuleTagsSchema,
   handler: async (_input, { request }) => {
     try {
-      const [, startPlugins] = await getStartServices();
+      const [, startPlugins] = await core.getStartServices();
       const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
 
       const findResult = await findRules({
@@ -104,4 +98,5 @@ export const createDiscoverRuleTagsInlineTool = ({
       };
     }
   },
+  tags: ['security', 'detection-rules'],
 });

@@ -14,10 +14,11 @@ import {
   createToolTestMocks,
   setupMockCoreStartServices,
 } from '../../__mocks__/test_helpers';
-import { FIND_RULES_INLINE_TOOL_ID, buildToolFilter, findRulesSchema } from './find_rules_tool';
+import { FIND_RULES_INLINE_TOOL_ID, buildToolFilter, findRulesSchema, findRulesTool } from './find_rules_tool';
 import {
   DISCOVER_RULE_TAGS_INLINE_TOOL_ID,
   discoverRuleTagsSchema,
+  discoverRuleTagsTool,
 } from './discover_rule_tags_tool';
 import { createFindRulesSkill } from './find_rules_skill';
 
@@ -41,6 +42,7 @@ const createMockDeps = () => {
   ] as never);
 
   return {
+    mockCore,
     getStartServices: mockCore.getStartServices,
     mockLogger,
     mockEsClient,
@@ -68,29 +70,29 @@ describe('findRulesSkill', () => {
     expect(isAllowedBuiltinSkill(skill.id)).toBe(true);
   });
 
-  it('exposes the alerts tool as a registry tool', () => {
+  it('exposes the alerts, find_rules, and discover_rule_tags tools as registry tools', () => {
     const { getStartServices, mockLogger } = createMockDeps();
     const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
     const tools = skill.getRegistryTools?.() ?? [];
-    expect(tools).toEqual([SECURITY_ALERTS_TOOL_ID]);
+    expect(tools).toEqual([
+      SECURITY_ALERTS_TOOL_ID,
+      FIND_RULES_INLINE_TOOL_ID,
+      DISCOVER_RULE_TAGS_INLINE_TOOL_ID,
+    ]);
   });
 
-  it('exposes two inline tools: find_rules and discover_rule_tags', async () => {
+  it('exposes no inline tools (promoted to registry)', async () => {
     const { getStartServices, mockLogger } = createMockDeps();
     const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
     const inlineTools = await skill.getInlineTools!();
-    expect(inlineTools).toHaveLength(2);
-    const ids = inlineTools.map((t) => t.id);
-    expect(ids).toContain(FIND_RULES_INLINE_TOOL_ID);
-    expect(ids).toContain(DISCOVER_RULE_TAGS_INLINE_TOOL_ID);
+    expect(inlineTools).toHaveLength(0);
   });
 
-  it('stays within the Agent Builder per-skill tool-count guideline (<= 7)', async () => {
+  it('stays within the Agent Builder per-skill tool-count guideline (<= 7)', () => {
     const { getStartServices, mockLogger } = createMockDeps();
     const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
-    const registryTools = (await skill.getRegistryTools?.()) ?? [];
-    const inlineTools = await skill.getInlineTools!();
-    expect(registryTools.length + inlineTools.length).toBeLessThanOrEqual(7);
+    const registryTools = skill.getRegistryTools?.() ?? [];
+    expect(registryTools.length).toBeLessThanOrEqual(7);
   });
 
   it('content includes the negative-routing guidance for sibling skills', () => {
@@ -426,16 +428,10 @@ describe('buildToolFilter', () => {
   });
 });
 
-describe('findRules inline tool handler', () => {
+describe('findRules tool handler', () => {
   const setup = async () => {
     const deps = createMockDeps();
-    const skill = createFindRulesSkill({
-      getStartServices: deps.getStartServices,
-      logger: deps.mockLogger,
-    });
-    const inlineTools = await skill.getInlineTools!();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const toolDef = inlineTools.find((t) => t.id === FIND_RULES_INLINE_TOOL_ID) as any;
+    const toolDef = findRulesTool(deps.mockCore, deps.mockLogger);
     return { ...deps, toolDef };
   };
 
@@ -578,16 +574,10 @@ describe('findRules inline tool handler', () => {
   });
 });
 
-describe('discoverRuleTags inline tool handler', () => {
+describe('discoverRuleTags tool handler', () => {
   const setup = async () => {
     const deps = createMockDeps();
-    const skill = createFindRulesSkill({
-      getStartServices: deps.getStartServices,
-      logger: deps.mockLogger,
-    });
-    const inlineTools = await skill.getInlineTools!();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const toolDef = inlineTools.find((t) => t.id === DISCOVER_RULE_TAGS_INLINE_TOOL_ID) as any;
+    const toolDef = discoverRuleTagsTool(deps.mockCore, deps.mockLogger);
     return { ...deps, toolDef };
   };
 
