@@ -106,9 +106,10 @@ steps:
   - name: set_runtime_config_variables
     type: data.set
     with:
-      # `${{ }}` preserves booleans/numbers; `{{ }}` is used for the connector id and tag prefix strings.
+      # `${{ }}` preserves booleans/numbers; `{{ }}` is used for the connector id, agent id, and tag prefix strings.
       workflow_enabled: "${{ steps.fetch_runtime_config.output.workflowEnabled }}"
       connector_id: "{{ steps.fetch_runtime_config.output.connectorId }}"
+      agent_id: "{{ steps.fetch_runtime_config.output.agentId }}"
       create_conversation: "${{ steps.fetch_runtime_config.output.createConversation }}"
       auto_close_enabled: "${{ steps.fetch_runtime_config.output.autoCloseEnabled }}"
       auto_close_confidence_score_min_threshold: "${{ steps.fetch_runtime_config.output.autoCloseConfidenceScoreMinThreshold }}"
@@ -941,7 +942,7 @@ steps:
 
           - name: onechat_runAgent_step
             type: ai.agent
-            agent-id: "elastic-ai-agent"
+            agent-id: "{{ variables.agent_id }}"
             connector-id: "{{ variables.connector_id }}"
             create-conversation: "${{ variables.create_conversation }}"
             on-failure:
