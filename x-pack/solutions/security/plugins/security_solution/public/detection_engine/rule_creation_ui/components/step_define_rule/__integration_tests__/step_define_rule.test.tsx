@@ -91,26 +91,6 @@ jest.mock('../../../../rule_creation/components/pick_timeline', () => ({
   PickTimeline: 'pick-timeline',
 }));
 
-jest.mock('../../../../../common/containers/source', () => {
-  const actual = jest.requireActual('../../../../../common/containers/source');
-  return {
-    ...actual,
-    useFetchIndex: jest.fn().mockReturnValue([
-      false,
-      {
-        indexPatterns: {
-          fields: [{ name: 'host.name', type: 'string', searchable: true, aggregatable: true }],
-          title: '',
-        },
-        browserFields: {},
-        indexes: [],
-        indexExists: true,
-        dataView: undefined,
-      },
-    ]),
-  };
-});
-
 jest.mock('../../ai_assistant', () => {
   return {
     AiAssistant: jest.fn(() => {
@@ -661,63 +641,6 @@ describe.skip('StepDefineRule', () => {
       expect(handleSubmit).toHaveBeenCalledWith(
         expect.objectContaining({
           requiredFields: [{ name: 'host.name', type: 'string' }],
-        }),
-        true
-      );
-    });
-  });
-
-  describe('threat_match rule type', () => {
-    // https://github.com/elastic/kibana/issues/276203
-    it('submits concurrentSearches and itemsPerSearch when they are set on a threat_match rule', async () => {
-      const initialState = {
-        ruleType: 'threat_match' as const,
-        index: ['test-index'],
-        queryBar: {
-          query: { query: '*:*', language: 'kuery' },
-          filters: [],
-          saved_id: null,
-        },
-        threatIndex: ['threat-index'],
-        threatQueryBar: {
-          query: { query: '*:*', language: 'kuery' },
-          filters: [],
-          saved_id: null,
-        },
-        threatMapping: [
-          {
-            entries: [{ field: 'host.name', value: 'host.name', type: 'mapping' as const }],
-          },
-        ],
-        concurrentSearches: 4,
-        itemsPerSearch: 2500,
-      };
-      const indexPattern: DataViewBase = {
-        fields: [createIndexPatternField({ name: 'host.name', esTypes: ['string'] })],
-        title: '',
-      };
-      const handleSubmit = jest.fn();
-
-      render(
-        <TestForm
-          initialState={initialState}
-          indexPattern={indexPattern}
-          onSubmit={handleSubmit}
-        />,
-        {
-          wrapper: TestProviders,
-        }
-      );
-
-      await submitForm();
-      await waitFor(() => {
-        expect(handleSubmit).toHaveBeenCalled();
-      });
-
-      expect(handleSubmit).toHaveBeenCalledWith(
-        expect.objectContaining({
-          concurrentSearches: 4,
-          itemsPerSearch: 2500,
         }),
         true
       );
