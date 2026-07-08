@@ -82,7 +82,7 @@ Follow the [guide on writing tests with custom roles](../../../platform/test/ser
 #### `/functional` - Observability Functional Tests
 
 **Location**: `x-pack/solutions/observability/test/functional/`
-**Use for**: End-to-end UI tests for Observability apps (APM, Logs, Metrics, Uptime)
+**Use for**: End-to-end UI tests for Observability apps (Logs, Metrics, Uptime)
 
 ## Running Tests
 
