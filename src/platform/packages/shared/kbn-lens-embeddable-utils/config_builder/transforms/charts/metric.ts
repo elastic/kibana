@@ -475,7 +475,11 @@ function enrichConfigurationWithVisualizationProperties(
       primaryMetric.subtitle = visualization.subtitle;
     }
 
-    if (visualization.trendlineLayerType) {
+    if (
+      visualization.trendlineLayerId &&
+      visualization.trendlineMetricAccessor &&
+      visualization.trendlineTimeAccessor
+    ) {
       // Trend takes precedence; do not retain bar-only fields (e.g. max_value) on the API config.
       primaryMetric.background_chart = { type: 'trend' };
     }

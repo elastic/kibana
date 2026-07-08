@@ -89,6 +89,24 @@ describe('Metric', () => {
     });
   });
 
+  describe('trendline persistence', () => {
+    it('should preserve an ESQL metric trendline when serializing renderable Lens state', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const lensState = builder.fromAPIFormat(esqlMetricWithTrendAPIAttributes);
+      const visualization = lensState.state.visualization as MetricVisualizationState;
+
+      expect(visualization.trendlineLayerId).toBeDefined();
+      expect(visualization.trendlineMetricAccessor).toBeDefined();
+      expect(visualization.trendlineTimeAccessor).toBeDefined();
+
+      delete visualization.trendlineLayerType;
+
+      const apiOutput = builder.toAPIFormat(lensState) as MetricConfig;
+
+      expect(apiOutput.metrics[0].background_chart).toEqual({ type: 'trend' });
+    });
+  });
+
   describe('default application', () => {
     const baseMetric = {
       type: 'metric',
