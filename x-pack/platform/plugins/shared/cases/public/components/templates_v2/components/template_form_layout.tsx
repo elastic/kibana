@@ -92,6 +92,11 @@ type EditableCaseDefaultField =
 const ASSIGNEES_YAML_KEY = 'assignees';
 const SETTINGS_YAML_KEY = 'settings';
 const TIMELINE_BOTTOM_BAR_SELECTOR = '[data-test-subj="timeline-bottom-bar-container"]';
+// The Security Solution app header row ("Add integrations" / breadcrumbs) is rendered in-flow inside
+// the scrollable content area but is NOT subtracted from `--kbn-application--content-height`. Reserve
+// its height (standard 48px EUI header) so the full-height editor fills the viewport exactly instead
+// of overflowing by one header row.
+const APP_HEADER_OFFSET = '48px';
 const LEGACY_SETTINGS_GUIDANCE_COMMENT =
   '# Case settings (sync alerts, extract observables) and the default connector are configured in the\n' +
   '# Settings tab of the preview panel, not here.';
@@ -602,7 +607,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
         gutterSize="none"
         // The templates editor hides the Security Solution timeline bottom bar on this page,
         // so no bottom offset is needed here.
-        css={[kbnFullBodyHeightCss('0px'), styles.wrapper]}
+        css={[kbnFullBodyHeightCss(APP_HEADER_OFFSET), styles.wrapper]}
       >
         <EuiFlexItem grow={false}>
           <AppHeader

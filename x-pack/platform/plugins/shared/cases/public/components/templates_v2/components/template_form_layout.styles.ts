@@ -9,11 +9,11 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const componentStyles = {
-  wrapper: ({ euiTheme }: UseEuiTheme) =>
+  wrapper: () =>
     css({
-      // Keep native top spacing so the page header stays fully visible, but reclaim the bottom
-      // section padding so the split editor can fill the viewport height.
-      marginBottom: `-${euiTheme.size.l}`,
+      // Keep the section's native block spacing so the app header and split editor aren't clipped
+      // when chrome/breadcrumb heights change.
+      marginBottom: 0,
     }),
   editorWrapper: ({ euiTheme }: UseEuiTheme) =>
     css({
