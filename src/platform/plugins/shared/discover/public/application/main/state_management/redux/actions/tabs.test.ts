@@ -151,8 +151,14 @@ describe('tabs actions', () => {
     });
 
     it('replaces profile URL state when switching selected tabs', async () => {
-      const { internalState, stateStorageContainer, initializeSingleTab, getCurrentTab } =
-        await setup();
+      const {
+        internalState,
+        stateStorageContainer,
+        initializeSingleTab,
+        getCurrentTab,
+        addNewTab,
+        switchToTab,
+      } = await setup();
       const currentTab = getCurrentTab();
       const profileState = {
         ...TEST_PROFILE_STATE_DEF.defaultState,
@@ -171,29 +177,13 @@ describe('tabs actions', () => {
         },
       };
 
-      await internalState.dispatch(
-        internalStateActions.updateTabs({
-          items: [...selectAllTabs(internalState.getState()), otherTab],
-          selectedItem: otherTab,
-        })
-      );
+      await addNewTab({ tab: otherTab });
       await initializeSingleTab({ tabId: otherTab.id });
-
-      await internalState.dispatch(
-        internalStateActions.updateTabs({
-          items: selectAllTabs(internalState.getState()),
-          selectedItem: selectTab(internalState.getState(), currentTab.id),
-        })
-      );
+      await switchToTab({ tabId: currentTab.id });
 
       const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
 
-      await internalState.dispatch(
-        internalStateActions.updateTabs({
-          items: selectAllTabs(internalState.getState()),
-          selectedItem: selectTab(internalState.getState(), otherTab.id),
-        })
-      );
+      await switchToTab({ tabId: otherTab.id });
 
       expect(setUrlStateSpy).toHaveBeenCalledWith(
         PROFILE_STATE_URL_KEY,
