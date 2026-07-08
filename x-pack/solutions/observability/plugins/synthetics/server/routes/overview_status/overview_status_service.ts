@@ -353,6 +353,11 @@ export class OverviewStatusService {
    * the active space's `meta.space_id` (plus `*`). The one exception is a user
    * who can read synthetics in *all* spaces — they are allowed to see remote
    * pings from every space, so the constraint is dropped entirely for them.
+   *
+   * Elastic Agent autodiscovery pings have no local saved object *and* no
+   * `meta.space_id` at all, so they belong to no space. Per product decision
+   * these are shown in every space, so the space scope always also matches docs
+   * where `meta.space_id` is missing.
    */
   private async getSpaceFilters(
     spaceId: string,
@@ -363,7 +368,14 @@ export class OverviewStatusService {
     }
 
     const activeSpaceTerms: QueryDslQueryContainer = {
-      terms: { 'meta.space_id': [spaceId, ALL_SPACES_ID] },
+      bool: {
+        minimum_should_match: 1,
+        should: [
+          { terms: { 'meta.space_id': [spaceId, ALL_SPACES_ID] } },
+          // Space-less autodiscovery pings belong to no space → shown everywhere.
+          { bool: { must_not: { exists: { field: 'meta.space_id' } } } },
+        ],
+      },
     };
 
     // Single-space view: both local and remote pings are tied to the active space.

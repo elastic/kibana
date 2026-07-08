@@ -1662,9 +1662,16 @@ describe('current status route', () => {
       const searchCall = esClient.search.mock.calls[0][0] as any;
       const filters = searchCall.query.bool.filter;
 
-      const spaceFilter = filters.find((f: any) => f.terms && f.terms['meta.space_id']);
+      const spaceFilter = filters.find((f: any) =>
+        f.bool?.should?.some((s: any) => s.terms?.['meta.space_id'])
+      );
       expect(spaceFilter).toBeDefined();
-      expect(spaceFilter.terms['meta.space_id']).toEqual(['default', '*']);
+      const spaceTerms = spaceFilter.bool.should.find((s: any) => s.terms?.['meta.space_id']);
+      expect(spaceTerms.terms['meta.space_id']).toEqual(['default', '*']);
+      // Space-less autodiscovery pings are always included.
+      expect(spaceFilter.bool.should).toContainEqual({
+        bool: { must_not: { exists: { field: 'meta.space_id' } } },
+      });
 
       const splitFilter = filters.find(
         (f: any) =>
@@ -1697,10 +1704,13 @@ describe('current status route', () => {
 
       const searchCall = esClient.search.mock.calls[0][0] as any;
       const filters = searchCall.query.bool.filter;
-      const spaceFilter = filters.find((f: any) => f.terms && f.terms['meta.space_id']);
+      const spaceFilter = filters.find((f: any) =>
+        f.bool?.should?.some((s: any) => s.terms?.['meta.space_id'])
+      );
       expect(spaceFilter).toBeDefined();
-      expect(spaceFilter.terms['meta.space_id']).toEqual(['default', '*']);
-      expect(spaceFilter.terms['meta.space_id']).not.toContain('production');
+      const spaceTerms = spaceFilter.bool.should.find((s: any) => s.terms?.['meta.space_id']);
+      expect(spaceTerms.terms['meta.space_id']).toEqual(['default', '*']);
+      expect(spaceTerms.terms['meta.space_id']).not.toContain('production');
 
       expect(result.down).toBe(0);
       expect(result.up).toBe(0);
@@ -1765,7 +1775,15 @@ describe('current status route', () => {
       expect(remoteBranch.bool.filter).toEqual(
         expect.arrayContaining([
           { wildcard: { _index: '*:*' } },
-          { terms: { 'meta.space_id': ['default', '*'] } },
+          {
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                { terms: { 'meta.space_id': ['default', '*'] } },
+                { bool: { must_not: { exists: { field: 'meta.space_id' } } } },
+              ],
+            },
+          },
         ])
       );
     });
@@ -2011,9 +2029,12 @@ describe('current status route', () => {
       // omits the CCS-only `index_name` sub-agg.
       const searchCall = esClient.search.mock.calls[0][0] as any;
       const filters = searchCall.query.bool.filter;
-      const spaceFilter = filters.find((f: any) => f.terms && f.terms['meta.space_id']);
+      const spaceFilter = filters.find((f: any) =>
+        f.bool?.should?.some((s: any) => s.terms?.['meta.space_id'])
+      );
       expect(spaceFilter).toBeDefined();
-      expect(spaceFilter.terms['meta.space_id']).toContain('default');
+      const spaceTerms = spaceFilter.bool.should.find((s: any) => s.terms?.['meta.space_id']);
+      expect(spaceTerms.terms['meta.space_id']).toContain('default');
 
       const monitorAggs = searchCall.aggs.monitors.aggs;
       expect(monitorAggs.index_name).toBeUndefined();
