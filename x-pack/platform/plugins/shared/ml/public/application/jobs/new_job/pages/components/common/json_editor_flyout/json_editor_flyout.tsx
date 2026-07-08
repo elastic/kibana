@@ -89,7 +89,11 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
       if (cpsManager) {
         cpsManager.fetchProjects().then((projects) => {
           if (projects) {
-            setAllowedProjects(Object.keys(projects));
+            const aliases = projects.linkedProjects.map((project) => project._alias);
+            if (projects.origin) {
+              aliases.push(projects.origin._alias);
+            }
+            setAllowedProjects([...aliases, '_origin', '*']);
           }
         });
       }
@@ -149,8 +153,9 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
         originalIndices.every((value, index) => value === datafeed.indices[index]);
       setShowChangedIndicesWarning(valid === false);
 
+      const projectRouting = datafeed.project_routing?.replace(/^_alias:/, '');
       const hasInvalidProjectRouting =
-        !!datafeed.project_routing && !allowedProjects.includes(datafeed.project_routing);
+        !!projectRouting && !allowedProjects.includes(projectRouting);
       setShowProjectRoutingWarning(hasInvalidProjectRouting);
       if (hasInvalidProjectRouting) {
         valid = false;
