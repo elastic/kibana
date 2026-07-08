@@ -360,6 +360,36 @@ describe('rule_request_mappers', () => {
       expect(result.recovery_strategy).toBeUndefined();
     });
 
+    it('includes no_data_strategy when set on alert rule', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'alert',
+        noDataStrategy: 'recover',
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.no_data_strategy).toBe('recover');
+    });
+
+    it('omits no_data_strategy for signal rules even when set', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'signal',
+        noDataStrategy: 'recover',
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.no_data_strategy).toBeUndefined();
+    });
+
+    it('omits no_data_strategy when undefined', () => {
+      const result = mapFormValuesToRuleRequest(baseFormValues);
+
+      expect(result.no_data_strategy).toBeUndefined();
+    });
+
     it('keeps non-empty runbook artifact value unchanged', () => {
       const formValues: FormValues = {
         ...baseFormValues,
@@ -508,7 +538,7 @@ describe('rule_request_mappers', () => {
         kind: 'alert',
         grouping: { fields: ['host.name'] },
         recoveryStrategy: 'no_breach',
-        noDataStrategy: 'emit',
+        noDataStrategy: 'recover',
         stateTransitionAlertDelayMode: 'duration',
         stateTransitionRecoveryDelayMode: 'immediate',
         stateTransition: { pendingCount: 2, pendingTimeframe: '5m' },
@@ -518,7 +548,7 @@ describe('rule_request_mappers', () => {
 
       expect(result.grouping).toEqual({ fields: ['host.name'] });
       expect(result.recovery_strategy).toBe('no_breach');
-      expect(result.no_data_strategy).toBe('emit');
+      expect(result.no_data_strategy).toBe('recover');
       expect(result.state_transition).toEqual({
         pending_count: 2,
         pending_timeframe: '5m',
@@ -563,6 +593,24 @@ describe('rule_request_mappers', () => {
       const result = mapFormValuesToUpdateRequest(formValues);
 
       expect(result.artifacts).toBeNull();
+    });
+
+    it('nullifies no_data_strategy when absent', () => {
+      const result = mapFormValuesToUpdateRequest(baseFormValues);
+
+      expect(result.no_data_strategy).toBeNull();
+    });
+
+    it('preserves no_data_strategy when set on alert rule', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'alert',
+        noDataStrategy: 'recover',
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.no_data_strategy).toBe('recover');
     });
 
     it('infers recovery_strategy: query when user adds recovery via form (recoveryStrategy undefined)', () => {
@@ -758,6 +806,30 @@ describe('rule_request_mappers', () => {
       });
       expect(result.stateTransitionAlertDelayMode).toBe('immediate');
       expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');
+    });
+
+    it('maps no_data_strategy from rule response', () => {
+      const rule = {
+        ...baseRuleResponse,
+        no_data_strategy: 'last_known_status',
+      } as RuleResponse;
+
+      const result = mapRuleResponseToFormValues(rule);
+
+      expect(result.noDataStrategy).toBe('last_known_status');
+    });
+
+    it('defaults noDataStrategy to none for alert rules without no_data_strategy', () => {
+      const result = mapRuleResponseToFormValues(baseRuleResponse);
+
+      expect(result.noDataStrategy).toBe('none');
+    });
+
+    it('defaults noDataStrategy to undefined for signal rules without no_data_strategy', () => {
+      const rule = { ...baseRuleResponse, kind: 'signal' } as RuleResponse;
+      const result = mapRuleResponseToFormValues(rule);
+
+      expect(result.noDataStrategy).toBeUndefined();
     });
 
     it('treats pending_count: 0 and recovering_count: 0 as immediate mode', () => {
