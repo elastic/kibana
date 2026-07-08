@@ -638,6 +638,25 @@ export const commandsMetadata: Record<string, unknown> = {
   registered_domain: {
     type: 'command',
     name: 'registered_domain',
+    output: {
+      vary_by: 'none',
+      variants: {
+        all: {
+          domain: {
+            type: 'keyword',
+          },
+          registered_domain: {
+            type: 'keyword',
+          },
+          subdomain: {
+            type: 'keyword',
+          },
+          top_level_domain: {
+            type: 'keyword',
+          },
+        },
+      },
+    },
   },
   rename: {
     type: 'command',
@@ -666,10 +685,75 @@ export const commandsMetadata: Record<string, unknown> = {
   uri_parts: {
     type: 'command',
     name: 'uri_parts',
+    output: {
+      vary_by: 'none',
+      variants: {
+        all: {
+          domain: {
+            type: 'keyword',
+          },
+          extension: {
+            type: 'keyword',
+          },
+          fragment: {
+            type: 'keyword',
+          },
+          password: {
+            type: 'keyword',
+          },
+          path: {
+            type: 'keyword',
+          },
+          port: {
+            type: 'integer',
+          },
+          query: {
+            type: 'keyword',
+          },
+          scheme: {
+            type: 'keyword',
+          },
+          user_info: {
+            type: 'keyword',
+          },
+          username: {
+            type: 'keyword',
+          },
+        },
+      },
+    },
   },
   user_agent: {
     type: 'command',
     name: 'user_agent',
+    output: {
+      vary_by: 'none',
+      variants: {
+        all: {
+          'device.name': {
+            type: 'keyword',
+          },
+          'device.type': {
+            type: 'keyword',
+          },
+          name: {
+            type: 'keyword',
+          },
+          'os.full': {
+            type: 'keyword',
+          },
+          'os.name': {
+            type: 'keyword',
+          },
+          'os.version': {
+            type: 'keyword',
+          },
+          version: {
+            type: 'keyword',
+          },
+        },
+      },
+    },
   },
   where: {
     type: 'command',
