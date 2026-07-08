@@ -93,12 +93,13 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
       ? [
           {
             id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
-            name: 'Internal output for agentless managed bulk',
+            name: 'Bulk output for managed integrations',
             type: 'elasticsearch' as const,
             hosts: [getManagedBulkEndpoint()!],
             // No ca_sha256 — the managed bulk endpoint uses a public cert trusted by system CAs.
             is_default: false,
             is_default_monitoring: false,
+            is_internal: true,
             is_preconfigured: true,
           } as PreconfiguredOutput,
         ]

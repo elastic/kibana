@@ -459,11 +459,12 @@ describe('Outputs preconfiguration', () => {
       expect(result).toHaveLength(2);
       expect(result[1]).toMatchObject({
         id: 'es-managed-bulk-agentless-output',
-        name: 'Internal output for agentless managed bulk',
+        name: 'Bulk output for managed integrations',
         type: 'elasticsearch',
         hosts: ['https://managed-otlp.example.com/_es'],
         is_default: false,
         is_default_monitoring: false,
+        is_internal: true,
         is_preconfigured: true,
       });
 
