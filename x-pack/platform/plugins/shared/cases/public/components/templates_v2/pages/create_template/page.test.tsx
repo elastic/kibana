@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { parse as yamlParse } from 'yaml';
 import { CreateTemplatePage } from './page';
 import { TestProviders } from '../../../../common/mock';
 import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
@@ -124,8 +125,15 @@ describe('CreateTemplatePage', () => {
       expect(mockMutateAsync).toHaveBeenCalledTimes(1);
     });
 
-    // Verify localStorage was NOT cleared (still has modified content)
-    expect(localStorage.getItem(storageKey)).toBe(JSON.stringify(modifiedTemplate));
+    // Verify localStorage was NOT cleared; failed save preserves the in-progress draft.
+    const storedDraft = localStorage.getItem(storageKey);
+    expect(storedDraft).not.toBeNull();
+    const parsedDraft = yamlParse(JSON.parse(storedDraft ?? '""') as string) as Record<
+      string,
+      unknown
+    >;
+    expect(parsedDraft.name).toEqual('Modified Template');
+    expect(localStorage.getItem(storageKey)).not.toBe(JSON.stringify(createPageInitialEditorYaml));
 
     // Verify navigation was NOT called
     expect(mockNavigateToCasesTemplates).not.toHaveBeenCalled();

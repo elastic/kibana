@@ -591,6 +591,27 @@ describe('TemplatesMigrationTaskManager', () => {
       );
     });
 
+    it('skips legacy templates with empty names and logs the error', async () => {
+      const configSO = buildConfigureSO({
+        templates: [buildLegacyTemplate('')],
+      });
+
+      repo.find
+        .mockResolvedValueOnce({ saved_objects: [configSO], total: 1 })
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 }) // field-defs
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 }); // templates
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      expect(repo.create).not.toHaveBeenCalledWith(
+        CASE_TEMPLATE_SAVED_OBJECT,
+        expect.anything(),
+        expect.anything()
+      );
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('empty name'));
+    });
+
     it('continues to next configure SO even if one fails entirely', async () => {
       // config-1 has a template that will fail to look up; config-2 has a template that succeeds.
       // Using filter-based discrimination avoids ordering issues from concurrent pMap execution.

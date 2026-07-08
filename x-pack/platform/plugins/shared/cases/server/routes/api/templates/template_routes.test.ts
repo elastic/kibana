@@ -129,7 +129,17 @@ const createMockCasesClient = () => ({
       return toSavedObject(newTemplate);
     }),
     updateTemplate: jest.fn(
-      async (templateId: string, input: { name: string; owner: string; definition: string }) => {
+      async (
+        templateId: string,
+        input: {
+          name: string;
+          owner: string;
+          definition: string;
+          description?: string;
+          tags?: string[];
+          isEnabled?: boolean;
+        }
+      ) => {
         const candidates = mockTemplates.filter(
           (template) => template.templateId === templateId && template.deletedAt === null
         );
@@ -144,9 +154,12 @@ const createMockCasesClient = () => ({
           name: input.name,
           owner: input.owner,
           definition: input.definition,
+          description: input.description,
+          tags: input.tags,
           templateVersion: latestVersion + 1,
           deletedAt: null,
           author: 'unknown',
+          isEnabled: input.isEnabled ?? true,
         };
 
         mockTemplates.push(updatedTemplate);
@@ -663,6 +676,29 @@ describe('Template Routes', () => {
             name: 'Template One',
             owner: 'securitySolution',
             templateVersion: 2,
+          }),
+        })
+      );
+    });
+
+    it('allows clearing description and tags with explicit empty values', async () => {
+      mockTemplates[0].description = 'Template description to clear';
+      const context = createMockContext();
+      const request = {
+        params: { template_id: 'template-1' },
+        body: { description: '', tags: [] },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await patchTemplateRoute.handler({ context, request, response });
+
+      expect(response.ok).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            templateId: 'template-1',
+            description: '',
+            tags: [],
           }),
         })
       );

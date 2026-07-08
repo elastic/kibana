@@ -59,8 +59,8 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
         templateId,
         template: {
           name: metadata.name,
-          description: metadata.description || undefined,
-          tags: metadata.tags.length > 0 ? metadata.tags : undefined,
+          description: metadata.description,
+          tags: metadata.tags,
           definition: data.definition,
           isEnabled,
         },

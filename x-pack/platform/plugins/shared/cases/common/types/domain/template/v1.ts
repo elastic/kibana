@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_TEMPLATE_NAME_LENGTH } from '../../../constants';
 import { FieldSchema, isRefField } from './fields';
 import { CaseConnectorWithoutNameSchema } from '../../domain_zod/connector/v1';
 import { CaseAssigneesSchema } from '../../domain_zod/user/v1';
@@ -30,7 +31,7 @@ export const TemplateSchema = z.object({
   /**
    * Display name
    */
-  name: z.string(),
+  name: z.string().min(1).max(MAX_TEMPLATE_NAME_LENGTH),
 
   /**
    * Owning Solution name

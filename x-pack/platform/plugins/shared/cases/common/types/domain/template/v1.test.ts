@@ -13,6 +13,7 @@ import {
   UpdateTemplateInputSchema,
   PatchTemplateInputSchema,
 } from './v1';
+import { MAX_TEMPLATE_NAME_LENGTH } from '../../../constants';
 import { FieldSchema, isRefField } from './fields';
 
 describe('TemplateSchema', () => {
@@ -63,6 +64,28 @@ describe('TemplateSchema', () => {
     if (!result.success) {
       expect(result.error.issues.length).toBeGreaterThan(0);
     }
+  });
+
+  it('rejects template with an empty name', () => {
+    const invalidTemplate = {
+      ...validTemplate,
+      name: '',
+    };
+
+    const result = TemplateSchema.safeParse(invalidTemplate);
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects template with a name longer than allowed', () => {
+    const invalidTemplate = {
+      ...validTemplate,
+      name: 'a'.repeat(MAX_TEMPLATE_NAME_LENGTH + 1),
+    };
+
+    const result = TemplateSchema.safeParse(invalidTemplate);
+
+    expect(result.success).toBe(false);
   });
 
   it('rejects template with invalid templateVersion type', () => {
@@ -474,6 +497,7 @@ describe('ParsedTemplateDefinitionSchema', () => {
 
 describe('CreateTemplateInputSchema', () => {
   const validCreateInput = {
+    name: 'Create template',
     owner: 'securitySolution',
     definition: 'fields:\n  - name: test_field\n    type: keyword',
   };
@@ -546,6 +570,7 @@ describe('CreateTemplateInputSchema', () => {
 
 describe('UpdateTemplateInputSchema', () => {
   const validUpdateInput = {
+    name: 'Updated template',
     owner: 'securitySolution',
     definition: 'fields:\n  - name: updated_field\n    type: keyword',
   };
@@ -601,7 +626,7 @@ describe('UpdateTemplateInputSchema', () => {
     }
   });
 
-  it('accepts update input without name', () => {
+  it('rejects update input without name', () => {
     const updateWithoutName = {
       owner: 'securitySolution',
       definition: 'fields:\n  - name: updated_field\n    type: keyword',
@@ -609,7 +634,7 @@ describe('UpdateTemplateInputSchema', () => {
 
     const result = UpdateTemplateInputSchema.safeParse(updateWithoutName);
 
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
   });
 
   it('requires owner and definition (PUT semantics)', () => {
@@ -665,6 +690,16 @@ describe('PatchTemplateInputSchema', () => {
     if (result.success) {
       expect(result.data).toEqual(ownerPatch);
     }
+  });
+
+  it('rejects patch with an empty name when provided', () => {
+    const emptyNamePatch = {
+      name: '',
+    };
+
+    const result = PatchTemplateInputSchema.safeParse(emptyNamePatch);
+
+    expect(result.success).toBe(false);
   });
 
   it('validates patch with only definition', () => {
