@@ -275,10 +275,7 @@ describe('getEntityAnomalyOverview', () => {
       mockGetJobConfig.mockResolvedValue(
         new Map([
           [JOB_A, { threatTactics: ['Execution'], threatTechniques: [], hasThreatTactics: true }],
-          [
-            JOB_B,
-            { threatTactics: ['Persistence'], threatTechniques: [], hasThreatTactics: true },
-          ],
+          [JOB_B, { threatTactics: ['Persistence'], threatTechniques: [], hasThreatTactics: true }],
         ])
       );
 
