@@ -17,7 +17,8 @@ export interface DlmSearchableSnapshotInfoSectionProps {
   dataTestSubj: string;
   manageRepositoriesHref?: string;
   defaultRepositoryName?: string;
-  onCreateDefaultRepository?: () => void;
+  createDefaultRepositoryHref?: string;
+  hasExistingRepositories?: boolean;
   onRefresh?: () => void;
   isRefreshing?: boolean;
 }
@@ -26,7 +27,8 @@ export const DlmSearchableSnapshotInfoSection = ({
   dataTestSubj,
   manageRepositoriesHref,
   defaultRepositoryName,
-  onCreateDefaultRepository,
+  createDefaultRepositoryHref,
+  hasExistingRepositories,
   onRefresh,
   isRefreshing,
 }: DlmSearchableSnapshotInfoSectionProps) => {
@@ -63,11 +65,14 @@ export const DlmSearchableSnapshotInfoSection = ({
         </EuiText>
       ) : (
         <FrozenDefaultRepositoryRequiredCallout
-          onCreateDefaultRepository={onCreateDefaultRepository}
+          createDefaultRepositoryHref={createDefaultRepositoryHref}
+          manageRepositoriesUrl={manageRepositoriesHref}
+          hasExistingRepositories={hasExistingRepositories}
           onRefresh={onRefresh}
           isRefreshing={isRefreshing}
           calloutTestSubj={`${dataTestSubj}FrozenDefaultRepositoryRequiredCallout`}
           createButtonTestSubj={`${dataTestSubj}CreateDefaultRepositoryButton`}
+          manageRepositoriesButtonTestSubj={`${dataTestSubj}ManageRepositoriesButton`}
           refreshButtonTestSubj={`${dataTestSubj}RefreshDefaultRepositoryButton`}
         />
       )}

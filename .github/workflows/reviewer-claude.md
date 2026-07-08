@@ -2,7 +2,7 @@
 name: Claude Reviewer
 on:
   pull_request_target:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
   workflow_dispatch:
     inputs:
       pr_number:
@@ -37,7 +37,10 @@ engine:
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 # Activation rules:
 # - Manual runs always activate.
-# - Opened/synchronize/reopened PR events activate unless reviewer:skip-ai is present.
+# - Non-draft PR events (opened/synchronize/reopened) activate unless reviewer:skip-ai is present.
+# - Draft PR events activate only when the ci:draft-checks label is present.
+# - ready_for_review activates the first review when a draft is marked ready.
+# - Adding the ci:draft-checks label activates a review; other label events are ignored.
 # - Comment follow-up runs are dispatched by Reviewer Comment Dispatcher after fork-safe validation.
 if: >-
   !github.event.repository.fork &&
@@ -46,13 +49,35 @@ if: >-
     (
       github.event.sender.type != 'Bot' &&
       !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai') &&
-      github.event_name == 'pull_request_target'
+      github.event_name == 'pull_request_target' &&
+      (
+        (
+          github.event.action == 'labeled' &&
+          github.event.label.name == 'ci:draft-checks'
+        ) ||
+        (
+          github.event.action != 'labeled' &&
+          (
+            !github.event.pull_request.draft ||
+            contains(github.event.pull_request.labels.*.name, 'ci:draft-checks')
+          )
+        )
+      )
     )
   )
 concurrency:
-  # Keep one review lane per PR/comment.
+  # Keep one review lane per PR/comment. Unrelated label events get their own group suffix so they can skip without canceling an in-flight review.
   group: >-
-    gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.event.inputs.pr_number || github.run_id }}-${{ github.event.inputs.comment_id || 'pr-review' }}
+    gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.event.inputs.pr_number || github.run_id }}-${{
+      github.event.inputs.comment_id ||
+      (
+        github.event.action == 'labeled' &&
+        github.event.label.name != 'ci:draft-checks' &&
+        github.event.label.name != 'reviewer:skip-ai' &&
+        github.event.label.name
+      ) ||
+      'pr-review'
+    }}
   cancel-in-progress: true
   job-discriminator: ${{ github.event.pull_request.number || github.event.inputs.pr_number || github.run_id }}
 permissions:
