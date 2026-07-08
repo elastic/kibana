@@ -89,6 +89,9 @@ export const getJobConfig = async ({
       }
 
       const customSettings = (job.custom_settings ?? {}) as JobCustomSettings;
+      const threatTactics = Array.isArray(customSettings.threat_tactics)
+        ? customSettings.threat_tactics
+        : [];
 
       result.set(job.job_id, {
         sourceIndex: (job.datafeed_config?.indices ?? []) as string[],
@@ -96,13 +99,11 @@ export const getJobConfig = async ({
         detectors: job.analysis_config?.detectors ?? [],
         bucketSpanMs,
         jobName: customSettings.security_app_display_name ?? null,
-        threatTactics: (customSettings.threat_tactics ?? []).map(
-          (id) => tacticNameById.get(id) ?? id
-        ),
+        threatTactics: threatTactics.map((id) => tacticNameById.get(id) ?? id),
         threatTechniques: (customSettings.threat_techniques ?? []).map(
           (id) => techniqueNameById.get(id) ?? id
         ),
-        hasThreatTactics: customSettings.threat_tactics !== undefined,
+        hasThreatTactics: Array.isArray(customSettings.threat_tactics),
       });
     }
   } catch (err) {

@@ -18,8 +18,9 @@ import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
-      http: {
-        basePath: { prepend: (path: string) => `/base-path${path}` },
+      application: {
+        getUrlForApp: (appId: string, options?: { path?: string }) =>
+          `/base-path/app/${appId}${options?.path ?? ''}`,
       },
     },
   }),

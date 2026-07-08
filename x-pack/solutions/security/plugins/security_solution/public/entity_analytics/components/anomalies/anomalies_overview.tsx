@@ -51,8 +51,6 @@ import {
   ANOMALIES_MISSING_THREAT_TACTICS_WARNING_TEST_ID,
 } from './test_ids';
 
-const INTEGRATIONS_INSTALLED_PATH = '/app/integrations/installed';
-
 const RECENT_TABLE_OTHER_COLUMN_WIDTH = '35.71%';
 const RECENT_TABLE_ANOMALY_COLUMN_WIDTH = '28.57%';
 
@@ -71,7 +69,9 @@ export const AnomaliesOverview: React.FC<AnomaliesOverviewProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana();
-  const integrationsUrl = services.http.basePath.prepend(INTEGRATIONS_INSTALLED_PATH);
+  const integrationsUrl = services.application.getUrlForApp('integrations', {
+    path: '/installed',
+  });
 
   const uniqueTactics = useMemo(() => Object.keys(data.tacticCounts), [data.tacticCounts]);
   const totalAnomaliesCount = data.totalAnomaliesCount;

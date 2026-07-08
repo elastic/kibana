@@ -211,6 +211,25 @@ describe('getJobConfig', () => {
     expect(result.get('test-job')?.hasThreatTactics).toBe(false);
   });
 
+  it('sets hasThreatTactics to false and threatTactics to [] when custom_settings.threat_tactics is not an array', async () => {
+    mockJobsFn.mockResolvedValueOnce({
+      // custom_settings is runtime ES data, so a job could have threat_tactics
+      // set to a non-array value (e.g. null) despite the declared type.
+      jobs: [makeJob({ custom_settings: { threat_tactics: null } })],
+    });
+
+    const result = await getJobConfig({
+      jobIds: ['test-job'],
+      logger,
+      ml: mockMl,
+      request,
+      soClient,
+    });
+
+    expect(result.get('test-job')?.hasThreatTactics).toBe(false);
+    expect(result.get('test-job')?.threatTactics).toEqual([]);
+  });
+
   it('sets jobName to null when security_app_display_name is absent', async () => {
     const result = await getJobConfig({
       jobIds: ['test-job'],
