@@ -89,7 +89,7 @@ export const SkillReferencedContentReadOnly: React.FC<SkillReferencedContentRead
       <EuiSpacer size="s" />
       <EuiFlexGroup direction="column" gutterSize="m">
         {items.map((item, index) => (
-          <EuiFlexItem grow={false} key={item.name ? `${item.name}:${item.relativePath}` : index}>
+          <EuiFlexItem grow={false} key={`${item.name || ''}:${item.relativePath}:${index}`}>
             <ReadOnlyFileRow item={item} index={index} />
           </EuiFlexItem>
         ))}

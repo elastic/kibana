@@ -966,7 +966,7 @@ export const labels = {
       }),
       compactTokenCount: (count: number) =>
         i18n.translate('xpack.agentBuilder.skills.referencedFileSection.compactTokenCount', {
-          defaultMessage: '~{count} tokens',
+          defaultMessage: '~{count, plural, one {# token} other {# tokens}}',
           values: { count },
         }),
       unnamedFilePlaceholder: i18n.translate(

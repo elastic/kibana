@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -96,7 +96,9 @@ interface ReferencedContentFileRowProps {
   control: Control<SkillFormData>;
   skillName: string;
   onRemove: () => void;
-  defaultIsEditing: boolean;
+  isEditing: boolean;
+  onStartEdit: () => void;
+  onStopEdit: () => void;
 }
 
 const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
@@ -104,9 +106,10 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
   control,
   skillName,
   onRemove,
-  defaultIsEditing,
+  isEditing,
+  onStartEdit,
+  onStopEdit,
 }) => {
-  const [isEditing, setIsEditing] = useState(defaultIsEditing);
   const snapshotRef = useRef<ReferencedContentItem>({ ...DEFAULT_REFERENCED_FILE });
   const { trigger } = useFormContext<SkillFormData>();
 
@@ -123,7 +126,7 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
       relativePath: pathField.field.value,
       content: contentField.field.value,
     };
-    setIsEditing(true);
+    onStartEdit();
   };
 
   const handleDone = async () => {
@@ -132,7 +135,7 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
       `referenced_content.${index}.relativePath`,
       `referenced_content.${index}.content`,
     ]);
-    if (isValid) setIsEditing(false);
+    if (isValid) onStopEdit();
   };
 
   const handleCancel = () => {
@@ -140,7 +143,7 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
     nameField.field.onChange(snapshot.name);
     pathField.field.onChange(snapshot.relativePath);
     contentField.field.onChange(snapshot.content);
-    setIsEditing(false);
+    onStopEdit();
   };
 
   const displayName = nameField.field.value
@@ -231,9 +234,9 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
               size="s"
               onClick={handleDone}
               disabled={
+                !nameField.field.value ||
                 Boolean(nameField.fieldState.error) ||
-                Boolean(pathField.fieldState.error) ||
-                Boolean(contentField.fieldState.error)
+                Boolean(pathField.fieldState.error)
               }
               data-test-subj={`agentBuilderSkillReferencedContentDone-${index}`}
             >
@@ -262,6 +265,7 @@ const SkillReferencedContentFieldArrayEdit: React.FC<{ control: Control<SkillFor
   control,
 }) => {
   const skillName = useWatch({ control, name: 'name' }) ?? '';
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -270,24 +274,32 @@ const SkillReferencedContentFieldArrayEdit: React.FC<{ control: Control<SkillFor
 
   const atLimit = fields.length >= maxReferencedContentItems;
 
-  const seenFieldIds = useRef(new Set<string>());
-  const hasInitialized = useRef(false);
-  if (!hasInitialized.current) {
-    hasInitialized.current = true;
-    for (const f of fields) seenFieldIds.current.add(f.id);
-  }
+  const handleAdd = () => {
+    append(DEFAULT_REFERENCED_FILE);
+    setActiveIndex(fields.length);
+  };
+
+  const handleRemove = (index: number) => {
+    remove(index);
+    setActiveIndex((prev) => {
+      if (prev === null) return null;
+      if (prev === index) return null;
+      if (index < prev) return prev - 1;
+      return prev;
+    });
+  };
 
   return (
     <div data-test-subj="agentBuilderSkillReferencedContentSection">
       {fields.length === 0 ? (
-        <ReferencedContentEmptyState onAdd={() => append(DEFAULT_REFERENCED_FILE)} />
+        <ReferencedContentEmptyState onAdd={handleAdd} />
       ) : (
         <>
           <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
             <EuiFlexItem grow={false}>
               <EuiButton
                 iconType="plusInCircle"
-                onClick={() => append(DEFAULT_REFERENCED_FILE)}
+                onClick={handleAdd}
                 disabled={atLimit}
                 title={
                   atLimit
@@ -317,21 +329,19 @@ const SkillReferencedContentFieldArrayEdit: React.FC<{ control: Control<SkillFor
           </EuiFlexGroup>
           <EuiSpacer size="l" />
           <EuiFlexGroup direction="column" gutterSize="m">
-            {fields.map((field, index) => {
-              const isNew = !seenFieldIds.current.has(field.id);
-              if (isNew) seenFieldIds.current.add(field.id);
-              return (
-                <EuiFlexItem key={field.id} grow={false}>
-                  <ReferencedContentFileRow
-                    index={index}
-                    control={control}
-                    skillName={skillName}
-                    onRemove={() => remove(index)}
-                    defaultIsEditing={isNew}
-                  />
-                </EuiFlexItem>
-              );
-            })}
+            {fields.map((field, index) => (
+              <EuiFlexItem key={field.id} grow={false}>
+                <ReferencedContentFileRow
+                  index={index}
+                  control={control}
+                  skillName={skillName}
+                  onRemove={() => handleRemove(index)}
+                  isEditing={activeIndex === index}
+                  onStartEdit={() => setActiveIndex(index)}
+                  onStopEdit={() => setActiveIndex(null)}
+                />
+              </EuiFlexItem>
+            ))}
           </EuiFlexGroup>
         </>
       )}
