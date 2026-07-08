@@ -128,6 +128,15 @@ const EDIT_MODE_OPTIONS = [
   { id: 'yaml', label: YAML_VIEW_LABEL, iconType: 'editorCodeBlock' },
 ];
 
+const getQuerySandboxTitle = (isBuilderMode: boolean) =>
+  isBuilderMode
+    ? i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.builderContextualTitle', {
+        defaultMessage: 'Query sandbox: Preview results',
+      })
+    : i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.editorContextualTitle', {
+        defaultMessage: 'Query sandbox: Edit queries',
+      });
+
 const getFlyoutTitle = (mode: ComposeDiscoverMode): string => {
   if (mode === 'clone') return CLONE_TITLE;
   if (mode === 'edit') return EDIT_TITLE;
@@ -1306,6 +1315,7 @@ export function ComposeDiscoverFlyout({
                 helpText={sandboxHelpText}
                 headerActions={sandboxHeaderActions}
                 onApply={isBuilderMode ? undefined : handleSandboxApply}
+                title={getQuerySandboxTitle(isBuilderMode)}
               />
             )}
           </EuiFlyout>
