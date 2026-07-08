@@ -16,6 +16,7 @@ import {
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../../../common/environment_filter_values';
 import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '../../../../../../common/es_fields/apm';
+import { getAlertingCapabilities } from '../../hooks/get_alerting_capabilities';
 
 interface UseAlertsHrefParams {
   core: CoreStart;
@@ -32,9 +33,7 @@ export function useAlertsHref({
   rangeFrom,
   rangeTo,
 }: UseAlertsHrefParams): string | undefined {
-  const canReadAlerts =
-    !!core.application.capabilities.alerting &&
-    !!core.application.capabilities.apm?.['alerting:show'];
+  const { canReadAlerts } = getAlertingCapabilities(core.application.capabilities);
   return useMemo(() => {
     if (!canReadAlerts) return undefined;
     const base = core.http.basePath.prepend(observabilityPaths.alerts);

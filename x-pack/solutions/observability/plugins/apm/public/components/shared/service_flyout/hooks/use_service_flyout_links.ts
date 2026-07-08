@@ -31,6 +31,7 @@ export function useServiceFlyoutLinks({
   transactionType = '',
 }: ServiceFlyoutLinksParams) {
   const { core, share } = useServiceFlyoutContext();
+  const canReadSlos = !!core.application?.capabilities?.slo?.read;
 
   const apm = useMemo(() => {
     const locator = share?.url?.locators?.get(APM_APP_LOCATOR_ID);
@@ -49,11 +50,13 @@ export function useServiceFlyoutLinks({
 
   const slos = useMemo(
     () =>
-      getManageSlosUrl(share?.url?.locators?.get<SloListLocatorParams>(sloListLocatorID), {
-        serviceName,
-        environment,
-      }),
-    [share, serviceName, environment]
+      canReadSlos
+        ? getManageSlosUrl(share?.url?.locators?.get<SloListLocatorParams>(sloListLocatorID), {
+            serviceName,
+            environment,
+          })
+        : undefined,
+    [canReadSlos, share, serviceName, environment]
   );
 
   const alerts = useAlertsHref({ core, serviceName, environment, rangeFrom, rangeTo });

@@ -20,7 +20,7 @@ function getKuery(href: string): string {
 
 const mockCore = {
   http: { basePath: { prepend: (path: string) => path } },
-  application: { capabilities: { alerting: true, apm: { 'alerting:show': true } } },
+  application: { capabilities: { apm: { 'alerting:show': true } } },
 } as any;
 
 function renderAlertsHref(overrides: Partial<Parameters<typeof useAlertsHref>[0]> = {}) {
@@ -41,17 +41,7 @@ describe('useAlertsHref', () => {
     const href = renderAlertsHref({
       core: {
         ...mockCore,
-        application: { capabilities: { alerting: true, apm: { 'alerting:show': false } } },
-      },
-    });
-    expect(href).toBeUndefined();
-  });
-
-  it('returns undefined when the alerting plugin is not available', () => {
-    const href = renderAlertsHref({
-      core: {
-        ...mockCore,
-        application: { capabilities: { alerting: false, apm: { 'alerting:show': true } } },
+        application: { capabilities: { apm: { 'alerting:show': false } } },
       },
     });
     expect(href).toBeUndefined();

@@ -10,6 +10,7 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { Environment } from '../../../../../common/environment_rt';
 import { useServiceFlyoutContext } from '../service_flyout_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { getAlertingCapabilities } from './get_alerting_capabilities';
 
 interface ServiceBadgesDataParams {
   serviceName: string;
@@ -31,10 +32,7 @@ export function useServiceBadgesData({
 }: ServiceBadgesDataParams): ServiceBadgesData {
   const { core } = useServiceFlyoutContext();
   const { capabilities } = core.application;
-  const isAlertingPluginAvailable = !!capabilities.alerting;
-  const canReadAlerts = !!capabilities.apm['alerting:show'];
-  const isAlertingAvailable =
-    isAlertingPluginAvailable && (canReadAlerts || !!capabilities.apm['alerting:save']);
+  const { canReadAlerts, isAlertingAvailable } = getAlertingCapabilities(capabilities);
   const { start = '', end = '' } = useTimeRange({ rangeFrom, rangeTo });
   const canReadMlJobs = !!capabilities.ml?.canGetJobs;
 

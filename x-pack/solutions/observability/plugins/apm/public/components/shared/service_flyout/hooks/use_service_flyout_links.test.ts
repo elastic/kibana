@@ -31,12 +31,17 @@ const mockGetRedirectUrl = jest.fn(
 );
 const mockLocatorsGet = jest.fn(() => ({ getRedirectUrl: mockGetRedirectUrl }));
 
+const mockUseServiceFlyoutContext = jest.fn();
 jest.mock('../service_flyout_context', () => ({
-  useServiceFlyoutContext: () => ({
-    core: {},
-    share: { url: { locators: { get: mockLocatorsGet } } },
-  }),
+  useServiceFlyoutContext: (...args: unknown[]) => mockUseServiceFlyoutContext(...args),
 }));
+
+function makeContext(sloRead = true) {
+  return {
+    core: { application: { capabilities: { slo: { read: sloRead } } } },
+    share: { url: { locators: { get: mockLocatorsGet } } },
+  };
+}
 
 const baseParams = {
   serviceName: 'opbeans-java',
@@ -50,6 +55,8 @@ describe('useServiceFlyoutLinks', () => {
     mockLocatorsGet.mockClear();
     mockGetRedirectUrl.mockClear();
     mockUseDiscoverHref.mockClear();
+    mockUseServiceFlyoutContext.mockClear();
+    mockUseServiceFlyoutContext.mockReturnValue(makeContext());
     mockUseDiscoverHref.mockImplementation(({ indexType }: { indexType: string }) =>
       indexType === 'traces' ? '/app/discover/traces' : '/app/discover/logs'
     );
@@ -131,5 +138,13 @@ describe('useServiceFlyoutLinks', () => {
     expect(result.current.alerts).toEqual('/app/observability/alerts?mock');
     expect(result.current.discover.traces).toEqual('/app/discover/traces');
     expect(result.current.discover.logs).toEqual('/app/discover/logs');
+  });
+
+  it('returns undefined slos when the slo.read capability is missing', () => {
+    mockUseServiceFlyoutContext.mockReturnValue(makeContext(false));
+
+    const { result } = renderHook(() => useServiceFlyoutLinks(baseParams));
+
+    expect(result.current.slos).toBeUndefined();
   });
 });
