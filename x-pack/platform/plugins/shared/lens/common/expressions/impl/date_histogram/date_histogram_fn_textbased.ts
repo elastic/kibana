@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { Unit } from '@kbn/datemath';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { parseInterval, splitStringInterval } from '@kbn/data-plugin/common';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import moment from 'moment-timezone';
 import type { DateHistogramTextBasedExpressionFunction } from '../../defs/date_histogram/types';
+
+type Unit = NonNullable<ReturnType<typeof splitStringInterval>>['unit'];
 
 const isFullyContained = (
   bucketStart: moment.Moment,
