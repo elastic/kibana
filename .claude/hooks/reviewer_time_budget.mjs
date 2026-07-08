@@ -2,7 +2,7 @@
 
 import { readFileSync, writeFileSync } from 'node:fs';
 
-const OVERALL_LIMIT_MINUTES = 5;
+const OVERALL_LIMIT_MINUTES = 2;
 const OVERALL_LIMIT_MS = OVERALL_LIMIT_MINUTES * 60 * 1000;
 const STOP_WORK_PERCENT = 85;
 const MILESTONE_PERCENTS = [25, 50, 75];
