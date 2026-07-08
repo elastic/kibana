@@ -182,7 +182,12 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
       href: getCasesTemplatesUrl(),
       // `AppHeader` renders this as "Back to {label}", so pass just the destination name.
       label: templatesI18n.TEMPLATE_TITLE,
-      onClick: navigateToCasesTemplates,
+      // AppHeader's back button keeps its `href` on the rendered anchor, so the default
+      // navigation must be prevented here to avoid a full page reload alongside the SPA one.
+      onClick: (event: React.MouseEvent) => {
+        event.preventDefault();
+        navigateToCasesTemplates();
+      },
     }),
     [getCasesTemplatesUrl, navigateToCasesTemplates]
   );

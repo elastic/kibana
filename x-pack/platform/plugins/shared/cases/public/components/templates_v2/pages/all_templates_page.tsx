@@ -72,7 +72,12 @@ export const AllTemplatesPage: React.FC = () => {
     () => ({
       href: getAllCasesUrl(),
       label: PAGE_TITLE,
-      onClick: navigateToAllCases,
+      // AppHeader's back button keeps its `href` on the rendered anchor, so the default
+      // navigation must be prevented here to avoid a full page reload alongside the SPA one.
+      onClick: (event: React.MouseEvent) => {
+        event.preventDefault();
+        navigateToAllCases();
+      },
     }),
     [getAllCasesUrl, navigateToAllCases]
   );

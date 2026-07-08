@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, act, waitFor } from '@testing-library/react';
+import { createEvent, fireEvent, screen, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useForm } from 'react-hook-form';
 import type { YamlEditorFormValues } from './template_form';
@@ -49,10 +49,12 @@ jest.mock('./template_editor_layout', () => ({
   },
 }));
 
+const mockNavigateToCasesTemplates = jest.fn();
+
 jest.mock('../../../common/navigation', () => ({
   useCasesTemplatesNavigation: () => ({
     getCasesTemplatesUrl: jest.fn().mockReturnValue('/templates'),
-    navigateToCasesTemplates: jest.fn(),
+    navigateToCasesTemplates: mockNavigateToCasesTemplates,
   }),
 }));
 
@@ -385,6 +387,17 @@ fields:
     renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toBeInTheDocument();
+  });
+
+  it('navigates to templates and prevents the anchor default navigation on back click', () => {
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
+
+    const backButton = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back);
+    const clickEvent = createEvent.click(backButton);
+    fireEvent(backButton, clickEvent);
+
+    expect(clickEvent.defaultPrevented).toBe(true);
+    expect(mockNavigateToCasesTemplates).toHaveBeenCalled();
   });
 });
 
