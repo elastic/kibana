@@ -116,7 +116,7 @@ The execution step picks the specific Scout auth method (`loginAsViewer`, `login
 
 ### 9. Deployment targets and Cloud portability
 
-Scout is deployment-agnostic — the goal is "write once, run locally and on Elastic Cloud." Reference [Design tests with a cloud-first mindset](../../../../docs/extend/scout/best-practices.md#design-tests-with-a-cloud-first-mindset) for the underlying principles.
+Scout is deployment-agnostic — the goal is "write once, run locally and on Elastic Cloud." Reference [Design tests with a cloud-first mindset](../../../../docs/extend/testing/scout-best-practices.md.md#design-tests-with-a-cloud-first-mindset) for the underlying principles.
 
 For each test group, answer all four:
 
@@ -184,4 +184,4 @@ Output the plan to `migration-plan-<source-dir-slug>-<YYYY-MM-DD>.md` (see **Out
 
 - Plan output structure (every section, table, and bullet format): [`plan-template.md`](plan-template.md)
 - Test-type downgrade catalog (UI vs API vs RTL/Jest): [`pick-correct-test-type.md`](pick-correct-test-type.md)
-- Cloud-first mindset (rationale for step 9): [`docs/extend/scout/best-practices.md#design-tests-with-a-cloud-first-mindset`](../../../../docs/extend/scout/best-practices.md#design-tests-with-a-cloud-first-mindset)
+- Cloud-first mindset (rationale for step 9): [`docs/extend/testing/scout-best-practices.md.md#design-tests-with-a-cloud-first-mindset`](../../../../docs/extend/testing/scout-best-practices.md.md#design-tests-with-a-cloud-first-mindset)

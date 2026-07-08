@@ -22,7 +22,7 @@ Important: Do not post GitHub comments unless explicitly stated.
 3. Removed/previous tests (if this is a migration) to verify behavior parity.
 4. Scout docs (open only what you need — best practices are split by test type so you can skip the irrelevant half):
 
-   - **General best practices** (always relevant): `docs/extend/scout/best-practices.md`
+   - **General best practices** (always relevant): `docs/extend/testing/scout-best-practices.md.md`
    - **UI-only best practices** (open when reviewing UI tests): `docs/extend/scout/ui-best-practices.md`
    - **API-only best practices** (open when reviewing API tests): `docs/extend/scout/api-best-practices.md`
    - Core concepts & fixtures: `docs/extend/scout/core-concepts.md`, `docs/extend/scout/fixtures.md`
@@ -43,7 +43,7 @@ Important: Do not post GitHub comments unless explicitly stated.
 
 Checklist items are tagged with the document they're detailed in:
 
-- **[general]** → `docs/extend/scout/best-practices.md` (applies to both UI and API tests)
+- **[general]** → `docs/extend/testing/scout-best-practices.md.md` (applies to both UI and API tests)
 - **[ui]** → `docs/extend/scout/ui-best-practices.md`
 - **[api]** → `docs/extend/scout/api-best-practices.md`
 
