@@ -301,7 +301,7 @@ export function Wrapper({
         iconType: 'trash',
         overflow: true,
         isDestructive: true,
-        testId: 'deleteQueryStreamButton',
+        testId: 'streamsDeleteStreamButton',
         run: () => setShowDeleteModal(true),
       });
     }

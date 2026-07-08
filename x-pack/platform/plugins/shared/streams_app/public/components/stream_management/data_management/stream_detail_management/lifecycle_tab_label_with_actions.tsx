@@ -8,28 +8,33 @@ import { i18n } from '@kbn/i18n';
 import { copyToClipboard } from '@elastic/eui';
 import { omit } from 'lodash';
 import type { Streams } from '@kbn/streams-schema';
+import { Streams as StreamsSchema, getParentId } from '@kbn/streams-schema';
 import type { CoreStart } from '@kbn/core/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import type { AppHeaderTabAction, AppHeaderTabActions } from '@kbn/app-header';
 import { buildRequestPreviewCodeContent } from '../shared/utils';
+import type { StatefulStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 
 interface LifecycleTabActionsParams {
   definition: Streams.ingest.all.GetResponse;
-  indexTemplateName?: string;
   notifications: CoreStart['notifications'];
   share: SharePublicStart;
+  router: StatefulStreamsAppRouter;
+  timeRange: { rangeFrom: string; rangeTo: string };
 }
 
 /**
- * Builds the ellipsis actions for the "Data lifecycle" tab (copy the lifecycle API request and edit
- * the backing index template). Rendered by the shared app header tab as an `actions` popover.
+ * Builds the ellipsis actions for the "Data lifecycle" tab: copy the lifecycle API request, plus a
+ * type-specific edit action (classic -> edit the backing index template, wired -> edit the parent
+ * stream). Rendered by the shared app header tab as an `actions` popover.
  */
 export const buildLifecycleTabActions = ({
   definition,
-  indexTemplateName,
   notifications,
   share,
+  router,
+  timeRange,
 }: LifecycleTabActionsParams): AppHeaderTabActions => {
   const indexManagementLocator = share.url.locators.get<IndexManagementLocatorParams>(
     'INDEX_MANAGEMENT_LOCATOR_ID'
@@ -68,7 +73,8 @@ export const buildLifecycleTabActions = ({
     },
   ];
 
-  if (indexManagementLocator) {
+  if (StreamsSchema.ClassicStream.GetResponse.is(definition) && indexManagementLocator) {
+    const indexTemplateName = definition.elasticsearch_assets?.indexTemplate;
     items.push({
       id: 'editTemplate',
       label: i18n.translate('xpack.streams.lifecycleTab.actions.editIndexTemplate', {
@@ -86,6 +92,26 @@ export const buildLifecycleTabActions = ({
         window.open(url, '_blank');
       },
     });
+  }
+
+  if (StreamsSchema.WiredStream.GetResponse.is(definition)) {
+    const parentId = getParentId(definition.stream.name);
+    if (parentId) {
+      items.push({
+        id: 'editParentStream',
+        label: i18n.translate('xpack.streams.lifecycleTab.actions.editParentStream', {
+          defaultMessage: 'Edit parent stream',
+        }),
+        iconType: 'gear',
+        'data-test-subj': 'streamsLifecycleTabEditParentStream',
+        onClick: () => {
+          router.push('/{key}/management/{tab}', {
+            path: { key: parentId, tab: 'lifecycle' },
+            query: { rangeFrom: timeRange.rangeFrom, rangeTo: timeRange.rangeTo },
+          });
+        },
+      });
+    }
   }
 
   return {

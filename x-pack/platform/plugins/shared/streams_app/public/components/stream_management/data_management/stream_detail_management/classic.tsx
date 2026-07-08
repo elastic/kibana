@@ -9,6 +9,8 @@ import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import { EuiBadgeGroup, EuiFlexGroup } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
+import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { RedirectTo } from '../../../redirect_to';
@@ -69,6 +71,8 @@ export function ClassicStreamDetailManagement({
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
+  const router = useStreamsAppRouter();
+  const { rangeFrom, rangeTo } = useTimeRange();
 
   const {
     features: { canvas, queryStreams },
@@ -129,9 +133,10 @@ export function ClassicStreamDetailManagement({
     'data-test-subj': 'retentionTab',
     actions: buildLifecycleTabActions({
       definition,
-      indexTemplateName: definition.elasticsearch_assets?.indexTemplate,
       notifications,
       share,
+      router,
+      timeRange: { rangeFrom, rangeTo },
     }),
   };
 

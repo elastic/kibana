@@ -9,6 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { type Streams, isRoot, isDraftStream, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
 import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
+import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { RedirectTo } from '../../../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
@@ -68,6 +70,8 @@ export function WiredStreamDetailManagement({
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
+  const router = useStreamsAppRouter();
+  const { rangeFrom, rangeTo } = useTimeRange();
 
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
     definition,
@@ -196,9 +200,10 @@ export function WiredStreamDetailManagement({
             'data-test-subj': 'retentionTab',
             actions: buildLifecycleTabActions({
               definition,
-              indexTemplateName: `${definition.stream.name}@stream`,
               notifications,
               share,
+              router,
+              timeRange: { rangeFrom, rangeTo },
             }),
           },
         }
