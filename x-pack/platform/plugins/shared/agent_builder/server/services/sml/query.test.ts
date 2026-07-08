@@ -251,6 +251,7 @@ describe('isNotFoundError', () => {
 
 describe('SML query/search/authz service', () => {
   let esClient: jest.Mocked<ElasticsearchClient>;
+  let currentUserEsClient: jest.Mocked<ElasticsearchClient>;
   let esqlQueryMock: jest.Mock;
   let termsEnumMock: jest.Mock;
   let scopedClient: IScopedClusterClient;
@@ -259,12 +260,17 @@ describe('SML query/search/authz service', () => {
 
   beforeEach(() => {
     esClient = createMockEsClient();
-    // `jest.Mocked` does not unwrap overloaded functions, so extract as jest.Mock directly.
-    esqlQueryMock = (esClient as unknown as { esql: { query: jest.Mock } }).esql.query;
     termsEnumMock = (esClient as unknown as { termsEnum: jest.Mock }).termsEnum;
     // Default to an empty permission universe; per-case tests override this.
     termsEnumMock.mockImplementation(async () => ({ complete: true, terms: [] }));
     scopedClient = createMockScopedClient(esClient);
+    // The genuine "return this user's results" paths (searchSml, autocompleteSml,
+    // getDocumentsByIds, listDocuments, findByOrigin, findByOriginAcrossSpaces) run
+    // as `asCurrentUser`; only the authz-support reads (resolveAuthorizedUniverse's
+    // `_terms_enum` pre-pass, checkItemsAccess) stay on `asInternalUser`.
+    currentUserEsClient = scopedClient.asCurrentUser as jest.Mocked<ElasticsearchClient>;
+    // `jest.Mocked` does not unwrap overloaded functions, so extract as jest.Mock directly.
+    esqlQueryMock = (currentUserEsClient as unknown as { esql: { query: jest.Mock } }).esql.query;
     logger = createMockLogger();
     request = {} as unknown as KibanaRequest;
   });
@@ -285,11 +291,14 @@ describe('SML query/search/authz service', () => {
         logger,
       });
 
+      // The actual search runs as the current user — the requesting user's own
+      // ES privileges on the SML index are the baseline enforcement.
       expect(esqlQueryMock).toHaveBeenCalledTimes(1);
-      expect(esClient.search).not.toHaveBeenCalled();
       expect(
-        (scopedClient.asCurrentUser as jest.Mocked<ElasticsearchClient>).search
+        (esClient as unknown as { esql: { query: jest.Mock } }).esql.query
       ).not.toHaveBeenCalled();
+      expect(esClient.search).not.toHaveBeenCalled();
+      expect(currentUserEsClient.search).not.toHaveBeenCalled();
 
       const { query: esql, params } = esqlQueryMock.mock.calls[0]![0]! as {
         query: string;
@@ -680,6 +689,55 @@ describe('SML query/search/authz service', () => {
       expect(params).toContainEqual(['saved_object:lens/get']);
     });
 
+    it('runs the search as the current user while still injecting the authz filter (layered, not swapped)', async () => {
+      // Regression guard for the asCurrentUser migration: the native ES
+      // privilege check (asCurrentUser) must be layered ON TOP OF the
+      // existing Kibana-feature-privilege filter (resolveAuthorizedUniverse),
+      // not substituted for it. A bug that dropped the filter while still
+      // calling the right client would look correct on the surface.
+      const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
+      termsEnumMock.mockImplementation(
+        buildTermsEnumMock({
+          kibana: ['saved_object:lens/get', 'saved_object:dashboard/get'],
+        })
+      );
+
+      esqlQueryMock.mockResolvedValue({
+        columns: makeEsqlColumns(true),
+        values: [],
+      } as any);
+
+      await searchSml({
+        query: '*',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+        logger,
+        securityAuthz,
+      });
+
+      // Layer 1 (native ES enforcement): the actual search executes against
+      // the current user's client, not the internal one.
+      expect(currentUserEsClient.esql.query).toHaveBeenCalledTimes(1);
+      expect(esClient.esql.query).not.toHaveBeenCalled();
+
+      // Layer 2 (Kibana-feature-privilege filter): the authz-derived
+      // MV_CONTAINS filter is still present in the query sent to the
+      // current-user client.
+      const { query: esql, params } = (currentUserEsClient.esql.query as jest.Mock).mock
+        .calls[0]![0]! as {
+        query: string;
+        params?: unknown[];
+      };
+      expect(esql).toContain('| WHERE MV_CONTAINS(?, permissions.kibana.privileges.name)');
+      expect(params).toContainEqual(['saved_object:lens/get']);
+
+      // The full-corpus enumeration that builds the filter still runs as the
+      // internal user (it needs full-corpus visibility, not this user's view).
+      expect(termsEnumMock).toHaveBeenCalled();
+    });
+
     it('restricts to public KIs when the caller holds nothing in a used dimension', async () => {
       // Corpus uses a Kibana privilege the caller does NOT hold → the authorized
       // array is empty, so MV_CONTAINS(?, field) admits only KIs whose required
@@ -794,7 +852,7 @@ describe('SML query/search/authz service', () => {
 
   describe('autocompleteSml', () => {
     it('builds a single nested discovery_labels query (with inner_hits) and a space filter', async () => {
-      esClient.search.mockResolvedValue({
+      currentUserEsClient.search.mockResolvedValue({
         hits: { total: 0, hits: [] },
       } as any);
 
@@ -806,8 +864,9 @@ describe('SML query/search/authz service', () => {
         logger,
       });
 
-      expect(esClient.search).toHaveBeenCalledTimes(1);
-      const call = esClient.search.mock.calls[0]![0]!;
+      expect(currentUserEsClient.search).toHaveBeenCalledTimes(1);
+      expect(esClient.search).not.toHaveBeenCalled();
+      const call = currentUserEsClient.search.mock.calls[0]![0]!;
       expect(call.query).toEqual({
         bool: {
           must: [
@@ -857,7 +916,7 @@ describe('SML query/search/authz service', () => {
     });
 
     it('uses match_all for query "*"', async () => {
-      esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+      currentUserEsClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
 
       await autocompleteSml({
         query: '*',
@@ -867,12 +926,12 @@ describe('SML query/search/authz service', () => {
         logger,
       });
 
-      const call = esClient.search.mock.calls[0]![0]!;
+      const call = currentUserEsClient.search.mock.calls[0]![0]!;
       expect(call.query!.bool!.must).toEqual([{ match_all: {} }]);
     });
 
     it('threads per-type constraints through buildConstraintsFilter into the ES filter clauses', async () => {
-      esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+      currentUserEsClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
 
       await autocompleteSml({
         query: 'git',
@@ -883,7 +942,7 @@ describe('SML query/search/authz service', () => {
         constraints: { [SmlSearchFilterType.connector]: { ids: ['gh-1', 'jira-1'] } },
       });
 
-      const call = esClient.search.mock.calls[0]![0]!;
+      const call = currentUserEsClient.search.mock.calls[0]![0]!;
       const filterClauses = call.query!.bool!.filter as Array<Record<string, unknown>>;
       // First clause is the space filter; second is the constraints filter.
       expect(filterClauses).toHaveLength(2);
@@ -901,7 +960,7 @@ describe('SML query/search/authz service', () => {
     });
 
     it('maps inner_hits onto matched_discovery_labels', async () => {
-      esClient.search.mockResolvedValue({
+      currentUserEsClient.search.mockResolvedValue({
         hits: {
           total: 1,
           hits: [
@@ -973,7 +1032,7 @@ describe('SML query/search/authz service', () => {
     });
 
     it('omits matched_discovery_labels when absent', async () => {
-      esClient.search.mockResolvedValue({
+      currentUserEsClient.search.mockResolvedValue({
         hits: {
           total: 1,
           hits: [
@@ -1011,7 +1070,7 @@ describe('SML query/search/authz service', () => {
     });
 
     it('returns empty results when the index does not exist (404)', async () => {
-      esClient.search.mockRejectedValue(createNotFoundError());
+      currentUserEsClient.search.mockRejectedValue(createNotFoundError());
 
       const result = await autocompleteSml({
         query: 'git',
@@ -1030,7 +1089,7 @@ describe('SML query/search/authz service', () => {
         ['saved_object:connector/get']
       );
 
-      esClient.search.mockResolvedValue({
+      currentUserEsClient.search.mockResolvedValue({
         hits: {
           total: 2,
           hits: [
@@ -1067,6 +1126,14 @@ describe('SML query/search/authz service', () => {
         esClient: scopedClient,
         logger,
       });
+      // Layer 1: the raw results came from the current-user client (native ES
+      // enforcement), not the internal one.
+      expect(currentUserEsClient.search).toHaveBeenCalledTimes(1);
+      expect(esClient.search).not.toHaveBeenCalled();
+
+      // Layer 2: the Kibana-feature-privilege post-filter still runs on top of
+      // those current-user-sourced results and still excludes the unauthorized
+      // hit — switching clients did not silently drop this layer.
       const result = await filterResultsByPermissions({
         searchResult: rawResult,
         request,
@@ -1571,7 +1638,7 @@ describe('SML query/search/authz service', () => {
 
   describe('getDocumentsByIds', () => {
     it('fetches documents from ES and returns Map', async () => {
-      esClient.search.mockResolvedValue({
+      currentUserEsClient.search.mockResolvedValue({
         hits: {
           total: 2,
           hits: [
@@ -1648,7 +1715,7 @@ describe('SML query/search/authz service', () => {
     });
 
     it('round-trips all new schema fields (origin, tags, discovery_labels, extended_attrs)', async () => {
-      esClient.search.mockResolvedValue({
+      currentUserEsClient.search.mockResolvedValue({
         hits: {
           total: 1,
           hits: [
@@ -1712,11 +1779,11 @@ describe('SML query/search/authz service', () => {
       });
 
       expect(result.size).toBe(0);
-      expect(esClient.search).not.toHaveBeenCalled();
+      expect(currentUserEsClient.search).not.toHaveBeenCalled();
     });
 
     it('handles 404 error gracefully', async () => {
-      esClient.search.mockRejectedValue(createNotFoundError());
+      currentUserEsClient.search.mockRejectedValue(createNotFoundError());
 
       const result = await getDocumentsByIds({
         ids: ['doc-1'],
@@ -1729,7 +1796,7 @@ describe('SML query/search/authz service', () => {
     });
 
     it('handles other errors gracefully', async () => {
-      esClient.search.mockRejectedValue(new Error('Connection timeout'));
+      currentUserEsClient.search.mockRejectedValue(new Error('Connection timeout'));
 
       const result = await getDocumentsByIds({
         ids: ['doc-1'],
@@ -1743,7 +1810,7 @@ describe('SML query/search/authz service', () => {
     });
 
     it('calls ES search with correct query', async () => {
-      esClient.search.mockResolvedValue({
+      currentUserEsClient.search.mockResolvedValue({
         hits: { total: 0, hits: [] },
       } as any);
 
@@ -1754,7 +1821,7 @@ describe('SML query/search/authz service', () => {
         logger,
       });
 
-      expect(esClient.search).toHaveBeenCalledWith(
+      expect(currentUserEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           index: smlIndexName,
           size: 2,
@@ -1775,9 +1842,8 @@ describe('SML query/search/authz service', () => {
           },
         })
       );
-      expect(
-        (scopedClient.asCurrentUser as jest.Mocked<ElasticsearchClient>).search
-      ).not.toHaveBeenCalled();
+      // Runs as the current user — the internal-user client is not touched.
+      expect(esClient.search).not.toHaveBeenCalled();
     });
   });
 
@@ -1799,7 +1865,7 @@ describe('SML query/search/authz service', () => {
     };
 
     it('passes pagination params to ES with sorted by updated_at desc', async () => {
-      esClient.search.mockResolvedValue({
+      currentUserEsClient.search.mockResolvedValue({
         hits: { total: 1, hits: [sampleHit] },
       } as any);
 
@@ -1811,14 +1877,16 @@ describe('SML query/search/authz service', () => {
         perPage: 25,
       });
 
-      const call = esClient.search.mock.calls[0]![0]!;
+      const call = currentUserEsClient.search.mock.calls[0]![0]!;
       expect(call.from).toBe(50);
       expect(call.size).toBe(25);
       expect(call.sort).toEqual([{ updated_at: { order: 'desc' } }]);
     });
 
-    it('uses default page=1 perPage=20 when not specified', async () => {
-      esClient.search.mockResolvedValue({
+    it('runs as the current user while the space-scoping filter is still applied', async () => {
+      // Layer 1: native ES enforcement — the query runs against the current
+      // user's own privileges on the SML index, not the internal user's.
+      currentUserEsClient.search.mockResolvedValue({
         hits: { total: 0, hits: [] },
       } as any);
 
@@ -1828,13 +1896,41 @@ describe('SML query/search/authz service', () => {
         logger,
       });
 
-      const call = esClient.search.mock.calls[0]![0]!;
+      expect(currentUserEsClient.search).toHaveBeenCalledTimes(1);
+      expect(esClient.search).not.toHaveBeenCalled();
+
+      // Layer 2: the space-scoping filter (this function's equivalent of the
+      // permissions filter) is still present in the query sent to the
+      // current-user client — switching clients did not drop it.
+      const call = currentUserEsClient.search.mock.calls[0]![0]! as {
+        query?: { bool?: { filter?: unknown[] } };
+      };
+      expect(call.query!.bool!.filter).toContainEqual({
+        bool: {
+          should: [{ term: { spaces: 'default' } }, { term: { spaces: '*' } }],
+          minimum_should_match: 1,
+        },
+      });
+    });
+
+    it('uses default page=1 perPage=20 when not specified', async () => {
+      currentUserEsClient.search.mockResolvedValue({
+        hits: { total: 0, hits: [] },
+      } as any);
+
+      await listDocuments({
+        spaceId: 'default',
+        esClient: scopedClient,
+        logger,
+      });
+
+      const call = currentUserEsClient.search.mock.calls[0]![0]!;
       expect(call.from).toBe(0);
       expect(call.size).toBe(20);
     });
 
     it('adds optional type and origin_uri filters when provided', async () => {
-      esClient.search.mockResolvedValue({
+      currentUserEsClient.search.mockResolvedValue({
         hits: { total: 0, hits: [] },
       } as any);
 
@@ -1846,7 +1942,7 @@ describe('SML query/search/authz service', () => {
         originId: 'dashboard://dash-1',
       });
 
-      const call = esClient.search.mock.calls[0]![0]! as {
+      const call = currentUserEsClient.search.mock.calls[0]![0]! as {
         query?: { bool?: { filter?: unknown[] } };
       };
       const filters = call.query!.bool!.filter!;
@@ -1855,7 +1951,7 @@ describe('SML query/search/authz service', () => {
     });
 
     it('does not add type/origin_uri filters when omitted', async () => {
-      esClient.search.mockResolvedValue({
+      currentUserEsClient.search.mockResolvedValue({
         hits: { total: 0, hits: [] },
       } as any);
 
@@ -1865,7 +1961,7 @@ describe('SML query/search/authz service', () => {
         logger,
       });
 
-      const call = esClient.search.mock.calls[0]![0]! as {
+      const call = currentUserEsClient.search.mock.calls[0]![0]! as {
         query?: { bool?: { filter?: unknown[] } };
       };
       const filters = call.query!.bool!.filter!;
@@ -1873,7 +1969,7 @@ describe('SML query/search/authz service', () => {
     });
 
     it('adds a terms: { tags } filter when tags are provided', async () => {
-      esClient.search.mockResolvedValue({
+      currentUserEsClient.search.mockResolvedValue({
         hits: { total: 0, hits: [] },
       } as any);
 
@@ -1884,7 +1980,7 @@ describe('SML query/search/authz service', () => {
         tags: ['otel', 'claude-code'],
       });
 
-      const call = esClient.search.mock.calls[0]![0]! as {
+      const call = currentUserEsClient.search.mock.calls[0]![0]! as {
         query?: { bool?: { filter?: unknown[] } };
       };
       const filters = call.query!.bool!.filter!;
@@ -1892,7 +1988,7 @@ describe('SML query/search/authz service', () => {
     });
 
     it('does not add a tags filter when tags is omitted', async () => {
-      esClient.search.mockResolvedValue({
+      currentUserEsClient.search.mockResolvedValue({
         hits: { total: 0, hits: [] },
       } as any);
 
@@ -1902,7 +1998,7 @@ describe('SML query/search/authz service', () => {
         logger,
       });
 
-      const call = esClient.search.mock.calls[0]![0]! as {
+      const call = currentUserEsClient.search.mock.calls[0]![0]! as {
         query?: { bool?: { filter?: unknown[] } };
       };
       const filters = call.query!.bool!.filter! as Array<Record<string, unknown>>;
@@ -1913,7 +2009,7 @@ describe('SML query/search/authz service', () => {
     });
 
     it('returns empty results when index does not exist', async () => {
-      esClient.search.mockRejectedValue(createNotFoundError());
+      currentUserEsClient.search.mockRejectedValue(createNotFoundError());
 
       const result = await listDocuments({
         spaceId: 'default',
@@ -1925,7 +2021,7 @@ describe('SML query/search/authz service', () => {
     });
 
     it('maps response total and results correctly', async () => {
-      esClient.search.mockResolvedValue({
+      currentUserEsClient.search.mockResolvedValue({
         hits: { total: { value: 1, relation: 'eq' }, hits: [sampleHit] },
       } as any);
 
@@ -1940,7 +2036,7 @@ describe('SML query/search/authz service', () => {
     });
 
     it('throws on non-404 errors', async () => {
-      esClient.search.mockRejectedValue(new Error('Connection refused'));
+      currentUserEsClient.search.mockRejectedValue(new Error('Connection refused'));
 
       await expect(
         listDocuments({
@@ -1955,7 +2051,7 @@ describe('SML query/search/authz service', () => {
     it('throws SmlResultWindowExceededError when ES rejects with result-window error', async () => {
       const reason =
         'Result window is too large, from + size must be less than or equal to: [10000] but was [11000]';
-      esClient.search.mockRejectedValue(
+      currentUserEsClient.search.mockRejectedValue(
         new errors.ResponseError({
           statusCode: 400,
           body: {
@@ -1989,7 +2085,7 @@ describe('SML query/search/authz service', () => {
     });
 
     it('does not translate unrelated 400 ES errors', async () => {
-      esClient.search.mockRejectedValue(
+      currentUserEsClient.search.mockRejectedValue(
         new errors.ResponseError({
           statusCode: 400,
           body: {
@@ -2013,7 +2109,7 @@ describe('SML query/search/authz service', () => {
 
   describe('findByOrigin', () => {
     it('returns every chunk matching (type, originId) that is visible in the caller space', async () => {
-      esClient.search.mockResolvedValue({
+      currentUserEsClient.search.mockResolvedValue({
         hits: {
           total: 2,
           hits: [
@@ -2059,14 +2155,24 @@ describe('SML query/search/authz service', () => {
 
       expect(result).toHaveLength(2);
       expect(result.map((d) => d.id).sort()).toEqual(['chunk-1', 'chunk-2']);
-      // Query targets the canonical `origin.uri` keyword — the only mapped origin field.
-      const passed = esClient.search.mock.calls[0][0] as any;
+      // Layer 1: runs as the current user, not the internal one.
+      expect(currentUserEsClient.search).toHaveBeenCalledTimes(1);
+      expect(esClient.search).not.toHaveBeenCalled();
+      // Layer 2: query targets the canonical `origin.uri` keyword (the only
+      // mapped origin field) AND still carries the space-scoping filter.
+      const passed = currentUserEsClient.search.mock.calls[0][0] as any;
       const filters = passed.query.bool.filter as any[];
       expect(filters[0]).toEqual({ term: { 'origin.uri': 'visualization://ref-1' } });
+      expect(filters[1]).toEqual({
+        bool: {
+          should: [{ term: { spaces: 'default' } }, { term: { spaces: '*' } }],
+          minimum_should_match: 1,
+        },
+      });
     });
 
     it('returns [] when no chunks exist or the index is missing', async () => {
-      esClient.search.mockRejectedValue(createNotFoundError());
+      currentUserEsClient.search.mockRejectedValue(createNotFoundError());
 
       const result = await findByOrigin({
         type: 'visualization',
@@ -2080,7 +2186,7 @@ describe('SML query/search/authz service', () => {
     });
 
     it('throws on non-404 errors and logs', async () => {
-      esClient.search.mockRejectedValue(new Error('cluster melted'));
+      currentUserEsClient.search.mockRejectedValue(new Error('cluster melted'));
 
       await expect(
         findByOrigin({
@@ -2102,7 +2208,7 @@ describe('SML query/search/authz service', () => {
       // origins into one). The returned chunks are still useful — the
       // per-space lookup is informational, not security-critical (see
       // findByOriginAcrossSpaces for the guard-side case).
-      esClient.search.mockResolvedValue({
+      currentUserEsClient.search.mockResolvedValue({
         hits: {
           total: { value: 1500, relation: 'eq' },
           hits: [],
@@ -2124,7 +2230,7 @@ describe('SML query/search/authz service', () => {
       // The query also opts into `track_total_hits` and uses the
       // shared `size` constant — pin both so a future change can't
       // quietly drop the overflow detection.
-      const passed = esClient.search.mock.calls[0][0] as any;
+      const passed = currentUserEsClient.search.mock.calls[0][0] as any;
       expect(passed.track_total_hits).toBe(true);
       expect(passed.size).toBe(1000);
     });
@@ -2132,7 +2238,7 @@ describe('SML query/search/authz service', () => {
 
   describe('findByOriginAcrossSpaces', () => {
     it('returns matching chunks regardless of which space they are in', async () => {
-      esClient.search.mockResolvedValue({
+      currentUserEsClient.search.mockResolvedValue({
         hits: {
           total: 2,
           hits: [
@@ -2176,14 +2282,19 @@ describe('SML query/search/authz service', () => {
       });
 
       expect(result).toHaveLength(2);
+      // Runs as the current user, not the internal one — this is a guard-only
+      // read (never surfaced to users), but it still goes through the same
+      // asCurrentUser migration as the other read paths.
+      expect(currentUserEsClient.search).toHaveBeenCalledTimes(1);
+      expect(esClient.search).not.toHaveBeenCalled();
       // No space filter — only the origin.uri filter is applied.
-      const passed = esClient.search.mock.calls[0][0] as any;
+      const passed = currentUserEsClient.search.mock.calls[0][0] as any;
       const filters = passed.query.bool.filter as any[];
       expect(filters).toEqual([{ term: { 'origin.uri': 'visualization://ref-1' } }]);
     });
 
     it('returns [] when index is missing', async () => {
-      esClient.search.mockRejectedValue(createNotFoundError());
+      currentUserEsClient.search.mockRejectedValue(createNotFoundError());
 
       const result = await findByOriginAcrossSpaces({
         type: 'visualization',
@@ -2196,7 +2307,7 @@ describe('SML query/search/authz service', () => {
     });
 
     it('throws on non-404 errors and logs', async () => {
-      esClient.search.mockRejectedValue(new Error('boom'));
+      currentUserEsClient.search.mockRejectedValue(new Error('boom'));
 
       await expect(
         findByOriginAcrossSpaces({
@@ -2219,7 +2330,7 @@ describe('SML query/search/authz service', () => {
       // MB across the wire per call for nothing. Pinning the
       // `_source` selector here so we notice if a future change tries
       // to remove it (and re-introduces the bandwidth regression).
-      esClient.search.mockResolvedValue({
+      currentUserEsClient.search.mockResolvedValue({
         hits: { total: { value: 1, relation: 'eq' }, hits: [] },
       } as any);
 
@@ -2230,7 +2341,7 @@ describe('SML query/search/authz service', () => {
         logger,
       });
 
-      const passed = esClient.search.mock.calls[0][0] as any;
+      const passed = currentUserEsClient.search.mock.calls[0][0] as any;
       expect(passed._source).toEqual(['id', 'type', 'spaces', 'origin', 'created_at']);
     });
 
@@ -2239,7 +2350,7 @@ describe('SML query/search/authz service', () => {
       // across spaces, the cross-space guard would act on a partial view and
       // could silently authorise a write that crosses a space boundary.
       // We throw to prevent that — the write is rejected entirely.
-      esClient.search.mockResolvedValue({
+      currentUserEsClient.search.mockResolvedValue({
         hits: {
           total: { value: 2000, relation: 'eq' },
           hits: [],
@@ -2260,7 +2371,7 @@ describe('SML query/search/authz service', () => {
         expect.stringContaining('SML findByOriginAcrossSpaces failed')
       );
 
-      const passed = esClient.search.mock.calls[0][0] as any;
+      const passed = currentUserEsClient.search.mock.calls[0][0] as any;
       expect(passed.track_total_hits).toBe(true);
       expect(passed.size).toBe(1000);
     });

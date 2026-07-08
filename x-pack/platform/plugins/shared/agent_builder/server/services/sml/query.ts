@@ -382,6 +382,16 @@ export const filterResultsByPermissions = async <T extends { permissions: SmlPer
  * Chunks without any kibana privileges and without any elasticsearch
  * indices are visible to anyone in the space. When the security plugin
  * is absent, all ids resolve to `true` (open access).
+ *
+ * Runs its lookup as `asInternalUser` — deliberately, not an oversight.
+ * This is an authorization-support read (it fetches `permissions`
+ * metadata to compute a boolean access verdict), not a "return this
+ * user's results" path: the actual document contents are fetched
+ * separately (by `getDocumentsByIds`, as `asCurrentUser`) and only
+ * surfaced to the caller if this check passes. Running the metadata
+ * lookup itself as the internal user keeps the access decision from
+ * silently degrading to "not found" for a user who lacks direct read
+ * on the SML index but does hold the relevant Kibana privileges.
  */
 export const checkItemsAccess = async ({
   ids,
@@ -785,12 +795,17 @@ const isEsqlIndexMissingError = (error: unknown): boolean => {
  * Search the SML index using ES|QL FORK + FUSE hybrid retrieval, with
  * authorization enforced in-query via pre-aggregation.
  *
- * Before the search, `resolveAuthorizedUniverse` enumerates the corpus's
- * permission universe (`_terms_enum`) and resolves, in a single
- * `_has_privileges` call, which Kibana actions and ES indices the caller is
- * authorized for. Those sets are pushed into the ES|QL query as MV_CONTAINS
- * subset filters, so the index returns only authorized docs — no overfetch, no
- * JS post-filter. The outer LIMIT is exactly `size`.
+ * The actual search runs as `asCurrentUser`, so the requesting user's own ES
+ * privileges on the SML index (a regular, non-system index) are the baseline,
+ * natively-enforced restriction. `resolveAuthorizedUniverse` enumerates the
+ * corpus's permission universe (`_terms_enum`, run as `asInternalUser` since
+ * it needs full-corpus visibility to build a correct filter) and resolves, in
+ * a single `_has_privileges` call, which Kibana actions and ES indices the
+ * caller is authorized for. Those sets are pushed into the ES|QL query as
+ * MV_CONTAINS subset filters — an additional layer on top of the native ES
+ * enforcement, not a replacement for it — so the index returns only
+ * authorized docs, no overfetch, no JS post-filter. The outer LIMIT is
+ * exactly `size`.
  *
  * When the security plugin is absent (dev / test), enumeration is skipped and
  * all docs in the space are returned (open-access parity with the prior
@@ -854,7 +869,7 @@ export const searchSml = async ({
 
   let response: { columns: Array<{ name: string; type: string }>; values: unknown[][] };
   try {
-    response = await esClient.asInternalUser.esql.query({
+    response = await esClient.asCurrentUser.esql.query({
       query: esql,
       ...(params.length > 0 ? { params: params as unknown as FieldValue[] } : {}),
     });
@@ -1061,7 +1076,7 @@ export const autocompleteSml = async ({
       filterClauses.push(agentClause);
     }
 
-    const response = await esClient.asInternalUser.search<SmlDocument>({
+    const response = await esClient.asCurrentUser.search<SmlDocument>({
       index: smlIndexName,
       size,
       allow_no_indices: true,
@@ -1158,7 +1173,7 @@ export const getDocumentsByIds = async ({
   if (ids.length === 0) return docMap;
 
   try {
-    const response = await esClient.asInternalUser.search<SmlDocument>({
+    const response = await esClient.asCurrentUser.search<SmlDocument>({
       index: smlIndexName,
       size: ids.length,
       allow_no_indices: true,
@@ -1246,7 +1261,7 @@ export const findByOrigin = async ({
 }): Promise<SmlDocument[]> => {
   const originUri = buildOriginUri(type, originId);
   try {
-    const response = await esClient.asInternalUser.search<SmlDocument>({
+    const response = await esClient.asCurrentUser.search<SmlDocument>({
       index: smlIndexName,
       size: MAX_CHUNKS_PER_ORIGIN,
       track_total_hits: true,
@@ -1353,7 +1368,7 @@ export const findByOriginAcrossSpaces = async ({
 }): Promise<SmlDocument[]> => {
   const originUri = buildOriginUri(type, originId);
   try {
-    const response = await esClient.asInternalUser.search<SmlDocument>({
+    const response = await esClient.asCurrentUser.search<SmlDocument>({
       index: smlIndexName,
       size: MAX_CHUNKS_PER_ORIGIN,
       track_total_hits: true,
@@ -1476,7 +1491,7 @@ export const listDocuments = async ({
   }
 
   try {
-    const response = await esClient.asInternalUser.search<SmlDocument>({
+    const response = await esClient.asCurrentUser.search<SmlDocument>({
       index: smlIndexName,
       from: (page - 1) * perPage,
       size: perPage,
