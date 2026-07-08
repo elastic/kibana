@@ -56,11 +56,13 @@ jest.mock('./mitre/components/mitre_attack_chain', () => ({
     selectedTactic,
     anomalyCountByTactic,
     triggeredTactics,
+    showPersistentFirstTacticBadge,
   }: {
     onSelectTactic?: (t: string) => void;
     selectedTactic?: string | null;
     anomalyCountByTactic?: Record<string, number>;
     triggeredTactics: string[];
+    showPersistentFirstTacticBadge?: boolean;
   }) => {
     onSelectTactic = handler;
     return (
@@ -69,17 +71,33 @@ jest.mock('./mitre/components/mitre_attack_chain', () => ({
         data-selected-tactic={selectedTactic ?? ''}
         data-tactic-counts={JSON.stringify(anomalyCountByTactic ?? {})}
         data-triggered-tactics={JSON.stringify(triggeredTactics)}
+        data-show-persistent-first-tactic-badge={String(Boolean(showPersistentFirstTacticBadge))}
+        data-has-select-handler={String(handler !== undefined)}
       />
     );
   },
 }));
 
 jest.mock('./anomalies_tab_timeline', () => ({
-  AnomalyTabTimelineSection: () => <div data-test-subj="mock-timeline" />,
+  AnomalyTabTimelineSection: ({
+    isLoading,
+    isEmpty,
+  }: {
+    isLoading?: boolean;
+    isEmpty?: boolean;
+  }) => (
+    <div
+      data-test-subj="mock-timeline"
+      data-is-loading={String(Boolean(isLoading))}
+      data-is-empty={String(Boolean(isEmpty))}
+    />
+  ),
 }));
 
 jest.mock('./anomalies_tab_table', () => ({
-  AnomalyTabTableSection: () => <div data-test-subj="mock-table" />,
+  AnomalyTabTableSection: ({ isLoading }: { isLoading?: boolean }) => (
+    <div data-test-subj="mock-table" data-is-loading={String(Boolean(isLoading))} />
+  ),
 }));
 
 // ─── Infrastructure mocks ─────────────────────────────────────────────────────
@@ -121,10 +139,15 @@ const emptyOverview = {
   data: { tacticCounts: {}, anomalyByTimeBucket: [], recentAnomalies: [], from: 0, to: 1 },
   error: null,
   isFetching: false,
+  isLoading: false,
+  isError: false,
 };
 const emptySummary = {
   data: { anomalies: [], page: 1, page_size: 10, total: 0 },
   error: null,
+  isFetching: false,
+  isLoading: false,
+  isError: false,
 };
 
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -379,6 +402,126 @@ describe('AnomaliesTab', () => {
       const chain = screen.getByTestId('mock-mitre-attack-chain');
       const triggeredTactics = JSON.parse(chain.getAttribute('data-triggered-tactics') ?? '[]');
       expect(triggeredTactics).toEqual(expect.arrayContaining(['Initial Access', 'Execution']));
+    });
+  });
+
+  describe('attack chain loading state', () => {
+    it('renders a loading chart placeholder instead of the MitreAttackChain while overview is loading', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+        isLoading: true,
+      });
+      const { container } = render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      expect(container.querySelector('.euiLoadingChart')).toBeInTheDocument();
+      // The placeholder renders a hidden MitreAttackChain with no tactic data.
+      expect(screen.getByTestId('mock-mitre-attack-chain')).toHaveAttribute(
+        'data-triggered-tactics',
+        '[]'
+      );
+    });
+
+    it('renders the real MitreAttackChain once overview finishes loading', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+        isLoading: false,
+      });
+      const { container } = render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      expect(container.querySelector('.euiLoadingChart')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mock-mitre-attack-chain')).toHaveAttribute(
+        'data-triggered-tactics',
+        JSON.stringify(['Initial Access'])
+      );
+    });
+  });
+
+  describe('attack chain empty state', () => {
+    it('shows the persistent first tactic badge and disables tactic selection when totalAnomaliesCount is 0', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: {
+          ...emptyOverview.data,
+          tacticCounts: { 'Initial Access': 1 },
+          totalAnomaliesCount: 0,
+        },
+      });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      const chain = screen.getByTestId('mock-mitre-attack-chain');
+      expect(chain).toHaveAttribute('data-show-persistent-first-tactic-badge', 'true');
+      expect(chain).toHaveAttribute('data-has-select-handler', 'false');
+      expect(chain).toHaveAttribute('data-selected-tactic', '');
+    });
+
+    it('shows the persistent first tactic badge and disables tactic selection when overview errored', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+        isError: true,
+      });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      const chain = screen.getByTestId('mock-mitre-attack-chain');
+      expect(chain).toHaveAttribute('data-show-persistent-first-tactic-badge', 'true');
+      expect(chain).toHaveAttribute('data-has-select-handler', 'false');
+    });
+
+    it('does not show the persistent first tactic badge and allows tactic selection when there are anomalies', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: {
+          ...emptyOverview.data,
+          tacticCounts: { 'Initial Access': 1 },
+          totalAnomaliesCount: 5,
+        },
+      });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      const chain = screen.getByTestId('mock-mitre-attack-chain');
+      expect(chain).toHaveAttribute('data-show-persistent-first-tactic-badge', 'false');
+      expect(chain).toHaveAttribute('data-has-select-handler', 'true');
+    });
+  });
+
+  describe('timeline and table loading/empty props', () => {
+    it('sets the timeline isLoading prop from useAnomalyOverview.isLoading', () => {
+      mockUseAnomalyOverview.mockReturnValue({ ...emptyOverview, isLoading: true });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.getByTestId('mock-timeline')).toHaveAttribute('data-is-loading', 'true');
+    });
+
+    it('sets the timeline isEmpty prop when the overview has no time bucket anomalies', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, anomalyByTimeBucket: [] },
+      });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.getByTestId('mock-timeline')).toHaveAttribute('data-is-empty', 'true');
+    });
+
+    it('sets the timeline isEmpty prop when the overview errored, even with time bucket data', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, anomalyByTimeBucket: [{ x: 0, y: 1 }] },
+        isError: true,
+      });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.getByTestId('mock-timeline')).toHaveAttribute('data-is-empty', 'true');
+    });
+
+    it('clears the timeline isLoading and isEmpty props when overview has data and no error', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, anomalyByTimeBucket: [{ x: 0, y: 1 }] },
+      });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      const timeline = screen.getByTestId('mock-timeline');
+      expect(timeline).toHaveAttribute('data-is-loading', 'false');
+      expect(timeline).toHaveAttribute('data-is-empty', 'false');
+    });
+
+    it('sets the table isLoading prop from useAnomalySummary.isLoading', () => {
+      mockUseAnomalySummary.mockReturnValue({ ...emptySummary, isLoading: true });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.getByTestId('mock-table')).toHaveAttribute('data-is-loading', 'true');
     });
   });
 });

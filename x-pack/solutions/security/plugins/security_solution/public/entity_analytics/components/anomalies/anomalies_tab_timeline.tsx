@@ -10,12 +10,15 @@ import {
   EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingChart,
   EuiSpacer,
   EuiText,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { IconChartHeatmap } from '@kbn/chart-icons';
 import { tacticOrder as mitreTacticOrder } from '../../../../common/detection_engine/mitre/mitre_tactics_order';
 import { tactics as mitreTactics } from '../../../../common/detection_engine/mitre/mitre_tactics_techniques';
 import { AnomaliesSwimlane } from './anomalies_swimlane';
@@ -23,6 +26,8 @@ import { ENTITY_ANOMALY_TIMELINE_TITLE } from './translations';
 import { ANOMALIES_TAB_TIMELINE_TEST_ID } from './test_ids';
 import { useAnomalyBands } from '../recent_anomalies/anomaly_bands';
 import { getAnomalyChartStyling } from '../recent_anomalies';
+import { AnomaliesBorderedVisPanel } from './anomalies_bordered_vis_panel';
+import { MitreAttackChainPlaceholder } from './mitre/components/mitre_attack_chain_placeholder';
 
 const tacticNames = [...mitreTactics]
   .sort((a, b) => mitreTacticOrder.indexOf(a.id) - mitreTacticOrder.indexOf(b.id))
@@ -34,15 +39,20 @@ interface AnomalyTabTimelineProps {
   anomalies: Array<{ timestamp: string; maxScore: number; threatTactics?: string[] }>;
   selectedTactic?: string | null;
   timeRangeMs: { from: number; to: number };
+  isEmpty?: boolean;
+  isLoading?: boolean;
 }
 
 export const AnomalyTabTimelineSection: React.FC<AnomalyTabTimelineProps> = ({
   anomalies,
   selectedTactic,
   timeRangeMs,
+  isEmpty = false,
+  isLoading = false,
 }) => {
   const { bands } = useAnomalyBands();
   const styling = getAnomalyChartStyling(true);
+  const showPlaceholderPanel = isEmpty || isLoading;
 
   const mitreTacticNames = useMemo(() => {
     if (selectedTactic && tacticNames.includes(selectedTactic)) {
@@ -93,53 +103,65 @@ export const AnomalyTabTimelineSection: React.FC<AnomalyTabTimelineProps> = ({
         }
       >
         <EuiSpacer size="m" />
-        <EuiFlexGroup>
-          <EuiFlexItem
-            css={css`
-              height: ${styling.heightOfEntityNamesList(mitreTacticLabels.length)}px;
-            `}
-            grow={false}
-          >
-            <EuiFlexGroup gutterSize="none" direction="column" justifyContent="center">
-              {mitreTacticLabels.map((row) => (
-                <EuiFlexItem
-                  key={row.id}
-                  css={css`
-                    justify-content: center;
-                    height: ${styling.heightOfEachCell}px;
-                  `}
-                  grow={false}
-                >
-                  <EuiToolTip content={row.label}>
-                    <EuiText
-                      textAlign="right"
-                      tabIndex={0}
-                      size="xs"
-                      css={css`
-                        max-width: 140px;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        white-space: nowrap;
-                      `}
-                    >
-                      {row.label}
-                    </EuiText>
-                  </EuiToolTip>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <AnomaliesSwimlane
-            anomalyBands={bands}
-            records={records}
-            from={timeRangeMs.from}
-            to={timeRangeMs.to}
-            yAxisNames={mitreTacticNames}
-            yAxisAccessor={TACTIC_ACCESSOR}
-            heatmapId="entity-anomalies-tab-timeline-heatmap"
-            ySortPredicate="dataIndex"
-          />
-        </EuiFlexGroup>
+        {showPlaceholderPanel ? (
+          <AnomaliesBorderedVisPanel>
+            <MitreAttackChainPlaceholder>
+              {isLoading ? (
+                <EuiLoadingChart size="l" />
+              ) : (
+                <EmptyPlaceholder icon={IconChartHeatmap} />
+              )}
+            </MitreAttackChainPlaceholder>
+          </AnomaliesBorderedVisPanel>
+        ) : (
+          <EuiFlexGroup>
+            <EuiFlexItem
+              css={css`
+                height: ${styling.heightOfEntityNamesList(mitreTacticLabels.length)}px;
+              `}
+              grow={false}
+            >
+              <EuiFlexGroup gutterSize="none" direction="column" justifyContent="center">
+                {mitreTacticLabels.map((row) => (
+                  <EuiFlexItem
+                    key={row.id}
+                    css={css`
+                      justify-content: center;
+                      height: ${styling.heightOfEachCell}px;
+                    `}
+                    grow={false}
+                  >
+                    <EuiToolTip content={row.label}>
+                      <EuiText
+                        textAlign="right"
+                        tabIndex={0}
+                        size="xs"
+                        css={css`
+                          max-width: 140px;
+                          overflow: hidden;
+                          text-overflow: ellipsis;
+                          white-space: nowrap;
+                        `}
+                      >
+                        {row.label}
+                      </EuiText>
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <AnomaliesSwimlane
+              anomalyBands={bands}
+              records={records}
+              from={timeRangeMs.from}
+              to={timeRangeMs.to}
+              yAxisNames={mitreTacticNames}
+              yAxisAccessor={TACTIC_ACCESSOR}
+              heatmapId="entity-anomalies-tab-timeline-heatmap"
+              ySortPredicate="dataIndex"
+            />
+          </EuiFlexGroup>
+        )}
       </EuiAccordion>
     </div>
   );

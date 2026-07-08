@@ -12,11 +12,10 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
+  EuiLoadingChart,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import moment from 'moment';
 import {
   ML_PAGES,
@@ -63,6 +62,8 @@ import {
   DEFAULT_SORT_FIELD,
   DEFAULT_TABLE_PAGE_SIZE,
 } from './table/constants';
+import { AnomaliesBorderedVisPanel } from './anomalies_bordered_vis_panel';
+import { MitreAttackChainPlaceholder } from './mitre/components/mitre_attack_chain_placeholder';
 
 const TIME_RANGE_PRESETS: TimeRangeBoundsOption[] = [
   { start: 'now-15m', end: 'now', label: ENTITY_ANOMALY_DATE_RANGE_LAST_15_MINUTES },
@@ -94,7 +95,6 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
   const [datePickerSettings, setDatePickerSettings] = useState<DateRangePickerSettings>(
     DEFAULT_DATE_PICKER_SETTINGS
   );
-
   const [recentTimeRanges, setRecentTimeRanges] = useState<TimeRangeBoundsOption[]>([]);
 
   const handleDatePickerChange = useCallback((args: DateRangePickerOnChangeProps) => {
@@ -181,6 +181,12 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
     () => Object.keys(anomalyOverview.data?.tacticCounts ?? {}),
     [anomalyOverview]
   );
+  const anomalyByTimeBucket = useMemo(
+    () => anomalyOverview.data?.anomalyByTimeBucket ?? [],
+    [anomalyOverview.data?.anomalyByTimeBucket]
+  );
+  const isLoading = anomalyOverview.isLoading;
+  const isEmpty = anomalyOverview.isError || anomalyOverview.data?.totalAnomaliesCount === 0;
 
   const anomalySummary = useAnomalySummary({
     entityId,
@@ -196,6 +202,10 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
       sort: [{ field: tableSortField, order: tableSortDirection }],
     },
   });
+  const anomalySummaryAnomalies = useMemo(
+    () => anomalySummary.data?.anomalies ?? [],
+    [anomalySummary.data?.anomalies]
+  );
 
   useEffect(() => {
     if (anomalyOverview.isFetching) return;
@@ -300,33 +310,35 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
           }
         >
           <EuiSpacer size="m" />
-          <EuiPanel
-            color="plain"
-            hasBorder
-            paddingSize="none"
-            css={css`
-              padding: 16px 24px;
-            `}
-          >
-            <MitreAttackChain
-              anomalyCountByTactic={anomalyOverview?.data?.tacticCounts ?? {}}
-              onSelectTactic={handleSelectTactic}
-              selectedTactic={selectedTactic}
-              triggeredTactics={uniqueTactics}
-              showLabels
-            />
-          </EuiPanel>
+          <AnomaliesBorderedVisPanel>
+            {isLoading ? (
+              <MitreAttackChainPlaceholder>
+                <EuiLoadingChart size="l" />
+              </MitreAttackChainPlaceholder>
+            ) : (
+              <MitreAttackChain
+                anomalyCountByTactic={anomalyOverview?.data?.tacticCounts ?? {}}
+                onSelectTactic={isEmpty ? undefined : handleSelectTactic}
+                selectedTactic={isEmpty ? null : selectedTactic}
+                triggeredTactics={uniqueTactics}
+                showLabels
+                showPersistentFirstTacticBadge={isEmpty}
+              />
+            )}
+          </AnomaliesBorderedVisPanel>
         </EuiAccordion>
       )}
       <EuiSpacer size="l" />
       <AnomalyTabTimelineSection
-        anomalies={anomalyOverview.data?.anomalyByTimeBucket ?? []}
+        anomalies={anomalyByTimeBucket}
         selectedTactic={selectedTactic}
         timeRangeMs={timeRangeMs}
+        isLoading={anomalyOverview.isLoading}
+        isEmpty={anomalyOverview.isError || anomalyByTimeBucket.length === 0}
       />
       <EuiSpacer size="l" />
       <AnomalyTabTableSection
-        anomalies={anomalySummary.data?.anomalies ?? []}
+        anomalies={anomalySummaryAnomalies}
         entityType={entityType}
         onTableChange={handleTableChange}
         page={anomalySummary.data?.page ?? tablePageIndex + 1}
@@ -335,6 +347,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
         sortDirection={tableSortDirection}
         timeRange={{ from: start, to: end }}
         total={anomalySummary.data?.total ?? 0}
+        isLoading={anomalySummary.isLoading}
       />
     </div>
   );
