@@ -289,7 +289,7 @@ export interface ReportHitlPromptShownParams {
   agent_id?: string;
 }
 
-export type HitlQuestionAnsweredOutcome = 'answered' | 'skipped' | 'skipped_all';
+export type HitlQuestionAnsweredOutcome = 'answered' | 'skipped';
 
 export interface ReportHitlQuestionAnsweredParams {
   prompt_id: string;
@@ -1170,7 +1170,7 @@ const MANAGE_ENTITY_LIST_VIEW_EVENT: AgentBuilderTelemetryEvent = {
     entity_type: {
       type: 'keyword',
       _meta: {
-        description: 'Type of entity on the list page (tool|plugin|skill)',
+        description: 'Type of entity on the list page (tool|plugin|skill|mcp_client)',
         optional: false,
       },
     },
@@ -1323,7 +1323,7 @@ const HITL_QUESTION_ANSWERED_EVENT: AgentBuilderTelemetryEvent = {
     outcome: {
       type: 'keyword',
       _meta: {
-        description: 'How the user responded (answered|skipped|skipped_all)',
+        description: 'How the user responded (answered|skipped)',
         optional: false,
       },
     },

@@ -6,7 +6,11 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { createAgentNotFoundError, createAgentUnavailableError } from '@kbn/agent-builder-common';
+import {
+  createAgentNotFoundError,
+  createAgentUnavailableError,
+  ConversationSourceType,
+} from '@kbn/agent-builder-common';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common/chat/access_control';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import { createClient, type ConversationClient } from './client';
@@ -334,6 +338,49 @@ describe('ConversationClient', () => {
     });
   });
 
+  describe('getBySource', () => {
+    it('finds a conversation by first-class source in the current space', async () => {
+      const document = createConversationDocument();
+      mockEsClient.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [document],
+          },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [document],
+          },
+        });
+
+      const result = await client.getBySource({
+        type: ConversationSourceType.Slack,
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      });
+
+      expect(result?.id).toBe('conversation-1');
+      expect(mockEsClient.search).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [
+                expect.any(Object),
+                { term: { 'source.type': 'slack' } },
+                {
+                  term: {
+                    'source.external_conversation_id':
+                      'team:T123/channel:C123/thread:1712345678.000100',
+                  },
+                },
+              ],
+            },
+          },
+        })
+      );
+    });
+  });
+
   describe('update', () => {
     it('remains owner-only by default for public conversations', async () => {
       mockEsClient.search.mockResolvedValue({
@@ -441,6 +488,26 @@ describe('ConversationClient', () => {
       );
 
       expect(mockEsClient.delete).not.toHaveBeenCalled();
+    });
+
+    it('returns true when the document was already deleted (404)', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+      const notFoundError = Object.assign(new Error('not found'), { statusCode: 404 });
+      mockEsClient.delete.mockRejectedValue(notFoundError);
+
+      await expect(client.delete('conversation-1')).resolves.toBe(true);
+    });
+
+    it('rethrows non-404 errors from the delete call', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+      const serverError = Object.assign(new Error('internal server error'), { statusCode: 500 });
+      mockEsClient.delete.mockRejectedValue(serverError);
+
+      await expect(client.delete('conversation-1')).rejects.toBe(serverError);
     });
   });
 });
