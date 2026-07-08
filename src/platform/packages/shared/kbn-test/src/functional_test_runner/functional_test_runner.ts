@@ -58,9 +58,8 @@ export class FunctionalTestRunner {
         break;
       }
 
-      // eslint-disable-next-line no-console
-      console.log(
-        `\nRetrying failed test files (${attempt}/${retry}):\n` +
+      this.log.info(
+        `Retrying failed test files (${attempt}/${retry}):\n` +
           result.failedTestFiles.map((file) => `- ${file}`).join('\n')
       );
 
