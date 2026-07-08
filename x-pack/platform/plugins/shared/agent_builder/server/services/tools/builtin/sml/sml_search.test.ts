@@ -9,7 +9,7 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, type OtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import type { ToolAvailabilityContext } from '@kbn/agent-builder-server';
-import type { SmlSearchResult } from '@kbn/agent-context-layer-plugin/server';
+import type { SmlSearchResult } from '@kbn/agent-builder-server';
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
@@ -24,12 +24,18 @@ const buildAvailabilityContext = (flags: Record<string, boolean>) =>
   } as unknown as ToolAvailabilityContext);
 
 const mockSearch = jest.fn();
-const getAgentContextLayer = jest.fn(() => ({
+const getAgentBuilderSml = jest.fn(() => ({
   search: mockSearch,
+  autocomplete: jest.fn(),
+  checkItemsAccess: jest.fn(),
   indexAttachment: jest.fn(),
   deleteAttachment: jest.fn(),
   getDocuments: jest.fn(),
+  listDocuments: jest.fn(),
+  findByOrigin: jest.fn(),
+  findByOriginAcrossSpaces: jest.fn(),
   getTypeDefinition: jest.fn(),
+  listTypeDefinitions: jest.fn(),
   resolveSmlAttachItems: jest.fn(),
 }));
 
@@ -47,7 +53,7 @@ describe('createSmlSearchTool', () => {
   });
 
   it('has correct id and tags', () => {
-    const tool = createSmlSearchTool({ getAgentContextLayer });
+    const tool = createSmlSearchTool({ getAgentBuilderSml });
     expect(tool.id).toBe(platformCoreTools.smlSearch);
     expect(tool.type).toBe(ToolType.builtin);
     expect(tool.tags).toEqual(['sml', 'search']);
@@ -55,7 +61,7 @@ describe('createSmlSearchTool', () => {
 
   describe('availability', () => {
     it('is available only when both experimental features and the Context Engine are enabled', async () => {
-      const tool = createSmlSearchTool({ getAgentContextLayer });
+      const tool = createSmlSearchTool({ getAgentBuilderSml });
       const result = await tool.availability!.handler(
         buildAvailabilityContext({
           [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
@@ -66,7 +72,7 @@ describe('createSmlSearchTool', () => {
     });
 
     it('is unavailable when experimental features are disabled', async () => {
-      const tool = createSmlSearchTool({ getAgentContextLayer });
+      const tool = createSmlSearchTool({ getAgentBuilderSml });
       const result = await tool.availability!.handler(
         buildAvailabilityContext({
           [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: false,
@@ -77,7 +83,7 @@ describe('createSmlSearchTool', () => {
     });
 
     it('is unavailable when the Context Engine is disabled', async () => {
-      const tool = createSmlSearchTool({ getAgentContextLayer });
+      const tool = createSmlSearchTool({ getAgentBuilderSml });
       const result = await tool.availability!.handler(
         buildAvailabilityContext({
           [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
@@ -89,7 +95,7 @@ describe('createSmlSearchTool', () => {
   });
 
   it('description mentions workflows, wildcard query, and the types/tags filters', () => {
-    const tool = createSmlSearchTool({ getAgentContextLayer });
+    const tool = createSmlSearchTool({ getAgentBuilderSml });
     expect(tool.description).toContain('workflows');
     expect(tool.description).toContain('"*"');
     expect(tool.description).toContain('types');
@@ -99,12 +105,12 @@ describe('createSmlSearchTool', () => {
 
   it('calls search with correct params (no constraints, no filters by default)', async () => {
     mockSearch.mockResolvedValue({ results: [] });
-    const tool = createSmlSearchTool({ getAgentContextLayer });
+    const tool = createSmlSearchTool({ getAgentBuilderSml });
     await tool.handler(
       { query: 'cpu usage', size: 20 },
       mockContext as unknown as ToolHandlerContext
     );
-    expect(getAgentContextLayer).toHaveBeenCalled();
+    expect(getAgentBuilderSml).toHaveBeenCalled();
     expect(mockSearch).toHaveBeenCalledWith({
       query: 'cpu usage',
       size: 20,
@@ -118,7 +124,7 @@ describe('createSmlSearchTool', () => {
 
   it('forwards agent-supplied types and tags as `filters` to the service', async () => {
     mockSearch.mockResolvedValue({ results: [] });
-    const tool = createSmlSearchTool({ getAgentContextLayer });
+    const tool = createSmlSearchTool({ getAgentBuilderSml });
     await tool.handler(
       { query: 'sales', types: ['dashboard'], tags: ['production'] },
       mockContext as unknown as ToolHandlerContext
@@ -132,7 +138,7 @@ describe('createSmlSearchTool', () => {
 
   it('omits filters when types/tags are empty arrays (treated as no constraint)', async () => {
     mockSearch.mockResolvedValue({ results: [] });
-    const tool = createSmlSearchTool({ getAgentContextLayer });
+    const tool = createSmlSearchTool({ getAgentBuilderSml });
     await tool.handler(
       { query: 'sales', types: [], tags: [] },
       mockContext as unknown as ToolHandlerContext
@@ -152,11 +158,11 @@ describe('createSmlSearchTool', () => {
         tags: ['perf'],
         references: [{ uri: 'dashboard://abc' }],
         spaces: ['default'],
-        permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
+        permissions: { kibana: { privileges: [] } },
       },
     ];
     mockSearch.mockResolvedValue({ results: hits });
-    const tool = createSmlSearchTool({ getAgentContextLayer });
+    const tool = createSmlSearchTool({ getAgentBuilderSml });
     const result = (await tool.handler(
       { query: 'cpu' },
       mockContext as unknown as ToolHandlerContext
@@ -182,7 +188,7 @@ describe('createSmlSearchTool', () => {
 
   it('returns "No results found" when empty', async () => {
     mockSearch.mockResolvedValue({ results: [] });
-    const tool = createSmlSearchTool({ getAgentContextLayer });
+    const tool = createSmlSearchTool({ getAgentBuilderSml });
     const result = (await tool.handler(
       { query: 'nonexistent' },
       mockContext as unknown as ToolHandlerContext
@@ -205,7 +211,7 @@ describe('createSmlSearchTool', () => {
 
   it('uses default size when not provided', async () => {
     mockSearch.mockResolvedValue({ results: [] });
-    const tool = createSmlSearchTool({ getAgentContextLayer });
+    const tool = createSmlSearchTool({ getAgentBuilderSml });
     await tool.handler({ query: 'test' }, mockContext as unknown as ToolHandlerContext);
     expect(mockSearch).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -222,7 +228,7 @@ describe('createSmlSearchTool', () => {
       agentConfiguration: { connector_ids: ['conn-1', 'conn-2'], tools: [] },
     };
 
-    const tool = createSmlSearchTool({ getAgentContextLayer });
+    const tool = createSmlSearchTool({ getAgentBuilderSml });
     await tool.handler({ query: 'test' }, contextWithConnectors as unknown as ToolHandlerContext);
 
     expect(mockSearch).toHaveBeenCalledWith(
@@ -240,7 +246,7 @@ describe('createSmlSearchTool', () => {
       agentConfiguration: { tools: [] },
     };
 
-    const tool = createSmlSearchTool({ getAgentContextLayer });
+    const tool = createSmlSearchTool({ getAgentBuilderSml });
     await tool.handler(
       { query: 'test' },
       contextWithoutConnectors as unknown as ToolHandlerContext
@@ -260,7 +266,7 @@ describe('createSmlSearchTool', () => {
       agentConfiguration: { connector_ids: [], tools: [] },
     };
 
-    const tool = createSmlSearchTool({ getAgentContextLayer });
+    const tool = createSmlSearchTool({ getAgentBuilderSml });
     await tool.handler(
       { query: 'test' },
       contextWithEmptyConnectors as unknown as ToolHandlerContext
@@ -276,7 +282,7 @@ describe('createSmlSearchTool', () => {
   it('does not pass constraints when agentConfiguration is undefined', async () => {
     mockSearch.mockResolvedValue({ results: [] });
 
-    const tool = createSmlSearchTool({ getAgentContextLayer });
+    const tool = createSmlSearchTool({ getAgentBuilderSml });
     await tool.handler({ query: 'test' }, mockContext as unknown as ToolHandlerContext);
 
     expect(mockSearch).toHaveBeenCalledWith(
@@ -293,7 +299,7 @@ describe('createSmlSearchTool', () => {
       agentConfiguration: { connector_ids: ['conn-1'], tools: [] },
     };
 
-    const tool = createSmlSearchTool({ getAgentContextLayer });
+    const tool = createSmlSearchTool({ getAgentBuilderSml });
     await tool.handler(
       { query: 'test', types: ['connector'], tags: ['prod'] },
       contextWithConnectors as unknown as ToolHandlerContext

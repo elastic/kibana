@@ -6,18 +6,17 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
+import type { SmlSearchConstraints, SmlSearchFilters } from '@kbn/agent-builder-server';
 import type {
-  SmlAutocompleteHttpResponse,
-  SmlSearchConstraints,
-  SmlSearchFilters,
   SmlSearchHttpResponse,
-} from '@kbn/agent-context-layer-plugin/public';
-import { smlAutocompletePath, smlSearchPath } from '@kbn/agent-context-layer-plugin/public';
+  SmlAutocompleteHttpResponse,
+} from '../../../common/http_api/sml';
+import { smlSearchPath, smlAutocompletePath } from '../../../common/constants';
 
 /**
  * Browser client for SML.
- *   - `search(...)` → `/internal/agent_context_layer/sml/_search` (hybrid retrieval)
- *   - `autocomplete(...)` → `/internal/agent_context_layer/sml/_autocomplete` (@ menu / typeahead)
+ *   - `search(...)` → `/internal/agent_builder/sml/_search` (hybrid retrieval)
+ *   - `autocomplete(...)` → `/internal/agent_builder/sml/_autocomplete` (@ menu / typeahead)
  */
 export class SmlService {
   private readonly http: HttpSetup;

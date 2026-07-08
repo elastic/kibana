@@ -14,7 +14,7 @@ import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
-import { SmlSearchFilterType } from '@kbn/agent-context-layer-plugin/server';
+import { SmlSearchFilterType } from '@kbn/agent-builder-server';
 import type { SmlToolsOptions } from './types';
 
 const smlSearchSchema = z.object({
@@ -56,7 +56,7 @@ const smlSearchSchema = z.object({
  * Searches the Semantic Metadata Layer for items matching a query.
  */
 export const createSmlSearchTool = ({
-  getAgentContextLayer,
+  getAgentBuilderSml,
 }: SmlToolsOptions): BuiltinToolDefinition<typeof smlSearchSchema> => ({
   id: platformCoreTools.smlSearch,
   type: ToolType.builtin,
@@ -101,7 +101,7 @@ export const createSmlSearchTool = ({
     },
   },
   handler: async ({ query, size, types, tags }, context) => {
-    const agentContextLayer = getAgentContextLayer();
+    const smlService = getAgentBuilderSml();
     const { spaceId, esClient, request, agentConfiguration } = context;
 
     // Runtime-imposed scoping: the connector allow-list comes from the
@@ -124,7 +124,7 @@ export const createSmlSearchTool = ({
 
     let searchResult;
     try {
-      searchResult = await agentContextLayer.search({
+      searchResult = await smlService.search({
         query,
         size,
         spaceId,

@@ -29,12 +29,18 @@ const buildAvailabilityContext = (flags: Record<string, boolean>) =>
 const mockResolveSmlAttachItems = jest.fn();
 const mockAttachmentsAdd = jest.fn();
 
-const getAgentContextLayer = jest.fn(() => ({
+const getAgentBuilderSml = jest.fn(() => ({
   search: jest.fn(),
+  autocomplete: jest.fn(),
+  checkItemsAccess: jest.fn(),
   indexAttachment: jest.fn(),
   deleteAttachment: jest.fn(),
   getDocuments: jest.fn(),
+  listDocuments: jest.fn(),
+  findByOrigin: jest.fn(),
+  findByOriginAcrossSpaces: jest.fn(),
   getTypeDefinition: jest.fn(),
+  listTypeDefinitions: jest.fn(),
   resolveSmlAttachItems: mockResolveSmlAttachItems,
 }));
 
@@ -55,7 +61,7 @@ describe('createSmlAttachTool', () => {
   });
 
   it('has correct id and tags', () => {
-    const tool = createSmlAttachTool({ getAgentContextLayer });
+    const tool = createSmlAttachTool({ getAgentBuilderSml });
     expect(tool.id).toBe(platformCoreTools.smlAttach);
     expect(tool.type).toBe(ToolType.builtin);
     expect(tool.tags).toEqual(['sml', 'attachment']);
@@ -63,7 +69,7 @@ describe('createSmlAttachTool', () => {
 
   describe('availability', () => {
     it('is available only when both experimental features and the Context Engine are enabled', async () => {
-      const tool = createSmlAttachTool({ getAgentContextLayer });
+      const tool = createSmlAttachTool({ getAgentBuilderSml });
       const result = await tool.availability!.handler(
         buildAvailabilityContext({
           [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
@@ -74,7 +80,7 @@ describe('createSmlAttachTool', () => {
     });
 
     it('is unavailable when experimental features are disabled', async () => {
-      const tool = createSmlAttachTool({ getAgentContextLayer });
+      const tool = createSmlAttachTool({ getAgentBuilderSml });
       const result = await tool.availability!.handler(
         buildAvailabilityContext({
           [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: false,
@@ -85,7 +91,7 @@ describe('createSmlAttachTool', () => {
     });
 
     it('is unavailable when the Context Engine is disabled', async () => {
-      const tool = createSmlAttachTool({ getAgentContextLayer });
+      const tool = createSmlAttachTool({ getAgentBuilderSml });
       const result = await tool.availability!.handler(
         buildAvailabilityContext({
           [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
@@ -104,7 +110,7 @@ describe('createSmlAttachTool', () => {
         message: 'Access denied: you do not have the required permissions',
       },
     ]);
-    const tool = createSmlAttachTool({ getAgentContextLayer });
+    const tool = createSmlAttachTool({ getAgentBuilderSml });
     const result = (await tool.handler(
       { chunk_ids: ['chunk-1'] },
       mockContext as unknown as ToolHandlerContext
@@ -122,7 +128,7 @@ describe('createSmlAttachTool', () => {
         message: "SML document 'chunk-1' not found in the index",
       },
     ]);
-    const tool = createSmlAttachTool({ getAgentContextLayer });
+    const tool = createSmlAttachTool({ getAgentBuilderSml });
     const result = (await tool.handler(
       { chunk_ids: ['chunk-1'] },
       mockContext as unknown as ToolHandlerContext
@@ -146,7 +152,7 @@ describe('createSmlAttachTool', () => {
       },
     ]);
     mockAttachmentsAdd.mockResolvedValue({ id: 'att-123' });
-    const tool = createSmlAttachTool({ getAgentContextLayer });
+    const tool = createSmlAttachTool({ getAgentBuilderSml });
     const result = (await tool.handler(
       { chunk_ids: ['chunk-1'] },
       mockContext as unknown as ToolHandlerContext
@@ -175,7 +181,7 @@ describe('createSmlAttachTool', () => {
       },
     ]);
     mockAttachmentsAdd.mockResolvedValue({ id: 'att-456' });
-    const tool = createSmlAttachTool({ getAgentContextLayer });
+    const tool = createSmlAttachTool({ getAgentBuilderSml });
     const result = (await tool.handler(
       { chunk_ids: ['denied-chunk', 'ok-chunk'] },
       mockContext as unknown as ToolHandlerContext
@@ -187,7 +193,7 @@ describe('createSmlAttachTool', () => {
 
   it('calls resolveSmlAttachItems with correct params', async () => {
     mockResolveSmlAttachItems.mockResolvedValue([]);
-    const tool = createSmlAttachTool({ getAgentContextLayer });
+    const tool = createSmlAttachTool({ getAgentBuilderSml });
     await tool.handler(
       { chunk_ids: ['chunk-a', 'chunk-b'] },
       mockContext as unknown as ToolHandlerContext

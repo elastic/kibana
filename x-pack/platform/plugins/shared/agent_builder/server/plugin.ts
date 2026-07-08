@@ -40,6 +40,7 @@ import { registerInferenceFeatures } from './inference_features';
 import {
   createAgentBuilderSmlService,
   type AgentBuilderSmlServiceInstance,
+  type AgentBuilderSmlServiceStart,
 } from './services/sml/service';
 
 export class AgentBuilderPlugin
@@ -59,7 +60,7 @@ export class AgentBuilderPlugin
   private analyticsService?: AnalyticsService;
   private home: HomeServerPluginSetup | null = null;
   private teardownTracing?: () => Promise<void>;
-  private startDeps?: AgentBuilderStartDependencies;
+  private smlServiceStart?: AgentBuilderSmlServiceStart;
   private smlServiceInstance: AgentBuilderSmlServiceInstance;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
@@ -172,11 +173,11 @@ export class AgentBuilderPlugin
     });
 
     const smlTools = createSmlTools({
-      getAgentContextLayer: () => {
-        if (!this.startDeps) {
-          throw new Error('Agent Context Layer not available — plugin has not started');
+      getAgentBuilderSml: () => {
+        if (!this.smlServiceStart) {
+          throw new Error('Agent Builder SML service not available — plugin has not started');
         }
-        return this.startDeps.agentContextLayer;
+        return this.smlServiceStart;
       },
     });
     smlTools.forEach((tool) => {
@@ -223,7 +224,6 @@ export class AgentBuilderPlugin
   }
 
   start(coreStart: CoreStart, startDeps: AgentBuilderStartDependencies): AgentBuilderPluginStart {
-    this.startDeps = startDeps;
     void registerTracingExporter({
       core: coreStart,
       tracingConfig: this.config.tracing,
@@ -250,6 +250,7 @@ export class AgentBuilderPlugin
       logger: this.logger.get('sml'),
       securityAuthz: securityPlugin?.authz,
     });
+    this.smlServiceStart = smlServiceStart;
 
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),

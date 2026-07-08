@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  SmlSearchFilters,
-  SmlSearchConstraints,
-} from '@kbn/agent-context-layer-plugin/public';
+import type { SmlSearchFilters, SmlSearchConstraints } from '@kbn/agent-builder-server';
 
 /**
  * Query keys for react-query

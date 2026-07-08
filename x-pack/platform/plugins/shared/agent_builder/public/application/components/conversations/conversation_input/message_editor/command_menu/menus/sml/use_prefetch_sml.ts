@@ -7,10 +7,7 @@
 
 import { useCallback } from 'react';
 import { useQueryClient } from '@kbn/react-query';
-import type {
-  SmlSearchFilters,
-  SmlSearchConstraints,
-} from '@kbn/agent-context-layer-plugin/public';
+import type { SmlSearchFilters, SmlSearchConstraints } from '@kbn/agent-builder-server';
 import { SML_SEARCH_DEFAULT_SIZE } from '../../../../../../../../services/sml/constants';
 import { queryKeys } from '../../../../../../../query_keys';
 import { useAgentBuilderServices } from '../../../../../../../hooks/use_agent_builder_service';

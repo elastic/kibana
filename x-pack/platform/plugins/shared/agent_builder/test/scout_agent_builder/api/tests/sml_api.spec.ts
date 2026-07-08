@@ -10,11 +10,11 @@ import type { Client } from '@elastic/elasticsearch';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { createLlmProxy } from '@kbn/ftr-llm-proxy';
-import type { SmlSearchHttpResponse } from '@kbn/agent-context-layer-plugin/common/http_api/sml';
+import type { SmlSearchHttpResponse } from '../../../../common/http_api/sml';
 import {
   smlElasticsearchIndexMappings,
   smlIndexName,
-} from '@kbn/agent-context-layer-plugin/server';
+} from '../../../../server/services/sml/storage';
 import type { SmlAttachHttpResponse } from '../../../../common/http_api/sml';
 import {
   createGenAiConnectorForProxy,
@@ -23,12 +23,7 @@ import {
 import { createSystemIndicesEsClient } from '../../../scout_agent_builder_shared/lib/system_indices_es_client';
 import { setupAgentDirectAnswer } from '../../../scout_agent_builder_shared/lib/proxy_scenario';
 import { apiTest } from '../fixtures';
-import {
-  API_AGENT_BUILDER,
-  COMMON_HEADERS,
-  INTERNAL_AGENT_BUILDER,
-  INTERNAL_AGENT_CONTEXT_LAYER,
-} from '../fixtures/constants';
+import { API_AGENT_BUILDER, COMMON_HEADERS, INTERNAL_AGENT_BUILDER } from '../fixtures/constants';
 import { postConverse } from '../fixtures/converse_http';
 
 apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.classic] }, () => {
@@ -88,7 +83,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   });
 
   apiTest('POST /internal/agent_builder/sml/_search autocomplete', async ({ apiClient }) => {
-    const response = await apiClient.post(`${INTERNAL_AGENT_CONTEXT_LAYER}/sml/_search`, {
+    const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/sml/_search`, {
       headers: ih(),
       body: { query: 'pacif', size: 20 },
       responseType: 'json',
@@ -105,7 +100,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   apiTest(
     'POST /internal/agent_builder/sml/_search wildcard returns item fields',
     async ({ apiClient }) => {
-      const response = await apiClient.post(`${INTERNAL_AGENT_CONTEXT_LAYER}/sml/_search`, {
+      const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/sml/_search`, {
         headers: ih(),
         body: { query: '*', size: 10 },
         responseType: 'json',
@@ -123,7 +118,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   );
 
   apiTest('POST /internal/agent_builder/sml/_search rejects empty query', async ({ apiClient }) => {
-    const response = await apiClient.post(`${INTERNAL_AGENT_CONTEXT_LAYER}/sml/_search`, {
+    const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/sml/_search`, {
       headers: ih(),
       body: { query: '' },
       responseType: 'json',

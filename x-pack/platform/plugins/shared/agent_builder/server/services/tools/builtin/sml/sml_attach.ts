@@ -32,7 +32,7 @@ const smlAttachSchema = z.object({
  * Converts SML search results into conversation attachments.
  */
 export const createSmlAttachTool = ({
-  getAgentContextLayer,
+  getAgentBuilderSml,
 }: SmlToolsOptions): BuiltinToolDefinition<typeof smlAttachSchema> => ({
   id: platformCoreTools.smlAttach,
   type: ToolType.builtin,
@@ -64,10 +64,10 @@ export const createSmlAttachTool = ({
     },
   },
   handler: async ({ chunk_ids: chunkIds }, context) => {
-    const agentContextLayer = getAgentContextLayer();
+    const smlService = getAgentBuilderSml();
     const { spaceId, savedObjectsClient, request, attachments, esClient, logger } = context;
 
-    const resolvedItems = await agentContextLayer.resolveSmlAttachItems({
+    const resolvedItems = await smlService.resolveSmlAttachItems({
       chunkIds,
       esClient,
       request,

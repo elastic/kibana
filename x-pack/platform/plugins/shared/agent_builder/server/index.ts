@@ -27,19 +27,14 @@ export type { ConversationListOptions } from '@kbn/agent-builder-common';
 
 export type {
   SmlTypeDefinition,
-  SmlChunk,
-  SmlData,
   SmlContext,
   SmlToAttachmentContext,
   SmlListItem,
   SmlSearchResult,
-  SmlIndexAttachmentParams,
-} from '@kbn/agent-context-layer-plugin/server';
+  SmlIndexerParams,
+} from '@kbn/agent-builder-server';
 
-export {
-  smlElasticsearchIndexMappings,
-  smlIndexName,
-} from '@kbn/agent-context-layer-plugin/server';
+export { smlElasticsearchIndexMappings, smlIndexName } from './services/sml/storage';
 
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,

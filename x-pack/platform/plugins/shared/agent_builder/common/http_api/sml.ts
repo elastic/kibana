@@ -31,3 +31,85 @@ export interface SmlAttachHttpErrorItem {
   attachment_type?: string;
   message: string;
 }
+
+// --- Search ---
+
+/** Max length of `query` for `POST /internal/agent_builder/sml/_search`. */
+export const SML_HTTP_SEARCH_QUERY_MAX_LENGTH = 512;
+
+/** Response body for `POST /internal/agent_builder/sml/_search`. */
+export interface SmlSearchHttpResponse {
+  results: SmlSearchHttpResultItem[];
+}
+
+export interface SmlSearchHttpResultItem {
+  id: string;
+  type: string;
+  origin: { uri: string };
+  title: string;
+  description?: string;
+  content?: string;
+  references?: Array<{ uri: string }>;
+  tags?: string[];
+}
+
+// --- Autocomplete ---
+
+/** Max length of `query` for `POST /internal/agent_builder/sml/_autocomplete`. */
+export const SML_HTTP_AUTOCOMPLETE_QUERY_MAX_LENGTH = 256;
+
+/** Response body for `POST /internal/agent_builder/sml/_autocomplete`. */
+export interface SmlAutocompleteHttpResponse {
+  results: SmlAutocompleteHttpResultItem[];
+}
+
+export interface SmlAutocompleteHttpResultItem {
+  id: string;
+  type: string;
+  origin: { uri: string };
+  title: string;
+  matched_discovery_labels?: SmlMatchedDiscoveryLabel[];
+}
+
+export interface SmlMatchedDiscoveryLabel {
+  value: string;
+  kind: string;
+  highlighted?: string;
+}
+
+// --- Get ---
+
+/** Wire representation of a single SML object. */
+export interface SmlHttpItem {
+  id: string;
+  type: string;
+  title: string;
+  origin: { uri: string };
+  content: string;
+  created_at: string;
+  updated_at: string;
+  spaces: string[];
+  tags: string[];
+  permissions: {
+    kibana: { privileges: Array<{ name: string }> };
+  };
+  ingestion_method: 'manual' | 'crawled';
+}
+
+/** Response body for `GET /internal/agent_builder/sml/{type}/{originId}`. */
+export interface SmlGetHttpResponse {
+  items: SmlHttpItem[];
+}
+
+// --- List ---
+
+export const SML_HTTP_LIST_PER_PAGE_DEFAULT = 20;
+export const SML_HTTP_LIST_PER_PAGE_MAX = 1000;
+export const SML_HTTP_LIST_PAGE_DEFAULT = 1;
+
+/** Response body for `GET /internal/agent_builder/sml`. */
+export interface SmlListHttpResponse {
+  page: number;
+  per_page: number;
+  items: SmlHttpItem[];
+}
