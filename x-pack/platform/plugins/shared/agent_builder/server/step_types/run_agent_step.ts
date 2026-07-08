@@ -40,7 +40,13 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
       } = { inputTokens: 0, outputTokens: 0, cachedTokens: 0, totalTokens: 0 };
 
       try {
-        const { schema, message, conversation_id: conversationId, attachments } = context.input;
+        const {
+          schema,
+          message,
+          conversation_id: conversationId,
+          attachments,
+          metadata,
+        } = context.input;
 
         const {
           'agent-id': agentId,
@@ -78,6 +84,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           mode: AgentExecutionMode.conversation,
           request,
           abortSignal: context.abortSignal,
+          metadata,
           params: {
             agentId: effectiveAgentId,
             connectorId: effectiveConnectorId,
