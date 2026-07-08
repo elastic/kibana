@@ -6,8 +6,9 @@
  */
 
 import { esql } from '@elastic/esql';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { QueryLink } from '@kbn/significant-events-schema';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { toEsqlRequest } from '../../streams/esql';
 import {
   RULES_BUCKET_SIZE,
@@ -16,8 +17,12 @@ import {
 } from './change_point_scan_shared';
 import type {
   ChangePointRuleBucket,
+  ChangePointTypeMap,
   ChangePointScanParams,
   CountDetectionAlertsParams,
+  RuleActivityAggregations,
+  RuleAlertWindowAggregations,
+  RuleChangePointAggregations,
   RuleMetadata,
 } from './alerts_reader';
 import {
@@ -26,13 +31,40 @@ import {
   buildRuleMetadataMap,
 } from './alerts_reader';
 
+const EMPTY_CHANGE_POINT_TYPE: ChangePointTypeMap = {};
+
+interface SignalCountAggregation {
+  value?: number;
+}
+
+interface SignalWindowAggregation {
+  doc_count?: number;
+  signal_count?: SignalCountAggregation;
+}
+
 interface RawRuleBucket {
   key: string;
   doc_count: number;
-  signal_count?: { value?: number };
-  change_points?: { type?: Record<string, { p_value: number }> };
-  last_5m?: { doc_count?: number; signal_count?: { value?: number } };
-  last_floor_window?: { doc_count?: number; signal_count?: { value?: number } };
+  signal_count?: SignalCountAggregation;
+  change_points?: { type?: ChangePointTypeMap };
+  last_5m?: SignalWindowAggregation;
+  last_floor_window?: SignalWindowAggregation;
+}
+
+interface CountAlertsAggregations {
+  signal_count?: SignalCountAggregation;
+}
+
+interface RawRuleActivityAggregations {
+  activity_windows?: {
+    buckets?: Array<{ key: string | number; signal_count?: SignalCountAggregation }>;
+  };
+  peak?: RuleActivityAggregations['peak'];
+}
+
+interface RawRuleAlertWindowAggregations {
+  current_window?: SignalWindowAggregation;
+  reference_window?: SignalWindowAggregation;
 }
 
 export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlertsReader {
@@ -52,10 +84,10 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
   }
 
   async countAlerts(
-    esClient: ElasticsearchClient,
+    esClient: TracedElasticsearchClient,
     { lookback, spaceId, ruleUuid }: CountDetectionAlertsParams
   ): Promise<number> {
-    const filter: Array<Record<string, unknown>> = [
+    const filter: QueryDslQueryContainer[] = [
       { term: { type: 'signal' } },
       { term: { space_id: spaceId } },
       { range: { '@timestamp': { gte: lookback } } },
@@ -64,10 +96,11 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
       filter.push({ term: { 'rule.id': ruleUuid } });
     }
 
-    const response = await esClient.search({
+    const response = await esClient.search('significant_events_alerts_v2_count_alerts', {
       index: this.index,
       ignore_unavailable: true,
       size: 0,
+      track_total_hits: false,
       query: { bool: { filter } },
       aggs: {
         signal_count: {
@@ -76,19 +109,21 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
       },
     });
 
-    return (response.aggregations?.signal_count as { value?: number } | undefined)?.value ?? 0;
+    const aggregations = response.aggregations as CountAlertsAggregations | undefined;
+    return aggregations?.signal_count?.value ?? 0;
   }
 
   async runChangePointScan(
-    esClient: ElasticsearchClient,
+    esClient: TracedElasticsearchClient,
     params: ChangePointScanParams,
     queryLinks: QueryLink[]
   ) {
     const ruleMetadata = buildRuleMetadataMap(queryLinks);
-    const response = await esClient.search({
+    const response = await esClient.search('significant_events_alerts_v2_change_point_scan', {
       index: this.index,
       ignore_unavailable: true,
       size: 0,
+      track_total_hits: false,
       // Drop the per-bucket `over_time` series from the response: it can be large and is only
       // needed server-side as the buckets_path input for the change_point pipeline agg, not in
       // the payload the Detection workflow consumes.
@@ -108,7 +143,7 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
   }
 
   async runRuleChangePoint(
-    esClient: ElasticsearchClient,
+    esClient: TracedElasticsearchClient,
     {
       ruleUuid,
       lookback,
@@ -116,10 +151,11 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
       spaceId,
     }: Parameters<ISignificantEventsAlertsReader['runRuleChangePoint']>[1]
   ) {
-    const response = await esClient.search({
+    const response = await esClient.search('significant_events_alerts_v2_rule_change_point', {
       index: this.index,
       ignore_unavailable: true,
       size: 0,
+      track_total_hits: false,
       query: {
         bool: {
           filter: [
@@ -136,11 +172,11 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
       }),
     });
 
-    return { aggregations: response.aggregations ?? {} };
+    return { aggregations: (response.aggregations ?? {}) as RuleChangePointAggregations };
   }
 
   async runRuleActivity(
-    esClient: ElasticsearchClient,
+    esClient: TracedElasticsearchClient,
     {
       ruleUuid,
       lookback,
@@ -148,10 +184,11 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
       spaceId,
     }: Parameters<ISignificantEventsAlertsReader['runRuleActivity']>[1]
   ) {
-    const response = await esClient.search({
+    const response = await esClient.search('significant_events_alerts_v2_rule_activity', {
       index: this.index,
       ignore_unavailable: true,
       size: 0,
+      track_total_hits: false,
       query: {
         bool: {
           filter: [
@@ -181,11 +218,15 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
       },
     });
 
-    return { aggregations: this.normalizeActivityAggregations(response.aggregations ?? {}) };
+    return {
+      aggregations: this.normalizeActivityAggregations(
+        (response.aggregations ?? {}) as RawRuleActivityAggregations
+      ),
+    };
   }
 
   async runRuleAlertWindows(
-    esClient: ElasticsearchClient,
+    esClient: TracedElasticsearchClient,
     {
       ruleUuid,
       currentLookback,
@@ -194,10 +235,11 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
       spaceId,
     }: Parameters<ISignificantEventsAlertsReader['runRuleAlertWindows']>[1]
   ) {
-    const response = await esClient.search({
+    const response = await esClient.search('significant_events_alerts_v2_rule_alert_windows', {
       index: this.index,
       ignore_unavailable: true,
       size: 0,
+      track_total_hits: false,
       query: {
         bool: {
           filter: [
@@ -231,7 +273,11 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
       },
     });
 
-    return { aggregations: this.normalizeWindowAggregations(response.aggregations ?? {}) };
+    return {
+      aggregations: this.normalizeWindowAggregations(
+        (response.aggregations ?? {}) as RawRuleAlertWindowAggregations
+      ),
+    };
   }
 
   private buildChangePointScanBody({ lookback, bucketInterval, spaceId }: ChangePointScanParams) {
@@ -272,7 +318,7 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
     const streamName = meta?.streamName ?? 'unknown';
     const changePoints = bucket.change_points?.type
       ? { type: bucket.change_points.type }
-      : { type: {} as Record<string, { p_value: number }> };
+      : { type: EMPTY_CHANGE_POINT_TYPE };
 
     return {
       key: bucket.key,
@@ -287,50 +333,42 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
 
   private distinctSignalCount(window?: {
     doc_count?: number;
-    signal_count?: { value?: number };
+    signal_count?: SignalCountAggregation;
   }): number {
     return window?.signal_count?.value ?? window?.doc_count ?? 0;
   }
 
   private normalizeWindowAggregations(
-    aggregations: Record<string, unknown>
-  ): Record<string, unknown> {
-    const normalizeWindow = (window: unknown) => {
-      const typedWindow = window as
-        | { doc_count?: number; signal_count?: { value?: number } }
-        | undefined;
-      if (!typedWindow) {
+    aggregations: RawRuleAlertWindowAggregations
+  ): RuleAlertWindowAggregations {
+    const normalizeWindow = (window: SignalWindowAggregation | undefined) => {
+      if (!window) {
         return window;
       }
-      return { doc_count: typedWindow.signal_count?.value ?? typedWindow.doc_count ?? 0 };
+      return { doc_count: window.signal_count?.value ?? window.doc_count ?? 0 };
     };
 
     return {
-      ...aggregations,
       current_window: normalizeWindow(aggregations.current_window),
       reference_window: normalizeWindow(aggregations.reference_window),
     };
   }
 
   private normalizeActivityAggregations(
-    aggregations: Record<string, unknown>
-  ): Record<string, unknown> {
-    const activityWindows = aggregations.activity_windows as
-      | { buckets?: Array<{ key: string; signal_count?: { value?: number } }> }
-      | undefined;
-
-    if (!activityWindows?.buckets) {
-      return aggregations;
+    aggregations: RawRuleActivityAggregations
+  ): RuleActivityAggregations {
+    if (!aggregations.activity_windows?.buckets) {
+      return { peak: aggregations.peak };
     }
 
     return {
-      ...aggregations,
       activity_windows: {
-        buckets: activityWindows.buckets.map((bucket) => ({
+        buckets: aggregations.activity_windows.buckets.map((bucket) => ({
           key: bucket.key,
           doc_count: bucket.signal_count?.value ?? 0,
         })),
       },
+      peak: aggregations.peak,
     };
   }
 }

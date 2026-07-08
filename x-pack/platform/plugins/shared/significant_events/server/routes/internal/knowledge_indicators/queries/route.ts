@@ -24,6 +24,7 @@ import { assertSignificantEventsAccess } from '../../../utils/assert_significant
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 import { queryStatusSchema, toRuleUnbackedFilter } from '../../../utils/query_status';
 import { BUCKET_SIZE_PATTERN } from '../../../../lib/significant_events/helpers/fill_bucket_gaps';
+import { createSignificantEventsTracedEsClient } from '../../../../lib/significant_events/create_significant_events_traced_es_client';
 import {
   computeOccurrences,
   fetchQueryLinks,
@@ -320,7 +321,13 @@ const getDiscoveryQueriesRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  handler: async ({ params, request, getScopedClients, server }): Promise<QueriesGetResponse> => {
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<QueriesGetResponse> => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
 
@@ -359,10 +366,14 @@ const getDiscoveryQueriesRoute = createServerRoute({
     const pageLinks =
       start >= total ? [] : sortQueryLinksForTable(queryLinks).slice(start, start + perPage);
     const pageRuleIds = [...new Set(pageLinks.map((link) => link.rule_id))];
+    const esClient = createSignificantEventsTracedEsClient({
+      client: scopedClusterClient.asCurrentUser,
+      logger,
+    });
 
     const occurrences = await computeOccurrences(
       { ruleIds: pageRuleIds, from, to, bucketSize, alertsReader },
-      { scopedClusterClient }
+      { esClient }
     );
     const queryOccurrences: QueryOccurrences = { queryLinks: pageLinks, ...occurrences };
     const queriesPage = pageLinks.map((queryLink) =>
@@ -396,6 +407,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<QueriesOccurrencesGetResponse> => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
@@ -408,6 +420,10 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
       scopedClients.getKnowledgeIndicatorClient(),
       scopedClients.getSignificantEventsAlertingContext(),
     ]);
+    const esClient = createSignificantEventsTracedEsClient({
+      client: scopedClusterClient.asCurrentUser,
+      logger,
+    });
     const { aggregatedOccurrences: aggregatedOccurrenceBuckets } = await getQueryOccurrences(
       {
         from,
@@ -417,7 +433,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
         streamNames,
         alertsReader,
       },
-      { kiClient, scopedClusterClient }
+      { kiClient, esClient }
     );
 
     const occurrencesHistogram = aggregatedOccurrenceBuckets.map((bucket) => ({

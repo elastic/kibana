@@ -6,9 +6,10 @@
  */
 
 import { esql } from '@elastic/esql';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { toEsqlRequest } from '../../streams/esql';
 import {
   RULES_BUCKET_SIZE,
@@ -17,8 +18,12 @@ import {
 } from './change_point_scan_shared';
 import type {
   ChangePointRuleBucket,
+  ChangePointTypeMap,
   ChangePointScanParams,
   CountDetectionAlertsParams,
+  RuleActivityAggregations,
+  RuleAlertWindowAggregations,
+  RuleChangePointAggregations,
   RuleMetadata,
 } from './alerts_reader';
 import {
@@ -27,12 +32,14 @@ import {
   buildRuleMetadataMap,
 } from './alerts_reader';
 
+const EMPTY_CHANGE_POINT_TYPE: ChangePointTypeMap = {};
+
 interface RawRuleBucket {
   key: string;
   doc_count: number;
   rule_name?: { top?: Array<{ metrics?: Record<string, string> }> };
   stream?: { buckets?: Array<{ key: string }> };
-  change_points?: { type?: Record<string, { p_value: number }> };
+  change_points?: { type?: ChangePointTypeMap };
   last_5m?: { doc_count?: number };
   last_floor_window?: { doc_count?: number };
 }
@@ -54,10 +61,10 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
   }
 
   async countAlerts(
-    esClient: ElasticsearchClient,
+    esClient: TracedElasticsearchClient,
     { lookback, spaceId, ruleUuid }: CountDetectionAlertsParams
   ): Promise<number> {
-    const filter: Array<Record<string, unknown>> = [
+    const filter: QueryDslQueryContainer[] = [
       {
         terms: {
           'kibana.space_ids': [spaceId, '*'],
@@ -69,25 +76,29 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
       filter.push({ term: { 'kibana.alert.rule.uuid': ruleUuid } });
     }
 
-    const response = await esClient.count({
+    const response = await esClient.search('significant_events_alerts_v1_count_alerts', {
       index: this.index,
       ignore_unavailable: true,
+      size: 0,
+      track_total_hits: true,
       query: { bool: { filter } },
     });
 
-    return response.count;
+    const total = response.hits.total;
+    return typeof total === 'number' ? total : total?.value ?? 0;
   }
 
   async runChangePointScan(
-    esClient: ElasticsearchClient,
+    esClient: TracedElasticsearchClient,
     params: ChangePointScanParams,
     queryLinks: QueryLink[]
   ) {
     const ruleMetadata = buildRuleMetadataMap(queryLinks);
-    const response = await esClient.search({
+    const response = await esClient.search('significant_events_alerts_v1_change_point_scan', {
       index: this.index,
       ignore_unavailable: true,
       size: 0,
+      track_total_hits: false,
       filter_path: '-aggregations.by_rule.buckets.over_time',
       ...this.buildChangePointScanBody(params),
     });
@@ -104,7 +115,7 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
   }
 
   async runRuleChangePoint(
-    esClient: ElasticsearchClient,
+    esClient: TracedElasticsearchClient,
     {
       ruleUuid,
       lookback,
@@ -112,10 +123,11 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
       spaceId,
     }: Parameters<ISignificantEventsAlertsReader['runRuleChangePoint']>[1]
   ) {
-    const response = await esClient.search({
+    const response = await esClient.search('significant_events_alerts_v1_rule_change_point', {
       index: this.index,
       ignore_unavailable: true,
       size: 0,
+      track_total_hits: false,
       query: {
         bool: {
           filter: [
@@ -131,11 +143,11 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
       }),
     });
 
-    return { aggregations: response.aggregations ?? {} };
+    return { aggregations: (response.aggregations ?? {}) as RuleChangePointAggregations };
   }
 
   async runRuleActivity(
-    esClient: ElasticsearchClient,
+    esClient: TracedElasticsearchClient,
     {
       ruleUuid,
       lookback,
@@ -143,10 +155,11 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
       spaceId,
     }: Parameters<ISignificantEventsAlertsReader['runRuleActivity']>[1]
   ) {
-    const response = await esClient.search({
+    const response = await esClient.search('significant_events_alerts_v1_rule_activity', {
       index: this.index,
       ignore_unavailable: true,
       size: 0,
+      track_total_hits: false,
       query: {
         bool: {
           filter: [
@@ -170,11 +183,11 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
       },
     });
 
-    return { aggregations: response.aggregations ?? {} };
+    return { aggregations: (response.aggregations ?? {}) as RuleActivityAggregations };
   }
 
   async runRuleAlertWindows(
-    esClient: ElasticsearchClient,
+    esClient: TracedElasticsearchClient,
     {
       ruleUuid,
       currentLookback,
@@ -183,10 +196,11 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
       spaceId,
     }: Parameters<ISignificantEventsAlertsReader['runRuleAlertWindows']>[1]
   ) {
-    const response = await esClient.search({
+    const response = await esClient.search('significant_events_alerts_v1_rule_alert_windows', {
       index: this.index,
       ignore_unavailable: true,
       size: 0,
+      track_total_hits: false,
       query: {
         bool: {
           filter: [
@@ -209,7 +223,7 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
       },
     });
 
-    return { aggregations: response.aggregations ?? {} };
+    return { aggregations: (response.aggregations ?? {}) as RuleAlertWindowAggregations };
   }
 
   private buildChangePointScanBody({ lookback, bucketInterval, spaceId }: ChangePointScanParams) {
@@ -259,9 +273,9 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
     const streamName = meta?.streamName ?? 'unknown';
     const changePoints = bucket.change_points?.type
       ? { type: bucket.change_points.type }
-      : { type: {} as Record<string, { p_value: number }> };
+      : { type: EMPTY_CHANGE_POINT_TYPE };
     const ruleNameAgg = bucket.rule_name?.top?.[0]?.metrics
-      ? { top: [{ metrics: bucket.rule_name.top[0].metrics as Record<string, string> }] }
+      ? { top: [{ metrics: bucket.rule_name.top[0].metrics }] }
       : { top: [{ metrics: { 'kibana.alert.rule.name': ruleName } }] };
     const streamAgg = bucket.stream?.buckets
       ? { buckets: bucket.stream.buckets }
