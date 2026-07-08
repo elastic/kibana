@@ -51795,7 +51795,6 @@
     "xpack.streams.streamsListView.conflictCalloutMessage": "启用 Wired Streams，使您的 Streams 配置与当前的 Elasticsearch 状态保持一致。",
     "xpack.streams.streamsListView.conflictCalloutTitle": "配置冲突",
     "xpack.streams.streamsListView.createClassicStreamButtonLabel": "创建经典流",
-    "xpack.streams.streamsListView.createQueryStreamButtonLabel": "创建查询流",
     "xpack.streams.streamsListView.disableWiredStreamsErrorToastTitle": "更新 Wired Streams 设置时出错",
     "xpack.streams.streamsListView.enableWiredStreamsErrorToastTitle": "更新 Wired Streams 设置时出错",
     "xpack.streams.streamsListView.enableWiredStreamsSwitchLabel": "启用 Wired Streams",
