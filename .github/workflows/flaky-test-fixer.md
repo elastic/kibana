@@ -178,7 +178,7 @@ Kibana is already bootstrapped for you.
 
 1. Read the investigator's comment on the issue for the suspected root cause and proposed fix. If no action is needed, skip to step 6.
 2. Read the failing test and the helpers, fixtures, and page objects it imports.
-3. Apply the smallest test-side patch that addresses the root cause.
+3. Apply the smallest test-side patch that addresses the root cause. Don't add explanatory code comments to the patch by default — a good test-side fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it to 1–2 sentences; a simple change like a timeout bump never warrants a comment.
 4. Verify the patch: lint and type check it with `node scripts/eslint` and `node scripts/type_check` (and, for a Jest test, run it with `node scripts/jest`). FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
 5. Open the PR (see "PR format" below).
 6. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
