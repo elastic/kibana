@@ -15,10 +15,10 @@ import {
   type LifecycleDetection,
   type EventLifecycleResponse,
 } from '@kbn/significant-events-schema';
-import { badRequest, notFound, serverUnavailable } from '@hapi/boom';
+import { notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
-import { updateEventStatus } from '../../../lib/significant_events/events/update_event_status';
+import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
 import { triggerInvestigationWorkflow } from '../../../lib/significant_events/events/trigger_investigation_workflow';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
@@ -327,7 +327,7 @@ const eventsUpdateRoute = createServerRoute({
       id: z.string().max(255),
     }),
     body: z.object({
-      status: significantEventStatusSchema.optional(),
+      status: significantEventStatusSchema,
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
@@ -335,15 +335,10 @@ const eventsUpdateRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { status } = params.body;
-    if (status === undefined) {
-      throw badRequest(`Nothing to update for significant event "${params.path.id}".`);
-    }
-
-    return updateEventStatus({
+    return updateSignificantEventStatus({
       eventClient: getEventClient(),
       eventId: params.path.id,
-      status,
+      status: params.body.status,
     });
   },
 });

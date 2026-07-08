@@ -6,7 +6,7 @@
  */
 
 import type { SignificantEventStatus } from '@kbn/significant-events-schema';
-import { updateEventStatus } from '../../../lib/significant_events/events/update_event_status';
+import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
 import type { EventClient } from '../../../lib/significant_events/events';
 
 export async function updateEventStatusToolHandler({
@@ -23,5 +23,5 @@ export async function updateEventStatusToolHandler({
   ignored: number;
   status: SignificantEventStatus;
 }> {
-  return updateEventStatus({ eventClient, eventId, status });
+  return updateSignificantEventStatus({ eventClient, eventId, status });
 }

@@ -201,10 +201,11 @@ const buildLatestSourceBaseQuery = ({
     .where`_id == tiebreaker_id`;
 
   // The upper bound (and `where`, below) must run AFTER the latest-per-group collapse above:
-  // both must reflect the resolved latest version's own field values (its own @timestamp,
-  // status, etc.), not any historical version's. Applying `to` beforehand can drop the true
-  // latest row for being newer than `to` and let a stale, in-range sibling win the collapse
-  // instead — the same failure mode the `where` reorder below fixes, reached via the time filter.
+  // both must reflect the resolved latest version's own field values, not any historical
+  // version's. `where` is caller-supplied and filters on whatever field(s) that caller cares
+  // about (e.g. status/stream/search for EventClient, `kind`/rule filters for
+  // DetectionClient/DiscoveryClient) — applying it (or `to`) beforehand can drop the true
+  // latest row for no longer matching and let a stale, in-range sibling win the collapse instead.
   query = applyTimeRange({ query, to: options.to });
 
   if (where) {

@@ -50,7 +50,7 @@ const RUN_ARIA_LABEL = i18n.translate(
 const CLOSE_EVENT_ARIA_LABEL = i18n.translate(
   'xpack.streams.sigEventsTab.closeEventButton.ariaLabel',
   {
-    defaultMessage: 'Close this event',
+    defaultMessage: 'Close this significant event',
   }
 );
 

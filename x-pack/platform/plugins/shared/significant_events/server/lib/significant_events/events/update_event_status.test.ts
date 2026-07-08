@@ -6,11 +6,11 @@
  */
 
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
-import { updateEventStatus } from './update_event_status';
+import { updateSignificantEventStatus } from './update_event_status';
 import { EventClient } from './event_client';
 import type { SignificantEvent } from './data_stream';
 
-const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
+const createSignificantEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
   created_at: '2026-01-01T00:00:00.000Z',
   event_id: 'event-1',
@@ -57,12 +57,12 @@ const createEventClient = (hits: SignificantEvent[], lineageHits?: SignificantEv
   return { client, dataStreamClient };
 };
 
-describe('updateEventStatus', () => {
+describe('updateSignificantEventStatus', () => {
   it('creates a new event version when status changes', async () => {
-    const existing = createEvent({ event_id: 'event-1', status: 'promoted' });
+    const existing = createSignificantEvent({ event_id: 'event-1', status: 'promoted' });
     const { client, dataStreamClient } = createEventClient([existing]);
 
-    const result = await updateEventStatus({
+    const result = await updateSignificantEventStatus({
       eventClient: client,
       eventId: 'event-1',
       status: 'closed',
@@ -90,7 +90,7 @@ describe('updateEventStatus', () => {
   it('ignores when the event is not found', async () => {
     const { client, dataStreamClient } = createEventClient([]);
 
-    const result = await updateEventStatus({
+    const result = await updateSignificantEventStatus({
       eventClient: client,
       eventId: 'missing-event',
       status: 'closed',
@@ -101,10 +101,10 @@ describe('updateEventStatus', () => {
   });
 
   it('ignores when the status is unchanged', async () => {
-    const existing = createEvent({ event_id: 'event-1', status: 'closed' });
+    const existing = createSignificantEvent({ event_id: 'event-1', status: 'closed' });
     const { client, dataStreamClient } = createEventClient([existing]);
 
-    const result = await updateEventStatus({
+    const result = await updateSignificantEventStatus({
       eventClient: client,
       eventId: 'event-1',
       status: 'closed',
@@ -115,8 +115,12 @@ describe('updateEventStatus', () => {
   });
 
   it('resolves lineage: update targets the latest slug version, not a stale caller reference', async () => {
-    const e0 = createEvent({ event_id: 'event-0', discovery_slug: 'slug-1', status: 'promoted' });
-    const e1 = createEvent({
+    const e0 = createSignificantEvent({
+      event_id: 'event-0',
+      discovery_slug: 'slug-1',
+      status: 'promoted',
+    });
+    const e1 = createSignificantEvent({
       event_id: 'event-1',
       discovery_slug: 'slug-1',
       previous_event_id: 'event-0',
@@ -126,7 +130,7 @@ describe('updateEventStatus', () => {
     // findById returns only E0 (the stale ref); findByDiscoverySlug returns the full lineage
     const { client, dataStreamClient } = createEventClient([e0], [e0, e1]);
 
-    const result = await updateEventStatus({
+    const result = await updateSignificantEventStatus({
       eventClient: client,
       eventId: 'event-0',
       status: 'closed',

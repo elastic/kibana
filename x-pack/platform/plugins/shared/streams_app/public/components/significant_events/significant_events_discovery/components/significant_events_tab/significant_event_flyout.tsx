@@ -54,7 +54,7 @@ const CLOSE_BUTTON_ARIA_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyou
   defaultMessage: 'Close',
 });
 const CLOSE_EVENT_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.closeEvent', {
-  defaultMessage: 'Close event',
+  defaultMessage: 'Close significant event',
 });
 const ACTIONS_BUTTON_ARIA_LABEL = i18n.translate(
   'xpack.streams.sigEventsTab.flyout.actionsMenuButtonAriaLabel',
@@ -182,8 +182,10 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
                     color="danger"
                     disabled={isUpdating}
                     onClick={() => {
-                      setIsActionsMenuOpen(false);
-                      updateEventStatus({ eventId: latestEvent.event_id, status: 'closed' });
+                      if (!isUpdating) {
+                        setIsActionsMenuOpen(false);
+                        updateEventStatus({ eventId: latestEvent.event_id, status: 'closed' });
+                      }
                     }}
                     data-test-subj="sigEventCloseButton"
                   >

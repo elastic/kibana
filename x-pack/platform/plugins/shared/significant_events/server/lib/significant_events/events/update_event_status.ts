@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 import type { EventClient } from './event_client';
 
-export const updateEventStatus = async ({
+export const updateSignificantEventStatus = async ({
   eventClient,
   eventId,
   status,
