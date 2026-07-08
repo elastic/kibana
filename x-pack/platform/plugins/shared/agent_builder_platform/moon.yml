@@ -26,7 +26,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/core-lifecycle-server'
   - '@kbn/esql-language'
-  - '@kbn/inference-common'
+  - '@kbn/product-doc-common'
   - '@kbn/llm-tasks-plugin'
   - '@kbn/i18n'
   - '@kbn/i18n-react'

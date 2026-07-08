@@ -337,6 +337,7 @@ tags:
   - description: Manage Kibana short URLs.
     name: short url
     x-displayName: Short URLs
+  - name: significant_events
   - description: SLO APIs enable you to define, manage and track service-level objectives
     name: slo
     x-displayName: Service level objectives
@@ -62018,7 +62019,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get the resolution group for a given entity, returning all linked entities. Requires an enterprise license.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+        Get the resolution group for a given entity, returning all linked entities.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
       operationId: get-security-entity-store-resolution-group
       parameters:
         - description: The entity identifier to look up the resolution group for.
@@ -62095,6 +62096,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/security/entity_store/resolution/group?entity_id=user:jane.doe@example.com
+      x-state: Generally available; added in 9.4.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -62107,7 +62109,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Link one or more entities to a target entity, creating a resolution group. Changes become visible on subsequent reads after the next index refresh (typically <1s). Requires an enterprise license.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+        Link one or more entities to a target entity, creating a resolution group. Changes become visible on subsequent reads after the next index refresh (typically <1s).<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
       operationId: post-security-entity-store-resolution-link
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -62205,6 +62207,163 @@ paths:
               "target_id": "user:jane.doe@example.com",
               "entity_ids": ["user:jdoe@example.com"]
             }
+      x-state: Generally available; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/security/entity_store/resolution/rules:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/resolution/rules</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        List managed entity resolution rules and their effective enabled state for this space.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+      operationId: get-security-entity-store-resolution-rules
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                rulesListExample:
+                  description: Lists the managed resolution rules and their enabled state in the current space.
+                  summary: Managed resolution rules
+                  value:
+                    rules:
+                      - enabled: false
+                        id: related_user_alias_resolution
+                        kind: related_user_alias_resolution
+                        managed: true
+                      - enabled: true
+                        id: email_exact_match
+                        kind: email_exact_match
+                        managed: true
+          description: Entity resolution rules.
+      summary: List entity resolution rules
+      tags:
+        - Security entity store
+      x-state: Generally available; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/security/entity_store/resolution/rules/{id}/disable:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/resolution/rules/{id}/disable</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Disable a managed entity resolution rule in this space.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+      operationId: put-security-entity-store-resolution-rules-id-disable
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The stable identifier of the entity resolution rule.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 100
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                ruleDisabledExample:
+                  description: The related user alias resolution rule was disabled in the current space.
+                  summary: Rule disabled
+                  value:
+                    enabled: false
+                    id: related_user_alias_resolution
+                    kind: related_user_alias_resolution
+                    managed: true
+          description: Updated entity resolution rule.
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: The requested entity resolution rule does not exist.
+                  summary: Unknown rule
+                  value:
+                    error: Not Found
+                    message: Saved object [entity-resolution-rule/unknown] not found
+                    statusCode: 404
+          description: Unknown entity resolution rule.
+      summary: Disable an entity resolution rule
+      tags:
+        - Security entity store
+      x-state: Generally available; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/security/entity_store/resolution/rules/{id}/enable:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/resolution/rules/{id}/enable</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Enable a managed entity resolution rule in this space.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+      operationId: put-security-entity-store-resolution-rules-id-enable
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The stable identifier of the entity resolution rule.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 100
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                ruleEnabledExample:
+                  description: The related user alias resolution rule was enabled in the current space.
+                  summary: Rule enabled
+                  value:
+                    enabled: true
+                    id: related_user_alias_resolution
+                    kind: related_user_alias_resolution
+                    managed: true
+          description: Updated entity resolution rule.
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: The requested entity resolution rule does not exist.
+                  summary: Unknown rule
+                  value:
+                    error: Not Found
+                    message: Saved object [entity-resolution-rule/unknown] not found
+                    statusCode: 404
+          description: Unknown entity resolution rule.
+      summary: Enable an entity resolution rule
+      tags:
+        - Security entity store
+      x-state: Generally available; added in 9.5.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -62217,7 +62376,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Remove one or more entities from their resolution group. Changes become visible on subsequent reads after the next index refresh (typically <1s). Requires an enterprise license.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+        Remove one or more entities from their resolution group. Changes become visible on subsequent reads after the next index refresh (typically <1s).<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
       operationId: post-security-entity-store-resolution-unlink
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -62301,6 +62460,7 @@ paths:
             {
               "entity_ids": ["user:jdoe@example.com"]
             }
+      x-state: Generally available; added in 9.4.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -65232,6 +65392,7 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -65269,7 +65430,7 @@ paths:
           description: List of queries linked to the stream.
       summary: Get stream queries
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -65299,6 +65460,7 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -65329,16 +65491,19 @@ paths:
                             properties:
                               description:
                                 default: ''
+                                maxLength: 10000
                                 type: string
                               esql:
                                 type: object
                                 properties:
                                   query:
+                                    maxLength: 10000
                                     type: string
                                 required:
                                   - query
                               evidence:
                                 items:
+                                  maxLength: 10000
                                   type: string
                                 type: array
                               expires_at:
@@ -65367,6 +65532,7 @@ paths:
                             type: object
                             properties:
                               id:
+                                maxLength: 255
                                 type: string
                             required:
                               - id
@@ -65380,7 +65546,7 @@ paths:
           description: Bulk operation completed successfully.
       summary: Bulk update queries
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -65410,12 +65576,14 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: The identifier of the query to remove.
           in: path
           name: queryId
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -65433,7 +65601,7 @@ paths:
           description: The query was removed successfully.
       summary: Remove a query from a stream
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -65462,12 +65630,14 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: The identifier of the query.
           in: path
           name: queryId
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -65485,17 +65655,20 @@ paths:
               properties:
                 description:
                   default: ''
+                  maxLength: 10000
                   type: string
                 esql:
                   additionalProperties: false
                   type: object
                   properties:
                     query:
+                      maxLength: 10000
                       type: string
                   required:
                     - query
                 evidence:
                   items:
+                    maxLength: 10000
                     type: string
                   type: array
                 expires_at:
@@ -65516,7 +65689,7 @@ paths:
           description: The query was added or updated successfully.
       summary: Upsert a query to a stream
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -65539,24 +65712,28 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Start of the time range as an ISO 8601 date string.
           in: query
           name: from
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: End of the time range as an ISO 8601 date string.
           in: query
           name: to
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: The bucket size for aggregating events (e.g. "1m", "1h").
           in: query
           name: bucketSize
           required: true
           schema:
+            maxLength: 255
             pattern: ^(\d+)([smhd])$
             type: string
         - description: Query string to filter significant events on metadata fields
@@ -65564,6 +65741,7 @@ paths:
           name: query
           required: false
           schema:
+            maxLength: 10000
             type: string
         - description: 'Search mode: keyword (BM25), semantic (vector), or hybrid (RRF). When omitted, defaults to hybrid with a silent keyword fallback on failure. When set explicitly, failures propagate as errors.'
           in: query
@@ -65625,7 +65803,7 @@ paths:
           description: Significant events for the stream.
       summary: Read the significant events
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
