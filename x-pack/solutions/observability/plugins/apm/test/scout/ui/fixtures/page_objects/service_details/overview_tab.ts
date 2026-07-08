@@ -10,6 +10,8 @@ import type { ServiceDetailsPageTabName } from './service_details_tab';
 import { ServiceDetailsTab } from './service_details_tab';
 import { EXTENDED_TIMEOUT } from '../../constants';
 
+export type OverviewTabVariant = 'ecs' | 'mobile';
+
 export class OverviewTab extends ServiceDetailsTab {
   public readonly tabName: ServiceDetailsPageTabName = 'overview';
   public readonly tab: Locator;
@@ -33,7 +35,12 @@ export class OverviewTab extends ServiceDetailsTab {
   public readonly contextualServiceMapMaxHopsInput: Locator;
   public readonly exploreInServiceMapLink: Locator;
 
-  constructor(page: ScoutPage, kbnUrl: KibanaUrl, defaultServiceName: string) {
+  constructor(
+    page: ScoutPage,
+    kbnUrl: KibanaUrl,
+    defaultServiceName: string,
+    variant: OverviewTabVariant = 'ecs'
+  ) {
     super(page, kbnUrl, defaultServiceName);
     this.tab = this.page.getByTestId(`${this.tabName}Tab`);
     this.latencyChart = this.page.getByTestId('latencyChart');
@@ -45,14 +52,22 @@ export class OverviewTab extends ServiceDetailsTab {
     this.coldstartRateChart = this.page.getByTestId('coldstartRate');
     this.coldstartRateChartTitle = this.page.getByTestId('coldstartRateChartTitle');
     this.transactionBreakdownChart = this.page.getByTestId('transactionBreakdownChart');
-    this.serviceMapSection = this.page.getByTestId('apmServiceOverviewServiceMapSection');
+    const serviceMapSectionTestSubj =
+      variant === 'mobile'
+        ? 'apmMobileServiceOverviewServiceMapSection'
+        : 'apmServiceOverviewServiceMapSection';
+    const exploreInServiceMapLinkTestSubj =
+      variant === 'mobile'
+        ? 'apmMobileServiceOverviewExploreInServiceMap'
+        : 'apmServiceOverviewExploreInServiceMap';
+    this.serviceMapSection = this.page.getByTestId(serviceMapSectionTestSubj);
     this.contextualServiceMapGraph = this.page.getByTestId('contextualServiceMapGraph');
     this.contextualServiceMapControls = this.page.getByTestId('contextualServiceMapControls');
     this.contextualServiceMapMaxVisibleInput = this.page.getByTestId(
       'contextualServiceMapMaxVisible'
     );
     this.contextualServiceMapMaxHopsInput = this.page.getByTestId('contextualServiceMapMaxHops');
-    this.exploreInServiceMapLink = this.page.getByTestId('apmServiceOverviewExploreInServiceMap');
+    this.exploreInServiceMapLink = this.page.getByTestId(exploreInServiceMapLinkTestSubj);
   }
 
   protected async waitForTabLoad(): Promise<void> {
@@ -75,9 +90,10 @@ export class OverviewTab extends ServiceDetailsTab {
   }
 
   async waitForContextualServiceNodeToLoad(serviceName: string) {
-    const circle = this.getContextualServiceNode(serviceName);
-    await circle.waitFor({ state: 'attached', timeout: EXTENDED_TIMEOUT });
-    await circle.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await this.getContextualServiceNode(serviceName).waitFor({
+      state: 'visible',
+      timeout: EXTENDED_TIMEOUT,
+    });
   }
 
   async setContextualMapMaxVisible(maxVisible: number) {
@@ -105,8 +121,8 @@ export class OverviewTab extends ServiceDetailsTab {
     );
   }
 
-  getContextualMapNodeCount() {
-    return this.contextualServiceMapGraph.locator('.react-flow__node');
+  getContextualMapNodes() {
+    return this.contextualServiceMapGraph.locator('[data-id]');
   }
 
   // #region Charts and Tables

@@ -43,7 +43,6 @@ test.describe(
       await test.step('Loads the contextual map centered on the current service', async () => {
         await overviewTab.waitForContextualServiceMapToLoad();
         await overviewTab.waitForContextualServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
-        await expect(overviewTab.getContextualServiceNode(SERVICE_OPBEANS_JAVA)).toBeVisible();
       });
 
       await test.step('Opens a service node popover from the contextual map', async () => {
@@ -74,7 +73,7 @@ test.describe(
 
       await test.step('Limit hops so dependencies stay hidden behind the focal service', async () => {
         await overviewTab.setContextualMapMaxHops(0);
-        await expect(overviewTab.getContextualMapNodeCount()).toHaveCount(1, {
+        await expect(overviewTab.getContextualMapNodes()).toHaveCount(1, {
           timeout: EXTENDED_TIMEOUT,
         });
         await expect(
@@ -84,7 +83,7 @@ test.describe(
 
       await test.step('Expand hidden dependencies from the focal service', async () => {
         await overviewTab.getExpandHiddenDependenciesButton(SERVICE_OPBEANS_JAVA).click();
-        await expect(overviewTab.getContextualMapNodeCount()).not.toHaveCount(1, {
+        await expect(overviewTab.getContextualMapNodes()).not.toHaveCount(1, {
           timeout: EXTENDED_TIMEOUT,
         });
         await expect(
@@ -94,7 +93,7 @@ test.describe(
         ).toBeVisible({ timeout: EXTENDED_TIMEOUT });
       });
 
-      await test.step('Dismiss popover before a11y check', async () => {
+      await test.step('Dismiss popover', async () => {
         await page.keyboard.press('Escape');
         await expect(page.getByTestId('serviceMapPopoverContent')).toBeHidden();
       });
