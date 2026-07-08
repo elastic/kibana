@@ -23,6 +23,8 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import {
   APP_ID,
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
@@ -65,6 +67,7 @@ import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task
 import {
   CasesAnalyticsV2Service,
   V2_NOOP_ACTIVITY_WRITER,
+  V2_NOOP_ATTACHMENTS_WRITER,
   V2_NOOP_DATA_VIEW_REFRESHER,
   V2_NOOP_WRITER,
 } from './cases_analytics_v2';
@@ -264,6 +267,7 @@ export class CasePlugin
       getSpaceId,
       serverlessProjectType,
       isCasesAttachmentsEnabled: this.caseConfig.attachments?.enabled === true,
+      isTemplatesEnabled: this.caseConfig.templates?.enabled === true,
     });
 
     registerCaseWorkflowSteps(
@@ -357,19 +361,47 @@ export class CasePlugin
             'Skipping v2 start.'
         );
       } else {
-        // Internal (unscoped) repo for four consumers: the cases-surface
-        // reconciliation runner (walks `cases` SOs), the activity-surface
-        // runner (walks `cases-user-actions` SOs), the data view sub-service
-        // (reads `cases-templates` per-space for runtime fields), and `/reset`
-        // (deletes per-space `index-pattern` SOs across namespaces — a
-        // request-scoped client 404s outside its own space). The hidden cases
-        // SO types must be opted in explicitly; `cases-templates` only when
-        // templates is on (else "Missing mappings for saved objects types");
-        // `index-pattern` grants the cross-namespace data-view delete `/reset`
-        // needs.
+        // The internal repo serves five consumers:
+        //  - The cases-surface reconciliation runner walks `cases` SOs.
+        //  - The activity-surface reconciliation runner walks
+        //    `cases-user-actions` SOs (created-only, no `updated_at`
+        //    filter — see `reconciliation/activity_runner.ts`).
+        //  - The attachments-surface reconciliation runner walks BOTH
+        //    `cases-comments` (legacy) AND `cases-attachments` (new
+        //    unified) SOs into a single analytics index, so the surface
+        //    works regardless of where in the in-flight SO migration
+        //    (security-team#15066) a tenant sits — see
+        //    `reconciliation/attachments_runner.ts`.
+        //  - The data view sub-service reads `cases-templates` SOs per-space
+        //    to derive runtime fields. Only included when templates is on
+        //    — `cases-templates` is registered with core only when
+        //    `xpack.cases.templates.enabled` is true (see
+        //    `saved_object_types/index.ts`), and naming it here when the
+        //    mapping isn't registered throws "Missing mappings for saved
+        //    objects types: 'cases-templates'" from
+        //    `createInternalRepository`. With templates off, the data view
+        //    sub-service short-circuits its template read and bootstraps
+        //    per-space data views with an empty runtime field overlay.
+        //  - The `/reset` admin route deletes per-space `index-pattern` SOs
+        //    across namespaces. A request-scoped SO client can't do this:
+        //    the spaces extension scopes `delete` to the request's namespace,
+        //    so deleting a data view in space `analytics-1` from a `/reset`
+        //    request that arrived in `default` 404s on the existence check
+        //    (even with `force: true`).
+        // The cases SO types are hidden, so they must be opted in
+        // explicitly. `index-pattern` is a globally-registered SO type
+        // (data-views plugin); opting it in here grants the internal client
+        // the cross-namespace delete it needs.
+        //
+        // Both attachment SO types are always registered with core (the
+        // unified `cases-attachments` type is registered unconditionally
+        // since #275225), so both are opted in here and the attachments
+        // reconciliation runner always walks both source types.
         const v2InternalRepository = core.savedObjects.createInternalRepository([
           CASE_SAVED_OBJECT,
           CASE_USER_ACTION_SAVED_OBJECT,
+          CASE_COMMENT_SAVED_OBJECT,
+          CASE_ATTACHMENT_SAVED_OBJECT,
           ...(this.caseConfig.templates?.enabled ? [CASE_TEMPLATE_SAVED_OBJECT] : []),
           'index-pattern',
         ]);
@@ -443,6 +475,12 @@ export class CasePlugin
       // user-actions service via the cases client factory.
       analyticsV2ActivityWriter:
         this.casesAnalyticsV2Service?.getActivityWriter() ?? V2_NOOP_ACTIVITY_WRITER,
+      // Attachments surface companion. Same lifetime + same defensive
+      // fallback as `analyticsV2Writer`. Captured by the AttachmentService
+      // (write hooks) and by the CasesService (cascade-on-case-delete) via
+      // the cases client factory.
+      analyticsV2AttachmentsWriter:
+        this.casesAnalyticsV2Service?.getAttachmentsWriter() ?? V2_NOOP_ATTACHMENTS_WRITER,
       // Companion refresher proxy (same lifetime + fallback). The templates
       // service calls it fire-and-forget after every template mutation.
       analyticsV2DataViewRefresher:

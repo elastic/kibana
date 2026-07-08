@@ -97,6 +97,7 @@ export class CascadedDocumentsFetcher {
         timeRange,
         scopedProfilesManager: this.scopedProfilesManager,
         inspectorAdapters: { requests: this.requestAdapter },
+        isApproximate: false,
         inspectorConfig: {
           title: i18n.translate('discover.dataCascade.inspector.cascadeQueryTitle', {
             defaultMessage: 'Cascade Row Data Query',
