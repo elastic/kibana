@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import Dagre from '@dagrejs/dagre';
+import { graphlib, layout } from '@dagrejs/dagre';
 import type { Node, Edge } from '@xyflow/react';
 import type { EdgeViewModel, NodeViewModel, Size } from '../types';
 import { getStackNodeStyle } from '../node/styles';
@@ -35,7 +35,7 @@ export const layoutGraph = (
     directed: true,
   };
 
-  const g = new Dagre.graphlib.Graph(graphOpts)
+  const g = new graphlib.Graph(graphOpts)
     .setGraph({
       rankdir: 'LR',
       align: 'UL',
@@ -99,7 +99,7 @@ export const layoutGraph = (
     });
   });
 
-  Dagre.layout(g);
+  layout(g);
 
   alignNodesCenterInPlace(
     g,
@@ -199,6 +199,14 @@ const layoutStackedLabels = (
   };
 };
 
+/** Position/size of a node after `layout()` has run; Dagre's own types mark these optional pre-layout. */
+interface DagrePositionedNode {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 /**
  * Shared context for graph alignment operations.
  * - Y/Height/setY: accessors for node vertical position and height in Dagre
@@ -206,7 +214,7 @@ const layoutStackedLabels = (
  * - nodesById: map of node ID to node data for accessing node properties
  */
 interface GraphHelpers {
-  g: Dagre.graphlib.Graph;
+  g: graphlib.Graph;
   filter: (node: string) => boolean;
   Y: (id: string) => number;
   Height: (id: string) => number;
@@ -217,7 +225,7 @@ interface GraphHelpers {
 
 /** Returns child nodes (successors) that pass the filter. */
 const getFilteredSuccessors = (
-  g: Dagre.graphlib.Graph,
+  g: graphlib.Graph,
   node: string,
   filter: (n: string) => boolean
 ): string[] =>
@@ -225,7 +233,7 @@ const getFilteredSuccessors = (
 
 /** Returns parent nodes (predecessors) that pass the filter. */
 const getFilteredPredecessors = (
-  g: Dagre.graphlib.Graph,
+  g: graphlib.Graph,
   node: string,
   filter: (n: string) => boolean
 ): string[] =>
@@ -425,16 +433,16 @@ const handleSingleParent = (helpers: GraphHelpers, currNode: string, parent: str
  * Mutates the Dagre graph in place.
  */
 const alignNodesCenterInPlace = (
-  g: Dagre.graphlib.Graph,
+  g: graphlib.Graph,
   filter: (node: string) => boolean,
   nodesById: Record<string, Node<NodeViewModel>>
 ) => {
   const helpers: GraphHelpers = {
     g,
     filter,
-    Y: (id: string) => (g.node(id) as Dagre.Node).y,
-    Height: (id: string) => (g.node(id) as Dagre.Node).height,
-    setY: (id: string, y: number) => ((g.node(id) as Dagre.Node).y = y),
+    Y: (id: string) => (g.node(id) as DagrePositionedNode).y,
+    Height: (id: string) => (g.node(id) as DagrePositionedNode).height,
+    setY: (id: string, y: number) => ((g.node(id) as DagrePositionedNode).y = y),
     prevNodeY: {},
     nodesById,
   };
@@ -454,7 +462,7 @@ const alignNodesCenterInPlace = (
   }
 };
 
-const topsort = (g: Dagre.graphlib.Graph, filter: (node: string) => boolean): string[] => {
+const topsort = (g: graphlib.Graph, filter: (node: string) => boolean): string[] => {
   const visited: Record<string, boolean> = {};
   const stack: Record<string, boolean> = {};
   const results: string[] = [];

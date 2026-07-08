@@ -689,9 +689,9 @@ function handleTimeout(
   stepId: string,
   stepType: 'workflow_level_timeout' | 'step_level_timeout',
   timeout: string,
-  innerGraph: graphlib.Graph<GraphNodeUnion>,
+  innerGraph: WorkflowGraphType,
   context: GraphBuildContext
-): graphlib.Graph<GraphNodeUnion> {
+): WorkflowGraphType {
   const enterTimeoutZone: EnterTimeoutZoneNode = {
     id: `enterTimeoutZone_${stepId}`,
     type: 'enter-timeout-zone',
@@ -717,7 +717,7 @@ function handleTimeout(
 function handleStepLevelOnFailure(
   step: BaseStep,
   context: GraphBuildContext
-): graphlib.Graph<GraphNodeUnion> | null {
+): WorkflowGraphType | null {
   const stackEntry: GraphNodeUnion = {
     id: `stepLevelOnFailure_${getStepId(step, context)}`,
     type: 'step-level-on-failure',
@@ -737,7 +737,7 @@ function handleStepLevelOnFailure(
 function handleWorkflowLevelOnFailure(
   step: BaseStep,
   context: GraphBuildContext
-): graphlib.Graph<GraphNodeUnion> | null {
+): WorkflowGraphType | null {
   const onFailureConfiguration = context.settings?.['on-failure'];
   if (
     flowControlStepTypes.has(step.type) ||
@@ -937,13 +937,10 @@ function createFallback(
   return graph;
 }
 
-function createStepsSequence(
-  steps: BaseStep[],
-  context: GraphBuildContext
-): graphlib.Graph<GraphNodeUnion> {
+function createStepsSequence(steps: BaseStep[], context: GraphBuildContext): WorkflowGraphType {
   const graph = createTypedGraph({ directed: true });
 
-  let previousGraph: graphlib.Graph<GraphNodeUnion> | null = null;
+  let previousGraph: WorkflowGraphType | null = null;
 
   for (let i = 0; i < steps.length; i++) {
     const currentGraph = visitAbstractStep(steps[i], context);
@@ -1305,7 +1302,7 @@ function visitLoopContinueStep(
 export function convertToWorkflowGraph(
   workflowSchema: WorkflowYaml,
   defaultSettings?: WorkflowSettings
-): graphlib.Graph<GraphNodeUnion> {
+): WorkflowGraphType {
   const resolvedSettings = resolveWorklfowSettings(workflowSchema.settings, defaultSettings);
   const context: GraphBuildContext = {
     settings: resolvedSettings,

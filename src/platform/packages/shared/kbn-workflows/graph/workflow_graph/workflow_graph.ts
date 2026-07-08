@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { GraphEdge } from '@dagrejs/dagre';
 import { graphlib } from '@dagrejs/dagre';
 import { createTypedGraph } from './create_typed_graph';
 import type { WorkflowSettings, WorkflowYaml } from '../..';
@@ -109,7 +108,7 @@ export class WorkflowGraph {
     return this.graph.edges().map((edge) => ({ v: edge.v, w: edge.w }));
   }
 
-  public getEdge(edgeMetadata: { v: string; w: string }): GraphEdge {
+  public getEdge(edgeMetadata: { v: string; w: string }): { label?: string } | undefined {
     return this.graph.edge(edgeMetadata);
   }
 
