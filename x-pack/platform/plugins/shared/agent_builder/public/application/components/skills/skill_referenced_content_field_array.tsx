@@ -111,7 +111,7 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
   onStopEdit,
 }) => {
   const snapshotRef = useRef<ReferencedContentItem>({ ...DEFAULT_REFERENCED_FILE });
-  const { trigger } = useFormContext<SkillFormData>();
+  const { trigger, clearErrors } = useFormContext<SkillFormData>();
 
   const nameField = useController({ control, name: `referenced_content.${index}.name` });
   const pathField = useController({ control, name: `referenced_content.${index}.relativePath` });
@@ -119,15 +119,6 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
 
   const debouncedContent = useDebouncedValue(contentField.field.value, 300);
   const tokenCount = useMemo(() => estimateTokens(debouncedContent), [debouncedContent]);
-
-  const handleEdit = () => {
-    snapshotRef.current = {
-      name: nameField.field.value,
-      relativePath: pathField.field.value,
-      content: contentField.field.value,
-    };
-    onStartEdit();
-  };
 
   const handleDone = async () => {
     const isValid = await trigger([
@@ -143,6 +134,11 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
     nameField.field.onChange(snapshot.name);
     pathField.field.onChange(snapshot.relativePath);
     contentField.field.onChange(snapshot.content);
+    clearErrors([
+      `referenced_content.${index}.name`,
+      `referenced_content.${index}.relativePath`,
+      `referenced_content.${index}.content`,
+    ]);
     onStopEdit();
   };
 
@@ -176,7 +172,14 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
             >
               <EuiButtonIcon
                 iconType="pencil"
-                onClick={handleEdit}
+                onClick={() => {
+                  snapshotRef.current = {
+                    name: nameField.field.value,
+                    relativePath: pathField.field.value,
+                    content: contentField.field.value,
+                  };
+                  onStartEdit();
+                }}
                 aria-label={labels.skills.referencedFileSection.editFileAriaLabel}
                 data-test-subj={`agentBuilderSkillReferencedContentEdit-${index}`}
               />
@@ -216,8 +219,6 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
       onContentBlur={contentField.field.onBlur}
       fileNameError={nameField.fieldState.error?.message}
       relativePathError={pathField.fieldState.error?.message}
-      contentError={contentField.fieldState.error?.message}
-      isActive
       footer={
         <EuiFlexGroup gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -275,8 +276,9 @@ const SkillReferencedContentFieldArrayEdit: React.FC<{ control: Control<SkillFor
   const atLimit = fields.length >= maxReferencedContentItems;
 
   const handleAdd = () => {
+    const nextIndex = fields.length;
     append(DEFAULT_REFERENCED_FILE);
-    setActiveIndex(fields.length);
+    setActiveIndex(nextIndex);
   };
 
   const handleRemove = (index: number) => {
@@ -300,7 +302,7 @@ const SkillReferencedContentFieldArrayEdit: React.FC<{ control: Control<SkillFor
               <EuiButton
                 iconType="plusInCircle"
                 onClick={handleAdd}
-                disabled={atLimit}
+                disabled={atLimit || activeIndex !== null}
                 title={
                   atLimit
                     ? labels.skills.referencedFileSection.addFileButtonDisabledTooltip(

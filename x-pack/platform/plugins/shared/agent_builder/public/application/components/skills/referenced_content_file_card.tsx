@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiFieldText,
@@ -39,9 +39,6 @@ export interface ReferencedContentFileCardProps {
   onContentBlur?: () => void;
   fileNameError?: string;
   relativePathError?: string;
-  contentError?: string;
-  readOnly?: boolean;
-  isActive?: boolean;
   footer?: React.ReactNode;
 }
 
@@ -58,9 +55,6 @@ export const ReferencedContentFileCard: React.FC<ReferencedContentFileCardProps>
   onContentBlur,
   fileNameError,
   relativePathError,
-  contentError,
-  readOnly = false,
-  isActive = false,
   footer,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -82,12 +76,14 @@ export const ReferencedContentFileCard: React.FC<ReferencedContentFileCardProps>
 
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
-  const activeBorderStyle = isActive
-    ? css`
-        border-color: ${euiTheme.colors.primary};
-        border-width: 2px;
-      `
-    : undefined;
+  useEffect(() => {
+    if (relativePathError) setIsAdvancedOpen(true);
+  }, [relativePathError]);
+
+  const activeBorderStyle = css`
+    border-color: ${euiTheme.colors.primary};
+    border-width: 2px;
+  `;
 
   return (
     <EuiPanel
@@ -98,10 +94,10 @@ export const ReferencedContentFileCard: React.FC<ReferencedContentFileCardProps>
     >
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="document" color={isActive ? 'primary' : 'subdued'} aria-hidden={true} />
+          <EuiIcon type="document" color="primary" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText size="s" color={isActive ? 'primary' : 'subdued'}>
+          <EuiText size="s" color="primary">
             {displayName}
           </EuiText>
         </EuiFlexItem>
@@ -122,24 +118,17 @@ export const ReferencedContentFileCard: React.FC<ReferencedContentFileCardProps>
           onBlur={onFileNameBlur}
           fullWidth
           isInvalid={Boolean(fileNameError)}
-          disabled={readOnly}
           data-test-subj="agentBuilderSkillReferencedContentFileName"
         />
       </EuiFormRow>
 
       <EuiSpacer size="m" />
 
-      <EuiFormRow
-        label={labels.skills.referencedFileCard.contentLabel}
-        isInvalid={Boolean(contentError)}
-        error={contentError}
-        fullWidth
-      >
+      <EuiFormRow label={labels.skills.referencedFileCard.contentLabel} fullWidth>
         <EuiMarkdownEditor
           value={content}
           onChange={onContentChange}
           onBlur={onContentBlur}
-          readOnly={readOnly}
           aria-label={labels.skills.referencedFileCard.contentAriaLabel}
           data-test-subj="agentBuilderSkillReferencedContentMarkdown"
         />
@@ -167,7 +156,6 @@ export const ReferencedContentFileCard: React.FC<ReferencedContentFileCardProps>
             onBlur={onRelativePathBlur}
             fullWidth
             isInvalid={Boolean(relativePathError)}
-            disabled={readOnly}
             data-test-subj="agentBuilderSkillReferencedContentRelativePath"
           />
         </EuiFormRow>
