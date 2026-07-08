@@ -25,6 +25,12 @@ declare global {
 
 type AutocompleteContext = AutoCompleteContext;
 
+interface WalkingStateOptions {
+  depth?: number;
+  priority?: number;
+  specificity?: number;
+}
+
 export function wrapComponentWithDefaults<T extends AutocompleteComponent>(
   component: T,
   defaults: Record<string, unknown>
@@ -81,16 +87,14 @@ export class WalkingState {
     parentName: string | undefined,
     components: AutocompleteComponent[],
     contextExtensionList: Array<Record<string, unknown>>,
-    depth?: number,
-    priority?: number,
-    specificity?: number
+    { depth = 0, priority, specificity = 0 }: WalkingStateOptions = {}
   ) {
     this.parentName = parentName;
     this.components = components;
     this.contextExtensionList = contextExtensionList;
-    this.depth = depth || 0;
+    this.depth = depth;
     this.priority = priority;
-    this.specificity = specificity || 0;
+    this.specificity = specificity;
   }
 }
 
@@ -140,7 +144,11 @@ export function walkTokenPath(
         const specificity = ws.specificity + (component instanceof ConstantComponent ? 1 : 0);
 
         nextWalkingStates.push(
-          new WalkingState(component.name, next, extensionList, ws.depth + 1, priority, specificity)
+          new WalkingState(component.name, next, extensionList, {
+            depth: ws.depth + 1,
+            priority,
+            specificity,
+          })
         );
       }
     });
@@ -191,7 +199,7 @@ export function populateContext(
     context.autoCompleteSet = Array.from(autoCompleteSet.values());
   }
 
-  // apply what values were set so far to context, selecting the deepest on which sets the context
+  // Apply accumulated context from the best matching state.
   if (walkStates.length !== 0) {
     let wsToUse;
     // Sort by explicit priority first (lower wins), then prefer the most specific
