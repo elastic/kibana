@@ -33,6 +33,7 @@ function notFoundResult(
     index_not_found: `The endpoint metadata index is not available. Cannot retrieve status for '${hostName}'.`,
   };
   return {
+    kind: 'response_action_result' as const,
     hostName,
     found: false,
     reason,
@@ -156,6 +157,8 @@ export const getEndpointStatusTool = (
               tool_result_id: getToolResultId(),
               type: ToolResultType.other,
               data: {
+                kind: 'response_action_result' as const,
+                action: 'get-endpoint-status' as const,
                 hostName,
                 agentId,
                 found: true,

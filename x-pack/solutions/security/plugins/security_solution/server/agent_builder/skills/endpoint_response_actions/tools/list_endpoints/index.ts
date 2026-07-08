@@ -76,6 +76,8 @@ export const listEndpointsTool = (
               tool_result_id: getToolResultId(),
               type: ToolResultType.other,
               data: {
+                kind: 'response_action_result' as const,
+                action: 'list-endpoints' as const,
                 endpoints,
                 total: hostInfo.total ?? 0,
               },

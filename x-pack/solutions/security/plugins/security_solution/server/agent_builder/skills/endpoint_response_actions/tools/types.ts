@@ -77,6 +77,12 @@ export type HostLookupReason = 'endpoint_not_found' | 'index_not_found';
  * cause of a not-found outcome.
  */
 export interface EndpointNotFoundResult {
+  /**
+   * Stable marker letting the frontend identify response-action tool
+   * results without colliding with the many other skills that also return
+   * `ToolResultType.other` (see `isResponseActionResult` type guard).
+   */
+  kind: 'response_action_result';
   hostName: string;
   found: false;
   reason: HostLookupReason;
