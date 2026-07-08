@@ -34,6 +34,7 @@ export interface Props {
   connectors: ActionConnector[];
   disabled: boolean;
   handleShowEditFlyout: () => void;
+  hideTitle?: boolean;
   isLoading: boolean;
   mappings: CaseConnectorMapping[];
   onChangeConnector: (id: string) => void;
@@ -46,6 +47,7 @@ const ConnectorsComponent: React.FC<Props> = ({
   connectors,
   disabled,
   handleShowEditFlyout,
+  hideTitle = false,
   isLoading,
   mappings,
   onChangeConnector,
@@ -88,6 +90,62 @@ const ConnectorsComponent: React.FC<Props> = ({
     ),
     [connectorsName, handleShowEditFlyout, updateConnectorDisabled]
   );
+  const connectorContent = (
+    <>
+      <EuiFormRow
+        fullWidth
+        label={dropDownLabel}
+        data-test-subj="case-connectors-form-row"
+        labelAppend={
+          canSave ? (
+            <EuiButtonEmpty
+              size="xs"
+              data-test-subj="add-new-connector"
+              onClick={onAddNewConnector}
+            >
+              {i18n.ADD_CONNECTOR}
+            </EuiButtonEmpty>
+          ) : null
+        }
+      >
+        {canUseConnectors ? (
+          <ConnectorsDropdown
+            connectors={connectors}
+            disabled={disabled}
+            selectedConnector={selectedConnector.id}
+            isLoading={isLoading}
+            onChange={onChangeConnector}
+          />
+        ) : (
+          <EuiText data-test-subj="configure-case-connector-permissions-error-msg" size="s">
+            <span>{i18n.READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>
+          </EuiText>
+        )}
+      </EuiFormRow>
+      {selectedConnector.type !== ConnectorTypes.none && isDeprecatedConnector(connector) && (
+        <>
+          <EuiSpacer size="m" />
+          <DeprecatedCallout />
+        </>
+      )}
+      {selectedConnector.type !== ConnectorTypes.none && (
+        <>
+          <EuiSpacer size="m" />
+          <Mapping
+            actionTypeName={actionTypeName}
+            connectorType={selectedConnector.type}
+            isLoading={isLoading}
+            mappings={mappings}
+          />
+        </>
+      )}
+    </>
+  );
+
+  if (hideTitle) {
+    return <div data-test-subj="case-connectors-form-group">{connectorContent}</div>;
+  }
+
   return (
     <>
       <EuiDescribedFormGroup
@@ -96,53 +154,7 @@ const ConnectorsComponent: React.FC<Props> = ({
         description={i18n.INCIDENT_MANAGEMENT_SYSTEM_DESC}
         data-test-subj="case-connectors-form-group"
       >
-        <EuiFormRow
-          fullWidth
-          label={dropDownLabel}
-          data-test-subj="case-connectors-form-row"
-          labelAppend={
-            canSave ? (
-              <EuiButtonEmpty
-                size="xs"
-                data-test-subj="add-new-connector"
-                onClick={onAddNewConnector}
-              >
-                {i18n.ADD_CONNECTOR}
-              </EuiButtonEmpty>
-            ) : null
-          }
-        >
-          {canUseConnectors ? (
-            <ConnectorsDropdown
-              connectors={connectors}
-              disabled={disabled}
-              selectedConnector={selectedConnector.id}
-              isLoading={isLoading}
-              onChange={onChangeConnector}
-            />
-          ) : (
-            <EuiText data-test-subj="configure-case-connector-permissions-error-msg" size="s">
-              <span>{i18n.READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>
-            </EuiText>
-          )}
-        </EuiFormRow>
-        {selectedConnector.type !== ConnectorTypes.none && isDeprecatedConnector(connector) && (
-          <>
-            <EuiSpacer size="m" />
-            <DeprecatedCallout />
-          </>
-        )}
-        {selectedConnector.type !== ConnectorTypes.none && (
-          <>
-            <EuiSpacer size="m" />
-            <Mapping
-              actionTypeName={actionTypeName}
-              connectorType={selectedConnector.type}
-              isLoading={isLoading}
-              mappings={mappings}
-            />
-          </>
-        )}
+        {connectorContent}
       </EuiDescribedFormGroup>
     </>
   );

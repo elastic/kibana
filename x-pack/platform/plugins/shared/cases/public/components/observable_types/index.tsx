@@ -25,6 +25,7 @@ import { ObservableTypesList } from './observable_types_list';
 export interface ObservableTypesProps {
   observableTypes: ObservableTypesConfiguration;
   disabled: boolean;
+  hideTitle?: boolean;
   isLoading: boolean;
   handleAddObservableType: () => void;
   handleDeleteObservableType: (key: string) => void;
@@ -32,6 +33,7 @@ export interface ObservableTypesProps {
 }
 const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
   disabled,
+  hideTitle = false,
   isLoading,
   handleAddObservableType,
   handleDeleteObservableType,
@@ -56,6 +58,58 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
     return null;
   }
 
+  const observableTypesContent = (
+    <EuiPanel paddingSize="s" color="subdued" hasBorder={false} hasShadow={false}>
+      {observableTypes.length ? (
+        <>
+          <ObservableTypesList
+            disabled={!canModifyObservableTypes}
+            observableTypes={observableTypes}
+            onDeleteObservableType={handleDeleteObservableType}
+            onEditObservableType={onEditObservableType}
+          />
+        </>
+      ) : null}
+      <EuiSpacer size="s" />
+      {!observableTypes.length ? (
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false} data-test-subj="empty-observable-types">
+            {i18n.NO_OBSERVABLE_TYPES}
+            <EuiSpacer size="m" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : null}
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem grow={false}>
+          {observableTypes.length < MAX_CUSTOM_OBSERVABLE_TYPES ? (
+            <EuiButtonEmpty
+              isLoading={isLoading}
+              isDisabled={!canModifyObservableTypes}
+              size="s"
+              onClick={onAddObservableType}
+              iconType="plusCircle"
+              data-test-subj="add-observable-type"
+            >
+              {i18n.ADD_OBSERVABLE_TYPE}
+            </EuiButtonEmpty>
+          ) : (
+            <EuiFlexGroup justifyContent="center">
+              <EuiFlexItem grow={false}>
+                <EuiText>{i18n.MAX_OBSERVABLE_TYPES_LIMIT(MAX_CUSTOM_OBSERVABLE_TYPES)}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+    </EuiPanel>
+  );
+
+  if (hideTitle) {
+    return <div data-test-subj="observable-types-form-group">{observableTypesContent}</div>;
+  }
+
   return (
     <EuiDescribedFormGroup
       fullWidth
@@ -69,51 +123,7 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
       description={<p>{i18n.DESCRIPTION}</p>}
       data-test-subj="observable-types-form-group"
     >
-      <EuiPanel paddingSize="s" color="subdued" hasBorder={false} hasShadow={false}>
-        {observableTypes.length ? (
-          <>
-            <ObservableTypesList
-              disabled={!canModifyObservableTypes}
-              observableTypes={observableTypes}
-              onDeleteObservableType={handleDeleteObservableType}
-              onEditObservableType={onEditObservableType}
-            />
-          </>
-        ) : null}
-        <EuiSpacer size="s" />
-        {!observableTypes.length ? (
-          <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false} data-test-subj="empty-observable-types">
-              {i18n.NO_OBSERVABLE_TYPES}
-              <EuiSpacer size="m" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : null}
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false}>
-            {observableTypes.length < MAX_CUSTOM_OBSERVABLE_TYPES ? (
-              <EuiButtonEmpty
-                isLoading={isLoading}
-                isDisabled={!canModifyObservableTypes}
-                size="s"
-                onClick={onAddObservableType}
-                iconType="plusCircle"
-                data-test-subj="add-observable-type"
-              >
-                {i18n.ADD_OBSERVABLE_TYPE}
-              </EuiButtonEmpty>
-            ) : (
-              <EuiFlexGroup justifyContent="center">
-                <EuiFlexItem grow={false}>
-                  <EuiText>{i18n.MAX_OBSERVABLE_TYPES_LIMIT(MAX_CUSTOM_OBSERVABLE_TYPES)}</EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="s" />
-      </EuiPanel>
+      {observableTypesContent}
     </EuiDescribedFormGroup>
   );
 };
