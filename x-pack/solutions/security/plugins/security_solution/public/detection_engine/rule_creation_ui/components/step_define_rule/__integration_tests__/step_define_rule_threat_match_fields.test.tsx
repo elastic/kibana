@@ -263,6 +263,60 @@ describe('StepDefineRule threat_match concurrentSearches/itemsPerSearch (#276203
       true
     );
   });
+
+  it('mounts concurrentSearches/itemsPerSearch as empty strings when a threat_match rule has no value for them', async () => {
+    // Documents a quirk of the underlying (deprecated) form library: a mounted
+    // UseField with no default value anywhere falls back to '' rather than
+    // undefined. formatDefineStepData is responsible for normalizing this back
+    // to undefined before the payload reaches the server -- see the
+    // "normalizes concurrentSearches/itemsPerSearch" test in
+    // rule_creation/helpers.test.ts.
+    const initialState = {
+      ruleType: 'threat_match' as const,
+      index: ['test-index'],
+      queryBar: {
+        query: { query: '*:*', language: 'kuery' },
+        filters: [],
+        saved_id: null,
+      },
+      threatIndex: ['threat-index'],
+      threatQueryBar: {
+        query: { query: '*:*', language: 'kuery' },
+        filters: [],
+        saved_id: null,
+      },
+      threatMapping: [
+        {
+          entries: [{ field: 'host.name', value: 'host.name', type: 'mapping' as const }],
+        },
+      ],
+    };
+    const indexPattern: DataViewBase = {
+      fields: [createIndexPatternField({ name: 'host.name', esTypes: ['string'] })],
+      title: '',
+    };
+    const handleSubmit = jest.fn();
+
+    render(
+      <TestForm initialState={initialState} indexPattern={indexPattern} onSubmit={handleSubmit} />,
+      { wrapper: TestProviders }
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Submit'));
+    });
+    await waitFor(() => {
+      expect(handleSubmit).toHaveBeenCalled();
+    });
+
+    expect(handleSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        concurrentSearches: '',
+        itemsPerSearch: '',
+      }),
+      true
+    );
+  });
 });
 
 interface TestFormProps {

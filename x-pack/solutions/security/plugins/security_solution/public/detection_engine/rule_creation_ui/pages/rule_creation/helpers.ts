@@ -515,8 +515,12 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         threat_filters: ruleFields.threatQueryBar?.filters,
         threat_mapping: ruleFields.threatMapping,
         threat_language: ruleFields.threatQueryBar?.query?.language,
-        concurrent_searches: ruleFields.concurrentSearches,
-        items_per_search: ruleFields.itemsPerSearch,
+        // UseField falls back to '' when no default value is found anywhere (this
+        // form library's behavior, not ours) -- these API-only fields have no UI
+        // and thus no meaningful default for most rules, so normalize back to
+        // undefined rather than sending an empty string to the number field on save.
+        concurrent_searches: ruleFields.concurrentSearches || undefined,
+        items_per_search: ruleFields.itemsPerSearch || undefined,
         ...alertSuppressionFields,
       }
     : isEqlFields(ruleFields)

@@ -552,6 +552,38 @@ describe('helpers', () => {
       expect(result).toEqual(expected);
     });
 
+    it('normalizes concurrentSearches/itemsPerSearch to undefined instead of sending an empty string', () => {
+      // Regression test: UseField falls back to '' (not undefined) as a mounted
+      // field's initial value when no default is found anywhere, which is the
+      // case for these hidden, API-only fields on any threat_match rule that
+      // doesn't already have them set. Sending '' to the server's number field
+      // fails validation and blocks every threat_match rule save.
+      const mockStepData: DefineStepRule = {
+        ...mockData,
+        ruleType: 'threat_match',
+        threatIndex: ['index_1'],
+        threatQueryBar: {
+          query: { language: 'kql', query: 'threat_host: *' },
+          filters: [],
+          saved_id: null,
+        },
+        threatMapping: [
+          {
+            entries: [{ field: 'host.name', type: 'mapping', value: 'host.name' }],
+          },
+        ],
+        // @ts-expect-error simulating the form library's empty-string fallback
+        concurrentSearches: '',
+        // @ts-expect-error simulating the form library's empty-string fallback
+        itemsPerSearch: '',
+      };
+
+      const result = formatDefineStepData(mockStepData);
+
+      expect(result.concurrent_searches).toBeUndefined();
+      expect(result.items_per_search).toBeUndefined();
+    });
+
     it('returns suppression fields for machine_learning rules', () => {
       const mockStepData: DefineStepRule = {
         ...mockData,
