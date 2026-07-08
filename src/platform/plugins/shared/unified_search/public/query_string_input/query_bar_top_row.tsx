@@ -1063,7 +1063,7 @@ export const QueryBarTopRow = React.memo(
           <EuiSplitButton.ActionSecondary
             iconType="backgroundTask"
             isLoading={isSendingToBackground}
-            isDisabled={!canSendToBackground}
+            // isDisabled={!canSendToBackground}
             onClick={onClickSendToBackground}
             tooltipProps={{
               content: strings.getSendToBackgroundLabel(),

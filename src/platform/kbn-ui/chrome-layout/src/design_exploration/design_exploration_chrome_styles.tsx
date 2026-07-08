@@ -115,11 +115,16 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
       overflow: visible !important;
       line-height: normal !important;
       align-items: center !important;
-      padding-inline: ${DESIGN_EXPLORATION_GAP}px !important;
+      padding-inline: calc(${DESIGN_EXPLORATION_GAP}px + 4px)!important;
     }
 
     ${scope} [data-test-subj='embeddablePanelTitle'] {
       padding-left: 4px !important;
+    }
+
+    ${scope} [class*='css-'][class*='react_expression_renderer--ReactExpressionRenderer'],
+    ${scope} [class*='css-'][class*='visualization_container--VisualizationContainer'] {
+      padding: 0 ${DESIGN_EXPLORATION_PADDING_COMPACT}px ${DESIGN_EXPLORATION_PADDING_COMPACT}px !important;
     }
 
     ${scope} .euiFormControlLayout:not(.euiFormControlLayout--group):not(:focus-within):not(:has(:invalid, [aria-invalid='true'])):not(:has(:disabled)) {
