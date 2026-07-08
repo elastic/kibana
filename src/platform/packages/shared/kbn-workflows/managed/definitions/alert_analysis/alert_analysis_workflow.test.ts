@@ -150,12 +150,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     const fields = workflow.consts.model_alert_fields as string[];
 
     expect(fields).toEqual(
-      expect.arrayContaining([
-        '_id',
-        '_index',
-        'process.command_line',
-        'kibana.alert.rule.name',
-      ])
+      expect.arrayContaining(['_id', '_index', 'process.command_line', 'kibana.alert.rule.name'])
     );
   });
 
