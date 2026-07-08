@@ -26,6 +26,17 @@ export const ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE =
 export const ALERT_ANALYSIS_WORKFLOW_RULE_UPDATE_ROUTE =
   '/internal/security_solution/alert_analysis_workflow/rules/_update' as const;
 
+// Allowed shape for the workflow tag prefix. The value is interpolated verbatim into Liquid
+// expression strings in the workflow YAML (the dedup gate and tag replacement), so it is
+// constrained to a safe tag-namespace charset: characters like `"`, `{{`, or `|` would produce a
+// malformed expression that silently breaks matching at run time. The leading lookahead also
+// requires at least one letter or number, so a prefix can't be only punctuation (e.g. `.` or `_`),
+// which would make for a meaningless tag namespace.
+export const TAG_PREFIX_MAX_LENGTH = 256;
+export const TAG_PREFIX_PATTERN = /^(?=.*[a-zA-Z0-9])[a-zA-Z0-9._-]+$/;
+export const TAG_PREFIX_VALIDATION_MESSAGE =
+  'Tag prefix may only contain letters, numbers, dots, dashes, and underscores, and must include at least one letter or number';
+
 export const AlertAnalysisWorkflowSettings = z.object({
   autoCloseEnabled: z.boolean(),
   autoCloseConfidenceScoreMinThreshold: z.number().min(0).max(1),
@@ -34,18 +45,10 @@ export const AlertAnalysisWorkflowSettings = z.object({
   // platform default agent) so the workflow step always has a real agent to invoke. Max length
   // matches Agent Builder's `agentIdMaxLength`.
   agentId: z.string().min(1).max(64),
-  // Prefix for the workflow tags written to (and matched on) each analyzed alert. The value is
-  // interpolated verbatim into Liquid expression strings in the workflow YAML (the dedup gate and
-  // tag replacement), so it is constrained to a safe tag-namespace charset: characters like `"`,
-  // `{{`, or `|` would produce a malformed expression that silently breaks matching at run time.
   tagPrefix: z
     .string()
-    .min(1)
-    .max(256)
-    .regex(
-      /^[a-zA-Z0-9._-]+$/,
-      'Tag prefix may only contain letters, numbers, dots, dashes, and underscores'
-    ),
+    .max(TAG_PREFIX_MAX_LENGTH)
+    .regex(TAG_PREFIX_PATTERN, TAG_PREFIX_VALIDATION_MESSAGE),
 });
 
 export type AlertAnalysisWorkflowSettings = z.infer<typeof AlertAnalysisWorkflowSettings>;

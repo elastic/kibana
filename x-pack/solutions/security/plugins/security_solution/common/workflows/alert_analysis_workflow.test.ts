@@ -26,15 +26,26 @@ describe('AlertAnalysisWorkflowSettings tagPrefix validation', () => {
   );
 
   // The prefix is interpolated into Liquid expression strings, so quotes, braces, pipes, spaces,
-  // and empty values must be rejected before they can break the workflow at run time.
-  it.each(['', '   ', 'foo"bar', 'foo{{bar}}', 'a|b', 'has space', 'tag:value'])(
-    'rejects the unsafe tag prefix %p',
-    (tagPrefix) => {
-      expect(AlertAnalysisWorkflowSettings.safeParse({ ...baseSettings, tagPrefix }).success).toBe(
-        false
-      );
-    }
-  );
+  // and empty values must be rejected before they can break the workflow at run time. Prefixes made
+  // up of only punctuation (e.g. '.', '_', '-') are also rejected: they pass the charset check but
+  // carry no meaningful namespace, so at least one letter or number is required.
+  it.each([
+    '',
+    '   ',
+    'foo"bar',
+    'foo{{bar}}',
+    'a|b',
+    'has space',
+    'tag:value',
+    '.',
+    '_',
+    '-',
+    '._-',
+  ])('rejects the unsafe tag prefix %p', (tagPrefix) => {
+    expect(AlertAnalysisWorkflowSettings.safeParse({ ...baseSettings, tagPrefix }).success).toBe(
+      false
+    );
+  });
 });
 
 describe('isThresholdRangeValid', () => {

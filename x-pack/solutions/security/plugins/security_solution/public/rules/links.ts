@@ -128,8 +128,10 @@ export const links: LinkItem = {
       capabilities: [
         [RULES_UI_READ_PRIVILEGE, RULES_UI_EDIT_PRIVILEGE, WORKFLOWS_MANAGEMENT_UPDATE_PRIVILEGE],
       ],
-      // Enterprise-only feature. Gating the link here hides it from the nav and global search on
-      // lower licenses; force-loading the URL renders the registered upsell page instead.
+      // Enterprise-only feature. On lower licenses the link is marked unavailable (it stays in the
+      // side nav and Rules landing page but is dropped from global search), and visiting the URL
+      // renders the registered upsell page, which surfaces a "Manage license" CTA, instead of the
+      // workflow UI.
       licenseType: 'enterprise',
       skipUrlState: true,
       hideTimeline: true,

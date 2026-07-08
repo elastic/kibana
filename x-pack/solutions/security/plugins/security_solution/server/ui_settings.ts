@@ -25,6 +25,11 @@ import {
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE,
 } from '@kbn/management-settings-ids';
 import { snakeCase } from 'lodash';
+import {
+  TAG_PREFIX_MAX_LENGTH,
+  TAG_PREFIX_PATTERN,
+  TAG_PREFIX_VALIDATION_MESSAGE,
+} from '../common/workflows/alert_analysis_workflow';
 import { DefaultClosingReasonSchema } from '../common/types';
 import {
   APP_ID,
@@ -896,11 +901,9 @@ export const getAlertAnalysisWorkflowSettings = (): SettingsConfig => ({
     // settings API, not just the workflow settings page).
     schema: schema.string({
       minLength: 1,
-      maxLength: 256,
+      maxLength: TAG_PREFIX_MAX_LENGTH,
       validate: (value) =>
-        /^[a-zA-Z0-9._-]+$/.test(value)
-          ? undefined
-          : 'Tag prefix may only contain letters, numbers, dots, dashes, and underscores',
+        TAG_PREFIX_PATTERN.test(value) ? undefined : TAG_PREFIX_VALIDATION_MESSAGE,
     }),
     solutionViews: ['classic', 'security'],
     technicalPreview: true,
