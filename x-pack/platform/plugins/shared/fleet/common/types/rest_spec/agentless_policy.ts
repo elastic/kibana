@@ -42,9 +42,10 @@ export const CreateAgentlessPolicyRequestSchema = {
         schema.arrayOf(
           schema.object({
             name: schema.string({
+              maxLength: 1024,
               meta: { description: 'Name of the custom field. The name cannot contain spaces.' },
             }),
-            value: schema.oneOf([schema.string(), schema.number()], {
+            value: schema.oneOf([schema.string({ maxLength: 1024 }), schema.number()], {
               meta: { description: 'Value of the custom field.' },
             }),
           }),
