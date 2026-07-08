@@ -4575,6 +4575,19 @@ components:
           type: object
         reason:
           $ref: '#/components/schemas/Reason'
+        runtime_fields:
+          additionalProperties:
+            $ref: '#/components/schemas/RuntimeFieldType'
+          description: Optional map of field name to runtime field type. For each entry,
+            the server defines a runtime field of the given type that reads its
+            value from `_source[fieldName]` and attaches it to the underlying
+            `_update_by_query` as `runtime_mappings`. Allows the `query` to
+            reference non-ECS fields stored on the alert `_source` but not in
+            the alerts index mapping — for example, runtime fields the rule's
+            source index defined at the time the alerts were created. Limited to
+            100 entries per request; larger maps are rejected.
+          maxProperties: 100
+          type: object
         status:
           enum:
             - closed
@@ -7581,7 +7594,9 @@ components:
         by the user through the advanced settings.'
       oneOf:
         - $ref: '#/components/schemas/ReasonEnum'
-        - type: string
+        - maxLength: 1024
+          minLength: 1
+          type: string
     ReasonEnum:
       enum:
         - false_positive
@@ -8401,6 +8416,18 @@ components:
               $ref: '#/components/schemas/RunScriptOsConfigValues'
       required:
         - command
+    RuntimeFieldType:
+      description: The data type for the runtime field type. Determines how the field
+        value is indexed and queried.
+      enum:
+        - keyword
+        - long
+        - double
+        - date
+        - ip
+        - boolean
+        - geo_point
+      type: string
     SavedObjectResolveAliasPurpose:
       enum:
         - savedObjectConversion
@@ -8994,6 +9021,18 @@ components:
           type: string
         query:
           additionalProperties: true
+          type: object
+        runtime_fields:
+          additionalProperties:
+            $ref: '#/components/schemas/RuntimeFieldType'
+          description: Optional map of field name to runtime field type. For each entry, a
+            runtime field of the specified type is created reading its value
+            from `_source[fieldName]` and included in the query as
+            `runtime_mappings`. Use this to reference fields stored on the alert
+            `_source` that are not part of the Elastic Common Schema (ECS) of
+            the alerts index mapping, for example, custom fields that the rule's
+            source index defined when the alerts were created.
+          maxProperties: 100
           type: object
         status:
           $ref: '#/components/schemas/AlertStatusExceptClosed'

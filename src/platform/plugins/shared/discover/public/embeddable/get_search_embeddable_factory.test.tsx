@@ -36,6 +36,7 @@ import {
   SolutionType,
   type ContextAwarenessToolkit,
 } from '../context_awareness';
+import { TEST_PROFILE_STATE_DEF } from '../context_awareness/__mocks__/profile_state';
 import { mockInitializeDrilldownsManager } from '@kbn/embeddable-plugin/public/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
@@ -596,6 +597,51 @@ describe('saved search embeddable', () => {
         const discoverGridComponent = discoverComponent.queryByTestId('discoverDocTable');
         expect(discoverGridComponent).toBeInTheDocument();
         expect(discoverComponent.queryByText('data-source-profile')).toBeInTheDocument();
+      });
+    });
+
+    it('should provide an in-memory profile state toolkit', async () => {
+      let capturedToolkit: ContextAwarenessToolkit | undefined;
+      const originalCreateScopedProfilesManager =
+        discoverServiceMock.profilesManager.createScopedProfilesManager.bind(
+          discoverServiceMock.profilesManager
+        );
+
+      if (!discoverServiceMock.profileStateRegistry.hasDefinition(TEST_PROFILE_STATE_DEF)) {
+        discoverServiceMock.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
+      }
+
+      jest
+        .spyOn(discoverServiceMock.profilesManager, 'createScopedProfilesManager')
+        .mockImplementationOnce((args) => {
+          capturedToolkit = args.toolkit;
+          return originalCreateScopedProfilesManager(args);
+        });
+
+      runtimeState = getInitialRuntimeState();
+
+      await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+
+      if (!capturedToolkit) {
+        throw new Error('Expected search embeddable to create a scoped profiles manager.');
+      }
+
+      const stateAdapter = capturedToolkit.getStateAdapter(TEST_PROFILE_STATE_DEF);
+      expect(stateAdapter.getState()).toEqual(TEST_PROFILE_STATE_DEF.defaultState);
+
+      stateAdapter.setState({ ...TEST_PROFILE_STATE_DEF.defaultState, uiValue: 'primary' });
+      stateAdapter.updateState({ uiValue: 'success' });
+
+      expect(stateAdapter.getState()).toEqual({
+        ...TEST_PROFILE_STATE_DEF.defaultState,
+        uiValue: 'success',
       });
     });
 

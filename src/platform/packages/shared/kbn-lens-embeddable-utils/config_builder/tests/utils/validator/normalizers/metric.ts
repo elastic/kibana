@@ -65,6 +65,7 @@ const NULLABLE_VIZ_ACCESSORS = [
 const ACCESSOR = 'metric_accessor';
 const TRENDLINE_LAYER_ID = `${DEFAULT_LAYER_ID}_trendline`;
 const SECONDARY_TRENDLINE_COLUMN = `${ACCESSOR}_secondary_trendlineX0`;
+const LEGACY_METRIC_DENSITY = 'compact';
 
 // `applyColorTo` only supports targeting the value or the background; other legacy values
 // (e.g. `bar`) are dropped by the transform.
@@ -145,6 +146,7 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
 
     // Absent sizing round-trips through the API as `auto`, which maps back to `valueFontMode: 'default'`.
     viz.valueFontMode = viz.valueFontMode ?? 'default';
+    viz.density = viz.density ?? LEGACY_METRIC_DENSITY;
 
     if (viz.breakdownByAccessor && viz.maxCols == null) {
       viz.maxCols = LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS;

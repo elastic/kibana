@@ -1,5 +1,5 @@
 {
-  "sha1": "83939c840e9193939dd27e952cfd0478e1c264e1",
+  "sha1": "6d3d100e3f9e629f30da88125358182a2a89f847",
   "tests": [
     {
       "id": "b24d1ecdbd533dc-9b4248bf82e44c0",
@@ -71,7 +71,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
-        "line": 72,
+        "line": 87,
         "column": 7
       }
     },
@@ -85,7 +85,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
-        "line": 78,
+        "line": 93,
         "column": 7
       }
     },
@@ -99,7 +99,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
-        "line": 84,
+        "line": 99,
         "column": 7
       }
     },
@@ -113,7 +113,35 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
-        "line": 90,
+        "line": 105,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8b772722b95dac-50d08881b842a4a",
+      "title": "Alert details - Chart layout Stateful - Anomaly alert renders callout and badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
+        "line": 111,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8b772722b95dac-8c2921a8df389fc",
+      "title": "Alert details - Chart layout Serverless - Anomaly alert renders callout and badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
+        "line": 117,
         "column": 7
       }
     },
@@ -143,7 +171,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/error_count.spec.ts",
-        "line": 138,
+        "line": 140,
         "column": 7
       }
     },
@@ -157,7 +185,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/error_count.spec.ts",
-        "line": 144,
+        "line": 146,
         "column": 7
       }
     },
@@ -857,13 +885,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 36,
+        "line": 40,
         "column": 9
       }
     },
     {
-      "id": "6a80f754a8758b3-bd179c28cf90db2",
-      "title": "Service map - nodes, edges and popovers shows popover when clicking on a service node",
+      "id": "6a80f754a8758b3-25c386966627348",
+      "title": "Service map - nodes, edges and popovers shows flyout when clicking on a service node",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -873,13 +901,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 67,
+        "line": 71,
         "column": 9
       }
     },
     {
-      "id": "6a80f754a8758b3-0c21e23b58b1030",
-      "title": "Service map - nodes, edges and popovers dismisses popover when clicking outside",
+      "id": "6a80f754a8758b3-ea39ae38f3b41ed",
+      "title": "Service map - nodes, edges and popovers dismisses service flyout when clicking the close button",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -889,7 +917,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 81,
+        "line": 94,
         "column": 9
       }
     },
@@ -905,7 +933,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 93,
+        "line": 106,
         "column": 9
       }
     },
@@ -921,13 +949,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 105,
+        "line": 118,
         "column": 9
       }
     },
     {
-      "id": "6a80f754a8758b3-39e157c4c45a87f",
-      "title": "Service map - nodes, edges and popovers navigates to Service Details from popover",
+      "id": "6a80f754a8758b3-b3c53cac9ad403b",
+      "title": "Service map - nodes, edges and popovers navigates to Discover (traces)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -937,13 +965,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 119,
+        "line": 132,
         "column": 9
       }
     },
     {
-      "id": "6a80f754a8758b3-cfea2cecad5e86a",
-      "title": "Service map - nodes, edges and popovers navigates to Focus Map from popover",
+      "id": "6a80f754a8758b3-f4d15e4df57ceca",
+      "title": "Service map - nodes, edges and popovers navigates to Discover (logs)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -953,7 +981,55 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 137,
+        "line": 149,
+        "column": 9
+      }
+    },
+    {
+      "id": "6a80f754a8758b3-de729fac031b3c6",
+      "title": "Service map - nodes, edges and popovers navigates to Service Details (alerts) and page loads",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
+        "line": 166,
+        "column": 9
+      }
+    },
+    {
+      "id": "6a80f754a8758b3-f61f62040135513",
+      "title": "Service map - nodes, edges and popovers navigates to SLOs and page loads",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
+        "line": 181,
+        "column": 9
+      }
+    },
+    {
+      "id": "6a80f754a8758b3-a8099ee2dd2f330",
+      "title": "Service map - nodes, edges and popovers navigates to Service Details from flyout title and page loads",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
+        "line": 198,
         "column": 9
       }
     },
@@ -969,7 +1045,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 154,
+        "line": 214,
         "column": 9
       }
     },
@@ -985,7 +1061,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_embeddable.spec.ts",
-        "line": 57,
+        "line": 58,
         "column": 9
       }
     },
@@ -1001,7 +1077,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_embeddable.spec.ts",
-        "line": 255,
+        "line": 259,
         "column": 9
       }
     },
@@ -1902,6 +1978,22 @@
       }
     },
     {
+      "id": "a193bb7a321f948-0910d8bd14f9c2f",
+      "title": "Service Overview - Mobile Services mobile service overview header renders the environment filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_mobile.spec.ts",
+        "line": 90,
+        "column": 9
+      }
+    },
+    {
       "id": "a193bb7a321f948-f997b78899c9454",
       "title": "Service Overview - Mobile Services accessing mobile service from apm route redirects to mobile route",
       "expectedStatus": "passed",
@@ -1913,7 +2005,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_mobile.spec.ts",
-        "line": 90,
+        "line": 116,
         "column": 9
       }
     },
