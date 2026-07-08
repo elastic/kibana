@@ -4,6 +4,6 @@
     "outDir": "target/types"
   },
   "include": ["**/*"],
-  "kbn_references": ["@kbn/scout-oblt", "@kbn/io-ts-utils", "@kbn/infra-plugin"],
+  "kbn_references": ["@kbn/scout-oblt", "@kbn/io-ts-utils",],
   "exclude": ["target/**/*"]
 }
