@@ -22,7 +22,7 @@ export const copyTextToClipboard = async (text: string): Promise<boolean> => {
     // Fall back to the async Clipboard API below.
   }
 
-  if (window.navigator?.clipboard) {
+  if (typeof window.navigator?.clipboard?.writeText === 'function') {
     try {
       await window.navigator.clipboard.writeText(text);
       return true;

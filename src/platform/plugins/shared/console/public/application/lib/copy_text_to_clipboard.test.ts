@@ -85,4 +85,15 @@ describe('WHEN copying text to the clipboard', () => {
 
     await expect(copyTextToClipboard('response')).resolves.toBe(false);
   });
+
+  it('SHOULD return false when document copy fails and Clipboard API writeText is unavailable', async () => {
+    mockCopyToClipboard.mockReturnValue(false);
+    Object.defineProperty(window.navigator, 'clipboard', {
+      configurable: true,
+      value: {},
+    });
+
+    await expect(copyTextToClipboard('response')).resolves.toBe(false);
+    expect(writeText).not.toHaveBeenCalled();
+  });
 });

@@ -19,6 +19,7 @@ import {
   useRequestReadContext,
   useServicesContext,
 } from '../../contexts';
+import { copyTextToClipboard } from '../../lib/copy_text_to_clipboard';
 import { useResizeCheckerUtils } from './hooks';
 
 let mockEditorValue = '';
@@ -106,6 +107,10 @@ jest.mock('./hooks', () => ({
   useResizeCheckerUtils: jest.fn(),
 }));
 
+jest.mock('../../lib/copy_text_to_clipboard', () => ({
+  copyTextToClipboard: jest.fn(),
+}));
+
 const mockUseEditorReadContext = useEditorReadContext as jest.MockedFunction<
   typeof useEditorReadContext
 >;
@@ -119,14 +124,13 @@ const mockUseServicesContext = useServicesContext as jest.MockedFunction<typeof 
 const mockUseResizeCheckerUtils = useResizeCheckerUtils as jest.MockedFunction<
   typeof useResizeCheckerUtils
 >;
+const mockCopyTextToClipboard = copyTextToClipboard as jest.MockedFunction<
+  typeof copyTextToClipboard
+>;
 
 describe('WHEN rendering Console output', () => {
-  const originalClipboard = window.navigator.clipboard;
-  const originalExecCommand = document.execCommand;
-  const writeText = jest.fn();
   const addSuccess = jest.fn();
   const addDanger = jest.fn();
-  const execCommand = jest.fn();
   const responseValue = '{\n  "acknowledged": true\n}';
 
   beforeEach(() => {
@@ -135,13 +139,7 @@ describe('WHEN rendering Console output', () => {
     mockSelectionStartLineNumber = 1;
     mockSelectionEndLineNumber = 1;
     mockEditor.getModel.mockImplementation(createMockModel);
-    Object.defineProperty(window.navigator, 'clipboard', {
-      configurable: true,
-      value: { writeText },
-    });
-    writeText.mockResolvedValue(undefined);
-    document.execCommand = execCommand;
-    execCommand.mockReturnValue(true);
+    mockCopyTextToClipboard.mockResolvedValue(true);
     mockUseEditorReadContext.mockReturnValue({
       settings: {
         fontSize: 14,
@@ -187,15 +185,6 @@ describe('WHEN rendering Console output', () => {
     });
   });
 
-  afterEach(() => {
-    jest.restoreAllMocks();
-    Object.defineProperty(window.navigator, 'clipboard', {
-      configurable: true,
-      value: originalClipboard,
-    });
-    document.execCommand = originalExecCommand;
-  });
-
   it('SHOULD copy the selected output text to the clipboard', async () => {
     render(
       <I18nProvider>
@@ -209,17 +198,13 @@ describe('WHEN rendering Console output', () => {
 
     await userEvent.click(screen.getByTestId('copyOutputButton'));
 
-    await waitFor(() => expect(execCommand).toHaveBeenCalledWith('copy'));
-    expect(writeText).not.toHaveBeenCalled();
+    await waitFor(() => expect(mockCopyTextToClipboard).toHaveBeenCalledWith(`${responseValue}\n`));
     expect(addSuccess).toHaveBeenCalled();
     expect(addDanger).not.toHaveBeenCalled();
   });
 
-  it('SHOULD copy the selected output text when the Clipboard API is unavailable', async () => {
-    Object.defineProperty(window.navigator, 'clipboard', {
-      configurable: true,
-      value: undefined,
-    });
+  it('SHOULD show an error when copying the selected output text fails', async () => {
+    mockCopyTextToClipboard.mockResolvedValue(false);
 
     render(
       <I18nProvider>
@@ -233,30 +218,9 @@ describe('WHEN rendering Console output', () => {
 
     await userEvent.click(screen.getByTestId('copyOutputButton'));
 
-    await waitFor(() => expect(execCommand).toHaveBeenCalledWith('copy'));
-    expect(addSuccess).toHaveBeenCalled();
-    expect(addDanger).not.toHaveBeenCalled();
-  });
-
-  it('SHOULD copy the selected output text when the Clipboard API would reject', async () => {
-    writeText.mockRejectedValue(new Error('Clipboard write failed'));
-
-    render(
-      <I18nProvider>
-        <MonacoEditorOutput />
-      </I18nProvider>
-    );
-
-    await waitFor(() =>
-      expect(screen.getByTestId('consoleMonacoOutput')).toHaveTextContent('"acknowledged": true')
-    );
-
-    await userEvent.click(screen.getByTestId('copyOutputButton'));
-
-    await waitFor(() => expect(execCommand).toHaveBeenCalledWith('copy'));
-    expect(writeText).not.toHaveBeenCalled();
-    expect(addSuccess).toHaveBeenCalled();
-    expect(addDanger).not.toHaveBeenCalled();
+    await waitFor(() => expect(mockCopyTextToClipboard).toHaveBeenCalledWith(`${responseValue}\n`));
+    expect(addSuccess).not.toHaveBeenCalled();
+    expect(addDanger).toHaveBeenCalled();
   });
 
   it('SHOULD show an error when reading the selected output fails', async () => {
@@ -279,12 +243,12 @@ describe('WHEN rendering Console output', () => {
     await userEvent.click(screen.getByTestId('copyOutputButton'));
 
     await waitFor(() => expect(addDanger).toHaveBeenCalled());
-    expect(execCommand).not.toHaveBeenCalled();
-    expect(writeText).not.toHaveBeenCalled();
+    expect(mockCopyTextToClipboard).not.toHaveBeenCalled();
     expect(addSuccess).not.toHaveBeenCalled();
   });
 
   it('SHOULD show an error when the selected output is empty', async () => {
+    mockCopyTextToClipboard.mockResolvedValue(false);
     mockEditor.getModel.mockReturnValue({
       getLineContent: () => '',
       getLineCount: () => 1,
@@ -307,78 +271,7 @@ describe('WHEN rendering Console output', () => {
     await userEvent.click(screen.getByTestId('copyOutputButton'));
 
     await waitFor(() => expect(addDanger).toHaveBeenCalled());
-    expect(execCommand).not.toHaveBeenCalled();
-    expect(writeText).not.toHaveBeenCalled();
+    expect(mockCopyTextToClipboard).toHaveBeenCalledWith('');
     expect(addSuccess).not.toHaveBeenCalled();
-  });
-
-  it('SHOULD use the Clipboard API when the document copy throws', async () => {
-    jest.spyOn(document, 'createRange').mockImplementation(() => {
-      throw new Error('Document copy failed');
-    });
-
-    render(
-      <I18nProvider>
-        <MonacoEditorOutput />
-      </I18nProvider>
-    );
-
-    await waitFor(() =>
-      expect(screen.getByTestId('consoleMonacoOutput')).toHaveTextContent('"acknowledged": true')
-    );
-
-    await userEvent.click(screen.getByTestId('copyOutputButton'));
-
-    await waitFor(() => expect(writeText).toHaveBeenCalledWith(`${responseValue}\n`));
-    expect(execCommand).not.toHaveBeenCalled();
-    expect(addSuccess).toHaveBeenCalled();
-    expect(addDanger).not.toHaveBeenCalled();
-  });
-
-  it('SHOULD use the Clipboard API when the document copy fails', async () => {
-    execCommand.mockReturnValue(false);
-    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-
-    render(
-      <I18nProvider>
-        <MonacoEditorOutput />
-      </I18nProvider>
-    );
-
-    await waitFor(() =>
-      expect(screen.getByTestId('consoleMonacoOutput')).toHaveTextContent('"acknowledged": true')
-    );
-
-    await userEvent.click(screen.getByTestId('copyOutputButton'));
-
-    await waitFor(() => expect(execCommand).toHaveBeenCalledWith('copy'));
-    await waitFor(() => expect(writeText).toHaveBeenCalledWith(`${responseValue}\n`));
-    expect(warn).toHaveBeenCalledWith('Unable to copy to clipboard.');
-    expect(addSuccess).toHaveBeenCalled();
-    expect(addDanger).not.toHaveBeenCalled();
-  });
-
-  it('SHOULD show an error when both copy methods fail', async () => {
-    execCommand.mockReturnValue(false);
-    writeText.mockRejectedValue(new Error('Clipboard write failed'));
-    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-
-    render(
-      <I18nProvider>
-        <MonacoEditorOutput />
-      </I18nProvider>
-    );
-
-    await waitFor(() =>
-      expect(screen.getByTestId('consoleMonacoOutput')).toHaveTextContent('"acknowledged": true')
-    );
-
-    await userEvent.click(screen.getByTestId('copyOutputButton'));
-
-    await waitFor(() => expect(execCommand).toHaveBeenCalledWith('copy'));
-    await waitFor(() => expect(writeText).toHaveBeenCalledWith(`${responseValue}\n`));
-    expect(warn).toHaveBeenCalledWith('Unable to copy to clipboard.');
-    expect(addSuccess).not.toHaveBeenCalled();
-    expect(addDanger).toHaveBeenCalled();
   });
 });
