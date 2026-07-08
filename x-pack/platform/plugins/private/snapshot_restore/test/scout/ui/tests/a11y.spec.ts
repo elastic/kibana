@@ -135,7 +135,9 @@ test.describe('Snapshot & Restore — accessibility', { tag: tags.stateful.class
 
     await browserAuth.loginAsAdmin();
     await page.gotoApp('management/data/snapshot_restore');
-    await snapshotRestore.waitForSnapshotsTab({ state: 'noSnapshots' });
+    // The wizard only needs a repository to select; the snapshot count is irrelevant (and non-zero
+    // on ECH, where the managed `found-snapshots` repository always holds SLM snapshots).
+    await snapshotRestore.waitForSnapshotsTab({ state: 'loaded' });
     await snapshotRestore.navToPolicies();
 
     await test.step('page one', async () => {
