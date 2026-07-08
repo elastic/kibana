@@ -240,7 +240,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
               },
               objectType: 'canvas workpad',
               title: 'abc',
-              version: '7.14.0',
+              version: 'version',
             },
             status: 'pending',
           },
