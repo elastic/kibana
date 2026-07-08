@@ -25,15 +25,23 @@ import { apiTest } from '../fixtures';
 
 const SPACE_ID = 'enter-routing-space';
 const CANVAS_ROUTE = '/app/canvas';
+// Some serverless project types pin `defaultRoute` via `uiSettings.overrides.defaultRoute`
+// (e.g. `config/serverless.es.yml`), which makes it read-only through the settings API and
+// causes the write to fail with a 400 whose body contains this fragment.
+const OVERRIDDEN_SETTING_ERROR = 'because it is overridden';
 
-const setDefaultRoute = (kbnClient: KbnClient, defaultRoute: string) =>
+const setDefaultRoute = (kbnClient: KbnClient, defaultRoute: string, retries?: number) =>
   kbnClient.uiSettings.replace(
     { defaultRoute, buildNum: 8467, 'dateFormat:tz': 'UTC' },
-    { space: SPACE_ID }
+    { space: SPACE_ID, retries }
   );
 
 apiTest.describe('Enter space redirect routing', { tag: tags.deploymentAgnostic }, () => {
   let cookieHeader: Record<string, string>;
+  // When `defaultRoute` is overridden by config we cannot seed a custom value, so tests must
+  // assert against the route the deployment enforces instead of `CANVAS_ROUTE`.
+  let isDefaultRouteWritable: boolean;
+  let spaceDefaultRoute: string;
 
   const enterSpace = async (apiClient: ApiClientFixture, next?: string) => {
     const query = next === undefined ? '' : `?next=${encodeURIComponent(next)}`;
@@ -47,7 +55,20 @@ apiTest.describe('Enter space redirect routing', { tag: tags.deploymentAgnostic 
   apiTest.beforeAll(async ({ apiServices, samlAuth, kbnClient }) => {
     ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
     await apiServices.spaces.create({ id: SPACE_ID, name: 'Enter Routing Space' });
-    await setDefaultRoute(kbnClient, CANVAS_ROUTE);
+
+    try {
+      await setDefaultRoute(kbnClient, CANVAS_ROUTE, 0);
+      isDefaultRouteWritable = true;
+      spaceDefaultRoute = CANVAS_ROUTE;
+    } catch (error) {
+      if (!String(error).includes(OVERRIDDEN_SETTING_ERROR)) {
+        throw error;
+      }
+      isDefaultRouteWritable = false;
+      spaceDefaultRoute = String(
+        await kbnClient.uiSettings.get('defaultRoute', { space: SPACE_ID })
+      );
+    }
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
@@ -57,9 +78,11 @@ apiTest.describe('Enter space redirect routing', { tag: tags.deploymentAgnostic 
   apiTest(
     'redirects to the space default route when no next route is provided',
     async ({ apiClient, kbnClient }) => {
-      await setDefaultRoute(kbnClient, CANVAS_ROUTE);
+      if (isDefaultRouteWritable) {
+        await setDefaultRoute(kbnClient, CANVAS_ROUTE);
+      }
       const location = await enterSpace(apiClient);
-      expect(location).toContain(`/s/${SPACE_ID}${CANVAS_ROUTE}`);
+      expect(location).toContain(`/s/${SPACE_ID}${spaceDefaultRoute}`);
     }
   );
 
@@ -77,9 +100,11 @@ apiTest.describe('Enter space redirect routing', { tag: tags.deploymentAgnostic 
   apiTest(
     'falls back to the default route when next is an external URL',
     async ({ apiClient, kbnClient }) => {
-      await setDefaultRoute(kbnClient, CANVAS_ROUTE);
+      if (isDefaultRouteWritable) {
+        await setDefaultRoute(kbnClient, CANVAS_ROUTE);
+      }
       const location = await enterSpace(apiClient, 'http://example.com/evil');
-      expect(location).toContain(`/s/${SPACE_ID}${CANVAS_ROUTE}`);
+      expect(location).toContain(`/s/${SPACE_ID}${spaceDefaultRoute}`);
       expect(location).not.toContain('example.com');
     }
   );
@@ -100,6 +125,10 @@ apiTest.describe('Enter space redirect routing', { tag: tags.deploymentAgnostic 
   apiTest(
     'preserves the query string and hash of the default route',
     async ({ apiClient, kbnClient }) => {
+      apiTest.skip(
+        !isDefaultRouteWritable,
+        'defaultRoute is overridden by config and cannot be customized in this deployment'
+      );
       await setDefaultRoute(
         kbnClient,
         '/app/management/kibana/objects?initialQuery=type:(visualization)#/view'
