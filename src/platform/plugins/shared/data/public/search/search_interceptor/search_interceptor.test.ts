@@ -1685,6 +1685,22 @@ describe('SearchInterceptor', () => {
         expect(mockCoreSetup.http.post).toBeCalledTimes(1);
       });
 
+      test('should not return from cache when only approximation differs', async () => {
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(basicCompleteResponse));
+
+        searchInterceptor
+          .search(basicReq, { sessionId, approximation: false })
+          .subscribe({ next, error, complete });
+        await timeTravel(10);
+        expect(mockCoreSetup.http.post).toBeCalledTimes(1);
+
+        searchInterceptor
+          .search(basicReq, { sessionId, approximation: true })
+          .subscribe({ next, error, complete });
+        await timeTravel(10);
+        expect(mockCoreSetup.http.post).toBeCalledTimes(2);
+      });
+
       test('aborting a search that didnt get any response should retrigger search', async () => {
         mockCoreSetup.http.post.mockImplementation(getHttpMock(basicCompleteResponse));
 

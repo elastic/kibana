@@ -354,8 +354,6 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
           const projectRouting = apiPublishesProjectRouting(parentApi)
             ? data.projectRouting
             : undefined;
-          // fetch$ already guarantees a real boolean regardless of whether parentApi
-          // implements PublishesApproximation, so no additional fallback is needed here.
           const isApproximate = data.isApproximate;
           const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
           searchSessionId$.next(searchSessionId);
