@@ -416,5 +416,75 @@ describe('map_to_columns', () => {
         drop_partials: true,
       });
     });
+
+    it('stamps a used_interval fallback from the numeric interval when present', async () => {
+      const input: Datatable = {
+        type: 'datatable',
+        columns: [
+          {
+            id: 'a',
+            name: 'A',
+            meta: {
+              type: 'date',
+              sourceParams: { params: {} },
+            },
+          },
+        ],
+        rows: [{ a: 0 }],
+      };
+
+      const idMap = {
+        a: [
+          {
+            id: 'a',
+            label: 'A',
+            operationType: 'date_histogram',
+            sourceField: '@timestamp',
+            interval: 3600000,
+            dropPartials: false,
+          },
+        ],
+      };
+
+      const result = await mapToColumns.fn(
+        input,
+        { idMap: JSON.stringify(idMap), isTextBased: true },
+        createMockExecutionContext()
+      );
+
+      expect(result.columns[0].meta.sourceParams?.params).toStrictEqual({
+        used_interval: '3600000ms',
+        drop_partials: false,
+      });
+    });
+
+    it('does not stamp used_interval when the interval is not a number', async () => {
+      const input: Datatable = {
+        type: 'datatable',
+        columns: [
+          {
+            id: 'a',
+            name: 'A',
+            meta: {
+              type: 'number',
+              sourceParams: { params: {} },
+            },
+          },
+        ],
+        rows: [{ a: 0 }],
+      };
+
+      const idMap = {
+        a: [{ id: 'a', label: 'A', operationType: 'count', interval: undefined }],
+      };
+
+      const result = await mapToColumns.fn(
+        input,
+        { idMap: JSON.stringify(idMap), isTextBased: true },
+        createMockExecutionContext()
+      );
+
+      expect(result.columns[0].meta.sourceParams?.params).toStrictEqual({});
+    });
   });
 });
