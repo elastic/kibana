@@ -10,7 +10,7 @@ import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import type { OpenFindingInSystemFlyout } from '@kbn/cloud-security-posture-plugin/public';
 import { useKibana } from '../../../common/lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 import type { MisconfigurationProps } from '../misconfiguration/main';
@@ -20,14 +20,14 @@ import { Vulnerability } from '../vulnerability/main';
 
 /**
  * Provides openers that render a CSP finding as a primary security solution "system flyout"
- * (the v2 flyout). Returns `undefined` when the `newFlyoutSystemEnabled` experimental flag is off,
+ * (the v2 flyout). Returns `undefined` when the new flyout system is disabled,
  * so callers can fall back to the legacy expandable-flyout panels.
  *
  * This is injected into the cloud security posture plugin via the `CspSecuritySolutionContext`
  * contract, since the CSP plugin cannot depend on security solution internals directly.
  */
 export const useOpenFindingInSystemFlyout = (): OpenFindingInSystemFlyout | undefined => {
-  const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+  const newFlyoutSystemEnabled = useIsNewFlyoutEnabled();
   const { services } = useKibana();
   const { overlays } = services;
   const store = useStore();

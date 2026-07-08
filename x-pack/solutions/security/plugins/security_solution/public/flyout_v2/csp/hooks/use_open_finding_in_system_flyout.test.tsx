@@ -6,11 +6,11 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { useOpenFindingInSystemFlyout } from './use_open_finding_in_system_flyout';
 
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
+jest.mock('../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: jest.fn(),
 }));
 
 jest.mock('react-redux', () => ({ useStore: () => ({}) }));
@@ -33,7 +33,7 @@ jest.mock('../../../common/lib/kibana', () => ({
   useKibana: () => ({ services: { overlays: { openSystemFlyout: mockOpenSystemFlyout } } }),
 }));
 
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
+const useIsNewFlyoutEnabledMock = useIsNewFlyoutEnabled as jest.Mock;
 
 describe('useOpenFindingInSystemFlyout', () => {
   beforeEach(() => {
@@ -41,13 +41,13 @@ describe('useOpenFindingInSystemFlyout', () => {
   });
 
   it('returns undefined when the new flyout system is disabled', () => {
-    useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
+    useIsNewFlyoutEnabledMock.mockReturnValue(false);
     const { result } = renderHook(() => useOpenFindingInSystemFlyout());
     expect(result.current).toBeUndefined();
   });
 
   it('opens a system flyout for a misconfiguration finding when enabled', () => {
-    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+    useIsNewFlyoutEnabledMock.mockReturnValue(true);
     const { result } = renderHook(() => useOpenFindingInSystemFlyout());
 
     result.current?.openMisconfigurationFinding({ resourceId: 'resource-1', ruleId: 'rule-1' });
@@ -60,7 +60,7 @@ describe('useOpenFindingInSystemFlyout', () => {
   });
 
   it('opens a system flyout for a vulnerability finding when enabled', () => {
-    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+    useIsNewFlyoutEnabledMock.mockReturnValue(true);
     const { result } = renderHook(() => useOpenFindingInSystemFlyout());
 
     result.current?.openVulnerabilityFinding({
