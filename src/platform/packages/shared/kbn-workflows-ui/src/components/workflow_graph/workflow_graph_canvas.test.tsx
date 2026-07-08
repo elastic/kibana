@@ -216,9 +216,7 @@ describe('WorkflowGraphCanvas initial centering and Reset zoom are equivalent', 
       <WorkflowGraphCanvasWithoutProvider {...baseProps} showZoomControls direction="LR" />
     );
     act(() => mockCapturedOnInit!(instance));
-    rerender(
-      <WorkflowGraphCanvasWithoutProvider {...baseProps} showZoomControls direction="LR" />
-    );
+    rerender(<WorkflowGraphCanvasWithoutProvider {...baseProps} showZoomControls direction="LR" />);
 
     expect(instance.setCenter).toHaveBeenCalledTimes(1);
     const [initialX, initialY] = instance.setCenter.mock.calls[0];
