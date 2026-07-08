@@ -12,6 +12,7 @@ import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiIconTip,
   EuiLink,
   EuiText,
   EuiTitle,
@@ -26,8 +27,10 @@ import {
   formatDlmLifecycleSummary,
   resolveLifecycleForSummary,
 } from '../../../../../lib/data_streams';
+import { getFailedDataLifecycleSummary } from '../../../../../lib/failed_data_lifecycle_summary';
 import type { TemplateDeserialized } from '../../../../../../../common';
 import { ILM_PAGES_POLICY_EDIT, INGEST_PIPELINES_EDIT } from '../../../../../constants';
+import { useLoadFailureStoreSettings } from '../../../../../services/api';
 import { useIlmLocator } from '../../../../../services/use_ilm_locator';
 import { useIngestPipelinesLocator } from '../../../../../services/use_ingest_pipeline_locator';
 import { allowAutoCreateRadioIds } from '../../../../../../../common/constants';
@@ -57,6 +60,8 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
     config: { isServerless },
   } = useAppContext();
   const dlmTiersLayoutEnabled = !isServerless;
+  const { data: failureStoreSettings, error: failureStoreSettingsError } =
+    useLoadFailureStoreSettings();
   const {
     version,
     priority,
@@ -84,6 +89,14 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
 
   const lifecycle = resolveLifecycleForSummary(templateDetails.template?.lifecycle, {
     hasDataStream: hasDatastream,
+  });
+
+  const failureStoreSummary = getFailedDataLifecycleSummary({
+    templateType: 'template',
+    failureStore: templateDetails.template?.data_stream_options?.failure_store,
+    failureStoreSettings: failureStoreSettings ?? undefined,
+    hasSettingsError: Boolean(failureStoreSettingsError),
+    showPhaseCounts: !isServerless,
   });
 
   return (
@@ -264,6 +277,42 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                   {formatDlmLifecycleSummary(lifecycle, {
                     includePhaseCount: dlmTiersLayoutEnabled,
                   })}
+                </EuiDescriptionListDescription>
+              </>
+            )}
+
+            {/* Failed ingest lifecycle (failure store retention, index template configured) */}
+            {hasDatastream && failureStoreSummary && (
+              <>
+                <EuiDescriptionListTitle>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.templateDetails.summaryTab.failedDataLifecycleTitle"
+                    defaultMessage="Failed data lifecycle"
+                  />
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription data-test-subj="failedDataLifecycleTemplateDetail">
+                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>{failureStoreSummary.detailsText}</EuiFlexItem>
+                    {failureStoreSummary.defaultRetentionTooltip && (
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          content={failureStoreSummary.defaultRetentionTooltip}
+                          position="right"
+                          type="info"
+                        />
+                      </EuiFlexItem>
+                    )}
+                    {failureStoreSummary.settingsErrorTooltip && (
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          content={failureStoreSummary.settingsErrorTooltip}
+                          position="right"
+                          type="warning"
+                          color="warning"
+                        />
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
                 </EuiDescriptionListDescription>
               </>
             )}

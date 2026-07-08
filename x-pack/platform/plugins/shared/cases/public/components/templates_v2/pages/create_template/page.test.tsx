@@ -12,7 +12,13 @@ import { CreateTemplatePage } from './page';
 import { TestProviders } from '../../../../common/mock';
 import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
 import { exampleTemplateDefinition } from '../../field_types/constants';
+import { splitTemplateDefinition } from '../../utils/template_settings_yaml';
 import * as i18n from '../../translations';
+
+// The editor buffer only holds the fields YAML; connector/settings are managed in the Settings
+// form and split out of the definition. The draft that gets persisted/reset is therefore the
+// fields-only version of the example template.
+const exampleFieldsYaml = splitTemplateDefinition(exampleTemplateDefinition).fieldsYaml;
 
 jest.mock('../../components/template_form', () => ({
   TemplateYamlEditor: () => <div data-test-subj="template-yaml-editor" />,
@@ -84,9 +90,9 @@ describe('CreateTemplatePage', () => {
       expect(mockMutateAsync).toHaveBeenCalledTimes(1);
     });
 
-    // Verify localStorage was reset to default template
+    // Verify localStorage was reset to the default template (fields-only buffer)
     await waitFor(() => {
-      expect(localStorage.getItem(storageKey)).toBe(JSON.stringify(exampleTemplateDefinition));
+      expect(localStorage.getItem(storageKey)).toBe(JSON.stringify(exampleFieldsYaml));
     });
 
     // Verify navigation was called
@@ -137,8 +143,8 @@ describe('CreateTemplatePage', () => {
       expect(mockMutateAsync).toHaveBeenCalledTimes(1);
     });
 
-    // Verify the localStorage value is the default example template
+    // Verify the localStorage value is the default example template (fields-only buffer)
     const storedValue = localStorage.getItem(storageKey);
-    expect(storedValue).toBe(JSON.stringify(exampleTemplateDefinition));
+    expect(storedValue).toBe(JSON.stringify(exampleFieldsYaml));
   });
 });
