@@ -232,7 +232,8 @@ export const createVegaGraph = async (
     // spec but Vega emitted warnings. We hand the model every warning and let it
     // judge each one, rather than pre-filtering to a curated list.
     const reviewingWarnings = state.actions.some(
-      (action) => isValidateSpecAction(action) && action.success && (action.warnings?.length ?? 0) > 0
+      (action) =>
+        isValidateSpecAction(action) && action.success && (action.warnings?.length ?? 0) > 0
     );
 
     // Feed back authoring and structural-check failures, plus every Vega warning,
@@ -249,7 +250,9 @@ export const createVegaGraph = async (
           return `Validation attempt ${action.attempt} failed: ${action.error}`;
         }
         if (action.warnings && action.warnings.length > 0) {
-          return `Validation attempt ${action.attempt} rendered, but Vega emitted these warnings:\n${action.warnings
+          return `Validation attempt ${
+            action.attempt
+          } rendered, but Vega emitted these warnings:\n${action.warnings
             .map((warning) => `- ${warning}`)
             .join('\n')}`;
         }
@@ -411,8 +414,7 @@ export const createVegaGraph = async (
     // it decide (fix or keep) — but only until that review pass has happened, so
     // warnings the model chooses to keep never loop. All bounded by the budget.
     const hasWarnings = (lastValidate?.warnings?.length ?? 0) > 0;
-    const needsRepair =
-      !lastValidate?.success || (hasWarnings && !state.warningsReviewed);
+    const needsRepair = !lastValidate?.success || (hasWarnings && !state.warningsReviewed);
 
     if (!needsRepair) {
       return FINALIZE_NODE;
@@ -426,25 +428,23 @@ export const createVegaGraph = async (
     return AUTHOR_SPEC_NODE;
   };
 
-  return (
-    new StateGraph(VegaStateAnnotation)
-      .addNode(GENERATE_ESQL_NODE, generateESQLNode)
-      .addNode(SELECT_EXAMPLES_NODE, selectExamplesNode)
-      .addNode(AUTHOR_SPEC_NODE, authorSpecNode)
-      .addNode(VALIDATE_SPEC_NODE, validateSpecNode)
-      .addNode(FINALIZE_NODE, finalizeNode)
-      .addEdge('__start__', GENERATE_ESQL_NODE)
-      .addEdge('__start__', SELECT_EXAMPLES_NODE)
-      .addConditionalEdges(GENERATE_ESQL_NODE, afterGenerateEsqlRouter, {
-        [AUTHOR_SPEC_NODE]: AUTHOR_SPEC_NODE,
-        [FINALIZE_NODE]: FINALIZE_NODE,
-      })
-      .addEdge(AUTHOR_SPEC_NODE, VALIDATE_SPEC_NODE)
-      .addConditionalEdges(VALIDATE_SPEC_NODE, shouldRetryRouter, {
-        [AUTHOR_SPEC_NODE]: AUTHOR_SPEC_NODE,
-        [FINALIZE_NODE]: FINALIZE_NODE,
-      })
-      .addEdge(FINALIZE_NODE, '__end__')
-      .compile()
-  );
+  return new StateGraph(VegaStateAnnotation)
+    .addNode(GENERATE_ESQL_NODE, generateESQLNode)
+    .addNode(SELECT_EXAMPLES_NODE, selectExamplesNode)
+    .addNode(AUTHOR_SPEC_NODE, authorSpecNode)
+    .addNode(VALIDATE_SPEC_NODE, validateSpecNode)
+    .addNode(FINALIZE_NODE, finalizeNode)
+    .addEdge('__start__', GENERATE_ESQL_NODE)
+    .addEdge('__start__', SELECT_EXAMPLES_NODE)
+    .addConditionalEdges(GENERATE_ESQL_NODE, afterGenerateEsqlRouter, {
+      [AUTHOR_SPEC_NODE]: AUTHOR_SPEC_NODE,
+      [FINALIZE_NODE]: FINALIZE_NODE,
+    })
+    .addEdge(AUTHOR_SPEC_NODE, VALIDATE_SPEC_NODE)
+    .addConditionalEdges(VALIDATE_SPEC_NODE, shouldRetryRouter, {
+      [AUTHOR_SPEC_NODE]: AUTHOR_SPEC_NODE,
+      [FINALIZE_NODE]: FINALIZE_NODE,
+    })
+    .addEdge(FINALIZE_NODE, '__end__')
+    .compile();
 };
