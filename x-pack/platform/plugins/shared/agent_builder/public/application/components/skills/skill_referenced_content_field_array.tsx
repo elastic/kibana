@@ -252,12 +252,11 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
 const SkillReferencedContentReadOnlySection: React.FC<{ control: Control<SkillFormData> }> = ({
   control,
 }) => {
-  const skillName = useWatch({ control, name: 'name' }) ?? '';
   const items: ReferencedContentItem[] = useWatch({ control, name: 'referenced_content' }) ?? [];
 
   return (
     <div data-test-subj="agentBuilderSkillReferencedContentSection">
-      <SkillReferencedContentReadOnly skillName={skillName} items={items} />
+      <SkillReferencedContentReadOnly items={items} />
     </div>
   );
 };

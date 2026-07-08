@@ -96,11 +96,7 @@ export const ReferencedContentFileCard: React.FC<ReferencedContentFileCardProps>
     >
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon
-            type="document"
-            color={isActive ? 'primary' : 'subdued'}
-            aria-hidden={true}
-          />
+          <EuiIcon type="document" color={isActive ? 'primary' : 'subdued'} aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s" color={isActive ? 'primary' : 'subdued'}>

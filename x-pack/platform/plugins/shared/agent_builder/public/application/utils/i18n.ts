@@ -987,6 +987,11 @@ export const labels = {
           defaultMessage: 'This skill has no additional files.',
         }
       ),
+      readOnlyFilesCount: (count: number) =>
+        i18n.translate('xpack.agentBuilder.skills.referencedFileSection.readOnlyFilesCount', {
+          defaultMessage: '{count, plural, one {# file} other {# files}}',
+          values: { count },
+        }),
       addFileButtonDisabledTooltip: (max: number) =>
         i18n.translate(
           'xpack.agentBuilder.skills.referencedFileSection.addFileButtonDisabledTooltip',
