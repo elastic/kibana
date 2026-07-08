@@ -1057,6 +1057,102 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
+        describe('query rule: medium range value list exception (over inline limit, under large-list threshold) is applied via the per-document path', function () {
+          this.timeout(600000);
+
+          const MEDIUM_INDEX = 'value-list-medium-list-test';
+          const MEDIUM_HOST = 'value-list-medium-list-host';
+          // Over MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE (200) so buildListClause cannot inline
+          // the clause, but well under MAXIMUM_SMALL_VALUE_LIST_SIZE (65536) so
+          // filterOutUnprocessableValueLists still classifies it as a small (inline-bucket) list.
+          // Such items must fall through to the per-document large-list path (see the
+          // `unprocessedExceptions.push(...)` in build_exception_filter.ts) rather than be silently
+          // dropped, which previously happened because `Array.concat` did not mutate the array.
+          const MEDIUM_LIST_SIZE = 300;
+
+          before(async () => {
+            await es.indices.delete({ index: MEDIUM_INDEX }, { ignore: [404] });
+            await es.indices.create({
+              index: MEDIUM_INDEX,
+              mappings: {
+                properties: {
+                  host: { properties: { name: { type: 'keyword' } } },
+                  '@timestamp': { type: 'date' },
+                  source: { properties: { port: { type: 'integer' } } },
+                },
+              },
+            });
+            await es.index({
+              index: MEDIUM_INDEX,
+              id: 'medium-single',
+              document: {
+                host: { name: MEDIUM_HOST },
+                '@timestamp': '2020-01-01T00:00:00.000Z',
+                source: { port: 100 },
+              },
+              refresh: 'wait_for',
+            });
+          });
+
+          after(async () => {
+            await es.indices.delete({ index: MEDIUM_INDEX });
+          });
+
+          it('integer_range (201–65,535 items) is applied, not dropped', async () => {
+            const listType: Type = 'integer_range';
+            const valueListId = `vl-medium-${listType}-${uuidv4()}.txt`;
+            // Filler ranges are all well above the document value (100); the final range contains it.
+            const listLines = [
+              ...Array.from({ length: MEDIUM_LIST_SIZE }, (_, i) => `${1000 + i}-${1000 + i}`),
+              '90-110',
+            ];
+            expect(listLines.length).toBeGreaterThan(200);
+            expect(listLines.length).toBeLessThan(65536);
+            try {
+              // Range values are stored in a form that differs from the imported string, so a value
+              // term query never matches; wait on the total instead of per-item polling.
+              await importFile(supertest, log, listType, listLines, valueListId, []);
+              await waitForListSize(supertest, log, valueListId, listLines.length);
+              const rule: QueryRuleCreateProps = {
+                name: `Medium value list ${listType}`,
+                description:
+                  'Medium range value list exception is applied via the per-document large-list path',
+                enabled: true,
+                risk_score: 1,
+                rule_id: `rule-medium-vl-${listType}-${uuidv4()}`,
+                severity: 'high',
+                index: [MEDIUM_INDEX],
+                type: 'query',
+                from: '1900-01-01T00:00:00.000Z',
+                query: `host.name: "${MEDIUM_HOST}"`,
+              };
+              const createdRule = await createRuleWithExceptionEntries(supertest, log, rule, [
+                [
+                  {
+                    field: 'source.port',
+                    operator: 'included',
+                    type: 'list',
+                    list: {
+                      id: valueListId,
+                      type: listType,
+                    },
+                  },
+                ],
+              ]);
+              // The document's port (100) is contained by the '90-110' range, so the included
+              // exception must suppress it. Before the concat->push fix this medium-sized range
+              // list was silently dropped and the document would (incorrectly) alert.
+              const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
+              expect(alertsOpen.hits.hits).toHaveLength(0);
+            } finally {
+              await supertest
+                .delete(`${LIST_URL}?id=${valueListId}&ignoreReferences=true`)
+                .set('kbn-xsrf', 'true')
+                .send();
+            }
+          });
+        });
+
         it('should Not allow deleting value list when there are references and ignoreReferences is false', async () => {
           const valueListId = 'value-list-id.txt';
           await importFile(supertest, log, 'keyword', ['suricata-sensor-amsterdam'], valueListId);
