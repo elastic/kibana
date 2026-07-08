@@ -323,12 +323,12 @@ Keep prose short and narrative-only:
 
 \`\`\`json
 { "riskScoreGrounding": { "status": "started" } }
-{ "riskScoreGrounding": { "status": "stopped", "lastScoreTimestamp": "<ISO 8601> | absent" } }
+{ "riskScoreGrounding": { "status": "stopped", "lastScoreTimeAgo": "<relative time, e.g. '3 hours ago'> | absent" } }
 { "riskScoreGrounding": { "status": "never_started" } }
 \`\`\`
 
 - **\`started\`** — scoring is current; say nothing about entity analytics status.
-- **\`stopped\`** — scoring was turned off. Caveat using \`lastScoreTimestamp\` (the last time it successfully ran, or "no scores have been computed yet" if absent), and suggest turning entity analytics back on.
+- **\`stopped\`** — scoring was turned off. Caveat using \`lastScoreTimeAgo\` (the last time it successfully ran, or "no scores have been computed yet" if absent), and suggest turning entity analytics back on.
 - **\`never_started\`** — scoring has never run. Say risk data isn't available rather than "no risk data found," and suggest turning entity analytics on.
 - Grounding missing — don't guess a status; answer from the entity result as-is.
 

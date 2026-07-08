@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EntityStoreStartContract } from '@kbn/entity-store/server';
@@ -35,12 +36,13 @@ describe('risk_score_grounding', () => {
       expect(getMaintainerStatus).toHaveBeenCalledWith('default', ['risk-score']);
     });
 
-    it('returns stopped with the maintainer last-success timestamp when the task is stopped', async () => {
+    it('returns stopped with the maintainer last-success time-ago when the task is stopped', async () => {
+      const lastSuccessTimestamp = moment().subtract(3, 'hours').toISOString();
       getMaintainerStatus.mockResolvedValueOnce([
         {
           id: 'risk-score',
           taskStatus: 'stopped',
-          lastSuccessTimestamp: '2026-05-20T10:00:00Z',
+          lastSuccessTimestamp,
         },
       ]);
 
@@ -51,7 +53,10 @@ describe('risk_score_grounding', () => {
       });
 
       expect(result!.data).toEqual({
-        riskScoreGrounding: { status: 'stopped', lastScoreTimestamp: '2026-05-20T10:00:00Z' },
+        riskScoreGrounding: {
+          status: 'stopped',
+          lastScoreTimeAgo: moment(lastSuccessTimestamp).fromNow(),
+        },
       });
     });
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import type { Logger } from '@kbn/core/server';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -15,7 +16,7 @@ const RISK_SCORE_MAINTAINER_ID = 'risk-score';
 
 /**
  * Checks the status of the risk-score entity maintainer.
- * If the maintainer is stopped, also returns the last successful run timestamp.
+ * If the maintainer is stopped, also returns how long ago it last ran successfully.
  */
 export const fetchRiskScoreGrounding = async ({
   entityStore,
@@ -48,7 +49,7 @@ const getRiskScoreMaintainerStatus = async ({
 }: {
   entityStore: EntityStoreStartContract;
   namespace: string;
-}): Promise<{ status: EntityMaintainerTaskStatus; lastScoreTimestamp?: string }> => {
+}): Promise<{ status: EntityMaintainerTaskStatus; lastScoreTimeAgo?: string }> => {
   const [maintainer] = await entityStore.getMaintainerStatus(namespace, [RISK_SCORE_MAINTAINER_ID]);
 
   const status = maintainer?.taskStatus ?? EntityMaintainerTaskStatus.NEVER_STARTED;
@@ -56,7 +57,9 @@ const getRiskScoreMaintainerStatus = async ({
   if (status === EntityMaintainerTaskStatus.STOPPED) {
     return {
       status,
-      lastScoreTimestamp: maintainer?.lastSuccessTimestamp ?? undefined,
+      lastScoreTimeAgo: maintainer?.lastSuccessTimestamp
+        ? moment(maintainer.lastSuccessTimestamp).fromNow()
+        : undefined,
     };
   }
 

@@ -981,7 +981,7 @@ describe('getEntityTool', () => {
       tool_result_id: 'grounding-result-id',
       type: ToolResultType.other,
       data: {
-        riskScoreGrounding: { status: 'stopped', lastScoreTimestamp: '2026-05-20T10:00:00Z' },
+        riskScoreGrounding: { status: 'stopped', lastScoreTimeAgo: '2 days ago' },
       },
     };
 
