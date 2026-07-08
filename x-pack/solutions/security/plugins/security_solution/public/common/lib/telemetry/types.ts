@@ -62,6 +62,10 @@ import type {
   RuleUpgradeEventTypes,
   RuleUpgradeTelemetryEventsMap,
 } from './events/rule_upgrade/types';
+import type {
+  RuleChangesHistoryEventTypes,
+  RuleChangesHistoryTelemetryEventsMap,
+} from './events/rule_changes_history/types';
 
 import type {
   AIValueReportEventTypes,
@@ -134,6 +138,8 @@ export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends Ru
   ? RuleDeprecationTelemetryEventsMap[T]
   : T extends RuleUpgradeEventTypes
   ? RuleUpgradeTelemetryEventsMap[T]
+  : T extends RuleChangesHistoryEventTypes
+  ? RuleChangesHistoryTelemetryEventsMap[T]
   : T extends AIValueReportEventTypes
   ? AIValueReportTelemetryEventsMap[T]
   : T extends TrialCompanionEventTypes
@@ -165,6 +171,7 @@ export type TelemetryEventTypes =
   | SiemMigrationsDashboardEventTypes
   | RuleDeprecationEventTypes
   | RuleUpgradeEventTypes
+  | RuleChangesHistoryEventTypes
   | AIValueReportEventTypes
   | TrialCompanionEventTypes
   | AgentBuilderEventTypes
