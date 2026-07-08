@@ -13,7 +13,6 @@ import { testData } from '../fixtures';
 const DASHBOARD_API_PATH = '/api/dashboards';
 const DASHBOARD_API_VERSION = '2023-10-31';
 
-
 function withSpace(path: string, spaceId: string): string {
   return `/s/${spaceId}${path}`;
 }
