@@ -226,23 +226,17 @@ export class ApmSystem {
   }
 
   /**
-   * Set route-change and page-load transaction names to the destination page name
-   * taken from the execution context. Otherwise, these transactions would have
-   * default names, like 'Click - span' or a raw URL path, instead of more
+   * Set route-change transaction name to the destination page name taken from
+   * the execution context. Otherwise, all route change transactions would have
+   * default names, like 'Click - span' or 'Click - a' instead of more
    * descriptive '/security/rules/:id/edit'.
    */
   private addRouteChangeNormalization(apm: ApmBase) {
     apm.observe('transaction:end', (t) => {
       const executionContext = this.executionContext?.get();
-      if (!executionContext) {
-        return;
-      }
-      const { name, page } = executionContext;
-      if (t.type === 'route-change') {
+      if (executionContext && t.type === 'route-change') {
+        const { name, page } = executionContext;
         t.name = `${name} ${page || 'unknown'}`;
-      } else if (t.type === 'page-load' && page) {
-        // Only override the /app/{appId} fallback when a parameterized page exists.
-        t.name = `${name} ${page}`;
       }
     });
   }
