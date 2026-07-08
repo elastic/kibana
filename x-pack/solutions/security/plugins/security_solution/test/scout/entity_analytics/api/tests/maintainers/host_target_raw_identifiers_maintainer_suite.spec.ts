@@ -194,6 +194,7 @@ const registerHostTargetRawIdentifiersMaintainerSuite = (
           const primingActor = actorId('prime');
           const primingTargetFqdn = targetFqdn('prime');
           const primingTarget = targetId('prime');
+          const primingTs = new Date(Date.now() + 3_600_000).toISOString();
 
           await seedHostEntity(esClient, { entityId: primingTarget, hostName: primingTargetFqdn });
           await seedHostEntity(esClient, {
@@ -201,6 +202,8 @@ const registerHostTargetRawIdentifiersMaintainerSuite = (
             hostName: `${entityPrefix}-prime.${domain}`,
             relationship: { key: relationshipKey, hostNames: [primingTargetFqdn] },
             entitySource: requiredEntitySource,
+            lastSeen: primingTs,
+            firstSeen: primingTs,
           });
 
           await triggerMaintainerRun(apiClient, internalHeaders, maintainerId, { sync: true });

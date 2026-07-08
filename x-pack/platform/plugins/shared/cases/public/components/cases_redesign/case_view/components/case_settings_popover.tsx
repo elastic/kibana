@@ -77,7 +77,7 @@ export const CaseSettingsPopover: FC<CaseSettingsPopoverProps> = ({
   const { data: selectedTemplateData } = useGetTemplate(
     isTemplatesEnabled ? selectedTemplateId || undefined : undefined
   );
-  const { mutate: changeTemplate } = useChangeAppliedTemplate();
+  const { mutate: changeAppliedTemplate } = useChangeAppliedTemplate();
 
   // Applied via useEffect rather than inside onTemplateChange because the
   // template definition (fields, version) is fetched asynchronously by
@@ -90,16 +90,23 @@ export const CaseSettingsPopover: FC<CaseSettingsPopoverProps> = ({
       selectedTemplateData.templateId === selectedTemplateId &&
       caseData.template?.id !== selectedTemplateId
     ) {
-      changeTemplate({
+      changeAppliedTemplate({
         caseData,
         newTemplate: {
           id: selectedTemplateData.templateId,
           version: selectedTemplateData.templateVersion,
           fields: selectedTemplateData.definition.fields,
+          settings: selectedTemplateData.definition.settings,
         },
       });
     }
-  }, [isTemplatesEnabled, selectedTemplateId, selectedTemplateData, caseData, changeTemplate]);
+  }, [
+    isTemplatesEnabled,
+    selectedTemplateId,
+    selectedTemplateData,
+    caseData,
+    changeAppliedTemplate,
+  ]);
 
   const onTemplateChange = useCallback((selected: Array<EuiComboBoxOptionOption<string>>) => {
     setSelectedTemplateId(selected[0]?.value ?? '');

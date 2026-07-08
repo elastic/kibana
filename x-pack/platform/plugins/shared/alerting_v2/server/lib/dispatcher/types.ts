@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { AlertEventSeverity } from '../../resources/datastreams/alert_events';
+import type {
+  AlertEpisodeStatus,
+  AlertEventSeverity,
+} from '../../resources/datastreams/alert_events';
 
 export type RuleId = string;
 export type ActionPolicyId = string;
@@ -22,7 +25,7 @@ export interface AlertEpisode {
   rule_id: RuleId;
   group_hash: string;
   episode_id: string;
-  episode_status: 'inactive' | 'pending' | 'active' | 'recovering';
+  episode_status: AlertEpisodeStatus;
   severity?: AlertEventSeverity;
   data?: AlertEpisodeData;
 }
@@ -140,7 +143,7 @@ export interface DispatcherPipelineState {
   readonly dispatchedExecutions?: Map<ActionGroupId, string[]>;
 }
 
-export type DispatcherHaltReason = 'no_episodes' | 'no_actions' | 'engine_disabled';
+export type DispatcherHaltReason = 'no_episodes' | 'no_actions';
 
 export type DispatcherStepOutput =
   | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }

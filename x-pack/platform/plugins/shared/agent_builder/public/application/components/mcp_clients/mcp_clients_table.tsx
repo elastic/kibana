@@ -18,9 +18,12 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { OAuthClient } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_EVENT_TYPES, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { useOAuthClients } from '../../hooks/oauth_clients/use_oauth_clients';
+import { useKibana } from '../../hooks/use_kibana';
 import { useMcpClientsActions } from '../../context/mcp_clients_provider';
 import { labels } from '../../utils/i18n';
 import illustrationGenai from './assets/illustration_genai.svg';
@@ -56,14 +59,28 @@ const emptyPromptStyles = ({ euiTheme }: UseEuiTheme) => css`
 `;
 
 export const McpClientsTable = memo(() => {
+  const {
+    services: { analytics },
+  } = useKibana();
   const { clients, isLoading, error } = useOAuthClients();
   const { createMcpClient } = useMcpClientsActions();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const columns = useMcpClientsTableColumns();
   const { searchConfig, results: tableClients } = useMcpClientsTableSearch({ clients });
+  const hasFiredListViewRef = useRef(false);
 
   const hasClients = clients.length > 0;
+
+  useEffect(() => {
+    if (!isLoading && !hasFiredListViewRef.current) {
+      hasFiredListViewRef.current = true;
+      analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ManageEntityListView, {
+        entity_type: AGENT_BUILDER_UI_EBT.entity.MCP_CLIENT,
+        entity_count: clients.length,
+      });
+    }
+  }, [isLoading, clients.length, analytics]);
 
   useEffect(() => {
     setPageIndex(0);
@@ -71,7 +88,9 @@ export const McpClientsTable = memo(() => {
 
   return (
     <>
-      <EuiSearchBar {...searchConfig} />
+      <div data-test-subj="mcpClientsTableSearch">
+        <EuiSearchBar {...searchConfig} />
+      </div>
       <EuiSpacer size="m" />
       {hasClients && <McpClientsNotConnectedBanner clients={clients} />}
       <McpClientsTableHeader
@@ -135,6 +154,11 @@ export const McpClientsTable = memo(() => {
                   <EuiButton
                     onClick={createMcpClient}
                     data-test-subj="mcpClientsEmptyStateAddButton"
+                    {...getEbtProps({
+                      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                      action: AGENT_BUILDER_UI_EBT.action.globalManagement.MCP_CLIENT_CREATE_OPEN,
+                      detail: AGENT_BUILDER_UI_EBT.entity.MCP_CLIENT,
+                    })}
                   >
                     {labels.tools.mcpClients.addMcpClientOAuthButtonLabel}
                   </EuiButton>,
@@ -147,7 +171,6 @@ export const McpClientsTable = memo(() => {
             )
           ) : null
         }
-        responsiveBreakpoint={false}
       />
     </>
   );

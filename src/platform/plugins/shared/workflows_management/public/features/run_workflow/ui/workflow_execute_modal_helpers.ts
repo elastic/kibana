@@ -62,10 +62,13 @@ export function workflowDefinitionHasTriggerType(
 
 /** Run-modal tabs to show based on triggers declared in the workflow definition. */
 export function getVisibleWorkflowTriggerTabs(
-  definition: WorkflowYaml | null
+  definition: WorkflowYaml | null,
+  { includeHistorical = true }: { includeHistorical?: boolean } = {}
 ): readonly WorkflowTriggerTab[] {
   if (!definition?.triggers?.length) {
-    return ENABLED_TRIGGER_TABS;
+    return includeHistorical
+      ? ENABLED_TRIGGER_TABS
+      : ENABLED_TRIGGER_TABS.filter((tab) => tab !== 'historical');
   }
 
   const visible: WorkflowTriggerTab[] = [];
@@ -79,7 +82,10 @@ export function getVisibleWorkflowTriggerTabs(
   if (workflowDefinitionHasTriggerType(definition, 'manual')) {
     visible.push('index');
   }
-  visible.push('manual', 'historical');
+  visible.push('manual');
+  if (includeHistorical) {
+    visible.push('historical');
+  }
 
   return visible;
 }
@@ -234,9 +240,10 @@ export function resolveInitialSelectedTrigger(
   hasAlertRacAccess: boolean,
   canReadWorkflowExecution: boolean,
   normalizedInputs: NormalizedWorkflowInputs | undefined,
-  eventDrivenExecutionEnabled = true
+  eventDrivenExecutionEnabled = true,
+  { includeHistorical = true }: { includeHistorical?: boolean } = {}
 ): WorkflowTriggerTab {
-  const visibleTabs = getVisibleWorkflowTriggerTabs(definition);
+  const visibleTabs = getVisibleWorkflowTriggerTabs(definition, { includeHistorical });
 
   let selected: WorkflowTriggerTab;
 
