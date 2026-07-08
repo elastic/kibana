@@ -24,10 +24,6 @@ export const SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID =
 export const SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID =
   'significant_events_investigation' as const;
 
-/** Consolidating knowledge gaps found during an investigation into memory. */
-export const SIGNIFICANT_EVENTS_INVESTIGATION_GAPS_INFERENCE_FEATURE_ID =
-  'significant_events_investigation_gaps' as const;
-
 /** Extracting durable knowledge from recent AI chat conversations into memory. */
 export const SIGNIFICANT_EVENTS_CONVERSATION_SCRAPER_INFERENCE_FEATURE_ID =
   'significant_events_conversation_scraper' as const;
@@ -36,10 +32,9 @@ export const SIGNIFICANT_EVENTS_CONVERSATION_SCRAPER_INFERENCE_FEATURE_ID =
 export const SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_INFERENCE_FEATURE_ID =
   'significant_events_memory_synthesis' as const;
 
-/** Curating the memory wiki (merging duplicates, removing stale entries). */
+/**
+ * Curating the memory wiki: merging duplicates, removing stale entries, and
+ * reconciling knowledge gaps (from investigations and the periodic memory audit).
+ */
 export const SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_INFERENCE_FEATURE_ID =
   'significant_events_memory_consolidation' as const;
-
-/** Auditing the memory wiki for knowledge gaps. */
-export const SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_INFERENCE_FEATURE_ID =
-  'significant_events_memory_gap_detection' as const;

@@ -12,13 +12,11 @@ import {
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_INVESTIGATION_GAPS_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_CONVERSATION_SCRAPER_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
@@ -158,24 +156,6 @@ export function registerSignificantEventsInferenceFeatures(
       ignoreGlobalDefault: true,
     },
     {
-      featureId: SIGNIFICANT_EVENTS_INVESTIGATION_GAPS_INFERENCE_FEATURE_ID,
-      featureName: i18n.translate(
-        'xpack.significantEvents.inferenceFeature.investigationGapsName',
-        {
-          defaultMessage: 'Investigation gaps consolidation',
-        }
-      ),
-      featureDescription: i18n.translate(
-        'xpack.significantEvents.inferenceFeature.investigationGapsDescription',
-        {
-          defaultMessage:
-            'Model used to reconcile knowledge gaps found during an investigation into memory.',
-        }
-      ),
-      recommendedEndpoints: MEMORY_BACKGROUND_RECOMMENDED_MODELS,
-      ignoreGlobalDefault: true,
-    },
-    {
       featureId: SIGNIFICANT_EVENTS_CONVERSATION_SCRAPER_INFERENCE_FEATURE_ID,
       featureName: i18n.translate(
         'xpack.significantEvents.inferenceFeature.conversationScraperName',
@@ -220,24 +200,7 @@ export function registerSignificantEventsInferenceFeatures(
         'xpack.significantEvents.inferenceFeature.memoryConsolidationDescription',
         {
           defaultMessage:
-            'Model used to curate the memory wiki (merging duplicates, removing stale entries).',
-        }
-      ),
-      recommendedEndpoints: MEMORY_BACKGROUND_RECOMMENDED_MODELS,
-      ignoreGlobalDefault: true,
-    },
-    {
-      featureId: SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_INFERENCE_FEATURE_ID,
-      featureName: i18n.translate(
-        'xpack.significantEvents.inferenceFeature.memoryGapDetectionName',
-        {
-          defaultMessage: 'Memory gap detection',
-        }
-      ),
-      featureDescription: i18n.translate(
-        'xpack.significantEvents.inferenceFeature.memoryGapDetectionDescription',
-        {
-          defaultMessage: 'Model used to audit the memory wiki for knowledge gaps.',
+            'Model used to curate the memory wiki: merging duplicates, removing stale entries, and reconciling knowledge gaps (from investigations and the periodic memory audit).',
         }
       ),
       recommendedEndpoints: MEMORY_BACKGROUND_RECOMMENDED_MODELS,
