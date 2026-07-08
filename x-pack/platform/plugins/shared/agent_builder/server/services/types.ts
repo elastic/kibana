@@ -72,6 +72,7 @@ export interface InternalStartServices {
   taskHandler: TaskHandler;
   plugins: PluginsServiceStart;
   consumption: ConsumptionServiceStart;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   callbackDeliveryService: CallbackDeliveryService;
 }
 
