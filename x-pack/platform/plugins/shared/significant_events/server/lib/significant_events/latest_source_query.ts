@@ -184,10 +184,12 @@ const buildLatestSourceBaseQuery = ({
   where,
   groupBy,
 }: BuildLatestSourceBaseQueryArgs) => {
+  // Only the lower bound is safe to apply before the collapse — it just limits how far back
+  // we look for versions and can't make a stale version incorrectly win (an event with all
+  // its versions older than `from` simply has no surviving rows).
   let query = applyTimeRange({
     query: fromIndexForSpace({ index, space, columns: ['_id', '_source'] }),
     from: options.from,
-    to: options.to,
   });
 
   // pick the latest events by group
@@ -198,10 +200,13 @@ const buildLatestSourceBaseQuery = ({
   query = query.pipe`INLINE STATS tiebreaker_id = MAX(_id) BY ${esql.col(groupBy)}`
     .where`_id == tiebreaker_id`;
 
-  // `where` must run AFTER the latest-per-group collapse above: it filters on the
-  // resolved latest version's field values, not on any historical version. Applying it
-  // beforehand can drop the true latest row (e.g. because its status no longer matches)
-  // and let a stale, older version win the collapse instead.
+  // The upper bound (and `where`, below) must run AFTER the latest-per-group collapse above:
+  // both must reflect the resolved latest version's own field values (its own @timestamp,
+  // status, etc.), not any historical version's. Applying `to` beforehand can drop the true
+  // latest row for being newer than `to` and let a stale, in-range sibling win the collapse
+  // instead — the same failure mode the `where` reorder below fixes, reached via the time filter.
+  query = applyTimeRange({ query, to: options.to });
+
   if (where) {
     query = query.where`${where}`;
   }
