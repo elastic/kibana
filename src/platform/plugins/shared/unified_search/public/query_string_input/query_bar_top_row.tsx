@@ -1029,7 +1029,6 @@ export const QueryBarTopRow = React.memo(
       }
 
       return {
-        icon: 'refresh' as const,
         text: strings.getRefreshButtonLabel(),
         ariaLabel: strings.getRefreshQueryLabel(),
         color: 'primary' as const,

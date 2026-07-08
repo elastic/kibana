@@ -101,7 +101,7 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} [data-test-subj='kbnGridLayout'] {
       --kbnGridGutterSize: 12 !important;
-      padding: ${DESIGN_EXPLORATION_PADDING}px !important;
+      padding: ${DESIGN_EXPLORATION_PADDING}px 20px !important;
     }
 
     ${scope} [data-test-subj='embeddablePanel'] {
