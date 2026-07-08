@@ -83994,16 +83994,19 @@ components:
                       type: boolean
                     var_group_selections:
                       additionalProperties:
+                        maxLength: 1024
                         type: string
                       description: Variable group selections. Maps var_group name to the selected option name within that group.
                       type: object
                     vars:
                       additionalProperties:
                         anyOf:
-                          - type: string
+                          - maxLength: 10000
+                            type: string
                           - type: number
                           - type: boolean
                           - items:
+                              maxLength: 10000
                               type: string
                             maxItems: 100
                             type: array
@@ -84015,6 +84018,7 @@ components:
                             type: object
                             properties:
                               id:
+                                maxLength: 255
                                 type: string
                               isSecretRef:
                                 type: boolean
@@ -84030,10 +84034,12 @@ components:
               vars:
                 additionalProperties:
                   anyOf:
-                    - type: string
+                    - maxLength: 10000
+                      type: string
                     - type: number
                     - type: boolean
                     - items:
+                        maxLength: 10000
                         type: string
                       maxItems: 100
                       type: array
@@ -84045,6 +84051,7 @@ components:
                       type: object
                       properties:
                         id:
+                          maxLength: 255
                           type: string
                         isSecretRef:
                           type: boolean
@@ -84077,16 +84084,19 @@ components:
           type: string
         var_group_selections:
           additionalProperties:
+            maxLength: 1024
             type: string
           description: Variable group selections. Maps var_group name to the selected option name within that group.
           type: object
         vars:
           additionalProperties:
             anyOf:
-              - type: string
+              - maxLength: 10000
+                type: string
               - type: number
               - type: boolean
               - items:
+                  maxLength: 10000
                   type: string
                 maxItems: 100
                 type: array
@@ -84098,6 +84108,7 @@ components:
                 type: object
                 properties:
                   id:
+                    maxLength: 255
                     type: string
                   isSecretRef:
                     type: boolean
@@ -86699,6 +86710,7 @@ components:
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
           items:
+            maxLength: 256
             type: string
           maxItems: 100
           nullable: true
@@ -86733,6 +86745,7 @@ components:
           type: boolean
         description:
           description: Policy description.
+          maxLength: 2048
           type: string
         force:
           description: Force package policy creation even if the package is not verified, or if the agent policy is managed.
@@ -86744,10 +86757,12 @@ components:
             properties:
               name:
                 description: Name of the custom field. The name cannot contain spaces.
+                maxLength: 1024
                 type: string
               value:
                 anyOf:
-                  - type: string
+                  - maxLength: 1024
+                    type: string
                   - type: number
                 description: Value of the custom field.
             required:
@@ -86757,6 +86772,7 @@ components:
           type: array
         id:
           description: Policy unique identifier.
+          maxLength: 255
           type: string
         inputs:
           additionalProperties:
@@ -86790,16 +86806,19 @@ components:
                       type: boolean
                     var_group_selections:
                       additionalProperties:
+                        maxLength: 1024
                         type: string
                       description: Variable group selections. Maps var_group name to the selected option name within that group.
                       type: object
                     vars:
                       additionalProperties:
                         anyOf:
-                          - type: string
+                          - maxLength: 10000
+                            type: string
                           - type: number
                           - type: boolean
                           - items:
+                              maxLength: 10000
                               type: string
                             maxItems: 100
                             type: array
@@ -86811,6 +86830,7 @@ components:
                             type: object
                             properties:
                               id:
+                                maxLength: 255
                                 type: string
                               isSecretRef:
                                 type: boolean
@@ -86826,10 +86846,12 @@ components:
               vars:
                 additionalProperties:
                   anyOf:
-                    - type: string
+                    - maxLength: 10000
+                      type: string
                     - type: number
                     - type: boolean
                     - items:
+                        maxLength: 10000
                         type: string
                       maxItems: 100
                       type: array
@@ -86841,6 +86863,7 @@ components:
                       type: object
                       properties:
                         id:
+                          maxLength: 255
                           type: string
                         isSecretRef:
                           type: boolean
@@ -86855,9 +86878,11 @@ components:
           type: object
         name:
           description: Unique name for the policy.
+          maxLength: 255
           type: string
         namespace:
           description: Policy namespace. When not specified, it inherits the agent policy namespace.
+          maxLength: 100
           type: string
         package:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_package'
@@ -86867,16 +86892,19 @@ components:
           type: string
         var_group_selections:
           additionalProperties:
+            maxLength: 1024
             type: string
           description: Variable group selections. Maps var_group name to the selected option name within that group.
           type: object
         vars:
           additionalProperties:
             anyOf:
-              - type: string
+              - maxLength: 10000
+                type: string
               - type: number
               - type: boolean
               - items:
+                  maxLength: 10000
                   type: string
                 maxItems: 100
                 type: array
@@ -86888,6 +86916,7 @@ components:
                 type: object
                 properties:
                   id:
+                    maxLength: 255
                     type: string
                   isSecretRef:
                     type: boolean
@@ -87104,6 +87133,7 @@ components:
                       type: string
                     var_group_selections:
                       additionalProperties:
+                        maxLength: 1024
                         type: string
                       description: Variable group selections. Maps var_group name to the selected option name within that group.
                       type: object
@@ -87132,6 +87162,7 @@ components:
                 type: string
               var_group_selections:
                 additionalProperties:
+                  maxLength: 1024
                   type: string
                 description: Variable group selections. Maps var_group name to the selected option name within that group.
                 type: object
@@ -87162,6 +87193,7 @@ components:
           type: string
         namespace:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
+          maxLength: 100
           type: string
         output_id:
           nullable: true
@@ -87207,6 +87239,7 @@ components:
           type: boolean
         var_group_selections:
           additionalProperties:
+            maxLength: 1024
             type: string
           description: Variable group selections. Maps var_group name to the selected option name within that group.
           type: object
@@ -89582,12 +89615,15 @@ components:
       additionalProperties: false
       properties:
         description:
+          maxLength: 4096
           type: string
         replaced_by:
           additionalProperties:
+            maxLength: 1024
             type: string
           type: object
         since:
+          maxLength: 50
           type: string
       required:
         - description
@@ -89834,6 +89870,7 @@ components:
                       type: string
                     var_group_selections:
                       additionalProperties:
+                        maxLength: 1024
                         type: string
                       description: Variable group selections. Maps var_group name to the selected option name within that group.
                       type: object
@@ -89862,6 +89899,7 @@ components:
                 type: string
               var_group_selections:
                 additionalProperties:
+                  maxLength: 1024
                   type: string
                 description: Variable group selections. Maps var_group name to the selected option name within that group.
                 type: object
@@ -89899,6 +89937,7 @@ components:
           type: string
         namespace:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
+          maxLength: 100
           type: string
         output_id:
           nullable: true
@@ -89955,6 +89994,7 @@ components:
           type: string
         var_group_selections:
           additionalProperties:
+            maxLength: 1024
             type: string
           description: Variable group selections. Maps var_group name to the selected option name within that group.
           type: object
@@ -94718,6 +94758,7 @@ components:
             type: object
             properties:
               data_stream:
+                maxLength: 1024
                 type: string
               features:
                 additionalProperties: true
@@ -107747,6 +107788,7 @@ components:
             type: object
             properties:
               data_stream:
+                maxLength: 1024
                 type: string
               features:
                 additionalProperties: false
@@ -107769,13 +107811,16 @@ components:
           type: boolean
         name:
           description: Package name
+          maxLength: 255
           type: string
         requires_root:
           type: boolean
         title:
+          maxLength: 255
           type: string
         version:
           description: Package version
+          maxLength: 50
           type: string
       required:
         - name
@@ -107966,6 +108011,7 @@ components:
                           type: string
                         var_group_selections:
                           additionalProperties:
+                            maxLength: 1024
                             type: string
                           description: Variable group selections. Maps var_group name to the selected option name within that group.
                           type: object
@@ -107994,6 +108040,7 @@ components:
                     type: string
                   var_group_selections:
                     additionalProperties:
+                      maxLength: 1024
                       type: string
                     description: Variable group selections. Maps var_group name to the selected option name within that group.
                     type: object
@@ -108050,16 +108097,19 @@ components:
                           type: boolean
                         var_group_selections:
                           additionalProperties:
+                            maxLength: 1024
                             type: string
                           description: Variable group selections. Maps var_group name to the selected option name within that group.
                           type: object
                         vars:
                           additionalProperties:
                             anyOf:
-                              - type: string
+                              - maxLength: 10000
+                                type: string
                               - type: number
                               - type: boolean
                               - items:
+                                  maxLength: 10000
                                   type: string
                                 maxItems: 100
                                 type: array
@@ -108071,6 +108121,7 @@ components:
                                 type: object
                                 properties:
                                   id:
+                                    maxLength: 255
                                     type: string
                                   isSecretRef:
                                     type: boolean
@@ -108086,10 +108137,12 @@ components:
                   vars:
                     additionalProperties:
                       anyOf:
-                        - type: string
+                        - maxLength: 10000
+                          type: string
                         - type: number
                         - type: boolean
                         - items:
+                            maxLength: 10000
                             type: string
                           maxItems: 100
                           type: array
@@ -108101,6 +108154,7 @@ components:
                           type: object
                           properties:
                             id:
+                              maxLength: 255
                               type: string
                             isSecretRef:
                               type: boolean
@@ -108121,6 +108175,7 @@ components:
           type: string
         namespace:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
+          maxLength: 100
           type: string
         output_id:
           nullable: true
@@ -108183,6 +108238,7 @@ components:
           type: string
         var_group_selections:
           additionalProperties:
+            maxLength: 1024
             type: string
           description: Variable group selections. Maps var_group name to the selected option name within that group.
           type: object
@@ -108204,10 +108260,12 @@ components:
               type: object
             - additionalProperties:
                 anyOf:
-                  - type: string
+                  - maxLength: 10000
+                    type: string
                   - type: number
                   - type: boolean
                   - items:
+                      maxLength: 10000
                       type: string
                     maxItems: 100
                     type: array
@@ -108219,6 +108277,7 @@ components:
                     type: object
                     properties:
                       id:
+                        maxLength: 255
                         type: string
                       isSecretRef:
                         type: boolean
@@ -111156,6 +111215,7 @@ components:
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
           items:
+            maxLength: 256
             type: string
           maxItems: 100
           nullable: true
@@ -111170,12 +111230,14 @@ components:
           type: boolean
         description:
           description: Policy description.
+          maxLength: 2048
           type: string
         force:
           description: Force package policy creation even if the package is not verified, or if the agent policy is managed.
           type: boolean
         id:
           description: Policy unique identifier.
+          maxLength: 255
           type: string
         inputs:
           additionalProperties:
@@ -111209,16 +111271,19 @@ components:
                       type: boolean
                     var_group_selections:
                       additionalProperties:
+                        maxLength: 1024
                         type: string
                       description: Variable group selections. Maps var_group name to the selected option name within that group.
                       type: object
                     vars:
                       additionalProperties:
                         anyOf:
-                          - type: string
+                          - maxLength: 10000
+                            type: string
                           - type: number
                           - type: boolean
                           - items:
+                              maxLength: 10000
                               type: string
                             maxItems: 100
                             type: array
@@ -111230,6 +111295,7 @@ components:
                             type: object
                             properties:
                               id:
+                                maxLength: 255
                                 type: string
                               isSecretRef:
                                 type: boolean
@@ -111245,10 +111311,12 @@ components:
               vars:
                 additionalProperties:
                   anyOf:
-                    - type: string
+                    - maxLength: 10000
+                      type: string
                     - type: number
                     - type: boolean
                     - items:
+                        maxLength: 10000
                         type: string
                       maxItems: 100
                       type: array
@@ -111260,6 +111328,7 @@ components:
                       type: object
                       properties:
                         id:
+                          maxLength: 255
                           type: string
                         isSecretRef:
                           type: boolean
@@ -111274,11 +111343,14 @@ components:
           type: object
         name:
           description: Unique name for the policy.
+          maxLength: 255
           type: string
         namespace:
           description: Policy namespace. When not specified, it inherits the agent policy namespace.
+          maxLength: 100
           type: string
         output_id:
+          maxLength: 255
           nullable: true
           type: string
         package:
@@ -111286,11 +111358,13 @@ components:
         policy_id:
           deprecated: true
           description: Deprecated. Use policy_ids instead.
+          maxLength: 255
           nullable: true
           type: string
         policy_ids:
           description: IDs of the agent policies that the package policy will be added to.
           items:
+            maxLength: 255
             type: string
           maxItems: 1000
           type: array
@@ -111301,16 +111375,19 @@ components:
           type: boolean
         var_group_selections:
           additionalProperties:
+            maxLength: 1024
             type: string
           description: Variable group selections. Maps var_group name to the selected option name within that group.
           type: object
         vars:
           additionalProperties:
             anyOf:
-              - type: string
+              - maxLength: 10000
+                type: string
               - type: number
               - type: boolean
               - items:
+                  maxLength: 10000
                   type: string
                 maxItems: 100
                 type: array
@@ -111322,6 +111399,7 @@ components:
                 type: object
                 properties:
                   id:
+                    maxLength: 255
                     type: string
                   isSecretRef:
                     type: boolean
@@ -116309,6 +116387,7 @@ components:
                       type: string
                     var_group_selections:
                       additionalProperties:
+                        maxLength: 1024
                         type: string
                       description: Variable group selections. Maps var_group name to the selected option name within that group.
                       type: object
@@ -116337,6 +116416,7 @@ components:
                 type: string
               var_group_selections:
                 additionalProperties:
+                  maxLength: 1024
                   type: string
                 description: Variable group selections. Maps var_group name to the selected option name within that group.
                 type: object
@@ -116366,6 +116446,7 @@ components:
           type: string
         namespace:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
+          maxLength: 100
           type: string
         output_id:
           nullable: true
@@ -116410,6 +116491,7 @@ components:
           type: boolean
         var_group_selections:
           additionalProperties:
+            maxLength: 1024
             type: string
           description: Variable group selections. Maps var_group name to the selected option name within that group.
           type: object
