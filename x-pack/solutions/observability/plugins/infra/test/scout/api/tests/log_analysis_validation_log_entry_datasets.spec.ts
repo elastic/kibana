@@ -61,6 +61,40 @@ apiTest.describe(
       ]);
     });
 
+    apiTest('deduplicates repeated indices', async ({ apiClient }) => {
+      const response = await apiClient.post(LOG_ANALYSIS_VALIDATE_DATASETS_PATH, {
+        headers: {
+          ...viewerApiCredentials.apiKeyHeader,
+          ...testData.INTERNAL_HEADERS,
+        },
+        responseType: 'json',
+        body: validateLogEntryDatasetsRequestPayloadRT.encode({
+          data: {
+            endTime: Date.now().valueOf(),
+            indices: ['filebeat-*', 'filebeat-*'],
+            startTime: 1562766600672,
+            timestampField: '@timestamp',
+            runtimeMappings: {},
+          },
+        }),
+      });
+
+      expect(response).toHaveStatusCode(200);
+
+      const {
+        data: { datasets },
+      } = decodeOrThrow(validateLogEntryDatasetsResponsePayloadRT)(response.body);
+
+      expect(datasets).toHaveLength(1);
+      expect(datasets[0].indexName).toBe('filebeat-*');
+      expect(datasets[0].datasets).toStrictEqual([
+        'elasticsearch.gc',
+        'elasticsearch.server',
+        'kibana.log',
+        'nginx.access',
+      ]);
+    });
+
     apiTest('rejects requests with too many indices', async ({ apiClient }) => {
       const indices = Array.from({ length: 1001 }, (_, index) => `filebeat-${index}-*`);
 
