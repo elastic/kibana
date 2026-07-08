@@ -21,6 +21,7 @@ export type {
   ChangeHistoryDefaultPreviewHeaderActionsProps,
 } from './src/components/modal';
 export {
+  ChangeHistoryModalContext,
   ChangeHistoryProvider,
   useChangeHistoryConfig,
   useChangeHistoryModal,
