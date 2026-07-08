@@ -6,7 +6,6 @@
  */
 
 import { enrichEvents } from '.';
-import { searchEnrichments } from './search_enrichments';
 import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
 import { createAlert } from './__mocks__/alerts';
 
@@ -20,7 +19,6 @@ import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/
 jest.mock('./search_enrichments', () => ({
   searchEnrichments: jest.fn(),
 }));
-const mockSearchEnrichments = searchEnrichments as jest.Mock;
 
 jest.mock('./utils/is_index_exist', () => ({
   isIndexExist: jest.fn(),
@@ -33,90 +31,6 @@ jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
   },
 }));
 const mockGetEuidFromObject = euid.getEuidFromObject as jest.Mock;
-
-const hostEnrichmentResponse = [
-  {
-    fields: {
-      'host.name': ['host name 1'],
-      'host.risk.calculated_level': ['Low'],
-      'host.risk.calculated_score_norm': [20],
-    },
-  },
-  {
-    fields: {
-      'host.name': ['host name 3'],
-      'host.risk.calculated_level': ['Critical'],
-      'host.risk.calculated_score_norm': [90],
-    },
-  },
-];
-
-const userEnrichmentResponse = [
-  {
-    fields: {
-      'user.name': ['user name 1'],
-      'user.risk.calculated_level': ['Moderate'],
-      'user.risk.calculated_score_norm': [50],
-    },
-  },
-  {
-    fields: {
-      'user.name': ['user name 2'],
-      'user.risk.calculated_level': ['Critical'],
-      'user.risk.calculated_score_norm': [90],
-    },
-  },
-];
-
-const serviceEnrichmentResponse = [
-  {
-    fields: {
-      'service.name': ['service name 1'],
-      'service.risk.calculated_level': ['Moderate'],
-      'service.risk.calculated_score_norm': [50],
-    },
-  },
-  {
-    fields: {
-      'service.name': ['service name 2'],
-      'service.risk.calculated_level': ['Critical'],
-      'service.risk.calculated_score_norm': [90],
-    },
-  },
-];
-
-const assetCriticalityUserResponse = [
-  {
-    fields: {
-      id_value: ['user name 1'],
-      criticality_level: ['important'],
-    },
-  },
-];
-
-const assetCriticalityHostResponse = [
-  {
-    fields: {
-      id_value: ['host name 2'],
-      criticality_level: ['extremely_critical'],
-    },
-  },
-  {
-    fields: {
-      id_value: ['host name 1'],
-      criticality_level: ['low'],
-    },
-  },
-];
-
-const assetCriticalityServiceResponse = [
-  {
-    fields: {
-      id_value: ['service name 1'],
-      criticality_level: ['high'],
-    },
-  },
-];
 
 describe('enrichEvents', () => {
   let ruleExecutionLogger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create>;

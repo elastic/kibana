@@ -53,7 +53,7 @@ const mockSingleEntityResponse = () =>
 
 describe('searchEntitiesTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const tool = searchEntitiesTool(mockCore, mockLogger, mockExperimentalFeatures);
+  const tool = searchEntitiesTool(mockCore, mockLogger);
   let mockCoreStart: ReturnType<typeof coreMock.createStart>;
 
   beforeEach(() => {

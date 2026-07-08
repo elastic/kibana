@@ -83,7 +83,7 @@ describe('setAssetCriticalityTool', () => {
     ]);
   });
 
-  const tool = setAssetCriticalityTool(mockCore, mockLogger, mockExperimentalFeatures, '8.0.0');
+  const tool = setAssetCriticalityTool(mockCore, mockLogger, '8.0.0');
 
   describe('schema', () => {
     it('accepts valid inputs', () => {

@@ -7,6 +7,7 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { createToolTestMocks } from '../../../__mocks__/test_helpers';
+import type { ExperimentalFeatures } from '../../../../../common';
 import { getAgentBuilderResourceAvailability } from '../../../utils/get_agent_builder_resource_availability';
 import { getWatchlistToolAvailability } from './watchlist_availability';
 
@@ -15,6 +16,10 @@ jest.mock('../../../utils/get_agent_builder_resource_availability', () => ({
 }));
 
 const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as jest.Mock;
+
+const mockExperimentalFeatures = {
+  entityAnalyticsWatchlistEnabled: true,
+} as ExperimentalFeatures;
 
 describe('getWatchlistToolAvailability', () => {
   const { mockCore, mockLogger, mockRequest } = createToolTestMocks();

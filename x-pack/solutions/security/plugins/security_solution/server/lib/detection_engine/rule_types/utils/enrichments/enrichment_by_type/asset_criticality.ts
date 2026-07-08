@@ -12,12 +12,7 @@ import {
   ALERT_USER_CRITICALITY,
 } from '../../../../../../../common/field_maps/field_names';
 import { createEntityStoreEnrichment } from '../create_entity_store_risk_enrichment';
-import type {
-  CreateCriticalityEnrichment,
-  CreateEnrichmentFunction,
-  CreateV2EnrichmentFunction,
-} from '../types';
-import { getFieldValue } from '../utils/events';
+import type { CreateCriticalityEnrichment, CreateV2EnrichmentFunction } from '../types';
 
 const ENTITY_ASSET_CRITICALITY_FIELD = 'asset.criticality';
 
@@ -91,35 +86,3 @@ export const createV2ServiceAssetCriticalityEnrichments: CreateCriticalityEnrich
     createEnrichmentFunction: createV2CriticalityEnrichmentFunction(ALERT_SERVICE_CRITICALITY),
   });
 };
-
-const enrichmentResponseFields = ['id_value', 'criticality_level'];
-const getExtraFiltersForEnrichment = (field: string) => [
-  {
-    match: {
-      id_field: {
-        query: field,
-      },
-    },
-  },
-];
-
-const createEnrichmentFactoryFunction =
-  (
-    alertField:
-      | typeof ALERT_HOST_CRITICALITY
-      | typeof ALERT_USER_CRITICALITY
-      | typeof ALERT_SERVICE_CRITICALITY
-  ): CreateEnrichmentFunction =>
-  (enrichment) =>
-  (event) => {
-    const criticality = getFieldValue(enrichment, 'criticality_level');
-
-    if (!criticality) {
-      return event;
-    }
-    const newEvent = cloneDeep(event);
-    if (criticality && newEvent._source) {
-      newEvent._source[alertField] = criticality;
-    }
-    return newEvent;
-  };

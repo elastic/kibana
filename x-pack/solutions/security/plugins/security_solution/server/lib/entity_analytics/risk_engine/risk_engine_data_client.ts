@@ -8,7 +8,6 @@
 import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
-import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics';
 import type { InitRiskEngineResult } from '../../../../common/entity_analytics/risk_engine';
 import {
   updateSavedObjectAttribute,
@@ -17,10 +16,9 @@ import {
   deleteSavedObjects,
 } from './utils/saved_object_configuration';
 import type { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
-import { removeRiskScoringTask, startRiskScoringTask } from '../risk_score/tasks';
+import { removeRiskScoringTask } from '../risk_score/tasks';
 import { RiskEngineAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
-import { getRiskScoringTaskStatus, scheduleNow } from '../risk_score/tasks/risk_scoring_task';
 import type { RiskEngineConfiguration } from '../types';
 
 interface InitOpts {
@@ -77,15 +75,6 @@ export class RiskEngineDataClient {
       return result;
     }
 
-    // should be the last step, after all resources are installed
-    try {
-      await this.enableRiskEngine({ taskManager });
-      result.riskEngineEnabled = true;
-    } catch (e) {
-      result.errors.push(e.message);
-      return result;
-    }
-
     return result;
   }
 
@@ -103,85 +92,6 @@ export class RiskEngineDataClient {
       namespace: this.options.namespace,
       attributes: config,
     });
-
-  public async getStatus({
-    namespace,
-    taskManager,
-  }: {
-    namespace: string;
-    taskManager?: TaskManagerStartContract;
-  }) {
-    const riskEngineStatus = await this.getCurrentStatus();
-
-    const taskStatus =
-      riskEngineStatus === 'ENABLED' && taskManager
-        ? await getRiskScoringTaskStatus({ namespace, taskManager })
-        : undefined;
-
-    this.options.auditLogger?.log({
-      message: 'User checked if the risk engine is enabled',
-      event: {
-        action: RiskEngineAuditActions.RISK_ENGINE_STATUS_GET,
-        category: AUDIT_CATEGORY.DATABASE,
-        type: AUDIT_TYPE.ACCESS,
-        outcome: AUDIT_OUTCOME.SUCCESS,
-      },
-    });
-
-    return {
-      riskEngineStatus,
-      taskStatus,
-    };
-  }
-
-  public async enableRiskEngine({ taskManager }: { taskManager: TaskManagerStartContract }) {
-    try {
-      const configurationResult = await updateSavedObjectAttribute({
-        logger: this.options.logger,
-        savedObjectsClient: this.options.soClient,
-        namespace: this.options.namespace,
-        attributes: {
-          enabled: true,
-        },
-      });
-
-      await startRiskScoringTask({
-        logger: this.options.logger,
-        namespace: this.options.namespace,
-        riskEngineDataClient: this,
-        taskManager,
-      });
-
-      this.options.auditLogger?.log({
-        message: 'User started risk scoring service',
-        event: {
-          action: RiskEngineAuditActions.RISK_ENGINE_START,
-          category: AUDIT_CATEGORY.DATABASE,
-          type: AUDIT_TYPE.CHANGE,
-          outcome: AUDIT_OUTCOME.SUCCESS,
-        },
-      });
-
-      return configurationResult;
-    } catch (e) {
-      this.options.logger.error(`Error while enabling risk engine: ${e.message}`);
-
-      this.options.auditLogger?.log({
-        message: 'System stopped risk scoring service after error occurred',
-        event: {
-          action: RiskEngineAuditActions.RISK_ENGINE_DISABLE,
-          category: AUDIT_CATEGORY.DATABASE,
-          type: AUDIT_TYPE.CHANGE,
-          outcome: AUDIT_OUTCOME.FAILURE,
-        },
-        error: e,
-      });
-
-      await this.disableRiskEngine({ taskManager });
-
-      throw e;
-    }
-  }
 
   public async disableRiskEngine({ taskManager }: { taskManager: TaskManagerStartContract }) {
     await removeRiskScoringTask({
@@ -210,32 +120,6 @@ export class RiskEngineDataClient {
     });
   }
 
-  public async scheduleNow({ taskManager }: { taskManager: TaskManagerStartContract }) {
-    const riskEngineStatus = await this.getCurrentStatus();
-
-    if (riskEngineStatus !== 'ENABLED') {
-      throw new Error(
-        `The risk engine must be enable to schedule a run. Current status: ${riskEngineStatus}`
-      );
-    }
-
-    this.options.auditLogger?.log({
-      message: 'User scheduled a risk engine run',
-      event: {
-        action: RiskEngineAuditActions.RISK_ENGINE_SCHEDULE_NOW,
-        category: AUDIT_CATEGORY.DATABASE,
-        type: AUDIT_TYPE.ACCESS,
-        outcome: AUDIT_OUTCOME.SUCCESS,
-      },
-    });
-
-    return scheduleNow({
-      taskManager,
-      namespace: this.options.namespace,
-      logger: this.options.logger,
-    });
-  }
-
   /**
    * Delete all risk engine resources.
    *
@@ -261,16 +145,6 @@ export class RiskEngineDataClient {
     const riskScoreErrors = await riskScoreDataClient.tearDown();
 
     return errors.concat(riskScoreErrors);
-  }
-
-  private async getCurrentStatus() {
-    const configuration = await this.getConfiguration();
-
-    if (configuration) {
-      return configuration.enabled ? RiskEngineStatusEnum.ENABLED : RiskEngineStatusEnum.DISABLED;
-    }
-
-    return RiskEngineStatusEnum.NOT_INSTALLED;
   }
 
   public async updateRiskEngineSavedObject(attributes: {}) {

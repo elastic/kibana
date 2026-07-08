@@ -69,10 +69,8 @@ export const registerTools = (
   );
   agentBuilder.tools.register(listWatchlistsTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(removeEntitiesFromWatchlistTool(core, logger, experimentalFeatures));
-  agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
-  agentBuilder.tools.register(
-    setAssetCriticalityTool(core, logger, experimentalFeatures, kibanaVersion)
-  );
+  agentBuilder.tools.register(searchEntitiesTool(core, logger));
+  agentBuilder.tools.register(setAssetCriticalityTool(core, logger, kibanaVersion));
   agentBuilder.tools.register(updateWatchlistTool(core, logger, experimentalFeatures));
 
   if (experimentalFeatures.rulePreviewAttachmentEnabled) {

@@ -18,7 +18,6 @@ import {
 import type { Logger } from '@kbn/logging';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
-import type { ExperimentalFeatures } from '../../../../common';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { AssetCriticalityLevelsForBulkUpload } from '../../../../common/api/entity_analytics/asset_criticality/bulk_upload_asset_criticality.gen';
 import { securityTool } from '../constants';
@@ -83,7 +82,6 @@ const schema = z.object({
 export const setAssetCriticalityTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
-  experimentalFeatures: ExperimentalFeatures,
   kibanaVersion: string
 ): BuiltinToolDefinition<typeof schema> => {
   return {

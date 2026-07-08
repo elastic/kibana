@@ -18,6 +18,7 @@ import {
   createToolTestMocks,
   setupMockCoreStartServices,
 } from '../../../__mocks__/test_helpers';
+import type { ExperimentalFeatures } from '../../../../../common';
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../../lib/telemetry/event_based/events';
 import { getWatchlistToolAvailability } from './watchlist_availability';
 import {
@@ -30,6 +31,10 @@ jest.mock('./watchlist_availability', () => ({
 }));
 
 const mockGetWatchlistToolAvailability = getWatchlistToolAvailability as jest.Mock;
+
+const mockExperimentalFeatures = {
+  entityAnalyticsWatchlistEnabled: true,
+} as ExperimentalFeatures;
 
 const mockGetWatchlistFn = jest.fn();
 jest.mock('../../../../lib/entity_analytics/watchlists/management/watchlist_config', () => {

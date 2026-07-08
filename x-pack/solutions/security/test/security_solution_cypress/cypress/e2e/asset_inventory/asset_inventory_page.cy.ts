@@ -36,10 +36,6 @@ import { ASSET_INVENTORY_URL } from '../../urls/navigation';
 import { postDataView } from '../../tasks/api_calls/common';
 import { NO_PRIVILEGES_BOX } from '../../screens/common/page';
 
-// Asset Inventory now reads from the unified Entity Store v2 latest alias
-// (`entities-latest-{namespace}`).
-const ASSET_INVENTORY_V2_KBN_SERVER_ARGS = [];
-
 const GENERIC_ENTITY_ID =
   '/subscriptions/ef111ee2-6c89-4b09-92c6-5c2321f888df/resourceGroups/cloud-shell-storage-centralindia/providers/Microsoft.Storage/storageAccounts/csg100320021acf35e2/tableServices/default';
 
@@ -95,7 +91,6 @@ describe(
   'Asset Inventory page - uiSetting disabled',
   {
     tags: ['@ess', '@serverless'],
-    env: { ftrConfig: { kbnServerArgs: ASSET_INVENTORY_V2_KBN_SERVER_ARGS } },
   },
   () => {
     beforeEach(() => {
@@ -115,7 +110,6 @@ describe(
   'Asset Inventory page - user flyout',
   {
     tags: ['@ess'],
-    env: { ftrConfig: { kbnServerArgs: ASSET_INVENTORY_V2_KBN_SERVER_ARGS } },
   },
   () => {
     before(() => {

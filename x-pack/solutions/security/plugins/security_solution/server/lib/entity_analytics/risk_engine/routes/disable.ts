@@ -18,8 +18,7 @@ import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 
 export const riskEngineDisableRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
-  isEntityAnalyticsEntityStoreV2Enabled: boolean
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   router.versioned
     .post({

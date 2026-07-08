@@ -21,7 +21,6 @@ import {
   IdentifierType,
   EntityRiskLevels,
 } from '../../../../common/api/entity_analytics/common/common.gen';
-import type { ExperimentalFeatures } from '../../../../common';
 import { AssetCriticalityLevel } from '../../../../common/api/entity_analytics/asset_criticality/common.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
@@ -671,8 +670,7 @@ const buildAttachmentSideEffectResults = async ({
 
 export const searchEntitiesTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
-  logger: Logger,
-  experimentalFeatures: ExperimentalFeatures
+  logger: Logger
 ): BuiltinToolDefinition<typeof schema> => {
   return {
     id: SECURITY_SEARCH_ENTITIES_TOOL_ID,

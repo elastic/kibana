@@ -14,10 +14,7 @@ import {
   requestContextMock,
   requestMock,
 } from '../../../detection_engine/routes/__mocks__';
-import type {
-  MockClients,
-  SecuritySolutionRequestHandlerContextMock,
-} from '../../../detection_engine/routes/__mocks__/request_context';
+import type { SecuritySolutionRequestHandlerContextMock } from '../../../detection_engine/routes/__mocks__/request_context';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import { riskScoreEntityCalculationRouteV2 } from './entity_calculation_v2';
 import { riskEnginePrivilegesMock } from '../../risk_engine/routes/risk_engine_privileges.mock';
@@ -60,7 +57,6 @@ const entityDocMock = {
 
 describe('entity risk score V2 calculation route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let clients: MockClients;
   let context: SecuritySolutionRequestHandlerContextMock;
   let logger: ReturnType<typeof loggerMock.create>;
   let getStartServicesMock: jest.Mock;
@@ -82,7 +78,7 @@ describe('entity risk score V2 calculation route', () => {
 
     server = serverMock.create();
     logger = loggerMock.create();
-    ({ clients, context } = requestContextMock.createTools());
+    ({ context } = requestContextMock.createTools());
 
     mockCrudClient = {
       listEntities: jest.fn().mockResolvedValue({ entities: [entityDocMock] }),
