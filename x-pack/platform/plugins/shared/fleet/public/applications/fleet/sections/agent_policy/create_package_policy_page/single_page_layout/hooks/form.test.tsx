@@ -277,6 +277,46 @@ describe('useOnSubmit', () => {
     });
   });
 
+  describe('copy source (defaultPolicyData) field carry-over', () => {
+    // Copying a policy seeds the create form from `defaultPolicyData` via a `pick` allowlist.
+    // Agentless copies hydrate that source through `agentlessPolicyToPackagePolicy`, which carries
+    // `global_data_tags` and `var_group_selections`; the allowlist must forward them or they are
+    // silently dropped before `toNewAgentlessPolicy` ever runs.
+    it('carries global_data_tags and var_group_selections onto the copied base policy', async () => {
+      renderResult = testRenderer.renderHook(() =>
+        useOnSubmit({
+          agentCount: 0,
+          packageInfo,
+          withSysMonitoring: false,
+          selectedPolicyTab: SelectedPolicyTab.NEW,
+          newAgentPolicy: { name: 'test', namespace: '' },
+          queryParamsPolicyId: undefined,
+          hasFleetAddAgentsPrivileges: true,
+          setNewAgentPolicy: jest.fn(),
+          setSelectedPolicyTab: jest.fn(),
+          defaultPolicyData: {
+            name: 'copied-policy',
+            supports_agentless: true,
+            additional_datastreams_permissions: ['logs-test-*'],
+            global_data_tags: [{ name: 'team', value: 'fleet' }],
+            var_group_selections: { credential_type: 'cloud_connectors' },
+          },
+        })
+      );
+
+      await waitFor(() => {
+        const { packagePolicy } = renderResult.result.current;
+        expect(packagePolicy.name).toBe('copied-policy');
+        expect(packagePolicy.global_data_tags).toEqual([{ name: 'team', value: 'fleet' }]);
+        expect(packagePolicy.var_group_selections).toEqual({
+          credential_type: 'cloud_connectors',
+        });
+        // Regression guard: the pre-existing allowlisted field still carries over.
+        expect(packagePolicy.additional_datastreams_permissions).toEqual(['logs-test-*']);
+      });
+    });
+  });
+
   describe('input deployment mode filtering', () => {
     beforeEach(() => {
       jest.clearAllMocks();

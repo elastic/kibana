@@ -14,6 +14,7 @@ import { useCalculateEntityRiskScore } from './use_calculate_entity_risk_score';
 import { useRefetchQueryById } from './use_refetch_query_by_id';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import { RESOLUTION_GROUP_QUERY_KEY } from '../../components/entity_resolution/hooks/use_resolution_group';
+import { useOnAssetCriticalityToolEvent } from '../../hooks/use_on_asset_criticality_tool_event';
 
 interface UseEntityRiskScoreRecalculationParams<T extends EntityType> {
   entityType: T;
@@ -74,6 +75,10 @@ export const useEntityRiskScoreRecalculation = <T extends EntityType>({
     queryClient,
     onRecalculation,
   ]);
+
+  useOnAssetCriticalityToolEvent(({ entityType: updatedType }) => {
+    if (updatedType === entityType) onRiskScoreUpdated();
+  });
 
   const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore({
     identifierType: entityType,

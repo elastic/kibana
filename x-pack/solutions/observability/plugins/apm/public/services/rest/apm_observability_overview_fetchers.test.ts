@@ -10,11 +10,14 @@ import {
   fetchObservabilityOverviewPageData,
   getHasData,
 } from './apm_observability_overview_fetchers';
-import * as createCallApmApi from './create_call_apm_api';
-import type { CallApmApiSpy } from './call_apm_api_spy';
+import * as plugin from '../../plugin';
 
 describe('Observability dashboard data', () => {
-  const callApmApiMock = jest.spyOn(createCallApmApi, 'callApmApi') as unknown as CallApmApiSpy;
+  const callApmApiMock = jest.fn();
+
+  jest.spyOn(plugin, 'getApmInternalServices').mockReturnValue({
+    callApmApi: callApmApiMock as any,
+  });
   const params = {
     absoluteTime: {
       start: moment('2020-07-02T13:25:11.629Z').valueOf(),

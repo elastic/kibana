@@ -63,6 +63,14 @@ import {
   WorkflowValidationError,
 } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
+import {
+  type ExternalResumeFormPageParams,
+  type ExternalResumeViaGetParams,
+  type ExternalResumeWorkflowExecutionWithInputParams,
+  getExternalResumeFormPage,
+  resumeWorkflowExecutionExternallyViaGet,
+  resumeWorkflowExecutionExternallyWithInput,
+} from './external_resume/external_resume_service';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
@@ -936,6 +944,22 @@ export class WorkflowsManagementApi {
     params: { page?: number; perPage?: number; includeReasoning?: boolean } = {}
   ): Promise<WaitForInputListResult> {
     return this.workflowsService.listWaitingForInputSteps(spaceId, params);
+  }
+
+  public async resumeWorkflowExecutionExternallyViaGet(
+    params: ExternalResumeViaGetParams
+  ): Promise<ResumeWorkflowExecutionResponseDto> {
+    return resumeWorkflowExecutionExternallyViaGet(this.workflowsService, params);
+  }
+
+  public async resumeWorkflowExecutionExternallyWithInput(
+    params: ExternalResumeWorkflowExecutionWithInputParams
+  ): Promise<ResumeWorkflowExecutionResponseDto> {
+    return resumeWorkflowExecutionExternallyWithInput(this.workflowsService, params);
+  }
+
+  public async getExternalResumeFormPage(params: ExternalResumeFormPageParams): Promise<string> {
+    return getExternalResumeFormPage(this.workflowsService, params);
   }
 
   /** Cross-workflow listing of processed `waitForInput` step executions. */
