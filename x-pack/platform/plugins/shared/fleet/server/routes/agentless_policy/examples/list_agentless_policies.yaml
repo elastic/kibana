@@ -4,7 +4,7 @@ responses:
     content:
       application/json:
         examples:
-          listAgentlessPoliciesResponseExample:
+          listManagedIntegrationsResponseExample:
             description: 'Example response for listing managed integrations'
             value:
               items:

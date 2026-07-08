@@ -4,7 +4,7 @@ responses:
     content:
       application/json:
         examples:
-          deleteAgentlessPoliciesResponseExample:
+          deleteManagedIntegrationsResponseExample:
             description: 'Example response for deleting a managed integration'
             value:
               item:

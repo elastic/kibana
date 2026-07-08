@@ -2,7 +2,7 @@ requestBody:
   content:
     application/json:
       examples:
-        upgradeAgentlessPoliciesRequestExample:
+        upgradeManagedIntegrationsRequestExample:
           description: 'Bulk upgrade managed integrations to their installed package version'
           value:
             policyIds:
@@ -14,7 +14,7 @@ responses:
     content:
       application/json:
         examples:
-          upgradeAgentlessPoliciesResponseExample:
+          upgradeManagedIntegrationsResponseExample:
             description: 'Example response where every policy was upgraded'
             value:
               - id: d52a7812-5736-4fdc-aed8-72152afa1ffa
@@ -23,7 +23,7 @@ responses:
               - id: aws-policy-12345
                 name: cspm-aws-policy
                 success: true
-          upgradeAgentlessPoliciesPartialFailureResponseExample:
+          upgradeManagedIntegrationsPartialFailureResponseExample:
             description: 'Example response where one managed integration upgraded and another id was missing or not a managed integration (the batch still returns 200)'
             value:
               - id: d52a7812-5736-4fdc-aed8-72152afa1ffa

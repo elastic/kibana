@@ -127,7 +127,7 @@ export const CreateAgentlessPolicyRequestSchema = {
     // shared schemas map. ObjectType.extends() inherits `meta.id` from the
     // base when the caller does not provide a fresh one, and the OAS bundler's
     // shared registry is last-write-wins on collisions.
-    { meta: { id: 'create_agentless_policy_request' } }
+    { meta: { id: 'create_managed_integration_request' } }
   ),
 };
 
@@ -341,7 +341,7 @@ export const BulkUpgradeAgentlessPoliciesRequestSchema = {
         },
       }),
     },
-    { meta: { id: 'bulk_upgrade_agentless_policies_request' } }
+    { meta: { id: 'bulk_upgrade_managed_integrations_request' } }
   ),
 };
 
@@ -371,7 +371,7 @@ export const AgentlessPolicyUpgradeDryRunRequestSchema = {
         })
       ),
     },
-    { meta: { id: 'agentless_policy_upgrade_dry_run_request' } }
+    { meta: { id: 'managed_integration_upgrade_dry_run_request' } }
   ),
 };
 
@@ -416,7 +416,7 @@ export const BulkUpgradeAgentlessPolicyResultSchema = schema.object(
       })
     ),
   },
-  { meta: { id: 'bulk_upgrade_agentless_policy_result' } }
+  { meta: { id: 'bulk_upgrade_managed_integration_result' } }
 );
 
 export const BulkUpgradeAgentlessPoliciesResponseSchema = schema.arrayOf(
@@ -491,7 +491,7 @@ export const AgentlessPolicyUpgradeDryRunResultSchema = schema.object(
       })
     ),
   },
-  { meta: { id: 'agentless_policy_upgrade_dry_run_result' } }
+  { meta: { id: 'managed_integration_upgrade_dry_run_result' } }
 );
 
 export const AgentlessPolicyUpgradeDryRunResponseSchema = schema.arrayOf(

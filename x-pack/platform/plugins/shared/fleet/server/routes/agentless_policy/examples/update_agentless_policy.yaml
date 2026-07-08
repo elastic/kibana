@@ -2,7 +2,7 @@ requestBody:
   content:
     application/json:
       examples:
-        updateAgentlessPolicyRequestExample:
+        updateManagedIntegrationRequestExample:
           description: >-
             Example request to update a managed integration. `PUT` uses full-replace
             semantics: the policy is rebuilt entirely from this body, so any
@@ -41,7 +41,7 @@ requestBody:
                         - billing
                   ess_billing.credits:
                     enabled: true
-        updateAgentlessPolicyVersionChangeRequestExample:
+        updateManagedIntegrationVersionChangeRequestExample:
           description: 'Example request to update a managed integration to a different package version. The package name is immutable, but the version may change.'
           value:
             package:
@@ -61,7 +61,7 @@ requestBody:
                     enabled: true
                   ess_billing.credits:
                     enabled: false
-        updateAgentlessPolicyClearFieldsRequestExample:
+        updateManagedIntegrationClearFieldsRequestExample:
           description: >-
             Example showing full-replace clearing semantics. Compared to the prior
             state, this request omits `description` (clearing it) and provides only
@@ -85,7 +85,7 @@ requestBody:
                     enabled: true
                   ess_billing.credits:
                     enabled: true
-        updateAgentlessPolicyAttachAWSCloudConnectorRequestExample:
+        updateManagedIntegrationAttachAWSCloudConnectorRequestExample:
           description: >-
             Example request to attach an AWS cloud connector to a managed integration
             on update. Because `PUT` is full-replace, the `cloud_connector` block must
@@ -123,7 +123,7 @@ requestBody:
             vars:
               posture: cspm
               deployment: aws
-        updateAgentlessPolicyReuseAWSCloudConnectorRequestExample:
+        updateManagedIntegrationReuseAWSCloudConnectorRequestExample:
           description: >-
             Example request to update a managed integration reusing an existing AWS
             cloud connector by ID instead of creating a new one.
@@ -168,7 +168,7 @@ responses:
     content:
       application/json:
         examples:
-          updateAgentlessPolicyResponseExample:
+          updateManagedIntegrationResponseExample:
             description: 'Example response for updating a managed integration'
             value:
               item:
@@ -205,7 +205,7 @@ responses:
                 created_by: test_user
                 updated_at: '2025-11-07T09:14:02.118Z'
                 updated_by: test_user
-          updateAgentlessPolicyWithAWSCloudConnectorResponseExample:
+          updateManagedIntegrationWithAWSCloudConnectorResponseExample:
             description: 'Example response after attaching an AWS cloud connector on update'
             value:
               item:

@@ -28,7 +28,7 @@ const AgentlessPolicyPackageSchema = schema.object(
       meta: { description: 'Integration package version.' },
     }),
   },
-  { meta: { id: 'agentless_policy_package' } }
+  { meta: { id: 'managed_integration_package' } }
 );
 
 const CloudConnectorSchema = schema.object(
@@ -41,7 +41,7 @@ const CloudConnectorSchema = schema.object(
       meta: { description: 'The ID of the cloud connector.' },
     }),
   },
-  { meta: { id: 'agentless_policy_cloud_connector' } }
+  { meta: { id: 'managed_integration_cloud_connector' } }
 );
 
 const GlobalDataTagSchema = schema.object({
@@ -112,12 +112,12 @@ export const AgentlessPolicySchema = schema.object(
       meta: { description: 'User who last updated the policy.' },
     }),
   },
-  { meta: { id: 'agentless_policy' } }
+  { meta: { id: 'managed_integration' } }
 );
 
 export const AgentlessPolicyResponseSchema = schema.object(
   {
     item: AgentlessPolicySchema,
   },
-  { meta: { id: 'agentless_policy_response' } }
+  { meta: { id: 'managed_integration_response' } }
 );

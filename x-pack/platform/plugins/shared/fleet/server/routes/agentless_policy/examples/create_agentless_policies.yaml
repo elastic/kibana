@@ -2,7 +2,7 @@ requestBody:
   content:
     application/json:
       examples:
-        createAgentlessPoliciesRequestExample:
+        createManagedIntegrationsRequestExample:
           description: 'Example request to create a managed integration'
           value:
             package:
@@ -29,7 +29,7 @@ requestBody:
                         - billing
                   ess_billing.credits:
                     enabled: false
-        createAgentlessPoliciesWithAWSCloudConnectorExample:
+        createManagedIntegrationsWithAWSCloudConnectorExample:
           description: 'Example request to create a managed integration with AWS cloud connector'
           value:
             package:
@@ -64,7 +64,7 @@ requestBody:
             vars:
               posture: cspm
               deployment: aws
-        createAgentlessPoliciesWithAzureCloudConnectorExample:
+        createManagedIntegrationsWithAzureCloudConnectorExample:
           description: 'Example request to create a managed integration with Azure cloud connector'
           value:
             package:
@@ -100,7 +100,7 @@ requestBody:
             vars:
               posture: cspm
               deployment: azure
-        createAgentlessPoliciesReuseAWSCloudConnectorExample:
+        createManagedIntegrationsReuseAWSCloudConnectorExample:
           description: 'Example request to create a managed integration reusing an existing AWS cloud connector'
           value:
             package:
@@ -143,7 +143,7 @@ responses:
     content:
       application/json:
         examples:
-          createAgentlessPoliciesResponseExample:
+          createManagedIntegrationsResponseExample:
             description: 'Example response for creating a managed integration'
             value:
               item:
@@ -180,7 +180,7 @@ responses:
                 created_by: test_user
                 updated_at: '2025-11-06T18:27:43.541Z'
                 updated_by: test_user
-          createAgentlessPoliciesWithAWSCloudConnectorResponseExample:
+          createManagedIntegrationsWithAWSCloudConnectorResponseExample:
             description: 'Example response for AWS cloud connector integration'
             value:
               item:
@@ -221,7 +221,7 @@ responses:
                 created_by: test_user
                 updated_at: '2025-11-06T18:27:43.541Z'
                 updated_by: test_user
-          createAgentlessPoliciesWithAzureCloudConnectorResponseExample:
+          createManagedIntegrationsWithAzureCloudConnectorResponseExample:
             description: 'Example response for Azure cloud connector integration'
             value:
               item:
