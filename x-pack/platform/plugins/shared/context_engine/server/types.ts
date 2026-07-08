@@ -27,8 +27,8 @@ import type {
   ContextEngineDeleteScope,
   ContextEngineIndexAttachmentOriginMode,
   ContextEngineIndexAttachmentContentMode,
-} from './services/context_engine/types';
-import type { ContextEngineResolvedItemResult } from './services/context_engine/execute_attach_items';
+} from './services/engine/types';
+import type { ContextEngineResolvedItemResult } from './services/engine/execute_attach_items';
 
 export interface ContextEngineSetupDependencies {
   features: FeaturesPluginSetup;

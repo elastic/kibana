@@ -19,13 +19,13 @@ import {
   MAX_CONTEXT_ENGINE_PERMISSIONS_NAME_LENGTH,
   MAX_CONTEXT_ENGINE_PERMISSIONS_ENTRIES,
 } from '../../common/constants';
-import { ContextEnginePermissionsConflictError } from '../services/context_engine/errors';
+import { ContextEnginePermissionsConflictError } from '../services/engine/errors';
 import type {
   ContextEngineEntry,
   ContextEnginePermissions,
   ContextEngineService,
-} from '../services/context_engine/types';
-import { isVisibleInSpace } from '../services/context_engine/service';
+} from '../services/engine/types';
+import { isVisibleInSpace } from '../services/engine/service';
 import type { ContextEngineStartDependencies, ContextEnginePluginStart } from '../types';
 import { WRITE_SECURITY, toContextEngineHttpItem, withContextEngineFeatureFlag } from './common';
 

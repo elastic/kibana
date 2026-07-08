@@ -9,7 +9,7 @@ import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import type { ContextEngineAutocompleteResult } from '../services/context_engine/types';
+import type { ContextEngineAutocompleteResult } from '../services/engine/types';
 import { registerAutocompleteRoute } from './autocomplete';
 
 const createMockContextEngineService = () => ({

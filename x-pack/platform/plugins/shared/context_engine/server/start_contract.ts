@@ -13,7 +13,7 @@ import type {
   ContextEngineIndexAttachmentParams,
   ContextEngineDeleteAttachmentParams,
 } from './types';
-import type { ContextEngineService } from './services/context_engine/types';
+import type { ContextEngineService } from './services/engine/types';
 
 interface StartContractDeps {
   contextEngineService: ContextEngineService;

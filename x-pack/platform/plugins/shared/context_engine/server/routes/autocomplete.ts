@@ -16,7 +16,7 @@ import {
   ContextEngineSearchFilterType,
 } from '../../common/http_api/context_engine';
 import { contextEngineAutocompletePath } from '../../common/constants';
-import type { ContextEngineService } from '../services/context_engine/types';
+import type { ContextEngineService } from '../services/engine/types';
 import type { ContextEngineStartDependencies, ContextEnginePluginStart } from '../types';
 import { READ_SECURITY, withContextEngineFeatureFlag } from './common';
 

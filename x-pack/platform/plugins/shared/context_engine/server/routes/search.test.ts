@@ -14,11 +14,11 @@ import {
   httpServerMock,
   httpServiceMock,
 } from './test_helpers';
-import type { ContextEngineSearchResult } from '../services/context_engine/types';
+import type { ContextEngineSearchResult } from '../services/engine/types';
 import {
   ContextEngineAuthzEnumerationIncompleteError,
   ContextEngineCorpusTooLargeError,
-} from '../services/context_engine/errors';
+} from '../services/engine/errors';
 import { registerSearchRoute } from './search';
 
 describe('registerSearchRoute', () => {

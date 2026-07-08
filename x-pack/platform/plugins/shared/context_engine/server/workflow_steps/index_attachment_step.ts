@@ -11,10 +11,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { contextEngineAddEntryStepCommonDefinition } from '../../common/workflow_steps/index_attachment_step';
 import { apiPrivileges } from '../../common/features';
-import type {
-  ContextEngineEntry,
-  ContextEnginePermissions,
-} from '../services/context_engine/types';
+import type { ContextEngineEntry, ContextEnginePermissions } from '../services/engine/types';
 import type { ContextEnginePluginStart } from '../types';
 
 /**

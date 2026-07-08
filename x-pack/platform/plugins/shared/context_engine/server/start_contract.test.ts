@@ -11,7 +11,7 @@ import type {
   ContextEngineEntry,
   ContextEnginePermissions,
   ContextEngineService,
-} from './services/context_engine/types';
+} from './services/engine/types';
 import { buildIndexAttachment, buildDeleteAttachment } from './start_contract';
 
 // Hand-built rather than `coreMock` — these builders only touch

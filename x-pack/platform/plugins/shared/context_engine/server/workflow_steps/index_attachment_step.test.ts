@@ -13,14 +13,14 @@ import { ContextEngineIndexAttachmentInputSchema } from '../../common/workflow_s
 import { apiPrivileges } from '../../common/features';
 import type { ContextEnginePluginStart } from '../types';
 import { createContextEngineAddEntryStepDefinition } from './index_attachment_step';
-import { createContextEngineIndexer } from '../services/context_engine/indexer';
-import { createContextEngineTypeRegistry } from '../services/context_engine/type_registry';
-import { kibanaSavedObjectPermissions } from '../services/context_engine/permissions/kibana_saved_object';
-import type { ContextEngineTypeDefinition } from '../services/context_engine/types';
+import { createContextEngineIndexer } from '../services/engine/indexer';
+import { createContextEngineTypeRegistry } from '../services/engine/type_registry';
+import { kibanaSavedObjectPermissions } from '../services/engine/permissions/kibana_saved_object';
+import type { ContextEngineTypeDefinition } from '../services/engine/types';
 // Imported as a namespace so we can spy on `createContextEngineStorage` without
 // adding a `__mock__` shim. `jest.spyOn(target, method)` needs a
 // concrete object reference, which is what the `* as` form gives us.
-import * as contextEngineStorage from '../services/context_engine/storage';
+import * as contextEngineStorage from '../services/engine/storage';
 
 const buildStartContract = (): jest.Mocked<ContextEnginePluginStart> => ({
   search: jest.fn(),
@@ -817,7 +817,7 @@ describe('createContextEngineAddEntryStepDefinition', () => {
     // would also strip it, but rejecting up-front makes the misuse loud —
     // a workflow author trying to "set permissions for this entry" gets a
     // schema error instead of believing it worked.
-    it('rejects a entry that carries a permissions field (schema is strict)', () => {
+    it('rejects an entry that carries a permissions field (schema is strict)', () => {
       const parsed = ContextEngineIndexAttachmentInputSchema.safeParse({
         originId: 'doc-1',
         attachmentType: 'custom',
@@ -840,7 +840,7 @@ describe('createContextEngineAddEntryStepDefinition', () => {
       expect(JSON.stringify(issues)).toContain('permissions');
     });
 
-    it('accepts a entry that omits the permissions field', () => {
+    it('accepts an entry that omits the permissions field', () => {
       const parsed = ContextEngineIndexAttachmentInputSchema.safeParse({
         originId: 'doc-1',
         attachmentType: 'custom',

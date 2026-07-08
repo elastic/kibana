@@ -239,7 +239,7 @@ class ContextEngineIndexerImpl implements ContextEngineIndexer {
 
     // Resolve permissions BEFORE `deleteEntries` so a hook throw doesn't
     // leave the origin in a wiped state. `getPermissions(originId, ctx)`
-    // is a per-origin computation (it doesn't take a entry), so one call
+    // is a per-origin computation (it doesn't take an entry), so one call
     // is correct and also avoids N hook invocations when getContextEngineData
     // returns multiple entries for the same origin.
     let resolvedPermissions: ContextEnginePermissions;
@@ -665,7 +665,7 @@ class ContextEngineIndexerImpl implements ContextEngineIndexer {
     }
     if (spaces && spaces.length > 0) {
       // Scope the delete to entries visible in at least one of the provided
-      // spaces. Mirrors `isVisibleInSpace`: a entry is visible when its
+      // spaces. Mirrors `isVisibleInSpace`: an entry is visible when its
       // `spaces` array contains the space id OR the wildcard `'*'` (global
       // entries). Without the `'*'` entry, crawler-written globally-scoped
       // entries would survive the delete and violate the "claim the origin"

@@ -16,12 +16,12 @@ import {
   ContextEngineSearchFilterType,
 } from '../../common/http_api/context_engine';
 import { contextEngineSearchPath } from '../../common/constants';
-import type { ContextEngineService } from '../services/context_engine/types';
+import type { ContextEngineService } from '../services/engine/types';
 import type { ContextEngineStartDependencies, ContextEnginePluginStart } from '../types';
 import {
   ContextEngineAuthzEnumerationIncompleteError,
   ContextEngineCorpusTooLargeError,
-} from '../services/context_engine/errors';
+} from '../services/engine/errors';
 import { READ_SECURITY, withContextEngineFeatureFlag } from './common';
 
 const CONTEXT_ENGINE_SEARCH_SIZE_MAX = 1000;

@@ -27,7 +27,7 @@ import type { ContextEngineService } from './types';
  * The crawler indexes ALL content across ALL spaces into the Context Engine system index.
  * Access control is enforced at **query time**, not index time:
  *
- *  1. `searchCe` filters results to the requesting user's current space.
+ *  1. `searchContextEngine` filters results to the requesting user's current space.
  *  2. `filterResultsByPermissions` batch-checks the user's Kibana privileges
  *     against each result's `permissions` array.
  *  3. `checkItemsAccess` (used by `sml_attach`) performs the same privilege

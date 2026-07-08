@@ -8,7 +8,7 @@
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import type { ContextEngineDocument } from '../services/context_engine/types';
+import type { ContextEngineDocument } from '../services/engine/types';
 
 export const createMockContextEngineService = () => ({
   search: jest.fn(),

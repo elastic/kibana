@@ -16,7 +16,7 @@ import {
   sampleDocument,
 } from './test_helpers';
 import { registerListRoute } from './list';
-import { ContextEngineResultWindowExceededError } from '../services/context_engine/errors';
+import { ContextEngineResultWindowExceededError } from '../services/engine/errors';
 
 describe('registerListRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;

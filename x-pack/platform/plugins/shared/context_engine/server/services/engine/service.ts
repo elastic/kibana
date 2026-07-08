@@ -112,7 +112,7 @@ class ContextEngineServiceImpl implements ContextEngineServiceInstance {
         constraints,
         filters,
       }) => {
-        return searchCe({
+        return searchContextEngine({
           query,
           size,
           fields,
@@ -134,7 +134,7 @@ class ContextEngineServiceImpl implements ContextEngineServiceInstance {
         constraints,
         filters,
       }) => {
-        const rawResults = await autocompleteCe({
+        const rawResults = await autocompleteContextEngine({
           query,
           size,
           spaceId,
@@ -472,9 +472,9 @@ const resolveAuthorizedUniverse = async ({
  * two stacked all-of checks per entry in a single `_has_privileges` call:
  *
  *   1. Kibana `permissions.kibana.privileges[].name` — every action
- *      string a entry lists must be authorized for the user.
+ *      string an entry lists must be authorized for the user.
  *   2. ES `permissions.elasticsearch.indices[].name` — every concrete
- *      index / alias / data stream a entry depends on must be `read`-
+ *      index / alias / data stream an entry depends on must be `read`-
  *      authorized.
  *
  * Entries with no `kibana.privileges` pass check 1 trivially; entries with
@@ -995,7 +995,7 @@ const isEsqlIndexMissingError = (error: unknown): boolean => {
  * separate WHERE clause (ANDed across dimensions); within types and tags,
  * matching is OR (any listed value matches).
  */
-const searchCe = async ({
+const searchContextEngine = async ({
   query,
   size,
   fields,
@@ -1212,7 +1212,7 @@ const buildContextEngineAutocompleteQuery = (query: string): Record<string, unkn
 /**
  * Autocomplete the Context Engine index. Prefix-only, with per-row provenance for the @ menu.
  */
-const autocompleteCe = async ({
+const autocompleteContextEngine = async ({
   query,
   size,
   spaceId,

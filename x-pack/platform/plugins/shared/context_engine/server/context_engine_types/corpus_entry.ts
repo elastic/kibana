@@ -6,9 +6,9 @@
  */
 
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import type { ContextEngineTypeDefinition } from '../services/context_engine/types';
+import type { ContextEngineTypeDefinition } from '../services/engine/types';
 
-export const CORPUS_ENTRY_CE_TYPE = 'corpus_entry';
+export const CORPUS_ENTRY_TYPE = 'corpus_entry';
 
 /**
  * Neutral Context Engine type for ad-hoc / eval corpus documents written directly via the
@@ -29,8 +29,8 @@ export const CORPUS_ENTRY_CE_TYPE = 'corpus_entry';
  * stored Context Engine document. So `toAttachment` builds the attachment directly from
  * the indexed `title` / `content` / `description`.
  */
-export const corpusEntryContextEngineType: ContextEngineTypeDefinition = {
-  id: CORPUS_ENTRY_CE_TYPE,
+export const corpusEntryType: ContextEngineTypeDefinition = {
+  id: CORPUS_ENTRY_TYPE,
 
   async *list() {},
 

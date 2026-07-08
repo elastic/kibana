@@ -25,15 +25,15 @@ import { registerAutocompleteRoute } from './routes/autocomplete';
 import {
   createContextEngineService,
   type ContextEngineServiceInstance,
-} from './services/context_engine/service';
+} from './services/engine/service';
 import {
   registerContextEngineCrawlerTaskDefinition,
   scheduleContextEngineCrawlerTasks,
-} from './services/context_engine/task_definitions';
-import { resolveAttachItems } from './services/context_engine/execute_attach_items';
-import type { ContextEngineService } from './services/context_engine/types';
+} from './services/engine/task_definitions';
+import { resolveAttachItems } from './services/engine/execute_attach_items';
+import type { ContextEngineService } from './services/engine/types';
 import { registerContextEngineWorkflowSteps } from './workflow_steps';
-import { corpusEntryContextEngineType } from './context_engine_types/corpus_entry';
+import { corpusEntryType } from './context_engine_types/corpus_entry';
 import { buildIndexAttachment, buildDeleteAttachment } from './start_contract';
 
 export class ContextEnginePlugin
@@ -72,7 +72,7 @@ export class ContextEnginePlugin
     // Register the neutral 'corpus_entry' Context Engine type so workflow authors can sink
     // ad-hoc / eval documents via contextEngine.addEntry without reusing a
     // solution-owned type.
-    contextEngineSetup.registerType(corpusEntryContextEngineType);
+    contextEngineSetup.registerType(corpusEntryType);
 
     registerContextEngineCrawlerTaskDefinition({
       taskManager: setupDeps.taskManager,

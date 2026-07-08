@@ -31,9 +31,10 @@ export const REMOVED_TYPES: string[] = [
   // deprecated in https://github.com/elastic/kibana/pull/216916
   'obs-ai-assistant:knowledge-base-migration',
 
-  // Legacy Context Engine (formerly SML) crawler task types,
-  // removed in https://github.com/elastic/kibana/pull/276017
+  // Legacy SML crawler task types
   'agent_builder:sml_crawler',
+  // Formerly `agent_context_layer:sml_crawler`, renamed to `context_engine:crawler`
+  // in https://github.com/elastic/kibana/pull/276017
   'agent_context_layer:sml_crawler',
 
   // removed in https://github.com/elastic/kibana/pull/250218

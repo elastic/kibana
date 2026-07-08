@@ -1,8 +1,6 @@
 # Context Engine (`contextEngine`)
 
-The Context Engine plugin provides a centralized service for indexing and searching Kibana context knowledge indicators (visualizations, dashboards, connectors, workflows, and so on) to improve agentic search.
-
-It was extracted from the `agentBuilder` plugin to serve as an independent, shared platform service.
+The Context Engine plugin provides a centralized service for indexing and searching context knowledge indicators (visualizations, dashboards, connectors, workflows, and so on) to improve agentic search.
 
 ## Overview
 

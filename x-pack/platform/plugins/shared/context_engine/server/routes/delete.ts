@@ -13,8 +13,8 @@ import {
   MAX_CONTEXT_ENGINE_ORIGIN_ID_LENGTH,
   MAX_CONTEXT_ENGINE_TYPE_LENGTH,
 } from '../../common/constants';
-import type { ContextEngineService } from '../services/context_engine/types';
-import { isVisibleInSpace } from '../services/context_engine/service';
+import type { ContextEngineService } from '../services/engine/types';
+import { isVisibleInSpace } from '../services/engine/service';
 import type { ContextEngineStartDependencies, ContextEnginePluginStart } from '../types';
 import { WRITE_SECURITY, withContextEngineFeatureFlag } from './common';
 

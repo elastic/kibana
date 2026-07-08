@@ -9,7 +9,7 @@ import type { RequestHandler } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { ContextEngineHttpItem } from '../../common/http_api/context_engine';
-import type { ContextEngineDocument } from '../services/context_engine/types';
+import type { ContextEngineDocument } from '../services/engine/types';
 import { apiPrivileges } from '../../common/features';
 
 export const toContextEngineHttpItem = (doc: ContextEngineDocument): ContextEngineHttpItem => ({

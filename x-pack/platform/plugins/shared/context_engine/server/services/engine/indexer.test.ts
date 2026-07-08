@@ -1413,7 +1413,7 @@ describe('createContextEngineIndexer', () => {
       });
 
       it('getPermissions is called once per origin (not once per entry)', async () => {
-        // `getPermissions(originId, ctx)` doesn't take a entry — its
+        // `getPermissions(originId, ctx)` doesn't take an entry — its
         // result is identical for every entry produced by the same
         // origin's `getContextEngineData`. The implementation now hoists the call
         // out of the per-entry loop both as a perf optimisation and as

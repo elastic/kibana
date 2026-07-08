@@ -16,7 +16,7 @@ import {
   sampleDocument,
 } from './test_helpers';
 import { registerUpsertRoute } from './upsert';
-import { ContextEnginePermissionsConflictError } from '../services/context_engine/errors';
+import { ContextEnginePermissionsConflictError } from '../services/engine/errors';
 
 const validBody = {
   title: 'Test Viz',

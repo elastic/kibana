@@ -14,10 +14,10 @@ import {
   CONTEXT_ENGINE_HTTP_LIST_PER_PAGE_MAX,
 } from '../../common/http_api/context_engine';
 import { contextEngineBasePath } from '../../common/constants';
-import type { ContextEngineService } from '../services/context_engine/types';
+import type { ContextEngineService } from '../services/engine/types';
 import type { ContextEngineStartDependencies, ContextEnginePluginStart } from '../types';
 import { READ_SECURITY, toContextEngineHttpItem, withContextEngineFeatureFlag } from './common';
-import { ContextEngineResultWindowExceededError } from '../services/context_engine/errors';
+import { ContextEngineResultWindowExceededError } from '../services/engine/errors';
 
 export const registerListRoute = ({
   router,

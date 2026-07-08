@@ -9,11 +9,11 @@
 // wire values (not renamed to `context_engine`) to avoid churning the internal
 // HTTP contract; only the exported constant names are de-abbreviated.
 export const internalApiPath = '/internal/agent_context_layer';
-export const contextEngineSearchPath = `${internalApiPath}/sml/_search`;
 export const contextEngineBasePath = `${internalApiPath}/sml`;
+export const contextEngineSearchPath = `${contextEngineBasePath}/_search`;
 // Both `type` and `originId` are required: the canonical storage key is `origin.uri = ${type}://${originId}` — bare originId values are not globally unique.
 export const contextEngineByTypeAndOriginIdPath = `${contextEngineBasePath}/{type}/{originId}`;
-export const contextEngineAutocompletePath = `${internalApiPath}/sml/_autocomplete`;
+export const contextEngineAutocompletePath = `${contextEngineBasePath}/_autocomplete`;
 
 export const MAX_CONTEXT_ENGINE_ORIGIN_ID_LENGTH = 512;
 

@@ -10,18 +10,18 @@ import type {
   ContextEngineContext,
   ContextEngineDocument,
   ContextEngineToAttachmentContext,
-} from '../services/context_engine/types';
-import { corpusEntryContextEngineType, CORPUS_ENTRY_CE_TYPE } from './corpus_entry';
+} from '../services/engine/types';
+import { corpusEntryType, CORPUS_ENTRY_TYPE } from './corpus_entry';
 
 const mockContextEngineContext = {} as ContextEngineContext;
 const mockAttachmentContext = {} as ContextEngineToAttachmentContext;
 
 const baseItem: ContextEngineDocument = {
   id: 'item-1',
-  type: CORPUS_ENTRY_CE_TYPE,
+  type: CORPUS_ENTRY_TYPE,
   title: 'Base Title',
   content: 'base content',
-  origin: { uri: `${CORPUS_ENTRY_CE_TYPE}://item-1` },
+  origin: { uri: `${CORPUS_ENTRY_TYPE}://item-1` },
   origin_id: 'origin-1',
   spaces: ['default'],
   ingestion_method: 'manual',
@@ -30,17 +30,17 @@ const baseItem: ContextEngineDocument = {
   permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
 };
 
-describe('corpusEntryContextEngineType', () => {
+describe('corpusEntryType', () => {
   describe('id', () => {
     it('is corpus_entry', () => {
-      expect(corpusEntryContextEngineType.id).toBe('corpus_entry');
+      expect(corpusEntryType.id).toBe('corpus_entry');
     });
   });
 
   describe('list', () => {
     it('yields nothing', async () => {
       const items: unknown[] = [];
-      for await (const item of corpusEntryContextEngineType.list(mockContextEngineContext)) {
+      for await (const item of corpusEntryType.list(mockContextEngineContext)) {
         items.push(item);
       }
       expect(items).toHaveLength(0);
@@ -50,14 +50,14 @@ describe('corpusEntryContextEngineType', () => {
   describe('getContextEngineData', () => {
     it('returns undefined', async () => {
       await expect(
-        corpusEntryContextEngineType.getContextEngineData('origin-1', mockContextEngineContext)
+        corpusEntryType.getContextEngineData('origin-1', mockContextEngineContext)
       ).resolves.toBeUndefined();
     });
   });
 
   describe('toAttachment', () => {
     it('returns undefined when all text fields are empty', async () => {
-      const result = await corpusEntryContextEngineType.toAttachment!(
+      const result = await corpusEntryType.toAttachment!(
         { ...baseItem, title: '', content: '', description: '' },
         mockAttachmentContext
       );
@@ -65,7 +65,7 @@ describe('corpusEntryContextEngineType', () => {
     });
 
     it('returns undefined when content is whitespace only and no title or description', async () => {
-      const result = await corpusEntryContextEngineType.toAttachment!(
+      const result = await corpusEntryType.toAttachment!(
         { ...baseItem, title: '', content: '   ' },
         mockAttachmentContext
       );
@@ -73,7 +73,7 @@ describe('corpusEntryContextEngineType', () => {
     });
 
     it('builds attachment from content alone', async () => {
-      const result = await corpusEntryContextEngineType.toAttachment!(
+      const result = await corpusEntryType.toAttachment!(
         { ...baseItem, title: '', content: 'body text' },
         mockAttachmentContext
       );
@@ -86,7 +86,7 @@ describe('corpusEntryContextEngineType', () => {
     });
 
     it('folds title and content with double newline separator', async () => {
-      const result = await corpusEntryContextEngineType.toAttachment!(
+      const result = await corpusEntryType.toAttachment!(
         { ...baseItem, title: 'My Title', content: 'body text' },
         mockAttachmentContext
       );
@@ -99,7 +99,7 @@ describe('corpusEntryContextEngineType', () => {
     });
 
     it('includes description in content and sets description field', async () => {
-      const result = await corpusEntryContextEngineType.toAttachment!(
+      const result = await corpusEntryType.toAttachment!(
         { ...baseItem, title: 'My Title', description: 'A summary', content: 'body text' },
         mockAttachmentContext
       );
@@ -113,7 +113,7 @@ describe('corpusEntryContextEngineType', () => {
     });
 
     it('does not set description field when description is absent', async () => {
-      const result = await corpusEntryContextEngineType.toAttachment!(
+      const result = await corpusEntryType.toAttachment!(
         { ...baseItem, title: 'My Title', content: 'body text' },
         mockAttachmentContext
       );

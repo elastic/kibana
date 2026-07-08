@@ -34,7 +34,7 @@ export interface DiscoveryLabel {
 }
 
 /**
- * A single Kibana feature privilege required to access a entry
+ * A single Kibana feature privilege required to access an entry
  * (e.g., `saved_object:lens/get`, `action:execute`).
  */
 export interface ContextEngineKibanaPrivilege {
@@ -43,7 +43,7 @@ export interface ContextEngineKibanaPrivilege {
 
 /**
  * A single concrete Elasticsearch index / alias / data stream name whose
- * data a entry's content depends on. Used by the search-time post-filter
+ * data an entry's content depends on. Used by the search-time post-filter
  * to gate entries behind the user's ES `read` privilege on each name.
  */
 export interface ContextEngineElasticsearchIndex {
@@ -51,7 +51,7 @@ export interface ContextEngineElasticsearchIndex {
 }
 
 /**
- * Permissions required to access a entry, split by access boundary.
+ * Permissions required to access an entry, split by access boundary.
  *
  * Both sub-objects are always present (with possibly-empty arrays) on
  * stored documents to keep the schema rigid and predictable.
@@ -217,7 +217,7 @@ export interface ContextEngineTypeDefinition {
 }
 
 /**
- * How a entry was produced.
+ * How an entry was produced.
  *
  * - `'crawled'`: written by the Context Engine crawler or by an event-driven `indexAttachment`
  *   origin-mode call (content fetched via `getContextEngineData`).

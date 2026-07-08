@@ -41,15 +41,15 @@ export type {
   ContextEngineDeleteScope,
   ContextEngineIndexAttachmentOriginMode,
   ContextEngineIndexAttachmentContentMode,
-} from './services/context_engine/types';
+} from './services/engine/types';
 
-export { kibanaSavedObjectPermissions } from './services/context_engine/permissions/kibana_saved_object';
+export { kibanaSavedObjectPermissions } from './services/engine/permissions/kibana_saved_object';
 
-export type { ContextEngineResolvedItemResult } from './services/context_engine/execute_attach_items';
+export type { ContextEngineResolvedItemResult } from './services/engine/execute_attach_items';
 export {
   contextEngineElasticsearchIndexMappings,
   contextEngineIndexName,
-} from './services/context_engine/storage';
+} from './services/engine/storage';
 export { ContextEngineSearchFilterType } from '../common/http_api/context_engine';
 
 export const plugin: PluginInitializer<

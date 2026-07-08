@@ -8,7 +8,7 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { ContextEngineDocument } from './services/context_engine/types';
+import type { ContextEngineDocument } from './services/engine/types';
 import type { ContextEngineStartDependencies } from './types';
 
 const mockContextEngineServiceInstance = {
@@ -16,17 +16,17 @@ const mockContextEngineServiceInstance = {
   start: jest.fn(),
 };
 
-jest.mock('./services/context_engine/service', () => ({
+jest.mock('./services/engine/service', () => ({
   createContextEngineService: jest.fn(() => mockContextEngineServiceInstance),
   isNotFoundError: jest.fn().mockReturnValue(false),
 }));
 
-jest.mock('./services/context_engine/task_definitions', () => ({
+jest.mock('./services/engine/task_definitions', () => ({
   registerContextEngineCrawlerTaskDefinition: jest.fn(),
   scheduleContextEngineCrawlerTasks: jest.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock('./services/context_engine/execute_attach_items', () => ({
+jest.mock('./services/engine/execute_attach_items', () => ({
   resolveAttachItems: jest.fn(),
 }));
 
