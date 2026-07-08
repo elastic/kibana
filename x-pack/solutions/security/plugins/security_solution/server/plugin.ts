@@ -148,6 +148,7 @@ import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_inte
 import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrations';
 import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
 import { SIEM_MIGRATION_INFERENCE_FEATURE_ID } from '../common/siem_migrations/constants';
+import { ALERT_ANALYSIS_WORKFLOW_INFERENCE_FEATURE_ID } from '../common/workflows/alert_analysis_workflow';
 import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
 import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
 import { threatIntelligenceSearchStrategyProvider } from './threat_intelligence/search_strategy';
@@ -447,6 +448,15 @@ export class Plugin implements ISecuritySolutionPlugin {
         featureId: 'attack_discovery',
         featureName: 'Attack Discovery',
         featureDescription: 'Attack Discovery inference endpoint configuration',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+      });
+
+      plugins.searchInferenceEndpoints.features.register({
+        parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
+        featureId: ALERT_ANALYSIS_WORKFLOW_INFERENCE_FEATURE_ID,
+        featureName: 'Alert analysis workflow',
+        featureDescription: 'Alert analysis workflow inference endpoint configuration',
         taskType: 'chat_completion',
         recommendedEndpoints: [],
       });
