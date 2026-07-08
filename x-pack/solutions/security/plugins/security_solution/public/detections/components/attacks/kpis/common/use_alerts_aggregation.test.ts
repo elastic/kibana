@@ -13,10 +13,18 @@ import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/u
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
+import {
+  fetchQueryAttacks,
+  fetchQueryUnifiedAlerts,
+} from '../../../../containers/detection_engine/alerts/api';
+import { useAttacksPageFetchMethod } from '../../../../hooks/attacks/use_attacks_page_fetch_method';
 
 jest.mock('../../../../containers/detection_engine/alerts/use_query');
 jest.mock('../../../../../common/containers/use_global_time');
 jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../hooks/attacks/use_attacks_page_fetch_method');
+
+const mockUseAttacksPageFetchMethod = useAttacksPageFetchMethod as jest.Mock;
 
 describe('useAlertsAggregation', () => {
   const mockFrom = 'now-15m';
@@ -29,6 +37,7 @@ describe('useAlertsAggregation', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseAttacksPageFetchMethod.mockReturnValue(fetchQueryUnifiedAlerts);
     (useGlobalTime as jest.Mock).mockReturnValue({ from: mockFrom, to: mockTo });
     (useKibana as jest.Mock).mockReturnValue({ services: { uiSettings: mockUiSettings } });
     (useQueryAlerts as jest.Mock).mockReturnValue({
@@ -58,6 +67,7 @@ describe('useAlertsAggregation', () => {
 
     expect(useQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
+        fetchMethod: fetchQueryUnifiedAlerts,
         query: expect.objectContaining({
           query: expect.objectContaining({
             bool: expect.objectContaining({
@@ -119,5 +129,22 @@ describe('useAlertsAggregation', () => {
     expect(result.current.data).toBe(mockData);
     expect(result.current.loading).toBe(true);
     expect(result.current.refetch).toBe(mockRefetch);
+  });
+
+  it('uses fetchQueryAttacks when publicAttacksApiEnabled is on', () => {
+    mockUseAttacksPageFetchMethod.mockReturnValue(fetchQueryAttacks);
+
+    renderHook(() =>
+      useAlertsAggregation({
+        aggs: {},
+        queryName: ALERTS_QUERY_NAMES.COUNT_ATTACKS_IDS,
+      })
+    );
+
+    expect(useQueryAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fetchMethod: fetchQueryAttacks,
+      })
+    );
   });
 });

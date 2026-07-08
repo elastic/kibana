@@ -14,7 +14,7 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import type { AlertsQueryName } from '../../../../containers/detection_engine/alerts/use_query';
 import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/use_query';
-import { fetchQueryUnifiedAlerts } from '../../../../containers/detection_engine/alerts/api';
+import { useAttacksPageFetchMethod } from '../../../../hooks/attacks/use_attacks_page_fetch_method';
 
 export interface UseAlertsAggregationProps {
   /** Optional array of filters to apply to the query */
@@ -74,9 +74,11 @@ export const useAlertsAggregation = <Aggs>({
     [additionalFilters, from, to, aggs, size]
   );
 
+  const attacksPageFetchMethod = useAttacksPageFetchMethod();
+
   // Get the aggregation data
   const { data, loading, refetch, setQuery } = useQueryAlerts<{}, Aggs>({
-    fetchMethod: fetchQueryUnifiedAlerts,
+    fetchMethod: attacksPageFetchMethod,
     query: alertsQuery,
     skip: false,
     queryName,

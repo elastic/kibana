@@ -7,8 +7,8 @@
 
 import { useEffect, useMemo } from 'react';
 import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/use_query';
-import { fetchQueryUnifiedAlerts } from '../../../../containers/detection_engine/alerts/api';
 import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
+import { useAttacksPageFetchMethod } from '../../../../hooks/attacks/use_attacks_page_fetch_method';
 
 interface AttackDetails {
   _id: string;
@@ -26,6 +26,8 @@ export interface UseAttackTimestampsProps {
  * @returns The attack start times
  */
 export const useAttackTimestamps = ({ attackIds }: UseAttackTimestampsProps) => {
+  const attacksPageFetchMethod = useAttacksPageFetchMethod();
+
   // Get the attack details query
   const attacksDetailsQuery = useMemo(() => {
     if (attackIds.length === 0) return {};
@@ -43,7 +45,7 @@ export const useAttackTimestamps = ({ attackIds }: UseAttackTimestampsProps) => 
     refetch: refetchDetails,
     setQuery: setDetailsQuery,
   } = useQueryAlerts<AttackDetails, {}>({
-    fetchMethod: fetchQueryUnifiedAlerts,
+    fetchMethod: attacksPageFetchMethod,
     query: attacksDetailsQuery,
     skip: attackIds.length === 0,
     queryName: ALERTS_QUERY_NAMES.COUNT_ATTACKS_DETAILS,

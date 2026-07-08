@@ -22,16 +22,20 @@ import { defaultGroupStatsAggregations } from './grouping_settings';
 import { PageScope } from '../../../data_view_manager/constants';
 import {
   fetchQueryAlerts,
+  fetchQueryAttacks,
   fetchQueryUnifiedAlerts,
 } from '../../containers/detection_engine/alerts/api';
+import { useAttacksPageFetchMethod } from '../../hooks/attacks/use_attacks_page_fetch_method';
 
 jest.mock('../../containers/detection_engine/alerts/use_query');
 jest.mock('../../../data_view_manager/hooks/use_data_view');
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../containers/detection_engine/alerts/api', () => ({
   fetchQueryAlerts: jest.fn(),
+  fetchQueryAttacks: jest.fn(),
   fetchQueryUnifiedAlerts: jest.fn(),
 }));
+jest.mock('../../hooks/attacks/use_attacks_page_fetch_method');
 
 const mockedTelemetry = createTelemetryServiceMock();
 (useKibana as jest.Mock).mockReturnValue({
@@ -53,6 +57,7 @@ const mockDate = {
 };
 
 const mockUseQueryAlerts = useQueryAlerts as jest.Mock;
+const mockUseAttacksPageFetchMethod = useAttacksPageFetchMethod as jest.Mock;
 const mockQueryResponse = {
   loading: false,
   data: {},
@@ -94,6 +99,7 @@ describe('GroupedSubLevelComponent', () => {
       status: 'ready',
       dataView,
     });
+    mockUseAttacksPageFetchMethod.mockReturnValue(fetchQueryUnifiedAlerts);
     mockUseQueryAlerts.mockImplementation((i) => {
       if (i.skip) {
         return mockQueryResponse;
@@ -208,7 +214,7 @@ describe('GroupedSubLevelComponent', () => {
     expect(groupTakeActionItems).toHaveBeenCalled();
   });
 
-  it('uses fetchQueryUnifiedAlerts when pageScope is "attacks"', async () => {
+  it('uses attacks page fetch method when pageScope is "attacks"', async () => {
     render(
       <TestProviders>
         <GroupedSubLevelComponent {...testProps} pageScope={PageScope.attacks} />
@@ -219,6 +225,24 @@ describe('GroupedSubLevelComponent', () => {
       expect(mockUseQueryAlerts).toHaveBeenCalledWith(
         expect.objectContaining({
           fetchMethod: fetchQueryUnifiedAlerts,
+        })
+      );
+    });
+  });
+
+  it('uses fetchQueryAttacks when pageScope is "attacks" and publicAttacksApiEnabled is on', async () => {
+    mockUseAttacksPageFetchMethod.mockReturnValue(fetchQueryAttacks);
+
+    render(
+      <TestProviders>
+        <GroupedSubLevelComponent {...testProps} pageScope={PageScope.attacks} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(mockUseQueryAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fetchMethod: fetchQueryAttacks,
         })
       );
     });

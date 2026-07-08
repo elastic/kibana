@@ -9,8 +9,16 @@ import { renderHook } from '@testing-library/react';
 import { useAttackTitles } from './use_attack_titles';
 import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
+import {
+  fetchQueryAttacks,
+  fetchQueryUnifiedAlerts,
+} from '../../../../containers/detection_engine/alerts/api';
+import { useAttacksPageFetchMethod } from '../../../../hooks/attacks/use_attacks_page_fetch_method';
 
 jest.mock('../../../../containers/detection_engine/alerts/use_query');
+jest.mock('../../../../hooks/attacks/use_attacks_page_fetch_method');
+
+const mockUseAttacksPageFetchMethod = useAttacksPageFetchMethod as jest.Mock;
 
 describe('useAttackTitles', () => {
   const mockSetQuery = jest.fn();
@@ -18,6 +26,7 @@ describe('useAttackTitles', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseAttacksPageFetchMethod.mockReturnValue(fetchQueryUnifiedAlerts);
     (useQueryAlerts as jest.Mock).mockReturnValue({
       data: undefined,
       loading: false,
@@ -32,6 +41,7 @@ describe('useAttackTitles', () => {
 
     expect(useQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
+        fetchMethod: fetchQueryUnifiedAlerts,
         skip: false,
         queryName: ALERTS_QUERY_NAMES.COUNT_ATTACKS_DETAILS,
         query: {
@@ -109,6 +119,18 @@ describe('useAttackTitles', () => {
     expect(mockSetQuery).toHaveBeenCalledWith(
       expect.objectContaining({
         query: { ids: { values: ['1', '2'] } },
+      })
+    );
+  });
+
+  it('uses fetchQueryAttacks when publicAttacksApiEnabled is on', () => {
+    mockUseAttacksPageFetchMethod.mockReturnValue(fetchQueryAttacks);
+
+    renderHook(() => useAttackTitles({ attackIds: ['1'] }));
+
+    expect(useQueryAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fetchMethod: fetchQueryAttacks,
       })
     );
   });
