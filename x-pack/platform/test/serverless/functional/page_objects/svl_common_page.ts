@@ -177,7 +177,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async assertProjectHeaderExists() {
-      await testSubjects.existOrFail('kibanaProjectHeader');
+      await testSubjects.existOrFail('chromeNextGlobalHeader');
     },
 
     async clickUserAvatar() {

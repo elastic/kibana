@@ -11,7 +11,7 @@ export class SpacesPage {
   constructor(private readonly page: ScoutPage) {}
 
   async isProjectHeaderVisible() {
-    return await this.page.testSubj.isVisible('kibanaProjectHeader');
+    return await this.page.testSubj.isVisible('chromeNextGlobalHeader');
   }
 
   async navigateToHome() {
