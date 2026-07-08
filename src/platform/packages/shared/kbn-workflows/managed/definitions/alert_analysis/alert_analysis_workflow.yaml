@@ -1008,7 +1008,7 @@ steps:
                 {%- endif %}
 
           # Trim the alert before sending it to the model. `pick` keeps only the dotted paths in
-          # consts.model_alert_fields (id/index plus the high-signal, allow-list-aligned fields),
+          # consts.model_alert_fields (id/index plus the curated high-signal triage fields),
           # preserving value types, and drops the rest of the noisy _source.
           - name: build_minimal_alert
             type: data.set

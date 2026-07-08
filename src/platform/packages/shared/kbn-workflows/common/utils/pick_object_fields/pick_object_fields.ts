@@ -34,20 +34,6 @@ const cloneValue = (value: unknown): unknown => {
   return clone;
 };
 
-/**
- * Returns a new object containing only the given dotted-path fields from `source`,
- * preserving the original nested structure and value types (numbers, booleans, and
- * arrays are kept as-is, not stringified).
- *
- * - Paths that are absent, or that traverse through a non-object, are skipped.
- * - Paths containing `__proto__`, `prototype`, or `constructor` are skipped to
- *   avoid prototype pollution.
- * - The `source` is never mutated; leaf values are deep-cloned.
- * - A non-object `source` is returned unchanged.
- *
- * @example
- * pickObjectFields({ a: { b: 1, c: 2 }, d: 3 }, ['a.b', 'd']) // => { a: { b: 1 }, d: 3 }
- */
 // Copies a single dotted `path` from `source` into `result`, in place. Absent paths,
 // paths that traverse a non-object, and prototype-polluting paths are ignored.
 const copyPath = (source: PlainObject, result: PlainObject, path: string): void => {
@@ -84,6 +70,20 @@ const copyPath = (source: PlainObject, result: PlainObject, path: string): void 
   target[segments[segments.length - 1]] = cloneValue(cursor);
 };
 
+/**
+ * Returns a new object containing only the given dotted-path fields from `source`,
+ * preserving the original nested structure and value types (numbers, booleans, and
+ * arrays are kept as-is, not stringified).
+ *
+ * - Paths that are absent, or that traverse through a non-object, are skipped.
+ * - Paths containing `__proto__`, `prototype`, or `constructor` are skipped to
+ *   avoid prototype pollution.
+ * - The `source` is never mutated; leaf values are deep-cloned.
+ * - A non-object `source` is returned unchanged.
+ *
+ * @example
+ * pickObjectFields({ a: { b: 1, c: 2 }, d: 3 }, ['a.b', 'd']) // => { a: { b: 1 }, d: 3 }
+ */
 export const pickObjectFields = (source: unknown, paths: readonly string[]): unknown => {
   if (!isPlainObject(source)) {
     return source;
