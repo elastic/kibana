@@ -95,7 +95,6 @@ safe-outputs:
     draft: true
     max: 1
     labels: [flaky-test-fixer]
-    reviewers: ${{ (github.actor == 'kibanamachine' || endsWith(github.actor, '[bot]')) && '' || github.actor }}
     base-branch: main
     allowed-base-branches: ['main', '9.*', '8.*', '7.*']
     if-no-changes: 'ignore'
@@ -107,17 +106,18 @@ safe-outputs:
     # transport makes the shallow safe_outputs checkout run `git fetch --unshallow`,
     # which on a repo Kibana's size cannot finish within the 15m job timeout.
     patch-format: am
-  # Fills the %%FIX_PR_URL%% / %%FIX_PR_BADGE%% placeholders the agent leaves in the
-  # outcome comment. The agent can't do this itself: it doesn't know the PR number while
-  # it runs (safe_outputs creates the PR afterwards), so this job runs after safe_outputs.
+  # Runs after safe_outputs opens the fix PR: fills the %%FIX_PR_URL%% / %%FIX_PR_BADGE%%
+  # placeholders in the outcome comment and requests the fix requester as a reviewer. The
+  # agent can't do this itself since it doesn't know the PR number while it runs.
   jobs:
     link-fix-pr:
-      description: 'Replace the %%FIX_PR_URL%% and %%FIX_PR_BADGE%% placeholders in the outcome comment with the newly-opened fix PR link and a live PR-state badge. Call this exactly once, and only after you have opened a draft PR.'
+      description: 'Replace the %%FIX_PR_URL%% and %%FIX_PR_BADGE%% placeholders in the outcome comment with the newly-opened fix PR link and a live PR-state badge, and request the fix requester as a reviewer. Call this exactly once, and only after you have opened a draft PR.'
       runs-on: ubuntu-latest
       needs: safe_outputs
       if: needs.safe_outputs.outputs.created_pr_url != '' && needs.safe_outputs.outputs.comment_id != ''
       permissions:
         issues: write
+        pull-requests: write
       inputs:
         confirm:
           description: 'Set to true to link the outcome comment to the opened fix PR. Only call this after a PR has been opened.'
@@ -129,6 +129,8 @@ safe-outputs:
         GH_AW_PR_NUMBER: ${{ needs.safe_outputs.outputs.created_pr_number }}
         # The id of the outcome comment safe_outputs just posted (which comment to edit).
         GH_AW_COMMENT_ID: ${{ needs.safe_outputs.outputs.comment_id }}
+        # Whoever triggered this run — requested as the fix PR reviewer unless it's a bot.
+        GH_AW_REQUESTED_BY: ${{ github.actor }}
       steps:
         - name: Append PR link to outcome comment
           uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
@@ -155,6 +157,29 @@ safe-outputs:
               }
               await github.rest.issues.updateComment({ owner, repo, comment_id: commentId, body: updated });
               core.info(`Filled fix-PR placeholders for #${prNumber} in comment ${commentId}.`);
+        - name: Request the fix requester as reviewer
+          uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+          with:
+            github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+            script: |
+              const requestedBy = process.env.GH_AW_REQUESTED_BY || '';
+              const prNumber = Number(process.env.GH_AW_PR_NUMBER);
+              // Bots (and kibanamachine, the PR author) can't be requested as reviewers.
+              if (!requestedBy || requestedBy === 'kibanamachine' || requestedBy.endsWith('[bot]')) {
+                core.info(`Requester ${requestedBy || '(unknown)'} is a bot; not requesting review.`);
+                return;
+              }
+              if (!Number.isInteger(prNumber)) {
+                core.info('Missing PR number; cannot request review.');
+                return;
+              }
+              const { owner, repo } = context.repo;
+              try {
+                await github.rest.pulls.requestReviewers({ owner, repo, pull_number: prNumber, reviewers: [requestedBy] });
+                core.info(`Requested review from ${requestedBy} on PR #${prNumber}.`);
+              } catch (error) {
+                core.warning(`Failed to request review from ${requestedBy}: ${error instanceof Error ? error.message : String(error)}`);
+              }
 
 strict: false
 timeout-minutes: 90
@@ -181,7 +206,7 @@ Kibana is already bootstrapped for you.
 5. Open the PR (see "PR format" below).
 6. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 7. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
-8. **Only if you opened a PR in step 5**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and replaces the `%%FIX_PR_URL%%` and `%%FIX_PR_BADGE%%` placeholders in your outcome comment with the PR link and a live PR-state badge. You cannot know the PR number while running (the PR is created afterwards), so leave the placeholders in place and never write the URL, number, or badge yourself — this tool is how they get filled.
+8. **Only if you opened a PR in step 5**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist, replaces the `%%FIX_PR_URL%%` and `%%FIX_PR_BADGE%%` placeholders in your outcome comment with the PR link and a live PR-state badge, and requests the fix requester as a reviewer. You cannot know the PR number while running (the PR is created afterwards), so leave the placeholders in place and never write the URL, number, or badge yourself — this tool is how they get filled.
 
 ## PR format
 
