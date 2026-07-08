@@ -28,22 +28,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { MetricsGridSettings } from '../../../types';
 import { COUNTER_OPTIONS, GAUGE_OPTIONS, HISTOGRAM_OPTIONS } from './options';
+import { getChangedSettings } from './get_changed_settings';
 
 interface GridSettingsFlyoutProps {
   gridSettings: MetricsGridSettings;
   onGridSettingsChange: (update: Partial<MetricsGridSettings>) => void;
   onClose: () => void;
 }
-
-const getChangedSettings = (
-  draft: MetricsGridSettings,
-  applied: MetricsGridSettings
-): Partial<MetricsGridSettings> =>
-  Object.fromEntries(
-    Object.keys(draft)
-      .filter((key) => draft[key] !== applied[key])
-      .map((key) => [key, draft[key]])
-  );
 
 export const GridSettingsFlyout = ({
   gridSettings,

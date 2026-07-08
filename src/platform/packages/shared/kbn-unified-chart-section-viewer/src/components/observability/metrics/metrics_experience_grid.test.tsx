@@ -29,11 +29,15 @@ import {
   ExternalServicesProvider,
   type ExternalServices,
 } from '../../../context/external_services';
-import type { ParsedMetricItem, Dimension, UnifiedMetricsGridProps } from '../../../types';
+import type {
+  ParsedMetricItem,
+  Dimension,
+  UnifiedMetricsGridProps,
+  MetricsGridSettings,
+} from '../../../types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
 import { METRICS_GRID_SETTINGS_DEFAULTS } from '../../flyout/metrics_grid_settings_flyout/constants';
-import { EuiSuperSelectTestHarness } from '@kbn/test-eui-helpers';
 
 jest.mock('./context/metrics_experience_state_provider');
 jest.mock('@kbn/ebt-tools', () => ({
@@ -56,6 +60,28 @@ jest.mock('./metrics_experience_grid_content', () => ({
     <div data-test-subj="metricsExperienceGridContent" />
   )),
 }));
+
+jest.mock('../../flyout', () => {
+  const actual = jest.requireActual('../../flyout');
+  return {
+    ...actual,
+    GridSettingsFlyout: ({
+      onGridSettingsChange,
+      onClose,
+    }: {
+      onGridSettingsChange: (update: Partial<MetricsGridSettings>) => void;
+      onClose: () => void;
+    }) => (
+      <div data-test-subj="metricsExperienceGridSettingsFlyout">
+        <button
+          data-test-subj="metricsExperienceGridSettingsFlyoutMockApply"
+          onClick={() => onGridSettingsChange({ counterAggregation: 'max' })}
+        />
+        <button data-test-subj="metricsExperienceGridSettingsFlyoutMockClose" onClick={onClose} />
+      </div>
+    ),
+  };
+});
 
 // Simplified ToolbarSelector so dimension options are clickable in JSDOM without
 // needing EUI portals or keyboard simulation.
@@ -639,7 +665,7 @@ describe('MetricsExperienceGrid', () => {
   });
 
   describe('grid settings flyout', () => {
-    it('opens the flyout when the edit button is clicked and forwards a selection change on Apply', async () => {
+    it('opens the flyout when the edit button is clicked and forwards its callbacks to state', () => {
       const onGridSettingsChange = jest.fn();
 
       useMetricsExperienceStateMock.mockReturnValue({
@@ -671,18 +697,16 @@ describe('MetricsExperienceGrid', () => {
 
       expect(getByTestId('metricsExperienceGridSettingsFlyout')).toBeInTheDocument();
 
-      const counterSelect = new EuiSuperSelectTestHarness(
-        'metricsExperienceGridSettingsCounterSelect'
-      );
-      await counterSelect.select('metricsExperienceGridSettingsCounterOption-max');
-
-      expect(onGridSettingsChange).not.toHaveBeenCalled();
-
       act(() => {
-        getByTestId('metricsExperienceGridSettingsApplyButton').click();
+        getByTestId('metricsExperienceGridSettingsFlyoutMockApply').click();
       });
 
       expect(onGridSettingsChange).toHaveBeenCalledWith({ counterAggregation: 'max' });
+
+      act(() => {
+        getByTestId('metricsExperienceGridSettingsFlyoutMockClose').click();
+      });
+
       expect(queryByTestId('metricsExperienceGridSettingsFlyout')).not.toBeInTheDocument();
     });
   });

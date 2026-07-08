@@ -44,20 +44,6 @@ describe('GridSettingsFlyout', () => {
     expect(histogramSelect.getSelected()).toContain('95th percentile');
   });
 
-  it('shows the currently applied option as the selected value in each dropdown', () => {
-    render(
-      <GridSettingsFlyout
-        gridSettings={defaultSettings}
-        onGridSettingsChange={jest.fn()}
-        onClose={jest.fn()}
-      />
-    );
-
-    expect(counterSelect.getSelected()).toContain('Sum');
-    expect(gaugeSelect.getSelected()).toContain('Average');
-    expect(histogramSelect.getSelected()).toContain('95th percentile');
-  });
-
   it('disables "Apply and close" until a selection actually changes', async () => {
     render(
       <GridSettingsFlyout
@@ -94,27 +80,6 @@ describe('GridSettingsFlyout', () => {
 
     expect(onGridSettingsChange).toHaveBeenCalledWith({ counterAggregation: 'max' });
     expect(onClose).toHaveBeenCalled();
-  });
-
-  it('applies only the fields that changed across all three dropdowns', async () => {
-    const onGridSettingsChange = jest.fn();
-    render(
-      <GridSettingsFlyout
-        gridSettings={defaultSettings}
-        onGridSettingsChange={onGridSettingsChange}
-        onClose={jest.fn()}
-      />
-    );
-
-    await gaugeSelect.select('metricsExperienceGridSettingsGaugeOption-min');
-    await histogramSelect.select('metricsExperienceGridSettingsHistogramOption-p90');
-
-    await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsApplyButton'));
-
-    expect(onGridSettingsChange).toHaveBeenCalledWith({
-      gaugeAggregation: 'min',
-      histogramPercentile: 'p90',
-    });
   });
 
   it('discards the draft and does not call onGridSettingsChange when Cancel is clicked', async () => {

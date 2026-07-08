@@ -7,16 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Grid settings tests.
- *
- * These tests validate that the toolbar edit button opens the grid
- * settings flyout, that selections are only staged (not applied) until
- * "Apply and close" is clicked, that "Cancel" discards a staged selection,
- * and that an applied selection persists across a page reload via
- * Discover's persistent profile state.
- */
-
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData, DEFAULT_TIME_RANGE } from '../../fixtures/metrics_experience';
 
@@ -43,37 +33,28 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'stages a counter selection without applying it until "Apply and close" is clicked',
+      'commits a staged counter selection on "Apply and close"',
       async ({ pageObjects }) => {
         const { gridSettings } = pageObjects.metricsExperience;
 
-        await spaceTest.step('open the flyout via the edit button', async () => {
+        await spaceTest.step('open the flyout with the apply button disabled', async () => {
           await gridSettings.open();
-          await expect(gridSettings.flyout).toBeVisible();
+          await expect(gridSettings.applyButton).toBeDisabled();
         });
 
-        await spaceTest.step(
-          '"Apply and close" starts disabled with no pending changes',
-          async () => {
-            await expect(gridSettings.applyButton).toBeDisabled();
-          }
-        );
+        await spaceTest.step('stage a counter aggregation selection', async () => {
+          await gridSettings.selectCounterAggregation('max');
+          await expect(gridSettings.applyButton).toBeEnabled();
+          await expect(gridSettings.counterSelect).toContainText('Maximum');
+        });
 
-        await spaceTest.step(
-          'selecting MAX for counters enables "Apply and close" but does not change the dropdown label yet',
-          async () => {
-            await gridSettings.selectCounterAggregation('max');
-            await expect(gridSettings.applyButton).toBeEnabled();
-            await expect(gridSettings.counterSelect).toContainText('Maximum');
-          }
-        );
-
-        await spaceTest.step('applying commits the change and closes the flyout', async () => {
+        await spaceTest.step('apply and close the flyout', async () => {
           await gridSettings.apply();
           await expect(gridSettings.flyout).toBeHidden();
         });
 
-        await spaceTest.step('reopening the flyout still shows the applied value', async () => {
+        await spaceTest.step('reopen and verify the selection committed', async () => {
+          // Reopening (no reload) proves the value committed to in-memory state.
           await gridSettings.open();
           await expect(gridSettings.counterSelect).toContainText('Maximum');
         });
@@ -85,22 +66,22 @@ spaceTest.describe(
       async ({ pageObjects }) => {
         const { gridSettings } = pageObjects.metricsExperience;
 
-        await spaceTest.step('open the flyout and note the current gauge value', async () => {
+        await spaceTest.step('open the flyout with the default gauge selection', async () => {
           await gridSettings.open();
           await expect(gridSettings.gaugeSelect).toContainText('Average');
         });
 
-        await spaceTest.step('select MINIMUM for gauges without applying', async () => {
+        await spaceTest.step('stage a gauge aggregation selection', async () => {
           await gridSettings.selectGaugeAggregation('min');
           await expect(gridSettings.gaugeSelect).toContainText('Minimum');
         });
 
-        await spaceTest.step('cancel discards the staged change and closes', async () => {
+        await spaceTest.step('cancel the flyout', async () => {
           await gridSettings.cancel();
           await expect(gridSettings.flyout).toBeHidden();
         });
 
-        await spaceTest.step('reopening the flyout still shows the original value', async () => {
+        await spaceTest.step('reopen and verify the selection was discarded', async () => {
           await gridSettings.open();
           await expect(gridSettings.gaugeSelect).toContainText('Average');
         });
@@ -112,24 +93,96 @@ spaceTest.describe(
       async ({ pageObjects, page }) => {
         const { gridSettings } = pageObjects.metricsExperience;
 
-        await spaceTest.step(
-          'select and apply the 50th percentile for the histogram aggregation',
-          async () => {
-            await gridSettings.selectHistogramPercentile('p50');
-            await expect(gridSettings.histogramSelect).toContainText('50th percentile');
-            await gridSettings.apply();
-            await expect(gridSettings.flyout).toBeHidden();
-          }
-        );
+        await spaceTest.step('stage and apply a histogram percentile selection', async () => {
+          await gridSettings.selectHistogramPercentile('p50');
+          await expect(gridSettings.histogramSelect).toContainText('50th percentile');
+          await gridSettings.apply();
+          await expect(gridSettings.flyout).toBeHidden();
+        });
+
+        await spaceTest.step('wait for the setting to persist to local storage', async () => {
+          // The applied setting is written to local storage via a throttled listener, so wait
+          // for it to actually land there before reloading -- otherwise the reload can race
+          // ahead of the write and read back the default instead of the applied value.
+          await expect
+            .poll(() => page.evaluate(() => window.localStorage.getItem('discover.tabs')))
+            .toContain('"histogramPercentile":"p50"');
+        });
 
         await spaceTest.step('reload the page', async () => {
           await page.reload();
           await expect(pageObjects.metricsExperience.grid).toBeVisible();
         });
 
-        await spaceTest.step('reopening the flyout still shows the applied value', async () => {
+        await spaceTest.step('reopen and verify the selection persisted', async () => {
           await gridSettings.open();
           await expect(gridSettings.histogramSelect).toContainText('50th percentile');
+        });
+      }
+    );
+
+    spaceTest(
+      'applies counter, gauge and histogram aggregations end to end and persists them',
+      async ({ pageObjects, page }) => {
+        const { metricsExperience } = pageObjects;
+        const { gridSettings, flyout } = metricsExperience;
+
+        await spaceTest.step(
+          'set counter, gauge and histogram aggregations and apply',
+          async () => {
+            await gridSettings.open();
+            await gridSettings.selectCounterAggregation('max');
+            await gridSettings.selectGaugeAggregation('min');
+            await gridSettings.selectHistogramPercentile('p50');
+            await gridSettings.apply();
+            await expect(gridSettings.flyout).toBeHidden();
+          }
+        );
+
+        await spaceTest.step('verify the counter aggregation is applied in the chart', async () => {
+          await metricsExperience.searchMetric('counter_0');
+          await metricsExperience.waitForFirstCard('counter_0-0');
+          await metricsExperience.openInsightsFlyout(0);
+          await flyout.esqlQuery.tabButton.click();
+          await expect(flyout.esqlQuery.codeBlock).toContainText('MAX(RATE(counter_0))');
+          await flyout.closeButton.click();
+          await metricsExperience.clearSearch();
+        });
+
+        await spaceTest.step('verify the gauge aggregation is applied in the chart', async () => {
+          await metricsExperience.searchMetric('gauge_0');
+          await metricsExperience.waitForFirstCard('gauge_0-0');
+          await metricsExperience.openInsightsFlyout(0);
+          await flyout.esqlQuery.tabButton.click();
+          await expect(flyout.esqlQuery.codeBlock).toContainText('MIN(gauge_0)');
+          await flyout.closeButton.click();
+          await metricsExperience.clearSearch();
+        });
+
+        await spaceTest.step(
+          'verify the histogram aggregation is applied in the chart',
+          async () => {
+            await metricsExperience.searchMetric('histogram_0');
+            await metricsExperience.waitForFirstCard('histogram_0-0');
+            await metricsExperience.openInsightsFlyout(0);
+            await flyout.esqlQuery.tabButton.click();
+            await expect(flyout.esqlQuery.codeBlock).toContainText(
+              'PERCENTILE(TO_TDIGEST(histogram_0), 50)'
+            );
+            await flyout.closeButton.click();
+            await metricsExperience.clearSearch();
+          }
+        );
+
+        await spaceTest.step('reload the page and verify the settings persisted', async () => {
+          await page.reload();
+          await expect(metricsExperience.grid).toBeVisible();
+
+          await gridSettings.open();
+          await expect(gridSettings.counterSelect).toContainText('Maximum');
+          await expect(gridSettings.gaugeSelect).toContainText('Minimum');
+          await expect(gridSettings.histogramSelect).toContainText('50th percentile');
+          await gridSettings.cancel();
         });
       }
     );
