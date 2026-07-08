@@ -145,8 +145,33 @@ const applyModelContentChanges = (
   }, prevValue);
 };
 
+const ALL_LINE_ENDINGS = /\r\n|\r|\n/g;
+// For CRLF models, this separates values that are already safe to leave untouched
+// (`foo\r\nbar`) from values whose offsets would not line up with Monaco's CRLF model
+// text (`foo\nbar`, `foo\rbar`).
+const HAS_NON_CRLF_LINE_ENDING = /(^|[^\r])\n|\r(?!\n)/;
+
+/**
+ * Keep the shadow value's line endings aligned with Monaco before applying
+ * `IModelContentChangedEvent.changes`.
+ *
+ * Monaco applies edits against its text buffer: it normalizes edit text to the buffer
+ * EOL, then records `rangeOffset` / `rangeLength` from that same buffer:
+ * https://github.com/microsoft/vscode/blob/e7e037083ff4455cf320e344325dacb480062c3c/src/vs/editor/common/model/pieceTreeTextBuffer/pieceTreeTextBuffer.ts#L276-L290
+ *
+ * Without this, CRLF shadow values and LF-based Monaco offsets drift by one extra `\r`
+ * per preceding line break, replacing the wrong character.
+ */
 const normalizeEndOfLine = (value: string, eol: string): string => {
-  return value.replace(/\r\n|\r|\n/g, eol);
+  if (eol === '\n' && !value.includes('\r')) {
+    return value;
+  }
+
+  if (eol === '\r\n' && !HAS_NON_CRLF_LINE_ENDING.test(value)) {
+    return value;
+  }
+
+  return value.replace(ALL_LINE_ENDINGS, eol);
 };
 
 // initialize supported languages

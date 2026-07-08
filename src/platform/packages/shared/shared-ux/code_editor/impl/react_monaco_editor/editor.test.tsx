@@ -26,10 +26,11 @@ const defaultProps: Partial<ComponentProps<typeof MonacoEditor>> = {
 };
 
 const createEvent = (
-  changes: monaco.editor.IModelContentChange[]
+  changes: monaco.editor.IModelContentChange[],
+  eol = '\n'
 ): monaco.editor.IModelContentChangedEvent => ({
   changes,
-  eol: '\n',
+  eol,
   versionId: 1,
   isUndoing: false,
   isRedoing: false,
@@ -287,7 +288,10 @@ describe('react monaco editor onChange performance', () => {
       onChange.mockClear();
 
       const range = createRange();
-      const event = createEvent([{ range, rangeOffset: 3, rangeLength: 1, text: 'X' }]);
+      const event = createEvent(
+        [{ range, rangeOffset: 3, rangeLength: 1, text: 'X' }],
+        createdModel!.getEOL()
+      );
       lastOnDidChangeModelContentCb!(event);
 
       expect(onChange).toHaveBeenCalledWith('A\r\nX', event);
@@ -323,7 +327,10 @@ describe('react monaco editor onChange performance', () => {
       onChange.mockClear();
 
       const range = createRange();
-      const event = createEvent([{ range, rangeOffset: 2, rangeLength: 1, text: 'X' }]);
+      const event = createEvent(
+        [{ range, rangeOffset: 2, rangeLength: 1, text: 'X' }],
+        createdModel!.getEOL()
+      );
       lastOnDidChangeModelContentCb!(event);
 
       expect(onChange).toHaveBeenCalledWith('A\nX', event);
