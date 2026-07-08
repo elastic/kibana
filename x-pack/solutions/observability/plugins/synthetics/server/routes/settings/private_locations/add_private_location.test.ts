@@ -21,7 +21,9 @@ describe('getAgentPolicySpaceIds', () => {
   });
 
   it('normalizes to all spaces when the policy already includes the all-spaces id', () => {
-    expect(getAgentPolicySpaceIds(agentPolicy([ALL_SPACES_ID, 'default']))).toEqual([ALL_SPACES_ID]);
+    expect(getAgentPolicySpaceIds(agentPolicy([ALL_SPACES_ID, 'default']))).toEqual([
+      ALL_SPACES_ID,
+    ]);
   });
 
   it('returns the policy space ids when scoped to specific spaces', () => {
