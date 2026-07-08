@@ -7,7 +7,9 @@
 
 import { useMemo } from 'react';
 import type { Environment } from '../../../../../common/environment_rt';
+import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
+import { useServiceFlyoutContext } from '../service_flyout_context';
 
 interface ServiceLinksParams {
   serviceName: string;
@@ -25,6 +27,7 @@ export function useServiceLinks({
   kuery,
 }: ServiceLinksParams) {
   const router = useApmRouter();
+  const { share } = useServiceFlyoutContext();
 
   return useMemo(() => {
     const baseQuery = {
@@ -35,10 +38,9 @@ export function useServiceLinks({
       comparisonEnabled: false,
     };
 
-    const overviewHref = router.link('/services/{serviceName}/overview', {
-      path: { serviceName },
-      query: { ...baseQuery, kuery },
-    });
+    const overviewHref = share.url.locators
+      .get(APM_APP_LOCATOR_ID)
+      ?.getRedirectUrl({ serviceName, query: { environment, rangeFrom, rangeTo, kuery } });
 
     const alertsHref = router.link('/services/{serviceName}/alerts', {
       path: { serviceName },
@@ -46,5 +48,5 @@ export function useServiceLinks({
     });
 
     return { overviewHref, alertsHref };
-  }, [router, serviceName, environment, rangeFrom, rangeTo, kuery]);
+  }, [router, share, serviceName, environment, rangeFrom, rangeTo, kuery]);
 }
