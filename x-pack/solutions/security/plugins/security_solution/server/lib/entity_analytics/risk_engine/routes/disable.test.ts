@@ -53,7 +53,7 @@ describe('risk score disable route', () => {
           security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
         },
       ]);
-      riskEngineDisableRoute(server.router, getStartServicesMock, false);
+      riskEngineDisableRoute(server.router, getStartServicesMock);
     });
 
     it('invokes the risk score data client', async () => {
@@ -93,7 +93,7 @@ describe('risk score disable route', () => {
           security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
         },
       ]);
-      riskEngineDisableRoute(server.router, getStartServicesMock, false);
+      riskEngineDisableRoute(server.router, getStartServicesMock);
     });
 
     it('returns a 400 response', async () => {
