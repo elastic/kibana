@@ -328,7 +328,7 @@ describe('AnomaliesOverview', () => {
         { wrapper: Wrapper }
       );
       expect(screen.getByText(/missing MITRE ATT&CK tactic mappings/)).toBeInTheDocument();
-      const link = screen.getByRole('link', { name: /Check for integrations updates/ });
+      const link = screen.getByRole('link', { name: /Update to the latest integration version/ });
       expect(link).toHaveAttribute('href', '/base-path/app/integrations/installed');
       expect(link).toHaveAttribute('target', '_blank');
     });

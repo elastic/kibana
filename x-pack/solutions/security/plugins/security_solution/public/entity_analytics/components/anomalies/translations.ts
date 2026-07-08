@@ -42,7 +42,7 @@ export const ENTITY_ANOMALIES_MISSING_THREAT_TACTICS_WARNING = i18n.translate(
 
 export const ENTITY_ANOMALIES_MISSING_THREAT_TACTICS_WARNING_LINK = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityAnomalies.missingThreatTacticsWarningLink',
-  { defaultMessage: 'Check for integrations updates' }
+  { defaultMessage: 'Update to the latest integration version' }
 );
 
 export const getEntityAnomaliesCountLabel = (count: number) =>
