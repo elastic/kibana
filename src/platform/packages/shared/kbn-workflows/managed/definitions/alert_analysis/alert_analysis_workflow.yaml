@@ -62,12 +62,9 @@ consts:
   # Tag suffix appended when an alert is auto-closed by this workflow
   closed_tag_suffix: "closed"
 
-  # High-signal fields sent to the model in place of the full alert _source (which is mostly noise,
-  # tens of thousands of tokens). Mirrors the elastic-assistant default anonymization allow-list
-  # (DEFAULT_ALLOW in elastic_assistant/common/anonymization). Consumed by build_minimal_alert via
-  # the `pick` filter, which keeps only these dotted paths and preserves value types. Absent fields
-  # are skipped. The richer vendor-specific identifiers (aws/azure/gcp) already reach the model
-  # through the observable-context section of the agent message.
+  # High-signal fields sent to the model in place of the full alert _source.
+  # Consumed by build_minimal_alert via the `pick` filter, which keeps only these dotted paths and
+  # preserves value types. Absent fields are skipped.
   model_alert_fields:
     - _id
     - _index
@@ -84,9 +81,15 @@ consts:
     - host.architecture
     - host.os.name
     - host.os.version
+    - host.asset.criticality
+    - host.risk.calculated_level
+    - host.risk.calculated_score_norm
     - user.name
     - user.domain
     - user.id
+    - user.asset.criticality
+    - user.risk.calculated_level
+    - user.risk.calculated_score_norm
     - process.name
     - process.executable
     - process.command_line
@@ -124,6 +127,7 @@ consts:
     - kibana.alert.rule.description
     - kibana.alert.rule.references
     - kibana.alert.rule.threat
+    - threat
 
 # NOTE: the tag prefix, connector, auto-close, create-conversation, and enabled settings are NOT
 # constants here. They are per-space and read at run time from the invoking space's uiSettings (see
