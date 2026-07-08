@@ -7,10 +7,6 @@
 
 import { createPlaywrightConfig } from '@kbn/scout';
 
-// Runs against the generic (default) Scout server config so the suite is
-// deployment-agnostic. It relies only on out-of-the-box defaults: on stateful
-// the Alerting V2 plugin is enabled with `alerting:v2:enabled` off, and on
-// serverless the plugin is disabled entirely.
 export default createPlaywrightConfig({
   testDir: './tests',
 });
