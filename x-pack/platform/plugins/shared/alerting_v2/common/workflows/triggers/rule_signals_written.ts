@@ -75,6 +75,7 @@ export const ruleSignalsWrittenTriggerCommonDefinition: CommonTriggerDefinition<
   typeof ruleSignalsWrittenPayloadSchema
 > = {
   id: RULE_SIGNALS_WRITTEN_TRIGGER_ID,
+  stability: 'tech_preview',
   eventSchema: ruleSignalsWrittenPayloadSchema,
   title: i18n.translate('xpack.alertingVTwo.workflowTriggers.ruleSignalsWritten.title', {
     defaultMessage: 'Alerting - Rule signals written',
