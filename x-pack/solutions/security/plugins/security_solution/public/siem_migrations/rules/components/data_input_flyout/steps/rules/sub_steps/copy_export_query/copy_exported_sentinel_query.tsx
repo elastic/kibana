@@ -42,17 +42,13 @@ export const CopyExportedSentinelQuery = React.memo(() => {
         <EuiCallOut
           title={
             <FormattedMessage
-              id="xpack.securitySolution.siemMigrations.copyExportedSentinelQuery.supportedRulesTitle"
-              defaultMessage="Supported rules"
+              id="xpack.securitySolution.siemMigrations.copyExportedSentinelQuery.rulesTypesupport"
+              defaultMessage="As of now only Scheduled & Near Real Time(NRT) rules are supported for migration. Please make sure your export file contains only these types of rules."
             />
           }
-          color="warning"
-          iconType="alert"
+          size="s"
+          iconType="pin"
         >
-          <FormattedMessage
-            id="xpack.securitySolution.siemMigrations.copyExportedSentinelQuery.rulesTypesupport"
-            defaultMessage="As of now only Scheduled & NRT rules are supported for migration. Please make sure your export file contains only these types of rules."
-          />
         </EuiCallOut>
       </EuiFlexItem>
     </EuiFlexGroup>
