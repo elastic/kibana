@@ -255,4 +255,17 @@ export class IndicatorReader {
       stream_name: doc['stream.name'],
     }));
   }
+
+  /**
+   * Returns distinct stream names that have at least one active (non-deleted) KI revision.
+   */
+  async getStreamNamesWithKnowledgeIndicators(): Promise<string[]> {
+    const where = inPredicate(TYPE, [KI_TYPE_FEATURE, KI_TYPE_QUERY]);
+    const docs = await this.revisionReader.fetchLatestRevisions(where, IS_NOT_DELETED);
+    const streamNames = new Set<string>();
+    for (const doc of docs) {
+      streamNames.add(doc['stream.name']);
+    }
+    return [...streamNames].sort();
+  }
 }

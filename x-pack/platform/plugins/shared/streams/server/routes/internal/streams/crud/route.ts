@@ -96,6 +96,28 @@ export const listStreamsRoute = createServerRoute({
   },
 });
 
+export const listClassicStreamsRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/classic',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({}),
+  handler: async ({
+    request,
+    getScopedClients,
+  }): Promise<{ streams: Streams.ClassicStream.Definition[] }> => {
+    const { streamsClient } = await getScopedClients({ request });
+    return {
+      streams: await streamsClient.listClassicStreams(),
+    };
+  },
+});
+
 export interface StreamDetailsResponse {
   details: {
     count: number;
@@ -212,6 +234,7 @@ export const bulkGetStreamSummariesRoute = createServerRoute({
 
 export const internalCrudRoutes = {
   ...listStreamsRoute,
+  ...listClassicStreamsRoute,
   ...streamDetailRoute,
   ...resolveIndexRoute,
   ...bulkGetStreamSummariesRoute,

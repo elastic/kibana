@@ -34,6 +34,8 @@ export {
   asNotificationExecutionSource,
   isNotificationExecutionSource,
   ActionExecutionSourceType,
+  NOTIFICATIONS_REQUESTER_ID,
+  WORKFLOWS_NOTIFICATION_REQUESTER_ID,
 } from './action_execution_source';
 export { parseDate } from './parse_date';
 export type { RelatedSavedObjects } from './related_saved_objects';
