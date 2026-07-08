@@ -28,7 +28,7 @@ describe('updateEventStatusToolHandler', () => {
     expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
     expect(eventClient.bulkCreate).toHaveBeenCalledWith(
       [expect.objectContaining({ status: 'acknowledged' })],
-      { throwOnFail: true }
+      { throwOnFail: true, refresh: 'wait_for' }
     );
     expect(result.event_id).not.toBe('event-1');
     expect(result).toEqual({

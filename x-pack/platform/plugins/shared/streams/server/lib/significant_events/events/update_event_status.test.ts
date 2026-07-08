@@ -82,6 +82,9 @@ describe('updateEventStatus', () => {
     expect(written.status).toBe('closed');
     expect(written.previous_event_id).toBe('event-1');
     expect(written.event_id).not.toBe('event-1');
+    // Written with `refresh: 'wait_for'` so an immediate re-read (e.g. the UI's post-mutation
+    // refetch) sees this version rather than resurfacing the previous one.
+    expect(callArg.refresh).toBe('wait_for');
   });
 
   it('ignores when the event is not found', async () => {

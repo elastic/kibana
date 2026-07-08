@@ -190,10 +190,6 @@ const buildLatestSourceBaseQuery = ({
     to: options.to,
   });
 
-  if (where) {
-    query = query.where`${where}`;
-  }
-
   // pick the latest events by group
   query = query.pipe`INLINE STATS latest_ts = MAX(@timestamp) BY ${esql.col(groupBy)}`
     .where`@timestamp == latest_ts`;
@@ -201,6 +197,14 @@ const buildLatestSourceBaseQuery = ({
   // use _id as a tiebreak in case multiple events share the same timestamp
   query = query.pipe`INLINE STATS tiebreaker_id = MAX(_id) BY ${esql.col(groupBy)}`
     .where`_id == tiebreaker_id`;
+
+  // `where` must run AFTER the latest-per-group collapse above: it filters on the
+  // resolved latest version's field values, not on any historical version. Applying it
+  // beforehand can drop the true latest row (e.g. because its status no longer matches)
+  // and let a stale, older version win the collapse instead.
+  if (where) {
+    query = query.where`${where}`;
+  }
 
   return query;
 };

@@ -54,7 +54,9 @@ export const updateEventStatus = async ({
     status,
   };
 
-  await eventClient.bulkCreate([updatedEvent], { throwOnFail: true });
+  // `wait_for` ensures the write is searchable before this resolves, so an immediate
+  // re-fetch (e.g. the UI invalidating its query right after this route responds) sees it.
+  await eventClient.bulkCreate([updatedEvent], { throwOnFail: true, refresh: 'wait_for' });
 
   return { event_id: nextEventId, updated: 1, ignored: 0, status };
 };
