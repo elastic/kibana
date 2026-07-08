@@ -75,21 +75,15 @@ describe('isNonRepresentableRule', () => {
     expect(isNonRepresentableRule(createMockRule({ recovery_strategy: 'none' }))).toBe(true);
   });
 
-  it('returns true for no_data_strategy: emit', () => {
+  it('returns true for no_data_strategy: emit (not supported by form dropdown)', () => {
     expect(isNonRepresentableRule(createMockRule({ no_data_strategy: 'emit' }))).toBe(true);
   });
 
-  it('returns true for no_data_strategy: last_known_status', () => {
+  it('returns false for supported no_data_strategy values', () => {
     expect(isNonRepresentableRule(createMockRule({ no_data_strategy: 'last_known_status' }))).toBe(
-      true
+      false
     );
-  });
-
-  it('returns true for no_data_strategy: recover', () => {
-    expect(isNonRepresentableRule(createMockRule({ no_data_strategy: 'recover' }))).toBe(true);
-  });
-
-  it('returns false for no_data_strategy: none', () => {
+    expect(isNonRepresentableRule(createMockRule({ no_data_strategy: 'recover' }))).toBe(false);
     expect(isNonRepresentableRule(createMockRule({ no_data_strategy: 'none' }))).toBe(false);
   });
 });
