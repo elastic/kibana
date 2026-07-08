@@ -160,10 +160,15 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
 
     if (tracingSettingChanged) {
       try {
-        await genAiSettingsApi(
-          'POST /internal/gen_ai_settings/agent_builder/sync_tracing_platform_features',
-          { signal: null }
-        );
+        await genAiSettingsApi('POST /internal/gen_ai_settings/agent_builder/tracing_dashboard', {
+          params: {
+            body: {
+              enabled: unsavedChanges[AGENT_BUILDER_TRACING_ENABLED_SETTING_ID]
+                ?.unsavedValue as boolean,
+            },
+          },
+          signal: null,
+        });
       } catch (error) {
         notifications.toasts.addDanger({
           title: i18n.translate('xpack.gen_ai_settings.agentBuilderTracing.syncFeaturesError', {

@@ -39,10 +39,10 @@ export const useDashboardStatus = (tracingEnabledSaved: boolean) => {
 
   const { mutateAsync: installDashboard, isLoading: isInstalling } = useMutation({
     mutationFn: async () => {
-      await genAiSettingsApi(
-        'POST /internal/gen_ai_settings/agent_builder/sync_tracing_platform_features',
-        { signal: null }
-      );
+      await genAiSettingsApi('POST /internal/gen_ai_settings/agent_builder/tracing_dashboard', {
+        params: { body: { enabled: true } },
+        signal: null,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
@@ -57,11 +57,41 @@ export const useDashboardStatus = (tracingEnabledSaved: boolean) => {
     },
   });
 
+  const { mutateAsync: deleteDashboard, isLoading: isDeleting } = useMutation({
+    mutationFn: async () => {
+      await genAiSettingsApi('POST /internal/gen_ai_settings/agent_builder/tracing_dashboard', {
+        params: { body: { enabled: false } },
+        signal: null,
+      });
+    },
+    onSuccess: () => {
+      queryClient.setQueryData(queryKey, {
+        installed: false,
+        dashboardId: data?.dashboardId ?? '',
+      });
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.genAiSettings.agentBuilderTracing.deleteDashboardSuccess', {
+          defaultMessage: 'Dashboard deleted',
+        }),
+      });
+    },
+    onError: (error: { body?: { message?: string }; message?: string }) => {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.genAiSettings.agentBuilderTracing.deleteDashboardError', {
+          defaultMessage: 'Failed to delete traces dashboard',
+        }),
+        text: error?.body?.message ?? error?.message,
+      });
+    },
+  });
+
   return {
     isInstalled: data?.installed ?? false,
     dashboardId: data?.dashboardId ?? '',
     isLoading,
     isInstalling,
+    isDeleting,
     installDashboard,
+    deleteDashboard,
   };
 };

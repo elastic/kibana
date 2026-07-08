@@ -6,11 +6,9 @@
  */
 
 import { Readable } from 'stream';
-import pMap from 'p-map';
 import type {
   CoreStart,
   ISavedObjectsImporter,
-  ISavedObjectsRepository,
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
@@ -21,8 +19,6 @@ import {
   AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER,
 } from './constants';
 import { overviewDashboard } from './assets/overview_dashboard';
-
-const SYNC_CONCURRENCY = 5;
 
 interface DashboardSavedObjectAsset {
   id: string;
@@ -144,48 +140,9 @@ async function removeAgentBuilderOverviewDashboard(
 }
 
 /**
- * Sync the dashboard for all spaces. The dashboard visualizes Agent Builder
- * traces. When tracing is enabled (via the experimental features and tracing
- * uiSettings), the dashboard is installed into every space; otherwise it is
- * removed.
+ * Installs or removes the Agent Builder tracing dashboard for a single space.
  */
-export async function syncAgentBuilderOverviewDashboard(
-  coreStart: Pick<CoreStart, 'savedObjects'>,
-  tracingEnabled: boolean,
-  logger: Logger
-): Promise<void> {
-  const client = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
-  const importer = coreStart.savedObjects.createImporter(client);
-
-  // `space` is a hidden SO type, so it must be explicitly allowlisted on the repository.
-  const spaceRepo = coreStart.savedObjects.createInternalRepository(['space']);
-  const spaceIds = await getAllSpaceIds(spaceRepo);
-
-  logger.debug(`Agent Builder dashboard sync: found ${spaceIds.length} space(s)`);
-
-  await pMap(
-    spaceIds,
-    async (spaceId) => {
-      const namespace = spaceId === 'default' ? undefined : spaceId;
-      try {
-        if (tracingEnabled) {
-          await installAgentBuilderOverviewDashboard(client, importer, logger, spaceId, namespace);
-        } else {
-          await removeAgentBuilderOverviewDashboard(client, logger, spaceId, namespace);
-        }
-      } catch (err) {
-        logger.error(`Agent Builder dashboard sync failed for space "${spaceId}": ${err}`);
-      }
-    },
-    { concurrency: SYNC_CONCURRENCY }
-  );
-}
-
-/**
- * Sync the dashboard for a single space. Installs when tracing is enabled,
- * removes otherwise.
- */
-export async function syncAgentBuilderOverviewDashboardForSpace(
+export async function setAgentBuilderDashboard(
   coreStart: Pick<CoreStart, 'savedObjects'>,
   tracingEnabled: boolean,
   spaceId: string,
@@ -200,28 +157,4 @@ export async function syncAgentBuilderOverviewDashboardForSpace(
   } else {
     await removeAgentBuilderOverviewDashboard(client, logger, spaceId, namespace);
   }
-}
-
-/**
- * fetch the ids of every space, paging through the (hidden) `space` saved objects.
- */
-async function getAllSpaceIds(spaceRepo: ISavedObjectsRepository): Promise<string[]> {
-  const perPage = 100;
-  const spaceIds = new Set<string>(['default']);
-
-  for (let page = 1; ; page++) {
-    const { saved_objects: batch } = await spaceRepo.find<unknown>({
-      type: 'space',
-      perPage,
-      page,
-    });
-
-    batch.forEach((space) => spaceIds.add(space.id));
-
-    if (batch.length < perPage) {
-      break;
-    }
-  }
-
-  return [...spaceIds];
 }
