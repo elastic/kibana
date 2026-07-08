@@ -27,7 +27,8 @@ jest.mock('../../shared/hooks/use_default_flyout_properties', () => ({
 jest.mock('../misconfiguration/main', () => ({ Misconfiguration: () => null }));
 jest.mock('../vulnerability/main', () => ({ Vulnerability: () => null }));
 
-const mockOpenSystemFlyout = jest.fn();
+const mockFlyoutRef = { close: jest.fn(), onClose: Promise.resolve() };
+const mockOpenSystemFlyout = jest.fn().mockReturnValue(mockFlyoutRef);
 
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: () => ({ services: { overlays: { openSystemFlyout: mockOpenSystemFlyout } } }),
@@ -50,20 +51,27 @@ describe('useOpenFindingInSystemFlyout', () => {
     useIsNewFlyoutEnabledMock.mockReturnValue(true);
     const { result } = renderHook(() => useOpenFindingInSystemFlyout());
 
-    result.current?.openMisconfigurationFinding({ resourceId: 'resource-1', ruleId: 'rule-1' });
+    const handle = result.current?.openMisconfigurationFinding({
+      resourceId: 'resource-1',
+      ruleId: 'rule-1',
+    });
 
     expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
     expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ session: 'start' })
     );
+    expect(handle?.onClose).toBe(mockFlyoutRef.onClose);
+
+    handle?.close();
+    expect(mockFlyoutRef.close).toHaveBeenCalledTimes(1);
   });
 
   it('opens a system flyout for a vulnerability finding when enabled', () => {
     useIsNewFlyoutEnabledMock.mockReturnValue(true);
     const { result } = renderHook(() => useOpenFindingInSystemFlyout());
 
-    result.current?.openVulnerabilityFinding({
+    const handle = result.current?.openVulnerabilityFinding({
       vulnerabilityId: 'CVE-1',
       resourceId: 'resource-1',
       packageName: 'pkg',
@@ -76,5 +84,9 @@ describe('useOpenFindingInSystemFlyout', () => {
       expect.anything(),
       expect.objectContaining({ session: 'start' })
     );
+    expect(handle?.onClose).toBe(mockFlyoutRef.onClose);
+
+    handle?.close();
+    expect(mockFlyoutRef.close).toHaveBeenCalledTimes(1);
   });
 });

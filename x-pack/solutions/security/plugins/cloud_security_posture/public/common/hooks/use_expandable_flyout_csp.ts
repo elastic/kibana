@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-import { useContext, useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { CspFinding, CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { SecuritySolutionContext } from '../../application/security_solution_context';
+import { useSecuritySolutionContext } from '../../application/security_solution_context';
+import type { OpenFindingInSystemFlyoutHandle } from '../../types';
 
 export const useExpandableFlyoutCsp = (
   flyoutType: 'misconfiguration' | 'vulnerability' = 'misconfiguration'
 ) => {
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
-  const securitySolutionContext = useContext(SecuritySolutionContext);
+  const securitySolutionContext = useSecuritySolutionContext();
+  // Tracks the currently open system flyout (if any), so it can be closed when the table row is
+  // deselected, and so we can reset `expandedDoc` when the user closes it directly (e.g. the
+  // flyout's own close button), which the legacy `useOnExpandableFlyoutClose` event never fires
+  // for. We intentionally never close a *previous* system flyout to open a new one — see
+  // `trackSystemFlyoutHandle` below.
+  const systemFlyoutHandleRef = useRef<OpenFindingInSystemFlyoutHandle | null>(null);
 
   const setFlyoutCloseCallback = useCallback(
     (onChange: (value: DataTableRecord | undefined) => void) => {
@@ -40,9 +47,28 @@ export const useExpandableFlyoutCsp = (
 
   setFlyoutCloseCallback(setExpandedDoc);
 
+  const closeActiveSystemFlyout = () => {
+    systemFlyoutHandleRef.current?.close();
+    systemFlyoutHandleRef.current = null;
+  };
+
+  const trackSystemFlyoutHandle = (handle: OpenFindingInSystemFlyoutHandle) => {
+    systemFlyoutHandleRef.current = handle;
+    handle.onClose.then(() => {
+      if (systemFlyoutHandleRef.current === handle) {
+        systemFlyoutHandleRef.current = null;
+        setExpandedDoc(undefined);
+      }
+    });
+  };
+
   const onExpandDocClick = (record?: DataTableRecord | undefined) => {
     if (!record) {
-      closeFlyout();
+      if (openInSystemFlyout) {
+        closeActiveSystemFlyout();
+      } else {
+        closeFlyout();
+      }
       setExpandedDoc(undefined);
       return;
     }
@@ -58,7 +84,7 @@ export const useExpandableFlyoutCsp = (
         eventId: finding?.event?.id,
       };
       if (openInSystemFlyout) {
-        openInSystemFlyout.openVulnerabilityFinding(params);
+        trackSystemFlyoutHandle(openInSystemFlyout.openVulnerabilityFinding(params));
       } else {
         openFlyout({ right: { id: 'findings-vulnerability-panel', params } });
       }
@@ -70,7 +96,7 @@ export const useExpandableFlyoutCsp = (
         ruleId: finding.rule.id,
       };
       if (openInSystemFlyout) {
-        openInSystemFlyout.openMisconfigurationFinding(params);
+        trackSystemFlyoutHandle(openInSystemFlyout.openMisconfigurationFinding(params));
       } else {
         openFlyout({ right: { id: 'findings-misconfiguration-panel', params } });
       }

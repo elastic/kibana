@@ -105,18 +105,33 @@ export interface CspSecuritySolutionContext {
 }
 
 /**
+ * Handle to a finding opened via {@link OpenFindingInSystemFlyout}, allowing the caller to close it
+ * (e.g. when the underlying table row is deselected or another finding is opened) and to react
+ * when it gets closed some other way (e.g. the user dismissing it directly).
+ */
+export interface OpenFindingInSystemFlyoutHandle {
+  /** Closes the opened system flyout. Does nothing if it is already closed. */
+  close: () => void;
+  /** Resolves once the system flyout is closed, whether via `close()` or user interaction. */
+  onClose: Promise<void>;
+}
+
+/**
  * Openers that render a CSP finding as a primary security solution system flyout.
  * Params mirror the query inputs accepted by the misconfiguration / vulnerability findings queries.
  */
 export interface OpenFindingInSystemFlyout {
-  openMisconfigurationFinding: (params: { resourceId: string; ruleId: string }) => void;
+  openMisconfigurationFinding: (params: {
+    resourceId: string;
+    ruleId: string;
+  }) => OpenFindingInSystemFlyoutHandle;
   openVulnerabilityFinding: (params: {
     vulnerabilityId?: string | string[];
     resourceId?: string;
     packageName?: string | string[];
     packageVersion?: string | string[];
     eventId?: string;
-  }) => void;
+  }) => OpenFindingInSystemFlyoutHandle;
 }
 
 export type CloudSecurityPostureStartServices = Pick<

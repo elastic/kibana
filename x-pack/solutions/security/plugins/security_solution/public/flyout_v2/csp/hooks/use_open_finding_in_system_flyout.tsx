@@ -8,7 +8,10 @@
 import React, { useCallback, useMemo } from 'react';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import type { OpenFindingInSystemFlyout } from '@kbn/cloud-security-posture-plugin/public';
+import type {
+  OpenFindingInSystemFlyout,
+  OpenFindingInSystemFlyoutHandle,
+} from '@kbn/cloud-security-posture-plugin/public';
 import { useKibana } from '../../../common/lib/kibana';
 import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
@@ -35,21 +38,23 @@ export const useOpenFindingInSystemFlyout = (): OpenFindingInSystemFlyout | unde
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const openMisconfigurationFinding = useCallback(
-    (params: MisconfigurationProps) => {
-      overlays.openSystemFlyout(
+    (params: MisconfigurationProps): OpenFindingInSystemFlyoutHandle => {
+      const flyoutRef = overlays.openSystemFlyout(
         flyoutProviders({ services, store, history, children: <Misconfiguration {...params} /> }),
         { ...defaultDocumentFlyoutProperties, session: 'start' }
       );
+      return { close: () => flyoutRef.close(), onClose: flyoutRef.onClose };
     },
     [overlays, services, store, history, defaultDocumentFlyoutProperties]
   );
 
   const openVulnerabilityFinding = useCallback(
-    (params: VulnerabilityProps) => {
-      overlays.openSystemFlyout(
+    (params: VulnerabilityProps): OpenFindingInSystemFlyoutHandle => {
+      const flyoutRef = overlays.openSystemFlyout(
         flyoutProviders({ services, store, history, children: <Vulnerability {...params} /> }),
         { ...defaultDocumentFlyoutProperties, session: 'start' }
       );
+      return { close: () => flyoutRef.close(), onClose: flyoutRef.onClose };
     },
     [overlays, services, store, history, defaultDocumentFlyoutProperties]
   );
