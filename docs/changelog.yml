@@ -211,7 +211,7 @@ pivot:
       - "Team:Obs AI Assistant"
       - "Team:obs-ux-infra_services - DEPRECATED"
       - "Team:obs-ux-logs"
-      - "Team:obs-onboarding"
+      - "Team:streams-ui"
       - "Team:obs-knowledge"
       - "Team:obs-entities"
       - "ci:project-deploy-observability"

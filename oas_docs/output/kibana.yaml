@@ -337,6 +337,7 @@ tags:
   - description: Manage Kibana short URLs.
     name: short url
     x-displayName: Short URLs
+  - name: significant_events
   - description: SLO APIs enable you to define, manage and track service-level objectives
     name: slo
     x-displayName: Service level objectives
@@ -7041,12 +7042,15 @@ paths:
                               - severity_equals
                             type: string
                           value:
-                            description: 'The target severity level: critical, high, medium, low, or info.'
+                            description: 'The target severity level: critical, major, high, medium, minor, low, warning, or info.'
                             enum:
                               - critical
+                              - major
                               - high
                               - medium
+                              - minor
                               - low
+                              - warning
                               - info
                             type: string
                         required:
@@ -10836,6 +10840,12 @@ paths:
             default: 50
             minimum: 1
             type: number
+        - description: Whether to filter by scheduled or ad-hoc attack discovery generations. If omitted, both types are returned. Use `true` to return only scheduled generations or `false` to return only ad-hoc (interactive or action-triggered) generations.
+          in: query
+          name: scheduled
+          required: false
+          schema:
+            type: boolean
         - description: Start of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now-7d").
           example: now-24h
           in: query
@@ -11118,7 +11128,6 @@ paths:
                   - connector_id
                   - discoveries
                   - execution_uuid
-                  - loading_message
                   - start
                   - status
           description: Indicates a successful call.
@@ -13500,6 +13509,100 @@ paths:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get case tags
+      tags:
+        - cases
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/cases/templates:
+    get:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/templates</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a paginated list of case templates. Requires the Cases feature to be enabled in the space.
+      operationId: getCaseTemplatesDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_page_index'
+        - $ref: '#/components/parameters/Cases_page_size'
+        - $ref: '#/components/parameters/Cases_template_sort_field'
+        - $ref: '#/components/parameters/Cases_sort_order'
+        - $ref: '#/components/parameters/Cases_search'
+        - $ref: '#/components/parameters/Cases_owner_filter'
+        - $ref: '#/components/parameters/Cases_template_tags'
+        - $ref: '#/components/parameters/Cases_template_author'
+        - $ref: '#/components/parameters/Cases_template_is_enabled'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getCaseTemplatesResponse:
+                  $ref: '#/components/examples/Cases_get_case_templates_response'
+              schema:
+                $ref: '#/components/schemas/Cases_get_case_templates_response'
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+      summary: Get all case templates
+      tags:
+        - cases
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/cases/templates/{template_id}:
+    get:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/templates/{template_id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns the details of a case template. Requires the Cases feature to be enabled in the space.
+      operationId: getCaseTemplateDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_template_id'
+        - $ref: '#/components/parameters/Cases_template_version'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getCaseTemplateResponse:
+                  $ref: '#/components/examples/Cases_get_case_template_response'
+              schema:
+                $ref: '#/components/schemas/Cases_template_v2_response'
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+        '404':
+          content:
+            application/json:
+              examples:
+                response404:
+                  $ref: '#/components/examples/Cases_response_404'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The template was not found.
+      summary: Get a case template by ID
       tags:
         - cases
       x-metaTags:
@@ -23090,953 +23193,6 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/entity_store/enable:
-    post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/enable</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Initialize the entire Entity Store, creating engines for all or specified entity types.
-      operationId: InitEntityStore
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                delay:
-                  default: 1m
-                  description: The delay before the transform will run.
-                  pattern: '[smdh]$'
-                  type: string
-                docsPerSecond:
-                  default: -1
-                  description: The number of documents per second to process.
-                  type: integer
-                enrichPolicyExecutionInterval:
-                  $ref: '#/components/schemas/Security_Entity_Analytics_API_Interval'
-                entityTypes:
-                  items:
-                    $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
-                  type: array
-                fieldHistoryLength:
-                  default: 10
-                  description: The number of historical values to keep for each field.
-                  type: integer
-                filter:
-                  type: string
-                frequency:
-                  default: 1m
-                  description: The frequency at which the transform will run.
-                  pattern: '[smdh]$'
-                  type: string
-                indexPattern:
-                  $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
-                lookbackPeriod:
-                  default: 3h
-                  description: The amount of time the transform looks back to calculate the aggregations.
-                  pattern: '[smdh]$'
-                  type: string
-                maxPageSearchSize:
-                  default: 500
-                  description: The initial page size to use for the composite aggregation of each checkpoint.
-                  type: integer
-                timeout:
-                  default: 180s
-                  description: The timeout for initializing the aggregating transform.
-                  pattern: '[smdh]$'
-                  type: string
-                timestampField:
-                  default: '@timestamp'
-                  description: The field to use as the timestamp.
-                  type: string
-        description: Configuration for the entity store initialization.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                initEntityStoreExample:
-                  description: The Entity Store was successfully initialized, creating host and user engines in the installing state.
-                  summary: Entity Store initialized with host and user engines
-                  value:
-                    engines:
-                      - delay: 1m
-                        fieldHistoryLength: 10
-                        frequency: 1m
-                        indexPattern: ''
-                        lookbackPeriod: 24h
-                        status: installing
-                        timeout: 180s
-                        timestampField: '@timestamp'
-                        type: host
-                      - delay: 1m
-                        fieldHistoryLength: 10
-                        frequency: 1m
-                        indexPattern: ''
-                        lookbackPeriod: 24h
-                        status: installing
-                        timeout: 180s
-                        timestampField: '@timestamp'
-                        type: user
-                    succeeded: true
-              schema:
-                type: object
-                properties:
-                  engines:
-                    description: The engine descriptors created during initialization.
-                    items:
-                      $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
-                    type: array
-                  succeeded:
-                    description: Whether the Entity Store was initialized successfully.
-                    type: boolean
-          description: Successful response
-        '400':
-          description: Invalid request
-      summary: Initialize the Entity Store
-      tags:
-        - Security Entity Analytics API
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-  /api/entity_store/engines:
-    delete:
-      operationId: DeleteEntityEngines
-      parameters:
-        - description: The entity type of the engine ('user', 'host', 'service', 'generic').
-          examples:
-            hostAndService:
-              value: host,service
-          in: query
-          name: entityTypes
-          required: false
-          schema:
-            description: Array of engine types to delete. Empty by default, which results in all the engines being deleted.
-            items:
-              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
-            type: array
-        - description: Control flag to also delete the entity data.
-          in: query
-          name: delete_data
-          required: false
-          schema:
-            type: boolean
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                deleteEntityEnginesExample:
-                  description: Example response after deleting 'host' engine
-                  value:
-                    deleted:
-                      - host
-                    still_running:
-                      - generic
-                      - user
-                      - service
-              schema:
-                type: object
-                properties:
-                  deleted:
-                    description: Entity types whose engines were successfully deleted.
-                    items:
-                      $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
-                    type: array
-                  still_running:
-                    description: Entity types whose engines are still running.
-                    items:
-                      $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
-                    type: array
-          description: Successful response
-      summary: Delete Entity Engines
-      tags:
-        - Security Entity Analytics API
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-    get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Get a list of all installed entity engines and their current status.
-      operationId: ListEntityEngines
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                listEntityEnginesExample:
-                  description: Returns a list with one running host engine and one stopped user engine.
-                  summary: Two engines installed
-                  value:
-                    count: 2
-                    engines:
-                      - delay: 1m
-                        fieldHistoryLength: 10
-                        frequency: 1m
-                        indexPattern: ''
-                        lookbackPeriod: 24h
-                        status: started
-                        timeout: 180s
-                        timestampField: '@timestamp'
-                        type: host
-                      - delay: 1m
-                        fieldHistoryLength: 10
-                        frequency: 1m
-                        indexPattern: ''
-                        lookbackPeriod: 24h
-                        status: stopped
-                        timeout: 180s
-                        timestampField: '@timestamp'
-                        type: user
-              schema:
-                type: object
-                properties:
-                  count:
-                    description: The total number of entity engines.
-                    type: integer
-                  engines:
-                    description: An array of engine descriptors.
-                    items:
-                      $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
-                    type: array
-          description: Successful response
-      summary: List the Entity Engines
-      tags:
-        - Security Entity Analytics API
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-  /api/entity_store/engines/{entityType}:
-    delete:
-      operationId: DeleteEntityEngine
-      parameters:
-        - description: The entity type of the engine (either 'user' or 'host').
-          examples:
-            host:
-              value: host
-          in: path
-          name: entityType
-          required: true
-          schema:
-            $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
-        - description: Control flag to also delete the entity data.
-          in: query
-          name: delete_data
-          required: false
-          schema:
-            type: boolean
-        - deprecated: true
-          description: Control flag to also delete the entity data.
-          in: query
-          name: data
-          required: false
-          schema:
-            type: boolean
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                deleteEntityEngineExample:
-                  description: Example response after deleting 'host' engine
-                  value:
-                    deleted: true
-              schema:
-                type: object
-                properties:
-                  deleted:
-                    description: Whether the engine was successfully deleted.
-                    type: boolean
-          description: Successful response
-      summary: Delete the Entity Engine
-      tags:
-        - Security Entity Analytics API
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/{entityType}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-    get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/{entityType}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Get the engine descriptor for a specific entity type, including its configuration and current status.
-      operationId: GetEntityEngine
-      parameters:
-        - description: The entity type of the engine.
-          example: host
-          in: path
-          name: entityType
-          required: true
-          schema:
-            $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                getEntityEngineExample:
-                  description: Returns the engine descriptor for a host engine that is currently running with default settings.
-                  summary: A running host engine
-                  value:
-                    delay: 1m
-                    fieldHistoryLength: 10
-                    frequency: 1m
-                    indexPattern: ''
-                    lookbackPeriod: 24h
-                    status: started
-                    timeout: 180s
-                    timestampField: '@timestamp'
-                    type: host
-              schema:
-                $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
-          description: Successful response
-      summary: Get an Entity Engine
-      tags:
-        - Security Entity Analytics API
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-  /api/entity_store/engines/{entityType}/init:
-    post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/{entityType}/init</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Initialize a single entity engine for the specified entity type.
-      operationId: InitEntityEngine
-      parameters:
-        - description: The entity type of the engine.
-          in: path
-          name: entityType
-          required: true
-          schema:
-            $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                delay:
-                  default: 1m
-                  description: The delay before the transform will run.
-                  pattern: '[smdh]$'
-                  type: string
-                docsPerSecond:
-                  default: -1
-                  description: The number of documents per second to process.
-                  type: integer
-                enrichPolicyExecutionInterval:
-                  $ref: '#/components/schemas/Security_Entity_Analytics_API_Interval'
-                fieldHistoryLength:
-                  default: 10
-                  description: The number of historical values to keep for each field.
-                  type: integer
-                filter:
-                  type: string
-                frequency:
-                  default: 1m
-                  description: The frequency at which the transform will run.
-                  pattern: '[smdh]$'
-                  type: string
-                indexPattern:
-                  $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
-                lookbackPeriod:
-                  default: 3h
-                  description: The amount of time the transform looks back to calculate the aggregations.
-                  pattern: '[smdh]$'
-                  type: string
-                maxPageSearchSize:
-                  default: 500
-                  description: The initial page size to use for the composite aggregation of each checkpoint.
-                  type: integer
-                timeout:
-                  default: 180s
-                  description: The timeout for initializing the aggregating transform.
-                  pattern: '[smdh]$'
-                  type: string
-                timestampField:
-                  default: '@timestamp'
-                  description: The field to use as the timestamp for the entity type.
-                  type: string
-        description: Schema for the engine initialization
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                initEntityEngineExample:
-                  description: A host engine was successfully initialized and is now in the installing state.
-                  summary: Host engine initialized
-                  value:
-                    delay: 1m
-                    fieldHistoryLength: 10
-                    frequency: 1m
-                    indexPattern: ''
-                    lookbackPeriod: 3h
-                    status: installing
-                    timeout: 180s
-                    timestampField: '@timestamp'
-                    type: host
-              schema:
-                $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
-          description: Successful response
-        '400':
-          description: Invalid request
-      summary: Initialize an Entity Engine
-      tags:
-        - Security Entity Analytics API
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-  /api/entity_store/engines/{entityType}/start:
-    post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/{entityType}/start</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Start a previously stopped entity engine, resuming transform processing for the given entity type.
-      operationId: StartEntityEngine
-      parameters:
-        - description: The entity type of the engine to start.
-          example: host
-          in: path
-          name: entityType
-          required: true
-          schema:
-            $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                startEntityEngineExample:
-                  description: The engine was successfully started and is now processing data.
-                  summary: Engine started successfully
-                  value:
-                    started: true
-              schema:
-                type: object
-                properties:
-                  started:
-                    description: Whether the engine was successfully started.
-                    type: boolean
-          description: Successful response
-      summary: Start an Entity Engine
-      tags:
-        - Security Entity Analytics API
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-  /api/entity_store/engines/{entityType}/stop:
-    post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/{entityType}/stop</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Stop a running entity engine, pausing transform processing for the given entity type.
-      operationId: StopEntityEngine
-      parameters:
-        - description: The entity type of the engine to stop.
-          example: host
-          in: path
-          name: entityType
-          required: true
-          schema:
-            $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                stopEntityEngineExample:
-                  description: The engine was successfully stopped and is no longer processing data.
-                  summary: Engine stopped successfully
-                  value:
-                    stopped: true
-              schema:
-                type: object
-                properties:
-                  stopped:
-                    description: Whether the engine was successfully stopped.
-                    type: boolean
-          description: Successful response
-      summary: Stop an Entity Engine
-      tags:
-        - Security Entity Analytics API
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-  /api/entity_store/engines/apply_dataview_indices:
-    post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/apply_dataview_indices</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Synchronize data view index patterns to all running entity engines so that newly added indices are picked up by the transforms.
-      operationId: ApplyEntityEngineDataviewIndices
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                applyDataviewIndicesExample:
-                  description: All running engines were successfully updated with the current data view index patterns.
-                  summary: All engines updated
-                  value:
-                    result:
-                      - changes:
-                          indexPatterns:
-                            - logs-*
-                            - filebeat-*
-                            - auditbeat-*
-                        type: host
-                      - changes:
-                          indexPatterns:
-                            - logs-*
-                            - filebeat-*
-                            - auditbeat-*
-                        type: user
-                    success: true
-              schema:
-                type: object
-                properties:
-                  result:
-                    description: Per-engine update results.
-                    items:
-                      $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDataviewUpdateResult'
-                    type: array
-                  success:
-                    description: Whether all engines updated successfully.
-                    type: boolean
-          description: Successful response
-        '207':
-          content:
-            application/json:
-              examples:
-                partialSuccessExample:
-                  description: The host engine was updated but the user engine failed due to insufficient privileges.
-                  summary: One engine failed
-                  value:
-                    errors:
-                      - 'Failed to update user engine: insufficient privileges'
-                    result:
-                      - changes:
-                          indexPatterns:
-                            - logs-*
-                            - filebeat-*
-                        type: host
-                    success: false
-              schema:
-                type: object
-                properties:
-                  errors:
-                    description: Error messages for engines that failed to update.
-                    items:
-                      type: string
-                    type: array
-                  result:
-                    description: Per-engine update results for engines that succeeded.
-                    items:
-                      $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDataviewUpdateResult'
-                    type: array
-                  success:
-                    description: Always `false` for a partial success.
-                    type: boolean
-          description: Partial successful response
-        '500':
-          content:
-            application/json:
-              examples:
-                serverErrorExample:
-                  description: An unexpected error occurred while applying data view indices.
-                  summary: Internal server error
-                  value:
-                    body: An internal error occurred while updating engine indices
-                    statusCode: 500
-              schema:
-                type: object
-                properties:
-                  body:
-                    description: Error message.
-                    type: string
-                  statusCode:
-                    description: HTTP status code.
-                    type: number
-          description: Error response
-      summary: Apply DataView indices to all installed engines
-      tags:
-        - Security Entity Analytics API
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-  /api/entity_store/entities/{entityType}:
-    delete:
-      description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/entities/{entityType}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Delete a single entity in Entity Store.
-        The entity will be immediately deleted from the latest index.  It will remain available in historical snapshots if it has been snapshotted.  The delete operation does not prevent the entity from being recreated if it is observed again in the future. 
-      operationId: DeleteSingleEntity
-      parameters:
-        - example: user
-          in: path
-          name: entityType
-          required: true
-          schema:
-            $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                id:
-                  description: Identifier of the entity to be deleted, commonly entity.id value.
-                  example: arn:aws:iam::123456789012:user/jane.doe
-                  type: string
-              required:
-                - id
-        description: Schema for the deleting entity
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                deleteEntityExample:
-                  description: The entity was found and successfully removed from the latest index.
-                  summary: Entity deleted
-                  value:
-                    deleted: true
-              schema:
-                type: object
-                properties:
-                  deleted:
-                    description: Whether the entity was successfully deleted.
-                    type: boolean
-          description: Successful response. Entity deleted.
-        '404':
-          description: Entity Not Found. No entity with this ID and Type exists.
-        '503':
-          description: Operation on an uninitialized Engine or in a cluster without CRUD API Enabled
-      summary: Delete an entity in Entity Store
-      tags:
-        - Security Entity Analytics API
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-    put:
-      description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/entities/{entityType}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Update or create an entity in Entity Store.
-        If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created. By default, only the following fields can be updated: * `entity.attributes.*` * `entity.lifecycle.*` * `entity.behavior.*` To update other fields, set the `force` query parameter to `true`. > info > Some fields always retain the first observed value. Updates to these fields will not appear in the final index.
-        > Due to technical limitations, not all updates are guaranteed to appear in the final list of observed values.
-        > Due to technical limitations, create is an async operation. The time for a document to be present in the  > final index depends on the entity store transform and usually takes more than 1 minute.
-      operationId: UpsertEntity
-      parameters:
-        - example: user
-          in: path
-          name: entityType
-          required: true
-          schema:
-            $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
-        - description: When true, allows updating protected fields.
-          in: query
-          name: force
-          required: false
-          schema:
-            default: false
-            type: boolean
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Security_Entity_Analytics_API_Entity'
-        description: Schema for the updating a single entity
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Security_Entity_Analytics_API_Entity'
-          description: Entity updated or created
-        '403':
-          description: Operation on a restricted field
-        '409':
-          description: Conflict. The entity was updated while another update was happening in ElasticSearch
-        '503':
-          description: Operation on an uninitialized Engine or in a cluster without CRUD API Enabled
-      summary: Upsert an entity in Entity Store
-      tags:
-        - Security Entity Analytics API
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-  /api/entity_store/entities/bulk:
-    put:
-      description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/entities/bulk</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Update or create many entities in Entity Store.
-        If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created.
-        The creation is asynchronous. The time for a document to be present in the  final index depends on the entity store transform and usually takes more than 1 minute.
-      operationId: UpsertEntitiesBulk
-      parameters:
-        - description: When true, allows updating protected fields.
-          in: query
-          name: force
-          required: false
-          schema:
-            default: false
-            type: boolean
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntitiesContainer'
-        description: Schema for the updating many entities
-        required: true
-      responses:
-        '200':
-          description: Entities updated or created
-        '403':
-          description: Operation on a restricted field
-        '503':
-          description: Operation on an uninitialized Engine or in a cluster without CRUD API Enabled
-      summary: Upsert many entities in Entity Store
-      tags:
-        - Security Entity Analytics API
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-  /api/entity_store/entities/list:
-    get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/entities/list</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        List entities records, paging, sorting and filtering as needed.
-      operationId: ListEntities
-      parameters:
-        - description: Field to sort results by.
-          example: entity.name
-          in: query
-          name: sort_field
-          required: false
-          schema:
-            type: string
-        - description: Sort order.
-          in: query
-          name: sort_order
-          required: false
-          schema:
-            enum:
-              - asc
-              - desc
-            type: string
-        - description: Page number to return (1-indexed).
-          example: 1
-          in: query
-          name: page
-          required: false
-          schema:
-            minimum: 1
-            type: integer
-        - description: Number of entities per page.
-          example: 10
-          in: query
-          name: per_page
-          required: false
-          schema:
-            maximum: 10000
-            minimum: 1
-            type: integer
-        - description: An ES query to filter by.
-          in: query
-          name: filterQuery
-          required: false
-          schema:
-            type: string
-        - description: Entity types to include in the results.
-          in: query
-          name: entity_types
-          required: true
-          schema:
-            items:
-              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
-            type: array
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  inspect:
-                    $ref: '#/components/schemas/Security_Entity_Analytics_API_InspectQuery'
-                  page:
-                    description: Current page number.
-                    minimum: 1
-                    type: integer
-                  per_page:
-                    description: Number of entities per page.
-                    maximum: 1000
-                    minimum: 1
-                    type: integer
-                  records:
-                    description: The entity records for this page.
-                    items:
-                      $ref: '#/components/schemas/Security_Entity_Analytics_API_Entity'
-                    type: array
-                  total:
-                    description: Total number of entities matching the query.
-                    minimum: 0
-                    type: integer
-                required:
-                  - records
-                  - page
-                  - per_page
-                  - total
-          description: Entities returned successfully
-      summary: List Entity Store Entities
-      tags:
-        - Security Entity Analytics API
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-  /api/entity_store/status:
-    get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/status</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Get the overall Entity Store status and per-engine statuses, optionally including component-level health details.
-      operationId: GetEntityStoreStatus
-      parameters:
-        - description: If true, returns a detailed status of each engine including all its components.
-          example: true
-          in: query
-          name: include_components
-          schema:
-            type: boolean
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                entityStoreRunning:
-                  description: The Entity Store is running with both host and user engines started and using default settings.
-                  summary: Entity Store running with two engines
-                  value:
-                    engines:
-                      - delay: 1m
-                        fieldHistoryLength: 10
-                        frequency: 1m
-                        indexPattern: ''
-                        lookbackPeriod: 24h
-                        status: started
-                        timeout: 180s
-                        timestampField: '@timestamp'
-                        type: host
-                      - delay: 1m
-                        fieldHistoryLength: 10
-                        frequency: 1m
-                        indexPattern: ''
-                        lookbackPeriod: 24h
-                        status: started
-                        timeout: 180s
-                        timestampField: '@timestamp'
-                        type: user
-                    status: running
-              schema:
-                type: object
-                properties:
-                  engines:
-                    description: Per-engine status information.
-                    items:
-                      allOf:
-                        - $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
-                        - type: object
-                          properties:
-                            components:
-                              description: Detailed component-level status. Only included when include_components is true.
-                              items:
-                                $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineComponentStatus'
-                              type: array
-                    type: array
-                  status:
-                    $ref: '#/components/schemas/Security_Entity_Analytics_API_StoreStatus'
-                    description: The overall status of the Entity Store.
-                required:
-                  - status
-                  - engines
-          description: Successful response
-      summary: Get the status of the Entity Store
-      tags:
-        - Security Entity Analytics API
-      x-metaTags:
-        - content: Kibana
-          name: product_name
   /api/exception_lists:
     delete:
       description: |-
@@ -32895,13 +32051,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -33740,6 +32904,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 enrollment_token:
                   type: string
                 settings:
@@ -33794,13 +32960,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -33880,6 +33054,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 user_info:
                   additionalProperties: false
                   type: object
@@ -33901,13 +33077,21 @@ paths:
                   value:
                     actionId: actionId
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: 'OK: A successful request.'
         '400':
           content:
@@ -33985,6 +33169,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 includeInactive:
                   default: false
                   type: boolean
@@ -34003,13 +33189,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -34088,6 +33282,8 @@ paths:
                       type: array
                     - description: KQL query string. Leave empty to target all collectors
                       type: string
+                dryRun:
+                  type: boolean
                 includeInactive:
                   description: When passing collectors by KQL query, also removes inactive collectors
                   type: boolean
@@ -34103,13 +33299,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -34198,6 +33402,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
               required:
                 - agents
       responses:
@@ -34210,13 +33416,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -34296,6 +33510,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 includeInactive:
                   default: false
                   type: boolean
@@ -34312,16 +33528,25 @@ paths:
                       - actionId1
                       - actionId2
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionIds:
-                    items:
-                      type: string
-                    maxItems: 10000
-                    type: array
-                required:
-                  - actionIds
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionIds:
+                        items:
+                          maxLength: 36
+                          type: string
+                        maxItems: 10000
+                        type: array
+                    required:
+                      - actionIds
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: 'OK: A successful request.'
         '400':
           content:
@@ -34401,6 +33626,8 @@ paths:
                       type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 force:
                   description: Unenrolls hosted agents too
                   type: boolean
@@ -34422,13 +33649,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -34511,6 +33746,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 includeInactive:
                   default: false
                   type: boolean
@@ -34536,13 +33773,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -34623,6 +33868,8 @@ paths:
                     - type: string
                 batchSize:
                   type: number
+                dryRun:
+                  type: boolean
                 force:
                   type: boolean
                 includeInactive:
@@ -34652,13 +33899,21 @@ paths:
                   value:
                     actionId: action-id-1
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      count:
+                        type: number
+                    required:
+                      - count
           description: Successful response
         '400':
           content:
@@ -47749,6 +47004,7 @@ paths:
               properties:
                 description:
                   description: A description of the pipeline.
+                  maxLength: 1024
                   type: string
                 pipeline:
                   description: A definition for the pipeline.
@@ -50847,6 +50103,13 @@ paths:
             maximum: 1000
             minimum: 1
             type: integer
+        - description: When true, each entry also includes the contributions recorded for that scoring run (`inputs`, `modifiers`, category 2 fields, and `criticality_level`), when present on the underlying document.
+          in: query
+          name: include_contributions
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses:
         '200':
           content:
@@ -55312,7 +54575,8 @@ paths:
                     records: []
                     total: 0
                 pageModeExample:
-                  description: A paginated list of host entities sorted by timestamp in descending order, including query inspection data.
+                  description: |
+                    A paginated list of host entities sorted by timestamp in descending order, including query inspection data.
                   summary: Page mode response with host entities
                   value:
                     inspect:
@@ -55354,7 +54618,8 @@ paths:
                             type: linux
                     total: 1
                 searchAfterModeExample:
-                  description: A cursor-based response with entities and a search_after token for the next page.
+                  description: |
+                    A cursor-based response with entities and a search_after token for the next page.
                   summary: Search-after mode response
                   value:
                     entities:
@@ -62854,7 +62119,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get the resolution group for a given entity, returning all linked entities. Requires an enterprise license.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+        Get the resolution group for a given entity, returning all linked entities.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
       operationId: get-security-entity-store-resolution-group
       parameters:
         - description: The entity identifier to look up the resolution group for.
@@ -62931,6 +62196,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/security/entity_store/resolution/group?entity_id=user:jane.doe@example.com
+      x-state: Generally available; added in 9.4.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -62943,7 +62209,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Link one or more entities to a target entity, creating a resolution group. Changes become visible on subsequent reads after the next index refresh (typically <1s). Requires an enterprise license.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+        Link one or more entities to a target entity, creating a resolution group. Changes become visible on subsequent reads after the next index refresh (typically <1s).<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
       operationId: post-security-entity-store-resolution-link
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -63041,6 +62307,163 @@ paths:
               "target_id": "user:jane.doe@example.com",
               "entity_ids": ["user:jdoe@example.com"]
             }
+      x-state: Generally available; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/security/entity_store/resolution/rules:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/resolution/rules</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        List managed entity resolution rules and their effective enabled state for this space.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+      operationId: get-security-entity-store-resolution-rules
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                rulesListExample:
+                  description: Lists the managed resolution rules and their enabled state in the current space.
+                  summary: Managed resolution rules
+                  value:
+                    rules:
+                      - enabled: false
+                        id: related_user_alias_resolution
+                        kind: related_user_alias_resolution
+                        managed: true
+                      - enabled: true
+                        id: email_exact_match
+                        kind: email_exact_match
+                        managed: true
+          description: Entity resolution rules.
+      summary: List entity resolution rules
+      tags:
+        - Security entity store
+      x-state: Generally available; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/security/entity_store/resolution/rules/{id}/disable:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/resolution/rules/{id}/disable</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Disable a managed entity resolution rule in this space.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+      operationId: put-security-entity-store-resolution-rules-id-disable
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The stable identifier of the entity resolution rule.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 100
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                ruleDisabledExample:
+                  description: The related user alias resolution rule was disabled in the current space.
+                  summary: Rule disabled
+                  value:
+                    enabled: false
+                    id: related_user_alias_resolution
+                    kind: related_user_alias_resolution
+                    managed: true
+          description: Updated entity resolution rule.
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: The requested entity resolution rule does not exist.
+                  summary: Unknown rule
+                  value:
+                    error: Not Found
+                    message: Saved object [entity-resolution-rule/unknown] not found
+                    statusCode: 404
+          description: Unknown entity resolution rule.
+      summary: Disable an entity resolution rule
+      tags:
+        - Security entity store
+      x-state: Generally available; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/security/entity_store/resolution/rules/{id}/enable:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/resolution/rules/{id}/enable</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Enable a managed entity resolution rule in this space.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+      operationId: put-security-entity-store-resolution-rules-id-enable
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The stable identifier of the entity resolution rule.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 100
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                ruleEnabledExample:
+                  description: The related user alias resolution rule was enabled in the current space.
+                  summary: Rule enabled
+                  value:
+                    enabled: true
+                    id: related_user_alias_resolution
+                    kind: related_user_alias_resolution
+                    managed: true
+          description: Updated entity resolution rule.
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: The requested entity resolution rule does not exist.
+                  summary: Unknown rule
+                  value:
+                    error: Not Found
+                    message: Saved object [entity-resolution-rule/unknown] not found
+                    statusCode: 404
+          description: Unknown entity resolution rule.
+      summary: Enable an entity resolution rule
+      tags:
+        - Security entity store
+      x-state: Generally available; added in 9.5.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63053,7 +62476,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Remove one or more entities from their resolution group. Changes become visible on subsequent reads after the next index refresh (typically <1s). Requires an enterprise license.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+        Remove one or more entities from their resolution group. Changes become visible on subsequent reads after the next index refresh (typically <1s).<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
       operationId: post-security-entity-store-resolution-unlink
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -63137,6 +62560,7 @@ paths:
             {
               "entity_ids": ["user:jdoe@example.com"]
             }
+      x-state: Generally available; added in 9.4.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -66068,6 +65492,7 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -66105,7 +65530,7 @@ paths:
           description: List of queries linked to the stream.
       summary: Get stream queries
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -66135,6 +65560,7 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -66165,16 +65591,19 @@ paths:
                             properties:
                               description:
                                 default: ''
+                                maxLength: 10000
                                 type: string
                               esql:
                                 type: object
                                 properties:
                                   query:
+                                    maxLength: 10000
                                     type: string
                                 required:
                                   - query
                               evidence:
                                 items:
+                                  maxLength: 10000
                                   type: string
                                 type: array
                               expires_at:
@@ -66203,6 +65632,7 @@ paths:
                             type: object
                             properties:
                               id:
+                                maxLength: 255
                                 type: string
                             required:
                               - id
@@ -66216,7 +65646,7 @@ paths:
           description: Bulk operation completed successfully.
       summary: Bulk update queries
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -66246,12 +65676,14 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: The identifier of the query to remove.
           in: path
           name: queryId
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -66269,7 +65701,7 @@ paths:
           description: The query was removed successfully.
       summary: Remove a query from a stream
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -66298,12 +65730,14 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: The identifier of the query.
           in: path
           name: queryId
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -66321,17 +65755,20 @@ paths:
               properties:
                 description:
                   default: ''
+                  maxLength: 10000
                   type: string
                 esql:
                   additionalProperties: false
                   type: object
                   properties:
                     query:
+                      maxLength: 10000
                       type: string
                   required:
                     - query
                 evidence:
                   items:
+                    maxLength: 10000
                     type: string
                   type: array
                 expires_at:
@@ -66352,7 +65789,7 @@ paths:
           description: The query was added or updated successfully.
       summary: Upsert a query to a stream
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -66375,24 +65812,28 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Start of the time range as an ISO 8601 date string.
           in: query
           name: from
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: End of the time range as an ISO 8601 date string.
           in: query
           name: to
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: The bucket size for aggregating events (e.g. "1m", "1h").
           in: query
           name: bucketSize
           required: true
           schema:
+            maxLength: 255
             pattern: ^(\d+)([smhd])$
             type: string
         - description: Query string to filter significant events on metadata fields
@@ -66400,6 +65841,7 @@ paths:
           name: query
           required: false
           schema:
+            maxLength: 10000
             type: string
         - description: 'Search mode: keyword (BM25), semantic (vector), or hybrid (RRF). When omitted, defaults to hybrid with a silent keyword fallback on failure. When set explicitly, failures propagate as errors.'
           in: query
@@ -66461,7 +65903,7 @@ paths:
           description: Significant events for the stream.
       summary: Read the significant events
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -70964,8 +70406,10 @@ paths:
                       message: Approve change to production?
                     isTestRun: false
                     output:
-                      approved: true
-                      reason: looks good
+                      respondedBy: alice
+                      response:
+                        approved: true
+                        reason: looks good
                     scopeStack: []
                     spaceId: default
                     startedAt: '2025-11-20T12:00:01.000Z'
@@ -70990,6 +70434,210 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/workflows/executions/{executionId}/step/{stepExecutionId}
+      x-state: Generally available; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/workflows/executions/{executionId}/steps/{stepId}/resume/external:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/executions/{executionId}/steps/{stepId}/resume/external</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Resume a paused `waitForApproval` step (pauses the workflow and waits for a human to approve/decline before execution continues) or `waitForInput` step (passes the expected input values as query parameters in the URL). Returns an HTML confirmation page.
+      operationId: get-workflows-executions-executionid-steps-stepid-resume-external
+      parameters:
+        - description: Workflow execution ID
+          in: path
+          name: executionId
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+        - description: Workflow step execution ID
+          in: path
+          name: stepId
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+        - description: The token created when the workflow execution was paused. Authenticates the request to resume execution.
+          in: query
+          name: token
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+        - description: Indicates whether a human reviewer approved the paused step. Required for `waitForApproval` when resuming an approval step.
+          in: query
+          name: approved
+          required: false
+          schema:
+            anyOf:
+              - type: boolean
+              - enum:
+                  - 'true'
+                type: string
+              - enum:
+                  - 'false'
+                type: string
+      responses:
+        '200':
+          content:
+            text/html:
+              examples:
+                externalResumeSuccessExample:
+                  description: Success page confirming the response was received
+                  value: <!DOCTYPE html><html><body><h1>Thank you</h1><p>Your response was received. You can close this window.</p></body></html>
+              schema:
+                type: string
+          description: An HTML confirmation page confirming that the response was received and the workflow execution was resumed.
+      summary: Resume a workflow execution from an external link
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/steps/{stepId}/resume/external?token=${RESUME_TOKEN}&approved=true"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/executions/{executionId}/steps/{stepId}/resume/external?token={resumeToken}&approved=true
+      x-state: Generally available; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/executions/{executionId}/steps/{stepId}/resume/external</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Resume a workflow execution that is paused and waiting for external input. Submit input values as a JSON request body, authenticated with a token query parameter. Returns an HTML confirmation page.
+      operationId: post-workflows-executions-executionid-steps-stepid-resume-external
+      parameters:
+        - description: Workflow execution ID
+          in: path
+          name: executionId
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+        - description: Workflow step execution ID
+          in: path
+          name: stepId
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+        - description: The resume token authenticating this request.
+          in: query
+          name: token
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              externalResumeInputRequestExample:
+                description: Example external input payload for a waitForInput step
+                value:
+                  description: Escalated from Slack triage
+                  severity: high
+            schema: {}
+      responses:
+        '200':
+          content:
+            text/html:
+              examples:
+                externalResumeInputSuccessExample:
+                  description: Success page confirming the input was received
+                  value: <!DOCTYPE html><html><body><h1>Thank you</h1><p>Your response was received. You can close this window.</p></body></html>
+              schema:
+                type: string
+          description: An HTML confirmation page confirming that the input was received and the workflow execution was resumed.
+      summary: Submit external input for a paused workflow execution
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/workflows/executions/{executionId}/steps/{stepId}/resume/external?token=${RESUME_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d '{"severity":"high"}'
+        - lang: Console
+          source: |
+            POST kbn://api/workflows/executions/{executionId}/steps/{stepId}/resume/external?token={resumeToken}
+            Content-Type: application/json
+
+            {"severity":"high"}
+      x-state: Generally available; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns an HTML form for submitting external input to a paused waitForInput step. Does not resume the execution.
+      operationId: get-workflows-executions-executionid-steps-stepid-resume-external-form
+      parameters:
+        - description: Workflow execution ID
+          in: path
+          name: executionId
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+        - description: Workflow step execution ID
+          in: path
+          name: stepId
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+        - description: The resume token authenticating this request.
+          in: query
+          name: token
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+      responses:
+        '200':
+          content:
+            text/html:
+              examples:
+                externalResumeFormExample:
+                  description: Form page for external input submission
+                  value: <!DOCTYPE html><html><body><h1>Submit your response</h1><form method="POST"><button type="submit">Submit</button></form></body></html>
+              schema:
+                type: string
+          description: HTML form page for submitting external input to a paused waitForInput step
+      summary: Get the external input form for a paused workflow execution
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form?token=${RESUME_TOKEN}"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form?token={resumeToken}
       x-state: Generally available; added in 9.4.0
       x-metaTags:
         - content: Kibana
@@ -72546,7 +72194,9 @@ paths:
                           message: Approve change to production?
                         isTestRun: false
                         output:
-                          approved: true
+                          respondedBy: alice
+                          response:
+                            approved: true
                         scopeStack: []
                         spaceId: default
                         startedAt: '2025-11-20T12:00:02.000Z'
@@ -74814,6 +74464,35 @@ components:
           profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
           username: elastic
         version: WzM2LDFd
+    Cases_get_case_template_response:
+      summary: A case template.
+      value:
+        definition: {}
+        definitionString: 'fields: []'
+        deletedAt: null
+        isLatest: true
+        latestVersion: 1
+        name: My Template
+        owner: cases
+        templateId: 9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42
+        templateVersion: 1
+    Cases_get_case_templates_response:
+      summary: A paginated list of case templates.
+      value:
+        page: 1
+        perPage: 20
+        templates:
+          - definition: {}
+            definitionString: 'fields: []'
+            deletedAt: null
+            fieldSearchMatches: false
+            isLatest: true
+            latestVersion: 1
+            name: My Template
+            owner: cases
+            templateId: 9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42
+            templateVersion: 1
+        total: 1
     Cases_get_comment_response:
       summary: A single user comment retrieved from a case
       value:
@@ -74914,6 +74593,12 @@ components:
         error: Unauthorized
         message: Unable to authenticate with the provided credentials.
         statusCode: 401
+    Cases_response_404:
+      summary: The requested resource was not found.
+      value:
+        error: Not Found
+        message: Saved object [cases-template/9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42] not found
+        statusCode: 404
     Cases_set_case_configuration_request:
       summary: Set the closure type, custom fields, and default connector for Stack Management cases.
       value:
@@ -79263,6 +78948,70 @@ components:
         oneOf:
           - $ref: '#/components/schemas/Cases_string'
           - $ref: '#/components/schemas/Cases_string_array'
+    Cases_template_author:
+      description: Filters the returned templates by author username.
+      example: elastic
+      in: query
+      name: author
+      schema:
+        oneOf:
+          - $ref: '#/components/schemas/Cases_string'
+          - $ref: '#/components/schemas/Cases_string_array'
+    Cases_template_id:
+      description: The identifier for the template.
+      example: 9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42
+      in: path
+      name: template_id
+      required: true
+      schema:
+        maxLength: 36
+        type: string
+    Cases_template_is_enabled:
+      description: Filters the returned templates by their enabled state.
+      example: true
+      in: query
+      name: isEnabled
+      schema:
+        type: boolean
+    Cases_template_sort_field:
+      description: Determines which field is used to sort the results.
+      example: name
+      in: query
+      name: sortField
+      required: false
+      schema:
+        default: name
+        enum:
+          - templateId
+          - name
+          - templateVersion
+          - owner
+          - deletedAt
+          - author
+          - usageCount
+          - fieldCount
+          - lastUsedAt
+          - isDefault
+          - isLatest
+        type: string
+    Cases_template_tags:
+      description: Filters the returned templates by tags.
+      example: tag-1
+      in: query
+      name: tags
+      schema:
+        oneOf:
+          - $ref: '#/components/schemas/Cases_string'
+          - $ref: '#/components/schemas/Cases_string_array'
+    Cases_template_version:
+      description: The version number of the template to retrieve. If omitted, the latest version is returned.
+      example: 1
+      in: query
+      name: version
+      required: false
+      schema:
+        minimum: 1
+        type: integer
     Cases_to:
       description: |
         Returns only cases that were created before a specific date. The date must be specified as a KQL data range or date match expression.
@@ -81167,6 +80916,36 @@ components:
         - page
         - per_page
         - total
+    Cases_get_case_templates_response:
+      description: Response returned by the get all case templates API.
+      type: object
+      properties:
+        page:
+          description: The page number of the returned results.
+          type: integer
+        perPage:
+          description: The number of results per page.
+          type: integer
+        templates:
+          items:
+            allOf:
+              - $ref: '#/components/schemas/Cases_template_v2_response'
+              - type: object
+                properties:
+                  fieldSearchMatches:
+                    description: Whether the search query matched a field name in this template.
+                    type: boolean
+                required:
+                  - fieldSearchMatches
+          type: array
+        total:
+          description: The total number of templates matching the query.
+          type: integer
+      required:
+        - templates
+        - page
+        - perPage
+        - total
     Cases_owner:
       description: |
         The application that owns the cases: Stack Management, Observability, or Elastic Security.
@@ -81622,6 +81401,101 @@ components:
         type: string
       maxItems: 200
       type: array
+    Cases_template_v2_response:
+      description: A case template (v2).
+      type: object
+      properties:
+        author:
+          description: The username of the template author.
+          maxLength: 1000
+          type: string
+        definition:
+          description: The parsed template definition.
+        definitionString:
+          description: The raw YAML definition string.
+          maxLength: 30000
+          type: string
+        deletedAt:
+          description: The date the template was soft-deleted, or null if active.
+          format: date-time
+          nullable: true
+          type: string
+        description:
+          description: A human-readable description of the template.
+          maxLength: 30000
+          type: string
+        fieldCount:
+          description: The number of fields defined in the template.
+          type: integer
+        fieldNames:
+          description: Metadata about each field defined in the template.
+          items:
+            type: object
+            properties:
+              control:
+                maxLength: 50
+                type: string
+              label:
+                maxLength: 256
+                type: string
+              name:
+                maxLength: 256
+                type: string
+              type:
+                maxLength: 50
+                type: string
+            required:
+              - name
+              - label
+              - type
+              - control
+          type: array
+        isDefault:
+          description: Whether this is the default template for its owner.
+          type: boolean
+        isEnabled:
+          description: Whether the template is enabled.
+          type: boolean
+        isLatest:
+          description: Whether this is the latest version of the template.
+          type: boolean
+        lastUsedAt:
+          description: The date the template was last used to create a case.
+          format: date-time
+          type: string
+        latestVersion:
+          description: The latest version number of this template.
+          type: integer
+        name:
+          description: The display name of the template.
+          maxLength: 100
+          type: string
+        owner:
+          description: The owning solution (e.g. cases, observability, securitySolution).
+          maxLength: 50
+          type: string
+        tags:
+          $ref: '#/components/schemas/Cases_template_tags'
+        templateId:
+          description: The unique identifier of the template, shared across all versions.
+          maxLength: 36
+          type: string
+        templateVersion:
+          description: The version number of this template revision.
+          type: integer
+        usageCount:
+          description: The number of times this template has been used to create a case.
+          type: integer
+      required:
+        - templateId
+        - name
+        - owner
+        - definition
+        - definitionString
+        - templateVersion
+        - deletedAt
+        - isLatest
+        - latestVersion
     Cases_templates:
       items:
         type: object
@@ -88750,13 +88624,36 @@ components:
       description: Duration format between time units.
       properties:
         from:
-          description: Source time unit for conversion, for example `milliseconds`, `seconds`, `minutes`, `hours`, or `days`.
+          description: Source time unit of the raw field value, including fine-grained units (`ps`, `ns`, `us`) in addition to standard units. This describes how the stored data is encoded, not a query duration literal.
+          enum:
+            - ps
+            - ns
+            - us
+            - ms
+            - s
+            - min
+            - h
+            - d
+            - w
+            - mo
+            - 'y'
           type: string
         suffix:
           description: Suffix appended to the formatted value.
           type: string
         to:
-          description: Display time unit after conversion, for example `seconds`, `minutes`, `hours`, or `days`.
+          description: 'Display time unit: `auto` (precise), `auto-approximate`, or a fixed conversion unit.'
+          enum:
+            - auto
+            - auto-approximate
+            - ms
+            - s
+            - min
+            - h
+            - d
+            - w
+            - mo
+            - 'y'
           type: string
         type:
           enum:
@@ -89478,6 +89375,7 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_numericFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_byteFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_durationFormat'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyDurationFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_customFormat'
       description: Number display format for the dimension value.
       title: Format Type
@@ -94622,6 +94520,9 @@ components:
         description:
           description: A short description of the dashboard.
           type: string
+        esql_approximation:
+          description: When `true`, ES|QL visualizations that use `STATS` run with [approximate execution](https://www.elastic.co/docs/reference/query-languages/esql/esql-query-approximation) for faster, estimated results.
+          type: boolean
         filters:
           description: Filters applied across all panels, including pinned panels.
           items:
@@ -96838,6 +96739,29 @@ components:
         - palette
         - shift
       title: Legacy color by value (absolute)
+      type: object
+    Kibana_HTTP_APIs_legacyDurationFormat:
+      additionalProperties: false
+      description: Legacy duration format used when the `asCode.useGASchemas` feature flag is disabled. Accepts free-form unit strings (no enum validation) to preserve pre-GA behavior.
+      properties:
+        from:
+          description: Source time unit for conversion, for example `milliseconds`, `seconds`, `minutes`, `hours`, or `days`.
+          type: string
+        suffix:
+          description: Suffix appended to the formatted value.
+          type: string
+        to:
+          description: Display time unit after conversion, for example `seconds`, `minutes`, `hours`, or `days`.
+          type: string
+        type:
+          enum:
+            - duration
+          type: string
+      required:
+        - type
+        - from
+        - to
+      title: Duration Format (Legacy)
       type: object
     Kibana_HTTP_APIs_legacyMetricCountMetric:
       additionalProperties: false
@@ -100681,6 +100605,12 @@ components:
       additionalProperties: false
       description: Visual chart styling options
       properties:
+        density:
+          description: Density preset for the metric chart layout. Use `compact` for a compact layout, or `default` for increased padding, element spacing, and font size.
+          enum:
+            - compact
+            - default
+          type: string
         icon:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_metricIconConfig'
         primary:
@@ -105186,6 +105116,14 @@ components:
                     type: number
                   timeUnit:
                     type: string
+                  warningComparator:
+                    type: string
+                  warningThreshold:
+                    items:
+                      description: The threshold value that is used with the `warningComparator`. If the `warningComparator` is `between`, you must specify the boundary values.
+                      type: number
+                    maxItems: 2
+                    type: array
                 required:
                   - threshold
                   - comparator
@@ -110074,10 +110012,12 @@ components:
             properties:
               slo_id:
                 description: SLO ID
+                maxLength: 64
                 type: string
               slo_instance_id:
                 default: '*'
                 description: SLO instance ID
+                maxLength: 512
                 type: string
             required:
               - slo_id
@@ -110128,6 +110068,7 @@ components:
           type: array
         duration:
           description: Duration for the burn rate chart in the format [value][unit], e.g. 5m, 3h, or 6d
+          maxLength: 32
           type: string
         hide_border:
           type: boolean
@@ -110135,10 +110076,12 @@ components:
           type: boolean
         slo_id:
           description: The ID of the SLO to display the burn rate for
+          maxLength: 64
           type: string
         slo_instance_id:
           default: '*'
           description: ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).
+          maxLength: 512
           type: string
         title:
           type: string
@@ -110192,10 +110135,12 @@ components:
           type: boolean
         slo_id:
           description: The ID of the SLO to display the error budget for
+          maxLength: 64
           type: string
         slo_instance_id:
           default: '*'
           description: ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).
+          maxLength: 512
           type: string
         title:
           type: string
@@ -110268,10 +110213,12 @@ components:
               type: string
             groups:
               items:
+                maxLength: 256
                 type: string
               maxItems: 100
               type: array
             kql_query:
+              maxLength: 2048
               type: string
         hide_border:
           type: boolean
@@ -110503,13 +110450,16 @@ components:
           type: string
         remote_name:
           description: The name of the remote SLO
+          maxLength: 256
           type: string
         slo_id:
           description: The ID of the SLO
+          maxLength: 64
           type: string
         slo_instance_id:
           default: '*'
           description: ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).
+          maxLength: 512
           type: string
         title:
           type: string
@@ -115113,9 +115063,21 @@ components:
         namespace_customization_enabled_for:
           description: Namespaces for which namespace-level customization is enabled on this package.
           items:
+            maxLength: 100
             type: string
           maxItems: 100
           type: array
+        namespace_customization_settings:
+          additionalProperties:
+            additionalProperties: true
+            type: object
+            properties:
+              ilm_policy:
+                maxLength: 1024
+                minLength: 1
+                type: string
+          description: Per-namespace managed settings (for example, ILM policy) for this package. Keyed by namespace name.
+          type: object
       title: update_package_request
       type: object
     Kibana_HTTP_APIs_update_package_response:
@@ -123399,21 +123361,56 @@ components:
             successful_generations:
               description: The number of successful generations for the same connector id, for the current user
               type: number
+        conversation_id:
+          description: Identifier of the persisted Agent Builder conversation for skill-based alert retrieval (optional; present only when the skill retrieval mode ran)
+          type: string
         discoveries:
           description: The number of new Attack discovery alerts (max kibana.alert.rule.execution.metrics.alert_counts.new) for this generation
           type: number
+        duplicates_dropped_count:
+          description: The number of attack discoveries dropped as duplicates during the persist step
+          type: integer
         end:
           description: When generation ended (max event.end)
+          type: string
+        error_category:
+          description: Structured error category from server classification (optional; absent for successful generations)
           type: string
         execution_uuid:
           description: The unique identifier (kibana.alert.rule.execution.uuid) for the generation
           type: string
+        failed_workflow_id:
+          description: Workflow ID that caused the failure (optional; absent for successful generations)
+          type: string
+        generated_count:
+          description: The number of attack discoveries generated before deduplication and hallucination filtering
+          type: integer
+        hallucinations_filtered_count:
+          description: The number of attack discoveries filtered as hallucinations during the validation step
+          type: integer
         loading_message:
           description: Generation loading message (kibana.alert.rule.execution.status)
           type: string
+        persisted_count:
+          description: The number of attack discoveries successfully persisted after deduplication and hallucination filtering
+          type: integer
         reason:
           description: Reason for failed generations (event.reason)
           type: string
+        source_metadata:
+          description: Source metadata for scheduled generations (rule_id, rule_name, action_execution_uuid)
+          nullable: true
+          type: object
+          properties:
+            action_execution_uuid:
+              description: The action execution UUID from the alerting framework
+              type: string
+            rule_id:
+              description: The ID of the alerting rule that triggered this generation
+              type: string
+            rule_name:
+              description: The name of the alerting rule that triggered this generation
+              type: string
         start:
           description: When generation started (min event.start)
           type: string
@@ -123426,11 +123423,24 @@ components:
             - started
             - succeeded
           type: string
+        step_event_actions:
+          description: Synthesized per-step lifecycle markers (e.g. step-start, step-complete, step-fail) derived from raw event.action values. The array is ordered by step sequence (alert retrieval, generation, validation), with each step contributing 0-2 tokens that indicate its execution status.
+          items:
+            type: string
+          type: array
+        workflow_executions:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_WorkflowExecutionsTracking'
+          description: Workflow execution tracking for alert retrieval, generation, and validation workflows
+        workflow_id:
+          description: The workflow definition ID for deep linking
+          type: string
+        workflow_run_id:
+          description: The workflow execution ID for monitoring
+          type: string
       required:
         - connector_id
         - discoveries
         - execution_uuid
-        - loading_message
         - start
         - status
     Security_Attack_discovery_API_AttackDiscoveryGenerationConfig:
@@ -123641,6 +123651,43 @@ components:
           description: User name.
           example: John Doe
           type: string
+    Security_Attack_discovery_API_WorkflowExecutionReference:
+      type: object
+      properties:
+        workflowId:
+          description: The workflow definition ID
+          type: string
+        workflowName:
+          description: The human-readable workflow name (optional; used by the UI to display a label)
+          type: string
+        workflowRunId:
+          description: The workflow execution ID
+          type: string
+      required:
+        - workflowId
+        - workflowRunId
+    Security_Attack_discovery_API_WorkflowExecutionsTracking:
+      description: Workflow execution tracking for manual orchestration
+      type: object
+      properties:
+        alertRetrieval:
+          description: Alert retrieval workflow executions (one per workflow invoked)
+          items:
+            $ref: '#/components/schemas/Security_Attack_discovery_API_WorkflowExecutionReference'
+          nullable: true
+          type: array
+        gate:
+          description: Generation-phase gate (skill) executions, including any net-new alert re-fetch the skill triggers
+          items:
+            $ref: '#/components/schemas/Security_Attack_discovery_API_WorkflowExecutionReference'
+          nullable: true
+          type: array
+        generation:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_WorkflowExecutionReference'
+          nullable: true
+        validation:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_WorkflowExecutionReference'
+          nullable: true
     Security_Detections_API_AlertAssignees:
       type: object
       properties:
@@ -124471,6 +124518,12 @@ components:
           type: object
         reason:
           $ref: '#/components/schemas/Security_Detections_API_Reason'
+        runtime_fields:
+          additionalProperties:
+            $ref: '#/components/schemas/Security_Detections_API_RuntimeFieldType'
+          description: Optional map of field name to runtime field type. For each entry, the server defines a runtime field of the given type that reads its value from `_source[fieldName]` and attaches it to the underlying `_update_by_query` as `runtime_mappings`. Allows the `query` to reference non-ECS fields stored on the alert `_source` but not in the alerts index mapping — for example, runtime fields the rule's source index defined at the time the alerts were created. Limited to 100 entries per request; larger maps are rejected.
+          maxProperties: 100
+          type: object
         status:
           enum:
             - closed
@@ -128108,6 +128161,17 @@ components:
               $ref: '#/components/schemas/Security_Detections_API_RunScriptOsConfigValues'
       required:
         - command
+    Security_Detections_API_RuntimeFieldType:
+      description: The data type for the runtime field type. Determines how the field value is indexed and queried.
+      enum:
+        - keyword
+        - long
+        - double
+        - date
+        - ip
+        - boolean
+        - geo_point
+      type: string
     Security_Detections_API_SavedObjectResolveAliasPurpose:
       enum:
         - savedObjectConversion
@@ -128665,6 +128729,12 @@ components:
           type: string
         query:
           additionalProperties: true
+          type: object
+        runtime_fields:
+          additionalProperties:
+            $ref: '#/components/schemas/Security_Detections_API_RuntimeFieldType'
+          description: Optional map of field name to runtime field type. For each entry, a runtime field of the specified type is created reading its value from `_source[fieldName]` and included in the query as `runtime_mappings`. Use this to reference fields stored on the alert `_source` that are not part of the Elastic Common Schema (ECS) of the alerts index mapping, for example, custom fields that the rule's source index defined when the alerts were created.
+          maxProperties: 100
           type: object
         status:
           $ref: '#/components/schemas/Security_Detections_API_AlertStatusExceptClosed'
@@ -132557,39 +132627,6 @@ components:
           type: array
         - minLength: 1
           type: string
-    Security_Entity_Analytics_API_Asset:
-      additionalProperties: false
-      description: Asset metadata associated with the entity.
-      type: object
-      properties:
-        business_unit:
-          description: Business unit the asset belongs to.
-          type: string
-        criticality:
-          $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
-          description: The criticality level assigned to this asset.
-          nullable: true
-        environment:
-          description: Deployment environment (for example, production, staging).
-          type: string
-        id:
-          description: Unique identifier for the asset.
-          type: string
-        model:
-          description: Model name or number.
-          type: string
-        name:
-          description: Human-readable asset name.
-          type: string
-        owner:
-          description: The owner of the asset.
-          type: string
-        serial_number:
-          description: Serial number of the asset.
-          type: string
-        vendor:
-          description: Vendor or manufacturer.
-          type: string
     Security_Entity_Analytics_API_AssetCriticalityBulkUploadErrorItem:
       type: object
       properties:
@@ -132801,184 +132838,6 @@ components:
       required:
         - start
         - end
-    Security_Entity_Analytics_API_EngineComponentResource:
-      description: The type of Elasticsearch or Kibana resource backing an engine component.
-      enum:
-        - entity_engine
-        - entity_definition
-        - index
-        - data_stream
-        - component_template
-        - index_template
-        - ingest_pipeline
-        - enrich_policy
-        - task
-        - transform
-        - ilm_policy
-      type: string
-    Security_Entity_Analytics_API_EngineComponentStatus:
-      description: Status of an individual Elasticsearch or Kibana resource backing an engine.
-      type: object
-      properties:
-        errors:
-          description: Errors reported by this component, if any.
-          items:
-            type: object
-            properties:
-              message:
-                description: Detailed error message.
-                type: string
-              title:
-                description: Short error title.
-                type: string
-          type: array
-        health:
-          description: The health status of the component.
-          enum:
-            - green
-            - yellow
-            - red
-            - unavailable
-            - unknown
-          type: string
-        id:
-          description: Unique identifier for the component.
-          type: string
-        installed:
-          description: Whether the component is currently installed.
-          type: boolean
-        metadata:
-          $ref: '#/components/schemas/Security_Entity_Analytics_API_TransformStatsMetadata'
-        resource:
-          $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineComponentResource'
-      required:
-        - id
-        - installed
-        - resource
-    Security_Entity_Analytics_API_EngineDataviewUpdateResult:
-      description: The result of applying data view index changes to a single engine.
-      type: object
-      properties:
-        changes:
-          description: The changes applied to the engine.
-          type: object
-          properties:
-            indexPatterns:
-              description: The updated list of index patterns now used by the engine.
-              items:
-                type: string
-              type: array
-        type:
-          description: The entity type of the engine that was updated.
-          type: string
-      required:
-        - type
-    Security_Entity_Analytics_API_EngineDescriptor:
-      description: Describes a single entity engine, including its configuration and current status.
-      type: object
-      properties:
-        delay:
-          default: 1m
-          description: The delay before the transform processes new data, allowing late-arriving documents to be included.
-          example: 1m
-          pattern: '[smdh]$'
-          type: string
-        docsPerSecond:
-          description: Throttle value for the number of documents processed per second. Use -1 for no throttle.
-          type: integer
-        error:
-          description: Present when the engine status is `error`. Describes the failure.
-          type: object
-          properties:
-            action:
-              description: The lifecycle action that caused the error.
-              enum:
-                - init
-              type: string
-            message:
-              description: A human-readable error message.
-              type: string
-          required:
-            - message
-            - action
-        fieldHistoryLength:
-          description: The number of historical values retained per field.
-          example: 10
-          type: integer
-        filter:
-          description: An optional Kibana Query Language (KQL) filter applied to source documents before aggregation.
-          example: 'host.name: "my-host"'
-          type: string
-        frequency:
-          default: 1m
-          description: How often the transform runs.
-          example: 1m
-          pattern: '[smdh]$'
-          type: string
-        indexPattern:
-          $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
-        lookbackPeriod:
-          default: 24h
-          description: How far back the transform looks when calculating aggregations.
-          example: 24h
-          pattern: '[smdh]$'
-          type: string
-        status:
-          $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
-        timeout:
-          default: 180s
-          description: The timeout for initializing the aggregating transform.
-          example: 180s
-          pattern: '[smdh]$'
-          type: string
-        timestampField:
-          description: The field used as the timestamp for source documents.
-          example: '@timestamp'
-          type: string
-        type:
-          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
-      required:
-        - type
-        - indexPattern
-        - status
-        - fieldHistoryLength
-    Security_Entity_Analytics_API_EngineMetadata:
-      additionalProperties: false
-      description: Internal metadata attached to an entity by the engine that produced it.
-      type: object
-      properties:
-        Type:
-          description: The engine type that produced this entity record.
-          type: string
-      required:
-        - Type
-    Security_Entity_Analytics_API_EngineStatus:
-      description: The current operational status of an entity engine.
-      enum:
-        - installing
-        - started
-        - stopped
-        - updating
-        - error
-      type: string
-    Security_Entity_Analytics_API_EntitiesContainer:
-      description: A collection of entities to upsert in bulk.
-      type: object
-      properties:
-        entities:
-          description: The entities to create or update.
-          items:
-            $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityContainer'
-          type: array
-      required:
-        - entities
-    Security_Entity_Analytics_API_Entity:
-      description: An entity record from the Entity Store. The `entity` namespace is a root-level field in the latest index, unlike source logs where it is nested under `host`, `user`, or `service`.
-      oneOf:
-        - $ref: '#/components/schemas/Security_Entity_Analytics_API_UserEntity'
-        - $ref: '#/components/schemas/Security_Entity_Analytics_API_HostEntity'
-        - $ref: '#/components/schemas/Security_Entity_Analytics_API_ServiceEntity'
-        - $ref: '#/components/schemas/Security_Entity_Analytics_API_GenericEntity'
     Security_Entity_Analytics_API_EntityAnalyticsPrivileges:
       type: object
       properties:
@@ -133013,168 +132872,6 @@ components:
       required:
         - has_all_required
         - privileges
-    Security_Entity_Analytics_API_EntityContainer:
-      description: A wrapper that pairs an entity type with the entity record to upsert.
-      type: object
-      properties:
-        record:
-          $ref: '#/components/schemas/Security_Entity_Analytics_API_Entity'
-          description: The entity record to create or update.
-        type:
-          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
-          description: The entity type of the record.
-      required:
-        - type
-        - record
-    Security_Entity_Analytics_API_EntityField:
-      additionalProperties: false
-      description: Core entity fields shared across all entity types. The `entity` namespace is a root-level field in the Entity Store latest index.
-      type: object
-      properties:
-        attributes:
-          additionalProperties: false
-          description: Boolean flags describing characteristics of the entity.
-          type: object
-          properties:
-            asset:
-              description: Whether the entity is classified as an asset.
-              type: boolean
-            managed:
-              description: Whether the entity is managed (for example, via a directory service).
-              type: boolean
-            mfa_enabled:
-              description: Whether multi-factor authentication is enabled for the entity.
-              type: boolean
-            privileged:
-              description: Whether the entity has elevated privileges.
-              type: boolean
-        behaviors:
-          additionalProperties: false
-          description: Boolean flags indicating observed behavioral signals.
-          type: object
-          properties:
-            brute_force_victim:
-              description: Whether the entity has been targeted by brute-force attacks.
-              type: boolean
-            new_country_login:
-              description: Whether the entity has logged in from a new country.
-              type: boolean
-            used_usb_device:
-              description: Whether the entity has used a USB device.
-              type: boolean
-        EngineMetadata:
-          $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
-        id:
-          description: Unique identifier for this entity.
-          example: arn:aws:iam::123456789012:user/jane.doe
-          type: string
-        lifecycle:
-          additionalProperties: false
-          description: Timestamps tracking the entity lifecycle.
-          type: object
-          properties:
-            first_seen:
-              description: When the entity was first observed.
-              format: date-time
-              type: string
-            last_activity:
-              description: When the entity last generated activity.
-              format: date-time
-              type: string
-            last_seen:
-              description: When the entity was last observed.
-              format: date-time
-              type: string
-        name:
-          description: Human-readable name of the entity.
-          example: jane.doe
-          type: string
-        relationships:
-          additionalProperties: false
-          description: Connections between this entity and other entities.
-          type: object
-          properties:
-            accessed_frequently_by:
-              description: Entity IDs that frequently access this entity.
-              items:
-                type: string
-              type: array
-            accesses_frequently:
-              description: Entity IDs this entity accesses frequently.
-              items:
-                type: string
-              type: array
-            accesses_infrequently:
-              description: Entity IDs this entity accesses infrequently.
-              items:
-                type: string
-              type: array
-            communicates_with:
-              description: Entity IDs this entity communicates with.
-              items:
-                type: string
-              type: array
-            dependent_of:
-              description: Entity IDs that depend on this entity.
-              items:
-                type: string
-              type: array
-            depends_on:
-              description: Entity IDs this entity depends on.
-              items:
-                type: string
-              type: array
-            owned_by:
-              description: Entity IDs that own this entity.
-              items:
-                type: string
-              type: array
-            owns:
-              description: Entity IDs owned by this entity.
-              items:
-                type: string
-              type: array
-            supervised_by:
-              description: Entity IDs that supervise this entity.
-              items:
-                type: string
-              type: array
-            supervises:
-              description: Entity IDs supervised by this entity.
-              items:
-                type: string
-              type: array
-        risk:
-          additionalProperties: false
-          description: Risk scoring information for the entity.
-          type: object
-          properties:
-            calculated_level:
-              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityRiskLevels'
-              description: Lexical description of the entity's risk.
-              example: Critical
-            calculated_score:
-              description: The raw numeric value of the given entity's risk score.
-              format: double
-              type: number
-            calculated_score_norm:
-              description: The normalized numeric value of the given entity's risk score. Useful for comparing with other entities.
-              format: double
-              maximum: 100
-              minimum: 0
-              type: number
-        source:
-          description: The source that produced this entity record.
-          type: string
-        sub_type:
-          description: Optional sub-type classification for the entity.
-          type: string
-        type:
-          description: The entity type.
-          example: user
-          type: string
-      required:
-        - id
     Security_Entity_Analytics_API_EntityRiskLevels:
       enum:
         - Unknown
@@ -133183,127 +132880,11 @@ components:
         - High
         - Critical
       type: string
-    Security_Entity_Analytics_API_EntityRiskScoreRecord:
-      type: object
-      properties:
-        '@timestamp':
-          description: The time at which the risk score was calculated.
-          example: '2017-07-21T17:32:28Z'
-          format: date-time
-          type: string
-        calculated_level:
-          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityRiskLevels'
-          description: Lexical description of the entity's risk.
-          example: Critical
-        calculated_score:
-          description: The raw numeric value of the given entity's risk score.
-          format: double
-          type: number
-        calculated_score_norm:
-          description: The normalized numeric value of the given entity's risk score. Useful for comparing with other entities.
-          format: double
-          maximum: 100
-          minimum: 0
-          type: number
-        calculation_run_id:
-          description: Unique identifier for the scoring run that produced this document.
-          type: string
-        category_1_count:
-          description: The number of risk input documents that contributed to the Category 1 score (`category_1_score`).
-          type: integer
-        category_1_score:
-          description: The contribution of Category 1 to the overall risk score (`calculated_score`). Category 1 contains Detection Engine Alerts.
-          format: double
-          type: number
-        category_2_count:
-          type: integer
-        category_2_score:
-          format: double
-          type: number
-        criticality_level:
-          $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
-        criticality_modifier:
-          format: double
-          type: number
-        id_field:
-          description: The identifier field defining this risk score. Coupled with `id_value`, uniquely identifies the entity being scored.
-          example: host.name
-          type: string
-        id_value:
-          description: The identifier value defining this risk score. Coupled with `id_field`, uniquely identifies the entity being scored.
-          example: example.host
-          type: string
-        inputs:
-          description: A list of the highest-risk documents contributing to this risk score. Useful for investigative purposes.
-          items:
-            $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskScoreInput'
-          type: array
-        modifiers:
-          description: A list of modifiers that were applied to the risk score calculation.
-          items:
-            type: object
-            properties:
-              contribution:
-                format: double
-                type: number
-              metadata:
-                additionalProperties: true
-                type: object
-              modifier_value:
-                format: double
-                type: number
-              subtype:
-                type: string
-              type:
-                type: string
-            required:
-              - type
-              - contribution
-          type: array
-        notes:
-          items:
-            type: string
-          type: array
-        related_entities:
-          items:
-            type: object
-            properties:
-              entity_id:
-                type: string
-              relationship_type:
-                type: string
-          type: array
-        score_type:
-          description: Distinguishes base, propagated, and resolution scores.
-          enum:
-            - base
-            - propagated
-            - resolution
-          type: string
-      required:
-        - '@timestamp'
-        - id_field
-        - id_value
-        - calculated_level
-        - calculated_score
-        - calculated_score_norm
-        - category_1_score
-        - category_1_count
-        - inputs
-        - notes
     Security_Entity_Analytics_API_EntitySourceType:
       enum:
         - index
         - entity_analytics_integration
         - store
-      type: string
-    Security_Entity_Analytics_API_EntityType:
-      description: The type of entity.
-      enum:
-        - user
-        - host
-        - service
-        - generic
       type: string
     Security_Entity_Analytics_API_Filter:
       type: object
@@ -133314,122 +132895,6 @@ components:
               type: string
             - additionalProperties: false
               type: object
-    Security_Entity_Analytics_API_GenericEntity:
-      additionalProperties: false
-      description: A generic entity record. Maps only the `entity` and `asset` namespaces. Add additional field mappings here as needed.
-      type: object
-      properties:
-        '@timestamp':
-          description: The time the entity record was last updated.
-          format: date-time
-          type: string
-        asset:
-          $ref: '#/components/schemas/Security_Entity_Analytics_API_Asset'
-          additionalProperties: false
-        entity:
-          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityField'
-      required:
-        - entity
-    Security_Entity_Analytics_API_HostEntity:
-      additionalProperties: false
-      description: An entity record representing a host, stored in the Entity Store latest index.
-      type: object
-      properties:
-        '@timestamp':
-          description: The time the entity record was last updated.
-          format: date-time
-          type: string
-        asset:
-          $ref: '#/components/schemas/Security_Entity_Analytics_API_Asset'
-          additionalProperties: false
-        entity:
-          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityField'
-        event:
-          additionalProperties: false
-          type: object
-          properties:
-            ingested:
-              description: When the event was ingested into Elasticsearch.
-              format: date-time
-              type: string
-        host:
-          additionalProperties: false
-          description: Elastic Common Schema (ECS) host fields collected on the entity.
-          type: object
-          properties:
-            architecture:
-              description: Observed CPU architectures.
-              items:
-                type: string
-              type: array
-            domain:
-              description: Observed host domains.
-              items:
-                type: string
-              type: array
-            entity:
-              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityField'
-            hostname:
-              description: Observed hostnames.
-              items:
-                type: string
-              type: array
-            id:
-              description: Observed host IDs.
-              items:
-                type: string
-              type: array
-            ip:
-              description: Observed IP addresses.
-              items:
-                type: string
-              type: array
-            mac:
-              description: Observed MAC addresses.
-              items:
-                type: string
-              type: array
-            name:
-              description: Primary host name.
-              type: string
-            os:
-              additionalProperties: false
-              description: Elastic Common Schema (ECS) host.os fields collected on the entity latest index.
-              type: object
-              properties:
-                family:
-                  type: string
-                full:
-                  type: string
-                kernel:
-                  type: string
-                name:
-                  oneOf:
-                    - type: string
-                    - items:
-                        type: string
-                      type: array
-                platform:
-                  type: string
-                type:
-                  oneOf:
-                    - type: string
-                    - items:
-                        type: string
-                      type: array
-                version:
-                  type: string
-            risk:
-              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityRiskScoreRecord'
-            type:
-              description: Observed host types.
-              items:
-                type: string
-              type: array
-          required:
-            - name
-      required:
-        - entity
     Security_Entity_Analytics_API_IdentifierType:
       enum:
         - host
@@ -133444,27 +132909,6 @@ components:
         - service.name
         - entity.id
       type: string
-    Security_Entity_Analytics_API_IndexPattern:
-      description: An additional Elasticsearch index pattern to include as a source for entity data. Merged with the default data view indices when the engine runs.
-      example: logs-*
-      type: string
-    Security_Entity_Analytics_API_InspectQuery:
-      description: Debug information about the Elasticsearch query executed.
-      type: object
-      properties:
-        dsl:
-          description: Elasticsearch query DSL that was executed.
-          items:
-            type: string
-          type: array
-        response:
-          description: Raw Elasticsearch responses.
-          items:
-            type: string
-          type: array
-      required:
-        - dsl
-        - response
     Security_Entity_Analytics_API_Integrations:
       type: object
       properties:
@@ -133484,11 +132928,6 @@ components:
           description: Index to read latest sync markers from
           maxLength: 1000
           type: string
-    Security_Entity_Analytics_API_Interval:
-      description: Interval in which enrich policy runs. For example, `"1h"` means the rule runs every hour. Must be less than or equal to half the duration of the lookback period,
-      example: 1h
-      pattern: ^[1-9]\d*[smh]$
-      type: string
     Security_Entity_Analytics_API_Matcher:
       type: object
       properties:
@@ -133514,8 +132953,6 @@ components:
       required:
         - fields
         - values
-    Security_Entity_Analytics_API_Metadata:
-      $ref: '#/components/schemas/Security_Entity_Analytics_API_TransformStatsMetadata'
     Security_Entity_Analytics_API_MonitoredUserDoc:
       allOf:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserUpdateDoc'
@@ -133723,6 +133160,23 @@ components:
         category_1_score:
           format: double
           type: number
+        category_2_count:
+          type: integer
+        category_2_score:
+          format: double
+          type: number
+        criticality_level:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
+        inputs:
+          description: Present only when requested with `include_contributions=true`.
+          items:
+            $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskScoreInput'
+          type: array
+        modifiers:
+          description: Present only when requested with `include_contributions=true`.
+          items:
+            $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskScoreModifier'
+          type: array
         score_type:
           enum:
             - base
@@ -133790,53 +133244,28 @@ components:
         - index
         - description
         - category
-    Security_Entity_Analytics_API_ServiceEntity:
-      additionalProperties: false
-      description: An entity record representing a service, stored in the Entity Store latest index.
+    Security_Entity_Analytics_API_RiskScoreModifier:
+      description: A modifier that was applied to the risk score calculation.
       type: object
       properties:
-        '@timestamp':
-          description: The time the entity record was last updated.
-          format: date-time
+        contribution:
+          format: double
+          type: number
+        metadata:
+          additionalProperties: true
+          type: object
+        modifier_value:
+          format: double
+          type: number
+        subtype:
+          maxLength: 100
           type: string
-        asset:
-          $ref: '#/components/schemas/Security_Entity_Analytics_API_Asset'
-          additionalProperties: false
-        entity:
-          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityField'
-        event:
-          additionalProperties: false
-          type: object
-          properties:
-            ingested:
-              description: When the event was ingested into Elasticsearch.
-              format: date-time
-              type: string
-        service:
-          additionalProperties: false
-          description: Elastic Common Schema (ECS) service fields collected on the entity.
-          type: object
-          properties:
-            entity:
-              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityField'
-            name:
-              description: Primary service name.
-              type: string
-            risk:
-              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityRiskScoreRecord'
-          required:
-            - name
+        type:
+          maxLength: 100
+          type: string
       required:
-        - entity
-    Security_Entity_Analytics_API_StoreStatus:
-      description: The overall operational status of the Entity Store.
-      enum:
-        - not_installed
-        - installing
-        - running
-        - stopped
-        - error
-      type: string
+        - type
+        - contribution
     Security_Entity_Analytics_API_TaskManagerUnavailableResponse:
       description: Task manager is unavailable
       type: object
@@ -133849,77 +133278,6 @@ components:
       required:
         - status_code
         - message
-    Security_Entity_Analytics_API_TransformStatsMetadata:
-      description: Statistics from the underlying Elasticsearch transform.
-      type: object
-      properties:
-        delete_time_in_ms:
-          description: Total time spent deleting documents, in milliseconds.
-          type: integer
-        documents_deleted:
-          description: Total number of documents deleted from the destination index.
-          type: integer
-        documents_indexed:
-          description: Total number of documents written to the destination index.
-          type: integer
-        documents_processed:
-          description: Total number of source documents processed.
-          type: integer
-        exponential_avg_checkpoint_duration_ms:
-          description: Exponential moving average of checkpoint duration, in milliseconds.
-          type: integer
-        exponential_avg_documents_indexed:
-          description: Exponential moving average of documents indexed per checkpoint.
-          type: integer
-        exponential_avg_documents_processed:
-          description: Exponential moving average of documents processed per checkpoint.
-          type: integer
-        index_failures:
-          description: Total number of failed index operations.
-          type: integer
-        index_time_in_ms:
-          description: Total time spent indexing documents, in milliseconds.
-          type: integer
-        index_total:
-          description: Total number of index operations.
-          type: integer
-        pages_processed:
-          description: Number of composite aggregation pages processed.
-          type: integer
-        processing_time_in_ms:
-          description: Total time spent processing results, in milliseconds.
-          type: integer
-        processing_total:
-          description: Total number of processing operations.
-          type: integer
-        search_failures:
-          description: Total number of failed search operations.
-          type: integer
-        search_time_in_ms:
-          description: Total time spent on search queries, in milliseconds.
-          type: integer
-        search_total:
-          description: Total number of search operations.
-          type: integer
-        trigger_count:
-          description: Number of times the transform has been triggered.
-          type: integer
-      required:
-        - pages_processed
-        - documents_processed
-        - documents_indexed
-        - trigger_count
-        - index_time_in_ms
-        - index_total
-        - index_failures
-        - search_time_in_ms
-        - search_total
-        - search_failures
-        - processing_time_in_ms
-        - processing_total
-        - exponential_avg_checkpoint_duration_ms
-        - exponential_avg_documents_indexed
-        - exponential_avg_documents_processed
     Security_Entity_Analytics_API_UpdateableMonitoringEntitySourceProperties:
       type: object
       properties:
@@ -133955,73 +133313,6 @@ components:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_DateRange'
         type:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EntitySourceType'
-    Security_Entity_Analytics_API_UserEntity:
-      additionalProperties: false
-      description: An entity record representing a user, stored in the Entity Store latest index.
-      type: object
-      properties:
-        '@timestamp':
-          description: The time the entity record was last updated.
-          format: date-time
-          type: string
-        asset:
-          $ref: '#/components/schemas/Security_Entity_Analytics_API_Asset'
-          additionalProperties: false
-        entity:
-          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityField'
-        event:
-          additionalProperties: false
-          type: object
-          properties:
-            ingested:
-              description: When the event was ingested into Elasticsearch.
-              format: date-time
-              type: string
-        user:
-          additionalProperties: false
-          description: Elastic Common Schema (ECS) user fields collected on the entity.
-          type: object
-          properties:
-            domain:
-              description: Observed user domains.
-              items:
-                type: string
-              type: array
-            email:
-              description: Observed email addresses.
-              items:
-                type: string
-              type: array
-            full_name:
-              description: Observed full names of the user.
-              items:
-                type: string
-              type: array
-            hash:
-              description: Observed user hashes.
-              items:
-                type: string
-              type: array
-            id:
-              description: Observed user IDs.
-              items:
-                type: string
-              type: array
-            name:
-              description: Primary user name.
-              type: string
-            risk:
-              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityRiskScoreRecord'
-              additionalProperties: false
-            roles:
-              description: Observed roles assigned to the user.
-              items:
-                type: string
-              type: array
-          required:
-            - name
-      required:
-        - entity
     Security_Entity_Analytics_API_UserName:
       type: object
       properties:
@@ -140927,6 +140218,11 @@ components:
         - from
       type: object
       properties:
+        allowHtml:
+          description: |
+            When `true`, the connector can send emails with HTML-formatted content in the body. Defaults to `false`. This option is unavailable when `service` is `elastic_cloud`.
+          default: false
+          type: boolean
         clientId:
           description: |
             The client identifier, which is a part of OAuth 2.0 client credentials authentication, in GUID format. If `service` is `exchange_server`, this property is required.

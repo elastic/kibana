@@ -190,6 +190,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   inference: InferenceServerStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   savedObjectsClient: SavedObjectsClientContract;
+  security: SecurityPluginStart;
   telemetry: AnalyticsServiceSetup;
   checkPrivileges: () => CheckPrivileges;
   /**
