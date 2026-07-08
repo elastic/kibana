@@ -21,10 +21,9 @@ export interface FieldChangeFieldSelectorProps {
 /**
  * Searchable dropdown used by the `field_change` snooze condition. Options are
  * scoped to the alert document's leaf-level scalar fields (supplied by the
- * caller, typically via `useFieldChangeDescriptor`/`useDataConditionTypes`),
- * preventing users from entering unsupported nested/array paths (see issue
- * #275054). This component is purely presentational — data fetching lives in the
- * hooks that build the descriptor.
+ * caller via the snooze component's `fieldOptions` prop), preventing users from
+ * entering unsupported nested/array paths (see issue #275054). This component is
+ * purely presentational — the package never fetches; consumers do.
  */
 export const FieldChangeFieldSelector = ({
   entry,

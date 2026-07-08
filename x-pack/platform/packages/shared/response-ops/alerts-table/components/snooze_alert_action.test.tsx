@@ -32,9 +32,12 @@ jest.mock('../hooks/use_alert_snoozed_state');
 const mockSnoozeAlert = jest.fn().mockResolvedValue(true);
 const mockUnsnoozeAlert = jest.fn().mockResolvedValue(true);
 
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alert_field_names', () => ({
+  useAlertFieldNames: () => ({ fieldNames: [], isLoading: false }),
+}));
+
 jest.mock('@kbn/response-ops-alert-snooze', () => ({
   useAlertSnooze: () => ({ snoozeAlert: mockSnoozeAlert, unsnoozeAlert: mockUnsnoozeAlert }),
-  useDataConditionTypes: () => [],
   AlertSnoozePanelInline: ({
     onApply,
     onBack,

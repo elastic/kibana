@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
-import { toLeafScalarFieldOptions } from './alert_field_options';
+import { toLeafScalarFieldNames } from './to_leaf_scalar_field_names';
 
 const field = (overrides: Partial<FieldDescriptor> & { name: string }): FieldDescriptor => ({
   aggregatable: true,
@@ -17,31 +19,28 @@ const field = (overrides: Partial<FieldDescriptor> & { name: string }): FieldDes
   ...overrides,
 });
 
-describe('toLeafScalarFieldOptions', () => {
-  it('maps scalar leaf fields to { label, value } options', () => {
-    const options = toLeafScalarFieldOptions([
+describe('toLeafScalarFieldNames', () => {
+  it('returns scalar leaf field names', () => {
+    const names = toLeafScalarFieldNames([
       field({ name: 'kibana.alert.status', type: 'keyword' }),
       field({ name: 'kibana.alert.start', type: 'date' }),
     ]);
 
-    expect(options).toEqual([
-      { label: 'kibana.alert.start', value: 'kibana.alert.start' },
-      { label: 'kibana.alert.status', value: 'kibana.alert.status' },
-    ]);
+    expect(names).toEqual(['kibana.alert.start', 'kibana.alert.status']);
   });
 
   it('excludes object and nested container fields', () => {
-    const options = toLeafScalarFieldOptions([
+    const names = toLeafScalarFieldNames([
       field({ name: 'kibana.alert.rule.parameters', type: 'object' }),
       field({ name: 'kibana.alert.rule.threshold', type: 'nested' }),
       field({ name: 'kibana.alert.status', type: 'keyword' }),
     ]);
 
-    expect(options).toEqual([{ label: 'kibana.alert.status', value: 'kibana.alert.status' }]);
+    expect(names).toEqual(['kibana.alert.status']);
   });
 
   it('excludes leaves inside nested objects', () => {
-    const options = toLeafScalarFieldOptions([
+    const names = toLeafScalarFieldNames([
       field({
         name: 'kibana.alert.rule.threshold.value',
         type: 'long',
@@ -50,34 +49,34 @@ describe('toLeafScalarFieldOptions', () => {
       field({ name: 'kibana.alert.status', type: 'keyword' }),
     ]);
 
-    expect(options).toEqual([{ label: 'kibana.alert.status', value: 'kibana.alert.status' }]);
+    expect(names).toEqual(['kibana.alert.status']);
   });
 
   it('de-duplicates fields by name', () => {
-    const options = toLeafScalarFieldOptions([
+    const names = toLeafScalarFieldNames([
       field({ name: 'host.name', type: 'keyword' }),
       field({ name: 'host.name', type: 'keyword' }),
     ]);
 
-    expect(options).toEqual([{ label: 'host.name', value: 'host.name' }]);
+    expect(names).toEqual(['host.name']);
   });
 
-  it('sorts options alphabetically', () => {
-    const options = toLeafScalarFieldOptions([
+  it('sorts names alphabetically', () => {
+    const names = toLeafScalarFieldNames([
       field({ name: 'zeta' }),
       field({ name: 'alpha' }),
       field({ name: 'mu' }),
     ]);
 
-    expect(options.map((o) => o.value)).toEqual(['alpha', 'mu', 'zeta']);
+    expect(names).toEqual(['alpha', 'mu', 'zeta']);
   });
 
   it('ignores fields without a name', () => {
-    const options = toLeafScalarFieldOptions([
+    const names = toLeafScalarFieldNames([
       field({ name: '' }),
       field({ name: 'host.name', type: 'keyword' }),
     ]);
 
-    expect(options).toEqual([{ label: 'host.name', value: 'host.name' }]);
+    expect(names).toEqual(['host.name']);
   });
 });

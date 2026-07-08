@@ -7,16 +7,11 @@
 
 import React, { useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
+import type { HttpStart } from '@kbn/core-http-browser';
 import { ALERT_RULE_TYPE_ID, ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
-import {
-  AlertSnoozePanelInline,
-  useAlertSnooze,
-  useDataConditionTypes,
-} from '@kbn/response-ops-alert-snooze';
-import type {
-  AlertSnoozePayload,
-  UseDataConditionTypesParams,
-} from '@kbn/response-ops-alert-snooze';
+import { AlertSnoozePanelInline, useAlertSnooze } from '@kbn/response-ops-alert-snooze';
+import type { AlertSnoozePayload } from '@kbn/response-ops-alert-snooze';
+import { useAlertFieldNames } from '@kbn/alerts-ui-shared/src/common/hooks/use_alert_field_names';
 import type { AdditionalContext, AlertActionsProps } from '../types';
 import { UNSNOOZE, SNOOZE } from '../translations';
 import { useAlertMutedState } from '../hooks/use_alert_muted_state';
@@ -26,26 +21,30 @@ import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import { useExpandableContextMenuPanel } from '../contexts/expandable_context_menu_panel_context';
 
 /**
- * Snooze form rendered inline inside the actions popover. The alert-field
- * options are fetched here (not by the parent) so that when the panel is opened
- * via `openPanel` — which snapshots its content — the dropdown still reflects
- * fields as they finish loading.
+ * Snooze form rendered inline inside the actions popover. The alert fields are
+ * fetched here (not by the parent) so that when the panel is opened via
+ * `openPanel` — which snapshots its content — the `field_change` dropdown still
+ * reflects fields as they finish loading. The `alert-snooze` package stays
+ * data-agnostic; the consumer owns fetching and passes field names down.
  */
 const SnoozeInlineForm = ({
   http,
   ruleTypeIds,
   onApply,
   onBack,
-}: UseDataConditionTypesParams & {
+}: {
+  http: HttpStart;
+  ruleTypeIds: string[];
   onApply: (payload: AlertSnoozePayload) => void;
   onBack: () => void;
 }) => {
-  const dataConditionTypes = useDataConditionTypes({ http, ruleTypeIds });
+  const { fieldNames, isLoading } = useAlertFieldNames({ http, ruleTypeIds });
   return (
     <AlertSnoozePanelInline
       onApply={onApply}
       onBack={onBack}
-      dataConditionTypes={dataConditionTypes}
+      fieldOptions={fieldNames}
+      isLoadingFields={isLoading}
     />
   );
 };

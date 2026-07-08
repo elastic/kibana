@@ -6,13 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSelect,
-  type EuiComboBoxOptionOption,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { ALERT_SEVERITY_VALUES } from '@kbn/rule-data-utils';
 import {
   DataConditionType,
@@ -53,8 +47,8 @@ const SEVERITY_OPTIONS = ALERT_SEVERITY_VALUES.map((value) => ({
 }));
 
 export interface CreateFieldChangeDescriptorParams {
-  /** Leaf-level scalar alert fields offered in the field dropdown. */
-  options?: Array<EuiComboBoxOptionOption<string>>;
+  /** Leaf-level scalar alert field names offered in the field dropdown. */
+  fields?: string[];
   isLoading?: boolean;
 }
 
@@ -64,38 +58,38 @@ export interface CreateFieldChangeDescriptorParams {
  * available and not a singleton — users can stack several `field_change` rows
  * for different fields.
  *
- * Field options are injected here. Callers that have fetched options — via
- * `useFieldChangeDescriptor`/`useDataConditionTypes` —
- * pass them in.
+ * The selectable field names are injected here.
  */
 export const createFieldChangeDescriptor = ({
-  options = [],
+  fields = [],
   isLoading = false,
-}: CreateFieldChangeDescriptorParams = {}): DataConditionTypeDescriptor => ({
-  id: DataConditionType.FIELD_CHANGE,
-  label: i18n.CONDITION_TYPE_FIELD_CHANGE,
-  isComplete: (entry) => !!entry.field,
-  renderInput: (entry, onChange) => (
-    <FieldChangeFieldSelector
-      entry={entry}
-      onChange={onChange}
-      options={options}
-      isLoading={isLoading}
-    />
-  ),
-  renderConfirmedSummary: (entry) => (
-    <EuiBadge color="hollow" title={entry.field}>
-      {truncateMiddle(entry.field)}
-    </EuiBadge>
-  ),
-  getPreviewText: (entry) => i18n.getPreviewFieldChange(truncateMiddle(entry.field)),
-  serialize: (entry) => ({
-    type: DataConditionType.FIELD_CHANGE,
-    field: entry.field,
-  }),
-});
+}: CreateFieldChangeDescriptorParams = {}): DataConditionTypeDescriptor => {
+  const options = fields.map((name) => ({ label: name, value: name }));
 
-export const fieldChangeDescriptor: DataConditionTypeDescriptor = createFieldChangeDescriptor();
+  return {
+    id: DataConditionType.FIELD_CHANGE,
+    label: i18n.CONDITION_TYPE_FIELD_CHANGE,
+    isComplete: (entry) => !!entry.field,
+    renderInput: (entry, onChange) => (
+      <FieldChangeFieldSelector
+        entry={entry}
+        onChange={onChange}
+        options={options}
+        isLoading={isLoading}
+      />
+    ),
+    renderConfirmedSummary: (entry) => (
+      <EuiBadge color="hollow" title={entry.field}>
+        {truncateMiddle(entry.field)}
+      </EuiBadge>
+    ),
+    getPreviewText: (entry) => i18n.getPreviewFieldChange(truncateMiddle(entry.field)),
+    serialize: (entry) => ({
+      type: DataConditionType.FIELD_CHANGE,
+      field: entry.field,
+    }),
+  };
+};
 
 /**
  * Built-in descriptor: matches when an alert's severity changes (any
@@ -164,10 +158,23 @@ export const severityEqualsDescriptor: DataConditionTypeDescriptor = {
 };
 
 /**
- * Default descriptor list shipped with the package.
+ * Builds the default descriptor list shipped with the package, wiring the
+ * `field_change` dropdown to the given (already-fetched) alert field names. The
+ * package itself never fetches — consumers pass field names via the snooze
+ * component's `fieldOptions` prop.
  */
-export const DEFAULT_DATA_CONDITION_TYPES: readonly DataConditionTypeDescriptor[] = [
-  fieldChangeDescriptor,
+export const buildDataConditionTypes = ({
+  fields = [],
+  isLoading = false,
+}: CreateFieldChangeDescriptorParams = {}): readonly DataConditionTypeDescriptor[] => [
+  createFieldChangeDescriptor({ fields, isLoading }),
   severityChangeDescriptor,
   severityEqualsDescriptor,
 ];
+
+/**
+ * Default descriptor list with an empty `field_change` dropdown, used as a
+ * fallback when no field names are supplied.
+ */
+export const DEFAULT_DATA_CONDITION_TYPES: readonly DataConditionTypeDescriptor[] =
+  buildDataConditionTypes();

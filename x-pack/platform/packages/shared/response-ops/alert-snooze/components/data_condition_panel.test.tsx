@@ -23,10 +23,12 @@ import { DataConditionPanel } from './data_condition_panel';
 import type { DataConditionEntry, DataConditionTypeDescriptor } from './types';
 import { DataConditionType } from './types';
 import {
-  fieldChangeDescriptor,
+  createFieldChangeDescriptor,
   severityChangeDescriptor,
   severityEqualsDescriptor,
 } from './built_in_data_conditions';
+
+const fieldChangeDescriptor = createFieldChangeDescriptor();
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>

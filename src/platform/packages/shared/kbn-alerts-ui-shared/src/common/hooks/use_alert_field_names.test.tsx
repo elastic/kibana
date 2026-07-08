@@ -1,26 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { renderHook } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { useFetchAlertsFieldsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_fields_query';
-import { useAlertFieldOptions } from './use_alert_field_options';
+import { useFetchAlertsFieldsQuery } from './use_fetch_alerts_fields_query';
+import { useAlertFieldNames } from './use_alert_field_names';
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_fields_query');
+jest.mock('./use_fetch_alerts_fields_query');
 const mockUseFetchAlertsFieldsQuery = useFetchAlertsFieldsQuery as jest.Mock;
 
 const http = httpServiceMock.createStartContract();
 
-describe('useAlertFieldOptions', () => {
+describe('useAlertFieldNames', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('maps fetched fields to leaf scalar combobox options', () => {
+  it('maps fetched fields to leaf scalar field names', () => {
     mockUseFetchAlertsFieldsQuery.mockReturnValue({
       data: {
         browserFields: {},
@@ -32,27 +34,25 @@ describe('useAlertFieldOptions', () => {
       isLoading: false,
     });
 
-    const { result } = renderHook(() => useAlertFieldOptions({ http, ruleTypeIds: ['.es-query'] }));
+    const { result } = renderHook(() => useAlertFieldNames({ http, ruleTypeIds: ['.es-query'] }));
 
-    expect(result.current.fieldOptions).toEqual([
-      { label: 'kibana.alert.status', value: 'kibana.alert.status' },
-    ]);
+    expect(result.current.fieldNames).toEqual(['kibana.alert.status']);
     expect(result.current.isLoading).toBe(false);
   });
 
-  it('returns an empty option set while there is no data', () => {
+  it('returns an empty list while there is no data', () => {
     mockUseFetchAlertsFieldsQuery.mockReturnValue({ data: undefined, isLoading: true });
 
-    const { result } = renderHook(() => useAlertFieldOptions({ http, ruleTypeIds: ['.es-query'] }));
+    const { result } = renderHook(() => useAlertFieldNames({ http, ruleTypeIds: ['.es-query'] }));
 
-    expect(result.current.fieldOptions).toEqual([]);
+    expect(result.current.fieldNames).toEqual([]);
     expect(result.current.isLoading).toBe(true);
   });
 
   it('disables the query when there are no rule type ids', () => {
     mockUseFetchAlertsFieldsQuery.mockReturnValue({ data: undefined, isLoading: false });
 
-    renderHook(() => useAlertFieldOptions({ http, ruleTypeIds: [] }));
+    renderHook(() => useAlertFieldNames({ http, ruleTypeIds: [] }));
 
     expect(mockUseFetchAlertsFieldsQuery).toHaveBeenCalledWith(
       { http, ruleTypeIds: [] },
@@ -63,7 +63,7 @@ describe('useAlertFieldOptions', () => {
   it('respects an explicit enabled=false override', () => {
     mockUseFetchAlertsFieldsQuery.mockReturnValue({ data: undefined, isLoading: false });
 
-    renderHook(() => useAlertFieldOptions({ http, ruleTypeIds: ['.es-query'], enabled: false }));
+    renderHook(() => useAlertFieldNames({ http, ruleTypeIds: ['.es-query'], enabled: false }));
 
     expect(mockUseFetchAlertsFieldsQuery).toHaveBeenCalledWith(
       { http, ruleTypeIds: ['.es-query'] },
