@@ -13,17 +13,15 @@
     "@kbn/presentation-publishing-schemas",
     "@kbn/config-schema",
     "@kbn/i18n",
-    "@kbn/i18n-react",
     "@kbn/inference-common",
     "@kbn/inference-plugin",
-    "@kbn/management-settings-ids",
     "@kbn/esql-utils",
     "@kbn/esql",
     "@kbn/search-types",
     "@kbn/data-plugin",
     "@kbn/code-editor",
-    "@kbn/monaco",
-    "@kbn/ui-theme"
+    "@kbn/ui-theme",
+    "@kbn/logging"
   ],
   "exclude": ["target/**/*"]
 }

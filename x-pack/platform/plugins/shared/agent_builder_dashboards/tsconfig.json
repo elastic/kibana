@@ -33,8 +33,6 @@
     "@kbn/as-code-shared-transforms",
     "@kbn/data-views-plugin",
     "@kbn/test-jest-helpers",
-    "@kbn/react-kibana-mount",
-    "@kbn/i18n-react",
     "@kbn/esql-utils",
   ],
   "exclude": ["target/**/*"]
