@@ -509,7 +509,7 @@ export interface SmlService {
    * `constraints` and `filters` are kept as separate parameters so the trust
    * boundary is visible at the API layer: `constraints` is runtime-imposed
    * (wrapper-applied from caller context — agent SO `connector_ids`, future
-   * allowed-indices, allowed-skills, RBAC) and the agent can't bypass it; `filters` is the
+   * allowed-indices, RBAC) and the agent can't bypass it; `filters` is the
    * agent-discoverable refinement (`types[]`, `tags[]`). Both are combined
    * server-side; agent filters never widen the scope.
    */
