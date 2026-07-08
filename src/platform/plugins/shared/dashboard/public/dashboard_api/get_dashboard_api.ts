@@ -7,21 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiFlyoutProps } from '@elastic/eui';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatestWith, concatMap, map, merge, of, Subject, tap } from 'rxjs';
+import { BehaviorSubject, concatMap, merge, of, Subject } from 'rxjs';
 import { v4 } from 'uuid';
-import type { EuiFlyoutProps } from '@elastic/eui';
 
+import { getLastSavedState } from '../../common/default_dashboard_state';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { DashboardState } from '../../common/types';
+import type { DashboardReadResponseBody } from '../../server';
 import { initializeAccessControlManager } from './access_control_manager';
+import { initializeApproximationManager } from './approximation_manager';
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
 import { initializeESQLVariablesManager } from './esql_variables_manager';
 import { initializeFiltersManager } from './filters_manager';
-import { getLastSavedState } from '../../common/default_dashboard_state';
+import { initializeHistoryManager } from './history_manager';
 import { initializeLayoutManager } from './layout_manager';
+import type { DashboardChildren } from './layout_manager/types';
+import { initializePauseFetchManager } from './pause_fetch_manager';
+import { initializeProjectRoutingManager } from './project_routing_manager';
 import { openSaveModal } from './save_modal/open_save_modal';
 import { saveDashboard } from './save_modal/save_dashboard';
 import { initializeSearchSessionManager } from './search_sessions/search_session_manager';
@@ -40,14 +46,8 @@ import type {
 } from './types';
 import { DASHBOARD_API_TYPE } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
-import { initializeProjectRoutingManager } from './project_routing_manager';
-import { initializeApproximationManager } from './approximation_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
-import type { DashboardReadResponseBody } from '../../server';
-import { initializePauseFetchManager } from './pause_fetch_manager';
-import type { DashboardChildren } from './layout_manager/types';
-import { initializeHistoryManager } from './history_manager';
 
 export function getDashboardApi({
   creationOptions,

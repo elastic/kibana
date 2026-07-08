@@ -49,14 +49,15 @@ export function startTrackingHistory<T extends object = {}>({
         // drop the bottom of the history stack when max size is reached
         history.shift();
       }
+      // add the new patch to the top of the history stack and increment (see note) the pointer
       history.push(diff);
-      pointer$.next(history.length - 1);
+      pointer$.next(history.length - 1); // note: this is safer than incrementing, just in case things get out of sync
     });
 
   const disabledActionsSubscription = pointer$.subscribe((pointer) => {
     disabledActions$.next({
-      undo: pointer <= -1, // at the start of history
-      redo: pointer + 1 >= history.length, // at the end of history
+      undo: pointer <= -1, // at the bottom of the history stack
+      redo: pointer + 1 >= history.length, // at the top of the history stack
     });
   });
 
