@@ -13,6 +13,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AppHeaderBadge } from '../types';
 import { AppBadge } from './app_badge';
+import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
 const MAX_VISIBLE_BADGES = 2;
 const OVERFLOW_THRESHOLD = 3;
@@ -79,6 +80,7 @@ export const AppBadges = memo<AppBadgesProps>(({ badges }) => {
             button={
               <EuiBadge
                 color="hollow"
+                data-test-subj={APP_HEADER_TEST_SUBJECTS.badgesOverflow}
                 onClick={handleTogglePopover}
                 onClickAriaLabel={i18n.translate(
                   'core.ui.chrome.appHeader.badges.overflowAriaLabel',

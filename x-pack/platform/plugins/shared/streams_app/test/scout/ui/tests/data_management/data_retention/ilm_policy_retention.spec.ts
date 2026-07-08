@@ -323,6 +323,7 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
         await page.getByTestId('createPolicyModal-policyNameInput').fill(newPolicyName);
         await page.getByTestId('createPolicyModal-saveButton').click();
 
+        await pageObjects.streams.openBadgesOverflowIfPresent();
         await expect(page.getByTestId(`lifecycleBadge-${TSDB_STREAM}`)).toContainText(
           newPolicyName
         );
