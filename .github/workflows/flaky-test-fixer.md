@@ -85,7 +85,7 @@ safe-outputs:
     max: 1
     target: *issue_number
     hide-older-comments: true
-  # Clear the `ai:fix-flaky` trigger label once we have a result (`unlabeled` doesn't re-trigger this workflow).
+  # Clear the `ai:fix-flaky` trigger label once we have a result.
   remove-labels:
     allowed:
       - ai:fix-flaky
