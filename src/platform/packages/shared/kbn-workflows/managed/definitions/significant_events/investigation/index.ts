@@ -15,7 +15,7 @@ export const SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID =
 
 export const SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
-  pluginId: 'streams', // todo: update to significant_events once https://github.com/elastic/kibana/pull/275522 and follow ups merge
+  pluginId: 'significant_events',
   version: 3,
   billable: false,
   yaml: INVESTIGATION_WORKFLOW_YAML,

@@ -67,6 +67,7 @@ plugins:
     - security_solution
     - serverless_observability
     - share
+    - significant_events
     - slo
     - snapshot_restore
     - spaces

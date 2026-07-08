@@ -95,6 +95,10 @@ export {
   validateSignificantEventsTuningConfig,
   significantEventInvestigationSchema,
   investigationStateSchema,
+  MAX_ID_LENGTH,
+  MAX_RULE_NAME_LENGTH,
+  MAX_TEXT_LENGTH,
+  MAX_TITLE_LENGTH,
 } from './src/significant_events';
 
 export type {
