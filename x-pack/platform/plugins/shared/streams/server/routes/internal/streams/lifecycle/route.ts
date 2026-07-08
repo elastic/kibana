@@ -29,6 +29,10 @@ import {
   simulateClassicStreamTemplate,
 } from '../../../../lib/streams/data_streams/manage_data_streams';
 import {
+  getDataStreamGlobalRetention,
+  type DataStreamGlobalRetention,
+} from '../../../../lib/streams/lifecycle/global_retention';
+import {
   buildPolicyUsage,
   normalizeIlmPhases,
   type IlmPoliciesResponse,
@@ -509,8 +513,39 @@ const lifecycleSnapshotRepositoriesRoute = createServerRoute({
   },
 });
 
+const lifecycleGlobalRetentionRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{name}/lifecycle/_global_retention',
+  options: {
+    access: 'internal',
+    summary: 'Get data stream global retention',
+    description:
+      'Gets the cluster-wide default and maximum data retention that apply to a stream lifecycle',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
+  }),
+  handler: async ({ params, request, getScopedClients }): Promise<DataStreamGlobalRetention> => {
+    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { name } = params.path;
+
+    // Verifies read privileges and that the stream exists.
+    await streamsClient.getStream(name);
+
+    return getDataStreamGlobalRetention({
+      esClient: scopedClusterClient.asCurrentUser,
+      name,
+    });
+  },
+});
+
 export const internalLifecycleRoutes = {
   ...lifecycleStatsRoute,
+  ...lifecycleGlobalRetentionRoute,
   ...lifecycleDslPhaseStatsRoute,
   ...lifecycleIlmExplainRoute,
   ...lifecycleInheritedRoute,

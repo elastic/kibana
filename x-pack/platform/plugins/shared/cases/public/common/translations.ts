@@ -246,6 +246,10 @@ export const CONFIGURE_CASES_BUTTON = i18n.translate('xpack.cases.configureCases
   defaultMessage: 'Settings',
 });
 
+export const TEMPLATES_BUTTON = i18n.translate('xpack.cases.templatesButton', {
+  defaultMessage: 'Templates',
+});
+
 export const ADD_COMMENT = i18n.translate('xpack.cases.caseView.comment.addComment', {
   defaultMessage: 'Add comment',
 });

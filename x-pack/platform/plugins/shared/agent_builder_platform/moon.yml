@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/connector-specs'
+  - '@kbn/connector-schemas'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/management-settings-ids'
   - '@kbn/agent-context-layer-plugin'
