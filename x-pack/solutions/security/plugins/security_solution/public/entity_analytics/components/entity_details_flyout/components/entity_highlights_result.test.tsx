@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { EntityHighlightsResult } from './entity_highlights_result';
+import { EntityHighlightsResult, joinSignalLabels } from './entity_highlights_result';
 import { TestProviders } from '../../../../common/mock';
 
 describe('EntityHighlightsResult', () => {
@@ -25,7 +25,7 @@ describe('EntityHighlightsResult', () => {
           text: 'The asset is critical.',
         },
       ],
-      recommendedActions: ['Review login attempts', 'Check user permissions'],
+      recommended_actions: ['Review login attempts', 'Check user permissions'],
     },
     replacements: { anonymized_user: 'test-user' },
   };
@@ -73,7 +73,7 @@ describe('EntityHighlightsResult', () => {
     const emptyResult = {
       response: {
         highlights: [],
-        recommendedActions: null,
+        recommended_actions: null,
       },
       replacements: {},
     };
@@ -102,7 +102,7 @@ describe('EntityHighlightsResult', () => {
             text: 'User [anonymized_user] has high risk activity.',
           },
         ],
-        recommendedActions: null,
+        recommended_actions: null,
       },
       replacements: { anonymized_user: 'test-user' },
     };
@@ -129,7 +129,7 @@ describe('EntityHighlightsResult', () => {
             text: 'User [anonymized_user] has high risk activity.',
           },
         ],
-        recommendedActions: null,
+        recommended_actions: null,
       },
       replacements: { anonymized_user: 'test-user' },
     };
@@ -249,7 +249,7 @@ describe('EntityHighlightsResult', () => {
     const emptyResult = {
       response: {
         highlights: [],
-        recommendedActions: null,
+        recommended_actions: null,
       },
       replacements: {},
     };
@@ -276,7 +276,7 @@ describe('EntityHighlightsResult', () => {
             text: 'User activity detected.',
           },
         ],
-        recommendedActions: ['Review [anonymized_user] permissions'],
+        recommended_actions: ['Review [anonymized_user] permissions'],
       },
       replacements: { anonymized_user: 'test-user' },
     };
@@ -306,7 +306,7 @@ describe('EntityHighlightsResult', () => {
             text: 'User activity detected.',
           },
         ],
-        recommendedActions: ['Review [anonymized_user] permissions'],
+        recommended_actions: ['Review [anonymized_user] permissions'],
       },
       replacements: { anonymized_user: 'test-user' },
     };
@@ -326,7 +326,7 @@ describe('EntityHighlightsResult', () => {
     ).toBeInTheDocument();
   });
 
-  it('does not render recommended actions section when recommendedActions is null', () => {
+  it('does not render recommended actions section when recommended_actions is null', () => {
     const resultWithoutActions = {
       response: {
         highlights: [
@@ -335,7 +335,7 @@ describe('EntityHighlightsResult', () => {
             text: 'User activity detected.',
           },
         ],
-        recommendedActions: null,
+        recommended_actions: null,
       },
       replacements: {},
     };
@@ -353,7 +353,7 @@ describe('EntityHighlightsResult', () => {
     expect(screen.queryByText('Recommended actions')).not.toBeInTheDocument();
   });
 
-  it('does not render recommended actions section when recommendedActions is empty array', () => {
+  it('does not render recommended actions section when recommended_actions is empty array', () => {
     const resultWithEmptyActions = {
       response: {
         highlights: [
@@ -362,7 +362,7 @@ describe('EntityHighlightsResult', () => {
             text: 'User activity detected.',
           },
         ],
-        recommendedActions: [],
+        recommended_actions: [],
       },
       replacements: {},
     };
@@ -378,5 +378,127 @@ describe('EntityHighlightsResult', () => {
     );
 
     expect(screen.queryByText('Recommended actions')).not.toBeInTheDocument();
+  });
+
+  describe('staleness warning callout', () => {
+    it('does not render the callout when there are no staleness reasons', () => {
+      render(
+        <EntityHighlightsResult
+          assistantResult={defaultAssistantResult}
+          showAnonymizedValues={false}
+          generatedAt={null}
+          onRefresh={mockOnRefresh}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      expect(screen.queryByTestId('entity-highlights-staleness-callout')).not.toBeInTheDocument();
+    });
+
+    it('renders a single EUI warning callout with a risk-specific header and one regenerate action', () => {
+      render(
+        <EntityHighlightsResult
+          assistantResult={defaultAssistantResult}
+          showAnonymizedValues={false}
+          generatedAt={null}
+          stalenessReasons={[{ signal: 'risk_score', previousScore: 70, currentScore: 90 }]}
+          onRefresh={mockOnRefresh}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      const callout = screen.getByTestId('entity-highlights-staleness-callout');
+      expect(callout).toBeInTheDocument();
+      expect(
+        screen.getByText('Entity risk has changed since this summary was generated')
+      ).toBeInTheDocument();
+
+      // Single regenerate action inside the callout — the old dual-button UI is gone.
+      expect(screen.getByTestId('entity-highlights-staleness-regenerate')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('entity-highlights-staleness-inline-regenerate')
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('entity-highlights-staleness-inline')).not.toBeInTheDocument();
+    });
+
+    it('renders a single reason as plain text rather than a bulleted list', () => {
+      render(
+        <EntityHighlightsResult
+          assistantResult={defaultAssistantResult}
+          showAnonymizedValues={false}
+          generatedAt={null}
+          stalenessReasons={[
+            { signal: 'risk_score', previousScore: 87.1264933848, currentScore: 62.8525224705 },
+          ]}
+          onRefresh={mockOnRefresh}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      // Scores are rounded to 2 decimals via formatRiskScore, not shown raw.
+      const reason = screen.getByText('Risk score changed from 87.13 to 62.85');
+      expect(reason.tagName).toBe('P');
+      expect(reason.closest('li')).toBeNull();
+    });
+
+    it('lists multiple reasons as a bulleted list', () => {
+      render(
+        <EntityHighlightsResult
+          assistantResult={defaultAssistantResult}
+          showAnonymizedValues={false}
+          generatedAt={null}
+          stalenessReasons={[
+            { signal: 'risk_score', previousScore: 70, currentScore: 90 },
+            { signal: 'risk_score', previousScore: 50, currentScore: 80 },
+          ]}
+          onRefresh={mockOnRefresh}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      expect(
+        screen.getByText('Risk score changed from 70.00 to 90.00').closest('li')
+      ).not.toBeNull();
+      expect(
+        screen.getByText('Risk score changed from 50.00 to 80.00').closest('li')
+      ).not.toBeNull();
+    });
+
+    it('calls onRefresh when the callout regenerate button is clicked', () => {
+      render(
+        <EntityHighlightsResult
+          assistantResult={defaultAssistantResult}
+          showAnonymizedValues={false}
+          generatedAt={null}
+          stalenessReasons={[{ signal: 'risk_score', previousScore: 70, currentScore: 90 }]}
+          onRefresh={mockOnRefresh}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      fireEvent.click(screen.getByTestId('entity-highlights-staleness-regenerate'));
+
+      expect(mockOnRefresh).toHaveBeenCalledTimes(1);
+    });
+  });
+});
+
+describe('joinSignalLabels', () => {
+  it('returns an empty string for no labels', () => {
+    expect(joinSignalLabels([])).toBe('');
+  });
+
+  it('returns the single label unchanged', () => {
+    expect(joinSignalLabels(['Entity risk'])).toBe('Entity risk');
+  });
+
+  it('joins two labels with "and"', () => {
+    expect(joinSignalLabels(['Entity risk', 'Anomalies'])).toBe('Entity risk and Anomalies');
+  });
+
+  it('joins three or more labels with commas and a trailing "and"', () => {
+    expect(joinSignalLabels(['Entity risk', 'Anomalies', 'Rules'])).toBe(
+      'Entity risk, Anomalies, and Rules'
+    );
   });
 });
