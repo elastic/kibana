@@ -528,7 +528,7 @@ describe('Scout path regexes', () => {
 /**
  * `selective_scout.ts` (under `.buildkite/pipeline-utils/`) can't import from
  * `@kbn/*` packages, so it keeps its own copy of these patterns. This test
- * reads that file and checks each pattern is still present, so the two
+ * reads that source file and checks each pattern is still present, so the two
  * copies stay in sync.
  */
 describe('Scout tests-only patterns duplicated in pipeline-utils/selective_scout', () => {
