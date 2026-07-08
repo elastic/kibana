@@ -1367,7 +1367,7 @@
     },
     {
       "groupName": "package.json/yarn.lock utils",
-      "matchDepNames": ["@yarnpkg/lockfile", "sort-package-json", "yarn-deduplicate"],
+      "matchDepNames": ["sort-package-json"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],

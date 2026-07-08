@@ -5497,7 +5497,7 @@ importers:
         version: 2.35.1
       '@rsdoctor/rspack-plugin':
         specifier: 1.5.7
-        version: 1.5.7(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)
+        version: 1.5.7(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)
       '@rspack/core':
         specifier: 1.7.11
         version: 1.7.11(@swc/helpers@0.5.19)
@@ -5894,9 +5894,6 @@ importers:
       '@wojtekmaj/enzyme-adapter-react-17':
         specifier: 0.6.7
         version: 0.6.7(enzyme@3.11.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@yarnpkg/lockfile':
-        specifier: 1.1.0
-        version: 1.1.0
       aggregate-error:
         specifier: 3.1.0
         version: 3.1.0
@@ -7210,9 +7207,6 @@ importers:
 
   src/platform/packages/private/kbn-esql-scripts:
     devDependencies:
-      ts-node:
-        specifier: ^10.9.2
-        version: 10.9.2(@swc/core@1.15.18(@swc/helpers@0.5.19))(@types/node@24.10.13)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -8553,11 +8547,7 @@ importers:
 
   x-pack/platform/packages/shared/kbn-evals: {}
 
-  x-pack/platform/packages/shared/kbn-evals-common:
-    dependencies:
-      simple-statistics:
-        specifier: 7.8.8
-        version: 7.8.8
+  x-pack/platform/packages/shared/kbn-evals-common: {}
 
   x-pack/platform/packages/shared/kbn-evals-extensions: {}
 
@@ -8667,11 +8657,7 @@ importers:
 
   x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui: {}
 
-  x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form:
-    dependencies:
-      '@tanstack/react-query':
-        specifier: ^4.29.5
-        version: 4.29.12(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.26.8)(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)
+  x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form: {}
 
   x-pack/platform/packages/shared/response-ops/alerting-v2-schemas: {}
 
@@ -15648,9 +15634,6 @@ packages:
 
   '@xyflow/system@0.0.77':
     resolution: {integrity: sha512-qCDCMCQAAgUu8yHnhloHG9F5mwPX5E+Wl8McpYIOPSSXfzFJJoZcwOcsDiAjitVKIg2de1WmJbCHfpcvxprsgg==}
-
-  '@yarnpkg/lockfile@1.1.0':
-    resolution: {integrity: sha512-GpSwvyXOcOOlV70vbnzjj4fW5xW/FdUF6nQEt1ENy7m4ZCczi1+/buVUPAqmGfqznsORNFzUMjctTIp8a9tuCQ==}
 
   '@zip.js/zip.js@2.8.26':
     resolution: {integrity: sha512-RQ4h9F6DOiHxpdocUDrOl6xBM+yOtz+LkUol47AVWcfebGBDpZ7w7Xvz9PS24JgXvLGiXXzSAfdCdVy1tPlaFA==}
@@ -28154,6 +28137,7 @@ snapshots:
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
+    optional: true
 
   '@csstools/selector-specificity@2.2.0(postcss-selector-parser@6.1.4)':
     dependencies:
@@ -29880,6 +29864,7 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+    optional: true
 
   '@js-sdsl/ordered-map@4.4.2': {}
 
@@ -32172,14 +32157,14 @@ snapshots:
 
   '@rsdoctor/client@1.5.7': {}
 
-  '@rsdoctor/core@1.5.7(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)':
+  '@rsdoctor/core@1.5.7(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)':
     dependencies:
       '@rsbuild/plugin-check-syntax': 1.6.1
       '@rsdoctor/graph': 1.5.7(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)
       '@rsdoctor/sdk': 1.5.7(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)
       '@rsdoctor/types': 1.5.7(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)
       '@rsdoctor/utils': 1.5.7(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)
-      '@rspack/resolver': 0.2.8(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
+      '@rspack/resolver': 0.2.8(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)
       browserslist-load-config: 1.0.3
       es-toolkit: 1.49.0
       filesize: 10.1.6
@@ -32207,9 +32192,9 @@ snapshots:
       - '@rspack/core'
       - webpack
 
-  '@rsdoctor/rspack-plugin@1.5.7(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)':
+  '@rsdoctor/rspack-plugin@1.5.7(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)':
     dependencies:
-      '@rsdoctor/core': 1.5.7(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)
+      '@rsdoctor/core': 1.5.7(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)
       '@rsdoctor/graph': 1.5.7(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)
       '@rsdoctor/sdk': 1.5.7(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)
       '@rsdoctor/types': 1.5.7(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)
@@ -32354,9 +32339,9 @@ snapshots:
   '@rspack/resolver-binding-linux-x64-musl@0.2.8':
     optional: true
 
-  '@rspack/resolver-binding-wasm32-wasi@0.2.8(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)':
+  '@rspack/resolver-binding-wasm32-wasi@0.2.8(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)':
     dependencies:
-      '@napi-rs/wasm-runtime': 1.1.6(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
+      '@napi-rs/wasm-runtime': 1.1.6(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)
     transitivePeerDependencies:
       - '@emnapi/core'
       - '@emnapi/runtime'
@@ -32371,7 +32356,7 @@ snapshots:
   '@rspack/resolver-binding-win32-x64-msvc@0.2.8':
     optional: true
 
-  '@rspack/resolver@0.2.8(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)':
+  '@rspack/resolver@0.2.8(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)':
     optionalDependencies:
       '@rspack/resolver-binding-darwin-arm64': 0.2.8
       '@rspack/resolver-binding-darwin-x64': 0.2.8
@@ -32379,7 +32364,7 @@ snapshots:
       '@rspack/resolver-binding-linux-arm64-musl': 0.2.8
       '@rspack/resolver-binding-linux-x64-gnu': 0.2.8
       '@rspack/resolver-binding-linux-x64-musl': 0.2.8
-      '@rspack/resolver-binding-wasm32-wasi': 0.2.8(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
+      '@rspack/resolver-binding-wasm32-wasi': 0.2.8(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)
       '@rspack/resolver-binding-win32-arm64-msvc': 0.2.8
       '@rspack/resolver-binding-win32-ia32-msvc': 0.2.8
       '@rspack/resolver-binding-win32-x64-msvc': 0.2.8
@@ -33379,13 +33364,17 @@ snapshots:
       mkdirp: 1.0.4
       path-browserify: 1.0.1
 
-  '@tsconfig/node10@1.0.12': {}
+  '@tsconfig/node10@1.0.12':
+    optional: true
 
-  '@tsconfig/node12@1.0.11': {}
+  '@tsconfig/node12@1.0.11':
+    optional: true
 
-  '@tsconfig/node14@1.0.3': {}
+  '@tsconfig/node14@1.0.3':
+    optional: true
 
-  '@tsconfig/node16@1.0.4': {}
+  '@tsconfig/node16@1.0.4':
+    optional: true
 
   '@tsd/typescript@5.9.3': {}
 
@@ -34697,8 +34686,6 @@ snapshots:
       d3-selection: 3.0.0
       d3-zoom: 3.0.0
 
-  '@yarnpkg/lockfile@1.1.0': {}
-
   '@zip.js/zip.js@2.8.26': {}
 
   abab@2.0.6: {}
@@ -34921,7 +34908,8 @@ snapshots:
 
   archy@1.0.0: {}
 
-  arg@4.1.3: {}
+  arg@4.1.3:
+    optional: true
 
   arg@5.0.2: {}
 
@@ -37199,7 +37187,8 @@ snapshots:
 
   diff-sequences@29.6.3: {}
 
-  diff@4.0.4: {}
+  diff@4.0.4:
+    optional: true
 
   diff@5.2.2: {}
 
@@ -41257,7 +41246,8 @@ snapshots:
     dependencies:
       semver: 7.8.0
 
-  make-error@1.3.6: {}
+  make-error@1.3.6:
+    optional: true
 
   makeerror@1.0.12:
     dependencies:
@@ -46574,6 +46564,7 @@ snapshots:
       yn: 3.1.1
     optionalDependencies:
       '@swc/core': 1.15.18(@swc/helpers@0.5.19)
+    optional: true
 
   tsconfig-paths-webpack-plugin@4.2.0:
     dependencies:
@@ -46995,7 +46986,8 @@ snapshots:
 
   uuid@9.0.1: {}
 
-  v8-compile-cache-lib@3.0.1: {}
+  v8-compile-cache-lib@3.0.1:
+    optional: true
 
   v8-compile-cache@2.4.0: {}
 
@@ -47959,7 +47951,8 @@ snapshots:
     dependencies:
       buffer-crc32: 1.0.0
 
-  yn@3.1.1: {}
+  yn@3.1.1:
+    optional: true
 
   yocto-queue@0.1.0: {}
 
