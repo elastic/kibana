@@ -156,9 +156,7 @@ describe('RowActionsMenu', () => {
       );
       fireEvent.click(screen.getByLabelText('Actions for test-item'));
 
-      const labels = screen
-        .getAllByRole('menuitem')
-        .map((item) => item.textContent);
+      const labels = screen.getAllByRole('menuitem').map((item) => item.textContent);
 
       expect(labels).toEqual(['Edit', 'Duplicate', 'Delete', 'Export']);
     });
