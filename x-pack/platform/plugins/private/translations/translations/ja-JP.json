@@ -51801,7 +51801,6 @@
     "xpack.streams.streamsListView.conflictCalloutMessage": "有線ストリームを有効にして、Streams設定を現在のElasticsearchの状態に合わせます。",
     "xpack.streams.streamsListView.conflictCalloutTitle": "設定の競合",
     "xpack.streams.streamsListView.createClassicStreamButtonLabel": "クラシックストリームを作成",
-    "xpack.streams.streamsListView.createQueryStreamButtonLabel": "クエリストリームを作成",
     "xpack.streams.streamsListView.disableWiredStreamsErrorToastTitle": "有線ストリーム設定の更新エラー",
     "xpack.streams.streamsListView.enableWiredStreamsErrorToastTitle": "有線ストリーム設定の更新エラー",
     "xpack.streams.streamsListView.enableWiredStreamsSwitchLabel": "有線ストリームを有効にする",

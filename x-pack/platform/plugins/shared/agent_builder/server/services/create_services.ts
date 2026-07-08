@@ -284,6 +284,7 @@ export class ServiceManager {
       savedObjects,
       plugins,
       consumption,
+      searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
     };
 
