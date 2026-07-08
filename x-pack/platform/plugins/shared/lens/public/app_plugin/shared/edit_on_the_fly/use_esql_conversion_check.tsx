@@ -116,7 +116,7 @@ export const useEsqlConversionCheck = (
     }
 
     // Guard: layer access
-    const layerId = layerIds[0];
+    const layerId = dataLayerIds[0];
     const layers = datasourceState.layers as Record<string, FormBasedLayer>;
     if (!layerId || !layers[layerId]) {
       return getEsqlConversionDisabledSettings();
