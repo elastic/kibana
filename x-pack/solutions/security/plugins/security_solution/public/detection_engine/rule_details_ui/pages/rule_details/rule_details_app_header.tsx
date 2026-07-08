@@ -23,6 +23,7 @@ import {
   type UseRuleActionsMenuItemsParams,
 } from './rule_actions_overflow/use_rule_actions_menu_items';
 import { useMlJobsSettingsMenu } from '../../../rule_management_ui/components/rules_table/use_ml_jobs_settings_menu';
+import { useRuleSnoozeMenu } from './use_rule_snooze_menu';
 
 interface RuleDetailsAppHeaderProps {
   title: string;
@@ -57,18 +58,30 @@ export const RuleDetailsAppHeader = React.memo<RuleDetailsAppHeaderProps>(
     const actionsMenuItems = useRuleActionsMenuItems(actionsParams);
     const { menuItem: mlJobSettingsMenuItem, popover: mlJobSettingsPopover } =
       useMlJobsSettingsMenu();
+    const { menuItem: snoozeMenuItem, popover: snoozePopover } = useRuleSnoozeMenu({
+      ruleId: actionsParams.rule?.id,
+      isDisabled: actionsParams.isDisabled,
+    });
 
     const menu = useMemo<AppMenuConfig>(
       () => ({
         switch: switchConfig,
         primaryActionItem,
         items: [
+          ...(snoozeMenuItem ? [snoozeMenuItem] : []),
           ...staticItems,
           ...(mlJobSettingsMenuItem ? [mlJobSettingsMenuItem] : []),
           ...actionsMenuItems,
         ],
       }),
-      [switchConfig, primaryActionItem, staticItems, mlJobSettingsMenuItem, actionsMenuItems]
+      [
+        switchConfig,
+        primaryActionItem,
+        snoozeMenuItem,
+        staticItems,
+        mlJobSettingsMenuItem,
+        actionsMenuItems,
+      ]
     );
 
     return (
@@ -82,6 +95,7 @@ export const RuleDetailsAppHeader = React.memo<RuleDetailsAppHeaderProps>(
           menu={menu}
           padding={{ bleed: 'l' }}
         />
+        {snoozePopover}
         {mlJobSettingsPopover}
       </>
     );

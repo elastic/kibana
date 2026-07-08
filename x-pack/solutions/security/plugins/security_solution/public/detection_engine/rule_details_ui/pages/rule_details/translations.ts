@@ -28,6 +28,13 @@ export const DISABLE_RULE = i18n.translate(
   }
 );
 
+export const SET_SNOOZE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.setSnoozeLabel',
+  {
+    defaultMessage: 'Set snooze',
+  }
+);
+
 export const CREATED_BY_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.createdByLabel',
   {

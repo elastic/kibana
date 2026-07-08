@@ -18,11 +18,21 @@ interface RuleSnoozeBadgeProps {
    */
   ruleId: RuleObjectId;
   showTooltipInline?: boolean;
+  /**
+   * When provided, the snooze panel renders as a popover anchored to this element (e.g. an app menu
+   * item), controlled via `isOpen`/`onClose`, instead of rendering its own badge button.
+   */
+  anchorElement?: HTMLElement | null;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 export function RuleSnoozeBadge({
   ruleId,
   showTooltipInline = false,
+  anchorElement,
+  isOpen,
+  onClose,
 }: RuleSnoozeBadgeProps): JSX.Element {
   const RulesListNotifyBadge = useKibana().services.triggersActionsUi.getRulesListNotifyBadge;
   const { snoozeSettings, error } = useRuleSnoozeSettings(ruleId);
@@ -37,6 +47,9 @@ export function RuleSnoozeBadge({
       disabled={!canEditRules || error}
       showTooltipInline={showTooltipInline}
       onRuleChanged={invalidateFetchRuleSnoozeSettings}
+      anchorElement={anchorElement}
+      isOpen={isOpen}
+      onClose={onClose}
     />
   );
 }
