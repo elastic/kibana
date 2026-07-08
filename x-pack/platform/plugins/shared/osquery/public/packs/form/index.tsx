@@ -103,6 +103,29 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const isRruleSchedulingEnabled = ExperimentalFeaturesService.get().rruleScheduling;
 
+  // Computed once per `defaultValue` and reused both to seed the form's
+  // `defaultValues.schedule` and as `originalStartDate` below, so
+  // `startIsUnchanged` in `validateScheduleFormData` compares the current
+  // `startDate` against the exact value the form was initialized with rather
+  // than a second independent `deserializeSchedule` call landing on a
+  // different `roundUpTo30Min(new Date())` timestamp (design.md D2).
+  const deserializedSchedule = useMemo(
+    () =>
+      isRruleSchedulingEnabled
+        ? deserializeSchedule(
+            defaultValue
+              ? {
+                  schedule_type: defaultValue.schedule_type,
+                  interval: defaultValue.interval,
+                  rrule_schedule: defaultValue.rrule_schedule,
+                }
+              : undefined
+          )
+        : undefined,
+
+    [isRruleSchedulingEnabled, defaultValue]
+  );
+
   const deserializer = (payload: PackItem) => {
     const defaultPolicyIds = filter(
       payload.policy_ids,
@@ -123,13 +146,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       policy_ids: defaultPolicyIds ?? [],
       queries: convertPackQueriesToSO(payload.queries),
       shards: omit(payload.shards, '*') ?? {},
-      schedule: isRruleSchedulingEnabled
-        ? deserializeSchedule({
-            schedule_type: payloadScheduleType,
-            interval: payloadInterval,
-            rrule_schedule: payloadRruleSchedule,
-          })
-        : undefined,
+      schedule: deserializedSchedule,
     };
   };
 
@@ -145,7 +162,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           enabled: true,
           queries: [],
           pack_type: 'policy',
-          schedule: isRruleSchedulingEnabled ? deserializeSchedule(undefined) : undefined,
+          schedule: deserializedSchedule,
         },
   });
 
@@ -169,12 +186,8 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       return undefined;
     }
 
-    return deserializeSchedule({
-      schedule_type: defaultValue.schedule_type,
-      interval: defaultValue.interval,
-      rrule_schedule: defaultValue.rrule_schedule,
-    }).startDate;
-  }, [editMode, defaultValue]);
+    return deserializedSchedule?.startDate;
+  }, [editMode, defaultValue, deserializedSchedule]);
 
   const scheduleErrors = useMemo(() => {
     if (!isRruleSchedulingEnabled || !schedule) {
@@ -236,6 +249,15 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           originalStartDate,
         });
         if (submitScheduleErrors.length > 0) {
+          // A blocked submit must be visible, never a silent no-op (design.md
+          // D4) — surface the schedule errors the same way `handleSaveClick`
+          // does for its own pre-submit check.
+          setShowScheduleErrors(true);
+          toasts.addDanger({
+            title: SCHEDULE_ERRORS_TOAST_TITLE,
+            text: submitScheduleErrors.join('\n'),
+          });
+
           return;
         }
       }
@@ -292,6 +314,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       isRruleSchedulingEnabled,
       originalStartDate,
       shards,
+      toasts,
       updateAsync,
     ]
   );

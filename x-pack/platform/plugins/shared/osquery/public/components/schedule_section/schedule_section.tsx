@@ -15,12 +15,15 @@ import { ScheduleTypeSelector } from './schedule_type_selector';
 import { SplayTimeField } from './splay_time_field';
 import { StartDateField } from './start_date_field';
 import { StopAfterField } from './stop_after_field';
+import { roundUpTo30Min } from './slot_utils';
 import {
   ADVANCED_PARTS_ADVISORY_BODY,
   ADVANCED_PARTS_ADVISORY_TITLE,
   SCHEDULE_SECTION_TITLE,
 } from './translations';
 import type { ScheduleFormData } from './types';
+
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 export interface ScheduleSectionProps {
   value: ScheduleFormData;
@@ -62,6 +65,24 @@ export const ScheduleSection = ({
 }: ScheduleSectionProps) => {
   const handleTypeChange = useCallback(
     (scheduleType: ScheduleType) => {
+      // Transitioning into recurrence mode from a non-recurrence state carries
+      // a stale interval-era `startDate` placeholder that was never meant to
+      // anchor a recurrence — re-seed it to a fresh valid slot so the past-
+      // start validation isn't tripped by a value the user never chose. Only
+      // fires on the transition *into* rrule so an in-session rrule start
+      // date is never clobbered (design.md D1).
+      if (scheduleType === 'rrule' && value.scheduleType !== 'rrule') {
+        const startDate = roundUpTo30Min(new Date());
+        onChange({
+          ...value,
+          scheduleType,
+          startDate,
+          stopAfter: { ...value.stopAfter, date: new Date(startDate.getTime() + ONE_DAY_MS) },
+        });
+
+        return;
+      }
+
       onChange({ ...value, scheduleType });
     },
     [onChange, value]
