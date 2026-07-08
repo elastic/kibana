@@ -35,9 +35,7 @@ describe('workday schemas', () => {
 
   describe('WorkdaySecretsSchema', () => {
     it('accepts clientId + clientSecret', () => {
-      expect(() =>
-        WorkdaySecretsSchema.parse({ clientId: 'a', clientSecret: 'b' })
-      ).not.toThrow();
+      expect(() => WorkdaySecretsSchema.parse({ clientId: 'a', clientSecret: 'b' })).not.toThrow();
     });
   });
 
@@ -54,9 +52,7 @@ describe('workday schemas', () => {
       expect(() => WorkdaySearchWorkersParamsSchema.parse({ search: 'ja' })).toThrow();
     });
     it('rejects out-of-range limit', () => {
-      expect(() =>
-        WorkdaySearchWorkersParamsSchema.parse({ search: 'jane', limit: 0 })
-      ).toThrow();
+      expect(() => WorkdaySearchWorkersParamsSchema.parse({ search: 'jane', limit: 0 })).toThrow();
       expect(() =>
         WorkdaySearchWorkersParamsSchema.parse({ search: 'jane', limit: 101 })
       ).toThrow();

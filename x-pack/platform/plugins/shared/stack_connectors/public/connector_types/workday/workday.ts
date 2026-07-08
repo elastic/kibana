@@ -37,9 +37,7 @@ export function getConnectorType(): ConnectorTypeModel<
     iconClass: lazy(() => import('./logo')),
     isExperimental: false,
     selectMessage: SELECT_MESSAGE,
-    async validateParams(
-      actionParams
-    ): Promise<GenericValidationResult<ValidationErrors>> {
+    async validateParams(actionParams): Promise<GenericValidationResult<ValidationErrors>> {
       const translations = await import('./translations');
       const errors: ValidationErrors = {
         subAction: [],

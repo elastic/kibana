@@ -23,8 +23,14 @@ const actionOptions = [
   { value: SUB_ACTION.SEARCH_WORKERS, inputDisplay: i18n.SEARCH_WORKERS_LABEL },
 ];
 
-type GetWorkerParams = { workerId?: string };
-type SearchWorkersParams = { search?: string; limit?: number; offset?: number };
+interface GetWorkerParams {
+  workerId?: string;
+}
+interface SearchWorkersParams {
+  search?: string;
+  limit?: number;
+  offset?: number;
+}
 
 const WorkdayParamsFields: React.FunctionComponent<ActionParamsProps<WorkdayActionParams>> = ({
   actionParams,
@@ -99,6 +105,7 @@ const WorkdayParamsFields: React.FunctionComponent<ActionParamsProps<WorkdayActi
             error={errors['subActionParams.workerId'] as string[]}
           >
             <EuiFieldText
+              isInvalid={(errors['subActionParams.workerId'] as string[])?.length > 0}
               fullWidth
               value={getWorkerParams.workerId ?? ''}
               onChange={(e) => setGetWorker({ workerId: e.target.value })}
@@ -119,6 +126,7 @@ const WorkdayParamsFields: React.FunctionComponent<ActionParamsProps<WorkdayActi
               error={errors['subActionParams.search'] as string[]}
             >
               <EuiFieldText
+                isInvalid={(errors['subActionParams.search'] as string[])?.length > 0}
                 fullWidth
                 value={searchWorkersParams.search ?? ''}
                 onChange={(e) => setSearch({ search: e.target.value })}

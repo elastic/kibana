@@ -143,7 +143,8 @@ export class WorkdayConnector extends SubActionConnector<WorkdayConfig, WorkdayS
       : (error.cause as NodeSystemError | undefined);
     if (cause) {
       if (cause.code === 'ENOTFOUND') return `URL not found: ${cause.hostname}`;
-      if (cause.code === 'ECONNREFUSED') return `Connection refused: ${cause.address}:${cause.port}`;
+      if (cause.code === 'ECONNREFUSED')
+        return `Connection refused: ${cause.address}:${cause.port}`;
     }
 
     if (!error.response?.status) {
