@@ -57,7 +57,6 @@ export default function (providerContext: FtrProviderContext) {
       if (initialized) {
         return;
       }
-      initialized = true;
       await kibanaServer.savedObjects.cleanStandardList();
       await cleanFleetIndices(es);
       await apiClient.setup();
@@ -107,6 +106,10 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
       regularPackagePolicyId = regularPackagePolicy.item.id;
+
+      // Only mark done after setup succeeds; otherwise a transient failure would
+      // permanently skip setup and fail every later test on undefined ids.
+      initialized = true;
     });
 
     after(async () => {
