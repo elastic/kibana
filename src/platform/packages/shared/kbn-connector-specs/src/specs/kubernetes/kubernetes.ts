@@ -260,6 +260,18 @@ export const KubernetesConnector: ConnectorSpec = {
         isRecommended: true,
         defaults: {},
       },
+      {
+        type: 'kubernetes_gke',
+        defaults: {},
+      },
+      {
+        type: 'kubernetes_eks',
+        defaults: {},
+      },
+      {
+        type: 'kubernetes_aks',
+        defaults: {},
+      },
     ],
   },
 

@@ -9,7 +9,7 @@ applies_to:
 
 # Kubernetes connector [kubernetes-action-type]
 
-The Kubernetes connector calls the [Kubernetes API](https://kubernetes.io/docs/reference/using-api/) to read and modify resources in a cluster. It exposes a generic `request` action for any API path, plus typed convenience actions for common operations. It authenticates with a service account bearer token and verifies the API server TLS certificate against the cluster CA.
+The Kubernetes connector calls the [Kubernetes API](https://kubernetes.io/docs/reference/using-api/) to read and modify resources in a cluster. It exposes a generic `request` action for any API path, plus typed convenience actions for common operations. It authenticates with a service account bearer token or with cloud provider credentials for managed clusters (GKE, Amazon EKS, AKS), and verifies the API server TLS certificate against the cluster CA.
 
 ::::{warning}
 This connector can perform any operation the configured service account is authorized for, including deleting resources. There are no additional restrictions in {{kib}}: access is governed entirely by the token's Kubernetes [RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/). Use a service account with least-privilege permissions scoped to what the connector actually needs.
@@ -26,14 +26,62 @@ Kubernetes connectors have the following configuration properties:
 API server URL
 :   The base URL of the Kubernetes API server, for example `https://my-cluster.example.com:6443`. This host must be permitted by the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting.
 
-Token
-:   A service account bearer token. The connector sends it in the `Authorization: Bearer <token>` header.
+### Authentication [kubernetes-connector-authentication]
+
+The connector supports four authentication methods. All of them share two optional TLS settings:
 
 Cluster CA certificate (PEM)
 :   Optional PEM-encoded certificate authority used to verify the API server certificate. Leave empty to rely on the system trust store or to disable verification.
 
 Verification mode
 :   How to verify the API server TLS certificate: `full` (verify certificate and hostname, the default), `certificate` (verify certificate only), or `none` (disable verification, not recommended).
+
+**Service account token**
+
+Token
+:   A service account bearer token. The connector sends it in the `Authorization: Bearer <token>` header. This works with any Kubernetes cluster, but the token is a long-lived credential you must rotate yourself.
+
+**Google Kubernetes Engine (GKE)**
+
+GCP service account key (JSON)
+:   The JSON key of a GCP service account. The connector exchanges it for short-lived (one hour) OAuth2 access tokens, which GKE accepts directly as Kubernetes bearer tokens. No long-lived cluster token is ever created.
+
+Grant the service account access to the cluster with a Cloud IAM role such as **Kubernetes Engine Viewer** (`roles/container.viewer`) for read-only use or **Kubernetes Engine Developer** (`roles/container.developer`) for read-write use. For finer-grained access, grant `roles/container.clusterViewer` and bind in-cluster RBAC roles to the service account's email address.
+
+**Amazon EKS**
+
+Access key ID / Secret access key
+:   Credentials of an IAM principal. The connector mints short-lived bearer tokens locally by presigning an STS `GetCallerIdentity` request (the same mechanism as `aws eks get-token`); tokens are valid for at most 15 minutes and a fresh one is minted for every action execution.
+
+AWS region
+:   The region the EKS cluster runs in, for example `us-east-1`.
+
+EKS cluster name
+:   The cluster name as shown in AWS. Tokens are cryptographically bound to this name.
+
+Grant the IAM principal access to the cluster with an [EKS access entry](https://docs.aws.amazon.com/eks/latest/userguide/access-entries.html), for example:
+
+```sh
+aws eks create-access-entry --cluster-name <cluster> --principal-arn <iam-principal-arn>
+aws eks associate-access-policy --cluster-name <cluster> --principal-arn <iam-principal-arn> \
+  --policy-arn arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy --access-scope type=cluster
+```
+
+Use `AmazonEKSViewPolicy` for read-only access or `AmazonEKSEditPolicy` for read-write access; both can also be scoped to specific namespaces.
+
+**Azure Kubernetes Service (AKS)**
+
+Tenant ID / Client ID / Client secret
+:   Credentials of a Microsoft Entra ID service principal. The connector runs the OAuth2 client credentials flow against Entra ID and uses the resulting token (valid for roughly an hour, cached and refreshed automatically) as the Kubernetes bearer token. Requires an AKS cluster with [Microsoft Entra ID integration](https://learn.microsoft.com/en-us/azure/aks/enable-authentication-microsoft-entra-id).
+
+Grant the service principal access with [Azure RBAC for Kubernetes](https://learn.microsoft.com/en-us/azure/aks/manage-azure-rbac), for example:
+
+```sh
+az role assignment create --role "Azure Kubernetes Service RBAC Reader" \
+  --assignee <client-id> --scope <aks-cluster-resource-id>
+```
+
+Use the `RBAC Reader`, `RBAC Writer`, or `RBAC Admin` built-in roles depending on the required access, or bind in-cluster RBAC roles to the service principal's object ID instead.
 
 ## Test connectors [kubernetes-action-configuration]
 
@@ -91,7 +139,7 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get API credentials [kubernetes-api-credentials]
 
-To use the Kubernetes connector, create a service account and a scoped token:
+For managed clusters (GKE, EKS, AKS), use the cloud provider credentials described in [Authentication](#kubernetes-connector-authentication) instead of a cluster token. To use the **Service account token** method, create a service account and a scoped token:
 
 1. Create a service account in the target namespace, for example `kubectl create serviceaccount kibana-connector -n <namespace>`.
 2. Grant it least-privilege RBAC via a `Role`/`ClusterRole` and a `RoleBinding`/`ClusterRoleBinding` covering only the resources and verbs the connector should use.

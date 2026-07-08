@@ -65,6 +65,55 @@ describe('KubernetesConnector', () => {
       expect(schema.safeParse({ authType: 'kubernetes', token: 'sa-token' }).success).toBe(true);
       expect(schema.safeParse({ authType: 'kubernetes', token: '' }).success).toBe(false);
     });
+
+    it('offers managed cluster auth types for GKE, EKS, and AKS', () => {
+      const types = KubernetesConnector.auth?.types.map((t) =>
+        typeof t === 'object' ? t.type : t
+      );
+      expect(types).toEqual(['kubernetes', 'kubernetes_gke', 'kubernetes_eks', 'kubernetes_aks']);
+    });
+
+    it('validates managed cluster secrets', () => {
+      const schema = generateSecretsSchemaFromSpec(KubernetesConnector.auth, {
+        isPfxEnabled: false,
+        isEarsEnabled: false,
+        isEarsExperimentalEnabled: false,
+      });
+
+      expect(
+        schema.safeParse({ authType: 'kubernetes_gke', serviceAccountJson: '{"type":"sa"}' })
+          .success
+      ).toBe(true);
+      expect(schema.safeParse({ authType: 'kubernetes_gke', serviceAccountJson: '' }).success).toBe(
+        false
+      );
+
+      expect(
+        schema.safeParse({
+          authType: 'kubernetes_eks',
+          accessKeyId: 'AKIA123',
+          secretAccessKey: 'secret',
+          region: 'us-east-1',
+          clusterName: 'my-cluster',
+        }).success
+      ).toBe(true);
+      expect(schema.safeParse({ authType: 'kubernetes_eks', accessKeyId: 'AKIA123' }).success).toBe(
+        false
+      );
+
+      expect(
+        schema.safeParse({
+          authType: 'kubernetes_aks',
+          tenantId: 'tenant',
+          clientId: 'client',
+          clientSecret: 'secret',
+        }).success
+      ).toBe(true);
+      expect(
+        schema.safeParse({ authType: 'kubernetes_aks', tenantId: 'tenant', clientId: 'client' })
+          .success
+      ).toBe(false);
+    });
   });
 
   describe('request action (generic)', () => {

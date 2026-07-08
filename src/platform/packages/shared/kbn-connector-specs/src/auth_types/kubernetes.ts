@@ -9,11 +9,9 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
-import { isString } from 'lodash';
-import type { SSLSettings } from '@kbn/actions-utils';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
-import { configureAxiosInstanceWithSsl } from '../lib/configure_axios_instance_with_ssl';
+import { configureKubernetesTls, kubernetesTlsSchemaFields } from './kubernetes_tls_helpers';
 
 export const KUBERNETES_AUTH_ID = 'kubernetes';
 
@@ -24,22 +22,7 @@ const authSchema = lazySchema(() =>
         .string()
         .min(1, { message: i18n.KUBERNETES_AUTH_TOKEN_REQUIRED_MESSAGE })
         .meta({ sensitive: true, label: i18n.KUBERNETES_AUTH_TOKEN_LABEL }),
-      caCert: z
-        .string()
-        .meta({
-          label: i18n.KUBERNETES_AUTH_CA_LABEL,
-          helpText: i18n.KUBERNETES_AUTH_CA_HELP_TEXT,
-          widget: 'textarea',
-          sensitive: true,
-        })
-        .optional(),
-      verificationMode: z
-        .enum(['none', 'certificate', 'full'])
-        .meta({
-          label: i18n.KUBERNETES_AUTH_VERIFICATION_MODE_LABEL,
-          helpText: i18n.KUBERNETES_AUTH_VERIFICATION_MODE_HELP_TEXT,
-        })
-        .optional(),
+      ...kubernetesTlsSchemaFields(),
     })
     .meta({ label: i18n.KUBERNETES_AUTH_LABEL })
 );
@@ -52,9 +35,6 @@ type AuthSchemaType = z.infer<typeof authSchema>;
  * Sends a service account bearer token via the `Authorization` header and,
  * because Kubernetes API servers almost always present a private (cluster) CA,
  * also configures TLS verification against a pasted PEM CA certificate.
- *
- * The CA is provided as PEM text (not a base64-encoded file upload), so it is
- * passed to the SSL layer as a UTF-8 buffer.
  */
 export const KubernetesAuth: AuthTypeSpec<AuthSchemaType> = {
   id: KUBERNETES_AUTH_ID,
@@ -66,11 +46,6 @@ export const KubernetesAuth: AuthTypeSpec<AuthSchemaType> = {
   ): Promise<AxiosInstance> => {
     axiosInstance.defaults.headers.common.Authorization = `Bearer ${secret.token}`;
 
-    const sslOverrides: SSLSettings = {
-      ...(isString(secret.verificationMode) ? { verificationMode: secret.verificationMode } : {}),
-      ...(isString(secret.caCert) ? { ca: Buffer.from(secret.caCert, 'utf8') } : {}),
-    };
-
-    return configureAxiosInstanceWithSsl(ctx, axiosInstance, sslOverrides);
+    return configureKubernetesTls(ctx, axiosInstance, secret);
   },
 };
