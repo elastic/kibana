@@ -257,10 +257,11 @@ export const setProfileState = <TState extends object>(
       );
     }
 
-    const profileStateForRedux = services.profileStateRegistry.pickStateByType({
-      profileState: { [payload.profileStateDefinition.key]: payload.profileState },
+    const profileStateForRedux = services.profileStateRegistry.filterFieldsByType({
+      profileState: payload.profileState,
+      stateKey: payload.profileStateDefinition.key,
       stateType: [ProfileStateType.Ui, ProfileStateType.Persistent],
-    })[payload.profileStateDefinition.key];
+    });
 
     if (profileStateForRedux) {
       dispatch(
@@ -272,11 +273,14 @@ export const setProfileState = <TState extends object>(
       );
     }
 
-    const pickedUrlState = services.profileStateRegistry.pickStateByType({
-      profileState: { [payload.profileStateDefinition.key]: payload.profileState },
+    const filteredUrlState = services.profileStateRegistry.filterFieldsByType({
+      profileState: payload.profileState,
+      stateKey: payload.profileStateDefinition.key,
       stateType: [ProfileStateType.Url],
     });
-    const profileStateForUrl = Object.keys(pickedUrlState).length ? pickedUrlState : undefined;
+    const profileStateForUrl = filteredUrlState
+      ? { [payload.profileStateDefinition.key]: filteredUrlState }
+      : undefined;
 
     void urlStateStorage.set(PROFILE_STATE_URL_KEY, profileStateForUrl, {
       replace: payload.historyMethod === 'replace',
@@ -307,11 +311,14 @@ export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
         let profileStateForUrl: Record<string, object | undefined> | undefined;
 
         if (profileStateDefinition && profileState) {
-          const pickedUrlState = services.profileStateRegistry.pickStateByType({
-            profileState: { [profileStateDefinition.key]: profileState },
+          const filteredUrlState = services.profileStateRegistry.filterFieldsByType({
+            profileState,
+            stateKey: profileStateDefinition.key,
             stateType: [ProfileStateType.Url],
           });
-          profileStateForUrl = Object.keys(pickedUrlState).length ? pickedUrlState : undefined;
+          profileStateForUrl = filteredUrlState
+            ? { [profileStateDefinition.key]: filteredUrlState }
+            : undefined;
         }
 
         return urlStateStorage.set(PROFILE_STATE_URL_KEY, profileStateForUrl, { replace: true });

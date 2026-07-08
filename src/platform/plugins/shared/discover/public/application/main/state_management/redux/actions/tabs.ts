@@ -268,14 +268,17 @@ export const updateTabs: InternalStateThunkActionCreator<
           runtimeStateManager,
           nextTab.id
         );
-        const pickedUrlState = profileStateDefinition
-          ? services.profileStateRegistry.pickStateByType({
-              profileState: nextTab.profileState,
+        const filteredProfileUrlState = profileStateDefinition
+          ? services.profileStateRegistry.filterFieldsByType({
+              profileState: nextTab.profileState[profileStateDefinition.key],
+              stateKey: profileStateDefinition.key,
               stateType: [ProfileStateType.Url],
             })
           : undefined;
         const profileStateForUrl =
-          pickedUrlState && Object.keys(pickedUrlState).length ? pickedUrlState : undefined;
+          profileStateDefinition && filteredProfileUrlState
+            ? { [profileStateDefinition.key]: filteredProfileUrlState }
+            : undefined;
 
         await Promise.all([
           urlStateStorage.set<QueryState>(

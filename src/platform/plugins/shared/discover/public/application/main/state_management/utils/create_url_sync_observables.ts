@@ -111,13 +111,16 @@ export const createUrlSyncObservables = ({
       ? selectTab(getState(), tabId).profileState[profileStateDefinition.key]
       : undefined;
     const pickedUrlState = profileStateDefinition
-      ? services.profileStateRegistry.pickStateByType({
-          profileState: { [profileStateDefinition.key]: profileState },
+      ? services.profileStateRegistry.filterFieldsByType({
+          profileState,
+          stateKey: profileStateDefinition.key,
           stateType: [ProfileStateType.Url],
         })
       : undefined;
 
-    return pickedUrlState && Object.keys(pickedUrlState).length ? pickedUrlState : undefined;
+    return profileStateDefinition && pickedUrlState
+      ? { [profileStateDefinition.key]: pickedUrlState }
+      : undefined;
   };
 
   const profileState$ = internalState$.pipe(
@@ -139,14 +142,16 @@ export const createUrlSyncObservables = ({
       const currentProfileState = selectTab(getState(), tabId).profileState[
         profileStateDefinition.key
       ];
-      const nonUrlState = services.profileStateRegistry.pickStateByType({
-        profileState: { [profileStateDefinition.key]: currentProfileState },
+      const nonUrlState = services.profileStateRegistry.filterFieldsByType({
+        profileState: currentProfileState,
+        stateKey: profileStateDefinition.key,
         stateType: [ProfileStateType.Ui, ProfileStateType.Persistent],
-      })[profileStateDefinition.key];
-      const urlState = services.profileStateRegistry.pickStateByType({
-        profileState: profileUrlState ?? EMPTY_PROFILE_URL_STATE,
+      });
+      const urlState = services.profileStateRegistry.filterFieldsByType({
+        profileState: profileUrlState?.[profileStateDefinition.key],
+        stateKey: profileStateDefinition.key,
         stateType: [ProfileStateType.Url],
-      })[profileStateDefinition.key];
+      });
       const nextProfileState = {
         ...profileStateDefinition.defaultState,
         ...nonUrlState,
