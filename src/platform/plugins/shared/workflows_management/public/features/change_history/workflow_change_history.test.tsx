@@ -12,6 +12,8 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import React from 'react';
 import { ChangeHistoryTelemetryEventTypes } from '@kbn/change-history-ui';
 import type { WorkflowDetailDto } from '@kbn/workflows';
+import { WORKFLOW_UNSAVED_CHANGE_ID } from './constants';
+import { UNSAVED_CHANGES_ACTION } from './translations';
 import {
   WorkflowChangeHistoryListItem,
   WorkflowChangeHistoryProvider,
@@ -26,7 +28,7 @@ import {
 } from '../../../common/lib/workflow_change_history/constants';
 import type { WorkflowChangesHistoryResponse } from '../../../common/lib/workflow_change_history/types';
 import { createMockStore } from '../../entities/workflows/store/__mocks__/store.mock';
-import { setWorkflow } from '../../entities/workflows/store/workflow_detail/slice';
+import { setWorkflow, setYamlString } from '../../entities/workflows/store/workflow_detail/slice';
 import {
   createStartServicesMock,
   createUseKibanaMockValue,
@@ -101,13 +103,13 @@ jest.mock('./use_workflow_change_history', () => ({
   useWorkflowChangeHistoryEnabled: jest.fn(),
 }));
 
-jest.mock('./apply_workflow_yaml_validation_to_editor', () => ({
-  applyWorkflowYamlValidationToEditor: jest.fn(() => Promise.resolve({ validationResults: [] })),
+jest.mock('./use_workflow_change_history_preview_validation', () => ({
+  useWorkflowChangeHistoryPreviewValidation: jest.fn(() => ({
+    validationResults: [],
+    isValidationLoading: false,
+    handleValidationErrorClick: jest.fn(),
+  })),
 }));
-
-const { applyWorkflowYamlValidationToEditor } = jest.requireMock(
-  './apply_workflow_yaml_validation_to_editor'
-);
 
 jest.mock('@kbn/code-editor', () => ({
   monaco: {
@@ -116,12 +118,15 @@ jest.mock('@kbn/code-editor', () => ({
       createModel: jest.fn(() => ({ dispose: jest.fn() })),
       create: jest.fn(() => ({
         dispose: jest.fn(),
+        layout: jest.fn(),
         getModel: jest.fn(() => ({ dispose: jest.fn() })),
+        updateOptions: jest.fn(),
         createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
       })),
       createDiffEditor: jest.fn(() => ({
         setModel: jest.fn(),
         dispose: jest.fn(),
+        layout: jest.fn(),
         updateOptions: jest.fn(),
         getLineChanges: jest.fn(() => [
           {
@@ -141,12 +146,13 @@ jest.mock('@kbn/code-editor', () => ({
         })),
       })),
       setModelMarkers: jest.fn(),
+      onDidChangeMarkers: jest.fn(() => ({ dispose: jest.fn() })),
     },
   },
 }));
 
 jest.mock('@kbn/workflows-ui', () => ({
-  useWorkflowsMonacoTheme: jest.fn(),
+  useDefineWorkflowsMonacoTheme: jest.fn(),
   WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
 }));
 
@@ -324,9 +330,6 @@ describe('WorkflowChangeHistoryListItem', () => {
     });
 
     expect(screen.getByTestId('workflowChangeHistoryMonacoPreview')).toBeInTheDocument();
-    await waitFor(() => {
-      expect(applyWorkflowYamlValidationToEditor).toHaveBeenCalled();
-    });
     expect(services.http.get).toHaveBeenCalledWith(
       expect.stringContaining('/internal/workflows/workflow/workflow-1/history'),
       expect.objectContaining({
@@ -379,6 +382,130 @@ describe('WorkflowChangeHistoryListItem', () => {
     });
 
     expect(jest.mocked(services.http.get).mock.calls.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('shows unsaved edits as the current version without a sequence', async () => {
+    mockWorkflowChangeHistoryKibanaServices({
+      configureHttp: (http) => {
+        jest.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
+      },
+    });
+
+    const store = createStoreWithWorkflow();
+    store.dispatch(setYamlString('name: edited\n'));
+
+    render(
+      <TestWrapper store={store}>
+        <WorkflowChangeHistoryProvider workflowId="workflow-1" workflowName="My workflow">
+          <WorkflowChangeHistoryListItem />
+        </WorkflowChangeHistoryProvider>
+      </TestWrapper>
+    );
+
+    await openHistoryModal();
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId(`changeHistoryItem-${WORKFLOW_UNSAVED_CHANGE_ID}`)
+      ).toBeInTheDocument();
+    });
+
+    const unsavedItem = screen.getByTestId(`changeHistoryItem-${WORKFLOW_UNSAVED_CHANGE_ID}`);
+
+    expect(
+      within(unsavedItem).getByTestId('workflowChangeHistoryUnsavedChangesBadge')
+    ).toHaveTextContent('Unsaved changes');
+    expect(
+      within(unsavedItem).queryByTestId('workflowChangeHistoryVersionBadge')
+    ).not.toBeInTheDocument();
+
+    await selectHistoryItem('evt-current');
+
+    expect(
+      within(screen.getByTestId('changeHistoryItem-evt-current')).getByTestId(
+        'workflowChangeHistoryVersionBadge'
+      )
+    ).toHaveTextContent('v3');
+  });
+
+  it('shows split compare labels with the unsaved badge for the pending selection', async () => {
+    mockWorkflowChangeHistoryKibanaServices({
+      configureHttp: (http) => {
+        jest.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
+      },
+    });
+
+    const store = createStoreWithWorkflow();
+    store.dispatch(setYamlString('name: edited\n'));
+
+    render(
+      <TestWrapper store={store}>
+        <WorkflowChangeHistoryProvider workflowId="workflow-1" workflowName="My workflow">
+          <WorkflowChangeHistoryListItem />
+        </WorkflowChangeHistoryProvider>
+      </TestWrapper>
+    );
+
+    await openHistoryModal();
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId(`changeHistoryItem-${WORKFLOW_UNSAVED_CHANGE_ID}`)
+      ).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('workflowChangeHistoryPreviewSettingsButton')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('workflowChangeHistoryPreviewSettingsButton'));
+    fireEvent.click(screen.getByTestId('workflowChangeHistoryCompareSplit'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('workflowChangeHistoryCompareSplitPaneLabels')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('Selected version:')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowChangeHistoryCompareSplitCurrentBadge')).toHaveTextContent(
+      UNSAVED_CHANGES_ACTION
+    );
+    expect(screen.getByTestId('workflowChangeHistoryCompareSplitBaselineBadge')).toHaveTextContent(
+      'v3'
+    );
+  });
+
+  it('warns when restoring with unsaved workflow changes', async () => {
+    mockWorkflowChangeHistoryKibanaServices({
+      configureHttp: (http) => {
+        jest.mocked(http.get).mockResolvedValue(sampleWorkflowHistoryResponse);
+      },
+    });
+
+    const store = createStoreWithWorkflow();
+    store.dispatch(setYamlString('name: edited\n'));
+
+    render(
+      <TestWrapper store={store}>
+        <WorkflowChangeHistoryProvider workflowId="workflow-1" workflowName="My workflow">
+          <WorkflowChangeHistoryListItem />
+        </WorkflowChangeHistoryProvider>
+      </TestWrapper>
+    );
+
+    await openHistoryModal();
+    await selectHistoricalVersion();
+
+    fireEvent.click(screen.getByTestId('changeHistoryRestoreButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('changeHistoryRestoreConfirmModal')).toBeInTheDocument();
+    });
+
+    expect(
+      screen.getByText(
+        'You have unsaved changes. Restoring this version will overwrite all changes that have not been saved.'
+      )
+    ).toBeInTheDocument();
   });
 
   it('keeps the confirm modal visible when restore fails', async () => {

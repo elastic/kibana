@@ -91,6 +91,7 @@ export const getAttackDiscoveryGenerationsRoute = (
             eventLogIndex,
             getAttackDiscoveryGenerationsParams: {
               end: query.end,
+              scheduled: query.scheduled,
               size: query.size,
               start: query.start,
             },

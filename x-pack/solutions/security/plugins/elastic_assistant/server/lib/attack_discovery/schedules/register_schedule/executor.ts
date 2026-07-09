@@ -30,6 +30,7 @@ import { findDocuments } from '../../../../ai_assistant_data_clients/find';
 import { generateAttackDiscoveries } from '../../../../routes/attack_discovery/helpers/generate_discoveries';
 import { filterHallucinatedAlerts } from '../../../../routes/attack_discovery/helpers/filter_hallucinated_alerts';
 import type { AttackDiscoveryExecutorOptions, AttackDiscoveryScheduleContext } from '../types';
+import type { AttackDiscoveryWorkflowExecutorFactory } from '../../../../types';
 import { getIndexTemplateAndPattern } from '../../../data_stream/helpers';
 import {
   generateAttackDiscoveryAlertHash,
@@ -40,6 +41,7 @@ import { getScheduledIndexPattern } from '../../persistence/get_scheduled_index_
 import { updateAlertsWithAttackIds } from './updateAlertsWithAttackIds';
 
 export interface AttackDiscoveryScheduleExecutorParams {
+  getWorkflowExecutorFactory?: () => AttackDiscoveryWorkflowExecutorFactory | undefined;
   inference: InferenceServerStart;
   options: AttackDiscoveryExecutorOptions;
   logger: Logger;
@@ -48,6 +50,7 @@ export interface AttackDiscoveryScheduleExecutorParams {
 }
 
 export const attackDiscoveryScheduleExecutor = async ({
+  getWorkflowExecutorFactory,
   inference,
   options,
   logger,
@@ -68,6 +71,28 @@ export const attackDiscoveryScheduleExecutor = async ({
     // This provides backward compatibility for existing schedules that reference
     // "Elastic-Managed-LLM" or "General-Purpose-LLM-v1".
     params.apiConfig.connectorId = resolveConnectorId(params.apiConfig.connectorId);
+  }
+
+  // AD 2.0: a schedule that carries a `workflowConfig` dispatches to the workflow
+  // executor registered by the discoveries plugin. Schedules only carry a
+  // `workflowConfig` when the feature is enabled, so with the feature flag off no
+  // schedule reaches this branch and the legacy generation path below is unaffected.
+  const workflowConfig = (params as Record<string, unknown>).workflowConfig as
+    | Record<string, unknown>
+    | undefined;
+
+  if (workflowConfig != null) {
+    const workflowExecutorFactory = getWorkflowExecutorFactory?.();
+
+    if (workflowExecutorFactory == null) {
+      const error = new Error(
+        `Schedule "${rule.id}" has workflowConfig but no workflow executor is registered. ` +
+          'Ensure the discoveries plugin is enabled and has called registerAttackDiscoveryWorkflowExecutor during setup.'
+      );
+      throw createTaskRunError(error, TaskErrorSource.USER);
+    }
+
+    return workflowExecutorFactory(options);
   }
 
   const esClient = scopedClusterClient.asCurrentUser;

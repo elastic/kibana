@@ -66,4 +66,6 @@ export const getMapAttachmentType = () =>
     getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_MAP }),
     getAttachmentTabViewObject: () => ({ children: MapAttachmentsTab }),
     schema: MapAttachmentPayloadSchema,
+    // Exclude pesistable data from the workflow schema
+    workflowSchema: MapAttachmentPayloadSchema.omit({ data: true }),
   });

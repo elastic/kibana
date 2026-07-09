@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
 import type { StreamType } from '@kbn/streams-schema';
-import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 
 interface StreamEndpointLatencyProps {
   name: string;
@@ -31,18 +29,6 @@ interface StreamsDescriptionGeneratedProps {
   stream_type: StreamType;
 }
 
-interface StreamsSignificantEventsQueriesGeneratedProps {
-  count: number;
-  connector_id: string;
-  input_tokens_used: number;
-  output_tokens_used: number;
-  cached_tokens_used: number;
-  duration_ms: number;
-  stream_name: string;
-  stream_type: StreamType;
-  tool_usage: SignificantEventsToolUsage;
-}
-
 interface StreamsProcessingPipelineSuggestedProps {
   duration_ms: number;
   steps_used: number;
@@ -51,126 +37,16 @@ interface StreamsProcessingPipelineSuggestedProps {
   stream_type: StreamType;
 }
 
-interface StreamsFeaturesIdentifiedProps {
-  run_id: string;
-  connector_id: string;
-  iteration: number;
-  docs_count: number;
-  features_new: number;
-  features_updated: number;
-  total_filters: number;
-  filters_capped: boolean;
-  has_filtered_documents: boolean;
-  input_tokens_used: number;
-  output_tokens_used: number;
-  total_tokens_used: number;
-  cached_tokens_used: number;
-  duration_ms: number;
-  excluded_features_count: number;
-  llm_ignored_count: number;
-  code_ignored_count: number;
-  stream_name: string;
-  stream_type: StreamType;
-  state: 'success' | 'failure' | 'canceled';
-}
-
-interface StreamsAgentBuilderKnowledgeIndicatorCreatedProps {
-  ki_kind: 'feature' | 'query';
-  tool_id: 'ki_feature_create' | 'ki_query_create';
-  success: boolean;
-  stream_name: string;
-  stream_type: StreamType | 'unknown';
-  error_message?: string;
-}
-
-interface StreamsAgentToolKiIdentificationStartedProps {
-  success: boolean;
-  stream_name: string;
-  error_message?: string;
-}
-
 interface StreamsAgentToolEventCreateProps {
   success: boolean;
   stream_names: string[];
   error_message?: string;
 }
 
-interface StreamsAgentToolEventStatusUpdateProps {
-  success: boolean;
-  event_id: string;
-  status: SignificantEventStatus;
-  error_message?: string;
-}
-
-interface StreamsAgentToolEventInvestigationAttachProps {
-  success: boolean;
-  event_id: string;
-  workflow_execution_id: string;
-  error_message?: string;
-}
-
-interface StreamsCodeAnalysisGroundingProps {
-  stream_name: string;
-  stream_type: string;
-  /**
-   * Outcome of the code_analysis computed feature: `feature` (a repository was
-   * selected and a feature emitted), `no_match` (candidates existed but none
-   * verified enough strings), `no_candidates`, `no_strings`, or `unavailable`
-   * (SCS / Agent Builder not installed).
-   */
-  status: string;
-  repository?: string;
-  candidate_count: number;
-  verified_count: number;
-}
-
-interface StreamsSignificantEventsDiscoveryTriggeredProps {
-  execution_id: string;
-  space_id: string;
-}
-
-interface StreamsSignificantEventsDetectionScanProps {
-  /** ES `took` (ms) reported by the alerts-source search itself. */
-  took_ms: number;
-  /** Wall-clock (ms) around the reader call, including transport and parsing. */
-  duration_ms: number;
-  /** Number of distinct rules covered by the change-point scan. */
-  rules_scanned: number;
-  /** Resolved alerting engine backing the read: `v2` reads `.rule-events`, `v1` reads `.alerts-*`. */
-  alerting_engine: 'v1' | 'v2';
-  /** The alerts-source index that was read (e.g. `.rule-events`). */
-  alerts_source_index: string;
-  /** The scan lookback window, e.g. `now-30m`. */
-  lookback: string;
-  /** The change-point bucket interval, e.g. `30s`. */
-  bucket_interval: string;
-  /** The Kibana space in which the scan ran. */
-  space_id: string;
-}
-
-interface StreamsOnboardingScheduledProps {
-  stream_name: string;
-  execution_id: string;
-  workflow_id: string;
-  space_id: string;
-  skip_features: boolean;
-  skip_queries: boolean;
-}
-
 export {
   type StreamEndpointLatencyProps,
   type StreamsStateErrorProps,
   type StreamsDescriptionGeneratedProps,
-  type StreamsSignificantEventsQueriesGeneratedProps,
   type StreamsProcessingPipelineSuggestedProps,
-  type StreamsFeaturesIdentifiedProps,
-  type StreamsAgentBuilderKnowledgeIndicatorCreatedProps,
-  type StreamsAgentToolKiIdentificationStartedProps,
   type StreamsAgentToolEventCreateProps,
-  type StreamsAgentToolEventStatusUpdateProps,
-  type StreamsAgentToolEventInvestigationAttachProps,
-  type StreamsCodeAnalysisGroundingProps,
-  type StreamsSignificantEventsDiscoveryTriggeredProps,
-  type StreamsSignificantEventsDetectionScanProps,
-  type StreamsOnboardingScheduledProps,
 };

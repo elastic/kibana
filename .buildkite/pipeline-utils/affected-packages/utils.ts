@@ -42,17 +42,23 @@ export function touchedCriticalFiles(files: string[], criticalFiles: string[]): 
  * Returns true when every file matches a `scope` pattern, treating files
  * that match an `ignore` pattern as irrelevant. Returns false on an empty
  * list or as soon as a file matches neither.
+ *
+ * A file matching an `exclude` pattern forces `false` immediately — it sits
+ * inside the scope but is deliberately treated as out-of-scope (e.g. Scout `fixtures/`).
  */
 export function allChangedFilesInScope(
   files: readonly string[],
   scope: readonly string[],
-  ignore: readonly string[] = []
+  ignore: readonly string[] = [],
+  exclude: readonly string[] = []
 ): boolean {
   const ignoreMatchers = compileMatchers(ignore);
   const scopeMatchers = compileMatchers(scope);
+  const excludeMatchers = compileMatchers(exclude);
   let hasScopedChange = false;
   for (const file of files) {
     if (matchesAny(file, ignoreMatchers)) continue;
+    if (matchesAny(file, excludeMatchers)) return false;
     if (!matchesAny(file, scopeMatchers)) return false;
     hasScopedChange = true;
   }
