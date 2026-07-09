@@ -7,6 +7,7 @@
 import { trialCompanionTelemetryEvents } from './trial_companion';
 import { alertsTelemetryEvents } from './alerts_grouping';
 import { appTelemetryEvents } from './app';
+import { attackDiscoveryTelemetryEvents } from './attack_discovery';
 import { dataQualityTelemetryEvents } from './data_quality';
 import { documentTelemetryEvents } from './document_details';
 import { entityTelemetryEvents } from './entity_analytics';
@@ -27,6 +28,7 @@ import { attackDiscoverySchedulesTelemetryEvents } from './attack_discovery_sche
 import { siemReadinessTelemetryEvents } from './siem_readiness';
 
 export const telemetryEvents = [
+  ...attackDiscoveryTelemetryEvents,
   ...ruleCreationTelemetryEvents,
   ...attacksTelemetryEvents,
   ...attackDiscoverySchedulesTelemetryEvents,
