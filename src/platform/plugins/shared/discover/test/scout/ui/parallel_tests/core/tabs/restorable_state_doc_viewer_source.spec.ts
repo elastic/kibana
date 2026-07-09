@@ -7,26 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PageObjects } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { countMatchingRequests, spaceTest } from '../../../fixtures/common';
+import { spaceTest, type DiscoverPageObjects } from '../../../fixtures';
+import { countMatchingRequests } from '../../../fixtures/common';
 
 const DOC_VIEWER_SOURCE_TAB_ID = 'doc_view_source';
 const DOC_VIEWER_TABLE_TAB_ID = 'doc_view_table';
 const ESE_SEARCH_ENDPOINT = '/internal/search/ese';
 
-const openSourceDocViewer = async ({ dataGrid, discover }: PageObjects, rowIndex: number) => {
-  await dataGrid.openAndWaitForDocViewerFlyout({ rowIndex });
+const openSourceDocViewer = async (
+  { discover, docViewer }: DiscoverPageObjects,
+  rowIndex: number
+) => {
+  await docViewer.openAndWaitForFlyout({ rowIndex });
   expect(await discover.isShowingDocViewer()).toBe(true);
-  await dataGrid.openDocViewerTab(DOC_VIEWER_SOURCE_TAB_ID);
-  await dataGrid.readJsonFromCodeEditor();
+  await docViewer.openTab(DOC_VIEWER_SOURCE_TAB_ID);
+  await docViewer.readJsonFromCodeEditor();
 };
 
-const openTableDocViewer = async ({ dataGrid, discover }: PageObjects, rowIndex: number) => {
-  await dataGrid.openAndWaitForDocViewerFlyout({ rowIndex });
+const openTableDocViewer = async ({ discover, docViewer }: DiscoverPageObjects, rowIndex: number) => {
+  await docViewer.openAndWaitForFlyout({ rowIndex });
   expect(await discover.isShowingDocViewer()).toBe(true);
-  await dataGrid.openDocViewerTab(DOC_VIEWER_TABLE_TAB_ID);
-  await dataGrid.getDocViewerTab(DOC_VIEWER_TABLE_TAB_ID).waitFor({ state: 'visible' });
+  await docViewer.openTab(DOC_VIEWER_TABLE_TAB_ID);
+  await docViewer.getTab(DOC_VIEWER_TABLE_TAB_ID).waitFor({ state: 'visible' });
 };
 
 spaceTest.describe(
@@ -48,7 +51,7 @@ spaceTest.describe(
     });
 
     spaceTest('restores ES query hide-null-values state per tab', async ({ page, pageObjects }) => {
-      const { dataGrid, discover, unifiedTabs } = pageObjects;
+      const { discover, docViewer, unifiedTabs } = pageObjects;
 
       await discover.selectTextBaseLang();
       await discover.waitUntilTabIsLoaded();
@@ -66,20 +69,20 @@ spaceTest.describe(
 
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
-      await dataGrid.getDocViewer().waitFor({ state: 'visible' });
+      await docViewer.getFlyout().waitFor({ state: 'visible' });
       await expect(hideNullValuesSwitch).toHaveAttribute('aria-checked', 'false');
     });
 
     spaceTest('restores JSON source content without refetching', async ({ page, pageObjects }) => {
-      const { dataGrid, discover, unifiedTabs } = pageObjects;
+      const { discover, docViewer, unifiedTabs } = pageObjects;
 
       await openSourceDocViewer(pageObjects, 0);
-      const originalJsonContent = await dataGrid.getJsonCodeEditorValue();
+      const originalJsonContent = await docViewer.getJsonCodeEditorValue();
 
       await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
       await openSourceDocViewer(pageObjects, 1);
-      const tab2JsonContent = await dataGrid.getJsonCodeEditorValue();
+      const tab2JsonContent = await docViewer.getJsonCodeEditorValue();
       expect(tab2JsonContent).not.toStrictEqual(originalJsonContent);
 
       expect(
@@ -88,7 +91,7 @@ spaceTest.describe(
           await discover.waitUntilTabIsLoaded();
         })
       ).toBe(0);
-      expect(await dataGrid.getJsonCodeEditorValue()).toBe(originalJsonContent);
+      expect(await docViewer.getJsonCodeEditorValue()).toBe(originalJsonContent);
 
       expect(
         await countMatchingRequests(page, ESE_SEARCH_ENDPOINT, async () => {
@@ -96,11 +99,11 @@ spaceTest.describe(
           await discover.waitUntilTabIsLoaded();
         })
       ).toBe(0);
-      expect(await dataGrid.getJsonCodeEditorValue()).toBe(tab2JsonContent);
+      expect(await docViewer.getJsonCodeEditorValue()).toBe(tab2JsonContent);
     });
 
     spaceTest('restores source viewer scroll position per tab', async ({ pageObjects }) => {
-      const { dataGrid, discover, unifiedTabs } = pageObjects;
+      const { discover, docViewer, unifiedTabs } = pageObjects;
       const scrollAmount = 200;
 
       await openSourceDocViewer(pageObjects, 0);
@@ -115,7 +118,7 @@ spaceTest.describe(
 
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
-      await dataGrid.getDocViewer().waitFor({ state: 'visible' });
+      await docViewer.getFlyout().waitFor({ state: 'visible' });
       expect(await discover.codeEditor.getScrollTop()).toBe(tab1ScrollTop);
     });
   }

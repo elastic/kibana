@@ -7,17 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PageObjects } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../../../fixtures/common';
+import { spaceTest, type DiscoverPageObjects } from '../../../fixtures';
 
 const DOC_VIEWER_TABLE_TAB_ID = 'doc_view_table';
 
-const openTableDocViewer = async ({ dataGrid, discover }: PageObjects) => {
-  await dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
+const openTableDocViewer = async ({ discover, docViewer }: DiscoverPageObjects) => {
+  await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
   expect(await discover.isShowingDocViewer()).toBe(true);
-  await dataGrid.openDocViewerTab(DOC_VIEWER_TABLE_TAB_ID);
-  await dataGrid.getDocViewer().waitFor({ state: 'visible' });
+  await docViewer.openTab(DOC_VIEWER_TABLE_TAB_ID);
+  await docViewer.getFlyout().waitFor({ state: 'visible' });
 };
 
 spaceTest.describe(
@@ -41,84 +40,84 @@ spaceTest.describe(
     spaceTest(
       'restores DocViewer field search and pinned fields per tab',
       async ({ pageObjects }) => {
-        const { dataGrid, discover, unifiedTabs } = pageObjects;
+        const { discover, docViewer, unifiedTabs } = pageObjects;
 
         await openTableDocViewer(pageObjects);
-        await discover.findFieldByNameOrValueInDocViewer('geo');
-        await expect(discover.getDocViewerFieldNames()).toHaveCount(4);
+        await docViewer.findFieldByNameOrValue('geo');
+        await expect(docViewer.getFieldNames()).toHaveCount(4);
 
-        await dataGrid.togglePinActionInFlyout('geo.src');
-        expect(await dataGrid.isFieldPinnedInFlyout('geo.src')).toBe(true);
+        await docViewer.togglePinAction('geo.src');
+        expect(await docViewer.isFieldPinned('geo.src')).toBe(true);
 
         await unifiedTabs.createNewTab();
         await discover.waitUntilTabIsLoaded();
         await openTableDocViewer(pageObjects);
-        await discover.findFieldByNameOrValueInDocViewer('.sr');
-        await expect(discover.getDocViewerFieldNames()).toHaveCount(2);
+        await docViewer.findFieldByNameOrValue('.sr');
+        await expect(docViewer.getFieldNames()).toHaveCount(2);
 
-        await dataGrid.togglePinActionInFlyout('geo.src');
-        await dataGrid.togglePinActionInFlyout('geo.srcdest');
-        expect(await dataGrid.isFieldPinnedInFlyout('geo.src')).toBe(false);
-        expect(await dataGrid.isFieldPinnedInFlyout('geo.srcdest')).toBe(true);
+        await docViewer.togglePinAction('geo.src');
+        await docViewer.togglePinAction('geo.srcdest');
+        expect(await docViewer.isFieldPinned('geo.src')).toBe(false);
+        expect(await docViewer.isFieldPinned('geo.srcdest')).toBe(true);
 
         await unifiedTabs.selectTab(0);
         await discover.waitUntilTabIsLoaded();
-        await dataGrid.getDocViewer().waitFor({ state: 'visible' });
-        expect(await discover.getDocViewerFieldSearchValue()).toBe('geo');
-        expect(await discover.getDocViewerFieldNameCount()).toBe(4);
-        expect(await dataGrid.isFieldPinnedInFlyout('geo.src')).toBe(true);
+        await docViewer.getFlyout().waitFor({ state: 'visible' });
+        expect(await docViewer.getFieldSearchValue()).toBe('geo');
+        expect(await docViewer.getFieldNameCount()).toBe(4);
+        expect(await docViewer.isFieldPinned('geo.src')).toBe(true);
       }
     );
 
     spaceTest(
       'restores DocViewer field type filters and selected-only state per tab',
       async ({ page, pageObjects }) => {
-        const { dataGrid, discover, unifiedFieldList, unifiedTabs } = pageObjects;
+        const { discover, docViewer, unifiedFieldList, unifiedTabs } = pageObjects;
 
         await openTableDocViewer(pageObjects);
-        await discover.openDocViewerFieldTypeFilter();
+        await docViewer.openFieldTypeFilter();
         await page.testSubj.locator('typeFilter-date').click();
         await expect(page.testSubj.locator('typeFilter-date')).toHaveAttribute(
           'aria-checked',
           'true'
         );
-        await discover.closeDocViewerFieldTypeFilter();
-        expect(await discover.getDocViewerFieldTypeFilterCount()).toBe('1');
+        await docViewer.closeFieldTypeFilter();
+        expect(await docViewer.getFieldTypeFilterCount()).toBe('1');
 
         await unifiedFieldList.clickFieldListItemAdd('utc_time');
         await discover.waitUntilTabIsLoaded();
-        await discover.expectDocViewerShowOnlySelectedFields(false);
+        await docViewer.expectShowOnlySelectedFields(false);
 
         await unifiedTabs.createNewTab();
         await discover.waitUntilTabIsLoaded();
         await openTableDocViewer(pageObjects);
-        await discover.openDocViewerFieldTypeFilter();
+        await docViewer.openFieldTypeFilter();
         await page.testSubj.locator('typeFilter-number').click();
         await expect(page.testSubj.locator('typeFilter-number')).toHaveAttribute(
           'aria-checked',
           'true'
         );
-        await discover.closeDocViewerFieldTypeFilter();
-        expect(await discover.getDocViewerFieldTypeFilterCount()).toBe('2');
+        await docViewer.closeFieldTypeFilter();
+        expect(await docViewer.getFieldTypeFilterCount()).toBe('2');
 
         await unifiedFieldList.clickFieldListItemAdd('utc_time');
         await discover.waitUntilTabIsLoaded();
-        await discover.expectDocViewerShowOnlySelectedFields(false);
-        await discover.clickDocViewerShowOnlySelectedFieldsSwitch();
-        await discover.expectDocViewerShowOnlySelectedFields(true);
+        await docViewer.expectShowOnlySelectedFields(false);
+        await docViewer.clickShowOnlySelectedFieldsSwitch();
+        await docViewer.expectShowOnlySelectedFields(true);
 
         await unifiedTabs.selectTab(0);
         await discover.waitUntilTabIsLoaded();
-        await dataGrid.getDocViewer().waitFor({ state: 'visible' });
-        expect(await discover.getDocViewerFieldTypeFilterCount()).toBe('1');
-        await discover.expectDocViewerShowOnlySelectedFields(false);
+        await docViewer.getFlyout().waitFor({ state: 'visible' });
+        expect(await docViewer.getFieldTypeFilterCount()).toBe('1');
+        await docViewer.expectShowOnlySelectedFields(false);
       }
     );
 
     spaceTest(
       'restores DocViewer rows per page and page number per tab',
       async ({ pageObjects }) => {
-        const { dataGrid, discover, unifiedTabs } = pageObjects;
+        const { dataGrid, discover, docViewer, unifiedTabs } = pageObjects;
 
         await openTableDocViewer(pageObjects);
         await dataGrid.changeRowsPerPageTo(50, 'docViewer');
@@ -135,7 +134,7 @@ spaceTest.describe(
 
         await unifiedTabs.selectTab(0);
         await discover.waitUntilTabIsLoaded();
-        await dataGrid.getDocViewer().waitFor({ state: 'visible' });
+        await docViewer.getFlyout().waitFor({ state: 'visible' });
         expect(await dataGrid.getCurrentRowsPerPage('docViewer')).toBe(50);
         expect(await dataGrid.getCurrentPageNumber('docViewer')).toBe('1');
       }

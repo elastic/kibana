@@ -9,7 +9,7 @@
 
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../../../fixtures/common';
+import { spaceTest } from '../../../fixtures';
 
 const FIRST_TAB_LABEL = 'Untitled';
 const SECOND_TAB_LABEL = 'testing';
@@ -42,7 +42,7 @@ spaceTest.describe('Discover tabs - navigation', { tag: '@local-stateful-classic
   spaceTest(
     'returns to the last active tab from Surrounding Docs',
     async ({ page, pageObjects }) => {
-      const { dataGrid, discover, filterBar, unifiedTabs } = pageObjects;
+      const { discover, docViewer, filterBar, unifiedTabs } = pageObjects;
 
       await discover.loadSavedSearch(SAVED_SEARCH_TITLE);
       await discover.waitUntilTabIsLoaded();
@@ -75,7 +75,7 @@ spaceTest.describe('Discover tabs - navigation', { tag: '@local-stateful-classic
 
       await unifiedTabs.selectTab(1);
       await discover.waitUntilTabIsLoaded();
-      await dataGrid.openSurroundingDocuments(0);
+      await docViewer.openSurroundingDocuments(0);
       await page.waitForURL(/#\/context/);
       await getFilterBadge(page, 'extension', 'jpg').waitFor({ state: 'visible' });
 
@@ -95,7 +95,7 @@ spaceTest.describe('Discover tabs - navigation', { tag: '@local-stateful-classic
   );
 
   spaceTest('returns to the last active tab from Single Doc', async ({ page, pageObjects }) => {
-    const { dataGrid, discover, filterBar, unifiedTabs } = pageObjects;
+    const { discover, docViewer, filterBar, unifiedTabs } = pageObjects;
 
     await unifiedTabs.createNewTab();
     await discover.waitUntilTabIsLoaded();
@@ -106,7 +106,7 @@ spaceTest.describe('Discover tabs - navigation', { tag: '@local-stateful-classic
     expect(await discover.getHitCountInt()).toBe(9_109);
     expect(await unifiedTabs.getTabLabels()).toStrictEqual([FIRST_TAB_LABEL, SECOND_TAB_LABEL]);
 
-    await dataGrid.openSingleDocument(0);
+    await docViewer.openSingleDocument(0);
     await page.waitForURL(/#\/doc/);
     await page.testSubj.locator('doc-hit').waitFor({ state: 'visible' });
 
