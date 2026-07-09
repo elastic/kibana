@@ -170,7 +170,7 @@ describe('ApplicationConnections', () => {
       expect(queryByText('Unused MCP app')).not.toBeInTheDocument();
     });
     expect(getByText('Connected app')).toBeInTheDocument();
-  });
+  }, 15_000);
 
   it('disables selection for clients with zero connections with an explanatory message', async () => {
     setupHttpResponses(coreStart, {
@@ -267,7 +267,7 @@ describe('ApplicationConnections', () => {
       expect(queryByText('Revoked app')).not.toBeInTheDocument();
     });
     expect(getByText('Active app')).toBeInTheDocument();
-  });
+  }, 15_000);
 
   function setupMixedStatusFixture() {
     setupHttpResponses(coreStart, {

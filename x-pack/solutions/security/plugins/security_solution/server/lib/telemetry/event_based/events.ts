@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { EventTypeOpts } from '@kbn/core/server';
+import type { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
 import type { CsvErrorCategory } from '../../entity_analytics/entity_resolution/csv_upload';
 import type {
@@ -31,6 +32,14 @@ import type {
   RuleBulkUpgradeTelemetry,
   RuleUpgradeTelemetry,
 } from '../../detection_engine/prebuilt_rules/api/perform_rule_upgrade/update_rule_telemetry';
+import type {
+  RuleRestoreTelemetry,
+  RuleRestoreErrorTelemetry,
+} from '../../detection_engine/rule_management/logic/detection_rules_client/restore_telemetry';
+import type {
+  RuleDuplicateTelemetry,
+  RuleLifecycleTelemetry,
+} from '../../detection_engine/rule_management/logic/detection_rules_client/rule_lifecycle_telemetry';
 import { TRIAL_COMPANION_EVENTS } from '../../trial_companion/telemetry/trial_companion_ebt_events';
 
 // Telemetry event that is sent for each rule that is upgraded during a prebuilt rule upgrade
@@ -103,6 +112,100 @@ export const DETECTION_RULE_UPGRADE_EVENT: EventTypeOpts<RuleUpgradeTelemetry> =
         },
       },
       _meta: { description: 'Fields updated without conflicts' },
+    },
+  },
+};
+
+// Telemetry event that is sent when a rule is restored to a previous changes-history revision
+export const DETECTION_RULE_RESTORE_EVENT: EventTypeOpts<RuleRestoreTelemetry> = {
+  eventType: 'detection_rule_restore',
+  schema: {
+    ruleId: { type: 'keyword', _meta: { description: 'ID of the rule that was restored' } },
+    ruleType: {
+      type: 'keyword',
+      _meta: { description: 'Type of the restored rule, e.g. query, eql, esql, threshold' },
+    },
+    isPrebuilt: {
+      type: 'boolean',
+      _meta: { description: 'True if the restored rule is a prebuilt (external) rule' },
+    },
+    isCustomized: {
+      type: 'boolean',
+      _meta: { description: 'True if the restored rule is a customized prebuilt rule' },
+    },
+    restoredRevisionTimestamp: {
+      type: 'date',
+      _meta: { description: 'Timestamp of the restored history revision' },
+    },
+  },
+};
+
+export const DETECTION_RULE_RESTORE_ERROR_EVENT: EventTypeOpts<RuleRestoreErrorTelemetry> = {
+  eventType: 'detection_rule_restore_error',
+  schema: {
+    ruleId: { type: 'keyword', _meta: { description: 'ID of the rule that failed to restore' } },
+    changeId: {
+      type: 'keyword',
+      _meta: { description: 'ID of the history change that was being restored' },
+    },
+    status: {
+      type: 'keyword',
+      _meta: { description: 'Failure reason: "conflict" or "error"' },
+    },
+    errorMessage: {
+      type: 'keyword',
+      _meta: { description: 'Error message thrown while restoring the rule' },
+    },
+  },
+};
+
+const ruleLifecycleTelemetrySchema = {
+  ruleId: { type: 'keyword' as const, _meta: { description: 'ID of the rule' } },
+  ruleType: {
+    type: 'keyword' as const,
+    _meta: { description: 'Type of the rule, e.g. query, eql, esql, threshold' },
+  },
+  isPrebuilt: {
+    type: 'boolean' as const,
+    _meta: { description: 'True if the rule is a prebuilt (external) rule' },
+  },
+  isCustomized: {
+    type: 'boolean' as const,
+    _meta: { description: 'True if the rule is a customized prebuilt rule' },
+  },
+};
+
+export const DETECTION_RULE_IMPORT_EVENT: EventTypeOpts<RuleLifecycleTelemetry> = {
+  eventType: 'detection_rule_import',
+  schema: ruleLifecycleTelemetrySchema,
+};
+
+export const DETECTION_RULE_REVERT_EVENT: EventTypeOpts<RuleLifecycleTelemetry> = {
+  eventType: 'detection_rule_revert',
+  schema: ruleLifecycleTelemetrySchema,
+};
+
+export const DETECTION_RULE_INSTALL_EVENT: EventTypeOpts<RuleLifecycleTelemetry> = {
+  eventType: 'detection_rule_install',
+  schema: ruleLifecycleTelemetrySchema,
+};
+
+export const DETECTION_RULE_DUPLICATE_EVENT: EventTypeOpts<RuleDuplicateTelemetry> = {
+  eventType: 'detection_rule_duplicate',
+  schema: {
+    ruleId: { type: 'keyword', _meta: { description: 'ID of the newly created (duplicate) rule' } },
+    sourceRuleId: { type: 'keyword', _meta: { description: 'ID of the rule that was duplicated' } },
+    ruleType: {
+      type: 'keyword',
+      _meta: { description: 'Type of the duplicated rule, e.g. query, eql, esql, threshold' },
+    },
+    isPrebuiltSource: {
+      type: 'boolean',
+      _meta: { description: 'True if the source rule is a prebuilt (external) rule' },
+    },
+    isCustomizedSource: {
+      type: 'boolean',
+      _meta: { description: 'True if the source rule is a customized prebuilt rule' },
     },
   },
 };
@@ -745,10 +848,55 @@ export const ENTITY_HIGHLIGHTS_USAGE_EVENT: EventTypeOpts<{
   },
 };
 
+export const ENTITY_AI_SUMMARY_PERSISTED_EVENT: EventTypeOpts<{
+  entityType: string;
+  spaceId: string;
+  highlightsCount: number;
+  recommendedActionsCount: number;
+}> = {
+  eventType: 'entity_ai_summary_persisted',
+  schema: {
+    entityType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entity the AI summary was generated for (e.g. "host")',
+      },
+    },
+    spaceId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Space where the summary was persisted (e.g. "default")',
+      },
+    },
+    highlightsCount: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of highlights the model produced (pre-cap), captured client-side before capping. Compare against MAX_ENTITY_SUMMARY_HIGHLIGHTS to see how often/by how much the model overshoots.',
+      },
+    },
+    recommendedActionsCount: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of recommended actions the model produced (pre-cap), captured client-side before capping. Compare against MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS to gauge overshoot.',
+      },
+    },
+  },
+};
+
 export const ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT: EventTypeOpts<{
-  entitiesReturned: number;
-  entityTypes: string[];
+  actionType?: 'read' | 'mutation';
+  /**
+   * @deprecated Use `resultCount` instead. Retained in the schema so historical
+   * rows (written before the rename) can still be queried in BigQuery; no tool
+   * populates this field anymore — dashboards should `COALESCE(resultCount, entitiesReturned)`.
+   */
+  entitiesReturned?: number;
+  entityTypes?: string[];
   errorMessage?: string;
+  userConfirmationOutcome?: ConfirmationStatus;
+  resultCount?: number;
   spaceId: string;
   success: boolean;
   toolId: string;
@@ -761,6 +909,14 @@ export const ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT: EventTypeOpts<{
         description: 'ID of the agent tool being used (e.g. "security.get_entity")',
       },
     },
+    actionType: {
+      type: 'keyword',
+      _meta: {
+        optional: true,
+        description:
+          'Whether the tool call reads data or mutates state ("read" | "mutation"). Omitted for legacy events emitted before this field was introduced.',
+      },
+    },
     entityTypes: {
       type: 'array',
       items: {
@@ -770,13 +926,15 @@ export const ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT: EventTypeOpts<{
         },
       },
       _meta: {
-        description: 'Entity types the tool was called for (e.g. ["host", "user"])',
+        optional: true,
+        description:
+          'Entity types the tool was called for (e.g. ["host", "user"]). Not populated for tools that do not operate on a specific entity type (e.g. watchlist and lead tools).',
       },
     },
     spaceId: {
       type: 'keyword',
       _meta: {
-        description: 'Space where the highlight request originated (e.g. "default")',
+        description: 'Space where the tool invocation originated (e.g. "default")',
       },
     },
     success: {
@@ -788,7 +946,25 @@ export const ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT: EventTypeOpts<{
     entitiesReturned: {
       type: 'long',
       _meta: {
-        description: 'Number of entities returned by the tool',
+        optional: true,
+        description:
+          'Deprecated — use `resultCount` instead. Historical field populated by `get_entity` / `search_entities` before the rename; no tool populates it anymore. Kept in the schema so historical rows remain queryable.',
+      },
+    },
+    resultCount: {
+      type: 'long',
+      _meta: {
+        optional: true,
+        description:
+          'Number of items returned or affected by the tool (entities, watchlists, leads, entities added to a watchlist, …). Replaces `entitiesReturned` for tools whose result set is not "entities". Not populated for tools that do not return a countable result set (e.g. single-record mutations).',
+      },
+    },
+    userConfirmationOutcome: {
+      type: 'keyword',
+      _meta: {
+        optional: true,
+        description:
+          'For HITL-gated mutation tools: "accepted" or "rejected" once the user has responded to the confirmation prompt, or "unprompted" if the tool resolved to a final answer without asking. Omitted entirely for tools that do not require a HITL prompt.',
       },
     },
     errorMessage: {
@@ -2145,6 +2321,7 @@ export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT: EventTypeOpts<{
   autoCloseEnabled: boolean;
   createConversation: boolean;
   connectorConfigured: boolean;
+  customAgent: boolean;
   autoCloseConfidenceScoreMinThreshold: number;
   autoCloseConfidenceScoreMaxThreshold: number;
 }> = {
@@ -2170,6 +2347,12 @@ export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT: EventTypeOpts<{
       type: 'boolean',
       _meta: { description: 'Whether an AI connector is configured for the workflow' },
     },
+    customAgent: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether a non-default (custom) agent is configured for the workflow',
+      },
+    },
     autoCloseConfidenceScoreMinThreshold: {
       type: 'float',
       _meta: { description: 'Minimum confidence score threshold for auto-close (0-1)' },
@@ -2184,6 +2367,12 @@ export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT: EventTypeOpts<{
 export const events = [
   DETECTION_RULE_UPGRADE_EVENT,
   DETECTION_RULE_BULK_UPGRADE_EVENT,
+  DETECTION_RULE_RESTORE_EVENT,
+  DETECTION_RULE_RESTORE_ERROR_EVENT,
+  DETECTION_RULE_IMPORT_EVENT,
+  DETECTION_RULE_REVERT_EVENT,
+  DETECTION_RULE_INSTALL_EVENT,
+  DETECTION_RULE_DUPLICATE_EVENT,
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
   RISK_SCORE_EXECUTION_CANCELLATION_EVENT,
@@ -2207,6 +2396,7 @@ export const events = [
   ENTITY_ENGINE_DELETION_EVENT,
   ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT,
   ENTITY_HIGHLIGHTS_USAGE_EVENT,
+  ENTITY_AI_SUMMARY_PERSISTED_EVENT,
   PRIVMON_ENGINE_INITIALIZATION_EVENT,
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   WATCHLIST_API_CALL_EVENT,

@@ -33,6 +33,7 @@ interface AnomaliesSectionProps {
   entityId: string;
   isPreviewMode?: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
+  hideHeaderIcons?: boolean;
 }
 
 export const AnomaliesSection: React.FC<AnomaliesSectionProps> = (props) => {
