@@ -87,11 +87,11 @@ export const Default: StoryObj<DefaultArgs> = {
   argTypes: {
     numberOfItems: {
       description: 'Number of info blocks to render',
-      control: { type: 'range', min: 2, max: 7, step: 1 },
+      control: { type: 'range', min: 1, max: 7, step: 1 },
     },
   },
   args: {
-    numberOfItems: 3,
+    numberOfItems: 5,
     compressed: false,
   },
   render: ({ numberOfItems, compressed }) => (
