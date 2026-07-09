@@ -38,31 +38,19 @@ export const getScoutCiExcludedConfigs = (): string[] => {
   return ciConfig.excluded_configs ?? [];
 };
 
-interface FilterModulesByScoutCiConfigOptions {
-  /**
-   * When true, modules that are not registered in the CI config do not cause a
-   * failure. Instead, a warning is logged and the unregistered modules are kept
-   * in the returned list. Disabled modules are still excluded.
-   */
-  skipValidation?: boolean;
-}
-
 /**
  * Filters modules based on Scout CI configuration.
  * Validates that all modules are registered in the CI config ('scout_ci_config.yml') and
  * returns only enabled modules.
- * Throws an error if any module with Scout tests is not registered in the CI config,
- * unless `skipValidation` is set.
+ * Throws an error if any module with Scout tests is not registered in the CI config.
  *
  * @param log - Tooling log instance for warnings
  * @param modulesWithTests - Array of modules to filter
- * @param options - Optional behavior flags (e.g. `skipValidation`)
- * @returns Filtered array containing enabled modules (plus unregistered ones when `skipValidation` is set)
+ * @returns Filtered array containing enabled modules
  */
 export const filterModulesByScoutCiConfig = (
   log: ToolingLog,
-  modulesWithTests: ModuleDiscoveryInfo[],
-  { skipValidation = false }: FilterModulesByScoutCiConfigOptions = {}
+  modulesWithTests: ModuleDiscoveryInfo[]
 ): ModuleDiscoveryInfo[] => {
   const scoutCiConfigRelPath = path.join('.buildkite', 'scout_ci_config.yml');
   const ciConfig = readScoutCiConfig();
@@ -84,8 +72,7 @@ export const filterModulesByScoutCiConfig = (
 
     if (!allRegistered.has(module.name)) {
       unregisteredItems.push(`${module.name} (${module.type})`);
-      // When validation is skipped, keep unregistered modules instead of failing.
-      return skipValidation;
+      return false;
     }
     if (allDisabled.has(module.name)) {
       filteredOutDisabledItems.push(`${module.name} (${module.type})`);
@@ -97,15 +84,9 @@ export const filterModulesByScoutCiConfig = (
   if (unregisteredItems.length > 0) {
     const unregisteredList = unregisteredItems.map((item) => `- ${item}`).join('\n');
 
-    if (skipValidation) {
-      log.warning(
-        `Skipping Scout CI config validation. The following plugin(s)/package(s) are not registered in '${scoutCiConfigRelPath}' but will be included:\n${unregisteredList}`
-      );
-    } else {
-      throw createFailError(
-        `The following plugin(s)/package(s) are not registered in Scout CI config '${scoutCiConfigRelPath}':\n${unregisteredList}\nRead more: src/platform/packages/shared/kbn-scout/README.md`
-      );
-    }
+    throw createFailError(
+      `The following plugin(s)/package(s) are not registered in Scout CI config '${scoutCiConfigRelPath}':\n${unregisteredList}\nRead more: src/platform/packages/shared/kbn-scout/README.md`
+    );
   }
 
   if (filteredOutDisabledItems.length > 0) {

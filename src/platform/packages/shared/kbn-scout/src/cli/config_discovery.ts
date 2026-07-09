@@ -224,14 +224,12 @@ const handleFlattenedOutput = (
   log: ToolingLog,
   bypassCiFilter: boolean
 ): void => {
-  const skipValidation = flagsReader.boolean('skip-validation');
-
   // Apply CI filtering if save flag is set (for consistency with non-flattened behavior).
   // When configs are explicitly requested (--configs), the CI enabled/disabled/registration
   // state is irrelevant, so the filter is skipped entirely.
   const modulesToFlatten =
     flagsReader.boolean('save') && !bypassCiFilter
-      ? filterModulesByScoutCiConfig(log, filteredModules, { skipValidation })
+      ? filterModulesByScoutCiConfig(log, filteredModules)
       : filteredModules;
 
   const flattenedConfigs = flattenModulesByServerRunFlag(modulesToFlatten);
@@ -251,14 +249,12 @@ const handleNonFlattenedOutput = (
   isSelective: boolean,
   bypassCiFilter: boolean
 ): void => {
-  const skipValidation = flagsReader.boolean('skip-validation');
-
   if (flagsReader.boolean('save')) {
     // When configs are explicitly requested (--configs), skip the CI enabled/disabled/registration
     // filter and save exactly the resolved modules.
     const filteredForCiModules = bypassCiFilter
       ? filteredModules
-      : filterModulesByScoutCiConfig(log, filteredModules, { skipValidation });
+      : filterModulesByScoutCiConfig(log, filteredModules);
     saveModuleDiscoveryInfo(filteredForCiModules, log);
 
     const { plugins: savedPluginCount, packages: savedPackageCount } =
@@ -277,7 +273,7 @@ const handleNonFlattenedOutput = (
 
   if (flagsReader.boolean('validate')) {
     if (!bypassCiFilter) {
-      filterModulesByScoutCiConfig(log, filteredModules, { skipValidation });
+      filterModulesByScoutCiConfig(log, filteredModules);
     }
     return;
   }
@@ -438,9 +434,6 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
                               requested path is not a known Scout config. Used by the flaky-test runner.
     --include-custom-servers  Include configs under 'test/scout_*' paths for custom server setups
     --validate                Validate that all discovered modules are registered in Scout CI config
-    --skip-validation         Do not fail when a discovered module is not registered in Scout CI config.
-                              Unregistered modules are kept (a warning is logged); disabled modules are
-                              still excluded. Applies to --validate, --save, and --flatten --save.
     --save                    Validate and save enabled modules to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
     --flatten                 Output configs in flattened format grouped by mode, group, and scout command
                               (useful for Cloud test execution)
@@ -462,23 +455,19 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
     # Save flattened configs for Cloud test execution
     node scripts/scout discover-playwright-configs --flatten --save
 
-    # Save configs without failing on modules not yet registered in Scout CI config
-    node scripts/scout discover-playwright-configs --save --skip-validation
-
     # Resolve only specific configs (flaky-test runner); bypasses CI registration/enabled filtering
     node scripts/scout discover-playwright-configs --target local --save \\
       --configs x-pack/plugins/foo/test/scout/ui/playwright.config.ts,src/plugins/bar/test/scout/api/playwright.config.ts
   `,
   flags: {
     string: ['target', 'testing-scope', 'configs'],
-    boolean: ['save', 'validate', 'flatten', 'include-custom-servers', 'skip-validation'],
+    boolean: ['save', 'validate', 'flatten', 'include-custom-servers'],
     default: {
       target: 'all',
       save: false,
       validate: false,
       flatten: false,
       'include-custom-servers': false,
-      'skip-validation': false,
     },
   },
   run: ({ flagsReader, log }) => {
