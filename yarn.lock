@@ -9253,6 +9253,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-info-blocks@link:src/platform/packages/shared/shared-ux/info_blocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-label-formatter@link:src/platform/packages/shared/shared-ux/label_formatter":
   version "0.0.0"
   uid ""
