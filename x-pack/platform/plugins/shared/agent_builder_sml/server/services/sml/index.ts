@@ -8,8 +8,7 @@
 export type {
   SmlService,
   SmlTypeDefinition,
-  SmlChunk,
-  SmlData,
+  SmlEntry,
   SmlContext,
   SmlToAttachmentContext,
   SmlListItem,

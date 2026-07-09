@@ -1395,7 +1395,7 @@ export const buildOriginUri = (type: string, originId: string): string => `${typ
  * in `spaceId`.
  *
  * Multiple chunks per origin are expected: the workflow step's
- * content mode and `getSmlData` in origin mode can both produce >1
+ * content mode and `getSmlEntry` in origin mode can both produce >1
  * chunk per origin. Ordering is unspecified.
  *
  * Lookups happen via the `origin.uri` keyword field — the only mapped

@@ -91,19 +91,15 @@ export const createDashboardSmlType = ({
     }
   },
 
-  getSmlData: async (originId, context) => {
+  getSmlEntry: async (originId, context) => {
     try {
       const dashboardClient = await getDashboardClient();
       const dashboard = await dashboardClient.read(context.savedObjectsClient, originId);
 
       return {
-        chunks: [
-          {
-            type: DASHBOARD_SML_TYPE,
-            title: dashboard.data.title ?? originId,
-            content: toDashboardSearchContent(dashboard.data),
-          },
-        ],
+        type: DASHBOARD_SML_TYPE,
+        title: dashboard.data.title ?? originId,
+        content: toDashboardSearchContent(dashboard.data),
       };
     } catch (error) {
       context.logger.warn(

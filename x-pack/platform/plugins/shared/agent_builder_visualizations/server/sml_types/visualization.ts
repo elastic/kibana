@@ -47,7 +47,7 @@ export const visualizationSmlType: SmlTypeDefinition = {
     }
   },
 
-  getSmlData: async (originId, context) => {
+  getSmlEntry: async (originId, context) => {
     try {
       const so = await context.savedObjectsClient.get('lens', originId);
       const attrs = so.attributes as LensAttributes;
@@ -59,13 +59,9 @@ export const visualizationSmlType: SmlTypeDefinition = {
       const contentParts = [title, description, chartType, esql].filter(Boolean);
 
       return {
-        chunks: [
-          {
-            type: VISUALIZATION_SML_TYPE,
-            title,
-            content: contentParts.join('\n'),
-          },
-        ],
+        type: VISUALIZATION_SML_TYPE,
+        title,
+        content: contentParts.join('\n'),
       };
     } catch (error) {
       context.logger.warn(

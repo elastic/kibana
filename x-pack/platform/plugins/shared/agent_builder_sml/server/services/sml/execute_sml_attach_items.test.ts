@@ -178,7 +178,7 @@ describe('resolveSmlAttachItems', () => {
     mockGetTypeDefinition.mockReturnValue({
       id: 'visualization',
       list: jest.fn(),
-      getSmlData: jest.fn(),
+      getSmlEntry: jest.fn(),
       toAttachment: jest.fn().mockResolvedValue(undefined),
     });
     const results = await resolveSmlAttachItems({
@@ -198,7 +198,7 @@ describe('resolveSmlAttachItems', () => {
     mockGetTypeDefinition.mockReturnValue({
       id: 'visualization',
       list: jest.fn(),
-      getSmlData: jest.fn(),
+      getSmlEntry: jest.fn(),
       toAttachment: jest.fn().mockResolvedValue({
         type: 'visualization',
         data: { layers: [] },
@@ -228,7 +228,7 @@ describe('resolveSmlAttachItems', () => {
     mockGetTypeDefinition.mockReturnValue({
       id: 'visualization',
       list: jest.fn(),
-      getSmlData: jest.fn(),
+      getSmlEntry: jest.fn(),
       toAttachment: jest.fn().mockResolvedValue({
         type: 'visualization',
         data: { x: 1 },
@@ -262,7 +262,7 @@ describe('resolveSmlAttachItems', () => {
     mockGetTypeDefinition.mockReturnValue({
       id: 'connector',
       list: jest.fn(),
-      getSmlData: jest.fn(),
+      getSmlEntry: jest.fn(),
       toAttachment: jest.fn().mockResolvedValue({
         type: 'connector',
         data: { connector_id: 'c1' },
@@ -288,7 +288,7 @@ describe('resolveSmlAttachItems', () => {
     mockGetTypeDefinition.mockReturnValue({
       id: 'visualization',
       list: jest.fn(),
-      getSmlData: jest.fn(),
+      getSmlEntry: jest.fn(),
       toAttachment: jest.fn().mockResolvedValue({ type: 'visualization', data: {} }),
     });
     const results = await resolveSmlAttachItems({
@@ -309,7 +309,7 @@ describe('resolveSmlAttachItems', () => {
     mockGetTypeDefinition.mockReturnValue({
       id: 'visualization',
       list: jest.fn(),
-      getSmlData: jest.fn(),
+      getSmlEntry: jest.fn(),
       toAttachment: jest.fn().mockRejectedValue(new Error('boom')),
     });
     const results = await resolveSmlAttachItems({
@@ -335,7 +335,7 @@ describe('resolveSmlAttachItems', () => {
     mockGetTypeDefinition.mockReturnValue({
       id: 'visualization',
       list: jest.fn(),
-      getSmlData: jest.fn(),
+      getSmlEntry: jest.fn(),
       toAttachment: jest.fn().mockResolvedValue({ type: 'visualization', data: {} }),
     });
     const results = await resolveSmlAttachItems({

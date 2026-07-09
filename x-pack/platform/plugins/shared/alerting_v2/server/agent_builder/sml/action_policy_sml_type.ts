@@ -25,7 +25,7 @@ interface CreateActionPolicySmlTypeOptions {
    * Resolves the `alerting:v2:enabled` global advanced setting. When the engine
    * is disabled, the SML hooks below become no-ops: `list` yields nothing (so
    * the crawler's mark-and-sweep removes any previously indexed policy chunks),
-   * and `getSmlData` / `toAttachment` return `undefined`. This gates action
+   * and `getSmlEntry` / `toAttachment` return `undefined`. This gates action
    * policy data out of the context layer dynamically, without a restart.
    */
   getIsAlertingV2Enabled: () => Promise<boolean>;
@@ -65,7 +65,7 @@ export const createActionPolicySmlType = ({
     }
   },
 
-  getSmlData: async (originId, context) => {
+  getSmlEntry: async (originId, context) => {
     if (!(await getIsAlertingV2Enabled())) {
       return undefined;
     }
@@ -89,13 +89,9 @@ export const createActionPolicySmlType = ({
       );
 
       return {
-        chunks: [
-          {
-            type: ACTION_POLICY_SML_TYPE,
-            title: name,
-            content: contentParts.join('\n'),
-          },
-        ],
+        type: ACTION_POLICY_SML_TYPE,
+        title: name,
+        content: contentParts.join('\n'),
       };
     } catch (error) {
       context.logger.warn(

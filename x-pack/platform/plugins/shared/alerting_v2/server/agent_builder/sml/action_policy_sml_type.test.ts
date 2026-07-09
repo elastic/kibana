@@ -183,7 +183,7 @@ describe('createActionPolicySmlType', () => {
     });
   });
 
-  describe('getSmlData', () => {
+  describe('getSmlEntry', () => {
     it('returns a single chunk built from action policy metadata', async () => {
       // Title is the policy name; content is the searchable corpus an
       // agent reasons over (name + description + matcher + grouping +
@@ -192,24 +192,20 @@ describe('createActionPolicySmlType', () => {
       // shows up as a diff.
       getRepoSo.mockResolvedValueOnce({ id: 'policy-1', attributes: baseActionPolicyAttrs });
 
-      const result = await buildDefinition().getSmlData('policy-1', buildSmlContext());
+      const result = await buildDefinition().getSmlEntry('policy-1', buildSmlContext());
 
       expect(getRepoSo).toHaveBeenCalledWith(ACTION_POLICY_SAVED_OBJECT_TYPE, 'policy-1');
       expect(result).toEqual({
-        chunks: [
-          {
-            type: ACTION_POLICY_SML_TYPE,
-            title: 'Critical alerts → Slack',
-            content: [
-              'Critical alerts → Slack',
-              'Route every critical-priority alert to #oncall',
-              'alert.severity = "critical"',
-              'per_episode',
-              'workflow:wf-critical-route',
-              'oncall, critical',
-            ].join('\n'),
-          },
-        ],
+        type: ACTION_POLICY_SML_TYPE,
+        title: 'Critical alerts → Slack',
+        content: [
+          'Critical alerts → Slack',
+          'Route every critical-priority alert to #oncall',
+          'alert.severity = "critical"',
+          'per_episode',
+          'workflow:wf-critical-route',
+          'oncall, critical',
+        ].join('\n'),
       });
     });
 
@@ -219,19 +215,19 @@ describe('createActionPolicySmlType', () => {
         attributes: undefined as unknown as ActionPolicySavedObjectAttributes,
       });
 
-      const result = await buildDefinition().getSmlData('policy-bare', buildSmlContext());
+      const result = await buildDefinition().getSmlEntry('policy-bare', buildSmlContext());
 
-      expect(result?.chunks[0].title).toBe('policy-bare');
+      expect(result?.title).toBe('policy-bare');
     });
 
     it('returns undefined and logs a warning when the saved object lookup throws', async () => {
-      // getSmlData is called by the crawler per-origin — a single
+      // getSmlEntry is called by the crawler per-origin — a single
       // missing SO must NOT abort the whole crawl. We swallow the
       // error and log it so other origins can still be indexed.
       getRepoSo.mockRejectedValueOnce(new Error('not found'));
       const logger = loggingSystemMock.createLogger();
 
-      const result = await buildDefinition().getSmlData('policy-missing', buildSmlContext(logger));
+      const result = await buildDefinition().getSmlEntry('policy-missing', buildSmlContext(logger));
 
       expect(result).toBeUndefined();
       expect(logger.warn).toHaveBeenCalledWith(

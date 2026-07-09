@@ -24,8 +24,7 @@ export type {
 
 export type {
   SmlTypeDefinition,
-  SmlChunk,
-  SmlData,
+  SmlEntry,
   SmlContext,
   SmlToAttachmentContext,
   SmlListItem,

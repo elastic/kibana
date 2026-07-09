@@ -78,7 +78,7 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
     }
   },
 
-  getSmlData: async (originId, context) => {
+  getSmlEntry: async (originId, context) => {
     try {
       const response = await context.esClient.search<WorkflowProperties>({
         index: indexPattern,
@@ -100,13 +100,9 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
       const title = source.name ?? originId;
 
       return {
-        chunks: [
-          {
-            type: WORKFLOW_SML_TYPE,
-            title,
-            content: buildSearchContent(source),
-          },
-        ],
+        type: WORKFLOW_SML_TYPE,
+        title,
+        content: buildSearchContent(source),
       };
     } catch (error) {
       context.logger.warn(
