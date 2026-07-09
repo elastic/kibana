@@ -1,5 +1,5 @@
 {
-  "sha1": "57f0eff2816ba74c1f2351bd61e1afc02e829dad",
+  "sha1": "b6dbe29a631465ff06b17f2c2bc18d116c92e9e6",
   "tests": [
     {
       "id": "2b226b45edecc17-e395ce97cca539e",
@@ -3117,7 +3117,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
-        "line": 66,
+        "line": 74,
         "column": 10
       }
     },
@@ -3133,7 +3133,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
-        "line": 80,
+        "line": 88,
         "column": 10
       }
     },
@@ -3149,7 +3149,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
-        "line": 94,
+        "line": 102,
         "column": 10
       }
     },
@@ -3165,7 +3165,23 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
-        "line": 111,
+        "line": 119,
+        "column": 10
+      }
+    },
+    {
+      "id": "21d9de4b5bb446e-f1853024c4df85a",
+      "title": "Entity Store uninstall keeps shared assets when only one of several engines is uninstalled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
+        "line": 136,
         "column": 10
       }
     },
@@ -3181,7 +3197,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/uninstall.spec.ts",
-        "line": 123,
+        "line": 172,
         "column": 10
       }
     }
