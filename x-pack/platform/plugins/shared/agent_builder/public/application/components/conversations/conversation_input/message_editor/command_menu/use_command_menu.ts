@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useState, useCallback } from 'react';
-import type { CommandMatchResult } from './types';
+import { useState, useCallback, useMemo } from 'react';
+import type { CommandMatchResult, TextMatch } from './types';
 import { matchCommand } from './command_matcher';
 import { useAvailableCommandDefinitions } from './command_definitions';
 import { getTextBeforeCursor } from './utils/get_text_before_cursor';
@@ -18,8 +18,8 @@ interface CommandMenuState {
   readonly dismiss: () => void;
   /** Handler to be called on input events */
   readonly checkInputForCommand: (element: HTMLElement) => void;
-  /** Reports whether the active command's mounted menu has anything to show */
-  readonly reportContent: (hasVisibleContent: boolean) => void;
+  /** Reports whether the active command's mounted menu has anything to show, for a given query */
+  readonly reportContent: (hasVisibleContent: boolean, forQuery: string) => void;
 }
 
 interface UseCommandMenuOptions {
@@ -27,11 +27,15 @@ interface UseCommandMenuOptions {
   readonly enabled?: boolean;
 }
 
-const INACTIVE_MATCH: CommandMatchResult = {
+const INACTIVE_MATCH: TextMatch = {
   isActive: false,
   activeCommand: null,
-  hasVisibleContent: true,
 };
+
+interface ConfirmedContent {
+  readonly query: string;
+  readonly hasVisibleContent: boolean;
+}
 
 /**
  * Hook that detects command sequences in a contentEditable element.
@@ -43,47 +47,38 @@ export const useCommandMenu = (options: UseCommandMenuOptions = {}): CommandMenu
   const { enabled = true } = options;
   const definitions = useAvailableCommandDefinitions();
 
-  const [match, setMatch] = useState<CommandMatchResult>(INACTIVE_MATCH);
+  const [textMatch, setTextMatch] = useState<TextMatch>(INACTIVE_MATCH);
+  const [confirmedContent, setConfirmedContent] = useState<ConfirmedContent | null>(null);
 
   const checkInputForCommand = useCallback(
     (element: HTMLElement) => {
       if (!enabled) {
-        setMatch((prev) => (prev.isActive ? INACTIVE_MATCH : prev));
+        setTextMatch((prev) => (prev.isActive ? INACTIVE_MATCH : prev));
         return;
       }
       const textBeforeCursor = getTextBeforeCursor(element);
-      setMatch((prev) => {
-        // Only stay sticky to the active command while there is a hope of a match
-        const stickyCommandId =
-          prev.isActive && prev.hasVisibleContent ? prev.activeCommand?.command.id : undefined;
-        const result = matchCommand(textBeforeCursor, definitions, stickyCommandId);
-
-        if (!result.isActive || !result.activeCommand) {
-          return INACTIVE_MATCH;
-        }
-
-        const isSameMention =
-          prev.isActive &&
-          prev.activeCommand?.command.id === result.activeCommand.command.id &&
-          prev.activeCommand?.commandStartOffset === result.activeCommand.commandStartOffset;
-
-        const isStillFirstWord = !result.activeCommand.query.includes(' ');
-        return {
-          ...result,
-          hasVisibleContent: isStillFirstWord || !isSameMention ? true : prev.hasVisibleContent,
-        };
-      });
+      setTextMatch(matchCommand(textBeforeCursor, definitions));
     },
     [enabled, definitions]
   );
 
   const dismiss = useCallback(() => {
-    setMatch((m) => ({ ...m, isActive: false }));
+    setTextMatch((prev) => ({ ...prev, isActive: false }));
   }, []);
 
-  const reportContent = useCallback((hasVisibleContent: boolean) => {
-    setMatch((prev) => (prev.isActive ? { ...prev, hasVisibleContent } : prev));
+  const reportContent = useCallback((hasVisibleContent: boolean, forQuery: string) => {
+    setConfirmedContent({ query: forQuery, hasVisibleContent });
   }, []);
+
+  const match: CommandMatchResult = useMemo(() => {
+    const { activeCommand } = textMatch;
+    if (!activeCommand || !activeCommand.query.includes(' ')) {
+      return { ...textMatch, hasVisibleContent: true };
+    }
+    const hasVisibleContent =
+      confirmedContent?.query === activeCommand.query ? confirmedContent.hasVisibleContent : false;
+    return { ...textMatch, hasVisibleContent };
+  }, [textMatch, confirmedContent]);
 
   return { match, dismiss, checkInputForCommand, reportContent };
 };

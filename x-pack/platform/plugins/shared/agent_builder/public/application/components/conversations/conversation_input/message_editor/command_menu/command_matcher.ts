@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CommandMatchResult, ActiveCommand, CommandDefinition, CommandId } from './types';
+import type { TextMatch, ActiveCommand, CommandDefinition } from './types';
 
 /**
  * Determines if the character at the given position is at a word boundary.
@@ -19,31 +19,24 @@ const isAtWordBoundary = (text: string, offset: number): boolean => {
   return /\s/.test(precedingChar);
 };
 
-const INACTIVE_RESULT: CommandMatchResult = {
+const INACTIVE_RESULT: TextMatch = {
   isActive: false,
   activeCommand: null,
-  hasVisibleContent: true,
 };
 
 /**
- * Given the text preceding the cursor, checks if any registered command is
- * active.
+ * Given the text preceding the cursor, finds the command whose trigger
+ * sequence (e.g. "@", "/") is closest to the cursor at a word boundary.
  *
- * Every registered command is checked for its last word-boundary occurrence.
- * If a command is already active (`activeCommandId`) and it still has a
- * match, that command is kept active, even if another command's sequence
- * appears closer to the cursor — otherwise a trigger character typed as
- * plain text inside an in-progress command's query (e.g. "/" typed while
- * writing an "@" mention) would hijack the active command. Absent an active
- * command, the sequence closest to the cursor starts a new one.
+ * A sequence inside another command's query (e.g. the "/" in
+ * "@connector/workday") is never a word boundary, so it's never mistaken
+ * for a new trigger — no extra bookkeeping needed for that case.
  */
 export const matchCommand = (
   textBeforeCursor: string,
-  definitions: readonly CommandDefinition[],
-  activeCommandId?: CommandId
-): CommandMatchResult => {
+  definitions: readonly CommandDefinition[]
+): TextMatch => {
   let best: ActiveCommand | null = null;
-  let active: ActiveCommand | null = null;
 
   for (const command of definitions) {
     const { sequence } = command;
@@ -57,25 +50,17 @@ export const matchCommand = (
       continue;
     }
 
-    const candidate: ActiveCommand = {
-      command,
-      commandStartOffset: lastIndex,
-      query: textBeforeCursor.substring(lastIndex + sequence.length),
-    };
-
-    if (command.id === activeCommandId) {
-      active = candidate;
-    }
-
     if (best === null || lastIndex > best.commandStartOffset) {
-      best = candidate;
+      best = {
+        command,
+        commandStartOffset: lastIndex,
+        query: textBeforeCursor.substring(lastIndex + sequence.length),
+      };
     }
   }
 
-  const result = active ?? best;
-
-  if (result) {
-    return { isActive: true, activeCommand: result, hasVisibleContent: true };
+  if (best) {
+    return { isActive: true, activeCommand: best };
   }
 
   return INACTIVE_RESULT;

@@ -70,8 +70,8 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
     // the user keeps typing past an unresolved mention.
     const hasVisibleContent = isLoading || orderedResults.length > 0;
     useEffect(() => {
-      onContentChange?.(hasVisibleContent);
-    }, [hasVisibleContent, onContentChange]);
+      onContentChange?.(hasVisibleContent, query);
+    }, [hasVisibleContent, query, onContentChange]);
 
     const smlMenuLabelStyles = useMemo(
       () => ({

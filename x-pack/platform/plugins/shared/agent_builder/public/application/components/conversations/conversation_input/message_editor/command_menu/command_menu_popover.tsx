@@ -20,7 +20,7 @@ interface CommandMenuPopoverProps {
   commandMatch: CommandMatchResult;
   anchorPosition: AnchorPosition | null;
   onSelect: (selection: CommandBadgeData) => void;
-  onContentChange: (hasVisibleContent: boolean) => void;
+  onContentChange: (hasVisibleContent: boolean, forQuery: string) => void;
   commandMenuRef: React.RefObject<CommandMenuHandle>;
   'data-test-subj'?: string;
 }
@@ -48,7 +48,14 @@ export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
 }) => {
   const { activeCommand, isActive, hasVisibleContent } = commandMatch;
 
-  const isOpen = isActive && activeCommand !== null && anchorPosition !== null && hasVisibleContent;
+  // Keep the menu component mounted whenever there's an active, positioned
+  // mention — regardless of whether it currently has anything to show. It
+  // needs to stay alive to keep re-evaluating as the query changes; if it
+  // unmounted while hidden, it could never report back in to reopen.
+  const isMounted = isActive && activeCommand !== null && anchorPosition !== null;
+  // What's actually visible to the user — hides the panel via CSS (not by
+  // unmounting) once the mounted menu confirms there's nothing to show.
+  const isOpen = isMounted && hasVisibleContent;
   let announcementText = '';
   let panelAriaLabel = '';
   if (activeCommand) {
@@ -75,7 +82,7 @@ export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
       <EuiPopover
         aria-labelledby={panelId}
         button={<span css={anchorStyles} />}
-        isOpen={isOpen}
+        isOpen={isMounted}
         closePopover={() => {
           // Do nothing
           // The popover does not control its own visibility state.
@@ -89,7 +96,10 @@ export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
         display="block"
       >
         {activeCommand && (
-          <div data-test-subj={`${dataTestSubj}-content`}>
+          <div
+            data-test-subj={`${dataTestSubj}-content`}
+            style={hasVisibleContent ? undefined : { display: 'none' }}
+          >
             <activeCommand.command.menuComponent
               ref={commandMenuRef}
               query={activeCommand.query}

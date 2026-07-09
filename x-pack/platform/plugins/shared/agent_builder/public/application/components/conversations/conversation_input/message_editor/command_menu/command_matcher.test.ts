@@ -108,32 +108,29 @@ describe('matchCommand', () => {
     });
   });
 
-  describe('active command stickiness', () => {
-    it('keeps the active "@" command active even when "/" appears closer to the cursor', () => {
-      const result = matchCommand('@foo /bar', allCommands, CommandId.Sml);
-      expect(result.isActive).toBe(true);
-      expect(result.activeCommand?.command.id).toBe(CommandId.Sml);
-      expect(result.activeCommand?.query).toBe('foo /bar');
-    });
-
-    it('keeps the active "/" command active even when "@" appears closer to the cursor', () => {
-      const result = matchCommand('/foo @bar', allCommands, CommandId.Skill);
-      expect(result.isActive).toBe(true);
-      expect(result.activeCommand?.command.id).toBe(CommandId.Skill);
-      expect(result.activeCommand?.query).toBe('foo @bar');
-    });
-
-    it('falls back to the closest sequence once the active command is no longer present', () => {
-      const result = matchCommand('@bar', allCommands, CommandId.Skill);
-      expect(result.isActive).toBe(true);
-      expect(result.activeCommand?.command.id).toBe(CommandId.Sml);
-      expect(result.activeCommand?.query).toBe('bar');
-    });
-
-    it('has no effect when no command is currently active', () => {
+  describe('no stickiness — always the closest word-boundary trigger, no memory of prior state', () => {
+    it('picks "/" over an earlier "@" once "/" is closer, with no memory of "@" having been active', () => {
       const result = matchCommand('@foo /bar', allCommands);
+      expect(result.isActive).toBe(true);
       expect(result.activeCommand?.command.id).toBe(CommandId.Skill);
       expect(result.activeCommand?.query).toBe('bar');
+    });
+
+    it('picks "@" over an earlier "/" once "@" is closer', () => {
+      const result = matchCommand('/foo @bar', allCommands);
+      expect(result.isActive).toBe(true);
+      expect(result.activeCommand?.command.id).toBe(CommandId.Sml);
+      expect(result.activeCommand?.query).toBe('bar');
+    });
+
+    it('never mistakes the "/" inside an "@type/name" mention for a new trigger', () => {
+      // "/" here isn't at a word boundary (preceded by "connector", not
+      // whitespace), so it's excluded as a candidate outright — no
+      // stickiness bookkeeping needed to protect this case.
+      const result = matchCommand('@connector/workday', allCommands);
+      expect(result.isActive).toBe(true);
+      expect(result.activeCommand?.command.id).toBe(CommandId.Sml);
+      expect(result.activeCommand?.query).toBe('connector/workday');
     });
   });
 

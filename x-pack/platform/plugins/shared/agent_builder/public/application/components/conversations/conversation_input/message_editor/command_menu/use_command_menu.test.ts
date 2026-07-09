@@ -61,23 +61,6 @@ describe('useCommandMenuCommand', () => {
     expect(result.current.match.activeCommand?.query).toBe('sum');
   });
 
-  it('keeps command active when query contains whitespace', () => {
-    const { result } = renderHook(() => useCommandMenu());
-
-    mockGetTextBeforeCursor.mockReturnValue('/summarize');
-    act(() => {
-      result.current.checkInputForCommand(mockElement);
-    });
-    expect(result.current.match.isActive).toBe(true);
-
-    mockGetTextBeforeCursor.mockReturnValue('/summarize ');
-    act(() => {
-      result.current.checkInputForCommand(mockElement);
-    });
-    expect(result.current.match.isActive).toBe(true);
-    expect(result.current.match.activeCommand?.query).toBe('summarize ');
-  });
-
   it('dismiss() deactivates the current command', () => {
     mockGetTextBeforeCursor.mockReturnValue('/summarize');
 
@@ -116,135 +99,6 @@ describe('useCommandMenuCommand', () => {
     expect(result.current.match.activeCommand?.query).toBe('summarize t');
   });
 
-  describe('stickiness release once content is confirmed empty', () => {
-    it('stays sticky to the active command by default, even when another trigger is closer', () => {
-      mockGetTextBeforeCursor.mockReturnValue('@foo');
-      const { result } = renderHook(() => useCommandMenu());
-      act(() => {
-        result.current.checkInputForCommand(mockElement);
-      });
-      expect(result.current.match.activeCommand?.command.id).toBe('sml');
-
-      // A "/" now appears closer to the cursor, but nothing has reported
-      // this mention dead yet, so it stays sticky to "sml".
-      mockGetTextBeforeCursor.mockReturnValue('@foo /bar');
-      act(() => {
-        result.current.checkInputForCommand(mockElement);
-      });
-      expect(result.current.match.activeCommand?.command.id).toBe('sml');
-      expect(result.current.match.activeCommand?.query).toBe('foo /bar');
-    });
-
-    it('releases stickiness once reportContent(false) confirms the mention is dead, letting a later trigger win', () => {
-      mockGetTextBeforeCursor.mockReturnValue('@foo');
-      const { result } = renderHook(() => useCommandMenu());
-      act(() => {
-        result.current.checkInputForCommand(mockElement);
-      });
-      expect(result.current.match.activeCommand?.command.id).toBe('sml');
-
-      act(() => {
-        result.current.reportContent(false);
-      });
-
-      // The "@" mention is now known-dead. A "/" typed later in the text
-      // should win outright instead of being blocked by stale stickiness.
-      mockGetTextBeforeCursor.mockReturnValue('@foo /bar');
-      act(() => {
-        result.current.checkInputForCommand(mockElement);
-      });
-      expect(result.current.match.activeCommand?.command.id).toBe('skill');
-      expect(result.current.match.activeCommand?.query).toBe('bar');
-    });
-
-    it('resets the content assumption to true for a genuinely new mention', () => {
-      mockGetTextBeforeCursor.mockReturnValue('/summarize');
-      const { result } = renderHook(() => useCommandMenu());
-      act(() => {
-        result.current.checkInputForCommand(mockElement);
-      });
-
-      act(() => {
-        result.current.reportContent(false);
-      });
-
-      // A different "/" mention starts at a new offset (e.g. the old one
-      // was deleted and a new one typed) — it should not inherit the old
-      // mention's "dead" status.
-      mockGetTextBeforeCursor.mockReturnValue(' /other');
-      act(() => {
-        result.current.checkInputForCommand(mockElement);
-      });
-      expect(result.current.match.activeCommand?.commandStartOffset).toBe(1);
-      expect(result.current.match.hasVisibleContent).toBe(true);
-    });
-  });
-
-  describe('always re-checks within the first word, before any space is crossed', () => {
-    it('re-opens on backspace after being confirmed dead, so a typo can still be fixed', () => {
-      // e.g. "@connector/no_match" resolves to zero results and hides the
-      // popup — but the user hasn't moved on to other text yet, so
-      // backspacing to fix the typo must get a fresh look, not stay frozen.
-      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match');
-      const { result } = renderHook(() => useCommandMenu());
-      act(() => {
-        result.current.checkInputForCommand(mockElement);
-      });
-
-      act(() => {
-        result.current.reportContent(false);
-      });
-      expect(result.current.match.hasVisibleContent).toBe(false);
-
-      mockGetTextBeforeCursor.mockReturnValue('@connector/no_matc');
-      act(() => {
-        result.current.checkInputForCommand(mockElement);
-      });
-
-      expect(result.current.match.activeCommand?.query).toBe('connector/no_matc');
-      expect(result.current.match.hasVisibleContent).toBe(true);
-    });
-
-    it('re-opens on continuing to type after being confirmed dead, while still in the first word', () => {
-      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match');
-      const { result } = renderHook(() => useCommandMenu());
-      act(() => {
-        result.current.checkInputForCommand(mockElement);
-      });
-
-      act(() => {
-        result.current.reportContent(false);
-      });
-
-      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match2');
-      act(() => {
-        result.current.checkInputForCommand(mockElement);
-      });
-
-      expect(result.current.match.hasVisibleContent).toBe(true);
-    });
-
-    it('stops re-opening once a space is crossed, carrying the known-dead status into the next word', () => {
-      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match');
-      const { result } = renderHook(() => useCommandMenu());
-      act(() => {
-        result.current.checkInputForCommand(mockElement);
-      });
-
-      act(() => {
-        result.current.reportContent(false);
-      });
-
-      // Crossing the space into a new word — from here on, edits within
-      // this second word should NOT keep forcing a fresh re-check.
-      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match this');
-      act(() => {
-        result.current.checkInputForCommand(mockElement);
-      });
-      expect(result.current.match.hasVisibleContent).toBe(false);
-    });
-  });
-
   it('disabled option prevents command detection', () => {
     mockGetTextBeforeCursor.mockReturnValue('/summarize');
 
@@ -254,5 +108,152 @@ describe('useCommandMenuCommand', () => {
       result.current.checkInputForCommand(mockElement);
     });
     expect(result.current.match.isActive).toBe(false);
+  });
+
+  describe('no stickiness — a later trigger always wins immediately', () => {
+    it('lets a "/" elsewhere in the text win outright, with no memory of an earlier "@" mention', () => {
+      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match');
+      const { result } = renderHook(() => useCommandMenu());
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+      expect(result.current.match.activeCommand?.command.id).toBe('sml');
+
+      // No reportContent() call at all — unlike before, nothing needs to
+      // "confirm this dead" first. The closer "/" just wins on its own.
+      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match and more /skill');
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+      expect(result.current.match.activeCommand?.command.id).toBe('skill');
+      expect(result.current.match.activeCommand?.query).toBe('skill');
+    });
+  });
+
+  describe('hasVisibleContent: always visible within the first word', () => {
+    it('is visible while still on the first word, before any content is confirmed', () => {
+      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match');
+      const { result } = renderHook(() => useCommandMenu());
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+
+      expect(result.current.match.hasVisibleContent).toBe(true);
+    });
+
+    it('stays visible on backspace after being reported empty, so a typo can still be fixed', () => {
+      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match');
+      const { result } = renderHook(() => useCommandMenu());
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+      act(() => {
+        result.current.reportContent(false, 'connector/no_match');
+      });
+
+      mockGetTextBeforeCursor.mockReturnValue('@connector/no_matc');
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+
+      expect(result.current.match.activeCommand?.query).toBe('connector/no_matc');
+      expect(result.current.match.hasVisibleContent).toBe(true);
+    });
+  });
+
+  describe('hasVisibleContent: past the first word, defaults to hidden until confirmed', () => {
+    it('is hidden by default once a space is crossed, before any confirmation arrives', () => {
+      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match ');
+      const { result } = renderHook(() => useCommandMenu());
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+
+      expect(result.current.match.hasVisibleContent).toBe(false);
+    });
+
+    it('becomes visible once a confirmation matching the exact current query arrives', () => {
+      mockGetTextBeforeCursor.mockReturnValue('/Skill With');
+      const { result } = renderHook(() => useCommandMenu());
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+      expect(result.current.match.hasVisibleContent).toBe(false);
+
+      act(() => {
+        result.current.reportContent(true, 'Skill With');
+      });
+      expect(result.current.match.hasVisibleContent).toBe(true);
+    });
+
+    it('ignores a stale confirmation for a query that has since changed', () => {
+      mockGetTextBeforeCursor.mockReturnValue('/Skill With');
+      const { result } = renderHook(() => useCommandMenu());
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+
+      mockGetTextBeforeCursor.mockReturnValue('/Skill With S');
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+
+      // A late confirmation for the OLD query ("Skill With") arrives after
+      // the user already typed more — it must not affect the current one.
+      act(() => {
+        result.current.reportContent(true, 'Skill With');
+      });
+      expect(result.current.match.hasVisibleContent).toBe(false);
+
+      // The matching confirmation for the CURRENT query does apply.
+      act(() => {
+        result.current.reportContent(true, 'Skill With S');
+      });
+      expect(result.current.match.hasVisibleContent).toBe(true);
+    });
+
+    it('keeps showing choices across every word of a multi-word skill name, as long as each is confirmed', () => {
+      // The original "gives up after the first space" complaint: as long
+      // as the mounted menu keeps confirming matches for the CURRENT
+      // query, visibility should track it continuously, word after word.
+      const { result } = renderHook(() => useCommandMenu());
+      const steps = ['/Skill', '/Skill With', '/Skill With Spaces'];
+      for (const text of steps) {
+        mockGetTextBeforeCursor.mockReturnValue(text);
+        act(() => {
+          result.current.checkInputForCommand(mockElement);
+        });
+        const query = result.current.match.activeCommand?.query ?? '';
+        act(() => {
+          result.current.reportContent(true, query);
+        });
+        expect(result.current.match.hasVisibleContent).toBe(true);
+      }
+    });
+
+    it('stays hidden across a whole sentence typed after a mention that never gets confirmed', () => {
+      // The original bug report: "@connector/no-match this is not a match"
+      // must not keep showing "No matching results" once you've moved on.
+      const { result } = renderHook(() => useCommandMenu());
+      mockGetTextBeforeCursor.mockReturnValue('@connector/no-match');
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+      act(() => {
+        result.current.reportContent(false, 'connector/no-match');
+      });
+
+      const sentence = '@connector/no-match this is not a match';
+      for (let end = '@connector/no-match'.length + 1; end <= sentence.length; end++) {
+        mockGetTextBeforeCursor.mockReturnValue(sentence.slice(0, end));
+        act(() => {
+          result.current.checkInputForCommand(mockElement);
+        });
+        // No reportContent() call for any of these — nothing ever confirms
+        // them, so they must all default to hidden, not just carry a stale
+        // "false" forward.
+        expect(result.current.match.hasVisibleContent).toBe(false);
+      }
+    });
   });
 });

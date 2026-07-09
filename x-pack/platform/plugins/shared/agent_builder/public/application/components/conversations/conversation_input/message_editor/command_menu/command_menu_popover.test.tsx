@@ -19,8 +19,8 @@ const MockMenuComponent = React.forwardRef<CommandMenuHandle, CommandMenuCompone
 
 /** Immediately reports `onContentChange` with whatever query it was given — lets a test drive it deterministically. */
 const MockReportingMenuComponent = React.forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
-  ({ onContentChange }, ref) => {
-    onContentChange?.(true);
+  ({ query, onContentChange }, ref) => {
+    onContentChange?.(true, query);
     return <div data-test-subj="mockMenu">reporting menu</div>;
   }
 );
@@ -136,7 +136,7 @@ describe('CommandMenuPopover', () => {
   });
 
   describe('content-driven visibility', () => {
-    it('stays closed when the match reports no visible content', () => {
+    it('hides the panel (via CSS) when the match reports no visible content', () => {
       render(
         <CommandMenuPopover
           commandMatch={buildMatch({ hasVisibleContent: false })}
@@ -146,10 +146,12 @@ describe('CommandMenuPopover', () => {
         />
       );
 
-      expect(screen.queryByTestId('testPopover-content')).not.toBeInTheDocument();
+      // Hidden visually, but NOT unmounted — see the mount-persistence test
+      // below for why that distinction matters.
+      expect(screen.getByTestId('testPopover-content')).not.toBeVisible();
     });
 
-    it('opens once the match reports visible content', () => {
+    it('shows the panel once the match reports visible content', () => {
       render(
         <CommandMenuPopover
           commandMatch={buildMatch({ hasVisibleContent: true })}
@@ -159,10 +161,68 @@ describe('CommandMenuPopover', () => {
         />
       );
 
-      expect(screen.getByTestId('testPopover-content')).toBeInTheDocument();
+      expect(screen.getByTestId('testPopover-content')).toBeVisible();
     });
 
-    it('forwards onContentChange to the mounted menu component', () => {
+    it('keeps the menu component mounted while hidden, so it can keep re-evaluating and recover on its own', () => {
+      // This is the fix for the "stuck closed" regression: if the menu
+      // unmounted while hasVisibleContent was false, it would never get a
+      // chance to notice the query changed and report back in.
+      const mountSpy = jest.fn();
+      const MockMountTrackingMenuComponent = React.forwardRef<
+        CommandMenuHandle,
+        CommandMenuComponentProps
+      >((_props, ref) => {
+        React.useEffect(() => {
+          mountSpy();
+        }, []);
+        return <div data-test-subj="mockMenu">tracked menu</div>;
+      });
+
+      const { rerender } = render(
+        <CommandMenuPopover
+          commandMatch={buildMatch({
+            hasVisibleContent: true,
+            activeCommand: {
+              ...activeMatch.activeCommand!,
+              command: {
+                ...activeMatch.activeCommand!.command,
+                menuComponent: MockMountTrackingMenuComponent,
+              },
+            },
+          })}
+          anchorPosition={{ left: 10, top: 20 }}
+          data-test-subj="testPopover"
+          {...defaultProps}
+        />
+      );
+      expect(mountSpy).toHaveBeenCalledTimes(1);
+
+      rerender(
+        <CommandMenuPopover
+          commandMatch={buildMatch({
+            hasVisibleContent: false,
+            activeCommand: {
+              ...activeMatch.activeCommand!,
+              query: 'joh2',
+              command: {
+                ...activeMatch.activeCommand!.command,
+                menuComponent: MockMountTrackingMenuComponent,
+              },
+            },
+          })}
+          anchorPosition={{ left: 10, top: 20 }}
+          data-test-subj="testPopover"
+          {...defaultProps}
+        />
+      );
+
+      // Still only mounted once — it was hidden, not unmounted/remounted.
+      expect(mountSpy).toHaveBeenCalledTimes(1);
+      expect(screen.getByTestId('mockMenu')).not.toBeVisible();
+    });
+
+    it('forwards onContentChange, including the current query, to the mounted menu component', () => {
       const onContentChange = jest.fn();
       render(
         <CommandMenuPopover
@@ -182,7 +242,7 @@ describe('CommandMenuPopover', () => {
         />
       );
 
-      expect(onContentChange).toHaveBeenCalledWith(true);
+      expect(onContentChange).toHaveBeenCalledWith(true, 'joh');
     });
   });
 });

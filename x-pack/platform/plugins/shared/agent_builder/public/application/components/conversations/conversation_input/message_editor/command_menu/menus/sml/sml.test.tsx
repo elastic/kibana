@@ -146,11 +146,11 @@ describe('Sml', () => {
   });
 
   describe('reporting content presence via onContentChange', () => {
-    it('reports content when there are results', () => {
+    it('reports content when there are results, for the current query', () => {
       const onContentChange = jest.fn();
       renderWithProvider(<Sml query="" onSelect={jest.fn()} onContentChange={onContentChange} />);
 
-      expect(onContentChange).toHaveBeenCalledWith(true);
+      expect(onContentChange).toHaveBeenCalledWith(true, '');
     });
 
     it('reports content while still loading, even with zero results so far', () => {
@@ -166,10 +166,10 @@ describe('Sml', () => {
         <Sml query="nosuchthing" onSelect={jest.fn()} onContentChange={onContentChange} />
       );
 
-      expect(onContentChange).toHaveBeenCalledWith(true);
+      expect(onContentChange).toHaveBeenCalledWith(true, 'nosuchthing');
     });
 
-    it('reports no content once results are confirmed empty', () => {
+    it('reports no content once results are confirmed empty, for the current query', () => {
       mockUseSmlAutocompleteReturn = {
         results: [],
         total: 0,
@@ -182,7 +182,7 @@ describe('Sml', () => {
         <Sml query="nosuchthing" onSelect={jest.fn()} onContentChange={onContentChange} />
       );
 
-      expect(onContentChange).toHaveBeenCalledWith(false);
+      expect(onContentChange).toHaveBeenCalledWith(false, 'nosuchthing');
     });
   });
 

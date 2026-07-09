@@ -30,8 +30,8 @@ export interface MessageEditorInstance {
   dismissActionMenu: () => void;
   /** Handle selection of an item from the command menu */
   handleCommandSelect: (selection: CommandBadgeData) => void;
-  /** Reports whether the active command's mounted menu has anything to show */
-  reportMenuContent: (hasVisibleContent: boolean) => void;
+  /** Reports whether the active command's mounted menu has anything to show, for a given query */
+  reportMenuContent: (hasVisibleContent: boolean, forQuery: string) => void;
 }
 
 export interface MessageEditorController {

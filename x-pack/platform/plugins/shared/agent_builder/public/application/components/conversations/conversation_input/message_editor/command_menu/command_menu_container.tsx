@@ -22,7 +22,7 @@ interface CommandMenuContainerProps {
   commandMatch: CommandMatchResult;
   editorRef: React.RefObject<HTMLDivElement>;
   onSelect: (selection: CommandBadgeData) => void;
-  onContentChange: (hasVisibleContent: boolean) => void;
+  onContentChange: (hasVisibleContent: boolean, forQuery: string) => void;
   commandMenuRef: React.RefObject<CommandMenuHandle>;
   children: React.ReactNode;
   'data-test-subj'?: string;

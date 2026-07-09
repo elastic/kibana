@@ -69,8 +69,8 @@ export const Skills = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
     // the user keeps typing past an unresolved mention.
     const hasVisibleContent = isLoading || options.length > 0;
     useEffect(() => {
-      onContentChange?.(hasVisibleContent);
-    }, [hasVisibleContent, onContentChange]);
+      onContentChange?.(hasVisibleContent, query);
+    }, [hasVisibleContent, query, onContentChange]);
 
     return (
       <CommandMenuList
