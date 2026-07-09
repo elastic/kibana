@@ -341,9 +341,7 @@ export interface AgentBuilderPluginSetup {
   /**
    * SML service setup contract, which can be used to register SML type definitions.
    *
-   * Not yet consumed anywhere — the built-in SML tools still call the older
-   * `agentContextLayer.registerType`. This is a parallel, independently-tested
-   * path that a future PR will cut consumers over to.
+   * Consumed by built-in SML tools to register type definitions.
    */
   smlService: AgentBuilderSmlServiceSetup;
   /**
@@ -389,9 +387,8 @@ export interface AgentBuilderPluginStart {
   /**
    * SML service, to search, fetch, and index Shared Memory Layer content.
    *
-   * Not yet consumed anywhere — `sml_search.ts`/`sml_attach.ts` still call the
-   * older `agentContextLayer` start contract. This is a parallel,
-   * independently-tested path that a future PR will cut consumers over to.
+   * Consumed by `sml_search.ts` and `sml_attach.ts` tools to search and resolve
+   * SML documents.
    */
   smlService: AgentBuilderSmlServiceStart;
 }
