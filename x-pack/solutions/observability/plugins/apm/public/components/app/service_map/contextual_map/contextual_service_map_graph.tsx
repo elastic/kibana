@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   ReactFlow,
   Background,
@@ -14,16 +14,24 @@ import {
   useNodesState,
   useEdgesState,
   useReactFlow,
+  type Node,
   type NodeTypes,
   type EdgeTypes,
   type NodeMouseHandler,
+  type EdgeMouseHandler,
   type FitViewOptions,
 } from '@xyflow/react';
 import { EuiButtonIcon, EuiFlexGroup, EuiPanel, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import '@xyflow/react/dist/style.css';
-import type { ServiceMapEdge, ServiceMapNode } from '../../../../../common/service_map';
+import type { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
+import type {
+  ServiceMapEdge as ServiceMapEdgeType,
+  ServiceMapNode,
+  ServiceNodeData,
+} from '../../../../../common/service_map';
 import { isServiceNode } from '../../../../../common/service_map';
 import { applyDagreLayout } from '../../../shared/service_map/layout';
 import { DependencyNode } from '../../../shared/service_map/dependency_node';
@@ -44,6 +52,11 @@ import {
 } from './collapsible_service_map_context';
 import { ServiceNodeWithCollapseAffordance } from './service_node_with_collapse_affordance';
 import { ContextualServiceMapControls } from './contextual_service_map_controls';
+import { ServiceFlyout } from '../../../shared/service_flyout';
+import { SERVICE_FLYOUT_SOURCES } from '../../../shared/service_flyout/constants';
+import type { ServiceFlyoutOptions } from '../../../shared/service_flyout/types';
+
+type ServiceMapServiceNode = Node<ServiceNodeData>;
 
 const contextualNodeTypes: NodeTypes = {
   service: ServiceNodeWithCollapseAffordance,
@@ -58,7 +71,7 @@ const edgeTypes: EdgeTypes = {
 export interface ContextualServiceMapGraphProps {
   height: number | string;
   nodes: ServiceMapNode[];
-  edges: ServiceMapEdge[];
+  edges: ServiceMapEdgeType[];
   focalServiceId: string;
   baseMaxHops: number;
   maxVisibleNodes: number;
@@ -78,6 +91,7 @@ export interface ContextualServiceMapGraphProps {
   alwaysNavigateOnPopoverFocus?: boolean;
   /** When false, max visible / hops controls are rendered by the host (e.g. service overview header). */
   showContextControls?: boolean;
+  flyoutOptions?: ServiceFlyoutOptions;
 }
 
 function ContextualGraphInner({
@@ -102,7 +116,10 @@ function ContextualGraphInner({
   clearKueryOnPopoverNavigation,
   alwaysNavigateOnPopoverFocus,
   showContextControls = true,
+  flyoutOptions,
 }: ContextualServiceMapGraphProps) {
+  const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
+  const { telemetry } = services;
   const makeAlertsNavigateHandler = useServiceMapAlertsNavigateFactory();
   const { euiTheme } = useEuiTheme();
   const { fitView, zoomIn, zoomOut } = useReactFlow();
@@ -111,6 +128,13 @@ function ContextualGraphInner({
 
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedNodeForPopover, setSelectedNodeForPopover] = useState<ServiceMapNode | null>(null);
+  const [selectedServiceNodeForFlyout, setSelectedServiceNodeForFlyout] =
+    useState<ServiceMapServiceNode | null>(null);
+  const [selectedEdgeForPopover, setSelectedEdgeForPopover] = useState<ServiceMapEdgeType | null>(
+    null
+  );
+  const selectedServiceNodeForFlyoutRef = useRef<ServiceMapServiceNode | null>(null);
+  selectedServiceNodeForFlyoutRef.current = selectedServiceNodeForFlyout;
 
   const expandedNodeIdsKey = useMemo(
     () => [...expandedNodeIds].sort((a, b) => a.localeCompare(b)).join('\0'),
@@ -168,6 +192,8 @@ function ContextualGraphInner({
   React.useEffect(() => {
     setSelectedNodeId(null);
     setSelectedNodeForPopover(null);
+    setSelectedServiceNodeForFlyout(null);
+    setSelectedEdgeForPopover(null);
   }, [expandedNodeIdsKey]);
 
   const collapseContext = useMemo<CollapsibleServiceMapContextValue>(
@@ -186,7 +212,9 @@ function ContextualGraphInner({
     (_, node) => {
       const newSelectedId = selectedNodeId === node.id ? null : node.id;
       setSelectedNodeId(newSelectedId);
-      setSelectedNodeForPopover(newSelectedId ? node : null);
+      setSelectedNodeForPopover(newSelectedId && !isServiceNode(node) ? node : null);
+      setSelectedServiceNodeForFlyout(newSelectedId && isServiceNode(node) ? node : null);
+      setSelectedEdgeForPopover(null);
       setEdges((currentEdges) =>
         applyEdgeHighlighting(currentEdges, { selectedNodeId: newSelectedId, selectedEdgeId: null })
       );
@@ -194,10 +222,46 @@ function ContextualGraphInner({
     [selectedNodeId, setEdges, applyEdgeHighlighting]
   );
 
+  const handleEdgeClick: EdgeMouseHandler<ServiceMapEdgeType> = useCallback(
+    (_, edge) => {
+      setSelectedNodeId(null);
+      setSelectedNodeForPopover(null);
+      setSelectedServiceNodeForFlyout(null);
+      const newSelectedEdge = selectedEdgeForPopover?.id === edge.id ? null : edge;
+      setSelectedEdgeForPopover(newSelectedEdge);
+      setEdges((currentEdges) =>
+        applyEdgeHighlighting(currentEdges, {
+          selectedNodeId: null,
+          selectedEdgeId: newSelectedEdge?.id ?? null,
+        })
+      );
+    },
+    [selectedEdgeForPopover, setEdges, applyEdgeHighlighting]
+  );
+
   const handlePopoverClose = useCallback(() => {
     setSelectedNodeId(null);
     setSelectedNodeForPopover(null);
-  }, []);
+    setSelectedServiceNodeForFlyout(null);
+    setSelectedEdgeForPopover(null);
+    setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, null));
+  }, [setEdges, applyEdgeHighlighting]);
+
+  const handlePaneClick = useCallback(() => {
+    if (selectedServiceNodeForFlyoutRef.current) {
+      return;
+    }
+    handlePopoverClose();
+  }, [handlePopoverClose]);
+
+  const flyoutSource = flyoutOptions?.source ?? SERVICE_FLYOUT_SOURCES.serviceMap;
+
+  const handleServiceFlyoutView = useCallback(
+    ({ tabId }: { tabId: string }) => {
+      telemetry.reportServiceFlyoutViewed({ tabId, source: flyoutSource });
+    },
+    [telemetry, flyoutSource]
+  );
 
   const topLeftToolbarStyles = useMemo(
     () => css`
@@ -252,7 +316,8 @@ function ContextualGraphInner({
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               onNodeClick={handleNodeClick}
-              onPaneClick={handlePopoverClose}
+              onEdgeClick={handleEdgeClick}
+              onPaneClick={handlePaneClick}
               onInit={() => {
                 if (layoutedNodes.length > 0) {
                   fitView(getFitViewOptions());
@@ -336,7 +401,7 @@ function ContextualGraphInner({
             </ReactFlow>
             <MapPopover
               selectedNode={selectedNodeForPopover}
-              selectedEdge={null}
+              selectedEdge={selectedEdgeForPopover}
               focusedServiceName={focalServiceId}
               environment={environment}
               kuery={kuery}
@@ -348,6 +413,19 @@ function ContextualGraphInner({
               alwaysNavigateOnFocus={alwaysNavigateOnPopoverFocus}
               clearKueryOnNavigation={clearKueryOnPopoverNavigation}
             />
+            {selectedServiceNodeForFlyout && (
+              <ServiceFlyout
+                key={selectedServiceNodeForFlyout.data.id}
+                service={selectedServiceNodeForFlyout.data}
+                environment={environment}
+                kuery={flyoutOptions?.kuery ?? kuery}
+                initialRangeFrom={flyoutOptions?.rangeFrom ?? start}
+                initialRangeTo={flyoutOptions?.rangeTo ?? end}
+                initialTransactionType={flyoutOptions?.initialTransactionType}
+                onView={handleServiceFlyoutView}
+                onClose={handlePopoverClose}
+              />
+            )}
           </div>
         </CollapsibleServiceMapProvider>
       </ServiceMapAlertsNavigateProvider>

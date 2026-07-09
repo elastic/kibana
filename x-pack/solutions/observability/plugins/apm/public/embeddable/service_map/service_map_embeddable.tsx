@@ -436,6 +436,7 @@ export function ServiceMapEmbeddable({
             alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
             clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
             showContextControls={!hideContextControls}
+            flyoutOptions={flyoutOptionsForGraph}
           />
         ) : (
           <ServiceMapGraph

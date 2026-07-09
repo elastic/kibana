@@ -8,7 +8,11 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
-import { EXTENDED_TIMEOUT, SERVICE_OPBEANS_JAVA } from '../../fixtures/constants';
+import {
+  EXTENDED_TIMEOUT,
+  SERVICE_OPBEANS_JAVA,
+  DEPENDENCY_POSTGRESQL,
+} from '../../fixtures/constants';
 
 test.describe(
   'Service Overview - Contextual service map',
@@ -45,15 +49,14 @@ test.describe(
         await overviewTab.waitForContextualServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
       });
 
-      await test.step('Opens a service node popover from the contextual map', async () => {
+      await test.step('Opens the service flyout from a service node on the contextual map', async () => {
         await overviewTab.getContextualServiceNode(SERVICE_OPBEANS_JAVA).click();
-        await expect(page.getByTestId('serviceMapPopoverContent')).toBeVisible();
-        await expect(page.getByTestId('serviceMapPopoverTitle')).toHaveText(SERVICE_OPBEANS_JAVA);
+        await expect(page.getByTestId('serviceFlyout')).toBeVisible();
+        await expect(page.getByTestId('serviceFlyoutTitleLink')).toHaveText(SERVICE_OPBEANS_JAVA);
       });
     });
 
     test('reveals hidden dependencies when hops are reduced and expand is clicked', async ({
-      page,
       pageObjects: { serviceDetailsPage },
     }) => {
       const { overviewTab } = serviceDetailsPage;
@@ -83,7 +86,7 @@ test.describe(
 
       await test.step('Expand hidden dependencies from the focal service', async () => {
         await overviewTab.getExpandHiddenDependenciesButton(SERVICE_OPBEANS_JAVA).click();
-        await expect(overviewTab.getContextualMapNodes()).not.toHaveCount(1, {
+        await expect(overviewTab.getContextualDependencyNode(DEPENDENCY_POSTGRESQL)).toBeVisible({
           timeout: EXTENDED_TIMEOUT,
         });
         await expect(
@@ -91,11 +94,6 @@ test.describe(
             .getContextualServiceNodeRoot(SERVICE_OPBEANS_JAVA)
             .getByTestId('serviceMapCollapseExpandedButton')
         ).toBeVisible({ timeout: EXTENDED_TIMEOUT });
-      });
-
-      await test.step('Dismiss popover', async () => {
-        await page.keyboard.press('Escape');
-        await expect(page.getByTestId('serviceMapPopoverContent')).toBeHidden();
       });
     });
   }

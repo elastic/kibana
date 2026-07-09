@@ -116,7 +116,12 @@ export class OverviewTab extends ServiceDetailsTab {
   }
 
   getContextualMapNodes() {
-    return this.contextualServiceMapGraph.locator('.react-flow__node');
+    return this.contextualServiceMapGraph.getByTestId('serviceMapNodeServiceCircle');
+  }
+
+  getContextualDependencyNode(dependencyId: string) {
+    const mapNodeId = dependencyId.startsWith('>') ? dependencyId : `>${dependencyId}`;
+    return this.contextualServiceMapGraph.getByTestId(`serviceMapNode-dependency-${mapNodeId}`);
   }
 
   getExpandHiddenDependenciesButton(serviceName: string) {

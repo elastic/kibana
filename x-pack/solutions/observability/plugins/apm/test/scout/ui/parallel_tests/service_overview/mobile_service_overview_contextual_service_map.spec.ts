@@ -44,10 +44,10 @@ test.describe(
         await overviewTab.waitForContextualServiceNodeToLoad(SERVICE_MOBILE_ANDROID);
       });
 
-      await test.step('Opens a service node popover from the contextual map', async () => {
+      await test.step('Opens the service flyout from a service node on the contextual map', async () => {
         await overviewTab.getContextualServiceNode(SERVICE_MOBILE_ANDROID).click();
-        await expect(page.getByTestId('serviceMapPopoverContent')).toBeVisible();
-        await expect(page.getByTestId('serviceMapPopoverTitle')).toHaveText(SERVICE_MOBILE_ANDROID);
+        await expect(page.getByTestId('serviceFlyout')).toBeVisible();
+        await expect(page.getByTestId('serviceFlyoutTitleLink')).toHaveText(SERVICE_MOBILE_ANDROID);
       });
     });
   }
