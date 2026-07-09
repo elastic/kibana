@@ -130,10 +130,8 @@ const filterModulesByExcludedConfigPaths = (
     .filter((module) => module.configs.length > 0);
 };
 
-// Normalize a repo-relative config path so an optional leading "./" doesn't cause misses.
 const normalizeConfigPath = (configPath: string): string => configPath.trim().replace(/^\.\//, '');
 
-// Parses the comma-separated `--configs` flag into a de-duplicated list of normalized paths.
 const parseRequestedConfigPaths = (raw: string | undefined): string[] => {
   if (!raw) {
     return [];
@@ -148,10 +146,6 @@ const parseRequestedConfigPaths = (raw: string | undefined): string[] => {
   ];
 };
 
-// Keeps only the explicitly-requested configs. Unlike the CI filters, this is an
-// allow-list keyed on config path: the caller has named exactly which configs to
-// resolve (e.g. the flaky-test runner), so registration/enabled/excluded state is
-// intentionally ignored.
 const filterModulesByRequestedConfigPaths = (
   modules: ModuleDiscoveryInfo[],
   requestedConfigPaths: string[]
@@ -166,8 +160,6 @@ const filterModulesByRequestedConfigPaths = (
     .filter((module) => module.configs.length > 0);
 };
 
-// Fails loudly when a requested config path does not correspond to any discovered
-// Scout config, so callers get a precise error instead of a later "not found in manifest".
 const assertRequestedConfigsExist = (
   modules: ModuleDiscoveryInfo[],
   requestedConfigPaths: string[]
