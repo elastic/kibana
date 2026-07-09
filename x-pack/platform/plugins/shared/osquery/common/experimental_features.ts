@@ -32,6 +32,14 @@ export const allowedExperimentalValues = Object.freeze({
    * with no linked projects reads exactly as it did before CPS. Has no effect on stateful Kibana.
    */
   crossProjectSearch: true,
+  /**
+   * Enables Agent Builder tool registration in the osquery plugin. When enabled,
+   * the plugin registers read-only Osquery inline tools (check_integration,
+   * list_saved_queries, get_table_schema, run_live_query, list_packs) that can
+   * be referenced by skills such as endpoint-forensic-analysis. Tools are
+   * fleet-wide-capable and gated behind the osquery integration being installed.
+   */
+  agentBuilderTools: false,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };
