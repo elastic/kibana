@@ -57,7 +57,6 @@ test.describe('Spaces Management: Create and Edit', { tag: tags.stateful.classic
     try {
       await pageObjects.spaces.gotoEditSpace(spaceId);
 
-      // Folds in the FTR a11y suite's "updating a space" (edit page) snapshot.
       await test.step('edit space page has no accessibility violations', async () => {
         const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
         expect(violations).toStrictEqual([]);
@@ -168,7 +167,6 @@ test.describe('Spaces Management: Create and Edit', { tag: tags.stateful.classic
       await pageObjects.spaces.toggleFeatureCategoryCheckbox('securitySolution');
       expect(await pageObjects.spaces.isFeatureCategoryChecked('securitySolution')).toBe(false);
 
-      // Folds in the FTR a11y suite's "toggling an entire feature category" snapshots.
       await test.step('feature category toggle has no accessibility violations', async () => {
         const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
         expect(violations).toStrictEqual([]);
@@ -193,7 +191,6 @@ test.describe('Spaces Management: Create and Edit', { tag: tags.stateful.classic
     }
   });
 
-  // Folds in the FTR a11y suite's "delete space" confirm-modal snapshot.
   test('delete space confirm modal has no accessibility violations', async ({
     apiServices,
     page,
@@ -216,7 +213,6 @@ test.describe('Spaces Management: Create and Edit', { tag: tags.stateful.classic
     }
   });
 
-  // Folds in the FTR a11y suite's create-page and color-picker snapshots.
   test('create space page has no accessibility violations', async ({ page, pageObjects }) => {
     await pageObjects.spaces.gotoSpacesGrid();
     await pageObjects.spaces.clickCreateSpace();

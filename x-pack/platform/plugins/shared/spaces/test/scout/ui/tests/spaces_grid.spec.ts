@@ -95,7 +95,6 @@ test.describe('Spaces Management: List of Spaces', { tag: tags.deploymentAgnosti
     expect(pageObjects.spaces.getCurrentUrl()).toContain(`/s/${target.id}`);
   });
 
-  // Folds in the FTR a11y suite's "space listing page" / "manage spaces page" snapshots.
   test('spaces grid page has no accessibility violations', async ({ page, pageObjects }) => {
     await expect(pageObjects.spaces.gridPageLocator()).toBeVisible();
 

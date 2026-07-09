@@ -38,7 +38,6 @@ test.describe('Spaces selection: login space selector', { tag: tags.deploymentAg
     await page.goto(kbnUrl.get('/spaces/space_selector'));
     await pageObjects.spaces.waitForSpaceSelector();
 
-    // Folds in the FTR a11y suite's "space selection page" snapshot.
     await test.step('space selection page has no accessibility violations', async () => {
       const { violations } = await page.checkA11y({
         include: ['[data-test-subj="kibanaSpaceSelector"]'],
