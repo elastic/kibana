@@ -23,7 +23,7 @@ import {
 } from '../../../fixtures/tabs/discover_session_test_data';
 import {
   buildMultiTabSession,
-  createMultiTabDiscoverSession,
+  createMultiTabDiscoverSessionViaApi,
 } from '../../../fixtures/tabs/discover_session_setup';
 
 const SAVED_SESSION_NAME = 'Saved multi-tab Discover session';
@@ -122,12 +122,14 @@ spaceTest.describe('tabs - multi-tab Discover sessions', { tag: '@local-stateful
 
   spaceTest(
     'should support loading a multi-tab Discover session',
-    async ({ pageObjects, page }) => {
+    async ({ apiServices, pageObjects, page, scoutSpace }) => {
       const { discover, datePicker, queryBar, unifiedTabs, unifiedFieldList } = pageObjects;
 
-      await createMultiTabDiscoverSession(pageObjects, LOADED_SESSION_NAME);
-      await discover.clickNewSearch();
-      await discover.waitUntilTabIsLoaded();
+      await createMultiTabDiscoverSessionViaApi({
+        apiServices,
+        sessionName: LOADED_SESSION_NAME,
+        spaceId: scoutSpace.id,
+      });
       await discover.loadSavedSearch(LOADED_SESSION_NAME);
       await discover.waitUntilTabIsLoaded();
 
@@ -184,12 +186,14 @@ spaceTest.describe('tabs - multi-tab Discover sessions', { tag: '@local-stateful
 
   spaceTest(
     'should locally persist unsaved changes to a multi-tab session',
-    async ({ pageObjects, page }) => {
+    async ({ apiServices, pageObjects, page, scoutSpace }) => {
       const { discover, datePicker, queryBar, unifiedTabs, unifiedFieldList } = pageObjects;
 
-      await createMultiTabDiscoverSession(pageObjects, UNSAVED_CHANGES_SESSION_NAME);
-      await discover.clickNewSearch();
-      await discover.waitUntilTabIsLoaded();
+      await createMultiTabDiscoverSessionViaApi({
+        apiServices,
+        sessionName: UNSAVED_CHANGES_SESSION_NAME,
+        spaceId: scoutSpace.id,
+      });
       await discover.loadSavedSearch(UNSAVED_CHANGES_SESSION_NAME);
       await discover.waitUntilTabIsLoaded();
       expect(await discover.getSelectedDataViewName()).toBe(PERSISTED_TAB.dataView);
