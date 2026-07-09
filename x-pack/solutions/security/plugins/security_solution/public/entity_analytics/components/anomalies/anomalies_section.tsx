@@ -36,6 +36,7 @@ export const EMPTY_ANOMALY_OVERVIEW: GetAnomalyOverviewResponse = {
   totalAnomaliesCount: 0,
   from: 0,
   to: 0,
+  hasJobsMissingThreatTactics: false,
 };
 
 interface AnomaliesSectionProps {
