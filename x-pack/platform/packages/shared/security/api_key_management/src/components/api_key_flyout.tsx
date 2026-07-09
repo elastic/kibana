@@ -1044,7 +1044,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                         <p>
                           <FormattedMessage
                             id="xpack.security.accountManagement.apiKeyFlyout.strongIdentityVerification.description"
-                            defaultMessage="This field is used to restrict API key to connections authenticated by a specific TLS certificate."
+                            defaultMessage="Use this option to restrict the API key to connections authenticated by a specific TLS certificate."
                           />
                         </p>
                       </EuiText>
@@ -1062,7 +1062,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                           helpText={
                             <FormattedMessage
                               id="xpack.security.accountManagement.apiKeyFlyout.certificateIdentityHelpText"
-                              defaultMessage="The value should match the certificate's distinguished name (DN) pattern. {learnMore}"
+                              defaultMessage="The value should match the certificate's Distinguished Name (DN) pattern. {learnMore}"
                               values={{
                                 learnMore: (
                                   <EuiLink
