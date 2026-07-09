@@ -72,7 +72,7 @@ export const EmbeddableAlertsTable = ({
     data: ruleTypes,
     isLoading: isLoadingRuleTypes,
     isError: cannotLoadRuleTypes,
-  } = useGetInternalRuleTypesQuery({ http: services.http });
+  } = useGetInternalRuleTypesQuery({ http: services.http, includeAlertAuthorized: true });
   const ruleTypeIds = useMemo(
     () => (!ruleTypes || !solution ? [] : getRuleTypeIdsForSolution(ruleTypes, solution)),
     [ruleTypes, solution]

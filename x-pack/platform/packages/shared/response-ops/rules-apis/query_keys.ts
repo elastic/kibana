@@ -32,5 +32,8 @@ export const queryKeys = {
       },
     ] as const,
   getRuleTypes: () => [queryKeys.root, 'getRuleTypes'] as const,
-  getInternalRuleTypes: () => [queryKeys.root, 'getInternalRuleTypes'] as const,
+  getInternalRuleTypes: ({
+    includeAlertAuthorized = false,
+  }: { includeAlertAuthorized?: boolean } = {}) =>
+    [queryKeys.root, 'getInternalRuleTypes', { includeAlertAuthorized }] as const,
 };
