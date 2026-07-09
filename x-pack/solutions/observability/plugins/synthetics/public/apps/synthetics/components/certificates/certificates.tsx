@@ -71,7 +71,7 @@ export const CertificatesPage: React.FC = () => {
     search,
     monitorTypes,
     browserResourceTypes,
-    party,
+    certOrigin,
     tags,
     issuers,
     remoteNames,
@@ -79,7 +79,7 @@ export const CertificatesPage: React.FC = () => {
     setSearch,
     setMonitorTypes,
     setBrowserResourceTypes,
-    setParty,
+    setCertOrigin,
     setTags,
     setIssuers,
     setExpiringWithin,
@@ -99,8 +99,8 @@ export const CertificatesPage: React.FC = () => {
     [facets?.resourceTypes]
   );
   const partyOptions = useMemo(
-    () => withCounts(PARTY_FILTER_OPTIONS, facets?.party),
-    [facets?.party]
+    () => withCounts(PARTY_FILTER_OPTIONS, facets?.certOrigin),
+    [facets?.certOrigin]
   );
   // The tag list itself is derived from the cert facets, so only tags that actually
   // appear on certificate-bearing documents are offered (each with its cert count).
@@ -130,7 +130,7 @@ export const CertificatesPage: React.FC = () => {
     direction: sort.direction,
     monitorTypes,
     browserResourceTypes: isBrowserIncluded ? browserResourceTypes : undefined,
-    party: isBrowserIncluded ? party : undefined,
+    certOrigin: isBrowserIncluded ? certOrigin : undefined,
     tags,
     issuers,
     notValidAfter: expiringWithin,
@@ -206,11 +206,11 @@ export const CertificatesPage: React.FC = () => {
               label={labels.PARTY_FILTER}
               dataTestSubj="certPartyFilterButton"
               options={partyOptions}
-              selectedValues={party}
+              selectedValues={certOrigin}
               isDisabled={!isBrowserIncluded}
               disabledTooltip={labels.BROWSER_FILTER_DISABLED_TOOLTIP}
               onChange={(values) => {
-                setParty(values);
+                setCertOrigin(values);
                 resetToFirstPage();
               }}
             />

@@ -45,7 +45,6 @@ import {
   getSettingValue,
   getCommonStylesheetPaths,
   getThemeStylesheetPaths,
-  getScriptPaths,
   getBrowserLoggingConfig,
 } from './render_utils';
 import { resolveLocale } from './resolve_locale';
@@ -279,25 +278,17 @@ export class RenderingService {
     });
     const themeName = this.themeName$.getValue();
 
-    const scriptPaths = getScriptPaths({
-      themeName,
-      darkMode,
-      baseHref: staticAssetsHrefBase,
-    });
-
     const loggingConfig = await getBrowserLoggingConfig(this.coreContext.configService);
 
     const configLocale = i18nLib.getLocale();
     const translationHashes = i18n.getTranslationHashes();
     const availableLocales = i18n.getAvailableLocales();
-    const isServerless = this.coreContext.env.packageInfo.buildFlavor === 'serverless';
     const { locale: effectiveLocale, setCookieHeader } = resolveLocale({
       request,
       userSettingLocale,
       configLocale,
       configuredLocales: availableLocales.map((entry) => entry.id),
       translationHashes,
-      isServerless,
       serverBasePath,
       allowLocaleCookie: i18n.allowLocaleCookie,
     });
@@ -348,7 +339,6 @@ export class RenderingService {
       themeVersion,
       darkMode,
       stylesheetPaths: commonStylesheetPaths,
-      scriptPaths,
       preloadFonts,
       optimizeFontLoading: useRspack || undefined,
       customBranding: {

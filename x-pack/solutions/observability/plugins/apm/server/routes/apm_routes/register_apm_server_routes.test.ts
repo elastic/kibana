@@ -6,8 +6,14 @@
  */
 
 import { jsonRt } from '@kbn/io-ts-utils';
-import type { ServerRoute, ServerRouteRepository } from '@kbn/server-route-repository';
+import type {
+  RouteParamsRT,
+  ServerRoute,
+  ServerRouteRepository,
+} from '@kbn/server-route-repository';
+import { passThroughValidationObject } from '@kbn/server-route-repository';
 import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { APMConfig } from '../..';
 import type { APMRouteCreateOptions } from '../typings';
@@ -79,7 +85,7 @@ const initApi = (
   routes: Array<
     ServerRoute<
       any,
-      t.Any | undefined,
+      RouteParamsRT | undefined,
       APMRouteHandlerResources,
       any,
       APMRouteCreateOptions | undefined
@@ -534,6 +540,121 @@ describe('createApi', () => {
       });
 
       expect(response.custom).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('when using zod', () => {
+    it('validates via Core, merging `_inspect` into the declared query schema', () => {
+      const {
+        mocks: { get },
+      } = initApi([
+        {
+          endpoint: 'GET /foo',
+          params: z.object({
+            path: z.object({ id: z.string() }),
+            query: z.object({ bar: z.string() }),
+          }),
+          security: disabledAuthz,
+          handler: async () => ({}),
+        },
+      ]);
+
+      const { validate } = get.mock.calls[0][0];
+
+      // io-ts (and no-params) routes bypass Core validation entirely; zod
+      // routes must not.
+      expect(validate).not.toBe(passThroughValidationObject);
+
+      // path: only the declared keys are allowed
+      expect(validate.params.parse({ id: 'abc' })).toEqual({ id: 'abc' });
+      expect(() => validate.params.parse({ id: 'abc', extra: 'x' })).toThrow();
+
+      // query: the route's own field and `_inspect` coexist
+      expect(validate.query.parse({ bar: 'baz', _inspect: 'true' })).toEqual({
+        bar: 'baz',
+        _inspect: true,
+      });
+      expect(validate.query.parse({ bar: 'baz' })).toEqual({ bar: 'baz' });
+      expect(() => validate.query.parse({ bar: 'baz', _inspect: 1 })).toThrow();
+      expect(() => validate.query.parse({ bar: 'baz', extra: 'x' })).toThrow();
+    });
+
+    it('still accepts `_inspect` when the route declares no query params', () => {
+      const {
+        mocks: { post },
+      } = initApi([
+        {
+          endpoint: 'POST /foo',
+          params: z.object({ body: z.object({ value: z.string() }) }),
+          security: disabledAuthz,
+          handler: async () => ({}),
+        },
+      ]);
+
+      const { validate } = post.mock.calls[0][0];
+
+      expect(validate.query.parse({})).toEqual({});
+      expect(validate.query.parse({ _inspect: 'false' })).toEqual({ _inspect: false });
+      expect(() => validate.query.parse({ somethingElse: 'x' })).toThrow();
+    });
+
+    it('passes params straight through to the handler without re-decoding them', async () => {
+      const handlerMock = jest.fn().mockResolvedValue({});
+      const {
+        simulateRequest,
+        mocks: { response },
+      } = initApi([
+        {
+          endpoint: 'GET /foo',
+          params: z.object({
+            path: z.object({ id: z.string() }),
+            query: z.object({ bar: z.string() }),
+          }),
+          handler: handlerMock,
+          security: disabledAuthz,
+        },
+      ]);
+
+      // Simulates what Core hands the handler after successfully validating
+      // and coercing the request against `validate` above.
+      await simulateRequest({
+        method: 'get',
+        pathname: '/foo',
+        params: { id: 'abc' },
+        query: { bar: 'baz', _inspect: true },
+      });
+
+      expect(response.custom).not.toHaveBeenCalled();
+      const params = handlerMock.mock.calls[0][0].params;
+      expect(params).toEqual({
+        path: { id: 'abc' },
+        query: { bar: 'baz', _inspect: true },
+      });
+    });
+
+    it('defaults `_inspect` to false when omitted', async () => {
+      const handlerMock = jest.fn().mockResolvedValue({});
+      const {
+        simulateRequest,
+        mocks: { response },
+      } = initApi([
+        {
+          endpoint: 'GET /foo',
+          params: z.object({ query: z.object({ bar: z.string() }) }),
+          handler: handlerMock,
+          security: disabledAuthz,
+        },
+      ]);
+
+      await simulateRequest({
+        method: 'get',
+        pathname: '/foo',
+        query: { bar: 'baz' },
+      });
+
+      expect(response.custom).not.toHaveBeenCalled();
+      const params = handlerMock.mock.calls[0][0].params;
+      expect(params).toEqual({ query: { bar: 'baz', _inspect: false } });
     });
   });
 });
