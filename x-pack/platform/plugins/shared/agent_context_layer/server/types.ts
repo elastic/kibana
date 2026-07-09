@@ -16,7 +16,6 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type {
   SmlTypeDefinition,
   SmlSearchResult,
@@ -33,7 +32,6 @@ import type { SmlResolvedItemResult } from './services/sml/execute_sml_attach_it
 export interface AgentContextLayerSetupDependencies {
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
-  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
 }
 
 export interface AgentContextLayerStartDependencies {

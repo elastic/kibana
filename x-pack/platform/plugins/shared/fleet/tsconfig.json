@@ -48,6 +48,7 @@
     "@kbn/custom-integrations-plugin",
 
     // packages
+    "@kbn/deeplinks-management",
     "@kbn/core-application-common",
     "@kbn/core-capabilities-common",
     "@kbn/i18n",
@@ -139,6 +140,7 @@
     "@kbn/charts-theme",
     "@kbn/search-types",
     "@kbn/human-readable-id",
-    "@kbn/elastic-agent-condition-language"
+    "@kbn/elastic-agent-condition-language",
+    "@kbn/app-header"
   ]
 }

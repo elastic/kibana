@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiFlexItem,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexItem, EuiPopover, EuiToolTip } from '@elastic/eui';
 
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -20,7 +14,10 @@ import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { getRulesAppDetailsRoute, rulesAppRoute } from '@kbn/rule-data-utils';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { useCaseAlertActionItems } from '@kbn/response-ops-alerts-table/hooks/use_case_alert_action_items';
+import { ExpandableContextMenuPanel } from '@kbn/response-ops-alerts-table/components/expandable_context_menu_panel';
 import { useKibana } from '../../utils/kibana_react';
+import { useCanModifyAlerts } from '../../hooks/use_can_modify_alerts';
+import { useAuthorizedToReadRuleType } from '../../hooks/use_authorized_to_read_rule_type';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
@@ -46,6 +43,12 @@ export function AlertActions(
     },
     cases,
   } = services;
+
+  const canModifyAlerts = useCanModifyAlerts();
+
+  const { authorizedToReadRuleForAlert } = useAuthorizedToReadRuleType();
+
+  const canReadAlertRule = authorizedToReadRuleForAlert(alert);
   const { telemetryClient } = useKibana().services;
   const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
 
@@ -114,14 +117,15 @@ export function AlertActions(
           {...props}
           key="defaultRowActions"
           onActionExecuted={closeActionsPopover}
+          canModifyAlerts={canModifyAlerts}
           resolveRulePagePath={(ruleId, currentPageId) =>
-            currentPageId !== RULE_DETAILS_PAGE_ID
+            canReadAlertRule && currentPageId !== RULE_DETAILS_PAGE_ID
               ? `${rulesAppRoute}${getRulesAppDetailsRoute(ruleId)}`
               : null
           }
         />
       ),
-      [closeActionsPopover, props]
+      [closeActionsPopover, props, canModifyAlerts, canReadAlertRule]
     ),
   ];
 
@@ -190,7 +194,8 @@ export function AlertActions(
         grow={parentAlert ? false : undefined}
       >
         <EuiPopover
-          anchorPosition="downLeft"
+          aria-label={actionsToolTip}
+          anchorPosition="rightCenter"
           button={
             <EuiToolTip content={actionsToolTip} disableScreenReaderOutput>
               <EuiButtonIcon
@@ -207,8 +212,9 @@ export function AlertActions(
           closePopover={closeActionsPopover}
           isOpen={isPopoverOpen}
           panelPaddingSize="none"
+          panelStyle={{ maxHeight: '80vh', overflowY: 'auto' }}
         >
-          <EuiContextMenuPanel items={actionsMenuItems} data-test-subj="alertsTableActionsMenu" />
+          <ExpandableContextMenuPanel items={actionsMenuItems} />
         </EuiPopover>
       </EuiFlexItem>
     </>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MemoryVolume } from '../runner/store/filesystem/memory_volume';
+import { MemoryVolume } from '../runner/store/memory_volume';
 import { FilesystemService } from './filesystem_service';
 import { WorkspaceVolume } from './workspace_volume';
 import type { IWorkspaceClient } from '../../workspaces';
@@ -22,8 +22,8 @@ const makeService = (workspaceClient: IWorkspaceClient, opts?: { workspaceId?: s
   });
   const service = new FilesystemService({
     workspaceVolume,
-    toolResultsVolume: new MemoryVolume('tool_results'),
-    skillsVolume: new MemoryVolume('skills'),
+    toolResultsSource: new MemoryVolume(),
+    skillsSource: new MemoryVolume(),
   });
   return { service, workspaceVolume };
 };

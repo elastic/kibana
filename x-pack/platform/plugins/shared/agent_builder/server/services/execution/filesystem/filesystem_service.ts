@@ -8,7 +8,7 @@
 import type { IFileSystem } from 'just-bash';
 import { InMemoryFs, MountableFs } from 'just-bash';
 import type { IFilesystemService } from '@kbn/agent-builder-server/runner';
-import type { Volume } from '@kbn/agent-builder-server/runner';
+import type { FileEntryAccessor } from '@kbn/agent-builder-server/runner';
 import { CapacityLimitedFs } from './capacity_limited_fs';
 import { VolumeBackedReadOnlyFs } from './volume_backed_read_only_fs';
 import type { WorkspaceVolume } from './workspace_volume';
@@ -18,8 +18,8 @@ export const EPHEMERAL_FS_CAPACITY_BYTES = 20 * 1024 * 1024;
 
 export interface FilesystemServiceDeps {
   workspaceVolume: WorkspaceVolume;
-  toolResultsVolume: Volume;
-  skillsVolume: Volume;
+  toolResultsSource: FileEntryAccessor;
+  skillsSource: FileEntryAccessor;
 }
 
 /**
@@ -50,11 +50,8 @@ export class FilesystemService implements IFilesystemService {
 
     await this.deps.workspaceVolume.load();
 
-    const toolCallsFs = new VolumeBackedReadOnlyFs(
-      this.deps.toolResultsVolume,
-      MOUNT_POINTS.toolCalls
-    );
-    const skillsFs = new VolumeBackedReadOnlyFs(this.deps.skillsVolume, MOUNT_POINTS.skills);
+    const toolCallsFs = new VolumeBackedReadOnlyFs(this.deps.toolResultsSource);
+    const skillsFs = new VolumeBackedReadOnlyFs(this.deps.skillsSource);
 
     this.fs = new MountableFs({
       base,

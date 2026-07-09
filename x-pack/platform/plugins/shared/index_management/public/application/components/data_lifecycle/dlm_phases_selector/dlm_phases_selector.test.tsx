@@ -185,6 +185,124 @@ describe('DlmPhasesSelector', () => {
     expect(queryByTestId('dlmPhasesSelectorFrozenPhaseCard')).not.toBeInTheDocument();
   });
 
+  describe('existing template with frozen phase already active (grace state)', () => {
+    const GRACE_DEFAULT_VALUE = {
+      frozen: { enabled: true, value: '30', unit: 'd' },
+      delete: { enabled: true, value: '60', unit: 'd' },
+    };
+
+    it('keeps frozen enabled with the enterprise warning callout when the license is missing', () => {
+      const { getByLabelText, getByTestId, getByText, queryByText } = renderSelector({
+        hasEnterpriseLicense: false,
+        defaultValue: GRACE_DEFAULT_VALUE,
+      });
+
+      expect(getByLabelText('Enable frozen phase')).not.toBeDisabled();
+      expect(getByLabelText('Enable frozen phase')).toBeChecked();
+      expect(getByTestId('frozenEnterpriseRequiredCallout')).toBeInTheDocument();
+      expect(getByText('Move after')).toBeInTheDocument();
+      expect(queryByText('Enterprise required')).not.toBeInTheDocument();
+    });
+
+    it('keeps frozen enabled with the default repository warning callout when the repository is missing', () => {
+      const { getByLabelText, getByTestId, queryByText } = renderSelector({
+        hasDefaultSnapshotRepository: false,
+        defaultValue: GRACE_DEFAULT_VALUE,
+      });
+
+      expect(getByLabelText('Enable frozen phase')).not.toBeDisabled();
+      expect(getByTestId('frozenDefaultRepositoryRequiredCallout')).toBeInTheDocument();
+      expect(queryByText('Default repository required')).not.toBeInTheDocument();
+    });
+
+    it('shows both warning callouts when both requirements are missing', () => {
+      const { getByTestId } = renderSelector({
+        hasEnterpriseLicense: false,
+        hasDefaultSnapshotRepository: false,
+        defaultValue: GRACE_DEFAULT_VALUE,
+      });
+
+      expect(getByTestId('frozenEnterpriseRequiredCallout')).toBeInTheDocument();
+      expect(getByTestId('frozenDefaultRepositoryRequiredCallout')).toBeInTheDocument();
+    });
+
+    it('collapses to the disabled badge state after the user unchecks the phase', () => {
+      const { getByLabelText, getByText, queryByTestId } = renderSelector({
+        hasEnterpriseLicense: false,
+        defaultValue: GRACE_DEFAULT_VALUE,
+      });
+
+      fireEvent.click(getByLabelText('Enable frozen phase'));
+
+      expect(getByText('Enterprise required')).toBeInTheDocument();
+      expect(getByLabelText('Enable frozen phase')).toBeDisabled();
+      expect(queryByTestId('frozenEnterpriseRequiredCallout')).not.toBeInTheDocument();
+    });
+
+    it('keeps the frozen phase visible in the grace state even without create permission', () => {
+      const { getByTestId } = renderSelector({
+        hasDefaultSnapshotRepository: false,
+        canCreateDefaultSnapshotRepository: false,
+        defaultValue: GRACE_DEFAULT_VALUE,
+      });
+
+      expect(getByTestId('dlmPhasesSelectorFrozenPhaseCard')).toBeInTheDocument();
+      expect(getByTestId('frozenDefaultRepositoryRequiredCallout')).toBeInTheDocument();
+      expect(getByTestId('frozenCreateDefaultRepositoryButton')).toBeDisabled();
+    });
+  });
+
+  describe('maximum retention', () => {
+    it('shows the maximum retention help text when the delete phase is enabled', () => {
+      const { getByText } = renderSelector({
+        serverless: true,
+        maximumRetentionPeriod: '365d',
+        defaultValue: { delete: { enabled: true, value: '60', unit: 'd' } },
+      });
+
+      expect(getByText('Must occur before the maximum retention (365d).')).toBeInTheDocument();
+    });
+
+    it('flags an error and reports invalid when the delete phase exceeds the maximum', () => {
+      const { getByText, getByTestId, onChange } = renderSelector({
+        serverless: true,
+        maximumRetentionPeriod: '365d',
+        defaultValue: { delete: { enabled: true, value: '60', unit: 'd' } },
+      });
+
+      fireEvent.change(getByTestId('deleteDurationValue'), { target: { value: '400' } });
+
+      expect(getByText('Must occur before the maximum retention (365d).')).toBeInTheDocument();
+      expect(onChange).toHaveBeenLastCalledWith(
+        {
+          frozen: { enabled: false, value: '30', unit: 'd' },
+          delete: { enabled: true, value: '400', unit: 'd' },
+        },
+        { frozen_after: undefined, data_retention: '400d' },
+        false
+      );
+    });
+
+    it('reports valid when the delete phase is within the maximum', () => {
+      const { getByTestId, onChange } = renderSelector({
+        serverless: true,
+        maximumRetentionPeriod: '365d',
+        defaultValue: { delete: { enabled: true, value: '60', unit: 'd' } },
+      });
+
+      fireEvent.change(getByTestId('deleteDurationValue'), { target: { value: '300' } });
+
+      expect(onChange).toHaveBeenLastCalledWith(
+        {
+          frozen: { enabled: false, value: '30', unit: 'd' },
+          delete: { enabled: true, value: '300', unit: 'd' },
+        },
+        { frozen_after: undefined, data_retention: '300d' },
+        true
+      );
+    });
+  });
+
   it('disables phase configuration fields when the selector is disabled', () => {
     const { getByText, getByTestId } = renderSelector({
       isDisabled: true,

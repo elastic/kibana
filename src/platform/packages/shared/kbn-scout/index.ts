@@ -25,6 +25,7 @@ export {
 export {
   browserAuthFixture,
   apiServicesFixture,
+  apiClientFixture,
   coreWorkerFixtures,
   esArchiverFixture,
   createPlaywrightConfig,
@@ -46,11 +47,9 @@ export * from './src/playwright/ui_components';
 // Page-object wrappers and helpers for shared Kibana surfaces.
 export {
   ContentListWrapper,
-  CopySavedObjectsToSpaceFlyout,
   buildContentListSearch,
   buildContentListUrlRegex,
   ListingTable,
-  SavedObjectsManagementPage,
 } from './src/playwright/page_objects';
 export type { ContentListUrlState } from './src/playwright/page_objects';
 
@@ -75,6 +74,7 @@ export type {
   BrowserAuthFixture,
   RequestAuthFixture,
   SamlAuth,
+  ScoutSpaceParallelFixture,
   SpaceSolutionView,
 } from './src/playwright';
 

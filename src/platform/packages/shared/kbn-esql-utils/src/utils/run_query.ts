@@ -12,12 +12,13 @@ import dateMath from '@kbn/datemath';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
-import type { TimeRange } from '@kbn/es-query';
+import type { ProjectRouting, TimeRange } from '@kbn/es-query';
 import { getTimeZoneFromSettings } from '@kbn/es-query';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
 import { type ESQLControlVariable } from '@kbn/esql-types';
+import { getESQLQueryVariables } from './query_parsing_helpers';
 
 export const hasStartEndParams = (query: string) => /\?_tstart|\?_tend/i.test(query);
 
@@ -48,20 +49,27 @@ export const getNamedParams = (
 ) => {
   const namedParams: ESQLSearchParams['params'] = getStartEndParams(query, timeRange);
   if (variables?.length) {
-    variables?.forEach(({ key, value }) => {
-      namedParams.push({ [key]: value });
-    });
+    const usedVariables = new Set(getESQLQueryVariables(query));
+    variables
+      .filter(({ key }) => usedVariables.has(key))
+      .forEach(({ key, value }) => {
+        namedParams.push({ [key]: value });
+      });
   }
   return namedParams;
 };
 
 export function formatESQLColumns(columns: ESQLColumn[]): DatatableColumn[] {
-  return columns.map(({ name, type }) => {
+  return columns.map(({ name, type, _meta }) => {
     const kibanaType = esFieldTypeToKibanaFieldType(type);
     return {
       id: name,
       name,
-      meta: { type: kibanaType, esType: type },
+      meta: {
+        type: kibanaType,
+        esType: type,
+        ...(_meta !== undefined && { esMeta: _meta }),
+      },
     } as DatatableColumn;
   });
 }
@@ -109,10 +117,11 @@ export async function getESQLQueryColumnsRaw({
     const lookup = new Set(hasEmptyColumns ? table.columns?.map(({ name }) => name) || [] : []);
 
     const allColumns =
-      (table.all_columns ?? table.columns)?.map(({ name, type }) => {
+      (table.all_columns ?? table.columns)?.map(({ name, type, original_types }) => {
         return {
           name,
           type,
+          original_types,
           isNull: hasEmptyColumns ? !lookup.has(name) : false,
         };
       }) ?? [];
@@ -181,6 +190,8 @@ export async function getESQLResults({
   variables,
   timezone,
   executionContext,
+  approximation,
+  projectRouting,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
@@ -191,6 +202,8 @@ export async function getESQLResults({
   variables?: ESQLControlVariable[];
   timezone?: string;
   executionContext?: KibanaExecutionContext;
+  approximation?: boolean;
+  projectRouting?: ProjectRouting;
 }): Promise<{
   response: ESQLSearchResponse;
   params: ESQLSearchParams;
@@ -211,6 +224,8 @@ export async function getESQLResults({
         abortSignal: signal,
         strategy: 'esql_async',
         ...(executionContext ? { executionContext } : {}),
+        ...(approximation !== undefined ? { approximation } : {}),
+        ...(projectRouting !== undefined ? { projectRouting } : {}),
       }
     )
   );

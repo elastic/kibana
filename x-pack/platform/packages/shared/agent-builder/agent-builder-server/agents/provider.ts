@@ -35,12 +35,12 @@ import type {
   ConversationStateManager,
   SkillsService,
   PluginsService,
+  RenderersService,
   ToolManager,
   TodoStateManager,
   IFilesystemService,
   IBashService,
 } from '../runner';
-import type { IFileStore } from '../runner/filestore';
 import type { AttachmentStateManager } from '../attachments';
 import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
@@ -98,14 +98,14 @@ export interface SubAgentExecution {
  * Experimental features configuration for agent builder.
  */
 export interface ExperimentalFeatures {
-  /** Whether the filestore feature is enabled */
-  filestore: boolean;
   /** Whether the skills feature is enabled */
   skills: boolean;
   /** Whether the sub-agent execution feature is enabled */
   subagents: boolean;
   /** Whether the todo list tool and task-management prompt are enabled */
   todos: boolean;
+  /** Whether external ES|QL datasets are surfaced to data-source tools */
+  datasets: boolean;
   /** Whether the ask_user_question HITL tool is enabled */
   askUserQuestion: boolean;
   /** Whether the bash tool (and the just-bash runtime) is enabled */
@@ -158,6 +158,13 @@ export interface AgentHandlerContext {
    */
   attachments: AttachmentsService;
   /**
+   * Renderers service, giving read access to the renderer types registered in
+   * agent builder (used to advertise them to the agent in the prompt).
+   * Optional: absent when the context is constructed outside agentBuilder's
+   * runner (treated as no renderers).
+   */
+  renderers?: RenderersService;
+  /**
    * Skills service to interact with skills.
    */
   skills: SkillsService;
@@ -206,12 +213,6 @@ export interface AgentHandlerContext {
    * Hooks service for agent lifecycle interception.
    */
   hooks: AgentBuilderHooks;
-  /**
-   * File store to access data from the agent's virtual filesystem.
-   * @deprecated Use `filesystemService` instead. Will be removed once the
-   * unified VFS migration completes.
-   */
-  filestore: IFileStore;
   /**
    * Unified virtual filesystem service.
    */

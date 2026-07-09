@@ -20,6 +20,8 @@ export class WorkflowEditorPage {
   public acceptAllButton: Locator;
   public declineAllButton: Locator;
   public bulkBar: Locator;
+  public graphCanvas: Locator;
+  public graphYamlErrorCallout: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.yamlEditor = this.page.testSubj.locator('workflowYamlEditor');
@@ -35,6 +37,8 @@ export class WorkflowEditorPage {
     this.acceptAllButton = this.page.testSubj.locator('wfDiffAcceptAllButton');
     this.declineAllButton = this.page.testSubj.locator('wfDiffDeclineAllButton');
     this.bulkBar = this.page.testSubj.locator('wfDiffBulkBar');
+    this.graphCanvas = this.page.testSubj.locator('workflowGraphCanvas');
+    this.graphYamlErrorCallout = this.page.testSubj.locator('workflowGraphYamlErrorCallout');
   }
 
   /**
@@ -78,6 +82,23 @@ export class WorkflowEditorPage {
    */
   async waitForEditorToLoad() {
     await this.yamlEditor.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Switch to the graph view by clicking the bottom bar toggle.
+   * Waits for the graph canvas to become visible.
+   * Requires the `workflows:experimentalFeatures` UI setting to be true.
+   */
+  async switchToGraphView(): Promise<void> {
+    await this.page.testSubj.click('workflowEditorViewToggle-graph');
+    await this.graphCanvas.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Switch back to the YAML view by clicking the bottom bar toggle.
+   */
+  async switchToYamlView(): Promise<void> {
+    await this.page.testSubj.click('workflowEditorViewToggle-yaml');
   }
 
   /**
@@ -282,7 +303,7 @@ export class WorkflowEditorPage {
    * Run the workflow and confirm if there are unsaved changes
    */
   async runWorkflowWithUnsavedChanges() {
-    await this.runButton.click();
+    await this.clickRunButton();
     await this.page.testSubj.waitForSelector('runWorkflowWithUnsavedChangesConfirmationModal', {
       state: 'visible',
     });
