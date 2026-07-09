@@ -15,6 +15,7 @@ export class EmbeddableAlertsTablePage {
   public readonly addAlertsPanelAction: Locator;
   public readonly configEditorSaveButton: Locator;
   public readonly alertsTableLoaded: Locator;
+  public readonly alertsTableEmptyState: Locator;
   public readonly alertsCount: Locator;
   public readonly alertRowCells: Locator;
 
@@ -22,6 +23,7 @@ export class EmbeddableAlertsTablePage {
     this.addAlertsPanelAction = this.page.testSubj.locator(ADD_ALERTS_PANEL_ACTION_SUBJ);
     this.configEditorSaveButton = this.page.testSubj.locator(SAVE_CONFIG_BUTTON_SUBJ);
     this.alertsTableLoaded = this.page.testSubj.locator('alertsTableIsLoaded');
+    this.alertsTableEmptyState = this.page.testSubj.locator('alertsTableEmptyState');
     this.alertsCount = this.page.testSubj.locator('toolbar-alerts-count');
     this.alertRowCells = this.page.testSubj.locator('dataGridRowCell');
   }
@@ -35,5 +37,9 @@ export class EmbeddableAlertsTablePage {
   async saveConfig() {
     await this.configEditorSaveButton.click();
     await this.configEditorSaveButton.waitFor({ state: 'hidden' });
+  }
+
+  async getAlertRowCount(): Promise<number> {
+    return this.alertRowCells.count();
   }
 }
