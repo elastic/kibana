@@ -13,15 +13,19 @@
  * the workflow via its `alert` trigger, and grades the `ai.agent` step's structured verdict
  * against the golden label.
  *
- * Each task indexes a UNIQUE alert (fresh alert id AND fresh rule uuid) and deletes it afterwards.
- * Two independent reasons require the freshness:
+ * Each task indexes a UNIQUE alert (fresh alert id, rule uuid, and entity-correlation fields) and
+ * deletes it afterwards. Three independent reasons require the freshness:
  *   1. A unique alert `_id` keeps the workflow's `already_analyzed` tag gate from skipping a
  *      repetition (the workflow tags analyzed alerts and short-circuits on re-runs).
- *   2. A unique rule uuid keeps each run's enrichment isolated. The eval runner runs tasks
- *      concurrently (repetitions default to 5-way concurrency), and every enrichment query in the
- *      workflow (prevalence, noise signal, close history, rule metadata) filters on the alert's
- *      rule uuid. With a shared rule uuid, concurrent repetitions of the same base alert would
- *      count each other and feed nondeterministic context to the model under test.
+ *   2. A unique rule uuid keeps each run's rule-scoped enrichment isolated. The eval runner runs
+ *      tasks concurrently (repetitions default to 5-way concurrency), and every rule-scoped
+ *      enrichment query in the workflow (prevalence, noise signal, close history, rule metadata)
+ *      filters on the alert's rule uuid. With a shared rule uuid, concurrent repetitions of the
+ *      same base alert would count each other and feed nondeterministic context to the model under
+ *      test.
+ *   3. Unique `process.entity_id` and `host.id` keep `get_related_alerts` isolated. That step
+ *      correlates alerts by entity fields within a time window, not by rule uuid, so concurrent
+ *      repetitions of the same base alert would otherwise surface each other as Related Alerts.
  *
  * Evaluators:
  *   - ClassificationAccuracy (CODE, primary): predicted verdict == golden label.
@@ -149,12 +153,13 @@ evaluate.describe(
                 throw new Error(`No synthetic alert found for id ${alertId}`);
               }
 
-              // Fresh alert id AND rule uuid per run so concurrent repetitions never share state:
-              // the unique `_id` bypasses the workflow's `already_analyzed` tag gate, and the unique
-              // rule uuid (which `preprocessAlertInputs` maps to `event.rule.id`) scopes every
-              // enrichment query to just this alert. Overriding the flattened rule keys via spread is
-              // safe because `base.doc` stores dotted keys as top-level properties (primitive values),
-              // so this clones without mutating the shared base document.
+              // Fresh alert id, rule uuid, and entity ids per run so concurrent repetitions never
+              // share state: the unique `_id` bypasses the workflow's `already_analyzed` tag gate,
+              // the unique rule uuid (which `preprocessAlertInputs` maps to `event.rule.id`) scopes
+              // rule-filtered enrichment queries, and unique entity ids keep `get_related_alerts`
+              // from correlating in-flight repetitions of the same base alert. Overriding flattened
+              // keys via spread is safe because `base.doc` stores dotted keys as top-level properties
+              // (primitive values), so this clones without mutating the shared base document.
               const uniqueAlertId = `${alertId}-${randomUUID()}`;
               const uniqueRuleId = `${uniqueAlertId}-rule`;
               const document = {
@@ -162,6 +167,10 @@ evaluate.describe(
                 'kibana.alert.uuid': uniqueAlertId,
                 'kibana.alert.rule.uuid': uniqueRuleId,
                 'kibana.alert.rule.rule_id': uniqueRuleId,
+                // Break entity-graph correlation between concurrent repetitions of the same base
+                // alert: get_related_alerts correlates on these (base-keyed) entity ids, not rule uuid.
+                'process.entity_id': `entity-${uniqueAlertId}`,
+                'host.id': `host-${uniqueAlertId}`,
               };
               createdAlertIds.add(uniqueAlertId);
               await esClient.index({
