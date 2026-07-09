@@ -1,14 +1,7 @@
 ---
 name: pr-reviewer-compatibility
 description: Reviews changed Kibana API, migration, config, persistence, and public contract code for upgrade, compatibility, and rollback safety. Dispatched by the review orchestrator when server, common, config, saved-object, or migration files change.
-globs:
-  - "**/server/**"
-  - "**/common/**"
-  - "**/*.json"
-  - "**/*.yml"
-  - "**/*.yaml"
-  - "**/saved_objects/**"
-  - "**/migrations/**"
+globs: ["**/server/**", "**/common/**", "**/*.json", "**/*.yml", "**/*.yaml", "**/saved_objects/**", "**/migrations/**"]
 tools: Read, Grep, Glob
 ---
 

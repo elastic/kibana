@@ -1,11 +1,7 @@
 ---
 name: pr-reviewer-test
 description: Reviews Kibana PRs for missing or wrong-layer automated test coverage of bug fixes and behavior changes. Dispatched by the review orchestrator when source or test files change.
-globs:
-  - "**/*.test.*"
-  - "**/*.spec.*"
-  - "**/test/**"
-  - "**/__tests__/**"
+globs: ["**/*.test.*", "**/*.spec.*", "**/test/**", "**/__tests__/**"]
 tools: Read, Grep, Glob
 ---
 

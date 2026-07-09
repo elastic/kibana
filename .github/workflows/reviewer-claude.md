@@ -112,6 +112,12 @@ steps:
     with:
       name: ${{ env.PR_CONTEXT_ARTIFACT_NAME }}
       path: /tmp/gh-aw/agent
+  - name: Compute reviewer file assignments
+    uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+    with:
+      script: |
+        const { assignReviewers } = require('./.github/scripts/reviewer_glob_assignments.js');
+        await assignReviewers({ core });
 safe-outputs:
   footer: true
   report-failure-as-issue: false
@@ -145,10 +151,10 @@ You orchestrate specialized review subagents; you do not review the diff yoursel
 
 ## Review mode
 
-1. Read `/tmp/gh-aw/agent/pr-metadata.json` and `/tmp/gh-aw/agent/pr-files.json` to build the list of changed files. Do not read `pr-diff.txt` yourself — the subagents inspect the diff.
-2. Enumerate the reviewer subagents by listing `.claude/agents/pr-reviewer-*.md`. For each file, read its frontmatter `name` and `globs`. Select every subagent that has at least one changed file matching one of its `globs` (`pr-reviewer-general` uses `**/*`, so it always matches).
-3. Dispatch, in a single parallel batch of `Task` calls, both the selected concern reviewers and the `pr-review-thread-resolver` subagent, using each subagent's `name` as the `subagent_type`. Do not rewrite or expand a subagent's instructions, and do not add checks beyond what its definition already covers.
-   - Concern reviewers (`pr-reviewer-*`): pass only the PR number, the repository from `GH_AW_GITHUB_REPOSITORY`, and the subset of changed files that matched that subagent's `globs`. Each returns its findings JSON.
+1. Read `/tmp/gh-aw/agent/pr-metadata.json` for PR context. Do not read `pr-diff.txt` yourself — the subagents inspect the diff.
+2. Read `/tmp/gh-aw/agent/pr-reviewer-assignments.json`, written by the workflow's assignment step. It maps each `pr-reviewer-*` subagent name to the changed files matched by its `globs` (the assignment is computed deterministically from each subagent's frontmatter, so you do not enumerate `.claude/agents` or match globs yourself).
+3. Dispatch, in a single parallel batch of `Task` calls, the concern reviewers and the `pr-review-thread-resolver` subagent, using each subagent's `name` as the `subagent_type`. Do not rewrite or expand a subagent's instructions, and do not add checks beyond what its definition already covers.
+   - Concern reviewers: dispatch every `pr-reviewer-*` whose file list in the assignment map is non-empty. Pass only the PR number, the repository from `GH_AW_GITHUB_REPOSITORY`, and that reviewer's assigned file list. Each returns its findings JSON.
    - `pr-review-thread-resolver`: pass only the PR number, the repository, and this reviewer's workflow id `reviewer-claude`. It resolves this reviewer's addressed prior threads on its own via safe outputs. It returns nothing you need — do not consume, parse, or wait on its result, and do not read prior threads or call `resolve-pull-request-review-thread` yourself.
 4. Collect the concern reviewers' findings JSON. Ignore any non-JSON text a reviewer returns; if a reviewer returns nothing parseable, treat it as zero findings.
 5. Aggregate and filter the findings before posting:

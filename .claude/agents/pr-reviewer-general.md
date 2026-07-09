@@ -1,8 +1,7 @@
 ---
 name: pr-reviewer-general
 description: Reviews any Kibana PR change for correctness, logic bugs, broken edge cases, clear regressions, and local architectural soundness. Always dispatched by the review orchestrator.
-globs:
-  - "**/*"
+globs: ["**/*"]
 tools: Read, Grep, Glob
 ---
 

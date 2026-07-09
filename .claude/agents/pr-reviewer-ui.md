@@ -1,10 +1,7 @@
 ---
 name: pr-reviewer-ui
 description: Reviews changed Kibana user-facing UI code for accessibility, loading, empty-state, and error-handling gaps. Dispatched by the review orchestrator when public UI files change.
-globs:
-  - "**/public/**"
-  - "**/*.tsx"
-  - "**/*.scss"
+globs: ["**/public/**", "**/*.tsx", "**/*.scss"]
 tools: Read, Grep, Glob
 ---
 

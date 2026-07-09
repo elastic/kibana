@@ -1,10 +1,7 @@
 ---
 name: pr-reviewer-security
 description: Reviews changed Kibana code for authn/authz, privilege, validation, and data-isolation regressions. Dispatched by the review orchestrator when code files change.
-globs:
-  - "**/*.ts"
-  - "**/*.tsx"
-  - "**/*.js"
+globs: ["**/*.ts", "**/*.tsx", "**/*.js"]
 tools: Read, Grep, Glob
 ---
 

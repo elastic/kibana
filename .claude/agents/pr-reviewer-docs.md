@@ -1,10 +1,7 @@
 ---
 name: pr-reviewer-docs
 description: Reviews Kibana PRs for missing documentation when a public API, operator workflow, or user-visible behavior changes. Dispatched by the review orchestrator when docs or user-facing behavior change.
-globs:
-  - "**/*.md"
-  - "**/*.mdx"
-  - "docs/**"
+globs: ["**/*.md", "**/*.mdx", "docs/**"]
 tools: Read, Grep, Glob
 ---
 
