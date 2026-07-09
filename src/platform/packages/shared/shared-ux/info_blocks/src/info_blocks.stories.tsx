@@ -20,6 +20,9 @@ import {
   EuiHealth,
   EuiIcon,
   EuiLink,
+  EuiSwitch,
+  EuiSpacer,
+  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import { InfoBlocks } from './info_blocks.component';
@@ -103,21 +106,52 @@ export const Default: StoryObj<DefaultArgs> = {
 
 type Story = StoryObj<typeof InfoBlocks>;
 
+const CompressedDemo: React.FC = () => {
+  const [useCompressed, setUseCompressed] = React.useState(true);
+
+  return (
+    <div>
+      <EuiSwitch
+        id="compressed-toggle"
+        label="Use compressed layout"
+        checked={useCompressed}
+        onChange={() => setUseCompressed(!useCompressed)}
+      />
+
+      <EuiSpacer size="xl" />
+      <EuiTitle size="l">
+        <h2>Sample set</h2>
+      </EuiTitle>
+      <InfoBlocks items={SAMPLE_ITEMS} compressed={useCompressed} />
+
+      <EuiSpacer size="xl" />
+      <EuiTitle size="l">
+        <h2>Big number</h2>
+      </EuiTitle>
+      <InfoBlocks items={BIG_NUMBER_ITEMS} compressed={useCompressed} />
+
+      <EuiSpacer size="xl" />
+      <EuiTitle size="l">
+        <h2>Empty blocks</h2>
+      </EuiTitle>
+      <InfoBlocks items={EMPTY_BLOCK_ITEMS} compressed={useCompressed} />
+    </div>
+  );
+};
+
 export const Compressed: Story = {
   args: {
-    items: SAMPLE_ITEMS.slice(0, 3),
+    items: SAMPLE_ITEMS,
     compressed: true,
   },
+  render: () => <CompressedDemo />,
 };
 
 // A mix of "big number" values and regular values. "Severity" shares a row with
 // the big-number "Healthy" block to show both cells take the same row height.
 const BIG_NUMBER_ITEMS: InfoBlockItem[] = [
   { title: 'Risk score', value: '90', valueSize: 'xl' },
-  { title: 'Vendor', value: 'Elastic' },
-  { title: 'Result', value: <EuiHealth color="success">Success</EuiHealth> },
-  { title: 'Executed by', value: 'paul.ewing@elastic.co' },
-  { title: 'Severity', value: <EuiHealth color="danger">High</EuiHealth> },
+  ...SAMPLE_ITEMS.slice(0, 3),
   { title: 'Healthy', value: '5', valueSize: 'xl' },
 ];
 
@@ -135,10 +169,7 @@ export const BigNumber: Story = {
 const EMPTY_BLOCK_ITEMS: InfoBlocksItem[] = [
   { title: 'Risk score', value: '90', valueSize: 'xl' },
   EMPTY_INFO_BLOCK,
-  { title: 'Vendor', value: 'Elastic' },
-  { title: 'Result', value: <EuiHealth color="success">Success</EuiHealth> },
-  { title: 'Executed by', value: 'paul.ewing@elastic.co' },
-  { title: 'Severity', value: <EuiHealth color="danger">High</EuiHealth> },
+  ...SAMPLE_ITEMS.slice(0, 4),
 ];
 
 export const EmptyBlocks: StoryObj<DefaultArgs> = {
@@ -180,9 +211,7 @@ const TALL_SVG = (
 
 const SVG_ITEMS: InfoBlockItem[] = [
   { title: 'Trend', value: TALL_SVG },
-  { title: 'Owner', value: 'Platform' },
-  { title: 'Environment', value: 'production' },
-  { title: 'Throughput', value: '1.2k tpm' },
+  ...SAMPLE_ITEMS.slice(0, 3),
 ];
 
 export const InlineSvg: Story = {
@@ -193,7 +222,7 @@ export const InlineSvg: Story = {
 };
 
 // No-op handler for the interactive controls below.
-const noop = () => {};
+const noop = () => { };
 
 // A truncating link with a trailing copy action, matching the SAMPLE_ITEMS
 // "Resource" pattern.
