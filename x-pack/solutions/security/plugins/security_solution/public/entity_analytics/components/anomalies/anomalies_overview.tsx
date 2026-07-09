@@ -52,12 +52,14 @@ interface AnomaliesOverviewProps {
   data: GetAnomalyOverviewResponse;
   isPreviewMode?: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
+  hideHeaderIcons?: boolean;
 }
 
 export const AnomaliesOverview: React.FC<AnomaliesOverviewProps> = ({
   data,
   isPreviewMode,
   openDetailsPanel,
+  hideHeaderIcons,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -124,7 +126,7 @@ export const AnomaliesOverview: React.FC<AnomaliesOverviewProps> = ({
     <ExpandablePanel
       data-test-subj={ANOMALIES_SECTION_EXPANDABLE_PANEL_TEST_ID}
       header={{
-        iconType: !isPreviewMode ? 'chevronLimitLeft' : undefined,
+        iconType: !isPreviewMode && !hideHeaderIcons ? 'chevronLimitLeft' : undefined,
         title: (
           <EuiText
             size="xs"

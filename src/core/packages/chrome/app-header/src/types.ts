@@ -59,7 +59,8 @@ export type AppHeaderPadding =
        * Set this to the SYMMETRIC padding of the surrounding section (e.g. an `EuiPageSection`'s
        * `paddingSize`). The header breaks out to that section's top/left/right edges via negative
        * margin so it spans full width and sits flush at the top, and its content is auto re-inset by
-       * the same amount to stay aligned with the page gutter. The header's internal vertical padding
+       * the same amount to stay aligned with the page gutter. `'m'` matches EUI `paddingSize: 'm'`
+       * (16px); `'l'` matches EUI `paddingSize: 'l'` (24px). The header's internal vertical padding
        * is unaffected.
        */
       bleed: 'm' | 'l';

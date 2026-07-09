@@ -12,8 +12,8 @@ import {
   ActionButtonType,
   type AttachmentUIDefinition,
 } from '@kbn/agent-builder-browser/attachments';
-import type { SignificantEventAttachment } from '@kbn/streams-plugin/common';
-import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '@kbn/streams-plugin/common';
+import type { SignificantEventAttachment } from '@kbn/significant-events-plugin/common';
+import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '@kbn/significant-events-plugin/common';
 import type { ChromeStart } from '@kbn/core/public';
 
 import type { StreamsAppStartDependencies } from '../../../types';

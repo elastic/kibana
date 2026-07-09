@@ -12,7 +12,8 @@ import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { noop } from 'lodash/fp';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { EntityType } from '../../../../../../common/entity_analytics/types';
+import type { EntityType } from '../../../../../../common/entity_analytics/types';
+import { EntityIconByType } from '../../../../../entity_analytics/components/entity_store/entity_icon_by_type';
 import { RiskInputsTab } from '../../../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -28,11 +29,11 @@ const TITLE = i18n.translate('xpack.securitySolution.flyout.entityDetails.riskIn
   defaultMessage: 'Risk score',
 });
 
-const ICON_TYPE = { [EntityType.host]: 'storage', [EntityType.user]: 'user' } as const;
+const ICON_TYPE = EntityIconByType;
 
 export interface RiskInputsProps {
-  /** Whether this tool is scoped to a host or user entity. Controls the icon and entity type passed to the tab. */
-  entityType: EntityType.host | EntityType.user;
+  /** Which entity type this tool is scoped to. Controls the icon and entity type passed to the tab. */
+  entityType: EntityType.host | EntityType.user | EntityType.service;
   /** Display name of the entity (typically `host.name` or `user.name`). */
   entityName: string;
   /** Canonical Entity Store v2 id (`entity.id`) when already resolved. */

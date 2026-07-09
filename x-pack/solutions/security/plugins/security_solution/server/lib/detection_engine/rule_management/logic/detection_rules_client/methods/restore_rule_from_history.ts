@@ -46,6 +46,7 @@ interface RestoreRuleFromHistoryParams {
 interface RestoreRuleFromHistoryResult {
   rule: RuleResponse;
   no_change?: true;
+  restoredRevisionTimestamp: string;
 }
 
 export const restoreRuleFromHistory = async (
@@ -89,11 +90,13 @@ export const restoreRuleFromHistory = async (
   }
 
   const snapshotRule = convertAlertingRuleToRuleResponse(item.rule as SanitizedRule<RuleParams>);
+  const restoredRevisionTimestamp = item['@timestamp'];
 
   if (existingRule == null) {
     return restoreDeletedRule({
       ...params,
       snapshotRule,
+      restoredRevisionTimestamp,
     });
   }
 
@@ -101,12 +104,14 @@ export const restoreRuleFromHistory = async (
     ...params,
     existingRule,
     snapshotRule,
+    restoredRevisionTimestamp,
   });
 };
 
 interface RestoreRuleStateParams extends RestoreRuleFromHistoryParams {
   existingRule: RuleResponse;
   snapshotRule: RuleResponse;
+  restoredRevisionTimestamp: string;
 }
 
 async function restoreRuleState({
@@ -118,6 +123,7 @@ async function restoreRuleState({
   changeId,
   existingRule,
   snapshotRule,
+  restoredRevisionTimestamp,
 }: RestoreRuleStateParams): Promise<RestoreRuleFromHistoryResult> {
   await validateMlAuth(mlAuthz, existingRule.type);
 
@@ -133,7 +139,7 @@ async function restoreRuleState({
   const newAlertingRule = convertRuleResponseToAlertingRule(ruleToSave, actionsClient);
 
   if (isEqual(existingAlertingRule, newAlertingRule)) {
-    return { rule: existingRule, no_change: true };
+    return { rule: existingRule, no_change: true, restoredRevisionTimestamp };
   }
 
   validateFieldWritePermissions(
@@ -156,11 +162,15 @@ async function restoreRuleState({
     },
   });
 
-  return { rule: convertAlertingRuleToRuleResponse(updatedRule) };
+  return {
+    rule: convertAlertingRuleToRuleResponse(updatedRule),
+    restoredRevisionTimestamp,
+  };
 }
 
 interface RestoreDeletedRuleParams extends RestoreRuleFromHistoryParams {
   snapshotRule: RuleResponse;
+  restoredRevisionTimestamp: string;
 }
 
 async function restoreDeletedRule({
@@ -171,6 +181,7 @@ async function restoreDeletedRule({
   ruleId,
   changeId,
   snapshotRule,
+  restoredRevisionTimestamp,
 }: RestoreDeletedRuleParams): Promise<RestoreRuleFromHistoryResult> {
   const conflictingRule = await getRuleByRuleId({ rulesClient, ruleId: snapshotRule.rule_id });
 
@@ -208,5 +219,8 @@ async function restoreDeletedRule({
     },
   });
 
-  return { rule: convertAlertingRuleToRuleResponse(createdRule) };
+  return {
+    rule: convertAlertingRuleToRuleResponse(createdRule),
+    restoredRevisionTimestamp,
+  };
 }

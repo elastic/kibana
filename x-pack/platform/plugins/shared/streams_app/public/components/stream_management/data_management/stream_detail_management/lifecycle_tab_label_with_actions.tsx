@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -19,23 +19,31 @@ import {
 } from '@elastic/eui';
 import { omit } from 'lodash';
 import type { Streams } from '@kbn/streams-schema';
+import { Streams as StreamsSchema, getParentId } from '@kbn/streams-schema';
 import type { CoreStart } from '@kbn/core/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { buildRequestPreviewCodeContent } from '../shared/utils';
+import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
+import { useTimeRange } from '../../../../hooks/use_time_range';
+
+interface LifecycleTabEditAction {
+  label: string;
+  disabled?: boolean;
+  onClick: () => void;
+  'data-test-subj': string;
+}
 
 interface LifecycleTabLabelWithActionsProps {
   showActions: boolean;
   onCopy: () => void;
-  indexTemplateName?: string;
-  onEditIndexTemplate?: (templateName: string) => void;
+  editAction?: LifecycleTabEditAction;
 }
 
 export const LifecycleTabLabelWithActions = ({
   showActions,
   onCopy,
-  indexTemplateName,
-  onEditIndexTemplate,
+  editAction,
 }: LifecycleTabLabelWithActionsProps) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -55,22 +63,20 @@ export const LifecycleTabLabelWithActions = ({
     </EuiContextMenuItem>,
   ];
 
-  if (onEditIndexTemplate) {
+  if (editAction) {
     menuItems.push(
       <EuiContextMenuItem
-        key="editTemplate"
+        key="edit"
         icon="gear"
-        disabled={!indexTemplateName}
+        disabled={editAction.disabled}
         onClick={() => {
-          if (!indexTemplateName) return;
+          if (editAction.disabled) return;
           setIsOpen(false);
-          onEditIndexTemplate(indexTemplateName);
+          editAction.onClick();
         }}
-        data-test-subj="streamsLifecycleTabEditIndexTemplate"
+        data-test-subj={editAction['data-test-subj']}
       >
-        {i18n.translate('xpack.streams.lifecycleTab.actions.editIndexTemplate', {
-          defaultMessage: 'Edit index template',
-        })}
+        {editAction.label}
       </EuiContextMenuItem>
     );
   }
@@ -130,7 +136,6 @@ export const LifecycleTabLabelWithActions = ({
 interface LifecycleTabLabelProps {
   definition: Streams.ingest.all.GetResponse;
   showActions: boolean;
-  indexTemplateName?: string;
   notifications: CoreStart['notifications'];
   share: SharePublicStart;
 }
@@ -138,13 +143,66 @@ interface LifecycleTabLabelProps {
 export const LifecycleTabLabel = ({
   definition,
   showActions,
-  indexTemplateName,
   notifications,
   share,
 }: LifecycleTabLabelProps) => {
+  const router = useStreamsAppRouter();
+  const { rangeFrom, rangeTo } = useTimeRange();
   const indexManagementLocator = share.url.locators.get<IndexManagementLocatorParams>(
     'INDEX_MANAGEMENT_LOCATOR_ID'
   );
+
+  const isClassic = StreamsSchema.ClassicStream.GetResponse.is(definition);
+  const isWired = StreamsSchema.WiredStream.GetResponse.is(definition);
+
+  const editAction = useMemo((): LifecycleTabEditAction | undefined => {
+    if (isClassic) {
+      const templateName = definition.elasticsearch_assets?.indexTemplate;
+      if (!indexManagementLocator) {
+        return undefined;
+      }
+
+      return {
+        label: i18n.translate('xpack.streams.lifecycleTab.actions.editIndexTemplate', {
+          defaultMessage: 'Edit index template',
+        }),
+        disabled: !templateName,
+        onClick: async () => {
+          if (!templateName) {
+            return;
+          }
+          const url = await indexManagementLocator.getUrl({
+            page: 'index_template_edit',
+            indexTemplate: templateName,
+          });
+          window.open(url, '_blank');
+        },
+        'data-test-subj': 'streamsLifecycleTabEditIndexTemplate',
+      };
+    }
+
+    if (isWired) {
+      const parentId = getParentId(definition.stream.name);
+      if (!parentId) {
+        return undefined;
+      }
+
+      return {
+        label: i18n.translate('xpack.streams.lifecycleTab.actions.editParentStream', {
+          defaultMessage: 'Edit parent stream',
+        }),
+        onClick: () => {
+          router.push('/{key}/management/{tab}', {
+            path: { key: parentId, tab: 'lifecycle' },
+            query: { rangeFrom, rangeTo },
+          });
+        },
+        'data-test-subj': 'streamsLifecycleTabEditParentStream',
+      };
+    }
+
+    return undefined;
+  }, [definition, indexManagementLocator, isClassic, isWired, rangeFrom, rangeTo, router]);
 
   return (
     <LifecycleTabLabelWithActions
@@ -171,18 +229,7 @@ export const LifecycleTabLabel = ({
           });
         }
       }}
-      indexTemplateName={indexTemplateName}
-      onEditIndexTemplate={
-        indexManagementLocator
-          ? async (templateName) => {
-              const url = await indexManagementLocator.getUrl({
-                page: 'index_template_edit',
-                indexTemplate: templateName,
-              });
-              window.open(url, '_blank');
-            }
-          : undefined
-      }
+      editAction={editAction}
     />
   );
 };
