@@ -1,0 +1,103 @@
+# Example incident config for `node scripts/es_snapshot_loader capture-incident`.
+# Copy this file, fill it in per incident, and pass it via --config.
+# One config file == one incident. YAML comments are ignored by the loader.
+#
+# Two queries, all log datasets (both queries are PLAIN Query DSL objects — the
+# remote _reindex accepts Query DSL only, not ES|QL). Write whatever DSL expresses
+# the incident; there is no required shape. Alternatives are shown in comments.
+#   - `query.symptom`  : narrow query that confirms the incident. NOT snapshotted —
+#                        stored so it can be replayed against the restored index.
+#   - `query.snapshot` : broad query that IS reindexed & snapshotted. Scope it by
+#                        an ENTITY key that appears in every dataset (project id /
+#                        node host.name), NOT by dataset, so the capture spans all
+#                        logs-* datasets that entity emitted. `{}` = whole
+#                        source.index within timeRange (noise kept).
+
+incident:
+  id: '<id>'
+  title: '<short title>'
+  date: '<YYYY-MM-DD>'
+  slackChannel: '#incident-<id>-...'
+
+source:
+  # The source cluster's real Elasticsearch endpoint (e.g. Overview: Kibana >
+  # Management > Fleet > Settings > Outputs, "default" row). Must be in the local
+  # ES `reindex.remote.whitelist` (see README).
+  host: 'https://<host>.<region>.aws.found.io:443'
+  # The API key is read from the OVERVIEW_API_KEY env var (preferred). You may set
+  # `apiKey` here instead, but never commit a real key.
+  # apiKey: '<api-key>'
+  # Prefer the BROAD all-datasets pattern so the capture spans every logs-*
+  # dataset the affected entity emitted (kibana.log, elasticsearch.server,
+  # container_logs, system.syslog, …), not just the symptom dataset. Scope volume
+  # via the entity filter in `query.snapshot`, not by narrowing the dataset here.
+  index: '<clusterAlias>:logs-*'
+  #  index:
+  #    - 'logs-*'
+  #    - 'serverless-logging-*:logs-*'
+  # Optional: patterns to drop from `index` (compiled to `-pattern` exclusions).
+  # Use this with a broad `logs-*` to skip unreadable / huge datasets, e.g. the
+  # verbose GC logs the source key can't read or that are too large to snapshot.
+  #  exclude:
+  #    - 'logs-elasticsearch.gc-*'
+  # Optional provenance label (stored in metadata); may be a wildcard or omitted.
+  cluster: '<clusterAlias>'
+
+query:
+  # Required time window bracketing the incident. If the incident's canonical
+  # query has no @timestamp bound, derive a sensible window from the incident date.
+  timeRange:
+    gte: '<gte ISO timestamp>'
+    lt: '<lt ISO timestamp>'
+
+  # symptom: narrow Query DSL query that confirms the incident. Any DSL is fine —
+  # pick whatever matches the incident's symptom. Do NOT include the @timestamp
+  # range (the tool adds it from `timeRange`). Examples of valid shapes:
+  #
+  #   symptom:
+  #     query_string:
+  #       query: '"<error string>" OR <status> OR <keyword>'
+  #
+  #   symptom:
+  #     match_phrase:
+  #       message: '<error phrase>'
+  #
+  #   symptom:
+  #     bool:
+  #       filter:
+  #         - term: { 'log.level': 'ERROR' }
+  #         - prefix: { 'log.logger': '<logger prefix>' }
+  #         - wildcard: { 'error.message': '*<substring>*' }
+  #         - exists: { field: '<field>' }
+  symptom:
+    query_string:
+      query: '<any Query DSL that matches the incident symptom>'
+
+  # snapshot: broad Query DSL query that IS reindexed and snapshotted. Scope it by
+  # an ENTITY key present in EVERY dataset so the slice spans all logs-* datasets
+  # (noise INCLUDED). Leave empty ({}) only to capture the whole source.index
+  # within `timeRange`.
+  #
+  #   snapshot:
+  #     term: { 'serverless.project.id': '<project-id>' }
+  #   snapshot:
+  #     terms: { 'host.name': ['<node-a>', '<node-b>'] }
+  snapshot:
+    term:
+      serverless.project.id: '<project-id>'
+
+# No `dest` block: each doc is reindexed into a local index named after its ORIGINAL
+# source data stream (e.g. `.ds-logs-elasticsearch.server-default-2026.05.06-000001`
+# -> `logs-elasticsearch.server-default`); non-data-stream sources keep their own
+# name. The tool snapshots exactly the set of indices this run created, so restore
+# brings them back under those original names. (They are plain indices, not real
+# data streams; backing generations are merged and source templates are not carried.)
+
+snapshot:
+  # Symptom hit count confirmed while locating the incident (informational).
+  # expectedSymptomDocCount: <n>
+  # Optional: fail the run if the reindexed TOTAL count (across all captured indices) differs.
+  # expectedDocCount: <n>
+  # gcsBasePath: 'customer0-incidents/incident-<id>'
+  # Optional (default true): keep the original _index / source cluster on each doc.
+  preserveProvenance: true
