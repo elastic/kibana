@@ -32,31 +32,8 @@ export const COLUMN_EVALUATOR_MODEL = i18n.translate(
   { defaultMessage: 'Evaluator Model' }
 );
 
-export const COLUMN_BRANCH = i18n.translate('xpack.evals.experimentsList.columns.branch', {
-  defaultMessage: 'Branch',
-});
-
 export const COLUMN_REPS = i18n.translate('xpack.evals.experimentsList.columns.reps', {
   defaultMessage: 'Reps',
-});
-
-export const COLUMN_CI = i18n.translate('xpack.evals.experimentsList.columns.ci', {
-  defaultMessage: 'CI',
-});
-
-export const COLUMN_PULL_REQUEST = i18n.translate(
-  'xpack.evals.experimentsList.columns.pullRequest',
-  {
-    defaultMessage: 'PR',
-  }
-);
-
-export const CI_BUILD_LINK = i18n.translate('xpack.evals.experimentsList.ciBuildLink', {
-  defaultMessage: 'Build',
-});
-
-export const PR_LINK = i18n.translate('xpack.evals.experimentsList.prLink', {
-  defaultMessage: 'PR',
 });
 
 export const SUITE_FILTER_ARIA_LABEL = i18n.translate(
@@ -100,6 +77,60 @@ export const NEW_EXPERIMENT_BUTTON = i18n.translate(
     defaultMessage: 'New experiment',
   }
 );
+
+export const VIEW_SAVED_WORKFLOWS_BUTTON = i18n.translate(
+  'xpack.evals.experimentsList.viewSavedWorkflowsButton',
+  {
+    defaultMessage: 'View saved workflows',
+  }
+);
+
+export const ROW_DETAILS_ARIA = i18n.translate('xpack.evals.experimentsList.rowDetailsAriaLabel', {
+  defaultMessage: 'Run details',
+});
+
+export const COPIED_TO_CLIPBOARD = i18n.translate('xpack.evals.experimentsList.copiedToClipboard', {
+  defaultMessage: 'Copied to clipboard',
+});
+
+export const DETAIL_EXPERIMENT_ID = i18n.translate(
+  'xpack.evals.experimentsList.detail.experimentId',
+  {
+    defaultMessage: 'Experiment ID',
+  }
+);
+
+export const DETAIL_EXECUTION_ID = i18n.translate(
+  'xpack.evals.experimentsList.detail.executionId',
+  {
+    defaultMessage: 'Execution ID',
+  }
+);
+
+export const DETAIL_BRANCH = i18n.translate('xpack.evals.experimentsList.detail.branch', {
+  defaultMessage: 'Branch',
+});
+
+export const DETAIL_PULL_REQUEST = i18n.translate(
+  'xpack.evals.experimentsList.detail.pullRequest',
+  {
+    defaultMessage: 'Pull request',
+  }
+);
+
+export const DETAIL_CI_BUILD = i18n.translate('xpack.evals.experimentsList.detail.ciBuild', {
+  defaultMessage: 'CI build',
+});
+
+export const DETAIL_VIEW_LINK = i18n.translate('xpack.evals.experimentsList.detail.viewLink', {
+  defaultMessage: 'View',
+});
+
+export const getCopyAriaLabel = (label: string) =>
+  i18n.translate('xpack.evals.experimentsList.detail.copyAriaLabel', {
+    defaultMessage: 'Copy {label}',
+    values: { label },
+  });
 
 export const COMPARE_SELECTION_HINT = i18n.translate(
   'xpack.evals.experimentsList.compareSelectionHint',

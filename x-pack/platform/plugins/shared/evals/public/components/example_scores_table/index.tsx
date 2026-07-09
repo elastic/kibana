@@ -15,7 +15,6 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPagination,
   EuiSpacer,
   EuiText,
@@ -327,9 +326,9 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
           ? `#${(row.exampleIndex ?? Number(exampleId)) + 1}`
           : exampleId;
         return (
-          <EuiLink onClick={() => onExampleClick(exampleId)}>
+          <EuiButtonEmpty size="s" flush="left" onClick={() => onExampleClick(exampleId)}>
             {truncate(label, EXAMPLE_ID_VISIBLE_LENGTH)}
-          </EuiLink>
+          </EuiButtonEmpty>
         );
       },
     },

@@ -42,6 +42,7 @@ export interface StepRuntime {
   abortSignal: AbortSignal;
   callKibanaApi: EvalsCallKibanaApi;
   getInferenceClient: (connectorId: string) => Promise<BoundInferenceClient>;
+  resolveModel: (connectorId: string) => Promise<Model>;
 }
 
 export interface TaskTarget {
@@ -538,13 +539,26 @@ export const runDatasetEvaluation = async (
   return { total: work.length, ...batchResult };
 };
 
+export const resolveTaskModel = async (
+  runtime: StepRuntime,
+  providedTaskModel: Model | undefined,
+  connectorId: string
+): Promise<Model> => {
+  if (providedTaskModel && (providedTaskModel.family || providedTaskModel.provider)) {
+    return providedTaskModel;
+  }
+  return runtime.resolveModel(connectorId);
+};
+
 /** Derives the default judge model from the evaluator connectors, falling back to the task connector. */
-export const resolveEvaluatorModel = (
+export const resolveEvaluatorModel = async (
+  runtime: StepRuntime,
   evaluators: EvaluatorConfig[],
   fallbackConnectorId: string
-): Model => {
-  const judgeConnectorId = evaluators.find((evaluator) => evaluator.connector_id)?.connector_id;
-  return { id: judgeConnectorId ?? fallbackConnectorId };
+): Promise<Model> => {
+  const judgeConnectorId =
+    evaluators.find((evaluator) => evaluator.connector_id)?.connector_id ?? fallbackConnectorId;
+  return runtime.resolveModel(judgeConnectorId);
 };
 
 export interface PairwiseComparison {

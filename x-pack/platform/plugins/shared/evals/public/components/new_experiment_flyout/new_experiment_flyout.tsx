@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiComboBox,
+  EuiEmptyPrompt,
   EuiFieldNumber,
   EuiFieldText,
   EuiFlexGroup,
@@ -20,7 +21,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiPanel,
   EuiSpacer,
   EuiSwitch,
   EuiText,
@@ -34,6 +34,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   LaunchedExperimentConfig,
   RunExperimentRequest,
+  SaveAsWorkflowResponse,
 } from '../../../common/experiments/run_experiment';
 import { useDatasets } from '../../hooks/use_evals_api';
 import {
@@ -107,6 +108,17 @@ const strings = {
   saveAsWorkflow: i18n.translate('xpack.evals.newExperiment.saveAsWorkflow', {
     defaultMessage: 'Save as workflow',
   }),
+  savedBody: i18n.translate('xpack.evals.newExperiment.savedBody', {
+    defaultMessage:
+      'Your experiment is saved as a reusable workflow. Run it now to see results here, or open it in Workflows to run it later, schedule it, or edit it.',
+  }),
+  savedRunIt: i18n.translate('xpack.evals.newExperiment.savedRunIt', {
+    defaultMessage: 'Run it now',
+  }),
+  savedOpen: i18n.translate('xpack.evals.newExperiment.savedOpen', {
+    defaultMessage: 'Open in Workflows',
+  }),
+  savedClose: i18n.translate('xpack.evals.newExperiment.savedClose', { defaultMessage: 'Close' }),
   cancel: i18n.translate('xpack.evals.newExperiment.cancel', { defaultMessage: 'Cancel' }),
   chooseConnectorTitle: i18n.translate('xpack.evals.newExperiment.chooseConnectorTitle', {
     defaultMessage: 'Task target',
@@ -142,6 +154,9 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
 
   const runExperiment = useRunExperiment();
   const saveWorkflow = useSaveExperimentWorkflow();
+  // Set once "Save as workflow" succeeds. Flips the flyout from the form to a
+  // success state so the just-created workflow isn't a dead-end (open/run it).
+  const [savedWorkflow, setSavedWorkflow] = useState<SaveAsWorkflowResponse | null>(null);
   const preview = usePreviewExperiment();
 
   const [name, setName] = useState('');
@@ -157,6 +172,9 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
   const [showYaml, setShowYaml] = useState(false);
 
   const isCrossModel = connectorIds.length >= 2;
+  // A bare tool run is a single `execute_tool` span, so evaluators that only make
+  // sense on a conversation trace (e.g. groundedness) are hidden for this target.
+  const isBareToolTarget = taskTarget === 'agentBuilder.tool';
 
   const { data: agentsData, isLoading: agentsLoading } = useAgentBuilderAgents({
     enabled: taskTarget === 'agentBuilder.converse',
@@ -172,12 +190,32 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
   );
   const evaluatorOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
     () =>
-      (evaluatorsData?.evaluators ?? []).map((e) => ({
-        label: e.kind === 'llm' ? `${e.name} (LLM)` : e.name,
-        value: e.name,
-      })),
-    [evaluatorsData]
+      (evaluatorsData?.evaluators ?? [])
+        .filter((e) => !isBareToolTarget || e.supports_bare_tool_trace !== false)
+        .map((e) => ({
+          label: e.kind === 'llm' ? `${e.name} (LLM)` : e.name,
+          value: e.name,
+        })),
+    [evaluatorsData, isBareToolTarget]
   );
+
+  useEffect(() => {
+    if (!isBareToolTarget) {
+      return;
+    }
+    const unsupported = new Set(
+      (evaluatorsData?.evaluators ?? [])
+        .filter((e) => e.supports_bare_tool_trace === false)
+        .map((e) => e.name)
+    );
+    if (unsupported.size === 0) {
+      return;
+    }
+    setEvaluators((prev) => {
+      const next = prev.filter((e) => !unsupported.has(e.name));
+      return next.length === prev.length ? prev : next;
+    });
+  }, [isBareToolTarget, evaluatorsData]);
   const agentOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
     () =>
       (agentsData ?? []).map((agent) => ({
@@ -293,27 +331,22 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
     !missingAgent &&
     !missingTool;
 
-  const onToggleYaml = useCallback(
-    (next: boolean) => {
-      setShowYaml(next);
-      if (next && isValid) {
-        preview.mutate(buildRequestBody());
-      }
-    },
-    [buildRequestBody, isValid, preview]
-  );
+  // Keep the YAML preview live: while the toggle is on and the form is valid,
+  // (re)generate it whenever any field changes — debounced so we don't hit the
+  // preview endpoint on every keystroke. This also covers turning the toggle on
+  // before the form is complete: the preview appears as soon as it becomes valid.
+  const { mutate: mutatePreview } = preview;
+  useEffect(() => {
+    if (!showYaml || !isValid) {
+      return;
+    }
+    const handle = window.setTimeout(() => mutatePreview(buildRequestBody()), 300);
+    return () => window.clearTimeout(handle);
+  }, [showYaml, isValid, buildRequestBody, mutatePreview]);
 
-  const onToggleCompare = useCallback(
-    (next: boolean) => {
-      setCompare(next);
-      // Reflect the change in the live YAML preview without waiting for the next
-      // render (state updates are async, so pass the new value explicitly).
-      if (showYaml && isValid) {
-        preview.mutate({ ...buildRequestBody(), compare: next || undefined });
-      }
-    },
-    [buildRequestBody, isValid, preview, showYaml]
-  );
+  const onToggleYaml = useCallback((next: boolean) => setShowYaml(next), []);
+
+  const onToggleCompare = useCallback((next: boolean) => setCompare(next), []);
 
   const onSelectEvaluators = useCallback(
     (selected: Array<EuiComboBoxOptionOption<string>>) => {
@@ -346,7 +379,14 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
   }, []);
 
   const onRunNow = useCallback(() => {
-    runExperiment.mutate(buildRequestBody(), {
+    const requestBody: RunExperimentRequest = {
+      ...buildRequestBody(),
+      // When launching a just-saved workflow ("Run it now"), correlate the run
+      // with it so it shows up under the saved workflow and updates its "Last
+      // run". Plain "Run now" (no saved workflow yet) stays ad-hoc.
+      ...(savedWorkflow ? { workflow_id: savedWorkflow.workflow_id } : {}),
+    };
+    runExperiment.mutate(requestBody, {
       onSuccess: (result) => {
         toasts?.addSuccess(
           i18n.translate('xpack.evals.newExperiment.runSuccess', {
@@ -372,6 +412,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
             search: `?${params.toString()}`,
             state: {
               experimentConfig: buildLaunchedConfig(),
+              experimentRequest: requestBody,
               connectorNamesById: Object.fromEntries(
                 connectorIds.map((id) => [
                   id,
@@ -394,9 +435,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
         history.push({
           pathname: `/experiments/${encodeURIComponent(detailPathId)}`,
           search: `?${params.toString()}`,
-          // Carry the submitted form so the detail page can show the config
-          // while the run has not yet produced queryable results.
-          state: { experimentConfig: buildLaunchedConfig() },
+          state: { experimentConfig: buildLaunchedConfig(), experimentRequest: requestBody },
         });
       },
       onError: (error) => {
@@ -415,19 +454,17 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
     history,
     onClose,
     runExperiment,
+    savedWorkflow,
     toasts,
   ]);
 
   const onSave = useCallback(() => {
     saveWorkflow.mutate(buildRequestBody(), {
       onSuccess: (result) => {
-        toasts?.addSuccess(
-          i18n.translate('xpack.evals.newExperiment.saveSuccess', {
-            defaultMessage: 'Saved workflow "{name}".',
-            values: { name: result.name },
-          })
-        );
-        onClose();
+        // Don't dead-end on an auto-dismissing toast: keep the flyout open and
+        // switch to a success state that lets the user open the saved workflow
+        // (to run/schedule/edit) or run it right away.
+        setSavedWorkflow(result);
       },
       onError: (error) => {
         toasts?.addError(error as Error, {
@@ -437,7 +474,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
         });
       },
     });
-  }, [buildRequestBody, onClose, saveWorkflow, toasts]);
+  }, [buildRequestBody, saveWorkflow, toasts]);
 
   const selectedConnectorOptions = connectorOptions.filter((o) =>
     connectorIds.includes(o.value as string)
@@ -451,6 +488,81 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
   const selectedAgentOptions = agentId
     ? [agentOptions.find((o) => o.value === agentId) ?? { label: agentId, value: agentId }]
     : [];
+
+  // Deep-link to the saved workflow's detail page in the Workflows app, where it
+  // can be run, scheduled, edited, and its execution history reviewed.
+  const savedWorkflowHref =
+    savedWorkflow && services.http
+      ? services.http.basePath.prepend(
+          `/app/workflows/${encodeURIComponent(savedWorkflow.workflow_id)}`
+        )
+      : undefined;
+
+  if (savedWorkflow) {
+    return (
+      <EuiFlyout
+        onClose={onClose}
+        size="m"
+        ownFocus
+        aria-labelledby={flyoutTitleId}
+        data-test-subj="evalsNewExperimentFlyout"
+      >
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2 id={flyoutTitleId}>{strings.title}</h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <EuiEmptyPrompt
+            iconType="checkInCircleFilled"
+            iconColor="success"
+            title={
+              <h2>
+                {i18n.translate('xpack.evals.newExperiment.savedTitle', {
+                  defaultMessage: 'Saved workflow "{name}"',
+                  values: { name: savedWorkflow.name },
+                })}
+              </h2>
+            }
+            body={<p>{strings.savedBody}</p>}
+            actions={[
+              <EuiButton
+                key="run"
+                fill
+                iconType="play"
+                onClick={onRunNow}
+                isLoading={runExperiment.isLoading}
+                data-test-subj="evalsSavedRunItButton"
+              >
+                {strings.savedRunIt}
+              </EuiButton>,
+              ...(savedWorkflowHref
+                ? [
+                    <EuiButton
+                      key="open"
+                      iconType="popout"
+                      href={savedWorkflowHref}
+                      data-test-subj="evalsSavedOpenWorkflowButton"
+                    >
+                      {strings.savedOpen}
+                    </EuiButton>,
+                  ]
+                : []),
+            ]}
+          />
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={onClose} data-test-subj="evalsSavedCloseButton">
+                {strings.savedClose}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    );
+  }
 
   return (
     <EuiFlyout
@@ -638,22 +750,27 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
           {showYaml && (
             <>
               <EuiSpacer size="s" />
-              <EuiPanel color="subdued" paddingSize="s" hasShadow={false} hasBorder>
+              {isValid ? (
                 <YamlPreview
                   yaml={preview.data?.yaml}
-                  isLoading={preview.isLoading}
+                  // The form is valid here, so treat the pre-first-result window
+                  // (debounce + in-flight request) as loading rather than flashing
+                  // the "complete the form" empty state.
+                  isLoading={preview.isLoading || (!preview.data && !preview.error)}
                   error={
                     preview.error
                       ? String((preview.error as Error).message ?? preview.error)
-                      : !isValid
-                      ? i18n.translate('xpack.evals.newExperiment.previewIncomplete', {
-                          defaultMessage:
-                            'Select at least one connector, dataset, and evaluator to preview the YAML.',
-                        })
                       : undefined
                   }
                 />
-              </EuiPanel>
+              ) : (
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate('xpack.evals.newExperiment.previewIncomplete', {
+                    defaultMessage:
+                      'Select at least one connector, dataset, and evaluator to preview the YAML.',
+                  })}
+                </EuiText>
+              )}
             </>
           )}
         </EuiForm>

@@ -42,11 +42,15 @@ import {
   useEvalsTraceFetcher,
   useExperimentDatasetExamples,
 } from '../../hooks/use_evals_api';
-import type { LaunchedExperimentConfig } from '../../../common/experiments/run_experiment';
+import type {
+  LaunchedExperimentConfig,
+  RunExperimentRequest,
+} from '../../../common/experiments/run_experiment';
 import { useWorkflowExecutions } from '../../hooks/use_experiments_api';
 import { ExampleScoresTable } from '../../components/example_scores_table';
 import { WorkflowRunProgress } from '../../components/workflow_run_progress';
 import { LaunchedConfigSummary } from '../../components/launched_config_summary';
+import { SaveAsWorkflowButton } from '../../components/save_as_workflow_button';
 import { resolvePrUrl } from '../../utils/pr_url';
 import * as i18n from './translations';
 
@@ -203,6 +207,12 @@ export const ExperimentDetailPage: React.FC = () => {
   const launchedConfig = useMemo(
     () =>
       (location.state as { experimentConfig?: LaunchedExperimentConfig } | null)?.experimentConfig,
+    [location.state]
+  );
+
+  const launchedRequest = useMemo(
+    () =>
+      (location.state as { experimentRequest?: RunExperimentRequest } | null)?.experimentRequest,
     [location.state]
   );
 
@@ -536,9 +546,18 @@ export const ExperimentDetailPage: React.FC = () => {
 
         {isLaunching && (
           <>
-            <EuiText size="s">
-              <h3>{i18n.SECTION_RUN_PROGRESS}</h3>
-            </EuiText>
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <h3>{i18n.SECTION_RUN_PROGRESS}</h3>
+                </EuiText>
+              </EuiFlexItem>
+              {runSettled && launchedRequest && (
+                <EuiFlexItem grow={false}>
+                  <SaveAsWorkflowButton request={launchedRequest} />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
             <EuiSpacer size="m" />
             <WorkflowRunProgress executions={workflowExecutions} />
             <EuiSpacer size="l" />

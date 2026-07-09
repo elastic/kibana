@@ -40,12 +40,8 @@ export const runExperimentRequestSchema = z.object({
   evaluators: z.array(experimentEvaluatorSchema).min(1),
   repetitions: z.number().int().min(1).optional(),
   concurrency: z.number().int().min(1).optional(),
-  /**
-   * Opt in to appending an `evals.compareExperiments` step when saving a
-   * cross-model (2+ connectors) workflow. No effect on "Run now" or single-model
-   * runs. Defaults to false.
-   */
   compare: z.boolean().optional(),
+  workflow_id: z.string().optional(),
 });
 export type RunExperimentRequest = z.infer<typeof runExperimentRequestSchema>;
 

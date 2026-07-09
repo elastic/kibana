@@ -144,6 +144,7 @@ const WorkflowExecutionCard: React.FC<{ execution: WorkflowExecutionView; label?
   if (isError) {
     return (
       <EuiCallOut
+        announceOnMount
         color="danger"
         size="s"
         title={i18n.translate('xpack.evals.runProgress.loadError', {
@@ -235,7 +236,7 @@ const WorkflowExecutionCard: React.FC<{ execution: WorkflowExecutionView; label?
       {data.error && (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut color="danger" size="s" title={data.error} />
+          <EuiCallOut announceOnMount color="danger" size="s" title={data.error} />
         </>
       )}
 
@@ -243,6 +244,7 @@ const WorkflowExecutionCard: React.FC<{ execution: WorkflowExecutionView; label?
         <React.Fragment key={`err-${step.step_id}`}>
           <EuiSpacer size="s" />
           <EuiCallOut
+            announceOnMount
             color="danger"
             size="s"
             title={i18n.translate('xpack.evals.runProgress.stepFailed', {

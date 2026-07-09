@@ -56,6 +56,9 @@ const createRuntime = (recorded: RecordedCall[]): StepRuntime => {
     abortSignal: new AbortController().signal,
     getInferenceClient: jest.fn() as unknown as StepRuntime['getInferenceClient'],
     callKibanaApi,
+    resolveModel: (async (connectorId: string) => ({
+      id: connectorId,
+    })) as StepRuntime['resolveModel'],
   };
 };
 
@@ -163,6 +166,9 @@ describe('runExampleEvaluation failure capture', () => {
       logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
       abortSignal: new AbortController().signal,
       getInferenceClient: jest.fn() as unknown as StepRuntime['getInferenceClient'],
+      resolveModel: (async (connectorId: string) => ({
+        id: connectorId,
+      })) as StepRuntime['resolveModel'],
       callKibanaApi: (async ({ path, body }: { path: string; body?: unknown }) => {
         recorded.push({ path, body });
         if (path === EVALS_EVALUATE_URL) {

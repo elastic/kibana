@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiCodeBlock, EuiEmptyPrompt, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiCodeBlock, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const emptyLabel = i18n.translate('xpack.evals.yamlPreview.empty', {
@@ -20,6 +20,7 @@ const loadingLabel = i18n.translate('xpack.evals.yamlPreview.loading', {
 export interface YamlPreviewProps {
   yaml?: string;
   isLoading?: boolean;
+  /** API or generation failure — shown as a compact error callout. */
   error?: string;
 }
 
@@ -30,12 +31,9 @@ export interface YamlPreviewProps {
 export const YamlPreview: React.FC<YamlPreviewProps> = ({ yaml, isLoading, error }) => {
   if (error) {
     return (
-      <EuiEmptyPrompt
-        color="danger"
-        iconType="warning"
-        titleSize="xs"
-        body={<EuiText size="s">{error}</EuiText>}
-      />
+      <EuiCallOut color="danger" iconType="alert" size="s" data-test-subj="evalsYamlPreviewError">
+        <p>{error}</p>
+      </EuiCallOut>
     );
   }
 

@@ -7,6 +7,8 @@
 
 import { randomUUID } from 'crypto';
 import { z } from '@kbn/zod/v4';
+import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
+import type { Model } from '@kbn/evals-common';
 import {
   createServerStepDefinition,
   createPollServerStepDefinition,
@@ -32,6 +34,7 @@ import {
   ingestScores,
   resolveDatasets,
   resolveEvaluatorModel,
+  resolveTaskModel,
   runExampleEvaluation,
   runTask,
   toRunnerEvaluatorResults,
@@ -59,6 +62,12 @@ const stateExampleSchema = z.object({
   metadata: z.record(z.string(), z.unknown()).nullable().optional(),
 });
 
+const resolvedModelSchema = z.object({
+  id: z.string(),
+  family: z.string().optional(),
+  provider: z.string().optional(),
+});
+
 /** Progress persisted between `evals.evaluateDataset` poll cycles. */
 const evaluateDatasetStateSchema = z.object({
   work: z.array(
@@ -72,6 +81,8 @@ const evaluateDatasetStateSchema = z.object({
   failed: z.number().int(),
   scores_ingested: z.number().int(),
   errors: z.array(z.string()),
+  task_model: resolvedModelSchema,
+  evaluator_model: resolvedModelSchema,
 });
 
 /** Cap on failure messages retained across poll cycles; keeps state/output bounded. */
@@ -91,6 +102,25 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
       const inference = await deps.getInferenceStart();
       const request = context.contextManager.getFakeRequest();
       return inference.getClient({ request, bindTo: { connectorId } });
+    },
+    resolveModel: async (connectorId: string): Promise<Model> => {
+      try {
+        const inference = await deps.getInferenceStart();
+        const request = context.contextManager.getFakeRequest();
+        const connector = await inference.getConnectorById(connectorId, request);
+        return {
+          id: getConnectorModel(connector) ?? connector.name,
+          family: getConnectorFamily(connector),
+          provider: getConnectorProvider(connector),
+        };
+      } catch (error) {
+        context.logger.debug(
+          `Could not resolve a model for connector "${connectorId}"; using the connector id as the model id: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        return { id: connectorId };
+      }
     },
   });
 
@@ -175,12 +205,17 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
     ...evaluateExampleCommonDefinition,
     handler: async (context) => {
       const { input } = context;
-      const result = await runExampleEvaluation(deps.taskProviderRegistry, makeRuntime(context), {
+      const runtime = makeRuntime(context);
+      const [taskModel, evaluatorModel] = await Promise.all([
+        resolveTaskModel(runtime, input.task_model, input.connector_id),
+        resolveEvaluatorModel(runtime, input.evaluators, input.connector_id),
+      ]);
+      const result = await runExampleEvaluation(deps.taskProviderRegistry, runtime, {
         experimentId: input.experiment_id,
         executionId: input.execution_id,
         suiteId: input.suite_id,
-        taskModel: input.task_model ?? { id: input.connector_id },
-        evaluatorModel: resolveEvaluatorModel(input.evaluators, input.connector_id),
+        taskModel,
+        evaluatorModel,
         target: {
           connectorId: input.connector_id,
           agentId: input.agent_id,
@@ -210,26 +245,28 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
     },
   });
 
-  const buildDatasetConfig = (input: {
-    experiment_id: string;
-    experiment_name?: string;
-    execution_id?: string;
-    suite_id?: string;
-    task_model?: { id: string; family?: string; provider?: string };
-    connector_id: string;
-    agent_id?: string;
-    tool_id?: string;
-    task_ref?: string;
-    params?: Record<string, unknown>;
-    evaluators: Array<{ name: string; version?: string; connector_id?: string }>;
-    repetitions?: number;
-  }): DatasetEvaluationConfig => ({
+  const buildDatasetConfig = (
+    input: {
+      experiment_id: string;
+      experiment_name?: string;
+      execution_id?: string;
+      suite_id?: string;
+      connector_id: string;
+      agent_id?: string;
+      tool_id?: string;
+      task_ref?: string;
+      params?: Record<string, unknown>;
+      evaluators: Array<{ name: string; version?: string; connector_id?: string }>;
+      repetitions?: number;
+    },
+    models: { taskModel: Model; evaluatorModel: Model }
+  ): DatasetEvaluationConfig => ({
     experimentId: input.experiment_id,
     experimentName: input.experiment_name,
     executionId: input.execution_id,
     suiteId: input.suite_id,
-    taskModel: input.task_model ?? { id: input.connector_id },
-    evaluatorModel: resolveEvaluatorModel(input.evaluators, input.connector_id),
+    taskModel: models.taskModel,
+    evaluatorModel: models.evaluatorModel,
     target: {
       connectorId: input.connector_id,
       agentId: input.agent_id,
@@ -246,8 +283,9 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
     stateSchema: evaluateDatasetStateSchema,
     ceilings: EVALUATE_DATASET_POLL_CEILINGS,
     start: async (context) => {
+      const runtime = makeRuntime(context);
       const { input } = context;
-      const datasets = await resolveDatasets(makeRuntime(context), input.dataset_ids);
+      const datasets = await resolveDatasets(runtime, input.dataset_ids);
       const work = flattenDatasetWork(datasets);
       if (work.length === 0) {
         return {
@@ -261,8 +299,21 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
           },
         };
       }
+      const [taskModel, evaluatorModel] = await Promise.all([
+        resolveTaskModel(runtime, input.task_model, input.connector_id),
+        resolveEvaluatorModel(runtime, input.evaluators, input.connector_id),
+      ]);
       return {
-        state: { work, cursor: 0, completed: 0, failed: 0, scores_ingested: 0, errors: [] },
+        state: {
+          work,
+          cursor: 0,
+          completed: 0,
+          failed: 0,
+          scores_ingested: 0,
+          errors: [],
+          task_model: taskModel,
+          evaluator_model: evaluatorModel,
+        },
       };
     },
     poll: async (context) => {
@@ -281,7 +332,10 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
       const batchResult = await evaluateWorkBatch(
         deps.taskProviderRegistry,
         runtime,
-        buildDatasetConfig(input),
+        buildDatasetConfig(input, {
+          taskModel: state.task_model,
+          evaluatorModel: state.evaluator_model,
+        }),
         batch,
         concurrency
       );
@@ -294,6 +348,8 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
         failed: state.failed + batchResult.failed,
         scores_ingested: state.scores_ingested + batchResult.scoresIngested,
         errors: [...state.errors, ...batchResult.errors].slice(0, MAX_DATASET_STEP_ERRORS),
+        task_model: state.task_model,
+        evaluator_model: state.evaluator_model,
       };
 
       if (cursor >= state.work.length) {

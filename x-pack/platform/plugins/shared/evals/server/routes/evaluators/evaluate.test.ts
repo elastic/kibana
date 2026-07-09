@@ -439,7 +439,7 @@ describe('POST /internal/evals/_evaluate', () => {
       {
         status: 'error',
         evaluator: { name: 'groundedness', version: '1.0.0', kind: 'llm' },
-        error: { message: 'Error: failed badly' },
+        error: { message: 'failed badly' },
       },
       expect.objectContaining({
         status: 'ok',
@@ -531,7 +531,7 @@ describe('POST /internal/evals/_evaluate', () => {
 
     expect(response.status).toBe(404);
     expect(response.payload).toEqual({
-      message: 'Error: Trace abc123 is not ready: agent response not yet available',
+      message: 'Trace abc123 is not ready: agent response not yet available',
     });
     expect(groundedness.evaluate).not.toHaveBeenCalled();
     expect(latency.evaluate).not.toHaveBeenCalled();

@@ -22,7 +22,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
-import type { LaunchedExperimentConfig } from '../../../common/experiments/run_experiment';
+import type {
+  LaunchedExperimentConfig,
+  RunExperimentRequest,
+} from '../../../common/experiments/run_experiment';
 import {
   isTerminalExecutionStatus,
   sumScoresIngested,
@@ -30,10 +33,12 @@ import {
 } from '../../hooks/use_experiments_api';
 import { WorkflowRunProgress } from '../../components/workflow_run_progress';
 import { LaunchedConfigSummary } from '../../components/launched_config_summary';
+import { SaveAsWorkflowButton } from '../../components/save_as_workflow_button';
 import * as i18n from './translations';
 
 interface RunOverviewLocationState {
   experimentConfig?: LaunchedExperimentConfig;
+  experimentRequest?: RunExperimentRequest;
   /** Nicer connector display names, keyed by connector id (lost on hard refresh). */
   connectorNamesById?: Record<string, string>;
 }
@@ -61,9 +66,10 @@ export const RunOverviewPage: React.FC = () => {
   const executionIds = useMemo(() => splitCsv(params.get('execution_id')), [params]);
   const connectorIds = useMemo(() => splitCsv(params.get('connector')), [params]);
 
-  const { executions: views } = useWorkflowExecutions(workflowExecutionIds);
+  const { executions: views, allSettled } = useWorkflowExecutions(workflowExecutionIds);
 
   const config = state?.experimentConfig;
+  const launchedRequest = state?.experimentRequest;
   const connectorNamesById = useMemo(() => state?.connectorNamesById ?? {}, [state]);
 
   const models = useMemo(
@@ -175,9 +181,18 @@ export const RunOverviewPage: React.FC = () => {
         </>
       )}
 
-      <EuiTitle size="s">
-        <h3>{i18n.SECTION_PROGRESS}</h3>
-      </EuiTitle>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h3>{i18n.SECTION_PROGRESS}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        {allSettled && launchedRequest && (
+          <EuiFlexItem grow={false}>
+            <SaveAsWorkflowButton request={launchedRequest} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
       <WorkflowRunProgress executions={views} getLabel={(id) => labelByWorkflowId.get(id)} />
 

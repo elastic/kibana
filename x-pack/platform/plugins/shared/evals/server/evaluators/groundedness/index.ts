@@ -18,6 +18,7 @@ export const groundednessEvaluator: EvaluatorDefinition = {
   kind: 'llm',
   description: 'Measures whether the response is grounded in tool-call outputs from the trace.',
   requiresChatEvidence: true,
+  supportsBareToolTrace: false,
   async evaluate({ trace, inferenceClient, log }) {
     if (!inferenceClient) {
       throw new Error('Inference client is required for groundedness evaluator');

@@ -83,6 +83,10 @@ export const registerRunExperimentRoute = ({
           for (const execution of run.executions) {
             const result = await workflowsManagement.management.executeWorkflow({
               yaml: execution.yaml,
+              // Correlate the (ephemeral) execution with a saved workflow when the
+              // caller launched one, so it appears under that workflow and updates
+              // its "Last run". Omitted for ad-hoc runs, which stay detached.
+              ...(body.workflow_id ? { workflowId: body.workflow_id } : {}),
               request,
               spaceId,
               waitForCompletion: false,

@@ -32,6 +32,7 @@ describe('YamlPreview', () => {
     render(<YamlPreview error="boom" />, { wrapper: Wrapper });
 
     expect(screen.getByText('boom')).toBeInTheDocument();
+    expect(screen.getByTestId('evalsYamlPreviewError')).toBeInTheDocument();
     expect(screen.queryByTestId('evalsYamlPreview')).not.toBeInTheDocument();
   });
 

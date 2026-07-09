@@ -26,6 +26,7 @@ describe('GET /internal/evals/evaluators', () => {
         version: '1.0.0',
         kind: 'llm',
         description: 'Groundedness evaluator',
+        supportsBareToolTrace: false,
         evaluate: jest.fn(),
       },
       {
@@ -119,6 +120,7 @@ describe('GET /internal/evals/evaluators', () => {
       version: '1.0.0',
       kind: 'llm',
       description: 'Groundedness evaluator',
+      supports_bare_tool_trace: false,
     });
 
     const correctnessEval = response.payload.evaluators.find(
@@ -129,6 +131,7 @@ describe('GET /internal/evals/evaluators', () => {
       version: '1.0.0',
       kind: 'llm',
       description: 'Correctness evaluator',
+      supports_bare_tool_trace: true,
       reference_data_schema: expect.objectContaining({
         properties: expect.objectContaining({
           expected: expect.objectContaining({

@@ -50,15 +50,8 @@ export interface EvaluatorDefinition<ReferenceData = Record<string, unknown>> {
   kind: 'llm' | 'code';
   description: string;
   referenceDataSchema?: z.ZodType<ReferenceData>;
-  /**
-   * Whether this evaluator reads chat evidence (the user message / agent response
-   * span events from `logs-*`). When true, the evaluate route waits for that
-   * evidence to be exported (`awaitTraceReady`) before grading. Trace-metric
-   * evaluators (tokens, latency, tool calls) do not read chat evidence and must
-   * not gate on it — those columns only exist for chat/agent traces, so requiring
-   * them would fail a token-only evaluation on a non-chat trace.
-   */
   requiresChatEvidence?: boolean;
+  supportsBareToolTrace?: boolean;
   evaluate(ctx: EvaluatorContext<ReferenceData>): Promise<EvaluatorResult>;
 }
 
