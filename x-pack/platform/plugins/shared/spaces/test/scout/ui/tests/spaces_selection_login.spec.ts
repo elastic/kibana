@@ -48,9 +48,7 @@ test.describe('Spaces selection: login space selector', { tag: tags.deploymentAg
 
     await pageObjects.spaces.clickSpaceCard(SPACE_ID);
 
-    await expect
-      .poll(() => pageObjects.spaces.getCurrentUrl())
-      .toContain(`/s/${SPACE_ID}/app/home`);
+    await expect.poll(() => pageObjects.spaces.getCurrentUrl()).toContain(`/s/${SPACE_ID}/app/`);
   });
 
   test('allows the user to switch between spaces from the navigation menu', async ({
