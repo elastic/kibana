@@ -6,12 +6,11 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { KibanaRequest } from '@kbn/core/server';
 import {
   hashContent,
   type VersionedAttachmentWithOrigin,
 } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '../../../common';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../routes/types';
@@ -37,11 +36,6 @@ const event: SignificantEvent = {
   confidence: 0.8,
   recommendations: ['Restart gateway client'],
 };
-
-const createContext = (): AttachmentResolveContext => ({
-  request: {} as KibanaRequest,
-  spaceId: 'default',
-});
 
 const createGetScopedClients = (
   events: SignificantEvent[]
@@ -95,7 +89,9 @@ describe('createSignificantEventAttachmentType', () => {
       getScopedClients: createGetScopedClients([event, updatedEvent]),
     });
 
-    await expect(type.resolve?.('payment-outage', createContext())).resolves.toEqual(updatedEvent);
+    await expect(
+      type.resolve?.('payment-outage', agentBuilderMocks.attachments.createResolveContextMock())
+    ).resolves.toEqual(updatedEvent);
   });
 
   it('reports stale when the latest event differs from the stored snapshot', async () => {
@@ -105,9 +101,12 @@ describe('createSignificantEventAttachmentType', () => {
       getScopedClients: createGetScopedClients([updatedEvent]),
     });
 
-    await expect(type.isStale?.(createVersionedAttachment(event), createContext())).resolves.toBe(
-      true
-    );
+    await expect(
+      type.isStale?.(
+        createVersionedAttachment(event),
+        agentBuilderMocks.attachments.createResolveContextMock()
+      )
+    ).resolves.toBe(true);
   });
 
   it('reports stale when the latest event timestamp differs from the stored snapshot', async () => {
@@ -117,9 +116,12 @@ describe('createSignificantEventAttachmentType', () => {
       getScopedClients: createGetScopedClients([updatedEvent]),
     });
 
-    await expect(type.isStale?.(createVersionedAttachment(event), createContext())).resolves.toBe(
-      true
-    );
+    await expect(
+      type.isStale?.(
+        createVersionedAttachment(event),
+        agentBuilderMocks.attachments.createResolveContextMock()
+      )
+    ).resolves.toBe(true);
   });
 
   it('does not report stale when event identity and timestamp match', async () => {
@@ -129,9 +131,12 @@ describe('createSignificantEventAttachmentType', () => {
       getScopedClients: createGetScopedClients([updatedEvent]),
     });
 
-    await expect(type.isStale?.(createVersionedAttachment(event), createContext())).resolves.toBe(
-      false
-    );
+    await expect(
+      type.isStale?.(
+        createVersionedAttachment(event),
+        agentBuilderMocks.attachments.createResolveContextMock()
+      )
+    ).resolves.toBe(false);
   });
 
   it('formats useful LLM text and exposes attachment metadata', async () => {

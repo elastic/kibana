@@ -93,4 +93,9 @@ export const dlmPhasesSelectorStrings = {
       defaultMessage: 'Must occur after the frozen phase ({frozenPhaseDuration}).',
       values: { frozenPhaseDuration },
     }),
+  deleteMaximumRetentionText: (maximumRetentionPeriod: string) =>
+    i18n.translate('xpack.idxMgmt.dataLifecyclePhaseSelector.deleteMaximumRetentionText', {
+      defaultMessage: 'Must occur before the maximum retention ({maximumRetentionPeriod}).',
+      values: { maximumRetentionPeriod },
+    }),
 };
