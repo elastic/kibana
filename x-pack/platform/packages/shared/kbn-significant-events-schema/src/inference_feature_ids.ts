@@ -23,3 +23,6 @@ export const SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID =
 /** Root cause investigation. */
 export const SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID =
   'significant_events_investigation' as const;
+
+/** Triage/judging of discovery candidates. */
+export const SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID = 'significant_events_triage' as const;
