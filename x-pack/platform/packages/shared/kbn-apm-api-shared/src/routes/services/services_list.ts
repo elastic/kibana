@@ -52,7 +52,7 @@ export const servicesListRoute = defineRoute<ServicesItemsResponse>()({
       .merge(serviceTransactionDataSourceSchema)
       .merge(
         z.object({
-          useDurationSummary: BooleanFromString,
+          useDurationSummary: BooleanFromString.default(false),
         })
       )
       .merge(environmentSchema)

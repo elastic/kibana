@@ -36,7 +36,7 @@ export const dependencyOperationsRoute = defineRoute<DependencyOperationsRespons
       .merge(
         z.object({
           dependencyName: z.string(),
-          searchServiceDestinationMetrics: BooleanFromString,
+          searchServiceDestinationMetrics: BooleanFromString.default(false),
         })
       ),
   }),

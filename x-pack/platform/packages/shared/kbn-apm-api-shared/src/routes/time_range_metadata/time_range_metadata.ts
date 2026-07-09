@@ -15,6 +15,9 @@ export type TimeRangeMetadataResponse = TimeRangeMetadata;
 export const timeRangeMetadataRoute = defineRoute<TimeRangeMetadataResponse>()({
   endpoint: 'GET /internal/apm/time_range_metadata',
   params: z.object({
-    query: z.object({ useSpanName: BooleanFromString }).merge(kuerySchema).merge(rangeSchema),
+    query: z
+      .object({ useSpanName: BooleanFromString.default(false) })
+      .merge(kuerySchema)
+      .merge(rangeSchema),
   }),
 });

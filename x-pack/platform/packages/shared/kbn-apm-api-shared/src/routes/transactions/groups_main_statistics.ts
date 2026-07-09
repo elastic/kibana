@@ -39,7 +39,7 @@ export const transactionGroupsMainStatisticsRoute =
         .merge(
           z.object({
             kuery: z.string(),
-            useDurationSummary: BooleanFromString,
+            useDurationSummary: BooleanFromString.default(false),
             transactionType: z.string(),
             latencyAggregationType: latencyAggregationTypeSchema,
           })

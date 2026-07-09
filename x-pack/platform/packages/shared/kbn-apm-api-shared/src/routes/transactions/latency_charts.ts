@@ -36,7 +36,7 @@ export const transactionLatencyChartsRoute = defineRoute<TransactionLatencyRespo
       .object({
         latencyAggregationType: latencyAggregationTypeSchema,
         bucketSizeInSeconds: z.coerce.number(),
-        useDurationSummary: BooleanFromString,
+        useDurationSummary: BooleanFromString.default(false),
       })
       .merge(
         z

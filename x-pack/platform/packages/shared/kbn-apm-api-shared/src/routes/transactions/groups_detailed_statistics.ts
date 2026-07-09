@@ -56,7 +56,7 @@ export const transactionGroupsDetailedStatisticsRoute =
         .merge(
           z.object({
             bucketSizeInSeconds: z.coerce.number(),
-            useDurationSummary: BooleanFromString,
+            useDurationSummary: BooleanFromString.default(false),
           })
         )
         .merge(

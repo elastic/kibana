@@ -13,7 +13,7 @@ export const dependencyChartQuerySchema = z
   .object({
     dependencyName: z.string(),
     spanName: z.string(),
-    searchServiceDestinationMetrics: BooleanFromString,
+    searchServiceDestinationMetrics: BooleanFromString.default(false),
   })
   .merge(rangeSchema)
   .merge(kuerySchema)

@@ -324,19 +324,22 @@ describe('servicesListRoute params', () => {
     expectParseSuccess(result);
   });
 
-  it('rejects a missing useDurationSummary', () => {
-    expectParseError(
-      servicesListRoute.params!.safeParse({
-        query: {
-          probability: '1',
-          documentType: 'transactionMetric',
-          rollupInterval: '1m',
-          environment: 'production',
-          kuery: '',
-          start: '2021-01-01T00:00:00.000Z',
-          end: '2021-01-02T00:00:00.000Z',
-        },
-      })
-    );
+  it('defaults useDurationSummary to false when missing', () => {
+    const result = servicesListRoute.params!.safeParse({
+      query: {
+        probability: '1',
+        documentType: 'transactionMetric',
+        rollupInterval: '1m',
+        environment: 'production',
+        kuery: '',
+        start: '2021-01-01T00:00:00.000Z',
+        end: '2021-01-02T00:00:00.000Z',
+      },
+    });
+
+    expectParseSuccess(result);
+    if (result.success) {
+      expect(result.data.query.useDurationSummary).toBe(false);
+    }
   });
 });
