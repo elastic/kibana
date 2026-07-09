@@ -18,6 +18,7 @@ import type {
 import type { CoreStart } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentContextLayerPluginStart } from '@kbn/agent-context-layer-plugin/server';
+import { isChatCallableConnectorType } from '../skills/connector_authoring/utils';
 
 interface ConnectorLifecycleHandlerDeps {
   logger: Logger;
@@ -43,6 +44,11 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
       }
 
       const { connectorId, connectorType } = params;
+
+      // Skipping SML indexing for connector, because it can't be called from chat
+      if (!isChatCallableConnectorType(connectorType)) {
+        return;
+      }
 
       try {
         const [coreStart, startDeps] = await getStartServices();
