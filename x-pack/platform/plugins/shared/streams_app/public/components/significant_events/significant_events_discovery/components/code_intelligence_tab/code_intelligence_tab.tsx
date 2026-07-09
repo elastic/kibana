@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { CriteriaWithPagination, Direction, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiConfirmModal,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiToolTip,
   useGeneratedHtmlId,
@@ -25,7 +27,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { LoadingPanel } from '../../../../loading_panel';
 import { useCodeIntelligenceAvailability } from '../../../../../hooks/significant_events/use_code_intelligence_availability';
 import { useCodeIntelligenceRun } from '../../../../../hooks/significant_events/use_code_intelligence_run';
@@ -33,17 +35,24 @@ import { useCodeIntelligenceRunStatus } from '../../../../../hooks/significant_e
 import { useFetchCodeKnowledgeIndicators } from '../../../../../hooks/significant_events/use_fetch_code_knowledge_indicators';
 import { useCodeIntelligenceServiceDistribution } from '../../../../../hooks/significant_events/use_code_intelligence_service_distribution';
 import { useKnowledgeIndicatorsBulkDelete } from '../../../../../hooks/significant_events/use_knowledge_indicators_bulk_delete';
+import { useDiscoveryFeaturesApi } from '../../../../../hooks/significant_events/use_discovery_features_api';
+import { useKibana } from '../../../../../hooks/use_kibana';
 import { CodeIntelligencePlaceholder } from '../../../stream_detail_significant_events_view/code_insights_panel';
 import { CodeIntelligenceServiceDistribution } from './code_intelligence_service_distribution';
+import { RepositoryFilter } from './repository_filter';
 import { KnowledgeIndicatorActionsCell } from '../../../stream_detail_significant_events_view/knowledge_indicator_actions_cell';
 import { KnowledgeIndicatorDetailsFlyout } from '../../../stream_detail_significant_events_view/knowledge_indicator_details_flyout';
 import { KnowledgeIndicatorSourceBadge } from '../../../stream_detail_significant_events_view/knowledge_indicator_source_badge';
+import { KnowledgeIndicatorsStatusFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_status_filter';
+import { KnowledgeIndicatorsTypeFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_type_filter';
+import { KnowledgeIndicatorsSubtypeFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_subtype_filter';
 import { DeleteTableItemsModal } from '../../../stream_detail_significant_events_view/delete_table_items_modal';
 import { getFeaturesFromKIs } from '../../../stream_detail_significant_events_view/utils/get_features_from_kis';
 import { getKnowledgeIndicatorItemId } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_item_id';
 import { getKnowledgeIndicatorSource } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_source';
 import { getKnowledgeIndicatorStreamName } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_stream_name';
 import { getKnowledgeIndicatorRepository } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_repository';
+import { matchesKnowledgeIndicatorFilters } from '../../../stream_detail_significant_events_view/utils/matches_knowledge_indicator_filters';
 
 const capitalizeStyle = css`
   text-transform: capitalize;
@@ -71,7 +80,16 @@ const getFeatureTypeLabel = (subtype: string | undefined, type: string): string 
   }
 };
 
+/** Stable, human-readable value used to sort the Type column. */
+const getTypeSortValue = (ki: KnowledgeIndicator): string =>
+  ki.kind === 'feature'
+    ? getFeatureTypeLabel(ki.feature.subtype, ki.feature.type)
+    : ki.query.type === QUERY_TYPE_STATS
+    ? STATS_QUERY_LABEL
+    : MATCH_QUERY_LABEL;
+
 const NO_OCCURRENCES: Record<string, Array<{ x: number; y: number }>> = {};
+const EMPTY_STREAMS: string[] = [];
 
 export function CodeIntelligenceTab() {
   const { available, isLoading: isAvailabilityLoading } = useCodeIntelligenceAvailability();
@@ -85,8 +103,17 @@ export function CodeIntelligenceTab() {
   const { isRunning } = useCodeIntelligenceRunStatus({ enabled: available });
   const distribution = useCodeIntelligenceServiceDistribution({ enabled: available });
   const { deleteKnowledgeIndicatorsInBulk, isDeleting } = useKnowledgeIndicatorsBulkDelete({
-    onSuccess: refetch,
+    onSuccess: () => {
+      setSelectedKnowledgeIndicators([]);
+      refetch();
+    },
   });
+  const { excludeFeaturesInBulk, restoreFeaturesInBulk } = useDiscoveryFeaturesApi();
+  const {
+    core: {
+      notifications: { toasts },
+    },
+  } = useKibana();
 
   const [selectedKnowledgeIndicatorId, setSelectedKnowledgeIndicatorId] = useState<
     string | undefined
@@ -97,12 +124,118 @@ export function CodeIntelligenceTab() {
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const resetModalTitleId = useGeneratedHtmlId();
 
+  // Toolbar filter + selection state.
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'active' | 'excluded'>('active');
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedSubtypes, setSelectedSubtypes] = useState<string[]>([]);
+  const [selectedRepositories, setSelectedRepositories] = useState<string[]>([]);
+  // Code features (repo_type/language) are "computed" types, so show them by default.
+  const [hideComputedTypes, setHideComputedTypes] = useState(false);
+  const [selectedKnowledgeIndicators, setSelectedKnowledgeIndicators] = useState<
+    KnowledgeIndicator[]
+  >([]);
+  const [isBulkInProgress, setIsBulkInProgress] = useState(false);
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
+  const [sortField, setSortField] = useState<string>('repository');
+  const [sortDirection, setSortDirection] = useState<Direction>('asc');
+
+  const handleTableChange = useCallback(
+    ({ page, sort }: CriteriaWithPagination<KnowledgeIndicator>) => {
+      if (sort) {
+        setSortField(sort.field as string);
+        setSortDirection(sort.direction);
+      }
+      if (page) {
+        setPagination({ pageIndex: page.index, pageSize: page.size });
+      }
+    },
+    []
+  );
+
+  const sorting = useMemo(
+    () => ({
+      sort: { field: sortField as keyof KnowledgeIndicator, direction: sortDirection },
+    }),
+    [sortField, sortDirection]
+  );
+
+  // Reset to the first page whenever the active filters change so the table
+  // never lands on a now-empty page (which otherwise renders as "0 rows").
+  useEffect(() => {
+    setPagination((current) => (current.pageIndex === 0 ? current : { ...current, pageIndex: 0 }));
+  }, [
+    searchTerm,
+    statusFilter,
+    selectedTypes,
+    selectedSubtypes,
+    selectedRepositories,
+    hideComputedTypes,
+  ]);
+
   const runInProgress = isRunningAll || isRunning;
 
   const features = useMemo(
     () => getFeaturesFromKIs(codeKnowledgeIndicators),
     [codeKnowledgeIndicators]
   );
+
+  const filterCriteria = useMemo(
+    () => ({ statusFilter, selectedTypes, selectedSubtypes, hideComputedTypes }),
+    [statusFilter, selectedTypes, selectedSubtypes, hideComputedTypes]
+  );
+
+  const filteredKnowledgeIndicators = useMemo(
+    () =>
+      codeKnowledgeIndicators.filter((ki) => {
+        if (
+          !matchesKnowledgeIndicatorFilters(ki, {
+            ...filterCriteria,
+            searchTerm: searchTerm.toLowerCase(),
+          })
+        ) {
+          return false;
+        }
+        if (selectedRepositories.length > 0) {
+          const repository = getKnowledgeIndicatorRepository(ki);
+          if (!repository || !selectedRepositories.includes(repository)) {
+            return false;
+          }
+        }
+        return true;
+      }),
+    [codeKnowledgeIndicators, filterCriteria, searchTerm, selectedRepositories]
+  );
+
+  const runBulkFeatureOp = async (
+    operation: typeof excludeFeaturesInBulk,
+    successTitle: string,
+    errorTitle: string
+  ) => {
+    const targetFeatures = selectedKnowledgeIndicators
+      .filter((ki) => ki.kind === 'feature')
+      .map((ki) => ki.feature);
+    if (targetFeatures.length === 0) {
+      return;
+    }
+    setIsBulkInProgress(true);
+    try {
+      await operation(targetFeatures);
+      toasts.addSuccess({ title: successTitle });
+      setSelectedKnowledgeIndicators([]);
+      setSelectedKnowledgeIndicatorId(undefined);
+    } catch (error) {
+      toasts.addError(error instanceof Error ? error : new Error(String(error)), {
+        title: errorTitle,
+      });
+    } finally {
+      setIsBulkInProgress(false);
+      refetch();
+    }
+  };
+
+  const selectionHasFeatures = selectedKnowledgeIndicators.some((ki) => ki.kind === 'feature');
+  const noSelection = selectedKnowledgeIndicators.length === 0;
 
   const selectedKnowledgeIndicator = useMemo(
     () =>
@@ -115,8 +248,10 @@ export function CodeIntelligenceTab() {
   const columns = useMemo<Array<EuiBasicTableColumn<KnowledgeIndicator>>>(
     () => [
       {
+        field: 'title' as keyof KnowledgeIndicator,
         name: TITLE_LABEL,
-        render: (ki: KnowledgeIndicator) => {
+        sortable: (ki: KnowledgeIndicator) => getTitle(ki).toLowerCase(),
+        render: (_: unknown, ki: KnowledgeIndicator) => {
           const isExpanded = selectedKnowledgeIndicatorId === getKnowledgeIndicatorItemId(ki);
           const toggle = () =>
             setSelectedKnowledgeIndicatorId(
@@ -144,9 +279,11 @@ export function CodeIntelligenceTab() {
         },
       },
       {
+        field: 'type' as keyof KnowledgeIndicator,
         name: TYPE_LABEL,
         width: '192px',
-        render: (ki: KnowledgeIndicator) =>
+        sortable: getTypeSortValue,
+        render: (_: unknown, ki: KnowledgeIndicator) =>
           ki.kind === 'feature' ? (
             <EuiBadge color="hollow" css={capitalizeStyle}>
               {getFeatureTypeLabel(ki.feature.subtype, ki.feature.type)}
@@ -158,16 +295,20 @@ export function CodeIntelligenceTab() {
           ),
       },
       {
+        field: 'source' as keyof KnowledgeIndicator,
         name: SOURCE_LABEL,
         width: '130px',
-        render: (ki: KnowledgeIndicator) => (
+        sortable: (ki: KnowledgeIndicator) => getKnowledgeIndicatorSource(ki),
+        render: (_: unknown, ki: KnowledgeIndicator) => (
           <KnowledgeIndicatorSourceBadge source={getKnowledgeIndicatorSource(ki)} />
         ),
       },
       {
+        field: 'repository' as keyof KnowledgeIndicator,
         name: REPOSITORY_LABEL,
         width: '240px',
-        render: (ki: KnowledgeIndicator) => {
+        sortable: (ki: KnowledgeIndicator) => getKnowledgeIndicatorRepository(ki) ?? '',
+        render: (_: unknown, ki: KnowledgeIndicator) => {
           const repository = getKnowledgeIndicatorRepository(ki);
           return repository ? (
             <EuiBadge color="hollow">{repository}</EuiBadge>
@@ -204,100 +345,234 @@ export function CodeIntelligenceTab() {
 
   return (
     <>
-      <CodeIntelligenceServiceDistribution
-        codeOnly={distribution.codeOnly}
-        both={distribution.both}
-        logsOnly={distribution.logsOnly}
-      />
-      <EuiSpacer size="m" />
-      <EuiFlexGroup
-        justifyContent="flexEnd"
-        alignItems="center"
-        gutterSize="s"
-        css={{ flexGrow: 0 }}
-      >
+      <EuiFlexGroup direction="column" css={{ flexGrow: 0 }}>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            color="danger"
-            iconType="trash"
-            isLoading={isResetting}
-            isDisabled={runInProgress || isReconciling}
-            onClick={() => setIsResetModalOpen(true)}
-          >
-            {RESET_LABEL}
-          </EuiButtonEmpty>
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                color="danger"
+                iconType="trash"
+                isLoading={isResetting}
+                isDisabled={runInProgress || isReconciling}
+                onClick={() => setIsResetModalOpen(true)}
+              >
+                {RESET_LABEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="querySelector"
+                isLoading={isReconciling}
+                isDisabled={runInProgress || isResetting}
+                onClick={() => reconcile()}
+              >
+                {RECONCILE_LABEL}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                iconType="play"
+                isLoading={runInProgress}
+                isDisabled={isResetting || isReconciling}
+                onClick={() => runAll()}
+              >
+                {runInProgress ? RUN_ALL_IN_PROGRESS_LABEL : RUN_ALL_LABEL}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            iconType="querySelector"
-            isLoading={isReconciling}
-            isDisabled={runInProgress || isResetting}
-            onClick={() => reconcile()}
-          >
-            {RECONCILE_LABEL}
-          </EuiButton>
+        <EuiFlexItem>
+          <CodeIntelligenceServiceDistribution
+            codeOnly={distribution.codeOnly}
+            both={distribution.both}
+            logsOnly={distribution.logsOnly}
+          />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            iconType="play"
-            isLoading={runInProgress}
-            isDisabled={isResetting || isReconciling}
-            onClick={() => runAll()}
-          >
-            {runInProgress ? RUN_ALL_IN_PROGRESS_LABEL : RUN_ALL_LABEL}
-          </EuiButton>
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+            <EuiFlexItem>
+              <EuiFieldSearch
+                fullWidth
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder={SEARCH_PLACEHOLDER}
+                aria-label={SEARCH_PLACEHOLDER}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <KnowledgeIndicatorsStatusFilter
+                knowledgeIndicators={codeKnowledgeIndicators}
+                searchTerm={searchTerm.toLowerCase()}
+                selectedTypes={selectedTypes}
+                selectedStreams={EMPTY_STREAMS}
+                hideComputedTypes={hideComputedTypes}
+                statusFilter={statusFilter}
+                onStatusFilterChange={setStatusFilter}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <KnowledgeIndicatorsTypeFilter
+                knowledgeIndicators={codeKnowledgeIndicators}
+                searchTerm={searchTerm.toLowerCase()}
+                statusFilter={statusFilter}
+                selectedTypes={selectedTypes}
+                onSelectedTypesChange={setSelectedTypes}
+                hideComputedTypes={hideComputedTypes}
+                selectedStreams={EMPTY_STREAMS}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <KnowledgeIndicatorsSubtypeFilter
+                knowledgeIndicators={codeKnowledgeIndicators}
+                searchTerm={searchTerm.toLowerCase()}
+                statusFilter={statusFilter}
+                selectedTypes={selectedTypes}
+                selectedSubtypes={selectedSubtypes}
+                onSelectedSubtypesChange={setSelectedSubtypes}
+                hideComputedTypes={hideComputedTypes}
+                selectedStreams={EMPTY_STREAMS}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <RepositoryFilter
+                knowledgeIndicators={codeKnowledgeIndicators}
+                searchTerm={searchTerm.toLowerCase()}
+                filterCriteria={filterCriteria}
+                selectedRepositories={selectedRepositories}
+                onSelectedRepositoriesChange={setSelectedRepositories}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                label={SHOW_COMPUTED_LABEL}
+                checked={!hideComputedTypes}
+                onChange={(e) => setHideComputedTypes(!e.target.checked)}
+                compressed
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {SELECTED_COUNT_LABEL(
+                  selectedKnowledgeIndicators.length,
+                  filteredKnowledgeIndicators.length
+                )}
+              </EuiText>
+            </EuiFlexItem>
+            {statusFilter === 'active' ? (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="eyeClosed"
+                  color="warning"
+                  size="xs"
+                  isLoading={isBulkInProgress}
+                  isDisabled={!selectionHasFeatures}
+                  onClick={() =>
+                    runBulkFeatureOp(
+                      excludeFeaturesInBulk,
+                      BULK_EXCLUDE_SUCCESS,
+                      BULK_EXCLUDE_ERROR
+                    )
+                  }
+                >
+                  {EXCLUDE_SELECTED_LABEL}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            ) : (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="eye"
+                  size="xs"
+                  isLoading={isBulkInProgress}
+                  isDisabled={!selectionHasFeatures}
+                  onClick={() =>
+                    runBulkFeatureOp(
+                      restoreFeaturesInBulk,
+                      BULK_RESTORE_SUCCESS,
+                      BULK_RESTORE_ERROR
+                    )
+                  }
+                >
+                  {RESTORE_SELECTED_LABEL}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType="trash"
+                color="danger"
+                size="xs"
+                isLoading={isDeleting}
+                isDisabled={noSelection}
+                onClick={() => setKnowledgeIndicatorsToDelete(selectedKnowledgeIndicators)}
+              >
+                {DELETE_SELECTED_LABEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiInMemoryTable<KnowledgeIndicator>
+            items={filteredKnowledgeIndicators}
+            columns={columns}
+            itemId={getKnowledgeIndicatorItemId}
+            loading={isLoading}
+            pagination={{
+              pageIndex: pagination.pageIndex,
+              pageSize: pagination.pageSize,
+              pageSizeOptions: [25, 50, 100],
+            }}
+            onTableChange={handleTableChange}
+            sorting={sorting}
+            selection={{
+              selected: selectedKnowledgeIndicators,
+              onSelectionChange: setSelectedKnowledgeIndicators,
+            }}
+            tableCaption={TABLE_CAPTION}
+            noItemsMessage={isLoading ? undefined : NO_ITEMS_MESSAGE}
+          />
+          {selectedKnowledgeIndicator ? (
+            <KnowledgeIndicatorDetailsFlyout
+              knowledgeIndicator={selectedKnowledgeIndicator}
+              occurrencesByQueryId={NO_OCCURRENCES}
+              onClose={() => setSelectedKnowledgeIndicatorId(undefined)}
+              features={features}
+            />
+          ) : null}
+          {knowledgeIndicatorsToDelete.length > 0 ? (
+            <DeleteTableItemsModal
+              title={DELETE_MODAL_TITLE(knowledgeIndicatorsToDelete.length)}
+              items={knowledgeIndicatorsToDelete}
+              onCancel={() => setKnowledgeIndicatorsToDelete([])}
+              onConfirm={() => {
+                void deleteKnowledgeIndicatorsInBulk(knowledgeIndicatorsToDelete).then(() => {
+                  setKnowledgeIndicatorsToDelete([]);
+                });
+              }}
+              isLoading={isDeleting}
+            />
+          ) : null}
+          {isResetModalOpen ? (
+            <EuiConfirmModal
+              title={RESET_MODAL_TITLE}
+              aria-labelledby={resetModalTitleId}
+              titleProps={{ id: resetModalTitleId }}
+              onCancel={() => setIsResetModalOpen(false)}
+              onConfirm={() => {
+                setIsResetModalOpen(false);
+                reset();
+              }}
+              cancelButtonText={RESET_MODAL_CANCEL}
+              confirmButtonText={RESET_MODAL_CONFIRM}
+              buttonColor="danger"
+            >
+              <EuiText size="s">{RESET_MODAL_BODY}</EuiText>
+            </EuiConfirmModal>
+          ) : null}
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiInMemoryTable<KnowledgeIndicator>
-        items={codeKnowledgeIndicators}
-        columns={columns}
-        itemId={getKnowledgeIndicatorItemId}
-        loading={isLoading}
-        pagination={{ pageSizeOptions: [25, 50, 100] }}
-        search={{ box: { incremental: true, placeholder: SEARCH_PLACEHOLDER } }}
-        tableCaption={TABLE_CAPTION}
-        noItemsMessage={isLoading ? undefined : NO_ITEMS_MESSAGE}
-      />
-      {selectedKnowledgeIndicator ? (
-        <KnowledgeIndicatorDetailsFlyout
-          knowledgeIndicator={selectedKnowledgeIndicator}
-          occurrencesByQueryId={NO_OCCURRENCES}
-          onClose={() => setSelectedKnowledgeIndicatorId(undefined)}
-          features={features}
-        />
-      ) : null}
-      {knowledgeIndicatorsToDelete.length > 0 ? (
-        <DeleteTableItemsModal
-          title={DELETE_MODAL_TITLE(knowledgeIndicatorsToDelete.length)}
-          items={knowledgeIndicatorsToDelete}
-          onCancel={() => setKnowledgeIndicatorsToDelete([])}
-          onConfirm={() => {
-            void deleteKnowledgeIndicatorsInBulk(knowledgeIndicatorsToDelete).then(() => {
-              setKnowledgeIndicatorsToDelete([]);
-            });
-          }}
-          isLoading={isDeleting}
-        />
-      ) : null}
-      {isResetModalOpen ? (
-        <EuiConfirmModal
-          title={RESET_MODAL_TITLE}
-          aria-labelledby={resetModalTitleId}
-          titleProps={{ id: resetModalTitleId }}
-          onCancel={() => setIsResetModalOpen(false)}
-          onConfirm={() => {
-            setIsResetModalOpen(false);
-            reset();
-          }}
-          cancelButtonText={RESET_MODAL_CANCEL}
-          confirmButtonText={RESET_MODAL_CONFIRM}
-          buttonColor="danger"
-        >
-          <EuiText size="s">{RESET_MODAL_BODY}</EuiText>
-        </EuiConfirmModal>
-      ) : null}
     </>
   );
 }
@@ -345,6 +620,41 @@ const MINIMIZE_LABEL = i18n.translate('xpack.streams.codeIntelligenceTab.minimiz
 const SEARCH_PLACEHOLDER = i18n.translate('xpack.streams.codeIntelligenceTab.searchPlaceholder', {
   defaultMessage: 'Search code knowledge indicators',
 });
+const SHOW_COMPUTED_LABEL = i18n.translate('xpack.streams.codeIntelligenceTab.showComputed', {
+  defaultMessage: 'Show computed',
+});
+const EXCLUDE_SELECTED_LABEL = i18n.translate('xpack.streams.codeIntelligenceTab.excludeSelected', {
+  defaultMessage: 'Exclude',
+});
+const RESTORE_SELECTED_LABEL = i18n.translate('xpack.streams.codeIntelligenceTab.restoreSelected', {
+  defaultMessage: 'Restore',
+});
+const DELETE_SELECTED_LABEL = i18n.translate('xpack.streams.codeIntelligenceTab.deleteSelected', {
+  defaultMessage: 'Delete',
+});
+const BULK_EXCLUDE_SUCCESS = i18n.translate(
+  'xpack.streams.codeIntelligenceTab.bulkExcludeSuccess',
+  {
+    defaultMessage: 'Excluded selected features',
+  }
+);
+const BULK_EXCLUDE_ERROR = i18n.translate('xpack.streams.codeIntelligenceTab.bulkExcludeError', {
+  defaultMessage: 'Failed to exclude selected features',
+});
+const BULK_RESTORE_SUCCESS = i18n.translate(
+  'xpack.streams.codeIntelligenceTab.bulkRestoreSuccess',
+  {
+    defaultMessage: 'Restored selected features',
+  }
+);
+const BULK_RESTORE_ERROR = i18n.translate('xpack.streams.codeIntelligenceTab.bulkRestoreError', {
+  defaultMessage: 'Failed to restore selected features',
+});
+const SELECTED_COUNT_LABEL = (selected: number, total: number) =>
+  i18n.translate('xpack.streams.codeIntelligenceTab.selectedCount', {
+    defaultMessage: '{selected} of {total} selected',
+    values: { selected, total },
+  });
 const NO_ITEMS_MESSAGE = i18n.translate('xpack.streams.codeIntelligenceTab.noItems', {
   defaultMessage:
     'No code knowledge indicators yet. Run "Identify features & queries" to generate them.',

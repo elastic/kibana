@@ -30,14 +30,14 @@ export function CodeIntelligenceServiceDistribution({ codeOnly, both, logsOnly }
       key: 'code',
       label: CODE_ONLY_LABEL,
       count: codeOnly,
-      color: euiTheme.colors.vis.euiColorVis0,
+      color: '#FDDDE9',
     },
-    { key: 'both', label: BOTH_LABEL, count: both, color: euiTheme.colors.vis.euiColorVis3 },
+    { key: 'both', label: BOTH_LABEL, count: both, color: euiTheme.colors.backgroundLightSuccess },
     {
       key: 'logs',
       label: LOGS_ONLY_LABEL,
       count: logsOnly,
-      color: euiTheme.colors.vis.euiColorVis1,
+      color: euiTheme.colors.vis.euiColorVis9,
     },
   ];
 
@@ -113,7 +113,7 @@ const CODE_ONLY_LABEL = i18n.translate('xpack.streams.codeIntelligenceTab.distri
   defaultMessage: 'Code only',
 });
 const BOTH_LABEL = i18n.translate('xpack.streams.codeIntelligenceTab.distribution.both', {
-  defaultMessage: 'Code & logs',
+  defaultMessage: 'Code + logs',
 });
 const LOGS_ONLY_LABEL = i18n.translate('xpack.streams.codeIntelligenceTab.distribution.logsOnly', {
   defaultMessage: 'Logs only',
