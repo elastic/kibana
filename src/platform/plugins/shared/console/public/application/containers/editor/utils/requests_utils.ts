@@ -304,6 +304,27 @@ export const indentData = (dataString: string): string => {
   }
 };
 
+/**
+ * This function removes comments from the request data.
+ *
+ * The comment removal is done by parsing the data with hjson and stringifying the result.
+ * Since hjson can't parse multi-line strings in triple quotes, if the direct parsing fails,
+ * the triple-quote strings are temporarily collapsed before parsing and restored afterwards.
+ * This way comments are removed even when the data combines them with triple-quote strings,
+ * while comments inside triple-quote strings (e.g. Painless comments) are preserved.
+ * If the data can't be parsed at all, it is returned unchanged.
+ */
+export const removeCommentsFromData = (dataString: string): string => {
+  try {
+    return JSON.stringify(parse(dataString), null, 2);
+  } catch (e) {
+    const { collapsedTripleQuotesData, tripleQuoteStrings } =
+      collapseTripleQuoteStrings(dataString);
+    const dataWithoutComments = indentData(collapsedTripleQuotesData);
+    return expandTripleQuoteStrings(dataWithoutComments, tripleQuoteStrings);
+  }
+};
+
 // ---------------------------------- Internal helpers ----------------------------------
 
 const isJsonString = (str: string) => {

@@ -17,6 +17,7 @@ import {
   trackSentRequests,
   getRequestFromEditor,
   containsComments,
+  removeCommentsFromData,
   collapseTripleQuoteStrings,
   expandTripleQuoteStrings,
   TRIPLE_QUOTE_STRINGS_MARKER,
@@ -671,6 +672,58 @@ describe('requests_utils', () => {
       "field": "value" // comment here
     }`;
       expect(containsComments(requestData)).toBe(true);
+    });
+  });
+
+  describe('removeCommentsFromData', () => {
+    it('removes line and block comments from the request data', () => {
+      const requestData = `{
+  // line comment
+  "query": {
+    /* block comment */
+    "match_all": {}
+  } // trailing comment
+}`;
+      const result = removeCommentsFromData(requestData);
+      expect(containsComments(result)).toBe(false);
+      expect(JSON.parse(result)).toEqual({ query: { match_all: {} } });
+    });
+
+    it('removes comments when the data also contains multi-line triple-quote strings', () => {
+      // Regression test for https://github.com/elastic/kibana/issues/277160
+      const requestData = `{
+  // watch metadata
+  "script": {
+    "lang": "painless",
+    "source": """
+      def a = 1; // painless comment
+      return a;
+    """
+  } /* end of script */
+}`;
+      const result = removeCommentsFromData(requestData);
+      expect(result).not.toContain('// watch metadata');
+      expect(result).not.toContain('/* end of script */');
+      // The triple-quote string is preserved, including the comments inside it
+      expect(result).toContain(`"source": """
+      def a = 1; // painless comment
+      return a;
+    """`);
+    });
+
+    it('preserves comment-like sequences inside strings', () => {
+      const requestData = `{
+  "url": "https://elastic.co", // comment
+  "pattern": "/*"
+}`;
+      const result = removeCommentsFromData(requestData);
+      expect(result).not.toContain('// comment');
+      expect(JSON.parse(result)).toEqual({ url: 'https://elastic.co', pattern: '/*' });
+    });
+
+    it('returns invalid data unchanged', () => {
+      const requestData = '{\n  "query": // comment\n    {';
+      expect(removeCommentsFromData(requestData)).toBe(requestData);
     });
   });
 
