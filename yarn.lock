@@ -2040,15 +2040,6 @@
   resolved "https://registry.yarnpkg.com/@csstools/selector-specificity/-/selector-specificity-2.2.0.tgz#2cbcf822bf3764c9658c4d2e568bd0c0cb748016"
   integrity sha512-+OJ9konv95ClSTOJCmMZqpd5+YGsB2S+x6w3E1oaM8UuR5j8nTNHYSz8c9BEPGDOCMQYIEEGlVPj/VY64iTbGw==
 
-"@cypress/debugging-proxy@2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@cypress/debugging-proxy/-/debugging-proxy-2.0.1.tgz#c0ef569af4c2efb6ceb329e5813bc770b133ab9e"
-  integrity sha512-kUFQSNQfvZUO5yqtiir65FPPJZKPQaA68trYiKlHuWhDu9sopjIAXoZv/ff0GbLSNDHdxIuF0VyJhJIRRHuhAw==
-  dependencies:
-    debug "^4.1.1"
-    http-proxy "^1.17.0"
-    self-signed-cert "^1.0.1"
-
 "@cypress/grep@5.1.0":
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/@cypress/grep/-/grep-5.1.0.tgz#9ca3565f51fde6721e3c00a6bdddfbf34b42378a"
@@ -4869,6 +4860,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/attack-discovery-schedules-common@link:x-pack/solutions/security/packages/kbn-attack-discovery-schedules-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/audit-log-plugin@link:x-pack/platform/test/security_api_integration/plugins/audit_log":
   version "0.0.0"
   uid ""
@@ -6701,6 +6696,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/discoveries-plugin@link:x-pack/solutions/security/plugins/discoveries":
+  version "0.0.0"
+  uid ""
+
+"@kbn/discoveries-schemas@link:x-pack/solutions/security/packages/kbn-discoveries-schemas":
+  version "0.0.0"
+  uid ""
+
+"@kbn/discoveries@link:x-pack/solutions/security/packages/kbn-discoveries":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dissect-heuristics@link:x-pack/platform/packages/shared/kbn-dissect-heuristics":
   version "0.0.0"
   uid ""
@@ -7570,6 +7577,10 @@
   uid ""
 
 "@kbn/interpreter@link:src/platform/packages/shared/kbn-interpreter":
+  version "0.0.0"
+  uid ""
+
+"@kbn/investigation-output@link:x-pack/platform/packages/shared/kbn-investigation-output":
   version "0.0.0"
   uid ""
 
@@ -16631,19 +16642,19 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@xyflow/react@12.11.0":
-  version "12.11.0"
-  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.11.0.tgz#7dca326d0e3e8def2988e6089d3c267fe8511242"
-  integrity sha512-na4IO33FSs2OS72hASgZDmTYwFAkef7Z74uBUVrong3ARmQQHfnRUVaCFn1kTt5LbS6pK03TbYjCPGLjLFfziA==
+"@xyflow/react@12.11.1":
+  version "12.11.1"
+  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.11.1.tgz#338d3f2e415bf236ed4661b514722ae60587b704"
+  integrity sha512-L+zBoLGSXham0MnlY8QqjfR7/C5JNw0zxkaey5aZ5XmCgJBAdH4+WRIu8CR40d3l/BdU635V6YbhBK1jMo8/6Q==
   dependencies:
-    "@xyflow/system" "0.0.77"
+    "@xyflow/system" "0.0.78"
     classcat "^5.0.3"
     zustand "^4.4.0"
 
-"@xyflow/system@0.0.77":
-  version "0.0.77"
-  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.77.tgz#e6ebc3f3ee0af8cca8352b4a63b414d921435001"
-  integrity sha512-qCDCMCQAAgUu8yHnhloHG9F5mwPX5E+Wl8McpYIOPSSXfzFJJoZcwOcsDiAjitVKIg2de1WmJbCHfpcvxprsgg==
+"@xyflow/system@0.0.78":
+  version "0.0.78"
+  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.78.tgz#0a6c09236f1f5b7748584182d2d635d5f468e706"
+  integrity sha512-lY0z2qP33fUhTva9Vaxrk0lqZta2pkbxB1trHAx1omnJqRtPvDlAQYV2r5fhS6AdpkulYmbNW0svy+A4/t4B/g==
   dependencies:
     "@types/d3-drag" "^3.0.7"
     "@types/d3-interpolate" "^3.0.4"
@@ -24278,7 +24289,7 @@ http-proxy-middleware@^2.0.9:
     is-plain-obj "^3.0.0"
     micromatch "^4.0.2"
 
-http-proxy@1.18.1, http-proxy@^1.17.0, http-proxy@^1.18.1:
+http-proxy@1.18.1, http-proxy@^1.18.1:
   version "1.18.1"
   resolved "https://registry.yarnpkg.com/http-proxy/-/http-proxy-1.18.1.tgz#401541f0534884bbf95260334e72f88ee3976549"
   integrity sha512-7mz/721AbnJwIVbnaSv1Cz3Am0ZLT/UBwkC92VlxhXv/k/BBQfM2fXElQNC27BVGr0uwUpplYPQM9LnaBMR5NQ==
@@ -32751,11 +32762,6 @@ selenium-webdriver@4.44.0:
     jszip "^3.10.1"
     tmp "^0.2.5"
     ws "^8.20.1"
-
-self-signed-cert@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/self-signed-cert/-/self-signed-cert-1.0.1.tgz#9e2fae07503f84fb910f4a87c5c5c6becc207bf6"
-  integrity sha512-86d1jYydqaRdUEyR9tj5nQ0d059RUWB9gdZrzDy2MJaUHii1h9EyzbAepkV1rOLO2AkSkQbXtUrqWRH4FDYWHA==
 
 selfsigned@^5.5.0:
   version "5.5.0"
