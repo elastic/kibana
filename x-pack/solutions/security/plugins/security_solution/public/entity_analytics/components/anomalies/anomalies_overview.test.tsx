@@ -15,6 +15,17 @@ import type {
 } from '../../../../common/api/entity_analytics';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
+jest.mock('../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        getUrlForApp: (appId: string, options?: { path?: string }) =>
+          `/base-path/app/${appId}${options?.path ?? ''}`,
+      },
+    },
+  }),
+}));
+
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
   return {
@@ -104,6 +115,7 @@ const makeData = (
   totalAnomaliesCount: 5,
   from: 1_000_000,
   to: 2_000_000,
+  hasJobsMissingThreatTactics: false,
   ...overrides,
 });
 
@@ -293,6 +305,33 @@ describe('AnomaliesOverview', () => {
         { wrapper: Wrapper }
       );
       expect(screen.queryByTestId('mock-anomaly-job-name')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('missing threat tactics warning', () => {
+    it('does not render the warning when hasJobsMissingThreatTactics is false', () => {
+      render(
+        <AnomaliesOverview
+          data={makeData({ hasJobsMissingThreatTactics: false })}
+          openDetailsPanel={openDetailsPanel}
+        />,
+        { wrapper: Wrapper }
+      );
+      expect(screen.queryByText(/missing MITRE ATT&CK tactic mappings/)).not.toBeInTheDocument();
+    });
+
+    it('renders the warning with a link to the integrations page when hasJobsMissingThreatTactics is true', () => {
+      render(
+        <AnomaliesOverview
+          data={makeData({ hasJobsMissingThreatTactics: true })}
+          openDetailsPanel={openDetailsPanel}
+        />,
+        { wrapper: Wrapper }
+      );
+      expect(screen.getByText(/missing MITRE ATT&CK tactic mappings/)).toBeInTheDocument();
+      const link = screen.getByRole('link', { name: /Update to the latest integration version/ });
+      expect(link).toHaveAttribute('href', '/base-path/app/integrations/installed');
+      expect(link).toHaveAttribute('target', '_blank');
     });
   });
 
