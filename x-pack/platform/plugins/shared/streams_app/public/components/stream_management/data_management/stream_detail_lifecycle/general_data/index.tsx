@@ -49,6 +49,7 @@ import { LifecycleSummary } from './lifecycle_summary';
 import { IngestionRate } from './ingestion_rate';
 import { useEditSuccessfulLifecycleFlyout } from './hooks/use_edit_successful_lifecycle_flyout';
 import { useDlmFrozenPhaseGating } from '../hooks/use_dlm_frozen_phase_gating';
+import { useDataStreamGlobalRetention } from '../hooks/use_data_stream_global_retention';
 
 const StreamDetailGeneralDataInner = ({
   definition,
@@ -94,6 +95,12 @@ const StreamDetailGeneralDataInner = ({
   const { notifyAfterSave } = useLifecycleAfterSave();
   const { euiTheme } = useEuiTheme();
   const { ilmPhases } = useIlmPhasesColorAndDescription();
+
+  // Delete phase default/maximum retention only apply in Serverless.
+  const { defaultRetentionPeriod, maximumRetentionPeriod } = useDataStreamGlobalRetention(
+    definition.stream.name,
+    isServerless
+  );
 
   const [isEditSuccessfulDeletePhaseFlyoutOpen, setIsEditSuccessfulDeletePhaseFlyoutOpen] =
     useState(false);
@@ -609,6 +616,8 @@ const StreamDetailGeneralDataInner = ({
       {isEditSuccessfulDeletePhaseFlyoutOpen ? (
         <EditDeletePhaseFlyout
           initialValue={successfulDeletePhaseInitialValue}
+          defaultRetentionPeriod={defaultRetentionPeriod}
+          maximumRetentionPeriod={maximumRetentionPeriod}
           onChange={setDeletePhasePreview}
           onSave={onSaveSuccessfulDeletePhase}
           onClose={closeEditSuccessfulDeletePhaseFlyout}

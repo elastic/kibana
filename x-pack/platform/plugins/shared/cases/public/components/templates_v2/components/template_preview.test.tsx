@@ -19,6 +19,12 @@ jest.mock('../../cases_context/use_cases_context', () => ({
   useCasesContext: () => ({ owner: ['securitySolution'] }),
 }));
 
+// TemplatePreview renders TemplateMetadataPreview, which calls useCasesFeatures (sync-alerts gate).
+// Mock it so the preview doesn't need the full cases features/permissions context.
+jest.mock('../../../common/use_cases_features', () => ({
+  useCasesFeatures: () => ({ isSyncAlertsEnabled: true }),
+}));
+
 describe('CreateTemplatePreview', () => {
   const renderPreview = (definition: string) => {
     const Wrapper = () => {
@@ -63,11 +69,20 @@ describe('CreateTemplatePreview', () => {
     );
   });
 
-  it('renders nothing when YAML is invalid (no last valid template)', () => {
+  it('shows an actionable error state when the YAML is invalid', () => {
     renderPreview('name: [');
 
-    // Component returns null when there's no valid template
+    expect(screen.getByTestId('templatePreviewError')).toBeInTheDocument();
+    expect(screen.getByText("Can't preview this template")).toBeInTheDocument();
     expect(screen.queryByTestId('template-field-renderer')).not.toBeInTheDocument();
+    expect(TemplateFieldRenderer).not.toHaveBeenCalled();
+  });
+
+  it('shows a neutral empty state when the definition is empty', () => {
+    renderPreview('   ');
+
+    expect(screen.getByTestId('templatePreviewEmpty')).toBeInTheDocument();
+    expect(screen.queryByTestId('templatePreviewError')).not.toBeInTheDocument();
     expect(TemplateFieldRenderer).not.toHaveBeenCalled();
   });
 });
