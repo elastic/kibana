@@ -57,6 +57,8 @@ describe('toExpression', () => {
     expect(idMap['@timestamp'][0]).toEqual({
       id: 'a',
       label: '@timestamp',
+      dataType: 'date',
+      operationType: 'literal',
     });
     expect(idMap['@timestamp'][0]).not.toHaveProperty('dropPartials');
   });
@@ -81,6 +83,8 @@ describe('toExpression', () => {
       id: 'a',
       label: '@timestamp',
       dropPartials: false,
+      dataType: 'date',
+      operationType: 'literal',
     });
   });
 
@@ -104,6 +108,8 @@ describe('toExpression', () => {
       id: 'a',
       label: '@timestamp',
       dropPartials: true,
+      dataType: 'date',
+      operationType: 'literal',
     });
   });
 });
