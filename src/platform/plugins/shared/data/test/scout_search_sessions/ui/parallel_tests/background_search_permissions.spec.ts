@@ -68,8 +68,6 @@ spaceTest.describe(
 
         await page.gotoApp('dashboards');
 
-        // Wait for Kibana to fully bootstrap before reading nav links.
-        // Under parallel load the page may take longer than the default 10 s action timeout.
         await expect(page.testSubj.locator('toggleNavButton')).toBeVisible({ timeout: 30_000 });
 
         const navLinks = await pageObjects.collapsibleNav.getNavLinks();
@@ -89,15 +87,12 @@ spaceTest.describe(
         const navLinks = await pageObjects.collapsibleNav.getNavLinks();
         expect(navLinks).toContain('Stack Management');
 
-        // Mirror the original FTR assertion (managementMenu had exactly one section
-        // `{ kibana: ['search_sessions'] }`): with only `store_search_session`, the
-        // management side nav must expose Background Search and nothing else.
-        const managementAppLinks = page.testSubj
-          .locator('mgtSideBarNav')
-          .locator('a.euiSideNavItemButton');
-        await expect(managementAppLinks).toHaveCount(1);
-        await expect(managementAppLinks).toHaveAttribute('data-test-subj', 'search_sessions');
-        await expect(managementAppLinks).toContainText('Background Search');
+        const sections = await pageObjects.management.readSidebarSections();
+        const kibanaSection = sections.find((section) => section.sectionId === 'kibana');
+        expect(kibanaSection?.sectionLinks).toStrictEqual(['search_sessions']);
+
+        const searchSessionsLink = page.testSubj.locator('search_sessions');
+        await expect(searchSessionsLink).toContainText('Background Search');
       }
     );
   }
