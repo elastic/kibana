@@ -27,7 +27,6 @@ import {
   autocompleteSml,
   checkItemsAccess,
   getDocumentsByIds,
-  listDocuments,
   findByOrigin,
   findByOriginAcrossSpaces,
   filterResultsByPermissions,
@@ -80,15 +79,6 @@ export interface AgentBuilderSmlServiceStart {
     spaceId: string;
     esClient: IScopedClusterClient;
   }) => Promise<Map<string, SmlDocument>>;
-  listDocuments: (params: {
-    spaceId: string;
-    esClient: IScopedClusterClient;
-    page?: number;
-    perPage?: number;
-    type?: string;
-    originUri?: string;
-    tags?: string[];
-  }) => Promise<{ total: number; results: SmlDocument[] }>;
   findByOrigin: (params: {
     type: string;
     originId: string;
@@ -215,18 +205,6 @@ class AgentBuilderSmlServiceImpl implements AgentBuilderSmlServiceInstance {
       },
       getDocuments: async ({ ids, spaceId, esClient }) => {
         return getDocumentsByIds({ ids, spaceId, esClient, logger });
-      },
-      listDocuments: async ({ spaceId, esClient, page, perPage, type, originUri, tags }) => {
-        return listDocuments({
-          spaceId,
-          esClient,
-          logger,
-          page,
-          perPage,
-          type,
-          originId: originUri,
-          tags,
-        });
       },
       findByOrigin: async ({ type, originId, spaceId, esClient }) => {
         return findByOrigin({ type, originId, spaceId, esClient, logger });

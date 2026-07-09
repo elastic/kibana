@@ -21,7 +21,6 @@ import type {
   SmlPermissions,
 } from '@kbn/agent-builder-server';
 import { smlIndexName } from './storage';
-import { SmlResultWindowExceededError } from './sml_result_window_exceeded_error';
 import { SmlAuthzEnumerationIncompleteError } from './sml_authz_enumeration_incomplete_error';
 import { SmlCorpusTooLargeError } from './sml_corpus_too_large_error';
 import { MAX_CHUNKS_PER_ORIGIN } from '../../../common/constants';
@@ -34,27 +33,6 @@ import { isNotFoundError } from './indexer';
 const emptyPermissions = (): SmlDocument['permissions'] => ({
   kibana: { privileges: [] },
 });
-
-const isResultWindowExceededError = (error: unknown): boolean => {
-  if (!(error instanceof errors.ResponseError) || error.statusCode !== 400) return false;
-  const body = error.body as
-    | {
-        error?: {
-          reason?: string;
-          caused_by?: { reason?: string };
-          root_cause?: Array<{ reason?: string }>;
-        };
-      }
-    | undefined;
-  const reasons = [
-    body?.error?.reason,
-    body?.error?.caused_by?.reason,
-    ...(body?.error?.root_cause?.map((rc) => rc.reason) ?? []),
-  ];
-  return reasons.some(
-    (reason) => typeof reason === 'string' && reason.includes('Result window is too large')
-  );
-};
 
 /**
  * Batch-check which Kibana action strings the user is authorized for via a
@@ -1179,91 +1157,4 @@ const hydrateDocument = (source: SmlDocument): SmlDocument => {
 export const isVisibleInSpace = (spaces: string[] | undefined, spaceId: string): boolean => {
   if (!spaces || spaces.length === 0) return false;
   return spaces.includes(spaceId) || spaces.includes('*');
-};
-
-/**
- * List SML documents in a space with optional filters and pagination.
- *
- * Pagination follows the standard Kibana convention (`page` is 1-based,
- * `per_page` bounds the page size).
- */
-export const listDocuments = async ({
-  spaceId,
-  esClient,
-  logger,
-  page = 1,
-  perPage = 20,
-  type,
-  originId,
-  tags,
-}: {
-  spaceId: string;
-  esClient: IScopedClusterClient;
-  logger: Logger;
-  page?: number;
-  perPage?: number;
-  type?: string;
-  originId?: string;
-  tags?: string[];
-}): Promise<{ total: number; results: SmlDocument[] }> => {
-  const filters: Array<Record<string, unknown>> = [
-    {
-      bool: {
-        should: [{ term: { spaces: spaceId } }, { term: { spaces: '*' } }],
-        minimum_should_match: 1,
-      },
-    },
-  ];
-  if (type) {
-    filters.push({ term: { type } });
-  }
-  if (originId) {
-    filters.push({ term: { 'origin.uri': originId } });
-  }
-  if (tags && tags.length > 0) {
-    filters.push({ terms: { tags } });
-  }
-
-  try {
-    const response = await esClient.asCurrentUser.search<SmlDocument>({
-      index: smlIndexName,
-      from: (page - 1) * perPage,
-      size: perPage,
-      allow_no_indices: true,
-      ignore_unavailable: true,
-      track_total_hits: true,
-      query: {
-        bool: {
-          filter: filters,
-        },
-      },
-      sort: [{ updated_at: { order: 'desc' } }],
-    });
-
-    const total =
-      typeof response.hits.total === 'number'
-        ? response.hits.total
-        : response.hits.total?.value ?? 0;
-
-    const results: SmlDocument[] = response.hits.hits
-      .filter((hit) => hit._source != null)
-      .map((hit) => hydrateDocument(hit._source!));
-
-    return { total, results };
-  } catch (error) {
-    if (isNotFoundError(error)) {
-      return { total: 0, results: [] };
-    }
-    if (isResultWindowExceededError(error)) {
-      const responseError = error as errors.ResponseError;
-      const body = responseError.body as
-        | { error?: { root_cause?: Array<{ reason?: string }>; reason?: string } }
-        | undefined;
-      const reason =
-        body?.error?.root_cause?.[0]?.reason ?? body?.error?.reason ?? responseError.message;
-      throw new SmlResultWindowExceededError(reason);
-    }
-    logger.warn(`SML listDocuments failed: ${(error as Error).message}`);
-    throw error;
-  }
 };

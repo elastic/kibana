@@ -54,6 +54,13 @@ export const suggestedKiIndexMappings = {
             },
           },
         },
+        // Historical field: present in the pre-relocation mapping, but no SML
+        // type ever populated it. Removed from Agent Builder's own live copy
+        // of this mapping in the 2026-07-08 amendment (see
+        // agent_builder/server/services/sml/storage.ts). A future
+        // implementer of the Context Engine index-template feature should
+        // deliberately decide whether to carry this forward, rather than
+        // copying it by default.
         elasticsearch: {
           properties: {
             indices: {

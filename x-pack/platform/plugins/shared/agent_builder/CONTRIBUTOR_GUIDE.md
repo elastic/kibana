@@ -1188,7 +1188,7 @@ attach them to a conversation.
 │  │  SmlTypeDefinition         │ ← you provide this           │
 │  │  • id                      │                              │
 │  │  • list()                  │                              │
-│  │  • getSmlData()            │                              │
+│  │  • getSmlEntry()           │                              │
 │  │  • toAttachment()          │                              │
 │  └────────────────────────────┘                              │
 └──────────────────────────────────────────────────────────────┘
@@ -1216,7 +1216,7 @@ attach them to a conversation.
 | Concept | Description |
 |---|---|
 | **SML Type** | A category of content you expose (e.g. `visualization`, `dashboard`). You implement `SmlTypeDefinition`. |
-| **Crawler** | A Task Manager background task that periodically calls your `list()` and `getSmlData()` hooks, indexing content into system indices. Uses mark-and-sweep with `last_crawled_at` timestamps for efficient change detection. |
+| **Crawler** | A Task Manager background task that periodically calls your `list()` and `getSmlEntry()` hooks, indexing content into system indices. Uses mark-and-sweep with `last_crawled_at` timestamps for efficient change detection. |
 | **SML Document** | A single indexed chunk stored in the `.ab-sml-data` index, containing title, content, permissions, and space information. |
 | **`sml_search` tool** | A built-in Agent Builder tool the AI uses to keyword-search SML documents. Results are filtered by the requesting user's space and permissions. |
 | **`sml_attach` tool** | A built-in Agent Builder tool the AI uses to convert SML search hits into conversation attachments. It accepts `chunk_ids` from `sml_search`;  `chunk_id` format is `attachment_type:origin_id:uuid`. |
@@ -1226,7 +1226,7 @@ attach them to a conversation.
 
 1. **Crawl**: The crawler runs on a configurable interval (default 10 min).
    For each registered SML type it calls `list()` to enumerate items, detects
-   changes via timestamps, and calls `getSmlData()` for new/updated items.
+   changes via timestamps, and calls `getSmlEntry()` for new/updated items.
 2. **Index**: Results are written to the `.ab-sml-data` index.
    Crawler state (which items have been seen) is stored in a separate
    `.chat-sml-crawler-state` index.
@@ -1241,7 +1241,7 @@ attach them to a conversation.
   content from all spaces.
 - Access control is enforced at **query time**: results are filtered by space
   and by Kibana feature privileges (the `permissions` array you set in
-  `getSmlData`).
+  `getSmlEntry`).
 
 ---
 
@@ -1290,7 +1290,7 @@ export const myAssetSmlType: SmlTypeDefinition = {
 
   // Fetch the full data for a single item to index.
   // Return undefined to skip the item (e.g. if it was deleted).
-  getSmlData: async (originId, context) => {
+  getSmlEntry: async (originId, context) => {
     try {
       const so = await context.savedObjectsClient.get('my-saved-object-type', originId);
       const attrs = so.attributes as { title?: string; description?: string };
@@ -1370,7 +1370,7 @@ memory, so even types with millions of items won't cause OOM.
 Use `createPointInTimeFinder` with `namespaces: ['*']` to enumerate across
 all spaces. The crawler indexes everything; access control happens at query time.
 
-##### `getSmlData()` — Chunks and permissions
+##### `getSmlEntry()` — Chunks and permissions
 
 You can return multiple chunks per item (e.g. if a dashboard has multiple
 panels). Each chunk gets its own document in the SML index.

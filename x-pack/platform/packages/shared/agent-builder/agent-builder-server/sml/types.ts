@@ -181,7 +181,7 @@ export type SmlIngestionMethod = 'manual' | 'crawled';
 
 /** An SML document as stored in the `.ab-sml-data` index. */
 export interface SmlDocument {
-  /** Unique id of the chunk */
+  /** Unique id of the entry */
   id: string;
   /** SML type (e.g., 'visualization', 'dashboard') */
   type: string;
@@ -217,7 +217,7 @@ export interface SmlDocument {
   spaces: string[];
   /** Permissions required to access the underlying element. Always present on stored documents. */
   permissions: SmlPermissions;
-  /** How this chunk was produced. */
+  /** How this entry was produced. */
   ingestion_method: SmlIngestionMethod;
 }
 
@@ -441,11 +441,11 @@ export interface SmlService {
   indexAttachment: (params: SmlIndexerParams) => Promise<void>;
 
   /**
-   * Delete chunks for an origin, with explicit control over which ingestion
+   * Delete entries for an origin, with explicit control over which ingestion
    * method(s) are removed. See {@link SmlIndexerDeleteAttachmentParams}.
    *
    * Distinct from `indexAttachment({ action: 'delete' })` only in that
-   * callers can choose to wipe `'manual'` or `'all'` chunks. Without this
+   * callers can choose to wipe `'manual'` or `'all'` entries. Without this
    * method, the action: 'delete' path defaults to `'crawled'` to preserve
    * the historical crawler/event-driven semantics (delete crawled output,
    * keep curated manuals).
@@ -453,7 +453,7 @@ export interface SmlService {
   deleteAttachment: (params: SmlIndexerDeleteAttachmentParams) => Promise<void>;
 
   /**
-   * Fetch SML documents by chunk IDs, scoped to a space. Does NOT perform
+   * Fetch SML documents by id, scoped to a space. Does NOT perform
    * permission checks -- callers must authorize via `checkItemsAccess` first.
    */
   getDocuments: (params: {
@@ -462,19 +462,8 @@ export interface SmlService {
     esClient: IScopedClusterClient;
   }) => Promise<Map<string, SmlDocument>>;
 
-  /** List SML documents in a space with optional filters and pagination. */
-  listDocuments: (params: {
-    spaceId: string;
-    esClient: IScopedClusterClient;
-    page?: number;
-    perPage?: number;
-    type?: string;
-    originUri?: string;
-    tags?: string[];
-  }) => Promise<{ total: number; results: SmlDocument[] }>;
-
   /**
-   * Fetch visible chunks for `(type, originId)` in `spaceId`. Does NOT
+   * Fetch visible entries for `(type, originId)` in `spaceId`. Does NOT
    * perform per-user permission checks. Returns `[]` when none exist.
    */
   findByOrigin: (params: {
@@ -485,7 +474,7 @@ export interface SmlService {
   }) => Promise<SmlDocument[]>;
 
   /**
-   * Fetch chunks for `(type, originId)` regardless of space. Guard-only
+   * Fetch entries for `(type, originId)` regardless of space. Guard-only
    * -- MUST NOT be used for read paths that surface data to users.
    */
   findByOriginAcrossSpaces: (params: {
