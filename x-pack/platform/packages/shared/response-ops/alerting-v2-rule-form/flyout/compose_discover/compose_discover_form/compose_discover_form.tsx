@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useWatch } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import type {
   ComposeDiscoverState,
@@ -26,6 +26,7 @@ import { RULE_BUILDER_REGISTRY } from '../rule_builder';
 import { isActionValid } from '../../../actions_form';
 import { ModeSelect } from '../../../form/fields/mode_select';
 import { AlertDelayField } from '../../../form/fields/alert_delay_field';
+import { NoDataStrategySelect } from '../../../form/fields/no_data_strategy_select';
 import { ScheduleField } from '../../../form/fields/schedule_field';
 import { LookbackWindowField } from '../../../form/fields/lookback_window_field';
 import { AlertConditionStep } from './alert_condition_step';
@@ -177,7 +178,9 @@ export const ComposeDiscoverForm = ({
   builderType,
   onManualSplit,
 }: Props) => {
+  const { setValue } = useFormContext<FormValues>();
   const isAlert = useWatch<FormValues, 'kind'>({ name: 'kind' }) === 'alert';
+  const noDataStrategy = useWatch<FormValues, 'noDataStrategy'>({ name: 'noDataStrategy' });
   const { steps, renderCustomRecovery } = useMemo(
     () => getSteps(isAlert, builderType),
     [isAlert, builderType]
@@ -215,6 +218,13 @@ export const ComposeDiscoverForm = ({
         <>
           <EuiSpacer size="m" />
           <AlertDelayField />
+          <EuiSpacer size="m" />
+          <NoDataStrategySelect
+            value={noDataStrategy ?? 'none'}
+            onChange={(strategy) => setValue('noDataStrategy', strategy, { shouldDirty: true })}
+            compressed
+            data-test-subj="composeDiscoverNoDataStrategy"
+          />
         </>
       )}
       <EuiSpacer size="m" />

@@ -27,6 +27,7 @@ import {
 } from '../../../../common/constants/attachments';
 import { AttachmentType } from '../../../../common/types/domain';
 import type { ConfigType } from '../../../config';
+import { V2_NOOP_ATTACHMENTS_WRITER } from '../../../cases_analytics_v2';
 
 const mode = 'legacy';
 
@@ -41,6 +42,10 @@ describe('AttachmentService getter', () => {
       log: mockLogger,
       unsecuredSavedObjectsClient,
       config: { attachments: { enabled: attachmentsEnabled } } as unknown as ConfigType,
+      // AttachmentGetter doesn't exercise the analytics writer (it's read-only),
+      // but ServiceContext requires the field. The shared exported noop keeps
+      // this in lockstep with the writer contract instead of a hand-rolled stub.
+      analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
     });
   let attachmentGetter: AttachmentGetter;
 

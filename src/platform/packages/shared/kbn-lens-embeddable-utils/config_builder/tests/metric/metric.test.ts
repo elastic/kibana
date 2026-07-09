@@ -28,6 +28,7 @@ import {
   breakdownMetricAPIAttributes,
   complexMetricAPIAttributes,
   complexESQLMetricAPIAttributes,
+  esqlMetricWithTrendAPIAttributes,
   metricAPIWithTermsRankedBySecondary,
 } from './lens_api_config.mock';
 
@@ -79,8 +80,34 @@ describe('Metric', () => {
       validator.metric.fromApi(complexESQLMetricAPIAttributes);
     });
 
+    it('should convert an ESQL metric with trend background chart', () => {
+      validator.metric.fromApi(esqlMetricWithTrendAPIAttributes);
+    });
+
     it('should convert a metric with a terms agg ranked by secondary metric', () => {
       validator.metric.fromApi(metricAPIWithTermsRankedBySecondary);
+    });
+  });
+
+  describe('trendline persistence', () => {
+    it('should preserve an ESQL metric trendline when serializing renderable Lens state', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const lensState = builder.fromAPIFormat(esqlMetricWithTrendAPIAttributes);
+      const visualization = lensState.state.visualization as MetricVisualizationState;
+
+      expect(visualization.trendlineLayerId).toBeDefined();
+      expect(visualization.trendlineMetricAccessor).toBeDefined();
+      expect(visualization.trendlineTimeAccessor).toBeDefined();
+
+      delete visualization.trendlineLayerType;
+
+      const apiOutput = builder.toAPIFormat(lensState) as MetricConfig;
+      const [primaryMetric] = apiOutput.metrics;
+
+      expect(primaryMetric).toMatchObject({
+        type: 'primary',
+        background_chart: { type: 'trend' },
+      });
     });
   });
 
