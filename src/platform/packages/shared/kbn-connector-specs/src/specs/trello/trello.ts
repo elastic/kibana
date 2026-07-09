@@ -42,8 +42,24 @@ export const Trello: ConnectorSpec = {
         defaults: { paramNames: ['key', 'token'] },
         overrides: {
           meta: {
-            key: { label: 'API key' },
-            token: { label: 'API token' },
+            key: {
+              label: i18n.translate('connectorSpecs.trello.auth.key.label', {
+                defaultMessage: 'API key',
+              }),
+              helpText: i18n.translate('connectorSpecs.trello.auth.key.helpText', {
+                defaultMessage:
+                  'Get this from https://trello.com/power-ups/admin — create or open a Power-Up, then generate a key on its "API Key" tab.',
+              }),
+            },
+            token: {
+              label: i18n.translate('connectorSpecs.trello.auth.token.label', {
+                defaultMessage: 'API token',
+              }),
+              helpText: i18n.translate('connectorSpecs.trello.auth.token.helpText', {
+                defaultMessage:
+                  'Trello does not display tokens in its UI. Copy this URL, replace YOUR_API_KEY with the key entered above, and open it in a browser: https://trello.com/1/authorize?expiration=never&scope=read,write&response_type=token&key=YOUR_API_KEY — click Allow, then paste the token shown on the resulting page here.',
+              }),
+            },
           },
         },
       },
