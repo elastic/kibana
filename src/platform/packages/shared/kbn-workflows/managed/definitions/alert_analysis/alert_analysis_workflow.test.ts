@@ -8,7 +8,9 @@
  */
 
 import { parse } from 'yaml';
-import { SECURITY_ALERT_ANALYSIS_WORKFLOW } from '.';
+import { SECURITY_ALERT_ANALYSIS_SINGLE_WORKFLOW_ID, SECURITY_ALERT_ANALYSIS_WORKFLOW } from '.';
+import { WorkflowGraph } from '../../../graph';
+import type { WorkflowYaml } from '../../../spec/schema';
 
 const findStepByName = (steps: unknown[], name: string): Record<string, unknown> | undefined => {
   for (const step of steps) {
@@ -25,7 +27,7 @@ const findStepByName = (steps: unknown[], name: string): Record<string, unknown>
   return undefined;
 };
 
-describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
+describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml (parent fan-out)', () => {
   // The workflow is installed statically (no template rendering); it reads per-space config at run
   // time. These assertions run against the static yaml the definition ships.
   const workflow = parse(SECURITY_ALERT_ANALYSIS_WORKFLOW.yaml) as {
@@ -63,25 +65,6 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     );
   });
 
-  it('writes short tag names derived from the configurable prefix', () => {
-    const setTagsStep = findStepByName(workflow.steps, 'set_tags') as {
-      with: { tags_to_add: string[] };
-    };
-    expect(setTagsStep).toBeDefined();
-    // The short tag names: `.classification.` and `.confidence.`, not the old longer
-    // `.output.classification.` / `.output.confidence_score.` segments. (The trailing
-    // `steps.runAgent_step.output.structured_output.*` is the agent step's output value that
-    // fills the tag, not part of the tag name.)
-    expect(setTagsStep.with.tags_to_add).toEqual([
-      '{{ variables.tag_prefix }}',
-      '{{ variables.tag_prefix }}.version.{{ variables.normalized_version }}',
-      '{{ variables.tag_prefix }}.classification.{{ steps.runAgent_step.output.structured_output.classification | downcase }}',
-      '{{ variables.tag_prefix }}.confidence.{{ steps.runAgent_step.output.structured_output.confidence_score }}',
-    ]);
-    // The auto-close suffix is short too.
-    expect(workflow.consts.closed_tag_suffix).toBe('closed');
-  });
-
   it('does not bake connector/auto-close/create-conversation config into consts', () => {
     // These are per-space and read at run time; leaving stale literals here (e.g. a dev connector
     // id) would be misleading and unused.
@@ -92,70 +75,98 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(workflow.consts.create_conversation).toBeUndefined();
   });
 
-  it('guards the whole alert loop on the runtime enabled flag and a configured connector', () => {
-    const loop = findStepByName(workflow.steps, 'loop_over_results') as { if: string };
-
-    expect(loop).toBeDefined();
-    // A disabled space or a space with no connector must skip enrichment, the AI agent call, and
-    // auto-close (fixes enabled-with-no-connector and moves the on/off decision to run time). The
-    // guard is a parens-free `and` because the workflow template parser reads `(` as range syntax.
-    expect(loop.if).toBe("${{ variables.workflow_enabled and variables.connector_id != '' }}");
-  });
-
-  it('passes the runtime connector id and create-conversation flag to the AI agent step', () => {
-    const agentStep = findStepByName(workflow.steps, 'runAgent_step') as {
-      'connector-id': string;
-      'create-conversation': string;
-    };
-
-    expect(agentStep).toBeDefined();
-    expect(agentStep['connector-id']).toBe('{{ variables.connector_id }}');
-    // `${{ }}` preserves the boolean; a plain `{{ }}` would render the string "false" (truthy).
-    expect(agentStep['create-conversation']).toBe('${{ variables.create_conversation }}');
-  });
-
-  it('adds token usage metadata to the verdict note', () => {
-    const verdictNoteStep = findStepByName(workflow.steps, 'add_verdict_note_to_alert') as {
-      with: { body: { note: { note: string } } };
-    };
-    const note = verdictNoteStep.with.body.note.note;
-
-    expect(note).toContain('steps.runAgent_step.output.metadata.usage.inputTokens');
-    expect(note).toContain('steps.runAgent_step.output.metadata.usage.outputTokens');
-    expect(note).toContain('steps.runAgent_step.output.metadata.usage.totalTokens');
-  });
-
-  it('formats the verdict note timestamp with a human-readable date filter', () => {
-    const verdictNoteStep = findStepByName(workflow.steps, 'add_verdict_note_to_alert') as {
-      with: { body: { note: { note: string } } };
-    };
-
-    expect(verdictNoteStep.with.body.note.note).toContain(
-      "{{ execution.startedAt | date: '%B %d, %Y at %H:%M:%S UTC' }}"
-    );
-  });
-
-  it('gates auto-close on the runtime thresholds using a 0-1 confidence scale', () => {
-    const autoCloseStep = findStepByName(workflow.steps, 'check_auto_close_conditions') as {
+  it('guards the whole fan-out on the runtime enabled flag and a configured connector', () => {
+    // A disabled space or a space with no connector must skip the fan-out entirely (enrichment, the
+    // AI agent call, and auto-close all live in the child). The `parallel` step schema has no `if`,
+    // so the guard lives on a single enclosing `if` step. The guard is a parens-free `and` because
+    // the workflow template parser reads `(` as range syntax.
+    const guard = findStepByName(workflow.steps, 'run_alert_analysis') as {
+      type: string;
       condition: string;
     };
-    expect(autoCloseStep).toBeDefined();
-    expect(autoCloseStep.condition).toContain('false_positive');
-    expect(autoCloseStep.condition).toContain('confidence_score >=');
-    expect(autoCloseStep.condition).toContain('confidence_score <=');
-    expect(autoCloseStep.condition).toContain(
-      'variables.auto_close_confidence_score_min_threshold'
-    );
-    expect(autoCloseStep.condition).toContain(
-      'variables.auto_close_confidence_score_max_threshold'
-    );
 
-    const agentStep = findStepByName(workflow.steps, 'runAgent_step') as {
-      with: { schema: { properties: { confidence_score: { minimum: number; maximum: number } } } };
+    expect(guard).toBeDefined();
+    expect(guard.type).toBe('if');
+    expect(guard.condition).toBe(
+      "${{ variables.workflow_enabled and variables.connector_id != '' }}"
+    );
+  });
+
+  it('fans out over the alert batch with a bounded, settled parallel step', () => {
+    const parallelStep = findStepByName(workflow.steps, 'analyze_alerts') as {
+      type: string;
+      foreach: string;
+      concurrency: number;
+      mode: string;
     };
-    // The LLM schema maximum must stay on the same 0-1 scale as the thresholds, or `score <= 1.0`
-    // would never hold for a meaningful score.
-    expect(agentStep.with.schema.properties.confidence_score.minimum).toBe(0);
-    expect(agentStep.with.schema.properties.confidence_score.maximum).toBe(1);
+
+    expect(parallelStep).toBeDefined();
+    expect(parallelStep.type).toBe('parallel');
+    // `settled` lets every child reach a terminal state so one failing alert does not abort the rest.
+    expect(parallelStep.mode).toBe('settled');
+    // A finite lane count bounds task-manager load; `concurrency: 1` is the sequential kill-switch.
+    expect(parallelStep.concurrency).toBe(5);
+  });
+
+  it('truncates the fan-out to the configured cap so an oversized batch does not fail the run', () => {
+    const parallelStep = findStepByName(workflow.steps, 'analyze_alerts') as { foreach: string };
+    // Slicing to consts.max_fan_out keeps the run within DEFAULT_PARALLEL_MAX_FAN_OUT (100) rather
+    // than hard-failing the whole batch when a rule raises max_signals above the cap.
+    expect(parallelStep.foreach).toBe('{{ event.alerts | slice: 0, consts.max_fan_out | json }}');
+    expect(workflow.consts.max_fan_out).toBe(100);
+  });
+
+  it('invokes the per-alert child workflow once per alert via workflow.execute', () => {
+    const childStep = findStepByName(workflow.steps, 'analyze_single_alert') as {
+      type: string;
+      with: { 'workflow-id': string; inputs: Record<string, string> };
+    };
+
+    expect(childStep).toBeDefined();
+    expect(childStep.type).toBe('workflow.execute');
+    expect(childStep.with['workflow-id']).toBe(SECURITY_ALERT_ANALYSIS_SINGLE_WORKFLOW_ID);
+    // `${{ }}` preserves the alert object; a plain `{{ }}` would stringify it and break the child's
+    // per-alert field access.
+    expect(childStep.with.inputs.alert).toBe('${{ foreach.item }}');
+    expect(childStep.with.inputs.rule_id).toBe('{{ event.rule.id }}');
+  });
+
+  it('forwards every per-space runtime setting the child needs', () => {
+    const childStep = findStepByName(workflow.steps, 'analyze_single_alert') as {
+      with: { inputs: Record<string, string> };
+    };
+    const { inputs } = childStep.with;
+
+    expect(inputs.connector_id).toBe('{{ variables.connector_id }}');
+    expect(inputs.agent_id).toBe('{{ variables.agent_id }}');
+    expect(inputs.tag_prefix).toBe('{{ variables.tag_prefix }}');
+    expect(inputs.create_conversation).toBe('${{ variables.create_conversation }}');
+    expect(inputs.auto_close_enabled).toBe('${{ variables.auto_close_enabled }}');
+    expect(inputs.auto_close_confidence_score_min_threshold).toBe(
+      '${{ variables.auto_close_confidence_score_min_threshold }}'
+    );
+    expect(inputs.auto_close_confidence_score_max_threshold).toBe(
+      '${{ variables.auto_close_confidence_score_max_threshold }}'
+    );
+  });
+
+  it('surfaces aggregate fan-out outcomes so settled failures are not hidden from operators', () => {
+    const logStep = findStepByName(workflow.steps, 'log_fan_out_results') as {
+      with: { message: string };
+    };
+
+    expect(logStep).toBeDefined();
+    expect(logStep.with.message).toContain('steps.analyze_alerts.output.succeeded');
+    expect(logStep.with.message).toContain('steps.analyze_alerts.output.failed');
+  });
+
+  it('compiles to an execution graph (the fan-out branch body is a valid straight-line body)', () => {
+    // Schema validation does not build the execution graph; a workflow.execute branch body that
+    // accidentally carried flow-control or a step-level on-failure/timeout would only fail here.
+    expect(() =>
+      WorkflowGraph.fromWorkflowDefinition(
+        parse(SECURITY_ALERT_ANALYSIS_WORKFLOW.yaml) as WorkflowYaml
+      )
+    ).not.toThrow();
   });
 });

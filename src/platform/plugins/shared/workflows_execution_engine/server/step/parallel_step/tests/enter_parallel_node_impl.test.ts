@@ -429,6 +429,32 @@ describe('EnterParallelNodeImpl', () => {
     expect(branchRunCalls).toContain(1);
   });
 
+  it('parks a branch that waits on a child workflow (WAITING_FOR_CHILD) then re-ticks it to completion', async () => {
+    // A `workflow.execute` branch body enters WAITING_FOR_CHILD while its child
+    // execution runs. The branch driver must treat that non-terminal status as a
+    // parkable wait (like a durable timer wait), re-tick it, and complete the
+    // branch once the child settles. This is the exact assumption the
+    // alert-analysis child-workflow fan-out relies on.
+    node = makeNode({ foreach: JSON.stringify(['a']), concurrency: { max: 1 } });
+    let childReady = false;
+    branchOutcome = () =>
+      childReady ? ExecutionStatus.COMPLETED : ExecutionStatus.WAITING_FOR_CHILD;
+    const impl = build();
+
+    await impl.run();
+    expect(stepRuntime.enterWaitUntil).toHaveBeenCalled();
+    expect(stepRuntime.finishStep).not.toHaveBeenCalled();
+
+    // The child execution settles between ticks; the parked branch re-ticks to done.
+    childReady = true;
+    await runToCompletion(impl);
+    const output = stepRuntime.finishStep.mock.calls[0][0] as {
+      succeeded: number;
+      status: string;
+    };
+    expect(output).toMatchObject({ succeeded: 1, status: 'completed' });
+  });
+
   it('finishes immediately with an empty aggregate when there are no items', async () => {
     node = makeNode({ foreach: JSON.stringify([]) });
     await build().run();
