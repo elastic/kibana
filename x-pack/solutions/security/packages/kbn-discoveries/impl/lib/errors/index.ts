@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-declare module '@cypress/debugging-proxy';
+export { AttackDiscoveryError } from './attack_discovery_error';
+
+export class InvalidDefendInsightTypeError extends Error {
+  constructor() {
+    super('invalid defend insight type');
+  }
+}
