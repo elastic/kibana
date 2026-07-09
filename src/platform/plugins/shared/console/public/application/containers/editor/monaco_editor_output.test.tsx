@@ -294,4 +294,24 @@ describe('WHEN rendering Console output', () => {
 
     expect(mouseDownEvent.defaultPrevented).toBe(true);
   });
+
+  it('SHOULD hide the actions and highlight after the copy completes', async () => {
+    render(
+      <I18nProvider>
+        <MonacoEditorOutput />
+      </I18nProvider>
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('consoleMonacoOutput')).toHaveTextContent('"acknowledged": true')
+    );
+
+    const button = screen.getByTestId('copyOutputButton');
+    await userEvent.click(button);
+
+    await waitFor(() => expect(addSuccess).toHaveBeenCalled());
+    // The floating actions container is hidden again as the completion feedback.
+    const actionsContainer = button.closest('[style]') as HTMLElement;
+    await waitFor(() => expect(actionsContainer.style.visibility).toBe('hidden'));
+  });
 });

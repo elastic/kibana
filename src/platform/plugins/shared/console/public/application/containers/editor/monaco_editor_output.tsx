@@ -226,6 +226,11 @@ export const MonacoEditorOutput: FunctionComponent = () => {
           defaultMessage: 'Could not copy selected output to clipboard',
         }),
       });
+    } finally {
+      // Clear the highlight and hide the actions once the copy attempt completes,
+      // mirroring the pre-existing visual feedback (the selection used to disappear
+      // via the editor blur that the mousedown handler above now prevents).
+      actionsProvider.current?.clearEditorDecorations();
     }
   }, [notifications.toasts]);
 

@@ -66,7 +66,7 @@ export class MonacoEditorOutputActionsProvider {
     });
   }
 
-  private clearEditorDecorations() {
+  public clearEditorDecorations() {
     // remove the highlighted lines
     this.highlightedLines.clear();
     // hide action buttons
