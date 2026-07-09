@@ -24,17 +24,11 @@ export const SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID =
 export const SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID =
   'significant_events_investigation' as const;
 
-/** Extracting durable knowledge from recent AI chat conversations into memory. */
-export const SIGNIFICANT_EVENTS_CONVERSATION_SCRAPER_INFERENCE_FEATURE_ID =
-  'significant_events_conversation_scraper' as const;
-
-/** Synthesizing significant events knowledge indicators into memory wiki pages. */
-export const SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_INFERENCE_FEATURE_ID =
-  'significant_events_memory_synthesis' as const;
-
 /**
- * Curating the memory wiki: merging duplicates, removing stale entries, and
- * reconciling knowledge gaps (from investigations and the periodic memory audit).
+ * Background memory upkeep for Streams Significant Events: scraping durable knowledge out of
+ * chat conversations, synthesizing knowledge indicators into wiki pages, consolidating the wiki
+ * (merging duplicates, removing stale entries), and reconciling knowledge gaps (from
+ * investigations and the periodic memory audit). All one feature since these are all low-stakes,
+ * background curation tasks over the same memory wiki.
  */
-export const SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_INFERENCE_FEATURE_ID =
-  'significant_events_memory_consolidation' as const;
+export const SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID = 'significant_events_memory' as const;

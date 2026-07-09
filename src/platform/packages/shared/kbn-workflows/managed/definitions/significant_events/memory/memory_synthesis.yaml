@@ -25,8 +25,8 @@ steps:
   - name: synthesize_memory
     type: ai.agent
     # Keep in sync with @kbn/significant-events-schema inference_feature_ids.ts
-    # (SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_INFERENCE_FEATURE_ID).
-    connector-id-by-feature: "significant_events_memory_synthesis"
+    # (SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID).
+    connector-id-by-feature: "significant_events_memory"
     create-conversation: true
     timeout: 1800s
     with:

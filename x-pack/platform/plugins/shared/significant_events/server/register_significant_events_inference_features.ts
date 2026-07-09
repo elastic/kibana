@@ -14,9 +14,7 @@ import {
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_CONVERSATION_SCRAPER_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
@@ -38,9 +36,9 @@ const DISCOVERY_RECOMMENDED_MODELS = [
   defaultInferenceEndpoints.OPENAI_GPT_5_2,
 ];
 
-// Background memory upkeep steps favor a cheaper/faster model over the heavier
+// Background memory upkeep favors a cheaper/faster model over the heavier
 // discovery/investigation ones.
-const MEMORY_BACKGROUND_RECOMMENDED_MODELS = [
+const MEMORY_RECOMMENDED_MODELS = [
   defaultInferenceEndpoints.OPENAI_GPT_OSS_120B,
   defaultInferenceEndpoints.OPENAI_GPT_5_4,
   defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET,
@@ -156,54 +154,18 @@ export function registerSignificantEventsInferenceFeatures(
       ignoreGlobalDefault: true,
     },
     {
-      featureId: SIGNIFICANT_EVENTS_CONVERSATION_SCRAPER_INFERENCE_FEATURE_ID,
-      featureName: i18n.translate(
-        'xpack.significantEvents.inferenceFeature.conversationScraperName',
-        {
-          defaultMessage: 'Conversation scraper',
-        }
-      ),
-      featureDescription: i18n.translate(
-        'xpack.significantEvents.inferenceFeature.conversationScraperDescription',
-        {
-          defaultMessage:
-            'Model used to extract durable knowledge from recent AI chat conversations into memory.',
-        }
-      ),
-      recommendedEndpoints: MEMORY_BACKGROUND_RECOMMENDED_MODELS,
-      ignoreGlobalDefault: true,
-    },
-    {
-      featureId: SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_INFERENCE_FEATURE_ID,
-      featureName: i18n.translate('xpack.significantEvents.inferenceFeature.memorySynthesisName', {
-        defaultMessage: 'Memory synthesis',
+      featureId: SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID,
+      featureName: i18n.translate('xpack.significantEvents.inferenceFeature.memoryName', {
+        defaultMessage: 'Memory',
       }),
       featureDescription: i18n.translate(
-        'xpack.significantEvents.inferenceFeature.memorySynthesisDescription',
+        'xpack.significantEvents.inferenceFeature.memoryDescription',
         {
           defaultMessage:
-            'Model used to synthesize significant events knowledge indicators into memory wiki pages.',
+            'Model used for background memory upkeep: scraping durable knowledge out of chat conversations, synthesizing knowledge indicators into wiki pages, consolidating the wiki, and reconciling knowledge gaps.',
         }
       ),
-      recommendedEndpoints: MEMORY_BACKGROUND_RECOMMENDED_MODELS,
-      ignoreGlobalDefault: true,
-    },
-    {
-      featureId: SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_INFERENCE_FEATURE_ID,
-      featureName: i18n.translate(
-        'xpack.significantEvents.inferenceFeature.memoryConsolidationName',
-        {
-          defaultMessage: 'Memory consolidation',
-        }
-      ),
-      featureDescription: i18n.translate(
-        'xpack.significantEvents.inferenceFeature.memoryConsolidationDescription',
-        {
-          defaultMessage:
-            'Model used to curate the memory wiki: merging duplicates, removing stale entries, and reconciling knowledge gaps (from investigations and the periodic memory audit).',
-        }
-      ),
-      recommendedEndpoints: MEMORY_BACKGROUND_RECOMMENDED_MODELS,
+      recommendedEndpoints: MEMORY_RECOMMENDED_MODELS,
       ignoreGlobalDefault: true,
     },
   ];
