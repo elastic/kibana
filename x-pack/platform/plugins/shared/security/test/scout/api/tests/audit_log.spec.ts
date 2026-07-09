@@ -51,7 +51,7 @@ const waitForAuditEvent = async (
   );
 };
 
-apiTest.describe('Audit log — OTel field shape', { tag: tags.stateful.classic }, () => {
+apiTest.describe('Audit log — OTel field shape', { tag: tags.serverless.security.complete }, () => {
   apiTest(
     'user_login success: renamed OTel fields, event.type default applied',
     async ({ apiClient, esClient, config }) => {
@@ -99,6 +99,14 @@ apiTest.describe('Audit log — OTel field shape', { tag: tags.stateful.classic 
       // AUDIT_OTEL_FIELD_RENAMES: kibana.space_id → kibana.space.id
       expect(e.kibana?.space?.id).toBeDefined();
       expect(e.kibana?.space_id).toBeUndefined();
+
+      // AUDIT_OTEL_FIELD_RENAMES: kibana.session_id → kibana.session.id
+      expect(e.kibana?.session?.id).toBeDefined();
+      expect(e.kibana?.session_id).toBeUndefined();
+
+      // AUDIT_OTEL_FIELD_RENAMES: kibana.lookup_realm → kibana.lookup.realm
+      expect(e.kibana?.lookup?.realm).toBeDefined();
+      expect(e.kibana?.lookup_realm).toBeUndefined();
 
       // AUDIT_OTEL_FIELD_DROPS: service.version and host.name excluded
       expect(e.service?.version).toBeUndefined();
