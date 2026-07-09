@@ -275,7 +275,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           {
             version: API_VERSIONS.public.v1,
             options: {
-              oasOperationObject: () => path.join(__dirname, 'examples/get_managed_integration.yaml'),
+              oasOperationObject: () =>
+                path.join(__dirname, 'examples/get_managed_integration.yaml'),
             },
             validate: {
               request: GetAgentlessPolicyRequestSchema,
