@@ -7,7 +7,7 @@
 
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SignificantEventsUnavailableReason } from '@kbn/streams-plugin/common';
+import type { SignificantEventsUnavailableReason } from '@kbn/significant-events-plugin/common';
 import React from 'react';
 
 // The server reasons plus the client-only `unknown` fallback, surfaced when the

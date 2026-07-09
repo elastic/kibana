@@ -109,7 +109,7 @@ describe('recover_esql end-to-end (real build_config + real graph)', () => {
     // into the output and bound back into the normalized spec's data source.
     expect(result.esqlQuery).toBe(RECOVERED_ESQL);
     expect(JSON.parse(result.spec).data).toEqual({
-      url: { '%type%': 'esql', query: RECOVERED_ESQL },
+      url: { '%type%': 'esql', '%context%': true, query: RECOVERED_ESQL },
     });
   });
 });
