@@ -395,7 +395,6 @@ export const useAgentBuilderIntegration = ({
     return () => {
       chatRefHandle.current?.close();
       chatRefHandle.current = null;
-      hasAutoOpenedRef.current = false;
       setSidebarOpen(false);
     };
   }, []);
