@@ -1,5 +1,5 @@
 {
-  "sha1": "d46ffd74b5bd948be9e616e778c5d7867702e173",
+  "sha1": "3454d5fa7c00803bee942bd2c279722123a9e697",
   "tests": [
     {
       "id": "7235a50d6703290-e91aef77f82ae5d",
@@ -23,7 +23,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/api/tests/rule_management_skill_gating.spec.ts",
-        "line": 38,
+        "line": 36,
         "column": 10
       }
     },
@@ -37,7 +37,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/api/tests/rule_management_skill_gating.spec.ts",
-        "line": 59,
+        "line": 57,
         "column": 10
       }
     }
