@@ -73,7 +73,7 @@ export const sysdigEvaluations = {
     entity.target.id IS NOT NULL, entity.target.id,
     data_stream.dataset IN ("sysdig.event", "sysdig.alerts") AND container.id IS NOT NULL, container.id,
     data_stream.dataset == "sysdig.event" AND orchestrator.resource.name IS NOT NULL, orchestrator.resource.name,
-    data_stream.dataset == "sysdig.vulnerability", resource.id,
+    data_stream.dataset == "sysdig.vulnerability", sysdig.vulnerability.resource_id,
     data_stream.dataset == "sysdig.alerts" AND event.provider == "aws_cloudtrail", cloud.account.id,
     null
   ),

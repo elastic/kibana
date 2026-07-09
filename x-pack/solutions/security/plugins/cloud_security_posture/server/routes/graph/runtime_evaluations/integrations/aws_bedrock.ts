@@ -33,8 +33,8 @@ export const aws_bedrockEvaluations = {
       esql: `| EVAL
   entity.sub_type = CASE(
     entity.sub_type IS NOT NULL, entity.sub_type,
-    data_stream.dataset == "aws_bedrock.invocation" AND user.id IS NOT NULL AND user.id LIKE "arn:aws:sts:*:assumed-role/*", "assumed_role",
-    data_stream.dataset == "aws_bedrock.invocation" AND user.id IS NOT NULL AND user.id LIKE "arn:aws:iam:*:user/*", "iam_user",
+    data_stream.dataset == "aws_bedrock.invocation" AND user.id IS NOT NULL AND TO_STRING(user.id) LIKE "arn:aws:sts:*:assumed-role/*", "assumed_role",
+    data_stream.dataset == "aws_bedrock.invocation" AND user.id IS NOT NULL AND TO_STRING(user.id) LIKE "arn:aws:iam:*:user/*", "iam_user",
     null
   ),
   service.target.sub_type = CASE(

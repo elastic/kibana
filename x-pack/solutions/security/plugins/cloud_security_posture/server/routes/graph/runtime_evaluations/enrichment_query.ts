@@ -111,7 +111,7 @@ export function buildEnrichmentQuery(options: BuildEnrichmentQueryOptions = {}):
       continue;
     }
 
-    const body = assignments.map(formatCaseAssignment).join(',\n');
+    const body = assignments.map((a) => formatCaseAssignment(a)).join(',\n');
     lines.push(`| EVAL\n${body}`);
   }
 

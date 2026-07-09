@@ -74,6 +74,34 @@ describe('fetchEvents', () => {
     expect(result).toEqual({ columns: [], records: [{ id: 'dummy' }] });
   });
 
+  it('casts user.id to keyword before the enrichment EVAL to prevent CASE type conflicts', () => {
+    // When user.id is mapped as "long" (e.g. aws_bedrock.invocation), the merged enrichment
+    // CASE has a preserve branch "user.id IS NOT NULL, user.id" that returns long, while all
+    // other branches return keyword strings — causing "argument of [CASE] must be [long]".
+    // The fix: emit "| EVAL user.id = TO_STRING(user.id)" before buildEnrichmentQuery() runs.
+    fetchEvents({
+      esClient,
+      logger,
+      start: 0,
+      end: 1000,
+      originEventIds: [] as OriginEventId[],
+      showUnknownTarget: false,
+      indexPatterns: ['valid_index'],
+      spaceId: 'default',
+      esQuery: undefined,
+    });
+
+    const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+    const query: string = args.query;
+
+    expect(query).toContain('EVAL user.id = TO_STRING(user.id)');
+
+    // Must appear before the enrichment block (which starts with entity.sub_type or similar EVAL)
+    const castPos = query.indexOf('EVAL user.id = TO_STRING(user.id)');
+    const enrichmentPos = query.indexOf('| EVAL\n');
+    expect(castPos).toBeLessThan(enrichmentPos);
+  });
+
   it('should include origin event parameters when originEventIds are provided', async () => {
     const originEventIds: OriginEventId[] = [
       { id: '1', isAlert: true },

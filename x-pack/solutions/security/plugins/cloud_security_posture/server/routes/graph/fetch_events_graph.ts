@@ -378,7 +378,6 @@ const buildEsqlQuery = ({
   alertsMappingsIncluded,
   pinnedIds,
 }: BuildEsqlQueryParams): string => {
-  // TODO: TEMPORARY USING NULLIFY INSTEAD OF LOAD - LOAD is still experimental and makes the query fail more often than nullify.
   const query = `SET unmapped_fields="NULLIFY";
 FROM ${indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
@@ -389,6 +388,7 @@ FROM ${indexPatterns
     OR entity.target.id IS NOT NULL OR entity.target.name IS NOT NULL
 | EVAL  __action_exists = event.action IS NOT NULL
 | EVAL data_stream.dataset = COALESCE(event.dataset, data_stream.dataset)
+| EVAL user.id = TO_STRING(user.id)
 ${buildEnrichmentQuery({ skipColumns: ['host.ip', 'host.target.ip', 'host.target.port'] })}
 ${buildV2ActorResolution()}
 | WHERE event.action IS NOT NULL AND actorEntityId IS NOT NULL
