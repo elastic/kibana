@@ -194,7 +194,6 @@ describe('createContextAwarenessToolkit', () => {
         initialProfileState: {
           [TEST_PROFILE_STATE_DEF.key]: {
             urlValue: 'fromUrl',
-            unknownValue: 'ignored',
           },
         },
       })
