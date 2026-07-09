@@ -34,13 +34,18 @@ export const testChannel = {
   },
 };
 
-export const testChannels = {
+export const testChannels: {
+  all: ScoutTestChannel[];
+  default: ScoutTestChannel[];
+  match(pattern: RegExp): ScoutTestChannel[];
+  current(): ScoutTestChannel[];
+} = {
   all: ScoutTestChannelSchema.options,
-  default: ['ci-on-commit', 'ci-batch-3h'] as ScoutTestChannel[],
-  match(pattern: RegExp): ScoutTestChannel[] {
+  default: ['ci-on-commit', 'ci-batch-3h'],
+  match(pattern) {
     return this.all.filter((channel) => channel.match(pattern));
   },
-  current(): ScoutTestChannel[] {
+  current() {
     if (
       process.env.SCOUT_TEST_CHANNELS === undefined ||
       process.env.SCOUT_TEST_CHANNELS.trim().length === 0
